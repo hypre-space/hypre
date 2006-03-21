@@ -55,6 +55,7 @@
 #include "HYPRE_LSI_block.h"
 #include "HYPRE_LSI_Uzawa_c.h"
 #include "HYPRE_LSI_Dsuperlu.h"
+#include "HYPRE_MLMaxwell.h"
 
 //---------------------------------------------------------------------------
 // FEI include files
@@ -106,6 +107,22 @@ extern "C" {
    int HYPRE_LSI_MLSetCoarsenScheme( HYPRE_Solver , int );
    int HYPRE_LSI_MLSetCoarseSolver( HYPRE_Solver, int );
    int HYPRE_LSI_MLSetNumPDEs( HYPRE_Solver, int );
+#endif
+
+/*-------------------------------------------------------------------------*
+ * MLMaxwell functions   
+ *-------------------------------------------------------------------------*/
+
+#ifdef HAVE_MLMAXWELL
+   int HYPRE_LSI_MLMaxwellCreate(MPI_Comm, HYPRE_Solver *);
+   int HYPRE_LSI_MLMaxwellDestroy(HYPRE_Solver);
+   int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver, HYPRE_ParCSRMatrix,
+                                HYPRE_ParVector, HYPRE_ParVector);
+   int HYPRE_LSI_MLMaxwellSolve(HYPRE_Solver, HYPRE_ParCSRMatrix,
+                                HYPRE_ParVector, HYPRE_ParVector);
+   int HYPRE_LSI_MLMaxwellSetGMatrix(HYPRE_Solver, HYPRE_ParCSRMatrix);
+   int HYPRE_LSI_MLMaxwellSetANNMatrix(HYPRE_Solver, HYPRE_ParCSRMatrix);
+   int HYPRE_LSI_MLMaxwellSetStrongThreshold(HYPRE_Solver, double);
 #endif
 
 /*-------------------------------------------------------------------------*
@@ -1618,6 +1635,23 @@ void HYPRE_LinSysCore::setupPCGPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+#ifdef HAVE_MLMAXWELL
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_MLMaxwellSolve,
+                                        HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconMLMaxwell();
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_MLMaxwellSolve,
+                                        HYPRE_LSI_MLMaxwellSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("CG : ML preconditioning not available.\n");
+#endif
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -1764,6 +1798,14 @@ void HYPRE_LinSysCore::setupLSICGPrecon()
            if ( mypid_ == 0 )
               printf("HYPRE_LSI : LSICG does not work with blkprec.\n");
            exit(1);
+           break;
+
+      case HYML :
+           printf("HYPRE_LSI : LSICG - MLI preconditioning not available.\n");
+           break;
+
+      case HYMLMAXWELL :
+           printf("HYPRE_LSI : LSICG - MLMAXWELL not available.\n");
            break;
 
       case HYMLI :
@@ -1957,6 +1999,23 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
               setupPreconML();
               HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_MLSolve,
                                           HYPRE_LSI_MLSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("GMRES : ML preconditioning not available.\n");
+#endif
+           break;
+
+      case HYMLMAXWELL :
+#ifdef HAVE_MLMAXWELL
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_LSI_MLMaxwellSolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconMLMaxwell();
+              HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_MLMaxwellSolve,
+                                          HYPRE_LSI_MLMaxwellSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
 #else
@@ -2166,6 +2225,10 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("FGMRES : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2370,6 +2433,10 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("BiCGSTAB : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2565,6 +2632,10 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("BiCGSTABL : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2754,6 +2825,10 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
 #else
            printf("TFQMR : ML preconditioning not available.\n");
 #endif
+           break;
+
+      case HYMLMAXWELL :
+           printf("TFQMR : MLMaxwell preconditioning not available.\n");
            break;
 
       case HYMLI :
@@ -2947,6 +3022,10 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("BiCGS : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -3118,6 +3197,10 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("SymQMR : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -3271,6 +3354,37 @@ void HYPRE_LinSysCore::setupPreconML()
    HYPRE_LSI_MLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
    HYPRE_LSI_MLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
    HYPRE_LSI_MLSetNumPDEs(HYPrecon_,mlNumPDEs_);
+#else
+   return;
+#endif
+}
+
+//***************************************************************************
+// this function sets up MLMaxwell preconditioner
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::setupPreconMLMaxwell()
+{
+#ifdef HAVE_MLMAXWELL
+   HYPRE_ParCSRMatrix A_csr;
+
+   if (maxwellGEN_ != NULL)
+      HYPRE_LSI_MLMaxwellSetGMatrix(HYPrecon_,maxwellGEN_);
+   else
+   {
+      printf("HYPRE_LSC::setupPreconMLMaxwell ERROR - no G matrix.\n");
+      exit(1);
+   }
+   if (maxwellANN_ == NULL)
+   {
+      HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+      hypre_BoomerAMGBuildCoarseOperator((hypre_ParCSRMatrix *) maxwellGEN_,
+                                      (hypre_ParCSRMatrix *) A_csr,
+                                      (hypre_ParCSRMatrix *) maxwellGEN_,
+                                      (hypre_ParCSRMatrix **) &maxwellANN_);
+   }
+   HYPRE_LSI_MLMaxwellSetGMatrix(HYPrecon_,maxwellGEN_);
+   HYPRE_LSI_MLMaxwellSetANNMatrix(HYPrecon_,maxwellANN_);
 #else
    return;
 #endif

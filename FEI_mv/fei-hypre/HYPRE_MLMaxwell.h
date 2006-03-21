@@ -13,9 +13,13 @@
 #ifndef _MLMAXWELL_
 #define _MLMAXWELL_
 
+//#define HAVE_MLMAXWELL
+
 #ifdef HAVE_MLMAXWELL
 #include "ml_include.h"
 #endif
+
+#include "HYPRE_MLMatrix.h"
 
 typedef struct
 {
@@ -38,8 +42,11 @@ typedef struct
     double   ag_threshold;
     void     *edge_smoother;
     void     *node_smoother;
+    HYPRE_ParCSRMatrix hypreG;
+    HYPRE_ParCSRMatrix hypreAnn;
 #ifdef HAVE_MLMAXWELL
     ML_Aggregate *ml_ag;
+    ML_Operator  *Annmat;
     ML_Operator  *Gmat;
     ML_Operator  *GTmat;
     ML_Operator  **Gmat_array;

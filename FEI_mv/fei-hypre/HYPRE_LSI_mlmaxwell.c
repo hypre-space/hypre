@@ -18,14 +18,8 @@
  *        HYPRE_LSI_MLMaxwellSetup
  *        HYPRE_LSI_MLMaxwellSolve
  *        HYPRE_LSI_MLMaxwellSetStrongThreshold
- *        HYPRE_LSI_MLMaxwellSetMethod
- *        HYPRE_LSI_MLMaxwellSetNumPreSmoothings
- *        HYPRE_LSI_MLMaxwellSetNumPostSmoothings
- *        HYPRE_LSI_MLMaxwellSetPreSmoother
- *        HYPRE_LSI_MLMaxwellSetPostSmoother
- *        HYPRE_LSI_MLMaxwellSetDampingFactor
- *        HYPRE_LSI_MLMaxwellSetCoarseSolver
- *        HYPRE_LSI_MLMaxwellSetCoarsenScheme
+ *        HYPRE_LSI_MLMaxwellSetGMatrix
+ *        HYPRE_LSI_MLMaxwellSetANNMatrix
  *        HYPRE_LSI_ConstructMLMatrix
  ****************************************************************************/
 
@@ -35,23 +29,16 @@
 #include <math.h>
 
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
-
 #include "../../utilities/utilities.h"
-#include "../../distributed_matrix/HYPRE_distributed_matrix_types.h"
-#include "../../distributed_matrix/HYPRE_distributed_matrix_protos.h"
-
-#include "../../matrix_matrix/HYPRE_matrix_matrix_protos.h"
-
 #include "../../seq_mv/vector.h"
 #include "../../parcsr_mv/par_vector.h"
-
-extern void qsort0(int *, int, int);
-
+#include "../../parcsr_mv/parcsr_mv.h"
 #include "HYPRE_MLMatrix.h"
 #include "HYPRE_MLMaxwell.h"
 
-extern int  HYPRE_LSI_ConstructMLMatrix(HYPRE_ParCSRMatrix,HYPRE_ML_Matrix *, 
-                                        MPI_Comm, MLMaxwell_Context*); 
+extern void qsort0(int *, int, int);
+extern int  HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix,
+                  HYPRE_ML_Matrix *, int *, MPI_Comm, MLMaxwell_Context*); 
 
 /****************************************************************************/
 /* communication functions on parallel platforms                            */
@@ -182,14 +169,20 @@ int ML_ExchBdry(double *vec, void *obj)
 /* matvec function for local matrix structure HYPRE_ML_Matrix               */
 /*--------------------------------------------------------------------------*/
 
+#ifdef HAVE_MLMAXWELL
+int ML_MatVec(ML_Operator *obj, int leng1, double p[], int leng2, double ap[])
+#else
 int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
+#endif
 {
     int               i, j, length, nRows, ibeg, iend, k, *rowptr, *colnum;
     double            *dbuf, sum, *values;
+    void              *vobj;
     HYPRE_ML_Matrix   *Amat;
     MLMaxwell_Context *context;
 
-    context = (MLMaxwell_Context *) obj;
+    vobj    = (void *) obj;
+    context = (MLMaxwell_Context *) vobj;
     Amat    = (HYPRE_ML_Matrix*) context->Amat;
     nRows   = Amat->Nrows;
     rowptr  = Amat->rowptr;
@@ -221,16 +214,22 @@ int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
 /* getrow function for local matrix structure HYPRE_ML_Matrix(ML compatible)*/
 /*--------------------------------------------------------------------------*/
 
+#ifdef HAVE_MLMAXWELL
+int ML_GetRow(ML_Operator *obj, int N_requested_rows, int requested_rows[],
+   int allocated_space, int columns[], double values[], int row_lengths[])
+#else
 int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
    int allocated_space, int columns[], double values[], int row_lengths[])
+#endif
 {
-    int        i, j, ncnt, colindex, rowLeng, rowindex;
-    MLMaxwell_Context *context = (MLMaxwell_Context *) obj;
+    int               i, j, ncnt, colindex, rowLeng, rowindex;
+    void              *vobj = (void *) obj;
+    MLMaxwell_Context *context = (MLMaxwell_Context *) vobj;
     HYPRE_ML_Matrix   *Amat    = (HYPRE_ML_Matrix*) context->Amat;
-    int        nRows    = Amat->Nrows;
-    int        *rowptr  = Amat->rowptr;
-    int        *colInd  = Amat->colnum;
-    double     *colVal  = Amat->values;
+    int     nRows    = Amat->Nrows;
+    int     *rowptr  = Amat->rowptr;
+    int     *colInd  = Amat->colnum;
+    double  *colVal  = Amat->values;
 
     ncnt = 0;
     for (i = 0; i < N_requested_rows; i++)
@@ -277,6 +276,7 @@ int HYPRE_LSI_MLMaxwellCreate(MPI_Comm comm, HYPRE_Solver *solver)
     link->Ann_contxt    = NULL;
     link->G_contxt      = NULL;
     link->ag_threshold  = 0.0;  /* threshold for aggregation */
+    link->Annmat        = NULL;
     link->Gmat          = NULL;
     link->GTmat         = NULL;
     link->Gmat_array    = NULL;
@@ -285,7 +285,7 @@ int HYPRE_LSI_MLMaxwellCreate(MPI_Comm comm, HYPRE_Solver *solver)
     link->edge_args     = NULL;
   
     ML_Create(&(link->ml_ee), link->nlevels);
-    ML_Create(&(link->ml_mm), link->nlevels);
+    ML_Create(&(link->ml_nn), link->nlevels);
 
     *solver = (HYPRE_Solver) link;
 
@@ -311,7 +311,6 @@ int HYPRE_LSI_MLMaxwellDestroy(HYPRE_Solver solver)
     if (link->ml_ee != NULL) ML_Destroy(&(link->ml_ee));
     if (link->ml_nn != NULL) ML_Destroy(&(link->ml_nn));
     if (link->Aee_contxt->partition != NULL) free(link->Aee_contxt->partition);
-    if (link->Amm_contxt->partition != NULL) free(link->Amm_contxt->partition);
     if (link->Ann_contxt->partition != NULL) free(link->Ann_contxt->partition);
     if (link->Aee_contxt->Amat != NULL)
     {
@@ -393,27 +392,27 @@ int HYPRE_LSI_MLMaxwellDestroy(HYPRE_Solver solver)
 /*--------------------------------------------------------------------------*/
 
 int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
-                       HYPRE_ParCSRMatrix A_nn, HYPRE_ParCSRMatrix G_en)
+                             HYPRE_ParVector x, HYPRE_ParVector b)
 {
 #ifdef HAVE_MLMAXWELL
    int         i, mypid, nprocs, coarsest_level, level, nlevels;
    int         *row_partition, nodeNEqns, edgeNEqns, length;
    int         edge_its = 3, node_its = 3, Nfine_node, Nfine_edge, itmp;
    int         hiptmair_type=HALF_HIPTMAIR, Nits_per_presmooth=1;
-   double      Ncoarse_edge, Ncoarse_node;
-   double      edge_coarsening_rate, node_coarsening_rate,
+   int         Ncoarse_edge, Ncoarse_node;
+   double      edge_coarsening_rate, node_coarsening_rate;
    double      node_omega = ML_DDEFAULT, edge_omega = ML_DDEFAULT; 
-   ML_Matrix   *mh_Aee, *mh_G, *mh_Ann;
-   MLMaxwell   *link;
    ML          *ml_ee, *ml_nn;
    ML_Operator *Gmat, *GTmat;
-   MLMaxwell_Context *Aee_context, G_context, Ann_context;
+   MLMaxwell_Link    *link;
+   HYPRE_ML_Matrix   *mh_Aee, *mh_G, *mh_Ann;
+   MLMaxwell_Context *Aee_context, *G_context, *Ann_context;
 
    /* -------------------------------------------------------- */ 
    /* set up the parallel environment                          */
    /* -------------------------------------------------------- */ 
 
-   link = (MLMaxwell *) solver;
+   link = (MLMaxwell_Link *) solver;
    MPI_Comm_rank(link->comm, &mypid);
    MPI_Comm_size(link->comm, &nprocs);
 
@@ -423,7 +422,7 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
 
    nlevels = link->nlevels;
    ML_Create(&(link->ml_ee), nlevels);
-   ML_Create(&(link->ml_mm), nlevels);
+   ML_Create(&(link->ml_nn), nlevels);
    ml_ee   = link->ml_ee;
    ml_nn   = link->ml_nn;
    
@@ -432,7 +431,7 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    /* into the matrix data object (for matvec and getrow)      */
    /* -------------------------------------------------------- */ 
 
-   Aee_context = (MLMawell_Context *) malloc(sizeof(MLMawell_Context));
+   Aee_context = (MLMaxwell_Context *) malloc(sizeof(MLMaxwell_Context));
    link->Aee_contxt = Aee_context;
    Aee_context->comm = link->comm;
    HYPRE_ParCSRMatrixGetRowPartitioning(A_ee, &row_partition);
@@ -441,14 +440,15 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    Aee_context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
    for (i=0; i<=nprocs; i++) Aee_context->partition[i] = row_partition[i];
    hypre_TFree(row_partition);
-   h_Aee = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
+   mh_Aee = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
    Aee_context->Amat = mh_Aee;
-   HYPRE_LSI_MLConstructMLMatrix(A_ee,mh_Aee,link->comm,Aee_context); 
+   HYPRE_LSI_MLConstructMLMatrix(A_ee,mh_Aee,row_partition,
+                                 link->comm,Aee_context); 
 
-   Ann_context = (MLMawell_Context *) malloc(sizeof(MLMawell_Context));
+   Ann_context = (MLMaxwell_Context *) malloc(sizeof(MLMaxwell_Context));
    link->Ann_contxt = Ann_context;
    Ann_context->comm = link->comm;
-   HYPRE_ParCSRMatrixGetRowPartitioning(A_nn, &row_partition);
+   HYPRE_ParCSRMatrixGetRowPartitioning(link->hypreAnn, &row_partition);
    nodeNEqns  = row_partition[mypid+1] - row_partition[mypid];
    Ann_context->globalEqns = row_partition[nprocs];
    Ann_context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
@@ -456,54 +456,56 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    hypre_TFree(row_partition);
    mh_Ann = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
    Ann_context->Amat = mh_Ann;
-   HYPRE_LSI_MLConstructMLMatrix(A_nn,mh_Ann,link->comm,Ann_context); 
+   HYPRE_LSI_MLConstructMLMatrix(link->hypreAnn,mh_Ann,row_partition,
+                                 link->comm,Ann_context); 
 
-   G_context = (MLMawell_Context *) malloc(sizeof(MLMawell_Context));
+   G_context = (MLMaxwell_Context *) malloc(sizeof(MLMaxwell_Context));
    link->G_contxt = G_context;
    G_context->comm = link->comm;
-   HYPRE_ParCSRMatrixGetRowPartitioning(G_en, &row_partition);
+   HYPRE_ParCSRMatrixGetRowPartitioning(link->hypreG, &row_partition);
    G_context->globalEqns = row_partition[nprocs];
    G_context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
    for (i=0; i<=nprocs; i++) G_context->partition[i] = row_partition[i];
    hypre_TFree(row_partition);
    mh_G = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
    G_context->Amat = mh_G;
-   HYPRE_LSI_MLConstructMLMatrix(G_en,mh_G,link->comm,G_context); 
+   HYPRE_LSI_MLConstructMLMatrix(link->hypreG,mh_G,row_partition,
+                                 link->comm,G_context); 
 
    /* -------------------------------------------------------- */ 
    /* Build A_ee directly as an ML matrix                      */
    /* -------------------------------------------------------- */ 
 
-   ML_Init_Amatrix(ml_ee,nLevels-1,edgeNEqns,edgeNEqns,(void *)Aee_context);
+   ML_Init_Amatrix(ml_ee,nlevels-1,edgeNEqns,edgeNEqns,(void *)Aee_context);
    length = edgeNEqns;
    for (i=0; i<mh_Aee->recvProcCnt; i++) length += mh_Aee->recvLeng[i];
    ML_Set_Amatrix_Getrow(ml_ee, nlevels-1, ML_GetRow, ML_ExchBdry, length);
-   ML_Operator_Set_ApplyFunc(&(ml_ee->Amat[nLevels-1]), ML_MatVec);
+   ML_Operator_Set_ApplyFunc(&(ml_ee->Amat[nlevels-1]), ML_MatVec);
 
    /* -------------------------------------------------------- */ 
    /* Build A_nn directly as an ML matrix                      */
    /* -------------------------------------------------------- */ 
 
-   ML_Init_Amatrix(ml_nn, nLevels-1,nodeNEqns,nodeNEqns,(void *)Ann_context);
+   ML_Init_Amatrix(ml_nn, nlevels-1,nodeNEqns,nodeNEqns,(void *)Ann_context);
    length = nodeNEqns;
    for (i=0; i<mh_Ann->recvProcCnt; i++) length += mh_Ann->recvLeng[i];
    ML_Set_Amatrix_Getrow(ml_nn, nlevels-1, ML_GetRow, ML_ExchBdry, length);
-   ML_Operator_Set_ApplyFunc(&(ml_nn->Amat[nLevels-1]), ML_MatVec);
+   ML_Operator_Set_ApplyFunc(&(ml_nn->Amat[nlevels-1]), ML_MatVec);
 
    /* -------------------------------------------------------- */ 
    /* Build G matrix and its transpose                         */
    /* -------------------------------------------------------- */ 
 
-   Gmat = ML_Operator_Create(link->comm);
+   Gmat = ML_Operator_Create(ml_ee->comm);
    ML_Operator_Set_Getrow(Gmat, edgeNEqns, ML_GetRow);
    ML_Operator_Set_ApplyFuncData(Gmat, nodeNEqns, edgeNEqns,
                          (void *) G_context, edgeNEqns, ML_MatVec, 0);
    length = 0;
    for (i=0; i<mh_Ann->recvProcCnt; i++) length += mh_Ann->recvLeng[i];
    ML_CommInfoOP_Generate(&(Gmat->getrow->pre_comm), ML_ExchBdry,
-                          G_context, link->comm, nodeNEqns, length);
+                          G_context, ml_ee->comm, nodeNEqns, length);
 
-   GTmat = ML_Operator_Create(link->comm);
+   GTmat = ML_Operator_Create(ml_ee->comm);
    ML_Operator_Transpose_byrow(Gmat, GTmat);
    link->GTmat = GTmat;
 
@@ -518,8 +520,8 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    ML_Aggregate_Set_MaxCoarseSize(link->ml_ag, 30);
    ML_Aggregate_Set_Threshold(link->ml_ag, link->ag_threshold);
 
-   coarsest_level = ML_Gen_MGHierarchy_UsingReitzinger(ml_eee, &ml_nn,
-                       nLevels-1, ML_DECREASING, link->ml_ag, Gmat,
+   coarsest_level = ML_Gen_MGHierarchy_UsingReitzinger(ml_ee, &ml_nn,
+                       nlevels-1, ML_DECREASING, link->ml_ag, Gmat,
                        GTmat, &(link->Gmat_array), &(link->GTmat_array),
                        link->smoothP_flag, 1.5, 0, ML_DDEFAULT);
 
@@ -539,19 +541,19 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
       ML_Smoother_Arglist_Set(link->edge_args, 0, &edge_its);
       ML_Smoother_Arglist_Set(link->edge_args, 1, &edge_omega);
    }
-   if (node_smoother == (void *) ML_Gen_Smoother_MLS)
+   if (link->node_smoother == (void *) ML_Gen_Smoother_MLS)
    {
       link->node_args = ML_Smoother_Arglist_Create(2);
       ML_Smoother_Arglist_Set(link->node_args, 0, &node_its);
       Nfine_node = link->Gmat_array[nlevels-1]->invec_leng;
-      ML_gsum_scalar_int(&Nfine_node, &itmp, link->comm);
+      ML_gsum_scalar_int(&Nfine_node, &itmp, ml_ee->comm);
    }
-   if (edge_smoother == (void *) ML_Gen_Smoother_MLS)
+   if (link->edge_smoother == (void *) ML_Gen_Smoother_MLS)
    {
       link->edge_args = ML_Smoother_Arglist_Create(2);
       ML_Smoother_Arglist_Set(link->edge_args, 0, &edge_its);
       Nfine_edge = link->Gmat_array[nlevels-1]->outvec_leng;
-      ML_gsum_scalar_int(&Nfine_edge, &itmp, link->comm);
+      ML_gsum_scalar_int(&Nfine_edge, &itmp, ml_ee->comm);
    }
 
    /* -------------------------------------------------------- */ 
@@ -574,13 +576,13 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
          if (level != coarsest_level)
          {
             Ncoarse_edge = link->Gmat_array[level-1]->outvec_leng;
-            ML_gsum_scalar_int(&Ncoarse_edge, &itmp, link->comm);
+            ML_gsum_scalar_int(&Ncoarse_edge, &itmp, ml_ee->comm);
             edge_coarsening_rate =  2.*((double) Nfine_edge)/
                                     ((double) Ncoarse_edge);
          }
          else edge_coarsening_rate =  (double) Nfine_edge;
-                                                                                
-         ML_Smoother_Arglist_Set(link->edge_args, 1, &edge_coarsening_rate);
+
+         ML_Smoother_Arglist_Set(link->edge_args,1,&edge_coarsening_rate);
          Nfine_edge = Ncoarse_edge;
       }
       if (link->node_smoother == (void *) ML_Gen_Smoother_MLS)
@@ -588,13 +590,13 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
          if (level != coarsest_level)
          {
             Ncoarse_node = link->Gmat_array[level-1]->invec_leng;
-            ML_gsum_scalar_int(&Ncoarse_node, &itmp, link->comm);
+            ML_gsum_scalar_int(&Ncoarse_node, &itmp, ml_ee->comm);
             node_coarsening_rate = 2.*((double) Nfine_node)/
                                    ((double) Ncoarse_node);
          }
          else node_coarsening_rate = (double) Nfine_node;
-                                                                                
-         ML_Smoother_Arglist_Set(link->node_args, 1, &node_coarsening_rate);
+
+         ML_Smoother_Arglist_Set(link->node_args,1,&node_coarsening_rate);
          Nfine_node = Ncoarse_node;
       }
       ML_Gen_Smoother_Hiptmair(ml_ee, level, ML_BOTH, Nits_per_presmooth,
@@ -641,17 +643,17 @@ int HYPRE_LSI_MLMaxwellSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 }
 
 /****************************************************************************/
-/* HYPRE_LSI_MLSetStrongThreshold                                           */
+/* HYPRE_LSI_MLMaxwellSetStrongThreshold                                    */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_LSI_MLSetStrengthThreshold(HYPRE_Solver solver,
+int HYPRE_LSI_MLMaxwellSetStrengthThreshold(HYPRE_Solver solver,
                                      double strength_threshold)
 {
     MLMaxwell_Link *link = (MLMaxwell_Link *) solver;
   
     if (strength_threshold < 0.0)
     {
-       printf("HYPRE_LSI_MLSetStrengthThreshold WARNING : reset to 0.\n");
+       printf("HYPRE_LSI_MLMaxwellSetStrengthThreshold WARNING: set to 0.\n");
        link->ag_threshold = 0.0;
     } 
     else
@@ -662,12 +664,34 @@ int HYPRE_LSI_MLSetStrengthThreshold(HYPRE_Solver solver,
 }
 
 /****************************************************************************/
+/* HYPRE_LSI_MLMaxwellSetGMatrix                                            */
+/*--------------------------------------------------------------------------*/
+
+int HYPRE_LSI_MLMaxwellSetGMatrix(HYPRE_Solver solver, HYPRE_ParCSRMatrix G)
+{
+    MLMaxwell_Link *link = (MLMaxwell_Link *) solver;
+    link->hypreG = G;
+    return( 0 );
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLMaxwellSetANNMatrix                                          */
+/*--------------------------------------------------------------------------*/
+
+int HYPRE_LSI_MLMaxwellSetANNMatrix(HYPRE_Solver solver, HYPRE_ParCSRMatrix ANN)
+{
+    MLMaxwell_Link *link = (MLMaxwell_Link *) solver;
+    link->hypreAnn = ANN;
+    return( 0 );
+}
+
+/****************************************************************************/
 /* HYPRE_LSI_MLConstructMLMatrix                                            */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,HYPRE_ML_Matrix *ml_mat,
-                             MPI_Comm comm, int *partition,
-                             MLMaxwell_Context *obj) 
+int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
+                                  HYPRE_ML_Matrix *ml_mat, int *partition,
+                                  MPI_Comm comm, MLMaxwell_Context *obj) 
 {
     int         i, j, index, mypid, nprocs;
     int         rowLeng, *colInd, startRow, endRow, localEqns;
@@ -723,7 +747,7 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,HYPRE_ML_Matrix *ml_mat,
           }
        }
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
-       if ( diagSize[i-startRow] + offdiagSize[i-startRow] == 1 ) num_bdry++;
+       if (diagSize[i-startRow] + offdiagSize[i-startRow] == 1) num_bdry++;
     }
 
     /* -------------------------------------------------------- */
@@ -935,7 +959,7 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,HYPRE_ML_Matrix *ml_mat,
        /* ----------------------------------------------------- */ 
 
        if (sendProcCnt > 0)
-          requests = (MPI_Request *) malloc(sendProcCnt * sizeof(MPI_Request));
+          requests = (MPI_Request *) malloc(sendProcCnt*sizeof(MPI_Request));
 
        msgid = 540;
        for (i = 0; i < sendProcCnt; i++) 
