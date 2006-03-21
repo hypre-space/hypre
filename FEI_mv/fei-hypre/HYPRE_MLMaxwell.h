@@ -13,7 +13,7 @@
 #ifndef _MLMAXWELL_
 #define _MLMAXWELL_
 
-//#define HAVE_MLMAXWELL
+/* #define HAVE_MLMAXWELL */
 
 #ifdef HAVE_MLMAXWELL
 #include "ml_include.h"
