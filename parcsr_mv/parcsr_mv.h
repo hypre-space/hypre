@@ -648,6 +648,8 @@ hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B , hypre_Pa
 int hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **AT_ptr , int data );
 void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr , int **indices , int G_type );
 void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr , int *indices2 , hypre_ParCSRMatrix ***submatrices );
+void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr , int *indices2 , hypre_ParCSRMatrix ***submatrices );
+
 
 /* par_csr_matrix.c */
 hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate( MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd );
