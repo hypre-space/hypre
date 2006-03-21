@@ -21,8 +21,8 @@ BASE_DIR = ${HYPRE_FEI_BASE_DIR}
 SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 
-CINCLUDES=${INCLUDES} ${MPIINCLUDE}
-CXXINCLUDES=${INCLUDES} ${MPIINCLUDE}
+CINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
+CXXINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
 CDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED
 CXXDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DMPICH_SKIP_MPICXX
 
@@ -117,6 +117,7 @@ FILESC = \
  HYPRE_parcsr_fgmres.c\
  HYPRE_parcsr_lsicg.c\
  HYPRE_parcsr_symqmr.c\
+ HYPRE_parcsr_maxwell.c\
  SymQMR.c\
  TFQmr.c\
  bicgs.c\
