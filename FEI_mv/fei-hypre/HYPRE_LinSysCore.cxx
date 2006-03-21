@@ -43,6 +43,7 @@
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
 #include "HYPRE_LSI_Uzawa_c.h"
+#include "HYPRE_MLMaxwell.h"
 #include "HYPRE_SlideReduction.h"
 
 //***************************************************************************
@@ -86,6 +87,11 @@ extern "C" {
 #ifdef HAVE_ML
    int   HYPRE_LSI_MLCreate( MPI_Comm, HYPRE_Solver *);
    int   HYPRE_LSI_MLDestroy( HYPRE_Solver );
+#endif
+
+#ifdef HAVE_MLMAXWELL
+   int   HYPRE_LSI_MLMaxwellCreate(MPI_Comm, HYPRE_Solver *);
+   int   HYPRE_LSI_MLMaxwellDestroy(HYPRE_Solver );
 #endif
 
 #ifdef HAVE_AMGE
@@ -459,6 +465,11 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       else if ( HYPreconID_ == HYML )
          HYPRE_LSI_MLDestroy( HYPrecon_ );
 #endif
+
+#ifdef HAVE_MLMAXWELL
+      else if ( HYPreconID_ == HYMLMAXWELL )
+         HYPRE_LSI_MLMaxwellDestroy( HYPrecon_ );
+#endif
       else if ( HYPreconID_ == HYMLI )
          HYPRE_LSI_MLIDestroy( HYPrecon_ );
 
@@ -508,12 +519,12 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 
    if (maxwellANN_ != NULL)
    {
-      HYPRE_IJMatrixDestroy(maxwellANN_);
+      HYPRE_ParCSRMatrixDestroy(maxwellANN_);
       maxwellANN_ = NULL;
    }
    if (maxwellGEN_ != NULL)
    {
-      HYPRE_IJMatrixDestroy(maxwellGEN_);
+      HYPRE_ParCSRMatrixDestroy(maxwellGEN_);
       maxwellGEN_ = NULL;
    }
 
@@ -2618,11 +2629,11 @@ int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
    name  = data.getTypeName();
    if (!strcmp(name, "ANN"))
    {
-      maxwellANN_ = (HYPRE_IJMatrix) data.getDataPtr();
+      maxwellANN_ = (HYPRE_ParCSRMatrix) data.getDataPtr();
    }
    else if (!strcmp(name, "GEN"))
    {
-      maxwellGEN_ = (HYPRE_IJMatrix) data.getDataPtr();
+      maxwellGEN_ = (HYPRE_ParCSRMatrix) data.getDataPtr();
    }
    else
    {
@@ -3351,7 +3362,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       printf("%4d : HYPRE_LSC::entering selectPreconditioner = %s.\n",
              mypid_, name);
 
@@ -3363,147 +3374,162 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    parasailsReuse_ = 0;
    if ( HYPrecon_ != NULL )
    {
-      if ( HYPreconID_ == HYPILUT )
-         HYPRE_ParCSRPilutDestroy( HYPrecon_ );
+      if (HYPreconID_ == HYPILUT)
+         HYPRE_ParCSRPilutDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYPARASAILS )
-         HYPRE_ParCSRParaSailsDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYPARASAILS)
+         HYPRE_ParCSRParaSailsDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYBOOMERAMG )
-         HYPRE_BoomerAMGDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYBOOMERAMG)
+         HYPRE_BoomerAMGDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYDDILUT )
-         HYPRE_LSI_DDIlutDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYDDILUT)
+         HYPRE_LSI_DDIlutDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYSCHWARZ )
-         HYPRE_LSI_SchwarzDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYSCHWARZ)
+         HYPRE_LSI_SchwarzDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYDDICT )
-         HYPRE_LSI_DDICTDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYDDICT)
+         HYPRE_LSI_DDICTDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYPOLY )
-         HYPRE_LSI_PolyDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYPOLY)
+         HYPRE_LSI_PolyDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYEUCLID )
-         HYPRE_EuclidDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYEUCLID)
+         HYPRE_EuclidDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYBLOCK )
-         HYPRE_LSI_BlockPrecondDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYBLOCK)
+         HYPRE_LSI_BlockPrecondDestroy(HYPrecon_);
 
 #ifdef HAVE_ML
-      else if ( HYPreconID_ == HYML )
-         HYPRE_LSI_MLDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYML)
+         HYPRE_LSI_MLDestroy(HYPrecon_);
 #endif
 #ifdef HAVE_MLI
-      else if ( HYPreconID_ == HYMLI )
-         HYPRE_LSI_MLIDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYMLI)
+         HYPRE_LSI_MLIDestroy(HYPrecon_);
 #endif
-      else if ( HYPreconID_ == HYUZAWA)   
-         HYPRE_LSI_UzawaDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYUZAWA)   
+         HYPRE_LSI_UzawaDestroy(HYPrecon_);
    }
 
    //-------------------------------------------------------------------
    // check for the validity of the preconditioner name
    //-------------------------------------------------------------------
 
-   if ( !strcmp(name, "identity"  ) )
+   if (!strcmp(name, "identity"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYIDENTITY;
    }
-   else if ( !strcmp(name, "diagonal"  ) )
+   else if (!strcmp(name, "diagonal"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYDIAGONAL;
    }
-   else if ( !strcmp(name, "pilut") )
+   else if (!strcmp(name, "pilut"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYPILUT;
    }
-   else if ( !strcmp(name, "parasails") )
+   else if (!strcmp(name, "parasails"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYPARASAILS;
    }
-   else if ( !strcmp(name, "boomeramg") )
+   else if (!strcmp(name, "boomeramg"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYBOOMERAMG;
    }
-   else if ( !strcmp(name, "ddilut") )
+   else if (!strcmp(name, "ddilut"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYDDILUT;
    }
-   else if ( !strcmp(name, "schwarz") )
+   else if (!strcmp(name, "schwarz"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYSCHWARZ;
    }
-   else if ( !strcmp(name, "ddict") )
+   else if (!strcmp(name, "ddict"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYDDICT;
    }
-   else if ( !strcmp(name, "poly") )
+   else if (!strcmp(name, "poly"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYPOLY;
    }
-   else if ( !strcmp(name, "euclid") )
+   else if (!strcmp(name, "euclid"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYEUCLID;
    }
-   else if ( !strcmp(name, "blockP") )
+   else if (!strcmp(name, "blockP"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYBLOCK;
    }
-   else if ( !strcmp(name, "ml") )
+   else if (!strcmp(name, "ml"))
    {
 #ifdef HAVE_ML
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYML;
 #else
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       {
-         printf("selectPreconditioner - MLPACK not declared.\n");
+         printf("selectPreconditioner - ML not available.\n");
          printf("                       set default to diagonal.\n");
       }
-      strcpy( HYPreconName_, "diagonal" );
+      strcpy(HYPreconName_, "diagonal");
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
-   else if ( !strcmp(name, "mli") )
+   else if (!strcmp(name, "mlmaxwell"))
+   {
+#ifdef HAVE_MLMAXWELL
+      strcpy(HYPreconName_, name);
+      HYPreconID_ = HYMLMAXWELL;
+#else
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
+      {
+         printf("selectPreconditioner - MLMaxwell not available.\n");
+         printf("                       set default to diagonal.\n");
+      }
+      strcpy(HYPreconName_, "diagonal");
+      HYPreconID_ = HYDIAGONAL;
+#endif
+   }
+   else if (!strcmp(name, "mli"))
    {
 #ifdef HAVE_MLI
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYMLI;
 #else
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       {
-         printf("selectPreconditioner - MLI not declared.\n");
+         printf("selectPreconditioner - MLI not available.\n");
          printf("                       set default to diagonal.\n");
       }
-      strcpy( HYPreconName_, "diagonal" );
+      strcpy(HYPreconName_, "diagonal");
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
-   else if ( !strcmp(name, "uzawa") )
+   else if (!strcmp(name, "uzawa"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYUZAWA;
    }
    else
    {
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       {
          printf("selectPreconditioner error : invalid option.\n");
          printf("                     use default = diagonal.\n");
       }
-      strcpy( HYPreconName_, "diagonal" );
+      strcpy(HYPreconName_, "diagonal");
       HYPreconID_ = HYDIAGONAL;
    }
 
@@ -3511,7 +3537,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // instantiate preconditioner
    //-------------------------------------------------------------------
 
-   switch ( HYPreconID_ )
+   switch (HYPreconID_)
    {
       case HYIDENTITY :
            HYPrecon_ = NULL;
@@ -3522,14 +3548,14 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            break;
 
       case HYPILUT :
-           ierr = HYPRE_ParCSRPilutCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
-           HYPRE_ParCSRPilutSetMaxIter( HYPrecon_, 1 );
+           ierr = HYPRE_ParCSRPilutCreate(comm_, &HYPrecon_);
+           assert(!ierr);
+           HYPRE_ParCSRPilutSetMaxIter(HYPrecon_, 1);
            break;
 
       case HYPARASAILS :
-           ierr = HYPRE_ParCSRParaSailsCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
+           ierr = HYPRE_ParCSRParaSailsCreate(comm_, &HYPrecon_);
+           assert(!ierr);
            break;
 
       case HYBOOMERAMG :
@@ -3541,51 +3567,57 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            break;
 
       case HYDDILUT :
-           ierr = HYPRE_LSI_DDIlutCreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_LSI_DDIlutCreate(comm_, &HYPrecon_);
            assert( !ierr );
            break;
 
       case HYSCHWARZ :
-           ierr = HYPRE_LSI_SchwarzCreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_LSI_SchwarzCreate(comm_, &HYPrecon_);
            assert( !ierr );
            break;
 
       case HYDDICT :
-           ierr = HYPRE_LSI_DDICTCreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_LSI_DDICTCreate(comm_, &HYPrecon_);
            assert( !ierr );
            break;
 
       case HYPOLY :
-           ierr = HYPRE_LSI_PolyCreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_LSI_PolyCreate(comm_, &HYPrecon_);
            assert( !ierr );
            break;
 
       case HYEUCLID :
-           ierr = HYPRE_EuclidCreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_EuclidCreate(comm_, &HYPrecon_);
            assert( !ierr );
            break;
 
       case HYBLOCK :
-           ierr = HYPRE_LSI_BlockPrecondCreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_LSI_BlockPrecondCreate(comm_, &HYPrecon_);
            assert( !ierr );
            break;
 
       case HYML :
 #ifdef HAVE_ML
-           ierr = HYPRE_LSI_MLCreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_LSI_MLCreate(comm_, &HYPrecon_);
 #else
            printf("HYPRE_LSC::selectPreconditioner - ML not supported.\n");
 #endif
            break;
       case HYMLI :
 #ifdef HAVE_MLI
-           ierr = HYPRE_LSI_MLICreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_LSI_MLICreate(comm_, &HYPrecon_);
 #else
            printf("HYPRE_LSC::selectPreconditioner - MLI not supported.\n");
 #endif
+      case HYMLMAXWELL :
+#ifdef HAVE_MLMAXWELL
+           ierr = HYPRE_LSI_MLMaxwellCreate(comm_, &HYPrecon_);
+#else
+           printf("HYPRE_LSC::selectPreconditioner-MLMaxwell unsupported.\n");
+#endif
            break;
       case HYUZAWA :
-           HYPRE_LSI_UzawaCreate( comm_, &HYPrecon_ );
+           HYPRE_LSI_UzawaCreate(comm_, &HYPrecon_);
            break;
    }
 
@@ -3593,7 +3625,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       printf("%4d : HYPRE_LSC::leaving  selectPreconditioner.\n",mypid_);
 }
 

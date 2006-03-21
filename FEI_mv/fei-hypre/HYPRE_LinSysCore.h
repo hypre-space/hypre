@@ -44,7 +44,7 @@ enum HYsolverID {HYPCG,HYLSICG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,
                  HYY12M,HYAMGE,HYHYBRID};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
-                 HYUZAWA};
+                 HYUZAWA,HYMLMAXWELL};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255
@@ -435,6 +435,7 @@ class HYPRE_LinSysCore
    void   setupPreconPoly();
    void   setupPreconSchwarz();
    void   setupPreconML();
+   void   setupPreconMLMaxwell();
    void   setupPreconBlock();
    void   setupPreconEuclid();
    void   solveUsingBoomeramg(int&);
@@ -674,8 +675,8 @@ class HYPRE_LinSysCore
    // ML Maxwell variables
    // ----------------------------------------------------------------------
 
-   HYPRE_IJMatrix  maxwellANN_;           // Maxwell nodal matrix 
-   HYPRE_IJMatrix  maxwellGEN_;           // Maxwell gradient matrix 
+   HYPRE_ParCSRMatrix  maxwellANN_;           // Maxwell nodal matrix 
+   HYPRE_ParCSRMatrix  maxwellGEN_;           // Maxwell gradient matrix 
 
    // ----------------------------------------------------------------------
    // temporary functions for testing purposes
