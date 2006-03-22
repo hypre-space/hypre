@@ -13,24 +13,24 @@
 #           differences (except for timings) indicate errors
 #=============================================================================
 
-diff ex1.base ex1.out >&2
+diff ex1.base default.out.1 >&2
 
-diff ex2.base ex2.out >&2
+diff ex2.base default.out.2 >&2
 
-diff ex3.base ex3.out >&2
+diff ex3.base default.out.3 >&2
 
-diff ex4.base ex4.out >&2
+diff ex4.base default.out.4 >&2
 
-diff ex5.base ex5.out >&2
+diff ex5.base default.out.5 >&2
 
-diff ex5b.base ex5b.out >&2
+diff ex5b.base default.out.5b >&2
 
-diff ex5b77.base ex5b77.out >&2
+diff ex5b77.base default.out.5b77 >&2
 
-diff ex6.base ex6.out >&2
+diff ex6.base default.out.6 >&2
 
-diff ex7.base ex7.out >&2
+diff ex7.base default.out.7 >&2
 
-diff ex8.base ex8.out >&2
+diff ex8.base default.out.8 >&2
 
-diff ex9.base ex9.out >&2
+diff ex9.base default.out.9 >&2
