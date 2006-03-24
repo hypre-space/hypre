@@ -39,6 +39,11 @@ Version 1.11.0b released, 2006/??/??.
 
 - modified runtest.sh to recognize TEST_examples as an input case to run.
 
+- updated ex5.c to include (1) an option to print the system matrix and rhs and 
+  (2) a description of how to read in a matrix and rhs in IJ format for testing 
+  purposes.
+
+
 ********************************************************************
 
 Version 1.10.0b released, 2005/12/19.
