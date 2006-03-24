@@ -34,7 +34,7 @@ int main (int argc, char *argv[])
    int local_size, extra;
 
    int solver_id;
-   int print_solution;
+   int print_solution, print_system;
 
    double h, h2;
 
@@ -56,6 +56,8 @@ int main (int argc, char *argv[])
    n = 33;
    solver_id = 0;
    print_solution  = 0;
+   print_system = 0;
+   
 
    /* Parse command line */
    {
@@ -79,6 +81,13 @@ int main (int argc, char *argv[])
             arg_index++;
             print_solution = 1;
          }
+         else if ( strcmp(argv[arg_index], "-print_system") == 0 )
+         {
+            arg_index++;
+            print_system = 1;
+         }
+
+
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
             print_usage = 1;
@@ -102,6 +111,7 @@ int main (int argc, char *argv[])
          printf("                        8  - ParaSails-PCG\n");
          printf("                        50 - PCG\n");
          printf("  -print_solution     : print the solution vector\n");
+         printf("  -print_system       : print the matrix and rhs\n");
          printf("\n");
       }
 
@@ -207,8 +217,24 @@ int main (int argc, char *argv[])
 
    /* Assemble after setting the coefficients */
    HYPRE_IJMatrixAssemble(A);
+
+   /* Note: for the testing of small problems, one may wish to read
+      in a matrix in IJ format (for the format, see the output files 
+      from the -print_system option).
+      In this case, one would use the following routine:  
+      HYPRE_IJMatrixRead( <filename>, MPI_COMM_WORLD,
+                          HYPRE_PARCSR, &A );
+      <filename>  = IJ.A.out to read in what has been printed out
+      by -print_system (processor numbers are omitted).
+      A call to HYPRE_IJMatrixRead is an *alternative* to the 
+      following sequence of HYPRE_IJMatrix calls: 
+      Create, SetObjectType, Initialize, SetValues, and Assemble
+   */                     
+
+
    /* Get the parcsr matrix object to use */
    HYPRE_IJMatrixGetObject(A, (void**) &parcsr_A);
+
 
    /* Create the rhs and solution */
    HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper,&b);
@@ -243,11 +269,29 @@ int main (int argc, char *argv[])
       free(rows);
    }
 
+
    HYPRE_IJVectorAssemble(b);
+   /*  As with the matrix, for testing purposes, one may wish to read in a rhs:
+       HYPRE_IJVectorRead( <filename>, MPI_COMM_WORLD, 
+                                 HYPRE_PARCSR, &b ); 
+       as an alternative to the 
+       following sequence of HYPRE_IJVectors calls: 
+       Create, SetObjectType, Initialize, SetValues, and Assemble
+   */
    HYPRE_IJVectorGetObject(b, (void **) &par_b);
 
    HYPRE_IJVectorAssemble(x);
    HYPRE_IJVectorGetObject(x, (void **) &par_x);
+
+ 
+  /*  Print out the system  - files names will be IJ.out.A.XXXXX
+       and IJ.out.b.XXXXX, where XXXXX = processor id */
+   if (print_system)
+   {
+      HYPRE_IJMatrixPrint(A, "IJ.out.A");
+      HYPRE_IJVectorPrint(b, "IJ.out.b");
+   }
+
 
    /* Choose a solver and solve the system */
 
