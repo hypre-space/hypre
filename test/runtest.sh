@@ -485,9 +485,17 @@ do
                TestDirNames="$TestDirNames $DirPart"
                case $DirPart in
                   TEST_examples)
-                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex5b ex5b77 ex6 ex7 ex8 ex9"
+                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9"
+                     BabelExampleFiles="ex5b ex5b77"
                      cd ../examples
                      cp -f $ExampleFiles $CurDir
+                     for file in $BabelExampleFiles
+                     do
+                        if [ -x $file ]
+                        then
+                           cp -f $file $CurDir
+                        fi
+                     done
                      cd $CurDir
                      ;;
                esac

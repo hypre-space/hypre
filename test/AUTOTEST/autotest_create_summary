@@ -87,6 +87,8 @@ apply_error_filters ()
         for ii in \
           '===\ End\ of\ Compilation'\
           'Compilation\ successful'\
+          'cpu\ clock'\
+          'wall\ clock'\
           '^\ Guide\ \ \ '\
           ':\ 0\ errors\ in\ file'\
           '1500-030:\ \(I\)\ INFORMATION:'\
@@ -105,6 +107,8 @@ apply_error_filters ()
           '[A-Za-z0-9_]*\.cxx$'\
           '^[ \t]*$'\
           '^[0-9]*\ Lines\ Compiled$'\
+          'cpu\ clock'\
+          'wall\ clock'\
           'external\ (subroutine|function)'\
           'EXTERNAL\ (SUBROUTINE|FUNCTION)'\
           'remark:\ LOOP\ WAS\ VECTORIZED'\
@@ -118,6 +122,8 @@ apply_error_filters ()
           '^No\ suffix\ list'\
           '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
           'WARNING:\ \ guidef77\ has\ implied\ '\
+          'cpu\ clock'\
+          'wall\ clock'\
           '^cc:\ Info:\ '
         do process_filter $ErrorFile "${ii}"
         done
@@ -129,6 +135,8 @@ apply_error_filters ()
           'autoheader\ has\ been\ disabled'\
           'configure:\ WARNING:\ Configuration\ for'\
           'configure:\ WARNING:\ Skipping\ Java'\
+          'cpu\ clock'\
+          'wall\ clock'\
           'Error:\ PDF:\ version'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           '../../../babel/runtime'\
@@ -149,6 +157,8 @@ apply_error_filters ()
       ;;
       vivid*)
         for ii in \
+          'cpu\ clock'\
+          'wall\ clock'\
           'xauth:\ \ error\ in\ locking\ authority\ file\ '
         do process_filter $ErrorFile "${ii}"
         done
@@ -253,7 +263,7 @@ HYPRE_DEFAULT_REMOTE_DIRS="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-kai/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
 
-HYPRE_STD_TEST_DIRS="TEST_fac TEST_ij TEST_sstruct TEST_struct"
+HYPRE_STD_TEST_DIRS="TEST_fac TEST_ij TEST_sstruct TEST_struct TEST_examples"
 
 cd ${HYPRE_AUTOTEST_EXECUTE_DIR}
 HYPRE_TEST_SUMMARY_FILE="autotest_summary.`date '+%Y%m%d'`.html"

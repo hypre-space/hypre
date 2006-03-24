@@ -16,7 +16,7 @@ CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
- -I${HYPRE_BUILD_DIR}/include\
+ -I${HYPRE_LINK_DIR}/include\
  ${CINCLUDES}\
  ${CDEFS}
 
@@ -24,14 +24,14 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
- -I${HYPRE_BUILD_DIR}/include\
+ -I${HYPRE_LINK_DIR}/include\
  ${CINCLUDES}\
  ${CXXDEFS}
 
 F77_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
- -I${HYPRE_BUILD_DIR}/include\
+ -I${HYPRE_LINK_DIR}/include\
  ${CINCLUDES}
  
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS} 
@@ -41,7 +41,7 @@ LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 
 LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_sstruct_ls\
  -lHYPRE_sstruct_mv\
  -lHYPRE_struct_ls\
@@ -64,8 +64,8 @@ LFLAGS =\
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
 
 BABELLIBFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -L${HYPRE_BUILD_DIR}/../babel-runtime/sidl/.libs\
+ -L${HYPRE_LINK_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/../babel-runtime/sidl/.libs\
  -lbHYPRE\
  -lbHYPREClient-C\
  -lbHYPREClient-F\
@@ -76,7 +76,7 @@ BABELLIBFLAGS =\
 # Commpkg definitions
 ###########################################
 COMMPKG_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
@@ -90,7 +90,7 @@ COMMPKG_LFLAGS =\
 # Struct definitions
 ###########################################
 STRUCT_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
  -lHYPRE_parcsr_ls\
@@ -113,7 +113,7 @@ STRUCT_LFLAGS =\
 # Sstruct definitions
 ###########################################
 SSTRUCT_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_sstruct_ls\
  -lHYPRE_sstruct_mv\
  -lHYPRE_struct_ls\
@@ -139,7 +139,7 @@ SSTRUCT_LFLAGS =\
 # IJ definitions
 ###########################################
 IJ_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver \
  -lHYPRE_ParaSails \
@@ -161,7 +161,7 @@ IJ_LFLAGS =\
 # IJ_MV definitions
 ###########################################
 IJ_MV_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_IJ_mv\
  -lHYPRE_parcsr_mv\
@@ -173,7 +173,7 @@ IJ_MV_LFLAGS =\
 # FEI definitions
 ###########################################
 FEICXX_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_LSI\
  -lHYPRE_superlu\
  ${LAPACKLIBFLAGS} \
@@ -256,8 +256,8 @@ distclean: clean
 	rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_FEI_DRIVER_CXX_EXECS}
-	rm -f TEST_examples/*.out
-	rm -f TEST_examples/*.err
+	rm -f TEST_examples/*.out*
+	rm -f TEST_examples/*.err*
 	rm -f TEST_fac/*.out*
 	rm -f TEST_fac/*.err*
 	rm -f TEST_ij/*.out*
