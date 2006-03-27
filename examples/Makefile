@@ -23,7 +23,7 @@ CXXDEFS   = $(CDEFS)
 CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS)
 
 LINKOPTS  = $(COPTS)
-LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -llapack -lblas -lg2c -lm
+LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lg2c -lm
 LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
 LFLAGS_B =\
  -L${HYPRE_DIR}/lib\
@@ -32,7 +32,6 @@ LFLAGS_B =\
  -lbHYPREClient-C\
  -lbHYPREClient-CX\
  -lbHYPREClient-F\
- -lbHYPRE\
  -lsidl -ldl -lxml2
 
 ########################################################################
@@ -50,8 +49,12 @@ LFLAGS_B =\
 ########################################################################
 # List of all programs to be compiled
 ########################################################################
-ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9 ex5b ex5b77
+ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9
+BABELPROGS = ex5b ex5b77
+
 all: $(ALLPROGS)
+
+babel: $(BABELPROGS)
 
 ########################################################################
 # Example 1
@@ -131,6 +134,8 @@ ex9: ex9.o
 ########################################################################
 clean:
 	rm -f $(ALLPROGS:=.o)
+	rm -f $(BABELPROGS:=.o)
 veryclean distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)
+	rm -f $(BABELPROGS) $(BABELPROGS:=*~)
 	rm -rf *.html README_files

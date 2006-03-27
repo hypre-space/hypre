@@ -662,8 +662,7 @@ AC_ARG_WITH(babel,
 AC_ARG_WITH(examples,
   AS_HELP_STRING([  --with-examples], [ Builds example codes.]),
 [case "${withval}" in
-   yes) casc_using_babel=yes 
-        casc_using_mpi=yes 
+   yes) casc_using_mpi=yes 
         casc_using_examples=yes 
         ;;
    no)  casc_using_examples=no 
