@@ -1,0 +1,17 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# Run each example 
+#=============================================================================
+
+mpirun -np 4 ./ex5b > babel.out.5b
+
+mpirun -np 4 ./ex5b77 > babel.out.5b77
