@@ -42,7 +42,6 @@ FILES =\
  par_csr_block_matrix.c\
  par_csr_block_matvec.c\
  par_csr_block_comm.c\
- par_csr_block_matop.c\
  par_csr_block_rap.c\
  par_csr_block_rap_communication.c\
  par_csr_block_interp.c\
