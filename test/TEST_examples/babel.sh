@@ -14,6 +14,14 @@
 #=============================================================================
 
 
-diff ex5b.base babel.out.5b >&2
+tail -21 babel.out.5b > babel.test.tmp
+head babel.test.tmp > babel.test
+
+tail -21 ex5b.base > babel.base.tmp
+head babel.base.tmp > babel.base
+
+diff babel.base babel.test >&2
 
 diff ex5b77.base babel.out.5b77 >&2
+
+rm -f babel.test.tmp babel.test babel.base.tmp babel.base

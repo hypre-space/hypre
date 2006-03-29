@@ -13,20 +13,12 @@
 #=============================================================================
 
 
-mpirun -np 2 ./ex1 > default.out.1
+mpirun -np 2 ./ex1_for > fortran_examples.out.1
 
-mpirun -np 2 ./ex2 > default.out.2
+mpirun -np 16 ./ex3_for -n 33 -solver 0 -v 1 1 > fortran_examples.out.3
 
-mpirun -np 16 ./ex3 -n 33 -solver 0 -v 1 1 > default.out.3
+mpirun -np 4 ./ex5_for > fortran_examples.out.5
 
-mpirun -np 16 ./ex4 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > default.out.4
+mpirun -np 2 ./ex6_for > fortran_examples.out.6
 
-mpirun -np 4 ./ex5 > default.out.5
-
-mpirun -np 2 ./ex6 > default.out.6
-
-mpirun -np 16 ./ex7 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > default.out.7
-
-mpirun -np 2 ./ex8 > default.out.8
-
-mpirun -np 16 ./ex9 -n 33 -solver 0 -v 1 1 > default.out.9
+mpirun -np 16 ./ex7_for -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > fortran_examples.out.7
