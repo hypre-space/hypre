@@ -135,6 +135,15 @@ typedef struct
 
    Index                  periodic;
 
+   /* for MatrixAddToBoxValues */
+   int                    matrixAddToValues_ntotalAdds;
+   ProblemIndex          *matrixAddToValues_ilowers;
+   ProblemIndex          *matrixAddToValues_iuppers;
+   int                   *matrixAddToValues_var;
+   int                   *matrixAddToValues_nentries;
+   int                  **matrixAddToValues_entries;
+   double               **matrixAddToValues_vals;
+
 } ProblemPartData;
  
 typedef struct
@@ -240,6 +249,25 @@ SScanIntArray( char  *sdata_ptr,
    return 0;
 }
 
+int
+SScanDblArray( char   *sdata_ptr,
+               char  **sdata_ptr_ptr,
+               int     size,
+               double *array )
+{
+   int i;
+                                                                                                                           
+   sdata_ptr += strspn(sdata_ptr, " \t\n[");
+   for (i = 0; i < size; i++)
+   {
+      array[i] = strtod(sdata_ptr, &sdata_ptr);
+   }
+   sdata_ptr += strcspn(sdata_ptr, "]") + 1;
+                                                                                                                           
+   *sdata_ptr_ptr = sdata_ptr;
+   return 0;
+}
+                                                                                                                           
 int
 SScanProblemIndex( char          *sdata_ptr,
                    char         **sdata_ptr_ptr,
@@ -714,6 +742,45 @@ ReadData( char         *filename,
             pdata.matrix_values[pdata.matrix_nentries] =
                strtod(sdata_ptr, &sdata_ptr);
             pdata.matrix_nentries++;
+            data.pdata[part] = pdata;
+         }
+         else if ( strcmp(key, "MatrixAddToValues:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            if ((pdata.matrixAddToValues_ntotalAdds% 10) == 0)
+            {
+               size = pdata.matrixAddToValues_ntotalAdds+10;
+               pdata.matrixAddToValues_ilowers=
+                  hypre_TReAlloc(pdata.matrixAddToValues_ilowers, ProblemIndex, size);
+               pdata.matrixAddToValues_iuppers=
+                  hypre_TReAlloc(pdata.matrixAddToValues_iuppers, ProblemIndex, size);
+               pdata.matrixAddToValues_var=
+                  hypre_TReAlloc(pdata.matrixAddToValues_var, int, size);
+               pdata.matrixAddToValues_nentries=
+                  hypre_TReAlloc(pdata.matrixAddToValues_nentries, int, size);
+               pdata.matrixAddToValues_entries=
+                  hypre_TReAlloc(pdata.matrixAddToValues_entries, int *, size);
+               pdata.matrixAddToValues_vals=
+                  hypre_TReAlloc(pdata.matrixAddToValues_vals, double *, size);
+            }
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.matrixAddToValues_ilowers[pdata.matrixAddToValues_ntotalAdds]);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.matrixAddToValues_iuppers[pdata.matrixAddToValues_ntotalAdds]);
+            pdata.matrixAddToValues_var[pdata.matrixAddToValues_ntotalAdds]=
+                strtol(sdata_ptr, &sdata_ptr, 10);
+            i= strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.matrixAddToValues_nentries[pdata.matrixAddToValues_ntotalAdds]= i;
+            pdata.matrixAddToValues_entries[pdata.matrixAddToValues_ntotalAdds] =
+               hypre_TAlloc(int, i);
+            SScanIntArray(sdata_ptr, &sdata_ptr, i,
+              (int*) pdata.matrixAddToValues_entries[pdata.matrixAddToValues_ntotalAdds]);
+            pdata.matrixAddToValues_vals[pdata.matrixAddToValues_ntotalAdds] =
+               hypre_TAlloc(double, i);
+            SScanDblArray(sdata_ptr, &sdata_ptr, i,
+              (double *) pdata.matrixAddToValues_vals[pdata.matrixAddToValues_ntotalAdds]);
+            pdata.matrixAddToValues_ntotalAdds++;
             data.pdata[part] = pdata;
          }
          else if ( strcmp(key, "ProcessPoolCreate:") == 0 )
@@ -1268,6 +1335,20 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.matrix_values);
       }
 
+      if (pdata.matrixAddToValues_ntotalAdds > 0)
+      {
+         hypre_TFree(pdata.matrixAddToValues_ilowers);
+         hypre_TFree(pdata.matrixAddToValues_iuppers);
+         hypre_TFree(pdata.matrixAddToValues_var);
+         hypre_TFree(pdata.matrixAddToValues_nentries);
+         for (s= 0; s< pdata.matrixAddToValues_ntotalAdds; s++)
+         {
+            hypre_TFree(pdata.matrixAddToValues_entries[s]);
+            hypre_TFree(pdata.matrixAddToValues_vals[s]);
+         }
+         hypre_TFree(pdata.matrixAddToValues_entries);
+         hypre_TFree(pdata.matrixAddToValues_vals);
+      }
    }
    hypre_TFree(data.pdata);
 
@@ -1525,7 +1606,7 @@ main( int   argc,
 
    double                cf_tol;
 
-   int                   arg_index, part, box, var, entry, s, i, j, k;
+   int                   arg_index, part, box, var, entry, s, i, j, k, size;
                         
    /* begin lobpcg */
 
@@ -2140,6 +2221,55 @@ main( int   argc,
       }
    }
 
+   /* Zero off the correct entries of the matrix values over the matrixAddToValue 
+      box extents and then re-compute them using the matrixAddValue routine. */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (i= 0; i< pdata.matrixAddToValues_ntotalAdds; i++)
+      {
+         var= pdata.matrixAddToValues_var[i];
+         GetVariableBox(pdata.matrixAddToValues_ilowers[i], 
+                        pdata.matrixAddToValues_iuppers[i],
+                        pdata.vartypes[var], ilower, iupper);
+
+         size= iupper[0]-ilower[0]+1;
+         for (j= 1; j< data.ndim; j++)
+         {
+            size*= iupper[j]-ilower[j]+1;
+         }
+
+         for (entry = 0; entry < pdata.matrixAddToValues_nentries[i]; entry++)
+         {
+            for (j= 0; j< size; j++)
+            {
+               values[j] = 0.0;
+            }
+          
+            HYPRE_SStructMatrixSetBoxValues(A, part,
+                                            ilower,
+                                            iupper,
+                                            var,
+                                            1,
+                                           &pdata.matrixAddToValues_entries[i][entry],
+                                            values);
+
+            for (j= 0; j< size; j++)
+            {
+               values[j] = pdata.matrixAddToValues_vals[i][entry];
+            }
+          
+            HYPRE_SStructMatrixAddToBoxValues(A, part, 
+                                              ilower, 
+                                              iupper, 
+                                              var, 
+                                              1,
+                                             &pdata.matrixAddToValues_entries[i][entry],
+                                              values);
+         }
+      }
+   }
+
    HYPRE_SStructMatrixAssemble(A);
 
    /*-----------------------------------------------------------
@@ -2417,6 +2547,7 @@ main( int   argc,
       HYPRE_SStructSysPFMGGetNumIterations(solver, &num_iterations);
       HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(
                                            solver, &final_res_norm);
+
       HYPRE_SStructSysPFMGDestroy(solver);
    }
 
