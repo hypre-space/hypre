@@ -183,7 +183,7 @@ FEICXX_LFLAGS =\
 ##################################################################
 # Targets
 ##################################################################
-HYPRE_STANDARD_DRIVERS =\
+HYPRE_DRIVERS =\
  ij.c\
  ij_mv.c\
  new_ij.c\
@@ -199,7 +199,14 @@ HYPRE_BABEL_DRIVERS =\
 HYPRE_FEI_DRIVERS_CXX =\
  fei.cxx
 
-HYPRE_STANDARD_DRIVERS_F77 =\
+HYPRE_F77_EXAMPLES_DRIVERS =\
+ ex1_for.c\
+ ex3_for.c\
+ ex5_for.c\
+ ex6_for.c\
+ ex7_for.c
+
+HYPRE_DRIVERS_F77 =\
  f77_ij.f\
  f77_ij_mv.f\
  f77_struct.f
@@ -210,20 +217,9 @@ HYPRE_BABEL_DRIVERS_F77 =\
  f77_ij_b.f\
  f77_struct_b.f
 
-#ifndef is gmake only, can't be used...
-#ifndef BABELLIBFLAGS
- HYPRE_DRIVERS = ${HYPRE_STANDARD_DRIVERS}
- HYPRE_DRIVERS_F77 = ${HYPRE_STANDARD_DRIVERS_F77}
-#else
-# HYPRE_DRIVERS = ${HYPRE_STANDARD_DRIVERS} ${HYPRE_BABEL_DRIVERS}
-# HYPRE_DRIVERS_F77 = ${HYPRE_STANDARD_DRIVERS_F77} ${HYPRE_BABEL_DRIVERS_F77}
-#endif
-
-HYPRE_DRIVER_OBJS=${HYPRE_DRIVERS:.c=.o}
-HYPRE_DRIVER_F77_OBJS=${HYPRE_DRIVERS_F77:.f=.o}
-HYPRE_FEI_DRIVER_CXX_OBJS=${HYPRE_FEI_DRIVERS_CXX:.cxx=.o}
 
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
+HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_FEI_DRIVER_CXX_EXECS=${HYPRE_FEI_DRIVERS_CXX:.cxx=}
 
@@ -235,7 +231,7 @@ HYPRE_BABEL_DRIVER_EXECS=${HYPRE_BABEL_DRIVERS:.c=}
 HYPRE_BABEL_DRIVER_CXX_EXECS=${HYPRE_BABEL_DRIVERS_CXX:.cxx=}
 HYPRE_BABEL_DRIVER_F77_EXECS=${HYPRE_BABEL_DRIVERS_F77:.f=}
 
-all: ${HYPRE_DRIVER_EXECS}
+all: ${HYPRE_DRIVER_EXECS} ${HYPRE_F77_EXAMPLES_DRIVER_EXECS}
 
 all77: ${HYPRE_DRIVER_F77_EXECS}
 
@@ -251,6 +247,7 @@ clean:
 
 distclean: clean
 	rm -f ${HYPRE_DRIVER_EXECS}
+	rm -f ${HYPRE_F77_EXAMPLES_DRIVER_EXECS}
 	rm -f ${HYPRE_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
@@ -268,7 +265,6 @@ distclean: clean
 	rm -f TEST_sstruct/*.err*
 	rm -f TEST_struct/*.out*
 	rm -f TEST_struct/*.err*
-	rm -f ex*_for
 	rm -f ex1 ex2 ex3 ex4 ex5 ex5b ex5b77 ex6 ex7 ex8 ex9
 
 ##################################################################
