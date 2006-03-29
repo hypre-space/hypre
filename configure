@@ -9942,6 +9942,30 @@ then
       BLASLIBS=""
       BLASLIBDIRS=""
    fi
+
+ if test "$casc_using_debug" = "yes" && "$casc_using_mpi" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+ fi
+
+ if test "$casc_using_mpi" = "no"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/serial"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
+
+ if test "$casc_using_openmp" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/threads"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
+
 elif test "$casc_testing_beta" = "yes"
 then
    case $HOSTNAME in
@@ -9960,6 +9984,30 @@ then
       BLASLIBS=""
       BLASLIBDIRS=""
    fi
+
+ if test "$casc_using_debug" = "yes" && "$casc_using_mpi" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+ fi
+
+ if test "$casc_using_mpi" = "no"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/serial"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
+
+ if test "$casc_using_openmp" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/threads"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
+
 elif test "$casc_testing_general" = "yes"
 then
    case $HOSTNAME in
@@ -9978,6 +10026,30 @@ then
       BLASLIBS=""
       BLASLIBDIRS=""
    fi
+
+ if test "$casc_using_debug" = "yes" && "$casc_using_mpi" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+ fi
+
+ if test "$casc_using_mpi" = "no"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/serial"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
+
+ if test "$casc_using_openmp" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/threads"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
+
 else
    HYPRE_LINKDIR="`pwd`/hypre"
 fi

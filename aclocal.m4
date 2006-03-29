@@ -68,6 +68,39 @@ else
 fi
 ])
 
+
+dnl **********************************************************************
+dnl * HYPRE_SET_LINK_SUBDIRS
+dnl *  sets appropriate sub-directory for linking based on using debug, 
+dnl *  no-mpi or openmp when testing public alpha, beta or general releases
+dnl **********************************************************************
+AC_DEFUN([HYPRE_SET_LINK_SUBDIRS],
+[
+ if test "$casc_using_debug" = "yes" && "$casc_using_mpi" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+ fi
+
+ if test "$casc_using_mpi" = "no"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/serial"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
+
+ if test "$casc_using_openmp" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/threads"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
+])
+
+
 dnl **********************************************************************
 dnl * HYPRE_FIND_G2C
 dnl *  try to find libg2c.a

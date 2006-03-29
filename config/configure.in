@@ -1101,6 +1101,7 @@ then
       BLASLIBS=""
       BLASLIBDIRS=""
    fi
+   HYPRE_SET_LINK_SUBDIRS
 elif test "$casc_testing_beta" = "yes"
 then
    case $HOSTNAME in
@@ -1119,6 +1120,7 @@ then
       BLASLIBS=""
       BLASLIBDIRS=""
    fi
+   HYPRE_SET_LINK_SUBDIRS
 elif test "$casc_testing_general" = "yes"
 then
    case $HOSTNAME in
@@ -1137,6 +1139,7 @@ then
       BLASLIBS=""
       BLASLIBDIRS=""
    fi
+   HYPRE_SET_LINK_SUBDIRS
 else
    HYPRE_LINKDIR="HYPRE_TOP_SRC_DIR/hypre"
 fi
