@@ -9804,7 +9804,7 @@ echo "$as_me: WARNING: architecture is unknown" >&2;}
 echo "${ECHO_T}$HYPRE_ARCH" >&6
          fi
       else
-         HYPRE_ARCH = $ARCH
+         HYPRE_ARCH=$ARCH
          echo "$as_me:$LINENO: result: $HYPRE_ARCH" >&5
 echo "${ECHO_T}$HYPRE_ARCH" >&6
       fi
