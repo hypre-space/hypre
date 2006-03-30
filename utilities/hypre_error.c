@@ -52,5 +52,5 @@ void HYPRE_DescribeError(int ierr, FILE *stream)
 
 int HYPRE_GetErrorArg()
 {
-   return (hypre_error_flag>>3 & 7);
+   return (hypre_error_flag>>3 & 31);
 }
