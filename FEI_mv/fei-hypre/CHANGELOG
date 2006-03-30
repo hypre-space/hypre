@@ -223,4 +223,13 @@
             - add hybrid SA/GSA preconditioner to CG and GMRES
             - major revision to configure/makefile
             - add up to 24 null space vector to AMGSA
+03/30/06    2.7.1R1
+            - add ML Maxwell 
+            - to use: turn on define in HYPRE_MLMaxwell.h, compile hypre 
+                      and ml, copy libml.a to hypre/lib, copy ml_maxwell.cxx
+                      to test directory, modify Makefile in test directory
+                      to compile ml_maxwell.cxx (link with ml), and run
+                      with Gradient and EdgeStiff files (first line nnz,
+                      number of rows, number of columns, then entries with
+                      0-based.)
 
