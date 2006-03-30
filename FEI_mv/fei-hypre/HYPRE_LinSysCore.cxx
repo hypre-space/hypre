@@ -522,11 +522,13 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       HYPRE_ParCSRMatrixDestroy(maxwellANN_);
       maxwellANN_ = NULL;
    }
-   if (maxwellGEN_ != NULL)
-   {
-      HYPRE_ParCSRMatrixDestroy(maxwellGEN_);
-      maxwellGEN_ = NULL;
-   }
+   // Users who copy this matrix in should be responsible for
+   // destroying this
+   //if (maxwellGEN_ != NULL)
+   //{
+   //   HYPRE_ParCSRMatrixDestroy(maxwellGEN_);
+   //   maxwellGEN_ = NULL;
+   //}
 
    //-------------------------------------------------------------------
    // diagnostic message
