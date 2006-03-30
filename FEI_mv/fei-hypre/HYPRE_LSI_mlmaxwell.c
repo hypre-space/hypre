@@ -175,19 +175,26 @@ int ML_MatVec(ML_Operator *obj, int leng1, double p[], int leng2, double ap[])
 int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
 #endif
 {
-    int               i, j, length, nRows, ibeg, iend, k, *rowptr, *colnum;
-    double            *dbuf, sum, *values;
-    void              *vobj;
+    int               i, j, length, nRows, ibeg, iend, k, *rowptr, *colInd;
+    double            *dbuf, sum, *colVal;
     HYPRE_ML_Matrix   *Amat;
     MLMaxwell_Context *context;
 
-    vobj    = (void *) obj;
-    context = (MLMaxwell_Context *) vobj;
+#ifdef HAVE_MLMAXWELL
+    ML_Operator *ml_op = (ML_Operator *) obj;
+    context = (MLMaxwell_Context *) ML_Get_MyGetrowData(ml_op);
     Amat    = (HYPRE_ML_Matrix*) context->Amat;
     nRows   = Amat->Nrows;
     rowptr  = Amat->rowptr;
-    colnum  = Amat->colnum;
-    values  = Amat->values;
+    colInd  = Amat->colnum;
+    colVal  = Amat->values;
+#else
+    printf("ML_MatVec : MLMaxwell not activated.\n");
+    exit(1);
+#endif
+
+    colInd = Amat->colnum;
+    colVal = Amat->values;
 
     length = nRows;
     for (i = 0; i < Amat->recvProcCnt; i++) length += Amat->recvLeng[i];
@@ -201,8 +208,8 @@ int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
        iend = rowptr[i+1];
        for (j = ibeg; j < iend; j++)
        { 
-          k = colnum[j];
-          sum += (values[j] * dbuf[k]);
+          k = colInd[j];
+          sum += (colVal[j] * dbuf[k]);
        }
        ap[i] = sum;
     }
@@ -223,13 +230,23 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
 #endif
 {
     int               i, j, ncnt, colindex, rowLeng, rowindex;
-    void              *vobj = (void *) obj;
-    MLMaxwell_Context *context = (MLMaxwell_Context *) vobj;
-    HYPRE_ML_Matrix   *Amat    = (HYPRE_ML_Matrix*) context->Amat;
-    int     nRows    = Amat->Nrows;
-    int     *rowptr  = Amat->rowptr;
-    int     *colInd  = Amat->colnum;
-    double  *colVal  = Amat->values;
+    int               nRows, *rowptr, *colInd;
+    double            *colVal;
+    MLMaxwell_Context *context;
+    HYPRE_ML_Matrix   *Amat;
+
+#ifdef HAVE_MLMAXWELL
+    ML_Operator *ml_op = (ML_Operator *) obj;
+    context = (MLMaxwell_Context *) ML_Get_MyGetrowData(ml_op);
+    Amat    = (HYPRE_ML_Matrix*) context->Amat;
+    nRows   = Amat->Nrows;
+    rowptr  = Amat->rowptr;
+    colInd  = Amat->colnum;
+    colVal  = Amat->values;
+#else
+    printf("ML_GetRow : MLMaxwell not activated.\n");
+    exit(1);
+#endif
 
     ncnt = 0;
     for (i = 0; i < N_requested_rows; i++)
@@ -441,9 +458,9 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    for (i=0; i<=nprocs; i++) Aee_context->partition[i] = row_partition[i];
    hypre_TFree(row_partition);
    mh_Aee = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
-   Aee_context->Amat = mh_Aee;
-   HYPRE_LSI_MLConstructMLMatrix(A_ee,mh_Aee,row_partition,
+   HYPRE_LSI_MLConstructMLMatrix(A_ee,mh_Aee,Aee_context->partition,
                                  link->comm,Aee_context); 
+   Aee_context->Amat = mh_Aee;
 
    Ann_context = (MLMaxwell_Context *) malloc(sizeof(MLMaxwell_Context));
    link->Ann_contxt = Ann_context;
@@ -455,9 +472,9 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    for (i=0; i<=nprocs; i++) Ann_context->partition[i] = row_partition[i];
    hypre_TFree(row_partition);
    mh_Ann = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
-   Ann_context->Amat = mh_Ann;
-   HYPRE_LSI_MLConstructMLMatrix(link->hypreAnn,mh_Ann,row_partition,
+   HYPRE_LSI_MLConstructMLMatrix(link->hypreAnn,mh_Ann,Ann_context->partition,
                                  link->comm,Ann_context); 
+   Ann_context->Amat = mh_Ann;
 
    G_context = (MLMaxwell_Context *) malloc(sizeof(MLMaxwell_Context));
    link->G_contxt = G_context;
@@ -468,9 +485,9 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    for (i=0; i<=nprocs; i++) G_context->partition[i] = row_partition[i];
    hypre_TFree(row_partition);
    mh_G = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
-   G_context->Amat = mh_G;
-   HYPRE_LSI_MLConstructMLMatrix(link->hypreG,mh_G,row_partition,
+   HYPRE_LSI_MLConstructMLMatrix(link->hypreG,mh_G,G_context->partition,
                                  link->comm,G_context); 
+   G_context->Amat = mh_G;
 
    /* -------------------------------------------------------- */ 
    /* Build A_ee directly as an ML matrix                      */
