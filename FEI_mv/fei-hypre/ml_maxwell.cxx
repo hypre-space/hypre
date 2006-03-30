@@ -212,6 +212,11 @@ void hypre_read_matrix(double **val, int **ia, int **ja, int *N, int *M,
 
     printf("Reading matrix file = %s \n", matfile);
     fp = fopen(matfile, "r");
+    if (fp == NULL)
+    {
+       printf("File not found = %s \n", matfile);
+       exit(1); 
+    }
     fscanf(fp, "%d %d %d", &nnz, &nrows, &ncols);
     mat_ia = new int[nrows+1];
     mat_ja = new int[nnz];
