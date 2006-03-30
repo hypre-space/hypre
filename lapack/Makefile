@@ -82,6 +82,10 @@ ieeeck.c\
 ilaenv.c\
 lapack_utils.c\
 lsame.c\
+dgetrf.c\
+dgetrs.c\
+dgetf2.c\
+dlaswp.c\
 xerbla.c
 
 OBJS = ${LAPACK_FILES:.c=.o}
