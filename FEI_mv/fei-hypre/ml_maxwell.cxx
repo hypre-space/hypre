@@ -39,6 +39,7 @@
 void fei_hypre_test(int, char **);
 void hypre_read_matrix(double **val, int **ia, int **ja, int *N, int *M, 
                        char *matfile);
+void hypre_read_rhs(double **val, int *N, char *rhsfile);
 
 //***************************************************************************
 // main program 
@@ -58,7 +59,7 @@ void fei_hypre_test(int argc, char *argv[])
     int    i, j, k, my_rank, num_procs, nrows, status;
     int    *ia, *ja, ncnt, index, ncols, iterations;
     int    *rowLengths, **colIndices;
-    double *val, *rhs;
+    double *val, *rhs, *sol;
     char   tname[20], *paramString = new char[100];
     HYPRE_ParCSRMatrix G_csr;
     Data               data;
@@ -77,7 +78,7 @@ void fei_hypre_test(int argc, char *argv[])
     // read edge matrix
     //------------------------------------------------------------------
 
-    hypre_read_matrix(&val,&ia,&ja,&nrows,&ncols,"EdgeStiffnessMatrix.ij");
+    hypre_read_matrix(&val,&ia,&ja,&nrows,&ncols,"Edge.ij");
     H.createMatricesAndVectors(nrows, 1, nrows);
     rowLengths = new int[nrows];
     colIndices = new int*[nrows];
@@ -109,7 +110,7 @@ void fei_hypre_test(int argc, char *argv[])
     //------------------------------------------------------------------
 
     HYPRE_LinSysCore G(MPI_COMM_WORLD);
-    hypre_read_matrix(&val, &ia, &ja, &nrows, &ncols, "GradientMatrix.ij");
+    hypre_read_matrix(&val, &ia, &ja, &nrows, &ncols, "Grad.ij");
     if (nrows != ncols) G.HYPRE_LSC_SetColMap(0, ncols-1);
     G.createMatricesAndVectors(nrows, 1, nrows);
     rowLengths = new int[nrows];
@@ -147,12 +148,15 @@ void fei_hypre_test(int argc, char *argv[])
     // load the right hand side 
     //------------------------------------------------------------------
 
-    rhs = new double[nrows];
-    for (i = 0; i < nrows; i++) 
+    hypre_read_rhs(&rhs, &i, "rhs.ij");
+    if (i < 0)
     {
-       rhs[i] = 1.0;
-       index = i;
-       H.sumIntoRHSVector(1, &rhs[i], &index);
+       rhs = new double[nrows];
+       for (i = 0; i < nrows; i++) rhs[i] = 1.0;
+    }
+    for (i = 0; i < nrows; i++)
+    {
+       H.sumIntoRHSVector(1, &rhs[i], &i);
     }
     delete [] rhs;
 
@@ -166,8 +170,9 @@ void fei_hypre_test(int argc, char *argv[])
     H.parameters(1, &paramString);
     strcpy(paramString, "relativeNorm");
     H.parameters(1, &paramString);
-    strcpy(paramString, "tolerance 1.0e-6");
+    strcpy(paramString, "tolerance 1.0e-12");
     H.parameters(1, &paramString);
+    strcpy(paramString, "preconditioner boomeramg");
     strcpy(paramString, "preconditioner mlmaxwell");
     H.parameters(1, &paramString);
     strcpy(paramString, "mlStrongThreshold 0.08");
@@ -180,6 +185,11 @@ void fei_hypre_test(int argc, char *argv[])
     strcpy(paramString, "outputLevel 3");
     H.parameters(1, &paramString);
     H.launchSolver(status, iterations);
+    sol = new double[nrows];
+    H.getSolution(sol, nrows);
+    for (i = 0; i < 10; i++)
+       printf("Solution %6d = %16.8e\n", i, sol[i]);
+    delete [] sol;
 
     //------------------------------------------------------------------
     // clean up 
@@ -195,7 +205,7 @@ void fei_hypre_test(int argc, char *argv[])
 #endif
 
 //***************************************************************************
-// read a matrix and right hand side
+// read a matrix 
 //***************************************************************************
 
 void hypre_read_matrix(double **val, int **ia, int **ja, int *N, int *M,
@@ -249,4 +259,43 @@ void hypre_read_matrix(double **val, int **ia, int **ja, int *N, int *M,
     printf("matrix has %6d rows and %7d nonzeros\n",nrows,mat_ia[nrows]);
     return;
 }
+
+//***************************************************************************
+// read a right hand side
+//***************************************************************************
+
+void hypre_read_rhs(double **val, int *N, char *rhsfile)
+{
+    int    i, nrows, rowindex;
+    double *rhs, value;
+    FILE   *fp;
+                                                                                
+    /*------------------------------------------------------------------*/
+    /* read matrix file                                                 */
+    /*------------------------------------------------------------------*/
+
+    printf("Reading rhs file = %s \n", rhsfile);
+    fp = fopen(rhsfile, "r");
+    if (fp == NULL)
+    {
+       printf("File not found = %s \n", rhsfile);
+       (*N) = -1;
+       return;
+    }
+    fscanf(fp, "%d", &nrows);
+    rhs = new double[nrows];
+                                                                                
+    for (i = 0; i < nrows; i++)
+    {
+       fscanf(fp, "%d %lg", &rowindex, &value);
+       if (rowindex < 0 || rowindex >= nrows)
+          printf("Error reading row %d (curr_row = %d)\n",rowindex,i);
+       rhs[i] = value;
+    }
+    fclose(fp);
+    (*N)   = nrows;
+    (*val) = rhs;
+    return;
+}
+
 
