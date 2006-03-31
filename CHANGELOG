@@ -16,53 +16,41 @@
 
 Version 1.11.0b released, 2006/??/??.
 
-- added configure options --with-test-alpha; --with-test-beta and 
-  --with-test-general to allow testing of publicly installed versions of hypre;
-  no checking is done to insure a specific release exists on the given platform.
-
 - added configure option --without-FEI to disable build of internal FEI routines.
+
+- added a new system for handling error codes in hypre.
+
+- added configure option --print-errors to enable printing of HYPRE error messages.
 
 - modified configure to only depend on having a C compiler available.
 
+- added compatible relaxation on one processor.
+
 - updated all F90_HYPRE_* files to be consistent with HYPRE_* files.
-
-- added ex6_for.c and ex7_for.c to test directory to verify fortran implementations.
-
-- added configure option --with-examples that builds the example codes that do 
-  not use babel; forces use of MPI as required for the codes.  When this option
-  is used the examples codes will be automatically built when make is run. If
-  babel has been used, the babel-related example codes will also be built. 
-
-- created new sub-directory, TEST_examples, in linear_solver/test for regression
-  testing example codes.  It contains baseline output files, *.base, for each
-  example as well as scripts needed by runtest.sh.  There is one script for babel
-  related examples and one for the non-babel examples.
-
-- modified the examples/Makefile to include a babel target for the examples that
-  use babel and one for all the other examples.
-
-- modified runtest.sh to recognize TEST_examples as an input case to run.
 
 - updated ex5.c to include (1) an option to print the system matrix and rhs and 
   (2) a description of how to read in a matrix and rhs in IJ format for testing 
   purposes.
 
+- corrected error that ocurred when more than one Euclid solver object is used
+  at the same time
+
+- added Maxwell capabilities via Sandia's ML solvers; see details in 
+  FEI_mv/fei-hypre/CHANGELOG.
+
+- replaced PILUT with Euclid in test code sstruct.c.
 
 ********************************************************************
 
 Version 1.10.0b released, 2005/12/19.
 
 - configure updates
-   -- config.guess and config.sub updated on 9/16/2005
    -- always runs --without-blas --without-lapack unless the user specifies otherwise
    -- cross-compiling enabled
    -- added --with-no-global-partition option
-   -- updated insure options for compatibility with current version on CASC cluster
 
 - makefile updates
-   -- included BABEL
    -- changed eigensolvers subdirectory to multivector
-   -- included insure related files to clean target
 
 - Added a set of simple example codes covering the Struct, SStruct and IJ
   interfaces. See README.html in the examples subdirectory for more details.
@@ -88,11 +76,7 @@ Version 1.10.0b released, 2005/12/19.
 
 Version 1.9.0b released, 2005/02/10.
 
-- NOTE: Soft links NOT changed until 2/17/05 due to vacation.
-
 - Added updated LOBPCG source code and test files.
-
-- Updated autotest scripts for current set of platforms.
 
 - Added a vector Laplace problem for testing systems AMG.
 
