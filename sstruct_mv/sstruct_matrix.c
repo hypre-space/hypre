@@ -794,7 +794,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    int                   sy, sz;
    int                   row_base, col_base, val_base;
    int                   e, entry, ii, jj, i, j, k;
-   int                   proc, myproc;
+/*   int                   proc, myproc;*/
   /* GEC1002 the matrix type */
    int                   matrix_type = hypre_SStructMatrixObjectType(matrix);
 
@@ -831,6 +831,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
          
       for (ii = 0; ii < nmap_entries; ii++)
       {
+#if 0    /* off-process setting/accumulating is done in the IJ interface now */
          /* continue if rows are not on this process; not an error */
          hypre_SStructMapEntryGetProcess(map_entries[ii], &proc);
          MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
@@ -838,6 +839,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
          {
             continue;
          }
+#endif
 
          /* GEC1002 introducing the strides based on the type of the matrix  */
 

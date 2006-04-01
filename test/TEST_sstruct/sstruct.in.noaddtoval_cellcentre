@@ -56,16 +56,11 @@ GraphSetStencil: 0 0 0
 
 # MatrixSetValues: \
 #   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
-###########################################################
+
+# MatrixAddToValues: \
+#   part ilower(ndim) iupper(ndim) var nentries entries[nentries] values[nentries]
 
 ###########################################################
-                                                                                                                   
-# MatrixAddToBoxValues
-                                                                                                                   
-# part ilower(ndim) iupper(ndim) var nentries entries values
-
-###########################################################
-
 
 # VectorCreate:
 

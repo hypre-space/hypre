@@ -12,4 +12,12 @@ tail -3 addtovalues.out.2 > addtovalues.testdata
 tail -3 addtovalues.out.3 > addtovalues.testdata.temp
 diff addtovalues.testdata addtovalues.testdata.temp >&2
 
+tail -3 addtovalues.out.4 > addtovalues.testdata
+tail -3 addtovalues.out.5 > addtovalues.testdata.temp
+diff addtovalues.testdata addtovalues.testdata.temp >&2
+
+tail -3 addtovalues.out.6 > addtovalues.testdata
+tail -3 addtovalues.out.7 > addtovalues.testdata.temp
+diff addtovalues.testdata addtovalues.testdata.temp >&2
+
 rm -f addtovalues.testdata addtovalues.testdata.temp

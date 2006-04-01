@@ -32,10 +32,10 @@ GridSetVariables: 0 3 [5 6 7]
 StencilCreate: 3 [33 33 33]
 
 # StencilSetEntry: stencil_num entry offset[ndim] var value
-StencilSetEntry: 0  0 [ 0  0  0] 0 10.77777778
-StencilSetEntry: 0  1 [ 0  1  0] 0 -1.305555556
-StencilSetEntry: 0  2 [ 0  1  1] 0 -1.326388889
-StencilSetEntry: 0  3 [ 0  0  1] 0 -1.305555556
+StencilSetEntry: 0  0 [ 0  0  0] 0 0.0
+StencilSetEntry: 0  1 [ 0  1  0] 0 0.0
+StencilSetEntry: 0  2 [ 0  1  1] 0 0.0
+StencilSetEntry: 0  3 [ 0  0  1] 0 0.0
 StencilSetEntry: 0  4 [ 0 -1  0] 0 -1.305555556
 StencilSetEntry: 0  5 [ 0 -1  1] 0 -1.326388889
 StencilSetEntry: 0  6 [ 0  0 -1] 0 -1.305555556
@@ -158,17 +158,13 @@ GraphSetStencil: 0 2 2
 
 # MatrixSetValues: \
 #   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
-###########################################################
+
+# MatrixAddToValues: \
+#   part ilower(ndim) iupper(ndim) var nentries entries[nentries] values[nentries]
+
+MatrixAddToValues: 0 (1- 1- 1- : 0 -1 -1) (4+ 4+ 4+) 0 4 [0 1 2 3] [10.77777778 -1.305555556 -1.326388889 -1.305555556]
 
 ###########################################################
-                                                                                                                   
-# MatrixAddToBoxValues
-                                                                                                                   
-# part ilower(ndim) iupper(ndim) var nentries entries values
-MatrixAddToValues: 0 (1- 1- 1-) (4+ 4+ 4+) 0 4 [0 1 2 3] [10.77777778 -1.305555556 -1.326388889 -1.305555556]
-
-###########################################################
-
 
 # VectorCreate:
 
