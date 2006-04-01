@@ -12,7 +12,7 @@
 # ij: LOBPCG cases
 #=============================================================================
 
-mpirun -np 2 ./ij -lobpcg -vrand 2 -seed 1 -tol 1.e-4 -vout 1 > in_out.out.vout.1
+mpirun -np 2 ./ij -lobpcg -vrand 2 -seed 1 -tol 1.e-4 -vout 1 > lobpcg.out.vout.1
 
 # use vectors computed by previous run as the initial
-mpirun -np 2 ./ij -lobpcg -vfromfile > in_out.out.vfromfile
+mpirun -np 2 ./ij -lobpcg -vfromfile > lobpcg.out.vfromfile
