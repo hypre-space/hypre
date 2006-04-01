@@ -16,29 +16,29 @@
 
 Version 1.11.0b released, 2006/??/??.
 
-- added configure option --without-FEI to disable build of internal FEI routines.
+- Added configure option --without-FEI to disable build of internal FEI routines.
 
-- added a new system for handling error codes in hypre.
+- Added a new system for handling error codes in hypre.
 
-- added configure option --print-errors to enable printing of HYPRE error messages.
+- Added configure option --print-errors to enable printing of HYPRE error messages.
 
-- modified configure to only depend on having a C compiler available.
+- Modified configure to only depend on having a C compiler available.
 
-- added compatible relaxation on one processor.
+- Added compatible relaxation on one processor.
 
-- updated all F90_HYPRE_* files to be consistent with HYPRE_* files.
+- Updated all F90_HYPRE_* files to be consistent with HYPRE_* files.
 
-- updated ex5.c to include (1) an option to print the system matrix and rhs and 
+- Updated ex5.c to include (1) an option to print the system matrix and rhs and 
   (2) a description of how to read in a matrix and rhs in IJ format for testing 
   purposes.
 
-- corrected error that ocurred when more than one Euclid solver object is used
+- Corrected error that ocurred when more than one Euclid solver object is used
   at the same time
 
-- added Maxwell capabilities via Sandia's ML solvers; see details in 
+- Added Maxwell capabilities via Sandia's ML solvers; see details in 
   FEI_mv/fei-hypre/CHANGELOG.
 
-- replaced PILUT with Euclid in test code sstruct.c.
+- Replaced PILUT with Euclid in test code sstruct.c.
 
 ********************************************************************
 
