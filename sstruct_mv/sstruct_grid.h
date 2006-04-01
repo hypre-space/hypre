@@ -72,6 +72,7 @@ typedef struct
    hypre_Index  ilower;
    hypre_Index  coord;
    hypre_Index  dir;
+   int          primary;
 
 } hypre_SStructNeighbor;
 
@@ -240,6 +241,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructNeighborILower(neighbor)  ((neighbor) -> ilower)
 #define hypre_SStructNeighborCoord(neighbor)   ((neighbor) -> coord)
 #define hypre_SStructNeighborDir(neighbor)     ((neighbor) -> dir)
+#define hypre_SStructNeighborPrimary(neighbor) ((neighbor) -> primary)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUCVar

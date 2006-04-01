@@ -104,6 +104,7 @@ typedef struct
    ProblemIndex          *glue_nbor_ilowers;
    ProblemIndex          *glue_nbor_iuppers;
    Index                 *glue_index_maps;
+   int                   *glue_primaries;
 
    /* for GraphSetStencil */
    int                   *stencil_num;
@@ -511,6 +512,8 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.glue_nbor_iuppers, ProblemIndex, size);
                pdata.glue_index_maps =
                   hypre_TReAlloc(pdata.glue_index_maps, Index, size);
+               pdata.glue_primaries =
+                  hypre_TReAlloc(pdata.glue_primaries, int, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.glue_ilowers[pdata.glue_nboxes]);
@@ -527,6 +530,19 @@ ReadData( char         *filename,
             for (i = data.ndim; i < 3; i++)
             {
                pdata.glue_index_maps[pdata.glue_nboxes][i] = i;
+            }
+            sdata_ptr += strcspn(sdata_ptr, ":\t\n");
+            if ( *sdata_ptr == ':' )
+            {
+               /* read in optional primary indicator */
+               sdata_ptr += 1;
+               pdata.glue_primaries[pdata.glue_nboxes] =
+                  strtol(sdata_ptr, &sdata_ptr, 10);
+            }
+            else
+            {
+               pdata.glue_primaries[pdata.glue_nboxes] = -1;
+               sdata_ptr -= 1;
             }
             pdata.glue_nboxes++;
             data.pdata[part] = pdata;
@@ -1267,6 +1283,7 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.glue_nbor_ilowers);
          hypre_TFree(pdata.glue_nbor_iuppers);
          hypre_TFree(pdata.glue_index_maps);
+         hypre_TFree(pdata.glue_primaries);
       }
 
       if (pdata.graph_nboxes == 0)
@@ -1368,6 +1385,7 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.glue_nbor_ilowers);
          hypre_TFree(pdata.glue_nbor_iuppers);
          hypre_TFree(pdata.glue_index_maps);
+         hypre_TFree(pdata.glue_primaries);
       }
 
       if (pdata.nvars > 0)
@@ -2050,6 +2068,7 @@ main( int   argc,
       /* GridSetNeighborBox */
       for (box = 0; box < pdata.glue_nboxes; box++)
       {
+#if 1 /* will add primary to the interface soon */
          HYPRE_SStructGridSetNeighborBox(grid, part,
                                          pdata.glue_ilowers[box],
                                          pdata.glue_iuppers[box],
@@ -2057,6 +2076,16 @@ main( int   argc,
                                          pdata.glue_nbor_ilowers[box],
                                          pdata.glue_nbor_iuppers[box],
                                          pdata.glue_index_maps[box]);
+#else
+         HYPRE_SStructGridSetNeighborBoxZ(grid, part,
+                                          pdata.glue_ilowers[box],
+                                          pdata.glue_iuppers[box],
+                                          pdata.glue_nbor_parts[box],
+                                          pdata.glue_nbor_ilowers[box],
+                                          pdata.glue_nbor_iuppers[box],
+                                          pdata.glue_index_maps[box],
+                                          pdata.glue_primaries[box]);
+#endif
       }
 
       HYPRE_SStructGridSetPeriodic(grid, part, pdata.periodic);

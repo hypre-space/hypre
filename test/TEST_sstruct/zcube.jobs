@@ -1,0 +1,15 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+mpirun -np 1 ./sstruct -in zsstruct.in.cube -r 10 10 10 -rhsone -solver 28 \
+ > zcube.out.0
+
+mpirun -np 1 ./sstruct -in zsstruct.in.bcube -r 10 10 10 -rhsone -solver 28 \
+ > zcube.out.1

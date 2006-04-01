@@ -184,6 +184,38 @@ int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
                                     int               *nbor_iupper,
                                     int               *index_map);
 
+/*
+ * ** TEMPORARY routine until more thorough testing is completed **
+ *
+ * This is the same as HYPRE_SStructGridSetNeighborBox, except for the addition
+ * of the last argument which enables hypre to couple a part to itself.
+ *
+ * SetNeighborBox calls can imply that certain variables on the grid are the
+ * same as other variables on the grid.  This redundancy must be reconciled
+ * somehow.  When SetNeighborBox couples the index spaces of two different
+ * parts, hypre can resolve this redundancy issue very easily.  However, when
+ * SetNeighborBox couples the index space of a part to itself, resolving the
+ * redundancey is much more complex and costly in general.  The best solution
+ * to this problem is to let the user dictate which variables are primary
+ * variables and which are secondary variables.
+ *
+ * The last argument 'primary' works as follows:
+ *
+ * 'primary' > 0  - the 'part' box variables are primary variables
+ * 'primary' = 0  - the 'part' box variables are secondary variables
+ * 'primary' < 0  - let hypre decide; only works for two different parts
+ *
+ **/
+int HYPRE_SStructGridSetNeighborBoxZ(HYPRE_SStructGrid  grid,
+                                     int                part,
+                                     int               *ilower,
+                                     int               *iupper,
+                                     int                nbor_part,
+                                     int               *nbor_ilower,
+                                     int               *nbor_iupper,
+                                     int               *index_map,
+                                     int                primary);
+
 /**
  * Add an unstructured part to the grid.  The variables in the
  * unstructured part of the grid are referenced by a global rank

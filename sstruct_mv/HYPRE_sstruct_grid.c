@@ -347,6 +347,100 @@ HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid  grid,
       }
    }
 
+   /* part with the smaller ID owns the primary variables */
+   if (part < nbor_part)
+   {
+      hypre_SStructNeighborPrimary(neighbor) = 1;
+   }
+   else
+   {
+      hypre_SStructNeighborPrimary(neighbor) = 0;
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * ** TEMPORARY **
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructGridSetNeighborBoxZ( HYPRE_SStructGrid  grid,
+                                  int                part,
+                                  int               *ilower,
+                                  int               *iupper,
+                                  int                nbor_part,
+                                  int               *nbor_ilower,
+                                  int               *nbor_iupper,
+                                  int               *index_map,
+                                  int                primary )
+{
+   int ierr = 0;
+
+   int                      ndim       = hypre_SStructGridNDim(grid);
+   int                     *nneighbors = hypre_SStructGridNNeighbors(grid);
+   hypre_SStructNeighbor  **neighbors  = hypre_SStructGridNeighbors(grid);
+   hypre_SStructNeighbor   *neighbor;
+
+   hypre_Box               *box;
+   hypre_Index              cilower;
+   hypre_Index              ciupper;
+   int                      memchunk = 10;
+   int                      d;
+
+   /* allocate more memory if needed */
+   if ((nneighbors[part] % memchunk) == 0)
+   {
+      neighbors[part] = hypre_TReAlloc(neighbors[part], hypre_SStructNeighbor,
+                                       (nneighbors[part] + memchunk));
+   }
+
+   neighbor = &neighbors[part][nneighbors[part]];
+   nneighbors[part]++;
+
+   box = hypre_SStructNeighborBox(neighbor);
+   hypre_CopyToCleanIndex(ilower, ndim, cilower);
+   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
+   hypre_BoxSetExtents(box, cilower, ciupper);
+
+   hypre_SStructNeighborPart(neighbor) = nbor_part;
+
+   hypre_CopyToCleanIndex(nbor_ilower, ndim,
+                          hypre_SStructNeighborILower(neighbor));
+
+   hypre_CopyIndex(index_map, hypre_SStructNeighborCoord(neighbor));
+   for (d = ndim; d < 3; d++)
+   {
+      hypre_IndexD(hypre_SStructNeighborCoord(neighbor), d) = d;
+   }
+
+   for (d = 0; d < 3; d++)
+   {
+      hypre_IndexD(hypre_SStructNeighborDir(neighbor), d) = 1;
+
+      if (d < ndim)
+      {
+         if (hypre_IndexD(nbor_ilower, d) > hypre_IndexD(nbor_iupper, d))
+         {
+            hypre_IndexD(hypre_SStructNeighborDir(neighbor), d) = -1;
+         }
+      }
+   }
+
+   if (primary < 0)
+   {
+      /* hypre decides: part with the smaller ID owns the primary variables */
+      if (part < nbor_part)
+      {
+         primary = 1;
+      }
+      else
+      {
+         primary = 0;
+      }
+   }
+   hypre_SStructNeighborPrimary(neighbor) = primary;
+
    return ierr;
 }
 
@@ -418,7 +512,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
       {
          neighbor = &neighbors[part][i];
 
-         if (hypre_SStructNeighborPart(neighbor) < part)
+         if (!hypre_SStructNeighborPrimary(neighbor))
          {
             hypre_SStructPGridSetPNeighbor(pgrid,
                                            hypre_SStructNeighborBox(neighbor));
