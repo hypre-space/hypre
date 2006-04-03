@@ -457,4 +457,4 @@ then
 fi
 
 chmod -R $HYPRE_INSTALL_PERMISSIONS $DIST_DIR
-chgrp -fR hypre $DIST_DIR
+chgrp -fR hyprelib $DIST_DIR
