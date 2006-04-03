@@ -11,7 +11,7 @@ the release is made available to users.
 
     --->> _________________________________________
 
- 2. Release number: ______________________________________
+ 2. Release number:
 
     --->> _________________________________________
 
@@ -63,95 +63,100 @@ the release is made available to users.
 
     --->> _________________________________________
 
-14. Create a repository tag with branch option for the release number
+14. Update config/configure.in with release number and date; run
+    ./config/bootstrap and commit changes to repository
 
     --->> _________________________________________
 
-15. Checkout tagged version
+15. Create a repository tag with branch option for the release number
 
     --->> _________________________________________
 
-16. Create tar file of checked out version by running the mkdist script
+16. Checkout tagged version
+
+    --->> _________________________________________
+
+17. Create tar file of checked out version by running the mkdist script
     ./mkdist [VersionId]  (run in local directory above linear_solvers)
 
     --->> _________________________________________
 
-17. Manually untar the file that was created in step 16
+18. Manually untar the file that was created in step 16
 
     --->> _________________________________________
 
-18. Manually run the autotest script with the following options on the checked
+19. Manually run the autotest script with the following options on the checked
         out version: -tux149 -insure -gpsmp -pengra
 
     --->> _________________________________________
 
-19. If the tests run properly, proceed to step 20
+20. If the tests run properly, proceed to step 20
     Otherwise, untag the repository, make necessary corrections, return
        to step 14; iterating until all tests run correctly.
 
     --->> _________________________________________
 
-20. Copy tar file to any closed (SCF) computer system, using FIS 
+21. Copy tar file to any closed (SCF) computer system, using FIS 
 
     --->> _________________________________________
 
-21. On the CASC cluster, copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
+22. On the CASC cluster, copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
 
     --->> _________________________________________
 
-22. Run the mkdistlinks script to create symbolic links to the tar file 
+23. Run the mkdistlinks script to create symbolic links to the tar file 
     ./mkdistlinks <HypreArchiveFileName> 
     (run in /usr/casc/hypre and OCF directory /usr/gapps/hypre)
 
     --->> _________________________________________
 
-23. On each OCF SYS_TYPE platform, including the CASC cluster, run the mklibs 
+24. On each OCF SYS_TYPE platform, including the CASC cluster, run the mklibs 
        script in the /usr/casc/hypre and/or /usr/gapps/hypre directories to 
        create and install the release
     ./mklibs -g <HypreArchiveFileName> install
 
     --->> _________________________________________
 
-24. Log onto any closed (SCF) computer system
+25. Log onto any closed (SCF) computer system
 
     --->> _________________________________________
 
-25. Retrieve the tar file from the FIS system
+26. Retrieve the tar file from the FIS system
 
     --->> _________________________________________
 
-26. Manually untar the file that was retrieved in step 25
+27. Manually untar the file that was retrieved in step 25
 
     --->> _________________________________________
 
-27. Manually run the autotest script with the following options on the checked
+28. Manually run the autotest script with the following options on the checked
         out version: -sc -lilac
 
     --->> _________________________________________
 
-28. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
+29. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
        /usr/gapps/hypre
 
     --->> _________________________________________
 
-29. Run the mkdistlinks script to create symbolic links to the tar file 
+30. Run the mkdistlinks script to create symbolic links to the tar file 
     ./mkdistlinks <HypreArchiveFileName> 
     (run in /usr/gapps/hypre)
 
     --->> _________________________________________
 
-30. On each SCF SYS_TYPE platform run the mklibs script in the /usr/gapps/hypre
+31. On each SCF SYS_TYPE platform run the mklibs script in the /usr/gapps/hypre
        directory to create and install the release
     ./mklibs -g <HypreArchiveFileName> install
 
     --->> _________________________________________
 
-31. If there are no errors in steps 16-30; inform project team and other
+32. If there are no errors in steps 16-30; inform project team and other
        appropriate users of availability
 
     --->> _________________________________________
 
-32. FINAL SIGN-OFF
+33. FINAL SIGN-OFF
     Verify that all steps have been signed off and commit this file to
        the repository
 
