@@ -1,0 +1,157 @@
+HYPRE Beta Release Checklist
+
+Beta releases tend to occur somewhat frequently. They may include new technology
+and are reasonably stable.  The following steps must be completed, initialed & dated
+on the --->> line by the responsible project member before the release is made 
+available to users.
+
+
+
+ 1. Decision made for release
+
+    --->> _______3/30/06_______________________
+
+ 2. Release number: 
+
+    --->> _________1.11.0b____________________
+
+ 3. Copy file checklist_beta_release to check{release number}.txt (i.e. check1.9.0b.txt)
+       and commit to the linear_solvers/releases directory
+
+    --->> __________4/3/2006_______________________________
+
+ 4. Project personnel advised of release decision and tentative date with
+       a request to not disrupt the repository until the release is complete
+
+    --->> _________________3/31/06___________________
+
+ 5. Requests for delay in release must be made within 24 hours of notification 
+
+    --->> _________no requests made______________
+
+ 6. Update CHANGELOG file with information regarding contents of this release
+
+    --->> _______done 4/1/2006_____________
+
+ 7. Verify that user, reference and developer manuals are updated
+
+    --->> ______OK 4/3/2006____________________
+
+ 8. Verify all agreed upon changes, especially documentation, have been committed
+
+    --->> _______N/A__________________________
+
+ 9. Project Lead review and/or concurrence to release
+
+    --->> ______OK 3/31/2006______________
+
+10. Update config/configure.in with release number and date; run 
+     ./config/bootstrap and commit changes to repository
+
+    --->> _________________________________________
+
+11. Tag repository with release number
+
+    --->> _________________________________________
+
+12. Checkout tagged version
+
+    --->> _________________________________________
+
+13. Manually run the autotest script with the following options on the checked
+        out version: -tux149 -insure -gpsmp -pengra
+
+    --->> _________________________________________
+
+14. If the test runs properly, proceed to step 14
+    Otherwise, untag the repository, make necessary corrections, return
+       to step 10; iterating until all tests run correctly.
+
+    --->> _________________________________________
+
+15. Create tar file of checked out version by running the mkdist script
+    ./mkdist [VersionID]  (run in local directory above linear_solvers)
+
+    --->> _________________________________________
+
+16. Manually untar the file that was created in step 14
+
+    --->> _________________________________________
+
+17. Manually run the autotest script with the following options on the checked
+        out version: -tux149 -insure -gpsmp -pengra
+
+    --->> _________________________________________
+
+18. If the tests run properly, proceed to step 18
+    Otherwise, untag the repository, make necessary corrections, return
+       to step 10; iterating until all tests run correctly.
+
+    --->> _________________________________________
+
+19. Copy tar file to any closed (SCF) computer system, using FIS 
+
+    --->> _________________________________________
+
+20. On the CASC cluster, copy tar file to /usr/casc/hypre/i686-pc-linux-gnu 
+       directory
+
+    --->> _________________________________________
+
+21. Run the mkdistlinks script to create symbolic links to the tar file 
+    ./mkdistlinks <HypreArchiveFileName> 
+         (run in /usr/casc/hypre and OCF directory /usr/gapps/hypre)
+
+    --->> _________________________________________
+
+22. On each open SYS_TYPE platform, including the CASC cluster, run the mklibs 
+       script in the /usr/casc/hypre and/or /usr/gapps/hypre directories to 
+       create and install the release
+    ./mklibs -b <HypreArchiveFileName> install
+
+    --->> _________________________________________
+
+23. Log onto any closed (SCF) computer system
+
+    --->> _________________________________________
+
+24. Retrieve the tar file from the FIS system
+
+    --->> _________________________________________
+
+25. Manually untar the file that was retrieved in step 23
+
+    --->> _________________________________________
+
+26. Manually run the autotest script with the following options on the checked
+        out version: -sc -lilac
+
+    --->> _________________________________________
+
+27. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
+       /usr/gapps/hypre
+
+    --->> _________________________________________
+
+28. Run the mkdistlinks script to create symbolic links to the tar file 
+    ./mkdistlinks <HypreArchiveFileName> 
+         (run in /usr/gapps/hypre)
+
+    --->> _________________________________________
+
+29. On each SCF SYS_TYPE platform run the mklibs script in the 
+       /usr/gapps/hypre directories to create and install the release
+    ./mklibs -b <HypreArchiveFileName> install
+
+    --->> _________________________________________
+
+30. If there are no errors in steps 16-30; inform project team and other
+       appropriate users of availability
+
+    --->> _________________________________________
+
+31. FINAL SIGN-OFF
+    Verify that all steps have been signed off and commit this file to
+       the repository
+
+    --->> _________________________________________
