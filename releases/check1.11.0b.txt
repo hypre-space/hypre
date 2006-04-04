@@ -48,22 +48,22 @@ available to users.
 10. Update config/configure.in with release number and date; run 
      ./config/bootstrap and commit changes to repository
 
-    --->> _________________________________________
+    --->> _____OK 4/3/06___________________
 
 11. Tag repository with release number
 
-    --->> _________________________________________
+    --->> _____OK 4/3/06___________________
 
 12. Checkout tagged version
 
-    --->> _________________________________________
+    --->> _____OK 4/3/06___________________
 
 13. Manually run the autotest script with the following options on the checked
         out version: -tux149 -insure -gpsmp -pengra
 
-    --->> _________________________________________
+    --->> _____OK 4/3/06___________________
 
-14. If the test runs properly, proceed to step 14
+14. If the test runs properly, proceed to step 15
     Otherwise, untag the repository, make necessary corrections, return
        to step 10; iterating until all tests run correctly.
 
@@ -72,44 +72,44 @@ available to users.
 15. Create tar file of checked out version by running the mkdist script
     ./mkdist [VersionID]  (run in local directory above linear_solvers)
 
-    --->> _________________________________________
+    --->> _______OK 4/3/06____________________
 
-16. Manually untar the file that was created in step 14
+16. Manually untar the file that was created in step 15
 
-    --->> _________________________________________
+    --->> ___________OK 4/3/06________________
 
 17. Manually run the autotest script with the following options on the checked
         out version: -tux149 -insure -gpsmp -pengra
 
-    --->> _________________________________________
+    --->> ________OK 4/3/06______________________
 
-18. If the tests run properly, proceed to step 18
+18. If the tests run properly, proceed to step 19
     Otherwise, untag the repository, make necessary corrections, return
        to step 10; iterating until all tests run correctly.
 
-    --->> _________________________________________
+    --->> __________N/A__________________________
 
 19. Copy tar file to any closed (SCF) computer system, using FIS 
 
-    --->> _________________________________________
+    --->> ______________OK 4/3/06_________________
 
 20. On the CASC cluster, copy tar file to /usr/casc/hypre/i686-pc-linux-gnu 
        directory
 
-    --->> _________________________________________
+    --->> ___________OK 4/3/06_________________
 
 21. Run the mkdistlinks script to create symbolic links to the tar file 
     ./mkdistlinks <HypreArchiveFileName> 
          (run in /usr/casc/hypre and OCF directory /usr/gapps/hypre)
 
-    --->> _________________________________________
+    --->> _____________OK 4/3/06_____________
 
 22. On each open SYS_TYPE platform, including the CASC cluster, run the mklibs 
        script in the /usr/casc/hypre and/or /usr/gapps/hypre directories to 
        create and install the release
     ./mklibs -b <HypreArchiveFileName> install
 
-    --->> _________________________________________
+    --->> _______OK 4/3/06____________
 
 23. Log onto any closed (SCF) computer system
 
@@ -119,7 +119,7 @@ available to users.
 
     --->> _________________________________________
 
-25. Manually untar the file that was retrieved in step 23
+25. Manually untar the file that was retrieved in step 24
 
     --->> _________________________________________
 
