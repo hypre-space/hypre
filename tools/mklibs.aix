@@ -145,8 +145,13 @@ DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
 SYSTEMTYPE=`uname -s`
 PLATFORM_NAME=`uname -n`
 MAKE="make -i"
-CONFIGURE="./nopoe ./configure"
-. ../env.blue
+case $PLATFORM_NAME in
+   up*) CONFIGURE="nopoe configure"
+        ;;
+     *) CONFIGURE="./nopoe ./configure"
+        . ../env.blue
+        ;;
+esac
 
 #===========================================================================
 # Build in the DIST_DIR subdirectory
