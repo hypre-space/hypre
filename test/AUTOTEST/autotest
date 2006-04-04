@@ -189,7 +189,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nsdEe 1 -a 2 -ABcf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nsde 1 -a 2 -ABcf"
         HYPRE_MESSAGE='PRIMARY[default]'
         COMPILERSELECT="default"
         ;;
