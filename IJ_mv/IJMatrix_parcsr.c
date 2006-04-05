@@ -720,6 +720,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
          }
          else
 	 {
+            aux_matrix = hypre_IJMatrixTranslator(matrix);
    	    if (!aux_matrix)
             {
 #ifdef HYPRE_NO_GLOBAL_PARTITION
