@@ -3,7 +3,7 @@
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBlockBuildInterp
 
-   This is the block version of standard interpolation. We use the complete 
+   This is the block version of classical R-S interpolation. We use the complete 
    blocks of A (not just the diagonals of these blocks).
 
    A and P are now Block matrices.  The Strength matrix S is not as it gives
@@ -1391,7 +1391,7 @@ hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBlockBuildInterpDiag
 
-   This is the block version of standard interpolation. We use just the 
+   This is the block version of classical R-S interpolation. We use just the 
    diagonals of these blocks.
 
    A and P are now Block matrices.  The Strength matrix S is not as it gives
