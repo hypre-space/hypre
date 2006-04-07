@@ -1,24 +1,24 @@
 // 
-// File:          bHYPRE_SStruct_MatrixVectorView.hh
-// Symbol:        bHYPRE.SStruct_MatrixVectorView-v1.0.0
+// File:          bHYPRE_SStructMatrixVectorView.hh
+// Symbol:        bHYPRE.SStructMatrixVectorView-v1.0.0
 // Symbol Type:   interface
 // Babel Version: 0.10.12
-// Description:   Client-side glue code for bHYPRE.SStruct_MatrixVectorView
+// Description:   Client-side glue code for bHYPRE.SStructMatrixVectorView
 // 
 // WARNING: Automatically generated; changes will be lost
 // 
 // babel-version = 0.10.12
 // 
 
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_hh
-#define included_bHYPRE_SStruct_MatrixVectorView_hh
+#ifndef included_bHYPRE_SStructMatrixVectorView_hh
+#define included_bHYPRE_SStructMatrixVectorView_hh
 
 // declare class before #includes
 // (this alleviates circular #include guard problems)[BUG#393]
 namespace ucxx { 
   namespace bHYPRE { 
 
-    class SStruct_MatrixVectorView;
+    class SStructMatrixVectorView;
   } // end namespace bHYPRE
 } // end namespace ucxx
 
@@ -29,7 +29,7 @@ namespace ucxx {
 namespace ucxx {
   namespace sidl {
     template<>
-    class array< ::ucxx::bHYPRE::SStruct_MatrixVectorView >;
+    class array< ::ucxx::bHYPRE::SStructMatrixVectorView >;
   }
 } //closes ucxx Namespace
 // 
@@ -59,8 +59,8 @@ namespace ucxx {
 #ifndef included_sidl_ucxx_hh
 #include "sidl_ucxx.hh"
 #endif
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_IOR_h
-#include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
+#ifndef included_bHYPRE_SStructMatrixVectorView_IOR_h
+#include "bHYPRE_SStructMatrixVectorView_IOR.h"
 #endif
 #ifndef included_bHYPRE_MatrixVectorView_hh
 #include "bHYPRE_MatrixVectorView.hh"
@@ -70,9 +70,9 @@ namespace ucxx {
   namespace bHYPRE { 
 
     /**
-     * Symbol "bHYPRE.SStruct_MatrixVectorView" (version 1.0.0)
+     * Symbol "bHYPRE.SStructMatrixVectorView" (version 1.0.0)
      */
-    class SStruct_MatrixVectorView: public virtual 
+    class SStructMatrixVectorView: public virtual 
       ::ucxx::bHYPRE::MatrixVectorView {
 
     //////////////////////////////////////////////////
@@ -105,7 +105,7 @@ namespace ucxx {
           sidl_BaseInterface__object * > 
           (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
           sidl_BaseInterface__object * > (d_self))->d_object,
-          "bHYPRE.SStruct_MatrixVectorView");
+          "bHYPRE.SStructMatrixVectorView");
         /*pack args to dispatch to ior*/
         (*(loc_self->d_epv->f_addRef))(loc_self->d_object );
         /*dispatch to ior*/
@@ -131,7 +131,7 @@ namespace ucxx {
           sidl_BaseInterface__object * > 
           (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
           sidl_BaseInterface__object * > (d_self))->d_object,
-          "bHYPRE.SStruct_MatrixVectorView");
+          "bHYPRE.SStructMatrixVectorView");
         /*pack args to dispatch to ior*/
         (*(loc_self->d_epv->f_deleteRef))(loc_self->d_object );
         /*dispatch to ior*/
@@ -222,7 +222,7 @@ namespace ucxx {
         sidl_BaseInterface__object * > 
         (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
         sidl_BaseInterface__object * > (d_self))->d_object,
-        "bHYPRE.SStruct_MatrixVectorView");
+        "bHYPRE.SStructMatrixVectorView");
       /*pack args to dispatch to ior*/
       _result = (*(loc_self->d_epv->f_Initialize))(loc_self->d_object );
       /*dispatch to ior*/
@@ -248,7 +248,7 @@ namespace ucxx {
         sidl_BaseInterface__object * > 
         (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
         sidl_BaseInterface__object * > (d_self))->d_object,
-        "bHYPRE.SStruct_MatrixVectorView");
+        "bHYPRE.SStructMatrixVectorView");
       /*pack args to dispatch to ior*/
       _result = (*(loc_self->d_epv->f_Assemble))(loc_self->d_object );
       /*dispatch to ior*/
@@ -283,29 +283,29 @@ namespace ucxx {
     // 
 
   public:
-    typedef struct bHYPRE_SStruct_MatrixVectorView__object ior_t;
-    typedef struct bHYPRE_SStruct_MatrixVectorView__external ext_t;
-    typedef struct bHYPRE_SStruct_MatrixVectorView__sepv sepv_t;
+    typedef struct bHYPRE_SStructMatrixVectorView__object ior_t;
+    typedef struct bHYPRE_SStructMatrixVectorView__external ext_t;
+    typedef struct bHYPRE_SStructMatrixVectorView__sepv sepv_t;
 
     // default constructor
-    SStruct_MatrixVectorView() { }
+    SStructMatrixVectorView() { }
 
     // default destructor
-    virtual ~SStruct_MatrixVectorView () { }
+    virtual ~SStructMatrixVectorView () { }
 
     // copy constructor
-    SStruct_MatrixVectorView ( const SStruct_MatrixVectorView& original );
+    SStructMatrixVectorView ( const SStructMatrixVectorView& original );
 
     // assignment operator
-    SStruct_MatrixVectorView& operator= ( const SStruct_MatrixVectorView& rhs );
+    SStructMatrixVectorView& operator= ( const SStructMatrixVectorView& rhs );
 
     // conversion from ior to C++ class
-    SStruct_MatrixVectorView ( SStruct_MatrixVectorView::ior_t* ior );
+    SStructMatrixVectorView ( SStructMatrixVectorView::ior_t* ior );
 
     // Alternate constructor: does not call addRef()
     // (sets d_weak_reference=isWeak)
     // For internal use by Impls (fixes bug#275)
-    SStruct_MatrixVectorView ( SStruct_MatrixVectorView::ior_t* ior,
+    SStructMatrixVectorView ( SStructMatrixVectorView::ior_t* ior,
       bool isWeak );
 
     ior_t* _get_ior() { return reinterpret_cast< ior_t*>(d_self); }
@@ -321,7 +321,7 @@ namespace ucxx {
     bool operator !() const { return (d_self==0); }
 
     static inline const char * type_name() { return 
-      "bHYPRE.SStruct_MatrixVectorView";}
+      "bHYPRE.SStructMatrixVectorView";}
     virtual void* _cast(const char* type) const;
 
   protected:
@@ -331,7 +331,7 @@ namespace ucxx {
     public:
       static const ext_t * _get_ext() throw ( ::ucxx::sidl::NullIORException );
 
-    }; // end class SStruct_MatrixVectorView
+    }; // end class SStructMatrixVectorView
   } // end namespace bHYPRE
 } // end namespace ucxx
 
@@ -339,60 +339,60 @@ namespace ucxx {
   namespace sidl {
     // traits specialization
     template<>
-    struct array_traits< ::ucxx::bHYPRE::SStruct_MatrixVectorView > {
-      typedef array< ::ucxx::bHYPRE::SStruct_MatrixVectorView > cxx_array_t;
-      typedef ::ucxx::bHYPRE::SStruct_MatrixVectorView cxx_item_t;
-      typedef struct bHYPRE_SStruct_MatrixVectorView__array ior_array_t;
+    struct array_traits< ::ucxx::bHYPRE::SStructMatrixVectorView > {
+      typedef array< ::ucxx::bHYPRE::SStructMatrixVectorView > cxx_array_t;
+      typedef ::ucxx::bHYPRE::SStructMatrixVectorView cxx_item_t;
+      typedef struct bHYPRE_SStructMatrixVectorView__array ior_array_t;
       typedef sidl_interface__array ior_array_internal_t;
-      typedef struct bHYPRE_SStruct_MatrixVectorView__object ior_item_t;
+      typedef struct bHYPRE_SStructMatrixVectorView__object ior_item_t;
       typedef cxx_item_t value_type;
       typedef value_type reference;
       typedef value_type* pointer;
       typedef const value_type const_reference;
       typedef const value_type* const_pointer;
-      typedef array_iter< array_traits< 
-        ::ucxx::bHYPRE::SStruct_MatrixVectorView > > iterator;
+      typedef array_iter< array_traits< ::ucxx::bHYPRE::SStructMatrixVectorView 
+        > > iterator;
       typedef const_array_iter< array_traits< 
-        ::ucxx::bHYPRE::SStruct_MatrixVectorView > > const_iterator;
+        ::ucxx::bHYPRE::SStructMatrixVectorView > > const_iterator;
     };
 
     // array specialization
     template<>
-    class array< ::ucxx::bHYPRE::SStruct_MatrixVectorView >: public 
-      interface_array< array_traits< ::ucxx::bHYPRE::SStruct_MatrixVectorView > 
+    class array< ::ucxx::bHYPRE::SStructMatrixVectorView >: public 
+      interface_array< array_traits< ::ucxx::bHYPRE::SStructMatrixVectorView > 
       > {
     public:
       typedef interface_array< array_traits< 
-        ::ucxx::bHYPRE::SStruct_MatrixVectorView > > Base;
-      typedef array_traits< ::ucxx::bHYPRE::SStruct_MatrixVectorView 
+        ::ucxx::bHYPRE::SStructMatrixVectorView > > Base;
+      typedef array_traits< ::ucxx::bHYPRE::SStructMatrixVectorView 
         >::cxx_array_t          cxx_array_t;
-      typedef array_traits< ::ucxx::bHYPRE::SStruct_MatrixVectorView 
+      typedef array_traits< ::ucxx::bHYPRE::SStructMatrixVectorView 
         >::cxx_item_t           cxx_item_t;
-      typedef array_traits< ::ucxx::bHYPRE::SStruct_MatrixVectorView 
+      typedef array_traits< ::ucxx::bHYPRE::SStructMatrixVectorView 
         >::ior_array_t          ior_array_t;
-      typedef array_traits< ::ucxx::bHYPRE::SStruct_MatrixVectorView 
+      typedef array_traits< ::ucxx::bHYPRE::SStructMatrixVectorView 
         >::ior_array_internal_t ior_array_internal_t;
-      typedef array_traits< ::ucxx::bHYPRE::SStruct_MatrixVectorView 
+      typedef array_traits< ::ucxx::bHYPRE::SStructMatrixVectorView 
         >::ior_item_t           ior_item_t;
 
       /**
        * conversion from ior to C++ class
        * (constructor/casting operator)
        */
-      array( struct bHYPRE_SStruct_MatrixVectorView__array* src = 0) : 
-        Base(src) {}
+      array( struct bHYPRE_SStructMatrixVectorView__array* src = 0) : Base(src) 
+        {}
 
       /**
        * copy constructor
        */
-      array( const array< ::ucxx::bHYPRE::SStruct_MatrixVectorView >&src) : 
+      array( const array< ::ucxx::bHYPRE::SStructMatrixVectorView >&src) : 
         Base(src) {}
 
       /**
        * assignment
        */
-      array< ::ucxx::bHYPRE::SStruct_MatrixVectorView >&
-      operator =( const array< ::ucxx::bHYPRE::SStruct_MatrixVectorView >&rhs ) 
+      array< ::ucxx::bHYPRE::SStructMatrixVectorView >&
+      operator =( const array< ::ucxx::bHYPRE::SStructMatrixVectorView >&rhs ) 
         { 
         if (d_array != rhs._get_baseior()) {
           if (d_array) deleteRef();

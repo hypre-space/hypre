@@ -91,6 +91,9 @@
 #ifndef included_bHYPRE_SStructMatrix_h
 #include "bHYPRE_SStructMatrix.h"
 #endif
+#ifndef included_bHYPRE_SStructMatrixVectorView_h
+#include "bHYPRE_SStructMatrixVectorView.h"
+#endif
 #ifndef included_bHYPRE_SStructMatrixView_h
 #include "bHYPRE_SStructMatrixView.h"
 #endif
@@ -114,9 +117,6 @@
 #endif
 #ifndef included_bHYPRE_SStructVectorView_h
 #include "bHYPRE_SStructVectorView.h"
-#endif
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_h
-#include "bHYPRE_SStruct_MatrixVectorView.h"
 #endif
 #ifndef included_bHYPRE_Schwarz_h
 #include "bHYPRE_Schwarz.h"

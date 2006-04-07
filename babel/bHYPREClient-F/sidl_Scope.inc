@@ -33,7 +33,7 @@ C
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.10.12
-C       xml-url       = /home/painter/babel/share/babel-0.10.12/repository/sidl.Scope-v0.9.3.xml
+C       xml-url       = /home/painter/babel-0.10.12/bin/.././share/repository/sidl.Scope-v0.9.3.xml
 C       
 
 

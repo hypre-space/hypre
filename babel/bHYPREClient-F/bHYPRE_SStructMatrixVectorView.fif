@@ -1,9 +1,9 @@
 C       
-C       File:          bHYPRE_SStruct_MatrixVectorView_Impl.f
-C       Symbol:        bHYPRE.SStruct_MatrixVectorView-v1.0.0
+C       File:          bHYPRE_SStructMatrixVectorView_Impl.f
+C       Symbol:        bHYPRE.SStructMatrixVectorView-v1.0.0
 C       Symbol Type:   interface
 C       Babel Version: 0.10.12
-C       Description:   Client-side documentation text for bHYPRE.SStruct_MatrixVectorView
+C       Description:   Client-side documentation text for bHYPRE.SStructMatrixVectorView
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
@@ -13,7 +13,7 @@ C
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "bHYPRE.SStruct_MatrixVectorView" (version 1.0.0)
+C       Symbol "bHYPRE.SStructMatrixVectorView" (version 1.0.0)
 C       
 
 
@@ -24,11 +24,11 @@ C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView__cast_f(ref, retval)
+        subroutine bHYPRE_SStructMatrixVectorView__cast_f(ref, retval)
         implicit none
 C       in opaque ref
         integer*8 ref
-C       out bHYPRE.SStruct_MatrixVectorView retval
+C       out bHYPRE.SStructMatrixVectorView retval
         integer*8 retval
         end
 
@@ -38,10 +38,10 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView__cast2_f(self, name,
+        subroutine bHYPRE_SStructMatrixVectorView__cast2_f(self, name,
      &     retval)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
 C       in string name
         character*(*) name
@@ -66,9 +66,9 @@ C       class.
 C       </p>
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView_addRef_f(self)
+        subroutine bHYPRE_SStructMatrixVectorView_addRef_f(self)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
         end
 
@@ -82,9 +82,9 @@ C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView_deleteRef_f(self)
+        subroutine bHYPRE_SStructMatrixVectorView_deleteRef_f(self)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
         end
 
@@ -95,10 +95,10 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView_isSame_f(self, iobj,
+        subroutine bHYPRE_SStructMatrixVectorView_isSame_f(self, iobj,
      &     retval)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
 C       in sidl.BaseInterface iobj
         integer*8 iobj
@@ -118,10 +118,10 @@ C       the specified type is not supported, then a null reference is
 C       returned.
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView_queryInt_f(self,
-     &     name, retval)
+        subroutine bHYPRE_SStructMatrixVectorView_queryInt_f(self, name,
+     &     retval)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
 C       in string name
         character*(*) name
@@ -138,10 +138,10 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView_isType_f(self, name,
+        subroutine bHYPRE_SStructMatrixVectorView_isType_f(self, name,
      &     retval)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
 C       in string name
         character*(*) name
@@ -155,10 +155,10 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView_getClassInfo_f(self,
+        subroutine bHYPRE_SStructMatrixVectorView_getClassInfo_f(self,
      &     retval)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
 C       out sidl.ClassInfo retval
         integer*8 retval
@@ -172,10 +172,10 @@ C
 C       
 
         subroutine 
-     &     bHYPRE_SStruct_MatrixVectorView_SetCommunicator_f(self,
+     &     bHYPRE_SStructMatrixVectorView_SetCommunicator_f(self,
      &     mpi_comm, retval)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
 C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
@@ -191,10 +191,10 @@ C       the first time or subsequently.
 C       
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView_Initialize_f(self,
+        subroutine bHYPRE_SStructMatrixVectorView_Initialize_f(self,
      &     retval)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
 C       out int retval
         integer*4 retval
@@ -211,10 +211,10 @@ C       between a call to Initialize and Assemble.
 C       
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView_Assemble_f(self,
+        subroutine bHYPRE_SStructMatrixVectorView_Assemble_f(self,
      &     retval)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
 C       out int retval
         integer*4 retval
@@ -231,10 +231,10 @@ C       convert it into a known type.
 C       
 C       
 
-        subroutine bHYPRE_SStruct_MatrixVectorView_GetObject_f(self, A,
+        subroutine bHYPRE_SStructMatrixVectorView_GetObject_f(self, A,
      &     retval)
         implicit none
-C       in bHYPRE.SStruct_MatrixVectorView self
+C       in bHYPRE.SStructMatrixVectorView self
         integer*8 self
 C       out sidl.BaseInterface A
         integer*8 A

@@ -101,6 +101,9 @@
 #ifndef included_bHYPRE_SStructMatrix_IOR_h
 #include "bHYPRE_SStructMatrix_IOR.h"
 #endif
+#ifndef included_bHYPRE_SStructMatrixVectorView_IOR_h
+#include "bHYPRE_SStructMatrixVectorView_IOR.h"
+#endif
 #ifndef included_bHYPRE_SStructMatrixView_IOR_h
 #include "bHYPRE_SStructMatrixView_IOR.h"
 #endif
@@ -124,9 +127,6 @@
 #endif
 #ifndef included_bHYPRE_SStructVectorView_IOR_h
 #include "bHYPRE_SStructVectorView_IOR.h"
-#endif
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_IOR_h
-#include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
 #endif
 #ifndef included_bHYPRE_Schwarz_IOR_h
 #include "bHYPRE_Schwarz_IOR.h"

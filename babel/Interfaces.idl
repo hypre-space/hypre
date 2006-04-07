@@ -292,7 +292,7 @@ package bHYPRE version 1.0.0
 
    /*----------- Interface -------------------------------------------------*/
 
-   interface SStruct_MatrixVectorView extends MatrixVectorView
+   interface SStructMatrixVectorView extends MatrixVectorView
    {
       /**
        *  A semi-structured matrix or vector contains a Struct or IJ matrix
@@ -304,7 +304,7 @@ package bHYPRE version 1.0.0
       int GetObject(out sidl.BaseInterface A);
    }
 
-   interface SStructMatrixView extends SStruct_MatrixVectorView
+   interface SStructMatrixView extends SStructMatrixVectorView
    {
       /**
        * Set the matrix graph.
@@ -458,7 +458,7 @@ package bHYPRE version 1.0.0
 
    /*----------- Interface -------------------------------------------------*/
 
-   interface SStructVectorView extends SStruct_MatrixVectorView
+   interface SStructVectorView extends SStructMatrixVectorView
    {
       /**
        * Set the vector grid.
@@ -1431,6 +1431,9 @@ package bHYPRE version 1.0.0
     *
     * \item[TruncFactor] ({\tt Double}) - truncation factor for
     * interpolation.
+    *
+    * \item[JacobiTruncThreshold] ({\tt Double}) - threshold for truncation
+    * of Jacobi interpolation.
     *
     * \item[SmoothType] ({\tt Int}) - more complex smoothers.
     *

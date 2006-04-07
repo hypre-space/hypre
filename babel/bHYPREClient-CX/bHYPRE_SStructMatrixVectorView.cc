@@ -1,17 +1,17 @@
 // 
-// File:          bHYPRE_SStruct_MatrixVectorView.cc
-// Symbol:        bHYPRE.SStruct_MatrixVectorView-v1.0.0
+// File:          bHYPRE_SStructMatrixVectorView.cc
+// Symbol:        bHYPRE.SStructMatrixVectorView-v1.0.0
 // Symbol Type:   interface
 // Babel Version: 0.10.12
-// Description:   Client-side glue code for bHYPRE.SStruct_MatrixVectorView
+// Description:   Client-side glue code for bHYPRE.SStructMatrixVectorView
 // 
 // WARNING: Automatically generated; changes will be lost
 // 
 // babel-version = 0.10.12
 // 
 
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_hh
-#include "bHYPRE_SStruct_MatrixVectorView.hh"
+#ifndef included_bHYPRE_SStructMatrixVectorView_hh
+#include "bHYPRE_SStructMatrixVectorView.hh"
 #endif
 #ifndef included_sidl_BaseInterface_hh
 #include "sidl_BaseInterface.hh"
@@ -52,7 +52,7 @@
  * object as this object.
  */
 bool
-ucxx::bHYPRE::SStruct_MatrixVectorView::isSame( /* in 
+ucxx::bHYPRE::SStructMatrixVectorView::isSame( /* in 
   */::ucxx::sidl::BaseInterface iobj )
 throw ()
 
@@ -62,7 +62,7 @@ throw ()
     sidl_BaseInterface__object * > 
     (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
     sidl_BaseInterface__object * > (d_self))->d_object,
-    "bHYPRE.SStruct_MatrixVectorView");
+    "bHYPRE.SStructMatrixVectorView");
   sidl_bool _local_result;
   struct sidl_BaseInterface__object* _local_iobj = reinterpret_cast< struct 
     sidl_BaseInterface__object* > ( iobj._get_ior() ? ((*((reinterpret_cast< 
@@ -91,7 +91,7 @@ throw ()
  * returned.
  */
 ::ucxx::sidl::BaseInterface
-ucxx::bHYPRE::SStruct_MatrixVectorView::queryInt( /* in */const ::std::string& 
+ucxx::bHYPRE::SStructMatrixVectorView::queryInt( /* in */const ::std::string& 
   name )
 throw ()
 
@@ -101,7 +101,7 @@ throw ()
     sidl_BaseInterface__object * > 
     (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
     sidl_BaseInterface__object * > (d_self))->d_object,
-    "bHYPRE.SStruct_MatrixVectorView");
+    "bHYPRE.SStructMatrixVectorView");
   /*pack args to dispatch to ior*/
   _result = ::ucxx::sidl::BaseInterface( 
     (*(loc_self->d_epv->f_queryInt))(loc_self->d_object,
@@ -120,7 +120,7 @@ throw ()
  * the string type name would succeed.
  */
 bool
-ucxx::bHYPRE::SStruct_MatrixVectorView::isType( /* in */const ::std::string& 
+ucxx::bHYPRE::SStructMatrixVectorView::isType( /* in */const ::std::string& 
   name )
 throw ()
 
@@ -130,7 +130,7 @@ throw ()
     sidl_BaseInterface__object * > 
     (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
     sidl_BaseInterface__object * > (d_self))->d_object,
-    "bHYPRE.SStruct_MatrixVectorView");
+    "bHYPRE.SStructMatrixVectorView");
   sidl_bool _local_result;
   /*pack args to dispatch to ior*/
   _local_result = (*(loc_self->d_epv->f_isType))(loc_self->d_object,
@@ -147,7 +147,7 @@ throw ()
  * Return the meta-data about the class implementing this interface.
  */
 ::ucxx::sidl::ClassInfo
-ucxx::bHYPRE::SStruct_MatrixVectorView::getClassInfo(  )
+ucxx::bHYPRE::SStructMatrixVectorView::getClassInfo(  )
 throw ()
 
 {
@@ -156,7 +156,7 @@ throw ()
     sidl_BaseInterface__object * > 
     (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
     sidl_BaseInterface__object * > (d_self))->d_object,
-    "bHYPRE.SStruct_MatrixVectorView");
+    "bHYPRE.SStructMatrixVectorView");
   /*pack args to dispatch to ior*/
   _result = ::ucxx::sidl::ClassInfo( 
     (*(loc_self->d_epv->f_getClassInfo))(loc_self->d_object ), false);
@@ -172,7 +172,7 @@ throw ()
  * 
  */
 int32_t
-ucxx::bHYPRE::SStruct_MatrixVectorView::SetCommunicator( /* in 
+ucxx::bHYPRE::SStructMatrixVectorView::SetCommunicator( /* in 
   */::ucxx::bHYPRE::MPICommunicator mpi_comm )
 throw ()
 
@@ -182,7 +182,7 @@ throw ()
     sidl_BaseInterface__object * > 
     (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
     sidl_BaseInterface__object * > (d_self))->d_object,
-    "bHYPRE.SStruct_MatrixVectorView");
+    "bHYPRE.SStructMatrixVectorView");
   struct bHYPRE_MPICommunicator__object* _local_mpi_comm = mpi_comm._get_ior();
   /*pack args to dispatch to ior*/
   _result = (*(loc_self->d_epv->f_SetCommunicator))(loc_self->d_object,
@@ -203,7 +203,7 @@ throw ()
  * 
  */
 int32_t
-ucxx::bHYPRE::SStruct_MatrixVectorView::GetObject( /* out 
+ucxx::bHYPRE::SStructMatrixVectorView::GetObject( /* out 
   */::ucxx::sidl::BaseInterface& A )
 throw ()
 
@@ -213,7 +213,7 @@ throw ()
     sidl_BaseInterface__object * > 
     (d_self))->d_epv->f__cast)((reinterpret_cast< struct 
     sidl_BaseInterface__object * > (d_self))->d_object,
-    "bHYPRE.SStruct_MatrixVectorView");
+    "bHYPRE.SStructMatrixVectorView");
   struct sidl_BaseInterface__object* _local_A;
   /*pack args to dispatch to ior*/
   _result = (*(loc_self->d_epv->f_GetObject))(loc_self->d_object,
@@ -237,9 +237,9 @@ throw ()
 // 
 
 // copy constructor
-ucxx::bHYPRE::SStruct_MatrixVectorView::SStruct_MatrixVectorView ( const 
-  ::ucxx::bHYPRE::SStruct_MatrixVectorView& original ) {
-  d_self = original._cast("bHYPRE.SStruct_MatrixVectorView");
+ucxx::bHYPRE::SStructMatrixVectorView::SStructMatrixVectorView ( const 
+  ::ucxx::bHYPRE::SStructMatrixVectorView& original ) {
+  d_self = original._cast("bHYPRE.SStructMatrixVectorView");
   d_weak_reference = original.d_weak_reference;
   if (d_self != 0 ) {
     addRef();
@@ -247,14 +247,14 @@ ucxx::bHYPRE::SStruct_MatrixVectorView::SStruct_MatrixVectorView ( const
 }
 
 // assignment operator
-::ucxx::bHYPRE::SStruct_MatrixVectorView&
-ucxx::bHYPRE::SStruct_MatrixVectorView::operator=( const 
-  ::ucxx::bHYPRE::SStruct_MatrixVectorView& rhs ) {
+::ucxx::bHYPRE::SStructMatrixVectorView&
+ucxx::bHYPRE::SStructMatrixVectorView::operator=( const 
+  ::ucxx::bHYPRE::SStructMatrixVectorView& rhs ) {
   if ( d_self != rhs.d_self ) {
     if ( d_self != 0 ) {
       deleteRef();
     }
-    d_self = rhs._cast("bHYPRE.SStruct_MatrixVectorView");
+    d_self = rhs._cast("bHYPRE.SStructMatrixVectorView");
     d_weak_reference = rhs.d_weak_reference;
     if ( d_self != 0 ) {
       addRef();
@@ -264,20 +264,20 @@ ucxx::bHYPRE::SStruct_MatrixVectorView::operator=( const
 }
 
 // conversion from ior to C++ class
-ucxx::bHYPRE::SStruct_MatrixVectorView::SStruct_MatrixVectorView ( 
-  ::ucxx::bHYPRE::SStruct_MatrixVectorView::ior_t* ior ) 
+ucxx::bHYPRE::SStructMatrixVectorView::SStructMatrixVectorView ( 
+  ::ucxx::bHYPRE::SStructMatrixVectorView::ior_t* ior ) 
    : StubBase(reinterpret_cast< void*>(ior)) { }
 
 // Alternate constructor: does not call addRef()
 // (sets d_weak_reference=isWeak)
 // For internal use by Impls (fixes bug#275)
-ucxx::bHYPRE::SStruct_MatrixVectorView::SStruct_MatrixVectorView ( 
-  ::ucxx::bHYPRE::SStruct_MatrixVectorView::ior_t* ior, bool isWeak ) : 
+ucxx::bHYPRE::SStructMatrixVectorView::SStructMatrixVectorView ( 
+  ::ucxx::bHYPRE::SStructMatrixVectorView::ior_t* ior, bool isWeak ) : 
 StubBase(reinterpret_cast< void*>(ior), isWeak){ 
 }
 
 // protected method that implements casting
-void* ucxx::bHYPRE::SStruct_MatrixVectorView::_cast(const char* type) const
+void* ucxx::bHYPRE::SStructMatrixVectorView::_cast(const char* type) const
 {
   ior_t* loc_self = reinterpret_cast< ior_t*>(this->d_self);
   void* ptr = 0;

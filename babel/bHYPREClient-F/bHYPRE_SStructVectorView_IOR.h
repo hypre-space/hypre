@@ -87,7 +87,7 @@ struct bHYPRE_SStructVectorView__epv {
   int32_t (*f_Assemble)(
     /* in */ void* self);
   /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
-  /* Methods introduced in bHYPRE.SStruct_MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStructMatrixVectorView-v1.0.0 */
   int32_t (*f_GetObject)(
     /* in */ void* self,
     /* out */ struct sidl_BaseInterface__object** A);
@@ -166,11 +166,11 @@ struct bHYPRE_SStructVectorView__object {
 #ifndef included_bHYPRE_ProblemDefinition_IOR_h
 #include "bHYPRE_ProblemDefinition_IOR.h"
 #endif
+#ifndef included_bHYPRE_SStructMatrixVectorView_IOR_h
+#include "bHYPRE_SStructMatrixVectorView_IOR.h"
+#endif
 #ifndef included_bHYPRE_SStructVectorView_IOR_h
 #include "bHYPRE_SStructVectorView_IOR.h"
-#endif
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_IOR_h
-#include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
 #endif
 #ifndef included_sidl_BaseInterface_IOR_h
 #include "sidl_BaseInterface_IOR.h"
@@ -230,7 +230,7 @@ struct bHYPRE__SStructVectorView__epv {
   int32_t (*f_Assemble)(
     /* in */ struct bHYPRE__SStructVectorView__object* self);
   /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
-  /* Methods introduced in bHYPRE.SStruct_MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStructMatrixVectorView-v1.0.0 */
   int32_t (*f_GetObject)(
     /* in */ struct bHYPRE__SStructVectorView__object* self,
     /* out */ struct sidl_BaseInterface__object** A);
@@ -293,14 +293,14 @@ struct bHYPRE__SStructVectorView__epv {
  */
 
 struct bHYPRE__SStructVectorView__object {
-  struct bHYPRE_MatrixVectorView__object         d_bhypre_matrixvectorview;
-  struct bHYPRE_ProblemDefinition__object        d_bhypre_problemdefinition;
-  struct bHYPRE_SStructVectorView__object        d_bhypre_sstructvectorview;
-  struct bHYPRE_SStruct_MatrixVectorView__object 
-    d_bhypre_sstruct_matrixvectorview;
-  struct sidl_BaseInterface__object              d_sidl_baseinterface;
-  struct bHYPRE__SStructVectorView__epv*         d_epv;
-  void*                                          d_data;
+  struct bHYPRE_MatrixVectorView__object        d_bhypre_matrixvectorview;
+  struct bHYPRE_ProblemDefinition__object       d_bhypre_problemdefinition;
+  struct bHYPRE_SStructMatrixVectorView__object 
+    d_bhypre_sstructmatrixvectorview;
+  struct bHYPRE_SStructVectorView__object       d_bhypre_sstructvectorview;
+  struct sidl_BaseInterface__object             d_sidl_baseinterface;
+  struct bHYPRE__SStructVectorView__epv*        d_epv;
+  void*                                         d_data;
 };
 
 

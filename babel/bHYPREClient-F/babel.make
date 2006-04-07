@@ -8,13 +8,13 @@ IORHDRS = bHYPRE_BiCGSTAB_IOR.h bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h      \
   bHYPRE_ParCSRDiagScale_IOR.h bHYPRE_ParaSails_IOR.h bHYPRE_Pilut_IOR.h      \
   bHYPRE_PreconditionedSolver_IOR.h bHYPRE_ProblemDefinition_IOR.h            \
   bHYPRE_SStructDiagScale_IOR.h bHYPRE_SStructGraph_IOR.h                     \
-  bHYPRE_SStructGrid_IOR.h bHYPRE_SStructMatrixView_IOR.h                     \
-  bHYPRE_SStructMatrix_IOR.h bHYPRE_SStructParCSRMatrix_IOR.h                 \
-  bHYPRE_SStructParCSRVector_IOR.h bHYPRE_SStructSplit_IOR.h                  \
-  bHYPRE_SStructStencil_IOR.h bHYPRE_SStructVariable_IOR.h                    \
-  bHYPRE_SStructVectorView_IOR.h bHYPRE_SStructVector_IOR.h                   \
-  bHYPRE_SStruct_MatrixVectorView_IOR.h bHYPRE_Schwarz_IOR.h                  \
-  bHYPRE_Solver_IOR.h bHYPRE_StructDiagScale_IOR.h bHYPRE_StructGrid_IOR.h    \
+  bHYPRE_SStructGrid_IOR.h bHYPRE_SStructMatrixVectorView_IOR.h               \
+  bHYPRE_SStructMatrixView_IOR.h bHYPRE_SStructMatrix_IOR.h                   \
+  bHYPRE_SStructParCSRMatrix_IOR.h bHYPRE_SStructParCSRVector_IOR.h           \
+  bHYPRE_SStructSplit_IOR.h bHYPRE_SStructStencil_IOR.h                       \
+  bHYPRE_SStructVariable_IOR.h bHYPRE_SStructVectorView_IOR.h                 \
+  bHYPRE_SStructVector_IOR.h bHYPRE_Schwarz_IOR.h bHYPRE_Solver_IOR.h         \
+  bHYPRE_StructDiagScale_IOR.h bHYPRE_StructGrid_IOR.h                        \
   bHYPRE_StructJacobi_IOR.h bHYPRE_StructMatrixView_IOR.h                     \
   bHYPRE_StructMatrix_IOR.h bHYPRE_StructPFMG_IOR.h bHYPRE_StructSMG_IOR.h    \
   bHYPRE_StructStencil_IOR.h bHYPRE_StructVectorView_IOR.h                    \
@@ -28,14 +28,14 @@ STUBDOCS = bHYPRE_BiCGSTAB.fif bHYPRE_BoomerAMG.fif bHYPRE_CGNR.fif           \
   bHYPRE_ParCSRDiagScale.fif bHYPRE_ParaSails.fif bHYPRE_Pilut.fif            \
   bHYPRE_PreconditionedSolver.fif bHYPRE_ProblemDefinition.fif                \
   bHYPRE_SStructDiagScale.fif bHYPRE_SStructGraph.fif bHYPRE_SStructGrid.fif  \
-  bHYPRE_SStructMatrix.fif bHYPRE_SStructMatrixView.fif                       \
-  bHYPRE_SStructParCSRMatrix.fif bHYPRE_SStructParCSRVector.fif               \
-  bHYPRE_SStructSplit.fif bHYPRE_SStructStencil.fif bHYPRE_SStructVector.fif  \
-  bHYPRE_SStructVectorView.fif bHYPRE_SStruct_MatrixVectorView.fif            \
-  bHYPRE_Schwarz.fif bHYPRE_Solver.fif bHYPRE_StructDiagScale.fif             \
-  bHYPRE_StructGrid.fif bHYPRE_StructJacobi.fif bHYPRE_StructMatrix.fif       \
-  bHYPRE_StructMatrixView.fif bHYPRE_StructPFMG.fif bHYPRE_StructSMG.fif      \
-  bHYPRE_StructStencil.fif bHYPRE_StructVector.fif                            \
+  bHYPRE_SStructMatrix.fif bHYPRE_SStructMatrixVectorView.fif                 \
+  bHYPRE_SStructMatrixView.fif bHYPRE_SStructParCSRMatrix.fif                 \
+  bHYPRE_SStructParCSRVector.fif bHYPRE_SStructSplit.fif                      \
+  bHYPRE_SStructStencil.fif bHYPRE_SStructVector.fif                          \
+  bHYPRE_SStructVectorView.fif bHYPRE_Schwarz.fif bHYPRE_Solver.fif           \
+  bHYPRE_StructDiagScale.fif bHYPRE_StructGrid.fif bHYPRE_StructJacobi.fif    \
+  bHYPRE_StructMatrix.fif bHYPRE_StructMatrixView.fif bHYPRE_StructPFMG.fif   \
+  bHYPRE_StructSMG.fif bHYPRE_StructStencil.fif bHYPRE_StructVector.fif       \
   bHYPRE_StructVectorView.fif bHYPRE_Vector.fif sidl_BaseClass.fif            \
   sidl_BaseException.fif sidl_BaseInterface.fif sidl_ClassInfo.fif            \
   sidl_ClassInfoI.fif sidl_DFinder.fif sidl_DLL.fif sidl_Finder.fif           \
@@ -58,24 +58,23 @@ STUBSRCS = bHYPRE_BiCGSTAB_fStub.c bHYPRE_BoomerAMG_fStub.c                   \
   bHYPRE_ParaSails_fStub.c bHYPRE_Pilut_fStub.c                               \
   bHYPRE_PreconditionedSolver_fStub.c bHYPRE_ProblemDefinition_fStub.c        \
   bHYPRE_SStructDiagScale_fStub.c bHYPRE_SStructGraph_fStub.c                 \
-  bHYPRE_SStructGrid_fStub.c bHYPRE_SStructMatrixView_fStub.c                 \
-  bHYPRE_SStructMatrix_fStub.c bHYPRE_SStructParCSRMatrix_fStub.c             \
-  bHYPRE_SStructParCSRVector_fStub.c bHYPRE_SStructSplit_fStub.c              \
-  bHYPRE_SStructStencil_fStub.c bHYPRE_SStructVariable_fStub.c                \
-  bHYPRE_SStructVectorView_fStub.c bHYPRE_SStructVector_fStub.c               \
-  bHYPRE_SStruct_MatrixVectorView_fStub.c bHYPRE_Schwarz_fStub.c              \
-  bHYPRE_Solver_fStub.c bHYPRE_StructDiagScale_fStub.c                        \
-  bHYPRE_StructGrid_fStub.c bHYPRE_StructJacobi_fStub.c                       \
-  bHYPRE_StructMatrixView_fStub.c bHYPRE_StructMatrix_fStub.c                 \
-  bHYPRE_StructPFMG_fStub.c bHYPRE_StructSMG_fStub.c                          \
-  bHYPRE_StructStencil_fStub.c bHYPRE_StructVectorView_fStub.c                \
-  bHYPRE_StructVector_fStub.c bHYPRE_Vector_fStub.c sidl_BaseClass_fStub.c    \
-  sidl_BaseException_fStub.c sidl_BaseInterface_fStub.c                       \
-  sidl_ClassInfoI_fStub.c sidl_ClassInfo_fStub.c sidl_DFinder_fStub.c         \
-  sidl_DLL_fStub.c sidl_Finder_fStub.c sidl_InvViolation_fStub.c              \
-  sidl_Loader_fStub.c sidl_PostViolation_fStub.c sidl_PreViolation_fStub.c    \
-  sidl_Resolve_fStub.c sidl_SIDLException_fStub.c sidl_Scope_fStub.c          \
-  sidl_array_fStub.c sidl_bool_fStub.c sidl_char_fStub.c                      \
+  bHYPRE_SStructGrid_fStub.c bHYPRE_SStructMatrixVectorView_fStub.c           \
+  bHYPRE_SStructMatrixView_fStub.c bHYPRE_SStructMatrix_fStub.c               \
+  bHYPRE_SStructParCSRMatrix_fStub.c bHYPRE_SStructParCSRVector_fStub.c       \
+  bHYPRE_SStructSplit_fStub.c bHYPRE_SStructStencil_fStub.c                   \
+  bHYPRE_SStructVariable_fStub.c bHYPRE_SStructVectorView_fStub.c             \
+  bHYPRE_SStructVector_fStub.c bHYPRE_Schwarz_fStub.c bHYPRE_Solver_fStub.c   \
+  bHYPRE_StructDiagScale_fStub.c bHYPRE_StructGrid_fStub.c                    \
+  bHYPRE_StructJacobi_fStub.c bHYPRE_StructMatrixView_fStub.c                 \
+  bHYPRE_StructMatrix_fStub.c bHYPRE_StructPFMG_fStub.c                       \
+  bHYPRE_StructSMG_fStub.c bHYPRE_StructStencil_fStub.c                       \
+  bHYPRE_StructVectorView_fStub.c bHYPRE_StructVector_fStub.c                 \
+  bHYPRE_Vector_fStub.c sidl_BaseClass_fStub.c sidl_BaseException_fStub.c     \
+  sidl_BaseInterface_fStub.c sidl_ClassInfoI_fStub.c sidl_ClassInfo_fStub.c   \
+  sidl_DFinder_fStub.c sidl_DLL_fStub.c sidl_Finder_fStub.c                   \
+  sidl_InvViolation_fStub.c sidl_Loader_fStub.c sidl_PostViolation_fStub.c    \
+  sidl_PreViolation_fStub.c sidl_Resolve_fStub.c sidl_SIDLException_fStub.c   \
+  sidl_Scope_fStub.c sidl_array_fStub.c sidl_bool_fStub.c sidl_char_fStub.c   \
   sidl_dcomplex_fStub.c sidl_double_fStub.c sidl_fcomplex_fStub.c             \
   sidl_float_fStub.c sidl_int_fStub.c sidl_io_Deserializer_fStub.c            \
   sidl_io_IOException_fStub.c sidl_io_Serializeable_fStub.c                   \

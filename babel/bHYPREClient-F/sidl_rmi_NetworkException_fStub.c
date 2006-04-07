@@ -33,7 +33,7 @@
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.10.12
- * xml-url       = /home/painter/babel/share/babel-0.10.12/repository/sidl.rmi.NetworkException-v0.9.3.xml
+ * xml-url       = /home/painter/babel-0.10.12/bin/.././share/repository/sidl.rmi.NetworkException-v0.9.3.xml
  */
 
 /*

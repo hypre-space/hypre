@@ -69,8 +69,8 @@ namespace ucxx {
 #ifndef included_bHYPRE_SStructVectorView_IOR_h
 #include "bHYPRE_SStructVectorView_IOR.h"
 #endif
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_hh
-#include "bHYPRE_SStruct_MatrixVectorView.hh"
+#ifndef included_bHYPRE_SStructMatrixVectorView_hh
+#include "bHYPRE_SStructMatrixVectorView.hh"
 #endif
 
 namespace ucxx { 
@@ -80,7 +80,7 @@ namespace ucxx {
      * Symbol "bHYPRE.SStructVectorView" (version 1.0.0)
      */
     class SStructVectorView: public virtual 
-      ::ucxx::bHYPRE::SStruct_MatrixVectorView {
+      ::ucxx::bHYPRE::SStructMatrixVectorView {
 
     //////////////////////////////////////////////////
     // 

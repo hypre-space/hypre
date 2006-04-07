@@ -1,9 +1,9 @@
 /*
- * File:          bHYPRE_SStruct_MatrixVectorView_fStub.c
- * Symbol:        bHYPRE.SStruct_MatrixVectorView-v1.0.0
+ * File:          bHYPRE_SStructMatrixVectorView_fStub.c
+ * Symbol:        bHYPRE.SStructMatrixVectorView-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.10.12
- * Description:   Client-side glue code for bHYPRE.SStruct_MatrixVectorView
+ * Description:   Client-side glue code for bHYPRE.SStructMatrixVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
@@ -11,7 +11,7 @@
  */
 
 /*
- * Symbol "bHYPRE.SStruct_MatrixVectorView" (version 1.0.0)
+ * Symbol "bHYPRE.SStructMatrixVectorView" (version 1.0.0)
  */
 
 #include <stddef.h>
@@ -26,7 +26,7 @@
 #ifdef SIDL_DYNAMIC_LIBRARY
 #include "sidl_Loader.h"
 #endif
-#include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
+#include "bHYPRE_SStructMatrixVectorView_IOR.h"
 #include "bHYPRE_MPICommunicator_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 #include "sidl_BaseInterface_IOR.h"
@@ -36,7 +36,7 @@
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__cast_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW__CAST_F,bHYPRE_SStruct_MatrixVectorView__cast_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__cast_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW__CAST_F,bHYPRE_SStructMatrixVectorView__cast_f)
 (
   int64_t *ref,
   int64_t *retval
@@ -48,7 +48,7 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__cast_f,BHYPRE_SSTRUCT_MATRI
     *retval = (ptrdiff_t)(
       *_base->d_epv->f__cast)(
       _base->d_object,
-      "bHYPRE.SStruct_MatrixVectorView");
+      "bHYPRE.SStructMatrixVectorView");
   } else {
     *retval = 0;
   }
@@ -59,7 +59,7 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__cast_f,BHYPRE_SSTRUCT_MATRI
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__cast2_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW__CAST2_F,bHYPRE_SStruct_MatrixVectorView__cast2_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__cast2_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW__CAST2_F,bHYPRE_SStructMatrixVectorView__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -68,12 +68,12 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__cast2_f,BHYPRE_SSTRUCT_MATR
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   void* _proxy_retval = NULL;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -104,15 +104,15 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__cast2_f,BHYPRE_SSTRUCT_MATR
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_addref_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_ADDREF_F,bHYPRE_SStruct_MatrixVectorView_addRef_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_addref_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_ADDREF_F,bHYPRE_SStructMatrixVectorView_addRef_f)
 (
   int64_t *self
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   (*(_epv->f_addRef))(
@@ -129,15 +129,15 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_addref_f,BHYPRE_SSTRUCT_MATR
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_deleteref_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_DELETEREF_F,bHYPRE_SStruct_MatrixVectorView_deleteRef_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_deleteref_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_DELETEREF_F,bHYPRE_SStructMatrixVectorView_deleteRef_f)
 (
   int64_t *self
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   (*(_epv->f_deleteRef))(
@@ -151,19 +151,19 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_deleteref_f,BHYPRE_SSTRUCT_M
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_issame_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_ISSAME_F,bHYPRE_SStruct_MatrixVectorView_isSame_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_issame_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_ISSAME_F,bHYPRE_SStructMatrixVectorView_isSame_f)
 (
   int64_t *self,
   int64_t *iobj,
   SIDL_F77_Bool *retval
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   struct sidl_BaseInterface__object* _proxy_iobj = NULL;
   sidl_bool _proxy_retval;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _proxy_iobj =
     (struct sidl_BaseInterface__object*)
@@ -188,7 +188,7 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_issame_f,BHYPRE_SSTRUCT_MATR
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_queryint_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_QUERYINT_F,bHYPRE_SStruct_MatrixVectorView_queryInt_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_queryint_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_QUERYINT_F,bHYPRE_SStructMatrixVectorView_queryInt_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -197,12 +197,12 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_queryint_f,BHYPRE_SSTRUCT_MA
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_BaseInterface__object* _proxy_retval = NULL;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -225,7 +225,7 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_queryint_f,BHYPRE_SSTRUCT_MA
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_istype_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_ISTYPE_F,bHYPRE_SStruct_MatrixVectorView_isType_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_istype_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_ISTYPE_F,bHYPRE_SStructMatrixVectorView_isType_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -234,12 +234,12 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_istype_f,BHYPRE_SSTRUCT_MATR
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   sidl_bool _proxy_retval;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -259,17 +259,17 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_istype_f,BHYPRE_SSTRUCT_MATR
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_getclassinfo_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_GETCLASSINFO_F,bHYPRE_SStruct_MatrixVectorView_getClassInfo_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_getclassinfo_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_GETCLASSINFO_F,bHYPRE_SStructMatrixVectorView_getClassInfo_f)
 (
   int64_t *self,
   int64_t *retval
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   struct sidl_ClassInfo__object* _proxy_retval = NULL;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
@@ -285,18 +285,18 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_getclassinfo_f,BHYPRE_SSTRUC
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_setcommunicator_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_SETCOMMUNICATOR_F,bHYPRE_SStruct_MatrixVectorView_SetCommunicator_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_setcommunicator_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_SETCOMMUNICATOR_F,bHYPRE_SStructMatrixVectorView_SetCommunicator_f)
 (
   int64_t *self,
   int64_t *mpi_comm,
   int32_t *retval
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
     (struct bHYPRE_MPICommunicator__object*)
@@ -316,16 +316,16 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_setcommunicator_f,BHYPRE_SST
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_initialize_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_INITIALIZE_F,bHYPRE_SStruct_MatrixVectorView_Initialize_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_initialize_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_INITIALIZE_F,bHYPRE_SStructMatrixVectorView_Initialize_f)
 (
   int64_t *self,
   int32_t *retval
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -344,16 +344,16 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_initialize_f,BHYPRE_SSTRUCT_
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_assemble_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_ASSEMBLE_F,bHYPRE_SStruct_MatrixVectorView_Assemble_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_assemble_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_ASSEMBLE_F,bHYPRE_SStructMatrixVectorView_Assemble_f)
 (
   int64_t *self,
   int32_t *retval
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -372,18 +372,18 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_assemble_f,BHYPRE_SSTRUCT_MA
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_getobject_f,BHYPRE_SSTRUCT_MATRIXVECTORVIEW_GETOBJECT_F,bHYPRE_SStruct_MatrixVectorView_GetObject_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview_getobject_f,BHYPRE_SSTRUCTMATRIXVECTORVIEW_GETOBJECT_F,bHYPRE_SStructMatrixVectorView_GetObject_f)
 (
   int64_t *self,
   int64_t *A,
   int32_t *retval
 )
 {
-  struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
-  struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
+  struct bHYPRE_SStructMatrixVectorView__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrixVectorView__object* _proxy_self = NULL;
   struct sidl_BaseInterface__object* _proxy_A = NULL;
   _proxy_self =
-    (struct bHYPRE_SStruct_MatrixVectorView__object*)
+    (struct bHYPRE_SStructMatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -395,9 +395,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_getobject_f,BHYPRE_SSTRUCT_M
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_createcol_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_CREATECOL_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_createCol_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_createcol_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_CREATECOL_F,
+                  bHYPRE_SStructMatrixVectorView__array_createCol_f)
   (int32_t *dimen,
    int32_t lower[],
    int32_t upper[],
@@ -408,9 +408,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_createcol_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_createrow_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_CREATEROW_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_createRow_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_createrow_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_CREATEROW_F,
+                  bHYPRE_SStructMatrixVectorView__array_createRow_f)
   (int32_t *dimen,
    int32_t lower[],
    int32_t upper[],
@@ -421,36 +421,36 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_createrow_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_create1d_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_CREATE1D_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_create1d_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_create1d_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_CREATE1D_F,
+                  bHYPRE_SStructMatrixVectorView__array_create1d_f)
   (int32_t *len, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create1d(*len);
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_create2dcol_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_CREATE2DCOL_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_create2dCol_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_create2dcol_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_CREATE2DCOL_F,
+                  bHYPRE_SStructMatrixVectorView__array_create2dCol_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create2dCol(*m, *n);
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_create2drow_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_CREATE2DROW_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_create2dRow_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_create2drow_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_CREATE2DROW_F,
+                  bHYPRE_SStructMatrixVectorView__array_create2dRow_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create2dRow(*m, *n);
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_addref_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_ADDREF_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_addRef_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_addref_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_ADDREF_F,
+                  bHYPRE_SStructMatrixVectorView__array_addRef_f)
   (int64_t *array)
 {
   sidl_interface__array_addRef((struct sidl_interface__array 
@@ -458,9 +458,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_addref_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_deleteref_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_DELETEREF_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_deleteRef_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_deleteref_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_DELETEREF_F,
+                  bHYPRE_SStructMatrixVectorView__array_deleteRef_f)
   (int64_t *array)
 {
   sidl_interface__array_deleteRef((struct sidl_interface__array 
@@ -468,9 +468,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_deleteref_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get1_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_GET1_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_get1_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_get1_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_GET1_F,
+                  bHYPRE_SStructMatrixVectorView__array_get1_f)
   (int64_t *array, 
    int32_t *i1, 
    int64_t *result)
@@ -482,9 +482,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get1_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get2_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_GET2_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_get2_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_get2_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_GET2_F,
+                  bHYPRE_SStructMatrixVectorView__array_get2_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -497,9 +497,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get2_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get3_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_GET3_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_get3_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_get3_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_GET3_F,
+                  bHYPRE_SStructMatrixVectorView__array_get3_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -513,9 +513,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get3_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get4_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_GET4_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_get4_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_get4_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_GET4_F,
+                  bHYPRE_SStructMatrixVectorView__array_get4_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -530,9 +530,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get4_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get5_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_GET5_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_get5_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_get5_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_GET5_F,
+                  bHYPRE_SStructMatrixVectorView__array_get5_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -548,9 +548,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get5_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get6_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_GET6_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_get6_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_get6_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_GET6_F,
+                  bHYPRE_SStructMatrixVectorView__array_get6_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -567,9 +567,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get6_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get7_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_GET7_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_get7_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_get7_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_GET7_F,
+                  bHYPRE_SStructMatrixVectorView__array_get7_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -587,9 +587,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get7_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_GET_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_get_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_get_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_GET_F,
+                  bHYPRE_SStructMatrixVectorView__array_get_f)
   (int64_t *array,
    int32_t indices[],
    int64_t *result)
@@ -600,9 +600,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_get_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set1_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SET1_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_set1_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_set1_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SET1_F,
+                  bHYPRE_SStructMatrixVectorView__array_set1_f)
   (int64_t *array,
    int32_t *i1,
    int64_t *value)
@@ -612,9 +612,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set1_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set2_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SET2_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_set2_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_set2_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SET2_F,
+                  bHYPRE_SStructMatrixVectorView__array_set2_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -625,9 +625,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set2_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set3_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SET3_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_set3_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_set3_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SET3_F,
+                  bHYPRE_SStructMatrixVectorView__array_set3_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -639,9 +639,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set3_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set4_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SET4_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_set4_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_set4_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SET4_F,
+                  bHYPRE_SStructMatrixVectorView__array_set4_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -654,9 +654,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set4_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set5_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SET5_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_set5_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_set5_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SET5_F,
+                  bHYPRE_SStructMatrixVectorView__array_set5_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -671,9 +671,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set5_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set6_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SET6_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_set6_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_set6_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SET6_F,
+                  bHYPRE_SStructMatrixVectorView__array_set6_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -689,9 +689,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set6_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set7_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SET7_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_set7_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_set7_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SET7_F,
+                  bHYPRE_SStructMatrixVectorView__array_set7_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -708,9 +708,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set7_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SET_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_set_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_set_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SET_F,
+                  bHYPRE_SStructMatrixVectorView__array_set_f)
   (int64_t *array,
   int32_t indices[],
   int64_t *value)
@@ -720,9 +720,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_set_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_dimen_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_DIMEN_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_dimen_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_dimen_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_DIMEN_F,
+                  bHYPRE_SStructMatrixVectorView__array_dimen_f)
   (int64_t *array, int32_t *result)
 {
   *result =
@@ -731,9 +731,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_dimen_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_lower_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_LOWER_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_lower_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_lower_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_LOWER_F,
+                  bHYPRE_SStructMatrixVectorView__array_lower_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -744,9 +744,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_lower_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_upper_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_UPPER_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_upper_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_upper_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_UPPER_F,
+                  bHYPRE_SStructMatrixVectorView__array_upper_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -757,9 +757,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_upper_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_length_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_LENGTH_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_length_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_length_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_LENGTH_F,
+                  bHYPRE_SStructMatrixVectorView__array_length_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -770,9 +770,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_length_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_stride_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_STRIDE_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_stride_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_stride_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_STRIDE_F,
+                  bHYPRE_SStructMatrixVectorView__array_stride_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -783,9 +783,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_stride_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_iscolumnorder_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_ISCOLUMNORDER_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_isColumnOrder_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_iscolumnorder_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_ISCOLUMNORDER_F,
+                  bHYPRE_SStructMatrixVectorView__array_isColumnOrder_f)
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
@@ -794,9 +794,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_iscolumnorder_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_isroworder_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_ISROWORDER_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_isRowOrder_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_isroworder_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_ISROWORDER_F,
+                  bHYPRE_SStructMatrixVectorView__array_isRowOrder_f)
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
@@ -805,9 +805,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_isroworder_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_copy_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_COPY_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_copy_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_copy_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_COPY_F,
+                  bHYPRE_SStructMatrixVectorView__array_copy_f)
   (int64_t *src,
    int64_t *dest)
 {
@@ -817,9 +817,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_copy_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_smartcopy_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SMARTCOPY_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_smartCopy_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_smartcopy_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SMARTCOPY_F,
+                  bHYPRE_SStructMatrixVectorView__array_smartCopy_f)
   (int64_t *src)
 {
   sidl_interface__array_smartCopy((struct sidl_interface__array 
@@ -827,9 +827,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_smartcopy_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_slice_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_SLICE_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_slice_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_slice_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_SLICE_F,
+                  bHYPRE_SStructMatrixVectorView__array_slice_f)
   (int64_t *src,
    int32_t *dimen,
    int32_t numElem[],
@@ -844,9 +844,9 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_slice_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview__array_ensure_f,
-                  BHYPRE_SSTRUCT_MATRIXVECTORVIEW__ARRAY_ENSURE_F,
-                  bHYPRE_SStruct_MatrixVectorView__array_ensure_f)
+SIDLFortran77Symbol(bhypre_sstructmatrixvectorview__array_ensure_f,
+                  BHYPRE_SSTRUCTMATRIXVECTORVIEW__ARRAY_ENSURE_F,
+                  bHYPRE_SStructMatrixVectorView__array_ensure_f)
   (int64_t *src,
    int32_t *dimen,
    int     *ordering,
