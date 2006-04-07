@@ -600,7 +600,7 @@ impl_bHYPRE_GMRES_Setup(
    int            max_iter         = data -> max_iter;
  
    /* Setup should not be called more than once. */
-   hypre_assert( data->p == (bHYPRE_Vector)NULL );
+   hypre_assert( data->p == (bHYPRE_Vector*)NULL );
    hypre_assert( data->r == (bHYPRE_Vector)NULL );
    hypre_assert( data->w == (bHYPRE_Vector)NULL );
 

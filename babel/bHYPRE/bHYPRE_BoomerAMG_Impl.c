@@ -87,6 +87,9 @@
  * \item[TruncFactor] ({\tt Double}) - truncation factor for
  * interpolation.
  * 
+ * \item[JacobiTruncThreshold] ({\tt Double}) - threshold for truncation
+ * of Jacobi interpolation.
+ * 
  * \item[SmoothType] ({\tt Int}) - more complex smoothers.
  * 
  * \item[SmoothNumLevels] ({\tt Int}) - number of levels for more
@@ -569,6 +572,10 @@ impl_bHYPRE_BoomerAMG_SetDoubleParameter(
    {
       ierr += HYPRE_BoomerAMGSetTruncFactor( solver, value );
    }
+   else if ( strcmp(name,"JacobiTruncThreshold")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetJacobiTruncThreshold( solver, value );
+   }
    else if ( strcmp(name,"SchwarzRlxWeight")==0 )
    {
       ierr += HYPRE_BoomerAMGSetSchwarzRlxWeight( solver, value );
@@ -1002,9 +1009,9 @@ impl_bHYPRE_BoomerAMG_GetDoubleValue(
    {
       ierr += HYPRE_BoomerAMGGetStrongThreshold( solver, value );
    }
-   else if ( strcmp(name,"TruncFactor")==0 )
+   else if ( strcmp(name,"JacobiTruncThreshold")==0 )
    {
-      ierr += HYPRE_BoomerAMGGetTruncFactor( solver, value );
+      ierr += HYPRE_BoomerAMGGetJacobiTruncThreshold( solver, value );
    }
    else if ( strcmp(name,"SchwarzRlxWeight")==0 )
    {

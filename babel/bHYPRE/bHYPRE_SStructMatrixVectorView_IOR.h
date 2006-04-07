@@ -1,17 +1,17 @@
 /*
- * File:          bHYPRE_SStruct_MatrixVectorView_IOR.h
- * Symbol:        bHYPRE.SStruct_MatrixVectorView-v1.0.0
+ * File:          bHYPRE_SStructMatrixVectorView_IOR.h
+ * Symbol:        bHYPRE.SStructMatrixVectorView-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.10.12
- * Description:   Intermediate Object Representation for bHYPRE.SStruct_MatrixVectorView
+ * Description:   Intermediate Object Representation for bHYPRE.SStructMatrixVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.10.12
  */
 
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_IOR_h
-#define included_bHYPRE_SStruct_MatrixVectorView_IOR_h
+#ifndef included_bHYPRE_SStructMatrixVectorView_IOR_h
+#define included_bHYPRE_SStructMatrixVectorView_IOR_h
 
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
@@ -21,11 +21,11 @@ extern "C" {
 #endif
 
 /*
- * Symbol "bHYPRE.SStruct_MatrixVectorView" (version 1.0.0)
+ * Symbol "bHYPRE.SStructMatrixVectorView" (version 1.0.0)
  */
 
-struct bHYPRE_SStruct_MatrixVectorView__array;
-struct bHYPRE_SStruct_MatrixVectorView__object;
+struct bHYPRE_SStructMatrixVectorView__array;
+struct bHYPRE_SStructMatrixVectorView__object;
 
 /*
  * Forward references for external classes and interfaces.
@@ -46,7 +46,7 @@ struct sidl_io_Serializer__object;
  * Declare the method entry point vector.
  */
 
-struct bHYPRE_SStruct_MatrixVectorView__epv {
+struct bHYPRE_SStructMatrixVectorView__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
     /* in */ void* self,
@@ -85,7 +85,7 @@ struct bHYPRE_SStruct_MatrixVectorView__epv {
   int32_t (*f_Assemble)(
     /* in */ void* self);
   /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
-  /* Methods introduced in bHYPRE.SStruct_MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStructMatrixVectorView-v1.0.0 */
   int32_t (*f_GetObject)(
     /* in */ void* self,
     /* out */ struct sidl_BaseInterface__object** A);
@@ -95,9 +95,9 @@ struct bHYPRE_SStruct_MatrixVectorView__epv {
  * Define the interface object structure.
  */
 
-struct bHYPRE_SStruct_MatrixVectorView__object {
-  struct bHYPRE_SStruct_MatrixVectorView__epv* d_epv;
-  void*                                        d_object;
+struct bHYPRE_SStructMatrixVectorView__object {
+  struct bHYPRE_SStructMatrixVectorView__epv* d_epv;
+  void*                                       d_object;
 };
 
 /**
@@ -113,86 +113,86 @@ struct bHYPRE_SStruct_MatrixVectorView__object {
 #ifndef included_bHYPRE_ProblemDefinition_IOR_h
 #include "bHYPRE_ProblemDefinition_IOR.h"
 #endif
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_IOR_h
-#include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
+#ifndef included_bHYPRE_SStructMatrixVectorView_IOR_h
+#include "bHYPRE_SStructMatrixVectorView_IOR.h"
 #endif
 #ifndef included_sidl_BaseInterface_IOR_h
 #include "sidl_BaseInterface_IOR.h"
 #endif
 
 /*
- * Symbol "bHYPRE._SStruct_MatrixVectorView" (version 1.0)
+ * Symbol "bHYPRE._SStructMatrixVectorView" (version 1.0)
  */
 
-struct bHYPRE__SStruct_MatrixVectorView__array;
-struct bHYPRE__SStruct_MatrixVectorView__object;
+struct bHYPRE__SStructMatrixVectorView__array;
+struct bHYPRE__SStructMatrixVectorView__object;
 
 /*
  * Declare the method entry point vector.
  */
 
-struct bHYPRE__SStruct_MatrixVectorView__epv {
+struct bHYPRE__SStructMatrixVectorView__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self,
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self,
     /* in */ const char* name);
   void (*f__delete)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self);
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self);
   void (*f__exec)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self,
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self,
     /* in */ const char* methodName,
     /* in */ struct sidl_io_Deserializer__object* inArgs,
     /* in */ struct sidl_io_Serializer__object* outArgs);
   char* (*f__getURL)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self);
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self);
   void (*f__ctor)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self);
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self);
   void (*f__dtor)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self);
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self);
   /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self);
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self);
   void (*f_deleteRef)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self);
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self);
   sidl_bool (*f_isSame)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self,
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self,
     /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self,
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self,
     /* in */ const char* name);
   sidl_bool (*f_isType)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self,
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self,
     /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self);
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self);
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self,
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self,
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_Initialize)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self);
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self);
   int32_t (*f_Assemble)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self);
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self);
   /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
-  /* Methods introduced in bHYPRE.SStruct_MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStructMatrixVectorView-v1.0.0 */
   int32_t (*f_GetObject)(
-    /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self,
+    /* in */ struct bHYPRE__SStructMatrixVectorView__object* self,
     /* out */ struct sidl_BaseInterface__object** A);
-  /* Methods introduced in bHYPRE._SStruct_MatrixVectorView-v1.0 */
+  /* Methods introduced in bHYPRE._SStructMatrixVectorView-v1.0 */
 };
 
 /*
  * Define the class object structure.
  */
 
-struct bHYPRE__SStruct_MatrixVectorView__object {
-  struct bHYPRE_MatrixVectorView__object         d_bhypre_matrixvectorview;
-  struct bHYPRE_ProblemDefinition__object        d_bhypre_problemdefinition;
-  struct bHYPRE_SStruct_MatrixVectorView__object 
-    d_bhypre_sstruct_matrixvectorview;
-  struct sidl_BaseInterface__object              d_sidl_baseinterface;
-  struct bHYPRE__SStruct_MatrixVectorView__epv*  d_epv;
-  void*                                          d_data;
+struct bHYPRE__SStructMatrixVectorView__object {
+  struct bHYPRE_MatrixVectorView__object        d_bhypre_matrixvectorview;
+  struct bHYPRE_ProblemDefinition__object       d_bhypre_problemdefinition;
+  struct bHYPRE_SStructMatrixVectorView__object 
+    d_bhypre_sstructmatrixvectorview;
+  struct sidl_BaseInterface__object             d_sidl_baseinterface;
+  struct bHYPRE__SStructMatrixVectorView__epv*  d_epv;
+  void*                                         d_data;
 };
 
 

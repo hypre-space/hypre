@@ -1057,10 +1057,10 @@ static struct bHYPRE_MatrixVectorView__epv s_rem_epv__bhypre_matrixvectorview;
 
 static struct bHYPRE_ProblemDefinition__epv s_rem_epv__bhypre_problemdefinition;
 
-static struct bHYPRE_SStructMatrixView__epv s_rem_epv__bhypre_sstructmatrixview;
+static struct bHYPRE_SStructMatrixVectorView__epv 
+  s_rem_epv__bhypre_sstructmatrixvectorview;
 
-static struct bHYPRE_SStruct_MatrixVectorView__epv 
-  s_rem_epv__bhypre_sstruct_matrixvectorview;
+static struct bHYPRE_SStructMatrixView__epv s_rem_epv__bhypre_sstructmatrixview;
 
 static struct sidl_BaseInterface__epv s_rem_epv__sidl_baseinterface;
 
@@ -1080,10 +1080,10 @@ const char* name)
     cast = (void*) &s0->d_bhypre_matrixvectorview;
   } else if (!strcmp(name, "bHYPRE.ProblemDefinition")) {
     cast = (void*) &s0->d_bhypre_problemdefinition;
+  } else if (!strcmp(name, "bHYPRE.SStructMatrixVectorView")) {
+    cast = (void*) &s0->d_bhypre_sstructmatrixvectorview;
   } else if (!strcmp(name, "bHYPRE.SStructMatrixView")) {
     cast = (void*) &s0->d_bhypre_sstructmatrixview;
-  } else if (!strcmp(name, "bHYPRE.SStruct_MatrixVectorView")) {
-    cast = (void*) &s0->d_bhypre_sstruct_matrixvectorview;
   } else if (!strcmp(name, "sidl.BaseInterface")) {
     cast = (void*) &s0->d_sidl_baseinterface;
   }
@@ -1684,17 +1684,17 @@ remote_bHYPRE__SStructMatrixView_Print(
 static void bHYPRE__SStructMatrixView__init_remote_epv(void)
 {
   /* assert( HAVE_LOCKED_STATIC_GLOBALS ); */
-  struct bHYPRE__SStructMatrixView__epv*       epv = 
+  struct bHYPRE__SStructMatrixView__epv*      epv = 
     &s_rem_epv__bhypre__sstructmatrixview;
-  struct bHYPRE_MatrixVectorView__epv*         e0  = 
+  struct bHYPRE_MatrixVectorView__epv*        e0  = 
     &s_rem_epv__bhypre_matrixvectorview;
-  struct bHYPRE_ProblemDefinition__epv*        e1  = 
+  struct bHYPRE_ProblemDefinition__epv*       e1  = 
     &s_rem_epv__bhypre_problemdefinition;
-  struct bHYPRE_SStructMatrixView__epv*        e2  = 
+  struct bHYPRE_SStructMatrixVectorView__epv* e2  = 
+    &s_rem_epv__bhypre_sstructmatrixvectorview;
+  struct bHYPRE_SStructMatrixView__epv*       e3  = 
     &s_rem_epv__bhypre_sstructmatrixview;
-  struct bHYPRE_SStruct_MatrixVectorView__epv* e3  = 
-    &s_rem_epv__bhypre_sstruct_matrixvectorview;
-  struct sidl_BaseInterface__epv*              e4  = 
+  struct sidl_BaseInterface__epv*             e4  = 
     &s_rem_epv__sidl_baseinterface;
 
   epv->f__cast                = remote_bHYPRE__SStructMatrixView__cast;
@@ -1782,25 +1782,6 @@ static void bHYPRE__SStructMatrixView__init_remote_epv(void)
   e2->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
   e2->f_GetObject       = (int32_t (*)(void*,
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
-  e2->f_SetGraph        = (int32_t (*)(void*,
-    struct bHYPRE_SStructGraph__object*)) epv->f_SetGraph;
-  e2->f_SetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    int32_t,struct sidl_int__array*,
-    struct sidl_double__array*)) epv->f_SetValues;
-  e2->f_SetBoxValues    = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    struct sidl_int__array*,int32_t,struct sidl_int__array*,
-    struct sidl_double__array*)) epv->f_SetBoxValues;
-  e2->f_AddToValues     = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    int32_t,struct sidl_int__array*,
-    struct sidl_double__array*)) epv->f_AddToValues;
-  e2->f_AddToBoxValues  = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    struct sidl_int__array*,int32_t,struct sidl_int__array*,
-    struct sidl_double__array*)) epv->f_AddToBoxValues;
-  e2->f_SetSymmetric    = (int32_t (*)(void*,int32_t,int32_t,int32_t,
-    int32_t)) epv->f_SetSymmetric;
-  e2->f_SetNSSymmetric  = (int32_t (*)(void*,int32_t)) epv->f_SetNSSymmetric;
-  e2->f_SetComplex      = (int32_t (*)(void*)) epv->f_SetComplex;
-  e2->f_Print           = (int32_t (*)(void*,const char*,int32_t)) epv->f_Print;
 
   e3->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e3->f__delete         = (void (*)(void*)) epv->f__delete;
@@ -1822,6 +1803,25 @@ static void bHYPRE__SStructMatrixView__init_remote_epv(void)
   e3->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
   e3->f_GetObject       = (int32_t (*)(void*,
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
+  e3->f_SetGraph        = (int32_t (*)(void*,
+    struct bHYPRE_SStructGraph__object*)) epv->f_SetGraph;
+  e3->f_SetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+    int32_t,struct sidl_int__array*,
+    struct sidl_double__array*)) epv->f_SetValues;
+  e3->f_SetBoxValues    = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+    struct sidl_int__array*,int32_t,struct sidl_int__array*,
+    struct sidl_double__array*)) epv->f_SetBoxValues;
+  e3->f_AddToValues     = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+    int32_t,struct sidl_int__array*,
+    struct sidl_double__array*)) epv->f_AddToValues;
+  e3->f_AddToBoxValues  = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+    struct sidl_int__array*,int32_t,struct sidl_int__array*,
+    struct sidl_double__array*)) epv->f_AddToBoxValues;
+  e3->f_SetSymmetric    = (int32_t (*)(void*,int32_t,int32_t,int32_t,
+    int32_t)) epv->f_SetSymmetric;
+  e3->f_SetNSSymmetric  = (int32_t (*)(void*,int32_t)) epv->f_SetNSSymmetric;
+  e3->f_SetComplex      = (int32_t (*)(void*)) epv->f_SetComplex;
+  e3->f_Print           = (int32_t (*)(void*,const char*,int32_t)) epv->f_Print;
 
   e4->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
   e4->f__delete      = (void (*)(void*)) epv->f__delete;
@@ -1872,13 +1872,13 @@ bHYPRE_SStructMatrixView__remoteConnect(const char *url,
     &s_rem_epv__bhypre_problemdefinition;
   s0->d_bhypre_problemdefinition.d_object = (void*) self;
 
+  s0->d_bhypre_sstructmatrixvectorview.d_epv    = 
+    &s_rem_epv__bhypre_sstructmatrixvectorview;
+  s0->d_bhypre_sstructmatrixvectorview.d_object = (void*) self;
+
   s0->d_bhypre_sstructmatrixview.d_epv    = 
     &s_rem_epv__bhypre_sstructmatrixview;
   s0->d_bhypre_sstructmatrixview.d_object = (void*) self;
-
-  s0->d_bhypre_sstruct_matrixvectorview.d_epv    = 
-    &s_rem_epv__bhypre_sstruct_matrixvectorview;
-  s0->d_bhypre_sstruct_matrixvectorview.d_object = (void*) self;
 
   s0->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
   s0->d_sidl_baseinterface.d_object = (void*) self;
@@ -1919,13 +1919,13 @@ bHYPRE_SStructMatrixView__IHConnect(sidl_rmi_InstanceHandle instance,
     &s_rem_epv__bhypre_problemdefinition;
   s0->d_bhypre_problemdefinition.d_object = (void*) self;
 
+  s0->d_bhypre_sstructmatrixvectorview.d_epv    = 
+    &s_rem_epv__bhypre_sstructmatrixvectorview;
+  s0->d_bhypre_sstructmatrixvectorview.d_object = (void*) self;
+
   s0->d_bhypre_sstructmatrixview.d_epv    = 
     &s_rem_epv__bhypre_sstructmatrixview;
   s0->d_bhypre_sstructmatrixview.d_object = (void*) self;
-
-  s0->d_bhypre_sstruct_matrixvectorview.d_epv    = 
-    &s_rem_epv__bhypre_sstruct_matrixvectorview;
-  s0->d_bhypre_sstruct_matrixvectorview.d_object = (void*) self;
 
   s0->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
   s0->d_sidl_baseinterface.d_object = (void*) self;

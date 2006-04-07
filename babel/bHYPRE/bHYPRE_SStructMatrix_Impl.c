@@ -1100,15 +1100,6 @@ impl_bHYPRE_SStructMatrix_ApplyAdjoint(
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.ApplyAdjoint) */
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct bHYPRE_SStruct_MatrixVectorView__object* 
-  impl_bHYPRE_SStructMatrix_fconnect_bHYPRE_SStruct_MatrixVectorView(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_SStruct_MatrixVectorView__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructMatrix_fgetURL_bHYPRE_SStruct_MatrixVectorView(struct 
-  bHYPRE_SStruct_MatrixVectorView__object* obj) {
-  return bHYPRE_SStruct_MatrixVectorView__getURL(obj);
-}
 struct bHYPRE_SStructMatrixView__object* 
   impl_bHYPRE_SStructMatrix_fconnect_bHYPRE_SStructMatrixView(char* url,
   sidl_BaseInterface *_ex) {
@@ -1135,6 +1126,15 @@ struct bHYPRE_SStructMatrix__object*
 char * impl_bHYPRE_SStructMatrix_fgetURL_bHYPRE_SStructMatrix(struct 
   bHYPRE_SStructMatrix__object* obj) {
   return bHYPRE_SStructMatrix__getURL(obj);
+}
+struct bHYPRE_SStructMatrixVectorView__object* 
+  impl_bHYPRE_SStructMatrix_fconnect_bHYPRE_SStructMatrixVectorView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructMatrixVectorView__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructMatrix_fgetURL_bHYPRE_SStructMatrixVectorView(struct 
+  bHYPRE_SStructMatrixVectorView__object* obj) {
+  return bHYPRE_SStructMatrixVectorView__getURL(obj);
 }
 struct bHYPRE_Operator__object* 
   impl_bHYPRE_SStructMatrix_fconnect_bHYPRE_Operator(char* url,

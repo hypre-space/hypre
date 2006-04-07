@@ -85,6 +85,9 @@
  * \item[TruncFactor] ({\tt Double}) - truncation factor for
  * interpolation.
  * 
+ * \item[JacobiTruncThreshold] ({\tt Double}) - threshold for truncation
+ * of Jacobi interpolation.
+ * 
  * \item[SmoothType] ({\tt Int}) - more complex smoothers.
  * 
  * \item[SmoothNumLevels] ({\tt Int}) - number of levels for more

@@ -1,17 +1,17 @@
 /*
- * File:          bHYPRE_SStruct_MatrixVectorView_Stub.c
- * Symbol:        bHYPRE.SStruct_MatrixVectorView-v1.0.0
+ * File:          bHYPRE_SStructMatrixVectorView_Stub.c
+ * Symbol:        bHYPRE.SStructMatrixVectorView-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.10.12
- * Description:   Client-side glue code for bHYPRE.SStruct_MatrixVectorView
+ * Description:   Client-side glue code for bHYPRE.SStructMatrixVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.10.12
  */
 
-#include "bHYPRE_SStruct_MatrixVectorView.h"
-#include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
+#include "bHYPRE_SStructMatrixVectorView.h"
+#include "bHYPRE_SStructMatrixVectorView_IOR.h"
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
@@ -40,21 +40,21 @@
 
 static int connect_loaded = 0;
 
-static struct bHYPRE_SStruct_MatrixVectorView__object* 
-  bHYPRE_SStruct_MatrixVectorView__remoteConnect(const char* url,
+static struct bHYPRE_SStructMatrixVectorView__object* 
+  bHYPRE_SStructMatrixVectorView__remoteConnect(const char* url,
   sidl_BaseInterface *_ex);
-static struct bHYPRE_SStruct_MatrixVectorView__object* 
-  bHYPRE_SStruct_MatrixVectorView__IHConnect(sidl_rmi_InstanceHandle instance,
+static struct bHYPRE_SStructMatrixVectorView__object* 
+  bHYPRE_SStructMatrixVectorView__IHConnect(sidl_rmi_InstanceHandle instance,
   sidl_BaseInterface *_ex);
 /*
  * RMI connector function for the class.
  */
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__connect(const char* url,
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__connect(const char* url,
   sidl_BaseInterface *_ex)
 {
-  return bHYPRE_SStruct_MatrixVectorView__remoteConnect(url, _ex);
+  return bHYPRE_SStructMatrixVectorView__remoteConnect(url, _ex);
 }
 
 /*
@@ -73,8 +73,8 @@ bHYPRE_SStruct_MatrixVectorView__connect(const char* url,
  */
 
 void
-bHYPRE_SStruct_MatrixVectorView_addRef(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self)
+bHYPRE_SStructMatrixVectorView_addRef(
+  /* in */ bHYPRE_SStructMatrixVectorView self)
 {
   (*self->d_epv->f_addRef)(
     self->d_object);
@@ -89,8 +89,8 @@ bHYPRE_SStruct_MatrixVectorView_addRef(
  */
 
 void
-bHYPRE_SStruct_MatrixVectorView_deleteRef(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self)
+bHYPRE_SStructMatrixVectorView_deleteRef(
+  /* in */ bHYPRE_SStructMatrixVectorView self)
 {
   (*self->d_epv->f_deleteRef)(
     self->d_object);
@@ -102,8 +102,8 @@ bHYPRE_SStruct_MatrixVectorView_deleteRef(
  */
 
 sidl_bool
-bHYPRE_SStruct_MatrixVectorView_isSame(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self,
+bHYPRE_SStructMatrixVectorView_isSame(
+  /* in */ bHYPRE_SStructMatrixVectorView self,
   /* in */ sidl_BaseInterface iobj)
 {
   return (*self->d_epv->f_isSame)(
@@ -122,8 +122,8 @@ bHYPRE_SStruct_MatrixVectorView_isSame(
  */
 
 sidl_BaseInterface
-bHYPRE_SStruct_MatrixVectorView_queryInt(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self,
+bHYPRE_SStructMatrixVectorView_queryInt(
+  /* in */ bHYPRE_SStructMatrixVectorView self,
   /* in */ const char* name)
 {
   return (*self->d_epv->f_queryInt)(
@@ -139,8 +139,8 @@ bHYPRE_SStruct_MatrixVectorView_queryInt(
  */
 
 sidl_bool
-bHYPRE_SStruct_MatrixVectorView_isType(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self,
+bHYPRE_SStructMatrixVectorView_isType(
+  /* in */ bHYPRE_SStructMatrixVectorView self,
   /* in */ const char* name)
 {
   return (*self->d_epv->f_isType)(
@@ -153,8 +153,8 @@ bHYPRE_SStruct_MatrixVectorView_isType(
  */
 
 sidl_ClassInfo
-bHYPRE_SStruct_MatrixVectorView_getClassInfo(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self)
+bHYPRE_SStructMatrixVectorView_getClassInfo(
+  /* in */ bHYPRE_SStructMatrixVectorView self)
 {
   return (*self->d_epv->f_getClassInfo)(
     self->d_object);
@@ -166,8 +166,8 @@ bHYPRE_SStruct_MatrixVectorView_getClassInfo(
  */
 
 int32_t
-bHYPRE_SStruct_MatrixVectorView_SetCommunicator(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self,
+bHYPRE_SStructMatrixVectorView_SetCommunicator(
+  /* in */ bHYPRE_SStructMatrixVectorView self,
   /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
@@ -182,8 +182,8 @@ bHYPRE_SStruct_MatrixVectorView_SetCommunicator(
  */
 
 int32_t
-bHYPRE_SStruct_MatrixVectorView_Initialize(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self)
+bHYPRE_SStructMatrixVectorView_Initialize(
+  /* in */ bHYPRE_SStructMatrixVectorView self)
 {
   return (*self->d_epv->f_Initialize)(
     self->d_object);
@@ -199,8 +199,8 @@ bHYPRE_SStruct_MatrixVectorView_Initialize(
  */
 
 int32_t
-bHYPRE_SStruct_MatrixVectorView_Assemble(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self)
+bHYPRE_SStructMatrixVectorView_Assemble(
+  /* in */ bHYPRE_SStructMatrixVectorView self)
 {
   return (*self->d_epv->f_Assemble)(
     self->d_object);
@@ -216,8 +216,8 @@ bHYPRE_SStruct_MatrixVectorView_Assemble(
  */
 
 int32_t
-bHYPRE_SStruct_MatrixVectorView_GetObject(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self,
+bHYPRE_SStructMatrixVectorView_GetObject(
+  /* in */ bHYPRE_SStructMatrixVectorView self,
   /* out */ sidl_BaseInterface* A)
 {
   return (*self->d_epv->f_GetObject)(
@@ -229,22 +229,22 @@ bHYPRE_SStruct_MatrixVectorView_GetObject(
  * Cast method for interface and class type conversions.
  */
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__cast(
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__cast(
   void* obj)
 {
-  bHYPRE_SStruct_MatrixVectorView cast = NULL;
+  bHYPRE_SStructMatrixVectorView cast = NULL;
 
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.SStruct_MatrixVectorView",
-      (void*)bHYPRE_SStruct_MatrixVectorView__IHConnect);
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.SStructMatrixVectorView",
+      (void*)bHYPRE_SStructMatrixVectorView__IHConnect);
     connect_loaded = 1;
   }
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
-    cast = (bHYPRE_SStruct_MatrixVectorView) (*base->d_epv->f__cast)(
+    cast = (bHYPRE_SStructMatrixVectorView) (*base->d_epv->f__cast)(
       base->d_object,
-      "bHYPRE.SStruct_MatrixVectorView");
+      "bHYPRE.SStructMatrixVectorView");
   }
 
   return cast;
@@ -255,7 +255,7 @@ bHYPRE_SStruct_MatrixVectorView__cast(
  */
 
 void*
-bHYPRE_SStruct_MatrixVectorView__cast2(
+bHYPRE_SStructMatrixVectorView__cast2(
   void* obj,
   const char* type)
 {
@@ -273,8 +273,8 @@ bHYPRE_SStruct_MatrixVectorView__cast2(
  */
 
 void
-bHYPRE_SStruct_MatrixVectorView__exec(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self,
+bHYPRE_SStructMatrixVectorView__exec(
+  /* in */ bHYPRE_SStructMatrixVectorView self,
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs)
@@ -291,167 +291,167 @@ bHYPRE_SStruct_MatrixVectorView__exec(
  */
 
 char*
-bHYPRE_SStruct_MatrixVectorView__getURL(
-  /* in */ bHYPRE_SStruct_MatrixVectorView self)
+bHYPRE_SStructMatrixVectorView__getURL(
+  /* in */ bHYPRE_SStructMatrixVectorView self)
 {
   return (*self->d_epv->f__getURL)(
   self->d_object);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_createCol(
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_createCol(
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[])
 {
   return (struct 
-    bHYPRE_SStruct_MatrixVectorView__array*)sidl_interface__array_createCol(
+    bHYPRE_SStructMatrixVectorView__array*)sidl_interface__array_createCol(
     dimen, lower, upper);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_createRow(
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_createRow(
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[])
 {
   return (struct 
-    bHYPRE_SStruct_MatrixVectorView__array*)sidl_interface__array_createRow(
+    bHYPRE_SStructMatrixVectorView__array*)sidl_interface__array_createRow(
     dimen, lower, upper);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_create1d(int32_t len)
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_create1d(int32_t len)
 {
   return (struct 
-    bHYPRE_SStruct_MatrixVectorView__array*)sidl_interface__array_create1d(len);
+    bHYPRE_SStructMatrixVectorView__array*)sidl_interface__array_create1d(len);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_create1dInit(
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_create1dInit(
   int32_t len, 
-  bHYPRE_SStruct_MatrixVectorView* data)
+  bHYPRE_SStructMatrixVectorView* data)
 {
   return (struct 
-    bHYPRE_SStruct_MatrixVectorView__array*)sidl_interface__array_create1dInit(
+    bHYPRE_SStructMatrixVectorView__array*)sidl_interface__array_create1dInit(
     len, (struct sidl_BaseInterface__object **)data);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_create2dCol(int32_t m, int32_t n)
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_create2dCol(int32_t m, int32_t n)
 {
   return (struct 
-    bHYPRE_SStruct_MatrixVectorView__array*)sidl_interface__array_create2dCol(m,
+    bHYPRE_SStructMatrixVectorView__array*)sidl_interface__array_create2dCol(m,
     n);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_create2dRow(int32_t m, int32_t n)
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_create2dRow(int32_t m, int32_t n)
 {
   return (struct 
-    bHYPRE_SStruct_MatrixVectorView__array*)sidl_interface__array_create2dRow(m,
+    bHYPRE_SStructMatrixVectorView__array*)sidl_interface__array_create2dRow(m,
     n);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_borrow(
-  bHYPRE_SStruct_MatrixVectorView* firstElement,
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_borrow(
+  bHYPRE_SStructMatrixVectorView* firstElement,
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[],
   const int32_t stride[])
 {
   return (struct 
-    bHYPRE_SStruct_MatrixVectorView__array*)sidl_interface__array_borrow(
+    bHYPRE_SStructMatrixVectorView__array*)sidl_interface__array_borrow(
     (struct sidl_BaseInterface__object **)
     firstElement, dimen, lower, upper, stride);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_smartCopy(
-  struct bHYPRE_SStruct_MatrixVectorView__array *array)
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_smartCopy(
+  struct bHYPRE_SStructMatrixVectorView__array *array)
 {
-  return (struct bHYPRE_SStruct_MatrixVectorView__array*)
+  return (struct bHYPRE_SStructMatrixVectorView__array*)
     sidl_interface__array_smartCopy((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_addRef(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array)
+bHYPRE_SStructMatrixVectorView__array_addRef(
+  struct bHYPRE_SStructMatrixVectorView__array* array)
 {
   sidl_interface__array_addRef((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_deleteRef(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array)
+bHYPRE_SStructMatrixVectorView__array_deleteRef(
+  struct bHYPRE_SStructMatrixVectorView__array* array)
 {
   sidl_interface__array_deleteRef((struct sidl_interface__array *)array);
 }
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__array_get1(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__array_get1(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1)
 {
-  return (bHYPRE_SStruct_MatrixVectorView)
+  return (bHYPRE_SStructMatrixVectorView)
     sidl_interface__array_get1((const struct sidl_interface__array *)array
     , i1);
 }
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__array_get2(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__array_get2(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2)
 {
-  return (bHYPRE_SStruct_MatrixVectorView)
+  return (bHYPRE_SStructMatrixVectorView)
     sidl_interface__array_get2((const struct sidl_interface__array *)array
     , i1, i2);
 }
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__array_get3(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__array_get3(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3)
 {
-  return (bHYPRE_SStruct_MatrixVectorView)
+  return (bHYPRE_SStructMatrixVectorView)
     sidl_interface__array_get3((const struct sidl_interface__array *)array
     , i1, i2, i3);
 }
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__array_get4(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__array_get4(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4)
 {
-  return (bHYPRE_SStruct_MatrixVectorView)
+  return (bHYPRE_SStructMatrixVectorView)
     sidl_interface__array_get4((const struct sidl_interface__array *)array
     , i1, i2, i3, i4);
 }
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__array_get5(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__array_get5(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5)
 {
-  return (bHYPRE_SStruct_MatrixVectorView)
+  return (bHYPRE_SStructMatrixVectorView)
     sidl_interface__array_get5((const struct sidl_interface__array *)array
     , i1, i2, i3, i4, i5);
 }
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__array_get6(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__array_get6(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -459,14 +459,14 @@ bHYPRE_SStruct_MatrixVectorView__array_get6(
   const int32_t i5,
   const int32_t i6)
 {
-  return (bHYPRE_SStruct_MatrixVectorView)
+  return (bHYPRE_SStructMatrixVectorView)
     sidl_interface__array_get6((const struct sidl_interface__array *)array
     , i1, i2, i3, i4, i5, i6);
 }
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__array_get7(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__array_get7(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -475,99 +475,99 @@ bHYPRE_SStruct_MatrixVectorView__array_get7(
   const int32_t i6,
   const int32_t i7)
 {
-  return (bHYPRE_SStruct_MatrixVectorView)
+  return (bHYPRE_SStructMatrixVectorView)
     sidl_interface__array_get7((const struct sidl_interface__array *)array
     , i1, i2, i3, i4, i5, i6, i7);
 }
 
-bHYPRE_SStruct_MatrixVectorView
-bHYPRE_SStruct_MatrixVectorView__array_get(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView
+bHYPRE_SStructMatrixVectorView__array_get(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t indices[])
 {
-  return (bHYPRE_SStruct_MatrixVectorView)
+  return (bHYPRE_SStructMatrixVectorView)
     sidl_interface__array_get((const struct sidl_interface__array *)array,
       indices);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_set1(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_set1(
+  struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
-  bHYPRE_SStruct_MatrixVectorView const value)
+  bHYPRE_SStructMatrixVectorView const value)
 {
   sidl_interface__array_set1((struct sidl_interface__array *)array
   , i1, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_set2(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_set2(
+  struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
-  bHYPRE_SStruct_MatrixVectorView const value)
+  bHYPRE_SStructMatrixVectorView const value)
 {
   sidl_interface__array_set2((struct sidl_interface__array *)array
   , i1, i2, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_set3(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_set3(
+  struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
-  bHYPRE_SStruct_MatrixVectorView const value)
+  bHYPRE_SStructMatrixVectorView const value)
 {
   sidl_interface__array_set3((struct sidl_interface__array *)array
   , i1, i2, i3, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_set4(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_set4(
+  struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
-  bHYPRE_SStruct_MatrixVectorView const value)
+  bHYPRE_SStructMatrixVectorView const value)
 {
   sidl_interface__array_set4((struct sidl_interface__array *)array
   , i1, i2, i3, i4, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_set5(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_set5(
+  struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5,
-  bHYPRE_SStruct_MatrixVectorView const value)
+  bHYPRE_SStructMatrixVectorView const value)
 {
   sidl_interface__array_set5((struct sidl_interface__array *)array
   , i1, i2, i3, i4, i5, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_set6(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_set6(
+  struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5,
   const int32_t i6,
-  bHYPRE_SStruct_MatrixVectorView const value)
+  bHYPRE_SStructMatrixVectorView const value)
 {
   sidl_interface__array_set6((struct sidl_interface__array *)array
   , i1, i2, i3, i4, i5, i6, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_set7(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_set7(
+  struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -575,32 +575,32 @@ bHYPRE_SStruct_MatrixVectorView__array_set7(
   const int32_t i5,
   const int32_t i6,
   const int32_t i7,
-  bHYPRE_SStruct_MatrixVectorView const value)
+  bHYPRE_SStructMatrixVectorView const value)
 {
   sidl_interface__array_set7((struct sidl_interface__array *)array
   , i1, i2, i3, i4, i5, i6, i7, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_set(
-  struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_set(
+  struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t indices[],
-  bHYPRE_SStruct_MatrixVectorView const value)
+  bHYPRE_SStructMatrixVectorView const value)
 {
   sidl_interface__array_set((struct sidl_interface__array *)array, indices,
     (struct sidl_BaseInterface__object *)value);
 }
 
 int32_t
-bHYPRE_SStruct_MatrixVectorView__array_dimen(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array)
+bHYPRE_SStructMatrixVectorView__array_dimen(
+  const struct bHYPRE_SStructMatrixVectorView__array* array)
 {
   return sidl_interface__array_dimen((struct sidl_interface__array *)array);
 }
 
 int32_t
-bHYPRE_SStruct_MatrixVectorView__array_lower(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_lower(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_lower((struct sidl_interface__array *)array,
@@ -608,8 +608,8 @@ bHYPRE_SStruct_MatrixVectorView__array_lower(
 }
 
 int32_t
-bHYPRE_SStruct_MatrixVectorView__array_upper(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_upper(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_upper((struct sidl_interface__array *)array,
@@ -617,8 +617,8 @@ bHYPRE_SStruct_MatrixVectorView__array_upper(
 }
 
 int32_t
-bHYPRE_SStruct_MatrixVectorView__array_length(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_length(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_length((struct sidl_interface__array *)array,
@@ -626,8 +626,8 @@ bHYPRE_SStruct_MatrixVectorView__array_length(
 }
 
 int32_t
-bHYPRE_SStruct_MatrixVectorView__array_stride(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array,
+bHYPRE_SStructMatrixVectorView__array_stride(
+  const struct bHYPRE_SStructMatrixVectorView__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_stride((struct sidl_interface__array *)array,
@@ -635,51 +635,51 @@ bHYPRE_SStruct_MatrixVectorView__array_stride(
 }
 
 int
-bHYPRE_SStruct_MatrixVectorView__array_isColumnOrder(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array)
+bHYPRE_SStructMatrixVectorView__array_isColumnOrder(
+  const struct bHYPRE_SStructMatrixVectorView__array* array)
 {
   return sidl_interface__array_isColumnOrder((struct sidl_interface__array 
     *)array);
 }
 
 int
-bHYPRE_SStruct_MatrixVectorView__array_isRowOrder(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* array)
+bHYPRE_SStructMatrixVectorView__array_isRowOrder(
+  const struct bHYPRE_SStructMatrixVectorView__array* array)
 {
   return sidl_interface__array_isRowOrder((struct sidl_interface__array 
     *)array);
 }
 
 void
-bHYPRE_SStruct_MatrixVectorView__array_copy(
-  const struct bHYPRE_SStruct_MatrixVectorView__array* src,
-  struct bHYPRE_SStruct_MatrixVectorView__array* dest)
+bHYPRE_SStructMatrixVectorView__array_copy(
+  const struct bHYPRE_SStructMatrixVectorView__array* src,
+  struct bHYPRE_SStructMatrixVectorView__array* dest)
 {
   sidl_interface__array_copy((const struct sidl_interface__array *)src,
                              (struct sidl_interface__array *)dest);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_slice(
-  struct bHYPRE_SStruct_MatrixVectorView__array* src,
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_slice(
+  struct bHYPRE_SStructMatrixVectorView__array* src,
   int32_t        dimen,
   const int32_t  numElem[],
   const int32_t  *srcStart,
   const int32_t  *srcStride,
   const int32_t  *newStart)
 {
-  return (struct bHYPRE_SStruct_MatrixVectorView__array*)
+  return (struct bHYPRE_SStructMatrixVectorView__array*)
     sidl_interface__array_slice((struct sidl_interface__array *)src,
                                 dimen, numElem, srcStart, srcStride, newStart);
 }
 
-struct bHYPRE_SStruct_MatrixVectorView__array*
-bHYPRE_SStruct_MatrixVectorView__array_ensure(
-  struct bHYPRE_SStruct_MatrixVectorView__array* src,
+struct bHYPRE_SStructMatrixVectorView__array*
+bHYPRE_SStructMatrixVectorView__array_ensure(
+  struct bHYPRE_SStructMatrixVectorView__array* src,
   int32_t dimen,
   int     ordering)
 {
-  return (struct bHYPRE_SStruct_MatrixVectorView__array*)
+  return (struct bHYPRE_SStructMatrixVectorView__array*)
     sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
       ordering);
 }
@@ -697,10 +697,10 @@ bHYPRE_SStruct_MatrixVectorView__array_ensure(
 
 #include "sidl_thread.h"
 #ifdef HAVE_PTHREAD
-static struct sidl_recursive_mutex_t bHYPRE__SStruct_MatrixVectorView__mutex= SIDL_RECURSIVE_MUTEX_INITIALIZER;
-#define LOCK_STATIC_GLOBALS sidl_recursive_mutex_lock( &bHYPRE__SStruct_MatrixVectorView__mutex )
-#define UNLOCK_STATIC_GLOBALS sidl_recursive_mutex_unlock( &bHYPRE__SStruct_MatrixVectorView__mutex )
-/* #define HAVE_LOCKED_STATIC_GLOBALS (sidl_recursive_mutex_trylock( &bHYPRE__SStruct_MatrixVectorView__mutex )==EDEADLOCK) */
+static struct sidl_recursive_mutex_t bHYPRE__SStructMatrixVectorView__mutex= SIDL_RECURSIVE_MUTEX_INITIALIZER;
+#define LOCK_STATIC_GLOBALS sidl_recursive_mutex_lock( &bHYPRE__SStructMatrixVectorView__mutex )
+#define UNLOCK_STATIC_GLOBALS sidl_recursive_mutex_unlock( &bHYPRE__SStructMatrixVectorView__mutex )
+/* #define HAVE_LOCKED_STATIC_GLOBALS (sidl_recursive_mutex_trylock( &bHYPRE__SStructMatrixVectorView__mutex )==EDEADLOCK) */
 #else
 #define LOCK_STATIC_GLOBALS
 #define UNLOCK_STATIC_GLOBALS
@@ -714,36 +714,36 @@ static const int32_t s_IOR_MINOR_VERSION = 9;
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
 
-static struct bHYPRE__SStruct_MatrixVectorView__epv 
-  s_rem_epv__bhypre__sstruct_matrixvectorview;
+static struct bHYPRE__SStructMatrixVectorView__epv 
+  s_rem_epv__bhypre__sstructmatrixvectorview;
 
 static struct bHYPRE_MatrixVectorView__epv s_rem_epv__bhypre_matrixvectorview;
 
 static struct bHYPRE_ProblemDefinition__epv s_rem_epv__bhypre_problemdefinition;
 
-static struct bHYPRE_SStruct_MatrixVectorView__epv 
-  s_rem_epv__bhypre_sstruct_matrixvectorview;
+static struct bHYPRE_SStructMatrixVectorView__epv 
+  s_rem_epv__bhypre_sstructmatrixvectorview;
 
 static struct sidl_BaseInterface__epv s_rem_epv__sidl_baseinterface;
 
 /* REMOTE CAST: dynamic type casting for remote objects. */
-static void* remote_bHYPRE__SStruct_MatrixVectorView__cast(
-struct bHYPRE__SStruct_MatrixVectorView__object* self,
+static void* remote_bHYPRE__SStructMatrixVectorView__cast(
+struct bHYPRE__SStructMatrixVectorView__object* self,
 const char* name)
 {
   void* cast = NULL;
 
-  struct bHYPRE__SStruct_MatrixVectorView__object* s0;
-   s0 =                                           self;
+  struct bHYPRE__SStructMatrixVectorView__object* s0;
+   s0 =                                          self;
 
-  if (!strcmp(name, "bHYPRE._SStruct_MatrixVectorView")) {
+  if (!strcmp(name, "bHYPRE._SStructMatrixVectorView")) {
     cast = (void*) s0;
   } else if (!strcmp(name, "bHYPRE.MatrixVectorView")) {
     cast = (void*) &s0->d_bhypre_matrixvectorview;
   } else if (!strcmp(name, "bHYPRE.ProblemDefinition")) {
     cast = (void*) &s0->d_bhypre_problemdefinition;
-  } else if (!strcmp(name, "bHYPRE.SStruct_MatrixVectorView")) {
-    cast = (void*) &s0->d_bhypre_sstruct_matrixvectorview;
+  } else if (!strcmp(name, "bHYPRE.SStructMatrixVectorView")) {
+    cast = (void*) &s0->d_bhypre_sstructmatrixvectorview;
   } else if (!strcmp(name, "sidl.BaseInterface")) {
     cast = (void*) &s0->d_sidl_baseinterface;
   }
@@ -758,15 +758,15 @@ const char* name)
 }
 
 /* REMOTE DELETE: call the remote destructor for the object. */
-static void remote_bHYPRE__SStruct_MatrixVectorView__delete(
-  struct bHYPRE__SStruct_MatrixVectorView__object* self)
+static void remote_bHYPRE__SStructMatrixVectorView__delete(
+  struct bHYPRE__SStructMatrixVectorView__object* self)
 {
   free((void*) self);
 }
 
 /* REMOTE GETURL: call the getURL function for the object. */
-static char* remote_bHYPRE__SStruct_MatrixVectorView__getURL(
-  struct bHYPRE__SStruct_MatrixVectorView__object* self)
+static char* remote_bHYPRE__SStructMatrixVectorView__getURL(
+  struct bHYPRE__SStructMatrixVectorView__object* self)
 {
   sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
   sidl_BaseInterface _ex = NULL;
@@ -777,8 +777,8 @@ static char* remote_bHYPRE__SStruct_MatrixVectorView__getURL(
 }
 
 /* REMOTE EXEC: call the exec function for the object. */
-static void remote_bHYPRE__SStruct_MatrixVectorView__exec(
-  struct bHYPRE__SStruct_MatrixVectorView__object* self,
+static void remote_bHYPRE__SStructMatrixVectorView__exec(
+  struct bHYPRE__SStructMatrixVectorView__object* self,
   const char* methodName,
   sidl_io_Deserializer inArgs,
   sidl_io_Serializer outArgs)
@@ -787,16 +787,16 @@ static void remote_bHYPRE__SStruct_MatrixVectorView__exec(
 
 /* REMOTE METHOD STUB:addRef */
 static void
-remote_bHYPRE__SStruct_MatrixVectorView_addRef(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */)
+remote_bHYPRE__SStructMatrixVectorView_addRef(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */)
 {
   /* FIXME  need to think through all of these special cases */
 }
 
 /* REMOTE METHOD STUB:deleteRef */
 static void
-remote_bHYPRE__SStruct_MatrixVectorView_deleteRef(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */)
+remote_bHYPRE__SStructMatrixVectorView_deleteRef(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -823,8 +823,8 @@ remote_bHYPRE__SStruct_MatrixVectorView_deleteRef(
 
 /* REMOTE METHOD STUB:isSame */
 static sidl_bool
-remote_bHYPRE__SStruct_MatrixVectorView_isSame(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */,
+remote_bHYPRE__SStructMatrixVectorView_isSame(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */,
   /* in */ struct sidl_BaseInterface__object* iobj)
 {
   /* FIXME  need to think through all of these special cases */
@@ -833,8 +833,8 @@ remote_bHYPRE__SStruct_MatrixVectorView_isSame(
 
 /* REMOTE METHOD STUB:queryInt */
 static struct sidl_BaseInterface__object*
-remote_bHYPRE__SStruct_MatrixVectorView_queryInt(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */,
+remote_bHYPRE__SStructMatrixVectorView_queryInt(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */,
   /* in */ const char* name)
 {
   /* FIXME  need to think through all of these special cases */
@@ -843,8 +843,8 @@ remote_bHYPRE__SStruct_MatrixVectorView_queryInt(
 
 /* REMOTE METHOD STUB:isType */
 static sidl_bool
-remote_bHYPRE__SStruct_MatrixVectorView_isType(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */,
+remote_bHYPRE__SStructMatrixVectorView_isType(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */,
   /* in */ const char* name)
 {
   sidl_BaseInterface _ex = NULL;
@@ -876,8 +876,8 @@ remote_bHYPRE__SStruct_MatrixVectorView_isType(
 
 /* REMOTE METHOD STUB:getClassInfo */
 static struct sidl_ClassInfo__object*
-remote_bHYPRE__SStruct_MatrixVectorView_getClassInfo(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */)
+remote_bHYPRE__SStructMatrixVectorView_getClassInfo(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */)
 {
   /* FIXME  need to think through all of these special cases */
   return 0;
@@ -885,8 +885,8 @@ remote_bHYPRE__SStruct_MatrixVectorView_getClassInfo(
 
 /* REMOTE METHOD STUB:SetCommunicator */
 static int32_t
-remote_bHYPRE__SStruct_MatrixVectorView_SetCommunicator(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */,
+remote_bHYPRE__SStructMatrixVectorView_SetCommunicator(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */,
   /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm)
 {
   sidl_BaseInterface _ex = NULL;
@@ -919,8 +919,8 @@ remote_bHYPRE__SStruct_MatrixVectorView_SetCommunicator(
 
 /* REMOTE METHOD STUB:Initialize */
 static int32_t
-remote_bHYPRE__SStruct_MatrixVectorView_Initialize(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */)
+remote_bHYPRE__SStructMatrixVectorView_Initialize(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -950,8 +950,8 @@ remote_bHYPRE__SStruct_MatrixVectorView_Initialize(
 
 /* REMOTE METHOD STUB:Assemble */
 static int32_t
-remote_bHYPRE__SStruct_MatrixVectorView_Assemble(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */)
+remote_bHYPRE__SStructMatrixVectorView_Assemble(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -981,8 +981,8 @@ remote_bHYPRE__SStruct_MatrixVectorView_Assemble(
 
 /* REMOTE METHOD STUB:GetObject */
 static int32_t
-remote_bHYPRE__SStruct_MatrixVectorView_GetObject(
-  /* in */ struct bHYPRE__SStruct_MatrixVectorView__object* self /* TLD */,
+remote_bHYPRE__SStructMatrixVectorView_GetObject(
+  /* in */ struct bHYPRE__SStructMatrixVectorView__object* self /* TLD */,
   /* out */ struct sidl_BaseInterface__object** A)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1015,43 +1015,41 @@ remote_bHYPRE__SStruct_MatrixVectorView_GetObject(
 }
 
 /* REMOTE EPV: create remote entry point vectors (EPVs). */
-static void bHYPRE__SStruct_MatrixVectorView__init_remote_epv(void)
+static void bHYPRE__SStructMatrixVectorView__init_remote_epv(void)
 {
   /* assert( HAVE_LOCKED_STATIC_GLOBALS ); */
-  struct bHYPRE__SStruct_MatrixVectorView__epv* epv = 
-    &s_rem_epv__bhypre__sstruct_matrixvectorview;
-  struct bHYPRE_MatrixVectorView__epv*          e0  = 
+  struct bHYPRE__SStructMatrixVectorView__epv* epv = 
+    &s_rem_epv__bhypre__sstructmatrixvectorview;
+  struct bHYPRE_MatrixVectorView__epv*         e0  = 
     &s_rem_epv__bhypre_matrixvectorview;
-  struct bHYPRE_ProblemDefinition__epv*         e1  = 
+  struct bHYPRE_ProblemDefinition__epv*        e1  = 
     &s_rem_epv__bhypre_problemdefinition;
-  struct bHYPRE_SStruct_MatrixVectorView__epv*  e2  = 
-    &s_rem_epv__bhypre_sstruct_matrixvectorview;
-  struct sidl_BaseInterface__epv*               e3  = 
+  struct bHYPRE_SStructMatrixVectorView__epv*  e2  = 
+    &s_rem_epv__bhypre_sstructmatrixvectorview;
+  struct sidl_BaseInterface__epv*              e3  = 
     &s_rem_epv__sidl_baseinterface;
 
-  epv->f__cast                = remote_bHYPRE__SStruct_MatrixVectorView__cast;
-  epv->f__delete              = remote_bHYPRE__SStruct_MatrixVectorView__delete;
-  epv->f__exec                = remote_bHYPRE__SStruct_MatrixVectorView__exec;
-  epv->f__getURL              = remote_bHYPRE__SStruct_MatrixVectorView__getURL;
+  epv->f__cast                = remote_bHYPRE__SStructMatrixVectorView__cast;
+  epv->f__delete              = remote_bHYPRE__SStructMatrixVectorView__delete;
+  epv->f__exec                = remote_bHYPRE__SStructMatrixVectorView__exec;
+  epv->f__getURL              = remote_bHYPRE__SStructMatrixVectorView__getURL;
   epv->f__ctor                = NULL;
   epv->f__dtor                = NULL;
-  epv->f_addRef               = remote_bHYPRE__SStruct_MatrixVectorView_addRef;
+  epv->f_addRef               = remote_bHYPRE__SStructMatrixVectorView_addRef;
   epv->f_deleteRef            = 
-    remote_bHYPRE__SStruct_MatrixVectorView_deleteRef;
-  epv->f_isSame               = remote_bHYPRE__SStruct_MatrixVectorView_isSame;
-  epv->f_queryInt             = 
-    remote_bHYPRE__SStruct_MatrixVectorView_queryInt;
-  epv->f_isType               = remote_bHYPRE__SStruct_MatrixVectorView_isType;
+    remote_bHYPRE__SStructMatrixVectorView_deleteRef;
+  epv->f_isSame               = remote_bHYPRE__SStructMatrixVectorView_isSame;
+  epv->f_queryInt             = remote_bHYPRE__SStructMatrixVectorView_queryInt;
+  epv->f_isType               = remote_bHYPRE__SStructMatrixVectorView_isType;
   epv->f_getClassInfo         = 
-    remote_bHYPRE__SStruct_MatrixVectorView_getClassInfo;
+    remote_bHYPRE__SStructMatrixVectorView_getClassInfo;
   epv->f_SetCommunicator      = 
-    remote_bHYPRE__SStruct_MatrixVectorView_SetCommunicator;
+    remote_bHYPRE__SStructMatrixVectorView_SetCommunicator;
   epv->f_Initialize           = 
-    remote_bHYPRE__SStruct_MatrixVectorView_Initialize;
-  epv->f_Assemble             = 
-    remote_bHYPRE__SStruct_MatrixVectorView_Assemble;
+    remote_bHYPRE__SStructMatrixVectorView_Initialize;
+  epv->f_Assemble             = remote_bHYPRE__SStructMatrixVectorView_Assemble;
   epv->f_GetObject            = 
-    remote_bHYPRE__SStruct_MatrixVectorView_GetObject;
+    remote_bHYPRE__SStructMatrixVectorView_GetObject;
 
   e0->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete         = (void (*)(void*)) epv->f__delete;
@@ -1131,26 +1129,26 @@ static void bHYPRE__SStruct_MatrixVectorView__init_remote_epv(void)
 }
 
 /* Create an instance that connects to an existing remote object. */
-static struct bHYPRE_SStruct_MatrixVectorView__object*
-bHYPRE_SStruct_MatrixVectorView__remoteConnect(const char *url,
+static struct bHYPRE_SStructMatrixVectorView__object*
+bHYPRE_SStructMatrixVectorView__remoteConnect(const char *url,
   sidl_BaseInterface *_ex)
 {
-  struct bHYPRE__SStruct_MatrixVectorView__object* self;
+  struct bHYPRE__SStructMatrixVectorView__object* self;
 
-  struct bHYPRE__SStruct_MatrixVectorView__object* s0;
+  struct bHYPRE__SStructMatrixVectorView__object* s0;
 
   sidl_rmi_InstanceHandle instance = 
     sidl_rmi_ProtocolFactory_connectInstance(url, _ex );
   if ( instance == NULL) { return NULL; }
   self =
-    (struct bHYPRE__SStruct_MatrixVectorView__object*) malloc(
-      sizeof(struct bHYPRE__SStruct_MatrixVectorView__object));
+    (struct bHYPRE__SStructMatrixVectorView__object*) malloc(
+      sizeof(struct bHYPRE__SStructMatrixVectorView__object));
 
-   s0 =                                           self;
+   s0 =                                          self;
 
   LOCK_STATIC_GLOBALS;
   if (!s_remote_initialized) {
-    bHYPRE__SStruct_MatrixVectorView__init_remote_epv();
+    bHYPRE__SStructMatrixVectorView__init_remote_epv();
   }
   UNLOCK_STATIC_GLOBALS;
 
@@ -1161,39 +1159,39 @@ bHYPRE_SStruct_MatrixVectorView__remoteConnect(const char *url,
     &s_rem_epv__bhypre_problemdefinition;
   s0->d_bhypre_problemdefinition.d_object = (void*) self;
 
-  s0->d_bhypre_sstruct_matrixvectorview.d_epv    = 
-    &s_rem_epv__bhypre_sstruct_matrixvectorview;
-  s0->d_bhypre_sstruct_matrixvectorview.d_object = (void*) self;
+  s0->d_bhypre_sstructmatrixvectorview.d_epv    = 
+    &s_rem_epv__bhypre_sstructmatrixvectorview;
+  s0->d_bhypre_sstructmatrixvectorview.d_object = (void*) self;
 
   s0->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
   s0->d_sidl_baseinterface.d_object = (void*) self;
 
   s0->d_data = (void*) instance;
-  s0->d_epv  = &s_rem_epv__bhypre__sstruct_matrixvectorview;
+  s0->d_epv  = &s_rem_epv__bhypre__sstructmatrixvectorview;
 
   self->d_data = (void*) instance;
 
-  return bHYPRE_SStruct_MatrixVectorView__cast(self);
+  return bHYPRE_SStructMatrixVectorView__cast(self);
 }
 /* Create an instance that uses an already existing InstanceHandel to connect 
   to an existing remote object. */
-static struct bHYPRE_SStruct_MatrixVectorView__object*
-bHYPRE_SStruct_MatrixVectorView__IHConnect(sidl_rmi_InstanceHandle instance,
+static struct bHYPRE_SStructMatrixVectorView__object*
+bHYPRE_SStructMatrixVectorView__IHConnect(sidl_rmi_InstanceHandle instance,
   sidl_BaseInterface *_ex)
 {
-  struct bHYPRE__SStruct_MatrixVectorView__object* self;
+  struct bHYPRE__SStructMatrixVectorView__object* self;
 
-  struct bHYPRE__SStruct_MatrixVectorView__object* s0;
+  struct bHYPRE__SStructMatrixVectorView__object* s0;
 
   self =
-    (struct bHYPRE__SStruct_MatrixVectorView__object*) malloc(
-      sizeof(struct bHYPRE__SStruct_MatrixVectorView__object));
+    (struct bHYPRE__SStructMatrixVectorView__object*) malloc(
+      sizeof(struct bHYPRE__SStructMatrixVectorView__object));
 
-   s0 =                                           self;
+   s0 =                                          self;
 
   LOCK_STATIC_GLOBALS;
   if (!s_remote_initialized) {
-    bHYPRE__SStruct_MatrixVectorView__init_remote_epv();
+    bHYPRE__SStructMatrixVectorView__init_remote_epv();
   }
   UNLOCK_STATIC_GLOBALS;
 
@@ -1204,18 +1202,18 @@ bHYPRE_SStruct_MatrixVectorView__IHConnect(sidl_rmi_InstanceHandle instance,
     &s_rem_epv__bhypre_problemdefinition;
   s0->d_bhypre_problemdefinition.d_object = (void*) self;
 
-  s0->d_bhypre_sstruct_matrixvectorview.d_epv    = 
-    &s_rem_epv__bhypre_sstruct_matrixvectorview;
-  s0->d_bhypre_sstruct_matrixvectorview.d_object = (void*) self;
+  s0->d_bhypre_sstructmatrixvectorview.d_epv    = 
+    &s_rem_epv__bhypre_sstructmatrixvectorview;
+  s0->d_bhypre_sstructmatrixvectorview.d_object = (void*) self;
 
   s0->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
   s0->d_sidl_baseinterface.d_object = (void*) self;
 
   s0->d_data = (void*) instance;
-  s0->d_epv  = &s_rem_epv__bhypre__sstruct_matrixvectorview;
+  s0->d_epv  = &s_rem_epv__bhypre__sstructmatrixvectorview;
 
   self->d_data = (void*) instance;
 
   sidl_rmi_InstanceHandle_addRef(instance);
-  return bHYPRE_SStruct_MatrixVectorView__cast(self);
+  return bHYPRE_SStructMatrixVectorView__cast(self);
 }

@@ -19,11 +19,11 @@
 #ifndef included_bHYPRE_SStructGrid_h
 #include "bHYPRE_SStructGrid.h"
 #endif
-#ifndef included_bHYPRE_SStruct_MatrixVectorView_h
-#include "bHYPRE_SStruct_MatrixVectorView.h"
-#endif
 #ifndef included_bHYPRE_MPICommunicator_h
 #include "bHYPRE_MPICommunicator.h"
+#endif
+#ifndef included_bHYPRE_SStructMatrixVectorView_h
+#include "bHYPRE_SStructMatrixVectorView.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
@@ -116,17 +116,17 @@ extern struct bHYPRE_SStructGrid__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStructGrid(struct 
   bHYPRE_SStructGrid__object* obj);
-extern struct bHYPRE_SStruct_MatrixVectorView__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStruct_MatrixVectorView(char* url,
-  sidl_BaseInterface *_ex);
-extern char* 
-  impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStruct_MatrixVectorView(struct 
-  bHYPRE_SStruct_MatrixVectorView__object* obj);
 extern struct bHYPRE_MPICommunicator__object* 
   impl_bHYPRE_SStructVector_fconnect_bHYPRE_MPICommunicator(char* url,
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_SStructVector_fgetURL_bHYPRE_MPICommunicator(struct 
   bHYPRE_MPICommunicator__object* obj);
+extern struct bHYPRE_SStructMatrixVectorView__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructMatrixVectorView(char* url,
+  sidl_BaseInterface *_ex);
+extern char* 
+  impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStructMatrixVectorView(struct 
+  bHYPRE_SStructMatrixVectorView__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructVector_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -326,17 +326,17 @@ extern struct bHYPRE_SStructGrid__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStructGrid(struct 
   bHYPRE_SStructGrid__object* obj);
-extern struct bHYPRE_SStruct_MatrixVectorView__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStruct_MatrixVectorView(char* url,
-  sidl_BaseInterface *_ex);
-extern char* 
-  impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStruct_MatrixVectorView(struct 
-  bHYPRE_SStruct_MatrixVectorView__object* obj);
 extern struct bHYPRE_MPICommunicator__object* 
   impl_bHYPRE_SStructVector_fconnect_bHYPRE_MPICommunicator(char* url,
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_SStructVector_fgetURL_bHYPRE_MPICommunicator(struct 
   bHYPRE_MPICommunicator__object* obj);
+extern struct bHYPRE_SStructMatrixVectorView__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructMatrixVectorView(char* url,
+  sidl_BaseInterface *_ex);
+extern char* 
+  impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStructMatrixVectorView(struct 
+  bHYPRE_SStructMatrixVectorView__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructVector_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
