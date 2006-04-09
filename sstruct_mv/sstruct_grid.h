@@ -220,11 +220,8 @@ typedef struct hypre_SStructGrid_struct
  * Accessor macros: hypre_SStructNMapInfo
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructNMapInfoType(info)    ((info) -> type)
-#define hypre_SStructNMapInfoProc(info)    ((info) -> proc)
-#define hypre_SStructNMapInfoOffset(info)  ((info) -> offset)
-#define hypre_SStructNMapInfoBox(info)     ((info) -> box)
-#define hypre_SStructNMapInfoGhoffset(info) ((info) -> ghoffset)
+/* Use the MapInfo macros to access the first five structure components */
+
 #define hypre_SStructNMapInfoPart(info)    ((info) -> part)
 #define hypre_SStructNMapInfoILower(info)  ((info) -> ilower)
 #define hypre_SStructNMapInfoCoord(info)   ((info) -> coord)

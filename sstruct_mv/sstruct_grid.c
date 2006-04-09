@@ -704,13 +704,13 @@ hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid )
             num_ghost = hypre_BoxMapEntryNumGhost(map_entry);
 
             entry_ninfo = &ninfo[part][var][b];
-            hypre_SStructNMapInfoType(entry_ninfo) =
+            hypre_SStructMapInfoType(entry_ninfo) =
                hypre_SSTRUCT_MAP_INFO_NEIGHBOR;
-            hypre_SStructNMapInfoProc(entry_ninfo)   = nbor_proc;
-            hypre_SStructNMapInfoBox(entry_ninfo)= nbor_boxnum;
-            hypre_SStructNMapInfoOffset(entry_ninfo) = nbor_offset;
+            hypre_SStructMapInfoProc(entry_ninfo)   = nbor_proc;
+            hypre_SStructMapInfoBox(entry_ninfo)= nbor_boxnum;
+            hypre_SStructMapInfoOffset(entry_ninfo) = nbor_offset;
             /* GEC1002 inclusion of ghoffset for the ninfo  */
-            hypre_SStructNMapInfoGhoffset(entry_ninfo) = nbor_ghoffset;
+            hypre_SStructMapInfoGhoffset(entry_ninfo) = nbor_ghoffset;
            
             hypre_SStructNMapInfoPart(entry_ninfo)   = nbor_part;
             hypre_CopyIndex(nbor_ilower,

@@ -695,8 +695,9 @@ hypre_BoxMapIntersect( hypre_BoxMap        *map,
          {
              all_entries[cnt]= entry;
              unsort[cnt]     = cnt;
-             info            = (hypre_SStructMapInfo *) hypre_BoxMapEntryInfo(entry);
-             offsets[cnt++]  = hypre_SStructNMapInfoOffset(info);
+             /* RDF: This sstruct-specific info stuff should not be here! */
+             info = (hypre_SStructMapInfo *) hypre_BoxMapEntryInfo(entry);
+             offsets[cnt++]  = hypre_SStructMapInfoOffset(info);
 
              entry= hypre_BoxMapEntryNext(entry);
          }
