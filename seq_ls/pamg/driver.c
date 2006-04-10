@@ -1008,7 +1008,8 @@ BuildFromFile( int               argc,
     *-----------------------------------------------------------*/
  
    A = hypre_CSRMatrixRead(filename);
-
+   hypre_CSRMatrixReorder(A);
+   
    *A_ptr = A;
 #if 0
    *global_part_ptr = global_part;
