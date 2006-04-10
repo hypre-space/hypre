@@ -142,6 +142,11 @@ hypre_AMGSolve( void            *amg_vdata,
    {
       relative_resid = resid_nrm_init / rhs_norm;
    }
+   else
+   {
+      relative_resid = resid_nrm_init;
+   }
+   
 
    if (amg_ioutdat == 2 || amg_ioutdat == 3)
    {     
@@ -179,6 +184,10 @@ hypre_AMGSolve( void            *amg_vdata,
       if (rhs_norm)
       {
          relative_resid = resid_nrm / rhs_norm;
+      }
+      else
+      {
+         relative_resid = resid_nrm;
       }
 
       ++cycle_count;
