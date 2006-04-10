@@ -592,7 +592,7 @@ impl_bHYPRE_Hybrid_Setup(
       precond_1 = bHYPRE_Solver__cast( ParCSRDiagScale );
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1 );
-      bHYPRE_StructDiagScale_deleteRef(ParCSRDiagScale);
+      bHYPRE_ParCSRDiagScale_deleteRef(ParCSRDiagScale);
    }
    if ( bHYPRE_Vector_queryInt( b, "bHYPRE.SStructVector" ) )
    {
@@ -602,7 +602,7 @@ impl_bHYPRE_Hybrid_Setup(
       precond_1 = bHYPRE_Solver__cast( SStructDiagScale );
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1 );
-      bHYPRE_StructDiagScale_deleteRef(SStructDiagScale);
+      bHYPRE_SStructDiagScale_deleteRef(SStructDiagScale);
    }
 
    /*  The user should not have called Setup on Krylov solver. */
