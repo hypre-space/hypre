@@ -1265,6 +1265,26 @@ DistributeData( ProblemData   global_data,
                    pdata.graph_ilowers[box][i] + 1);
             }
          }
+         for (box = 0; box < pdata.matset_nboxes; box++)
+         {
+            size = 1;
+            for (i = 0; i < 3; i++)
+            {
+               size*= (pdata.matset_iuppers[box][i] -
+                       pdata.matset_ilowers[box][i] + 1);
+            }
+            pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
+         }
+         for (box = 0; box < pdata.matadd_nboxes; box++)
+         {
+            size = 1;
+            for (i = 0; i < 3; i++)
+            {
+               size*= (pdata.matadd_iuppers[box][i] -
+                       pdata.matadd_ilowers[box][i] + 1);
+            }
+            pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
+         }
       }
 
       if (pdata.nboxes == 0)
