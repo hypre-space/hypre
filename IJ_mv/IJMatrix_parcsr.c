@@ -579,13 +579,14 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
    int *offd_j;
    double *offd_data;
    int first;
+/*
    int current_num_elmts;
    int max_off_proc_elmts;
    int off_proc_i_indx;
    int *off_proc_i;
    int *off_proc_j;
    double *off_proc_data;
-
+*/
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
    par_matrix = hypre_IJMatrixObject( matrix );
@@ -617,6 +618,9 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
       {
          row = rows[ii];
          n = ncols[ii];
+
+         /* processor owns the row */ 
+
 #ifdef HYPRE_NO_GLOBAL_PARTITION
          if (row >= row_partitioning[0] && row < row_partitioning[1])
          {
@@ -718,8 +722,15 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
                indx++;
             }
          }
+         
+         /* processor does not own the row */  
+        
          else
 	 {
+            /* processors may not set values on rows they do not own - the user
+               can call the function, but it is ignored - AB 4/06 */ 
+            return ierr;
+/*
             aux_matrix = hypre_IJMatrixTranslator(matrix);
    	    if (!aux_matrix)
             {
@@ -779,8 +790,9 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
 	    hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix) = off_proc_i_indx; 
 	    hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix)
    	    	= current_num_elmts; 
+*/
 	 }
-      }
+      } /* end of for loop */
    }
    else
    {
@@ -793,12 +805,13 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
       {
          row = rows[ii];
          n = ncols[ii];
+         /* processor owns the row */ 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
          if (row >= row_partitioning[0] && row < row_partitioning[1])
          {
             row_local = row - row_partitioning[0]; 
 #else
-            if (row >= row_partitioning[my_id] && row < row_partitioning[my_id+1])
+         if (row >= row_partitioning[my_id] && row < row_partitioning[my_id+1])
          {
             row_local = row - row_partitioning[my_id]; 
 
@@ -966,8 +979,15 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
 
             }
          }
+
+         /* processor does not own the row */
          else
 	 {
+            /* processors may not set values on rows they do not own - the user
+               can call the function, but it is ignored - AB 4/06 */ 
+            return ierr;
+/*
+
    	    current_num_elmts 
 		= hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);
    	    max_off_proc_elmts
@@ -1015,6 +1035,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
 	    hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix) = off_proc_i_indx; 
 	    hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix)
    	    	= current_num_elmts; 
+*/
 	 }
       }
    }
