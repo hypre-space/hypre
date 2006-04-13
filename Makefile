@@ -136,7 +136,7 @@ help:
 test: all
 	@ \
 	echo "Making test drivers ..."; \
-	(cd test; $(MAKE) distclean; $(MAKE) all)
+	(cd test; $(MAKE) clean; $(MAKE) all)
 
 install: all
 	@echo "Installing hypre ..."
