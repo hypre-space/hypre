@@ -175,12 +175,10 @@ int ML_MatVec(ML_Operator *obj, int leng1, double p[], int leng2, double ap[])
 int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
 #endif
 {
+#ifdef HAVE_MLMAXWELL
     int               i, j, length, nRows, ibeg, iend, k, *rowptr, *colInd;
     double            *dbuf, sum, *colVal;
     HYPRE_ML_Matrix   *Amat;
-/*    MLMaxwell_Context *context;  */
-
-#ifdef HAVE_MLMAXWELL
     MLMaxwell_Context *context;
 
     ML_Operator *ml_op = (ML_Operator *) obj;
@@ -190,13 +188,6 @@ int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
     rowptr  = Amat->rowptr;
     colInd  = Amat->colnum;
     colVal  = Amat->values;
-#else
-    printf("ML_MatVec : MLMaxwell not activated.\n");
-    exit(1);
-#endif
-
-    colInd = Amat->colnum;
-    colVal = Amat->values;
 
     length = nRows;
     for (i = 0; i < Amat->recvProcCnt; i++) length += Amat->recvLeng[i];
@@ -216,7 +207,11 @@ int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
        ap[i] = sum;
     }
     if (dbuf != NULL) free(dbuf);
-    return 1;
+    return 0;
+#else
+    printf("ML_MatVec : MLMaxwell not activated.\n");
+    return -1;
+#endif
 }
 
 /****************************************************************************/
@@ -231,13 +226,10 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
    int allocated_space, int columns[], double values[], int row_lengths[])
 #endif
 {
+#ifdef HAVE_MLMAXWELL
     int               i, j, ncnt, colindex, rowLeng, rowindex;
     int               nRows, *rowptr, *colInd;
     double            *colVal;
-/*    MLMaxwell_Context *context;  */
-/*    HYPRE_ML_Matrix   *Amat;  */
-
-#ifdef HAVE_MLMAXWELL
     MLMaxwell_Context *context;
     HYPRE_ML_Matrix   *Amat;
 
@@ -248,10 +240,6 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
     rowptr  = Amat->rowptr;
     colInd  = Amat->colnum;
     colVal  = Amat->values;
-#else
-    printf("ML_GetRow : MLMaxwell not activated.\n");
-    exit(1);
-#endif
 
     ncnt = 0;
     for (i = 0; i < N_requested_rows; i++)
@@ -269,7 +257,11 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
           values[ncnt++] = colVal[colindex++];
        }
     }
-    return 1;
+    return 0;
+#else
+    printf("ML_GetRow : MLMaxwell not activated.\n");
+    return -1;
+#endif
 }
 
 /****************************************************************************/
@@ -406,7 +398,6 @@ int HYPRE_LSI_MLMaxwellDestroy(HYPRE_Solver solver)
     printf("ML not linked.\n");
     return -1;
 #endif
-
 }
 
 /****************************************************************************/
