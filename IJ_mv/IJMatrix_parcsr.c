@@ -277,6 +277,19 @@ hypre_IJMatrixInitializeParCSR(hypre_IJMatrix *matrix)
          }
       }
    }
+   else /* AB 4/06 - the assemble routine destroys the aux matrix - so we need
+           to recreate if initialize is called again*/
+   {
+      if (!aux_matrix)
+      {
+         ierr = hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, 
+                                            hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(par_matrix)), 
+                                            NULL);
+         hypre_AuxParCSRMatrixNeedAux(aux_matrix) = 0;
+         hypre_IJMatrixTranslator(matrix) = aux_matrix;
+      }
+
+   }
    return ierr;
 }
 
@@ -1113,16 +1126,23 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
 #endif
    if (hypre_IJMatrixAssembleFlag(matrix))
    {
+
+
       int num_cols_offd;
       int *col_map_offd;
       int j_offd;
       indx = 0;   
+
+
+      /* AB - 4/06 - need to get this object*/
+      aux_matrix = hypre_IJMatrixTranslator(matrix);
+
       for (ii=0; ii < nrows; ii++)
       {
          row = rows[ii];
          n = ncols[ii];
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-  if (row >= row_partitioning[0] && row < row_partitioning[1])
+         if (row >= row_partitioning[0] && row < row_partitioning[1])
          {
             row_local = row - row_partitioning[0]; 
 #else
@@ -1221,6 +1241,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
             indx++;
             }
          }
+         /* not my row */
          else
 	 {
    	    if (!aux_matrix)
@@ -1271,7 +1292,11 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
 	       hypre_AuxParCSRMatrixOffProcJ(aux_matrix) = off_proc_j;
 	       hypre_AuxParCSRMatrixOffProcData(aux_matrix) = off_proc_data;
 	    }
-            off_proc_i[off_proc_i_indx++] = row; 
+
+            /* AB - 4/6 - the row should be negative to indicate an add */
+            /* off_proc_i[off_proc_i_indx++] = row; */
+            off_proc_i[off_proc_i_indx++] = -row-1;
+            
             off_proc_i[off_proc_i_indx++] = n; 
 	    for (i=0; i < n; i++)
 	    {
@@ -1284,6 +1309,8 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
 	 }
       }
    }
+   
+/* not assembled */
    else
    {
       aux_matrix = hypre_IJMatrixTranslator(matrix);
@@ -1296,7 +1323,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
          row = rows[ii];
          n = ncols[ii];
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-  if (row >= row_partitioning[0] && row < row_partitioning[1])
+         if (row >= row_partitioning[0] && row < row_partitioning[1])
          {
             row_local = row - row_partitioning[0]; 
 #else
@@ -1467,6 +1494,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
 
             }
          }
+         /* not my row */
          else
          {
    	    current_num_elmts 
