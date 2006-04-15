@@ -1535,6 +1535,48 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (amg_print_level == 1 || amg_print_level == 3)
       hypre_BoomerAMGSetupStats(amg_data,A);
 
+/* print out CF info to plot grids in matlab (see 'tools/AMGgrids.m') */
+#if 0
+{
+   int *CF, *CFc, *itemp;
+   FILE* fp;
+
+   local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   CF = hypre_CTAlloc(int, local_size);
+   CFc = hypre_CTAlloc(int, local_size);
+
+   for (level = (num_levels - 2); level >= 0; level--)
+   {
+      /* swap pointers */
+      itemp = CFc;
+      CFc = CF;
+      CF = itemp;
+
+      local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
+      for (i = 0, j = 0; i < local_size; i++)
+      {
+         /* if a C-point */
+         CF[i] = 0;
+         if (CF_marker_array[level][i] > -1)
+         {
+            CF[i] = CFc[j] + 1;
+            j++;
+         }
+      }
+   }
+
+   local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   fp = fopen("AMGgrids.CF.dat", "w");
+   for (i = 0; i < local_size; i++)
+   {
+      fprintf(fp, "%d\n", CF[i]);
+   }
+   fclose(fp);
+
+   hypre_TFree(CF);
+   hypre_TFree(CFc);
+}
+#endif
 
    return(Setup_err_flag);
 }  
