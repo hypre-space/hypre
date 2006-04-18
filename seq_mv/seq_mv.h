@@ -256,6 +256,8 @@ int hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix );
 hypre_CSRMatrix *hypre_CSRMatrixRead( char *file_name );
 int hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix , char *file_name );
 int hypre_CSRMatrixCopy( hypre_CSRMatrix *A , hypre_CSRMatrix *B , int copy_data );
+hypre_CSRMatrix *hypre_CSRMatrixClone( hypre_CSRMatrix *A );
+hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 
 /* csr_matvec.c */
 int hypre_CSRMatrixMatvec( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );

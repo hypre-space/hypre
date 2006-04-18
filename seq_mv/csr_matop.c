@@ -376,6 +376,8 @@ int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
    {
       for (j = A_i[i]; j < A_i[i+1]; j++)
       {
+         hypre_assert( AT_i[A_j[j]] >= 0 );
+         hypre_assert( AT_i[A_j[j]] < num_nonzerosAT );
          AT_j[AT_i[A_j[j]]] = i;
          if (data) AT_data[AT_i[A_j[j]]] = A_data[j];
          AT_i[A_j[j]]++;
