@@ -103,7 +103,7 @@ void BoomerAMG_DefaultParameters( CommandLineParameters *clp );
 void PrintUsage( char *argv[] );
 int IJMatrixVectorDebug(
    const bHYPRE_MPICommunicator bmpicomm, const int local_num_cols,
-   const int first_local_col, const int last_local_col,
+   const int first_local_col, const int last_local_col, const int N,
    const bHYPRE_IJParCSRMatrix  bHYPRE_parcsr_A,
    bHYPRE_IJParCSRVector  bHYPRE_b, bHYPRE_IJParCSRVector  bHYPRE_x );
 int Demo_Matrix_AddToValues(
@@ -411,7 +411,7 @@ main( int   argc,
  
 #ifdef HYPRE_IJMV_DEBUG
    ierr += IJMatrixVectorDebug(
-      bmpicomm, local_num_cols, first_local_col, last_local_col,
+      bmpicomm, local_num_cols, first_local_col, last_local_col, N,
       bHYPRE_parcsr_A, bHYPRE_b, bHYPRE_x );
 #endif
 
@@ -3212,7 +3212,7 @@ void PrintUsage( char *argv[] )
 
 int IJMatrixVectorDebug(
    const bHYPRE_MPICommunicator bmpicomm, const int local_num_cols,
-   const int first_local_col, const int last_local_col,
+   const int first_local_col, const int last_local_col, const int N,
    const bHYPRE_IJParCSRMatrix  bHYPRE_parcsr_A,
    bHYPRE_IJParCSRVector bHYPRE_b, bHYPRE_IJParCSRVector bHYPRE_x )
 {
