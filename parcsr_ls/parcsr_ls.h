@@ -2,7 +2,6 @@
 #include <HYPRE_config.h>
 
 #include "HYPRE_parcsr_ls.h"
-#include "HYPRE_parcsr_int.h"
 
 #ifndef hypre_PARCSR_LS_HEADER
 #define hypre_PARCSR_LS_HEADER
@@ -11,7 +10,9 @@
 #include "krylov.h"
 #include "seq_mv.h"
 #include "parcsr_mv.h"
-#include "temp_multivector.h" 
+#include "temp_multivector.h"
+ /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
+#include "HYPRE_MatvecFunctions.h"
  /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
 
 #ifdef __cplusplus
@@ -98,6 +99,10 @@ int HYPRE_BoomerAMGSetMaxRowSum( HYPRE_Solver solver , double max_row_sum );
 int HYPRE_BoomerAMGGetMaxRowSum( HYPRE_Solver solver , double *max_row_sum );
 int HYPRE_BoomerAMGSetTruncFactor( HYPRE_Solver solver , double trunc_factor );
 int HYPRE_BoomerAMGGetTruncFactor( HYPRE_Solver solver , double *trunc_factor );
+int HYPRE_BoomerAMGSetJacobiTruncThreshold( HYPRE_Solver solver , double jacobi_trunc_threshold );
+int HYPRE_BoomerAMGGetJacobiTruncThreshold( HYPRE_Solver solver , double *jacobi_trunc_threshold );
+int HYPRE_BoomerAMGSetPostInterpType( HYPRE_Solver solver , int post_interp_type );
+int HYPRE_BoomerAMGGetPostInterpType( HYPRE_Solver solver , int *post_interp_type );
 int HYPRE_BoomerAMGSetSCommPkgSwitch( HYPRE_Solver solver , double S_commpkg_switch );
 int HYPRE_BoomerAMGSetInterpType( HYPRE_Solver solver , int interp_type );
 int HYPRE_BoomerAMGSetMinIter( HYPRE_Solver solver , int min_iter );
@@ -383,6 +388,10 @@ int hypre_BoomerAMGSetMaxRowSum( void *data , double max_row_sum );
 int hypre_BoomerAMGGetMaxRowSum( void *data , double *max_row_sum );
 int hypre_BoomerAMGSetTruncFactor( void *data , double trunc_factor );
 int hypre_BoomerAMGGetTruncFactor( void *data , double *trunc_factor );
+int hypre_BoomerAMGSetJacobiTruncThreshold( void *data , double jacobi_trunc_threshold );
+int hypre_BoomerAMGGetJacobiTruncThreshold( void *data , double *jacobi_trunc_threshold );
+int hypre_BoomerAMGSetPostInterpType( void *data , int post_interp_type );
+int hypre_BoomerAMGGetPostInterpType( void *data , int *post_interp_type );
 int hypre_BoomerAMGSetSCommPkgSwitch( void *data , double S_commpkg_switch );
 int hypre_BoomerAMGGetSCommPkgSwitch( void *data , double *S_commpkg_switch );
 int hypre_BoomerAMGSetInterpType( void *data , int interp_type );
@@ -520,6 +529,7 @@ int hypre_BoomerAMGCycle( void *amg_vdata , hypre_ParVector **F_array , hypre_Pa
 HYPRE_ParCSRMatrix GenerateDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 
 /* par_gsmg.c */
+void hypre_F90_NAME_BLAS( int dgels , int DGELS );
 int hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , int copy_data );
 int hypre_ParCSRMatrixFillSmooth( int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int num_functions , int *dof_func );
 double hypre_ParCSRMatrixChooseThresh( hypre_ParCSRMatrix *S );
@@ -541,6 +551,14 @@ int hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix *A , int *CF_marker , hypre
 int hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 int hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P , double trunc_factor );
 
+/* par_jacobi_interp.c */
+void hypre_BoomerAMGJacobiInterp( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , hypre_ParCSRMatrix *S , int *CF_marker , int level , double truncation_threshold , double truncation_threshold_minus );
+void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , hypre_ParCSRMatrix *S , int *CF_marker , int level , double truncation_threshold , double truncation_threshold_minus , double weight_AF , double weight_AFF );
+void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P , double eps , double dlt , int *CF_marker );
+
+/* par_jacobi_interp_junk.c */
+void hypre_BoomerAMGJacobiInterp_crude_rescaling( hypre_ParCSRMatrix *P );
+
 /* par_laplace_27pt.c */
 HYPRE_ParCSRMatrix GenerateLaplacian27pt( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 int hypre_map3( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part );
@@ -553,8 +571,7 @@ int hypre_map2( int ix , int iy , int p , int q , int P , int Q , int *nx_part ,
 HYPRE_ParCSRMatrix GenerateLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 int hypre_map( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part );
 HYPRE_ParCSRMatrix GenerateSysLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , int num_fun , double *mtrx , double *value );
-HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, int nx, int ny, int nz,  int P, int Q, int R, int p, int q, int r, int num_fun, double *mtrx, double *value);
-
+HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , int num_fun , double *mtrx , double *value );
 
 /* par_multi_interp.c */
 int hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int weight_option , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
@@ -562,8 +579,7 @@ int hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix *A , int *CF_marker , hypr
 /* par_nodal_systems.c */
 int hypre_BoomerAMGCreateNodalA( hypre_ParCSRMatrix *A , int num_functions , int *dof_func , int option , hypre_ParCSRMatrix **AN_ptr );
 int hypre_BoomerAMGCreateScalarCFS( hypre_ParCSRMatrix *SN , int *CFN_marker , int *col_offd_SN_to_AN , int num_functions , int nodal , int data , int **dof_func_ptr , int **CF_marker_ptr , int **col_offd_S_to_A_ptr , hypre_ParCSRMatrix **S_ptr );
-   int hypre_BoomerAMGCreateScalarCF(int *CFN_marker, int num_functions, int num_nodes,  int **dof_func_ptr,  int  **CF_marker_ptr);
-   
+int hypre_BoomerAMGCreateScalarCF( int *CFN_marker , int num_functions , int num_nodes , int **dof_func_ptr , int **CF_marker_ptr );
 
 /* par_rap.c */
 hypre_CSRMatrix *hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int , hypre_ParCSRCommPkg *comm_pkg_RT );
@@ -574,8 +590,6 @@ int hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix 
 int hypre_GenerateSendMapAndCommPkg( MPI_Comm comm , int num_sends , int num_recvs , int *recv_procs , int *send_procs , int *recv_vec_starts , hypre_ParCSRMatrix *A );
 
 /* par_relax.c */
-int hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp );
-int gselim(double *A , double *x , int n );
 
 /* par_relax_interface.c */
 int hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_order , int cycle_type , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp );
@@ -644,6 +658,7 @@ int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
 int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
 
 /* schwarz.c */
+void hypre_F90_NAME_BLAS( int dpotrf , int DPOTRF );
 int hypre_ParMPSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_CSRMatrix *A_boundary , hypre_ParVector *rhs_vector , hypre_CSRMatrix *domain_structure , hypre_ParVector *par_x , double relax_wt , double *scale , hypre_ParVector *Vtemp );
 int hypre_MPSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_Vector *rhs_vector , hypre_CSRMatrix *domain_structure , hypre_ParVector *par_x , double relax_wt , hypre_Vector *aux_vector );
 int transpose_matrix_create( int **i_face_element_pointer , int **j_face_element_pointer , int *i_element_face , int *j_element_face , int num_elements , int num_faces );

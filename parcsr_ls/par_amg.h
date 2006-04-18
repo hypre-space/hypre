@@ -27,6 +27,7 @@ typedef struct
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
+   double   jacobi_trunc_threshold;
    double   S_commpkg_switch;
    double   CR_rate;
    int      measure_type;
@@ -36,6 +37,7 @@ typedef struct
    int      restr_par;
    int      agg_num_levels;
    int      num_paths;
+   int      post_interp_type;
    int      num_CR_relax_steps;
    int      IS_type;
 
@@ -140,6 +142,7 @@ typedef struct
 ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
+#define hypre_ParAMGDataJacobiTruncThreshold(amg_data) ((amg_data)->jacobi_trunc_threshold)
 #define hypre_ParAMGDataSCommPkgSwitch(amg_data) ((amg_data)->S_commpkg_switch)
 #define hypre_ParAMGDataInterpType(amg_data) ((amg_data)->interp_type)
 #define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
@@ -147,6 +150,7 @@ typedef struct
 #define hypre_ParAMGDataSetupType(amg_data) ((amg_data)->setup_type)
 #define hypre_ParAMGDataNumPaths(amg_data) ((amg_data)->num_paths)
 #define hypre_ParAMGDataAggNumLevels(amg_data) ((amg_data)->agg_num_levels)
+#define hypre_ParAMGDataPostInterpType(amg_data) ((amg_data)->post_interp_type)
 #define hypre_ParAMGDataNumCRRelaxSteps(amg_data) ((amg_data)->num_CR_relax_steps)
 #define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)

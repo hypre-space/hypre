@@ -177,6 +177,49 @@ HYPRE_BoomerAMGGetTruncFactor( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetJacobiTruncThreshold, HYPRE_BoomerAMGGetJacobiTruncThreshold
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetJacobiTruncThreshold( HYPRE_Solver solver,
+                            double       jacobi_trunc_threshold  )
+{
+   return( hypre_BoomerAMGSetJacobiTruncThreshold( (void *) solver,
+                                           jacobi_trunc_threshold ) );
+}
+
+int
+HYPRE_BoomerAMGGetJacobiTruncThreshold( HYPRE_Solver solver,
+                            double     * jacobi_trunc_threshold  )
+{
+   return( hypre_BoomerAMGGetJacobiTruncThreshold( (void *) solver,
+                                           jacobi_trunc_threshold ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetPostInterpType, HYPRE_BoomerAMGGetPostInterpType
+ *  If >0, specifies something to do to improve a computed interpolation matrix.
+ * defaults to 0, for nothing.
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetPostInterpType( HYPRE_Solver solver,
+                                  int       post_interp_type  )
+{
+   return( hypre_BoomerAMGSetPostInterpType( (void *) solver,
+                                             post_interp_type ) );
+}
+
+int
+HYPRE_BoomerAMGGetPostInterpType( HYPRE_Solver solver,
+                                  int     * post_interp_type  )
+{
+   return( hypre_BoomerAMGGetPostInterpType( (void *) solver,
+                                             post_interp_type ) );
+}
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetSCommPkgSwitch
  *--------------------------------------------------------------------------*/
 

@@ -56,7 +56,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    double               schwarz_relax_wt = 1;
    double               strong_threshold;
    double               max_row_sum;
-   double               trunc_factor;
+   double               trunc_factor, jacobi_trunc_threshold;
    double               S_commpkg_switch;
    double      		CR_rate;
 
@@ -120,6 +120,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    char     *euclidfile;
 
    int interp_type;
+   int post_interp_type;  /* what to do after computing the interpolation matrix
+                             0 for nothing, 1 for a Jacobi step */
 
    hypre_ParCSRBlockMatrix *A_H_block;
 
@@ -149,6 +151,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    max_nz_per_row = hypre_ParAMGDataMaxNzPerRow(amg_data);
    euclidfile = hypre_ParAMGDataEuclidFile(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
+   post_interp_type = hypre_ParAMGDataPostInterpType(amg_data);
    IS_type = hypre_ParAMGDataISType(amg_data);
    num_CR_relax_steps = hypre_ParAMGDataNumCRRelaxSteps(amg_data);
    CR_rate = hypre_ParAMGDataCRRate(amg_data);
@@ -433,6 +436,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
    max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
    trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
+   jacobi_trunc_threshold = hypre_ParAMGDataJacobiTruncThreshold(amg_data);
    S_commpkg_switch = hypre_ParAMGDataSCommPkgSwitch(amg_data);
    if (smooth_num_levels > level)
    {
@@ -1341,6 +1345,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 
       }
+
+      if ( post_interp_type>=1 )
+         /* Improve on P with Jacobi interpolation */
+         hypre_BoomerAMGJacobiInterp( A_array[level], &P, S, CF_marker_array[level],
+                                      level, jacobi_trunc_threshold, 0.5*jacobi_trunc_threshold );
+
 
       if (debug_flag==1)
       {

@@ -83,6 +83,7 @@ FILES =\
  par_gsmg.c\
  par_indepset.c\
  par_interp.c\
+ par_jacobi_interp.c\
  par_multi_interp.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\

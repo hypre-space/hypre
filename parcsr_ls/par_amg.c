@@ -31,6 +31,7 @@ hypre_BoomerAMGCreate()
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
+   double   jacobi_trunc_threshold;
    double   S_commpkg_switch;
    double   CR_rate;
    int      interp_type;
@@ -41,6 +42,7 @@ hypre_BoomerAMGCreate()
    int 	    nodal;
    int 	    num_paths;
    int 	    agg_num_levels;
+   int      post_interp_type;
    int 	    num_CR_relax_steps;
    int 	    IS_type;
 
@@ -91,6 +93,7 @@ hypre_BoomerAMGCreate()
    strong_threshold = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
+   jacobi_trunc_threshold = 0.01;
    S_commpkg_switch = 1.0;
    interp_type = 200;
    coarsen_type = 6;
@@ -100,6 +103,7 @@ hypre_BoomerAMGCreate()
    nodal = 0;
    num_paths = 1;
    agg_num_levels = 0;
+   post_interp_type = 0;
    num_CR_relax_steps = 2;
    CR_rate = 0.7;
    IS_type = 1;
@@ -156,6 +160,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
+   hypre_BoomerAMGSetJacobiTruncThreshold(amg_data, jacobi_trunc_threshold);
    hypre_BoomerAMGSetSCommPkgSwitch(amg_data, S_commpkg_switch);
    hypre_BoomerAMGSetInterpType(amg_data, interp_type);
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
@@ -165,6 +170,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetNodal(amg_data, nodal);
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
    hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
+   hypre_BoomerAMGSetPostInterpType(amg_data, post_interp_type);
    hypre_BoomerAMGSetNumCRRelaxSteps(amg_data, num_CR_relax_steps);
    hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
    hypre_BoomerAMGSetISType(amg_data, IS_type);
@@ -505,6 +511,54 @@ hypre_BoomerAMGGetTruncFactor( void     *data,
    hypre_ParAMGData  *amg_data = data;
 
    *trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetJacobiTruncThreshold( void     *data,
+                            double    jacobi_trunc_threshold )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataJacobiTruncThreshold(amg_data) = jacobi_trunc_threshold;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGGetJacobiTruncThreshold( void     *data,
+                            double *  jacobi_trunc_threshold )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   *jacobi_trunc_threshold = hypre_ParAMGDataJacobiTruncThreshold(amg_data);
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetPostInterpType( void     *data,
+                                  int    post_interp_type )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataPostInterpType(amg_data) = post_interp_type;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGGetPostInterpType( void     *data,
+                                  int  * post_interp_type )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   *post_interp_type = hypre_ParAMGDataPostInterpType(amg_data);
 
    return (ierr);
 }
