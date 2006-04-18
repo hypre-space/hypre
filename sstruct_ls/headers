@@ -27,6 +27,8 @@ cat > $INTERNAL_HEADER <<@
 #include "krylov.h"
 #include "struct_ls.h"
 #include "sstruct_mv.h"
+#include "parcsr_ls.h"
+#include "multivector.h"
 
 #ifdef __cplusplus
 extern "C" {
