@@ -566,16 +566,22 @@ hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix,
       for (j = diag_i[i]; j < diag_i[i+1]; j++)
       {
          J = first_col_diag + diag_j[j] + base_j;
-         fprintf(file, "%d %d %e\n", I, J, diag_data[j]);
+         if ( diag_data )
+            fprintf(file, "%d %d %e\n", I, J, diag_data[j]);
+         else
+            fprintf(file, "%d %d\n", I, J);
       }
 
       /* print offd columns */
-      if ( num_nonzeros_offd)
+      if ( num_nonzeros_offd )
       {
          for (j = offd_i[i]; j < offd_i[i+1]; j++)
          {
             J = col_map_offd[offd_j[j]] + base_j;
+         if ( offd_data )
             fprintf(file, "%d %d %e\n", I, J, offd_data[j]);
+         else
+            fprintf(file, "%d %d\n", I, J );
          }
       }
    }
@@ -1961,4 +1967,113 @@ hypre_FillResponseParToCSRMatrix(void *p_recv_contact_buf,
    
    return(0);
 
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixCompleteClone
+ * Creates and returns a new copy of the argument, A.
+ * Data is not copied, only structural information is reproduced.
+ * The following variables are not copied because they will be constructed
+ * later if needed: CommPkg, CommPkgT, rowindices, rowvalues
+ *--------------------------------------------------------------------------*/
+/* This differs from Hypre_ParCSRMatrixClone in parcsr_ls/par_gsmg.c, because
+   that Clone function makes a matrix with different global parameters. */
+
+hypre_ParCSRMatrix * hypre_ParCSRMatrixCompleteClone( hypre_ParCSRMatrix * A )
+{
+   hypre_ParCSRMatrix * B = hypre_CTAlloc(hypre_ParCSRMatrix, 1);
+
+   hypre_ParCSRMatrixComm( B ) = hypre_ParCSRMatrixComm( A );
+   hypre_ParCSRMatrixGlobalNumRows( B ) = hypre_ParCSRMatrixGlobalNumRows( A );
+   hypre_ParCSRMatrixGlobalNumCols( B ) = hypre_ParCSRMatrixGlobalNumCols( A );
+   hypre_ParCSRMatrixFirstRowIndex( B ) = hypre_ParCSRMatrixFirstRowIndex( A );
+   hypre_ParCSRMatrixFirstColDiag( B ) = hypre_ParCSRMatrixFirstColDiag( A );
+   hypre_ParCSRMatrixLastRowIndex( B ) = hypre_ParCSRMatrixLastRowIndex( A );
+   hypre_ParCSRMatrixLastColDiag( B ) = hypre_ParCSRMatrixLastColDiag( A );
+   hypre_ParCSRMatrixDiag( B ) = hypre_CSRMatrixClone( hypre_ParCSRMatrixDiag( A ) );
+   hypre_ParCSRMatrixOffd( B ) = hypre_CSRMatrixClone( hypre_ParCSRMatrixOffd( A ) );
+   hypre_ParCSRMatrixRowStarts( B ) = hypre_ParCSRMatrixRowStarts( A );
+   hypre_ParCSRMatrixColStarts( B ) = hypre_ParCSRMatrixColStarts( A );
+   /* note that B doesn't own row_starts and col_starts, this isn't a fully deep copy */
+   hypre_ParCSRMatrixCommPkg( B ) = NULL;
+   hypre_ParCSRMatrixCommPkgT( B ) = NULL;
+   hypre_ParCSRMatrixOwnsData( B ) = 1;
+   hypre_ParCSRMatrixOwnsRowStarts( B ) = 0;
+   hypre_ParCSRMatrixOwnsColStarts( B ) = 0;
+   hypre_ParCSRMatrixNumNonzeros( B ) = hypre_ParCSRMatrixNumNonzeros( A );
+   hypre_ParCSRMatrixDNumNonzeros( B ) = hypre_ParCSRMatrixNumNonzeros( A );
+   hypre_ParCSRMatrixRowindices( B ) = NULL;
+   hypre_ParCSRMatrixRowvalues( B ) = NULL;
+   hypre_ParCSRMatrixGetrowactive( B ) = 0;
+   int i;
+   int ncols_offd = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd( B ) );
+
+   hypre_ParCSRMatrixColMapOffd( B ) = hypre_CTAlloc( int, ncols_offd );
+   for ( i=0; i<ncols_offd; ++i )
+      hypre_ParCSRMatrixColMapOffd( B )[i] = hypre_ParCSRMatrixColMapOffd( A )[i];
+
+   return B;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixUnion
+ * Creates and returns a new matrix whose elements are the union of A and B.
+ * Data is not copied, only structural information is created.
+ * A and B must have the same communicator, numbers and distributions of rows
+ * and columns (they can differ in which row-column pairs are nonzero)
+ *--------------------------------------------------------------------------*/
+
+hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,
+                                              hypre_ParCSRMatrix * B )
+{
+   int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+   int num_cols_offd;
+   int num_nonzeros_diag;
+   int num_nonzeros_offd;
+   hypre_ParCSRMatrix * C;
+   int  num_procs, my_id, p;
+   MPI_Comm comm = hypre_ParCSRMatrixComm( A );
+
+   MPI_Comm_rank(comm,&my_id);
+   MPI_Comm_size(comm,&num_procs);
+
+   C = hypre_CTAlloc( hypre_ParCSRMatrix, 1 );
+   hypre_ParCSRMatrixComm( C ) = hypre_ParCSRMatrixComm( A );
+   hypre_ParCSRMatrixGlobalNumRows( C ) = hypre_ParCSRMatrixGlobalNumRows( A );
+   hypre_ParCSRMatrixGlobalNumCols( C ) = hypre_ParCSRMatrixGlobalNumCols( A );
+   hypre_ParCSRMatrixFirstRowIndex( C ) = hypre_ParCSRMatrixFirstRowIndex( A );
+   hypre_assert( hypre_ParCSRMatrixFirstRowIndex( B )
+                 == hypre_ParCSRMatrixFirstRowIndex( A ) );
+   hypre_ParCSRMatrixRowStarts( C ) = hypre_ParCSRMatrixRowStarts( A );
+   hypre_ParCSRMatrixOwnsRowStarts( C ) = 0;
+   /* hypre_ParCSRMatrixColStarts( C ) = hypre_CTAlloc( int, num_procs+1 ); */
+   hypre_ParCSRMatrixColStarts( C ) = hypre_ParCSRMatrixColStarts( A );
+   hypre_ParCSRMatrixOwnsColStarts( C ) = 0;
+   for ( p=0; p<=num_procs; ++p )
+      hypre_assert( hypre_ParCSRMatrixColStarts(A)
+                    == hypre_ParCSRMatrixColStarts(B) );
+   hypre_ParCSRMatrixFirstColDiag( C ) = hypre_ParCSRMatrixFirstColDiag( A );
+   hypre_ParCSRMatrixLastRowIndex( C ) = hypre_ParCSRMatrixLastRowIndex( A );
+   hypre_ParCSRMatrixLastColDiag( C ) = hypre_ParCSRMatrixLastColDiag( A );
+
+   hypre_ParCSRMatrixDiag( C ) =
+      hypre_CSRMatrixUnion( hypre_ParCSRMatrixDiag(A), hypre_ParCSRMatrixDiag(B) );
+   hypre_ParCSRMatrixOffd( C ) =
+      hypre_CSRMatrixUnion( hypre_ParCSRMatrixOffd(A), hypre_ParCSRMatrixOffd(B) );
+   hypre_ParCSRMatrixCommPkg( C ) = NULL;
+   hypre_ParCSRMatrixCommPkgT( C ) = NULL;
+   hypre_ParCSRMatrixOwnsData( C ) = 1;
+   hypre_ParCSRMatrixSetNumNonzeros( C );
+   hypre_ParCSRMatrixSetDNumNonzeros( C );
+   hypre_ParCSRMatrixRowindices( B ) = NULL;
+   hypre_ParCSRMatrixRowvalues( B ) = NULL;
+   hypre_ParCSRMatrixGetrowactive( B ) = 0;
+
+   int i;
+   int ncols_offd = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd( C ) );
+   hypre_ParCSRMatrixColMapOffd( C ) = hypre_CTAlloc( int, ncols_offd );
+   for ( i=0; i<ncols_offd; ++i )
+      hypre_ParCSRMatrixColMapOffd( C )[i] = hypre_ParCSRMatrixColMapOffd( A )[i];
+
+   return C;
 }

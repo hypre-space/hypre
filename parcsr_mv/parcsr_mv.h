@@ -650,6 +650,14 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr , int **indice
 void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr , int *indices2 , hypre_ParCSRMatrix ***submatrices );
 void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr , int *indices2 , hypre_ParCSRMatrix ***submatrices );
 
+/* par_csr_matop_marked.c */
+void hypre_ParMatmul_RowSizes_Marked( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_diag_i , int *B_ext_diag_j , int *B_ext_offd_i , int *B_ext_offd_j , int *map_B_to_C , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int allsquare , int num_cols_diag_B , int num_cols_offd_B , int num_cols_offd_C , int *CF_marker );
+hypre_ParCSRMatrix *hypre_ParMatmul_FC( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , int *CF_marker , double weight );
+void hypre_ParMatScaleDiagInv_F( hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *A , double weight , int *CF_marker );
+hypre_ParCSRMatrix *hypre_ParMatMinus_F( hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *C , int *CF_marker );
+void hypre_ParCSRMatrixZero_F( hypre_ParCSRMatrix *P , int *CF_marker );
+void hypre_ParCSRMatrixCopy_C( hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *C , int *CF_marker );
+void hypre_ParCSRMatrixDropEntries( hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *P , int *CF_marker );
 
 /* par_csr_matrix.c */
 hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate( MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd );
@@ -673,6 +681,8 @@ hypre_CSRMatrix *hypre_MergeDiagAndOffd( hypre_ParCSRMatrix *par_matrix );
 hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll( hypre_ParCSRMatrix *par_matrix );
 int hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B , int copy_data );
 int hypre_FillResponseParToCSRMatrix( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
+hypre_ParCSRMatrix *hypre_ParCSRMatrixCompleteClone( hypre_ParCSRMatrix *A );
+hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 
 /* par_csr_matvec.c */
 int hypre_ParCSRMatrixMatvec( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
