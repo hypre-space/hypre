@@ -121,6 +121,7 @@ main( int   argc,
    /* parameters for BoomerAMG */
    double   strong_threshold;
    double   trunc_factor;
+   double   jacobi_trunc_threshold;
    double   S_commpkg_switch = 1.0;
    double   CR_rate = 0.7;
    int      cycle_type;
@@ -163,6 +164,7 @@ main( int   argc,
    /* parameters for GSMG */
    int      gsmg_samples = 5;
    int      interp_type  = 200; /* default value */
+   int      post_interp_type  = 0; /* default value */
 
    int      print_system = 0;
 
@@ -565,6 +567,7 @@ main( int   argc,
    {
    strong_threshold = 0.25;
    trunc_factor = 0.;
+   jacobi_trunc_threshold = 0.01;
    cycle_type = 1;
    relax_wt = 1.;
    outer_wt = 1.;
@@ -671,6 +674,11 @@ main( int   argc,
          arg_index++;
          trunc_factor  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-jtr") == 0 )
+      {
+         arg_index++;
+         jacobi_trunc_threshold  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-Ssw") == 0 )
       {
          arg_index++;
@@ -720,6 +728,11 @@ main( int   argc,
       {
          arg_index++;
          interp_type  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-postinterptype") == 0 )
+      {
+         arg_index++;
+         post_interp_type  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-nodal") == 0 )
       {
@@ -840,6 +853,7 @@ main( int   argc,
       printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
       printf("  -th   <val>            : set AMG threshold Theta = val \n");
       printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
+      printf("  -jtr  <val>            : set AMG interpolation Jacobi truncation threshold = val \n");
       printf("  -Ssw  <val>            : set S-commpkg-switch = val \n");
       printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
       printf("  -nf <val>              : set number of functions for systems AMG\n");
@@ -851,6 +865,7 @@ main( int   argc,
       printf("                         : set to 10 for nodal standard interpolation (for systems only) \n");
       printf("                         : set to 11 for diagonal nodal standard interpolation (for systems only) \n");
       printf("                         : set to 200 for standard interpolation (default)\n");
+      printf("  -postinterptype <val>  : set to 1 to add Jacobi interpolation after the main interpolation\n");
       printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
       printf("                         : 1  PCG  (default)\n");
       printf("                         : 2  GMRES\n");
@@ -1690,12 +1705,14 @@ main( int   argc,
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
+      HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
+      HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
       HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
 /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
@@ -1783,12 +1800,14 @@ main( int   argc,
       HYPRE_BoomerAMGCreate(&amg_solver);
       HYPRE_BoomerAMGSetGSMG(amg_solver, 4); /* specify GSMG */
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
+      HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
+      HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
       HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
 /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
@@ -1905,12 +1924,13 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
@@ -2013,12 +2033,14 @@ main( int   argc,
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
@@ -2184,12 +2206,14 @@ main( int   argc,
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
@@ -2282,12 +2306,14 @@ main( int   argc,
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
@@ -2459,12 +2485,14 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
@@ -2640,12 +2668,14 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-CGNR\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
