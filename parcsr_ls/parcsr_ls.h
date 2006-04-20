@@ -529,7 +529,6 @@ int hypre_BoomerAMGCycle( void *amg_vdata , hypre_ParVector **F_array , hypre_Pa
 HYPRE_ParCSRMatrix GenerateDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 
 /* par_gsmg.c */
-void hypre_F90_NAME_BLAS( int dgels , int DGELS );
 int hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , int copy_data );
 int hypre_ParCSRMatrixFillSmooth( int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int num_functions , int *dof_func );
 double hypre_ParCSRMatrixChooseThresh( hypre_ParCSRMatrix *S );
@@ -590,6 +589,8 @@ int hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix 
 int hypre_GenerateSendMapAndCommPkg( MPI_Comm comm , int num_sends , int num_recvs , int *recv_procs , int *send_procs , int *recv_vec_starts , hypre_ParCSRMatrix *A );
 
 /* par_relax.c */
+int hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp );
+int gselim( double *A , double *x , int n );
 
 /* par_relax_interface.c */
 int hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_order , int cycle_type , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp );
@@ -658,7 +659,6 @@ int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
 int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
 
 /* schwarz.c */
-void hypre_F90_NAME_BLAS( int dpotrf , int DPOTRF );
 int hypre_ParMPSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_CSRMatrix *A_boundary , hypre_ParVector *rhs_vector , hypre_CSRMatrix *domain_structure , hypre_ParVector *par_x , double relax_wt , double *scale , hypre_ParVector *Vtemp );
 int hypre_MPSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_Vector *rhs_vector , hypre_CSRMatrix *domain_structure , hypre_ParVector *par_x , double relax_wt , hypre_Vector *aux_vector );
 int transpose_matrix_create( int **i_face_element_pointer , int **j_face_element_pointer , int *i_element_face , int *j_element_face , int num_elements , int num_faces );
