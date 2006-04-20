@@ -1982,6 +1982,7 @@ hypre_FillResponseParToCSRMatrix(void *p_recv_contact_buf,
 hypre_ParCSRMatrix * hypre_ParCSRMatrixCompleteClone( hypre_ParCSRMatrix * A )
 {
    hypre_ParCSRMatrix * B = hypre_CTAlloc(hypre_ParCSRMatrix, 1);
+   int i, ncols_offd;
 
    hypre_ParCSRMatrixComm( B ) = hypre_ParCSRMatrixComm( A );
    hypre_ParCSRMatrixGlobalNumRows( B ) = hypre_ParCSRMatrixGlobalNumRows( A );
@@ -2005,8 +2006,7 @@ hypre_ParCSRMatrix * hypre_ParCSRMatrixCompleteClone( hypre_ParCSRMatrix * A )
    hypre_ParCSRMatrixRowindices( B ) = NULL;
    hypre_ParCSRMatrixRowvalues( B ) = NULL;
    hypre_ParCSRMatrixGetrowactive( B ) = 0;
-   int i;
-   int ncols_offd = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd( B ) );
+   ncols_offd = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd( B ) );
 
    hypre_ParCSRMatrixColMapOffd( B ) = hypre_CTAlloc( int, ncols_offd );
    for ( i=0; i<ncols_offd; ++i )
@@ -2026,13 +2026,10 @@ hypre_ParCSRMatrix * hypre_ParCSRMatrixCompleteClone( hypre_ParCSRMatrix * A )
 hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,
                                               hypre_ParCSRMatrix * B )
 {
-   int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
-   int num_cols_offd;
-   int num_nonzeros_diag;
-   int num_nonzeros_offd;
    hypre_ParCSRMatrix * C;
    int  num_procs, my_id, p;
    MPI_Comm comm = hypre_ParCSRMatrixComm( A );
+   int i, ncols_offd;
 
    MPI_Comm_rank(comm,&my_id);
    MPI_Comm_size(comm,&num_procs);
@@ -2069,8 +2066,7 @@ hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,
    hypre_ParCSRMatrixRowvalues( B ) = NULL;
    hypre_ParCSRMatrixGetrowactive( B ) = 0;
 
-   int i;
-   int ncols_offd = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd( C ) );
+   ncols_offd = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd( C ) );
    hypre_ParCSRMatrixColMapOffd( C ) = hypre_CTAlloc( int, ncols_offd );
    for ( i=0; i<ncols_offd; ++i )
       hypre_ParCSRMatrixColMapOffd( C )[i] = hypre_ParCSRMatrixColMapOffd( A )[i];

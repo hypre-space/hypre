@@ -78,17 +78,24 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    hypre_CSRMatrix *Pnew_diag;
    hypre_CSRMatrix *Pnew_offd;
    int	num_rows_diag_P = hypre_CSRMatrixNumRows(P_diag);
-   int i, m;
-   double PIi, PIimax, PIimin, PIimav, PIipav, randthresh;
-   int Jnochanges=0, Jchanges, nmav, npav, Pnew_num_nonzeros;
+   int i;
+   int Jnochanges=0, Jchanges, Pnew_num_nonzeros;
    int CF_coarse=0;
-   char filename[80];
    int * J_marker = hypre_CTAlloc( int, num_rows_diag_P );
-   double eps = 1.0e-17;
    int nc, ncmax, ncmin, nc1;
-   int sample_rows[50], n_sample_rows=0, isamp;
    int num_procs, my_id;
    MPI_Comm comm = hypre_ParCSRMatrixComm( A );
+#ifdef HYPRE_JACINT_PRINT_ROW_SUMS
+   int m, nmav, npav;
+   double PIi, PIimax, PIimin, PIimav, PIipav, randthresh;
+   double eps = 1.0e-17;
+#endif
+#ifdef HYPRE_JACINT_PRINT_MATRICES
+   char filename[80];
+#endif
+#ifdef HYPRE_JACINT_PRINT_SOME_ROWS
+   int sample_rows[50], n_sample_rows=0, isamp;
+#endif
 
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
@@ -333,7 +340,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    if ( num_rows_diag_P <= 100 )  hypre_ParCSRMatrixPrintIJ( *P,0,0,filename);
 #endif
       
-};
+}
 
 void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
                                     double eps, double dlt,
