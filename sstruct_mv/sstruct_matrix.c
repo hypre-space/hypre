@@ -620,7 +620,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    int                   ncoeffs;
    double               *coeffs;
    int                   i, entry;
-/*   int                   proc, myproc;*/
+   int                   proc, myproc;
    /* GEC1002 the matrix type */
    int                   matrix_type = hypre_SStructMatrixObjectType(matrix);
 
@@ -644,15 +644,17 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       hypre_BoxMapEntryGetInfo(map_entry, (void **) &entry_info);
    }
 
-#if 0    /* off-process setting/accumulating is done in the IJ interface now */
-   /* return if row is not on this process; not an error */
-   hypre_SStructMapEntryGetProcess(map_entry, &proc);
-   MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
-   if (proc != myproc)
+   /* Only Set values if I am the owner process; off-process AddTo and Get
+    * values are done by IJ */
+   if (!add_to)
    {
-      return hypre_error_flag;
+      hypre_SStructMapEntryGetProcess(map_entry, &proc);
+      MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
+      if (proc != myproc)
+      {
+         return hypre_error_flag;
+      }
    }
-#endif
 
    /* GEC1002 get the rank using the function with the type=matrixtype*/
    hypre_SStructMapEntryGetGlobalRank(map_entry, index, &row_coord, matrix_type);
@@ -767,7 +769,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    int                   sy, sz;
    int                   row_base, col_base, val_base;
    int                   e, entry, ii, jj, i, j, k;
-/*   int                   proc, myproc;*/
+   int                   proc, myproc;
   /* GEC1002 the matrix type */
    int                   matrix_type = hypre_SStructMatrixObjectType(matrix);
 
@@ -804,15 +806,17 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
          
       for (ii = 0; ii < nmap_entries; ii++)
       {
-#if 0    /* off-process setting/accumulating is done in the IJ interface now */
-         /* continue if rows are not on this process; not an error */
-         hypre_SStructMapEntryGetProcess(map_entries[ii], &proc);
-         MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
-         if (proc != myproc)
+         /* Only Set values if I am the owner process; off-process AddTo and Get
+          * values are done by IJ */
+         if (!add_to)
          {
-            continue;
+            hypre_SStructMapEntryGetProcess(map_entries[ii], &proc);
+            MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
+            if (proc != myproc)
+            {
+               continue;
+            }
          }
-#endif
 
          /* GEC1002 introducing the strides based on the type of the matrix  */
          hypre_SStructMapEntryGetStrides(map_entries[ii], rs, matrix_type);
