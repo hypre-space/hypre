@@ -92,7 +92,7 @@ impl_bHYPRE_Hybrid__ctor(
    struct bHYPRE_Hybrid__data * data;
    data = hypre_CTAlloc( struct bHYPRE_Hybrid__data, 1 );
 
-   data -> mpicomm         = MPI_COMM_NULL;
+   data -> mpicomm      = bHYPRE_MPICommunicator_CreateC( (void *)MPI_COMM_NULL );
    data -> krylov_solver_1 = (bHYPRE_PreconditionedSolver)NULL;
    data -> krylov_solver_2 = (bHYPRE_PreconditionedSolver)NULL;
    data -> solver_used = 0;

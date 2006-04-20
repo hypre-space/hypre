@@ -88,7 +88,7 @@ impl_bHYPRE_GMRES__ctor(
    data = hypre_CTAlloc( struct bHYPRE_GMRES__data, 1 );
 
    /* set defaults */
-   data -> bmpicomm = MPI_COMM_NULL;
+   data -> bmpicomm      = bHYPRE_MPICommunicator_CreateC( (void *)MPI_COMM_NULL );
    data -> matrix = (bHYPRE_Operator)NULL;
    data -> precond = (bHYPRE_Solver)NULL;
    data -> k_dim          = 5;
@@ -183,7 +183,7 @@ impl_bHYPRE_GMRES_Create(
   /* Insert-Code-Here {bHYPRE.GMRES.Create} (Create method) */
 
    bHYPRE_GMRES solver = bHYPRE_GMRES__create();
-   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( solver );;
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( solver );
    bHYPRE_IdentitySolver Id  = bHYPRE_IdentitySolver_Create( mpi_comm );
    bHYPRE_Solver IdS = bHYPRE_Solver__cast( Id );
 

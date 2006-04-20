@@ -68,7 +68,7 @@ impl_bHYPRE_PCG__ctor(
    struct bHYPRE_PCG__data * data;
    data = hypre_CTAlloc( struct bHYPRE_PCG__data, 1 );
 
-   data -> mpicomm      = MPI_COMM_NULL;
+   data -> mpicomm      = bHYPRE_MPICommunicator_CreateC( (void *)MPI_COMM_NULL );
    data -> matrix       = (bHYPRE_Operator)NULL;
    data -> tol          = 1.0e-06;
    data -> atolf        = 0.0;
@@ -163,7 +163,7 @@ impl_bHYPRE_PCG_Create(
   /* Insert-Code-Here {bHYPRE.PCG.Create} (Create method) */
 
    bHYPRE_PCG solver = bHYPRE_PCG__create();
-   struct bHYPRE_PCG__data * data = bHYPRE_PCG__get_data( solver );;
+   struct bHYPRE_PCG__data * data = bHYPRE_PCG__get_data( solver );
    bHYPRE_IdentitySolver Id  = bHYPRE_IdentitySolver_Create( mpi_comm );
    bHYPRE_Solver IdS = bHYPRE_Solver__cast( Id );
 

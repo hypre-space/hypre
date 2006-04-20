@@ -31,6 +31,7 @@
 /* Insert-Code-Here {bHYPRE.MPICommunicator._includes} (includes and arbitrary code) */
 
 #include <stddef.h>
+extern MPI_Comm MPI_Comm_f2c(ptrdiff_t mpi_int);
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._includes) */
 

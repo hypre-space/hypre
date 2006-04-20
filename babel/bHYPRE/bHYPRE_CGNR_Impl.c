@@ -80,7 +80,7 @@ impl_bHYPRE_CGNR__ctor(
 
    /* additional log info (logged when `logging' > 0) */
 
-   data -> mpicomm      = MPI_COMM_NULL;
+   data -> mpicomm      = bHYPRE_MPICommunicator_CreateC( (void *)MPI_COMM_NULL );
    data -> matrix       = (bHYPRE_Operator)NULL;
    data -> precond      = (bHYPRE_Solver)NULL;
 
@@ -173,7 +173,7 @@ impl_bHYPRE_CGNR_Create(
   /* Insert-Code-Here {bHYPRE.CGNR.Create} (Create method) */
 
    bHYPRE_CGNR solver = bHYPRE_CGNR__create();
-   struct bHYPRE_CGNR__data * data = bHYPRE_CGNR__get_data( solver );;
+   struct bHYPRE_CGNR__data * data = bHYPRE_CGNR__get_data( solver );
    bHYPRE_IdentitySolver Id  = bHYPRE_IdentitySolver_Create( mpi_comm );
    bHYPRE_Solver IdS = bHYPRE_Solver__cast( Id );
 

@@ -498,9 +498,10 @@ impl_bHYPRE_IJParCSRVector_Read(
    int ierr = 0;
    struct bHYPRE_IJParCSRVector__data * data;
    HYPRE_IJVector ij_b;
+   MPI_Comm mpicomm = bHYPRE_MPICommunicator__get_data(comm)->mpi_comm;
+
    data = bHYPRE_IJParCSRVector__get_data( self );
    ij_b = data->ij_b;
-   MPI_Comm mpicomm = bHYPRE_MPICommunicator__get_data(comm)->mpi_comm;
 
    /* HYPRE_IJVectorRead will make a new one */
    ierr = HYPRE_IJVectorDestroy( ij_b );

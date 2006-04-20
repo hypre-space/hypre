@@ -80,7 +80,7 @@ impl_bHYPRE_BiCGSTAB__ctor(
 
    /* additional log info (logged when `logging' > 0) */
 
-   data -> mpicomm      = MPI_COMM_NULL;
+   data -> mpicomm      = bHYPRE_MPICommunicator_CreateC( (void *)MPI_COMM_NULL );
    data -> matrix       = (bHYPRE_Operator)NULL;
    data -> precond      = (bHYPRE_Solver)NULL;
 
@@ -180,7 +180,7 @@ impl_bHYPRE_BiCGSTAB_Create(
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.Create} (Create method) */
 
    bHYPRE_BiCGSTAB solver = bHYPRE_BiCGSTAB__create();
-   struct bHYPRE_BiCGSTAB__data * data = bHYPRE_BiCGSTAB__get_data( solver );;
+   struct bHYPRE_BiCGSTAB__data * data = bHYPRE_BiCGSTAB__get_data( solver );
    bHYPRE_IdentitySolver Id  = bHYPRE_IdentitySolver_Create( mpi_comm );
    bHYPRE_Solver IdS = bHYPRE_Solver__cast( Id );
 

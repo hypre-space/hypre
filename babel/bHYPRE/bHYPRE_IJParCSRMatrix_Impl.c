@@ -1012,9 +1012,10 @@ impl_bHYPRE_IJParCSRMatrix_GetIntValue(
    void * object;
    HYPRE_IJMatrix HijA;
    struct bHYPRE_IJParCSRMatrix__data * data;
+   HYPRE_ParCSRMatrix HA ;
+
    data = bHYPRE_IJParCSRMatrix__get_data( self );
    HijA = data->ij_A;
-   HYPRE_ParCSRMatrix HA ;
 
    ierr += HYPRE_IJMatrixGetObject( HijA, &object );
    HA = (HYPRE_ParCSRMatrix) object;
