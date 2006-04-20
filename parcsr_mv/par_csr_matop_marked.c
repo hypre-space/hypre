@@ -739,7 +739,7 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
 
    return C;
    
-};
+}
 
 void hypre_ParMatScaleDiagInv_F(
    hypre_ParCSRMatrix * C, hypre_ParCSRMatrix * A, double weight, int * CF_marker )
@@ -829,7 +829,7 @@ void hypre_ParMatScaleDiagInv_F(
       }
    }
 
-};
+}
 
 hypre_ParCSRMatrix * hypre_ParMatMinus_F(
    hypre_ParCSRMatrix * P, hypre_ParCSRMatrix * C, int * CF_marker )
@@ -1095,7 +1095,7 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
    hypre_TFree(Pnew_j2m);
 
    return Pnew;
-};
+}
 
 
   /* fine (marked <0 ) rows of Pnew set to 0 */
@@ -1201,7 +1201,6 @@ void hypre_ParCSRMatrixDropEntries( hypre_ParCSRMatrix * C,
    int             *C_offd_j = hypre_CSRMatrixJ(C_offd);
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
-   double          *P_diag_data = hypre_CSRMatrixData(P_diag);
    int             *P_diag_i = hypre_CSRMatrixI(P_diag);
    int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
    int             *P_offd_i = hypre_CSRMatrixI(P_offd);
