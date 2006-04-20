@@ -567,26 +567,6 @@ int HYPRE_BoomerAMGSetAggNumLevels(HYPRE_Solver solver,
                                 int          agg_num_levels);
 
 /**
- * (Optional) Defines the number of relaxation steps for CR
- * The default is 2.
- **/
-int HYPRE_BoomerAMGSetNumCRRelaxSteps(HYPRE_Solver solver,
-                                int          num_CR_relax_steps);
-
-/**
- * (Optional) Defines convergence rate for CR
- * The default is 0.7.
- **/
-int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
-                             double  CR_rate);
-
-/**
- * (Optional) Defines the Type of independent set algorithm used for CR
- **/
-int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
-                                int          IS_type);
-
-/**
  * (Optional) Defines the degree of aggressive coarsening.
  * The default is 1.
  **/
@@ -1769,6 +1749,39 @@ int HYPRE_ParCSRHybridGetPCGNumIterations(HYPRE_Solver  solver,
                                           int                *pcg_num_its);
  
 int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(HYPRE_Solver  solver,                                                   double             *norm); 
+
+/**
+ * (Optional) Switches on use of Jacobi interpolation after computing
+ * an original interpolation
+ **/
+int HYPRE_BoomerAMGSetPostInterpType(HYPRE_Solver solver,
+                                int          post_interp_type);
+
+/**
+ * (Optional) Sets a truncation threshold for Jacobi interpolation.
+ **/
+int HYPRE_BoomerAMGSetJacobiTruncThreshold(HYPRE_Solver solver,
+                                double          jacobi_trunc_threshold);
+
+/**
+ * (Optional) Defines the number of relaxation steps for CR
+ * The default is 2.
+ **/
+int HYPRE_BoomerAMGSetNumCRRelaxSteps(HYPRE_Solver solver,
+                                int          num_CR_relax_steps);
+
+/**
+ * (Optional) Defines convergence rate for CR
+ * The default is 0.7.
+ **/
+int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
+                             double  CR_rate);
+
+/**
+ * (Optional) Defines the Type of independent set algorithm used for CR
+ **/
+int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
+                                int          IS_type);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/ 
