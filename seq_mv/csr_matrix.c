@@ -378,8 +378,6 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion( hypre_CSRMatrix * A, hypre_CSRMatrix * B
    int num_rows = hypre_CSRMatrixNumRows( A );
    int num_cols_A = hypre_CSRMatrixNumCols( A );
    int num_cols_B = hypre_CSRMatrixNumCols( B );
-   int num_nonzeros_A = hypre_CSRMatrixNumNonzeros( A );
-   int num_nonzeros_B = hypre_CSRMatrixNumNonzeros( B );
    int num_cols = hypre_max( num_cols_A, num_cols_B );
    int num_nonzeros;
    int * A_i = hypre_CSRMatrixI(A);
