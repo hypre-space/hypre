@@ -14,7 +14,7 @@
 #
 #=============================================================================
 
-Version 1.11.0b released, 2006/??/??.
+Version 1.11.0b released, 2006/04/24.
 
 - Added configure option --without-FEI to disable build of internal FEI routines.
 
