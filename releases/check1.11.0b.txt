@@ -87,71 +87,71 @@ available to users.
     Otherwise, untag the repository, make necessary corrections, return
        to step 10; iterating until all tests run correctly.
 
-    --->> __________N/A__________________________
+    --->> ___iterations to resolve error reported by Koning & Kerbel until 4/21/06
 
 19. Copy tar file to any closed (SCF) computer system, using FIS 
 
-    --->> ______________OK 4/3/06_________________
+    --->> ______________OK 4/21/06_________________
 
 20. On the CASC cluster, copy tar file to /usr/casc/hypre/i686-pc-linux-gnu 
        directory
 
-    --->> ___________OK 4/3/06_________________
+    --->> ___________OK 4/21/06_________________
 
 21. Run the mkdistlinks script to create symbolic links to the tar file 
     ./mkdistlinks <HypreArchiveFileName> 
          (run in /usr/casc/hypre and OCF directory /usr/gapps/hypre)
 
-    --->> _____________OK 4/3/06_____________
+    --->> _____________OK 4/21/06_____________
 
 22. On each open SYS_TYPE platform, including the CASC cluster, run the mklibs 
        script in the /usr/casc/hypre and/or /usr/gapps/hypre directories to 
        create and install the release
     ./mklibs -b <HypreArchiveFileName> install
 
-    --->> _______OK 4/3/06____________
+    --->> _______OK 4/24/06____________
 
 23. Log onto any closed (SCF) computer system
 
-    --->> _________________________________________
+    --->> ____OK 4/24/06______________________________
 
 24. Retrieve the tar file from the FIS system
 
-    --->> _________________________________________
+    --->> ____OK 4/24/06______________________________
 
 25. Manually untar the file that was retrieved in step 24
 
-    --->> _________________________________________
+    --->> ____OK 4/24/06______________________________
 
 26. Manually run the autotest script with the following options on the checked
         out version: -sc -lilac
 
-    --->> _________________________________________
+    --->> ____OK 4/24/06______________________________
 
 27. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
        /usr/gapps/hypre
 
-    --->> _________________________________________
+    --->> ____OK 4/24/06______________________________
 
 28. Run the mkdistlinks script to create symbolic links to the tar file 
     ./mkdistlinks <HypreArchiveFileName> 
          (run in /usr/gapps/hypre)
 
-    --->> _________________________________________
+    --->> ____OK 4/24/06______________________________
 
 29. On each SCF SYS_TYPE platform run the mklibs script in the 
        /usr/gapps/hypre directories to create and install the release
     ./mklibs -b <HypreArchiveFileName> install
 
-    --->> _________________________________________
+    --->> ____OK 4/24/06______________________________
 
 30. If there are no errors in steps 16-30; inform project team and other
        appropriate users of availability
 
-    --->> _________________________________________
+    --->> ____OK 4/24/06______________________________
 
 31. FINAL SIGN-OFF
     Verify that all steps have been signed off and commit this file to
        the repository
 
-    --->> _________________________________________
+    --->> ____OK 4/24/06______________________________
