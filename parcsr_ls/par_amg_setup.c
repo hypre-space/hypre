@@ -1320,7 +1320,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                     col_offd_S_to_A,
                                                     &P_block_array[level]);
             }
-            else if (interp_type == 12)
+            /*else if (interp_type == 12)
             {
                hypre_BoomerAMGBuildBlockDirInterp( A_block_array[level], CFN_marker, 
                                                     SN,
@@ -1341,7 +1341,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                     trunc_factor,
                                                     col_offd_S_to_A,
                                                     &P_block_array[level]);
-            }
+            }*/
             else /* interp_type ==10 */
             {
                
@@ -1441,6 +1441,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       }
 
+      /*if ( post_interp_type>=1 && level < agg_num_levels)*/
       if ( post_interp_type>=1 )
          /* Improve on P with Jacobi interpolation */
          hypre_BoomerAMGJacobiInterp( A_array[level], &P, S, CF_marker_array[level],
