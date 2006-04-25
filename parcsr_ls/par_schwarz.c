@@ -187,11 +187,60 @@ hypre_SchwarzSolve(void               *schwarz_vdata,
    {
       ierr = hypre_AdSchwarzSolve(A, f, domain_structure, scale, u, Vtemp);
    }
+   else if (variant == 4)
+   {
+      ierr = hypre_MPSchwarzFWSolve(A, hypre_ParVectorLocalVector(f), 
+				domain_structure, u, relax_wt, 
+				hypre_ParVectorLocalVector(Vtemp));
+   }
    else 
    {
       ierr = hypre_MPSchwarzSolve(A, hypre_ParVectorLocalVector(f), 
 				domain_structure, u, relax_wt, 
 				hypre_ParVectorLocalVector(Vtemp));
+   }
+      
+   return ierr;
+}
+/*--------------------------------------------------------------------
+ * hypre_SchwarzCFSolve
+ *--------------------------------------------------------------------*/
+
+int
+hypre_SchwarzCFSolve(void               *schwarz_vdata,
+                   hypre_ParCSRMatrix *A,
+                   hypre_ParVector    *f,
+                   hypre_ParVector    *u,
+                   int *CF_marker,
+		   int rlx_pt)
+{
+   hypre_SchwarzData   *schwarz_data = schwarz_vdata;
+   int ierr = 0;
+   hypre_CSRMatrix *domain_structure = 
+		hypre_SchwarzDataDomainStructure(schwarz_data);
+   double *scale = hypre_SchwarzDataScale(schwarz_data);
+   hypre_ParVector *Vtemp = hypre_SchwarzDataVtemp(schwarz_data);
+   int variant = hypre_SchwarzDataVariant(schwarz_data);
+   double relax_wt = hypre_SchwarzDataRelaxWeight(schwarz_data);
+
+   if (variant == 1)
+   {
+      ierr = hypre_AdSchwarzCFSolve(A, f, domain_structure, scale, u, Vtemp,
+				CF_marker, rlx_pt);
+   }
+   else if (variant == 4)
+   {
+      ierr = hypre_MPSchwarzCFFWSolve(A, hypre_ParVectorLocalVector(f), 
+				domain_structure, u, relax_wt, 
+				hypre_ParVectorLocalVector(Vtemp),
+				CF_marker, rlx_pt);
+   }
+   else 
+   {
+      ierr = hypre_MPSchwarzCFSolve(A, hypre_ParVectorLocalVector(f), 
+				domain_structure, u, relax_wt, 
+				hypre_ParVectorLocalVector(Vtemp),
+				CF_marker, rlx_pt);
    }
       
    return ierr;

@@ -211,6 +211,48 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    switch (mode)
    {
+      case 7:  /* frobenius norm with signs*/
+      {
+         for (i=0; i < num_nodes; i++)
+         {
+            for (j=0; j < num_functions; j++)
+            {
+	       for (k=A_diag_i[row]; k < A_diag_i[row+1]; k++)
+	       {
+	          k_map = map_to_node[A_diag_j[k]];
+	          if (counter[k_map] < start_index)
+	          {
+	             counter[k_map] = index;
+	             AN_diag_j[index] = k_map;
+	             AN_diag_data[index] = A_diag_data[k]*A_diag_data[k];
+	             index++;
+	          }
+	          else
+	          {
+	             AN_diag_data[counter[k_map]] += 
+				A_diag_data[k]*A_diag_data[k];
+	          }
+	       }
+	       row++;
+            }
+            start_index = index;
+         }
+         for (i=0; i < AN_num_nonzeros_diag; i++)
+            AN_diag_data[i] = sqrt(AN_diag_data[i]);
+
+         /* temp for testing - make all diagonal entries negative */
+         /* the diagonal is the first element listed in each row -
+            this is the same as serial code */
+
+         for (i=0; i < num_nodes; i++)
+         {
+            index = AN_diag_i[i];
+            AN_diag_data[index] = - AN_diag_data[index];
+         }
+
+      }
+      break;
+      
       case 1:  /* frobenius norm */
       {
          for (i=0; i < num_nodes; i++)

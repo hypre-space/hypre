@@ -12,4 +12,5 @@
 #include <math.h>
 
 #include "parcsr_ls.h"
+#include "par_csr_block_matrix.h"
 
