@@ -797,8 +797,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
-	status = hypre_CTAlloc(MPI_Status,num_recvs);
-	requests = hypre_CTAlloc(MPI_Request, num_recvs);
+	status  = hypre_CTAlloc(MPI_Status,num_recvs+num_sends);
+	requests= hypre_CTAlloc(MPI_Request, num_recvs+num_sends);
 
 	if (num_cols_offd)
 	{
@@ -940,8 +940,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
-	status = hypre_CTAlloc(MPI_Status,num_recvs);
-	requests = hypre_CTAlloc(MPI_Request, num_recvs);
+	status  = hypre_CTAlloc(MPI_Status,num_recvs+num_sends);
+	requests= hypre_CTAlloc(MPI_Request, num_recvs+num_sends);
 
 	if (num_cols_offd)
 	{
