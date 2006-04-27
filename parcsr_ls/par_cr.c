@@ -1448,7 +1448,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    hypre_ParVector *e0_vec, *e1_vec, *Vtemp;                                                                                                             
    int             *AN_i, *AN_offd_i;
    int             *CF_marker;
-   int             *CFN_marker;
+   /*int             *CFN_marker;*/
    int              coarse_size;
    int              ierr = 0;
    int 		    i,j, jj, j2, nstages=0;  
@@ -1683,9 +1683,11 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                }
             }
    	    if (IS_type == 1)
-	        hypre_BoomerAMGIndepHMIS(AN,0,0,CFN_marker);
+	        hypre_BoomerAMGIndepHMIS(AN,0,0,CF_marker);
+	        /*hypre_BoomerAMGIndepHMIS(AN,0,0,CFN_marker);*/
    	    else if (IS_type == 2)
-	       hypre_BoomerAMGIndepPMIS(AN,0,0,CFN_marker);
+	       hypre_BoomerAMGIndepPMIS(AN,0,0,CF_marker);
+	       /*hypre_BoomerAMGIndepPMIS(AN,0,0,CFN_marker);*/
    	    else if (IS_type == 3)
 	    {
                IndepSetGreedy(hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AN)),
@@ -1694,7 +1696,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
 			/*num_nodes,CFN_marker);*/
 	    }
    	    else 
-	       hypre_BoomerAMGIndepRS(AN,1,0,CFN_marker);
+	       hypre_BoomerAMGIndepRS(AN,1,0,CF_marker);
+	       /*hypre_BoomerAMGIndepRS(AN,1,0,CFN_marker);*/
          }
 
          if (my_id == 0) fprintf(stdout,"  %d \t%2.3f  \t%2.3f \n",
