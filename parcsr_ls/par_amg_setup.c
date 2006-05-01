@@ -1444,7 +1444,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       /*if ( post_interp_type>=1 && level < agg_num_levels)*/
       if ( post_interp_type>=1 )
          /* Improve on P with Jacobi interpolation */
-         hypre_BoomerAMGJacobiInterp( A_array[level], &P, S, CF_marker_array[level],
+         hypre_BoomerAMGJacobiInterp( A_array[level], &P, S,
+                                      num_functions, dof_func,
+                                      CF_marker_array[level],
                                       level, jacobi_trunc_threshold, 0.5*jacobi_trunc_threshold );
 
 

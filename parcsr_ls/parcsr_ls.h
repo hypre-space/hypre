@@ -551,9 +551,10 @@ int hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix *A , int *CF_marker , hypr
 int hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P , double trunc_factor );
 
 /* par_jacobi_interp.c */
-void hypre_BoomerAMGJacobiInterp( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , hypre_ParCSRMatrix *S , int *CF_marker , int level , double truncation_threshold , double truncation_threshold_minus );
-void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , hypre_ParCSRMatrix *S , int *CF_marker , int level , double truncation_threshold , double truncation_threshold_minus , double weight_AF , double weight_AFF );
+void hypre_BoomerAMGJacobiInterp( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , hypre_ParCSRMatrix *S , int num_functions , int *dof_func , int *CF_marker , int level , double truncation_threshold , double truncation_threshold_minus );
+void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , hypre_ParCSRMatrix *S , int *CF_marker , int level , double truncation_threshold , double truncation_threshold_minus , int *dof_func , int *dof_func_offd , double weight_AF , double weight_AFF );
 void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P , double eps , double dlt , int *CF_marker );
+int hypre_ParCSRMatrix_dof_func_offd( hypre_ParCSRMatrix *A , int num_functions , int *dof_func , int **dof_func_offd );
 
 /* par_jacobi_interp_junk.c */
 void hypre_BoomerAMGJacobiInterp_crude_rescaling( hypre_ParCSRMatrix *P );
