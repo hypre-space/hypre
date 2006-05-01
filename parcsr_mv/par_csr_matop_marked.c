@@ -23,7 +23,7 @@ void hypre_ParMatmul_RowSizes_Marked
   int *C_diag_size, int *C_offd_size,
   int num_rows_diag_A, int num_cols_offd_A, int allsquare,
   int num_cols_diag_B, int num_cols_offd_B, int num_cols_offd_C,
-  int * CF_marker
+  int * CF_marker, int * dof_func, int * dof_func_offd
    )
  /* Compute row sizes of result of a matrix multiplication A*B.
    But we only consider rows designated by CF_marker(i)<0 ("Fine" rows).
@@ -83,6 +83,7 @@ void hypre_ParMatmul_RowSizes_Marked
       else
    {
       /* >>>  this block is unchanged from hypare_ParMatmul_Row Sizes...
+         >>> *** except for the dof_func check ***
          >>> maybe it can be spun off into a separate shared function.*/      
       /*--------------------------------------------------------------------
        *  Set marker for diagonal entry, C_{i1,i1} (for square matrices). 
@@ -101,39 +102,42 @@ void hypre_ParMatmul_RowSizes_Marked
          
 	 if (num_cols_offd_A)
 	 {
-           for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
-           {
-            i2 = A_offd_j[jj2];
+            for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+            {
+               i2 = A_offd_j[jj2];
  
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of B_ext.
-                *-----------------------------------------------------------*/
+               if ( dof_func==NULL || dof_func[i1] == dof_func_offd[i2] )
+               {/* interpolate only like "functions" */
+                  /*-----------------------------------------------------------
+                   *  Loop over entries in row i2 of B_ext.
+                   *-----------------------------------------------------------*/
  
-               for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
-               {
-                  i3 = num_cols_diag_B+B_ext_offd_j[jj3];
-                  
-                  /*--------------------------------------------------------
-                   *  Check B_marker to see that C_{i1,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
-
-                  if ((*B_marker)[i3] < jj_row_begin_offd)
+                  for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
                   {
+                     i3 = num_cols_diag_B+B_ext_offd_j[jj3];
+                  
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{i1,i3} has not already
+                      *  been accounted for. If it has not, mark it and increment
+                      *  counter.
+                      *--------------------------------------------------------*/
+
+                     if ((*B_marker)[i3] < jj_row_begin_offd)
+                     {
                      	(*B_marker)[i3] = jj_count_offd;
                      	jj_count_offd++;
-		  } 
-               }
-               for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
-               {
-                  i3 = B_ext_diag_j[jj3];
-                  
-                  if ((*B_marker)[i3] < jj_row_begin_diag)
+                     } 
+                  }
+                  for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
                   {
+                     i3 = B_ext_diag_j[jj3];
+                  
+                     if ((*B_marker)[i3] < jj_row_begin_diag)
+                     {
                   	(*B_marker)[i3] = jj_count_diag;
                      	jj_count_diag++;
-		  } 
+                     } 
+                  }
                }
             }
          }
@@ -145,6 +149,8 @@ void hypre_ParMatmul_RowSizes_Marked
          {
             i2 = A_diag_j[jj2];
  
+            if( dof_func==NULL || dof_func[i1] == dof_func[i2] )
+            { /* interpolate only like "functions" */
                /*-----------------------------------------------------------
                 *  Loop over entries in row i2 of B_diag.
                 *-----------------------------------------------------------*/
@@ -171,24 +177,25 @@ void hypre_ParMatmul_RowSizes_Marked
 
 	       if (num_cols_offd_B)
 	       { 
-                 for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
-                 {
-                  i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
-                  
-                  /*--------------------------------------------------------
-                   *  Check B_marker to see that C_{i1,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
- 
-                  if ((*B_marker)[i3] < jj_row_begin_offd)
+                  for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
                   {
-                     (*B_marker)[i3] = jj_count_offd;
-                     jj_count_offd++;
+                     i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
+                  
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{i1,i3} has not already
+                      *  been accounted for. If it has not, mark it and increment
+                      *  counter.
+                      *--------------------------------------------------------*/
+ 
+                     if ((*B_marker)[i3] < jj_row_begin_offd)
+                     {
+                        (*B_marker)[i3] = jj_count_offd;
+                        jj_count_offd++;
+                     }
                   }
-                 }
+               }
             }
-      }
+         }
             
       /*--------------------------------------------------------------------
        * Set C_diag_i and C_offd_i for this row.
@@ -218,7 +225,8 @@ void hypre_ParMatmul_RowSizes_Marked
 
 
 hypre_ParCSRMatrix * hypre_ParMatmul_FC(
-   hypre_ParCSRMatrix * A, hypre_ParCSRMatrix * P, int * CF_marker, double weight )
+   hypre_ParCSRMatrix * A, hypre_ParCSRMatrix * P, int * CF_marker,
+   int * dof_func, int * dof_func_offd, double weight )
 /* hypre_parMatmul_FC creates and returns the "Fine"-designated rows of the
    matrix product A*P.  A's size is (nC+nF)*(nC+nF), P's size is (nC+nF)*nC
    where nC is the number of coarse rows/columns, nF the number of fine
@@ -494,7 +502,7 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
       &C_diag_size, &C_offd_size,
       num_rows_diag_A, num_cols_offd_A, allsquare,
       num_cols_diag_P, num_cols_offd_P,
-      num_cols_offd_C, CF_marker
+      num_cols_offd_C, CF_marker, dof_func, dof_func_offd
       );
 
    /* The above call of hypre_ParMatmul_RowSizes_Marked computed
@@ -547,12 +555,12 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
             hypre_ParMatmul_FC is different from the regular hypre_ParMatmul */
       {
 
-      /*--------------------------------------------------------------------
-       *  Create diagonal entry, C_{i1,i1} 
-       *--------------------------------------------------------------------*/
+         /*--------------------------------------------------------------------
+          *  Create diagonal entry, C_{i1,i1} 
+          *--------------------------------------------------------------------*/
 
-      jj_row_begin_diag = jj_count_diag;
-      jj_row_begin_offd = jj_count_offd;
+         jj_row_begin_diag = jj_count_diag;
+         jj_row_begin_offd = jj_count_offd;
 
          /*-----------------------------------------------------------------
           *  Loop over entries in row i1 of A_offd.
@@ -560,50 +568,59 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
          
 	 if (num_cols_offd_A)
 	 {
-	  for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
-          {
-            i2 = A_offd_j[jj2];
-            a_entry = A_offd_data[jj2];
-            if ( CF_marker[i2]<0 ) a_entry = a_entry * weight;
+            for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+            {
+               i2 = A_offd_j[jj2];
+               if( dof_func==NULL || dof_func[i1] == dof_func_offd[i2] )
+               {  /* interpolate only like "functions" */
+                  a_entry = A_offd_data[jj2];
+                  if ( CF_marker[i2]<0 ) a_entry = a_entry * weight;
             
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of P_ext.
-                *-----------------------------------------------------------*/
+                  /*-----------------------------------------------------------
+                   *  Loop over entries in row i2 of P_ext.
+                   *-----------------------------------------------------------*/
 
-               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
-               {
-                  i3 = num_cols_diag_P+P_ext_offd_j[jj3];
-                  a_b_product = a_entry * P_ext_offd_data[jj3];
+                  for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                  {
+                     i3 = num_cols_diag_P+P_ext_offd_j[jj3];
+                     a_b_product = a_entry * P_ext_offd_data[jj3];
                   
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that C_{i1,i3} has not already
-                   *  been accounted for. If it has not, create a new entry.
-                   *  If it has, add new contribution.
-                   *--------------------------------------------------------*/
-                  if (P_marker[i3] < jj_row_begin_offd)
+                     /*--------------------------------------------------------
+                      *  Check P_marker to see that C_{i1,i3} has not already
+                      *  been accounted for. If it has not, create a new entry.
+                      *  If it has, add new contribution.
+                      *--------------------------------------------------------*/
+                     if (P_marker[i3] < jj_row_begin_offd)
+                     {
+                        P_marker[i3] = jj_count_offd;
+                        C_offd_data[jj_count_offd] = a_b_product;
+                        C_offd_j[jj_count_offd] = i3-num_cols_diag_P;
+                        jj_count_offd++;
+                     }
+                     else
+                        C_offd_data[P_marker[i3]] += a_b_product;
+                  }
+                  for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                   {
-                     	P_marker[i3] = jj_count_offd;
-                     	C_offd_data[jj_count_offd] = a_b_product;
-                     	C_offd_j[jj_count_offd] = i3-num_cols_diag_P;
-                     	jj_count_offd++;
-		  }
-		  else
-                    	C_offd_data[P_marker[i3]] += a_b_product;
+                     i3 = P_ext_diag_j[jj3];
+                     a_b_product = a_entry * P_ext_diag_data[jj3];
+                     if (P_marker[i3] < jj_row_begin_diag)
+                     {
+                        P_marker[i3] = jj_count_diag;
+                        C_diag_data[jj_count_diag] = a_b_product;
+                        C_diag_j[jj_count_diag] = i3;
+                        jj_count_diag++;
+                     }
+                     else
+                        C_diag_data[P_marker[i3]] += a_b_product;
+                  }
                }
-               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
-               {
-                  i3 = P_ext_diag_j[jj3];
-                  a_b_product = a_entry * P_ext_diag_data[jj3];
-                  if (P_marker[i3] < jj_row_begin_diag)
-                  {
-                     	P_marker[i3] = jj_count_diag;
-                     	C_diag_data[jj_count_diag] = a_b_product;
-                     	C_diag_j[jj_count_diag] = i3;
-                     	jj_count_diag++;
-		  }
-		  else
-                     	C_diag_data[P_marker[i3]] += a_b_product;
+               else
+               {  /* Interpolation mat should be 0 where i1 and i2 correspond to
+                     different "functions".  As we haven't created an entry for
+                     C(i1,i2), nothing needs to be done. */
                }
+
             }
          }
 
@@ -614,8 +631,10 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
          for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
          {
             i2 = A_diag_j[jj2];
-            a_entry = A_diag_data[jj2];
-            if ( CF_marker[i2]<0 ) a_entry = a_entry * weight;
+            if( dof_func==NULL || dof_func[i1] == dof_func[i2] )
+            {  /* interpolate only like "functions" */
+               a_entry = A_diag_data[jj2];
+               if ( CF_marker[i2]<0 ) a_entry = a_entry * weight;
             
                /*-----------------------------------------------------------
                 *  Loop over entries in row i2 of P_diag.
@@ -646,32 +665,38 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
                }
                if (num_cols_offd_P)
 	       {
-		for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
-                {
-                  i3 = num_cols_diag_P+map_P_to_C[P_offd_j[jj3]];
-                  a_b_product = a_entry * P_offd_data[jj3];
+                  for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
+                  {
+                     i3 = num_cols_diag_P+map_P_to_C[P_offd_j[jj3]];
+                     a_b_product = a_entry * P_offd_data[jj3];
                   
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that C_{i1,i3} has not already
-                   *  been accounted for. If it has not, create a new entry.
-                   *  If it has, add new contribution.
-                   *--------------------------------------------------------*/
+                     /*--------------------------------------------------------
+                      *  Check P_marker to see that C_{i1,i3} has not already
+                      *  been accounted for. If it has not, create a new entry.
+                      *  If it has, add new contribution.
+                      *--------------------------------------------------------*/
 
-                  if (P_marker[i3] < jj_row_begin_offd)
-                  {
-                     P_marker[i3] = jj_count_offd;
-                     C_offd_data[jj_count_offd] = a_b_product;
-                     C_offd_j[jj_count_offd] = i3-num_cols_diag_P;
-                     jj_count_offd++;
+                     if (P_marker[i3] < jj_row_begin_offd)
+                     {
+                        P_marker[i3] = jj_count_offd;
+                        C_offd_data[jj_count_offd] = a_b_product;
+                        C_offd_j[jj_count_offd] = i3-num_cols_diag_P;
+                        jj_count_offd++;
+                     }
+                     else
+                     {
+                        C_offd_data[P_marker[i3]] += a_b_product;
+                     }
                   }
-                  else
-                  {
-                     C_offd_data[P_marker[i3]] += a_b_product;
-                  }
-                }
                }
+            }
+            else
+            {  /* Interpolation mat should be 0 where i1 and i2 correspond to
+                  different "functions".  As we haven't created an entry for
+                  C(i1,i2), nothing needs to be done. */
+            }
          }
-   }
+      }
       else  /* i1 is a coarse row.*/
          /* Copy P coarse-row values to C.  This is useful if C is meant to
             become a replacement for P */

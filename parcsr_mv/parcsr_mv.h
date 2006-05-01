@@ -651,8 +651,8 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr , int *indi
 void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr , int *indices2 , hypre_ParCSRMatrix ***submatrices );
 
 /* par_csr_matop_marked.c */
-void hypre_ParMatmul_RowSizes_Marked( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_diag_i , int *B_ext_diag_j , int *B_ext_offd_i , int *B_ext_offd_j , int *map_B_to_C , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int allsquare , int num_cols_diag_B , int num_cols_offd_B , int num_cols_offd_C , int *CF_marker );
-hypre_ParCSRMatrix *hypre_ParMatmul_FC( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , int *CF_marker , double weight );
+void hypre_ParMatmul_RowSizes_Marked( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_diag_i , int *B_ext_diag_j , int *B_ext_offd_i , int *B_ext_offd_j , int *map_B_to_C , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int allsquare , int num_cols_diag_B , int num_cols_offd_B , int num_cols_offd_C , int *CF_marker , int *dof_func , int *dof_func_offd );
+hypre_ParCSRMatrix *hypre_ParMatmul_FC( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , int *CF_marker , int *dof_func , int *dof_func_offd , double weight );
 void hypre_ParMatScaleDiagInv_F( hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *A , double weight , int *CF_marker );
 hypre_ParCSRMatrix *hypre_ParMatMinus_F( hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *C , int *CF_marker );
 void hypre_ParCSRMatrixZero_F( hypre_ParCSRMatrix *P , int *CF_marker );
