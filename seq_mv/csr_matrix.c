@@ -371,6 +371,10 @@ hypre_CSRMatrix * hypre_CSRMatrixClone( hypre_CSRMatrix * A )
  * They need not have the same number of columns, if they were different I don't
  * know why anybody would want to call this function.
  * Nothing is done about Rownnz.
+ *
+ * The algorithm can be expected to have reasonable efficiency only for very
+ * sparse matrices (many rows, few nonzeros per row).
+ * The nonzeros of a computed row are NOT necessarily in any particular order.
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix * hypre_CSRMatrixUnion( hypre_CSRMatrix * A, hypre_CSRMatrix * B )
@@ -386,8 +390,7 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion( hypre_CSRMatrix * A, hypre_CSRMatrix * B
    int * B_j = hypre_CSRMatrixJ(B);
    int * C_i = hypre_CTAlloc( int, num_rows+1 );
    int * C_j;
-   int * row_js = hypre_CTAlloc( int, num_cols );
-   int i, j, ma, mb, mc;
+   int i, j, ma, mb, mc, ma_min, ma_max;
    hypre_CSRMatrix * C;
 
    hypre_assert( num_rows == hypre_CSRMatrixNumRows(B) );
@@ -395,17 +398,22 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion( hypre_CSRMatrix * A, hypre_CSRMatrix * B
    /* The first run through A and B is to count the number of nonzero elements,
       without double-counting duplicates. */
    C_i[0] = 0;
-   num_nonzeros = 0;
+   num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    for ( i=0; i<num_rows; ++i )
    {
-      for ( j=0; j<num_cols; ++j )
-         row_js[j] = 0;
-      for ( ma=A_i[i]; ma<A_i[i+1]; ++ma )
-         row_js[ A_j[ma] ] = 1;
+      ma_min = A_i[i];  ma_max = A_i[i+1];
       for ( mb=B_i[i]; mb<B_i[i+1]; ++mb )
-         row_js[ B_j[mb] ] = 1;
-      for ( j=0; j<num_cols; ++j )
-         if ( row_js[j]>0 ) ++num_nonzeros;
+      {
+         j = B_j[mb];
+         for ( ma=ma_min; ma<ma_max; ++ma )
+            if ( A_j[ma] == j )
+            {
+               if( ma==ma_min ) ++ma_min;
+               break;
+            }
+         else
+            ++num_nonzeros;
+      }
    }
 
    C = hypre_CSRMatrixCreate( num_rows, num_cols, num_nonzeros );
@@ -419,26 +427,31 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion( hypre_CSRMatrix * A, hypre_CSRMatrix * B
    mc = 0;
    for ( i=0; i<num_rows; ++i )
    {
-      for ( j=0; j<num_cols; ++j )
-         row_js[j] = 0;
-      for ( ma=A_i[i]; ma<A_i[i+1]; ++ma )
-         row_js[ A_j[ma] ] = 1;
-      for ( mb=B_i[i]; mb<B_i[i+1]; ++mb )
-         row_js[ B_j[mb] ] = 1;
-      for ( j=0; j<num_cols; ++j )
+      ma_min = A_i[i];  ma_max = A_i[i+1];
+      for ( ma=ma_min; ma<ma_max; ++ma )
       {
-         if ( row_js[j]>0 )
-         {
-            C_j[mc] = j;
-            ++mc;
-         }
+         C_j[mc] = A_j[ma];
+         ++mc;
+      }
+      for ( mb=B_i[i]; mb<B_i[i+1]; ++mb )
+      {
+         j = B_j[mb];
+         for ( ma=ma_min; ma<ma_max; ++ma )
+            if ( A_j[ma] == j )
+            {
+               if( ma==ma_min ) ++ma_min;
+               break;
+            }
+            else
+            {
+               C_j[mc] = B_j[mb];
+               ++mc;
+            }
       }
       C_i[i+1] = mc;
    }
 
    hypre_assert( mc == num_nonzeros );
-
-   hypre_TFree( row_js );
 
    return C;
 }
