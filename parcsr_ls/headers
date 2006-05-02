@@ -36,6 +36,8 @@ cat > $INTERNAL_HEADER <<@
 extern "C" {
 #endif
 
+typedef struct { int prev; int next; } Link;
+
 @
 
 #===========================================================================

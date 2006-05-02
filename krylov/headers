@@ -35,7 +35,14 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-../utilities/protos [!F]*.c               >> $INTERNAL_HEADER
+../utilities/protos bicgstab.c            >> $INTERNAL_HEADER
+../utilities/protos cgnr.c                >> $INTERNAL_HEADER
+../utilities/protos gmres.c               >> $INTERNAL_HEADER
+../utilities/protos HYPRE_bicgstab.c      >> $INTERNAL_HEADER
+../utilities/protos HYPRE_cgnr.c          >> $INTERNAL_HEADER
+../utilities/protos HYPRE_gmres.c         >> $INTERNAL_HEADER
+../utilities/protos HYPRE_pcg.c           >> $INTERNAL_HEADER
+../utilities/protos pcg.c                 >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

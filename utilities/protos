@@ -8,7 +8,8 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-mkproto $* \
- | awk '(NR > 6) && ($1 !~ /#undef/)' \
- | sed -e 's/ P((/( /g; s/);/;/g'|grep -v " main[ (]"
-
+while [ $# -ge 1 ]; do
+    echo ""; echo "/* $1 */"
+    perl -e 'while ($line = <>) {if ($line =~ /#else|#elif/) {0 while(<> !~ /#endif/);} elsif ($line !~ /#if|#endif/) {print("$line");}}' $1 | mkproto -p | grep -v " main[ (]"
+    shift
+done

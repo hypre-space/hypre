@@ -178,6 +178,7 @@ typedef struct hypre_IJMatrix_struct
    int         global_first_col;    /*   to be able to avoind using the global */
    int         global_num_rows;     /*   global partition */ 
    int         global_num_cols;
+   
 
 
 } hypre_IJMatrix;
@@ -259,6 +260,8 @@ typedef struct hypre_IJVector_struct
                                     /*    global partition */ 
    
    
+
+
 } hypre_IJVector;
 
 /*--------------------------------------------------------------------------
@@ -287,125 +290,122 @@ typedef struct hypre_IJVector_struct
 #endif
 
 /* aux_parcsr_matrix.c */
-int hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix , int local_num_rows , int local_num_cols , int *sizes );
-int hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix );
-int hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix );
-int hypre_AuxParCSRMatrixSetMaxOffPRocElmts( hypre_AuxParCSRMatrix *matrix , int max_off_proc_elmts );
+int hypre_AuxParCSRMatrixCreate ( hypre_AuxParCSRMatrix **aux_matrix , int local_num_rows , int local_num_cols , int *sizes );
+int hypre_AuxParCSRMatrixDestroy ( hypre_AuxParCSRMatrix *matrix );
+int hypre_AuxParCSRMatrixInitialize ( hypre_AuxParCSRMatrix *matrix );
+int hypre_AuxParCSRMatrixSetMaxOffPRocElmts ( hypre_AuxParCSRMatrix *matrix , int max_off_proc_elmts );
 
 /* aux_par_vector.c */
-int hypre_AuxParVectorCreate( hypre_AuxParVector **aux_vector );
-int hypre_AuxParVectorDestroy( hypre_AuxParVector *vector );
-int hypre_AuxParVectorInitialize( hypre_AuxParVector *vector );
-int hypre_AuxParVectorSetMaxOffPRocElmts( hypre_AuxParVector *vector , int max_off_proc_elmts );
-
+int hypre_AuxParVectorCreate ( hypre_AuxParVector **aux_vector );
+int hypre_AuxParVectorDestroy ( hypre_AuxParVector *vector );
+int hypre_AuxParVectorInitialize ( hypre_AuxParVector *vector );
+int hypre_AuxParVectorSetMaxOffPRocElmts ( hypre_AuxParVector *vector , int max_off_proc_elmts );
 
 /* IJMatrix.c */
-int hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix , int **row_partitioning );
-int hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix , int **col_partitioning );
-int hypre_IJMatrixSetObject( HYPRE_IJMatrix matrix , void *object );
+int hypre_IJMatrixGetRowPartitioning ( HYPRE_IJMatrix matrix , int **row_partitioning );
+int hypre_IJMatrixGetColPartitioning ( HYPRE_IJMatrix matrix , int **col_partitioning );
+int hypre_IJMatrixSetObject ( HYPRE_IJMatrix matrix , void *object );
 
 /* IJMatrix_isis.c */
-int hypre_IJMatrixSetLocalSizeISIS( hypre_IJMatrix *matrix , int local_m , int local_n );
-int hypre_IJMatrixCreateISIS( hypre_IJMatrix *matrix );
-int hypre_IJMatrixSetRowSizesISIS( hypre_IJMatrix *matrix , int *sizes );
-int hypre_IJMatrixSetDiagRowSizesISIS( hypre_IJMatrix *matrix , int *sizes );
-int hypre_IJMatrixSetOffDiagRowSizesISIS( hypre_IJMatrix *matrix , int *sizes );
-int hypre_IJMatrixInitializeISIS( hypre_IJMatrix *matrix );
-int hypre_IJMatrixInsertBlockISIS( hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs );
-int hypre_IJMatrixAddToBlockISIS( hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs );
-int hypre_IJMatrixInsertRowISIS( hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs );
-int hypre_IJMatrixAddToRowISIS( hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs );
-int hypre_IJMatrixAssembleISIS( hypre_IJMatrix *matrix );
-int hypre_IJMatrixDistributeISIS( hypre_IJMatrix *matrix , int *row_starts , int *col_starts );
-int hypre_IJMatrixApplyISIS( hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b );
-int hypre_IJMatrixDestroyISIS( hypre_IJMatrix *matrix );
-int hypre_IJMatrixSetTotalSizeISIS( hypre_IJMatrix *matrix , int size );
+int hypre_IJMatrixSetLocalSizeISIS ( hypre_IJMatrix *matrix , int local_m , int local_n );
+int hypre_IJMatrixCreateISIS ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixSetRowSizesISIS ( hypre_IJMatrix *matrix , int *sizes );
+int hypre_IJMatrixSetDiagRowSizesISIS ( hypre_IJMatrix *matrix , int *sizes );
+int hypre_IJMatrixSetOffDiagRowSizesISIS ( hypre_IJMatrix *matrix , int *sizes );
+int hypre_IJMatrixInitializeISIS ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixInsertBlockISIS ( hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs );
+int hypre_IJMatrixAddToBlockISIS ( hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs );
+int hypre_IJMatrixInsertRowISIS ( hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs );
+int hypre_IJMatrixAddToRowISIS ( hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs );
+int hypre_IJMatrixAssembleISIS ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixDistributeISIS ( hypre_IJMatrix *matrix , int *row_starts , int *col_starts );
+int hypre_IJMatrixApplyISIS ( hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b );
+int hypre_IJMatrixDestroyISIS ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixSetTotalSizeISIS ( hypre_IJMatrix *matrix , int size );
 
 /* IJMatrix_parcsr.c */
-int hypre_IJMatrixCreateParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixSetRowSizesParCSR( hypre_IJMatrix *matrix , const int *sizes );
-int hypre_IJMatrixSetDiagOffdSizesParCSR( hypre_IJMatrix *matrix , const int *diag_sizes , const int *offdiag_sizes );
-int hypre_IJMatrixSetMaxOffProcElmtsParCSR( hypre_IJMatrix *matrix , int max_off_proc_elmts );
-int hypre_IJMatrixInitializeParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixGetRowCountsParCSR( hypre_IJMatrix *matrix , int nrows , int *rows , int *ncols );
-int hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , int *rows , int *cols , double *values );
-int hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
-int hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
-int hypre_IJMatrixAssembleParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixDestroyParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix , int off_proc_i_indx , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , int *off_proc_j , double *off_proc_data );
-int hypre_FindProc( int *list , int value , int list_length );
+int hypre_IJMatrixCreateParCSR ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixSetRowSizesParCSR ( hypre_IJMatrix *matrix , const int *sizes );
+int hypre_IJMatrixSetDiagOffdSizesParCSR ( hypre_IJMatrix *matrix , const int *diag_sizes , const int *offdiag_sizes );
+int hypre_IJMatrixSetMaxOffProcElmtsParCSR ( hypre_IJMatrix *matrix , int max_off_proc_elmts );
+int hypre_IJMatrixInitializeParCSR ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixGetRowCountsParCSR ( hypre_IJMatrix *matrix , int nrows , int *rows , int *ncols );
+int hypre_IJMatrixGetValuesParCSR ( hypre_IJMatrix *matrix , int nrows , int *ncols , int *rows , int *cols , double *values );
+int hypre_IJMatrixSetValuesParCSR ( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
+int hypre_IJMatrixAddToValuesParCSR ( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
+int hypre_IJMatrixAssembleParCSR ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixDestroyParCSR ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixAssembleOffProcValsParCSR ( hypre_IJMatrix *matrix , int off_proc_i_indx , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , int *off_proc_j , double *off_proc_data );
+int hypre_FindProc ( int *list , int value , int list_length );
 
 /* IJMatrix_petsc.c */
-int hypre_IJMatrixSetLocalSizePETSc( hypre_IJMatrix *matrix , int local_m , int local_n );
-int hypre_IJMatrixCreatePETSc( hypre_IJMatrix *matrix );
-int hypre_IJMatrixSetRowSizesPETSc( hypre_IJMatrix *matrix , int *sizes );
-int hypre_IJMatrixSetDiagRowSizesPETSc( hypre_IJMatrix *matrix , int *sizes );
-int hypre_IJMatrixSetOffDiagRowSizesPETSc( hypre_IJMatrix *matrix , int *sizes );
-int hypre_IJMatrixInitializePETSc( hypre_IJMatrix *matrix );
-int hypre_IJMatrixInsertBlockPETSc( hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs );
-int hypre_IJMatrixAddToBlockPETSc( hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs );
-int hypre_IJMatrixInsertRowPETSc( hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs );
-int hypre_IJMatrixAddToRowPETSc( hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs );
-int hypre_IJMatrixAssemblePETSc( hypre_IJMatrix *matrix );
-int hypre_IJMatrixDistributePETSc( hypre_IJMatrix *matrix , int *row_starts , int *col_starts );
-int hypre_IJMatrixApplyPETSc( hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b );
-int hypre_IJMatrixDestroyPETSc( hypre_IJMatrix *matrix );
-int hypre_IJMatrixSetTotalSizePETSc( hypre_IJMatrix *matrix , int size );
+int hypre_IJMatrixSetLocalSizePETSc ( hypre_IJMatrix *matrix , int local_m , int local_n );
+int hypre_IJMatrixCreatePETSc ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixSetRowSizesPETSc ( hypre_IJMatrix *matrix , int *sizes );
+int hypre_IJMatrixSetDiagRowSizesPETSc ( hypre_IJMatrix *matrix , int *sizes );
+int hypre_IJMatrixSetOffDiagRowSizesPETSc ( hypre_IJMatrix *matrix , int *sizes );
+int hypre_IJMatrixInitializePETSc ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixInsertBlockPETSc ( hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs );
+int hypre_IJMatrixAddToBlockPETSc ( hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs );
+int hypre_IJMatrixInsertRowPETSc ( hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs );
+int hypre_IJMatrixAddToRowPETSc ( hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs );
+int hypre_IJMatrixAssemblePETSc ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixDistributePETSc ( hypre_IJMatrix *matrix , int *row_starts , int *col_starts );
+int hypre_IJMatrixApplyPETSc ( hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b );
+int hypre_IJMatrixDestroyPETSc ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixSetTotalSizePETSc ( hypre_IJMatrix *matrix , int size );
 
 /* IJVector.c */
-int hypre_IJVectorDistribute( HYPRE_IJVector vector , const int *vec_starts );
-int hypre_IJVectorZeroValues( HYPRE_IJVector vector );
+int hypre_IJVectorDistribute ( HYPRE_IJVector vector , const int *vec_starts );
+int hypre_IJVectorZeroValues ( HYPRE_IJVector vector );
 
 /* IJVector_parcsr.c */
-int hypre_IJVectorCreatePar( hypre_IJVector *vector , int *IJpartitioning );
-int hypre_IJVectorDestroyPar( hypre_IJVector *vector );
-int hypre_IJVectorInitializePar( hypre_IJVector *vector );
-int hypre_IJVectorSetMaxOffProcElmtsPar( hypre_IJVector *vector , int max_off_proc_elmts );
-int hypre_IJVectorDistributePar( hypre_IJVector *vector , const int *vec_starts );
-int hypre_IJVectorZeroValuesPar( hypre_IJVector *vector );
-int hypre_IJVectorSetValuesPar( hypre_IJVector *vector , int num_values , const int *indices , const double *values );
-int hypre_IJVectorAddToValuesPar( hypre_IJVector *vector , int num_values , const int *indices , const double *values );
-int hypre_IJVectorAssemblePar( hypre_IJVector *vector );
-int hypre_IJVectorGetValuesPar( hypre_IJVector *vector , int num_values , const int *indices , double *values );
-int hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , double *off_proc_data );
-
+int hypre_IJVectorCreatePar ( hypre_IJVector *vector , int *IJpartitioning );
+int hypre_IJVectorDestroyPar ( hypre_IJVector *vector );
+int hypre_IJVectorInitializePar ( hypre_IJVector *vector );
+int hypre_IJVectorSetMaxOffProcElmtsPar ( hypre_IJVector *vector , int max_off_proc_elmts );
+int hypre_IJVectorDistributePar ( hypre_IJVector *vector , const int *vec_starts );
+int hypre_IJVectorZeroValuesPar ( hypre_IJVector *vector );
+int hypre_IJVectorSetValuesPar ( hypre_IJVector *vector , int num_values , const int *indices , const double *values );
+int hypre_IJVectorAddToValuesPar ( hypre_IJVector *vector , int num_values , const int *indices , const double *values );
+int hypre_IJVectorAssemblePar ( hypre_IJVector *vector );
+int hypre_IJVectorGetValuesPar ( hypre_IJVector *vector , int num_values , const int *indices , double *values );
+int hypre_IJVectorAssembleOffProcValsPar ( hypre_IJVector *vector , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , double *off_proc_data );
 
 /* HYPRE_IJMatrix.c */
-int HYPRE_IJMatrixCreate( MPI_Comm comm , int ilower , int iupper , int jlower , int jupper , HYPRE_IJMatrix *matrix );
-int HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix );
-int HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix );
-int HYPRE_IJMatrixSetValues( HYPRE_IJMatrix matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
-int HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
-int HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix );
-int HYPRE_IJMatrixGetRowCounts( HYPRE_IJMatrix matrix , int nrows , int *rows , int *ncols );
-int HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix , int nrows , int *ncols , int *rows , int *cols , double *values );
-int HYPRE_IJMatrixSetObjectType( HYPRE_IJMatrix matrix , int type );
-int HYPRE_IJMatrixGetObjectType( HYPRE_IJMatrix matrix , int *type );
-int HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix matrix , int *ilower , int *iupper , int *jlower , int *jupper );
-int HYPRE_IJMatrixGetObject( HYPRE_IJMatrix matrix , void **object );
-int HYPRE_IJMatrixSetRowSizes( HYPRE_IJMatrix matrix , const int *sizes );
-int HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix , const int *diag_sizes , const int *offdiag_sizes );
-int HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix , int max_off_proc_elmts );
-int HYPRE_IJMatrixRead( const char *filename , MPI_Comm comm , int type , HYPRE_IJMatrix *matrix_ptr );
-int HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix , const char *filename );
+int HYPRE_IJMatrixCreate ( MPI_Comm comm , int ilower , int iupper , int jlower , int jupper , HYPRE_IJMatrix *matrix );
+int HYPRE_IJMatrixDestroy ( HYPRE_IJMatrix matrix );
+int HYPRE_IJMatrixInitialize ( HYPRE_IJMatrix matrix );
+int HYPRE_IJMatrixSetValues ( HYPRE_IJMatrix matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
+int HYPRE_IJMatrixAddToValues ( HYPRE_IJMatrix matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
+int HYPRE_IJMatrixAssemble ( HYPRE_IJMatrix matrix );
+int HYPRE_IJMatrixGetRowCounts ( HYPRE_IJMatrix matrix , int nrows , int *rows , int *ncols );
+int HYPRE_IJMatrixGetValues ( HYPRE_IJMatrix matrix , int nrows , int *ncols , int *rows , int *cols , double *values );
+int HYPRE_IJMatrixSetObjectType ( HYPRE_IJMatrix matrix , int type );
+int HYPRE_IJMatrixGetObjectType ( HYPRE_IJMatrix matrix , int *type );
+int HYPRE_IJMatrixGetLocalRange ( HYPRE_IJMatrix matrix , int *ilower , int *iupper , int *jlower , int *jupper );
+int HYPRE_IJMatrixGetObject ( HYPRE_IJMatrix matrix , void **object );
+int HYPRE_IJMatrixSetRowSizes ( HYPRE_IJMatrix matrix , const int *sizes );
+int HYPRE_IJMatrixSetDiagOffdSizes ( HYPRE_IJMatrix matrix , const int *diag_sizes , const int *offdiag_sizes );
+int HYPRE_IJMatrixSetMaxOffProcElmts ( HYPRE_IJMatrix matrix , int max_off_proc_elmts );
+int HYPRE_IJMatrixRead ( const char *filename , MPI_Comm comm , int type , HYPRE_IJMatrix *matrix_ptr );
+int HYPRE_IJMatrixPrint ( HYPRE_IJMatrix matrix , const char *filename );
 
 /* HYPRE_IJVector.c */
-int HYPRE_IJVectorCreate( MPI_Comm comm , int jlower , int jupper , HYPRE_IJVector *vector );
-int HYPRE_IJVectorDestroy( HYPRE_IJVector vector );
-int HYPRE_IJVectorInitialize( HYPRE_IJVector vector );
-int HYPRE_IJVectorSetValues( HYPRE_IJVector vector , int nvalues , const int *indices , const double *values );
-int HYPRE_IJVectorAddToValues( HYPRE_IJVector vector , int nvalues , const int *indices , const double *values );
-int HYPRE_IJVectorAssemble( HYPRE_IJVector vector );
-int HYPRE_IJVectorGetValues( HYPRE_IJVector vector , int nvalues , const int *indices , double *values );
-int HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector , int max_off_proc_elmts );
-int HYPRE_IJVectorSetObjectType( HYPRE_IJVector vector , int type );
-int HYPRE_IJVectorGetObjectType( HYPRE_IJVector vector , int *type );
-int HYPRE_IJVectorGetLocalRange( HYPRE_IJVector vector , int *jlower , int *jupper );
-int HYPRE_IJVectorGetObject( HYPRE_IJVector vector , void **object );
-int HYPRE_IJVectorRead( const char *filename , MPI_Comm comm , int type , HYPRE_IJVector *vector_ptr );
-int HYPRE_IJVectorPrint( HYPRE_IJVector vector , const char *filename );
-
+int HYPRE_IJVectorCreate ( MPI_Comm comm , int jlower , int jupper , HYPRE_IJVector *vector );
+int HYPRE_IJVectorDestroy ( HYPRE_IJVector vector );
+int HYPRE_IJVectorInitialize ( HYPRE_IJVector vector );
+int HYPRE_IJVectorSetValues ( HYPRE_IJVector vector , int nvalues , const int *indices , const double *values );
+int HYPRE_IJVectorAddToValues ( HYPRE_IJVector vector , int nvalues , const int *indices , const double *values );
+int HYPRE_IJVectorAssemble ( HYPRE_IJVector vector );
+int HYPRE_IJVectorGetValues ( HYPRE_IJVector vector , int nvalues , const int *indices , double *values );
+int HYPRE_IJVectorSetMaxOffProcElmts ( HYPRE_IJVector vector , int max_off_proc_elmts );
+int HYPRE_IJVectorSetObjectType ( HYPRE_IJVector vector , int type );
+int HYPRE_IJVectorGetObjectType ( HYPRE_IJVector vector , int *type );
+int HYPRE_IJVectorGetLocalRange ( HYPRE_IJVector vector , int *jlower , int *jupper );
+int HYPRE_IJVectorGetObject ( HYPRE_IJVector vector , void **object );
+int HYPRE_IJVectorRead ( const char *filename , MPI_Comm comm , int type , HYPRE_IJVector *vector_ptr );
+int HYPRE_IJVectorPrint ( HYPRE_IJVector vector , const char *filename );
 
 #ifdef __cplusplus
 }

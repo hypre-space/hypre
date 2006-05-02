@@ -369,9 +369,8 @@ void hypre_FreeDML( char *ptr , char *file , int line );
 #endif
 
 /* random.c */
-void hypre_SeedRand( int seed );
-double hypre_Rand( void );
-
+void hypre_SeedRand ( int seed );
+double hypre_Rand ( void );
 /*BHEADER**********************************************************************
  * (c) 1998   The Regents of the University of California
  *
@@ -795,31 +794,27 @@ int hypre_DataExchangeList(int num_contacts,
 #endif /* end of header */
 
 /* amg_linklist.c */
-void dispose_elt( hypre_LinkList element_ptr );
-void remove_point( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
-hypre_LinkList create_elt( int Item );
-void enter_on_lists( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
-
+void dispose_elt ( hypre_LinkList element_ptr );
+void remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
+hypre_LinkList create_elt ( int Item );
+void enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
 
 /* binsearch.c */
-int hypre_BinarySearch( int *list , int value , int list_length );
-
+int hypre_BinarySearch ( int *list , int value , int list_length );
 
 /* qsplit.c */
-int hypre_DoubleQuickSplit( double *values , int *indices , int list_length , int NumberKept );
-
+int hypre_DoubleQuickSplit ( double *values , int *indices , int list_length , int NumberKept );
 
 /* hypre_qsort.c */
-void swap( int *v , int i , int j );
-void swap2( int *v , double *w , int i , int j );
-void hypre_swap2i( int *v , int *w , int i , int j );
-void hypre_swap3i( int *v , int *w , int *z , int i , int j );
-void qsort0( int *v , int left , int right );
-void qsort1( int *v , double *w , int left , int right );
-void hypre_qsort2i( int *v , int *w , int left , int right );
-void hypre_qsort2( int *v , double *w , int left , int right );
-void hypre_qsort3i( int *v , int *w , int *z , int left , int right );
-
+void swap ( int *v , int i , int j );
+void swap2 ( int *v , double *w , int i , int j );
+void hypre_swap2i ( int *v , int *w , int i , int j );
+void hypre_swap3i ( int *v , int *w , int *z , int i , int j );
+void qsort0 ( int *v , int left , int right );
+void qsort1 ( int *v , double *w , int left , int right );
+void hypre_qsort2i ( int *v , int *w , int left , int right );
+void hypre_qsort2 ( int *v , double *w , int left , int right );
+void hypre_qsort3i ( int *v , int *w , int *z , int left , int right );
 /*BHEADER**********************************************************************
  * (c) 1997   The Regents of the University of California
  *
@@ -839,8 +834,8 @@ void hypre_qsort3i( int *v , int *w , int *z , int left , int right );
 #define HYPRE_ERROR_GENERIC      1<<0   /* generic error */
 #define HYPRE_ERROR_MEMORY       1<<1   /* unable to allocate memory */
 #define HYPRE_ERROR_ARG          1<<2   /* argument error */
-/* bits 4-6 are reserved for the index of the argument error */
-#define HYPRE_ERROR_CONV         1<<6   /* method did not converge as expected */
+/* bits 4-8 are reserved for the index of the argument error */
+#define HYPRE_ERROR_CONV         1<<8   /* method did not converge as expected */
 
 /*--------------------------------------------------------------------------
  * Global variable used in hypre error checking
