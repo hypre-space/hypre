@@ -157,7 +157,7 @@ hypre_BlockNewCommPkgCreate(hypre_ParCSRBlockMatrix *A)
    MPI_Comm   comm;
 
    hypre_ParCSRCommPkg	 *comm_pkg;
-
+   hypre_IJAssumedPart   *apart;
    
    /*-----------------------------------------------------------
     * get parcsr_A information 
@@ -177,6 +177,15 @@ hypre_BlockNewCommPkgCreate(hypre_ParCSRBlockMatrix *A)
 
    first_col_diag = hypre_ParCSRBlockMatrixFirstColDiag(A);
 
+   /* Create the assumed partition */
+   if  (hypre_ParCSRBlockMatrixAssumedPartition(A) == NULL)
+   {
+      hypre_ParCSRBlockMatrixCreateAssumedPartition(A);
+   }
+
+   apart = hypre_ParCSRBlockMatrixAssumedPartition(A);
+
+
    /*-----------------------------------------------------------
     * get commpkg info information 
     *----------------------------------------------------------*/
@@ -186,7 +195,7 @@ hypre_BlockNewCommPkgCreate(hypre_ParCSRBlockMatrix *A)
                                 num_cols_off_d, global_num_cols,
                                 &num_recvs, &recv_procs, &recv_vec_starts,
                                 &num_sends, &send_procs, &send_map_starts, 
-                                &send_map_elements);
+                                &send_map_elements, apart);
 
 
 
@@ -223,4 +232,94 @@ hypre_BlockNewCommPkgCreate(hypre_ParCSRBlockMatrix *A)
    hypre_ParCSRBlockMatrixCommPkg(A) = comm_pkg;
 
    return ierr;
+}
+
+
+
+
+/*--------------------------------------------------------------------
+ * hypre_ParCSRBlockMatrixCreateAssumedPartition -
+ * Each proc gets it own range. Then 
+ * each needs to reconcile its actual range with its assumed
+ * range - the result is essentila a partition of its assumed range -
+ * this is the assumed partition.   
+ *--------------------------------------------------------------------*/
+
+
+int
+hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix) 
+{
+
+
+   int global_num_cols;
+   int myid;
+   int ierr = 0;
+   int  row_start=0, row_end=0, col_start = 0, col_end = 0;
+
+   MPI_Comm   comm;
+   
+   hypre_IJAssumedPart *apart;
+
+   global_num_cols = hypre_ParCSRBlockMatrixGlobalNumCols(matrix); 
+   comm = hypre_ParCSRBlockMatrixComm(matrix);
+   
+   /* find out my actualy range of rows and columns */
+   row_start = hypre_ParCSRBlockMatrixFirstRowIndex(matrix);
+   row_end = hypre_ParCSRBlockMatrixLastRowIndex(matrix);
+   col_start =  hypre_ParCSRBlockMatrixFirstColDiag(matrix);
+   col_end =  hypre_ParCSRBlockMatrixLastColDiag(matrix);
+
+   MPI_Comm_rank(comm, &myid );
+
+   /* allocate space */
+   apart = hypre_CTAlloc(hypre_IJAssumedPart, 1);
+
+  /* get my assumed partitioning  - we want partitioning of the vector that the
+      matrix multiplies - so we use the col start and end */
+   ierr = hypre_GetAssumedPartitionRowRange( myid, global_num_cols, &(apart->row_start), 
+                                             &(apart->row_end));
+
+  /*allocate some space for the partition of the assumed partition */
+    apart->length = 0;
+    /*room for 10 owners of the assumed partition*/ 
+    apart->storage_length = 10; /*need to be >=1 */ 
+    apart->proc_list = hypre_TAlloc(int, apart->storage_length);
+    apart->row_start_list =   hypre_TAlloc(int, apart->storage_length);
+    apart->row_end_list =   hypre_TAlloc(int, apart->storage_length);
+
+
+    /* now we want to reconcile our actual partition with the assumed partition */
+    hypre_LocateAssummedPartition(col_start, col_end, global_num_cols, apart, myid);
+
+    /* this partition will be saved in the matrix data structure until the matrix is destroyed */
+    hypre_ParCSRBlockMatrixAssumedPartition(matrix) = apart;
+   
+   return (ierr);
+
+}
+
+/*--------------------------------------------------------------------
+ * hypre_ParCSRMatrixDestroyAssumedPartition
+ *--------------------------------------------------------------------*/
+int 
+hypre_ParCSRBlockMatrixDestroyAssumedPartition(hypre_ParCSRBlockMatrix *matrix )
+{
+
+   hypre_IJAssumedPart *apart;
+   
+   apart = hypre_ParCSRMatrixAssumedPartition(matrix);
+   
+
+   if(apart->storage_length > 0) 
+   {      
+      hypre_TFree(apart->proc_list);
+      hypre_TFree(apart->row_start_list);
+      hypre_TFree(apart->row_end_list);
+      hypre_TFree(apart->sort_index);
+   }
+
+   hypre_TFree(apart);
+   
+
+   return (0);
 }

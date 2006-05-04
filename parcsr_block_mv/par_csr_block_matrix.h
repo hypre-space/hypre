@@ -77,6 +77,9 @@ typedef struct
    double  *rowvalues;
    int      getrowactive;
 
+   hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
+                                              is used (compile-time option)*/
+
 } hypre_ParCSRBlockMatrix;
 
 /*--------------------------------------------------------------------------
@@ -110,6 +113,8 @@ hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixDiag(matrix))
 #define hypre_ParCSRBlockMatrixRowindices(matrix)      ((matrix) -> rowindices)
 #define hypre_ParCSRBlockMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRBlockMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
+#define hypre_ParCSRBlockMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
+
 
 hypre_CSRBlockMatrix *
 hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
@@ -199,7 +204,14 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A);
 int
 hypre_BlockNewCommPkgCreate(hypre_ParCSRBlockMatrix *A);
 
+int
+hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix);
    
+int 
+hypre_ParCSRBlockMatrixDestroyAssumedPartition(hypre_ParCSRBlockMatrix *matrix );
+   
+
+  
 hypre_ParCSRMatrix *
 hypre_ParCSRBlockMatrixConvertToParCSRMatrix(hypre_ParCSRBlockMatrix *matrix);
    

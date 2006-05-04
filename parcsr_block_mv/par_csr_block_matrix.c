@@ -93,6 +93,9 @@ hypre_ParCSRBlockMatrixCreate(  MPI_Comm comm,
 
    hypre_ParCSRBlockMatrixColMapOffd(matrix) = NULL;
 
+   hypre_ParCSRBlockMatrixAssumedPartition(matrix) = NULL;
+
+
 /* When NO_GLOBAL_PARTITION is set we could make these null, instead
    of leaving the range.  If that change is made, then when this create
    is called from functions like the matrix-matrix multiply, be careful
@@ -140,6 +143,11 @@ hypre_ParCSRBlockMatrixDestroy( hypre_ParCSRBlockMatrix *matrix )
               hypre_TFree(hypre_ParCSRBlockMatrixRowStarts(matrix));
       if ( hypre_ParCSRBlockMatrixOwnsColStarts(matrix) )
               hypre_TFree(hypre_ParCSRBlockMatrixColStarts(matrix));
+
+      if (hypre_ParCSRBlockMatrixAssumedPartition(matrix))
+         hypre_ParCSRBlockMatrixDestroyAssumedPartition(matrix);
+
+
       hypre_TFree(matrix);
    }
 
