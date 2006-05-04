@@ -336,13 +336,15 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
   else if (x_object_type == HYPRE_PARCSR)
   {
-      hypre_ParVector  *x_par;
-      hypre_ParVector  *y_par;
+      hypre_SStructVectorConvert(x, &parx);
+      hypre_SStructVectorConvert(y, &pary);
 
-      hypre_SStructVectorConvert(x, &x_par);
-      hypre_SStructVectorConvert(y, &y_par);
+      hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, beta, pary);
 
-      hypre_ParCSRMatrixMatvec(alpha, parcsrA, x_par, 1.0, y_par);
+      hypre_SStructVectorRestore(x, NULL);
+      hypre_SStructVectorRestore(y, pary); 
+
+      parx = NULL; 
    }
 
    return ierr;
