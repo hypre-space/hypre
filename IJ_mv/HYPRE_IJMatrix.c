@@ -24,7 +24,7 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
 			  int jlower, int jupper, HYPRE_IJMatrix *matrix) 
 
 {
-   int ierr=0;
+
    int *row_partitioning;
    int *col_partitioning;
    int *info;
@@ -56,13 +56,15 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
 
    if (ilower > iupper+1)
    {
-      ierr = -11;
+      hypre_error_in_arg(1);
+      /* ierr = -11; */
       printf("Warning! ilower larger than iupper+1!\n");
    }
 
    if (jlower > jupper+1)
    {
-      ierr = -12;
+      hypre_error_in_arg(4);
+      /* ierr = -12; */
       printf("Warning! jlower larger than jupper+1!\n");
    }
 
@@ -139,7 +141,8 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
       if ( recv_buf[i4+1] != (recv_buf[i4+4]-1) )
       {
          printf("Warning -- row partitioning does not line up! Partitioning incomplete!\n");
-	 ierr = -9;
+	 /* ierr = -9; */
+         hypre_error(HYPRE_ERROR_GENERIC);
 	 break;
       }
       else
@@ -169,7 +172,8 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
          if (recv_buf[i4+3] != recv_buf[i4+6]-1)
          {
            printf("Warning -- col partitioning does not line up! Partitioning incomplete!\n");
-   	   ierr = -10;
+   	   /* ierr = -10;*/
+           hypre_error(HYPRE_ERROR_GENERIC);
    	   break;
          }
          else
@@ -200,7 +204,8 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
 
    *matrix = (HYPRE_IJMatrix) ijmatrix;
   
-   return ierr; 
+   return hypre_error_flag;
+   /* return ierr; */
 }
 
 /*--------------------------------------------------------------------------
@@ -216,6 +221,7 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixDestroy\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -242,13 +248,15 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
       else if ( hypre_IJMatrixObjectType(ijmatrix) != -1 )
       {
          printf("Unrecognized object type -- HYPRE_IJMatrixDestroy\n");
+         hypre_error_in_arg(1);
          exit(1);
       }
    }
 
    hypre_TFree(ijmatrix); 
 
-   return ierr;
+   return hypre_error_flag;
+
 }
 
 /*--------------------------------------------------------------------------
@@ -264,7 +272,10 @@ HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixInitialize\n");
-      return 1;
+
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+      /* return 1; */
    }
 
    /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
@@ -278,10 +289,17 @@ HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixInitialize\n");
-      return 1;
+      hypre_error_in_arg(1);
+ 
+      return hypre_error_flag;
+      /* return 1; */
    }
-   return ierr; 
+  
+   return hypre_error_flag;
+
 }
+  
+
 
 /*--------------------------------------------------------------------------
  * HYPRE_IJMatrixSetValues
@@ -297,6 +315,7 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix matrix, int nrows,
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetValues\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -314,10 +333,14 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix matrix, int nrows,
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixSetValues\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
     
-   return -99;
+   hypre_error_in_arg(1); /* no recognized type */
+   return hypre_error_flag;
+
+   /* return -99;*/
 }
 
 /*--------------------------------------------------------------------------
@@ -335,6 +358,7 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix matrix, int nrows,
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixAddToValues\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -350,10 +374,14 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix matrix, int nrows,
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixAddToValues\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
-   return -99;
+   hypre_error_in_arg(1); /* no recognized type */
+   return hypre_error_flag;
+
+   /* return -99; */
 }
 
 /*--------------------------------------------------------------------------
@@ -368,6 +396,7 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixAssemble\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -382,10 +411,12 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixAssemble\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
-
-   return -99;
+   hypre_error_in_arg(1); /* no recognized type */
+   return hypre_error_flag;
+   /* return -99; */
 }
 
 /*--------------------------------------------------------------------------
@@ -402,6 +433,7 @@ HYPRE_IJMatrixGetRowCounts( HYPRE_IJMatrix matrix, int nrows,
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetRowCounts\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -416,10 +448,11 @@ HYPRE_IJMatrixGetRowCounts( HYPRE_IJMatrix matrix, int nrows,
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixGetRowCounts\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
-   return ierr;
+    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -436,6 +469,7 @@ HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix, int nrows, int *ncols,
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetValues\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -453,10 +487,12 @@ HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix, int nrows, int *ncols,
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixGetValues\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
-   return ierr;
+   return hypre_error_flag;
+
 }
 
 /*--------------------------------------------------------------------------
@@ -471,12 +507,14 @@ HYPRE_IJMatrixSetObjectType( HYPRE_IJMatrix matrix, int type )
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetObjectType\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
    hypre_IJMatrixObjectType(ijmatrix) = type;
 
-   return 0;
+   return hypre_error_flag;
+   /* return 0 */
 }
 
 /*--------------------------------------------------------------------------
@@ -491,12 +529,13 @@ HYPRE_IJMatrixGetObjectType( HYPRE_IJMatrix matrix, int *type )
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetObjectType\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
    *type = hypre_IJMatrixObjectType(ijmatrix);
-
-   return 0;
+   return hypre_error_flag;
+   /* return 0; */
 }
 
 /*--------------------------------------------------------------------------
@@ -516,6 +555,7 @@ HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix matrix, int *ilower, int *iupper,
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetObjectType\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -537,7 +577,8 @@ HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix matrix, int *ilower, int *iupper,
    *jupper = col_partitioning[my_id+1]-1;
 #endif
 
-   return 0;
+   return hypre_error_flag;
+   /* return 0; */
 }
 
 /*--------------------------------------------------------------------------
@@ -562,12 +603,15 @@ HYPRE_IJMatrixGetObject( HYPRE_IJMatrix matrix, void **object )
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetObject\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
    *object = hypre_IJMatrixObject( ijmatrix );
 
-   return 0;
+   return hypre_error_flag;
+
+   /* return 0; */
 }
 
 /*--------------------------------------------------------------------------
@@ -582,6 +626,7 @@ HYPRE_IJMatrixSetRowSizes( HYPRE_IJMatrix matrix, const int *sizes )
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetRowSizes\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -596,10 +641,13 @@ HYPRE_IJMatrixSetRowSizes( HYPRE_IJMatrix matrix, const int *sizes )
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixSetRowSizes\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
-   return -99;
+   hypre_error_in_arg(1);
+   return hypre_error_flag;
+   /* return -99; */
 }
 
 
@@ -618,6 +666,7 @@ HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix,
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetDiagOffdSizes\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -635,10 +684,11 @@ HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix,
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixSetDiagOffdSizes\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
+   return hypre_error_flag;
 
-   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -654,6 +704,7 @@ HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix,
    if (!ijmatrix)
    {
       printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetMaxOffProcElmts\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -671,10 +722,12 @@ HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix,
    else
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixSetMaxOffProcElmts\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
-
-   return -99;
+   hypre_error_in_arg(1);
+   return hypre_error_flag;
+   /* return -99; */
 }
 
 /*--------------------------------------------------------------------------
@@ -703,6 +756,8 @@ HYPRE_IJMatrixRead( const char     *filename,
    if ((file = fopen(new_filename, "r")) == NULL)
    {
       printf("Error: can't open input file %s\n", new_filename);
+
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -724,7 +779,8 @@ HYPRE_IJMatrixRead( const char     *filename,
 
    *matrix_ptr = matrix;
 
-   return ierr;
+   return hypre_error_flag;
+
 }
 
 /*--------------------------------------------------------------------------
@@ -751,12 +807,14 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
    if (!matrix)
    {
       printf("Variable matrix is NULL -- HYPRE_IJMatrixPrint\n");
-      exit(1);
+      hypre_error_in_arg(1);
+     exit(1);
    }
 
    if ( (hypre_IJMatrixObjectType(matrix) != HYPRE_PARCSR) )
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixPrint\n");
+      hypre_error_in_arg(1);
       exit(1);
    }
 
@@ -767,6 +825,7 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
    if ((file = fopen(new_filename, "w")) == NULL)
    {
       printf("Error: can't open output file %s\n", new_filename);
+      hypre_error_in_arg(2);
       exit(1);
    }
 
@@ -791,12 +850,20 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
    {
       if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )
       {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         ii = i -  hypre_IJMatrixGlobalFirstRow(matrix);
+#else
          ii = i - row_partitioning[0];
+#endif
          ierr += HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) object,
                                           ii, &ncols, &cols, &values);
          for (j = 0; j < ncols; j++)
          {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+            cols[j] +=  hypre_IJMatrixGlobalFirstCol(matrix);
+#else
             cols[j] += col_partitioning[0];
+#endif
          }
       }
 
@@ -809,7 +876,11 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
       {
          for (j = 0; j < ncols; j++)
          {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+            cols[j] -=  hypre_IJMatrixGlobalFirstCol(matrix);
+#else
             cols[j] -= col_partitioning[0];
+#endif
          }
          ierr += HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) object,
                                               ii, &ncols, &cols, &values);
@@ -818,5 +889,5 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
 
    fclose(file);
 
-   return ierr;
+   return hypre_error_flag;
 }
