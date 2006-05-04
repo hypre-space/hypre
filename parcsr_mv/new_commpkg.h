@@ -22,11 +22,10 @@ typedef struct
   int                   *vec_starts;
   int                   element_storage_length; 
   int                   *elements;
+   double                *d_elements;
 }  hypre_ProcListElements;   
 
 
-int hypre_NewCommPkgCreate( hypre_ParCSRMatrix* );
-int hypre_NewCommPkgDestroy( hypre_ParCSRMatrix* );
 
 
 #endif /* hypre_NEW_COMMPKG */

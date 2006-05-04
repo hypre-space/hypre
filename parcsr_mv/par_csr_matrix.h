@@ -67,6 +67,10 @@ typedef struct
    double  *rowvalues;
    int      getrowactive;
 
+   hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
+                                              is used (compile-time option)*/
+
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -99,6 +103,7 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixRowindices(matrix)      ((matrix) -> rowindices)
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
+#define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
 
 
 

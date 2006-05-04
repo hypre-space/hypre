@@ -93,6 +93,38 @@ typedef struct
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)  (comm_handle -> requests[i])
 
 #endif /* HYPRE_PAR_CSR_COMMUNICATION_HEADER */
+
+#ifndef hypre_NEW_COMMPKG
+#define hypre_NEW_COMMPKG
+
+typedef struct
+{
+   int                   length;
+   int                   row_start;
+   int                   row_end;
+   int                   storage_length;
+   int                   *proc_list;
+   int		         *row_start_list;
+   int                   *row_end_list;  
+  int                    *sort_index;
+} hypre_IJAssumedPart;
+
+typedef struct
+{
+  int                   length;
+  int                   storage_length; 
+  int                   *id;
+  int                   *vec_starts;
+  int                   element_storage_length; 
+  int                   *elements;
+   double                *d_elements;
+}  hypre_ProcListElements;   
+
+
+
+
+#endif /* hypre_NEW_COMMPKG */
+
 /*BHEADER**********************************************************************
  * (c) 1998   The Regents of the University of California
  *
@@ -219,6 +251,10 @@ typedef struct
    double  *rowvalues;
    int      getrowactive;
 
+   hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
+                                              is used (compile-time option)*/
+
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -251,6 +287,7 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixRowindices(matrix)      ((matrix) -> rowindices)
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
+#define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
 
 
 
@@ -369,39 +406,6 @@ int * hypre_NumbersArray( hypre_NumbersNode * node );
 
 
 #endif
-
-#ifndef hypre_NEW_COMMPKG
-#define hypre_NEW_COMMPKG
-
-typedef struct
-{
-   int                   length;
-   int                   row_start;
-   int                   row_end;
-   int                   storage_length;
-   int                   *proc_list;
-   int		         *row_start_list;
-   int                   *row_end_list;  
-  int                    *sort_index;
-} hypre_IJAssumedPart;
-
-typedef struct
-{
-  int                   length;
-  int                   storage_length; 
-  int                   *id;
-  int                   *vec_starts;
-  int                   element_storage_length; 
-  int                   *elements;
-}  hypre_ProcListElements;   
-
-
-int hypre_NewCommPkgCreate( hypre_ParCSRMatrix* );
-int hypre_NewCommPkgDestroy( hypre_ParCSRMatrix* );
-
-
-#endif /* hypre_NEW_COMMPKG */
-
 /*BHEADER**********************************************************************
  * (c) 1996   The Regents of the University of California
  *
@@ -506,11 +510,19 @@ typedef struct
 
 #endif
 
+/* assumed_part.c */
+int hypre_LocateAssummedPartition( int row_start , int row_end , int global_num_rows , hypre_IJAssumedPart *part , int myid );
+int hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix );
+int hypre_ParCSRMatrixDestroyAssumedPartition( hypre_ParCSRMatrix *matrix );
+int hypre_GetAssumedPartitionProcFromRow( int row , int global_num_rows , int *proc_id );
+int hypre_GetAssumedPartitionRowRange( int proc_id , int global_num_rows , int *row_start , int *row_end );
+
 /* communicationT.c */
-void RowsWithColumn_original ( int *rowmin , int *rowmax , int column , hypre_ParCSRMatrix *A );
-void RowsWithColumn ( int *rowmin , int *rowmax , int column , int num_rows_diag , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd );
-void hypre_MatTCommPkgCreate_core ( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_rows_diag , int num_cols_diag , int num_cols_offd , int *row_starts , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
-int hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A );
+void RowsWithColumn_original( int *rowmin , int *rowmax , int column , hypre_ParCSRMatrix *A );
+void RowsWithColumn( int *rowmin , int *rowmax , int column , int num_rows_diag , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd );
+void hypre_MatTCommPkgCreate_core( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_rows_diag , int num_cols_diag , int num_cols_offd , int *row_starts , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
+int hypre_MatTCommPkgCreate( hypre_ParCSRMatrix *A );
+
 
 /* driver_aat.c */
 
@@ -562,15 +574,13 @@ int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x , HYPRE_ParVector y , double *p
 int HYPRE_VectorToParVector ( MPI_Comm comm , HYPRE_Vector b , int *partitioning , HYPRE_ParVector *vector );
 
 /* new_commpkg.c */
-int PrintCommpkg ( hypre_ParCSRMatrix *A , const char *file_name );
-int hypre_NewCommPkgCreate_core ( MPI_Comm comm , int *col_map_off_d , int first_col_diag , int col_start , int col_end , int num_cols_off_d , int global_num_cols , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elements );
-int hypre_NewCommPkgCreate ( hypre_ParCSRMatrix *parcsr_A );
-int hypre_NewCommPkgDestroy ( hypre_ParCSRMatrix *parcsr_A );
-int hypre_LocateAssummedPartition ( int row_start , int row_end , int global_num_rows , hypre_IJAssumedPart *part , int myid );
-int hypre_RangeFillResponseIJDetermineRecvProcs ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
-int hypre_FillResponseIJDetermineSendProcs ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
-int hypre_GetAssumedPartitionProcFromRow ( int row , int global_num_rows , int *proc_id );
-int hypre_GetAssumedPartitionRowRange ( int proc_id , int global_num_rows , int *row_start , int *row_end );
+int PrintCommpkg( hypre_ParCSRMatrix *A , const char *file_name );
+int hypre_NewCommPkgCreate_core( MPI_Comm comm , int *col_map_off_d , int first_col_diag , int col_start , int col_end , int num_cols_off_d , int global_num_cols , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elements , hypre_IJAssumedPart *apart );
+int hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A );
+int hypre_NewCommPkgDestroy( hypre_ParCSRMatrix *parcsr_A );
+int hypre_RangeFillResponseIJDetermineRecvProcs( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
+int hypre_FillResponseIJDetermineSendProcs( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
+
 
 /* numbers.c */
 hypre_NumbersNode *hypre_NumbersNewNode ( void );
@@ -586,9 +596,9 @@ int hypre_ParChordMatrixToParCSRMatrix ( hypre_ParChordMatrix *Ac , MPI_Comm com
 int hypre_ParCSRMatrixToParChordMatrix ( hypre_ParCSRMatrix *Ap , MPI_Comm comm , hypre_ParChordMatrix **pAc );
 
 /* par_csr_aat.c */
-void hypre_ParAat_RowSizes ( int **C_diag_i , int **C_offd_i , int *B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *A_col_map_offd , int *A_ext_i , int *A_ext_j , int *A_ext_row_map , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int num_rows_A_ext , int first_col_diag_A , int first_row_index_A );
-hypre_ParCSRMatrix *hypre_ParCSRAAt ( hypre_ParCSRMatrix *A );
-hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt ( hypre_ParCSRMatrix *A , int data , int **pA_ext_row_map );
+void hypre_ParAat_RowSizes( int **C_diag_i , int **C_offd_i , int *B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *A_col_map_offd , int *A_ext_i , int *A_ext_j , int *A_ext_row_map , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int num_rows_A_ext , int first_col_diag_A , int first_row_index_A );
+hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix *A );
+hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A , int data , int **pA_ext_row_map );
 
 /* par_csr_bool_matop.c */
 hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul ( hypre_ParCSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *B );

@@ -41,6 +41,7 @@ FILES =\
  new_commpkg.c\
  numbers.c\
  par_csr_aat.c\
+ par_csr_assumed_part.c\
  par_csr_bool_matop.c\
  par_csr_bool_matrix.c\
  par_csr_communication.c\
