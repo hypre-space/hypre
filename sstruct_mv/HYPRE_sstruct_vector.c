@@ -382,8 +382,17 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 
    /* u-vector */
    ierr = HYPRE_IJVectorAssemble(ijvector);
+
    HYPRE_IJVectorGetObject(ijvector, 
-                           (void **) &hypre_SStructVectorParVector(vector));
+                          (void **) &hypre_SStructVectorParVector(vector));
+
+   /* if the object type is parcsr, then convert the sstruct vector which has ghost
+      layers to a parcsr vector without ghostlayers. */
+   if (hypre_SStructVectorObjectType(vector) == HYPRE_PARCSR)
+   {
+      hypre_SStructVectorParConvert(vector, 
+                                   &hypre_SStructVectorParVector(vector));
+   }
 
    return ierr;
 }
@@ -549,7 +558,7 @@ HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
    }
    else if (vector_type == HYPRE_PARCSR)
    {
-      hypre_SStructVectorParConvert(vector, (hypre_ParVector **) object);
+     *object= hypre_SStructVectorParVector(vector);
    }
    else if (vector_type == HYPRE_STRUCT)
    {
