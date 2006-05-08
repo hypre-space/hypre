@@ -25,6 +25,9 @@ dgels.c\
 dgeqr2.c\
 dgeqrf.c\
 dgesvd.c\
+dgetrf.c\
+dgetrs.c\
+dgetf2.c\
 dlabad.c\
 dlabrd.c\
 dlacpy.c\
@@ -52,6 +55,7 @@ dlasq6.c\
 dlasr.c\
 dlasrt.c\
 dlassq.c\
+dlaswp.c\
 dlasv2.c\
 dlatrd.c\
 dorg2l.c\
@@ -82,10 +86,6 @@ ieeeck.c\
 ilaenv.c\
 lapack_utils.c\
 lsame.c\
-dgetrf.c\
-dgetrs.c\
-dgetf2.c\
-dlaswp.c\
 xerbla.c
 
 OBJS = ${LAPACK_FILES:.c=.o}
