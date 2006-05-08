@@ -25,11 +25,10 @@ void hypre_BoomerAMGJacobiInterp( hypre_ParCSRMatrix * A,
 /* nji steps of Jacobi interpolation, with nji presently just set in the code.*/
 {
    double weight_AF = 1.0;  /* weight multiplied by A's fine row elements */
-   double weight_AFF = 1.01;  /* weight multiplied by A's fine row + fine column elements */
+   double weight_AFF = 1.0;  /* weight multiplied by A's fine row + fine column elements */
    int * dof_func_offd = NULL;
    int nji = 1;
    int iji;
-
 
    hypre_ParCSRMatrix_dof_func_offd( A,
                                      num_functions,
@@ -199,7 +198,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
 #ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
    printf("%i %i P has %i rows, %i changeable, %i don't change-good, %i coarse\n",
           my_id, level, num_rows_diag_P, Jchanges, Jnochanges, CF_coarse );
-   printf("%i %i min,max cols per row: %i, %i;  no.rows w.<=1 col: %i\n", my_id, level, ncmin, ncmax, nc1 );
+   printf("%i %i min,max diag cols per row: %i, %i;  no.rows w.<=1 col: %i\n", my_id, level, ncmin, ncmax, nc1 );
 #endif
 #ifdef HYPRE_JACINT_PRINT_MATRICES
    if ( num_rows_diag_P <= 100 )
@@ -270,11 +269,13 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
      hypre_ParCSRMatrixDestroy( *P );*/
 
    /* Note that I'm truncating all the fine rows, not just the J-marked ones. */
-   if ( Pnew_num_nonzeros < 10000 )
+#if 0
+   if ( Pnew_num_nonzeros < 10000 )  /* a fixed number like this makes it no.procs.-depdendent */
    {  /* ad-hoc attempt to reduce zero-matrix problems seen in testing..*/
       truncation_threshold = 1.0e-6 * truncation_threshold; 
       truncation_threshold_minus = 1.0e-6 * truncation_threshold_minus;
   }
+#endif
    hypre_BoomerAMGTruncateInterp( Pnew, truncation_threshold,
                                   truncation_threshold_minus, CF_marker );
    *P = Pnew;
@@ -335,7 +336,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
 #ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
    printf("%i %i P has %i rows, %i changeable, %i too good, %i coarse\n",
           my_id, level, num_rows_diag_P, num_rows_diag_P-Jnochanges-CF_coarse, Jnochanges, CF_coarse );
-   printf("%i %i min,max cols per row: %i, %i;  no.rows w.<=1 col: %i\n", my_id, level, ncmin, ncmax, nc1 );
+   printf("%i %i min,max diag cols per row: %i, %i;  no.rows w.<=1 col: %i\n", my_id, level, ncmin, ncmax, nc1 );
 
    printf("%i %i Jacobi_Interp_1 after truncation (%e), Pnew has %i+%i=%i nonzeros\n",
           my_id, level, truncation_threshold,
