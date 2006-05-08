@@ -2400,21 +2400,35 @@ main( int   argc,
    }
 
    HYPRE_SStructVectorInitialize(x);
-   for (j = 0; j < data.max_boxsize; j++)
+   /*-----------------------------------------------------------
+    * If requested, reset linear system so that it has
+    * exact solution:
+    *
+    *   u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
+    * 
+    *-----------------------------------------------------------*/
+
+   if (object_type == HYPRE_STRUCT)
    {
-      values[j] = 0.0;
+      cosine = struct_cosine;
    }
-   for (part = 0; part < data.nparts; part++)
+
+   if (cosine)
    {
-      pdata = data.pdata[part];
-      for (var = 0; var < pdata.nvars; var++)
+      for (part = 0; part < data.nparts; part++)
       {
-         for (box = 0; box < pdata.nboxes; box++)
+         pdata = data.pdata[part];
+         for (var = 0; var < pdata.nvars; var++)
          {
-            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                           pdata.vartypes[var], ilower, iupper);
-            HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
-                                            var, values);
+            scale = (part+1.0)*(var+1.0);
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
+                              ilower, iupper);
+               SetCosineVector(scale, ilower, iupper, values);
+               HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
+                                               var, values);
+            }
          }
       }
    }
@@ -2503,9 +2517,13 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
-
+   /*hypre_SStructMatvec(1.0, A, x, 2.0, b);
+   HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 2.0, par_b );*/
+                                                                                                               
    if (print_system)
    {
+      HYPRE_SStructVectorGather(b);
+      HYPRE_SStructVectorGather(x);
       HYPRE_SStructMatrixPrint("sstruct.out.A",  A, 0);
       HYPRE_SStructVectorPrint("sstruct.out.b",  b, 0);
       HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
