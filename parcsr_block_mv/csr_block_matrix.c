@@ -14,6 +14,16 @@
 
 #include "headers.h"
 
+#define LB_VERSION 0 /* lapack and blas version 5/12/06 - preliminary testing shows this
+                      is slower for block sizes < 4 (did not try larger block sizes)-
+                      need to edit the Makefile to find blas and lapack */
+
+
+
+#if LB_VERSION
+#include "hypre_blas.h"
+#include "hypre_lapack.h"
+#endif
 
 
 /*--------------------------------------------------------------------------
@@ -299,11 +309,14 @@ hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *matrix,
 int
 hypre_CSRBlockMatrixBlockAdd(double* i1, double* i2, double* o, int block_size)
 {
-   int i, j;
 
-   for (i = 0; i < block_size; i++)
-      for (j = 0; j < block_size; j++)
-         o[i*block_size+j] = i1[i*block_size+j] + i2[i*block_size+j];
+
+   int i;
+   int sz = block_size*block_size;
+   
+   for (i = 0; i < sz; i++)
+      o[i] = i1[i] + i2[i];
+
    return 0;
 }
 
@@ -315,11 +328,14 @@ hypre_CSRBlockMatrixBlockAdd(double* i1, double* i2, double* o, int block_size)
 int
 hypre_CSRBlockMatrixBlockAddAccumulate(double* i1, double* o, int block_size)
 {
-   int i, j;
 
-   for (i = 0; i < block_size; i++)
-      for (j = 0; j < block_size; j++)
-         o[i*block_size+j] += i1[i*block_size+j];
+
+   int i;
+   int sz = block_size*block_size;
+   
+   for (i = 0; i < sz; i++)
+      o[i] += i1[i];
+
    return 0;
 }
 
@@ -344,11 +360,14 @@ hypre_CSRBlockMatrixBlockAddAccumulateDiag(double* i1, double* o, int block_size
 int
 hypre_CSRBlockMatrixBlockSetScalar(double* o, double beta, int block_size)
 {
-   int i, j;
 
-   for (i = 0; i < block_size; i++)
-      for (j = 0; j < block_size; j++)
-         o[i*block_size+j] = beta;
+
+   int i;
+   int sz = block_size*block_size;
+   
+   for (i = 0; i < sz; i++)
+      o[i] = beta;
+
    return 0;
 }
 
@@ -360,32 +379,34 @@ hypre_CSRBlockMatrixBlockSetScalar(double* o, double beta, int block_size)
 int
 hypre_CSRBlockMatrixBlockCopyData(double* i1, double* o, double beta, int block_size)
 {
-   int i, j;
-
-   for (i = 0; i < block_size; i++)
-      for (j = 0; j < block_size; j++)
-         o[i*block_size+j] = beta*i1[i*block_size+j];
+   
+   int i;
+   int sz = block_size*block_size;
+   
+   for (i = 0; i < sz; i++)
+      o[i] = beta*i1[i];
+   
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRBlockMatrixBlockCopyDataDiag
+ * hypre_CSRBlockMatrixBlockCopyDataDiag - zeros off-diag entries
  * (o = beta*diag(i1)) 
  *--------------------------------------------------------------------------*/
 int
 hypre_CSRBlockMatrixBlockCopyDataDiag(double* i1, double* o, double beta, int block_size)
 {
-   int i, j;
+    int i;
 
-   for (i = 0; i < block_size; i++)
-   {
-      for (j = 0; j < block_size; j++)
-      {
-         o[i*block_size+j] = 0.0;
-      }
-   }
-   for (i = 0; i < block_size; i++)
-         o[i*block_size+i] = beta*i1[i*block_size+i];
+    int sz = block_size*block_size;
+   
+    for (i = 0; i < sz; i++)
+       o[i] = 0.0;
+
+    for (i = 0; i < block_size; i++)
+       o[i*block_size+i] = beta*i1[i*block_size+i];
+
+
    return 0;
 }
 
@@ -418,12 +439,12 @@ int
 hypre_CSRBlockMatrixBlockNorm(int norm_type, double* data, double* out, int block_size)
 {
 
+
    int ierr = 0;
    int i,j;
    double sum = 0.0;
    double *totals;
-   
-
+   int sz = block_size*block_size;
 
    switch (norm_type)
    {
@@ -477,24 +498,18 @@ hypre_CSRBlockMatrixBlockNorm(int norm_type, double* data, double* out, int bloc
       
          sum = data[0];
   
-         for(i = 0; i < block_size; i++) /* row */
+         for(i = 0; i < sz; i++) 
          {
-            for(j = 0; j < block_size; j++) /* col */
-            {
-               if (fabs(data[i*block_size + j]) > fabs(sum))  sum =data[i*block_size + j];
-            }
+               if (fabs(data[i]) > fabs(sum))  sum =data[i];
          }
          
          break;
       }
       case 2: /* sum of abs values of all elements in the block  */
       {
-         for(i = 0; i < block_size; i++) 
+         for(i = 0; i < sz; i++) 
          {
-            for(j = 0; j < block_size; j++) 
-            {
-               sum += fabs(data[i*block_size + j]);
-            }
+               sum += fabs(data[i]);
          }
          break;
       }
@@ -502,20 +517,14 @@ hypre_CSRBlockMatrixBlockNorm(int norm_type, double* data, double* out, int bloc
 
       default: /* 1 = frobenius*/
       {
-          for(i = 0; i < block_size; i++) 
+          for(i = 0; i < sz; i++) 
           {
-             for(j = 0; j < block_size; j++) 
-             {
-               sum += data[i*block_size + j]*data[i*block_size + j];
-             }
+               sum += data[i]*data[i];
           }
           sum = sqrt(sum);
       }
-   
-      
    }
    
-
    *out = sum;
    
 
@@ -533,50 +542,64 @@ int
 hypre_CSRBlockMatrixBlockMultAdd(double* i1, double* i2, double beta, 
                                  double* o, int block_size)
 {
-   int    i, j, k;
-   double ddata;
 
-   if (beta == 0.0)
+#if LB_VERSION
    {
-      for (i = 0; i < block_size; i++)
+      double alp = 1.0;
+      dgemm_("N","N", &block_size, &block_size, &block_size, &alp, i2, &block_size, i1,
+          &block_size, &beta, o, &block_size);
+   }
+#else
+   {
+      
+      int    i, j, k;
+      double ddata;
+
+      if (beta == 0.0)
       {
-         for (j = 0; j < block_size; j++)
+         for (i = 0; i < block_size; i++)
          {
-            ddata = 0.0;
-            for (k = 0; k < block_size; k++)
+            for (j = 0; j < block_size; j++)
             {
-               ddata += i1[i*block_size + k] * i2[k*block_size + j];
+               ddata = 0.0;
+               for (k = 0; k < block_size; k++)
+               {
+                  ddata += i1[i*block_size + k] * i2[k*block_size + j];
+               }
+               o[i*block_size + j] = ddata;
             }
-            o[i*block_size + j] = ddata;
          }
       }
-   }
-   else if (beta == 1.0)
-   {
-      for(i = 0; i < block_size; i++)
+      else if (beta == 1.0)
       {
-         for(j = 0; j < block_size; j++)
+         for(i = 0; i < block_size; i++)
          {
-            ddata = o[i*block_size + j];
-            for(k = 0; k < block_size; k++)
-               ddata += i1[i*block_size + k] * i2[k*block_size + j];
-            o[i*block_size + j] = ddata;
+            for(j = 0; j < block_size; j++)
+            {
+               ddata = o[i*block_size + j];
+               for(k = 0; k < block_size; k++)
+                  ddata += i1[i*block_size + k] * i2[k*block_size + j];
+               o[i*block_size + j] = ddata;
+            }
          }
       }
-   }
-   else
-   {
-      for(i = 0; i < block_size; i++)
+      else
       {
-         for(j = 0; j < block_size; j++)
+         for(i = 0; i < block_size; i++)
          {
-            ddata = beta * o[i*block_size + j];
-            for(k = 0; k < block_size; k++)
-               ddata += i1[i*block_size + k] * i2[k*block_size + j];
-            o[i*block_size + j] = ddata;
+            for(j = 0; j < block_size; j++)
+            {
+               ddata = beta * o[i*block_size + j];
+               for(k = 0; k < block_size; k++)
+                  ddata += i1[i*block_size + k] * i2[k*block_size + j];
+               o[i*block_size + j] = ddata;
+            }
          }
       }
    }
+   
+#endif
+
    return 0;
 }
 
@@ -590,30 +613,26 @@ hypre_CSRBlockMatrixBlockMultAddDiag(double* i1, double* i2, double beta,
                                  double* o, int block_size)
 {
    int    i;
-   double ddata;
 
    if (beta == 0.0)
    {
       for (i = 0; i < block_size; i++)
       {
-         ddata = i1[i*block_size + i] * i2[i*block_size + i];
-         o[i*block_size + i] = ddata;
+         o[i*block_size + i] = i1[i*block_size + i] * i2[i*block_size + i];
       }
    }
    else if (beta == 1.0)
    {
       for(i = 0; i < block_size; i++)
       {
-            ddata = o[i*block_size + i] + i1[i*block_size + i] * i2[i*block_size + i];
-            o[i*block_size + i] = ddata;
+         o[i*block_size + i] = o[i*block_size + i] + i1[i*block_size + i] * i2[i*block_size + i];
       }
    }
    else
    {
       for(i = 0; i < block_size; i++)
       {
-            ddata = beta* o[i*block_size + i] + i1[i*block_size + i] * i2[i*block_size + i];
-            o[i*block_size + i] = ddata;
+            o[i*block_size + i] = beta* o[i*block_size + i] + i1[i*block_size + i] * i2[i*block_size + i];
       }
    }
    return 0;
@@ -631,58 +650,73 @@ hypre_CSRBlockMatrixBlockMatvec(double alpha, double* mat, double* v, double bet
                                 double* ov, int block_size)
 {
 
-   int    i, j, ierr = 0;
-   double ddata;
+   int ierr = 0;
 
-   /* if alpha = 0, then no matvec */
-   if (alpha == 0.0)
+#if LB_VERSION
    {
-      for (j = 0; j < block_size; j++)
-      {
-         ov[j] *= beta;
-      }
-      return ierr;
+      int one = 1;
+
+      dgemv_("T",  &block_size, &block_size, &alpha, mat, &block_size, v,
+             &one, &beta, ov, &one);
    }
    
-   /* ov = (beta/alpha) * ov; */
-   ddata = beta / alpha;
-   if (ddata != 1.0)
+#else
    {
-      if (ddata == 0.0)
-      {
-          for (j = 0; j < block_size; j++)
-          {
-             ov[j] = 0.0;
-          }
-      }
-      else 
+      int    i, j;
+      double ddata;
+
+      /* if alpha = 0, then no matvec */
+      if (alpha == 0.0)
       {
          for (j = 0; j < block_size; j++)
          {
-            ov[j] *= ddata;
+            ov[j] *= beta;
+         }
+         return ierr;
+      }
+      
+      /* ov = (beta/alpha) * ov; */
+      ddata = beta / alpha;
+      if (ddata != 1.0)
+      {
+         if (ddata == 0.0)
+         {
+            for (j = 0; j < block_size; j++)
+            {
+               ov[j] = 0.0;
+            }
+         }
+         else 
+         {
+            for (j = 0; j < block_size; j++)
+            {
+               ov[j] *= ddata;
+            }
+         }
+      }
+      
+      /* ov = ov + mat*v */
+      for (i = 0; i < block_size; i++)
+      {
+         ddata =  ov[i];
+         for (j = 0; j < block_size; j++)
+         {
+            ddata += mat[i*block_size + j] * v[j];
+         }
+         ov[i] = ddata;
+      }
+      
+      /* ov = alpha*ov */
+      if (alpha != 1.0)
+      {
+         for (j = 0; j < block_size; j++)
+         {
+            ov[j] *= alpha;
          }
       }
    }
    
-   /* ov = ov + mat*v */
-   for (i = 0; i < block_size; i++)
-   {
-      ddata =  ov[i];
-      for (j = 0; j < block_size; j++)
-      {
-         ddata += mat[i*block_size + j] * v[j];
-      }
-      ov[i] = ddata;
-   }
-
-   /* ov = alpha*ov */
-   if (alpha != 1.0)
-   {
-      for (j = 0; j < block_size; j++)
-      {
-         ov[j] *= alpha;
-      }
-   }
+#endif
 
    return ierr;
    
@@ -700,108 +734,152 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
                                    double* ov, int block_size)
 {
    int ierr = 0;
-   int m,j,k;
-   int piv_row;
-   
-   double factor, eps;
-   double piv, tmp;
    double *mat_i;
-   
-   mat_i = hypre_CTAlloc(double, block_size*block_size);
-   
-   eps = 1.0e-6;
 
-   if (block_size ==1 )
+   mat_i = hypre_CTAlloc(double, block_size*block_size);
+
+#if LB_VERSION
    {
-      if (fabs(mat[0]) > 1e-10)
+
+      int one, info;
+      int *piv;
+      int sz;
+      
+      
+      one = 1;
+      piv = hypre_CTAlloc(int, block_size);
+      sz = block_size*block_size;
+      
+
+     /* copy v to ov and  mat to mat_i*/
+
+      dcopy_(&sz, mat, &one, mat_i, &one);
+      dcopy_(&block_size, v, &one, ov, &one);
+      
+      /* writes over mat_i with LU */
+      dgetrf_(&block_size,&block_size, mat_i, &block_size, piv , &info);
+      if (info) 
       {
-         ov[0] = v[0]/mat[0];
-         return(ierr);
+         hypre_TFree(mat_i);
+         hypre_TFree(piv);
+         return(-1);
+      }
+      
+      /* writes over ov */
+      dgetrs_("T", &block_size, &one , 
+           mat_i, &block_size, piv, ov, &block_size, &info);
+      if (info) 
+      {
+         hypre_TFree(mat_i);
+         hypre_TFree(piv);
+         return(-1);
+      }
+
+      hypre_TFree(piv);
+
+   }
+   
+#else
+   {
+      
+      int m, j, k;
+      int piv_row;
+      double factor, eps;
+      double piv, tmp;
+      eps = 1.0e-6;
+      
+      if (block_size ==1 )
+      {
+         if (fabs(mat[0]) > 1e-10)
+         {
+            ov[0] = v[0]/mat[0];
+            hypre_TFree(mat_i);
+            return(ierr);
+         }
+         else
+         {
+            /* printf("GE zero pivot error\n"); */
+            hypre_TFree(mat_i);
+            return(-1);
+         }
       }
       else
       {
-         /* printf("GE zero pivot error\n"); */
-         hypre_TFree(mat_i);
-         return(-1);
-      }
-   }
-   else
-   {
-      /* copy v to ov and mat to mat_i*/
-      for (k = 0; k < block_size; k++)   
-      {
-         ov[k] = v[k];
-         for (j=0; j<block_size; j++)
+         /* copy v to ov and mat to mat_i*/
+         for (k = 0; k < block_size; k++)   
          {
-            mat_i[k*block_size + j] =  mat[k*block_size + j];
-         }
-      }
-      /* start ge  - turning m_i into U factor (don't save L - just apply to 
-         rhs - which is ov)*/
-      /* we do partial pivoting for size */
-
-      /* loop through the rows (row k) */ 
-      for (k = 0; k < block_size-1; k++)
-      {
-         piv = mat_i[k*block_size+k];
-         piv_row = k;
-  
-         /* find the largest pivot in position k*/
-         for (j=k+1; j < block_size; j++)         
-         {
-            if (fabs(mat_i[j*block_size+k]) > fabs(piv))
+            ov[k] = v[k];
+            for (j=0; j<block_size; j++)
             {
-               piv =  mat_i[j*block_size+k];
-               piv_row = j;
+               mat_i[k*block_size + j] =  mat[k*block_size + j];
             }
+         }
+         /* start ge  - turning m_i into U factor (don't save L - just apply to 
+            rhs - which is ov)*/
+         /* we do partial pivoting for size */
+         
+         /* loop through the rows (row k) */ 
+         for (k = 0; k < block_size-1; k++)
+         {
+            piv = mat_i[k*block_size+k];
+            piv_row = k;
             
-         }
-         if (piv_row !=k) /* do a row exchange  - rows k and piv_row*/
-         {
-            for (j=0; j < block_size; j++)
+            /* find the largest pivot in position k*/
+            for (j=k+1; j < block_size; j++)         
             {
-               tmp = mat_i[k*block_size + j];
-               mat_i[k*block_size + j] = mat_i[piv_row*block_size + j];
-               mat_i[piv_row*block_size + j] = tmp;
-            }
-            tmp = ov[k];
-            ov[k] = ov[piv_row];
-            ov[piv_row] = tmp;
-         }
-         /* end of pivoting */
-
-         if (fabs(piv) > eps)
-         {
-            /* now we can factor into U */
-            for (j = k+1; j < block_size; j++)
-            {
-               factor = mat_i[j*block_size+k]/piv;
-               for (m = k+1; m < block_size; m++)
+               if (fabs(mat_i[j*block_size+k]) > fabs(piv))
                {
-                  mat_i[j*block_size+m]  -= factor * mat_i[k*block_size+m];
+                  piv =  mat_i[j*block_size+k];
+                  piv_row = j;
                }
-               /* Elimination step for rhs */ 
-               ov[j]  -= factor * ov[k];
+               
+            }
+            if (piv_row !=k) /* do a row exchange  - rows k and piv_row*/
+            {
+               for (j=0; j < block_size; j++)
+               {
+                  tmp = mat_i[k*block_size + j];
+                  mat_i[k*block_size + j] = mat_i[piv_row*block_size + j];
+                  mat_i[piv_row*block_size + j] = tmp;
+               }
+               tmp = ov[k];
+               ov[k] = ov[piv_row];
+               ov[piv_row] = tmp;
+            }
+            /* end of pivoting */
+            
+            if (fabs(piv) > eps)
+            {
+               /* now we can factor into U */
+               for (j = k+1; j < block_size; j++)
+               {
+                  factor = mat_i[j*block_size+k]/piv;
+                  for (m = k+1; m < block_size; m++)
+                  {
+                     mat_i[j*block_size+m]  -= factor * mat_i[k*block_size+m];
+                  }
+                  /* Elimination step for rhs */ 
+                  ov[j]  -= factor * ov[k];
+               }
+            }
+            else
+            {
+               /* printf("Block of matrix is nearly singular: zero pivot error\n");  */
+               hypre_TFree(mat_i);
+               return(-1);
             }
          }
-         else
+
+         /* we also need to check the pivot in the last row to see if it is zero */  
+         k = block_size - 1; /* last row */
+         if ( fabs(mat_i[k*block_size+k]) < eps)
          {
             /* printf("Block of matrix is nearly singular: zero pivot error\n");  */
             hypre_TFree(mat_i);
             return(-1);
          }
-      }
-
-      /* we also need to check the pivot in the last row to see if it is zero */  
-      k = block_size - 1; /* last row */
-      if ( fabs(mat_i[k*block_size+k]) < eps)
-      {
-         /* printf("Block of matrix is nearly singular: zero pivot error\n");  */
-         hypre_TFree(mat_i);
-         return(-1);
-      }
          
-      /* Back Substitution  - do rhs (U is now in m_i1)*/
+         /* Back Substitution  - do rhs (U is now in m_i1)*/
          for (k = block_size-1; k > 0; --k)
          {
             ov[k] /= mat_i[k*block_size+k];
@@ -814,8 +892,12 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
             }
          }
          ov[0] /= mat_i[0];
+         
+      }
+      
    }
-   
+#endif
+  
 
    hypre_TFree(mat_i);
    
@@ -833,137 +915,207 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, int block_si
 {
 
    int ierr = 0;
-   int i,m,j,k;
-   int piv_row;
-   
-   double factor, eps;
-   double piv, tmp;
+   int i, j;
    double *m_i1;
-   
-   m_i1 = hypre_CTAlloc(double, block_size*block_size);
-   
-   eps = 1.0e-6;
 
-   if (block_size ==1 )
+   m_i1 = hypre_CTAlloc(double, block_size*block_size);
+
+#if LB_VERSION
    {
-      if (fabs(m_i1[0]) > 1e-10)
+
+      int one, info;
+      int *piv;
+      int sz;
+      
+      double *i2_t;
+
+      one = 1;
+      i2_t = hypre_CTAlloc(double, block_size*block_size);
+      piv = hypre_CTAlloc(int, block_size);
+      
+
+     /* copy i1 to m_i1*/
+      sz = block_size*block_size;
+      dcopy_(&sz, i1, &one, m_i1, &one);
+
+
+      /* writes over m_i1 with LU */
+      dgetrf_(&block_size, &block_size, m_i1, &block_size, piv , &info);
+      if (info) 
       {
-         o[0] = i2[0]/i1[0];
-         return(ierr);
+         hypre_TFree(m_i1);
+         hypre_TFree(i2_t);
+         hypre_TFree(piv);
+         return (-1);
+      }
+      
+      /* need the transpose of i_2*/
+     for (i=0; i < block_size; i++)
+     {
+        for (j=0; j< block_size; j++)
+        {
+           i2_t[i*block_size+j] = i2[j*block_size+i];  
+        }
+     }
+     
+      /* writes over i2_t */
+      dgetrs_("T", &block_size, &block_size, 
+           m_i1, &block_size, piv, i2_t, &block_size, &info);
+      if (info) 
+      {
+         hypre_TFree(m_i1);
+         hypre_TFree(i2_t);
+         hypre_TFree(piv);
+         return (-1);
+      }
+   
+      /* ans. is the transpose of i2_t*/
+      for (i=0; i < block_size; i++)
+      {
+         for (j=0; j< block_size; j++)
+         {
+            o[i*block_size+j] = i2_t[j*block_size+i];  
+         }
+      }
+     
+      hypre_TFree(i2_t);
+      hypre_TFree(piv);
+      
+   }
+   
+#else
+   {
+      
+      int m, k;
+      int piv_row;
+      double factor, eps;
+      double piv, tmp;
+      
+      eps = 1.0e-6;
+      
+      if (block_size ==1 )
+      {
+         if (fabs(m_i1[0]) > 1e-10)
+         {
+            o[0] = i2[0]/i1[0];
+            hypre_TFree(m_i1);
+            return(ierr);
+         }
+         else
+         {
+            /* printf("GE zero pivot error\n"); */
+            hypre_TFree(m_i1);
+            return(-1);
+         }
       }
       else
       {
-         /* printf("GE zero pivot error\n"); */
-         return(-1);
-      }
-   }
-   else
-   {
-      /* copy i2 to o and i1 to m_i1*/
-      for (k = 0; k < block_size*block_size; k++)   
-      {
-         o[k] = i2[k];
-         m_i1[k] = i1[k];
-      }
-
-
-      /* start ge  - turning m_i1 into U factor (don't save L - just apply to 
-         rhs - which is o)*/
-      /* we do partial pivoting for size */
-
-      /* loop through the rows (row k) */ 
-      for (k = 0; k < block_size-1; k++)
-      {
-         piv = m_i1[k*block_size+k];
-         piv_row = k;
-  
-         /* find the largest pivot in position k*/
-         for (j=k+1; j < block_size; j++)         
+         /* copy i2 to o and i1 to m_i1*/
+         for (k = 0; k < block_size*block_size; k++)   
          {
-            if (fabs(m_i1[j*block_size+k]) > fabs(piv))
-            {
-               piv =  m_i1[j*block_size+k];
-               piv_row = j;
-            }
+            o[k] = i2[k];
+            m_i1[k] = i1[k];
+         }
+         
+         
+         /* start ge  - turning m_i1 into U factor (don't save L - just apply to 
+            rhs - which is o)*/
+         /* we do partial pivoting for size */
+         
+         /* loop through the rows (row k) */ 
+         for (k = 0; k < block_size-1; k++)
+         {
+            piv = m_i1[k*block_size+k];
+            piv_row = k;
             
-         }
-         if (piv_row !=k) /* do a row exchange  - rows k and piv_row*/
-         {
-            for (j=0; j < block_size; j++)
+            /* find the largest pivot in position k*/
+            for (j=k+1; j < block_size; j++)         
             {
-               tmp = m_i1[k*block_size + j];
-               m_i1[k*block_size + j] = m_i1[piv_row*block_size + j];
-               m_i1[piv_row*block_size + j] = tmp;
-
-               tmp = o[k*block_size + j];
-               o[k*block_size + j] = o[piv_row*block_size + j];
-               o[piv_row*block_size + j] = tmp;
-
-            }
-         }
-         /* end of pivoting */
-  
-
-         if (fabs(piv) > eps)
-         {
-            /* now we can factor into U */
-            for (j = k+1; j < block_size; j++)
-            {
-               factor = m_i1[j*block_size+k]/piv;
-               for (m = k+1; m < block_size; m++)
+               if (fabs(m_i1[j*block_size+k]) > fabs(piv))
                {
-                  m_i1[j*block_size+m]  -= factor * m_i1[k*block_size+m];
+                  piv =  m_i1[j*block_size+k];
+                  piv_row = j;
                }
-               /* Elimination step for rhs */ 
-               /* do for each of the "rhs" */
-               for (i=0; i < block_size; i++)
+               
+            }
+            if (piv_row !=k) /* do a row exchange  - rows k and piv_row*/
+            {
+               for (j=0; j < block_size; j++)
                {
-                  /* o(row, col) = o(row*block_size + col) */ 
-                  o[j*block_size+i] -= factor * o[k*block_size + i];              
+                  tmp = m_i1[k*block_size + j];
+                  m_i1[k*block_size + j] = m_i1[piv_row*block_size + j];
+                  m_i1[piv_row*block_size + j] = tmp;
+                  
+                  tmp = o[k*block_size + j];
+                  o[k*block_size + j] = o[piv_row*block_size + j];
+                  o[piv_row*block_size + j] = tmp;
+                  
                }
             }
+            /* end of pivoting */
+            
+            
+            if (fabs(piv) > eps)
+            {
+               /* now we can factor into U */
+               for (j = k+1; j < block_size; j++)
+               {
+                  factor = m_i1[j*block_size+k]/piv;
+                  for (m = k+1; m < block_size; m++)
+                  {
+                     m_i1[j*block_size+m]  -= factor * m_i1[k*block_size+m];
+                  }
+                  /* Elimination step for rhs */ 
+                  /* do for each of the "rhs" */
+                  for (i=0; i < block_size; i++)
+                  {
+                     /* o(row, col) = o(row*block_size + col) */ 
+                     o[j*block_size+i] -= factor * o[k*block_size + i];              
+                  }
+               }
+            }
+            else
+            {
+               /* printf("Block of matrix is nearly singular: zero pivot error\n"); */
+               hypre_TFree(m_i1);
+               return(-1);
+            }
          }
-         else
+
+
+         /* we also need to check the pivot in the last row to see if it is zero */  
+         k = block_size - 1; /* last row */
+         if ( fabs(m_i1[k*block_size+k]) < eps)
          {
             /* printf("Block of matrix is nearly singular: zero pivot error\n"); */
             hypre_TFree(m_i1);
             return(-1);
          }
-      }
-
-
-      /* we also need to check the pivot in the last row to see if it is zero */  
-      k = block_size - 1; /* last row */
-      if ( fabs(m_i1[k*block_size+k]) < eps)
-      {
-         /* printf("Block of matrix is nearly singular: zero pivot error\n"); */
-         hypre_TFree(m_i1);
-         return(-1);
-      }
-
-
-      /* Back Substitution  - do for each "rhs" (U is now in m_i1)*/
-      for (i=0; i < block_size; i++)
-      {
-         for (k = block_size-1; k > 0; --k)
+         
+         
+         /* Back Substitution  - do for each "rhs" (U is now in m_i1)*/
+         for (i=0; i < block_size; i++)
          {
-            o[k*block_size + i] /= m_i1[k*block_size+k];
-            for (j = 0; j < k; j++)
+            for (k = block_size-1; k > 0; --k)
             {
-               if (m_i1[j*block_size+k] != 0.0)
+               o[k*block_size + i] /= m_i1[k*block_size+k];
+               for (j = 0; j < k; j++)
                {
-                  o[j*block_size + i] -= o[k*block_size + i] * m_i1[j*block_size+k];
+                  if (m_i1[j*block_size+k] != 0.0)
+                  {
+                     o[j*block_size + i] -= o[k*block_size + i] * m_i1[j*block_size+k];
+                  }
                }
             }
+            o[0*block_size + i] /= m_i1[0];
          }
-         o[0*block_size + i] /= m_i1[0];
       }
    }
    
-
+#endif
    hypre_TFree(m_i1);
    
-   return (ierr);
+   return ierr;
 }
 
 
@@ -976,52 +1128,101 @@ hypre_CSRBlockMatrixBlockMultInv(double* i1, double* i2, double* o, int block_si
 {
 
    int ierr = 0;
-   double eps;
-   double *i1_t, *i2_t, *o_t;
+ 
    
-
-   eps = 1.0e-12;
+#if LB_VERSION
    
-   if (block_size ==1 )
    {
-      if (fabs(i1[0]) > eps)
+     /* same as solving A^T C^T = B^T */
+      double *m_i1;
+      int info;
+      int *piv;
+      int sz, one;
+      
+
+      piv = hypre_CTAlloc(int, block_size);
+      m_i1 = hypre_CTAlloc(double, block_size*block_size);
+      one = 1;
+      sz = block_size*block_size;
+
+     /* copy i1 to m_i1 and i2 to o*/
+
+      dcopy_(&sz, i1, &one, m_i1, &one);
+      dcopy_(&sz, i2, &one, o, &one);
+
+      /* writes over m_i1 with LU */
+      dgetrf_(&block_size, &block_size, m_i1, &block_size, piv , &info);
+      if (info) 
       {
-         o[0] = i2[0]/i1[0];
-         return(ierr);
+         hypre_TFree(m_i1);
+         hypre_TFree(piv);
+         return (-1);
+      }
+     /* writes over B */
+      dgetrs_("N", &block_size, &block_size, 
+           m_i1, &block_size, piv, o, &block_size, &info);
+      if (info) 
+      {
+         hypre_TFree(m_i1);
+         hypre_TFree(piv);
+         return (-1);
+      }
+
+      hypre_TFree(m_i1);
+      hypre_TFree(piv);
+   }
+   
+#else
+   {
+      
+      double eps;
+      double *i1_t, *i2_t, *o_t;
+      
+      
+      eps = 1.0e-12;
+      
+      if (block_size ==1 )
+      {
+         if (fabs(i1[0]) > eps)
+         {
+            o[0] = i2[0]/i1[0];
+            return(ierr);
+         }
+         else
+         {
+            /* printf("GE zero pivot error\n"); */
+            return(-1);
+         }
       }
       else
       {
-         /* printf("GE zero pivot error\n"); */
-         return(-1);
+         
+         i1_t = hypre_CTAlloc(double, block_size*block_size);
+         i2_t = hypre_CTAlloc(double, block_size*block_size);
+         o_t = hypre_CTAlloc(double, block_size*block_size);
+         
+         /* TO DO:: this could be done more efficiently! */  
+         hypre_CSRBlockMatrixBlockTranspose(i1, i1_t, block_size);
+         hypre_CSRBlockMatrixBlockTranspose(i2, i2_t, block_size);
+         ierr = hypre_CSRBlockMatrixBlockInvMult(i1_t, i2_t, o_t, block_size);
+         
+         if (!ierr) hypre_CSRBlockMatrixBlockTranspose(o_t, o, block_size);
+         
+         hypre_TFree(i1_t);
+         hypre_TFree(i2_t);
+         hypre_TFree(o_t);
+         
       }
    }
-   else
-   {
-
-      i1_t = hypre_CTAlloc(double, block_size*block_size);
-      i2_t = hypre_CTAlloc(double, block_size*block_size);
-      o_t = hypre_CTAlloc(double, block_size*block_size);
-  
-      /* TO DO:: this could be done more efficiently! */  
-      hypre_CSRBlockMatrixBlockTranspose(i1, i1_t, block_size);
-      hypre_CSRBlockMatrixBlockTranspose(i2, i2_t, block_size);
-      ierr = hypre_CSRBlockMatrixBlockInvMult(i1_t, i2_t, o_t, block_size);
-       
-      if (!ierr) hypre_CSRBlockMatrixBlockTranspose(o_t, o, block_size);
-
-      hypre_TFree(i1_t);
-      hypre_TFree(i2_t);
-      hypre_TFree(o_t);
-
-   }
    
+#endif   
    return (ierr);
 }
 
 
 
 /*--------------------------------------------------------------------------
- * hypre_CSRBlockMatrixBlockInvMultDiag
+ * hypre_CSRBlockMatrixBlockInvMultDiag - zeros off-d entires
  * (o = diag(i1)^{-1} * diag(i2)) 
  *--------------------------------------------------------------------------*/
 int
@@ -1029,19 +1230,15 @@ hypre_CSRBlockMatrixBlockInvMultDiag(double* i1, double* i2, double* o, int bloc
 {
 
    int ierr = 0;
-   int i, j;
-   
+   int i;
+   int  sz = block_size*block_size;
+
    double eps;
-      
-   eps = 1.0e-8;
    
-   for (i = 0; i < block_size; i++)
-   {
-      for (j = 0; j < block_size; j++)
-      {
-         o[i*block_size+j] = 0.0;
-      }
-   }
+   eps = 1.0e-8;
+
+   for (i = 0; i < sz; i++)
+      o[i] = 0.0;
    
    for (i = 0; i < block_size; i++)
    {
