@@ -165,9 +165,10 @@ int HYPRE_ParCSRCotreeSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
    comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) A);
    MPI_Comm_size(comm, &nprocs);
+   partition = hypre_ParVectorPartitioning((hypre_ParVector *) b);
    new_partition = (int *) malloc((nprocs+1) * sizeof(int));
    for (ii = 0; ii <= nprocs; ii++) new_partition[ii] = partition[ii];
-   partition = hypre_ParVectorPartitioning((hypre_ParVector *) b);
+/*   partition = hypre_ParVectorPartitioning((hypre_ParVector *) b);  */
    new_vector = hypre_ParVectorCreate(hypre_ParVectorComm((hypre_ParVector *)b),
 		   (int) hypre_ParVectorGlobalSize((hypre_ParVector *) b),	
                    new_partition);
