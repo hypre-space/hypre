@@ -214,7 +214,7 @@ hypre_F90_IFACE(hypre_structhybridsetkdim, HYPRE_STRUCTHYBRIDSETKDIM)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetPrecond
+ * HYPRE_StructHybridSetPrecond
  *--------------------------------------------------------------------------*/
 
 void
@@ -233,7 +233,7 @@ hypre_F90_IFACE(hypre_structhybridsetprecond, HYPRE_STRUCTHYBRIDSETPRECOND)( lon
    if (*precond_id == 0)
    {
       *ierr = (int)
-         ( HYPRE_StructPCGSetPrecond( (HYPRE_StructSolver) *solver,
+         ( HYPRE_StructHybridSetPrecond( (HYPRE_StructSolver) *solver,
                                       HYPRE_StructSMGSolve,
                                       HYPRE_StructSMGSetup,
                                       (HYPRE_StructSolver) *precond_solver) );
@@ -241,7 +241,7 @@ hypre_F90_IFACE(hypre_structhybridsetprecond, HYPRE_STRUCTHYBRIDSETPRECOND)( lon
    else if (*precond_id == 1)
    {
       *ierr = (int)
-         ( HYPRE_StructPCGSetPrecond( (HYPRE_StructSolver) *solver,
+         ( HYPRE_StructHybridSetPrecond( (HYPRE_StructSolver) *solver,
                                       HYPRE_StructPFMGSolve,
                                       HYPRE_StructPFMGSetup,
                                       (HYPRE_StructSolver) *precond_solver) );
