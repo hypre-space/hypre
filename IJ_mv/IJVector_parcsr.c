@@ -42,7 +42,7 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector, int *IJpartitioning)
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    jmin = hypre_IJVectorGlobalFirstRow(vector);
-   global_n = hypre_IJVectorGlobalNumRows(vector);
+   global_n = hypre_IJVectorGlobalNumRows(vector) - jmin;
 
    partitioning = hypre_CTAlloc(int, 2); 
 
