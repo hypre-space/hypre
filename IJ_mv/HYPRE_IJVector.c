@@ -107,7 +107,7 @@ int HYPRE_IJVectorCreate( MPI_Comm comm,
 
 
    hypre_IJVectorGlobalFirstRow(vec) = partitioning[0];
-   hypre_IJVectorGlobalNumRows(vec)= partitioning[num_procs]-1;
+   hypre_IJVectorGlobalNumRows(vec)= partitioning[num_procs]-partitioning[0];
    
 
 
