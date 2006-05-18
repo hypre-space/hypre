@@ -27,7 +27,7 @@ int HYPRE_IJVectorCreate( MPI_Comm comm,
 {
    hypre_IJVector *vec;
    int num_procs, my_id, *partitioning;
-   int ierr;
+   int ierr = 0;
  
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    int  row0, rowN;
