@@ -1007,6 +1007,9 @@ int LLNL_FEI_Fei::loadComplete()
       printf("%4d : LLNL_FEI_Fei::loadComplete - numCRMult   = %d\n",
              mypid_, numCRMult_);
    }
+if (mypid_ == 0)
+printf("%4d : LLNL_FEI_Fei::loadComplete - numExtNodes = %d\n",
+mypid_, localNNodes-numLocalNodes_);
 
    /* -----------------------------------------------------------------
     * construct global node list, starting with nodes that belong
@@ -1907,6 +1910,7 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
    {
       nodeID = BCNodeIDs_[iN];
       index  = -1;
+
       if ( numLocalNodes_ > 0 )
          index = hypre_BinarySearch(nodeGlobalIDs_,nodeID,numLocalNodes_);
       if ( index >= 0 )
@@ -1986,83 +1990,88 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
       }
       else
       {
-         if ( numExtNodes_ <= 0 )
+         if (numExtNodes_ <= 0)
          {
-            printf("%4d : LLNL_FEI_Fei::buildGlobalMatrixVector ERROR(2).\n",
-                   mypid_);
-            exit(1);
+            if (outputLevel_ > 2)
+               printf("WARNING : BC node ID not local %d (%d).\n",nodeID,
+                      mypid_);
+            index = -1;
          }
-         index = hypre_BinarySearch(&nodeGlobalIDs_[numLocalNodes_],nodeID,
-                                    numExtNodes_);
-         if ( index < 0 )
+         else
          {
-            printf("ERROR : BC node ID not local.\n");
-            exit(1);
+            index = hypre_BinarySearch(&nodeGlobalIDs_[numLocalNodes_],nodeID,
+                                       numExtNodes_);
+            if (index < 0 && outputLevel_ > 2)
+               printf("WARNING : BC node ID not local %d (%d).\n",nodeID,
+                      mypid_);
          }
-         index += numLocalNodes_;
-         for ( iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++ )
+         if (index >= 0)
          {
-            alpha  = BCNodeAlpha_[iN][iD%nodeDOF_]; 
-            beta   = BCNodeBeta_[iN][iD%nodeDOF_]; 
-            gamma  = BCNodeGamma_[iN][iD%nodeDOF_]; 
-            if ( beta == 0.0 && alpha != 0.0 )
+            index += numLocalNodes_;
+            for (iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++)
             {
-               rowInd = iD + numCRMult_;
-               if ( numExtNodes_ > 0 )
+               alpha  = BCNodeAlpha_[iN][iD%nodeDOF_]; 
+               beta   = BCNodeBeta_[iN][iD%nodeDOF_]; 
+               gamma  = BCNodeGamma_[iN][iD%nodeDOF_]; 
+               if ( beta == 0.0 && alpha != 0.0 )
                {
+                  rowInd = iD + numCRMult_;
+                  if ( numExtNodes_ > 0 )
+                  {
+                     for (iD2=TdiagIA[rowInd]; 
+                          iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
+                     {
+                        rowInd2 = TdiagJA[iD2];
+                        if (rowInd2 >= 0)
+                        {
+                           for (iD3 = ToffdIA[rowInd2];
+                                iD3<ToffdIA[rowInd2]+offdCounts[rowInd2];iD3++)
+                           {
+                              if (ToffdJA[iD3] == rowInd && ToffdAA[iD3]!=0.0)
+                              {
+                                rhsVector_[rowInd2]-=(gamma/alpha*ToffdAA[iD3]);
+                                ToffdAA[iD3] = 0.0;
+                                break;
+                              }
+                           }
+                        }
+                     }
+                     for (iD2=ToffdIA[rowInd]; 
+                          iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
+                     {
+                        rowInd2 = ToffdJA[iD2];
+                        if ( rowInd2 != rowInd && rowInd2 >= 0 )
+                        {
+                           for (iD3 = ToffdIA[rowInd2];
+                                iD3<ToffdIA[rowInd2]+offdCounts[rowInd2];iD3++)
+                           {
+                              if (ToffdJA[iD3] == rowInd && ToffdAA[iD3]!=0.0)
+                              {
+                                rhsVector_[rowInd2]-=(gamma/alpha*ToffdAA[iD3]);
+                                ToffdAA[iD3] = 0.0;
+                                break;
+                              }
+                           }
+                        }
+                     }
+                  }
                   for (iD2=TdiagIA[rowInd]; 
                        iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
                   {
-                     rowInd2 = TdiagJA[iD2];
-                     if ( rowInd2 >= 0 )
+                     TdiagJA[iD2] = -1;
+                     TdiagAA[iD2] = 0.0;
+                  }
+                  if ( ToffdIA != NULL )
+                  {
+                     for (iD2=ToffdIA[rowInd]; 
+                          iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
                      {
-                        for (iD3 = ToffdIA[rowInd2];
-                             iD3<ToffdIA[rowInd2]+offdCounts[rowInd2]; iD3++)
-                        {
-                           if ( ToffdJA[iD3] == rowInd && ToffdAA[iD3] != 0.0 )
-                           {
-                              rhsVector_[rowInd2] -=(gamma/alpha*ToffdAA[iD3]); 
-                              ToffdAA[iD3] = 0.0;
-                              break;
-                           }
-                        }
+                        ToffdJA[iD2] = -1;
+                        ToffdAA[iD2] = 0.0;
                      }
                   }
-                  for (iD2=ToffdIA[rowInd]; 
-                       iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
-                  {
-                     rowInd2 = ToffdJA[iD2];
-                     if ( rowInd2 != rowInd && rowInd2 >= 0 )
-                     {
-                        for (iD3 = ToffdIA[rowInd2];
-                             iD3<ToffdIA[rowInd2]+offdCounts[rowInd2]; iD3++)
-                        {
-                           if ( ToffdJA[iD3] == rowInd && ToffdAA[iD3] != 0.0 )
-                           {
-                              rhsVector_[rowInd2] -= (gamma/alpha*ToffdAA[iD3]);
-                              ToffdAA[iD3] = 0.0;
-                              break;
-                           }
-                        }
-                     }
-                  }
+                  rhsVector_[rowInd] = 0.0;
                }
-               for (iD2=TdiagIA[rowInd]; 
-                    iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
-               {
-                  TdiagJA[iD2] = -1;
-                  TdiagAA[iD2] = 0.0;
-               }
-               if ( ToffdIA != NULL )
-               {
-                  for (iD2=ToffdIA[rowInd]; 
-                       iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
-                  {
-                     ToffdJA[iD2] = -1;
-                     ToffdAA[iD2] = 0.0;
-                  }
-               }
-               rhsVector_[rowInd] = 0.0;
             }
          }
       }
