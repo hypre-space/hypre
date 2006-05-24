@@ -990,7 +990,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
     *--------------------------------------------------------------------*/
    if (!hypre_ParCSRMatrixCommPkg(A))
    {
-       	hypre_MatvecCommPkgCreate(A);
+              hypre_MatvecCommPkgCreate(A);
    }
     
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -2210,3 +2210,14 @@ void hypre_ParCSRMatrixExtractRowSubmatrices(hypre_ParCSRMatrix *A_csr, int *ind
    free(exp_indices);
 }
 
+/* -----------------------------------------------------------------------------
+ * return the sum of all local elements of the matrix
+ * ----------------------------------------------------------------------------- */
+
+double hypre_ParCSRMatrixLocalSumElts( hypre_ParCSRMatrix * A )
+{
+   hypre_CSRMatrix * A_diag = hypre_ParCSRMatrixDiag( A );
+   hypre_CSRMatrix * A_offd = hypre_ParCSRMatrixOffd( A );
+
+   return hypre_CSRMatrixSumElts(A_diag) + hypre_CSRMatrixSumElts(A_offd);
+}

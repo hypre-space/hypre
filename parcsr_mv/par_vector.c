@@ -1010,3 +1010,12 @@ hypre_FillResponseParToVectorAll(void *p_recv_contact_buf,
    return(0);
 
 }
+
+/* -----------------------------------------------------------------------------
+ * return the sum of all local elements of the vector
+ * ----------------------------------------------------------------------------- */
+
+double hypre_ParVectorLocalSumElts( hypre_ParVector * vector )
+{
+   return hypre_VectorSumElts( hypre_ParVectorLocalVector(vector) );
+}

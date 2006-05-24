@@ -82,7 +82,7 @@ void hypre_ParMatmul_RowSizes_Marked
       }
       else
    {
-      /* >>>  this block is unchanged from hypare_ParMatmul_Row Sizes...
+      /* >>>  this block is unchanged from hypre_ParMatmul_Row Sizes...
          >>> *** except for the dof_func check ***
          >>> maybe it can be spun off into a separate shared function.*/      
       /*--------------------------------------------------------------------
@@ -226,7 +226,7 @@ void hypre_ParMatmul_RowSizes_Marked
 
 hypre_ParCSRMatrix * hypre_ParMatmul_FC(
    hypre_ParCSRMatrix * A, hypre_ParCSRMatrix * P, int * CF_marker,
-   int * dof_func, int * dof_func_offd, double weight )
+   int * dof_func, int * dof_func_offd )
 /* hypre_parMatmul_FC creates and returns the "Fine"-designated rows of the
    matrix product A*P.  A's size is (nC+nF)*(nC+nF), P's size is (nC+nF)*nC
    where nC is the number of coarse rows/columns, nF the number of fine
@@ -235,8 +235,6 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
    only of the computed rows of C, its size would be nF*nC.
    "Fine" is defined solely by the marker array, and for example could be
    a proper subset of the fine points of a multigrid hierarchy.
-   The last argument is a weight which is multiplied by elements A(i,j)*P(j,k)
-   when _j_ (as well as i) is "Fine."
 */
 {
    /* To compute a submatrix of C containing only the computed data, i.e.
@@ -259,6 +257,7 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
    double          *A_offd_data = hypre_CSRMatrixData(A_offd);
    int             *A_offd_i = hypre_CSRMatrixI(A_offd);
    int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
+   int		   *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
 
    int *row_starts_A = hypre_ParCSRMatrixRowStarts(A);
    int	num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
@@ -331,8 +330,8 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
    int              jj_count_diag, jj_count_offd;
    int              jj_row_begin_diag, jj_row_begin_offd;
    int              start_indexing = 0; /* start indexing for C_data at 0 */
-   int		    n_rows_A, n_cols_A;
-   int		    n_rows_P, n_cols_P;
+   int		    n_rows_A_global, n_cols_A_global;
+   int		    n_rows_P_global, n_cols_P_global;
    int              allsquare = 0;
    int              cnt, cnt_offd, cnt_diag;
    int 		    num_procs;
@@ -341,12 +340,12 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
    double           a_entry;
    double           a_b_product;
    
-   n_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
-   n_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
-   n_rows_P = hypre_ParCSRMatrixGlobalNumRows(P);
-   n_cols_P = hypre_ParCSRMatrixGlobalNumCols(P);
+   n_rows_A_global = hypre_ParCSRMatrixGlobalNumRows(A);
+   n_cols_A_global = hypre_ParCSRMatrixGlobalNumCols(A);
+   n_rows_P_global = hypre_ParCSRMatrixGlobalNumRows(P);
+   n_cols_P_global = hypre_ParCSRMatrixGlobalNumCols(P);
 
-   if (n_cols_A != n_rows_P || num_cols_diag_A != num_rows_diag_P)
+   if (n_cols_A_global != n_rows_P_global || num_cols_diag_A != num_rows_diag_P)
    {
 	printf(" Error! Incompatible matrix dimensions!\n");
 	return NULL;
@@ -574,7 +573,6 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
                if( dof_func==NULL || dof_func[i1] == dof_func_offd[i2] )
                {  /* interpolate only like "functions" */
                   a_entry = A_offd_data[jj2];
-                  if ( CF_marker[i2]<0 ) a_entry = a_entry * weight;
             
                   /*-----------------------------------------------------------
                    *  Loop over entries in row i2 of P_ext.
@@ -604,6 +602,7 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
                   {
                      i3 = P_ext_diag_j[jj3];
                      a_b_product = a_entry * P_ext_diag_data[jj3];
+
                      if (P_marker[i3] < jj_row_begin_diag)
                      {
                         P_marker[i3] = jj_count_diag;
@@ -634,7 +633,6 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
             if( dof_func==NULL || dof_func[i1] == dof_func[i2] )
             {  /* interpolate only like "functions" */
                a_entry = A_diag_data[jj2];
-               if ( CF_marker[i2]<0 ) a_entry = a_entry * weight;
             
                /*-----------------------------------------------------------
                 *  Loop over entries in row i2 of P_diag.
@@ -719,10 +717,11 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
       }
    }
 
-   C = hypre_ParCSRMatrixCreate(comm, n_rows_A, n_cols_P, row_starts_A,
-	col_starts_P, num_cols_offd_C, C_diag_size, C_offd_size);
+   C = hypre_ParCSRMatrixCreate(
+      comm, n_rows_A_global, n_cols_P_global,
+      row_starts_A, col_starts_P, num_cols_offd_C, C_diag_size, C_offd_size );
 
-/* Note that C does not own the partitionings */
+   /* Note that C does not own the partitionings */
    hypre_ParCSRMatrixSetRowStartsOwner(C,0);
    hypre_ParCSRMatrixSetColStartsOwner(C,0);
 
@@ -801,12 +800,7 @@ void hypre_ParMatScaleDiagInv_F(
 
    int              i1, i2;
    int              jj2, jj3;
-   int		    n_rows_A, n_cols_A;
    double           a_entry;
-
-   n_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
-   n_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
-
 
    /*-----------------------------------------------------------------------
     *  Loop over C_diag rows.
@@ -888,12 +882,14 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
    double          *P_offd_data = hypre_CSRMatrixData(P_offd);
    int             *P_offd_i = hypre_CSRMatrixI(P_offd);
    int             *P_offd_j = hypre_CSRMatrixJ(P_offd);
+   int             *P_col_map_offd = hypre_ParCSRMatrixColMapOffd( P );
    double          *C_diag_data = hypre_CSRMatrixData(C_diag);
    int             *C_diag_i = hypre_CSRMatrixI(C_diag);
    int             *C_diag_j = hypre_CSRMatrixJ(C_diag);
    double          *C_offd_data = hypre_CSRMatrixData(C_offd);
    int             *C_offd_i = hypre_CSRMatrixI(C_offd);
    int             *C_offd_j = hypre_CSRMatrixJ(C_offd);
+   int             *C_col_map_offd = hypre_ParCSRMatrixColMapOffd( C );
    int             *Pnew_diag_i;
    int             *Pnew_diag_j;
    double          *Pnew_diag_data;
@@ -901,21 +897,22 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
    int             *Pnew_offd_j;
    double          *Pnew_offd_data;
    int             *Pnew_j2m;
+   int             *Pnew_col_map_offd;
 
    int	num_rows_diag_C = hypre_CSRMatrixNumRows(C_diag);
-   int	num_rows_offd_C = hypre_CSRMatrixNumCols(C_offd);
+   int	num_rows_offd_C = hypre_CSRMatrixNumRows(C_offd);
    int	num_cols_offd_C = hypre_CSRMatrixNumCols(C_offd);
+   int	num_cols_offd_P = hypre_CSRMatrixNumCols(P_offd);
+   int  num_cols_offd_Pnew, num_rows_offd_Pnew;
    
    int              i1, jmin, jmax, jrange, jrangem1;
-   int              j, m, mc, mp, jp, jc;
-   int		    n_rows_P, n_cols_P;
+   int              j, m, mc, mp, jc, jp, jP, jC, jg, jCg, jPg;
    double           dc, dp;
 
-   n_rows_P = hypre_ParCSRMatrixGlobalNumRows(P);
-   n_cols_P = hypre_ParCSRMatrixGlobalNumCols(P);
-
 /*   Pnew = hypre_ParCSRMatrixCompleteClone( C );*/
+
    Pnew = hypre_ParCSRMatrixUnion( C, P );
+;
    hypre_ParCSRMatrixZero_F( Pnew, CF_marker );  /* fine rows of Pnew set to 0 */
    hypre_ParCSRMatrixCopy_C( Pnew, C, CF_marker ); /* coarse rows of Pnew copied from C (or P) */
    /*>>> ...Zero_F may not be needed depending on how Pnew is made */
@@ -931,15 +928,20 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
    Pnew_offd_j = hypre_CSRMatrixJ(Pnew_offd);
    Pnew_diag_data = hypre_CSRMatrixData(Pnew_diag);
    Pnew_offd_data = hypre_CSRMatrixData(Pnew_offd);
+   Pnew_col_map_offd = hypre_ParCSRMatrixColMapOffd( Pnew );
+   num_rows_offd_Pnew = hypre_CSRMatrixNumRows(Pnew_offd);
+   num_cols_offd_Pnew = hypre_CSRMatrixNumCols(Pnew_offd);
+
 
    /* Find the j-ranges, needed to allocate a "reverse lookup" array. */
    /* This is the max j - min j over P and Pnew (which here is a copy of C).
       Each row of diag and offd can be treated separately */
+   /* >>> this is probably not scalable.  jrange could get very big <<< */
    jrange = 0;
    jrangem1=-1;
    for ( i1 = 0; i1 < num_rows_diag_C; i1++ )
    {
-      if ( CF_marker[i1] < 0 )  /* only Fine rows matter */
+      if ( CF_marker[i1]<0 && hypre_CSRMatrixNumNonzeros(Pnew_diag)>0 )  /* only Fine rows matter */
       {
          jmin = Pnew_diag_j[ Pnew_diag_i[i1] ];
          jmax = Pnew_diag_j[ Pnew_diag_i[i1+1]-1 ];
@@ -965,11 +967,11 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
          jrange = hypre_max(jrange,jrangem1+1);
       }
    }
-   if ( num_cols_offd_C )
+   if ( num_cols_offd_Pnew )
    {
-      for ( i1 = 0; i1 < num_rows_offd_C; i1++ )
+      for ( i1 = 0; i1 < num_rows_offd_Pnew; i1++ )
       {
-         if ( CF_marker[i1] < 0 )  /* only Fine rows matter */
+         if ( CF_marker[i1]<0 && hypre_CSRMatrixNumNonzeros(Pnew_offd)>0 )  /* only Fine rows matter */
          {
             jmin = Pnew_offd_j[ Pnew_offd_i[i1] ];
             if ( Pnew_offd_i[i1+1]> Pnew_offd_i[i1] )
@@ -988,6 +990,7 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
                jmin = hypre_min( jmin, j );
                jmax = hypre_max( jmax, j );
             }
+            if ( num_cols_offd_P )
             for ( m=P_offd_i[i1]; m<P_offd_i[i1+1]; ++m )
             {
                j = P_offd_j[m];
@@ -1010,7 +1013,7 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
 
    for ( i1 = 0; i1 < num_rows_diag_C; i1++ )
    {
-      if ( CF_marker[i1] < 0 )  /* Fine data only */
+      if ( CF_marker[i1]<0 && hypre_CSRMatrixNumNonzeros(Pnew_diag)>0 )  /* Fine data only */
       {
          /* just needed for an assertion below... */
          for ( j=0; j<jrange; ++j ) Pnew_j2m[j] = -1;
@@ -1069,53 +1072,38 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
           * Repeat for the offd block.
           *-----------------------------------------------------------------------*/
 
-   for ( i1 = 0; i1 < num_rows_offd_C; i1++ )
+   for ( i1 = 0; i1 < num_rows_offd_Pnew; i1++ )
    {
-      if ( CF_marker[i1] < 0 )  /* Fine data only */
+      if ( CF_marker[i1]<0 && hypre_CSRMatrixNumNonzeros(Pnew_offd)>0 )  /* Fine data only */
       {
-         if ( num_cols_offd_C )
+         if ( num_cols_offd_Pnew )
          {
-            for ( j=0; j<jrange; ++j ) Pnew_j2m[j] = -1;
-            jmin = Pnew_offd_j[ Pnew_offd_i[i1] ];
-            for ( m=Pnew_offd_i[i1]+1; m<Pnew_offd_i[i1+1]; ++m )
-            {
-               j = Pnew_offd_j[m];
-               jmin = hypre_min( jmin, j );
-            }
-            for ( m=P_offd_i[i1]; m<P_offd_i[i1+1]; ++m )
-            {
-               j = P_offd_j[m];
-               jmin = hypre_min( jmin, j );
-            }
+            /* >>> This is a simple quadratic algorithm, go back to a variant of
+               >>> the linear one used on the diag block if necessary */
             for ( m = Pnew_offd_i[i1]; m<Pnew_offd_i[i1+1]; ++m )
             {
                j = Pnew_offd_j[m];
-               hypre_assert( j-jmin>=0 );
-               hypre_assert( j-jmin<jrange );
-               Pnew_j2m[ j-jmin ] = m;
-            }
-
-            for ( mc=C_offd_i[i1]; mc<C_offd_i[i1+1]; ++mc )
-            {
-               jc = C_offd_j[mc];
-               dc = C_offd_data[mc];
-               m = Pnew_j2m[jc-jmin];
-               hypre_assert( m>=0 );
-               Pnew_offd_data[m] -= dc;
-            }
-
-            for ( mp=P_offd_i[i1]; mp<P_offd_i[i1+1]; ++mp )
-            {
-               jp = P_offd_j[mp];
-               dp = P_offd_data[mp];
-               m = Pnew_j2m[jp-jmin];
-               hypre_assert( m>=0 );
-               Pnew_offd_data[m] += dp;
+               jg = Pnew_col_map_offd[j];
+               Pnew_offd_data[m] = 0;
+               if ( num_cols_offd_C )
+                  for ( mc=C_offd_i[i1]; mc<C_offd_i[i1+1]; ++mc )
+                  {
+                     jC = C_offd_j[mc];
+                     jCg = C_col_map_offd[jC];
+                     if ( jCg==jg ) Pnew_offd_data[m] -= C_offd_data[mc];
+                  }
+               if ( num_cols_offd_P )
+                  for ( mp=P_offd_i[i1]; mp<P_offd_i[i1+1]; ++mp )
+                  {
+                     jP = P_offd_j[mp];
+                     jPg = P_col_map_offd[jP];
+                     if ( jPg==jg ) Pnew_offd_data[m] += P_offd_data[mp];
+                  }
             }
          }
-
       }
    }
+
 
    hypre_TFree(Pnew_j2m);
 
@@ -1334,8 +1322,13 @@ void hypre_ParCSRMatrixDropEntries( hypre_ParCSRMatrix * C,
 
    hypre_CSRMatrixNumNonzeros(C_diag) = num_nonzeros_diag;
    hypre_CSRMatrixNumNonzeros(C_offd) = num_nonzeros_offd;
-   hypre_ParCSRMatrixSetDNumNonzeros( C );
-   hypre_ParCSRMatrixSetNumNonzeros( C );
+   /*  SetNumNonzeros, SetDNumNonzeros are global, need MPI_Allreduce.
+       I suspect, but don't know, that other parts of hypre do not assume that
+       the correct values have been set.
+     hypre_ParCSRMatrixSetNumNonzeros( C );
+     hypre_ParCSRMatrixSetDNumNonzeros( C );*/
+   hypre_ParCSRMatrixNumNonzeros( C ) = 0;
+   hypre_ParCSRMatrixDNumNonzeros( C ) = 0.0;
 
 }
 

@@ -492,9 +492,9 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix, 
-                           int		       base_i,
-                           int		       base_j,
+hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix, 
+                           const int		       base_i,
+                           const int		       base_j,
                            const char         *filename )
 {
    int ierr = 0;
@@ -2028,16 +2028,17 @@ hypre_ParCSRMatrix * hypre_ParCSRMatrixCompleteClone( hypre_ParCSRMatrix * A )
  * Creates and returns a new matrix whose elements are the union of A and B.
  * Data is not copied, only structural information is created.
  * A and B must have the same communicator, numbers and distributions of rows
- * and columns (they can differ in which row-column pairs are nonzero)
+ * and columns (they can differ in which row-column pairs are nonzero, thus
+ * in which columns are in a offd block)
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,
                                               hypre_ParCSRMatrix * B )
 {
    hypre_ParCSRMatrix * C;
+   int * col_map_offd_C = NULL;
    int  num_procs, my_id, p;
    MPI_Comm comm = hypre_ParCSRMatrixComm( A );
-   int i, ncols_offd;
 
    MPI_Comm_rank(comm,&my_id);
    MPI_Comm_size(comm,&num_procs);
@@ -2062,22 +2063,26 @@ hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,
    hypre_ParCSRMatrixLastColDiag( C ) = hypre_ParCSRMatrixLastColDiag( A );
 
    hypre_ParCSRMatrixDiag( C ) =
-      hypre_CSRMatrixUnion( hypre_ParCSRMatrixDiag(A), hypre_ParCSRMatrixDiag(B) );
+      hypre_CSRMatrixUnion( hypre_ParCSRMatrixDiag(A), hypre_ParCSRMatrixDiag(B),
+                            0, 0, 0 );
    hypre_ParCSRMatrixOffd( C ) =
-      hypre_CSRMatrixUnion( hypre_ParCSRMatrixOffd(A), hypre_ParCSRMatrixOffd(B) );
+      hypre_CSRMatrixUnion( hypre_ParCSRMatrixOffd(A), hypre_ParCSRMatrixOffd(B),
+                            hypre_ParCSRMatrixColMapOffd(A),
+                            hypre_ParCSRMatrixColMapOffd(B), &col_map_offd_C );
+   hypre_ParCSRMatrixColMapOffd( C ) = col_map_offd_C;
    hypre_ParCSRMatrixCommPkg( C ) = NULL;
    hypre_ParCSRMatrixCommPkgT( C ) = NULL;
    hypre_ParCSRMatrixOwnsData( C ) = 1;
-   hypre_ParCSRMatrixSetNumNonzeros( C );
-   hypre_ParCSRMatrixSetDNumNonzeros( C );
-   hypre_ParCSRMatrixRowindices( B ) = NULL;
-   hypre_ParCSRMatrixRowvalues( B ) = NULL;
-   hypre_ParCSRMatrixGetrowactive( B ) = 0;
-
-   ncols_offd = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd( C ) );
-   hypre_ParCSRMatrixColMapOffd( C ) = hypre_CTAlloc( int, ncols_offd );
-   for ( i=0; i<ncols_offd; ++i )
-      hypre_ParCSRMatrixColMapOffd( C )[i] = hypre_ParCSRMatrixColMapOffd( A )[i];
+   /*  SetNumNonzeros, SetDNumNonzeros are global, need MPI_Allreduce.
+       I suspect, but don't know, that other parts of hypre do not assume that
+       the correct values have been set.
+     hypre_ParCSRMatrixSetNumNonzeros( C );
+     hypre_ParCSRMatrixSetDNumNonzeros( C );*/
+   hypre_ParCSRMatrixNumNonzeros( C ) = 0;
+   hypre_ParCSRMatrixDNumNonzeros( C ) = 0.0;
+   hypre_ParCSRMatrixRowindices( C ) = NULL;
+   hypre_ParCSRMatrixRowvalues( C ) = NULL;
+   hypre_ParCSRMatrixGetrowactive( C ) = 0;
 
    return C;
 }
