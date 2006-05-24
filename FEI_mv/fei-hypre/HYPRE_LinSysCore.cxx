@@ -3611,6 +3611,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 #else
            printf("HYPRE_LSC::selectPreconditioner - MLI not supported.\n");
 #endif
+           break;
       case HYMLMAXWELL :
 #ifdef HAVE_MLMAXWELL
            ierr = HYPRE_LSI_MLMaxwellCreate(comm_, &HYPrecon_);
