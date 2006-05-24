@@ -246,6 +246,7 @@ hypre_CSRMatrix *hypre_CSRMatrixMultiply ( hypre_CSRMatrix *A , hypre_CSRMatrix 
 hypre_CSRMatrix *hypre_CSRMatrixDeleteZeros ( hypre_CSRMatrix *A , double tol );
 int hypre_CSRMatrixTranspose ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , int data );
 int hypre_CSRMatrixReorder ( hypre_CSRMatrix *A );
+double hypre_CSRMatrixSumElts ( hypre_CSRMatrix *A );
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( int num_rows , int num_cols , int num_nonzeros );
@@ -257,7 +258,7 @@ hypre_CSRMatrix *hypre_CSRMatrixRead ( char *file_name );
 int hypre_CSRMatrixPrint ( hypre_CSRMatrix *matrix , char *file_name );
 int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );
-hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , int *col_map_offd_A , int *col_map_offd_B , int **col_map_offd_C );
 
 /* csr_matvec.c */
 int hypre_CSRMatrixMatvec ( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
@@ -345,6 +346,7 @@ hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
 int hypre_SeqVectorScale ( double alpha , hypre_Vector *y );
 int hypre_SeqVectorAxpy ( double alpha , hypre_Vector *x , hypre_Vector *y );
 double hypre_SeqVectorInnerProd ( hypre_Vector *x , hypre_Vector *y );
+double hypre_VectorSumElts ( hypre_Vector *vector );
 
 #ifdef __cplusplus
 }

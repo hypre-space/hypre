@@ -368,50 +368,115 @@ hypre_CSRMatrix * hypre_CSRMatrixClone( hypre_CSRMatrix * A )
  * Creates and returns a matrix whose elements are the union of those of A and B.
  * Data is not computed, only structural information is created.
  * A and B must have the same numbers of rows.
- * They need not have the same number of columns, if they were different I don't
- * know why anybody would want to call this function.
  * Nothing is done about Rownnz.
+ *
+ * If col_map_offd_A and col_map_offd_B are zero, A and B are expected to have
+ * the same column indexing.  Otherwise, col_map_offd_A, col_map_offd_B should
+ * be the arrays of that name from two ParCSRMatrices of which A and B are the
+ * offd blocks.
  *
  * The algorithm can be expected to have reasonable efficiency only for very
  * sparse matrices (many rows, few nonzeros per row).
  * The nonzeros of a computed row are NOT necessarily in any particular order.
  *--------------------------------------------------------------------------*/
 
-hypre_CSRMatrix * hypre_CSRMatrixUnion( hypre_CSRMatrix * A, hypre_CSRMatrix * B )
+hypre_CSRMatrix * hypre_CSRMatrixUnion(
+   hypre_CSRMatrix * A, hypre_CSRMatrix * B,
+   int * col_map_offd_A, int * col_map_offd_B, int ** col_map_offd_C )
 {
    int num_rows = hypre_CSRMatrixNumRows( A );
    int num_cols_A = hypre_CSRMatrixNumCols( A );
    int num_cols_B = hypre_CSRMatrixNumCols( B );
-   int num_cols = hypre_max( num_cols_A, num_cols_B );
+   int num_cols;
    int num_nonzeros;
    int * A_i = hypre_CSRMatrixI(A);
    int * A_j = hypre_CSRMatrixJ(A);
    int * B_i = hypre_CSRMatrixI(B);
    int * B_j = hypre_CSRMatrixJ(B);
-   int * C_i = hypre_CTAlloc( int, num_rows+1 );
+   int * C_i;
    int * C_j;
-   int i, j, ma, mb, mc, ma_min, ma_max;
+   int * jC = NULL;
+   int i, jA, jB, jBg;
+   int ma, mb, mc, ma_min, ma_max, match;
    hypre_CSRMatrix * C;
 
    hypre_assert( num_rows == hypre_CSRMatrixNumRows(B) );
+   if ( col_map_offd_B ) hypre_assert( col_map_offd_A );
+   if ( col_map_offd_A ) hypre_assert( col_map_offd_B );
 
-   /* The first run through A and B is to count the number of nonzero elements,
-      without double-counting duplicates. */
-   C_i[0] = 0;
+   /* ==== First, go through the columns of A and B to count the columns of C. */
+   if ( col_map_offd_A==0 )
+   {  /* The matrices are diagonal blocks.
+         Normally num_cols_A==num_cols_B, col_starts is the same, etc.
+      */
+      num_cols = hypre_max( num_cols_A, num_cols_B );
+   }
+   else
+   {  /* The matrices are offdiagonal blocks. */
+      jC = hypre_CTAlloc( int, num_cols_B );
+      num_cols = num_cols_A;  /* initialization; we'll compute the actual value */
+      for ( jB=0; jB<num_cols_B; ++jB )
+      {
+         match = 0;
+         jBg = col_map_offd_B[jB];
+         for ( ma=0; ma<num_cols_A; ++ma )
+         {
+            if ( col_map_offd_A[ma]==jBg )
+               match = 1;
+         }
+         if ( match==0 )
+         {
+            jC[jB] = num_cols;
+            ++num_cols;
+         }
+      }
+   }
+
+   /* ==== If we're working on a ParCSRMatrix's offd block,
+      make and load col_map_offd_C */
+   if ( col_map_offd_A )
+   {
+      *col_map_offd_C = hypre_CTAlloc( int, num_cols );
+      for ( jA=0; jA<num_cols_A; ++jA )
+         (*col_map_offd_C)[jA] = col_map_offd_A[jA];
+      for ( jB=0; jB<num_cols_B; ++jB )
+      {
+         match = 0;
+         jBg = col_map_offd_B[jB];
+         for ( ma=0; ma<num_cols_A; ++ma )
+         {
+            if ( col_map_offd_A[ma]==jBg )
+               match = 1;
+         }
+         if ( match==0 )
+            (*col_map_offd_C)[ jC[jB] ] = jBg;
+      }
+   }
+
+
+   /* ==== The first run through A and B is to count the number of nonzero elements,
+      without double-counting duplicates.  Then we can create C. */
    num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    for ( i=0; i<num_rows; ++i )
    {
       ma_min = A_i[i];  ma_max = A_i[i+1];
       for ( mb=B_i[i]; mb<B_i[i+1]; ++mb )
       {
-         j = B_j[mb];
+         jB = B_j[mb];
+         if ( col_map_offd_B ) jB = col_map_offd_B[jB];
+         match = 0;
          for ( ma=ma_min; ma<ma_max; ++ma )
-            if ( A_j[ma] == j )
+         {
+            jA = A_j[ma];
+            if ( col_map_offd_A ) jA = col_map_offd_A[jA];
+            if ( jB == jA )
             {
+               match = 1;
                if( ma==ma_min ) ++ma_min;
                break;
             }
-         else
+         }
+         if ( match==0 )
             ++num_nonzeros;
       }
    }
@@ -419,7 +484,8 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion( hypre_CSRMatrix * A, hypre_CSRMatrix * B
    C = hypre_CSRMatrixCreate( num_rows, num_cols, num_nonzeros );
    hypre_CSRMatrixInitialize( C );
 
-   /* The second run through A and B is to pick out the column numbers
+
+   /* ==== The second run through A and B is to pick out the column numbers
       for each row, and put them in C. */
    C_i = hypre_CSRMatrixI(C);
    C_i[0] = 0;
@@ -435,23 +501,31 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion( hypre_CSRMatrix * A, hypre_CSRMatrix * B
       }
       for ( mb=B_i[i]; mb<B_i[i+1]; ++mb )
       {
-         j = B_j[mb];
+         jB = B_j[mb];
+         if ( col_map_offd_B ) jB = col_map_offd_B[jB];
+         match = 0;
          for ( ma=ma_min; ma<ma_max; ++ma )
-            if ( A_j[ma] == j )
+         {
+            jA = A_j[ma];
+            if ( col_map_offd_A ) jA = col_map_offd_A[jA];
+            if ( jB == jA )
             {
+               match = 1;
                if( ma==ma_min ) ++ma_min;
                break;
             }
-            else
-            {
-               C_j[mc] = B_j[mb];
-               ++mc;
-            }
+         }
+         if ( match==0 )
+         {
+            C_j[mc] = jC[ B_j[mb] ];
+            ++mc;
+         }
       }
       C_i[i+1] = mc;
    }
 
    hypre_assert( mc == num_nonzeros );
+   if (jC) hypre_TFree( jC );
 
    return C;
 }

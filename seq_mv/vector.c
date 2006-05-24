@@ -424,3 +424,19 @@ double   hypre_SeqVectorInnerProd( hypre_Vector *x,
    return result;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_VectorSumElts:
+ * Returns the sum of all vector elements.
+ *--------------------------------------------------------------------------*/
+
+double hypre_VectorSumElts( hypre_Vector *vector )
+{
+   double sum = 0;
+   double * data = hypre_VectorData( vector );
+   int size = hypre_VectorSize( vector );
+   int i;
+
+   for ( i=0; i<size; ++i ) sum += data[i];
+
+   return sum;
+}

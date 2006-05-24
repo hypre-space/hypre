@@ -453,3 +453,20 @@ int hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
 
    return 0;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixSumElts:
+ * Returns the sum of all matrix elements.
+ *--------------------------------------------------------------------------*/
+
+double hypre_CSRMatrixSumElts( hypre_CSRMatrix *A )
+{
+   double sum = 0;
+   double * data = hypre_CSRMatrixData( A );
+   int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   int i;
+
+   for ( i=0; i<num_nonzeros; ++i ) sum += data[i];
+
+   return sum;
+}
