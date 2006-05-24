@@ -57,6 +57,8 @@ int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
       sscanf(paramString[i], "%s", param1);
       if ( !strcmp( param1, "externalSolver" ) )
       {
+         printf("LLNL_FEI_Impl::make sure you call externalSolver before ");
+         printf("loading the matrix.\n");
          if ( (solverLibID_ & SOLVERLOCK) == 0 )
          {
             sscanf(paramString[i], "%s %s", param1, param2);
