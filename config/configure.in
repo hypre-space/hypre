@@ -963,24 +963,16 @@ dnl *
 dnl * Create FEI_mv/fei-hypre/Makefile with appropriate substitutions
 dnl * based on whether or not internal routines are needed
 dnl *********************************************************************
+HYPRE_FEI_SRC_DIR="HYPRE_TOP_SRC_DIR/FEI_mv"
+HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.o"
+HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.o"
+HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.o"
+
 if test "$casc_user_chose_fei" = "yes"
 then
-   HYPRE_FEI_BASE_DIR="FEIINCLUDE"
+   HYPRE_FEI_BASE_DIR="$FEIINCLUDE"
 else
    HYPRE_FEI_BASE_DIR="HYPRE_TOP_SRC_DIR/FEI_mv/fei-base"
-   if test "$casc_using_fei" = "no"
-   then
-      HYPRE_FEI_SRC_DIR=""
-      HYPRE_FEI_BASE_DIR=""
-      HYPRE_FEI_SUPERLU_FILES=""
-      HYPRE_FEI_HYPRE_FILES=""
-      HYPRE_FEI_FEMLI_FILES=""
-   else
-      HYPRE_FEI_SRC_DIR="HYPRE_TOP_SRC_DIR/FEI_mv"
-      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.o"
-      HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.o"
-      HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.o"
-   fi
 fi
 
 dnl *********************************************************************

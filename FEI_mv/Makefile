@@ -9,10 +9,10 @@
 
 include ../config/Makefile.config
 
-HYPRE_FEI_SUBDIRS =\
- SuperLU \
- fei-hypre\
- femli
+HYPRE_FEI_SUBDIRS = \
+   SuperLU \
+   fei-hypre \
+   femli
 
 all: 
 	@ \
