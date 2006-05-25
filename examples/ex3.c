@@ -75,7 +75,7 @@ int main (int argc, char *argv[])
    solver_id = 0;
    n_pre  = 1;
    n_post = 1;
-   print_solution  = 0;
+   print_solution = 0;
 
    /* Parse command line */
    {

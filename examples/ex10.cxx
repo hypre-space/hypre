@@ -321,10 +321,10 @@ int main(int argc, char *argv[])
          for (k = 0; k < elemNNodes; k++)
             elemStiff[i*n+j][k] = new double[elemNNodes];
 
-         // Finite element matrix for the reference square
-	 //                  3 +---+ 2
-         //	               |   |
-	 //                  0 +---+ 1
+         // Stiffness matrix for the reference square
+         //                3 +---+ 2
+         //                  |   |
+         //                0 +---+ 1
 
          double **A = elemStiff[i*n+j];
 
