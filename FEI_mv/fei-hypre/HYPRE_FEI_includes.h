@@ -16,9 +16,9 @@
 #ifndef NOFEI
 
 #include "fei_defs.h"
-#include "base/Data.h"
-#include "base/Lookup.h"
-#include "base/LinearSystemCore.h"
+#include "Data.h"
+#include "Lookup.h"
+#include "LinearSystemCore.h"
 
 #else
 
