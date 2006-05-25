@@ -257,7 +257,6 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
    double          *A_offd_data = hypre_CSRMatrixData(A_offd);
    int             *A_offd_i = hypre_CSRMatrixI(A_offd);
    int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
-   int		   *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
 
    int *row_starts_A = hypre_ParCSRMatrixRowStarts(A);
    int	num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
@@ -900,7 +899,7 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
    int             *Pnew_col_map_offd;
 
    int	num_rows_diag_C = hypre_CSRMatrixNumRows(C_diag);
-   int	num_rows_offd_C = hypre_CSRMatrixNumRows(C_offd);
+   /* int	num_rows_offd_C = hypre_CSRMatrixNumRows(C_offd); */
    int	num_cols_offd_C = hypre_CSRMatrixNumCols(C_offd);
    int	num_cols_offd_P = hypre_CSRMatrixNumCols(P_offd);
    int  num_cols_offd_Pnew, num_rows_offd_Pnew;
