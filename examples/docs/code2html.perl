@@ -2397,6 +2397,65 @@ $LANGUAGE{'cxx'}        = $LANGUAGE{'c++'};
 
 
 
+# taken from nedit
+# modified by tk
+$LANGUAGE{'f'}          = {
+                            'filename'   => '\\.(f(f|or|77)|F(F|OR|77))$',
+                            'regex'      => '',
+                            'patterns'   => [
+                                              {
+                                                'name'       => 'comment',
+                                                'regex'      => '^[C|c].*?$',
+					        'style'      => 'comment',
+                                                'childregex' => []
+                                              },
+                                              {
+                                                'name'       => 'string',
+                                                'regex'      => '""|".*?([^\\\\](\\\\\\\\)*)"|"\\\\\\\\"',
+					        'style'      => 'string',
+                                                'childregex' => []
+                                              },
+                                              {
+                                                'name'       => 'numeric constant',
+                                                'regex'      => '\\b([0-9]+(\\.[0-9]*)?([DEde][-+]?[0-9]*)?|\\.[0-9]+([DEde][-+]?[0-9]*)?)\\b',
+					        'style'      => 'numeric',
+                                                'childregex' => []
+                                              },
+                                              {
+                                                'name'       => 'storage keyword',
+                                                'regex'      => '\\b(BYTE|[Bb]yte|CHARACTER|[Cc]haracter|COMPLEX|[Cc]omplex|DOUBLE *COMPLEX|[Dd]ouble *[Cc]omplex|DOUBLE *PRECISION|[Dd]ouble *[Pp]recision|DOUBLE|[Dd]ouble|INTEGER|[Ii]nteger|REAL|[Rr]eal)(\\*[0-9]+)?\\b',
+					        'style'      => 'reserved word',
+                                                'childregex' => []
+                                              },
+                                              {
+                                                'name'       => 'keyword',
+                                                'regex'      => '\\b(ACCEPT|[Aa]ccept|ASSIGN|[Aa]ssign|AUTOMATIC|[Aa]utomatic|BACKSPACE|[Bb]ackspace|BLOCK|[Bb]lock|CALL|[Cc]all|CLOSE|[Cc]lose|COMMON|[Cc]ommon|CONTINUE|[Cc]ontinue|DATA|[Dd]ata|DECODE|[Dd]ecode|DELETE|[Dd]elete|DIMENSION|[Dd]imension|DO|[Dd]o|ELSE|[Ee]lse|ELSEIF|[Ee]lseif|ENCODE|[Ee]ncode|END *FILE|[Ee]nd *[Ff]ile|ENDFILE|[Ee]ndfile|END|[Ee]nd|ENDIF|[Ee]ndif|ENTRY|[Ee]ntry|EQUIVALENCE|[Ee]quivalence|EXIT|[Ee]xit|EXTERNAL|[Ee]xternal|FORMAT|[Ff]ormat|FUNCTION|[Ff]unction|GOTO|[Gg]oto|IF|[Ii]f|IMPLICIT|[Ii]mplicit|INCLUDE|[Ii]nclude|INQUIRE|[Ii]nquire|INTRINSIC|[Ii]ntrinsic|LOGICAL|[Ll]ogical|MAP|[Mm]ap|NONE|[Nn]one|ON|[Oo]n|OPEN|[Oo]pen|PARAMETER|[Pp]arameter|PAUSE|[Pp]ause|POINTER|[Pp]ointer|PRINT|[Pp]rint|PROGRAM|[Pp]rogram|READ|[Rr]ead|RECORD|[Rr]ecord|RETURN|[Rr]eturn|REWIND|[Rr]ewind|SAVE|[Ss]ave|STATIC|[Ss]tatic|STOP|[Ss]top|STRUCTURE|[Ss]tructure|SUBROUTINE|[Ss]ubroutine|SYSTEM|[Ss]ystem|THEN|[Tt]hen|TO|[Tt]o|TYPE|[Tt]ype|UNION|[Uu]nion|UNLOCK|[Uu]nlock|VIRTUAL|[Vv]irtual|VOLATILE|[Vv]olatile|WHILE|[Ww]hile|WRITE|[Ww]rite)\\b',
+					        'style'      => 'reserved word',
+                                                'childregex' => []
+                                              },
+                                              {
+                                                'name'       => 'symbols',
+                                                'regex'      => '([\\*\\-\\+=:;%&\\|<>\\(\\)\\[\\]!])',
+					        'style'      => 'symbol',
+                                                'childregex' => []
+                                              },
+                                              {
+                                                'name'       => 'identifiers',
+                                                'regex'      => '([a-zA-Z_][a-zA-Z_0-9]*)',
+					        'style'      => 'identifier',
+                                                'childregex' => []
+                                              }
+                                            ]
+                          };
+
+
+
+
+
+
+
+
+
 # written by VRS
 $LANGUAGE{'gpasm'}      = {
                             'filename'   => '(?i)\\.(asm|inc)$',
