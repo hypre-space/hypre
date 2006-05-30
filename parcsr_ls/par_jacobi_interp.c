@@ -370,10 +370,6 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
 #ifdef HYPRE_JACINT_PRINT_MATRICES
    sprintf( filename, "Pout%i", level );
    if ( num_rows_diag_P <= HYPRE_MAX_PRINTABLE_MATRIX )  hypre_ParCSRMatrixPrintIJ( *P,0,0,filename);
-   /* >>>> temporary test for mal-formed matrix which prints ok... >>> */
-   /* hypre_ParCSRMatrixReadIJ( comm, filename,
-                             base_i_ptr, base_j_ptr,
-                             P );*/
 #endif
       
 }
