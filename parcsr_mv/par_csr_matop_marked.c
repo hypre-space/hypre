@@ -82,9 +82,9 @@ void hypre_ParMatmul_RowSizes_Marked
       }
       else
    {
-      /* >>>  this block is unchanged from hypre_ParMatmul_Row Sizes...
-         >>> *** except for the dof_func check ***
-         >>> maybe it can be spun off into a separate shared function.*/      
+      /* This block, most of of this function, is unchanged from hypre_ParMatmul_Row_Sizes
+         (except for the dof_func checks, which are effectively gone if you set
+         dof_func=NULL); maybe it can be spun off into a separate shared function.*/      
       /*--------------------------------------------------------------------
        *  Set marker for diagonal entry, C_{i1,i1} (for square matrices). 
        *--------------------------------------------------------------------*/
@@ -914,11 +914,7 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
 ;
    hypre_ParCSRMatrixZero_F( Pnew, CF_marker );  /* fine rows of Pnew set to 0 */
    hypre_ParCSRMatrixCopy_C( Pnew, C, CF_marker ); /* coarse rows of Pnew copied from C (or P) */
-   /*>>> ...Zero_F may not be needed depending on how Pnew is made */
-   /* >>> it should work to do Pnew = C; would save construction of a matrix
-      >>> Instead of Pnew+=P, Pnew-=C in the data computations below we'd do
-      >>> Pnew*=(-1), then Pnew+=A
-   */
+   /* ...Zero_F may not be needed depending on how Pnew is made */
    Pnew_diag = hypre_ParCSRMatrixDiag(Pnew);
    Pnew_offd = hypre_ParCSRMatrixOffd(Pnew);
    Pnew_diag_i = hypre_CSRMatrixI(Pnew_diag);
@@ -934,8 +930,11 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
 
    /* Find the j-ranges, needed to allocate a "reverse lookup" array. */
    /* This is the max j - min j over P and Pnew (which here is a copy of C).
-      Each row of diag and offd can be treated separately */
-   /* >>> this is probably not scalable.  jrange could get very big <<< */
+      Only the diag block is considered. */
+   /* For scalability reasons (jrange can get big) this won't work for the offd block.
+      Also, indexing is more complicated in the offd block (c.f. col_map_offd).
+      It's not clear, though whether the "quadratic" algorithm I'm using for the offd
+      block is really any slower than the more complicated "linear" algorithm here. */
    jrange = 0;
    jrangem1=-1;
    for ( i1 = 0; i1 < num_rows_diag_C; i1++ )
@@ -966,41 +965,7 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
          jrange = hypre_max(jrange,jrangem1+1);
       }
    }
-   if ( num_cols_offd_Pnew )
-   {
-      for ( i1 = 0; i1 < num_rows_offd_Pnew; i1++ )
-      {
-         if ( CF_marker[i1]<0 && hypre_CSRMatrixNumNonzeros(Pnew_offd)>0 )  /* only Fine rows matter */
-         {
-            jmin = Pnew_offd_j[ Pnew_offd_i[i1] ];
-            if ( Pnew_offd_i[i1+1]> Pnew_offd_i[i1] )
-               jmax = Pnew_offd_j[ Pnew_offd_i[i1+1]-1 ];
-            else
-               jmax = jmin;
-            jrangem1 = jmax-jmin;
-            jrange = hypre_max(jrange,jrangem1+1);
-            /* If columns (of a given row) were in increasing order, the above would be sufficient.
-               If not, the following would be necessary (and sufficient) */
-            jmin = Pnew_offd_j[ Pnew_offd_i[i1] ];
-            jmax = Pnew_offd_j[ Pnew_offd_i[i1] ];
-            for ( m=Pnew_offd_i[i1]+1; m<Pnew_offd_i[i1+1]; ++m )
-            {
-               j = Pnew_offd_j[m];
-               jmin = hypre_min( jmin, j );
-               jmax = hypre_max( jmax, j );
-            }
-            if ( num_cols_offd_P )
-            for ( m=P_offd_i[i1]; m<P_offd_i[i1+1]; ++m )
-            {
-               j = P_offd_j[m];
-               jmin = hypre_min( jmin, j );
-               jmax = hypre_max( jmax, j );
-            }
-            jrangem1 = jmax-jmin;
-            jrange = hypre_max(jrange,jrangem1+1);
-         }
-      }
-   }
+
 
    /*-----------------------------------------------------------------------
     *  Loop over Pnew_diag rows.  Construct a temporary reverse array:
@@ -1077,8 +1042,8 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
       {
          if ( num_cols_offd_Pnew )
          {
-            /* >>> This is a simple quadratic algorithm, go back to a variant of
-               >>> the linear one used on the diag block if necessary */
+            /*  This is a simple quadratic algorithm.  If necessary I may try
+               to implement the ideas used on the diag block later. */
             for ( m = Pnew_offd_i[i1]; m<Pnew_offd_i[i1+1]; ++m )
             {
                j = Pnew_offd_j[m];
@@ -1246,10 +1211,10 @@ void hypre_ParCSRMatrixDropEntries( hypre_ParCSRMatrix * C,
          v = C_diag_data[m];
          jC = C_diag_j[m];
          old_sum += v;
-         /*>>> Do we know anything about the order of P_diag_j?  It would be better
-           >>> not to search through it all here.  If we know nothing, some ordering or
-           >>> index scheme will be needed for efficiency (worth doing iff this function
-           >>> gets called at all ) */
+         /* Do we know anything about the order of P_diag_j?  It would be better
+            not to search through it all here.  If we know nothing, some ordering or
+            index scheme will be needed for efficiency (worth doing iff this function
+            gets called at all ) (may2006: this function is no longer called) */
          keep=0;
          for ( mP=P_diag_i[i1]; mP<P_diag_i[i1+1]; ++mP )
          {
