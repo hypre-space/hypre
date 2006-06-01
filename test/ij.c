@@ -106,6 +106,8 @@ main( int   argc,
    int                *col_inds;
    int                *dof_func;
    int		       num_functions = 1;
+   int		       num_paths = 1;
+   int		       agg_num_levels = 0;
 
    int		       time_index;
    MPI_Comm            comm = MPI_COMM_WORLD;
@@ -435,7 +437,37 @@ main( int   argc,
       {
          arg_index++;
          coarsen_type      = 6;
-      }    
+      }
+      else if ( strcmp(argv[arg_index], "-pmis") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 8;
+      }
+      else if ( strcmp(argv[arg_index], "-pmis1") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 9;
+      }
+      else if ( strcmp(argv[arg_index], "-hmis") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 10;
+      }
+      else if ( strcmp(argv[arg_index], "-ruge1p") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 11;
+      }
+      else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
+      {
+         arg_index++;
+         agg_num_levels = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-np") == 0 )
+      {
+         arg_index++;
+         num_paths = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-nohybrid") == 0 )
       {
          arg_index++;
@@ -1800,6 +1832,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
+      HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
+      HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
 
@@ -1902,6 +1936,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
+      HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
+      HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       if (num_functions > 1)
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
  
@@ -2005,6 +2041,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2125,6 +2163,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_PCGSetPrecond(pcg_solver,
@@ -2387,6 +2427,8 @@ main( int   argc,
 	   HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
 	   HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
 	   HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+           HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+           HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
 	   HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
 	   HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
 	   HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2507,6 +2549,8 @@ main( int   argc,
 	   HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
 	   HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
 	   HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+           HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+           HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
 	   if (num_functions > 1)
 	     HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
 	   HYPRE_PCGSetPrecond(pcg_solver,
@@ -2764,6 +2808,8 @@ main( int   argc,
 	   HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
 	   HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
 	   HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+           HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+           HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
 	   HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
 	   HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
 	   HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2889,6 +2935,8 @@ main( int   argc,
 	   HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
 	   HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
 	   HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+           HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+           HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
 	   if (num_functions > 1)
 	     HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
 	    
@@ -3149,6 +3197,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -3259,6 +3309,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_GMRESSetPrecond(pcg_solver,
@@ -3412,6 +3464,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -3572,6 +3626,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
