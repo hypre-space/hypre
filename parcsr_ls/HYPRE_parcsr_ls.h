@@ -1676,6 +1676,10 @@ HYPRE_ParCSRHybridSetCoarsenType( HYPRE_Solver solver,
                               int                coarsen_type    );
  
 int
+HYPRE_ParCSRHybridSetInterpType( HYPRE_Solver solver,
+                              int                interp_type    );
+ 
+int
 HYPRE_ParCSRHybridSetCycleType( HYPRE_Solver solver,
                               int                cycle_type    );
  
@@ -1734,10 +1738,24 @@ HYPRE_ParCSRHybridSetLevelOuterWt( HYPRE_Solver solver,
 int
 HYPRE_ParCSRHybridSetRelaxWeight( HYPRE_Solver solver,
                               double             *relax_weight    );
- 
 int
 HYPRE_ParCSRHybridSetOmega( HYPRE_Solver solver,
                               double             *omega    );
+int
+HYPRE_ParCSRHybridSetAggNumLevels( HYPRE_Solver solver,
+                              int             agg_num_levels    );
+int
+HYPRE_ParCSRHybridSetNumPaths( HYPRE_Solver solver,
+                              int             num_paths    );
+int
+HYPRE_ParCSRHybridSetNumFunctions( HYPRE_Solver solver,
+                              int             num_functions    );
+int
+HYPRE_ParCSRHybridSetDofFunc( HYPRE_Solver solver,
+                              int            *dof_func    );
+int
+HYPRE_ParCSRHybridSetNodal( HYPRE_Solver solver,
+                              int             nodal    );
  
 int HYPRE_ParCSRHybridGetNumIterations(HYPRE_Solver  solver,
                                        int                *num_its);

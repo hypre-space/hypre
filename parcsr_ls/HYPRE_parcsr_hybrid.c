@@ -271,6 +271,17 @@ HYPRE_ParCSRHybridSetCoarsenType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetInterpType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetInterpType( HYPRE_Solver solver,
+                              int                interp_type    )
+{
+   return( hypre_AMGHybridSetInterpType( (void *) solver, interp_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetCycleType
  *--------------------------------------------------------------------------*/
 
@@ -437,6 +448,61 @@ HYPRE_ParCSRHybridSetOmega( HYPRE_Solver solver,
                               double             *omega    )
 {
    return( hypre_AMGHybridSetOmega( (void *) solver, omega ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetAggNumLevels
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetAggNumLevels( HYPRE_Solver solver,
+                                int          agg_num_levels    )
+{
+   return( hypre_AMGHybridSetAggNumLevels( (void *) solver, agg_num_levels ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNumPaths
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetNumPaths( HYPRE_Solver solver,
+                                int          num_paths    )
+{
+   return( hypre_AMGHybridSetNumPaths( (void *) solver, num_paths ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNumFunctions
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetNumFunctions( HYPRE_Solver solver,
+                                int          num_functions    )
+{
+   return( hypre_AMGHybridSetNumFunctions( (void *) solver, num_functions ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNodal
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetNodal( HYPRE_Solver solver,
+                                int          nodal    )
+{
+   return( hypre_AMGHybridSetNodal( (void *) solver, nodal ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetDofFunc
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetDofFunc( HYPRE_Solver solver,
+                                int       *dof_func    )
+{
+   return( hypre_AMGHybridSetDofFunc( (void *) solver, dof_func ) );
 }
 
 /*--------------------------------------------------------------------------
