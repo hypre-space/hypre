@@ -1643,6 +1643,10 @@ main( int   argc,
       HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_ParCSRHybridSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_ParCSRHybridSetRelaxType(amg_solver, relax_type);
+      HYPRE_ParCSRHybridSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_ParCSRHybridSetNumPaths(amg_solver, num_paths);
+      HYPRE_ParCSRHybridSetNumFunctions(amg_solver, num_functions);
+      HYPRE_ParCSRHybridSetNodal(amg_solver, nodal);
       if (relax_fine > -1)
          HYPRE_ParCSRHybridSetCycleRelaxType(amg_solver, relax_fine, 0);
       if (relax_down > -1)
@@ -1670,6 +1674,31 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_ParCSRHybridSolve(amg_solver, parcsr_A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_ParCSRHybridGetNumIterations(amg_solver, &num_iterations);
+      HYPRE_ParCSRHybridGetPCGNumIterations(amg_solver, &pcg_num_its);
+      HYPRE_ParCSRHybridGetDSCGNumIterations(amg_solver, &dscg_num_its);
+      HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(amg_solver, 
+	&final_res_norm);
+
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("PCG_Iterations = %d\n", pcg_num_its);
+         printf("DSCG_Iterations = %d\n", dscg_num_its);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+      time_index = hypre_InitializeTiming("ParCSR Hybrid Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRHybridSolve(amg_solver, parcsr_A, x, b);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
