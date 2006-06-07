@@ -119,6 +119,9 @@ Version 1.9.0a released, 2005/01/18.
 
 - Added support to the PFMG solver for matrices with constant coefficients.
 
+- Reverted back to the first approach for setting periodic conditions.  The
+  periodic flag now contains the periodicity value, and is not just a boolean.
+
 ************************
 
 Version 1.8.3a released, 2004/01/21.
