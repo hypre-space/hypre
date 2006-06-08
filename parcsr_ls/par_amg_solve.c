@@ -173,7 +173,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute initial fine-grid residual and print 
     *-----------------------------------------------------------------------*/
 
-   if (tol > 0.)
+   if (tol >= 0.)
    {
      if ( amg_logging > 1 ) {
         hypre_ParVectorCopy(F_array[0], Residual );
@@ -224,7 +224,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
      relative_resid = 1.;
    }
 
-   if (my_id == 0 && amg_print_level > 1 && tol > 0.)
+   if (my_id == 0 && amg_print_level > 1 && tol >= 0.)
    {     
       printf("                                            relative\n");
       printf("               residual        factor       residual\n");
@@ -250,7 +250,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      if (tol > 0.)
+      if (tol >= 0.)
       {
         old_resid = resid_nrm;
 
@@ -285,14 +285,14 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       ++hypre_ParAMGDataCumNumIterations(amg_data);
 #endif
 
-      if (my_id == 0 && amg_print_level > 1 && tol > 0.)
+      if (my_id == 0 && amg_print_level > 1 && tol >= 0.)
       { 
          printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
                  resid_nrm, conv_factor, relative_resid);
       }
    }
 
-   if (cycle_count == max_iter && tol > 0.)
+   if (cycle_count == max_iter && tol >= 0.)
    {
       Solve_err_flag = 1;
       hypre_error(HYPRE_ERROR_CONV);
@@ -302,7 +302,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   if (cycle_count > 0 && tol > 0.) 
+   if (cycle_count > 0 && tol >= 0.) 
      conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/(double) cycle_count));
    else
      conv_factor = 1.;
@@ -333,7 +333,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          printf("      within the allowed %d V-cycles\n",max_iter);
          printf("==============================================");
       }
-      if (tol > 0.)
+      if (tol >= 0.)
         printf("\n\n Average Convergence Factor = %f",conv_factor);
       printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
       printf("                operator = %f\n",operat_cmplxty);
