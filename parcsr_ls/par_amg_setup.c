@@ -1686,5 +1686,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 }
 #endif
 
+/* print out matrices on all levels  */
+#if 0
+{
+   char  filename[256];
+
+   for (level = 0; level < num_levels; level++)
+   {
+      sprintf(filename, "BoomerAMG.out.A.%02d.ij", level);
+      hypre_ParCSRMatrixPrintIJ(A_array[level], 0, 0, filename);
+   }
+}
+#endif
+
    return(Setup_err_flag);
 }  
