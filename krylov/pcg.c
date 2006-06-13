@@ -301,6 +301,8 @@ hypre_PCGSolve( void *pcg_vdata,
    int             ierr = 0;
    int             my_id, num_procs;
 
+   (pcg_data -> converged) = 0;
+
    (*(pcg_functions->CommInfo))(A,&my_id,&num_procs);
 
    /*-----------------------------------------------------------------------

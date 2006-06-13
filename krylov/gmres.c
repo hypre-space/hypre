@@ -263,6 +263,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    double     r_norm_0;
    double     relative_error;
 
+   (gmres_data -> converged) = 0;
    /*-----------------------------------------------------------------------
     * With relative change convergence test on, it is possible to attempt
     * another iteration with a zero residual. This causes the parameter

@@ -234,6 +234,8 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    double     weight;
    double     r_norm_0;
 
+   (bicgstab_data -> converged) = 0;
+
    (*(bicgstab_functions->CommInfo))(A,&my_id,&num_procs);
    if (logging > 0 || print_level > 0)
    {
