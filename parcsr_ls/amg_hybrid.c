@@ -1069,7 +1069,6 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    int	       *num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
    int	       *grid_relax_type = (AMGhybrid_data -> grid_relax_type);
    int	      **grid_relax_points = (AMGhybrid_data -> grid_relax_points);
-   int	       *dof_func = (AMGhybrid_data -> dof_func);
    double      *relax_weight = (AMGhybrid_data -> relax_weight);
    double      *omega = (AMGhybrid_data -> omega);
    int         *dof_func = (AMGhybrid_data -> dof_func);
@@ -1091,8 +1090,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    hypre_GMRESFunctions *gmres_functions;
    hypre_BiCGSTABFunctions *bicgstab_functions;
                                                                                                                                         
-   int                dscg_num_its;
-   int                pcg_num_its;
+   int                dscg_num_its=0;
+   int                pcg_num_its=0;
    int                converged=0;
    int                num_variables = hypre_VectorSize(hypre_ParVectorLocalVector(b));
    double             res_norm;
@@ -1111,6 +1110,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    sol_print_level = print_level - pre_print_level*10;
   
    pcg_solver = (AMGhybrid_data -> pcg_solver);
+   (AMGhybrid_data -> dscg_num_its) = 0;
+   (AMGhybrid_data -> pcg_num_its) = 0;
                                                                                                                                         
    if (setup_type)
    {
