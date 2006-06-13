@@ -371,6 +371,8 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    sprintf( filename, "Pout%i", level );
    if ( num_rows_diag_P <= HYPRE_MAX_PRINTABLE_MATRIX )  hypre_ParCSRMatrixPrintIJ( *P,0,0,filename);
 #endif
+
+   hypre_TFree( J_marker );
       
 }
 
