@@ -1621,6 +1621,9 @@ int HYPRE_ParCSRHybridSetDSCGMaxIter(HYPRE_Solver solver,
 int HYPRE_ParCSRHybridSetPCGMaxIter(HYPRE_Solver solver,
                                     int                pcg_max_its);
  
+int HYPRE_ParCSRHybridSetSetupType(HYPRE_Solver solver,
+                                    int                setup_type);
+ 
 int HYPRE_ParCSRHybridSetSolverType(HYPRE_Solver solver,
                                     int                solver_type);
  

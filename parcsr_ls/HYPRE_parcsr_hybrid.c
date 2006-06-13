@@ -112,6 +112,17 @@ HYPRE_ParCSRHybridSetPCGMaxIter( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetSetupType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetSetupType( HYPRE_Solver solver,
+                                 int                setup_type )
+{
+   return( hypre_AMGHybridSetSetupType( (void *) solver, setup_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetSolverType
  *--------------------------------------------------------------------------*/
 
