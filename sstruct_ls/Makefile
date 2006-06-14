@@ -36,7 +36,9 @@ HEADERS =\
  fac.h\
  sstruct_owninfo.h\
  sstruct_recvinfo.h\
- sstruct_sendinfo.h
+ sstruct_sendinfo.h\
+ nd1_amge_interpolation.h\
+ maxwell_TV.h
 
 FILES =\
  F90_HYPRE_sstruct_bicgstab.c\
@@ -50,6 +52,7 @@ FILES =\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_InterFAC.c\
  HYPRE_sstruct_int.c\
+ HYPRE_sstruct_maxwell.c\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
  HYPRE_sstruct_sys_pfmg.c\
@@ -70,11 +73,24 @@ FILES =\
  hypre_bsearch.c\
  krylov.c\
  krylov_sstruct.c\
+ eliminate_rowscols.c\
+ maxwell_grad.c\
+ maxwell_physbdy.c\
+ maxwell_PNedelec.c\
+ maxwell_PNedelec_bdy.c\
+ maxwell_semi_interp.c\
+ maxwell_TV.c\
+ maxwell_TV_setup.c\
+ maxwell_zeroBC.c\
+ hypre_MaxwellSolve.c\
+ hypre_MaxwellSolve2.c\
+ nd1_amge_interpolation.c\
  node_relax.c\
  sstruct_amr_intercommunication.c\
  sstruct_owninfo.c\
  sstruct_recvinfo.c\
  sstruct_sendinfo.c\
+ sstruct_sharedDOFComm.c\
  sys_pfmg.c\
  sys_pfmg_relax.c\
  sys_pfmg_setup.c\
