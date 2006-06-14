@@ -897,6 +897,8 @@ int hypre_SStructNBorBoxToBox ( hypre_Box *nbor_box , hypre_Index index , hypre_
 int hypre_SStructGridSetNumGhost ( hypre_SStructGrid *grid , int *num_ghost );
 int hypre_SStructMapEntryGetGlobalRank ( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr , int type );
 int hypre_SStructMapEntryGetStrides ( hypre_BoxMapEntry *entry , hypre_Index strides , int type );
+int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid , int part , int boxnum , int **num_varboxes_ptr , int ***map_ptr );
+int hypre_SStructCellGridBoxNumMap ( hypre_SStructGrid *grid , int part , int ***num_varboxes_ptr , int ****map_ptr );
 
 /* sstruct_innerprod.c */
 int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , double *presult_ptr );

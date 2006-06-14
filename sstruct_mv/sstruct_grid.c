@@ -1187,4 +1187,138 @@ hypre_SStructMapEntryGetStrides(hypre_BoxMapEntry   *entry,
   return ierr;
 }  
 
+/*--------------------------------------------------------------------------
+ *  A function to determine the local variable box numbers that underlie
+ *  a cellbox with local box number boxnum. Only returns local box numbers
+ *  of myproc.
+ *--------------------------------------------------------------------------*/
+int
+hypre_SStructBoxNumMap(hypre_SStructGrid        *grid,
+                       int                       part,
+                       int                       boxnum,
+                       int                     **num_varboxes_ptr,
+                       int                    ***map_ptr)
+{
+   int ierr = 0;
+  
+   hypre_SStructPGrid    *pgrid   = hypre_SStructGridPGrid(grid, part);
+   hypre_StructGrid      *cellgrid= hypre_SStructPGridCellSGrid(pgrid);
+   hypre_StructGrid      *vargrid;
+   hypre_BoxArray        *boxes;
+   hypre_Box             *cellbox, vbox, *box, intersect_box;
+   HYPRE_SStructVariable *vartypes= hypre_SStructPGridVarTypes(pgrid);
 
+   int                    ndim    = hypre_SStructGridNDim(grid);
+   int                    nvars   = hypre_SStructPGridNVars(pgrid);
+   hypre_Index            varoffset;
+
+   int                   *num_boxes;
+   int                  **var_boxnums;
+   int                   *temp;
+
+   int                    i, j, k, var;
+
+   cellbox= hypre_StructGridBox(cellgrid, boxnum);
+
+  /* ptrs to store var_box map info */
+   num_boxes  = hypre_CTAlloc(int, nvars);
+   var_boxnums= hypre_TAlloc(int *, nvars);
+
+  /* intersect the cellbox with the var_boxes */
+   for (var= 0; var< nvars; var++)
+   {
+      vargrid= hypre_SStructPGridSGrid(pgrid, var);
+      boxes  = hypre_StructGridBoxes(vargrid);
+      temp   = hypre_CTAlloc(int, hypre_BoxArraySize(boxes));
+
+     /* map cellbox to a variable box */
+      hypre_CopyBox(cellbox, &vbox);
+
+      i= vartypes[var];
+      hypre_SStructVariableGetOffset((hypre_SStructVariable) i,
+                                      ndim, varoffset);
+      hypre_SubtractIndex(hypre_BoxIMin(&vbox), varoffset,
+                          hypre_BoxIMin(&vbox));
+
+     /* loop over boxes to see if they intersect with vbox */
+      hypre_ForBoxI(i, boxes)
+      {
+         box= hypre_BoxArrayBox(boxes, i);
+         hypre_IntersectBoxes(&vbox, box, &intersect_box);
+         if (hypre_BoxVolume(&intersect_box))
+         {
+            temp[i]++;
+            num_boxes[var]++;
+         }
+      }
+
+     /* record local var box numbers */
+      if (num_boxes[var])
+      {
+         var_boxnums[var]= hypre_TAlloc(int, num_boxes[var]);
+      }
+      else
+      {
+         var_boxnums[var]= NULL;
+      }
+
+      j= 0;
+      k= hypre_BoxArraySize(boxes);
+      for (i= 0; i< k; i++)
+      {
+         if (temp[i])
+         {
+            var_boxnums[var][j]= i;
+            j++;
+         }
+      }
+      hypre_TFree(temp);
+
+   }  /* for (var= 0; var< nvars; var++) */
+
+  *num_varboxes_ptr= num_boxes;
+  *map_ptr= var_boxnums;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *  A function to extract all the local var box numbers underlying the
+ *  cellgrid boxes.
+ *--------------------------------------------------------------------------*/
+int
+hypre_SStructCellGridBoxNumMap(hypre_SStructGrid        *grid,
+                               int                       part,
+                               int                    ***num_varboxes_ptr,
+                               int                   ****map_ptr)
+{
+   int ierr = 0;
+  
+   hypre_SStructPGrid    *pgrid    = hypre_SStructGridPGrid(grid, part);
+   hypre_StructGrid      *cellgrid = hypre_SStructPGridCellSGrid(pgrid);
+   hypre_BoxArray        *cellboxes= hypre_StructGridBoxes(cellgrid);
+   
+   int                  **num_boxes;
+   int                 ***var_boxnums;
+
+   int                    i, ncellboxes;
+
+   ncellboxes = hypre_BoxArraySize(cellboxes);
+
+   num_boxes  = hypre_TAlloc(int *, ncellboxes);
+   var_boxnums= hypre_TAlloc(int **, ncellboxes);
+
+   hypre_ForBoxI(i, cellboxes)
+   {
+       hypre_SStructBoxNumMap(grid,
+                              part,
+                              i,
+                             &num_boxes[i],
+                             &var_boxnums[i]);
+   }
+
+  *num_varboxes_ptr= num_boxes;
+  *map_ptr= var_boxnums;
+
+   return ierr;
+}
