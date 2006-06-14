@@ -42,6 +42,9 @@ extern "C" {
 cat sstruct_owninfo.h     >> $INTERNAL_HEADER
 cat sstruct_recvinfo.h    >> $INTERNAL_HEADER
 cat sstruct_sendinfo.h    >> $INTERNAL_HEADER
+cat maxwell_PTopology.h   >> $INTERNAL_HEADER
+cat maxwell_TV.h          >> $INTERNAL_HEADER
+cat sstruct_sharedDOFComm.h  >> $INTERNAL_HEADER
                                                                                                             
 ../utilities/protos [!F]*.c   >> $INTERNAL_HEADER
 
