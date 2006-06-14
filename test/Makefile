@@ -189,7 +189,8 @@ HYPRE_DRIVERS =\
  new_ij.c\
  sstruct.c\
  sstruct_fac.c\
- struct.c
+ struct.c\
+ maxwell_unscaled.c
 
 HYPRE_BABEL_DRIVERS =\
  struct_b.c\
@@ -328,6 +329,10 @@ ex7_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex7_for.o
 	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
 sstruct: sstruct.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+
+maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
 
