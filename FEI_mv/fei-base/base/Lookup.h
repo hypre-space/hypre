@@ -1,7 +1,9 @@
 #ifndef _Lookup_h_
 #define _Lookup_h_
 
-#include "fei_defs.h"
+#ifndef _fei_defs_h_
+#include <fei_defs.h>
+#endif
 
 /**  
   This interface is intended to be used by a LinearSystemCore implementation
@@ -46,8 +48,7 @@
 
 class Lookup {
  public:
-  /** Destructor, Don't call this. The FEI implementation will destroy this
-      object. */
+  /** Destructor. */
    virtual ~Lookup(){};
 
   /** Get the (global) number of fields defined for the problem. A field may
