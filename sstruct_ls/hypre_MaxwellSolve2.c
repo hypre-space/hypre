@@ -32,7 +32,6 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
    hypre_ParVector      **xn_l        = maxwell_data-> xn_l;
    hypre_ParVector      **resn_l      = maxwell_data-> resn_l;
    hypre_ParVector      **en_l        = maxwell_data-> en_l;
-   hypre_ParVector      **nVtemp_l    = maxwell_data-> nVtemp_l;
    hypre_ParVector      **nVtemp2_l   = maxwell_data-> nVtemp2_l;
    int                  **nCF_marker_l = maxwell_data-> nCF_marker_l;
    double                *nrelax_weight= maxwell_data-> nrelax_weight;
@@ -43,9 +42,6 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
    hypre_ParCSRMatrix    *Tgrad       = maxwell_data-> Tgrad;
    hypre_ParCSRMatrix    *T_transpose = maxwell_data-> T_transpose;
 
-   hypre_ParCSRMatrix   **Aen_l       = maxwell_data-> Aen_l;
-   int                    en_numlevs  = maxwell_data-> en_numlevels;
-
    hypre_ParCSRMatrix   **Aee_l       = maxwell_data-> Aee_l;
    hypre_IJMatrix       **Pe_l        = maxwell_data-> Pe_l;
    hypre_IJMatrix       **ReT_l       = maxwell_data-> ReT_l;
@@ -53,7 +49,6 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
    hypre_ParVector      **xe_l        = maxwell_data-> xe_l;
    hypre_ParVector      **rese_l      = maxwell_data-> rese_l;
    hypre_ParVector      **ee_l        = maxwell_data-> ee_l;
-   hypre_ParVector      **eVtemp_l    = maxwell_data-> eVtemp_l;
    hypre_ParVector      **eVtemp2_l   = maxwell_data-> eVtemp2_l;
    int                  **eCF_marker_l = maxwell_data-> eCF_marker_l;
    double                *erelax_weight= maxwell_data-> erelax_weight;
