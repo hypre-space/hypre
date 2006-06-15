@@ -309,7 +309,8 @@ hypre_BoomerAMGDestroy( void *data )
    }
 
    /* get rid of a fine level block matrix */
-   if (hypre_ParAMGDataABlockArray(amg_data)[0])
+   if (hypre_ParAMGDataABlockArray(amg_data))
+      if (hypre_ParAMGDataABlockArray(amg_data)[0])
            hypre_ParCSRBlockMatrixDestroy(hypre_ParAMGDataABlockArray(amg_data)[0]);
 
 
