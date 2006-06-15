@@ -58,12 +58,6 @@
 #include "HYPRE_MLMaxwell.h"
 
 //---------------------------------------------------------------------------
-// FEI include files
-//---------------------------------------------------------------------------
-
-#include "HYPRE_FEI_includes.h"
-
-//---------------------------------------------------------------------------
 // SUPERLU include files
 //---------------------------------------------------------------------------
 
@@ -3268,6 +3262,7 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
    HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
    HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
    HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,amgStrongThreshold_);
+   HYPRE_BoomerAMGSetTol(HYPrecon_, -1.0e0);
    num_sweeps = hypre_CTAlloc(int,4);
    for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
 
