@@ -1,11 +1,19 @@
 #ifndef _cfei_H_
 #define _cfei_H_
 
-/*------------------------------------------------------------------------------
-   This is the header for the prototypes of the procedural ("C") version
-   of the finite element interface.
+/*--------------------------------------------------------------------*/
+/*    Copyright 2005 Sandia Corporation.                              */
+/*    Under the terms of Contract DE-AC04-94AL85000, there is a       */
+/*    non-exclusive license for use of this work by or on behalf      */
+/*    of the U.S. Government.  Export of this program may require     */
+/*    a license from the United States Government.                    */
+/*--------------------------------------------------------------------*/
 
-   For explanations of parameters and semantics, see the C++ header, or
+/*------------------------------------------------------------------------------
+   This is the header for the prototypes of the C interface
+   of the Finite Element Interface to Linear Solvers (FEI).
+
+   For explanations of parameters and semantics, see the C++ FEI.h header, or
    doxygen output created there-from. With the exception of create/destroy
    functions, all FEI functions in this header mirror those in the C++ header
    but have 'FEI_' pre-pended to the name, and have 'CFEI* cfei' as the first
@@ -22,43 +30,32 @@
 ------------------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------------------
-   First, we define a "Linear System Core" struct. This is the beast that
+   First, we define a "Linear System Core" struct. This is the object that
    handles all solver-library-specific functionality like sumIntoMatrix,
    launchSolver, etc., etc. The pointer 'lsc_' needs to hold an instance
    of an object which implements the C++ interface defined in
-   ../base/LinearSystemCore.h. Naturally, an implementation-specific 
-   function will be required to create one of these. 
+   LinearSystemCore.h. Naturally, an implementation-specific 
+   function will be required to create one of these.
 
-   e.g., ISIS_LinSysCore_create(LinSysCore** lsc,
-                                MPI_Comm comm);
+   e.g., Aztec_LinSysCore_create(LinSysCore** lsc, MPI_Comm comm);
 
-   This function would be found in ../support-ISIS/cfei_isis.h, in the case
-   of an ISIS++ FEI implementation. Each other FEI implementation will also
-   need an equivalent function.
+   This function would be found in ../support-Trilinos/cfei_aztec.h, in the case
+   of an Aztec implementation.
 ------------------------------------------------------------------------------*/
+
+#ifndef CFEI_LinSysCore_DEFINED
+#define CFEI_LinSysCore_DEFINED
 
 struct LinSysCore_struct {
    void* lsc_;
 };
 typedef struct LinSysCore_struct LinSysCore;
 
-/*------------------------------------------------------------------------------
-   The LinSysCore struct is going to obsolete, as soon as ESI objects become
-   widely implemented. We will replace LinSysCore with a close cousin, which
-   we'll call the "Linear System Manager". It will be more like a broker,
-   handing out interfaces to individual objects such as matrices, vectors, etc.,
-   on demand. For now, it will just be a wrapper around LinSysCore so that we
-   don't lose our backwards compatibility.
-------------------------------------------------------------------------------*/
-
-struct LinSysMgr_struct {
-   void* lsm_;
-};
-typedef struct LinSysMgr_struct LinSysMgr;
+#endif /* CFEI_LinSysCore_DEFINED */
 
 
 /*------------------------------------------------------------------------------
-   Next, define an opaque CFEI thingy which will be an FEI context, and will
+   Next, define an opaque CFEI object which will be an FEI context, and will
    be the first argument to all of the C FEI functions which follow in this
    header.
 ------------------------------------------------------------------------------*/
@@ -68,6 +65,7 @@ struct CFEI_struct {
 };
 typedef struct CFEI_struct CFEI;
 
+
 /*------------------------------------------------------------------------------
    And now, the function prototypes...
 ------------------------------------------------------------------------------*/
@@ -75,6 +73,8 @@ typedef struct CFEI_struct CFEI;
 /* include fei_defs.h for the #defines of parameters such as FEI_LOCAL_TIMES,
   FEI_NODE_MAJOR, etc. */
 #include <fei_defs.h>
+#include <base/snl_fei_version.h>
+#include <base/fei_mpi.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,22 +84,20 @@ extern "C" {
    Initialization function. Creates an FEI instance, wrapped in a CFEI pointer.
 */
 int FEI_create(CFEI** cfei,
-               LinSysMgr* lsm,
-               MPI_Comm FEI_COMM_WORLD, 
+               LinSysCore* lsc,
+               MPI_Comm FEI_COMM_WORLD,
                int masterRank);
-
-/* Function to create a LinSysMgr struct from a LinSysCore */
-int LinSysMgr_create(LinSysMgr** lsm,
-                     LinSysCore* lsc);
 
 /* A function to destroy allocated memory. */
 int FEI_destroy(CFEI** cfei);
 
-/* A function to destroy those LinSysCore things. */
+/* A function to destroy LinSysCore objects. (Note that the create function
+ is specific to the implementation and so is not provided here.) */
 int LinSysCore_destroy(LinSysCore** lsc);
 
-/* A function to destroy those LinSysMgr things. */
-int LinSysMgr_destroy(LinSysMgr** lsm);
+  /* A function to query a named property. */
+int LinSysCore_getProperty_double(LinSysCore* lsc,
+				  const char* name, double* value);
 
 /*                                     */
 /* And now all of the FEI functions... */
@@ -138,7 +136,7 @@ int FEI_initElem(CFEI* cfei,
                  GlobalID elemID, 
                  GlobalID *elemConn);
 
-int FEI_initSharedNodes(CFEI* cfei, 
+int FEI_initSharedNodes(CFEI* cfei,
                         int numSharedNodes, 
                         GlobalID *sharedNodeIDs,
                         int* numProcsPerNode,
@@ -155,6 +153,16 @@ int FEI_initCRPen(CFEI* cfei,
                   GlobalID* CRNodes, 
                   int *CRFields,
                   int* CRID); 
+
+int FEI_initSlaveVariable(CFEI* cfei,
+			  GlobalID slaveNodeID,
+			  int slaveFieldID,
+			  int offsetIntoSlaveField,
+			  int numMasterNodes,
+			  const GlobalID* masterNodeIDs,
+			  const int* masterFieldIDs,
+			  const double* weights,
+			  double rhsValue);
 
 int FEI_initCoefAccessPattern( CFEI* cfei,
                                int patternID,
@@ -178,6 +186,9 @@ int FEI_initComplete(CFEI* cfei);
 int FEI_resetSystem(CFEI* cfei, double s);
 int FEI_resetMatrix(CFEI* cfei, double s);
 int FEI_resetRHSVector(CFEI* cfei, double s);
+int FEI_resetInitialGuess(CFEI* cfei, double s);
+
+int FEI_deleteMultCRs(CFEI* cfei);
 
 int FEI_setCurrentMatrix(CFEI* cfei, int matID);
 int FEI_setCurrentRHS(CFEI* cfei, int rhsID);
@@ -293,6 +304,8 @@ int FEI_setRHSScalars(CFEI* cfei,
                       int* IDs,
                       double* scalars);
 
+int FEI_loadComplete(CFEI* cfei);
+
 int FEI_residualNorm(CFEI* cfei,
                       int whichNorm,
                      int numFields,
@@ -303,14 +316,35 @@ int FEI_solve(CFEI* cfei, int* status);
 
 int FEI_iterations(CFEI* cfei, int* itersTaken);
 
-int FEI_version(CFEI* cfei, char** versionStringPtr);
+int FEI_getFieldSize(CFEI* cfei, int fieldID, int* numScalars);
 
-int FEI_cumulative_MPI_Wtimes(CFEI* cfei,
+int FEI_getEqnNumbers(CFEI* cfei,
+		      GlobalID ID,
+		      int idType, 
+		      int fieldID,
+		      int* numEqns,
+		      int* eqnNumbers);
+
+int FEI_getNodalFieldSolution(CFEI* cfei,
+			      int fieldID,
+			      int numNodes,
+			      GlobalID* nodeIDs,
+			      double* results);
+
+int FEI_getNumLocalNodes(CFEI* cfei, int* numNodes);
+
+int FEI_getLocalNodeIDList(CFEI* cfei,
+			   int* numNodes,
+			   GlobalID* nodeIDs,
+			   int lenNodeIDs);
+
+int FEI_version(CFEI* cfei, const char** versionStringPtr);
+
+int FEI_cumulative_cpu_times(CFEI* cfei,
                               double* initTime,
                               double* loadTime,
                               double* solveTime,
-                              double* solnReturnTime,
-                              int timingMode);
+                              double* solnReturnTime);
 
 int FEI_allocatedSize(CFEI* cfei,
                       int* bytes);
@@ -354,6 +388,12 @@ int FEI_putBlockNodeSolution(CFEI* cfei,
                              GlobalID *nodeIDs, 
                              int *offsets,  
                              double *estimates);
+
+int FEI_putNodalFieldData(CFEI* cfei,
+			  int fieldID, 
+			  int numNodes, 
+			  GlobalID* nodeIDs,
+			  double* nodeData);
 
 int FEI_putBlockFieldNodeSolution(CFEI* cfei, 
                                   GlobalID elemBlockID,  

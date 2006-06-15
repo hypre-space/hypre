@@ -9,14 +9,10 @@
 #undef max
 #endif
 
-/*
-#include <iostream.h>
-*/
-
 class Data;
 class Lookup;
 
-#include "fei_defs.h"
+#include <fei_defs.h>
 
 /**  
   This is the original internal FEI interface to solver-libraries --
@@ -26,8 +22,7 @@ class Lookup;
   When creating a specific FEI implementation, i.e., a version that
   supports a specific underlying linear solver library, the main
   task that must be performed is the implementation of this interface,
-  LinearSystemCore (Note: the LinearSystemCore interface is being
-  replaced by the ESI_Broker interface.).
+  LinearSystemCore.
 
   To date (as of August 2001), implementations of this interface exist for
   coupling the following solver libraries to the FEI implementation:
@@ -134,6 +129,8 @@ NOTES:
 
 class LinearSystemCore {
  public:
+  //@{\name Constructor/Destructor
+
   /** Default constructor, typically overridden by the implementing class, which
    probably requires an MPI Communicator, and possibly other arguments.
   */
@@ -146,7 +143,9 @@ class LinearSystemCore {
    taken responsibility for those matrix/vector copies.
   */
    virtual ~LinearSystemCore() {};
+   //@}
 
+   //@{\name Miscellaneous setup/control
 
   /** For cloning a LinearSystemCore instance. Caller recieves a pointer to a
      new instantiation of the implementing object. */
@@ -170,6 +169,9 @@ class LinearSystemCore {
   */
    virtual int setLookup(Lookup& lookup) = 0;
 
+   //@}
+
+   //@{\name Queries
 
    /** Query a named property (such as timing statistics, etc.) from the solver
        library.
@@ -181,30 +183,13 @@ class LinearSystemCore {
    */
    virtual int getProperty(const char* name, double& value)
      {
-       printf("LinearSystemCore::getProperty not implemented by derived class.\n");
+       (void)name; (void)value;
        return(-1);
      }
 
-  /** Supply LinearSystemCore with global offset information for the problem
-      being assembled.
-      @param len Length of the following list arguments. This will be numProcs+1
-      @param nodeOffsets The FEI implementation assigns a global 0-based
-          numbering to the finite-element nodes in the problem. Each processor
-          is given ownership of a contiguous subset of these node-numbers.
-          nodeOffsets[i] gives the first local node-number for processor i.
-          nodeOffsets[len-1] gives the total number of nodes.
-      @param eqnOffsets eqnOffsets[i] gives the first local equation number for
-         processor i, eqnOffsets[len-1] gives the global number of equations.
-      @param blkEqnOffsets Contains the same kind of information as eqnOffsets,
-          but for 'block-equations'. A block-equation contains all of the
-          point-equations present at a finite-element node. Special case: if
-          this problem contains Lagrange Multiplier constraints, they will
-          be equations that don't correspond to any node, and there will only be
-          one of these equations mapped to a block-equation.
-  */
-   virtual int setGlobalOffsets(int len, int* nodeOffsets,
-                                 int* eqnOffsets, int* blkEqnOffsets) = 0;
+   //@}
 
+   //@{\name Load element-based data
 
    /** For passing element-connectivity arrays.
     @param elemBlock Identifier for the element-block that these elements
@@ -221,7 +206,6 @@ class LinearSystemCore {
                                   int numNodesPerElem,
                                   const GlobalID* elemIDs,
                                   const int* const* connNodes) = 0;
-
 
    /** For passing element-stiffness arrays.
     @param elemBlock Identifier for the element-block that these elements
@@ -263,29 +247,44 @@ class LinearSystemCore {
                                int numEqnsPerElem,
                                const int *const * eqnIndices) = 0;
 
-
-   /** Supply LinearSystemCore with information defining the structure of the
-       sparse matrix to be assembled. Implementers of LinearSystemCore may safely
-       assume that this function will not be called until after the
-       function 'setGlobalOffsets' has been called. Using the information 
-       provided via setGlobalOffsets, the number-of-local-equations can be
-       trivially calculated. After setMatrixStructure has been called, there
-       should be enough information to instantiate internal linear-algebra
-       entities, such as vectors, matrix, etc.
-     @param ptColIndices Table, with num-local-eqns rows, and the i-th row is of
-             length ptRowLengths[i].
-     @param ptRowLengths
-     @param blkColIndices Table, with num-local-blkEqns rows, and the i-th row
-             is of length blkRowLengths[i].
-     @param blkRowLengths
-     @param ptRowsPerBlkRow The i-th local block-equation corresponds to
-          ptRowsPerBlkRow[i] point-equations.
+   /** Pass nodal data that probably doesn't mean anything to the FEI
+     implementation, but may mean something to the linear solver. Examples:
+     geometric coordinates, nullspace data, etc.
+    @param fieldID Identifier for the field that describes this data. Lists of
+       field identifiers and field sizes defined for the finite-element problem
+       may be obtained from the Lookup interface that is supplied to the
+       LinearSystemCore by the FEI implementation.
+    @param nodeNumbers List of nodes for which data is being supplied.
+    @param numNodes
+    @param data List of length numNodes * (size of field 'fieldID')
    */
-   virtual int setMatrixStructure(int** ptColIndices,
-                                   int* ptRrowLengths,
-                                   int** blkColIndices,
-                                   int* blkRowLengths,
-                                   int* ptRowsPerBlkRow) = 0;
+   virtual int putNodalFieldData(int fieldID, int fieldSize,
+                                  int* nodeNumbers, int numNodes,
+                                  const double* data) = 0;
+
+   //@}
+
+   //@{\name Initialization of structural data
+
+  /** Supply LinearSystemCore with global offset information for the problem
+      being assembled.
+      @param len Length of the following list arguments. This will be numProcs+1
+      @param nodeOffsets The FEI implementation assigns a global 0-based
+          numbering to the finite-element nodes in the problem. Each processor
+          is given ownership of a contiguous subset of these node-numbers.
+          nodeOffsets[i] gives the first local node-number for processor i.
+          nodeOffsets[len-1] gives the total number of nodes.
+      @param eqnOffsets eqnOffsets[i] gives the first local equation number for
+         processor i, eqnOffsets[len-1] gives the global number of equations.
+      @param blkEqnOffsets Contains the same kind of information as eqnOffsets,
+          but for 'block-equations'. A block-equation contains all of the
+          point-equations present at a finite-element node. Special case: if
+          this problem contains Lagrange Multiplier constraints, they will
+          be equations that don't correspond to any node, and there will only be
+          one of these equations mapped to a block-equation.
+  */
+   virtual int setGlobalOffsets(int len, int* nodeOffsets,
+                                 int* eqnOffsets, int* blkEqnOffsets) = 0;
 
 
    /** Specify which global equation numbers correspond to Lagrange Multiplier
@@ -324,6 +323,32 @@ class LinearSystemCore {
                               int** nodeNumbers, int** eqnNumbers,
                               int* fieldIDs) = 0;
 
+   /** Supply LinearSystemCore with information defining the structure of the
+       sparse matrix to be assembled. Implementers of LinearSystemCore may safely
+       assume that this function will not be called until after the
+       function 'setGlobalOffsets' has been called. Using the information 
+       provided via setGlobalOffsets, the number-of-local-equations can be
+       trivially calculated. After setMatrixStructure has been called, there
+       should be enough information to instantiate internal linear-algebra
+       entities, such as vectors, matrix, etc.
+     @param ptColIndices Table, with num-local-eqns rows, and the i-th row is of
+             length ptRowLengths[i].
+     @param ptRowLengths
+     @param blkColIndices Table, with num-local-blkEqns rows, and the i-th row
+             is of length blkRowLengths[i].
+     @param blkRowLengths
+     @param ptRowsPerBlkRow The i-th local block-equation corresponds to
+          ptRowsPerBlkRow[i] point-equations.
+   */
+   virtual int setMatrixStructure(int** ptColIndices,
+                                   int* ptRrowLengths,
+                                   int** blkColIndices,
+                                   int* blkRowLengths,
+                                   int* ptRowsPerBlkRow) = 0;
+
+   //@}
+
+   //@{\name Load coefficient data
 
    /** Provides point-entry data, as well as block-entry data. This is the
     primary assembly function, through which the FEI implementation provides
@@ -353,6 +378,29 @@ class LinearSystemCore {
                                     int numPtCols, const int* ptCols,
                                     const double* const* values) = 0;
 
+   /** For accumulating coefficients into the rhs vector */
+
+   virtual int sumIntoRHSVector(int num, const double* values,
+                                 const int* indices) = 0;
+   /** For putting coefficients into the rhs vector */
+   virtual int putIntoRHSVector(int num, const double* values,
+                                 const int* indices) = 0;
+
+   /** The FEI implementation will call this function to supply initial-guess
+     data that should be used as the starting 'x-vector' if an iterative
+    solution is to be performed.
+    @param eqnNumbers Global 0-based equation numbers for which the initial
+      guess should be set.
+    @param values The initial guess data.
+    @param len Number of equations for which an initial guess is being supplied.
+   */
+   virtual int putInitialGuess(const int* eqnNumbers, const double* values,
+                                int len) = 0;
+
+   //@}
+
+   //@{\name Queries - retrieve size and coefficient data from assembled system
+
    /** Get the length of a row of the matrix.
        @param row Global 0-based equation number
        @param length Output. Length of the row.
@@ -374,37 +422,22 @@ class LinearSystemCore {
    virtual int getMatrixRow(int row, double* coefs, int* indices,
                             int len, int& rowLength) = 0;
 
-   /** For accumulating coefficients into the rhs vector */
-
-   virtual int sumIntoRHSVector(int num, const double* values,
-                                 const int* indices) = 0;
-   /** For putting coefficients into the rhs vector */
-   virtual int putIntoRHSVector(int num, const double* values,
-                                 const int* indices) = 0;
    /** For getting coefficients out of the rhs vector */
    virtual int getFromRHSVector(int num, double* values,
                                  const int* indices) = 0;
+
+   //@}
+
+   //@{\name Signal that data loading is complete
 
    /** The FEI implementation calls this function to signal the linsyscore
       object that data-loading is finished.
    */
    virtual int matrixLoadComplete() = 0;
 
-   /** Pass nodal data that probably doesn't mean anything to the FEI
-     implementation, but may mean something to the linear solver. Examples:
-     geometric coordinates, nullspace data, etc.
-    @param fieldID Identifier for the field that describes this data. Lists of
-       field identifiers and field sizes defined for the finite-element problem
-       may be obtained from the Lookup interface that is supplied to the
-       LinearSystemCore by the FEI implementation.
-    @param nodeNumbers List of nodes for which data is being supplied.
-    @param numNodes
-    @param data List of length numNodes * (size of field 'fieldID')
-   */
-   virtual int putNodalFieldData(int fieldID, int fieldSize,
-                                  int* nodeNumbers, int numNodes,
-                                  const double* data) = 0;
+   //@}
 
+   //@{\name Reset
 
    /** For setting the scalar 's' (usually 0.0) throughout the matrix rhs 
     vector.
@@ -418,6 +451,9 @@ class LinearSystemCore {
    /** For setting the scalar 's' (usually 0.0) throughout the rhs vector.
    */
    virtual int resetRHSVector(double s) = 0;
+   //@}
+
+   //@{\name Specify Boundary Conditions
 
    /** The FEI implementation calls this function to inform LinearSystemCore
        of equations that need to have essential (Dirichlet) boundary conditions
@@ -477,6 +513,9 @@ class LinearSystemCore {
    */
    virtual int enforceOtherBC(int* globalEqn, double* alpha,
                                double* beta, double* gamma, int len) = 0;
+   //@}
+
+   //@{\name Special-purpose 'opaque' matrix/vector manipulation
 
    /** The FEI implementation calls this function to request a pointer to the
      internal 'A-matrix' data.
@@ -535,6 +574,9 @@ class LinearSystemCore {
     @param data See documentation for Data class.
    */
    virtual int destroyVectorData(Data& data) = 0;
+   //@}
+
+   //@{\name Control methods for case of multiple-rhs vectors
 
    /** Indicate the number of rhs-vectors being assembled/solved for.
      This function will be called by the FEI implementation at or near the
@@ -557,17 +599,9 @@ class LinearSystemCore {
     @param rhsID
    */
    virtual int setRHSID(int rhsID) = 0;
+   //@}
 
-   /** The FEI implementation will call this function to supply initial-guess
-     data that should be used as the starting 'x-vector' if an iterative
-    solution is to be performed.
-    @param eqnNumbers Global 0-based equation numbers for which the initial
-      guess should be set.
-    @param values The initial guess data.
-    @param len Number of equations for which an initial guess is being supplied.
-   */
-   virtual int putInitialGuess(const int* eqnNumbers, const double* values,
-                                int len) = 0;
+   //@{\name Methods for querying solution values
 
    /** The FEI implementation will call this function to request all local
     solution values.
@@ -585,6 +619,9 @@ class LinearSystemCore {
     @param answer
    */
    virtual int getSolnEntry(int eqnNumber, double& answer) = 0;
+   //@}
+
+   //@{\name System solution and residual calculation
 
    /** This will be called to request that LinearSystemCore form the residual
     vector r = b - A*x, and pass the coefficients for r back out in the 'values'
@@ -604,6 +641,9 @@ class LinearSystemCore {
     solver-library's documentation to figure out exactly what happened.
    */
    virtual int launchSolver(int& solveStatus, int& iterations) = 0;
+   //@}
+
+   //@{\name Debugging output method - not used.
 
    /** This function's intent is to provide a file-name to be used by 
     LinearSystemCore in writing the linear system into disk files. Format is
@@ -613,6 +653,7 @@ class LinearSystemCore {
     by the FEI implementation.
    */
    virtual int writeSystem(const char* name) = 0;
+   //@}
 };
 
 #endif
