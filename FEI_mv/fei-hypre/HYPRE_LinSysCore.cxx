@@ -685,7 +685,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
       ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
                                   localStartCol_,localEndCol_, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   assert(!ierr);
+   //assert(!ierr);
 
    //-------------------------------------------------------------------
    // instantiate the right hand vectors
@@ -699,7 +699,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
       ierr = HYPRE_IJVectorSetObjectType(HYbs_[i], HYPRE_PARCSR);
       ierr = HYPRE_IJVectorInitialize(HYbs_[i]);
       ierr = HYPRE_IJVectorAssemble(HYbs_[i]);
-      assert(!ierr);
+      //assert(!ierr);
    }
    HYb_ = HYbs_[0];
 
@@ -714,7 +714,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    ierr = HYPRE_IJVectorSetObjectType(HYx_, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(HYx_);
    ierr = HYPRE_IJVectorAssemble(HYx_);
-   assert(!ierr);
+   //assert(!ierr);
 
    //-------------------------------------------------------------------
    // reset fedata
@@ -753,7 +753,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    ierr = HYPRE_IJVectorSetObjectType(HYr_, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(HYr_);
    ierr = HYPRE_IJVectorAssemble(HYr_);
-   assert(!ierr);
+   //assert(!ierr);
    matrixVectorsCreated_ = 1;
    schurReductionCreated_ = 0;
    systemAssembled_ = 0;
@@ -1138,7 +1138,7 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
    ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
                                localStartRow_-1, localEndRow_-1, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   assert(!ierr);
+   //assert(!ierr);
 
    //-------------------------------------------------------------------
    // clean the reduction stuff
@@ -1247,7 +1247,7 @@ int HYPRE_LinSysCore::resetMatrix(double setValue)
       ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
                                   localStartCol_, localEndCol_, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   assert(!ierr);
+   //assert(!ierr);
 
    //-------------------------------------------------------------------
    // allocate space for storing the matrix coefficient
@@ -1849,7 +1849,7 @@ int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
 
    ierr = HYPRE_IJVectorAddToValues(HYb_, num, (const int *) localInds, 
                                     (const double *) values);
-   assert(!ierr);
+   //assert(!ierr);
 
    delete [] localInds;
 
@@ -1962,7 +1962,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 
       ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
       ierr = HYPRE_IJMatrixInitialize(HYA_);
-      assert(!ierr);
+      //assert(!ierr);
 
       //----------------------------------------------------------------
       // load the matrix stored locally to a HYPRE matrix
@@ -2775,7 +2775,7 @@ int HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
    ierr = HYPRE_IJVectorSetObjectType(newVector, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(newVector);
    ierr = HYPRE_IJVectorAssemble(newVector);
-   assert(!ierr);
+   //assert(!ierr);
 
    HYPRE_ParVector Vec1;
    HYPRE_ParVector Vec2;
@@ -3057,7 +3057,7 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
    }
    ierr = HYPRE_IJVectorSetValues(HYx_, leng, (const int *) localInds,
                                   (const double *) values);
-   assert(!ierr);
+   //assert(!ierr);
 
    delete [] localInds;
 
@@ -3109,7 +3109,7 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
       for ( i = 0; i < leng; i++ ) equations[i] = localStartCol_ + i;
 
    ierr = HYPRE_IJVectorGetValues(HYx_,leng,equations,answers);
-   assert(!ierr);
+   //assert(!ierr);
 
    delete [] equations;
 
@@ -3153,7 +3153,7 @@ int HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
    }
 
    ierr = HYPRE_IJVectorGetValues(HYx_,1,&equation,&val);
-   assert(!ierr);
+   //assert(!ierr);
    answer = val;
 
    //-------------------------------------------------------------------
@@ -3551,13 +3551,13 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
       case HYPILUT :
            ierr = HYPRE_ParCSRPilutCreate(comm_, &HYPrecon_);
-           assert(!ierr);
+           //assert(!ierr);
            HYPRE_ParCSRPilutSetMaxIter(HYPrecon_, 1);
            break;
 
       case HYPARASAILS :
            ierr = HYPRE_ParCSRParaSailsCreate(comm_, &HYPrecon_);
-           assert(!ierr);
+           //assert(!ierr);
            break;
 
       case HYBOOMERAMG :
@@ -3570,32 +3570,32 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
       case HYDDILUT :
            ierr = HYPRE_LSI_DDIlutCreate(comm_, &HYPrecon_);
-           assert( !ierr );
+           //assert( !ierr );
            break;
 
       case HYSCHWARZ :
            ierr = HYPRE_LSI_SchwarzCreate(comm_, &HYPrecon_);
-           assert( !ierr );
+           //assert( !ierr );
            break;
 
       case HYDDICT :
            ierr = HYPRE_LSI_DDICTCreate(comm_, &HYPrecon_);
-           assert( !ierr );
+           //assert( !ierr );
            break;
 
       case HYPOLY :
            ierr = HYPRE_LSI_PolyCreate(comm_, &HYPrecon_);
-           assert( !ierr );
+           //assert( !ierr );
            break;
 
       case HYEUCLID :
            ierr = HYPRE_EuclidCreate(comm_, &HYPrecon_);
-           assert( !ierr );
+           //assert( !ierr );
            break;
 
       case HYBLOCK :
            ierr = HYPRE_LSI_BlockPrecondCreate(comm_, &HYPrecon_);
-           assert( !ierr );
+           //assert( !ierr );
            break;
 
       case HYML :
@@ -3824,7 +3824,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
 		 localEndRow_-1, localStartRow_-1, localEndRow_-1,&IJI);
          ierr += HYPRE_IJMatrixSetObjectType(IJI, HYPRE_PARCSR);
-         assert(!ierr);
+         //assert(!ierr);
          localNRows = localEndRow_ - localStartRow_ + 1;
          matSizes = new int[localNRows];
          rowInd   = new int[localNRows];
@@ -3842,7 +3842,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          ierr += HYPRE_IJMatrixSetValues(IJI, localNRows, matSizes,
                    (const int *) rowInd, (const int *) colInd,
                    (const double *) colVal);
-         assert(!ierr);
+         //assert(!ierr);
          delete [] rowInd;
          delete [] colInd;
          delete [] colVal;
@@ -3855,7 +3855,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
 		 localEndRow_-1, localStartRow_-1, localEndRow_-1,&HYnormalA_);
          ierr += HYPRE_IJMatrixSetObjectType(HYnormalA_, HYPRE_PARCSR);
-         assert(!ierr);
+         //assert(!ierr);
          for ( i = localStartRow_-1; i < localEndRow_; i++ )
          {
             HYPRE_ParCSRMatrixGetRow(normalA_csr,i,&rowSize,NULL,NULL);
