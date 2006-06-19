@@ -1119,7 +1119,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
     if (pcg_precond)
     {
        hypre_BoomerAMGDestroy(pcg_precond);
-       pcg_precond == NULL;
+       pcg_precond = NULL;
+       (AMGhybrid_data -> pcg_precond) = NULL;
     }
     if (solver_type == 1)
     {
