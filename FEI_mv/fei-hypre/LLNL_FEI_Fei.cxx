@@ -1521,7 +1521,7 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
    int    diagOffset, offdOffset, nLocal, rowInd2, *globalEqnOffsets; 
    int    *diagIA, *diagJA, *offdIA, *offdJA, *extEqnList, *crOffsets;
    int    nRecvs, *recvLengs, *recvProcs, *recvProcIndices;
-   int    nSends, *sendLengs, *sendProcs, *sendProcIndices;
+   int    nSends, *sendLengs, *sendProcs, *sendProcIndices, *flags;
    double **elemMats=NULL, *elemMat=NULL, *TdiagAA=NULL, *ToffdAA=NULL;
    double alpha, beta, gamma, dtemp, *diagAA, *offdAA, *diagonal; 
 
@@ -1905,58 +1905,40 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
     * impose boundary conditions
     * -----------------------------------------------------------------*/
 
-   for ( iD = nLocal; iD < matDim; iD++ ) rhsVector_[iD] = 0.0;
+   for (iD = nLocal; iD < matDim; iD++) rhsVector_[iD] = 0.0;
+   if (numLocalNodes_ > 0)
+   {
+      flags = new int[numLocalNodes_];
+      for (iD = 0; iD < numLocalNodes_; iD++) flags[iD] = 0;
+   }
    for ( iN = 0; iN < numBCNodes_; iN++ )
    {
       nodeID = BCNodeIDs_[iN];
       index  = -1;
 
-      if ( numLocalNodes_ > 0 )
+      if (numLocalNodes_ > 0)
          index = hypre_BinarySearch(nodeGlobalIDs_,nodeID,numLocalNodes_);
-      if ( index >= 0 )
+      if (index >= 0)
       {
-         for ( iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++ )
+         if (flags[index] == 0)
          {
-            alpha = BCNodeAlpha_[iN][iD%nodeDOF_]; 
-            beta  = BCNodeBeta_[iN][iD%nodeDOF_]; 
-            gamma = BCNodeGamma_[iN][iD%nodeDOF_]; 
-            if ( beta == 0.0 && alpha != 0.0 )
+            flags[index] = 1;
+            for (iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++)
             {
-               for (iD2=TdiagIA[iD]; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
+               alpha = BCNodeAlpha_[iN][iD%nodeDOF_]; 
+               beta  = BCNodeBeta_[iN][iD%nodeDOF_]; 
+               gamma = BCNodeGamma_[iN][iD%nodeDOF_]; 
+               if (beta == 0.0 && alpha != 0.0)
                {
-                  rowInd = TdiagJA[iD2];
-                  if ( rowInd != iD && rowInd >= 0 )
+                  for (iD2=TdiagIA[iD];iD2<TdiagIA[iD]+diagCounts[iD];iD2++)
                   {
-                     for (iD3 = TdiagIA[rowInd];
-                          iD3<TdiagIA[rowInd]+diagCounts[rowInd]; iD3++)
-                     {
-                        if ( TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0 )
-                        {
-                           rhsVector_[rowInd] -= (gamma/alpha*TdiagAA[iD3]); 
-                           TdiagAA[iD3] = 0.0;
-                           break;
-                        }
-                     }
-                  }
-               }
-               TdiagJA[TdiagIA[iD]] = iD;
-               TdiagAA[TdiagIA[iD]] = 1.0;
-               for (iD2=TdiagIA[iD]+1; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
-               {
-                  TdiagJA[iD2] = -1;
-                  TdiagAA[iD2] = 0.0;
-               }
-               if ( ToffdIA != NULL )
-               {
-                  for (iD2=ToffdIA[iD]; iD2<ToffdIA[iD]+offdCounts[iD]; iD2++)
-                  {
-                     rowInd = ToffdJA[iD2];
-                     if ( rowInd != iD && rowInd >= 0 )
+                     rowInd = TdiagJA[iD2];
+                     if (rowInd != iD && rowInd >= 0)
                      {
                         for (iD3 = TdiagIA[rowInd];
                              iD3<TdiagIA[rowInd]+diagCounts[rowInd]; iD3++)
                         {
-                           if ( TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0 )
+                           if (TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0)
                            {
                               rhsVector_[rowInd] -= (gamma/alpha*TdiagAA[iD3]); 
                               TdiagAA[iD3] = 0.0;
@@ -1965,26 +1947,53 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
                         }
                      }
                   }
-                  for (iD2=ToffdIA[iD]; iD2<ToffdIA[iD]+offdCounts[iD]; iD2++)
+                  TdiagJA[TdiagIA[iD]] = iD;
+                  TdiagAA[TdiagIA[iD]] = 1.0;
+                  for (iD2=TdiagIA[iD]+1;iD2<TdiagIA[iD]+diagCounts[iD];iD2++)
                   {
-                     ToffdJA[iD2] = -1;
-                     ToffdAA[iD2] = 0.0;
+                     TdiagJA[iD2] = -1;
+                     TdiagAA[iD2] = 0.0;
                   }
+                  if (ToffdIA != NULL)
+                  {
+                     for (iD2=ToffdIA[iD];iD2<ToffdIA[iD]+offdCounts[iD];iD2++)
+                     {
+                        rowInd = ToffdJA[iD2];
+                        if (rowInd != iD && rowInd >= 0)
+                        {
+                           for (iD3 = TdiagIA[rowInd];
+                                iD3<TdiagIA[rowInd]+diagCounts[rowInd]; iD3++)
+                           {
+                              if (TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0)
+                              {
+                                 rhsVector_[rowInd]-=(gamma/alpha*TdiagAA[iD3]);
+                                 TdiagAA[iD3] = 0.0;
+                                 break;
+                              }
+                           }
+                        }
+                     }
+                     for (iD2=ToffdIA[iD];iD2<ToffdIA[iD]+offdCounts[iD];iD2++)
+                     {
+                        ToffdJA[iD2] = -1;
+                        ToffdAA[iD2] = 0.0;
+                     }
+                  }
+                  rhsVector_[iD] = gamma / alpha;
                }
-               rhsVector_[iD] = gamma / alpha;
-            }
-            else if ( beta != 0.0 )
-            {
-               for (iD2=TdiagIA[iD]; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
+               else if (beta != 0.0)
                {
-                  rowInd = TdiagJA[iD2];
-                  if ( rowInd == iD )
+                  for (iD2=TdiagIA[iD];iD2<TdiagIA[iD]+diagCounts[iD];iD2++)
                   {
-                     TdiagAA[iD2] += alpha / beta;
-                     break;
+                     rowInd = TdiagJA[iD2];
+                     if (rowInd == iD)
+                     {
+                        TdiagAA[iD2] += alpha / beta;
+                        break;
+                     }
                   }
+                  rhsVector_[iD] += gamma / beta;
                }
-               rhsVector_[iD] += gamma / beta;
             }
          }
       }
@@ -2076,6 +2085,7 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
          }
       }
    }
+   if (numLocalNodes_ > 0) delete [] flags;
    gatherAddDData( rhsVector_ );
    for ( iD = nLocal; iD < matDim; iD++ ) rhsVector_[iD] = 0.0;
 
