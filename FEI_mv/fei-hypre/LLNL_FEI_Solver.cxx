@@ -285,7 +285,7 @@ int LLNL_FEI_Solver::solveUsingCG()
     * loop until convergence is achieved
     * -----------------------------------------------------------------*/
 
-   while ( converged == 0 && numTrials < 1 ) 
+   while ( converged == 0 && numTrials < 2 ) 
    {
       innerIteration = 0;
       while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
