@@ -216,6 +216,7 @@ casc_using_cxx=yes
 casc_using_fortran=yes
 
 casc_using_fei=yes
+casc_using_superlu=yes
 
 casc_using_babel=no
 casc_using_examples=no
@@ -322,7 +323,7 @@ AC_ARG_WITH(purify,
  if test "$casc_user_chose_fcompilers" = "no"
  then
    AC_CHECK_PROGS(F77, g77, [""])
-   if test "x$CC" = "x"
+   if test "x$F77" = "x"
    then
       casc_using_fortran=no
    fi
@@ -559,11 +560,11 @@ AC_ARG_WITH(lapack-lib-dirs,
 AC_ARG_WITH(fei-libs,
   AS_HELP_STRING([  --with-fei-libs=LIBS],
                  [ LIBS is space-separated list (enclosed in quotes) of FEI 
-                   library names.  The options --with-fei-libs, --with-fei-inc-dir
-                   and --with-fei-lib-dir must be used together.]),
+                   library names.]),
 [for fei_lib in $withval; do
    FEILIBS="$FEILIBS -l$fei_lib"
  done;
+ casc_using_fei=yes;
  casc_user_chose_fei=yes]
 )
 
@@ -571,12 +572,11 @@ AC_ARG_WITH(fei-lib-dir,
   AS_HELP_STRING([  --with-fei-lib-dir=DIRS],
                  [ DIRS is space-separated list (enclosed in quotes) of 
                    directories containing the libraries specified by 
-                   --with-fei-libs, e.g "usr/lib /usr/local/fei/lib".  
-                   The options --with-fei-libs, --with-fei-inc-dir and
-                   --with-fei-lib-dir must be used together.]),
+                   --with-fei-libs, e.g "usr/lib /usr/local/fei/lib".]),
 [for fei_lib_dir in $withval; do
    FEILIBDIRS="-L$fei_lib_dir $FEILIBDIRS"
  done;
+ casc_using_fei=yes;
  casc_user_chose_fei=yes]
 )
 
@@ -585,12 +585,11 @@ AC_ARG_WITH(fei-inc-dir,
                  [ DIRS is space-separated list (enclosed in quotes) of 
                    directories containing the include files needed by the
                    FEI specified by --with-fei-libs, 
-                   e.g "usr/include /usr/fei/include".  The options
-                   --with-fei-libs, --with-fei-inc-dir and --with-fei-lib-dir
-                   must be used together.]),
+                   e.g "usr/include /usr/fei/include".]),
 [for fei_inc in $withval; do
    FEIINCLUDE="$FEIINCLUDE $fei_inc"
  done;
+ casc_using_fei=yes;
  casc_user_chose_fei=yes]
 )
 
@@ -671,14 +670,22 @@ AC_ARG_WITH(examples,
 [casc_using_examples=no]
 )
 
-AC_ARG_WITH(FEI,
-  AS_HELP_STRING([  --with-FEI], [ Use internal FEI routines.]),
+AC_ARG_WITH(fei,
+  AS_HELP_STRING([  --with-fei], [ Use internal FEI routines.]),
 [case "${withval}" in
-   yes) casc_using_fei=yes
-        ;;
     no) casc_using_fei=no
         ;;
      *) casc_using_fei=yes
+        ;;
+ esac]
+)
+
+AC_ARG_WITH(superlu,
+  AS_HELP_STRING([  --with-superlu], [ Use internal SuperLU routines.]),
+[case "${withval}" in
+    no) casc_using_superlu=no
+        ;;
+     *) casc_using_superlu=yes
         ;;
  esac]
 )
@@ -697,7 +704,6 @@ AC_ARG_WITH(MPI,
                  [ DEFAULT: Compile with MPI.  Selecting --without-MPI
                    may affect which compiler is chosen.]),
 [case "$withval" in 
-   yes) casc_using_mpi=yes ;;
     no) casc_using_mpi=no ;;
      *) casc_using_mpi=yes ;;
  esac], [casc_using_mpi=yes])
@@ -714,7 +720,7 @@ then
    then
       AC_CHECK_PROGS(CC, [gcc icc xlc pgcc cc kcc], [""])
    else
-      AC_CHECK_PROGS(CC, [mpcc mpicc mpxlc mpiicc mpipgcc], [""])
+      AC_CHECK_PROGS(CC, [mpxlc mpcc mpicc mpiicc mpipgcc], [""])
    fi
 
    if test "x$CC" = "x"
@@ -732,7 +738,7 @@ then
    then
       AC_CHECK_PROGS(CXX, [g++ gcc icc xlC cxx pgCC KCC], [""])
    else
-      AC_CHECK_PROGS(CXX, [mpCC mpicxx mpiCC mpxlC mpiicc mpipgCC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC mpCC mpicxx mpiCC mpiicc mpipgCC], [""])
    fi
 
    if test "x$CXX" = "x"
@@ -750,7 +756,7 @@ then
    then
       AC_CHECK_PROGS(F77, [g77 ifort xlf pgf77 f77 kf77], [""])
    else
-      AC_CHECK_PROGS(F77, [mpf77 mpif77 mpxlf mpiifort mpipgf77], [""])
+      AC_CHECK_PROGS(F77, [mpxlf mpf77 mpif77 mpiifort mpipgf77], [""])
    fi
 
    if test "x$F77" = "x"
@@ -959,21 +965,34 @@ dnl *********************************************************************
 dnl * Determine if FEI libraries are needed.
 dnl * if so, determine whether internal routines or user-specified 
 dnl * libraries are to be used.
-dnl *
-dnl * Create FEI_mv/fei-hypre/Makefile with appropriate substitutions
-dnl * based on whether or not internal routines are needed
 dnl *********************************************************************
-HYPRE_FEI_SRC_DIR="HYPRE_TOP_SRC_DIR/FEI_mv"
-HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.o"
-HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.o"
-HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.o"
-
-if test "$casc_user_chose_fei" = "yes"
+if test "$casc_using_fei" = "yes"
 then
-   HYPRE_FEI_BASE_DIR="$FEIINCLUDE"
+   HYPRE_FEI_SRC_DIR="HYPRE_TOP_SRC_DIR/FEI_mv"
+   HYPRE_FEI_SUBDIRS="fei-hypre femli"
+   HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.o"
+   HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.o"
+   if test "$casc_using_superlu" = "yes"
+   then
+      HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
+      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.o"
+   else
+      HYPRE_FEI_SUPERLU_FILES=
+   fi
+   if test "$casc_user_chose_fei" = "yes"
+   then
+      HYPRE_FEI_BASE_DIR="$FEIINCLUDE"
+   else
+      HYPRE_FEI_BASE_DIR="HYPRE_TOP_SRC_DIR/FEI_mv/fei-base"
+   fi
 else
-   HYPRE_FEI_BASE_DIR="HYPRE_TOP_SRC_DIR/FEI_mv/fei-base"
+   HYPRE_FEI_SRC_DIR=
+   HYPRE_FEI_BASE_DIR=
+   HYPRE_FEI_SUPERLU_FILES=
+   HYPRE_FEI_HYPRE_FILES=
+   HYPRE_FEI_FEMLI_FILES=
 fi
+
 
 dnl *********************************************************************
 dnl * Find libm.a
@@ -1030,10 +1049,14 @@ dnl *********************************************************************
 HYPRE_SET_ARCH
 
 dnl *********************************************************************
-dnl * Set large page load option that is needed by the purple platforms.
+dnl * Set large page option that is needed by all AIX platforms.
 dnl *********************************************************************
-case $HOSTNAME in
-   up* | uP*) LDFLAGS="${LDFLAGS} -blpdata"
+hypre_platform=`uname`
+case $hypre_platform in
+   AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
+                       CFLAGS="${CFLAGS} -blpdata"
+                       CXXFLAGS="${CXXFLAGS} -blpdata"
+                       FFLAGS="${FFLAGS} -blpdata"
    ;;
 esac
 
@@ -1202,6 +1225,7 @@ AC_SUBST(FEILIBDIRS)
 AC_SUBST(FEIINCLUDE)
 AC_SUBST(HYPRE_FEI_SRC_DIR)
 AC_SUBST(HYPRE_FEI_BASE_DIR)
+AC_SUBST(HYPRE_FEI_SUBDIRS)
 AC_SUBST(HYPRE_FEI_SUPERLU_FILES)
 AC_SUBST(HYPRE_FEI_HYPRE_FILES)
 AC_SUBST(HYPRE_FEI_FEMLI_FILES)
