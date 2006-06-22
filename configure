@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK LN_S SET_MAKE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXXFLAGS ac_ct_CXX CXXCPP FFLAGS ac_ct_F77 FLIBS FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR EXAMPLEDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LINKDIR HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE HYPRE_FEI_SRC_DIR HYPRE_FEI_BASE_DIR HYPRE_FEI_SUPERLU_FILES HYPRE_FEI_HYPRE_FILES HYPRE_FEI_FEMLI_FILES MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK LN_S SET_MAKE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXXFLAGS ac_ct_CXX CXXCPP FFLAGS ac_ct_F77 FLIBS FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR EXAMPLEDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LINKDIR HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE HYPRE_FEI_SRC_DIR HYPRE_FEI_BASE_DIR HYPRE_FEI_SUBDIRS HYPRE_FEI_SUPERLU_FILES HYPRE_FEI_HYPRE_FILES HYPRE_FEI_FEMLI_FILES MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -964,22 +964,16 @@ Optional Packages:
                           --with-lapack-libs and --with-lapack-lib-dirs must
                           be used together.
     --with-fei-libs=LIBS  LIBS is space-separated list (enclosed in quotes) of
-                          FEI library names. The options --with-fei-libs,
-                          --with-fei-inc-dir and --with-fei-lib-dir must be
-                          used together.
+                          FEI library names.
     --with-fei-lib-dir=DIRS
                           DIRS is space-separated list (enclosed in quotes) of
                           directories containing the libraries specified by
                           --with-fei-libs, e.g "usr/lib /usr/local/fei/lib".
-                          The options --with-fei-libs, --with-fei-inc-dir and
-                          --with-fei-lib-dir must be used together.
     --with-fei-inc-dir=DIRS
                           DIRS is space-separated list (enclosed in quotes) of
                           directories containing the include files needed by
                           the FEI specified by --with-fei-libs, e.g
-                          "usr/include /usr/fei/include". The options
-                          --with-fei-libs, --with-fei-inc-dir and
-                          --with-fei-lib-dir must be used together.
+                          "usr/include /usr/fei/include".
     --with-no-global-partition
                           Do not use global partitioning.
     --with-print-errors   Print HYPRE errors.
@@ -991,7 +985,8 @@ Optional Packages:
                           chosen. Supported on IBM and DECS, test on Linux.
     --with-babel          Use babel
     --with-examples       Builds example codes.
-    --with-FEI            Use internal FEI routines.
+    --with-fei            Use internal FEI routines.
+    --with-superlu        Use internal SuperLU routines.
     --with-mli            Use MLI
     --with-MPI            DEFAULT: Compile with MPI. Selecting --without-MPI
                           may affect which compiler is chosen.
@@ -1727,6 +1722,7 @@ casc_using_cxx=yes
 casc_using_fortran=yes
 
 casc_using_fei=yes
+casc_using_superlu=yes
 
 casc_using_babel=no
 casc_using_examples=no
@@ -1952,7 +1948,7 @@ fi
 done
 test -n "$F77" || F77=""""
 
-   if test "x$CC" = "x"
+   if test "x$F77" = "x"
    then
       casc_using_fortran=no
    fi
@@ -2427,6 +2423,7 @@ if test "${with_fei_libs+set}" = set; then
   for fei_lib in $withval; do
    FEILIBS="$FEILIBS -l$fei_lib"
  done;
+ casc_using_fei=yes;
  casc_user_chose_fei=yes
 
 fi;
@@ -2438,6 +2435,7 @@ if test "${with_fei_lib_dir+set}" = set; then
   for fei_lib_dir in $withval; do
    FEILIBDIRS="-L$fei_lib_dir $FEILIBDIRS"
  done;
+ casc_using_fei=yes;
  casc_user_chose_fei=yes
 
 fi;
@@ -2449,6 +2447,7 @@ if test "${with_fei_inc_dir+set}" = set; then
   for fei_inc in $withval; do
    FEIINCLUDE="$FEIINCLUDE $fei_inc"
  done;
+ casc_using_fei=yes;
  casc_user_chose_fei=yes
 
 fi;
@@ -2557,15 +2556,26 @@ else
 fi;
 
 
-# Check whether --with-FEI or --without-FEI was given.
-if test "${with_FEI+set}" = set; then
-  withval="$with_FEI"
+# Check whether --with-fei or --without-fei was given.
+if test "${with_fei+set}" = set; then
+  withval="$with_fei"
   case "${withval}" in
-   yes) casc_using_fei=yes
-        ;;
     no) casc_using_fei=no
         ;;
      *) casc_using_fei=yes
+        ;;
+ esac
+
+fi;
+
+
+# Check whether --with-superlu or --without-superlu was given.
+if test "${with_superlu+set}" = set; then
+  withval="$with_superlu"
+  case "${withval}" in
+    no) casc_using_superlu=no
+        ;;
+     *) casc_using_superlu=yes
         ;;
  esac
 
@@ -2589,7 +2599,6 @@ fi;
 if test "${with_MPI+set}" = set; then
   withval="$with_MPI"
   case "$withval" in
-   yes) casc_using_mpi=yes ;;
     no) casc_using_mpi=no ;;
      *) casc_using_mpi=yes ;;
  esac
@@ -2686,7 +2695,7 @@ done
 test -n "$CC" || CC=""""
 
    else
-      for ac_prog in mpcc mpicc mpxlc mpiicc mpipgcc
+      for ac_prog in mpxlc mpcc mpicc mpiicc mpipgcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2824,7 +2833,7 @@ done
 test -n "$CXX" || CXX=""""
 
    else
-      for ac_prog in mpCC mpicxx mpiCC mpxlC mpiicc mpipgCC
+      for ac_prog in mpxlC mpCC mpicxx mpiCC mpiicc mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2962,7 +2971,7 @@ done
 test -n "$F77" || F77=""""
 
    else
-      for ac_prog in mpf77 mpif77 mpxlf mpiifort mpipgf77
+      for ac_prog in mpxlf mpf77 mpif77 mpiifort mpipgf77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5833,7 +5842,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5836:" \
+echo "$as_me:5845:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6029,7 +6038,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6032: \"$ac_link\") >&5
+(eval echo $as_me:6041: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6107,7 +6116,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6110: \"$ac_link\") >&5
+(eval echo $as_me:6119: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9219,17 +9228,33 @@ _ACEOF
    fi
 fi
 
-HYPRE_FEI_SRC_DIR="`pwd`/FEI_mv"
-HYPRE_FEI_SUPERLU_FILES="`pwd`/FEI_mv/SuperLU/*.o"
-HYPRE_FEI_HYPRE_FILES="`pwd`/FEI_mv/fei-hypre/*.o"
-HYPRE_FEI_FEMLI_FILES="`pwd`/FEI_mv/femli/lib/*.o"
-
-if test "$casc_user_chose_fei" = "yes"
+if test "$casc_using_fei" = "yes"
 then
-   HYPRE_FEI_BASE_DIR="$FEIINCLUDE"
+   HYPRE_FEI_SRC_DIR="`pwd`/FEI_mv"
+   HYPRE_FEI_SUBDIRS="fei-hypre femli"
+   HYPRE_FEI_HYPRE_FILES="`pwd`/FEI_mv/fei-hypre/*.o"
+   HYPRE_FEI_FEMLI_FILES="`pwd`/FEI_mv/femli/lib/*.o"
+   if test "$casc_using_superlu" = "yes"
+   then
+      HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
+      HYPRE_FEI_SUPERLU_FILES="`pwd`/FEI_mv/SuperLU/*.o"
+   else
+      HYPRE_FEI_SUPERLU_FILES=
+   fi
+   if test "$casc_user_chose_fei" = "yes"
+   then
+      HYPRE_FEI_BASE_DIR="$FEIINCLUDE"
+   else
+      HYPRE_FEI_BASE_DIR="`pwd`/FEI_mv/fei-base"
+   fi
 else
-   HYPRE_FEI_BASE_DIR="`pwd`/FEI_mv/fei-base"
+   HYPRE_FEI_SRC_DIR=
+   HYPRE_FEI_BASE_DIR=
+   HYPRE_FEI_SUPERLU_FILES=
+   HYPRE_FEI_HYPRE_FILES=
+   HYPRE_FEI_FEMLI_FILES=
 fi
+
 
 echo "$as_me:$LINENO: checking for cabs in -lm" >&5
 echo $ECHO_N "checking for cabs in -lm... $ECHO_C" >&6
@@ -9868,8 +9893,12 @@ _ACEOF
 
 
 
-case $HOSTNAME in
-   up* | uP*) LDFLAGS="${LDFLAGS} -blpdata"
+hypre_platform=`uname`
+case $hypre_platform in
+   AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
+                       CFLAGS="${CFLAGS} -blpdata"
+                       CXXFLAGS="${CXXFLAGS} -blpdata"
+                       FFLAGS="${FFLAGS} -blpdata"
    ;;
 esac
 
@@ -10045,6 +10074,7 @@ then
 else
    HYPRE_LINKDIR="`pwd`/hypre"
 fi
+
 
 
 
@@ -10795,6 +10825,7 @@ s,@FEILIBDIRS@,$FEILIBDIRS,;t t
 s,@FEIINCLUDE@,$FEIINCLUDE,;t t
 s,@HYPRE_FEI_SRC_DIR@,$HYPRE_FEI_SRC_DIR,;t t
 s,@HYPRE_FEI_BASE_DIR@,$HYPRE_FEI_BASE_DIR,;t t
+s,@HYPRE_FEI_SUBDIRS@,$HYPRE_FEI_SUBDIRS,;t t
 s,@HYPRE_FEI_SUPERLU_FILES@,$HYPRE_FEI_SUPERLU_FILES,;t t
 s,@HYPRE_FEI_HYPRE_FILES@,$HYPRE_FEI_HYPRE_FILES,;t t
 s,@HYPRE_FEI_FEMLI_FILES@,$HYPRE_FEI_FEMLI_FILES,;t t
