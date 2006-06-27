@@ -23,6 +23,7 @@ typedef struct hypre_CommInfo_struct
    int                  **send_processes;
    int                  **recv_processes;
    int                  **send_rboxnums;
+   int                  **recv_rboxnums; /* required for "inverse" communication */
    hypre_BoxArrayArray   *send_rboxes;
 
 } hypre_CommInfo;
@@ -119,6 +120,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommInfoSendProcesses(info) (info -> send_processes)
 #define hypre_CommInfoRecvProcesses(info) (info -> recv_processes)
 #define hypre_CommInfoSendRBoxnums(info)  (info -> send_rboxnums)
+#define hypre_CommInfoRecvRBoxnums(info)  (info -> recv_rboxnums)
 #define hypre_CommInfoSendRBoxes(info)    (info -> send_rboxes)
 
 /*--------------------------------------------------------------------------
