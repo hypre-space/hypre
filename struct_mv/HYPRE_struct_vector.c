@@ -272,6 +272,17 @@ HYPRE_StructVectorSetNumGhost( HYPRE_StructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructVectorSetAddOrReplaceValues
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructVectorSetAddOrReplaceValues( HYPRE_StructVector  vector,
+                                         int                 flag )
+{
+   return ( hypre_StructVectorSetAddOrReplaceValues(vector, flag) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorCopy
  * copies data from x to y
  * y has its own data array, so this is a deep copy in that sense.

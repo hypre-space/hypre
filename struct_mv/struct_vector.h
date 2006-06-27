@@ -39,6 +39,12 @@ typedef struct hypre_StructVector_struct
                       
    int                   global_size;  /* Total number coefficients */
 
+   int                   offproc_flag; /* offproc set values flag */
+   int                   AddOrReplace; /* offproc set values: add or replace,
+                                          or don't do anything. AddToValues
+                                          switches on add, SetValues must switch
+                                          on the replace. */
+
    int                   ref_count;
 
 } hypre_StructVector;
@@ -56,6 +62,8 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
+#define hypre_StructVectorOffProcFlag(vector)   ((vector) -> offproc_flag)
+#define hypre_StructVectorAddOrReplace(vector)  ((vector) -> AddOrReplace)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
 #define hypre_StructVectorBox(vector, b) \
