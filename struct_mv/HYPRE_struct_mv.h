@@ -355,6 +355,9 @@ typedef struct hypre_CommPkg_struct *HYPRE_CommPkg;
 int HYPRE_StructVectorSetNumGhost(HYPRE_StructVector  vector,
                                   int                *num_ghost);
 
+int HYPRE_StructVectorSetAddOrReplaceValues(HYPRE_StructVector  vector,
+                                            int                 flag);
+
 int HYPRE_StructVectorSetConstantValues(HYPRE_StructVector vector,
                                         double             values);
 

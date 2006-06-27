@@ -1259,6 +1259,7 @@ typedef struct hypre_CommInfo_struct
    int                  **send_processes;
    int                  **recv_processes;
    int                  **send_rboxnums;
+   int                  **recv_rboxnums; /* required for "inverse" communication */
    hypre_BoxArrayArray   *send_rboxes;
 
 } hypre_CommInfo;
@@ -1355,6 +1356,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommInfoSendProcesses(info) (info -> send_processes)
 #define hypre_CommInfoRecvProcesses(info) (info -> recv_processes)
 #define hypre_CommInfoSendRBoxnums(info)  (info -> send_rboxnums)
+#define hypre_CommInfoRecvRBoxnums(info)  (info -> recv_rboxnums)
 #define hypre_CommInfoSendRBoxes(info)    (info -> send_rboxes)
 
 /*--------------------------------------------------------------------------
@@ -1553,6 +1555,12 @@ typedef struct hypre_StructMatrix_struct
                       
    int                   global_size;  /* Total number of nonzero coeffs */
 
+   int                   offproc_flag; /* offproc set values flag */
+   int                   AddOrReplace; /* offproc set values: add or replace,
+                                          or don't do anything. AddToValues
+                                          switches on add, SetValues must switch
+                                          on the replace. */
+
    hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
    int                   ref_count;
@@ -1578,6 +1586,8 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
+#define hypre_StructMatrixOffProcFlag(matrix)   ((matrix) -> offproc_flag)
+#define hypre_StructMatrixAddOrReplace(matrix)  ((matrix) -> AddOrReplace)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 
@@ -1637,6 +1647,12 @@ typedef struct hypre_StructVector_struct
                       
    int                   global_size;  /* Total number coefficients */
 
+   int                   offproc_flag; /* offproc set values flag */
+   int                   AddOrReplace; /* offproc set values: add or replace,
+                                          or don't do anything. AddToValues
+                                          switches on add, SetValues must switch
+                                          on the replace. */
+
    int                   ref_count;
 
 } hypre_StructVector;
@@ -1654,6 +1670,8 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
+#define hypre_StructVectorOffProcFlag(vector)   ((vector) -> offproc_flag)
+#define hypre_StructVectorAddOrReplace(vector)  ((vector) -> AddOrReplace)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
 #define hypre_StructVectorBox(vector, b) \
@@ -1789,7 +1807,7 @@ int hypre_BoxNeighborsAssemble ( hypre_BoxNeighbors *neighbors , hypre_Index per
 int hypre_BoxNeighborsDestroy ( hypre_BoxNeighbors *neighbors );
 
 /* communication_info.c */
-int hypre_CommInfoCreate ( hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , int **send_procs , int **recv_procs , int **send_rboxnums , hypre_BoxArrayArray *send_rboxes , hypre_CommInfo **comm_info_ptr );
+int hypre_CommInfoCreate ( hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , int **send_procs , int **recv_procs , int **send_rboxnums , int **recv_rboxnums , hypre_BoxArrayArray *send_rboxes , hypre_CommInfo **comm_info_ptr );
 int hypre_CommInfoProjectSend ( hypre_CommInfo *comm_info , hypre_Index index , hypre_Index stride );
 int hypre_CommInfoProjectRecv ( hypre_CommInfo *comm_info , hypre_Index index , hypre_Index stride );
 int hypre_CommInfoDestroy ( hypre_CommInfo *comm_info );
@@ -1834,6 +1852,7 @@ int HYPRE_StructMatrixAddToBoxValues ( HYPRE_StructMatrix matrix , int *ilower ,
 int HYPRE_StructMatrixAddToConstantValues ( HYPRE_StructMatrix matrix , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixAssemble ( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixSetNumGhost ( HYPRE_StructMatrix matrix , int *num_ghost );
+int HYPRE_StructMatrixSetAddOrReplaceValues ( HYPRE_StructMatrix matrix , int flag );
 int HYPRE_StructMatrixGetGrid ( HYPRE_StructMatrix matrix , HYPRE_StructGrid *grid );
 int HYPRE_StructMatrixSetSymmetric ( HYPRE_StructMatrix matrix , int symmetric );
 int HYPRE_StructMatrixSetConstantEntries ( HYPRE_StructMatrix matrix , int nentries , int *entries );
@@ -1859,6 +1878,7 @@ int HYPRE_StructVectorGetBoxValues ( HYPRE_StructVector vector , int *ilower , i
 int HYPRE_StructVectorAssemble ( HYPRE_StructVector vector );
 int HYPRE_StructVectorPrint ( const char *filename , HYPRE_StructVector vector , int all );
 int HYPRE_StructVectorSetNumGhost ( HYPRE_StructVector vector , int *num_ghost );
+int HYPRE_StructVectorSetAddOrReplaceValues ( HYPRE_StructVector vector , int flag );
 int HYPRE_StructVectorCopy ( HYPRE_StructVector x , HYPRE_StructVector y );
 int HYPRE_StructVectorSetConstantValues ( HYPRE_StructVector vector , double values );
 int HYPRE_StructVectorGetMigrateCommPkg ( HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg );
@@ -1935,6 +1955,7 @@ int hypre_StructMatrixSetConstantValues ( hypre_StructMatrix *matrix , int num_s
 int hypre_StructMatrixAssemble ( hypre_StructMatrix *matrix );
 int hypre_StructMatrixSetNumGhost ( hypre_StructMatrix *matrix , int *num_ghost );
 int hypre_StructMatrixSetConstantCoefficient ( hypre_StructMatrix *matrix , int constant_coefficient );
+int hypre_StructMatrixSetAddOrReplaceValues ( hypre_StructMatrix *matrix , int flag );
 int hypre_StructMatrixSetConstantEntries ( hypre_StructMatrix *matrix , int nentries , int *entries );
 int hypre_StructMatrixPrint ( const char *filename , hypre_StructMatrix *matrix , int all );
 int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix , hypre_StructMatrix *to_matrix );
@@ -1978,6 +1999,7 @@ int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector , hypre_Box *val
 int hypre_StructVectorGetValues ( hypre_StructVector *vector , hypre_Index grid_index , double *values_ptr );
 int hypre_StructVectorGetBoxValues ( hypre_StructVector *vector , hypre_Box *value_box , double *values );
 int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , int *num_ghost );
+int hypre_StructVectorSetAddOrReplaceValues ( hypre_StructVector *vector , int flag );
 int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );
 int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector , double values );
