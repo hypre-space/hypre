@@ -143,6 +143,28 @@ hypre_SStructPVectorInitialize( hypre_SStructPVector *pvector )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructVectorSetAddOrReplaceValues
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructVectorSetAddOrReplaceValues( hypre_SStructVector *vector,
+                                          int                  part,
+                                          int                  var,
+                                          int                  flag)
+{
+   int  ierr = 0;
+
+   hypre_SStructPVector  *pvector= hypre_SStructVectorPVector(vector, part);
+   hypre_StructVector    *svector = hypre_SStructPVectorSVector(pvector, var);
+
+   hypre_StructVectorAddOrReplace(svector)= flag; /* flag  > 0, add
+                                                     flag  = 0, replace
+                                                     flag  < 0, no action */
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SStructPVectorSetValues
  *--------------------------------------------------------------------------*/
 

@@ -298,6 +298,21 @@ HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector  vector,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructVectorAddOrReplaceValues( HYPRE_SStructVector  vector,
+                                       int                  part,
+                                       int                  var,
+                                       int                  flag )
+{
+   int ierr = 0;
+
+   ierr = hypre_SStructVectorSetAddOrReplaceValues(vector, part, var, flag);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 int
 HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
