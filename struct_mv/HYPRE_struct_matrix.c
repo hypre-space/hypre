@@ -278,6 +278,17 @@ HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixSetAddOrReplaceValues
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructMatrixSetAddOrReplaceValues( HYPRE_StructMatrix  matrix,
+                                         int                 flag )
+{
+   return ( hypre_StructMatrixSetAddOrReplaceValues(matrix, flag) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructMatrixGetGrid
  *--------------------------------------------------------------------------*/
 

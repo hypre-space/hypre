@@ -51,6 +51,12 @@ typedef struct hypre_StructMatrix_struct
                       
    int                   global_size;  /* Total number of nonzero coeffs */
 
+   int                   offproc_flag; /* offproc set values flag */
+   int                   AddOrReplace; /* offproc set values: add or replace,
+                                          or don't do anything. AddToValues
+                                          switches on add, SetValues must switch
+                                          on the replace. */
+
    hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
    int                   ref_count;
@@ -76,6 +82,8 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
+#define hypre_StructMatrixOffProcFlag(matrix)   ((matrix) -> offproc_flag)
+#define hypre_StructMatrixAddOrReplace(matrix)  ((matrix) -> AddOrReplace)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 
