@@ -25,6 +25,7 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
 
    hypre_BoxArrayArray    *recvboxes;
    int                   **rprocesses;
+   int                   **recv_rboxnums;
 
    hypre_BoxArray         *boxarray;
 
@@ -56,10 +57,14 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
    recvboxes  = hypre_BoxArrayArrayDuplicate(recvinfo -> recv_boxes);
    rprocesses = hypre_CTAlloc(int *, hypre_BoxArrayArraySize(recvboxes));
 
+   /* dummy pointer for CommInfoCreate */
+   recv_rboxnums = hypre_CTAlloc(int *, hypre_BoxArrayArraySize(recvboxes));
+
    hypre_ForBoxArrayI(i, recvboxes)
    {
       boxarray= hypre_BoxArrayArrayBoxArray(recvboxes, i);
       rprocesses[i]= hypre_CTAlloc(int, hypre_BoxArraySize(boxarray));
+      recv_rboxnums[i]= hypre_CTAlloc(int, hypre_BoxArraySize(boxarray));
 
       hypre_ForBoxI(j, boxarray)
       {
@@ -69,7 +74,7 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
 
 
    hypre_CommInfoCreate(sendboxes, recvboxes, sprocesses, rprocesses,
-                        send_rboxnums, send_rboxes, &comm_info);
+                        send_rboxnums, recv_rboxnums, send_rboxes, &comm_info);
 
    hypre_CommPkgCreate(comm_info,
                        send_data_space,

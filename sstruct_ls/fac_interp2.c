@@ -136,6 +136,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
    hypre_BoxArrayArray     **recv_boxes;
    int                    ***recv_processes;
+   int                    ***recv_remote_boxnums;
 
    hypre_BoxArray           *boxarray;
    hypre_BoxArray           *tmp_boxarray, *intersect_boxes;
@@ -328,6 +329,9 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    recv_boxes= hypre_CTAlloc(hypre_BoxArrayArray *, nvars);
    recv_processes= hypre_CTAlloc(int **, nvars);
 
+   /* dummy pointer for CommInfoCreate */
+   recv_remote_boxnums= hypre_CTAlloc(int **, nvars);
+
    hypre_SetIndex(index, 1, 1, 1);
    for (vars= 0; vars< nvars; vars++)
    {
@@ -340,6 +344,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       own_cboxnums[vars]= hypre_CTAlloc(int *, hypre_BoxArraySize(boxarray));
       recv_boxes[vars]    = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
       recv_processes[vars]= hypre_CTAlloc(int *, hypre_BoxArraySize(boxarray));
+      recv_remote_boxnums[vars]= hypre_CTAlloc(int *, hypre_BoxArraySize(boxarray));
 
       hypre_ForBoxI(fi, boxarray)
       {
@@ -382,6 +387,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
          own_cboxnums[vars][fi]  = hypre_CTAlloc(int, cnt1);
          recv_processes[vars][fi]= hypre_CTAlloc(int, cnt2);
+         recv_remote_boxnums[vars][fi]= hypre_CTAlloc(int , cnt2);
 
          cnt1= 0; cnt2= 0;
          for (i= 0; i< nmap_entries; i++)
@@ -604,7 +610,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
       hypre_CommInfoCreate(send_boxes[vars], recv_boxes[vars], send_processes[vars],
                            recv_processes[vars], send_remote_boxnums[vars],
-                           send_rboxes, &comm_info);
+                           recv_remote_boxnums[vars], send_rboxes, &comm_info);
 
       hypre_CommPkgCreate(comm_info,
                           hypre_StructVectorDataSpace(s_rc),
@@ -618,6 +624,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
   hypre_TFree(send_processes);
   hypre_TFree(recv_processes);
   hypre_TFree(send_remote_boxnums);
+  hypre_TFree(recv_remote_boxnums);
 
   (fac_interp_data -> interlevel_comm)= interlevel_comm;
 
