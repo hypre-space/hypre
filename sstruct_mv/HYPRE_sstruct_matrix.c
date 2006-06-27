@@ -392,7 +392,22 @@ HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructMatrixAddOrReplaceValues( HYPRE_SStructMatrix  matrix,
+                                       int                  part,
+                                       int                  var1,
+                                       int                  var2,
+                                       int                  flag )
+{
+   int ierr = 0;
+                                                                                                                                      
+   ierr = hypre_SStructMatrixSetAddOrReplaceValues(matrix, part, var1, var2, flag);
+                                                                                                                                      
+   return ierr;
+}
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 int
 HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
                               int                  part,

@@ -251,6 +251,28 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructMatrixSetAddOrReplaceValues
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructMatrixSetAddOrReplaceValues( hypre_SStructMatrix *matrix,
+                                          int                  part,
+                                          int                  var1,
+                                          int                  var2,
+                                          int                  flag)
+{
+   int  ierr = 0;
+
+   hypre_SStructPMatrix  *pmatrix= hypre_SStructMatrixPMatrix(matrix, part);
+   hypre_StructMatrix    *smatrix= hypre_SStructPMatrixSMatrix(pmatrix, var1, var2);
+
+   hypre_StructMatrixAddOrReplace(smatrix)= flag; /* flag  > 0, add
+                                                     flag  = 0, replace
+                                                     flag  < 0, no action */
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SStructPMatrixSetValues
  *--------------------------------------------------------------------------*/
 
