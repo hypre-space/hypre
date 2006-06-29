@@ -172,6 +172,35 @@ hypre_F90_IFACE(hypre_sstructgridsetneighborbox, HYPRE_SSTRUCTGRIDSETNEIGHBORBOX
 }
 
 /*--------------------------------------------------------------------------
+ * ** TEMPORARY **
+ *  HYPRE_SStructGridSetNeighborBoxZ
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridsetneighborboz, HYPRE_SSTRUCTGRIDSETNEIGHBORBOZ)
+                                                          (long int   *grid,
+                                                           int        *part,
+                                                           int        *ilower,
+                                                           int        *iupper,
+                                                           int        *nbor_part,
+                                                           int        *nbor_ilower,
+                                                           int        *nbor_iupper,
+                                                           int        *index_map,
+                                                           int        *primary,
+                                                           int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructGridSetNeighborBoxZ( (HYPRE_SStructGrid) *grid,
+                                                    (int)               *part,
+                                                    (int *)              ilower,
+                                                    (int *)              iupper,
+                                                    (int)               *nbor_part,
+                                                    (int *)              nbor_ilower,
+                                                    (int *)              nbor_iupper,
+                                                    (int *)              index_map,
+                                                    (int)               *primary ) );
+}
+
+/*--------------------------------------------------------------------------
  * *** placeholder ***
  *  HYPRE_SStructGridAddUnstructuredPart
  *--------------------------------------------------------------------------*/

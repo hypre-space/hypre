@@ -226,6 +226,22 @@ hypre_F90_IFACE(hypre_structmatrixsetnumghost, HYPRE_STRUCTMATRIXSETNUMGHOST)( l
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixSetAddOrReplaceValues
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_structmatrixsetaddorrepla, HYPRE_STRUCTMATRIXSETADDORREPLA)
+                                              ( long int *matrix,
+                                                int      *flag,
+                                                int      *ierr )
+{
+   *ierr = (int)
+      ( HYPRE_StructMatrixSetAddOrReplaceValues( 
+                                       (HYPRE_StructMatrix) *matrix,
+                                       (int)                *flag ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructMatrixGetGrid
  *--------------------------------------------------------------------------*/
 

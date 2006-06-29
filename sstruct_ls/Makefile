@@ -45,6 +45,7 @@ FILES =\
  F90_HYPRE_sstruct_gmres.c\
  F90_HYPRE_sstruct_InterFAC.c\
  F90_HYPRE_sstruct_int.c\
+ F90_HYPRE_sstruct_maxwell.c\
  F90_HYPRE_sstruct_pcg.c\
  F90_HYPRE_sstruct_split.c\
  F90_HYPRE_sstruct_sys_pfmg.c\

@@ -99,6 +99,25 @@ hypre_F90_IFACE(hypre_sstructvectorsetboxvalues, HYPRE_SSTRUCTVECTORSETBOXVALUES
 }
 
 /*--------------------------------------------------------------------------
+ *  HYPRE_SStructVectorAddOrReplaceValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructvectoraddorreplace, HYPRE_SSTRUCTVECTORADDORREPLACE)
+                                                              (long int *vector,
+                                                               int      *part,
+                                                               int      *var,
+                                                               int      *flag,
+                                                               int      *ierr)
+{
+   *ierr = (int) (HYPRE_SStructVectorAddOrReplaceValues( 
+                                                  (HYPRE_SStructVector) *vector,
+                                                  (int)                 *part,
+                                                  (int)                 *var,
+                                                  (int)                 *flag ) );
+}
+
+/*--------------------------------------------------------------------------
  *  HYPRE_SStructVectorAddToValues
  *--------------------------------------------------------------------------*/
 
