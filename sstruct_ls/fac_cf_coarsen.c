@@ -407,7 +407,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                   if (temp2[i] < max_stencil_size)
                                   {
                                      j= rank_stencils[temp2[i]];
-                                     if (j > 0)
+                                     if (j >= 0)
                                      {
                                         a_ptrs[j][iA]= 0.0;
                                      }
@@ -432,7 +432,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                   if (temp2[i] < max_stencil_size)
                                   {
                                       j= rank_stencils[temp2[i]];
-                                      if (j > 0)
+                                      if (j >= 0)
                                       {
                                          a_ptrs[j][iA]+= vals[i];
                                       }
