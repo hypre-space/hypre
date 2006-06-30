@@ -79,10 +79,13 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
              hypre_ClearIndex(temp_index);
              hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), temp_index,
                             refine_factors[level], hypre_BoxIMin(&scaled_box));
-             hypre_SetIndex(temp_index, refine_factors[level][0]-1,
-                            refine_factors[level][1]-1, refine_factors[level][2]-1);
+             for (i= 0; i< ndim; i++)
+             {
+                temp_index[i]= refine_factors[level][i]-1;
+             }
              hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), temp_index,
                             refine_factors[level], hypre_BoxIMax(&scaled_box));
+             hypre_ClearIndex(temp_index);
 
              hypre_BoxMapIntersect(fmap, hypre_BoxIMin(&scaled_box),
                                    hypre_BoxIMax(&scaled_box), &map_entries,
@@ -104,7 +107,6 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
                    }
                 }
 
-                hypre_ClearIndex(temp_index);
                 hypre_StructMapFineToCoarse(hypre_BoxIMin(&intersect_box), temp_index,
                                      refine_factors[level], hypre_BoxIMin(&intersect_box));
                 hypre_StructMapFineToCoarse(hypre_BoxIMax(&intersect_box), temp_index,
@@ -204,8 +206,10 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
           hypre_ClearIndex(temp_index);
           hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), temp_index,
                                       rfactors, hypre_BoxIMin(&scaled_box));
-          hypre_SetIndex(temp_index, rfactors[0]-1, rfactors[1]-1,
-                         rfactors[2]-1);
+          for (i= 0; i< ndim; i++)
+          {
+             temp_index[i]=  rfactors[i]-1;
+          }
           hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), temp_index,
                                       rfactors, hypre_BoxIMax(&scaled_box));
           hypre_ClearIndex(temp_index);
