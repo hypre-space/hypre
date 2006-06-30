@@ -87,8 +87,10 @@ hypre_FacZeroCData( void                 *fac_vdata,
              hypre_ClearIndex(temp_index);
              hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), temp_index,
                                         *refine_factors, hypre_BoxIMin(&scaled_box));
-             hypre_SetIndex(temp_index, (*refine_factors)[0]-1,
-                            (*refine_factors)[1]-1, (*refine_factors)[2]-1);
+             for (i= 0; i< ndim; i++)
+             {
+                temp_index[i]= (*refine_factors)[i]-1;
+             }
              hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), temp_index,
                                         *refine_factors, hypre_BoxIMax(&scaled_box));
 
