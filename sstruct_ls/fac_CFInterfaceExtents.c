@@ -36,7 +36,11 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    int                    i, j;
     
    hypre_ClearIndex(zero_index);
-   hypre_SetIndex(neg_index, -1 , -1, -1);
+   hypre_ClearIndex(neg_index);
+   for (i= 0; i< ndim; i++)
+   {
+      neg_index[i]= -1;
+   }
    hypre_CopyIndex(hypre_BoxIMin(cgrid_box), cstart);
 
    stencil_size       = hypre_StructStencilSize(stencils);
@@ -57,7 +61,7 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
           {
              hypre_AppendBox(cfine_box, union_boxes);
              hypre_CopyBox(cfine_box, hypre_BoxArrayBox(stencil_box_extents, i));
-             for (j= 0; j< 3; j++)
+             for (j= 0; j< ndim; j++)
              {
                 hypre_BoxIMin(cfine_box)[j]-=  cstart[j];
                 hypre_BoxIMax(cfine_box)[j]-=  cstart[j];
@@ -100,7 +104,7 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    for (i= stencil_size; i< hypre_BoxArraySize(stencil_box_extents); i++)
    {
       box= hypre_BoxArrayBox(stencil_box_extents, i);
-      for (j= 0; j< 3; j++)
+      for (j= 0; j< ndim; j++)
       {
          hypre_BoxIMin(box)[j]-=  cstart[j];
          hypre_BoxIMax(box)[j]-=  cstart[j];
@@ -122,7 +126,7 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
    hypre_BoxArray        *union_boxes;
    hypre_Box             *cfine_box;
 
-   hypre_Index            stencil_shape, cstart, zero_index, neg_index;
+   hypre_Index            stencil_shape, zero_index, neg_index;
    int                    stencil_size;
    int                    abs_stencil;
 
@@ -132,8 +136,11 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
    int                    ierr= 0;
     
    hypre_ClearIndex(zero_index);
-   hypre_SetIndex(neg_index, -1 , -1, -1);
-   hypre_CopyIndex(hypre_BoxIMin(cgrid_box), cstart);
+   hypre_ClearIndex(neg_index);
+   for (i= 0; i< ndim; i++)
+   {
+      neg_index[i]= -1;
+   }
 
    stencil_size       = hypre_StructStencilSize(stencils);
    stencil_box_extents= hypre_BoxArrayCreate(stencil_size);
