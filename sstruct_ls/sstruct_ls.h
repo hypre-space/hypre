@@ -253,7 +253,7 @@ hypre_BoxArray *hypre_CFInterfaceExtents ( hypre_Box *fgrid_box , hypre_Box *cgr
 int hypre_CFInterfaceExtents2 ( hypre_Box *fgrid_box , hypre_Box *cgrid_box , hypre_StructStencil *stencils , hypre_Index rfactors , hypre_BoxArray *cf_interface );
 
 /* fac_cfstencil_box.c */
-hypre_Box *hypre_CF_StenBox ( hypre_Box *fgrid_box , hypre_Box *cgrid_box , hypre_Index stencil_shape , hypre_Index rfactors );
+hypre_Box *hypre_CF_StenBox ( hypre_Box *fgrid_box , hypre_Box *cgrid_box , hypre_Index stencil_shape , hypre_Index rfactors , int ndim );
 
 /* fac_interp2.c */
 int hypre_FacSemiInterpCreate2 ( void **fac_interp_vdata_ptr );

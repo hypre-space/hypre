@@ -142,7 +142,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                          hypre_BoxSetExtents(&fgrid_box, ilower, iupper);
 
                          shift_ibox= hypre_CF_StenBox(&fgrid_box, cgrid_box, stencil_shape, 
-                                                       refine_factors);
+                                                       refine_factors, ndim);
 
                          if ( hypre_BoxVolume(shift_ibox) )
                          {
@@ -347,7 +347,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                                                                      stencil_shape);
                       hypre_ForBoxI(fj, intersect_boxes)
                       {
-                         intersect_box= *hypre_BoxArrayBox(intersect_boxes, fj);
+                         hypre_CopyBox(hypre_BoxArrayBox(intersect_boxes, fj), &intersect_box);
 
                          hypre_AddIndex(shift_index, hypre_BoxIMin(&intersect_box),
                                         hypre_BoxIMin(&intersect_box));

@@ -19,7 +19,8 @@ hypre_Box *
 hypre_CF_StenBox( hypre_Box              *fgrid_box,
                   hypre_Box              *cgrid_box,
                   hypre_Index             stencil_shape,
-                  hypre_Index             rfactors )
+                  hypre_Index             rfactors,
+                  int                     ndim )
 {
    hypre_Box              coarsen_box;
    hypre_Box              contracted_box;
@@ -50,7 +51,7 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
    * needs to be adjusted.
    *--------------------------------------------------------------------------*/
    hypre_CopyBox(fgrid_box, &contracted_box);
-   for (i= 0; i< 3; i++)
+   for (i= 0; i< ndim; i++)
    {
       remainder= hypre_BoxIMin(&contracted_box)[i] % rfactors[i];
       if (remainder)
@@ -64,12 +65,8 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
    hypre_StructMapFineToCoarse(hypre_BoxIMax(&contracted_box), temp_index,
                                rfactors, hypre_BoxIMax(&coarsen_box));
 
-   for (i= 0; i< 3; i++)
-   {
-      size_cbox[i] = hypre_BoxSizeD(&coarsen_box, i) - 1;
-   }
-
-   for (i= 0; i< 3; i++)
+   hypre_ClearIndex(size_cbox);
+   for (i= 0; i< ndim; i++)
    {
       size_cbox[i] = hypre_BoxSizeD(&coarsen_box, i) - 1;
    }
@@ -84,7 +81,7 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
                                rfactors, hypre_BoxIMin(&extended_box));
    hypre_StructMapFineToCoarse(hypre_BoxIMax(fgrid_box), temp_index,
                                rfactors, hypre_BoxIMax(&extended_box));*/
-   for (i= 0; i< 3; i++)
+   for (i= 0; i< ndim; i++)
    {
       hypre_BoxIMin(&extended_box)[i]-=1;
       hypre_BoxIMax(&extended_box)[i]+=1;
@@ -98,7 +95,8 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
        return stenbox;
    }
 
-   for (i= 0; i< 3; i++)
+   hypre_ClearIndex(size_ibox);
+   for (i= 0; i< ndim; i++)
    {
       size_ibox[i] = hypre_BoxSizeD(&intersect_box, i) - 1;
    }
