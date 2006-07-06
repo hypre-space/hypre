@@ -1010,6 +1010,191 @@ int HYPRE_ParCSRPilutSetFactorRowSize(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 /**
+ * @name ParCSR AMS Solver and Preconditioner
+ *
+ * Parallel auxiliary space Maxwell solver and preconditioner
+ **/
+/*@{*/
+
+/**
+ * Create an AMS solver object.
+ **/
+int HYPRE_AMSCreate(HYPRE_Solver *solver);
+
+/**
+ * Destroy an AMS solver object.
+ **/
+int HYPRE_AMSDestroy(HYPRE_Solver solver);
+
+/**
+ * Set up the AMS solver or preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+int HYPRE_AMSSetup(HYPRE_Solver solver,
+                   HYPRE_ParCSRMatrix A,
+                   HYPRE_ParVector b,
+                   HYPRE_ParVector x);
+
+/**
+ * Solve the system or apply AMS as a preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+int HYPRE_AMSSolve(HYPRE_Solver solver,
+                   HYPRE_ParCSRMatrix A,
+                   HYPRE_ParVector b,
+                   HYPRE_ParVector x);
+
+/**
+ * (Optional) Sets the problem dimension (2 or 3). The default is 3.
+ **/
+int HYPRE_AMSSetDimension(HYPRE_Solver solver, int dim);
+
+/**
+ * Sets the discrete gradient matrix $G$.
+ * This function should be called before hypre\_AMSSetup()!
+ **/
+int HYPRE_AMSSetDiscreteGradient(HYPRE_Solver solver,
+                                 HYPRE_ParCSRMatrix G);
+
+/**
+ * Sets the $x$, $y$ and $z$ coordinates of the vertices in the mesh.
+ *
+ * Either SetCoordinateVectors or SetEdgeConstantVectors should be
+ * called before hypre\_AMSSetup()!
+ **/
+int HYPRE_AMSSetCoordinateVectors(HYPRE_Solver solver,
+                                  HYPRE_ParVector x,
+                                  HYPRE_ParVector y,
+                                  HYPRE_ParVector z);
+
+/**
+ * Sets the vectors $Gx$, $Gy$ and $Gz$ which give the representations of
+ * the constant vector fields $(1,0,0)$, $(0,1,0)$ and $(0,0,1)$ in the
+ * edge element basis.
+ *
+ * Either SetCoordinateVectors or SetEdgeConstantVectors should be
+ * called before hypre\_AMSSetup()!
+ **/
+int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver solver,
+                                    HYPRE_ParVector Gx,
+                                    HYPRE_ParVector Gy,
+                                    HYPRE_ParVector Gz);
+
+/**
+ * (Optional) Sets the matrix $A_\alpha$ corresponding to the Poisson
+ * problem with coefficient alpha (the curl-curl term coefficient in
+ * the Maxwell problem).
+ *
+ * If this function is called, the coarse space solver on the range
+ * of $\Pi^T$ is a block-diagonal version of $A_\Pi$. If this function is not
+ * called, the coarse space solver on the range of $Pi^T$ is constructed
+ * as $Pi^T A Pi$ in hypre\_AMSSetup()
+ **/
+int HYPRE_AMSSetAlphaPoissonMatrix(HYPRE_Solver solver,
+                                   HYPRE_ParCSRMatrix A_alpha);
+
+/**
+ * (Optional) Sets the matrix $A_\beta$ corresponding to the Poisson
+ * problem with coefficient beta (the mass term coefficient in the
+ * Maxwell problem).
+ *
+ * If not given, the Poisson matrix will be computed in hypre\_AMSSetup().
+ * If the given matrix is NULL, we assume that beta is $0$ and use two-level
+ * (instead of three-level) methods.
+ **/
+int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver solver,
+                                  HYPRE_ParCSRMatrix A_beta);
+
+/**
+ * (Optional) Sets maximum number of iterations, if AMS is used
+ * as a solver. If it is used as a preconditioner, this function has
+ * no effect. The default is $20$.
+ **/
+int HYPRE_AMSSetMaxIter(HYPRE_Solver solver, int maxit);
+
+/**
+ * (Optional) Set the convergence tolerance, if AMS is used
+ * as a solver. If it is used as a preconditioner, this function has
+ * no effect. The default is $1e-6$.
+ **/
+int HYPRE_AMSSetTol(HYPRE_Solver solver, double tol);
+
+/**
+ * (Optional) Choose which three-level solver to use. Possible values are:
+ *
+ * \begin{tabular}{|c|l|}
+ * \hline
+ *   1 & 3-level multiplicative solver (01210) \\
+ *   3 & 3-level multiplicative solver (02120) \\
+ *   5 & 3-level multiplicative solver (0102010) \\
+ *   7 & 3-level multiplicative solver (0201020) \\
+ * \hline
+ *   2 & 3-level additive solver (0+1+2) \\
+ *   4 & 3-level additive solver (010+2) \\
+ *   6 & 3-level additive solver (1+020) \\
+ *   8 & 3-level additive solver (010+020) \\
+ * \hline
+ * \end{tabular}
+ *
+ * The default is $1$.
+ **/
+int HYPRE_AMSSetCycleType(HYPRE_Solver solver, int cycle_type);
+
+/**
+ * (Optional) Control how much information is printed during the
+ * solution iterations.
+ * The default is $1$ (print residual norm at each step).
+ **/
+int HYPRE_AMSSetPrintLevel(HYPRE_Solver solver, int print_level);
+
+/**
+ * (Optional) Sets relaxation parameters for $A$.
+ * The defaults are $2$, $1$, $1.0$, $1.0$.
+ **/
+int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
+                                 int relax_type,
+                                 int relax_times,
+                                 double relax_weight,
+                                 double omega);
+
+/**
+ * (Optional) Sets AMG parameters for $B_\Pi$.
+ * The defaults are $10$, $1$, $3$, $0.25$.
+ **/
+int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
+                                int alpha_coarsen_type,
+                                int alpha_agg_levels,
+                                int alpha_relax_type,
+                                double alpha_strength_threshold);
+
+/**
+ * (Optional) Sets AMG parameters for $B_G$.
+ * The defaults are $10$, $1$, $3$, $0.25$.
+ **/
+int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
+                               int beta_coarsen_type,
+                               int beta_agg_levels,
+                               int beta_relax_type,
+                               double beta_strength_threshold);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
  * @name ParCSR PCG Solver
  **/
 /*@{*/
@@ -1806,6 +1991,7 @@ int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/ 
+
 #ifdef __cplusplus
 }
 #endif

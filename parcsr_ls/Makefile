@@ -70,6 +70,7 @@ FILES =\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
  HYPRE_parcsr_schwarz.c\
+ HYPRE_ams.c\
  par_amg.c\
  par_amg_setup.c\
  par_amg_solve.c\
@@ -101,7 +102,8 @@ FILES =\
  par_strength.c\
  pcg_par.c\
  schwarz.c\
- block_tridiag.c
+ block_tridiag.c\
+ ams.c
 
 OBJS = ${FILES:.c=.o}
 
