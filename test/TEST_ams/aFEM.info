@@ -1,0 +1,2 @@
+Number of processors: 4
+aFEM options: -mesh cube-8.mesh3d -pde cube-8-curlcurl-a0b-8.pde3d -discr discr-nd1.in -sref 3 -pref 3 
