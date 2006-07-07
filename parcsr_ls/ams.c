@@ -88,12 +88,21 @@ int hypre_ParCSRRelax(/* matrix to relax with */
          if (num_procs > 1)
          {
             hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-            int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-            double *u_buf_data = hypre_TAlloc(double,
-                                              hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+            int num_sends;
+            double *u_buf_data;
             hypre_ParCSRCommHandle *comm_handle;
 
             int index = 0, start;
+
+            if (!comm_pkg)
+            {
+               hypre_MatvecCommPkgCreate(A);
+               comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+            }
+
+            num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+            u_buf_data = hypre_TAlloc(double,
+                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
             for (i = 0; i < num_sends; i++)
             {
@@ -306,7 +315,7 @@ int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
    double *A_offd_data = hypre_CSRMatrixData(A_offd);
    int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   // a row will be considered zero if its l1 norm is less than eps
+   /* a row will be considered zero if its l1 norm is less than eps */
    double eps = DBL_EPSILON * 1e+4;
 
    for (i = 0; i < num_rows; i++)
