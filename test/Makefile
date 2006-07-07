@@ -380,6 +380,10 @@ driver_commpkg: driver_commpkg.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${COMMPKG_LFLAGS}
 
+ams_driver: ams_driver.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
 ##################################################################
 # Babel version of above
 ##################################################################
