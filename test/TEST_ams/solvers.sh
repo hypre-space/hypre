@@ -9,6 +9,10 @@
 #EHEADER***********************************************************************
 
 #=============================================================================
-# No comparison done
+# The outputs below should differ only in timings.
 #=============================================================================
 
+diff -I"time" solvers.out.0 solvers.out.1 >&2
+diff -I"time" solvers.out.2 solvers.out.3 >&2
+diff -I"time" solvers.out.4 solvers.out.5 >&2
+diff -I"time" solvers.out.6 solvers.out.7 >&2
