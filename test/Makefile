@@ -190,7 +190,8 @@ HYPRE_DRIVERS =\
  sstruct.c\
  sstruct_fac.c\
  struct.c\
- maxwell_unscaled.c
+ maxwell_unscaled.c\
+ ams_driver.c
 
 HYPRE_BABEL_DRIVERS =\
  struct_b.c\
