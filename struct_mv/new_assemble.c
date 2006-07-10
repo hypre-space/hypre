@@ -29,7 +29,7 @@ int        my_rank;
  *------------------------------------------------------------------------*/ 
 
 
-int hypre_NewStructGridAssemble( hypre_StructGrid *grid )
+int hypre_StructGridAssembleWithAP( hypre_StructGrid *grid )
 {
  
 
@@ -418,7 +418,7 @@ int hypre_NewStructGridAssemble( hypre_StructGrid *grid )
                    avoid refinement */  
     
  
-    ierr = hypre_CreateStructAssumedPartition(dim, bounding_box, dbl_global_size, 
+    ierr = hypre_StructAssumedPartitionCreate(dim, bounding_box, dbl_global_size, 
                                               global_num_boxes,
                                               local_boxes, 
                                               max_regions, 
@@ -584,7 +584,7 @@ int hypre_NewStructGridAssemble( hypre_StructGrid *grid )
                 
         if (!multiple_ap) /* only one assumed partition (AP) call */
         {
-           hypre_GetStructAssumedProcsFromBox(assumed_part, box, &proc_count, 
+           hypre_StructAssumedPartitionGetProcsFromBox(assumed_part, box, &proc_count, 
                                               &proc_alloc, &proc_array);
            if ((count + proc_count) > size)       
            {
@@ -612,7 +612,7 @@ int hypre_NewStructGridAssemble( hypre_StructGrid *grid )
               hypre_IntersectBoxes(period_box, bounding_box, result_box);  
               if (hypre_BoxVolume(result_box) > 0)
               {
-                 hypre_GetStructAssumedProcsFromBox(assumed_part, period_box, 
+                 hypre_StructAssumedPartitionGetProcsFromBox(assumed_part, period_box, 
                                                     &proc_count, &proc_alloc, 
                                                     &proc_array);
                  if ((count + proc_count) > size)       
@@ -725,7 +725,7 @@ int hypre_NewStructGridAssemble( hypre_StructGrid *grid )
      hypre_TFree(send_buf_starts);
      hypre_TFree(ap_proc_ids);
      /*we no longer need the assumed partition */
-     hypre_DestroyStructAssumedPartition(assumed_part);
+     hypre_StructAssumedPartitionDestroy(assumed_part);
 
 #if NEIGH_PRINT
  start_time = MPI_Wtime();
@@ -925,7 +925,7 @@ int hypre_NewStructGridAssemble( hypre_StructGrid *grid )
 
 
      /* create the neighbors structure! */ 
-     hypre_NewBoxNeighborsCreate(neighbor_boxes, neighbor_proc_ids, 
+     hypre_BoxNeighborsCreateWithAP(neighbor_boxes, neighbor_proc_ids, 
                                  neighbor_boxnums,
                                  first_local, num_local_boxes, pshifts, &neighbors);
     
@@ -956,7 +956,7 @@ int hypre_NewStructGridAssemble( hypre_StructGrid *grid )
  start_time = MPI_Wtime();
 #endif
 
-      hypre_NewBoxNeighborsAssemble(neighbors, periodic, max_distance, prune);
+      hypre_BoxNeighborsAssembleWithAP(neighbors, periodic, max_distance, prune);
 
 
 #if NEIGH_PRINT

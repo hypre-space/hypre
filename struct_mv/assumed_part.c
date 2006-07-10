@@ -8,7 +8,11 @@
 #define NO_REFINE   0
 #define REFINE_INFO 0
 
-/* functions used in this file to determine the partition - not elsewhere */
+
+/* functions used in this file to determine the partition - not elsewhere - 
+have names that start with AP */
+
+#if 0
 int hypre_APFillResponseStructAssumedPart(void *, int, int, void *,MPI_Comm, 
                                           void **, int *);
 int hypre_APSubdivideRegion(hypre_Box*, int, int, hypre_BoxArray*, int*);
@@ -21,6 +25,7 @@ int hypre_APShrinkRegions( hypre_BoxArray*, hypre_BoxArray*, MPI_Comm );
 int hypre_APRefineRegionsByVol( hypre_BoxArray*,  double*, int, double, 
                                 int, int *, MPI_Comm);
 
+#endif
 
 /******************************************************************************
  *
@@ -785,7 +790,7 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
  *****************************************************************************/
 
 
-int hypre_CreateStructAssumedPartition(int dim, hypre_Box *bounding_box, 
+int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box, 
                                        double global_boxes_size, 
                                        int global_num_boxes,
                                        hypre_BoxArray *local_boxes, 
@@ -1408,7 +1413,7 @@ int hypre_CreateStructAssumedPartition(int dim, hypre_Box *bounding_box,
     /* figure out my partition region and put it in the assumed_part structure*/   
      hypre_StructAssumedPartMyPartition(assumed_part) =  hypre_BoxArrayCreate(2);
      my_partition = hypre_StructAssumedPartMyPartition(assumed_part);
-     hypre_GetStructAssumedRegionsFromProc(assumed_part, myid, my_partition);
+     hypre_StructAssumedPartitionGetRegionsFromProc(assumed_part, myid, my_partition);
 #if 0
     hypre_ForBoxI(i, my_partition)
     {
@@ -1469,13 +1474,13 @@ int hypre_CreateStructAssumedPartition(int dim, hypre_Box *bounding_box,
               hypre_BoxExpand(grow_box, grow_array);
 
               /* NOTE - part of the box could lie outside of the regions */
-              hypre_GetStructAssumedProcsFromBox(assumed_part, grow_box, 
+              hypre_StructAssumedPartitionGetProcsFromBox(assumed_part, grow_box, 
                                                  &proc_count, 
                                                  &proc_alloc, &proc_array);
            }
            else /* box with positive volume */
            {
-              hypre_GetStructAssumedProcsFromBox(assumed_part, box, &proc_count, 
+              hypre_StructAssumedPartitionGetProcsFromBox(assumed_part, box, &proc_count, 
                                               &proc_alloc, &proc_array);
            }
            
@@ -1623,7 +1628,7 @@ int hypre_CreateStructAssumedPartition(int dim, hypre_Box *bounding_box,
  *****************************************************************************/
 
 
-int hypre_DestroyStructAssumedPartition(hypre_StructAssumedPart *assumed_part)
+int hypre_StructAssumedPartitionDestroy(hypre_StructAssumedPart *assumed_part)
 {
 
    int ierr = 0;
@@ -1747,7 +1752,7 @@ hypre_APFillResponseStructAssumedPart(void *p_recv_contact_buf,
  *****************************************************************************/
 
 
-int hypre_GetStructAssumedRegionsFromProc( hypre_StructAssumedPart *assumed_part , 
+int hypre_StructAssumedPartitionGetRegionsFromProc( hypre_StructAssumedPart *assumed_part , 
                                      int proc_id, hypre_BoxArray *assumed_regions)
 {
    
@@ -1937,7 +1942,7 @@ int hypre_GetStructAssumedRegionsFromProc( hypre_StructAssumedPart *assumed_part
  *****************************************************************************/
 
 
-int hypre_GetStructAssumedProcsFromBox( hypre_StructAssumedPart *assumed_part , 
+int hypre_StructAssumedPartitionGetProcsFromBox( hypre_StructAssumedPart *assumed_part , 
                                         hypre_Box *box, 
                                         int *num_proc_array, 
                                         int *size_alloc_proc_array, 

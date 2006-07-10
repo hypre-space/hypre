@@ -643,7 +643,7 @@ hypre_StructGridRead( MPI_Comm           comm,
    }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   hypre_NewStructGridAssemble(grid);
+   hypre_StructGridAssembleWithAP(grid);
 #else
    hypre_StructGridAssemble(grid);
 #endif

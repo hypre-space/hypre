@@ -638,7 +638,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_StructGridSetPeriodic(cgrid, periodic);
 
 
-   hypre_NewStructGridAssemble(cgrid);
+   hypre_StructGridAssembleWithAP(cgrid);
 
    *cgrid_ptr = cgrid;
 

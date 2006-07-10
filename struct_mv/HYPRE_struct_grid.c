@@ -94,7 +94,7 @@ int
 HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
 {
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   return ( hypre_NewStructGridAssemble(grid) );
+   return ( hypre_StructGridAssembleWithAP(grid) );
 #else
    return ( hypre_StructGridAssemble(grid) );
 #endif

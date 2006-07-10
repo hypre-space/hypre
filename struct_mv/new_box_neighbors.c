@@ -20,13 +20,13 @@ static int debug_count = 0;
 
 
 int
-hypre_NewBoxNeighborsCreate( hypre_BoxArray      *boxes,
-                             int                 *procs,
-                             int                 *boxnums,
-                             int                  first_local,
-                             int                  num_local,
-                             hypre_Index         *pshifts,
-                             hypre_BoxNeighbors **neighbors_ptr )
+hypre_BoxNeighborsCreateWithAP( hypre_BoxArray      *boxes,
+                                int                 *procs,
+                                int                 *boxnums,
+                                int                  first_local,
+                                int                  num_local,
+                                hypre_Index         *pshifts,
+                                hypre_BoxNeighbors **neighbors_ptr )
 {
    hypre_BoxNeighbors  *neighbors;
    int                 *ids, i;
@@ -66,7 +66,7 @@ hypre_NewBoxNeighborsCreate( hypre_BoxArray      *boxes,
 
 
 /*--------------------------------------------------------------------------
- * hypre_NewBoxNeighborsAssemble:
+ * hypre_BoxNeighborsAssembleWithAP:
  *
  * NOte: Now we do not keep nearby boxes with the same proc id (AB 10/04)
  * as a "neighbor" box
@@ -87,10 +87,10 @@ hypre_NewBoxNeighborsCreate( hypre_BoxArray      *boxes,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_NewBoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
-                            hypre_Index         periodic,
-                            int                 max_distance,
-                            int                 prune )
+hypre_BoxNeighborsAssembleWithAP( hypre_BoxNeighbors *neighbors,
+                                     hypre_Index         periodic,
+                                     int                 max_distance,
+                                     int                 prune )
 {
    hypre_BoxArray      *boxes;
    int                 *procs;
