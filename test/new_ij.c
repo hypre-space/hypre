@@ -64,8 +64,7 @@ main( int   argc,
    int                 poutdat;
    int                 debug_flag;
    int                 ierr = 0;
-   int                 i,j,k; 
-   int                 indx, rest, tms;
+   int                 i,j; 
    int                 max_levels = 25;
    int                 num_iterations; 
    int                 pcg_num_its; 
@@ -110,7 +109,6 @@ main( int   argc,
    int M, N;
    int first_local_row, last_local_row, local_num_rows;
    int first_local_col, last_local_col, local_num_cols;
-   int local_num_vars;
    int variant, overlap, domain_type;
    double schwarz_rlx_weight;
    double *values, val;
@@ -1579,26 +1577,8 @@ main( int   argc,
       }
       else
       {
-         local_num_vars = local_num_rows;
-         dof_func = hypre_CTAlloc(int,local_num_vars);
          if (myid == 0)
-	    printf (" Number of unknown functions = %d \n", num_functions);
-         rest = first_local_row-((first_local_row/num_functions)*num_functions);
-         indx = num_functions-rest;
-         if (rest == 0) indx = 0;
-         k = num_functions - 1;
-         for (j = indx-1; j > -1; j--)
-	    dof_func[j] = k--;
-         tms = local_num_vars/num_functions;
-         if (tms*num_functions+indx > local_num_vars) tms--;
-         for (j=0; j < tms; j++)
-         {
-	    for (k=0; k < num_functions; k++)
-	       dof_func[indx++] = k;
-         }
-         k = 0;
-         while (indx < local_num_vars)
-	    dof_func[indx++] = k++;
+	    printf (" Number of functions = %d \n", num_functions);
       }
    }
  
