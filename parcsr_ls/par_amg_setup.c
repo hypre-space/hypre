@@ -329,6 +329,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       k = 0;
       while (indx < local_size)
          dof_func[indx++] = k++;
+      hypre_ParAMGDataDofFunc(amg_data) = dof_func;
    }
 
    A_array[0] = A;
