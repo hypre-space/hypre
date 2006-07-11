@@ -180,7 +180,7 @@ hypre_F90_IFACE(hypre_sstructmaxwellsetmaxiter, HYPRE_SSTRUCTMAXWELLSETMAXITER)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_sstructmaxwellsetrelchan, HYPRE_SSTRUCTMAXWELLSETRELCHAN)
+hypre_F90_IFACE(hypre_sstructmaxwellsetrelchang, HYPRE_SSTRUCTMAXWELLSETRELCHANG)
                                                 (long int *solver,
                                                  int      *rel_change,
                                                  int      *ierr)
@@ -194,7 +194,7 @@ hypre_F90_IFACE(hypre_sstructmaxwellsetrelchan, HYPRE_SSTRUCTMAXWELLSETRELCHAN)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_sstructmaxwellsetnumprer, HYPRE_SSTRUCTMAXWELLSETNUMPRER)
+hypre_F90_IFACE(hypre_sstructmaxwellsetnumprere, HYPRE_SSTRUCTMAXWELLSETNUMPRERE)
                                                 (long int *solver,
                                                  int      *num_pre_relax,
                                                  int      *ierr)
@@ -209,7 +209,7 @@ hypre_F90_IFACE(hypre_sstructmaxwellsetnumprer, HYPRE_SSTRUCTMAXWELLSETNUMPRER)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_sstructmaxwellsetnumpost, HYPRE_SSTRUCTMAXWELLSETNUMPOST)
+hypre_F90_IFACE(hypre_sstructmaxwellsetnumpostr, HYPRE_SSTRUCTMAXWELLSETNUMPOSTR)
                                                 (long int *solver,
                                                  int      *num_post_relax,
                                                  int      *ierr)
@@ -239,7 +239,7 @@ HYPRE_SStructMaxwellSetPrintLevel
 *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_sstructmaxwellsetprintle, HYPRE_SSTRUCTMAXWELLSETPRINTLE)
+hypre_F90_IFACE(hypre_sstructmaxwellsetprintlev, HYPRE_SSTRUCTMAXWELLSETPRINTLEV)
                                                 (long int *solver,
                                                  int      *print_level,
                                                  int      *ierr)
