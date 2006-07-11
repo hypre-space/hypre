@@ -628,3 +628,110 @@ extern void hypre_F90_NAME(fhypre_sstructsyspfmggetnumiter, FHYPRE_SSTRUCTSYSPFM
         hypre_F90_NAME(fhypre_sstructsyspfmggetfinalre, FHYPRE_SSTRUCTSYSPFMGGETFINALRE)
 extern void hypre_F90_NAME(fhypre_sstructsyspfmggetfinalre, FHYPRE_SSTRUCTSYSPFMGGETFINALRE)
                           (long int *, double *);
+
+
+
+#define HYPRE_SStructMaxwellCreate \
+        hypre_F90_NAME(fhypre_sstructmaxwellcreate, FHYPRE_SSTRUCTMAXWELLCREATE)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellcreate, FHYPRE_SSTRUCTMAXWELLCREATE)
+                          (long int *, long int *);
+
+#define HYPRE_SStructMaxwellDestroy \
+        hypre_F90_NAME(fhypre_sstructmaxwelldestroy, FHYPRE_SSTRUCTMAXWELLDESTROY)
+extern void hypre_F90_NAME(fhypre_sstructmaxwelldestroy, FHYPRE_SSTRUCTMAXWELLDESTROY)
+                          (long int *);
+
+#define HYPRE_SStructMaxwellSetup \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetup, FHYPRE_SSTRUCTMAXWELLSETUP)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetup, FHYPRE_SSTRUCTMAXWELLSETUP)
+                          (long int *, long int *, long int *, long int *);
+
+#define HYPRE_SStructMaxwellSolve \
+        hypre_F90_NAME(fhypre_sstructmaxwellsolve, FHYPRE_SSTRUCTMAXWELLSOLVE)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsolve, FHYPRE_SSTRUCTMAXWELLSOLVE)
+                          (long int *, long int *, long int *, long int *);
+
+#define HYPRE_SStructMaxwellSolve2 \
+        hypre_F90_NAME(fhypre_sstructmaxwellsolve2, FHYPRE_SSTRUCTMAXWELLSOLVE2)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsolve2, FHYPRE_SSTRUCTMAXWELLSOLVE2)
+                          (long int *, long int *, long int *, long int *);
+
+#define HYPRE_MaxwellGrad \
+        hypre_F90_NAME(fhypre_maxwellgrad, FHYPRE_MAXWELLGRAD)
+extern void hypre_F90_NAME(fhypre_maxwellgrad, FHYPRE_MAXWELLGRAD)
+                          (long int *, long int *);
+
+#define HYPRE_SStructMaxwellSetGrad \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetgrad, FHYPRE_SSTRUCTMAXWELLSETGRAD)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetgrad, FHYPRE_SSTRUCTMAXWELLSETGRAD)
+                          (long int *, long int *);
+
+#define HYPRE_SStructMaxwellSetRfactors \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetrfactor, FHYPRE_SSTRUCTMAXWELLSETRFACTOR)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetrfactor, FHYPRE_SSTRUCTMAXWELLSETRFACTOR)
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellSetTol \
+        hypre_F90_NAME(fhypre_sstructmaxwellsettol, FHYPRE_SSTRUCTMAXWELLSETTOL)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsettol, FHYPRE_SSTRUCTMAXWELLSETTOL)
+                          (long int *, double *);
+
+#define HYPRE_SStructMaxwellSetConstantCoef \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetconstan, FHYPRE_SSTRUCTMAXWELLSETCONSTAN)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetconstan, FHYPRE_SSTRUCTMAXWELLSETCONSTAN)
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellSetMaxIter \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetmaxiter, FHYPRE_SSTRUCTMAXWELLSETMAXITER)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetmaxiter, FHYPRE_SSTRUCTMAXWELLSETMAXITER)
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellSetRelChange \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetrelchan, FHYPRE_SSTRUCTMAXWELLSETRELCHAN)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetrelchan, FHYPRE_SSTRUCTMAXWELLSETRELCHAN)
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellSetNumPreRelax \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetnumprer, FHYPRE_SSTRUCTMAXWELLSETNUMPRER)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetnumprer, FHYPRE_SSTRUCTMAXWELLSETNUMPRER)
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellSetNumPostRelax \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetnumpost, FHYPRE_SSTRUCTMAXWELLSETNUMPOST)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetnumpost, FHYPRE_SSTRUCTMAXWELLSETNUMPOST)
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellSetLogging \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetlogging, FHYPRE_SSTRUCTMAXWELLSETLOGGING)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetlogging, FHYPRE_SSTRUCTMAXWELLSETLOGGING)
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellSetPrintLevel \
+        hypre_F90_NAME(fhypre_sstructmaxwellsetprintle, FHYPRE_SSTRUCTMAXWELLSETPRINTLE)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellsetprintle, FHYPRE_SSTRUCTMAXWELLSETPRINTLE)
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellPrintLogging \
+        hypre_F90_NAME(fhypre_sstructmaxwellprintloggi, FHYPRE_SSTRUCTMAXWELLPRINTLOGGI)
+extern void hypre_F90_NAME(fhypre_sstructmaxwellprintloggi, FHYPRE_SSTRUCTMAXWELLPRINTLOGGI)
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellGetNumIterations \
+        hypre_F90_NAME(fhypre_sstructmaxwellgetnumiter, FHYPRE_SSTRUCTMAXWELLGETNUMITER) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwellgetnumiter, FHYPRE_SSTRUCTMAXWELLGETNUMITER) 
+                          (long int *, int *);
+
+#define HYPRE_SStructMaxwellGetFinalRelativeResidualNorm \
+        hypre_F90_NAME(fhypre_sstructmaxwellgetfinalre, FHYPRE_SSTRUCTMAXWELLGETFINALRE) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwellgetfinalre, FHYPRE_SSTRUCTMAXWELLGETFINALRE) 
+                          (long int *, double *);
+
+#define HYPRE_SStructMaxwellPhysBdy \
+        hypre_F90_NAME(fhypre_sstructmaxwellphysbdy, FHYPRE_SSTRUCTMAXWELLPHYSBDY) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwellphysbdy, FHYPRE_SSTRUCTMAXWELLPHYSBDY) 
+                          (long int *, int *, int *, int *, int *);
+
+#define HYPRE_ParCSRMatrixEliminateRowsCols \
+        hypre_F90_NAME(fhypre_parcsrmatrixeliminaterow, FHYPRE_PARCSRMATRIXELIMINATEROW) 
+extern void hypre_F90_NAME(fhypre_parcsrmatrixeliminaterow, FHYPRE_PARCSRMATRIXELIMINATEROW) 
+                          (long int *, int *, int *);

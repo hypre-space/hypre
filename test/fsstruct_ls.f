@@ -1,5 +1,5 @@
 c****************************************************************************
-c HYPRE_SStruct fortran interface routines
+c HYPRE_SStruct_ls fortran interface routines
 c****************************************************************************
 
 
@@ -1943,6 +1943,435 @@ c--------------------------------------------------------------------------
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsyspfmggetfinalrelative error = ', ierr
+      endif
+
+      return
+      end
+
+
+c*****************************************************************************
+c*
+c* HYPRE_SStructMaxwell interface
+c*
+c*****************************************************************************
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellCreate
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellcreate(fcomm, fsolver)
+
+      integer ierr
+      integer*8 fcomm
+      integer*8 fsolver
+
+      call HYPRE_SStructMaxwellCreate(fcomm, fsolver, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellcreate = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellDestroy
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwelldestroy(fsolver)
+
+      integer ierr
+      integer*8 fsolver
+
+      call HYPRE_SStructMaxwellDestroy(fsolver, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwelldestroy = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetup
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetup (fsolver, fA, fb, fx)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fA
+      integer*8 fb
+      integer*8 fx
+
+      call HYPRE_SStructMaxwellSetup(fsolver, fA, fb, fx, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetup = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSolve
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsolve (fsolver, fA, fb, fx)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fA
+      integer*8 fb
+      integer*8 fx
+
+      call HYPRE_SStructMaxwellSolve(fsolver, fA, fb, fx, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsolve = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSolve2
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsolve2(fsolver, fA, fb, fx)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fA
+      integer*8 fb
+      integer*8 fx
+
+      call HYPRE_SStructMaxwellSolve2(fsolver, fA, fb, fx, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsolve2 = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_MaxwellGrad
+c*--------------------------------------------------------------------------
+      subroutine fhypre_maxwellgrad (fgrid, fT)
+
+      integer ierr
+      integer*8 fgrid
+      integer*8 fT
+
+      call HYPRE_MaxwellGrad(fgrid, fT, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellgrad = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetGrad
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetgrad (fsolver, fT)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fT
+
+      call HYPRE_SStructMaxwellSetGrad(fsolver, fT, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetgrad = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetRfactors
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetrfactor (fsolver,frfactors)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 frfactors(3)
+
+      call HYPRE_SStructMaxwellSetRfactors(fsolver, frfactors, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetrfactors = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetTol
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsettol (fsolver, ftol)
+
+      integer ierr
+      integer*8 fsolver
+      double precision ftol
+
+      call HYPRE_SStructMaxwellSetTol(fsolver, ftol, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsettol = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetConstantCoef
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetconstan (fsolver,
+     1                                            fconstant_coef)
+
+      integer ierr
+      integer*8 fsolver
+      integer fconstant_coef
+
+      call HYPRE_SStructMaxwellSetConstant(fsolver, fconstant_coef,
+     1                                     ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetconstantcoef = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetMaxIter
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetmaxiter (fsolver, fmax_iter)
+
+      integer ierr
+      integer*8 fsolver
+      integer fmax_iter
+
+      call HYPRE_SStructMaxwellSetMaxIter(fsolver, fmax_iter, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetmaxiter = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetRelChange
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetrelchan (fsolver, frel_change)
+
+      integer ierr
+      integer*8 fsolver
+      integer frel_change
+
+      call HYPRE_SStructMaxwellSetRelChang(fsolver, frel_change, ierr) 
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetrelchange = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetNumPreRelax
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetnumprer (fsolver, 
+     1                                            fnum_pre_relax)
+
+      integer ierr
+      integer*8 fsolver
+      integer fnum_pre_relax
+
+      call HYPRE_SStructMaxwellSetNumPreRe(fsolver, fnum_pre_relax, 
+     1                                     ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetnumprerelax = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetNumPostRelax
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetnumpost (fsolver, 
+     1                                            fnum_post_relax)
+
+      integer ierr
+      integer*8 fsolver
+      integer fnum_post_relax
+
+      call HYPRE_SStructMaxwellSetNumPostR(fsolver, fnum_post_relax,
+     1                                     ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetnumpostrelax = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetLogging
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetlogging (fsolver, flogging)
+
+      integer ierr
+      integer*8 fsolver
+      integer flogging
+
+      call HYPRE_SStructMaxwellSetLogging(fsolver, flogging, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetlogging = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellSetPrintLevel
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellsetprintle (fsolver, fprint_level)
+
+      integer ierr
+      integer*8 fsolver
+      integer flogging
+
+      call HYPRE_SStructMaxwellSetPrintLev(fsolver, fprint_level, 
+     1                                     ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellsetprintlevel = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellPrintLogging
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellprintloggi (fsolver, fmyid)
+
+      integer ierr
+      integer*8 fsolver
+      integer flogging
+
+      call HYPRE_SStructMaxwellPrintLoggin(fsolver, fmyid, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellprintlogging = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellGetNumIterations
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellgetnumiter (fsolver, 
+     1                                            fnum_iterations)
+
+      integer ierr
+      integer*8 fsolver
+      integer fnum_iterations
+
+      call HYPRE_SStructMaxwellGetNumItera(fsolver, 
+     1                                     fnum_iterations, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellgetnumiterations = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellGetFinalRelativeResidualNorm
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellgetfinalre (fsolver, fnorm)
+
+      integer ierr
+      integer*8 fsolver
+      double precision fnorm
+
+      call HYPRE_SStructMaxwellGetFinalRel(fsolver, fnorm, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 
+     1      'fhypre_sstructmaxwellgetfinalrelativeresidualnorm = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellPhysBdy
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellphysbdy (fgrid_l, fnum_levels,
+     1                                         frfactors, 
+     2                                         fBdryRanks_ptr,
+     3                                         fBdryRanksCnt_ptr)
+
+      integer ierr
+      integer*8 fgrid_l
+      integer*8 frfactors
+      integer*8 fBdryRanks_ptr
+      integer*8 fBdryRanksCnt_ptr
+      integer fnum_levels
+
+      call HYPRE_SStructMaxwellPhysBdy(fgrid_l, fnum_levels, frfactors,
+     1                                 fBdryRanks_ptr, 
+     2                                 fBdryRanksCnt_ptr, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellphysbdy = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_ParCSRMatrixEliminateRowsCols
+c*--------------------------------------------------------------------------
+      subroutine fhypre_parcsrmatrixeliminaterow (fparA, fnrows, frows)
+
+      integer ierr
+      integer*8 fparA
+      integer*8 frows
+      integer fnrows
+
+      call HYPRE_ParCSRMatrixEliminateRows(fparA, fnrows, frows, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_parcsrmatrixeliminaterows = ', ierr
       endif
 
       return
