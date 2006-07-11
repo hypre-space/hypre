@@ -67,12 +67,16 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
    for (i = 0; i < 6; i++)
    {
       hypre_StructMatrixNumGhost(matrix)[i] = 0;
+      hypre_StructMatrixAddNumGhost(matrix)[i]= 0;
    }
 
    for (i = 0; i < ndim; i++)
    {
       hypre_StructMatrixNumGhost(matrix)[2*i] = 1;
       hypre_StructMatrixNumGhost(matrix)[2*i+1] = 1;
+
+      hypre_StructMatrixAddNumGhost(matrix)[2*i]= 1;
+      hypre_StructMatrixAddNumGhost(matrix)[2*i+1]= 1;
    }
 
    hypre_StructMatrixOffProcFlag(matrix) = 0;
@@ -723,10 +727,20 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
          set this off_proc value, see if it is along the ghostlayer. */
       if ((!found) && (AddOrReplace >= 0))
       {
-         boxes = hypre_StructMatrixDataSpace(matrix);
+         hypre_Box  *orig_box;
+
+         int        *add_num_ghost= hypre_StructMatrixAddNumGhost(matrix);
+         int         j;
+
          hypre_ForBoxI(i, boxes)
          {
-            box = hypre_BoxArrayBox(boxes, i);
+            orig_box = hypre_BoxArrayBox(boxes, i);
+            box      = hypre_BoxDuplicate(orig_box);
+            for (j= 0; j< 3; j++)
+            {
+               hypre_BoxIMin(box)[j]-= add_num_ghost[2*j];
+               hypre_BoxIMax(box)[j]+= add_num_ghost[2*j+1];
+            }
 
             if ( constant_coefficient==2 ) /* only center and action > -1 */
             {
@@ -824,13 +838,14 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                                 int                 action )
 {
    int    ierr = 0;
-   int    AddOrReplace= hypre_StructMatrixAddOrReplace(matrix);
+   int    AddOrReplace = hypre_StructMatrixAddOrReplace(matrix);
+   int   *add_num_ghost= hypre_StructVectorAddNumGhost(matrix);
 
    hypre_BoxArray      *grid_boxes;
    hypre_Box           *grid_box;
    hypre_BoxArray      *box_array1, *box_array2, *tmp_box_array;
    hypre_BoxArrayArray *box_aarray;
-   hypre_Box           *box, *tmp_box;
+   hypre_Box           *box, *tmp_box, *orig_box;
    hypre_Index          center_index;
    hypre_StructStencil *stencil;
    int                  center_rank;
@@ -878,17 +893,24 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    vol_offproc= 0;
    if ((vol_vbox > vol_iboxes) && (AddOrReplace >= 0))
    {
-      data_space= hypre_StructMatrixDataSpace(matrix);
       box_aarray= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
 
       hypre_ForBoxI(i, grid_boxes)
       {
          tmp_box_array= hypre_BoxArrayCreate(0);
+                                                                                           
+         /* get ghostlayer boxes */
+         orig_box= hypre_BoxArrayBox(grid_boxes, i);
+         tmp_box  = hypre_BoxDuplicate(orig_box );
+         for (j= 0; j< 3; j++)
+         {
+            hypre_BoxIMin(tmp_box)[j]-= add_num_ghost[2*j];
+            hypre_BoxIMax(tmp_box)[j]+= add_num_ghost[2*j+1];
+         }
 
          /* get ghostlayer boxes */
-         hypre_SubtractBoxes(hypre_BoxArrayBox(data_space, i),
-                             hypre_BoxArrayBox(grid_boxes, i),
-                             tmp_box_array);
+         hypre_SubtractBoxes(tmp_box, orig_box, tmp_box_array);
+         hypre_BoxDestroy(tmp_box);
 
          box_array2= hypre_BoxArrayArrayBoxArray(box_aarray, i);
          /* intersect the value_box and the ghostlayer boxes */
@@ -906,7 +928,6 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
       /* if vol_offproc= 0, trying to set values away from ghostlayer */
       if (!vol_offproc)
       {
-         printf("Warning: trying to set matrix values that are unreachable by this proc\n");
          hypre_BoxArrayArrayDestroy(box_aarray);
       }
       else
@@ -1321,6 +1342,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    int    ierr = 0;
 
    int   *num_ghost = hypre_StructMatrixNumGhost(matrix);
+
    int    comm_num_values, mat_num_values, constant_coefficient;
    int    stencil_size;
    hypre_StructStencil   *stencil;
@@ -1386,17 +1408,29 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    {
       hypre_CreateCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix),
                                        num_ghost, &comm_info);
+      hypre_CommPkgCreate(comm_info,
+                          hypre_StructMatrixDataSpace(matrix),
+                          hypre_StructMatrixDataSpace(matrix),
+                          comm_num_values,
+                          hypre_StructMatrixComm(matrix), &comm_pkg);
 
-      /* before comm_info is destroyed, use it to determine the inverse 
-         communication pattern if off_proc AddOrReplace values exist */
+      hypre_StructMatrixCommPkg(matrix) = comm_pkg;
+
+      /* inverse communication pattern if off_proc AddOrReplace values.
+         Note that we cannot use the comm_info above because the 
+         add_num_ghost is generally different from num_ghost (add_num_ghost
+         depends on the variable type. */
       if (sum_offproc_flag)
       {
          /* since the off_proc add_values are located on the ghostlayer, we
             need "inverse" communication. */
+          hypre_CommInfo        *add_comm_info;
           hypre_CommInfo        *inv_comm_info;
           hypre_CommPkg         *inv_comm_pkg;
           int                    AddOrReplace= 
                                      hypre_StructMatrixAddOrReplace(matrix);
+          int                   *add_num_ghost= 
+                                     hypre_StructMatrixAddNumGhost(matrix);
 
           hypre_BoxArrayArray   *send_boxes;
           hypre_BoxArrayArray   *recv_boxes;
@@ -1422,12 +1456,14 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
           int                    i, j, s, xi, loopi, loopj, loopk;
 
+          hypre_CreateCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix),
+                                           add_num_ghost, &add_comm_info);
          /* inverse CommInfo achieved by switching send & recv structures of
-            CommInfo */
+            add_comm_info */
           send_boxes= 
-               hypre_BoxArrayArrayDuplicate(hypre_CommInfoRecvBoxes(comm_info));
+               hypre_BoxArrayArrayDuplicate(hypre_CommInfoRecvBoxes(add_comm_info));
           recv_boxes= 
-               hypre_BoxArrayArrayDuplicate(hypre_CommInfoSendBoxes(comm_info));
+               hypre_BoxArrayArrayDuplicate(hypre_CommInfoSendBoxes(add_comm_info));
           send_rboxes= hypre_BoxArrayArrayDuplicate(send_boxes);
 
           send_procs= hypre_CTAlloc(int *, hypre_BoxArrayArraySize(send_boxes));
@@ -1439,11 +1475,11 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
           {
              box_array= hypre_BoxArrayArrayBoxArray(send_boxes, i);
              send_procs[i]= hypre_CTAlloc(int, hypre_BoxArraySize(box_array));
-             memcpy(send_procs[i], hypre_CommInfoRecvProcesses(comm_info)[i],
+             memcpy(send_procs[i], hypre_CommInfoRecvProcesses(add_comm_info)[i],
                     hypre_BoxArraySize(box_array)*sizeof(int));
 
              send_rboxnums[i]= hypre_CTAlloc(int, hypre_BoxArraySize(box_array));
-             memcpy(send_rboxnums[i], hypre_CommInfoRecvRBoxnums(comm_info)[i],
+             memcpy(send_rboxnums[i], hypre_CommInfoRecvRBoxnums(add_comm_info)[i],
                     hypre_BoxArraySize(box_array)*sizeof(int));
           }
 
@@ -1451,11 +1487,11 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
           {
              box_array= hypre_BoxArrayArrayBoxArray(recv_boxes, i);
              recv_procs[i]= hypre_CTAlloc(int, hypre_BoxArraySize(box_array));
-             memcpy(recv_procs[i], hypre_CommInfoSendProcesses(comm_info)[i],
+             memcpy(recv_procs[i], hypre_CommInfoSendProcesses(add_comm_info)[i],
                     hypre_BoxArraySize(box_array)*sizeof(int));
 
              recv_rboxnums[i]= hypre_CTAlloc(int, hypre_BoxArraySize(box_array));
-             memcpy(recv_rboxnums[i], hypre_CommInfoSendRBoxnums(comm_info)[i],
+             memcpy(recv_rboxnums[i], hypre_CommInfoSendRBoxnums(add_comm_info)[i],
                     hypre_BoxArraySize(box_array)*sizeof(int));
           }
 
@@ -1478,9 +1514,9 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
                                        &inv_comm_handle);
           hypre_FinalizeCommunication(inv_comm_handle);
 
-         /* this proc will recved data in it's send_boxes of comm_info, or
+         /* this proc will recved data in it's send_boxes of add_comm_info, or
             equivalently, in the recv_boxes of inv_comm_info. Since inv_comm_info
-            has already been destroyed, we use the send_boxes of comm_info */
+            has already been destroyed, we use the send_boxes of add_comm_info */
           stencil = hypre_StructMatrixStencil(matrix);
           stencil_size  = hypre_StructStencilSize(stencil);
           hypre_SetIndex(unit_stride, 0, 0, 0);
@@ -1491,7 +1527,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
           hypre_ForBoxI(i, box_array)
           {
              recv_array=
-                hypre_BoxArrayArrayBoxArray(hypre_CommInfoSendBoxes(comm_info), i);
+                hypre_BoxArrayArrayBoxArray(hypre_CommInfoSendBoxes(add_comm_info), i);
 
              data_box= hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), i);
              for (s= 0; s< stencil_size; s++)
@@ -1576,15 +1612,8 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
           hypre_TFree(data);
           hypre_CommPkgDestroy(inv_comm_pkg);
+          hypre_CommInfoDestroy(add_comm_info);
       }
-     
-      hypre_CommPkgCreate(comm_info,
-                          hypre_StructMatrixDataSpace(matrix),
-                          hypre_StructMatrixDataSpace(matrix),
-                          comm_num_values,
-                          hypre_StructMatrixComm(matrix), &comm_pkg);
-
-      hypre_StructMatrixCommPkg(matrix) = comm_pkg;
    }
 
    /*-----------------------------------------------------------------------

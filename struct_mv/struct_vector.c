@@ -37,7 +37,10 @@ hypre_StructVectorCreate( MPI_Comm          comm,
 
    /* set defaults */
    for (i = 0; i < 6; i++)
+   {
       hypre_StructVectorNumGhost(vector)[i] = 1;
+      hypre_StructVectorAddNumGhost(vector)[i] = 1;
+   }
 
    return vector;
 }
@@ -254,12 +257,21 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
       grid, use the data_space boxes of vector instead of the grid boxes. */
    if ((!found) && (AddOrReplace >= 0))
    {
-      boxes = hypre_StructVectorDataSpace(vector);
+      hypre_Box  *orig_box;
+
+      int        *add_num_ghost= hypre_StructVectorAddNumGhost(vector);
+      int         j;
 
       hypre_ForBoxI(i, boxes)
       {
-         box = hypre_BoxArrayBox(boxes, i);
-                                                                                                                   
+         orig_box = hypre_BoxArrayBox(boxes, i);
+         box      = hypre_BoxDuplicate(orig_box );
+         for (j= 0; j< 3; j++)
+         {
+            hypre_BoxIMin(box)[j]-= add_num_ghost[2*j];
+            hypre_BoxIMax(box)[j]+= add_num_ghost[2*j+1];
+         }
+
          if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
              (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
              (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
@@ -278,6 +290,7 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
             }
             found= true;
          }
+         hypre_BoxDestroy(box);
       }
 
       /* set offproc_flag for communication and AddOrReplace. Note that
@@ -307,14 +320,15 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 {
    int    ierr = 0;
 
-   int                 AddOrReplace= hypre_StructVectorAddOrReplace(vector);
+   int                 AddOrReplace = hypre_StructVectorAddOrReplace(vector);
+   int                *add_num_ghost= hypre_StructVectorAddNumGhost(vector);
 
    hypre_BoxArray     *grid_boxes;
    hypre_Box          *grid_box;
    hypre_BoxArray     *box_array1, *box_array2, *tmp_box_array;
    hypre_BoxArrayArray *box_aarray;
    
-   hypre_Box          *box, *tmp_box;
+   hypre_Box          *box, *tmp_box, *orig_box;
 
    hypre_BoxArray     *data_space;
    hypre_Box          *data_box;
@@ -357,7 +371,6 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
    vol_offproc= 0;
    if ((vol_vbox > vol_iboxes) && (AddOrReplace >= 0))
    {
-      data_space= hypre_StructVectorDataSpace(vector);
       box_aarray= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
 
       hypre_ForBoxI(i, grid_boxes)
@@ -365,9 +378,15 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
          tmp_box_array= hypre_BoxArrayCreate(0);
 
          /* get ghostlayer boxes */
-         hypre_SubtractBoxes(hypre_BoxArrayBox(data_space, i),
-                             hypre_BoxArrayBox(grid_boxes, i),
-                             tmp_box_array);
+         orig_box= hypre_BoxArrayBox(grid_boxes, i);
+         tmp_box  = hypre_BoxDuplicate(orig_box );
+         for (j= 0; j< 3; j++)
+         {
+            hypre_BoxIMin(tmp_box)[j]-= add_num_ghost[2*j];
+            hypre_BoxIMax(tmp_box)[j]+= add_num_ghost[2*j+1];
+         }
+         hypre_SubtractBoxes(tmp_box, orig_box, tmp_box_array);
+         hypre_BoxDestroy(tmp_box);
           
          box_array2= hypre_BoxArrayArrayBoxArray(box_aarray, i);
          /* intersect the value_box and the ghostlayer boxes */
@@ -386,7 +405,6 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
       /* if vol_offproc= 0, trying to set values away from ghostlayer */
       if (!vol_offproc)
       {
-         printf("Warning: trying to set values that are unreachable by this proc\n");
          hypre_BoxArrayArrayDestroy(box_aarray);
       }
       else
@@ -743,7 +761,7 @@ hypre_StructVectorAssemble( hypre_StructVector *vector )
       hypre_CommInfo        *comm_info;
       hypre_CommInfo        *inv_comm_info;
       hypre_CommPkg         *comm_pkg;
-      int                   *num_ghost   = hypre_StructVectorNumGhost(vector);
+      int                   *num_ghost   = hypre_StructVectorAddNumGhost(vector);
       int                    AddOrReplace= hypre_StructVectorAddOrReplace(vector);
 
       hypre_BoxArrayArray   *send_boxes;

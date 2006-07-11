@@ -45,6 +45,9 @@ typedef struct hypre_StructVector_struct
                                           switches on add, SetValues must switch
                                           on the replace. */
 
+   int                   add_num_ghost[6]; /* ghostlayers to scan for offproc 
+                                              add values */
+
    int                   ref_count;
 
 } hypre_StructVector;
@@ -64,6 +67,7 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorOffProcFlag(vector)   ((vector) -> offproc_flag)
 #define hypre_StructVectorAddOrReplace(vector)  ((vector) -> AddOrReplace)
+#define hypre_StructVectorAddNumGhost(vector)   ((vector) -> add_num_ghost)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
 #define hypre_StructVectorBox(vector, b) \
