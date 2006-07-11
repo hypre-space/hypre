@@ -14,6 +14,11 @@
 #    2: parallel Ruge
 #    3: Ruge 3rd pass
 #    4: Falgout
+# new_ij: Run default case with low complexity coarsenings, hybrid GS,
+#    5: PMIS
+#    6: HMIS
+#    7: Falgout 2 levels aggressive coarsening
+#    8: HMIS 1 level aggressive coarsening
 #=============================================================================
 
 mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -cljp -27pt \
@@ -27,4 +32,16 @@ mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -ruge3c -gm -27pt \
 
 mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -falgout -27pt \
  > coarsening.out.3
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -27pt \
+ > coarsening.out.4
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -hmis -27pt \
+ > coarsening.out.5
+
+mpirun -np 4 ./new_ij -rhsrand -n 60 60 30 -P 2 2 1 -falgout -agg_nl 2 -27pt -rlx 6 -solver 1 \
+ > coarsening.out.6
+
+mpirun -np 4 ./new_ij -rhsrand -n 60 60 30 -P 2 2 1 -hmis -agg_nl 1 -27pt -rlx 6 -solver 1 \
+ > coarsening.out.7
 
