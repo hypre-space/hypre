@@ -263,7 +263,7 @@ HYPRE_DEFAULT_REMOTE_DIRS="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-kai/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
 
-HYPRE_STD_TEST_DIRS="TEST_fac TEST_ij TEST_sstruct TEST_struct TEST_examples"
+HYPRE_STD_TEST_DIRS="TEST_ams TEST_fac TEST_ij TEST_sstruct TEST_struct TEST_examples"
 
 cd ${HYPRE_AUTOTEST_EXECUTE_DIR}
 HYPRE_TEST_SUMMARY_FILE="autotest_summary.`date '+%Y%m%d'`.html"

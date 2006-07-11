@@ -19,9 +19,9 @@ initialize_variables ()
   Hdr="autotest"
   HYPRE_BATCH_MODE="no"
   HYPRE_SEND_MAIL="no"
-  TEST_CASES="TEST_ij/*.sh TEST_fac/*.sh TEST_sstruct/*.sh TEST_struct/*.sh"
+  TEST_CASES="TEST_ams/*.sh TEST_ij/*.sh TEST_fac/*.sh TEST_sstruct/*.sh TEST_struct/*.sh"
   EXAMPLES_TEST_CASES="TEST_examples/*.sh"
-  TEST_DIRS="ij fac sstruct struct examples"
+  TEST_DIRS="ams ij fac sstruct struct examples"
   STD_CONFIGOPTIONS="all++ all77 babel debug default docs insure no_mpi \
                      openmp strict_checking test_alpha test_beta test_general examples"
   STD_MAKEOPTIONS="all configure"
