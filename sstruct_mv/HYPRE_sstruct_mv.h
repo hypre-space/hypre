@@ -584,9 +584,9 @@ int HYPRE_SStructVectorDestroy(HYPRE_SStructVector vector);
 int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
 
 /**
- * Off processor set_value flag. Values set off processor must be
- * communicated. These can be added (flag= 1), replaced (flag= 0),
- * or kept unchanged (flag < 0).
+ * Off processor set\_value flag. Values set off processor must be
+ * communicated. These can be added (flag = 1), replaced (flag = 0),
+ * or kept unchanged (flag \< 0).
  **/
 int HYPRE_SStructVectorAddOrReplaceValues(HYPRE_SStructVector  vector,
                                           int                  part,
