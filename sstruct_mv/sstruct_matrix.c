@@ -227,14 +227,25 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
 int 
 hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
 {
-   int                  nvars        = hypre_SStructPMatrixNVars(pmatrix);
-   int                **symmetric    = hypre_SStructPMatrixSymmetric(pmatrix);
-   int                  num_ghost[6] = {1, 1, 1, 1, 1, 1};
-   hypre_StructMatrix  *smatrix;
-   int                  vi, vj;
+   int                    nvars       = hypre_SStructPMatrixNVars(pmatrix);
+   int                  **symmetric   = hypre_SStructPMatrixSymmetric(pmatrix);
+   hypre_SStructPGrid    *pgrid       = hypre_SStructPMatrixPGrid(pmatrix);
+   HYPRE_SStructVariable *vartypes    = hypre_SStructPGridVarTypes(pgrid);
+   int                    ndim        = hypre_SStructPGridNDim(pgrid);
+
+   int                    num_ghost[6]= {1, 1, 1, 1, 1, 1};
+   hypre_StructMatrix    *smatrix;
+   hypre_StructGrid      *sgrid;
+
+   hypre_Index            varoffset;
+   int                    vi, vj, d;
 
    for (vi = 0; vi < nvars; vi++)
    {
+     /* use variable vi add_numghost */
+      sgrid= hypre_SStructPGridSGrid(pgrid, vi);
+      hypre_SStructVariableGetOffset(vartypes[vi], ndim, varoffset);
+
       for (vj = 0; vj < nvars; vj++)
       {
          smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
@@ -242,6 +253,15 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
          {
             HYPRE_StructMatrixSetSymmetric(smatrix, symmetric[vi][vj]);
             hypre_StructMatrixSetNumGhost(smatrix, num_ghost);
+
+            for (d = 0; d < 3; d++)
+            {
+               hypre_StructMatrixAddNumGhost(smatrix)[2*d]=
+                                       hypre_IndexD(varoffset, d);
+               hypre_StructMatrixAddNumGhost(smatrix)[2*d+1]=
+                                       hypre_IndexD(varoffset, d);
+            }
+
             hypre_StructMatrixInitialize(smatrix);
          }
       }

@@ -48,7 +48,10 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    hypre_StructVector   **svectors;
    hypre_CommPkg        **comm_pkgs;
    hypre_StructGrid      *sgrid;
-   int                    var;
+   HYPRE_SStructVariable *vartypes= hypre_SStructPGridVarTypes(pgrid);
+   int                    ndim    = hypre_SStructPGridNDim(pgrid);
+   hypre_Index            varoffset;
+   int                    var, d;
  
    pvector = hypre_TAlloc(hypre_SStructPVector, 1);
 
@@ -62,6 +65,21 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    {
       sgrid = hypre_SStructPGridSGrid(pgrid, var);
       svectors[var] = hypre_StructVectorCreate(comm, sgrid);
+
+      /* set the Add_num_ghost layer */
+      if (vartypes[var] > 0)
+      {
+         sgrid = hypre_StructVectorGrid(svectors[var]);
+         hypre_SStructVariableGetOffset(vartypes[var], ndim, varoffset);
+         for (d = 0; d < 3; d++)
+         {
+            hypre_StructVectorAddNumGhost(svectors[var])[2*d]= 
+                                           hypre_IndexD(varoffset, d);
+            hypre_StructVectorAddNumGhost(svectors[var])[2*d+1]= 
+                                           hypre_IndexD(varoffset, d);
+         }
+      }
+         
    }
    hypre_SStructPVectorSVectors(pvector) = svectors;
    comm_pkgs = hypre_TAlloc(hypre_CommPkg *, nvars);
