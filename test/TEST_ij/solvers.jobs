@@ -75,4 +75,4 @@ mpirun -np 2 ./ij -lobpcg -solver 43 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5 > s
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
 mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
-mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 solvers.out.sysn
+mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 > solvers.out.sysn
