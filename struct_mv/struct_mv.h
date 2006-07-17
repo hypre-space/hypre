@@ -1760,6 +1760,17 @@ int hypre_DestroyStructAssumedPartition ( hypre_StructAssumedPart *assumed_part 
 int hypre_APFillResponseStructAssumedPart ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
 int hypre_GetStructAssumedRegionsFromProc ( hypre_StructAssumedPart *assumed_part , int proc_id , hypre_BoxArray *assumed_regions );
 int hypre_GetStructAssumedProcsFromBox ( hypre_StructAssumedPart *assumed_part , hypre_Box *box , int *num_proc_array , int *size_alloc_proc_array , int **p_proc_array );
+int hypre_StructAssumedPartitionGetRegionsFromProc( hypre_StructAssumedPart *assumed_part, 
+                                                    int proc_id, hypre_BoxArray *assumed_regions);
+int hypre_StructAssumedPartitionGetProcsFromBox( hypre_StructAssumedPart *assumed_part, 
+                                                 hypre_Box *box, int *num_proc_array,
+                                                 int *size_alloc_proc_array, int **p_proc_array);
+int hypre_StructAssumedPartitionCreate( int dim, hypre_Box *bounding_box, double global_boxes_size,
+                                        int global_num_boxes, hypre_BoxArray *local_boxes,
+                                        int max_regions, int max_refinements, double gamma, 
+                                        MPI_Comm comm, 
+                                        hypre_StructAssumedPart **p_assumed_partition);
+int hypre_StructAssumedPartitionDestroy( hypre_StructAssumedPart *assumed_part);
 
 /* box_algebra.c */
 int hypre_IntersectBoxes ( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
@@ -1899,8 +1910,16 @@ int hypre_FillResponseStructAssembleAP ( void *p_recv_contact_buf , int contact_
 int hypre_StructGridSetIDs ( hypre_StructGrid *grid , int *ids );
 
 /* new_box_neighbors.c */
-int hypre_NewBoxNeighborsCreate ( hypre_BoxArray *boxes , int *procs , int *boxnums , int first_local , int num_local , hypre_Index *pshifts , hypre_BoxNeighbors **neighbors_ptr );
-int hypre_NewBoxNeighborsAssemble ( hypre_BoxNeighbors *neighbors , hypre_Index periodic , int max_distance , int prune );
+int hypre_NewBoxNeighborsCreate ( hypre_BoxArray *boxes , int *procs , 
+                                  int *boxnums , int first_local , int num_local ,
+                                  hypre_Index *pshifts , hypre_BoxNeighbors **neighbors_ptr );
+int hypre_NewBoxNeighborsAssemble ( hypre_BoxNeighbors *neighbors , 
+                                    hypre_Index periodic , int max_distance , int prune );
+int hypre_BoxNeighborsCreateWithAP ( hypre_BoxArray *boxes , int *procs , 
+                                     int *boxnums , int first_local , int num_local , 
+                                     hypre_Index *pshifts , hypre_BoxNeighbors **neighbors_ptr );
+int hypre_BoxNeighborsAssembleWithAP ( hypre_BoxNeighbors *neighbors ,
+                                       hypre_Index periodic , int max_distance , int prune );
 
 /* project.c */
 int hypre_ProjectBox ( hypre_Box *box , hypre_Index index , hypre_Index stride );
