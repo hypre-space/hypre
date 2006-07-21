@@ -198,21 +198,6 @@ hypre_F90_IFACE(hypre_structvectorsetnumghost, HYPRE_STRUCTVECTORSETNUMGHOST)( l
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructVectorSetAddOrReplaceValues
- *--------------------------------------------------------------------------*/
- 
-void
-hypre_F90_IFACE(hypre_structvectorsetaddorrepla, HYPRE_STRUCTVECTORSETADDORREPLA)
-                                              ( long int *vector,
-                                                int      *flag,
-                                                int      *ierr  )
-{
-   *ierr = (int)
-      ( HYPRE_StructVectorSetAddOrReplaceValues( (HYPRE_StructVector) *vector,
-                                                 (int)                *flag ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_StructVectorCopy
  *--------------------------------------------------------------------------*/
  

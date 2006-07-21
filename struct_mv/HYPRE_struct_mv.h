@@ -284,6 +284,13 @@ int HYPRE_StructVectorDestroy(HYPRE_StructVector vector);
 int HYPRE_StructVectorInitialize(HYPRE_StructVector vector);
 
 /**
+ * Clears the ghostvalues of vector object. Beneficial to users
+ * that re-assemble a vector object (e.g., in time-stepping).
+ **/
+int HYPRE_StructVectorClearGhostValues(HYPRE_StructVector vector);
+
+
+/**
  * Set vector coefficients index by index.
  **/
 int HYPRE_StructVectorSetValues(HYPRE_StructVector  vector,
@@ -354,9 +361,6 @@ typedef struct hypre_CommPkg_struct *HYPRE_CommPkg;
 
 int HYPRE_StructVectorSetNumGhost(HYPRE_StructVector  vector,
                                   int                *num_ghost);
-
-int HYPRE_StructVectorSetAddOrReplaceValues(HYPRE_StructVector  vector,
-                                            int                 flag);
 
 int HYPRE_StructVectorSetConstantValues(HYPRE_StructVector vector,
                                         double             values);

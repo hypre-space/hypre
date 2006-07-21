@@ -51,6 +51,16 @@ HYPRE_StructVectorInitialize( HYPRE_StructVector vector )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructVectorClearGhostValues
+ *--------------------------------------------------------------------------*/
+                                                                                                      
+int
+HYPRE_StructVectorClearGhostValues( HYPRE_StructVector vector )
+{
+   return ( hypre_StructVectorClearGhostValues(vector) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorSetValues
  *--------------------------------------------------------------------------*/
 
@@ -269,17 +279,6 @@ HYPRE_StructVectorSetNumGhost( HYPRE_StructVector  vector,
                                int                *num_ghost )
 {
    return ( hypre_StructVectorSetNumGhost(vector, num_ghost) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_StructVectorSetAddOrReplaceValues
- *--------------------------------------------------------------------------*/
-
-int
-HYPRE_StructVectorSetAddOrReplaceValues( HYPRE_StructVector  vector,
-                                         int                 flag )
-{
-   return ( hypre_StructVectorSetAddOrReplaceValues(vector, flag) );
 }
 
 /*--------------------------------------------------------------------------

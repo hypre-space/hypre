@@ -31,8 +31,7 @@ hypre_StructVectorCreate( MPI_Comm          comm,
    hypre_StructVectorComm(vector)        = comm;
    hypre_StructGridRef(grid, &hypre_StructVectorGrid(vector));
    hypre_StructVectorDataAlloced(vector) = 1;
-   hypre_StructVectorOffProcFlag(vector) = 0;
-   hypre_StructVectorAddOrReplace(vector)= 0;
+   hypre_StructVectorOffProcAdd(vector)  = 0;
    hypre_StructVectorRefCount(vector)    = 1;
 
    /* set defaults */
@@ -216,7 +215,7 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
 {
    int    ierr = 0;
 
-   int                 AddOrReplace= hypre_StructVectorAddOrReplace(vector);
+   MPI_Comm            comm=  hypre_StructVectorComm(vector);
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
 
@@ -225,6 +224,10 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
    int                 i, found;
    int                 true = 1;
    int                 false= 0;
+
+   int                 nprocs;
+   
+   MPI_Comm_size(comm, &nprocs);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
 
@@ -253,9 +256,9 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
          }
       }
 
-   /* to permit set values off myproc, but only glayers away from myproc's
+   /* to permit ADD values off myproc, but only glayers away from myproc's
       grid, use the data_space boxes of vector instead of the grid boxes. */
-   if ((!found) && (AddOrReplace >= 0))
+   if ((!found) && (add_to) && (nprocs > 1))
    {
       hypre_Box  *orig_box;
 
@@ -293,15 +296,18 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
          hypre_BoxDestroy(box);
       }
 
-      /* set offproc_flag for communication and AddOrReplace. Note that
+      /* set OffProcAdd for communication. Note that
          we have an Add if only one point switches this on. */
       if (found)
       {
-         hypre_StructVectorOffProcFlag(vector)= 1;
          if (add_to)
          {
-            hypre_StructVectorAddOrReplace(vector)= 1;
+            hypre_StructVectorOffProcAdd(vector)= 1;
          }
+      }
+      else
+      {
+         printf("not found- grid_index off the extended vector grid\n");
       }
    }
 
@@ -320,7 +326,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 {
    int    ierr = 0;
 
-   int                 AddOrReplace = hypre_StructVectorAddOrReplace(vector);
+   MPI_Comm            comm         = hypre_StructVectorComm(vector);
    int                *add_num_ghost= hypre_StructVectorAddNumGhost(vector);
 
    hypre_BoxArray     *grid_boxes;
@@ -346,6 +352,9 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 
    int                 i, j, vol_vbox, vol_iboxes, vol_offproc;
    int                 loopi, loopj, loopk;
+   int                 nprocs;
+   
+   MPI_Comm_size(comm, &nprocs);
 
    /*-----------------------------------------------------------------------
     * Set up `box_array' by intersecting `box' with the grid boxes
@@ -369,7 +378,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 
    /* Check if possible off_proc setting */
    vol_offproc= 0;
-   if ((vol_vbox > vol_iboxes) && (AddOrReplace >= 0))
+   if ((vol_vbox > vol_iboxes) && (add_to) && (nprocs > 1))
    {
       box_aarray= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
 
@@ -409,13 +418,9 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
       }
       else
       {
-         /* set offproc_flag for communication and AddOrReplace. Note that
+         /* set OffProcAdd for communication. Note that
             we have an Add if only one point switches this on. */
-         hypre_StructVectorOffProcFlag(vector)= 1;
-         if (add_to)
-         {
-            hypre_StructVectorAddOrReplace(vector)= 1;
-         }
+         hypre_StructVectorOffProcAdd(vector)= 1;
       }
    }
    hypre_BoxDestroy(box);
@@ -480,7 +485,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
    }
    hypre_BoxArrayDestroy(box_array1);
 
-   if (vol_offproc)
+   if (vol_offproc) /* nonzero only when adding values. */
    {
       data_space = hypre_StructVectorDataSpace(vector);
       hypre_SetIndex(data_stride, 1, 1, 1);
@@ -507,7 +512,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
  
                hypre_BoxGetSize(box, loop_size);
 
-               if (add_to)
+               if (add_to) /* don't really need this conditional */
                {
                    hypre_BoxLoop2Begin(loop_size,
                                        data_box,data_start,data_stride,datai,
@@ -517,19 +522,6 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
                    hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
                    {
                       datap[datai] += values[dvali];
-                   }
-                   hypre_BoxLoop2End(datai, dvali);
-               }
-               else
-               {
-                   hypre_BoxLoop2Begin(loop_size,
-                                       data_box,data_start,data_stride,datai,
-                                       dval_box,dval_start,dval_stride,dvali);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
-#include "hypre_box_smp_forloop.h"
-                   hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
-                   {
-                      datap[datai] = values[dvali];
                    }
                    hypre_BoxLoop2End(datai, dvali);
                }
@@ -545,7 +537,8 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructVectorGetValues
+ * hypre_StructVectorGetValues. OffProc values on the ghostlayer will be
+ * extracted out, and hence, the values_ptr must contain ghostlayers.
  *--------------------------------------------------------------------------*/
 
 int 
@@ -555,40 +548,48 @@ hypre_StructVectorGetValues( hypre_StructVector *vector,
 {
    int    ierr = 0;
 
+   int                *add_num_ghost= hypre_StructVectorAddNumGhost(vector);
    double              values;
 
    hypre_BoxArray     *boxes;
-   hypre_Box          *box;
+   hypre_Box          *box, *orig_box;
 
    double             *vecp;
 
-   int                 i;
+   int                 i, j;
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
 
    hypre_ForBoxI(i, boxes)
+   {
+      orig_box = hypre_BoxArrayBox(boxes, i);
+      box      = hypre_BoxDuplicate(orig_box );
+      for (j= 0; j< 3; j++)
       {
-         box = hypre_BoxArrayBox(boxes, i);
-
-         if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
-             (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
-             (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
-             (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
-             (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
-             (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
-         {
-            vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
-            values = *vecp;
-         }
+         hypre_BoxIMin(box)[j]-= add_num_ghost[2*j];
+         hypre_BoxIMax(box)[j]+= add_num_ghost[2*j+1];
       }
 
-   *values_ptr = values;
+      if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
+          (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
+          (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
+          (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
+          (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
+          (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
+      {
+          vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
+          values= *vecp;
+      }
+      hypre_BoxDestroy(box);
+   }
+
+  *values_ptr = values;
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructVectorGetBoxValues
+ * hypre_StructVectorGetBoxValues. Loop over ghostlayer also.
  *--------------------------------------------------------------------------*/
 
 int 
@@ -598,10 +599,14 @@ hypre_StructVectorGetBoxValues( hypre_StructVector *vector,
 {
    int    ierr = 0;
 
+   int                *add_num_ghost= hypre_StructVectorAddNumGhost(vector);
+
    hypre_BoxArray     *grid_boxes;
    hypre_Box          *grid_box;
+                                                            
    hypre_BoxArray     *box_array;
-   hypre_Box          *box;
+
+   hypre_Box          *box, *orig_box;
 
    hypre_BoxArray     *data_space;
    hypre_Box          *data_box;
@@ -617,23 +622,31 @@ hypre_StructVectorGetBoxValues( hypre_StructVector *vector,
 
    hypre_Index         loop_size;
 
-   int                 i;
+   int                 i, j;
    int                 loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
-    * Set up `box_array' by intersecting `box' with the grid boxes
+    * Set up `box_array' by intersecting `box' with the grid boxes 
+    * extended appropriately to cover ghostlayers.
     *-----------------------------------------------------------------------*/
 
    grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   box_array = hypre_BoxArrayCreate(hypre_BoxArraySize(grid_boxes));
-   box = hypre_BoxCreate();
+   box_array  = hypre_BoxArrayCreate(hypre_BoxArraySize(grid_boxes));
+   grid_box = hypre_BoxCreate();
    hypre_ForBoxI(i, grid_boxes)
+   {
+      orig_box= hypre_BoxArrayBox(grid_boxes, i);
+      box     = hypre_BoxDuplicate(orig_box);
+      for (j= 0; j< 3; j++)
       {
-         grid_box = hypre_BoxArrayBox(grid_boxes, i);
-         hypre_IntersectBoxes(value_box, grid_box, box);
-         hypre_CopyBox(box, hypre_BoxArrayBox(box_array, i));
+         hypre_BoxIMin(box)[j]-= add_num_ghost[2*j];
+         hypre_BoxIMax(box)[j]+= add_num_ghost[2*j+1];
       }
-   hypre_BoxDestroy(box);
+      hypre_IntersectBoxes(value_box, box, grid_box);
+      hypre_CopyBox(grid_box, hypre_BoxArrayBox(box_array, i));
+      hypre_BoxDestroy(box);
+   }
+   hypre_BoxDestroy(grid_box);
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -700,43 +713,16 @@ hypre_StructVectorSetNumGhost( hypre_StructVector *vector,
    return ierr;
 }
 
-/*--------------------------------------------------------------------------
- * hypre_StructVectorSetAddOrReplaceValues
- *--------------------------------------------------------------------------*/
-
-int
-hypre_StructVectorSetAddOrReplaceValues( hypre_StructVector *vector,
-                                         int                 flag)
-{
-   int  ierr = 0;
-
-   hypre_StructVectorAddOrReplace(vector)= flag; /* flag  > 0, add 
-                                                    flag  = 0  replace
-                                                    flag  < 0, no action. */
-
-   return ierr;
-}
 
 /*--------------------------------------------------------------------------
  * hypre_StructVectorAssemble
- * Before assembling the vector, all vector values set or added from 
+ * Before assembling the vector, all vector values added from 
  * off_procs are communicated to the correct proc. However, note that since
  * the comm_pkg is created from an "inverted" comm_info derived from the
  * vector, not all the communicated data is valid (i.e., we did not mark
  * which values are actually set off_proc). Because the communicated values
- * either overwrite or are added to existing values, the user is assumed
- * to have set the values correctly on or off the proc. A problem can
- * occur if the user did not: If the user has set the value on two procs,
- * then if the values are added, we get twice the actual value.
- * A problem occurs also  when overwriting the value: since the values
- * to be overwrittened are not marked and since more data is actually
- * communicated, we may overwrite some values incorrectly. For example,
- * since the ghostlayer are initialized to zero, communication of these
- * values may then zero-off the actual values. To avoid this, we check if the
- * communicated value is zero or not. Zero values do not replace the
- * vector value (if the actual value were zero, the vector will already be
- * zero after the initialization so there is no problem in this conditional
- * procedure).
+ * are added to existing values, the user is assumed to have set the
+ * values correctly on or off the proc. 
  *--------------------------------------------------------------------------*/
 
 int 
@@ -744,16 +730,16 @@ hypre_StructVectorAssemble( hypre_StructVector *vector )
 {
    int  ierr = 0;
 
-   int  sum_offproc_flag;
-   int  offproc_flag= hypre_StructVectorOffProcFlag(vector);
+   int  sum_OffProcAdd;
+   int  OffProcAdd= hypre_StructVectorOffProcAdd(vector);
 
    /* add_values may be off-proc. Communication needed, which is triggered
-      if one of the OffProcFlags is 1 */
-   sum_offproc_flag= 0;
-   MPI_Allreduce(&offproc_flag, &sum_offproc_flag, 1, MPI_INT, MPI_SUM,
+      if one of the OffProcAdd is 1 */
+   sum_OffProcAdd= 0;
+   MPI_Allreduce(&OffProcAdd, &sum_OffProcAdd, 1, MPI_INT, MPI_SUM,
                   hypre_StructVectorComm(vector));
 
-   if (sum_offproc_flag)
+   if (sum_OffProcAdd)
    {
       /* since the off_proc add_values are located on the ghostlayer, we
          need "inverse" communication. */
@@ -762,7 +748,6 @@ hypre_StructVectorAssemble( hypre_StructVector *vector )
       hypre_CommInfo        *inv_comm_info;
       hypre_CommPkg         *comm_pkg;
       int                   *num_ghost   = hypre_StructVectorAddNumGhost(vector);
-      int                    AddOrReplace= hypre_StructVectorAddOrReplace(vector);
 
       hypre_BoxArrayArray   *send_boxes;
       hypre_BoxArrayArray   *recv_boxes;
@@ -864,35 +849,18 @@ hypre_StructVectorAssemble( hypre_StructVector *vector )
             box  = hypre_BoxArrayBox(recv_array, j);
             start= hypre_BoxIMin(box);
             hypre_BoxGetSize(box, loop_size);
-                                                                                                                   
-            if (AddOrReplace > 0)   /* add the off-proc values */
-            {
-                hypre_BoxLoop1Begin(loop_size,
-                                    data_box, start, unit_stride, xi)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi
-#include "hypre_box_smp_forloop.h"
-                hypre_BoxLoop1For(loopi, loopj, loopk, xi)
-                {
-                   data_vec[xi] += comm_data[xi];
-                }
-                hypre_BoxLoop1End(xi);
-            }
 
-            else if (AddOrReplace == 0)   /* replace the current values if non-zero.*/
-            {
-                hypre_BoxLoop1Begin(loop_size,
-                                    data_box, start, unit_stride, xi)
+           /* note that every proc adds since we don't track which
+              ones should. */
+            hypre_BoxLoop1Begin(loop_size,
+                                data_box, start, unit_stride, xi)
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi
 #include "hypre_box_smp_forloop.h"
-                hypre_BoxLoop1For(loopi, loopj, loopk, xi)
-                {
-                   if (comm_data[xi] != 0.0)
-                   {
-                      data_vec[xi]= comm_data[xi];
-                   }
-                }
-                hypre_BoxLoop1End(xi);
+            hypre_BoxLoop1For(loopi, loopj, loopk, xi)
+            {
+                data_vec[xi] += comm_data[xi];
             }
+            hypre_BoxLoop1End(xi);
 
          }  /* hypre_ForBoxI(j, recv_array) */
       }     /* hypre_ForBoxI(i, box_array) */
