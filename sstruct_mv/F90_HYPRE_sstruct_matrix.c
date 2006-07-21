@@ -106,27 +106,6 @@ hypre_F90_IFACE(hypre_sstructmatrixsetboxvalues, HYPRE_SSTRUCTMATRIXSETBOXVALUES
 }
 
 /*--------------------------------------------------------------------------
- *  HYPRE_SStructMatrixAddOrReplaceValues
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_sstructmatrixaddorreplace, HYPRE_SSTRUCTMATRIXADDORREPLACE)
-                                                        (long int   *matrix,
-                                                         int        *part,
-                                                         int        *var1,
-                                                         int        *var2,
-                                                         int        *flag,
-                                                         int        *ierr)
-{
-   *ierr = (int) (HYPRE_SStructMatrixAddOrReplaceValues(
-                                                (HYPRE_SStructMatrix) *matrix,
-                                                (int)                 *part,
-                                                (int)                 *var1,
-                                                (int)                 *var2,
-                                                (int)                 *flag) );
-}
-
-/*--------------------------------------------------------------------------
  *  HYPRE_SStructMatrixGetValues
  *--------------------------------------------------------------------------*/
 

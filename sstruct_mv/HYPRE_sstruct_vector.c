@@ -298,21 +298,6 @@ HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector  vector,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-int
-HYPRE_SStructVectorAddOrReplaceValues( HYPRE_SStructVector  vector,
-                                       int                  part,
-                                       int                  var,
-                                       int                  flag )
-{
-   int ierr = 0;
-
-   ierr = hypre_SStructVectorSetAddOrReplaceValues(vector, part, var, flag);
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
 
 int
 HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
@@ -611,6 +596,17 @@ HYPRE_SStructVectorPrint( const char          *filename,
 
    return ierr;
 }
+
+/******************************************************************************
+ * Zero out the ghostlayer values of a vector. Needed when a vector is
+ * re-assembled with new values and addtovalues from off_procs are triggered.
+ *****************************************************************************/
+int
+HYPRE_SStructVectorClearGhostValues(HYPRE_SStructVector x)
+{
+   return hypre_SStructVectorClearGhostValues((hypre_SStructVector *)x);
+}
+
 
 /******************************************************************************
  * copy x to y, y should already exist and be the same size

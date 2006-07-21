@@ -584,16 +584,6 @@ int HYPRE_SStructVectorDestroy(HYPRE_SStructVector vector);
 int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
 
 /**
- * Off processor set\_value flag. Values set off processor must be
- * communicated. These can be added (flag = 1), replaced (flag = 0),
- * or kept unchanged (flag \< 0).
- **/
-int HYPRE_SStructVectorAddOrReplaceValues(HYPRE_SStructVector  vector,
-                                          int                  part,
-                                          int                  var,
-                                          int                  flag);
-
-/**
  * Set vector coefficients index by index.
  *
  * NOTE: Users are required to set values on all processes that own
