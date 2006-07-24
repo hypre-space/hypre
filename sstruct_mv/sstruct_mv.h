@@ -817,7 +817,6 @@ int HYPRE_SStructMatrixDestroy ( HYPRE_SStructMatrix matrix );
 int HYPRE_SStructMatrixInitialize ( HYPRE_SStructMatrix matrix );
 int HYPRE_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , int part , int *index , int var , int nentries , int *entries , double *values );
 int HYPRE_SStructMatrixSetBoxValues ( HYPRE_SStructMatrix matrix , int part , int *ilower , int *iupper , int var , int nentries , int *entries , double *values );
-int HYPRE_SStructMatrixAddOrReplaceValues ( HYPRE_SStructMatrix matrix , int part , int var1 , int var2 , int flag );
 int HYPRE_SStructMatrixGetValues ( HYPRE_SStructMatrix matrix , int part , int *index , int var , int nentries , int *entries , double *values );
 int HYPRE_SStructMatrixGetBoxValues ( HYPRE_SStructMatrix matrix , int part , int *ilower , int *iupper , int var , int nentries , int *entries , double *values );
 int HYPRE_SStructMatrixAddToValues ( HYPRE_SStructMatrix matrix , int part , int *index , int var , int nentries , int *entries , double *values );
@@ -842,7 +841,6 @@ int HYPRE_SStructVectorDestroy ( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorInitialize ( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorSetValues ( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
 int HYPRE_SStructVectorSetBoxValues ( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
-int HYPRE_SStructVectorAddOrReplaceValues ( HYPRE_SStructVector vector , int part , int var , int flag );
 int HYPRE_SStructVectorAddToValues ( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
 int HYPRE_SStructVectorAddToBoxValues ( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
 int HYPRE_SStructVectorAssemble ( HYPRE_SStructVector vector );
@@ -853,6 +851,7 @@ int HYPRE_SStructVectorSetConstantValues ( HYPRE_SStructVector vector , double v
 int HYPRE_SStructVectorSetObjectType ( HYPRE_SStructVector vector , int type );
 int HYPRE_SStructVectorGetObject ( HYPRE_SStructVector vector , void **object );
 int HYPRE_SStructVectorPrint ( const char *filename , HYPRE_SStructVector vector , int all );
+int HYPRE_SStructVectorClearGhostValues ( HYPRE_SStructVector x );
 int HYPRE_SStructVectorCopy ( HYPRE_SStructVector x , HYPRE_SStructVector y );
 int HYPRE_SStructVectorScale ( double alpha , HYPRE_SStructVector y );
 int HYPRE_SStructInnerProd ( HYPRE_SStructVector x , HYPRE_SStructVector y , double *result );
@@ -911,7 +910,6 @@ int hypre_SStructPMatrixRef ( hypre_SStructPMatrix *matrix , hypre_SStructPMatri
 int hypre_SStructPMatrixCreate ( MPI_Comm comm , hypre_SStructPGrid *pgrid , hypre_SStructStencil **stencils , hypre_SStructPMatrix **pmatrix_ptr );
 int hypre_SStructPMatrixDestroy ( hypre_SStructPMatrix *pmatrix );
 int hypre_SStructPMatrixInitialize ( hypre_SStructPMatrix *pmatrix );
-int hypre_SStructMatrixSetAddOrReplaceValues ( hypre_SStructMatrix *matrix , int part , int var1 , int var2 , int flag );
 int hypre_SStructPMatrixSetValues ( hypre_SStructPMatrix *pmatrix , hypre_Index index , int var , int nentries , int *entries , double *values , int add_to );
 int hypre_SStructPMatrixSetBoxValues ( hypre_SStructPMatrix *pmatrix , hypre_Index ilower , hypre_Index iupper , int var , int nentries , int *entries , double *values , int add_to );
 int hypre_SStructPMatrixAssemble ( hypre_SStructPMatrix *pmatrix );
@@ -952,7 +950,6 @@ int hypre_SStructPVectorRef ( hypre_SStructPVector *vector , hypre_SStructPVecto
 int hypre_SStructPVectorCreate ( MPI_Comm comm , hypre_SStructPGrid *pgrid , hypre_SStructPVector **pvector_ptr );
 int hypre_SStructPVectorDestroy ( hypre_SStructPVector *pvector );
 int hypre_SStructPVectorInitialize ( hypre_SStructPVector *pvector );
-int hypre_SStructVectorSetAddOrReplaceValues ( hypre_SStructVector *vector , int part , int var , int flag );
 int hypre_SStructPVectorSetValues ( hypre_SStructPVector *pvector , hypre_Index index , int var , double *value , int add_to );
 int hypre_SStructPVectorSetBoxValues ( hypre_SStructPVector *pvector , hypre_Index ilower , hypre_Index iupper , int var , double *values , int add_to );
 int hypre_SStructPVectorAssemble ( hypre_SStructPVector *pvector );
@@ -969,6 +966,7 @@ int hypre_SStructVectorRestore ( hypre_SStructVector *vector , hypre_ParVector *
 int hypre_SStructVectorParRestore ( hypre_SStructVector *vector , hypre_ParVector *parvector );
 int hypre_SStructPVectorInitializeShell ( hypre_SStructPVector *pvector );
 int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
+int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
 
 #ifdef __cplusplus
 }
