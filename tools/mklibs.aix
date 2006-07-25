@@ -172,7 +172,7 @@ then
           CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           F77FLAGS="-q32 -O3 -qstrict"\
-          LDFLAGS="-q32" AR="ar -X32 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q32" AR="ar -X32 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -186,7 +186,7 @@ then
           CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           F77FLAGS="-q64 -O3 -qstrict"\
-          LDFLAGS="-q64" AR="ar -X64 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q64" AR="ar -X64 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -217,7 +217,7 @@ then
           CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           F77FLAGS="-q32 -g"\
-          LDFLAGS="-q32" AR="ar -X32 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q32" AR="ar -X32 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -231,7 +231,7 @@ then
           CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           F77FLAGS="-q64 -g"\
-          LDFLAGS="-q64" AR="ar -X64 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q64" AR="ar -X64 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -267,7 +267,7 @@ then
           CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           F77FLAGS="-q32 -O3 -qstrict"\
-          LDFLAGS="-q32" AR="ar -X32 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q32" AR="ar -X32 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -281,7 +281,7 @@ then
           CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           F77FLAGS="-q64 -O3 -qstrict"\
-          LDFLAGS="-q64" AR="ar -X64 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q64" AR="ar -X64 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -312,7 +312,7 @@ then
           CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           F77FLAGS="-q32 -g"\
-          LDFLAGS="-q32" AR="ar -X32 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q32" AR="ar -X32 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -326,7 +326,7 @@ then
           CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           F77FLAGS="-q64 -g"\
-          LDFLAGS="-q64" AR="ar -X64 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q64" AR="ar -X64 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -366,7 +366,7 @@ then
           CFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           CXXFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           F77FLAGS="-q32 -qsmp=omp -O3 -qstrict"\
-          LDFLAGS="-q32" AR="ar -X32 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q32" AR="ar -X32 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -380,7 +380,7 @@ then
           CFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           CXXFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           F77FLAGS="-q64 -qsmp=omp -O3 -qstrict"\
-          LDFLAGS="-q64" AR="ar -X64 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q64" AR="ar -X64 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -411,7 +411,7 @@ then
           CFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           CXXFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           F77FLAGS="-q32 -qsmp=omp -g"\
-          LDFLAGS="-q32" AR="ar -X32 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q32" AR="ar -X32 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
@@ -425,7 +425,7 @@ then
           CFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           CXXFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           F77FLAGS="-q64 -qsmp=omp -g"\
-          LDFLAGS="-q64" AR="ar -X64 -q" --prefix=$HYPRE_INSTALL_DIR
+          LDFLAGS="-q64" AR="ar -X64 -rcu" --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         cd $HYPRE_INSTALL_DIR/lib
         for i in *.a;do
