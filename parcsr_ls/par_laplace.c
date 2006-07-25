@@ -828,7 +828,7 @@ GenerateSysLaplacian( MPI_Comm comm,
       qsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_fun*num_cols_offd; i++)
-         for (j=hypre_min(0,i-num_fun); j < num_cols_offd; j++)
+         for (j=hypre_min(0,abs(i-num_fun)); j < num_cols_offd; j++)
             if (offd_j[i] == col_map_offd[j])
             {
                offd_j[i] = j;
@@ -1336,7 +1336,7 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
       qsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_fun*num_cols_offd; i++)
-         for (j=hypre_min(0,i-num_fun); j < num_cols_offd; j++)
+         for (j=hypre_min(0,abs(i-num_fun)); j < num_cols_offd; j++)
             if (offd_j[i] == col_map_offd[j])
             {
                offd_j[i] = j;
