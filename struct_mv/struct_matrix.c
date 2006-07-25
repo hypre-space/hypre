@@ -788,6 +788,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                   found= true;
                }
             }
+            if (found) break;
          } 
 
          /* set OffProcAdd for communication */
@@ -828,8 +829,9 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    hypre_BoxArray      *grid_boxes;
    hypre_Box           *grid_box;
    hypre_BoxArray      *box_array1, *box_array2, *tmp_box_array;
+   hypre_BoxArray      *value_boxarray;
    hypre_BoxArrayArray *box_aarray;
-   hypre_Box           *box, *tmp_box, *orig_box;
+   hypre_Box           *box, *tmp_box, *orig_box, *vbox;
    hypre_Index          center_index;
    hypre_StructStencil *stencil;
    int                  center_rank;
@@ -849,10 +851,10 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                    
    hypre_Index          loop_size;
                    
-   int                  i, j, s, vol_vbox, vol_iboxes, vol_offproc;
+   int                  i, j, k, s, vol_vbox, vol_iboxes, vol_offproc;
    int                  loopi, loopj, loopk;
 
-   int                 nprocs;
+   int                  nprocs;
 
    MPI_Comm_size(comm, &nprocs );
 
@@ -883,6 +885,11 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    {
       box_aarray= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
 
+      /* to prevent overlapping intersected boxes, we subtract the intersected
+         boxes from value_box. This requires a box_array structure. */
+      value_boxarray= hypre_BoxArrayCreate(0);
+      hypre_AppendBox(value_box, value_boxarray);
+
       hypre_ForBoxI(i, grid_boxes)
       {
          tmp_box_array= hypre_BoxArrayCreate(0);
@@ -905,11 +912,18 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
          hypre_ForBoxI(j, tmp_box_array)
          {
             tmp_box= hypre_BoxArrayBox(tmp_box_array, j);
-            hypre_IntersectBoxes(value_box, tmp_box, box);
-            hypre_AppendBox(box, box_array2);
-
-            vol_offproc+= hypre_BoxVolume(box);
+            hypre_ForBoxI(k, value_boxarray)
+            {
+               vbox= hypre_BoxArrayBox(value_boxarray, k);
+               hypre_IntersectBoxes(vbox, tmp_box, box);
+               hypre_AppendBox(box, box_array2);
+                                                                                                      
+               vol_offproc+= hypre_BoxVolume(box);
+            }
          }
+
+         /* eliminate intersected boxes so that we do not get overlapping */
+         hypre_SubtractBoxArrays(value_boxarray, box_array2, tmp_box_array);
          hypre_BoxArrayDestroy(tmp_box_array);
       }  /* hypre_ForBoxI(i, grid_boxes) */
 
@@ -924,6 +938,8 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
             must be communicated */
          hypre_StructMatrixOffProcAdd(matrix)= 1;
       }
+      hypre_BoxArrayDestroy(value_boxarray);
+
    }
    hypre_BoxDestroy(box);
 
