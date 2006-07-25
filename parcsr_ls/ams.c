@@ -863,7 +863,7 @@ int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
       int *row_starts = hypre_ParCSRMatrixRowStarts(G);
       int col_starts_size, *col_starts;
       int num_cols_offd = dim*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(G));
-      int num_nonzeros_diag = dim*hypre_ParCSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
+      int num_nonzeros_diag = dim*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
       int num_nonzeros_offd = dim*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(G));
       int *col_starts_G = hypre_ParCSRMatrixColStarts(G);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
