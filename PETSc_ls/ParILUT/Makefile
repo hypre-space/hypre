@@ -53,7 +53,7 @@ CXX_COMPILE_FLAGS = \
 # Main rules
 ##################################################################
 
-driver: driver.o lib_HYPRE.a
+driver: driver.o libHYPRE${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
@@ -63,8 +63,8 @@ link:
 
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
-	@${AR} lib_HYPRE_PETScSolverParILUT.a ${OBJS}
-	@${RANLIB} lib_HYPRE_PETScSolverParILUT.a 
+	@${AR} lib_HYPRE_PETScSolverParILUT${HYPRE_LIB_SUFFIX} ${OBJS}
+	@${RANLIB} lib_HYPRE_PETScSolverParILUT${HYPRE_LIB_SUFFIX}
 
 
 ##################################################################

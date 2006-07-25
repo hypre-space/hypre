@@ -31,11 +31,11 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_multivector.a 
+all: libHYPRE_multivector${HYPRE_LIB_SUFFIX}
 	cp -fp *.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_multivector.a 
+install: libHYPRE_multivector${HYPRE_LIB_SUFFIX}
 	cp -f *.h $(HYPRE_INC_INSTALL)
 	cp -f libHYPRE* $(HYPRE_LIB_INSTALL)
 
@@ -49,7 +49,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_multivector.a: ${OBJS}
+libHYPRE_multivector${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

@@ -2222,7 +2222,7 @@ test -n "$CC" || CC=""""
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
   fi
 
-  for ac_prog in g++ gcc icc pgCC xlC KCC
+  for ac_prog in g++ gcc icpc icc pgCC xlC KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2791,7 +2791,7 @@ test -n "$CXX" || CXX=""""
 
    elif test "$casc_using_mpi" = "no"
    then
-      for ac_prog in g++ gcc icc xlC cxx pgCC KCC
+      for ac_prog in g++ gcc icpc icc xlC cxx pgCC KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -9720,6 +9720,27 @@ then
         ;;
    esac
 fi
+fi
+
+if test "$casc_using_shared" = "yes"
+then
+   HYPRE_LIBSUFFIX=".so"
+
+ case "${host}" in
+    *aix*)
+        CFLAGS="$CFLAGS -qmkshrobj"
+        CXXFLAGS="$CXXFLAGS -qmkshrobj"
+        FFLAGS="$CFLAGS -qmkshrobj"
+        ;;
+    *)
+        CFLAGS="$CFLAGS -fPIC"
+        CXXFLAGS="$CXXFLAGS -fPIC"
+        FFLAGS="$FFLAGS -fPIC"
+        ;;
+ esac
+
+else
+   HYPRE_LIBSUFFIX=".a"
 fi
 
 if test "$casc_using_insure" = "yes"

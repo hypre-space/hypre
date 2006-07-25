@@ -71,36 +71,36 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_parcsr_mv.a
+all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
  
-driver: driver.o libHYPRE_parcsr_mv.a 
+driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX} 
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS} 
  
-driver_matvec: driver_matvec.o libHYPRE_parcsr_mv.a
+driver_matvec: driver_matvec.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matvec driver_matvec.o ${LFLAGS} 
  
-driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
+driver_matmul: driver_matmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
 
-driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv.a
+driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS} 
 
-driver_aat: driver_aat.o libHYPRE_parcsr_mv.a
+driver_aat: driver_aat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_aat driver_aat.o ${LFLAGS} 
 
-driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv.a
+driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
 
-install: libHYPRE_parcsr_mv.a
+install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
@@ -116,7 +116,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_parcsr_mv.a: ${OBJS}
+libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

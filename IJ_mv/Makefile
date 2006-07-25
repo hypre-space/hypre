@@ -53,12 +53,12 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_IJ_mv.a
+all: libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/IJ_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_IJ_mv.a
+install: libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/IJ_mv.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
@@ -73,7 +73,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_IJ_mv.a: ${OBJS}
+libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

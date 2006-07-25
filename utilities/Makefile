@@ -67,13 +67,13 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_utilities.a 
+all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_utilities.a 
+install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
@@ -89,7 +89,7 @@ distclean: clean
 # Rules
 ##################################################################
  
-libHYPRE_utilities.a: ${OBJS}
+libHYPRE_utilities${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ *.o
 	${RANLIB} $@

@@ -35,7 +35,7 @@ MPILIBFLAGS =
 LIBFLAGS =   -lm -lg2c
 LDLIBFLAGS =   @LIBM@
 LAPACKLIBFLAGS =  -L/usr/lib -L/usr/local/lib -llapack
-BLASLIBFLAGS =  -L/home/hill66/dev/linear_solvers/hypre/lib -lHYPRE_utilities
+BLASLIBFLAGS =  ${BLASLIBDIRS} ${BLASLIBS}
 
 
 ##################################################################

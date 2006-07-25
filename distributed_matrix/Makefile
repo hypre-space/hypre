@@ -40,11 +40,11 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_DistributedMatrix.a 
+all: libHYPRE_DistributedMatrix${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/distributed_matrix.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_DistributedMatrix.a 
+install: libHYPRE_DistributedMatrix${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/distributed_matrix.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 clean:
@@ -58,7 +58,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_DistributedMatrix.a: ${OBJS}
+libHYPRE_DistributedMatrix${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

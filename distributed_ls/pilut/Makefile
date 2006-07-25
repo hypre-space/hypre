@@ -49,11 +49,11 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_DistributedMatrixPilutSolver.a
+all: libHYPRE_DistributedMatrixPilutSolver${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_DistributedMatrixPilutSolver.a
+install: libHYPRE_DistributedMatrixPilutSolver${HYPRE_LIB_SUFFIX}
 	cp -f $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -f libHYPRE* $(HYPRE_LIB_INSTALL)
 
@@ -67,7 +67,7 @@ distclean: clean
 # Main rules
 ##################################################################
 
-libHYPRE_DistributedMatrixPilutSolver.a: ${OBJS}
+libHYPRE_DistributedMatrixPilutSolver${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

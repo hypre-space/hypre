@@ -59,17 +59,17 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_parcsr_block_mv.a 
+all: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/par_csr_block_matrix.h $(HYPRE_BUILD_DIR)/include	
 	cp -fp $(srcdir)/csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
+	cp -fp libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
  
-mytest: mytest.o libHYPRE_parcsr_block_mv.a 
+mytest: mytest.o libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o mytest mytest.o ${LFLAGS} 
  
 
-driver: driver.o libHYPRE_parcsr_block_mv.a 
+driver: driver.o libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS} 
  
@@ -77,29 +77,29 @@ driver_matvec: driver_matvec.o
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matvec driver_matvec.o ${LFLAGS} 
  
-driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
+driver_matmul: driver_matmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
 
-driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv.a
+driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS} 
 
-driver_aat: driver_aat.o libHYPRE_parcsr_mv.a
+driver_aat: driver_aat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_aat driver_aat.o ${LFLAGS} 
 
-driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv.a
+driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
 
-install: libHYPRE_parcsr_block_mv.a
+install: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/par_csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
 	cp -fp $(srcdir)/csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
-	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
+	cp -fp libHYPRE_* $(HYPRE_LIB_INSTALL)/.
  
 clean:
-	rm -f *.o lib*.a
+	rm -f *.o libHYPRE_*
 	rm -f driver driver_matvec driver_matmul
 
 distclean: clean
@@ -108,7 +108,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_parcsr_block_mv.a: ${OBJS}
+libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

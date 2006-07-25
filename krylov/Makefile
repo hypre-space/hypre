@@ -47,7 +47,7 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_krylov.a 
+all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/HYPRE_MatvecFunctions.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/*lobpcg*.h $(HYPRE_BUILD_DIR)/include
@@ -70,7 +70,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_krylov.a: ${OBJS}
+libHYPRE_krylov${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

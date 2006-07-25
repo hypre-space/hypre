@@ -36,16 +36,16 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_MatrixMatrix.a
+all: libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_MatrixMatrix.a
+install: libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o lib*.a
+	rm -f *.o lib*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -54,7 +54,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_MatrixMatrix.a: ${OBJS}
+libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

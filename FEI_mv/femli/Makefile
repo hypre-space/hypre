@@ -8,7 +8,7 @@
 #EHEADER***********************************************************************
 
 ###  Copy needed header and source files to lib sub-directory to be compiled
-###  and create libHYPRE_mli.a 
+###  and create libHYPRE_mli*
 
 include ../../config/Makefile.config
 

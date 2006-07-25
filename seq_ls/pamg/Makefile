@@ -87,9 +87,9 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-lib: libHYPRE_amg_ls.a
+lib: libHYPRE_amg_ls${HYPRE_LIB_SUFFIX}
 
-all: libHYPRE_amg_ls.a driver
+all: libHYPRE_amg_ls${HYPRE_LIB_SUFFIX} driver
 
 install: all
 
@@ -103,11 +103,11 @@ distclean: clean
 # Rules
 ##################################################################
 
-driver: driver.o libHYPRE_amg_ls.a
+driver: driver.o libHYPRE_amg_ls${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
-libHYPRE_amg_ls.a: ${OBJS}
+libHYPRE_amg_ls${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

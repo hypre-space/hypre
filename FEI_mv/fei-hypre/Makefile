@@ -153,7 +153,7 @@ OBJS = ${OBJSC} ${OBJSCXX}
 # Targets
 ##################################################################
 
-all: libHYPRE_FEI.a
+all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
@@ -165,7 +165,7 @@ all: libHYPRE_FEI.a
 	cp -fp $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_FEI.a
+install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
@@ -187,7 +187,7 @@ distclean: clean
 ##################################################################
 # Rules
 ##################################################################
-libHYPRE_FEI.a: ${OBJS}
+libHYPRE_FEI${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

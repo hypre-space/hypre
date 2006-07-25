@@ -100,14 +100,14 @@ $(UTILFILES)
 ##################################################################
 
 all:
-	@echo  "Building libHYPRE.a ... "
+	@echo  "Building libHYPRE ... "
 	cp -fp ${FILES1} .
 	cp -fp ${FILES2} .
-	${AR} libHYPRE.a *.o
-	${RANLIB} libHYPRE.a
-	@echo  "Building libHYPRE_LSI.a ... "
-	${AR} libHYPRE_LSI.a ${FILES_LSI}
-	${RANLIB} libHYPRE_LSI.a
+	${AR} libHYPRE${HYPRE_LIB_SUFFIX} *.o
+	${RANLIB} libHYPRE${HYPRE_LIB_SUFFIX}
+	@echo  "Building libHYPRE_LSI ... "
+	${AR} libHYPRE_LSI${HYPRE_LIB_SUFFIX} ${FILES_LSI}
+	${RANLIB} libHYPRE_LSI${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* ${HYPRE_BUILD_DIR}/lib
 
 install: all

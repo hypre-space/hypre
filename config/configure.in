@@ -440,7 +440,7 @@ AC_ARG_WITH(strict-checking,
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
   fi
  
-  AC_CHECK_PROGS(CXX, [g++ gcc icc pgCC xlC KCC], [""])
+  AC_CHECK_PROGS(CXX, [g++ gcc icpc icc pgCC xlC KCC], [""])
   if test "x$CXX" = "x"
   then
      casc_using_cxx=no
@@ -736,7 +736,7 @@ then
       AC_CHECK_PROGS(CXX, [mpguidec++ guidec++ icc xlC pgCC CC], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CXX, [g++ gcc icc xlC cxx pgCC KCC], [""])
+      AC_CHECK_PROGS(CXX, [g++ gcc icpc icc xlC cxx pgCC KCC], [""])
    else
       AC_CHECK_PROGS(CXX, [mpxlC mpCC mpicxx mpiCC mpiicc mpipgCC], [""])
    fi
@@ -1007,6 +1007,17 @@ then
    ACX_DEBUG_FLAGS
 else
    ACX_OPTIMIZATION_FLAGS
+fi
+
+dnl *********************************************************************
+dnl * Set flags if needed to enable shared libraries 
+dnl *********************************************************************
+if test "$casc_using_shared" = "yes"
+then
+   HYPRE_LIBSUFFIX=".so"
+   HYPRE_SET_SHARED_FLAGS
+else
+   HYPRE_LIBSUFFIX=".a"
 fi
 
 dnl *********************************************************************

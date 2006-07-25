@@ -127,10 +127,10 @@ OBJS = ${OBJSCXX:.f=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_mli.a 
+all: libHYPRE_mli${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_mli.a 
+install: libHYPRE_mli${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 	@echo  " "
 
@@ -145,7 +145,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_mli.a: ${OBJS}
+libHYPRE_mli${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

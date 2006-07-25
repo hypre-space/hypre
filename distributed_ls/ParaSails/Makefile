@@ -57,10 +57,10 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_ParaSails.a 
+all: libHYPRE_ParaSails${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_ParaSails.a 
+install: libHYPRE_ParaSails${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
@@ -74,7 +74,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_ParaSails.a: ${OBJS}
+libHYPRE_ParaSails${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

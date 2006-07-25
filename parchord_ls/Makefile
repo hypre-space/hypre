@@ -50,21 +50,21 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_parcsr_mv.a
+all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@cp -f HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_BUILD_DIR)/include/.
-	@cp -f libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
+	@cp -f libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
  
-driver: driver.o libHYPRE_parcsr_mv.a 
+driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS} 
  
 
 install: all
 	@cp -f HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_INC_INSTALL)/.
-	@cp -f libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
+	@cp -f libHYPRE_* $(HYPRE_LIB_INSTALL)/.
  
 clean:
-	@rm -f *.o lib*.a driver
+	@rm -f *.o lib* driver
 
 veryclean: clean
 
@@ -72,7 +72,7 @@ veryclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_parcsr_mv.a: ${OBJS}
+libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR}  $@ ${OBJS}
 	${RANLIB} $@

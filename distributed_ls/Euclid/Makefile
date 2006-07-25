@@ -94,10 +94,10 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_Euclid.a 
+all: libHYPRE_Euclid${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_Euclid.a 
+install: libHYPRE_Euclid${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
@@ -111,7 +111,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_Euclid.a: ${OBJS}
+libHYPRE_Euclid${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

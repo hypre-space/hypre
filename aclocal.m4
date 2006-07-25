@@ -562,6 +562,28 @@ then
 fi]) dnl
 
 dnl **********************************************************************
+dnl * HYPRE_SET_SHARED_FLAGS
+dnl *
+dnl * Set FLAGS for building shared libraries
+dnl **********************************************************************
+AC_DEFUN([HYPRE_SET_SHARED_FLAGS],
+[AC_PREREQ(2.57)dnl
+
+ case "${host}" in
+    *aix*)
+        CFLAGS="$CFLAGS -qmkshrobj"
+        CXXFLAGS="$CXXFLAGS -qmkshrobj"
+        FFLAGS="$CFLAGS -qmkshrobj"
+        ;;
+    *)
+        CFLAGS="$CFLAGS -fPIC"
+        CXXFLAGS="$CXXFLAGS -fPIC"
+        FFLAGS="$FFLAGS -fPIC"
+        ;;
+ esac
+])
+
+dnl **********************************************************************
 dnl * HYPRE_SET_ARCH
 dnl * Defines the architecture of the platform on which the code is to run.
 dnl * Cross-compiling is indicated by the host and build platforms being

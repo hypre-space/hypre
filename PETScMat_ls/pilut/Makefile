@@ -57,7 +57,7 @@ CXX_COMPILE_FLAGS = \
 # Main rules
 ##################################################################
 
-driver: driver.o lib_HYPRE_PETScMatPilutSolver.a
+driver: driver.o lib_HYPRE_PETScMatPilutSolver${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
@@ -67,14 +67,14 @@ link:
 
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
-	@${AR} lib_HYPRE_PETScMatPilutSolver.a ${OBJS}
-	@${RANLIB} lib_HYPRE_PETScMatPilutSolver.a 
+	@${AR} lib_HYPRE_PETScMatPilutSolver${HYPRE_LIB_SUFFIX} ${OBJS}
+	@${RANLIB} lib_HYPRE_PETScMatPilutSolver${HYPRE_LIB_SUFFIX}
 
 
 ##################################################################
 # Targets
 ##################################################################
 clean:
-	@rm -f *.o lib*.a
+	@rm -f *.o lib*
 
 distclean: clean
