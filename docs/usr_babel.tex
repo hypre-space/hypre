@@ -1,0 +1,485 @@
+%=============================================================================
+%=============================================================================
+
+\chapter{Babel-based Interfaces}
+\label{ch-babel}
+
+\section{Introduction}
+
+Much of \hypre{} is accessible through a language-neutral interface
+built through the Babel tool.  This tool can connect to \hypre{} from
+your code which you can write in any of several languages.
+
+The Struct (Structured grid), SStruct (Semi-Structured grid), and IJ
+(linear algebra style) interfaces all can be used
+this way.  The code you write to call \hypre{} functions through the
+Babel-based interface works much the same as the code you write to
+call them through the original C interface.  The function names are
+different, the object structure of \hypre{} is more visible, and there
+are many more minor differences.
+
+This chapter will discuss these differences and present brief
+examples.  You can also see them in action by looking at the complete examples
+in the examples directory.
+
+You do not need to have the Babel software to use the Babel-based
+interface of \hypre{}.  Prebuilt interfaces for the C, C++, and
+Fortran languages are included with the \hypre{} distribution.  We
+enlarge the distribution with more such interfaces whenever \hypre{}
+users indicate that they need them, and our tools such as Babel
+support them.
+
+% >>> Someplace we should say that we can't do Python until shared
+% >>> library support is put back into hypre (it would be better to be
+% >>> able to build shared libraries again!)
+
+\section{The HYPRE Object Structure}
+
+Even though it is written in C, \hypre{} is object-oriented in its
+conceptual design.  The object structure of \hypre{} is often visible
+in names of structs and functions.  Because Babel is explicitly
+object-oriented, the Babel-based interface of \hypre{} makes the
+\hypre{} object system more visible, at least at the level of the
+user interface.
+
+The object structure of the Babel-based interface is explicitly
+defined in the SIDL (Scientific Interface Definition Language) file
+\code{Interfaces.idl}.  Babel translates this object structure as
+appropriate for the language the user uses - from SIDL's interfaces
+and classes to C++ classes, or to mangled names in C and Fortran.
+
+Here is an example: In the SIDL file defining the Babel interface, the
+StructVector class inherits from the StructVectorView and Vector
+interfaces.  StructVectorView extends MatrixVectorView interface,
+which extends the ProblemDefinition interface.  The Babel StructVector
+class can appear as a C++ class also named \code{StructVector} (in the
+\code{bHYPRE} namespace), as a C struct named
+\code{bHYPRE_StructVector}, or as a Fortran
+\code{integer*8}.  Its member function SetValues can appear in C++ as a
+member function \code{SetValues}, in C as a function
+\code{bHYPRE_StructVector_SetValues}, or in Fortran as a subroutine
+\code{bHYPRE_StructVector_SetValues}.
+
+The inheritance structure matters in use because you can cast an
+object up and down its inheritance hierarchy.  Sometimes you must cast
+it in order to provide an object of the right data type in a function
+call.  For example, the PCG solver works on any kind of vector, so PCG
+functions expect Vector objects among their arguments.  If you have a
+StructVector, and you want to use PCG, you might write C code like
+this:
+\begin{verbatim}
+    bHYPRE_StructVector b_S = bHYPRE_StructVector_Create(...);
+    bHYPRE_Vector       b = bHYPRE_Vector__cast( b_S );
+    hypre_Vector        x;
+    bHYPRE_PCG          PCG_solver;
+    bHYPRE_PCG_Apply( PCG_solver, b, &x );
+\end{verbatim}
+(Other code not shown would set up the matrix, provide it and
+parameters to the solver, set up the vectors, and so forth).
+
+Figure~\ref{figObjectModel} describes in abbreviated form the most
+important ideas of the \hypre{} inheritance hierarchy.
+
+
+\begin{figure}
+\centering
+\includegraphics[width=5in]{figObjectModel}
+\caption{%
+Graphic illustrating the ideas of the object model.}
+\label{figObjectModel}
+\end{figure}
+
+% The same chart appears in the following two places, among others.
+% 1. page 5 of ``The Design and Implementation of hypre, a Library of
+% Parallel High Performance Preconditioners''
+% (jfp has this in an email from Rob Falgout on May 13, 2005)
+% 2. slide 79 of ACTS viewgraphs on hypre dated August 23, 2005 (jfp
+% has this in an email from Rob Falgout dated July 19, 2006)
+
+
+% >>>>>>> a more complete chart would be nice, if it would fit! <<<<<<<<
+
+
+
+\section{Matrices and Vectors}
+
+\subsection{ParCSR Matrices}
+
+\subsubsection{C-Babel}
+In C with the Babel-based interface, a ParCSR matrix is typically built as follows:
+
+\begin{verbatim}
+    bHYPRE_MPICommunicator mpi_comm;
+    bHYPRE_IJParCSRMatrix parcsr_A;
+    parcsr_A = bHYPRE_IJParCSRMatrix_Create(
+      mpi_comm, row_lower, row_upper, col_lower, col_upper );
+
+    bHYPRE_IJParCSRMatrix_Initialize( parcsr_A );
+
+    /* SetValues sets values for matrix rows; normally there
+       are many SetValues calls inside a loop ... */
+    bHYPRE_IJParCSRMatrix_SetValues( parcsr_A, n_rows, n_cols, rows, cols, values, n_nonzeros );
+
+    bHYPRE_IJParCSRMatrix_Assemble( parcsr_A );
+\end{verbatim}
+
+\subsubsection{C-only}
+The same job in the C-only interface would be done as follows:
+
+\begin{verbatim}
+    MPI_COMM mpi_comm;
+    HYPRE_IJMatrix A;
+    HYPRE_IJMatrixCreate( mpi_comm, row_lower, row_upper, col_lower, col_upper, &A );
+
+    HYPRE_IJMatrixSetObjectType( A, HYPRE_PARCSR );
+
+    HYPRE_IJMatrixInitialize( A );
+
+    /* SetValues sets values for matrix rows; normally there
+       are many SetValues calls inside a loop ... */
+    HYPRE_IJMatrixSetValues( A, n_rows, n_cols, rows, cols, values );
+
+    HYPRE_IJMatrixAssemble(A);
+\end{verbatim}
+
+
+The most significant difference between the C-Babel and C-only
+interfaces is that the C-only interface includes a SetObjectType
+function call not found in the C-Babel interface.  This is because the
+same information is incorporated in function names in the Babel
+interface.  It is also notable that the MPI communicator is wrapped in
+a special object in the Babel interface, but passed directly in the
+C-only interface.  This is because the Babel interface is
+language-neutral, but MPI communicator types are generally
+language-dependent.  MPI communicators are discussed in another
+section of this chapter.
+
+\subsubsection{C++-Babel}
+Here is how the same matrix would be built in C++ and Fortran.
+both with the same Babel-based interface as above.
+You can see how everything works the same.  Most of this chapter
+will not include non-C examples except in contexts where their differences
+from C are interesting.
+
+\begin{verbatim}
+    using namespace ::ucxx::bHYPRE;
+    MPICommunicator mpi_comm;
+    IJParCSRMatrix parcsr_A;
+    parcsr_A = IJParCSRMatrix::Create(
+       mpi_comm, row_lower, row_upper, col_lower, colupper );
+
+    parcsr_A.Initialize();
+
+    // SetValues sets values for matrix rows; normally there
+    //   are many SetValues calls inside a loop ...
+    parcsr_A.SetValues( n_rows, n_cols, rows, cols, values, n_nonzeros );
+
+    parcsr_A.Assemble();
+\end{verbatim}
+
+
+\subsubsection{Fortran-Babel}
+\begin{verbatim}
+          integer*8  bHYPRE_mpicomm
+          integer*8  parcsr_A
+          call bHYPRE_IJParCSRMatrix_Create_f( bHYPRE_mpicomm, row_lower,
+         1     row_upper, col_lower, col_upper, parcsr_A )
+
+          call bHYPRE_IJParCSRMatrix_Initialize_f( parcsr_A, ierrtmp )
+
+    c        SetValues sets values for matrix rows; normally there
+    c        are many SetValues calls inside a loop ...
+             call bHYPRE_IJParCSRMatrix_SetValues_f(
+         1        parcsr_A, n_rows, n_cols, rows, cols, values,
+         2        n_nonzeros, ierrtmp )
+
+          call bHYPRE_IJParCSRMatrix_Assemble_f( parcsr_A, ierrtmp )
+\end{verbatim}
+
+
+
+\subsection{Struct Matrices}
+
+Struct matrices are built almost the same way with
+the C-only and Babel+C interfaces.
+
+\subsubsection{C-Babel}
+
+In C, a Struct  matrix is typically built as follows with
+the Babel interface:
+
+\begin{verbatim}
+    bHYPRE_MPICommunicator mpi_comm;
+    bHYPRE_StructMatrix  A_b;
+    bHYPRE_StructGrid grid;
+    bHYPRE_StructStencil stencil;
+    int *box_lower, *box_upper, *stencil_indices;
+    double *values;
+
+    A_b = bHYPRE_StructMatrix_Create( mpi_comm, grid, stencil );
+    ierr += bHYPRE_StructMatrix_Initialize( A_b );
+
+    /* SetBox values sets values for a block of the matrix;
+       normally there are many SetBoxValues calls inside a loop.*/
+    bHYPRE_StructMatrix_SetBoxValues(
+                  A_b, box_lower, box_upper, dim,
+                  stencil_size, stencil_indices, values, volume );
+    ierr += bHYPRE_StructMatrix_Assemble( A_b );
+\end{verbatim}
+
+
+Other languages work the same way in the Babel interface; see the
+section on ParCSR matrices for syntax examples.
+
+\subsubsection{C-only}
+
+This job is done as follows with the C-only interface:
+
+\begin{verbatim}
+    MPICommunicator mpi_comm;
+    HYPRE_StructMatrix  A;
+    HYPRE_StructGrid    grid;
+    HYPRE_StructStencil stencil;
+    int *box_lower, *box_upper, *stencil_indices;
+    double *values;
+
+    HYPRE_StructMatrixCreate( mpi_comm, grid, stencil, &A);
+    HYPRE_StructMatrixInitialize(A);
+
+    /* SetBox values sets values for a block of the matrix;
+       normally there are many SetBoxValues calls inside a loop.*/
+    HYPRE_StructMatrixSetBoxValues( A, box_lower, box_upper,
+                                    stencil_size, stencil_indices, values);
+    HYPRE_StructMatrixAssemble(A);
+\end{verbatim}
+
+
+Both interfaces work the same way, with minor differences in argument
+lists and data types.
+
+\subsection{SStruct Matrices}
+
+SStruct matrices are built almost the same way with
+the C-only and C-Babel interfaces.
+
+\subsubsection{C-Babel}
+
+In C, a SStruct  matrix is typically built as follows with
+the Babel interface.  There are minor differences depending on the
+kind of SStruct matrix, \code{object_type} in the following.  Its possible
+values are \code{HYPRE_PARCSR}, \code{HYPRE_STRUCT}, \code{HYPRE_SSTRUCT}.
+
+For \code{object_type==HYPRE_PARCSR}:
+\begin{verbatim}
+    bHYPRE_MPICommunicator mpi_comm;
+    bHYPRE_SStructParCSRMatrix   A_b;
+    bHYPRE_SStructGraph   graph;
+    int object_type, dim, var, nentries, nvalues, part;
+    int box_lower[3], box_upper[3], index[3];
+    int *entries;
+
+    A_b = bHYPRE_SStructParCSRMatrix_Create( mpi_comm, graph );
+
+    /* No call of SetObjectType is needed, the information is in
+       the name of this Initialize function: */
+    bHYPRE_SStructParCSRMatrix_Initialize( A_b );
+
+    /* SetBoxValues and SetValues are normally called inside loops */
+    bHYPRE_SStructParCSRMatrix_SetBoxValues
+          ( A_b, part, box_lower, box_upper, dim, var,
+            nentries, entries, values, nvalues );
+           }
+    bHYPRE_SStructParCSRMatrix_SetValues
+          ( A_b, part, index, dim, var, nentries, entries, values );
+
+    bHYPRE_SStructParCSRMatrix_Assemble( A_b );
+\end{verbatim}
+
+
+For \code{object_type==HYPRE_STRUCT} or \code{HYPRE_SSTRUCT}:
+\begin{verbatim}
+    bHYPRE_MPICommunicator mpi_comm;
+    bHYPRE_SStructMatrix  A_b;
+    bHYPRE_SStructGraph   graph;
+    int object_type, n_dim, var, nentries, nvalues;
+    int box_lower[3], box_upper[3], index[3];
+    int *entries;
+
+    A_b = bHYPRE_SStructMatrix_Create( mpi_comm, graph );
+
+    bHYPRE_SStructMatrix_SetObjectType(A_b, object_type);
+    bHYPRE_SStructMatrix_Initialize( A_b );
+
+    /* SetBoxValues and SetValues are normally called inside loops */
+     bHYPRE_SStructMatrix_SetBoxValues
+           ( A_b, part, boxlower, box_upper, dim, var,
+             nentries, entries, values, nvalues );
+     bHYPRE_SStructMatrix_SetValues
+           ( A_b, part, index, dim, var, nentries, entries, values );
+
+     bHYPRE_SStructMatrix_Assemble( A_b );
+\end{verbatim}
+
+\subsubsection{C-only}
+
+The C-only interface is very similar:
+\begin{verbatim}
+    MPICommunicator mpi_comm;
+    HYPRE_SStructMatrix   A;
+    HYPRE_SStructGraph    graph;
+    int object_type, var, nentries;
+    int box_lower[3], box_upper[3], index[3];
+    int *entries;
+
+    HYPRE_SStructMatrixCreate( mpi_comm, graph, &A );
+
+    /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
+    if ( object_type != HYPRE_SSTRUCT )
+        HYPRE_SStructMatrixSetObjectType(A, object_type);
+    HYPRE_SStructMatrixInitialize(A);
+
+    /* SetBoxValues and SetValues are normally called inside loops */
+    HYPRE_SStructMatrixSetBoxValues( A, part, box_lower, box_upper, var,
+                                     nentries, entries, values );
+    HYPRE_SStructMatrixSetValues
+         ( A, part, index, var, nentries, entries, values )
+
+    HYPRE_SStructMatrixAssemble(A);
+\end{verbatim}
+
+
+\section{Parameters and Error Flags}
+
+Most \hypre{} objects can be modified by setting parameters.  In the
+C-only interface, there is a separate function to set each parameter.
+The Babel-based interface has just a few parameter-setting functions
+for each object.  The parameters are identified by their names, as
+strings.  See below for some examples.
+
+Most \hypre{} functions return error flags, as discussed elsewhere in
+this manual. The following examples simply show how they are returned,
+not how to handle them.
+
+\subsubsection{C-only}
+\begin{verbatim}
+    HYPRE_Solver amg_solver;
+    int ierr;
+    ierr = HYPRE_BoomerAMGSetCoarsenType( amg_solver, 6 );
+    ierr = HYPRE_BoomerAMGSetTol( amg_solver, 1e-7 );
+\end{verbatim}
+
+\subsubsection{C-Babel}
+\begin{verbatim}
+    bHYPRE_BoomerAMG amg_solver;
+    int ierr;
+    ierr = bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6);
+    ierr = bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-7);
+\end{verbatim}
+
+\subsubsection{Fortran-Babel}
+\begin{verbatim}
+          integer*8  amg_solver
+          integer ierr
+          call bHYPRE_BoomerAMG_SetIntParameter_f(
+         1        amg_solver, "CoarsenType", 6, ierr )
+          call bHYPRE_BoomerAMG_SetDoubleParameter_f(
+         1        amg_solver, "Tolerance", tol, ierr )
+\end{verbatim}
+
+\subsubsection{C++-Babel}
+\begin{verbatim}
+    using namespace ::ucxx::bHYPRE;
+    BoomerAMG amg_solver;
+    ierr = amg_solver.SetIntParameter( "CoarsenType", 6);
+    ierr = amg_solver.SetDoubleParameter( "Tolerance", 1e-7);
+\end{verbatim}
+
+% >>>>>>>>>>>>>> Not done: vectors, stencils, graphs, grids, note that some
+% have versions for different matrix storage types
+
+% >>>>>>>>>>>>>> Not done: all solvers: PCG, GMRES, BiCGSTAB, CGNR, Euclid,
+% Hybrid, ParaSails, Pilut, Schwarz, Split, and DiagScale, Identity;
+%note that some have versions for different matrix storage types
+
+\section{MPI communicator}
+
+In the C-only \hypre{} interface, and most normal MPI usage, one often
+needs an MPI communicator of type \code{MPI_Comm}.  What an
+\code{MPI_Comm} really is depends on the language and the MPI
+implementation.
+
+But the Babel interface is supposed to be fundamentally independent of
+languages and implementations.  So the MPI communicator is wrapped in
+a special \code{bHYPRE_MPICommunicator} object.  This, not an
+\code{MPI_Comm} object, is what you pass to all the Babel-interface
+functions which need an MPI communicator.  Thus the language
+dependence of MPI is isolated in the function which creates the
+\code{bHYPRE_MPICommunicator} object.  Here are examples of how to use
+this function:
+
+\subsubsection{C-Babel}
+\begin{verbatim}
+    bHYPRE_MPICommunicator mpi_comm;
+    MPI_Comm mpicommworld = MPI_COMM_WORLD;
+    MPI_Comm * C_mpi_comm = &mpicommworld;
+    mpi_comm = bHYPRE_MPICommunicator_CreateC( C_mpi_comm );
+       ...
+    parcsr_A = bHYPRE_IJParCSRMatrix_Create( mpi_comm,... );
+\end{verbatim}
+
+\subsubsection{C++-Babel}
+\begin{verbatim}
+    using namespace ::ucxx::bHYPRE;
+    MPICommunicator mpi_comm;
+    MPI_Comm mpicommworld = MPI_COMM_WORLD;
+    MPI_Comm * C_mpi_comm = &mpicommworld;
+    mpi_comm = MPICommunicator::CreateC( C_mpi_comm );
+       ...
+    parcsr_A = IJParCSRMatrix::Create( mpi_comm,... );
+\end{verbatim}
+
+\subsubsection{Fortran-Babel}
+\begin{verbatim}
+          integer*8  mpi_comm
+          integer*8  F_mpi_comm
+          F_mpi_comm = MPI_COMM_WORLD
+          call bHYPRE_MPICommunicator_CreateF_f( F_mpi_comm, mpi_comm )
+             ...
+          call bHYPRE_IJParCSRMatrix_Create_f( mpi_comm, ... )
+\end{verbatim}
+
+\section{Building HYPRE with the Babel Interface}
+
+You can build \hypre{} almost the same way with and without the
+Babel-based interface.  Normally the only difference is that the
+configure line needs an extra argument; for example:
+
+\begin{verbatim}
+    configure --with-babel
+    make
+\end{verbatim}
+rather than
+\begin{verbatim}
+    configure
+    make
+\end{verbatim}
+
+The configure system will enable whatever built-in languages it can
+find compilers for.
+
+The configure system for the runtime portion of Babel (included with
+\hypre{} and enabled with the Babel-based interface) will
+automatically compile and run a few tiny test programs.  This has been
+a problem in multiprocessing AIX systems, where compiled programs are
+normally run in a different environment from the configure system.
+For AIX systems with POE, the
+\hypre{} distribution includes a workaround script, \code{nopoe}.
+When necessary, build \hypre{} as follows instead of the above:
+
+\begin{verbatim}
+    nopoe configure --with-babel
+    make
+\end{verbatim}
+
+% I could write something about how building interfaces to other
+% languages, but that may be too advanced for a user manual.

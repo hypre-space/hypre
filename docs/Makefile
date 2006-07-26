@@ -36,6 +36,7 @@ USR_FILES =\
  usr_ij.tex\
  usr_solvers.tex\
  usr_misc.tex\
+ usr_babel.tex\
  usr_manual.tex
 
 DEV_FILES =\
