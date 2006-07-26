@@ -1,12 +1,30 @@
 #!/bin/ksh
-#BHEADER***********************************************************************
-# (c) 2000   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT file for the copyright notice and disclaimer,
+# and the LICENSE file for the GNU Lesser General Public License.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # $Revision$
 #EHEADER***********************************************************************
+
 #
 # MaKe hypre DISTribution
 # This script is used to create the hypre distribution tar files.
@@ -130,7 +148,7 @@ HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
 # store version info
 (
   cd $HYPRE_DIST_INSTALL_DIR
-  cp src/linear_solvers/COPYRIGHT_and_DISCLAIMER .
+  cp src/linear_solvers/COPYRIGHT_and_LICENSE .
   cp src/linear_solvers/CHANGELOG .
   cp src/linear_solvers/INSTALL .
   cp src/linear_solvers/README .
@@ -144,7 +162,7 @@ rmdir $HYPRE_DIR/src/linear_solvers
 echo "creating $HYPRE_DIR.tar file ..."
 tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/CHANGELOG \
-    $HYPRE_DIR/COPYRIGHT_and_DISCLAIMER \
+    $HYPRE_DIR/COPYRIGHT_and_LICENSE \
     $HYPRE_DIR/INSTALL \
     $HYPRE_DIR/README \
     $HYPRE_DIR/docs \
