@@ -27,9 +27,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([HYPRE_NAME], [hypre])
-m4_define([HYPRE_VERSION], [1.11.1b])
-m4_define([HYPRE_DATE], [2006/05/30])
-m4_define([HYPRE_TIME], [09:30:00])
+m4_define([HYPRE_VERSION], [1.12.0a])
+m4_define([HYPRE_DATE], [2006/07/26])
+m4_define([HYPRE_TIME], [08:05:00])
 m4_define([HYPRE_DATETIME], [HYPRE_DATE HYPRE_TIME])
 m4_define([HYPRE_BUGS], [http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE])
 m4_define([HYPRE_TOP_SRC_DIR], [`pwd`])
