@@ -1081,7 +1081,7 @@ int HYPRE_AMSSetDimension(HYPRE_Solver solver, int dim);
 
 /**
  * Sets the discrete gradient matrix $G$.
- * This function should be called before hypre\_AMSSetup()!
+ * This function should be called before HYPRE\_AMSSetup()!
  **/
 int HYPRE_AMSSetDiscreteGradient(HYPRE_Solver solver,
                                  HYPRE_ParCSRMatrix G);
@@ -1089,8 +1089,8 @@ int HYPRE_AMSSetDiscreteGradient(HYPRE_Solver solver,
 /**
  * Sets the $x$, $y$ and $z$ coordinates of the vertices in the mesh.
  *
- * Either SetCoordinateVectors or SetEdgeConstantVectors should be
- * called before hypre\_AMSSetup()!
+ * Either HYPRE\_AMSSetCoordinateVectors() or HYPRE\_AMSSetEdgeConstantVectors()
+ * should be called before HYPRE\_AMSSetup()!
  **/
 int HYPRE_AMSSetCoordinateVectors(HYPRE_Solver solver,
                                   HYPRE_ParVector x,
@@ -1102,8 +1102,8 @@ int HYPRE_AMSSetCoordinateVectors(HYPRE_Solver solver,
  * the constant vector fields $(1,0,0)$, $(0,1,0)$ and $(0,0,1)$ in the
  * edge element basis.
  *
- * Either SetCoordinateVectors or SetEdgeConstantVectors should be
- * called before hypre\_AMSSetup()!
+ * Either HYPRE\_AMSSetCoordinateVectors() or HYPRE\_AMSSetEdgeConstantVectors()
+ * should be called before HYPRE\_AMSSetup()!
  **/
 int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver solver,
                                     HYPRE_ParVector Gx,
@@ -1112,40 +1112,40 @@ int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver solver,
 
 /**
  * (Optional) Sets the matrix $A_\alpha$ corresponding to the Poisson
- * problem with coefficient alpha (the curl-curl term coefficient in
+ * problem with coefficient $\alpha$ (the curl-curl term coefficient in
  * the Maxwell problem).
  *
  * If this function is called, the coarse space solver on the range
  * of $\Pi^T$ is a block-diagonal version of $A_\Pi$. If this function is not
- * called, the coarse space solver on the range of $Pi^T$ is constructed
- * as $Pi^T A Pi$ in hypre\_AMSSetup()
+ * called, the coarse space solver on the range of $\Pi^T$ is constructed
+ * as $\Pi^T A \Pi$ in HYPRE\_AMSSetup(). See the user's manual for more details.
  **/
 int HYPRE_AMSSetAlphaPoissonMatrix(HYPRE_Solver solver,
                                    HYPRE_ParCSRMatrix A_alpha);
 
 /**
  * (Optional) Sets the matrix $A_\beta$ corresponding to the Poisson
- * problem with coefficient beta (the mass term coefficient in the
+ * problem with coefficient $\beta$ (the mass term coefficient in the
  * Maxwell problem).
  *
- * If not given, the Poisson matrix will be computed in hypre\_AMSSetup().
- * If the given matrix is NULL, we assume that beta is $0$ and use two-level
- * (instead of three-level) methods.
+ * If not given, the Poisson matrix will be computed in HYPRE\_AMSSetup().
+ * If the given matrix is NULL, we assume that $\beta$ is identically $0$
+ * and use two-level (instead of three-level) methods. See the user's manual for more details.
  **/
 int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver solver,
                                   HYPRE_ParCSRMatrix A_beta);
 
 /**
  * (Optional) Sets maximum number of iterations, if AMS is used
- * as a solver. If it is used as a preconditioner, this function has
- * no effect. The default is $20$.
+ * as a solver. To use AMS as a preconditioner, set the maximum
+ * number of iterations to $1$. The default is $20$.
  **/
 int HYPRE_AMSSetMaxIter(HYPRE_Solver solver, int maxit);
 
 /**
  * (Optional) Set the convergence tolerance, if AMS is used
- * as a solver. If it is used as a preconditioner, this function has
- * no effect. The default is $1e-6$.
+ * as a solver. When using AMS as a preconditioner, set the tolerance
+ * to $0.0$. The default is $10^{-6}$.
  **/
 int HYPRE_AMSSetTol(HYPRE_Solver solver, double tol);
 
@@ -1166,7 +1166,7 @@ int HYPRE_AMSSetTol(HYPRE_Solver solver, double tol);
  * \hline
  * \end{tabular}
  *
- * The default is $1$.
+ * The default is $1$. See the user's manual for more details.
  **/
 int HYPRE_AMSSetCycleType(HYPRE_Solver solver, int cycle_type);
 
@@ -1189,7 +1189,7 @@ int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
 
 /**
  * (Optional) Sets AMG parameters for $B_\Pi$.
- * The defaults are $10$, $1$, $3$, $0.25$.
+ * The defaults are $10$, $1$, $3$, $0.25$. See the user's manual for more details.
  **/
 int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
                                 int alpha_coarsen_type,
@@ -1199,7 +1199,7 @@ int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
 
 /**
  * (Optional) Sets AMG parameters for $B_G$.
- * The defaults are $10$, $1$, $3$, $0.25$.
+ * The defaults are $10$, $1$, $3$, $0.25$. See the user's manual for more details.
  **/
 int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                int beta_coarsen_type,
