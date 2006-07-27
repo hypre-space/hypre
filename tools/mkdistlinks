@@ -3,7 +3,7 @@
 # executed in /usr/casc/hypre and /usr/gapps/hypre
 #  usage: ./mkdistlinks HypreArchiveFile
 #
-# Directory list as of December 2005 based on SYS_TYPE environment variable for
+# Directory list as of July 2006 based on SYS_TYPE environment variable for
 # LC platforms and i686-pc-linux-gnu for the CASC open cluster
 
 DIR="\
