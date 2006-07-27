@@ -1,3 +1,29 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 
 #include <HYPRE_config.h>
 
@@ -125,14 +151,6 @@ typedef struct
 
 #endif /* hypre_NEW_COMMPKG */
 
-/*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision$
- *********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -182,14 +200,6 @@ typedef struct
 
 
 #endif
-/*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision$
- *********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -349,14 +359,6 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
-/*BHEADER**********************************************************************
- * (c) 2002   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision$
- *********************************************************************EHEADER*/
 /******************************************************************************
  *
  * Tree structure for keeping track of numbers (e.g. column numbers) -
@@ -406,14 +408,6 @@ int * hypre_NumbersArray( hypre_NumbersNode * node );
 
 
 #endif
-/*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision$
- *********************************************************************EHEADER*/
 /******************************************************************************
  *
  * Header info for Parallel Chord Matrix data structures

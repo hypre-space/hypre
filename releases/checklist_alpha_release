@@ -43,7 +43,7 @@ available to users.
 
     --->> _________________________________________
 
- 9. Tag repository with release number
+ 9. Tag repository with release number (i.e. cvs rtag VM-mm-ra linear_solvers)
 
     --->> _________________________________________
 
@@ -56,7 +56,7 @@ available to users.
 
     --->> _________________________________________
 
-12. Manually untar the file that was created in step 16
+12. Manually untar the file that was created in step 11
 
     --->> _________________________________________
 
@@ -65,13 +65,13 @@ available to users.
 
     --->> _________________________________________
 
-14. If the test runs properly, proceed to step 14
+14. If the test runs properly, proceed to step 15
     Otherwise, untag the repository, make necessary corrections, return
-       to step 8; iterating until all tests run correctly.
+       to step 9; iterating until all tests run correctly.
 
     --->> _________________________________________
 
-15. Copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
+15. Copy tar file to /usr/casc/hypre directory
 
     --->> _________________________________________
 
@@ -80,18 +80,22 @@ available to users.
 
     --->> _________________________________________
 
-17. Run the mklibs script with the '-a install' option to create 
-       and install the release
-    ./mklibs -a <HypreArchiveFileName> install
+17. cd to i686-pc-linux-gnu sub-directory
 
     --->> _________________________________________
 
-18. If there are no errors in steps 11-16; inform project team and other
+18. Run the mklibs script with the '-a install' option to create 
+       and install the release
+    ../mklibs -a <HypreArchiveFileName> install
+
+    --->> _________________________________________
+
+19. If there are no errors in steps 11-18; inform project team and other
        appropriate users of availability
 
     --->> _________________________________________
 
-19. FINAL SIGN-OFF
+20. FINAL SIGN-OFF
     Verify that all steps have been signed off and commit this file to
        the repository
 
