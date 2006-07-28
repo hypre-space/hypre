@@ -71,8 +71,6 @@ do
 
    echo ""
    echo "Processing file: " $file
-   echo ""
-
 
    foundb=0
    founde=0
@@ -80,23 +78,21 @@ do
    pathname=`dirname $file`
    filename=`basename $file`
 
-   if [ "$pathname" = "." ]
-   then 
-      pathname=$current_dir
-   fi
-
    cd $pathname
 
    while read InputLine
    do
       case $InputLine in
+         "#!/bin"*)
+               echo $InputLine > $hypre_temp_outfile
+               ;;
          "#BHEADER"*)
                foundb=1
                if [ "$pathname" != "$current_dir" ]
                then
                   cp $current_dir/$hypre_file_template .
                fi
-               cat $hypre_file_template > $hypre_temp_outfile
+               cat $hypre_file_template >> $hypre_temp_outfile
                ;;
          *BHEADER*)
                foundb=1
@@ -104,7 +100,7 @@ do
                then
                   cp $current_dir/$hypre_code_template .
                fi
-               cat $hypre_code_template > $hypre_temp_outfile
+               cat $hypre_code_template >> $hypre_temp_outfile
                ;;
          *EHEADER*)
                founde=1
@@ -114,7 +110,7 @@ do
 
    if [ "$foundb" = "1" -a "$founde" = "1" ]
    then
-      perl -e 'while ($line = <>) {if ($line =~ /\*BHEADER|#BHEADER/) {0 while(<> !~ /\*EHEADER|#EHEADER/);} elsif ($line !~ /BHEADER|EHEADER/) {print("$line");}}' $filename >> $hypre_temp_outfile
+      perl -e 'while ($line = <>) {if ($line =~ /\*BHEADER|#BHEADER/) {0 while(<> !~ /\*EHEADER|#EHEADER/);} elsif ($line !~ /BHEADER|EHEADER|bin/) {print("$line");}}' $filename >> $hypre_temp_outfile
 
       rm -rf $filename
       mv $hypre_temp_outfile $filename
