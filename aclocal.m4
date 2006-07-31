@@ -11,6 +11,32 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+dnl #BHEADER**********************************************************************
+dnl # Copyright (c) 2006   The Regents of the University of California.
+dnl # Produced at the Lawrence Livermore National Laboratory.
+dnl # Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+dnl # All rights reserved.
+dnl #
+dnl # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+dnl # Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+dnl # disclaimer and the GNU Lesser General Public License.
+dnl #
+dnl # This program is free software; you can redistribute it and/or modify it
+dnl # under the terms of the GNU General Public License (as published by the Free
+dnl # Software Foundation) version 2.1 dated February 1999.
+dnl #
+dnl # This program is distributed in the hope that it will be useful, but WITHOUT
+dnl # ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+dnl # FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+dnl # GNU General Public License for more details.
+dnl #
+dnl # You should have received a copy of the GNU Lesser General Public License
+dnl # along with this program; if not, write to the Free Software Foundation,
+dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+dnl #
+dnl # $Revision$
+dnl #EHEADER**********************************************************************
+
 dnl **********************************************************************
 dnl * ACX_CHECK_MPI
 dnl *
@@ -709,6 +735,32 @@ dnl *    return architecture and host name values
 
 ])dnl
 
+dnl #BHEADER**********************************************************************
+dnl # Copyright (c) 2006   The Regents of the University of California.
+dnl # Produced at the Lawrence Livermore National Laboratory.
+dnl # Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+dnl # All rights reserved.
+dnl #
+dnl # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+dnl # Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+dnl # disclaimer and the GNU Lesser General Public License.
+dnl #
+dnl # This program is free software; you can redistribute it and/or modify it
+dnl # under the terms of the GNU General Public License (as published by the Free
+dnl # Software Foundation) version 2.1 dated February 1999.
+dnl #
+dnl # This program is distributed in the hope that it will be useful, but WITHOUT
+dnl # ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+dnl # FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+dnl # GNU General Public License for more details.
+dnl #
+dnl # You should have received a copy of the GNU Lesser General Public License
+dnl # along with this program; if not, write to the Free Software Foundation,
+dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+dnl #
+dnl # $Revision$
+dnl #EHEADER**********************************************************************
+
 dnl @synopsis HYPRE_FIND_BLAS([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
 dnl This macro looks for a library that implements the BLAS
@@ -836,6 +888,32 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   LDFLAGS="$hypre_save_LDFLGS"
 
 ])dnl HYPRE_FIND_BLAS
+
+dnl #BHEADER**********************************************************************
+dnl # Copyright (c) 2006   The Regents of the University of California.
+dnl # Produced at the Lawrence Livermore National Laboratory.
+dnl # Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+dnl # All rights reserved.
+dnl #
+dnl # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+dnl # Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+dnl # disclaimer and the GNU Lesser General Public License.
+dnl #
+dnl # This program is free software; you can redistribute it and/or modify it
+dnl # under the terms of the GNU General Public License (as published by the Free
+dnl # Software Foundation) version 2.1 dated February 1999.
+dnl #
+dnl # This program is distributed in the hope that it will be useful, but WITHOUT
+dnl # ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+dnl # FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+dnl # GNU General Public License for more details.
+dnl #
+dnl # You should have received a copy of the GNU Lesser General Public License
+dnl # along with this program; if not, write to the Free Software Foundation,
+dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+dnl #
+dnl # $Revision$
+dnl #EHEADER**********************************************************************
 
 dnl @synopsis HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl

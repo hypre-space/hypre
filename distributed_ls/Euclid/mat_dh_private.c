@@ -1,3 +1,29 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 #include "mat_dh_private.h"
 #include "Parser_dh.h"
 #include "Hash_i_dh.h"
@@ -487,7 +513,6 @@ void readMat(Mat_dh *Aout, char *ft, char *fn, int ignore)
     Mat_dhReadTriples(Aout, ignore, fn); CHECK_V_ERROR;
   } 
 
-  else if (!strcmp(ft, "ebin")) 
   {
     Mat_dhReadBIN(Aout, fn); CHECK_V_ERROR;
   } 
@@ -641,7 +666,6 @@ void readVec(Vec_dh *bout, char *ft, char *fn, int ignore)
     Vec_dhRead(bout, ignore, fn); CHECK_V_ERROR;
   } 
 
-  else if (!strcmp(ft, "ebin")) 
   {
     Vec_dhReadBIN(bout, fn); CHECK_V_ERROR;
   } 
@@ -699,7 +723,6 @@ void writeMat(Mat_dh Ain, char *ft, char *fn)
     Mat_dhPrintTriples(Ain, NULL, fn); CHECK_V_ERROR;
   } 
 
-  else if (!strcmp(ft, "ebin")) 
   {
     Mat_dhPrintBIN(Ain, NULL, fn); CHECK_V_ERROR;
   } 
@@ -744,7 +767,6 @@ void writeMat(Mat_dh Ain, char *ft, char *fn)
 
 #undef __FUNC__
 #define __FUNC__ "writeVec"
-void writeVec(Vec_dh bin, char *ft, char *fn)
 {
   START_FUNC_DH
   if (fn == NULL) {
@@ -753,12 +775,9 @@ void writeVec(Vec_dh bin, char *ft, char *fn)
 
   if (!strcmp(ft, "csr")  ||  !strcmp(ft, "trip")) 
   {
-    Vec_dhPrint(bin, NULL, fn); CHECK_V_ERROR;
   } 
 
-  else if (!strcmp(ft, "ebin")) 
   {
-    Vec_dhPrintBIN(bin, NULL, fn); CHECK_V_ERROR;
   } 
 
 #ifdef PETSC_MODE
@@ -768,7 +787,6 @@ void writeVec(Vec_dh bin, char *ft, char *fn)
     int ierr;
     Vec bb;
 
-    ierr = buildPetscVec(bin->n, bin->n, 0, bin->vals, &bb);
     if (ierr) { SET_V_ERROR("buildPetscVec failed!");  }
     ierr = ViewerBinaryOpen_DH(comm_dh, fn, BINARY_CREATE_DH, &viewer);
     if (ierr) { SET_V_ERROR("ViewerBinaryOpen failed! [PETSc lib]"); }

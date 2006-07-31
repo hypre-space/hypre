@@ -1,3 +1,29 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 #include <stdlib.h>
 #include "Vec_dh.h"
 #include "Mem_dh.h"
@@ -197,7 +223,6 @@ void Vec_dhPrintBIN(Vec_dh v, SubdomainGraph_dh sg, char *filename)
     SET_V_ERROR("not implemented for reordered vector; ensure sg=NULL");
   }
 
-  io_dh_print_ebin_vec_private(v->n, 0, v->vals, 
                                NULL, NULL, NULL, filename); CHECK_V_ERROR;
   END_FUNC_DH
 }
@@ -280,6 +305,5 @@ extern void Vec_dhReadBIN(Vec_dh *vout, char *filename)
 
   Vec_dhCreate(&tmp); CHECK_V_ERROR;
   *vout = tmp;
-  io_dh_read_ebin_vec_private(&tmp->n, &tmp->vals, filename); CHECK_V_ERROR;
   END_FUNC_DH
 }

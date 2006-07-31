@@ -1,3 +1,29 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 #include "Mat_dh.h"
 #include "getRow_dh.h"
 #include "SubdomainGraph_dh.h"
@@ -995,7 +1021,6 @@ void Mat_dhPrintBIN(Mat_dh A, SubdomainGraph_dh sg, char *filename)
     SET_V_ERROR("not implemented for reordering; ensure sg=NULL");
   }
 
-  io_dh_print_ebin_mat_private(A->m, A->beg_row, A->rp, A->cval, A->aval,
                               NULL, NULL, NULL, filename); CHECK_V_ERROR;
   END_FUNC_DH
 }
@@ -1053,7 +1078,6 @@ void Mat_dhReadTriples(Mat_dh *mat, int ignore, char *filename)
 }
 
 /* here we pass the private function a filename, instead of an open file,
-   the reason being that Euclid's binary format is more complicated,
    i.e, the other "Read" methods are only for a single mpi task.
 */
 #undef __FUNC__
@@ -1068,7 +1092,6 @@ void Mat_dhReadBIN(Mat_dh *mat, char *filename)
   }
 
   Mat_dhCreate(&A); CHECK_V_ERROR;
-  io_dh_read_ebin_mat_private(&A->m, &A->rp, &A->cval, &A->aval, filename); CHECK_V_ERROR;
   A->n = A->m;
   *mat = A;
   END_FUNC_DH
