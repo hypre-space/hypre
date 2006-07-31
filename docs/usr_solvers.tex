@@ -159,6 +159,39 @@ uses simple pointwise smoothing.  As a result, PFMG is not as robust
 as SMG, but is much more efficient per V-cycle.
 
 %-----------------------------------------------------------------------------
+                                                                                                                                                             
+\section{SysPFMG}
+
+SysPFMG is a parallel semicoarsening multigrid solver for systems of 
+elliptic PDEs. It is a generalization of PFMG, with the interpolation
+defined only within the same variable. The relaxation is of nodal type-
+all variables at a given point location are simultaneously solved for in the
+relaxation.
+
+Although SysPFMG is implemented through the SStruct interface, it can
+be used only for problems with one grid part. Ideally, the solver should
+handle any of the seven variable types (cell-, node-, xface-, yface-, zface-,
+xedge-, yedge-, and zedge-based). However, it has been completed only for cell-based
+variables.
+
+%-----------------------------------------------------------------------------
+
+%-----------------------------------------------------------------------------
+                                                                                                                                                             
+\section{SplitSolve}
+                                                                                                                                                             
+SplitSolve is a parallel block Gauss-Seidel solver for semi-structured
+problems with multiple parts. For problems with only one variable, it can be viewed as 
+a domain-decomposition solver with no grid overlapping.
+
+Consider a multiple part problem given by the linear system $Ax=b$. Matrix $A$ can
+be decomposed into a structured intra-variable block diagonal component $M$ and a
+component $N$ consisting of the inter-variable blocks and any unstructured connections
+between the parts. SplitSolve performs the iteration 
+\[ x_{k+1} = \tilde{M}^{-1} (b + N x_k),\]
+where $\tilde{M}^{-1}$ is a decoupled block-diagonal V(1,1) cycle, a separate cycle for each
+part and variable type. There are two V-cycle options, SMG and PFMG.
+%-----------------------------------------------------------------------------
 
 \section{BoomerAMG}
 
