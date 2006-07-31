@@ -46,7 +46,9 @@ ready to be built.
 
 Executing \file{make}, with or without targets being specified, in the \file{src}
 directory initiates compiling of all of the source code and building of the \hypre{} 
-library. 
+library.  If any errors occur while compiling, the user can edit the file 
+\file{config/Makefile.config} directly then run \file{make} again; without having to 
+re-run configure.
 
 When building HYPRE without the install target, the libraries and include files 
 will be copied into the default directories, \file{src/hypre/lib} and 
@@ -66,32 +68,32 @@ refine the defaults for any system. The best way to find out what options are
 available is to display the help package, by executing \file{./configure --help}, which 
 also includes the usage information.
 
-NOTE: when executing on an IBM platform \file{configure} must be executed under 
-the nopoe script (\file{./nopoe ./configure <option> ...<option>}) to force a single 
-task to be run on the log-in node.
-
-
-%==========================================================================
-\subsection{Configure Execution}
+The user can mix and match the configure options and variable settings to meet their 
+needs.  It should be noted that \hypre{} can be configured with external BLAS and/or
+LAPACK libraries, which can be combined with any other option.  This is done with
+the following options:
 
 \begin{verbatim}
-Usage: ./configure [OPTION] ... [VAR=VALUE]...
-\end{verbatim}
+   Specifying BLAS only:
+      ./configure  --with-blas-lib="essl" --with-blas-lib-dirs="/usr/lib"
 
-Examples of using \file{configure} with options and variable settings.  The user can mix 
-and match the options and variable settings as needed to satisfy their requirements.
-\begin{verbatim}
-./configure --with-openmp --enable-debug
+   Specifying LAPACK only:
+      ./configure  --with-lapack-lib="lapack" --with-lapack-lib-dirs="/usr/local/lib"
 
-./configure  CC=mpiicc --with-babel
-
-./configure  --with-blas-lib="essl" --with-blas-lib-dirs="/usr/lib"
+   Specifying both BLAS and LAPACK:
+      ./configure  --with-blas-lib="essl" --with-blas-lib-dirs="/usr/lib" \
+                   --with_lapack-lib="lapack"  --with-lapack-lib-dirs="/usr/local/lib"
 \end{verbatim}
 
 
 The output from \file{configure} is several pages long.  It reports the system type 
 being used for building and executing, compilers being used, libraries being searched,
 option flags being set, etc.  
+
+
+NOTE: when executing on an IBM platform \file{configure} must be executed under 
+the nopoe script (\file{./nopoe ./configure <option> ...<option>}) to force a single 
+task to be run on the log-in node.
 
 %-----------------------------
 
@@ -130,48 +132,32 @@ of libraries occurs.  Make has several options that are called targets.  These i
 
 
 %==========================================================================
-\subsection{Make Execution}
-
-\begin{verbatim}
-Usage: make [TARGET]
-\end{verbatim}
-
-Examples of using \file{make} with different targets.  Note that only ONE target 
-can be specified at a time. The output from \file{make} is several pages long.
-\begin{verbatim}
-make
-
-make install
-
-make test
-\end{verbatim}
-
-
-%-----------------------------
 
 \section{Testing the Library} 
 
-The \kbd{test} subdirectory contains several codes that can be used to test
+The \kbd{examples} subdirectory contains several codes that can be used to test
 the newly created \hypre{} library.  To create the executable versions, move into
-the \kbd{test} subdirectory, enter \kbd{make test} then execute the codes as described
-by their help packages.
+the \kbd{examples} subdirectory, enter \kbd{make} then execute the codes as described
+in the initial comments section of each source code.
 
 %-----------------------------
 
 \section{Linking to the Library}
 
 An application code linking with \hypre{} must be compiled with \kbd{-I\$PREFIX/include} 
-and linked with \kbd{-L\$PREFIX/lib -l}{\it hypre library name}... 
-\kbd{-l}{\it hypre library name}..., where \kbd{\$PREFIX} is the
-directory where \hypre{} is installed, specified by the configure
-option \kbd{--prefix=PREFIX}.  Additionally, any other libraries to which \hypre{} 
-is linked must also be linked to by the users application. 
+and linked with \kbd{-L\$PREFIX/lib -lHYPRE}, where \kbd{\$PREFIX} is the directory 
+where \hypre{} is installed, (default is \kbd{hypre}, or as defined by the configure 
+option \kbd{--prefix=PREFIX}. 
+
+We strongly recommend that users link with libHYPRE.a rather than specifying each 
+of the seperate \hypre{} libraries, i.e.  libHYPRE\_krylov.a, libHYPRE\_parcsr\_mv.a,
+etc.  By using libHYPRE.a the user is guaranteed to have all capabilities without
+having to change their link flags.
 
 As an example of linking with \hypre{}, a user may refer to the \kbd{Makefile} in the 
-\file{test} subdirectory.  It is designed to build test applications that link with and 
-call \hypre{}.  All include and linking flags are defined in the \file{Makefile.config} 
-file by \file{configure}.
-
+\file{examples} subdirectory.  It is designed to build codes similar to user applications
+that link with and call \hypre{}.  All include and linking flags are defined in the 
+\file{Makefile.config} file by \file{configure}.
 
 %-----------------------------------------------------------------------------
 
