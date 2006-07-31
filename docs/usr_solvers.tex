@@ -22,11 +22,14 @@ considerations for other usage patterns.
                                & \multicolumn{4}{|c|}{System Interfaces} \\
 \multicolumn{1}{|c||}{Solvers} & Struct & SStruct & FEI & IJ \\
 \hline\hline
-Jacobi     & X &   &   &   \\
-SMG        & X &   &   &   \\
-PFMG       & X &   &   &   \\
-SysPFMG    & X &   &   &   \\
+Jacobi     & X & X &   &   \\
+SMG        & X & X &   &   \\
+PFMG       & X & X &   &   \\
+SysPFMG    &   & X &   &   \\
 Split      &   & X &   &   \\
+FAC        &   & X &   &   \\
+Maxwell    &   & X &   &   \\
+AMS        &   & X & X & X \\
 BoomerAMG  &   & X & X & X \\
 MLI        &   & X & X & X \\
 ParaSails  &   & X & X & X \\
@@ -127,6 +130,35 @@ usually required.
 
 %-----------------------------------------------------------------------------
 
+\subsection{Synopsis}
+
+In general, a solver (let's call it PHOO) is set up and run using the following routines,
+where A is the matrix, b the right hand side and x the solution vector
+of the linear system to be solved:
+
+\begin{display}
+\begin{verbatim}
+/* Create Solver */
+int HYPRE_PHOOCreate(MPI_COMM_WORLD, &solver); 
+
+/* set certain parameters if desired */
+HYPRE_PHOOSetTol(solver, 1.e-8);
+.
+.
+/* Set up Solver */
+HYPRE_PHOOSetup(solver, A, b, x);
+/* Solve the system */
+HYPRE_PHOOSolve(solver, A, b, x);
+/* Destroy the solver */
+HYPRE_PHOODestroy(solver);
+\end{verbatim}
+\end{display}
+
+In the following sections, we will give brief descriptions of the available \hypre{} solvers
+with some suggestions on how to choose the parameters as well as references for users 
+who are interested in a more detailed description and analysis of the solvers.
+A complete list of all routines that are available can be found in the reference manual.
+
 \section{SMG}
 
 SMG is a parallel semicoarsening multigrid solver for the linear
@@ -193,6 +225,29 @@ where $\tilde{M}^{-1}$ is a decoupled block-diagonal V(1,1) cycle, a separate cy
 part and variable type. There are two V-cycle options, SMG and PFMG.
 %-----------------------------------------------------------------------------
 
+\section{Hybrid}
+
+The hybrid solver is designed to detect whether a multigrid preconditioner
+is needed when solving a linear system.
+It first uses a diagonally scaled Krylov solver, which can be chosen by the user
+(the default is conjugate gradient, but one should use GMRES if the matrix of the 
+linear system to be solved is nonsymmetric). It monitors how fast the Krylov solver
+converges.
+If there is not sufficient progress, the algorithm switches to a preconditioned
+Krylov solver.
+
+This solver is both available through the structured and the ij interface,
+however under a different name.
+
+If used through the structured interface, it is called StructHybrid, and can be
+used with the preconditioners PFMG and SMG.
+
+If used through the IJ interface, it is called ParCSRHybrid and can be used with 
+the preconditioner BoomerAMG.
+
+
+%-----------------------------------------------------------------------------
+
 \section{BoomerAMG}
 
 BoomerAMG is a parallel implementation of the algebraic multigrid 
@@ -235,29 +290,11 @@ can also be used.
 
 %-----------------------------
 
-\subsection{Synopsis}
+\subsection{Parameter settings}
 
-The solver is set up and run using the following routines,
-where A is the matrix, b the right hand side and x the solution vector
-of the linear system to be solved:
-
-\begin{display}
-\begin{verbatim}
-#include "HYPRE_parcsr_ls.h"
-
-int HYPRE_BoomerAMGCreate(HYPRE_Solver *solver); 
-
-<set certain parameters if desired >
-
-int HYPRE_BoomerAMGSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-  HYPRE_ParVector b, HYPRE_ParVector x);
-int HYPRE_BoomerAMGSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-  HYPRE_ParVector b, HYPRE_ParVector x);
-int HYPRE_BoomerAMGDestroy(HYPRE_Solver solver);
-\end{verbatim}
-\end{display}
-
-%-----------------------------
+BoomerAMG's Create function differs from the synopsis in that it has only one parameter
+int HYPRE$\_$BoomerAMGCreate(HYPRE$\_$Solver *solver). It uses the communicator 
+of the matrix A.
 
 For best performance, it might be necessary to set certain parameters.
 One important parameter is the strong threshold, which can be set
@@ -296,24 +333,7 @@ For more details about the ParaSails algorithm, see \cite{EChow_2000}.
 
 %-----------------------------
 
-\subsection{Synopsis}
-
-\begin{display}
-\begin{verbatim}
-#include "HYPRE_parcsr_ls.h"
-
-int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_Solver *solver, 
-  int symmetry);
-int HYPRE_ParaSailsSetParams(HYPRE_Solver solver, 
-  double thresh, int nlevel, double filter);
-int HYPRE_ParaSailsSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-  HYPRE_ParVector b, HYPRE_ParVector x);
-int HYPRE_ParaSailsSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-  HYPRE_ParVector b, HYPRE_ParVector x);
-int HYPRE_ParaSailsStats(HYPRE_Solver solver);
-int HYPRE_ParaSailsDestroy(HYPRE_Solver solver);
-\end{verbatim}
-\end{display}
+\subsection{Parameter Settings}
 
 The accuracy and cost of ParaSails are parameterized by the real {\em thresh}
 and integer {\em nlevels} parameters,
@@ -343,9 +363,8 @@ order to construct the preconditioner.
 
 %-----------------------------
 
-\subsection{Interface functions}
+ParaSail's Create function differs from the synopsis in the followin way:
 
-A ParaSails solver \code{solver} is returned with 
 \begin{display}
 \begin{verbatim}
 int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_Solver *solver,
@@ -448,7 +467,7 @@ multigrid methods.
 
 %-----------------------------
 
-\subsection{Synopsis}
+\subsection{Overview}
 
 Euclid is best thought of as an ``extensible ILU preconditioning
 framework.''
@@ -689,6 +708,10 @@ yet fully functional (i.e, don't use them until further notice).
 
 \section{\pilut: Parallel Incomplete Factorization}
 \label{PILUT}
+
+Note that this code is no longer supported by the \hypre{} team. We recommend to 
+use Euclid instead, which is more versatile and in general more efficient, especially
+when used with many processors.
 
 \pilut{} is a parallel preconditioner based on Saad's dual-threshold incomplete
 factorization algorithm. The original version of \pilut{} was done by Karypis
