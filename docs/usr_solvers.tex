@@ -228,7 +228,9 @@ part and variable type. There are two V-cycle options, SMG and PFMG.
 \section{Hybrid}
 
 The hybrid solver is designed to detect whether a multigrid preconditioner
-is needed when solving a linear system.
+is needed when solving a linear system and possibly avoid the expensive setup
+of a preconditioner if a system can be solved efficiently with a diagonally
+scaled Krylov solver, e.g. a strongly diagonally dominant system. 
 It first uses a diagonally scaled Krylov solver, which can be chosen by the user
 (the default is conjugate gradient, but one should use GMRES if the matrix of the 
 linear system to be solved is nonsymmetric). It monitors how fast the Krylov solver
@@ -236,15 +238,23 @@ converges.
 If there is not sufficient progress, the algorithm switches to a preconditioned
 Krylov solver.
 
-This solver is both available through the structured and the ij interface,
-however under a different name.
+If used through the \code{Struct} interface, the solver is called StructHybrid
+and can be used with the preconditioners SMG and PFMG (default).
+It is called ParCSRHybrid, if used through the \code{IJ} interface and is used here
+with BoomerAMG.
+The user can determine the average convergence speed by setting a convergence tolerance $0 \leq \theta
+< 1$
+via the routine HYPRE$\_$StructHybridSetConvergenceTol or HYPRE$\_$StructParCSRHybridSetConvergenceTol.
+The default setting is 0.9.
 
-If used through the structured interface, it is called StructHybrid, and can be
-used with the preconditioners PFMG and SMG.
-
-If used through the IJ interface, it is called ParCSRHybrid and can be used with 
-the preconditioner BoomerAMG.
-
+The average convergence factor $\rho_i = \left({{\| r_i \|} \over {\| r_0 \|}}\right)^{1/i}$ is
+monitored within the chosen Krylov solver, where $r_i = b - Ax_{i}$ is the $i$-th residual.
+Convergence is considered too slow if the following condition is fulfilled
+\begin{equation}
+\left( 1 - {{|\rho_i - \rho_{i-1}|} \over { \max(\rho_i, \rho_{i-1})}} \right) \rho_i > \theta .
+\end{equation}
+When this condition is fulfilled the hybrid solver switches from a diagonally scaled 
+Krylov solver to a preconditioned solver.
 
 %-----------------------------------------------------------------------------
 
