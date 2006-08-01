@@ -5,6 +5,7 @@
 /*@version \TEX{\input{version}\HYPREVersion{}}*/
 
 //@{
+	//@Include: ./ref_license.h
 	//@Include: ../struct_mv/HYPRE_struct_mv.h
 	//@Include: ../sstruct_mv/HYPRE_sstruct_mv.h
 	//@Include: ../IJ_mv/HYPRE_IJ_mv.h

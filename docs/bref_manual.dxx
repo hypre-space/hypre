@@ -9,6 +9,13 @@
 /*--------------------------------------------------------------------------*/
 
 /**
+ * @name COPYRIGHT and LICENSE
+ **/
+//@{
+//@Include: ./ref_license.h
+//@}
+
+/**
  * @name Matrix and Vector Views (Conceptual Interfaces)
  **/
 //@{
