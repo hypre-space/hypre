@@ -513,6 +513,7 @@ void readMat(Mat_dh *Aout, char *ft, char *fn, int ignore)
     Mat_dhReadTriples(Aout, ignore, fn); CHECK_V_ERROR;
   } 
 
+  else if (!strcmp(ft, "ebin")) 
   {
     Mat_dhReadBIN(Aout, fn); CHECK_V_ERROR;
   } 
@@ -666,6 +667,7 @@ void readVec(Vec_dh *bout, char *ft, char *fn, int ignore)
     Vec_dhRead(bout, ignore, fn); CHECK_V_ERROR;
   } 
 
+  else if (!strcmp(ft, "ebin")) 
   {
     Vec_dhReadBIN(bout, fn); CHECK_V_ERROR;
   } 
@@ -723,6 +725,7 @@ void writeMat(Mat_dh Ain, char *ft, char *fn)
     Mat_dhPrintTriples(Ain, NULL, fn); CHECK_V_ERROR;
   } 
 
+  else if (!strcmp(ft, "ebin")) 
   {
     Mat_dhPrintBIN(Ain, NULL, fn); CHECK_V_ERROR;
   } 
@@ -767,6 +770,7 @@ void writeMat(Mat_dh Ain, char *ft, char *fn)
 
 #undef __FUNC__
 #define __FUNC__ "writeVec"
+void writeVec(Vec_dh bin, char *ft, char *fn)
 {
   START_FUNC_DH
   if (fn == NULL) {
@@ -775,9 +779,12 @@ void writeMat(Mat_dh Ain, char *ft, char *fn)
 
   if (!strcmp(ft, "csr")  ||  !strcmp(ft, "trip")) 
   {
+    Vec_dhPrint(bin, NULL, fn); CHECK_V_ERROR;
   } 
 
+  else if (!strcmp(ft, "ebin")) 
   {
+    Vec_dhPrintBIN(bin, NULL, fn); CHECK_V_ERROR;
   } 
 
 #ifdef PETSC_MODE
@@ -787,6 +794,7 @@ void writeMat(Mat_dh Ain, char *ft, char *fn)
     int ierr;
     Vec bb;
 
+    ierr = buildPetscVec(bin->n, bin->n, 0, bin->vals, &bb);
     if (ierr) { SET_V_ERROR("buildPetscVec failed!");  }
     ierr = ViewerBinaryOpen_DH(comm_dh, fn, BINARY_CREATE_DH, &viewer);
     if (ierr) { SET_V_ERROR("ViewerBinaryOpen failed! [PETSc lib]"); }

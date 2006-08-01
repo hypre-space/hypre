@@ -223,6 +223,7 @@ void Vec_dhPrintBIN(Vec_dh v, SubdomainGraph_dh sg, char *filename)
     SET_V_ERROR("not implemented for reordered vector; ensure sg=NULL");
   }
 
+  io_dh_print_ebin_vec_private(v->n, 0, v->vals, 
                                NULL, NULL, NULL, filename); CHECK_V_ERROR;
   END_FUNC_DH
 }
@@ -305,5 +306,6 @@ extern void Vec_dhReadBIN(Vec_dh *vout, char *filename)
 
   Vec_dhCreate(&tmp); CHECK_V_ERROR;
   *vout = tmp;
+  io_dh_read_ebin_vec_private(&tmp->n, &tmp->vals, filename); CHECK_V_ERROR;
   END_FUNC_DH
 }

@@ -57,14 +57,18 @@ void closeFile_dh(FILE *fpIN)
 }
 
 /*----------------------------------------------------------------*/
+void io_dh_print_ebin_mat_private(int m, int beg_row, 
                                 int *rp, int *cval, double *aval, 
                            int *n2o, int *o2n, Hash_i_dh hash, char *filename)
 {}
 
+extern void io_dh_read_ebin_mat_private(int *m, int **rp, int **cval, 
                                      double **aval, char *filename)
 {}
 
+void io_dh_print_ebin_vec_private(int n, int beg_row, double *vals, 
                            int *n2o, int *o2n, Hash_i_dh hash, char *filename)
 {}
 
+void io_dh_read_ebin_vec_private(int *n, double **vals, char *filename)
 {}

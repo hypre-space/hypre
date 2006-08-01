@@ -1021,6 +1021,7 @@ void Mat_dhPrintBIN(Mat_dh A, SubdomainGraph_dh sg, char *filename)
     SET_V_ERROR("not implemented for reordering; ensure sg=NULL");
   }
 
+  io_dh_print_ebin_mat_private(A->m, A->beg_row, A->rp, A->cval, A->aval,
                               NULL, NULL, NULL, filename); CHECK_V_ERROR;
   END_FUNC_DH
 }
@@ -1078,6 +1079,7 @@ void Mat_dhReadTriples(Mat_dh *mat, int ignore, char *filename)
 }
 
 /* here we pass the private function a filename, instead of an open file,
+   the reason being that Euclid's binary format is more complicated,
    i.e, the other "Read" methods are only for a single mpi task.
 */
 #undef __FUNC__
@@ -1092,6 +1094,7 @@ void Mat_dhReadBIN(Mat_dh *mat, char *filename)
   }
 
   Mat_dhCreate(&A); CHECK_V_ERROR;
+  io_dh_read_ebin_mat_private(&A->m, &A->rp, &A->cval, &A->aval, filename); CHECK_V_ERROR;
   A->n = A->m;
   *mat = A;
   END_FUNC_DH
