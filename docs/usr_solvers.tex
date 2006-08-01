@@ -249,7 +249,7 @@ The default setting is 0.9.
 
 The average convergence factor $\rho_i = \left({{\| r_i \|} \over {\| r_0 \|}}\right)^{1/i}$ is
 monitored within the chosen Krylov solver, where $r_i = b - Ax_{i}$ is the $i$-th residual.
-Convergence is considered too slow if the following condition is fulfilled
+Convergence is considered too slow when
 \begin{equation}
 \left( 1 - {{|\rho_i - \rho_{i-1}|} \over { \max(\rho_i, \rho_{i-1})}} \right) \rho_i > \theta .
 \end{equation}
@@ -719,10 +719,11 @@ yet fully functional (i.e, don't use them until further notice).
 \section{\pilut: Parallel Incomplete Factorization}
 \label{PILUT}
 
-Note that this code is no longer supported by the \hypre{} team. We recommend to 
+{\bf Note:} this code is no longer supported by the \hypre{} team. We recommend to 
 use Euclid instead, which is more versatile and in general more efficient, especially
 when used with many processors.
 
+\vspace{.3in}
 \pilut{} is a parallel preconditioner based on Saad's dual-threshold incomplete
 factorization algorithm. The original version of \pilut{} was done by Karypis
 and Kumar \cite{GKarypis_VKumar_1998} in terms of the Cray SHMEM library. The
