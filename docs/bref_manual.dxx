@@ -1,19 +1,14 @@
 /**
 @name {\it hypre} Reference Manual
+
+HYPRECopyright
+
 @version HYPREVersion
 */
-/*@version \TEX{\input{version}\HYPREVersion{}}*/
 
 //@{
 
 /*--------------------------------------------------------------------------*/
-
-/**
- * @name COPYRIGHT and LICENSE
- **/
-//@{
-//@Include: ./ref_license.h
-//@}
 
 /**
  * @name Matrix and Vector Views (Conceptual Interfaces)
