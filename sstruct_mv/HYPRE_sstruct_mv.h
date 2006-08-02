@@ -47,7 +47,6 @@ extern "C" {
  * a linear system.
  *
  * @memo A semi-structured-grid conceptual interface
- * @author Robert D. Falgout
  **/
 /*@{*/
 
