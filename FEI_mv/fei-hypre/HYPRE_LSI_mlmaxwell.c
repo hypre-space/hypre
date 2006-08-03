@@ -248,10 +248,11 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
     int               i, j, ncnt, colindex, rowLeng, rowindex;
     int               nRows, *rowptr, *colInd;
     double            *colVal;
+
+#ifdef HAVE_MLMAXWELL
     MLMaxwell_Context *context;
     HYPRE_ML_Matrix   *Amat;
 
-#ifdef HAVE_MLMAXWELL
     ML_Operator *ml_op = (ML_Operator *) obj;
     context = (MLMaxwell_Context *) ML_Get_MyGetrowData(ml_op);
     Amat    = (HYPRE_ML_Matrix*) context->Amat;

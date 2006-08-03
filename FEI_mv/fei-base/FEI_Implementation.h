@@ -1,3 +1,29 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 #ifndef _FEI_Implementation_h_
 #define _FEI_Implementation_h_
 
@@ -107,7 +133,6 @@ class FEI_Implementation : public FEI_SNL {
     /** Set the type of solve to be performed.
         This distinguishes between a 'standard' single solve of Ax=b,
         an eigen-solve (not yet supported), an 'aggregate-sum' solve
-        (a linear-combination of several separate A's and b's), and an
         'aggregate-product' solve (not supported).
         @param solveType currently supported values for this are:
                           FEI_SINGLE_SOLVE, FEI_AGGREGATE_SUM
@@ -175,7 +200,6 @@ class FEI_Implementation : public FEI_SNL {
                 GlobalID elemID,
                 const GlobalID* elemConn);
 
-   /** Advise the FEI that a nodal variable is slaved to a linear combination
        of other variables, plus a right-hand-side value (note that the rhsValue
        will often be zero). Since a field may contain more than one scalar
        component, the particular scalar equation that's being slaved must be
@@ -674,7 +698,6 @@ class FEI_Implementation : public FEI_SNL {
 
 // Equation solution services.....................................
 
-   /** set scalar coefficients for forming aggregate (linear-combination)
      system of matrices. */
    int setMatScalars(int numScalars,
                      const int* IDs, 

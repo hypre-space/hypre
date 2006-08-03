@@ -1,10 +1,35 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 #ifndef _Utils_h_
 #define _Utils_h_
 
 #include "base/feiArray.h"
 
 template<class T>
-int Utils_binary_search(T item, const T* list, int len, int& insertPoint)
 {
   if (len == 0) {
     insertPoint = 0;
@@ -39,7 +64,6 @@ int Utils_binary_search(T item, const T* list, int len, int& insertPoint)
 }
 
 template<class T>
-int Utils_binary_search(T item, const T** list, int len, int& insertPoint)
 {
   if (len == 0) {
     insertPoint = 0;
@@ -74,7 +98,6 @@ int Utils_binary_search(T item, const T** list, int len, int& insertPoint)
 }
 
 template<class T>
-int Utils_binary_search(T item, const T* list, int len)
 {
   if (len == 0) return(-1);
 
@@ -98,26 +121,19 @@ int Utils_binary_search(T item, const T* list, int len)
 }
 
 template<class T>
-class Utils_binary_search_object {
  public:
-  virtual ~Utils_binary_search_object() {}
 
   int operator() (T item, const T* list, int len)
     {
-      return( Utils_binary_search(item, list, len) );
     }
 
   int operator() (T item, const T* list, int len, int& insertPoint)
     {
-      return( Utils_binary_search(item, list, len, insertPoint) );
     }
 };
 
-template<class T, class binary_searcher>
-int Utils_insert_sorted(T item, feiArray<T>& list, binary_searcher bin_search)
 {
   int insertPoint = -1;
-  int position = bin_search(item, list.dataPtr(),  list.length(), insertPoint);
 
   if (position >= 0) return(-1);
   else {
@@ -161,7 +177,6 @@ int Utils_merge_sorted_arrays(feiArray<T>& input, feiArray<T>& dest,
   for(i=0; i<input_len; i++) {
     T next_value = input_ptr[i];
 
-    dest_offset = Utils_binary_search(next_value, old_dest_ptr+search_offset,
 				      end-search_offset, insertPoint);
 
     if (dest_offset < 0) {
@@ -200,7 +215,6 @@ int Utils_merge_sorted_arrays(feiArray<T>& input, feiArray<T>& dest,
     end = offset;
 
     if (i > 0) {
-      Utils_binary_search(work_ptr[i-1], dest_ptr, end, offset);
     }
   }
 
