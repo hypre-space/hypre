@@ -29,6 +29,10 @@ which is accomplished by:
    make
 \end{verbatim}
 
+NOTE: when executing on an IBM platform \file{configure} must be executed under 
+the nopoe script (\file{./nopoe ./configure <option> ...<option>}) to force a single 
+task to be run on the log-in node.
+
 There are many options to \file{configure} and \file{make} to customize such 
 things as installation directories, compilers used, compile and load flags, etc.
 
@@ -56,8 +60,8 @@ will be copied into the default directories, \file{src/hypre/lib} and
 
 When building HYPRE using the install target, the libraries and include files 
 will be copied into the directories that the user specified in the options to 
-\file{configure}, e.g. --prefix=/usr/apps.  If none were specified the default 
-directories are used, \file{src/hypre/lib} and \file{src/hypre/include}.
+\file{configure}, e.g. \file{--prefix=/usr/apps}.  If none were specified the default 
+directories, \file{src/hypre/lib} and \file{src/hypre/include}, are used.
 
 %-----------------------------
 
@@ -75,25 +79,20 @@ the following options:
 
 \begin{verbatim}
    Specifying BLAS only:
-      ./configure  --with-blas-lib="essl" --with-blas-lib-dirs="/usr/lib"
+      ./configure  --with-blas-lib="blas-lib-name" --with-blas-lib-dirs="path-to-blas-lib"
 
    Specifying LAPACK only:
-      ./configure  --with-lapack-lib="lapack" --with-lapack-lib-dirs="/usr/local/lib"
+      ./configure  --with-lapack-lib="lapack-lib-name" --with-lapack-lib-dirs="path-to-lapack-lib"
 
    Specifying both BLAS and LAPACK:
-      ./configure  --with-blas-lib="essl" --with-blas-lib-dirs="/usr/lib" \
-                   --with_lapack-lib="lapack"  --with-lapack-lib-dirs="/usr/local/lib"
+      ./configure  --with-blas-lib="blas-lib-name" --with-blas-lib-dirs="path-to-blas-lib" \
+                   --with-lapack-lib="lapack-lib-name" --with-lapack-lib-dirs="path-to-lapack-lib"
 \end{verbatim}
 
 
 The output from \file{configure} is several pages long.  It reports the system type 
 being used for building and executing, compilers being used, libraries being searched,
 option flags being set, etc.  
-
-
-NOTE: when executing on an IBM platform \file{configure} must be executed under 
-the nopoe script (\file{./nopoe ./configure <option> ...<option>}) to force a single 
-task to be run on the log-in node.
 
 %-----------------------------
 
@@ -150,7 +149,7 @@ where \hypre{} is installed, (default is \kbd{hypre}, or as defined by the confi
 option \kbd{--prefix=PREFIX}. 
 
 We strongly recommend that users link with libHYPRE.a rather than specifying each 
-of the seperate \hypre{} libraries, i.e.  libHYPRE\_krylov.a, libHYPRE\_parcsr\_mv.a,
+of the separate \hypre{} libraries, i.e.  libHYPRE\_krylov.a, libHYPRE\_parcsr\_mv.a,
 etc.  By using libHYPRE.a the user is guaranteed to have all capabilities without
 having to change their link flags.
 
