@@ -216,7 +216,7 @@ int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
     for (i = 0; i < Amat->recvProcCnt; i++) length += Amat->recvLeng[i];
     dbuf = (double *) malloc(length * sizeof(double));
     for (i = 0; i < nRows; i++) dbuf[i] = p[i];
-    ML_ExchBdry(dbuf, obj);
+    ML_ExchBdry(dbuf, (void *) context);
     for (i = 0 ; i < nRows; i++) 
     {
        sum = 0.0;
