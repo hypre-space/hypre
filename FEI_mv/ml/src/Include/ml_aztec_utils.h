@@ -1,3 +1,29 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 /********************************************************************* */
 /* See the file COPYRIGHT for a complete copyright notice, contact      */
 /* person and disclaimer.                                               */        
@@ -84,13 +110,10 @@ extern struct AZ_PREC_STRUCT   *AZ_precond_create(struct AZ_MATRIX_STRUCT *Pmat,
 
 extern void AZ_matrix_destroy( struct AZ_MATRIX_STRUCT **Amat);
 extern void AZ_precond_destroy(struct AZ_PREC_STRUCT **precond);
-extern void AZ_set_MSR(AZ_MATRIX *Amat, int bindx[], double val[],
         int data_org[]);
 
 extern void AZ_set_VBR(AZ_MATRIX *Amat, int rpntr[], int cpntr[], int bpntr[],
-        int indx[], int bindx[], double val[], int data_org[]);
 
-extern int AZ_block_MSR(int **param_bindx, double **param_val,
                  int N_update, int num_PDE_eqns, int *update);
 
 #define mdwrap_wait(a,b,c,x,y,z)   md_wrap_wait(a,b,c,(x),(y),(z))
@@ -161,7 +184,6 @@ extern int ML_MSR_sym_diagonal_scaling(AZ_MATRIX *Amat,
 
 extern int ML_MSR_scalesol(double *x, double *scale_vect,int length);
 extern int ML_MSR_scalerhs(double *x, double *scale_vect,int length);
-extern int AZ_block_MSR(int **param_bindx, double **param_val,
 			int N_update, int num_PDE_eqns, int *update);
 
 
@@ -171,20 +193,15 @@ extern int  wrapper_DCSR_getrow(int columns[], double values[], int row_lengths[
 extern void wrapper_DCSR_matvec(double *b, double *c,AZ_MATRIX *Amat,
                      int proc_config[]);
 extern void AZ_transform_norowreordering(int proc_config[], int *external[],
-    int bindx[], double val[], int update[], int *update_index[],
 	int *extern_index[], int *data_org[], int N_update, int indx[], int bnptr[],
 	int rnptr[], int *cnptr[], int mat_type);
 extern void AZ_input_msr_matrix_nodiag(char datafile[], int update[],
-	double **val, int **bindx, 
 	int N_update, int proc_config[]);
 extern void AZ_add_new_row_nodiag(int therow, int *nz_ptr, int *current,
-	double **val, int **bindx, char *input, FILE *dfp, int *msr_len,
 	int *column0);
-extern void ML_find_local_indices(int N_update, int bindx[], int update[],
 	int *sorted_ext, int N_external, int map[], int start, int end);
 
 extern void AZ_Tmat_transform2ml(int Nexterns, int global_node_externs[], int *reordered_node_externs,
-			    int Tmat_bindx[], double Tmat_val[], int rowptr[], int Nlocal_nodes,
 				 int global_node_inds[], ML_Comm *comm, int Nlocal_edges,
 				 ML_Operator **Tmat);
 
