@@ -428,9 +428,8 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
 
    if (assemble_flag == 0)
    {
-      hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_error_in_arg(1);
       printf("Error! Matrix not assembled yet! HYPRE_IJMatrixGetValues\n");
-      exit(1);
    }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -481,9 +480,8 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
 			offd_i[row_local+1]-offd_i[row_local];
             if (counter[i]+row_size > counter[nrows])
 	    {
-               hypre_error(HYPRE_ERROR_MEMORY);
+               hypre_error_in_arg(1);
 	       printf ("Error! Not enough memory! HYPRE_IJMatrixGetValues\n");
-	       exit(1);
 	    }
             if (ncols[i] < row_size)
 		warning = 1;
@@ -645,9 +643,8 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
 #endif
    if (nrows < 0)
    {
-      hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_error_in_arg(2);
       printf("Error! nrows negative! HYPRE_IJMatrixSetValues\n");
-      exit(1);
    }
 
    if (hypre_IJMatrixAssembleFlag(matrix))
@@ -695,7 +692,6 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
                hypre_error(HYPRE_ERROR_GENERIC);
       	       printf (" row %d too long! \n", row);
                return hypre_error_flag;
-      	       /* return -1; */
             }
        
             pos_diag = diag_i[row_local];
@@ -717,7 +713,6 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
       	             printf (" Error, element %d %d does not exist\n",
 				row, cols[indx]);
                      return hypre_error_flag;
-      	             /* return -1; */
       	          }
       	          for (j=pos_offd; j < len_offd; j++)
       	          {
@@ -734,7 +729,6 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
       	             printf (" Error, element %d %d does not exist\n",
 				row, cols[indx]);
                      return hypre_error_flag;
-      	             /* return -1; */
       	          }
       	          not_found = 1;
                }
@@ -2726,7 +2720,7 @@ hypre_FillResponseIJOffProcValsDouble(void *p_recv_contact_buf,
    /*check to see if we need to allocate more space in send_proc_obj for vec starts*/
    if (send_proc_obj->length == send_proc_obj->storage_length)
    {
-      send_proc_obj->storage_length +=20; /*add space for 10 more contact*/
+      send_proc_obj->storage_length +=20; /*add space for 20 more contact*/
       send_proc_obj->vec_starts = hypre_TReAlloc(send_proc_obj->vec_starts,int, 
                                   send_proc_obj->storage_length + 1);
    }
