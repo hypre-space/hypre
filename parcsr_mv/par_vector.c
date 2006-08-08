@@ -68,6 +68,10 @@ hypre_ParVectorCreate(  MPI_Comm comm,
 #endif
    }
 
+
+   hypre_ParVectorAssumedPartition(vector) = NULL;
+   
+
    hypre_ParVectorComm(vector) = comm;
    hypre_ParVectorGlobalSize(vector) = global_size;
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -127,6 +131,12 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
       {
          hypre_TFree(hypre_ParVectorPartitioning(vector));
       }
+
+      if (hypre_ParVectorAssumedPartition(vector))
+         hypre_ParVectorDestroyAssumedPartition(vector);
+
+
+
       hypre_TFree(vector);
    }
 

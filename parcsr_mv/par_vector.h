@@ -34,6 +34,7 @@
 #ifndef hypre_PAR_VECTOR_HEADER
 #define hypre_PAR_VECTOR_HEADER
 
+
 /*--------------------------------------------------------------------------
  * hypre_ParVector
  *--------------------------------------------------------------------------*/
@@ -52,6 +53,12 @@ typedef struct
    int      	 owns_data;
    int      	 owns_partitioning;
 
+   hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
+                                              is used (compile-time option) AND this partition
+                                              needed
+                                              (for setting off-proc elements, for example)*/
+
+
 } hypre_ParVector;
 
 /*--------------------------------------------------------------------------
@@ -69,7 +76,7 @@ typedef struct
 #define hypre_ParVectorNumVectors(vector)\
  (hypre_VectorNumVectors( hypre_ParVectorLocalVector(vector) ))
 
-
+#define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
 
 #endif

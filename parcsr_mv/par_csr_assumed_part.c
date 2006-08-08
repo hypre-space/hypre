@@ -492,3 +492,90 @@ hypre_GetAssumedPartitionRowRange( int proc_id, int global_num_rows,
 }
 
 
+/*--------------------------------------------------------------------
+ * hypre_ParVectorCreateAssumedPartition -
+
+ * Essentially the same as for a matrix!
+
+ * Each proc gets it own range. Then 
+ * each needs to reconcile its actual range with its assumed
+ * range - the result is essentila a partition of its assumed range -
+ * this is the assumed partition.   
+ *--------------------------------------------------------------------*/
+
+
+int
+hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector) 
+{
+
+
+   int global_num;
+   int myid;
+   int  start=0, end=0;
+
+   MPI_Comm   comm;
+   
+   hypre_IJAssumedPart *apart;
+
+   global_num = hypre_ParVectorGlobalSize(vector); 
+   comm = hypre_ParVectorComm(vector);
+   
+   /* find out my actualy range of rows */
+   start =  hypre_ParVectorFirstIndex(vector);
+   end = hypre_ParVectorLastIndex(vector);
+   
+   MPI_Comm_rank(comm, &myid );
+
+   /* allocate space */
+   apart = hypre_CTAlloc(hypre_IJAssumedPart, 1);
+
+  /* get my assumed partitioning  - we want partitioning of the vector that the
+      matrix multiplies - so we use the col start and end */
+   hypre_GetAssumedPartitionRowRange( myid, global_num, &(apart->row_start), 
+                                             &(apart->row_end));
+
+  /*allocate some space for the partition of the assumed partition */
+    apart->length = 0;
+    /*room for 10 owners of the assumed partition*/ 
+    apart->storage_length = 10; /*need to be >=1 */ 
+    apart->proc_list = hypre_TAlloc(int, apart->storage_length);
+    apart->row_start_list =   hypre_TAlloc(int, apart->storage_length);
+    apart->row_end_list =   hypre_TAlloc(int, apart->storage_length);
+
+
+    /* now we want to reconcile our actual partition with the assumed partition */
+    hypre_LocateAssummedPartition(start, end, global_num, apart, myid);
+
+    /* this partition will be saved in the vector data structure until the vector is destroyed */
+    hypre_ParVectorAssumedPartition(vector) = apart;
+   
+    return hypre_error_flag;
+
+
+}
+
+/*--------------------------------------------------------------------
+ * hypre_ParVectorDestroyAssumedPartition
+ *--------------------------------------------------------------------*/
+int 
+hypre_ParVectorDestroyAssumedPartition(hypre_ParVector *vector )
+{
+
+   hypre_IJAssumedPart *apart;
+   
+   apart = hypre_ParVectorAssumedPartition(vector);
+   
+
+   if(apart->storage_length > 0) 
+   {      
+      hypre_TFree(apart->proc_list);
+      hypre_TFree(apart->row_start_list);
+      hypre_TFree(apart->row_end_list);
+      hypre_TFree(apart->sort_index);
+   }
+
+   hypre_TFree(apart);
+   
+   return hypre_error_flag;
+
+}

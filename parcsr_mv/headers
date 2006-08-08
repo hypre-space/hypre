@@ -55,6 +55,7 @@ extern "C" {
 #===========================================================================
 
 cat par_csr_communication.h   >> $INTERNAL_HEADER	
+cat par_csr_assumed_part.h    >> $INTERNAL_HEADER
 cat new_commpkg.h             >> $INTERNAL_HEADER
 cat par_vector.h              >> $INTERNAL_HEADER	
 cat par_csr_matrix.h          >> $INTERNAL_HEADER	
