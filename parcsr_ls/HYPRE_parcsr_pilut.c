@@ -48,8 +48,10 @@
   functions are publically provided. AJC, 5/99 */
 /* Likewise for Vector. AJC, 5/99 */
 #include "../seq_mv/vector.h"
-#include "../parcsr_mv/par_vector.h"
 
+/* AB 8/06 - replace header file */
+/* #include "../parcsr_mv/par_vector.h" */
+#include "../parcsr_mv/parcsr_mv.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRPilutCreate
