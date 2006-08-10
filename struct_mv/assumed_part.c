@@ -650,7 +650,8 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
    double            *fraction_full;
    int               *order;
    int                myid, num_procs, est_size;
-   int                new, regions_intact;
+   int                new;
+   /* int  regions_intact; */
 
       
    hypre_BoxArray    *tmp_array;
@@ -789,9 +790,9 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
 
    }
 
-   /*number of regions intact (beginning of region array is intact)- 
-     may need to return this*/
-   regions_intact = init_num_regions - count;
+   /* TO DO: number of regions intact (beginning of region array is intact)- 
+     may return this eventually*/
+   /* regions_intact = init_num_regions - count;*/
    
   
    /* clean up */
