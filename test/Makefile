@@ -263,7 +263,7 @@ install:
 
 clean:
 	rm -f *.o
-	rm -rf pchdir tca.map *inslog*
+	rm -rf pchdir tca.map *inslog* .libs
 
 distclean: clean
 	rm -f ${HYPRE_DRIVER_EXECS}

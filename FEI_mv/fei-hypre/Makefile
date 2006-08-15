@@ -198,7 +198,7 @@ install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 
 clean:
 	rm -rf *.o *.lo libHYPRE*
-	rm -rf pchdir tca.map *inslog*
+	rm -rf pchdir tca.map *inslog* .libs
 
 distclean: clean
 

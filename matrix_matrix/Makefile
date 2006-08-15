@@ -64,7 +64,7 @@ install: libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}
 
 clean:
 	rm -f *.o *.lo lib*
-	rm -rf pchdir tca.map *inslog*
+	rm -rf pchdir tca.map *inslog* .libs
 
 distclean: clean
 
