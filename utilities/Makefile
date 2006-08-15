@@ -79,7 +79,7 @@ UTIL_FILES =\
 
 FILES = ${UTIL_FILES}
 
-OBJS = ${FILES:.c=.o}
+OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
 
 ##################################################################
 # Targets
@@ -98,7 +98,7 @@ install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE* f2c.h *blas.h *lapack.h 
+	rm -f *.o *.lo libHYPRE* f2c.h *blas.h *lapack.h 
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -109,7 +109,7 @@ distclean: clean
  
 libHYPRE_utilities${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
-	${AR} $@ *.o
+	${AR} $@ *${HYPRE_OBJ_SUFFIX}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

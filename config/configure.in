@@ -1051,14 +1051,26 @@ else
 fi
 
 dnl *********************************************************************
+dnl * Set default link commands and suffix values
+dnl *********************************************************************
+LINK_F77="${F77}"
+LINK_CC="${CC}"
+LINK_CXX="${CXX}"
+
+HYPRE_LIBSUFFIX=".a"
+HYPRE_OBJSUFFIX=".o"
+
+dnl *********************************************************************
 dnl * Set flags if needed to enable shared libraries 
 dnl *********************************************************************
 if test "$casc_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-   HYPRE_SET_SHARED_FLAGS
-else
-   HYPRE_LIBSUFFIX=".a"
+   HYPRE_OBJSUFFIX=".lo"
+   HYPRE_LIBTOOL="libtool --mode=compile"
+   LINK_F77="libtool --mode=link ${F77}"
+   LINK_CC="libtool --mode=link ${CC}"
+   LINK_CXX="libtool --mode=link ${CXX}"
 fi
 
 dnl *********************************************************************
@@ -1071,11 +1083,9 @@ then
    then
       HYPRE_REVERSE_FLIBS
    fi
+   LINK_F77="insure ${casc_insure_flags}"
    LINK_CC="insure ${casc_insure_flags}"
    LINK_CXX="insure ${casc_insure_flags}"
-else
-   LINK_CC="${CC}"
-   LINK_CXX="${CXX}"
 fi
 
 dnl *********************************************************************
@@ -1228,8 +1238,11 @@ AC_SUBST(CXXFLAGS)
 AC_SUBST(F77FLAGS)
 AC_SUBST(LDFLAGS)
 
+AC_SUBST(LINK_F77)
 AC_SUBST(LINK_CC)
 AC_SUBST(LINK_CXX)
+
+AC_SUBST(HYPRE_LIBTOOL)
 
 dnl *********************************************************************
 dnl * Installation Directories
@@ -1254,6 +1267,7 @@ dnl *********************************************************************
 dnl * suffix for hypre libraries
 dnl *********************************************************************
 AC_SUBST(HYPRE_LIBSUFFIX)
+AC_SUBST(HYPRE_OBJSUFFIX)
 
 dnl *********************************************************************
 dnl * MPI-related header files and libraries and directories for

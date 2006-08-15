@@ -70,8 +70,8 @@ EXTRA_FILES =
 
 DRIVER_FILES =
 
-OBJS = ${FILES:.c=.o}
-DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
+OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+DRIVER_OBJS = ${DRIVER_FILES:.c=${HYPRE_OBJ_SUFFIX}}
 
 ##################################################################
 # Targets
@@ -82,11 +82,6 @@ all: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
  
-mytest: mytest.o libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
-	@echo  "Linking" $@ "... "
-	${CC} -o mytest mytest.o ${LFLAGS} 
- 
-
 driver: driver.o libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS} 
@@ -117,7 +112,7 @@ install: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE_* $(HYPRE_LIB_INSTALL)/.
  
 clean:
-	rm -f *.o libHYPRE_*
+	rm -f *.o *.lo libHYPRE_*
 	rm -f driver driver_matvec driver_matmul
 
 distclean: clean

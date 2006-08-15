@@ -61,8 +61,8 @@ FILES =\
 DRIVER_FILES =\
  driver.c
 
-OBJS = ${FILES:.c=.o}
-DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
+OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+DRIVER_OBJS = ${DRIVER_FILES:.c=${HYPRE_OBJ_SUFFIX}}
 
 ##################################################################
 # Targets
@@ -82,7 +82,7 @@ install: all
 	@cp -f libHYPRE_* $(HYPRE_LIB_INSTALL)/.
  
 clean:
-	@rm -f *.o lib* driver
+	@rm -f *.o *.lo lib* driver
 
 veryclean: clean
 

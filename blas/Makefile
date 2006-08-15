@@ -58,21 +58,21 @@ dtrsm.c\
 dtrsv.c\
 idamax.c
 
-OBJS = ${BLAS_FILES:.c=.o}
+OBJS = ${BLAS_FILES:.c=${HYPRE_OBJ_SUFFIX}}
 
 ##################################################################
 # Targets
 ##################################################################
 
 all: ${OBJS}
-	cp -fp *.o ${HYPRE_SRC_TOP_DIR}/utilities
+	cp -fp *${HYPRE_OBJ_SUFFIX} ${HYPRE_SRC_TOP_DIR}/utilities
 	cp -fp *.h ${HYPRE_BUILD_DIR}/include
 
 install: all
 	cp -fp *.h ${HYPRE_INC_INSTALL}/include
 
 clean:
-	rm -f *.o
+	rm -f *.o *.lo
 
 distclean: clean
 

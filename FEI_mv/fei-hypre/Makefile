@@ -163,8 +163,8 @@ FILESCXX = \
  hypre_schur_reduce.cxx\
  hypre_slide_reduce.cxx
 
-OBJSC = ${FILESC:.c=.o}
-OBJSCXX = ${FILESCXX:.cxx=.o}
+OBJSC = ${FILESC:.c=${HYPRE_OBJ_SUFFIX}}
+OBJSCXX = ${FILESCXX:.cxx=${HYPRE_OBJ_SUFFIX}}
 OBJS = ${OBJSC} ${OBJSCXX}
 
 ##################################################################
@@ -197,7 +197,7 @@ install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	@echo  ""
 
 clean:
-	rm -rf *.o libHYPRE*
+	rm -rf *.o *.lo libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

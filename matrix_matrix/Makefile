@@ -48,7 +48,7 @@ FILES =\
  HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
  HYPRE_ConvertPETScMatrixToDistributedMatrix.c
 
-OBJS = ${FILES:.c=.o}
+OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
 
 ##################################################################
 # Targets
@@ -63,7 +63,7 @@ install: libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o lib*
+	rm -f *.o *.lo lib*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

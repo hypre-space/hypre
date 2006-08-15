@@ -137,9 +137,9 @@ FILES =\
  mli_solver_arpacksuperlu.cxx\
  mli_vector.cxx
 
-OBJSC = ${FILES:.c=.o}
-OBJSCXX = ${OBJSC:.cxx=.o}
-OBJS = ${OBJSCXX:.f=.o}
+OBJSC = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJSCXX = ${OBJSC:.cxx=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${OBJSCXX:.f=${HYPRE_OBJ_SUFFIX}}
 
 ##################################################################
 # Targets
@@ -153,7 +153,7 @@ install: libHYPRE_mli${HYPRE_LIB_SUFFIX}
 	@echo  " "
 
 clean:
-	rm -f *.o *.h *.c *.f *.cxx libHYPRE*
+	rm -f *.o *.lo *.h *.c *.f *.cxx libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

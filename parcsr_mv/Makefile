@@ -82,8 +82,8 @@ DRIVER_FILES =\
  driver_matvec.c\
  driver_multivec.c
 
-OBJS = ${FILES:.c=.o}
-DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
+OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+DRIVER_OBJS = ${DRIVER_FILES:.c=${HYPRE_OBJ_SUFFIX}}
 
 ##################################################################
 # Targets
@@ -124,7 +124,7 @@ install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
  
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o *.lo libHYPRE*
 	rm -f driver driver_matvec driver_matmul
 	rm -rf pchdir tca.map *inslog*
 
