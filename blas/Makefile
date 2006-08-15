@@ -72,7 +72,7 @@ install: all
 	cp -fp *.h ${HYPRE_INC_INSTALL}/include
 
 clean:
-	rm -f *.o *.lo .libs
+	rm -rf *.o *.lo .libs
 
 distclean: clean
 
