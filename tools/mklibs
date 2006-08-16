@@ -150,13 +150,13 @@ fi
 
 if [ "$SKIPEXT" != "1" ]
 then
-if [ -f $TAR_FILE ]
-then
-  gzip -cd $TAR_FILE | tar xof -
-else
-  echo "Error: HypreArchiveFile does not exist"
-  exit
-fi
+   if [ -f $TAR_FILE ]
+   then
+      gzip -cd $TAR_FILE | tar xof -
+   else
+      echo "Error: HypreArchiveFile does not exist"
+      exit
+   fi
 fi
 
 DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
