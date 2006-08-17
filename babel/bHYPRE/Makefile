@@ -64,13 +64,13 @@ HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
 FILES = ${IMPLSRCS} ${IORSRCS_NONNULL} ${SKELSRCS} ${STUBSRCS} \
  bHYPRE_Extensions.c
 
-OBJS = ${FILES:.c=.o}
+OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
 
 ##################################################################
 # Targets
 ##################################################################
 
-all: libbHYPRE.a
+all: libbHYPRE${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include
 	cp -fp libbHYPRE* ${HYPRE_BUILD_DIR}/lib
  
@@ -79,7 +79,7 @@ install: all
 	cp -fp libbHYPRE* ${HYPRE_LIB_INSTALL}
  
 clean:
-	rm -f *.o libbHYPRE*
+	rm -f *.o *.lo libbHYPRE*
 
 distclean: clean
 
@@ -91,5 +91,10 @@ libbHYPRE.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libbHYPRE.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${LINK_CC} -o $@ ${OBJS} -L${HYPRE_LIB_INSTALL} -lHYPRE -lsidl-0.10.12
+
 
 ${OBJS}: ${HEADERS}
