@@ -534,8 +534,8 @@ int HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(
  * @name SStruct Split Solver
  **/
 
-#define HYPRE_SMG  0
-#define HYPRE_PFMG 1
+#define HYPRE_SMG  11
+#define HYPRE_PFMG 10
 
 int HYPRE_SStructSplitCreate(MPI_Comm             comm,
                              HYPRE_SStructSolver *solver);
