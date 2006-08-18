@@ -54,9 +54,7 @@
 #define HYPRE_ISIS    9911
 #define HYPRE_PETSC   9933
 
-/* 
- *  #define HYPRE_PFMG    10
- *  #define HYPRE_SMG     11
-*/
+#define HYPRE_PFMG    10
+#define HYPRE_SMG     11
 
 #endif
