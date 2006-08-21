@@ -34,9 +34,11 @@
 #=============================================================================
 
 Version 1.12.0a released, 2006/07/26.
-- AMS options included
+
+- First release of AMS -- a new solver for (semi)definite Maxwell problems.
 
 Version 1.11.1b released, 2006/05/30.
+
 - Corrected FEI build to allow user to specify a system FEI and build internal 
   HYPRE routines.
 
