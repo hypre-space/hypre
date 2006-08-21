@@ -1698,15 +1698,21 @@ main( int   argc,
    /* reset matrix values so that stencil connections between two parts are zeroed */
    for (part= data.nparts-1; part> 0; part--)
    {
-      hypre_FacZeroCFSten(hypre_SStructMatrixPMatrix(A, part),
+      /*hypre_FacZeroCFSten(hypre_SStructMatrixPMatrix(A, part),
                           hypre_SStructMatrixPMatrix(A, part-1),
                           grid,
                           part,
                           prefinements[part]);
-      hypre_FacZeroFCSten(hypre_SStructMatrixPMatrix(A, part),
+       hypre_FacZeroFCSten(hypre_SStructMatrixPMatrix(A, part),
                           grid,
-                          part);
-      hypre_ZeroAMRMatrixData(A, part-1, prefinements[part]);
+                          part); 
+       hypre_ZeroAMRMatrixData(A, part-1, prefinements[part]); */
+
+      HYPRE_SStructFACZeroCFSten(A, grid, part, prefinements[part]);
+      HYPRE_SStructFACZeroFCSten(A,
+                                 grid,
+                                 part);
+      HYPRE_SStructFACZeroAMRMatrixData(A, part-1, prefinements[part]);
    }
                           
    HYPRE_SStructMatrixAssemble(A);
@@ -1778,7 +1784,9 @@ main( int   argc,
          }
       }
    }
-   hypre_ZeroAMRVectorData(b, plevels, prefinements);
+   /*hypre_ZeroAMRVectorData(b, plevels, prefinements);*/
+   HYPRE_SStructFACZeroAMRVectorData(b, plevels, prefinements);
+
    HYPRE_SStructVectorAssemble(b);
 
    if ( ((solver_id >= 20) && (solver_id <= 30)) ||
@@ -1839,7 +1847,8 @@ main( int   argc,
          }
       }
    }
-   hypre_ZeroAMRVectorData(x, plevels, prefinements);
+   /*hypre_ZeroAMRVectorData(x, plevels, prefinements);*/
+   HYPRE_SStructFACZeroAMRVectorData(x, plevels, prefinements);
    HYPRE_SStructVectorAssemble(x);
 
 
@@ -1961,9 +1970,11 @@ main( int   argc,
    {
       time_fac_rap = hypre_InitializeTiming("fac rap");
       hypre_BeginTiming(time_fac_rap);
-      hypre_AMR_RAP(A, prefinements, &fac_A);
-      hypre_ZeroAMRVectorData(b, plevels, prefinements);
-      hypre_ZeroAMRVectorData(x, plevels, prefinements);
+      HYPRE_SStructFACAMR_RAP(A, prefinements, &fac_A);
+      /*hypre_ZeroAMRVectorData(b, plevels, prefinements);
+      hypre_ZeroAMRVectorData(x, plevels, prefinements);*/
+      HYPRE_SStructFACZeroAMRVectorData(b, plevels, prefinements);
+      HYPRE_SStructFACZeroAMRVectorData(x, plevels, prefinements);
       hypre_EndTiming(time_fac_rap);
       hypre_PrintTiming("fac rap", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_fac_rap);
@@ -2015,7 +2026,7 @@ main( int   argc,
       HYPRE_SStructFACSetLogging(solver, 1);
       HYPRE_SStructFACSetup2(solver, fac_A, b, x);
       
-      hypre_FacZeroCData(solver, fac_A, b, x);
+      /*hypre_FacZeroCData(solver, fac_A, b, x);*/
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);

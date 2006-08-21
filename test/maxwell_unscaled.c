@@ -1712,11 +1712,9 @@ main( int   argc,
    HYPRE_SStructMaxwellPhysBdy(&grid, 1, data.rfactor,
                                &bdryRanks, &bdryRanksCnt);
 
-   HYPRE_ParCSRMatrixEliminateRowsCols(parA, bdryRanksCnt[0], bdryRanks[0]);
+   HYPRE_SStructMaxwellEliminateRowsCols(parA, bdryRanksCnt[0], bdryRanks[0]);
 
-   HYPRE_ParCSRMatrixEliminateRowsCols(parA, bdryRanksCnt[0], bdryRanks[0]);
-                                                                                                                                    
-   {
+   /*{
       hypre_MaxwellOffProcRow **OffProcRows;
       hypre_SStructSharedDOF_ParcsrMatRowsComm(grid,
                                                (hypre_ParCSRMatrix *) parA,
@@ -1727,7 +1725,7 @@ main( int   argc,
          hypre_MaxwellOffProcRowDestroy((void *) OffProcRows[j]);
       }
       hypre_TFree(OffProcRows);
-    }
+    }*/
                                                                                                                                     
    /*-----------------------------------------------------------
     * Set up the linear system
@@ -1785,10 +1783,8 @@ main( int   argc,
 
    HYPRE_SStructVectorGetObject(x, (void **) &parx);
    HYPRE_SStructVectorGetObject(b, (void **) &parb);
-   hypre_ParVectorZeroBCValues((hypre_ParVector *) parx, bdryRanks[0],
-                                                   bdryRanksCnt[0]);
-   hypre_ParVectorZeroBCValues((hypre_ParVector *) parb, bdryRanks[0],
-                                                   bdryRanksCnt[0]);
+   HYPRE_SStructMaxwellZeroVector(parx, bdryRanks[0], bdryRanksCnt[0]);
+   HYPRE_SStructMaxwellZeroVector(parb, bdryRanks[0], bdryRanksCnt[0]);
 
    hypre_TFree(bdryRanks[0]);
    hypre_TFree(bdryRanks);
