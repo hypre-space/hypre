@@ -530,46 +530,83 @@ int HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/*
+/**
  * @name SStruct Split Solver
  **/
+/*@{*/
 
+/**
+ * Create a split solver object.
+ **/
 #define HYPRE_SMG  11
 #define HYPRE_PFMG 10
 
 int HYPRE_SStructSplitCreate(MPI_Comm             comm,
                              HYPRE_SStructSolver *solver);
 
+/**
+ * Destroy a split solver object.
+ **/
 int HYPRE_SStructSplitDestroy(HYPRE_SStructSolver solver);
 
+/**
+ * Setup a split solver object.
+ **/
 int HYPRE_SStructSplitSetup(HYPRE_SStructSolver solver,
                             HYPRE_SStructMatrix A,
                             HYPRE_SStructVector b,
                             HYPRE_SStructVector x);
 
+/**
+ * Solve using a split solver.
+ **/
 int HYPRE_SStructSplitSolve(HYPRE_SStructSolver solver,
                             HYPRE_SStructMatrix A,
                             HYPRE_SStructVector b,
                             HYPRE_SStructVector x);
 
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
 int HYPRE_SStructSplitSetTol(HYPRE_SStructSolver solver,
                              double              tol);
 
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
 int HYPRE_SStructSplitSetMaxIter(HYPRE_SStructSolver solver,
                                  int                 max_iter);
 
+/**
+ * (Optional) Use a zero initial guess.
+ **/
 int HYPRE_SStructSplitSetZeroGuess(HYPRE_SStructSolver solver);
 
+/**
+ * (Optional) Use a non-zero initial guess.
+ **/
 int HYPRE_SStructSplitSetNonZeroGuess(HYPRE_SStructSolver solver);
 
+/**
+ * (Optional) Set up the type of diagonal struct solver, HYPRE\_SMG or
+ * HYPRE\_PFMG.
+ **/
 int HYPRE_SStructSplitSetStructSolver(HYPRE_SStructSolver solver,
-                                      int                 ssolver);
+                                      int                 ssolver );
 
+/**
+ * Return the number of iterations taken.
+ **/
 int HYPRE_SStructSplitGetNumIterations(HYPRE_SStructSolver  solver,
                                        int                 *num_iterations);
 
+/**
+ * Return the norm of the final relative residual.
+ **/
 int HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                    double              *norm);
+
+/*@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -589,6 +626,14 @@ int HYPRE_SStructFACCreate( MPI_Comm             comm,
  **/
 int HYPRE_SStructFACDestroy2( HYPRE_SStructSolver solver );
                                                                                                             
+/**
+ * Re-distribute the composite matrix so that the amr hierachy is approximately
+ * nested. Coarse underlying operators are also formed.
+ **/
+int HYPRE_SStructFACAMR_RAP( HYPRE_SStructMatrix  A,
+                             int                (*rfactors)[3],
+                             HYPRE_SStructMatrix *fac_A );
+
 /**
  * Set up the FAC solver structure .
  **/
@@ -618,7 +663,41 @@ int HYPRE_SStructFACSetPRefinements(HYPRE_SStructSolver  solver,
                                     int                  nparts,
                                     int                (*rfactors)[3] );
 
-                                                                                                            
+/**
+ * (Optional but user must make sure that they do this function otherwise.)
+ * Zero off the coarse level stencils reaching into a fine level grid.
+ **/
+int HYPRE_SStructFACZeroCFSten(HYPRE_SStructMatrix  A,
+                               HYPRE_SStructGrid    grid,
+                               int                  part,
+                               int                  rfactors[3]);
+
+/**
+ * (Optional but user must make sure that they do this function otherwise.)
+ * Zero off the fine level stencils reaching into a coarse level grid.
+ **/
+int HYPRE_SStructFACZeroFCSten(HYPRE_SStructMatrix  A,
+                               HYPRE_SStructGrid    grid,
+                               int                  part);
+
+/**
+ * (Optional but user must make sure that they do this function otherwise.)
+ *  Places the identity in the coarse grid matrix underlying the fine patches.
+ *  Required between each pair of amr levels.
+ **/
+int HYPRE_SStructFACZeroAMRMatrixData(HYPRE_SStructMatrix  A,
+                                      int                  part_crse,
+                                      int                  rfactors[3]);
+
+/**
+ * (Optional but user must make sure that they do this function otherwise.)
+ *  Places zeros in the coarse grid vector underlying the fine patches.
+ *  Required between each pair of amr levels.
+ **/
+int HYPRE_SStructFACZeroAMRVectorData(HYPRE_SStructVector  b,
+                                      int                 *plevels,
+                                      int                (*rfactors)[3] );
+
 /**
  * (Optional) Set max FAC levels.
  **/
@@ -690,16 +769,150 @@ int HYPRE_SStructFACGetNumIterations(HYPRE_SStructSolver  solver,
 /**
  * Return the norm of the final relative residual.
  **/
-int HYPRE_SStructFACGetFinalRelativeResidualNorm(
-                                          HYPRE_SStructSolver solver,
-                                          double             *norm);
+int HYPRE_SStructFACGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
+                                                 double             *norm);
                                                                                                             
 /*@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+/**
+ * @name SStruct Maxwell Solver
+ **/
+/*@{*/
+                                                                                                            
+/**
+ * Create a Maxwell solver object.
+ **/
+int HYPRE_SStructMaxwellCreate( MPI_Comm             comm,
+                                HYPRE_SStructSolver *solver );
+/**
+ * Destroy a Maxwell solver object.
+ **/
+int HYPRE_SStructMaxwellDestroy( HYPRE_SStructSolver solver );
+                                                                                                            
+/**
+ * Set up the Maxwell solver structure .
+ **/
+int HYPRE_SStructMaxwellSetup(HYPRE_SStructSolver solver,
+                              HYPRE_SStructMatrix A,
+                              HYPRE_SStructVector b,
+                              HYPRE_SStructVector x);
+                                                                                                            
+/**
+ * Solve the system.
+ **/
+int HYPRE_SStructMaxwellSolve(HYPRE_SStructSolver solver,
+                              HYPRE_SStructMatrix A,
+                              HYPRE_SStructVector b,
+                              HYPRE_SStructVector x);
+                                                                                                            
+/**
+ * Sets the gradient operator in the Maxwell solver.
+ **/
+int HYPRE_SStructMaxwellSetGrad(HYPRE_SStructSolver solver,
+                                HYPRE_ParCSRMatrix  T);
+
+/**
+ * Sets the coarsening factor.
+ **/
+int HYPRE_SStructMaxwellSetRfactors(HYPRE_SStructSolver solver,
+                                    int                 rfactors[3]);
+
+/**
+ * Finds the physical boundary row ranks on all levels.
+ **/
+int HYPRE_SStructMaxwellPhysBdy(HYPRE_SStructGrid  *grid_l,
+                                int                 num_levels,
+                                int                 rfactors[3],
+                                int              ***BdryRanks_ptr,
+                                int               **BdryRanksCnt_ptr );
+
+/**
+ * Eliminates the rows and cols corresponding to the physical boundary in
+ * a parcsr matrix.
+ **/
+int HYPRE_SStructMaxwellEliminateRowsCols(HYPRE_ParCSRMatrix  parA,
+                                          int                 nrows,
+                                          int                *rows );
+
+/**
+ * Zeros the rows corresponding to the physical boundary in
+ * a par vector.
+ **/
+int HYPRE_SStructMaxwellZeroVector(HYPRE_ParVector  b,
+                                   int             *rows,
+                                   int              nrows );
+
+/**
+ * (Optional) Set the constant coefficient flag- Nedelec interpolation
+ * used.
+ **/
+int HYPRE_SStructMaxwellSetSetConstantCoef(HYPRE_SStructSolver solver,
+                                           int                 flag);
+
+/**
+ * (Optional) Creates a gradient matrix from the grid. This presupposes
+ * a particular orientation of the edge elements.
+ **/
+int HYPRE_SStructMaxwellGrad(HYPRE_SStructGrid    grid,
+                             HYPRE_ParCSRMatrix  *T);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int HYPRE_SStructMaxwellSetTol(HYPRE_SStructSolver solver,
+                               double              tol);
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int HYPRE_SStructMaxwellSetMaxIter(HYPRE_SStructSolver solver,
+                                   int                 max_iter);
+                                                                                                            
+/**
+ * (Optional) Additionally require that the relative difference in
+ * successive iterates be small.
+ **/
+int HYPRE_SStructMaxwellSetRelChange(HYPRE_SStructSolver solver,
+                                     int                 rel_change);
+                                                                                                            
+                                                                                                            
+/**
+ * (Optional) Set number of pre-relaxation sweeps.
+ **/
+int HYPRE_SStructMaxwellSetNumPreRelax(HYPRE_SStructSolver solver,
+                                       int                 num_pre_relax);
+                                                                                                            
+/**
+ * (Optional) Set number of post-relaxation sweeps.
+ **/
+int HYPRE_SStructMaxwellSetNumPostRelax(HYPRE_SStructSolver solver,
+                                    int                 num_post_relax);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int HYPRE_SStructMaxwellSetLogging(HYPRE_SStructSolver solver,
+                                   int                 logging);
+                                                                                                            
+/**
+ * Return the number of iterations taken.
+ **/
+int HYPRE_SStructMaxwellGetNumIterations(HYPRE_SStructSolver  solver,
+                                         int                 *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
+                                                     double             *norm);
 
 /*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+/*@}*/
+
 
 #ifdef __cplusplus
 }

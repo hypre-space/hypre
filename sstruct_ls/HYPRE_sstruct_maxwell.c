@@ -247,6 +247,9 @@ HYPRE_SStructMaxwellGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
 }
 
 
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructMaxwellPhysBdy
+ *--------------------------------------------------------------------------*/
 int
 HYPRE_SStructMaxwellPhysBdy( HYPRE_SStructGrid  *grid_l,
                              int                 num_levels,
@@ -261,8 +264,11 @@ HYPRE_SStructMaxwellPhysBdy( HYPRE_SStructGrid  *grid_l,
                                                            BdryRanksCnt_ptr ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructMaxwellEliminateRowsCols
+ *--------------------------------------------------------------------------*/
 int
-HYPRE_ParCSRMatrixEliminateRowsCols( HYPRE_ParCSRMatrix  parA,
+HYPRE_SStructMaxwellEliminateRowsCols( HYPRE_ParCSRMatrix  parA,
                                      int                 nrows,
                                      int                *rows )
 {
@@ -270,4 +276,17 @@ HYPRE_ParCSRMatrixEliminateRowsCols( HYPRE_ParCSRMatrix  parA,
                                                                         nrows,
                                                                         rows ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructMaxwellZeroVector
+ *--------------------------------------------------------------------------*/
+int HYPRE_SStructMaxwellZeroVector(HYPRE_ParVector  v,
+                                   int             *rows,
+                                   int              nrows)
+{
+    return( hypre_ParVectorZeroBCValues( (hypre_ParVector *) v,
+                                                                rows,
+                                                                nrows ) );
+}
+
 

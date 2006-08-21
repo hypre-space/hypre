@@ -45,7 +45,7 @@ HYPRE_SStructFACCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructFACDestroy
+ * HYPRE_SStructFACDestroy2
  *--------------------------------------------------------------------------*/
 
 int
@@ -54,6 +54,20 @@ HYPRE_SStructFACDestroy2( HYPRE_SStructSolver solver )
    return( hypre_FACDestroy2( (void *) solver ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACAMR_RAP
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructFACAMR_RAP( HYPRE_SStructMatrix  A,
+                         int                (*rfactors)[3], 
+                         HYPRE_SStructMatrix *fac_A )
+{
+   return( hypre_AMR_RAP(A, rfactors, fac_A) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACSetup2
+ *--------------------------------------------------------------------------*/
 int
 HYPRE_SStructFACSetup2( HYPRE_SStructSolver  solver,
                         HYPRE_SStructMatrix  A,
@@ -66,6 +80,9 @@ HYPRE_SStructFACSetup2( HYPRE_SStructSolver  solver,
                            (hypre_SStructVector *)  x ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACSolve3
+ *--------------------------------------------------------------------------*/
 int
 HYPRE_SStructFACSolve3(HYPRE_SStructSolver solver,
                        HYPRE_SStructMatrix A,
@@ -101,9 +118,61 @@ HYPRE_SStructFACSetPLevels( HYPRE_SStructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructFACZeroCFSten
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructFACZeroCFSten( HYPRE_SStructMatrix  A,
+                            HYPRE_SStructGrid    grid,
+                            int                  part,
+                            int                  rfactors[3] )
+{
+    hypre_SStructPMatrix   *Af= hypre_SStructMatrixPMatrix(A, part);
+    hypre_SStructPMatrix   *Ac= hypre_SStructMatrixPMatrix(A, part-1);
+
+    return( hypre_FacZeroCFSten(Af, Ac, (hypre_SStructGrid *)grid,
+                                part, rfactors) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACZeroFCSten
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructFACZeroFCSten( HYPRE_SStructMatrix  A,
+                            HYPRE_SStructGrid    grid,
+                            int                  part )
+{
+    hypre_SStructPMatrix   *Af= hypre_SStructMatrixPMatrix(A, part);
+
+    return( hypre_FacZeroFCSten(Af, (hypre_SStructGrid *)grid,
+                                part) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACZeroAMRMatrixData
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructFACZeroAMRMatrixData( HYPRE_SStructMatrix  A,
+                                   int                  part_crse,
+                                   int                  rfactors[3] )
+{
+    return( hypre_ZeroAMRMatrixData(A, part_crse, rfactors) );
+}
+                                                                                                                                                             
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACZeroAMRVectorData
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructFACZeroAMRVectorData( HYPRE_SStructVector  b,
+                                   int                 *plevels,
+                                   int                (*rfactors)[3] )
+{
+    return( hypre_ZeroAMRVectorData(b, plevels, rfactors) );
+}
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_SStructFACSetPRefinements
  *--------------------------------------------------------------------------*/
-
 int
 HYPRE_SStructFACSetPRefinements( HYPRE_SStructSolver  solver,
                                  int                  nparts,

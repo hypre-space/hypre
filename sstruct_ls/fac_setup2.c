@@ -939,6 +939,7 @@ hypre_FacSetup2( void                 *fac_vdata,
    (fac_data -> csolver)  = crse_solver;
    (fac_data -> cprecond) = crse_precond;
 
+    hypre_FacZeroCData(fac_vdata, A, b, x);
 
    return ierr;
 }

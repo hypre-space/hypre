@@ -60,6 +60,19 @@ hypre_F90_IFACE(hypre_sstructfacdestroy2, HYPRE_SSTRUCTFACDESTROY2)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructFACAMR_RAP
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructfacamrrap, HYPRE_SSTRUCTFACAMRRAP)
+               (long int *A, int (*rfactors)[3], long int *facA, int *ierr)
+{
+   *ierr = (int) ( HYPRE_SStructFACAMR_RAP( (HYPRE_SStructMatrix) *A,
+                                                            rfactors,
+                                            (HYPRE_SStructMatrix *) facA ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SStructFACSetup2
  *--------------------------------------------------------------------------*/
 
@@ -111,6 +124,60 @@ hypre_F90_IFACE(hypre_sstructfacsetplevels, HYPRE_SSTRUCTFACSETPLEVELS)
                                                (int)                 *nparts,
                                                (int *)                plevels));
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACZeroCFSten
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructfaczerocfsten, HYPRE_SSTRUCTFACZEROCFSTEN)
+               (long int *A, long int *grid, int *part, int (*rfactors)[3], int *ierr)
+{
+   *ierr = (int) ( HYPRE_SStructFACZeroCFSten( (HYPRE_SStructMatrix) *A,
+                                               (HYPRE_SStructGrid)   *grid,
+                                               (int)                 *part,
+                                                                      rfactors[3] ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACZeroFCSten
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructfaczerofcsten, HYPRE_SSTRUCTFACZEROFCSTEN)
+               (long int *A, long int *grid, int *part, int *ierr)
+{
+   *ierr = (int) ( HYPRE_SStructFACZeroFCSten( (HYPRE_SStructMatrix) *A,
+                                               (HYPRE_SStructGrid)   *grid,
+                                               (int)                 *part ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACZeroAMRMatrixData
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructfaczeroamrmatrixdata, HYPRE_SSTRUCTFACZEROAMRMATRIXDATA)
+               (long int *A, int *part_crse, int (*rfactors)[3], int *ierr)
+{
+   *ierr = (int) ( HYPRE_SStructFACZeroAMRMatrixData( (HYPRE_SStructMatrix) *A,
+                                                      (int)                 *part_crse,
+                                                                             rfactors[3] ));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACZeroAMRVectorData
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructfaczeroamrvectordata, HYPRE_SSTRUCTFACZEROAMRVECTORDATA)
+               (long int *b, int *plevels, int (*rfactors)[3], int *ierr)
+{
+   *ierr = (int) ( HYPRE_SStructFACZeroAMRVectorData( (HYPRE_SStructVector) *b,
+                                                      (int *)                plevels,
+                                                              rfactors ));
+}
+
 
 /*--------------------------------------------------------------------------
  * HYPRE_SStructFACSetPRefinements

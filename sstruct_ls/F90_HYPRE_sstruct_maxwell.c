@@ -342,18 +342,35 @@ hypre_F90_IFACE(hypre_sstructmaxwellphysbdy, HYPRE_SSTRUCTMAXWELLPHYSBDY)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRMatrixEliminateRowsCols
+ * HYPRE_SStructMaxwellEliminateRowsCols
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixeliminaterows, HYPRE_PARCSRMATRIXELIMINATEROWS) 
-                                                (long int *parA, 
+hypre_F90_IFACE(hypre_sstructmaxwelleliminaterowscols, HYPRE_SSTRUCTMAXWELLELIMINATEROWSCOLS) 
+                                                (long int *A, 
                                                  int      *nrows,
                                                  int      *rows,
                                                  int      *ierr)
 {
-   *ierr = (int) ( HYPRE_ParCSRMatrixEliminateRowsCols( 
-                                     (HYPRE_ParCSRMatrix) *parA,
-                                     (int)                *nrows,
-                                     (int *)               rows ));
-}
+   *ierr = (int) ( HYPRE_SStructMaxwellEliminateRowsCols( (HYPRE_ParCSRMatrix) *A,
+                                                          (int)                *nrows,
+                                                          (int *)               rows ));
+}      
+
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructMaxwellZeroVector
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructmaxwellzerovector, HYPRE_SSTRUCTMAXWELLZEROVECTOR) 
+                                                (long int *b, 
+                                                 int      *rows,
+                                                 int      *nrows,
+                                                 int      *ierr)
+{
+   *ierr = (int) ( HYPRE_SStructMaxwellZeroVector( (HYPRE_ParVector) *b,
+                                                   (int *)            rows,
+                                                   (int)             *nrows ));
+}      
+
