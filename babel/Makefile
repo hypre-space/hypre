@@ -39,6 +39,12 @@ BHYPRE_BABEL_DIRS =\
 
 HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl
 
+###HYPRE_BABEL_RUNTIME_PYTHON_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/python
+###  when python option is enabled, uncomment the following line and move it
+###  to the all and install targets, repsectively, with the other cp commands
+###   cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_BUILD_DIR}/include
+###   cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_INC_INSTALL}/include
+
 all:
 	@ \
 	for i in ${BHYPRE_BABEL_DIRS}; \
