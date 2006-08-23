@@ -1,3 +1,22 @@
+
+#include <HYPRE_config.h>
+
+#include "HYPRE_sstruct_ls.h"
+
+#ifndef hypre_SSTRUCT_LS_HEADER
+#define hypre_SSTRUCT_LS_HEADER
+
+#include "utilities.h"
+#include "krylov.h"
+#include "struct_ls.h"
+#include "sstruct_mv.h"
+#include "parcsr_ls.h"
+#include "multivector.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -23,24 +42,6 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-#include <HYPRE_config.h>
-
-#include "HYPRE_sstruct_ls.h"
-
-#ifndef hypre_SSTRUCT_LS_HEADER
-#define hypre_SSTRUCT_LS_HEADER
-
-#include "utilities.h"
-#include "krylov.h"
-#include "struct_ls.h"
-#include "sstruct_mv.h"
-#include "parcsr_ls.h"
-#include "multivector.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*--------------------------------------------------------------------------
  * hypre_SStructOwnInfo data structure
@@ -79,6 +80,32 @@ typedef struct
 ((own_data) -> own_composite_size)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 /*--------------------------------------------------------------------------
  * hypre_SStructRecvInfo data structure
  *--------------------------------------------------------------------------*/
@@ -96,6 +123,32 @@ typedef struct
 } hypre_SStructRecvInfoData;
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 /*--------------------------------------------------------------------------
  * hypre_SStructSendInfo data structure
  *--------------------------------------------------------------------------*/
@@ -114,6 +167,32 @@ typedef struct
 } hypre_SStructSendInfoData;
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 typedef struct
 {
     hypre_IJMatrix    *Face_iedge;
@@ -124,6 +203,32 @@ typedef struct
     hypre_IJMatrix    *Element_Edge;
                                                                                                                             
 } hypre_PTopology;
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -224,6 +329,32 @@ typedef struct
 } hypre_MaxwellData;
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 typedef struct
 {
    int       row;
@@ -297,13 +428,13 @@ int hypre_FACRestrict2 ( void *fac_restrict_vdata , hypre_SStructVector *xf , hy
 int hypre_FacSemiRestrictDestroy2 ( void *fac_restrict_vdata );
 
 /* fac_setup2.c */
-int hypre_FacSetup2 ( void *fac_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
+int hypre_FacSetup2 ( void *fac_vdata , hypre_SStructMatrix *A_in , hypre_SStructVector *b , hypre_SStructVector *x );
 
 /* fac_solve3.c */
-int hypre_FACSolve3 ( void *fac_vdata , hypre_SStructMatrix *A_in , hypre_SStructVector *b_in , hypre_SStructVector *x_in );
+int hypre_FACSolve3 ( void *fac_vdata , hypre_SStructMatrix *A_user , hypre_SStructVector *b_in , hypre_SStructVector *x_in );
 
 /* fac_zero_cdata.c */
-int hypre_FacZeroCData ( void *fac_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
+int hypre_FacZeroCData ( void *fac_vdata , hypre_SStructMatrix *A );
 
 /* fac_zero_stencilcoef.c */
 int hypre_FacZeroCFSten ( hypre_SStructPMatrix *Af , hypre_SStructPMatrix *Ac , hypre_SStructGrid *grid , int fine_part , hypre_Index rfactors );
@@ -362,10 +493,15 @@ int HYPRE_SStructSetupMatvec ( HYPRE_MatvecFunctions *mv );
 /* HYPRE_sstruct_InterFAC.c */
 int HYPRE_SStructFACCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
 int HYPRE_SStructFACDestroy2 ( HYPRE_SStructSolver solver );
+int HYPRE_SStructFACAMR_RAP ( HYPRE_SStructMatrix A , int (*rfactors )[3 ], HYPRE_SStructMatrix *fac_A );
 int HYPRE_SStructFACSetup2 ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 int HYPRE_SStructFACSolve3 ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 int HYPRE_SStructFACSetTol ( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructFACSetPLevels ( HYPRE_SStructSolver solver , int nparts , int *plevels );
+int HYPRE_SStructFACZeroCFSten ( HYPRE_SStructMatrix A , HYPRE_SStructGrid grid , int part , int rfactors [3 ]);
+int HYPRE_SStructFACZeroFCSten ( HYPRE_SStructMatrix A , HYPRE_SStructGrid grid , int part );
+int HYPRE_SStructFACZeroAMRMatrixData ( HYPRE_SStructMatrix A , int part_crse , int rfactors [3 ]);
+int HYPRE_SStructFACZeroAMRVectorData ( HYPRE_SStructVector b , int *plevels , int (*rfactors )[3 ]);
 int HYPRE_SStructFACSetPRefinements ( HYPRE_SStructSolver solver , int nparts , int (*rfactors )[3 ]);
 int HYPRE_SStructFACSetMaxLevels ( HYPRE_SStructSolver solver , int max_levels );
 int HYPRE_SStructFACSetMaxIter ( HYPRE_SStructSolver solver , int max_iter );
@@ -401,7 +537,8 @@ int HYPRE_SStructMaxwellPrintLogging ( HYPRE_SStructSolver solver , int myid );
 int HYPRE_SStructMaxwellGetNumIterations ( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructMaxwellGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , double *norm );
 int HYPRE_SStructMaxwellPhysBdy ( HYPRE_SStructGrid *grid_l , int num_levels , int rfactors [3 ], int ***BdryRanks_ptr , int **BdryRanksCnt_ptr );
-int HYPRE_ParCSRMatrixEliminateRowsCols ( HYPRE_ParCSRMatrix parA , int nrows , int *rows );
+int HYPRE_SStructMaxwellEliminateRowsCols ( HYPRE_ParCSRMatrix parA , int nrows , int *rows );
+int HYPRE_SStructMaxwellZeroVector ( HYPRE_ParVector v , int *rows , int nrows );
 
 /* HYPRE_sstruct_pcg.c */
 int HYPRE_SStructPCGCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );

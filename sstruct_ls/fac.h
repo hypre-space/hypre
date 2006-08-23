@@ -52,6 +52,7 @@ typedef struct
    hypre_SStructGrid    **grid_level;
    hypre_SStructGraph   **graph_level;
 
+   hypre_SStructMatrix   *A_rap;
    hypre_SStructMatrix  **A_level;
    hypre_SStructVector  **b_level;
    hypre_SStructVector  **x_level;

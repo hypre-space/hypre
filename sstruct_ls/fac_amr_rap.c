@@ -30,7 +30,12 @@
  * hypre_AMR_RAP:  Forms the coarse operators for all amr levels.
  * Given an amr composite matrix, the coarse grid operator is produced.
  * Nesting of amr levels is not assumed. Communication of chunks of the 
- * coarse grid operator is performed.
+ * coarse grid operator is performed. 
+ *
+ * Note: The sstruct_grid of A and fac_A are the same. These are kept the
+ * same so that the row ranks are the same. However, the generated
+ * coarse-grid operators are re-distributed so that each processor has its
+ * operator on its grid.
  *--------------------------------------------------------------------------*/
 int
 hypre_AMR_RAP( hypre_SStructMatrix  *A,

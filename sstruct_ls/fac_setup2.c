@@ -34,7 +34,7 @@
 
 int
 hypre_FacSetup2( void                 *fac_vdata,
-                hypre_SStructMatrix  *A,
+                hypre_SStructMatrix  *A_in,
                 hypre_SStructVector  *b,
                 hypre_SStructVector  *x )
 {
@@ -43,9 +43,9 @@ hypre_FacSetup2( void                 *fac_vdata,
    int                    *plevels       = (fac_data-> plevels);
    hypre_Index            *rfactors      = (fac_data-> prefinements);
 
-   MPI_Comm                comm          =  hypre_SStructMatrixComm(A);
-   int                     ndim          =  hypre_SStructMatrixNDim(A);
-   int                     npart         =  hypre_SStructMatrixNParts(A);
+   MPI_Comm                comm;
+   int                     ndim;
+   int                     npart;
    int                     nparts_level  =  2;
    int                     part_crse     =  0;
    int                     part_fine     =  1;
@@ -58,8 +58,8 @@ hypre_FacSetup2( void                 *fac_vdata,
    int                     part, level;
    int                     nvars;
 
-   hypre_SStructGraph     *graph         =  hypre_SStructMatrixGraph(A);
-   hypre_SStructGrid      *grid          =  hypre_SStructGraphGrid(graph);
+   hypre_SStructGraph     *graph;
+   hypre_SStructGrid      *grid;
    hypre_SStructPGrid     *pgrid; 
    hypre_StructGrid       *sgrid; 
    hypre_BoxArray         *sgrid_boxes;
@@ -82,6 +82,7 @@ hypre_FacSetup2( void                 *fac_vdata,
    int                     i, j, k, to_rank, row_coord, nUentries;
    hypre_BoxMapEntry      *map_entry;
 
+   hypre_SStructMatrix    *A_rap;
    hypre_SStructMatrix   **A_level;
    hypre_SStructVector   **b_level;
    hypre_SStructVector   **x_level;
@@ -128,8 +129,8 @@ hypre_FacSetup2( void                 *fac_vdata,
    int                    *level_cols;
    int                     level_cnt;
 
-   HYPRE_IJMatrix          ij_A       = hypre_SStructMatrixIJMatrix(A);
-   int                     matrix_type= hypre_SStructMatrixObjectType(A);
+   HYPRE_IJMatrix          ij_A;
+   int                     matrix_type;
 
    int                     max_cycles;
 
@@ -139,6 +140,17 @@ hypre_FacSetup2( void                 *fac_vdata,
    nested_A= hypre_TAlloc(hypre_SStructMatrix , 1);
    nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
 
+   /* generate the composite operator with the computed coarse-grid operators */
+    hypre_AMR_RAP(A_in, rfactors, &A_rap);
+   (fac_data -> A_rap)= A_rap;
+
+    comm = hypre_SStructMatrixComm(A_rap);
+    ndim = hypre_SStructMatrixNDim(A_rap);
+    npart= hypre_SStructMatrixNParts(A_rap);
+    graph= hypre_SStructMatrixGraph(A_rap);
+    grid = hypre_SStructGraphGrid(graph);
+    ij_A = hypre_SStructMatrixIJMatrix(A_rap);
+    matrix_type= hypre_SStructMatrixObjectType(A_rap);
 
    /*--------------------------------------------------------------------------
     * logging arrays.
@@ -461,7 +473,7 @@ hypre_FacSetup2( void                 *fac_vdata,
        }
 
        values   = hypre_TAlloc(double, max_box_volume);
-       A_pmatrix= hypre_SStructMatrixPMatrix(A, levels[level]);
+       A_pmatrix= hypre_SStructMatrixPMatrix(A_rap, levels[level]);
 
        /*-----------------------------------------------------------
         * extract stencil values for all fine levels.
@@ -535,7 +547,7 @@ hypre_FacSetup2( void                 *fac_vdata,
           }
 
           values   = hypre_TAlloc(double, max_box_volume);
-          A_pmatrix= hypre_SStructMatrixPMatrix(A, levels[level-1]);
+          A_pmatrix= hypre_SStructMatrixPMatrix(A_rap, levels[level-1]);
 
           /*-----------------------------------------------------------
            * extract stencil values 
@@ -859,7 +871,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                              hypre_SStructVectorPVector(x_level[0],part_fine));
    
    hypre_SStructMatvecCreate(&matvec_data);
-   hypre_SStructMatvecSetup(matvec_data, A, x);
+   hypre_SStructMatvecSetup(matvec_data, A_rap, x);
 
    /*HYPRE_SStructVectorPrint("sstruct.out.b_l", b_level[max_level], 0);*/
    /*HYPRE_SStructMatrixPrint("sstruct.out.A_l",  A_level[max_level-2], 0);*/
@@ -939,7 +951,7 @@ hypre_FacSetup2( void                 *fac_vdata,
    (fac_data -> csolver)  = crse_solver;
    (fac_data -> cprecond) = crse_precond;
 
-    hypre_FacZeroCData(fac_vdata, A, b, x);
+    hypre_FacZeroCData(fac_vdata, A_rap);
 
    return ierr;
 }

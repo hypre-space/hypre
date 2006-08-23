@@ -41,9 +41,7 @@
 
 int
 hypre_FacZeroCData( void                 *fac_vdata,
-                    hypre_SStructMatrix  *A,
-                    hypre_SStructVector  *b, 
-                    hypre_SStructVector  *x )
+                    hypre_SStructMatrix  *A )
 {
    hypre_FACData         *fac_data      =  fac_vdata;
 
@@ -72,7 +70,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
    int                    max_level     =  fac_data -> max_levels;
    int                   *level_to_part =  fac_data -> level_to_part;
 
-   int                    ndim          =  hypre_SStructVectorNDim(b);
+   int                    ndim          =  hypre_SStructMatrixNDim(A);
    int                    part_crse     =  0;
    int                    part_fine     =  1;
    int                    level;
@@ -169,15 +167,6 @@ hypre_FacZeroCData( void                 *fac_vdata,
                                                       var, 1, &j, values);
                    }
 
-                   HYPRE_SStructVectorSetBoxValues(b, level_to_part[level-1], 
-                                                   hypre_BoxIMin(&intersect_box),
-                                                   hypre_BoxIMax(&intersect_box),
-                                                   var, values);
-
-                   HYPRE_SStructVectorSetBoxValues(x, level_to_part[level-1], 
-                                                   hypre_BoxIMin(&intersect_box),
-                                                   hypre_BoxIMax(&intersect_box),
-                                                   var, values);
                    hypre_TFree(values);
 
                 }  /* if (intersect_size > 0) */

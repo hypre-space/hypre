@@ -69,6 +69,8 @@ hypre_FACDestroy2(void *fac_vdata)
       hypre_TFree((fac_data ->plevels) );
       hypre_TFree((fac_data ->prefinements) );
 
+      HYPRE_SStructGraphDestroy(hypre_SStructMatrixGraph((fac_data -> A_rap)));
+      HYPRE_SStructMatrixDestroy((fac_data -> A_rap));
       for (level= 0; level<= (fac_data -> max_levels); level++)
       {
          HYPRE_SStructMatrixDestroy( (fac_data -> A_level[level]) );

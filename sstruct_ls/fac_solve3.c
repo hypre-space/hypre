@@ -36,13 +36,14 @@
 
 int
 hypre_FACSolve3( void                 *fac_vdata,
-                hypre_SStructMatrix  *A_in,
+                hypre_SStructMatrix  *A_user,
                 hypre_SStructVector  *b_in,
                 hypre_SStructVector  *x_in         )
 {
    hypre_SStructGrid       *grid; 
    hypre_FACData           *fac_data           = fac_vdata;
 
+   hypre_SStructMatrix     *A_in               =(fac_data-> A_rap);
    hypre_SStructMatrix    **A_level            =(fac_data-> A_level);
    hypre_SStructVector    **b_level            =(fac_data-> b_level);
    hypre_SStructVector    **x_level            =(fac_data-> x_level);
