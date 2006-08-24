@@ -37,6 +37,10 @@ Version 1.12.0a released, 2006/07/26.
 
 - First release of AMS -- a new solver for (semi)definite Maxwell problems.
 
+- First release of Maxwell, a semi-structured Maxwell solver.
+
+- Modifications to the fac user interface to permit easier set up of the problem.
+  
 Version 1.11.1b released, 2006/05/30.
 
 - Corrected FEI build to allow user to specify a system FEI and build internal 
