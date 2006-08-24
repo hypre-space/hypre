@@ -170,6 +170,11 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
   (maxwell_TV_data -> ndim)= ndim;
 
+   /* Adjust rfactor so that the correct dimension is used */
+   for (i= ndim; i< 3; i++)
+   {
+      rfactor_in[0][i]= 1;
+   }
    hypre_CopyIndex(rfactor_in[0], rfactor);
 
    /*---------------------------------------------------------------------

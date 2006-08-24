@@ -159,7 +159,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
 
    /*-----------------------------------------------------
     * Do V-cycles:
-    * For each index l, "fine" = l, "coarse" = (l-1)
+    * For each index l, "fine" = (l-1), "coarse" = l
     *   down cycle:
     *      a) smooth nodes (Ann)
     *      b) update edge residual (Ane)

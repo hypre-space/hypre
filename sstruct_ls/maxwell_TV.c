@@ -35,6 +35,7 @@ void *
 hypre_MaxwellTVCreate( MPI_Comm  comm )
 {
    hypre_MaxwellData *maxwell_data;
+   hypre_Index       *maxwell_rfactor;
 
    maxwell_data = hypre_CTAlloc(hypre_MaxwellData, 1);
 
@@ -51,6 +52,11 @@ hypre_MaxwellTVCreate( MPI_Comm  comm )
    (maxwell_data -> constant_coef)  = 0;
    (maxwell_data -> print_level)    = 0;
    (maxwell_data -> logging)        = 0;
+
+   maxwell_rfactor= hypre_TAlloc(hypre_Index, 1);
+   hypre_SetIndex(maxwell_rfactor[0], 2, 2, 2);
+   (maxwell_data -> rfactor)= maxwell_rfactor;
+                                         
 
    return (void *) maxwell_data;
 }

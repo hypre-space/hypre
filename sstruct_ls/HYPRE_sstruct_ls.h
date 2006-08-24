@@ -800,12 +800,24 @@ int HYPRE_SStructMaxwellSetup(HYPRE_SStructSolver solver,
                               HYPRE_SStructVector x);
                                                                                                             
 /**
- * Solve the system.
+ * Solve the system. Full coupling of the augmented system used
+ * throughout the multigrid hierarchy.
  **/
 int HYPRE_SStructMaxwellSolve(HYPRE_SStructSolver solver,
                               HYPRE_SStructMatrix A,
                               HYPRE_SStructVector b,
                               HYPRE_SStructVector x);
+
+/**
+ * Solve the system. Full coupling of the augmented system used
+ * only on the finest level, i.e., the node and edge multigrid
+ * cycles are coupled only on the finest level.
+ **/
+int HYPRE_SStructMaxwellSolve2(HYPRE_SStructSolver solver,
+                               HYPRE_SStructMatrix A,
+                               HYPRE_SStructVector b,
+                               HYPRE_SStructVector x);
+
                                                                                                             
 /**
  * Sets the gradient operator in the Maxwell solver.

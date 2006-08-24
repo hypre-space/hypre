@@ -39,60 +39,60 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
                      hypre_SStructVector * f,
                      hypre_SStructVector * u )
 {
-   hypre_MaxwellData     *maxwell_data= maxwell_vdata;
+   hypre_MaxwellData     *maxwell_data = maxwell_vdata;
 
    hypre_ParVector       *f_edge;
    hypre_ParVector       *u_edge;
 
-   int                    max_iter    = maxwell_data-> max_iter;
-   double                 tol         = maxwell_data-> tol;
-   int                    rel_change  = maxwell_data-> rel_change;
-   int                    zero_guess  = maxwell_data-> zero_guess;
-   int                    npre_relax  = maxwell_data-> num_pre_relax;
-   int                    npost_relax = maxwell_data-> num_post_relax;
+   int                    max_iter     = maxwell_data-> max_iter;
+   double                 tol          = maxwell_data-> tol;
+   int                    rel_change   = maxwell_data-> rel_change;
+   int                    zero_guess   = maxwell_data-> zero_guess;
+   int                    npre_relax   = maxwell_data-> num_pre_relax;
+   int                    npost_relax  = maxwell_data-> num_post_relax;
 
-   hypre_ParCSRMatrix   **Ann_l       = maxwell_data-> Ann_l;
-   hypre_ParCSRMatrix   **Pn_l        = maxwell_data-> Pn_l;
-   hypre_ParCSRMatrix   **RnT_l       = maxwell_data-> RnT_l;
-   hypre_ParVector      **bn_l        = maxwell_data-> bn_l;
-   hypre_ParVector      **xn_l        = maxwell_data-> xn_l;
-   hypre_ParVector      **resn_l      = maxwell_data-> resn_l;
-   hypre_ParVector      **en_l        = maxwell_data-> en_l;
-   hypre_ParVector      **nVtemp2_l   = maxwell_data-> nVtemp2_l;
+   hypre_ParCSRMatrix   **Ann_l        = maxwell_data-> Ann_l;
+   hypre_ParCSRMatrix   **Pn_l         = maxwell_data-> Pn_l;
+   hypre_ParCSRMatrix   **RnT_l        = maxwell_data-> RnT_l;
+   hypre_ParVector      **bn_l         = maxwell_data-> bn_l;
+   hypre_ParVector      **xn_l         = maxwell_data-> xn_l;
+   hypre_ParVector      **resn_l       = maxwell_data-> resn_l;
+   hypre_ParVector      **en_l         = maxwell_data-> en_l;
+   hypre_ParVector      **nVtemp2_l    = maxwell_data-> nVtemp2_l;
    int                  **nCF_marker_l = maxwell_data-> nCF_marker_l;
    double                *nrelax_weight= maxwell_data-> nrelax_weight;
    double                *nomega       = maxwell_data-> nomega;
    int                    nrelax_type  = maxwell_data-> nrelax_type;
-   int                    node_numlevs= maxwell_data-> node_numlevels;
+   int                    node_numlevs = maxwell_data-> node_numlevels;
 
-   hypre_ParCSRMatrix    *Tgrad       = maxwell_data-> Tgrad;
-   hypre_ParCSRMatrix    *T_transpose = maxwell_data-> T_transpose;
+   hypre_ParCSRMatrix    *Tgrad        = maxwell_data-> Tgrad;
+   hypre_ParCSRMatrix    *T_transpose  = maxwell_data-> T_transpose;
 
-   hypre_ParCSRMatrix   **Aee_l       = maxwell_data-> Aee_l;
-   hypre_IJMatrix       **Pe_l        = maxwell_data-> Pe_l;
-   hypre_IJMatrix       **ReT_l       = maxwell_data-> ReT_l;
-   hypre_ParVector      **be_l        = maxwell_data-> be_l;
-   hypre_ParVector      **xe_l        = maxwell_data-> xe_l;
-   hypre_ParVector      **rese_l      = maxwell_data-> rese_l;
-   hypre_ParVector      **ee_l        = maxwell_data-> ee_l;
-   hypre_ParVector      **eVtemp2_l   = maxwell_data-> eVtemp2_l;
+   hypre_ParCSRMatrix   **Aee_l        = maxwell_data-> Aee_l;
+   hypre_IJMatrix       **Pe_l         = maxwell_data-> Pe_l;
+   hypre_IJMatrix       **ReT_l        = maxwell_data-> ReT_l;
+   hypre_ParVector      **be_l         = maxwell_data-> be_l;
+   hypre_ParVector      **xe_l         = maxwell_data-> xe_l;
+   hypre_ParVector      **rese_l       = maxwell_data-> rese_l;
+   hypre_ParVector      **ee_l         = maxwell_data-> ee_l;
+   hypre_ParVector      **eVtemp2_l    = maxwell_data-> eVtemp2_l;
    int                  **eCF_marker_l = maxwell_data-> eCF_marker_l;
    double                *erelax_weight= maxwell_data-> erelax_weight;
    double                *eomega       = maxwell_data-> eomega;
    int                    erelax_type  = maxwell_data-> erelax_type;
-   int                    edge_numlevs= maxwell_data-> edge_numlevels;
+   int                    edge_numlevs = maxwell_data-> edge_numlevels;
 
-   int                  **BdryRanks_l = maxwell_data-> BdryRanks_l;
+   int                  **BdryRanks_l  = maxwell_data-> BdryRanks_l;
    int                   *BdryRanksCnts_l= maxwell_data-> BdryRanksCnts_l;
 
-   int                    logging     = maxwell_data-> logging;
-   double                *norms       = maxwell_data-> norms;
-   double                *rel_norms   = maxwell_data-> rel_norms;
+   int                    logging      = maxwell_data-> logging;
+   double                *norms        = maxwell_data-> norms;
+   double                *rel_norms    = maxwell_data-> rel_norms;
 
    int                    Solve_err_flag;
    int                    relax_local, cycle_param;
                                                                                                             
-   double                 b_dot_b, r_dot_r, r_dot_r2, eps;
+   double                 b_dot_b, r_dot_r, eps;
    double                 e_dot_e, x_dot_x;
 
    int                    i, j;
@@ -198,7 +198,7 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
       hypre_ParVectorCopy(bn_l[0], resn_l[0]);
       hypre_ParCSRMatrixMatvec(-1.0, Ann_l[0], xn_l[0], 1.0, resn_l[0]);
       r_dot_r= hypre_ParVectorInnerProd(resn_l[0], resn_l[0]);
-r_dot_r= sqrt(r_dot_r);
+
       for (level= 0; level<= node_numlevs-2; level++)
       {
          /*-----------------------------------------------
@@ -289,16 +289,14 @@ r_dot_r= sqrt(r_dot_r);
       }  /* for (j= 0; j< npost_relax; j++) */
       hypre_ParVectorCopy(bn_l[0], resn_l[0]);
       hypre_ParCSRMatrixMatvec(-1.0, Ann_l[0], xn_l[0], 1.0, resn_l[0]);
-      r_dot_r2= hypre_ParVectorInnerProd(resn_l[0], resn_l[0]);
-r_dot_r2= sqrt(r_dot_r2);
-                                                                                                              
+
       /* add the gradient solution component to xe_l[0] */
       hypre_ParCSRMatrixMatvec(1.0, Tgrad, xn_l[0], 1.0, xe_l[0]);
 
       hypre_ParVectorCopy(be_l[0], rese_l[0]);
       hypre_ParCSRMatrixMatvec(-1.0, Aee_l[0], xe_l[0], 1.0, rese_l[0]);
       r_dot_r= hypre_ParVectorInnerProd(rese_l[0], rese_l[0]);
-r_dot_r= sqrt(r_dot_r);
+
       for (level= 0; level<= edge_numlevs-2; level++)
       {
          /*-----------------------------------------------
@@ -407,8 +405,6 @@ r_dot_r= sqrt(r_dot_r);
 
       hypre_ParVectorCopy(be_l[0], rese_l[0]);
       hypre_ParCSRMatrixMatvec(-1.0, Aee_l[0], xe_l[0], 1.0, rese_l[0]);
-      r_dot_r2= hypre_ParVectorInnerProd(rese_l[0], rese_l[0]);
-r_dot_r2= sqrt(r_dot_r2);
 
       (maxwell_data -> num_iterations) = (i + 1);
    }
