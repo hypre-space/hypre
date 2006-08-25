@@ -25,7 +25,6 @@
 #EHEADER**********************************************************************
 
 
-
 #=============================================================================
 #
 # This file chronicles user-level changes/additions to hypre, beginning
@@ -33,6 +32,15 @@
 #
 #=============================================================================
 
+Version 1.12.0b released, 2006/??/??.
+
+- Modifications to the fac user interface to permit easier set up of the problem.
+
+- shared libraries can be built by using the --enable-shared option when configuring.
+  NOTE: the directory where the shared libraries reside MUST be defined in the
+        LD_LIBRARY_PATH variable.
+
+********************************************************************
 Version 1.12.0a released, 2006/07/26.
 
 - First release of AMS -- a new solver for (semi)definite Maxwell problems.
@@ -40,11 +48,13 @@ Version 1.12.0a released, 2006/07/26.
 - First release of Maxwell, a semi-structured Maxwell solver.
 
 - Modifications to the fac user interface to permit easier set up of the problem.
+********************************************************************
   
 Version 1.11.1b released, 2006/05/30.
 
 - Corrected FEI build to allow user to specify a system FEI and build internal 
   HYPRE routines.
+********************************************************************
 
 Version 1.11.0b released, 2006/04/24.
 
