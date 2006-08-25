@@ -190,15 +190,11 @@ int
 hypre_MaxwellSetRfactors(void         *maxwell_vdata,
                           int           rfactor[3] )
 {
-   hypre_MaxwellData *maxwell_data= maxwell_vdata;
-   hypre_Index       *maxwell_rfactor;
+   hypre_MaxwellData *maxwell_data   = maxwell_vdata;
+   hypre_Index       *maxwell_rfactor=(maxwell_data -> rfactor);
    int                ierr       = 0;
                                                                                                               
-   maxwell_rfactor= hypre_TAlloc(hypre_Index, 1);
-
    hypre_CopyIndex(rfactor, maxwell_rfactor[0]);
-                                                                                                              
-   (maxwell_data -> rfactor)=  maxwell_rfactor;
                                                                                                               
    return ierr;
 }
