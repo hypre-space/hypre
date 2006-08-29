@@ -2,12 +2,11 @@
  * File:          bHYPRE_SStructVector_Impl.c
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -22,10 +21,11 @@
  * 
  * Objects of this type can be cast to SStructVectorView or Vector
  * objects using the {\tt \_\_cast} methods.
- * 
  */
 
 #include "bHYPRE_SStructVector_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._includes) */
 /* Put additional includes or other arbitrary code here... */
@@ -57,6 +57,7 @@
  ***********************************************************************EHEADER*/
 
 #include <assert.h>
+#include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
 #include "sstruct_mv.h"
 #include "bHYPRE_SStructGrid_Impl.h"
@@ -65,6 +66,8 @@
 #include "sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._includes) */
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -77,11 +80,14 @@ extern "C"
 #endif
 void
 impl_bHYPRE_SStructVector__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._load) */
   /* Insert-Code-Here {bHYPRE.SStructVector._load} (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._load) */
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -95,8 +101,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_SStructVector__ctor(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._ctor) */
   /* Insert the implementation of the constructor method here... */
 
@@ -111,8 +120,38 @@ impl_bHYPRE_SStructVector__ctor(
    bHYPRE_SStructVector__set_data( self, data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._ctor) */
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructVector__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_SStructVector__ctor2(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._ctor2) */
+    /* Insert-Code-Here {bHYPRE.SStructVector._ctor2} (special constructor method) */
+    /*
+     * This method has not been implemented
+     */
+
+    SIDL_THROW(*_ex, sidl_NotImplementedException,     "This method has not been implemented");
+  EXIT:;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -125,8 +164,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_SStructVector__dtor(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._dtor) */
   /* Insert the implementation of the destructor method here... */
 
@@ -140,6 +182,7 @@ impl_bHYPRE_SStructVector__dtor(
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._dtor) */
+  }
 }
 
 /*
@@ -155,8 +198,11 @@ extern "C"
 bHYPRE_SStructVector
 impl_bHYPRE_SStructVector_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_SStructGrid grid)
+  /* in */ bHYPRE_SStructGrid grid,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Create) */
   /* Insert-Code-Here {bHYPRE.SStructVector.Create} (Create method) */
 
@@ -168,7 +214,7 @@ impl_bHYPRE_SStructVector_Create(
    HYPRE_SStructGrid Hgrid;
    MPI_Comm comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
-   vec = bHYPRE_SStructVector__create();
+   vec = bHYPRE_SStructVector__create(_ex); SIDL_CHECK(*_ex);
    data = bHYPRE_SStructVector__get_data( vec );
    gdata = bHYPRE_SStructGrid__get_data( grid );
    Hgrid = gdata->grid;
@@ -179,7 +225,9 @@ impl_bHYPRE_SStructVector_Create(
 
    return( vec );
 
+   hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Create) */
+  }
 }
 
 /*
@@ -195,8 +243,11 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructVector_SetObjectType(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ int32_t type)
+  /* in */ int32_t type,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetObjectType) */
   /* Insert the implementation of the SetObjectType method here... */
 
@@ -211,159 +262,11 @@ impl_bHYPRE_SStructVector_SetObjectType(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetObjectType) */
-}
-
-/*
- * Set the MPI Communicator.  DEPRECATED, Use Create()
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructVector_SetCommunicator"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructVector_SetCommunicator(
-  /* in */ bHYPRE_SStructVector self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-   /* N.B. This function will have no effect unless called _before_
-      SetGrid.
-    */
-
-   /* DEPRECATED   use _Create */
-
-   int ierr = 0;
-   struct bHYPRE_SStructVector__data * data;
-   data = bHYPRE_SStructVector__get_data( self );
-   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetCommunicator) */
-}
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructVector_Initialize"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructVector_Initialize(
-  /* in */ bHYPRE_SStructVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Initialize) */
-  /* Insert the implementation of the Initialize method here... */
-   /* Create and SetObjectType should be called before Initialize */
-
-   int ierr = 0;
-   struct bHYPRE_SStructVector__data * data;
-   HYPRE_SStructVector Hy;
-   data = bHYPRE_SStructVector__get_data( self );
-   Hy = data -> vec;
-
-   ierr = HYPRE_SStructVectorInitialize( Hy );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Initialize) */
-}
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructVector_Assemble"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructVector_Assemble(
-  /* in */ bHYPRE_SStructVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Assemble) */
-  /* Insert the implementation of the Assemble method here... */
-
-   int ierr = 0;
-   struct bHYPRE_SStructVector__data * data;
-   HYPRE_SStructVector Hy;
-   data = bHYPRE_SStructVector__get_data( self );
-   Hy = data -> vec;
-
-   ierr = HYPRE_SStructVectorAssemble( Hy );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Assemble) */
-}
-
-/*
- *  A semi-structured matrix or vector contains a Struct or IJ matrix
- *  or vector.  GetObject returns it.
- * The returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructVector_GetObject"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructVector_GetObject(
-  /* in */ bHYPRE_SStructVector self,
-  /* out */ sidl_BaseInterface* A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
-
-   int ierr=0;
-   struct bHYPRE_SStructVector__data * data;
-   HYPRE_SStructVector Hx;
-   bHYPRE_StructVector sx;
-   struct bHYPRE_StructVector__data * s_data;
-   HYPRE_StructVector Hsx;
-
-   data = bHYPRE_SStructVector__get_data( self );
-   Hx = data -> vec;
-
-   sx = bHYPRE_StructVector__create();
-   s_data = bHYPRE_StructVector__get_data( sx );
-   ierr += HYPRE_SStructVectorGetObject( Hx, (void **) (&Hsx) );
-   s_data -> vec = Hsx;
-   s_data -> comm = data -> comm;
-
-   *A = sidl_BaseInterface__cast( sx );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.GetObject) */
+  }
 }
 
 /*
  * Set the vector grid.
- * 
  */
 
 #undef __FUNC__
@@ -375,8 +278,11 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructVector_SetGrid(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ bHYPRE_SStructGrid grid)
+  /* in */ bHYPRE_SStructGrid grid,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
    /* The grid cannot be changed.  It is used only for the creation process.
@@ -406,6 +312,7 @@ impl_bHYPRE_SStructVector_SetGrid(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetGrid) */
+  }
 }
 
 /*
@@ -418,7 +325,6 @@ impl_bHYPRE_SStructVector_SetGrid(
  * If the vector is complex, then {\tt value} consists of a pair
  * of doubles representing the real and imaginary parts of the
  * complex value.
- * 
  */
 
 #undef __FUNC__
@@ -434,8 +340,11 @@ impl_bHYPRE_SStructVector_SetValues(
   /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
 
@@ -452,6 +361,7 @@ impl_bHYPRE_SStructVector_SetValues(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetValues) */
+  }
 }
 
 /*
@@ -464,7 +374,6 @@ impl_bHYPRE_SStructVector_SetValues(
  * If the vector is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 
 #undef __FUNC__
@@ -482,8 +391,11 @@ impl_bHYPRE_SStructVector_SetBoxValues(
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
 
@@ -500,6 +412,7 @@ impl_bHYPRE_SStructVector_SetBoxValues(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetBoxValues) */
+  }
 }
 
 /*
@@ -512,7 +425,6 @@ impl_bHYPRE_SStructVector_SetBoxValues(
  * If the vector is complex, then {\tt value} consists of a pair
  * of doubles representing the real and imaginary parts of the
  * complex value.
- * 
  */
 
 #undef __FUNC__
@@ -528,8 +440,11 @@ impl_bHYPRE_SStructVector_AddToValues(
   /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
 
@@ -545,6 +460,7 @@ impl_bHYPRE_SStructVector_AddToValues(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.AddToValues) */
+  }
 }
 
 /*
@@ -557,7 +473,6 @@ impl_bHYPRE_SStructVector_AddToValues(
  * If the vector is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 
 #undef __FUNC__
@@ -575,8 +490,11 @@ impl_bHYPRE_SStructVector_AddToBoxValues(
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.AddToBoxValues) */
   /* Insert the implementation of the AddToBoxValues method here... */
 
@@ -593,11 +511,11 @@ impl_bHYPRE_SStructVector_AddToBoxValues(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.AddToBoxValues) */
+  }
 }
 
 /*
  * Gather vector data before calling {\tt GetValues}.
- * 
  */
 
 #undef __FUNC__
@@ -608,8 +526,11 @@ extern "C"
 #endif
 int32_t
 impl_bHYPRE_SStructVector_Gather(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Gather) */
   /* Insert the implementation of the Gather method here... */
 
@@ -624,6 +545,7 @@ impl_bHYPRE_SStructVector_Gather(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Gather) */
+  }
 }
 
 /*
@@ -635,7 +557,6 @@ impl_bHYPRE_SStructVector_Gather(
  * If the vector is complex, then {\tt value} consists of a pair
  * of doubles representing the real and imaginary parts of the
  * complex value.
- * 
  */
 
 #undef __FUNC__
@@ -651,8 +572,11 @@ impl_bHYPRE_SStructVector_GetValues(
   /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* out */ double* value)
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.GetValues) */
   /* Insert the implementation of the GetValues method here... */
 
@@ -669,6 +593,7 @@ impl_bHYPRE_SStructVector_GetValues(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.GetValues) */
+  }
 }
 
 /*
@@ -680,7 +605,6 @@ impl_bHYPRE_SStructVector_GetValues(
  * If the vector is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 
 #undef __FUNC__
@@ -698,8 +622,11 @@ impl_bHYPRE_SStructVector_GetBoxValues(
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* inout rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.GetBoxValues) */
   /* Insert the implementation of the GetBoxValues method here... */
 
@@ -716,11 +643,11 @@ impl_bHYPRE_SStructVector_GetBoxValues(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.GetBoxValues) */
+  }
 }
 
 /*
  * Set the vector to be complex.
- * 
  */
 
 #undef __FUNC__
@@ -731,18 +658,21 @@ extern "C"
 #endif
 int32_t
 impl_bHYPRE_SStructVector_SetComplex(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetComplex) */
   /* Insert the implementation of the SetComplex method here... */
    return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetComplex) */
+  }
 }
 
 /*
  * Print the vector to file.  This is mainly for debugging
  * purposes.
- * 
  */
 
 #undef __FUNC__
@@ -755,8 +685,11 @@ int32_t
 impl_bHYPRE_SStructVector_Print(
   /* in */ bHYPRE_SStructVector self,
   /* in */ const char* filename,
-  /* in */ int32_t all)
+  /* in */ int32_t all,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Print) */
   /* Insert the implementation of the Print method here... */
 
@@ -772,11 +705,171 @@ impl_bHYPRE_SStructVector_Print(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Print) */
+  }
+}
+
+/*
+ * A semi-structured matrix or vector contains a Struct or IJ matrix
+ * or vector.  GetObject returns it.
+ * The returned type is a sidl.BaseInterface.
+ * A cast must be used on the returned object to convert it into a known type.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructVector_GetObject"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructVector_GetObject(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface* A,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+
+   int ierr=0;
+   struct bHYPRE_SStructVector__data * data;
+   HYPRE_SStructVector Hx;
+   bHYPRE_StructVector sx;
+   struct bHYPRE_StructVector__data * s_data;
+   HYPRE_StructVector Hsx;
+
+   data = bHYPRE_SStructVector__get_data( self );
+   Hx = data -> vec;
+
+   sx = bHYPRE_StructVector__create(_ex); SIDL_CHECK(*_ex);
+   s_data = bHYPRE_StructVector__get_data( sx );
+   ierr += HYPRE_SStructVectorGetObject( Hx, (void **) (&Hsx) );
+   s_data -> vec = Hsx;
+   s_data -> comm = data -> comm;
+
+   *A = sidl_BaseInterface__cast( sx, _ex ); SIDL_CHECK(*_ex);
+
+   return( ierr );
+
+   hypre_babel_exception_return_error(_ex);
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.GetObject) */
+  }
+}
+
+/*
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructVector_SetCommunicator"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructVector_SetCommunicator(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+   /* N.B. This function will have no effect unless called _before_
+      SetGrid.
+    */
+
+   /* DEPRECATED   use _Create */
+
+   int ierr = 0;
+   struct bHYPRE_SStructVector__data * data;
+   data = bHYPRE_SStructVector__get_data( self );
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.SetCommunicator) */
+  }
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructVector_Initialize"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructVector_Initialize(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Initialize) */
+  /* Insert the implementation of the Initialize method here... */
+   /* Create and SetObjectType should be called before Initialize */
+
+   int ierr = 0;
+   struct bHYPRE_SStructVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr = HYPRE_SStructVectorInitialize( Hy );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Initialize) */
+  }
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructVector_Assemble"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructVector_Assemble(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Assemble) */
+  /* Insert the implementation of the Assemble method here... */
+
+   int ierr = 0;
+   struct bHYPRE_SStructVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr = HYPRE_SStructVectorAssemble( Hy );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Assemble) */
+  }
 }
 
 /*
  * Set {\tt self} to 0.
- * 
  */
 
 #undef __FUNC__
@@ -787,8 +880,11 @@ extern "C"
 #endif
 int32_t
 impl_bHYPRE_SStructVector_Clear(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Clear) */
   /* Insert the implementation of the Clear method here... */
 
@@ -803,11 +899,11 @@ impl_bHYPRE_SStructVector_Clear(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Clear) */
+  }
 }
 
 /*
  * Copy data from x into {\tt self}.
- * 
  */
 
 #undef __FUNC__
@@ -819,8 +915,11 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructVector_Copy(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Copy) */
   /* Insert the implementation of the Copy method here... */
    /* copy x into self, x should be the same size */
@@ -832,15 +931,8 @@ impl_bHYPRE_SStructVector_Copy(
    HYPRE_SStructVector Hx;
    HYPRE_SStructVector Hself;
 
-   if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructVector" ) )
-   {
-      bSSx = bHYPRE_SStructVector__cast( x );
-      bHYPRE_SStructVector_deleteRef( bSSx ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bSSx = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( x, "bHYPRE.SStructVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bSSx!=NULL );
 
    data = bHYPRE_SStructVector__get_data( self );
    datax = bHYPRE_SStructVector__get_data( bSSx );
@@ -851,7 +943,9 @@ impl_bHYPRE_SStructVector_Copy(
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Copy) */
+  }
 }
 
 /*
@@ -861,7 +955,6 @@ impl_bHYPRE_SStructVector_Copy(
  * NOTE: When this method is used in an inherited class, the
  * cloned {\tt Vector} object can be cast to an object with the
  * inherited class type.
- * 
  */
 
 #undef __FUNC__
@@ -873,8 +966,11 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructVector_Clone(
   /* in */ bHYPRE_SStructVector self,
-  /* out */ bHYPRE_Vector* x)
+  /* out */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Clone) */
   /* Insert the implementation of the Clone method here... */
    /* This is a deep copy in terms of the data array,
@@ -895,8 +991,8 @@ impl_bHYPRE_SStructVector_Clone(
    comm = data->comm;
    MPI_Comm_rank(comm, &my_id );
 
-   bHYPREP_x = bHYPRE_SStructVector__create();
-   bHYPRE_x = bHYPRE_SStructVectorView__cast( bHYPREP_x );
+   bHYPREP_x = bHYPRE_SStructVector__create(_ex); SIDL_CHECK(*_ex);
+   bHYPRE_x = bHYPRE_SStructVectorView__cast( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    data_x = bHYPRE_SStructVector__get_data( bHYPREP_x );
    data_x->comm = comm;
@@ -909,18 +1005,19 @@ impl_bHYPRE_SStructVector_Clone(
    ierr += HYPRE_SStructVectorSetObjectType(
       Hx,
       hypre_SStructVectorObjectType((hypre_SStructVector *)Hself) );
-   ierr += bHYPRE_SStructVectorView_Initialize( bHYPRE_x );
+   ierr += bHYPRE_SStructVectorView_Initialize( bHYPRE_x, _ex ); SIDL_CHECK(*_ex);
 
-   *x = bHYPRE_Vector__cast( bHYPRE_x );
+   *x = bHYPRE_Vector__cast( bHYPRE_x, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Clone) */
+  }
 }
 
 /*
  * Scale {\tt self} by {\tt a}.
- * 
  */
 
 #undef __FUNC__
@@ -932,8 +1029,11 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructVector_Scale(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ double a)
+  /* in */ double a,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Scale) */
   /* Insert the implementation of the Scale method here... */
 
@@ -948,11 +1048,11 @@ impl_bHYPRE_SStructVector_Scale(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Scale) */
+  }
 }
 
 /*
  * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -965,8 +1065,11 @@ int32_t
 impl_bHYPRE_SStructVector_Dot(
   /* in */ bHYPRE_SStructVector self,
   /* in */ bHYPRE_Vector x,
-  /* out */ double* d)
+  /* out */ double* d,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Dot) */
   /* Insert the implementation of the Dot method here... */
 
@@ -977,15 +1080,8 @@ impl_bHYPRE_SStructVector_Dot(
    HYPRE_SStructVector Hself;
    HYPRE_SStructVector Hx;
 
-   if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructVector" ) )
-   {
-      bSSx = bHYPRE_SStructVector__cast( x );
-      bHYPRE_SStructVector_deleteRef( bSSx ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bSSx = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( x, "bHYPRE.SStructVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bSSx!=NULL );
 
    data = bHYPRE_SStructVector__get_data( self );
    datax = bHYPRE_SStructVector__get_data( bSSx );
@@ -996,12 +1092,13 @@ impl_bHYPRE_SStructVector_Dot(
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Dot) */
+  }
 }
 
 /*
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
+ * Add {\tt a}{\tt x} to {\tt self}.
  */
 
 #undef __FUNC__
@@ -1014,8 +1111,11 @@ int32_t
 impl_bHYPRE_SStructVector_Axpy(
   /* in */ bHYPRE_SStructVector self,
   /* in */ double a,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
    /* self = self + a*x */
@@ -1027,15 +1127,8 @@ impl_bHYPRE_SStructVector_Axpy(
    HYPRE_SStructVector Hself;
    HYPRE_SStructVector Hx;
 
-   if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructVector" ) )
-   {
-      bSSx = bHYPRE_SStructVector__cast( x );
-      bHYPRE_SStructVector_deleteRef( bSSx ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bSSx = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( x, "bHYPRE.SStructVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bSSx!=NULL );
 
    data = bHYPRE_SStructVector__get_data( self );
    datax = bHYPRE_SStructVector__get_data( bSSx );
@@ -1046,106 +1139,128 @@ impl_bHYPRE_SStructVector_Axpy(
 
    return ierr;
 
-
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Axpy) */
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct bHYPRE_SStructGrid__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructGrid(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_SStructGrid__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStructGrid(struct 
-  bHYPRE_SStructGrid__object* obj) {
-  return bHYPRE_SStructGrid__getURL(obj);
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_MPICommunicator__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructVector_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj) {
-  return bHYPRE_MPICommunicator__getURL(obj);
-}
-struct bHYPRE_SStructMatrixVectorView__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructMatrixVectorView(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_SStructMatrixVectorView__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStructMatrixVectorView(struct 
-  bHYPRE_SStructMatrixVectorView__object* obj) {
-  return bHYPRE_SStructMatrixVectorView__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructVector_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructVector_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_Vector(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Vector__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructVector_fgetURL_bHYPRE_Vector(struct 
-  bHYPRE_Vector__object* obj) {
-  return bHYPRE_Vector__getURL(obj);
-}
-struct bHYPRE_SStructVector__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructVector(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_SStructVector__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStructVector(struct 
-  bHYPRE_SStructVector__object* obj) {
-  return bHYPRE_SStructVector__getURL(obj);
-}
-struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_ProblemDefinition(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_ProblemDefinition__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructVector_fgetURL_bHYPRE_ProblemDefinition(struct 
-  bHYPRE_ProblemDefinition__object* obj) {
-  return bHYPRE_ProblemDefinition__getURL(obj);
-}
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructVector_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructVector_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
+  impl_bHYPRE_SStructVector_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_MatrixVectorView(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_MatrixVectorView__connect(url, _ex);
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MatrixVectorView__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_SStructVector_fgetURL_bHYPRE_MatrixVectorView(struct 
-  bHYPRE_MatrixVectorView__object* obj) {
-  return bHYPRE_MatrixVectorView__getURL(obj);
+struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_SStructVector_fcast_bHYPRE_MatrixVectorView(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MatrixVectorView__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructVector_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_ProblemDefinition__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_SStructVector_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_SStructVector_fcast_bHYPRE_ProblemDefinition(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_ProblemDefinition__cast(bi, _ex);
+}
+struct bHYPRE_SStructGrid__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructGrid(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructGrid__connectI(url, ar, _ex);
+}
+struct bHYPRE_SStructGrid__object* 
+  impl_bHYPRE_SStructVector_fcast_bHYPRE_SStructGrid(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_SStructGrid__cast(bi, _ex);
+}
+struct bHYPRE_SStructMatrixVectorView__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructMatrixVectorView(const char* 
+  url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructMatrixVectorView__connectI(url, ar, _ex);
+}
+struct bHYPRE_SStructMatrixVectorView__object* 
+  impl_bHYPRE_SStructVector_fcast_bHYPRE_SStructMatrixVectorView(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_SStructMatrixVectorView__cast(bi, _ex);
+}
+struct bHYPRE_SStructVector__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructVector(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructVector__connectI(url, ar, _ex);
+}
+struct bHYPRE_SStructVector__object* 
+  impl_bHYPRE_SStructVector_fcast_bHYPRE_SStructVector(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_SStructVector__cast(bi, _ex);
 }
 struct bHYPRE_SStructVectorView__object* 
-  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructVectorView(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_SStructVectorView__connect(url, _ex);
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructVectorView__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStructVectorView(struct 
-  bHYPRE_SStructVectorView__object* obj) {
-  return bHYPRE_SStructVectorView__getURL(obj);
+struct bHYPRE_SStructVectorView__object* 
+  impl_bHYPRE_SStructVector_fcast_bHYPRE_SStructVectorView(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_SStructVectorView__cast(bi, _ex);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_Vector(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connectI(url, ar, _ex);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_SStructVector_fcast_bHYPRE_Vector(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Vector__cast(bi, _ex);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_SStructVector_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_SStructVector_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructVector_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructVector_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructVector_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructVector_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_SStructVector_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_SStructVector_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
 }

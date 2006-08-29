@@ -2,12 +2,11 @@
  * File:          bHYPRE_IJParCSRVector_Impl.c
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -22,10 +21,11 @@
  * 
  * Objects of this type can be cast to IJVectorView or Vector
  * objects using the {\tt \_\_cast} methods.
- * 
  */
 
 #include "bHYPRE_IJParCSRVector_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._includes) */
 /* Put additional includes or other arbitrary code here... */
@@ -57,11 +57,14 @@
  ***********************************************************************EHEADER*/
 
 #include <assert.h>
+#include "hypre_babel_exception_handler.h"
 #include "parcsr_mv.h"
 #include "bHYPRE_IJVectorView.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -74,11 +77,14 @@ extern "C"
 #endif
 void
 impl_bHYPRE_IJParCSRVector__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._load) */
   /* Insert-Code-Here {bHYPRE.IJParCSRVector._load} (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._load) */
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -92,8 +98,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_IJParCSRVector__ctor(
-  /* in */ bHYPRE_IJParCSRVector self)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._ctor) */
   /* Insert the implementation of the constructor method here... */
 
@@ -107,8 +116,38 @@ impl_bHYPRE_IJParCSRVector__ctor(
    bHYPRE_IJParCSRVector__set_data( self, data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._ctor) */
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_IJParCSRVector__ctor2(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._ctor2) */
+    /* Insert-Code-Here {bHYPRE.IJParCSRVector._ctor2} (special constructor method) */
+    /*
+     * This method has not been implemented
+     */
+
+    SIDL_THROW(*_ex, sidl_NotImplementedException,     "This method has not been implemented");
+  EXIT:;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -121,8 +160,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_IJParCSRVector__dtor(
-  /* in */ bHYPRE_IJParCSRVector self)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._dtor) */
   /* Insert the implementation of the destructor method here... */
 
@@ -136,6 +178,7 @@ impl_bHYPRE_IJParCSRVector__dtor(
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._dtor) */
+  }
 }
 
 /*
@@ -152,8 +195,11 @@ bHYPRE_IJParCSRVector
 impl_bHYPRE_IJParCSRVector_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t jlower,
-  /* in */ int32_t jupper)
+  /* in */ int32_t jupper,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Create) */
   /* Insert-Code-Here {bHYPRE.IJParCSRVector.Create} (Create method) */
 
@@ -162,7 +208,7 @@ impl_bHYPRE_IJParCSRVector_Create(
    HYPRE_IJVector * Hvec = &dummy;
    struct bHYPRE_IJParCSRVector__data * data;
 
-   bHYPRE_IJParCSRVector vec = bHYPRE_IJParCSRVector__create();
+   bHYPRE_IJParCSRVector vec = bHYPRE_IJParCSRVector__create(_ex); SIDL_CHECK(*_ex);
    data = bHYPRE_IJParCSRVector__get_data( vec );
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm,
    ierr += HYPRE_IJVectorCreate( data->comm, jlower, jupper, Hvec );
@@ -172,101 +218,9 @@ impl_bHYPRE_IJParCSRVector_Create(
 
    return vec;
 
+   hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Create) */
-}
-
-/*
- * Set the MPI Communicator.  DEPRECATED, Use Create()
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetCommunicator"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_SetCommunicator(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-
-   /* DEPRECATED  Use Create */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetCommunicator) */
-}
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Initialize"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_Initialize(
-  /* in */ bHYPRE_IJParCSRVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Initialize) */
-  /* Insert the implementation of the Initialize method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-   ierr = HYPRE_IJVectorInitialize( ij_b );
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Initialize) */
-}
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Assemble"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_Assemble(
-  /* in */ bHYPRE_IJParCSRVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Assemble) */
-  /* Insert the implementation of the Assemble method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-
-   ierr = HYPRE_IJVectorAssemble( ij_b );
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Assemble) */
+  }
 }
 
 /*
@@ -280,7 +234,6 @@ impl_bHYPRE_IJParCSRVector_Assemble(
  * particular, one may use zero- or one-based indexing.
  * 
  * Collective.
- * 
  */
 
 #undef __FUNC__
@@ -293,8 +246,11 @@ int32_t
 impl_bHYPRE_IJParCSRVector_SetLocalRange(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t jlower,
-  /* in */ int32_t jupper)
+  /* in */ int32_t jupper,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetLocalRange) */
   /* Insert the implementation of the SetLocalRange method here... */
 
@@ -315,6 +271,7 @@ impl_bHYPRE_IJParCSRVector_SetLocalRange(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetLocalRange) */
+  }
 }
 
 /*
@@ -325,7 +282,6 @@ impl_bHYPRE_IJParCSRVector_SetLocalRange(
  * specified locations and replaces them with new ones.
  * 
  * Not collective.
- * 
  */
 
 #undef __FUNC__
@@ -339,8 +295,11 @@ impl_bHYPRE_IJParCSRVector_SetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
   /* in rarray[nvalues] */ int32_t* indices,
-  /* in rarray[nvalues] */ double* values)
+  /* in rarray[nvalues] */ double* values,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
 
@@ -356,6 +315,7 @@ impl_bHYPRE_IJParCSRVector_SetValues(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetValues) */
+  }
 }
 
 /*
@@ -363,7 +323,6 @@ impl_bHYPRE_IJParCSRVector_SetValues(
  * {\tt SetValues}.
  * 
  * Not collective.
- * 
  */
 
 #undef __FUNC__
@@ -377,8 +336,11 @@ impl_bHYPRE_IJParCSRVector_AddToValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
   /* in rarray[nvalues] */ int32_t* indices,
-  /* in rarray[nvalues] */ double* values)
+  /* in rarray[nvalues] */ double* values,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
 
@@ -394,12 +356,12 @@ impl_bHYPRE_IJParCSRVector_AddToValues(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.AddToValues) */
+  }
 }
 
 /*
  * Returns range of the part of the vector owned by this
  * processor.
- * 
  */
 
 #undef __FUNC__
@@ -412,8 +374,11 @@ int32_t
 impl_bHYPRE_IJParCSRVector_GetLocalRange(
   /* in */ bHYPRE_IJParCSRVector self,
   /* out */ int32_t* jlower,
-  /* out */ int32_t* jupper)
+  /* out */ int32_t* jupper,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetLocalRange) */
   /* Insert the implementation of the GetLocalRange method here... */
 
@@ -428,6 +393,7 @@ impl_bHYPRE_IJParCSRVector_GetLocalRange(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetLocalRange) */
+  }
 }
 
 /*
@@ -435,7 +401,6 @@ impl_bHYPRE_IJParCSRVector_GetLocalRange(
  * SetValues}.
  * 
  * Not collective.
- * 
  */
 
 #undef __FUNC__
@@ -449,8 +414,11 @@ impl_bHYPRE_IJParCSRVector_GetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
   /* in rarray[nvalues] */ int32_t* indices,
-  /* inout rarray[nvalues] */ double* values)
+  /* inout rarray[nvalues] */ double* values,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetValues) */
   /* Insert the implementation of the GetValues method here... */
 
@@ -466,12 +434,12 @@ impl_bHYPRE_IJParCSRVector_GetValues(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetValues) */
+  }
 }
 
 /*
  * Print the vector to file.  This is mainly for debugging
  * purposes.
- * 
  */
 
 #undef __FUNC__
@@ -483,8 +451,11 @@ extern "C"
 int32_t
 impl_bHYPRE_IJParCSRVector_Print(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ const char* filename)
+  /* in */ const char* filename,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Print) */
   /* Insert the implementation of the Print method here... */
 
@@ -499,12 +470,12 @@ impl_bHYPRE_IJParCSRVector_Print(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Print) */
+  }
 }
 
 /*
  * Read the vector from file.  This is mainly for debugging
  * purposes.
- * 
  */
 
 #undef __FUNC__
@@ -517,8 +488,11 @@ int32_t
 impl_bHYPRE_IJParCSRVector_Read(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ const char* filename,
-  /* in */ bHYPRE_MPICommunicator comm)
+  /* in */ bHYPRE_MPICommunicator comm,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Read) */
   /* Insert the implementation of the Read method here... */
 
@@ -541,11 +515,114 @@ impl_bHYPRE_IJParCSRVector_Read(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Read) */
+  }
+}
+
+/*
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetCommunicator"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_SetCommunicator(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED  Use Create */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetCommunicator) */
+  }
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Initialize"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_Initialize(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Initialize) */
+  /* Insert the implementation of the Initialize method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+   ierr = HYPRE_IJVectorInitialize( ij_b );
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Initialize) */
+  }
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Assemble"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_Assemble(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Assemble) */
+  /* Insert the implementation of the Assemble method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+
+   ierr = HYPRE_IJVectorAssemble( ij_b );
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Assemble) */
+  }
 }
 
 /*
  * Set {\tt self} to 0.
- * 
  */
 
 #undef __FUNC__
@@ -556,8 +633,11 @@ extern "C"
 #endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Clear(
-  /* in */ bHYPRE_IJParCSRVector self)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Clear) */
   /* Insert the implementation of the Clear method here... */
 
@@ -576,11 +656,11 @@ impl_bHYPRE_IJParCSRVector_Clear(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Clear) */
+  }
 }
 
 /*
  * Copy data from x into {\tt self}.
- * 
  */
 
 #undef __FUNC__
@@ -592,8 +672,11 @@ extern "C"
 int32_t
 impl_bHYPRE_IJParCSRVector_Copy(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Copy) */
   /* Insert the implementation of the Copy method here... */
 
@@ -610,15 +693,9 @@ impl_bHYPRE_IJParCSRVector_Copy(
    /* A bHYPRE_Vector is just an interface, we have no knowledge of its
     * contents.  Check whether it's something we know how to handle.
     * If not, die. */
-   if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bHYPREP_x = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2(x, "bHYPRE.IJParCSRVector", _ex );
+   SIDL_CHECK(*_ex);
+   hypre_assert( bHYPREP_x!=NULL );
 
    data_y = bHYPRE_IJParCSRVector__get_data( self );
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
@@ -644,7 +721,9 @@ impl_bHYPRE_IJParCSRVector_Copy(
 
    return( ierr );
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Copy) */
+  }
 }
 
 /*
@@ -654,7 +733,6 @@ impl_bHYPRE_IJParCSRVector_Copy(
  * NOTE: When this method is used in an inherited class, the
  * cloned {\tt Vector} object can be cast to an object with the
  * inherited class type.
- * 
  */
 
 #undef __FUNC__
@@ -666,8 +744,11 @@ extern "C"
 int32_t
 impl_bHYPRE_IJParCSRVector_Clone(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* out */ bHYPRE_Vector* x)
+  /* out */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Clone) */
   /* Insert the implementation of the Clone method here... */
 
@@ -681,8 +762,8 @@ impl_bHYPRE_IJParCSRVector_Clone(
 
    MPI_Comm_rank(MPI_COMM_WORLD, &my_id );
 
-   bHYPREP_x = bHYPRE_IJParCSRVector__create();
-   bHYPRE_ij_x = bHYPRE_IJVectorView__cast( bHYPREP_x );
+   bHYPREP_x = bHYPRE_IJParCSRVector__create(_ex); SIDL_CHECK(*_ex);
+   bHYPRE_ij_x = bHYPRE_IJVectorView__cast( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    data_y = bHYPRE_IJParCSRVector__get_data( self );
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
@@ -706,18 +787,19 @@ impl_bHYPRE_IJParCSRVector_Clone(
    /* ... don't know how to deal with other types */
    hypre_assert( *type == HYPRE_PARCSR );
 
-   ierr += bHYPRE_IJVectorView_Initialize( bHYPRE_ij_x );
+   ierr += bHYPRE_IJVectorView_Initialize( bHYPRE_ij_x, _ex ); SIDL_CHECK(*_ex);
 
-   *x = bHYPRE_Vector__cast( bHYPRE_ij_x );
+   *x = bHYPRE_Vector__cast( bHYPRE_ij_x, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Clone) */
+  }
 }
 
 /*
  * Scale {\tt self} by {\tt a}.
- * 
  */
 
 #undef __FUNC__
@@ -729,8 +811,11 @@ extern "C"
 int32_t
 impl_bHYPRE_IJParCSRVector_Scale(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ double a)
+  /* in */ double a,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Scale) */
   /* Insert the implementation of the Scale method here... */
 
@@ -748,11 +833,11 @@ impl_bHYPRE_IJParCSRVector_Scale(
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Scale) */
+  }
 }
 
 /*
  * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -765,8 +850,11 @@ int32_t
 impl_bHYPRE_IJParCSRVector_Dot(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ bHYPRE_Vector x,
-  /* out */ double* d)
+  /* out */ double* d,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Dot) */
   /* Insert the implementation of the Dot method here... */
 
@@ -780,15 +868,9 @@ impl_bHYPRE_IJParCSRVector_Dot(
    /* A bHYPRE_Vector is just an interface, we have no knowledge of its
     * contents.  Check whether it's something we know how to handle.
     * If not, die. */
-   if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bHYPREP_x = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2(x, "bHYPRE.IJParCSRVector", _ex );
+   SIDL_CHECK(*_ex);
+   hypre_assert( bHYPREP_x!=NULL );
 
    data = bHYPRE_IJParCSRVector__get_data( self );
    ij_y = data -> ij_b;
@@ -804,12 +886,13 @@ impl_bHYPRE_IJParCSRVector_Dot(
 
    return( ierr );
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Dot) */
+  }
 }
 
 /*
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
+ * Add {\tt a}{\tt x} to {\tt self}.
  */
 
 #undef __FUNC__
@@ -822,8 +905,11 @@ int32_t
 impl_bHYPRE_IJParCSRVector_Axpy(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ double a,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
 
@@ -846,15 +932,9 @@ impl_bHYPRE_IJParCSRVector_Axpy(
    /* A bHYPRE_Vector is just an interface, we have no knowledge of its
     * contents.  Check whether it's something we know how to handle.
     * If not, die. */
-   if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra ref from query Int */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bHYPREP_x = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2(x, "bHYPRE.IJParCSRVector", _ex );
+   SIDL_CHECK(*_ex);
+   hypre_assert( bHYPREP_x!=NULL );
 
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
    ij_x = data_x->ij_b;
@@ -869,87 +949,108 @@ impl_bHYPRE_IJParCSRVector_Axpy(
 
    return( ierr );
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Axpy) */
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_IJParCSRVector__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_IJParCSRVector__connect(url, _ex);
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_IJParCSRVector__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJParCSRVector(struct 
-  bHYPRE_IJParCSRVector__object* obj) {
-  return bHYPRE_IJParCSRVector__getURL(obj);
-}
-struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_MPICommunicator__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj) {
-  return bHYPRE_MPICommunicator__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRVector_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_Vector(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Vector__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_Vector(struct 
-  bHYPRE_Vector__object* obj) {
-  return bHYPRE_Vector__getURL(obj);
+struct bHYPRE_IJParCSRVector__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_bHYPRE_IJParCSRVector(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_IJParCSRVector__cast(bi, _ex);
 }
 struct bHYPRE_IJVectorView__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJVectorView(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_IJVectorView__connect(url, _ex);
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_IJVectorView__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJVectorView(struct 
-  bHYPRE_IJVectorView__object* obj) {
-  return bHYPRE_IJVectorView__getURL(obj);
+struct bHYPRE_IJVectorView__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_bHYPRE_IJVectorView(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_IJVectorView__cast(bi, _ex);
 }
-struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_ProblemDefinition(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_ProblemDefinition__connect(url, _ex);
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_ProblemDefinition(struct 
-  bHYPRE_ProblemDefinition__object* obj) {
-  return bHYPRE_ProblemDefinition__getURL(obj);
-}
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_MatrixVectorView(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_MatrixVectorView__connect(url, _ex);
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MatrixVectorView__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_MatrixVectorView(struct 
-  bHYPRE_MatrixVectorView__object* obj) {
-  return bHYPRE_MatrixVectorView__getURL(obj);
+struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_bHYPRE_MatrixVectorView(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MatrixVectorView__cast(bi, _ex);
+}
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_ProblemDefinition__connectI(url, ar, _ex);
+}
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_bHYPRE_ProblemDefinition(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_ProblemDefinition__cast(bi, _ex);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_Vector(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connectI(url, ar, _ex);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_bHYPRE_Vector(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Vector__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_IJParCSRVector_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
 }

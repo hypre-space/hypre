@@ -2,12 +2,11 @@
  * File:          bHYPRE_SStructSplit_Impl.c
  * Symbol:        bHYPRE.SStructSplit-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for bHYPRE.SStructSplit
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -22,11 +21,11 @@
  * Documentation goes here.
  * 
  * The SStructSplit solver requires a SStruct matrix.
- * 
- * 
  */
 
 #include "bHYPRE_SStructSplit_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._includes) */
 /* Insert-Code-Here {bHYPRE.SStructSplit._includes} (includes and arbitrary code) */
@@ -58,6 +57,7 @@
  ***********************************************************************EHEADER*/
 
 #include <assert.h>
+#include "hypre_babel_exception_handler.h"
 #include "bHYPRE_SStructMatrix.h"
 #include "bHYPRE_SStructMatrix_Impl.h"
 #include "bHYPRE_SStructVector.h"
@@ -67,6 +67,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._includes) */
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -79,11 +81,14 @@ extern "C"
 #endif
 void
 impl_bHYPRE_SStructSplit__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._load) */
   /* Insert-Code-Here {bHYPRE.SStructSplit._load} (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._load) */
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -97,8 +102,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_SStructSplit__ctor(
-  /* in */ bHYPRE_SStructSplit self)
+  /* in */ bHYPRE_SStructSplit self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._ctor) */
   /* Insert-Code-Here {bHYPRE.SStructSplit._ctor} (constructor method) */
 
@@ -110,8 +118,38 @@ impl_bHYPRE_SStructSplit__ctor(
    bHYPRE_SStructSplit__set_data( self, data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._ctor) */
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructSplit__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_SStructSplit__ctor2(
+  /* in */ bHYPRE_SStructSplit self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._ctor2) */
+    /* Insert-Code-Here {bHYPRE.SStructSplit._ctor2} (special constructor method) */
+    /*
+     * This method has not been implemented
+     */
+
+    SIDL_THROW(*_ex, sidl_NotImplementedException,     "This method has not been implemented");
+  EXIT:;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -124,8 +162,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_SStructSplit__dtor(
-  /* in */ bHYPRE_SStructSplit self)
+  /* in */ bHYPRE_SStructSplit self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._dtor) */
   /* Insert-Code-Here {bHYPRE.SStructSplit._dtor} (destructor method) */
 
@@ -133,10 +174,12 @@ impl_bHYPRE_SStructSplit__dtor(
    struct bHYPRE_SStructSplit__data * data;
    data = bHYPRE_SStructSplit__get_data( self );
    ierr += HYPRE_SStructSplitDestroy( data->solver );
-   bHYPRE_SStructMatrix_deleteRef( data->matrix );
+   bHYPRE_SStructMatrix_deleteRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
    hypre_TFree( data );
 
+   return; hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._dtor) */
+  }
 }
 
 /*
@@ -152,13 +195,16 @@ extern "C"
 bHYPRE_SStructSplit
 impl_bHYPRE_SStructSplit_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A)
+  /* in */ bHYPRE_Operator A,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.Create) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.Create} (Create method) */
 
    int ierr = 0;
-   bHYPRE_SStructSplit solver = bHYPRE_SStructSplit__create();
+   bHYPRE_SStructSplit solver = bHYPRE_SStructSplit__create(_ex); SIDL_CHECK(*_ex);
    struct bHYPRE_SStructSplit__data * data = bHYPRE_SStructSplit__get_data( solver );
    HYPRE_SStructSolver dummy;
    HYPRE_SStructSolver * Hsolver = &dummy;
@@ -170,27 +216,276 @@ impl_bHYPRE_SStructSplit_Create(
    hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
 
-   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.SStructMatrix" ) )
-   {
-      Amat = bHYPRE_SStructMatrix__cast( A );
-      bHYPRE_SStructMatrix_deleteRef( Amat ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized operator type."==(char *)A );
-   }
+   Amat = (bHYPRE_SStructMatrix) bHYPRE_Operator__cast2( A, "bHYPRE.SStructMatrix", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( Amat!=NULL );
+
    data->matrix = Amat;
-   bHYPRE_SStructMatrix_addRef( data->matrix );
+   bHYPRE_SStructMatrix_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
 
    return solver;
 
+   hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.Create) */
+  }
+}
+
+/*
+ * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructSplit_SetOperator"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructSplit_SetOperator(
+  /* in */ bHYPRE_SStructSplit self,
+  /* in */ bHYPRE_Operator A,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetOperator) */
+  /* Insert-Code-Here {bHYPRE.SStructSplit.SetOperator} (SetOperator method) */
+
+   int ierr = 0;
+   struct bHYPRE_SStructSplit__data * data;
+   bHYPRE_SStructMatrix Amat;
+
+   Amat = (bHYPRE_SStructMatrix) bHYPRE_Operator__cast2( A, "bHYPRE.SStructMatrix", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( Amat!=NULL );
+
+   data = bHYPRE_SStructSplit__get_data( self );
+   data->matrix = Amat;
+   bHYPRE_SStructMatrix_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
+
+   return ierr;
+
+   hypre_babel_exception_return_error(_ex);
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetOperator) */
+  }
+}
+
+/*
+ * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructSplit_SetTolerance"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructSplit_SetTolerance(
+  /* in */ bHYPRE_SStructSplit self,
+  /* in */ double tolerance,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetTolerance) */
+  /* Insert-Code-Here {bHYPRE.SStructSplit.SetTolerance} (SetTolerance method) */
+
+   int ierr = 0;
+   HYPRE_SStructSolver solver;
+   struct bHYPRE_SStructSplit__data * data;
+
+   data = bHYPRE_SStructSplit__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_SStructSplitSetTol( solver, tolerance );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetTolerance) */
+  }
+}
+
+/*
+ * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructSplit_SetMaxIterations"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructSplit_SetMaxIterations(
+  /* in */ bHYPRE_SStructSplit self,
+  /* in */ int32_t max_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetMaxIterations) */
+  /* Insert-Code-Here {bHYPRE.SStructSplit.SetMaxIterations} (SetMaxIterations method) */
+
+   int ierr = 0;
+   HYPRE_SStructSolver solver;
+   struct bHYPRE_SStructSplit__data * data;
+
+   data = bHYPRE_SStructSplit__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_SStructSplitSetMaxIter( solver, max_iterations );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetMaxIterations) */
+  }
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructSplit_SetLogging"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructSplit_SetLogging(
+  /* in */ bHYPRE_SStructSplit self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetLogging) */
+  /* Insert-Code-Here {bHYPRE.SStructSplit.SetLogging} (SetLogging method) */
+
+  /* ignored by HYPRE_SStructSplit, but it sets Logging to 0 for solvers it calls */
+   if ( level==0 ) return 0;
+   else return 1;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetLogging) */
+  }
+}
+
+/*
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructSplit_SetPrintLevel"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructSplit_SetPrintLevel(
+  /* in */ bHYPRE_SStructSplit self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetPrintLevel) */
+  /* Insert-Code-Here {bHYPRE.SStructSplit.SetPrintLevel} (SetPrintLevel method) */
+
+  /* ignored by HYPRE_SStructSplit, but it sets PrintLevel to 0 for solvers it calls */
+   if ( level==0 ) return 0;
+   else return 1;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetPrintLevel) */
+  }
+}
+
+/*
+ * (Optional) Return the number of iterations taken.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructSplit_GetNumIterations"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructSplit_GetNumIterations(
+  /* in */ bHYPRE_SStructSplit self,
+  /* out */ int32_t* num_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetNumIterations) */
+  /* Insert-Code-Here {bHYPRE.SStructSplit.GetNumIterations} (GetNumIterations method) */
+
+   int ierr = 0;
+   HYPRE_SStructSolver solver;
+   struct bHYPRE_SStructSplit__data * data;
+
+   data = bHYPRE_SStructSplit__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_SStructSplitGetNumIterations( solver, num_iterations );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetNumIterations) */
+  }
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructSplit_GetRelResidualNorm"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructSplit_GetRelResidualNorm(
+  /* in */ bHYPRE_SStructSplit self,
+  /* out */ double* norm,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetRelResidualNorm) */
+  /* Insert-Code-Here {bHYPRE.SStructSplit.GetRelResidualNorm} (GetRelResidualNorm method) */
+
+   int ierr = 0;
+   HYPRE_SStructSolver solver;
+   struct bHYPRE_SStructSplit__data * data;
+
+   data = bHYPRE_SStructSplit__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_SStructSplitGetFinalRelativeResidualNorm( solver, norm );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetRelResidualNorm) */
+  }
 }
 
 /*
  * Set the MPI Communicator.
  * DEPRECATED, use Create:
- * 
  */
 
 #undef __FUNC__
@@ -202,17 +497,20 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructSplit_SetCommunicator(
   /* in */ bHYPRE_SStructSplit self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetCommunicator} (SetCommunicator method) */
    return 1; /* deprecated and will never be implemented */
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetCommunicator) */
+  }
 }
 
 /*
  * Set the int parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -225,8 +523,11 @@ int32_t
 impl_bHYPRE_SStructSplit_SetIntParameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* in */ int32_t value)
+  /* in */ int32_t value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetIntParameter} (SetIntParameter method) */
 
@@ -240,7 +541,7 @@ impl_bHYPRE_SStructSplit_SetIntParameter(
 
    if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
    {
-      ierr += bHYPRE_SStructSplit_SetMaxIterations( self, value );
+      ierr += bHYPRE_SStructSplit_SetMaxIterations( self, value, _ex ); SIDL_CHECK(*_ex);
    }
    else if ( strcmp(name,"NonZeroGuess")==0 || strcmp(name,"nonzero guess")==0 )
    {
@@ -281,12 +582,13 @@ impl_bHYPRE_SStructSplit_SetIntParameter(
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetIntParameter) */
+  }
 }
 
 /*
  * Set the double parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -299,8 +601,11 @@ int32_t
 impl_bHYPRE_SStructSplit_SetDoubleParameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetDoubleParameter} (SetDoubleParameter method) */
 
@@ -313,7 +618,7 @@ impl_bHYPRE_SStructSplit_SetDoubleParameter(
 
    if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 )
    {
-      ierr += bHYPRE_SStructSplit_SetTolerance( self, value );      
+      ierr += bHYPRE_SStructSplit_SetTolerance( self, value, _ex ); SIDL_CHECK(*_ex);
    }
    else
    {
@@ -322,12 +627,13 @@ impl_bHYPRE_SStructSplit_SetDoubleParameter(
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetDoubleParameter) */
+  }
 }
 
 /*
  * Set the string parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -340,8 +646,11 @@ int32_t
 impl_bHYPRE_SStructSplit_SetStringParameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* in */ const char* value)
+  /* in */ const char* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetStringParameter) */
    /* Insert-Code-Here {bHYPRE.SStructSplit.SetStringParameter} (SetStringParameter method) */
 
@@ -381,11 +690,11 @@ impl_bHYPRE_SStructSplit_SetStringParameter(
    return ierr;
 
    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetStringParameter) */
+  }
 }
 
 /*
  * Set the int 1-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -399,19 +708,22 @@ impl_bHYPRE_SStructSplit_SetIntArray1Parameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ int32_t* value,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetIntArray1Parameter) */
+  }
 }
 
 /*
  * Set the int 2-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -424,19 +736,22 @@ int32_t
 impl_bHYPRE_SStructSplit_SetIntArray2Parameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetIntArray2Parameter) */
+  }
 }
 
 /*
  * Set the double 1-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -450,19 +765,22 @@ impl_bHYPRE_SStructSplit_SetDoubleArray1Parameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ double* value,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetDoubleArray1Parameter) */
+  }
 }
 
 /*
  * Set the double 2-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -475,19 +793,22 @@ int32_t
 impl_bHYPRE_SStructSplit_SetDoubleArray2Parameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetDoubleArray2Parameter) */
+  }
 }
 
 /*
  * Set the int parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -500,19 +821,22 @@ int32_t
 impl_bHYPRE_SStructSplit_GetIntValue(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* out */ int32_t* value)
+  /* out */ int32_t* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.GetIntValue} (GetIntValue method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetIntValue) */
+  }
 }
 
 /*
  * Get the double parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -525,20 +849,23 @@ int32_t
 impl_bHYPRE_SStructSplit_GetDoubleValue(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* out */ double* value)
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.GetDoubleValue} (GetDoubleValue method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetDoubleValue) */
+  }
 }
 
 /*
  * (Optional) Do any preprocessing that may be necessary in
  * order to execute {\tt Apply}.
- * 
  */
 
 #undef __FUNC__
@@ -551,8 +878,11 @@ int32_t
 impl_bHYPRE_SStructSplit_Setup(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ bHYPRE_Vector b,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.Setup) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.Setup} (Setup method) */
 
@@ -572,40 +902,29 @@ impl_bHYPRE_SStructSplit_Setup(
    dataA = bHYPRE_SStructMatrix__get_data( A );
    HA = dataA -> matrix;
 
-   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.SStructVector" ) )
-   {
-      bHb = bHYPRE_SStructVector__cast( b );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bHb = (bHYPRE_SStructVector) bHYPRE_Vector__cast2(b, "bHYPRE.SStructVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bHb!=NULL );
+
    datab = bHYPRE_SStructVector__get_data( bHb );
-   bHYPRE_SStructVector_deleteRef( bHb );
    Hb = datab -> vec;
 
-   if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructVector" ) )
-   {
-      bHx = bHYPRE_SStructVector__cast( x );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)(x) );
-   }
+   bHx = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( x, "bHYPRE.SStructVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bHx!=NULL );
+
    datax = bHYPRE_SStructVector__get_data( bHx );
-   bHYPRE_SStructVector_deleteRef( bHx );
    Hx = datax -> vec;
 
    ierr += HYPRE_SStructSplitSetup( solver, HA, Hb, Hx );
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.Setup) */
+  }
 }
 
 /*
  * Apply the operator to {\tt b}, returning {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -618,8 +937,11 @@ int32_t
 impl_bHYPRE_SStructSplit_Apply(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x)
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.Apply) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.Apply} (Apply method) */
 
@@ -639,16 +961,10 @@ impl_bHYPRE_SStructSplit_Apply(
    dataA = bHYPRE_SStructMatrix__get_data( A );
    HA = dataA -> matrix;
 
-   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.SStructVector" ) )
-   {
-      bHb = bHYPRE_SStructVector__cast( b );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bHb = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( b, "bHYPRE.SStructVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bHb!=NULL );
+
    datab = bHYPRE_SStructVector__get_data( bHb );
-   bHYPRE_SStructVector_deleteRef( bHb );
    Hb = datab -> vec;
 
    if ( *x==NULL )
@@ -657,31 +973,27 @@ impl_bHYPRE_SStructSplit_Apply(
       /* There's no good way to check the size of x.  It would be good
        * to do something similar if x had zero length.  Or hypre_assert(x
        * has the right size) */
-      bHYPRE_Vector_Clone( b, x );
-      bHYPRE_Vector_Clear( *x );
+      bHYPRE_Vector_Clone( b, x, _ex ); SIDL_CHECK(*_ex);
+      bHYPRE_Vector_Clear( *x, _ex ); SIDL_CHECK(*_ex);
    }
-   if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.SStructVector" ) )
-   {
-      bHx = bHYPRE_SStructVector__cast( *x );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)(*x) );
-   }
+
+   bHx = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( *x, "bHYPRE.SStructVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bHx!=NULL );
+
    datax = bHYPRE_SStructVector__get_data( bHx );
-   bHYPRE_SStructVector_deleteRef( bHx );
    Hx = datax -> vec;
 
    ierr += HYPRE_SStructSplitSolve( solver, HA, Hb, Hx );
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.Apply) */
+  }
 }
 
 /*
  * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -694,324 +1006,107 @@ int32_t
 impl_bHYPRE_SStructSplit_ApplyAdjoint(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x)
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.ApplyAdjoint) */
-}
-
-/*
- * Set the operator for the linear system being solved.
- * DEPRECATED.  use Create
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructSplit_SetOperator"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructSplit_SetOperator(
-  /* in */ bHYPRE_SStructSplit self,
-  /* in */ bHYPRE_Operator A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetOperator) */
-  /* Insert-Code-Here {bHYPRE.SStructSplit.SetOperator} (SetOperator method) */
-
-   int ierr = 0;
-   struct bHYPRE_SStructSplit__data * data;
-   bHYPRE_SStructMatrix Amat;
-
-   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.SStructMatrix" ) )
-   {
-      Amat = bHYPRE_SStructMatrix__cast( A );
-      bHYPRE_SStructMatrix_deleteRef( Amat ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized operator type."==(char *)A );
-   }
-
-   data = bHYPRE_SStructSplit__get_data( self );
-   data->matrix = Amat;
-   bHYPRE_SStructMatrix_addRef( data->matrix );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetOperator) */
-}
-
-/*
- * (Optional) Set the convergence tolerance.
- * DEPRECATED.  use SetDoubleParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructSplit_SetTolerance"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructSplit_SetTolerance(
-  /* in */ bHYPRE_SStructSplit self,
-  /* in */ double tolerance)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetTolerance) */
-  /* Insert-Code-Here {bHYPRE.SStructSplit.SetTolerance} (SetTolerance method) */
-
-   int ierr = 0;
-   HYPRE_SStructSolver solver;
-   struct bHYPRE_SStructSplit__data * data;
-
-   data = bHYPRE_SStructSplit__get_data( self );
-   solver = data->solver;
-
-   ierr = HYPRE_SStructSplitSetTol( solver, tolerance );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetTolerance) */
-}
-
-/*
- * (Optional) Set maximum number of iterations.
- * DEPRECATED   use SetIntParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructSplit_SetMaxIterations"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructSplit_SetMaxIterations(
-  /* in */ bHYPRE_SStructSplit self,
-  /* in */ int32_t max_iterations)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetMaxIterations) */
-  /* Insert-Code-Here {bHYPRE.SStructSplit.SetMaxIterations} (SetMaxIterations method) */
-
-   int ierr = 0;
-   HYPRE_SStructSolver solver;
-   struct bHYPRE_SStructSplit__data * data;
-
-   data = bHYPRE_SStructSplit__get_data( self );
-   solver = data->solver;
-
-   ierr = HYPRE_SStructSplitSetMaxIter( solver, max_iterations );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetMaxIterations) */
-}
-
-/*
- * (Optional) Set the {\it logging level}, specifying the degree
- * of additional informational data to be accumulated.  Does
- * nothing by default (level = 0).  Other levels (if any) are
- * implementation-specific.  Must be called before {\tt Setup}
- * and {\tt Apply}.
- * DEPRECATED   use SetIntParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructSplit_SetLogging"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructSplit_SetLogging(
-  /* in */ bHYPRE_SStructSplit self,
-  /* in */ int32_t level)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetLogging) */
-  /* Insert-Code-Here {bHYPRE.SStructSplit.SetLogging} (SetLogging method) */
-
-  /* ignored by HYPRE_SStructSplit, but it sets Logging to 0 for solvers it calls */
-   if ( level==0 ) return 0;
-   else return 1;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetLogging) */
-}
-
-/*
- * (Optional) Set the {\it print level}, specifying the degree
- * of informational data to be printed either to the screen or
- * to a file.  Does nothing by default (level=0).  Other levels
- * (if any) are implementation-specific.  Must be called before
- * {\tt Setup} and {\tt Apply}.
- * DEPRECATED   use SetIntParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructSplit_SetPrintLevel"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructSplit_SetPrintLevel(
-  /* in */ bHYPRE_SStructSplit self,
-  /* in */ int32_t level)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetPrintLevel) */
-  /* Insert-Code-Here {bHYPRE.SStructSplit.SetPrintLevel} (SetPrintLevel method) */
-
-  /* ignored by HYPRE_SStructSplit, but it sets PrintLevel to 0 for solvers it calls */
-   if ( level==0 ) return 0;
-   else return 1;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetPrintLevel) */
-}
-
-/*
- * (Optional) Return the number of iterations taken.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructSplit_GetNumIterations"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructSplit_GetNumIterations(
-  /* in */ bHYPRE_SStructSplit self,
-  /* out */ int32_t* num_iterations)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetNumIterations) */
-  /* Insert-Code-Here {bHYPRE.SStructSplit.GetNumIterations} (GetNumIterations method) */
-
-   int ierr = 0;
-   HYPRE_SStructSolver solver;
-   struct bHYPRE_SStructSplit__data * data;
-
-   data = bHYPRE_SStructSplit__get_data( self );
-   solver = data->solver;
-
-   ierr = HYPRE_SStructSplitGetNumIterations( solver, num_iterations );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetNumIterations) */
-}
-
-/*
- * (Optional) Return the norm of the relative residual.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructSplit_GetRelResidualNorm"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructSplit_GetRelResidualNorm(
-  /* in */ bHYPRE_SStructSplit self,
-  /* out */ double* norm)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetRelResidualNorm) */
-  /* Insert-Code-Here {bHYPRE.SStructSplit.GetRelResidualNorm} (GetRelResidualNorm method) */
-
-   int ierr = 0;
-   HYPRE_SStructSolver solver;
-   struct bHYPRE_SStructSplit__data * data;
-
-   data = bHYPRE_SStructSplit__get_data( self );
-   solver = data->solver;
-
-   ierr = HYPRE_SStructSplitGetFinalRelativeResidualNorm( solver, norm );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetRelResidualNorm) */
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Solver(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Solver__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructSplit_fgetURL_bHYPRE_Solver(struct 
-  bHYPRE_Solver__object* obj) {
-  return bHYPRE_Solver__getURL(obj);
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_MPICommunicator__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructSplit_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj) {
-  return bHYPRE_MPICommunicator__getURL(obj);
+  impl_bHYPRE_SStructSplit_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Operator(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Operator__connect(url, _ex);
+  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Operator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_SStructSplit_fgetURL_bHYPRE_Operator(struct 
-  bHYPRE_Operator__object* obj) {
-  return bHYPRE_Operator__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructSplit_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructSplit_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Vector(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Vector__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructSplit_fgetURL_bHYPRE_Vector(struct 
-  bHYPRE_Vector__object* obj) {
-  return bHYPRE_Vector__getURL(obj);
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_SStructSplit_fcast_bHYPRE_Operator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Operator__cast(bi, _ex);
 }
 struct bHYPRE_SStructSplit__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_SStructSplit(char* url,
+  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_SStructSplit(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructSplit__connectI(url, ar, _ex);
+}
+struct bHYPRE_SStructSplit__object* 
+  impl_bHYPRE_SStructSplit_fcast_bHYPRE_SStructSplit(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_SStructSplit__cast(bi, _ex);
+}
+struct bHYPRE_Solver__object* 
+  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) {
-  return bHYPRE_SStructSplit__connect(url, _ex);
+  return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_SStructSplit_fgetURL_bHYPRE_SStructSplit(struct 
-  bHYPRE_SStructSplit__object* obj) {
-  return bHYPRE_SStructSplit__getURL(obj);
+struct bHYPRE_Solver__object* 
+  impl_bHYPRE_SStructSplit_fcast_bHYPRE_Solver(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Solver__cast(bi, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructSplit_fconnect_sidl_BaseInterface(char* url,
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
+  return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_SStructSplit_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_SStructSplit_fcast_bHYPRE_Vector(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Vector__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructSplit_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  impl_bHYPRE_SStructSplit_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_SStructSplit_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_SStructSplit_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructSplit_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructSplit_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructSplit_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructSplit_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_SStructSplit_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_SStructSplit_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
 }

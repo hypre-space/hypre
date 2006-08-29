@@ -2,12 +2,11 @@
  * File:          bHYPRE_CoefficientAccess.h
  * Symbol:        bHYPRE.CoefficientAccess-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for bHYPRE.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_CoefficientAccess_h
@@ -27,54 +26,42 @@ typedef struct bHYPRE_CoefficientAccess__object* bHYPRE_CoefficientAccess;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
+#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_bHYPRE_CoefficientAccess_IOR_h
+#include "bHYPRE_CoefficientAccess_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 bHYPRE_CoefficientAccess
 bHYPRE_CoefficientAccess__connect(const char *, sidl_BaseInterface *_ex);
-void
-bHYPRE_CoefficientAccess_addRef(
-  /* in */ bHYPRE_CoefficientAccess self);
-
-void
-bHYPRE_CoefficientAccess_deleteRef(
-  /* in */ bHYPRE_CoefficientAccess self);
-
-sidl_bool
-bHYPRE_CoefficientAccess_isSame(
-  /* in */ bHYPRE_CoefficientAccess self,
-  /* in */ sidl_BaseInterface iobj);
-
-sidl_BaseInterface
-bHYPRE_CoefficientAccess_queryInt(
-  /* in */ bHYPRE_CoefficientAccess self,
-  /* in */ const char* name);
-
-sidl_bool
-bHYPRE_CoefficientAccess_isType(
-  /* in */ bHYPRE_CoefficientAccess self,
-  /* in */ const char* name);
-
-sidl_ClassInfo
-bHYPRE_CoefficientAccess_getClassInfo(
-  /* in */ bHYPRE_CoefficientAccess self);
 
 /**
  * The GetRow method will allocate space for its two output
@@ -82,22 +69,122 @@ bHYPRE_CoefficientAccess_getClassInfo(
  * subsequent calls.  Thus the user must not delete them, yet
  * must not depend on the data from GetRow to persist beyond the
  * next GetRow call.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_CoefficientAccess_GetRow(
   /* in */ bHYPRE_CoefficientAccess self,
   /* in */ int32_t row,
   /* out */ int32_t* size,
   /* out array<int,column-major> */ struct sidl_int__array** col_ind,
-  /* out array<double,column-major> */ struct sidl_double__array** values);
+  /* out array<double,column-major> */ struct sidl_double__array** values,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetRow)(
+    self->d_object,
+    row,
+    size,
+    col_ind,
+    values,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+void
+bHYPRE_CoefficientAccess_addRef(
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+void
+bHYPRE_CoefficientAccess_deleteRef(
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_CoefficientAccess_isSame(
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_CoefficientAccess_isType(
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self->d_object,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_ClassInfo
+bHYPRE_CoefficientAccess_getClassInfo(
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_CoefficientAccess__object*
 bHYPRE_CoefficientAccess__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -105,23 +192,94 @@ bHYPRE_CoefficientAccess__cast(
 void*
 bHYPRE_CoefficientAccess__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 bHYPRE_CoefficientAccess__exec(
   /* in */ bHYPRE_CoefficientAccess self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self->d_object,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 bHYPRE_CoefficientAccess__getURL(
-  /* in */ bHYPRE_CoefficientAccess self);
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_CoefficientAccess__raddRef(
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_CoefficientAccess__isRemote(
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+bHYPRE_CoefficientAccess__isLocal(
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* out */ sidl_BaseInterface *_ex);
 struct bHYPRE_CoefficientAccess__array*
 bHYPRE_CoefficientAccess__array_createCol(
   int32_t       dimen,
@@ -349,6 +507,25 @@ bHYPRE_CoefficientAccess__array_ensure(
   struct bHYPRE_CoefficientAccess__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak bHYPRE_CoefficientAccess__connectI
+
+#pragma weak bHYPRE_CoefficientAccess__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct bHYPRE_CoefficientAccess__object*
+bHYPRE_CoefficientAccess__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct bHYPRE_CoefficientAccess__object*
+bHYPRE_CoefficientAccess__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

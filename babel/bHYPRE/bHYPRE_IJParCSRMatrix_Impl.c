@@ -2,12 +2,11 @@
  * File:          bHYPRE_IJParCSRMatrix_Impl.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -22,10 +21,11 @@
  * 
  * Objects of this type can be cast to IJMatrixView, Operator, or
  * CoefficientAccess objects using the {\tt \_\_cast} methods.
- * 
  */
 
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._includes) */
 /* Put additional includes or other arbitrary code here... */
@@ -57,11 +57,14 @@
  ***********************************************************************EHEADER*/
 
 #include <assert.h>
+#include "hypre_babel_exception_handler.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
 #include "HYPRE_parcsr_mv.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._includes) */
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -74,11 +77,14 @@ extern "C"
 #endif
 void
 impl_bHYPRE_IJParCSRMatrix__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._load) */
   /* Insert-Code-Here {bHYPRE.IJParCSRMatrix._load} (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._load) */
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -92,8 +98,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_IJParCSRMatrix__ctor(
-  /* in */ bHYPRE_IJParCSRMatrix self)
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._ctor) */
   /* Insert the implementation of the constructor method here... */
 
@@ -113,8 +122,38 @@ impl_bHYPRE_IJParCSRMatrix__ctor(
    bHYPRE_IJParCSRMatrix__set_data( self, data );
    
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._ctor) */
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_IJParCSRMatrix__ctor2(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._ctor2) */
+    /* Insert-Code-Here {bHYPRE.IJParCSRMatrix._ctor2} (special constructor method) */
+    /*
+     * This method has not been implemented
+     */
+
+    SIDL_THROW(*_ex, sidl_NotImplementedException,     "This method has not been implemented");
+  EXIT:;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -127,8 +166,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_IJParCSRMatrix__dtor(
-  /* in */ bHYPRE_IJParCSRMatrix self)
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._dtor) */
   /* Insert the implementation of the destructor method here... */
 
@@ -146,6 +188,7 @@ impl_bHYPRE_IJParCSRMatrix__dtor(
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._dtor) */
+  }
 }
 
 /*
@@ -164,8 +207,11 @@ impl_bHYPRE_IJParCSRMatrix_Create(
   /* in */ int32_t ilower,
   /* in */ int32_t iupper,
   /* in */ int32_t jlower,
-  /* in */ int32_t jupper)
+  /* in */ int32_t jupper,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Create) */
   /* Insert-Code-Here {bHYPRE.IJParCSRMatrix.Create} (Create method) */
 
@@ -173,7 +219,7 @@ impl_bHYPRE_IJParCSRMatrix_Create(
    HYPRE_IJMatrix dummy;
    HYPRE_IJMatrix * Hmat = &dummy;
    struct bHYPRE_IJParCSRMatrix__data * data;
-   bHYPRE_IJParCSRMatrix mat = bHYPRE_IJParCSRMatrix__create();
+   bHYPRE_IJParCSRMatrix mat = bHYPRE_IJParCSRMatrix__create(_ex); SIDL_CHECK(*_ex);
 
    data = bHYPRE_IJParCSRMatrix__get_data( mat );
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
@@ -185,7 +231,9 @@ impl_bHYPRE_IJParCSRMatrix_Create(
 
    return mat;
 
+   hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Create) */
+  }
 }
 
 /*
@@ -212,8 +260,11 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
   /* in */ int32_t r,
   /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues,
-  /* in */ int32_t discretization)
+  /* in */ int32_t discretization,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GenerateLaplacian) */
   /* Insert-Code-Here {bHYPRE.IJParCSRMatrix.GenerateLaplacian} (GenerateLaplacian method) */
 
@@ -245,7 +296,7 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
    local_num_rows = last_local_row - first_local_row + 1;
 
    bHA = bHYPRE_IJParCSRMatrix_Create(
-      mpi_comm, first_local_row, last_local_row, first_local_col, last_local_col );
+      mpi_comm, first_local_row, last_local_row, first_local_col, last_local_col, _ex ); SIDL_CHECK(*_ex);
 
    row_sizes = hypre_CTAlloc( int, local_num_rows );
    size = discretization;
@@ -253,10 +304,10 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
    {
       row_sizes[i] = size;
    }
-   ierr = bHYPRE_IJParCSRMatrix_SetRowSizes( bHA, row_sizes, local_num_rows );
+   ierr = bHYPRE_IJParCSRMatrix_SetRowSizes( bHA, row_sizes, local_num_rows, _ex ); SIDL_CHECK(*_ex);
    hypre_TFree( row_sizes );
 
-   ierr = bHYPRE_IJParCSRMatrix_Initialize( bHA );
+   ierr = bHYPRE_IJParCSRMatrix_Initialize( bHA, _ex ); SIDL_CHECK(*_ex);
 
    row_sizes = hypre_CTAlloc( int, 1 );
    stride[0] = 1;
@@ -266,14 +317,16 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
    {
       ierr += HYPRE_ParCSRMatrixGetRow( HA, i, &size, &col_inds, &row_values );
       ierr += bHYPRE_IJParCSRMatrix_SetValues(
-         bHA, 1, &size, &i, col_inds, row_values, size );
+         bHA, 1, &size, &i, col_inds, row_values, size, _ex ); SIDL_CHECK(*_ex);
       ierr += HYPRE_ParCSRMatrixRestoreRow( HA, i, &size, &col_inds, &row_values );
    }
 
    hypre_assert( ierr == 0 );
    return bHA;
 
+   hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GenerateLaplacian) */
+  }
 }
 
 /*
@@ -288,7 +341,6 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
  * construction, and should always be utilized if possible.
  * 
  * Not collective.
- * 
  */
 
 #undef __FUNC__
@@ -302,8 +354,11 @@ impl_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in rarray[local_nrows] */ int32_t* diag_sizes,
   /* in rarray[local_nrows] */ int32_t* offdiag_sizes,
-  /* in */ int32_t local_nrows)
+  /* in */ int32_t local_nrows,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDiagOffdSizes) */
   /* Insert the implementation of the SetDiagOffdSizes method here... */
 
@@ -322,113 +377,7 @@ impl_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDiagOffdSizes) */
-}
-
-/*
- * Set the MPI Communicator.  DEPRECATED, Use Create()
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_SetCommunicator"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-   /* The data type of the last argument, mpi_comm, should be MPI_Comm */
-
-   int ierr=0;
-   struct bHYPRE_IJParCSRMatrix__data * data;
-
-   data = bHYPRE_IJParCSRMatrix__get_data( self );
-
-#ifdef HYPRE_DEBUG
-   printf("impl_bHYPRE_IJParCSRMatrix_SetCommunicator\n");
-#endif
-   
-   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetCommunicator) */
-}
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_Initialize"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRMatrix_Initialize(
-  /* in */ bHYPRE_IJParCSRMatrix self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Initialize) */
-  /* Insert the implementation of the Initialize method here... */
-
-   int ierr=0;
-   struct bHYPRE_IJParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-
-   data = bHYPRE_IJParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-
-   ierr = HYPRE_IJMatrixInitialize( ij_A );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Initialize) */
-}
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_Assemble"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRMatrix_Assemble(
-  /* in */ bHYPRE_IJParCSRMatrix self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Assemble) */
-  /* Insert the implementation of the Assemble method here... */
-
-   int ierr=0;
-   struct bHYPRE_IJParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-
-   data = bHYPRE_IJParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-
-   ierr = HYPRE_IJMatrixAssemble( ij_A );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Assemble) */
+  }
 }
 
 /*
@@ -452,7 +401,6 @@ impl_bHYPRE_IJParCSRMatrix_Assemble(
  * of the matrix separately from the rest of the matrix.
  * 
  * Collective.
- * 
  */
 
 #undef __FUNC__
@@ -467,8 +415,11 @@ impl_bHYPRE_IJParCSRMatrix_SetLocalRange(
   /* in */ int32_t ilower,
   /* in */ int32_t iupper,
   /* in */ int32_t jlower,
-  /* in */ int32_t jupper)
+  /* in */ int32_t jupper,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetLocalRange) */
   /* Insert the implementation of the SetLocalRange method here... */
 
@@ -502,6 +453,7 @@ impl_bHYPRE_IJParCSRMatrix_SetLocalRange(
    }
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetLocalRange) */
+  }
 }
 
 /*
@@ -519,7 +471,6 @@ impl_bHYPRE_IJParCSRMatrix_SetLocalRange(
  * inserts a new one.
  * 
  * Not collective.
- * 
  */
 
 #undef __FUNC__
@@ -536,8 +487,11 @@ impl_bHYPRE_IJParCSRMatrix_SetValues(
   /* in rarray[nrows] */ int32_t* rows,
   /* in rarray[nnonzeros] */ int32_t* cols,
   /* in rarray[nnonzeros] */ double* values,
-  /* in */ int32_t nnonzeros)
+  /* in */ int32_t nnonzeros,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetValues) */
   /* Insert the implementation of the SetValues method here... */
 
@@ -558,6 +512,7 @@ impl_bHYPRE_IJParCSRMatrix_SetValues(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetValues) */
+  }
 }
 
 /*
@@ -567,7 +522,6 @@ impl_bHYPRE_IJParCSRMatrix_SetValues(
  * there before, inserts a new one.
  * 
  * Not collective.
- * 
  */
 
 #undef __FUNC__
@@ -584,8 +538,11 @@ impl_bHYPRE_IJParCSRMatrix_AddToValues(
   /* in rarray[nrows] */ int32_t* rows,
   /* in rarray[nnonzeros] */ int32_t* cols,
   /* in rarray[nnonzeros] */ double* values,
-  /* in */ int32_t nnonzeros)
+  /* in */ int32_t nnonzeros,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
 
@@ -606,12 +563,12 @@ impl_bHYPRE_IJParCSRMatrix_AddToValues(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.AddToValues) */
+  }
 }
 
 /*
  * Gets range of rows owned by this processor and range of
  * column partitioning for this processor.
- * 
  */
 
 #undef __FUNC__
@@ -626,8 +583,11 @@ impl_bHYPRE_IJParCSRMatrix_GetLocalRange(
   /* out */ int32_t* ilower,
   /* out */ int32_t* iupper,
   /* out */ int32_t* jlower,
-  /* out */ int32_t* jupper)
+  /* out */ int32_t* jupper,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetLocalRange) */
   /* Insert the implementation of the GetLocalRange method here... */
 
@@ -644,13 +604,13 @@ impl_bHYPRE_IJParCSRMatrix_GetLocalRange(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetLocalRange) */
+  }
 }
 
 /*
  * Gets number of nonzeros elements for {\tt nrows} rows
  * specified in {\tt rows} and returns them in {\tt ncols},
  * which needs to be allocated by the user.
- * 
  */
 
 #undef __FUNC__
@@ -664,8 +624,11 @@ impl_bHYPRE_IJParCSRMatrix_GetRowCounts(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
   /* in rarray[nrows] */ int32_t* rows,
-  /* inout rarray[nrows] */ int32_t* ncols)
+  /* inout rarray[nrows] */ int32_t* ncols,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRowCounts) */
   /* Insert the implementation of the GetRowCounts method here... */
 
@@ -684,12 +647,12 @@ impl_bHYPRE_IJParCSRMatrix_GetRowCounts(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetRowCounts) */
+  }
 }
 
 /*
  * Gets values for {\tt nrows} rows or partial rows of the
  * matrix.  Usage details are analogous to {\tt SetValues}.
- * 
  */
 
 #undef __FUNC__
@@ -706,8 +669,11 @@ impl_bHYPRE_IJParCSRMatrix_GetValues(
   /* in rarray[nrows] */ int32_t* rows,
   /* in rarray[nnonzeros] */ int32_t* cols,
   /* inout rarray[nnonzeros] */ double* values,
-  /* in */ int32_t nnonzeros)
+  /* in */ int32_t nnonzeros,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetValues) */
   /* Insert the implementation of the GetValues method here... */
 
@@ -728,6 +694,7 @@ impl_bHYPRE_IJParCSRMatrix_GetValues(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetValues) */
+  }
 }
 
 /*
@@ -739,7 +706,6 @@ impl_bHYPRE_IJParCSRMatrix_GetValues(
  * utilized if possible.
  * 
  * Not collective.
- * 
  */
 
 #undef __FUNC__
@@ -752,8 +718,11 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetRowSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in rarray[nrows] */ int32_t* sizes,
-  /* in */ int32_t nrows)
+  /* in */ int32_t nrows,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetRowSizes) */
   /* Insert the implementation of the SetRowSizes method here... */
 
@@ -770,12 +739,12 @@ impl_bHYPRE_IJParCSRMatrix_SetRowSizes(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetRowSizes) */
+  }
 }
 
 /*
  * Print the matrix to file.  This is mainly for debugging
  * purposes.
- * 
  */
 
 #undef __FUNC__
@@ -787,8 +756,11 @@ extern "C"
 int32_t
 impl_bHYPRE_IJParCSRMatrix_Print(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ const char* filename)
+  /* in */ const char* filename,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Print) */
   /* Insert the implementation of the Print method here... */
 
@@ -805,12 +777,12 @@ impl_bHYPRE_IJParCSRMatrix_Print(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Print) */
+  }
 }
 
 /*
  * Read the matrix from file.  This is mainly for debugging
  * purposes.
- * 
  */
 
 #undef __FUNC__
@@ -823,8 +795,11 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_Read(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* filename,
-  /* in */ bHYPRE_MPICommunicator comm)
+  /* in */ bHYPRE_MPICommunicator comm,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Read) */
   /* Insert the implementation of the Read method here... */
 
@@ -842,11 +817,127 @@ impl_bHYPRE_IJParCSRMatrix_Read(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Read) */
+  }
+}
+
+/*
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_SetCommunicator"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+   /* The data type of the last argument, mpi_comm, should be MPI_Comm */
+
+   int ierr=0;
+   struct bHYPRE_IJParCSRMatrix__data * data;
+
+   data = bHYPRE_IJParCSRMatrix__get_data( self );
+
+#ifdef HYPRE_DEBUG
+   printf("impl_bHYPRE_IJParCSRMatrix_SetCommunicator\n");
+#endif
+   
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetCommunicator) */
+  }
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_Initialize"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRMatrix_Initialize(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Initialize) */
+  /* Insert the implementation of the Initialize method here... */
+
+   int ierr=0;
+   struct bHYPRE_IJParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+
+   data = bHYPRE_IJParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+
+   ierr = HYPRE_IJMatrixInitialize( ij_A );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Initialize) */
+  }
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_Assemble"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRMatrix_Assemble(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Assemble) */
+  /* Insert the implementation of the Assemble method here... */
+
+   int ierr=0;
+   struct bHYPRE_IJParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+
+   data = bHYPRE_IJParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+
+   ierr = HYPRE_IJMatrixAssemble( ij_A );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Assemble) */
+  }
 }
 
 /*
  * Set the int parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -859,19 +950,22 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetIntParameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ int32_t value)
+  /* in */ int32_t value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetIntParameter) */
+  }
 }
 
 /*
  * Set the double parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -884,19 +978,22 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetDoubleParameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDoubleParameter) */
+  }
 }
 
 /*
  * Set the string parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -909,19 +1006,22 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetStringParameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ const char* value)
+  /* in */ const char* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetStringParameter) */
+  }
 }
 
 /*
  * Set the int 1-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -935,17 +1035,20 @@ impl_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ int32_t* value,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetIntArray1Parameter) */
+  }
 }
 
 /*
  * Set the int 2-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -958,17 +1061,20 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetIntArray2Parameter) */
+  }
 }
 
 /*
  * Set the double 1-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -982,17 +1088,20 @@ impl_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ double* value,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDoubleArray1Parameter) */
+  }
 }
 
 /*
  * Set the double 2-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -1005,17 +1114,20 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
    return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDoubleArray2Parameter) */
+  }
 }
 
 /*
  * Set the int parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -1028,8 +1140,11 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_GetIntValue(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* out */ int32_t* value)
+  /* out */ int32_t* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
@@ -1065,11 +1180,11 @@ impl_bHYPRE_IJParCSRMatrix_GetIntValue(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetIntValue) */
+  }
 }
 
 /*
  * Get the double parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -1082,20 +1197,23 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_GetDoubleValue(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* out */ double* value)
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetDoubleValue) */
+  }
 }
 
 /*
  * (Optional) Do any preprocessing that may be necessary in
  * order to execute {\tt Apply}.
- * 
  */
 
 #undef __FUNC__
@@ -1108,8 +1226,11 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_Setup(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ bHYPRE_Vector b,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Setup) */
   /* Insert the implementation of the Setup method here... */
 
@@ -1126,11 +1247,11 @@ impl_bHYPRE_IJParCSRMatrix_Setup(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Setup) */
+  }
 }
 
 /*
  * Apply the operator to {\tt b}, returning {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -1143,8 +1264,11 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_Apply(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x)
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Apply) */
   /* Insert the implementation of the Apply method here... */
 
@@ -1169,23 +1293,13 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
    /* A bHYPRE_Vector is just an interface, we have no knowledge of its
     * contents.  Check whether it's something we know how to handle.
     * If not, die. */
-   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_b = bHYPRE_IJParCSRVector__cast( b );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)b );
-   }
+   bHYPREP_b = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2(b, "bHYPRE.IJParCSRVector", _ex );
+   SIDL_CHECK(*_ex);
+   hypre_assert( bHYPREP_b!=NULL );
 
-   if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast( *x );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bHYPREP_x = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( *x, "bHYPRE.IJParCSRVector", _ex );
+   SIDL_CHECK(*_ex);
+   hypre_assert( bHYPREP_x!=NULL );
 
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
    ij_x = data_x -> ij_b;
@@ -1198,17 +1312,15 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
 
    ierr += HYPRE_ParCSRMatrixMatvec( 1.0, A, bb, 0.0, xx );
 
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b ); /* ref was created by queryInt */
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* ref was created by queryInt */
-
    return( ierr );
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Apply) */
+  }
 }
 
 /*
  * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -1221,8 +1333,11 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x)
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.IJParCSRMatrix.ApplyAdjoint} (ApplyAdjoint method) */
 
@@ -1248,23 +1363,13 @@ impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
    /* A bHYPRE_Vector is just an interface, we have no knowledge of its
     * contents.  Check whether it's something we know how to handle.
     * If not, die. */
-   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_b = bHYPRE_IJParCSRVector__cast( b );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)b );
-   }
+   bHYPREP_b = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2(b, "bHYPRE.IJParCSRVector", _ex );
+   SIDL_CHECK(*_ex);
+   hypre_assert( bHYPREP_b!=NULL );
 
-   if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast( *x );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bHYPREP_x = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( *x, "bHYPRE.IJParCSRVector", _ex );
+   SIDL_CHECK(*_ex);
+   hypre_assert( bHYPREP_x!=NULL );
 
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
    ij_x = data_x -> ij_b;
@@ -1277,12 +1382,11 @@ impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
 
    ierr += HYPRE_ParCSRMatrixMatvecT( 1.0, A, bb, 0.0, xx );
 
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b ); /* ref was created by queryInt */
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* ref was created by queryInt */
-
    return( ierr );
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.ApplyAdjoint) */
+  }
 }
 
 /*
@@ -1291,7 +1395,6 @@ impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
  * subsequent calls.  Thus the user must not delete them, yet
  * must not depend on the data from GetRow to persist beyond the
  * next GetRow call.
- * 
  */
 
 #undef __FUNC__
@@ -1306,8 +1409,11 @@ impl_bHYPRE_IJParCSRMatrix_GetRow(
   /* in */ int32_t row,
   /* out */ int32_t* size,
   /* out array<int,column-major> */ struct sidl_int__array** col_ind,
-  /* out array<double,column-major> */ struct sidl_double__array** values)
+  /* out array<double,column-major> */ struct sidl_double__array** values,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRow) */
   /* Insert the implementation of the GetRow method here... */
 
@@ -1340,104 +1446,126 @@ impl_bHYPRE_IJParCSRMatrix_GetRow(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetRow) */
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_CoefficientAccess__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_CoefficientAccess__connect(url, _ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_CoefficientAccess__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
-  bHYPRE_CoefficientAccess__object* obj) {
-  return bHYPRE_CoefficientAccess__getURL(obj);
-}
-struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_MPICommunicator__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj) {
-  return bHYPRE_MPICommunicator__getURL(obj);
-}
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Operator__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Operator(struct 
-  bHYPRE_Operator__object* obj) {
-  return bHYPRE_Operator__getURL(obj);
-}
-struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_IJParCSRMatrix__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJParCSRMatrix(struct 
-  bHYPRE_IJParCSRMatrix__object* obj) {
-  return bHYPRE_IJParCSRMatrix__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Vector__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Vector(struct 
-  bHYPRE_Vector__object* obj) {
-  return bHYPRE_Vector__getURL(obj);
+struct bHYPRE_CoefficientAccess__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_CoefficientAccess__cast(bi, _ex);
 }
 struct bHYPRE_IJMatrixView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_IJMatrixView__connect(url, _ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_IJMatrixView__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJMatrixView(struct 
-  bHYPRE_IJMatrixView__object* obj) {
-  return bHYPRE_IJMatrixView__getURL(obj);
+struct bHYPRE_IJMatrixView__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_IJMatrixView__cast(bi, _ex);
 }
-struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_ProblemDefinition__connect(url, _ex);
+struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_IJParCSRMatrix__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_ProblemDefinition(struct 
-  bHYPRE_ProblemDefinition__object* obj) {
-  return bHYPRE_ProblemDefinition__getURL(obj);
+struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_IJParCSRMatrix__cast(bi, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_MatrixVectorView__connect(url, _ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MatrixVectorView__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MatrixVectorView(struct 
-  bHYPRE_MatrixVectorView__object* obj) {
-  return bHYPRE_MatrixVectorView__getURL(obj);
+struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MatrixVectorView__cast(bi, _ex);
+}
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Operator__connectI(url, ar, _ex);
+}
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Operator__cast(bi, _ex);
+}
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_ProblemDefinition__connectI(url, ar, _ex);
+}
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_ProblemDefinition__cast(bi, _ex);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connectI(url, ar, _ex);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Vector__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
 }

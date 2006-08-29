@@ -2,12 +2,11 @@
  * File:          bHYPRE_Schwarz_Impl.c
  * Symbol:        bHYPRE.Schwarz-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for bHYPRE.Schwarz
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -24,11 +23,11 @@
  * RDF: Documentation goes here.
  * 
  * Schwarz requires an IJParCSR matrix
- * 
- * 
  */
 
 #include "bHYPRE_Schwarz_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._includes) */
 /* Insert-Code-Here {bHYPRE.Schwarz._includes} (includes and arbitrary code) */
@@ -60,11 +59,14 @@
  ***********************************************************************EHEADER*/
 
 #include <assert.h>
+#include "hypre_babel_exception_handler.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._includes) */
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -77,11 +79,14 @@ extern "C"
 #endif
 void
 impl_bHYPRE_Schwarz__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._load) */
   /* Insert-Code-Here {bHYPRE.Schwarz._load} (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._load) */
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -95,8 +100,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_Schwarz__ctor(
-  /* in */ bHYPRE_Schwarz self)
+  /* in */ bHYPRE_Schwarz self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._ctor) */
   /* Insert-Code-Here {bHYPRE.Schwarz._ctor} (constructor method) */
 
@@ -110,8 +118,38 @@ impl_bHYPRE_Schwarz__ctor(
    bHYPRE_Schwarz__set_data( self, data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._ctor) */
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Schwarz__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_Schwarz__ctor2(
+  /* in */ bHYPRE_Schwarz self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._ctor2) */
+    /* Insert-Code-Here {bHYPRE.Schwarz._ctor2} (special constructor method) */
+    /*
+     * This method has not been implemented
+     */
+
+    SIDL_THROW(*_ex, sidl_NotImplementedException,     "This method has not been implemented");
+  EXIT:;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -124,8 +162,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_Schwarz__dtor(
-  /* in */ bHYPRE_Schwarz self)
+  /* in */ bHYPRE_Schwarz self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._dtor) */
   /* Insert-Code-Here {bHYPRE.Schwarz._dtor} (destructor method) */
 
@@ -134,13 +175,17 @@ impl_bHYPRE_Schwarz__dtor(
 
    data = bHYPRE_Schwarz__get_data( self );
    if ( data->matrix != (bHYPRE_IJParCSRMatrix) NULL )
-      bHYPRE_IJParCSRMatrix_deleteRef( data->matrix );
+   {
+      bHYPRE_IJParCSRMatrix_deleteRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
+   }
    ierr += HYPRE_SchwarzDestroy( data->solver );
    hypre_assert( ierr== 0 );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
 
+   return; hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._dtor) */
+  }
 }
 
 /*
@@ -155,15 +200,18 @@ extern "C"
 #endif
 bHYPRE_Schwarz
 impl_bHYPRE_Schwarz_Create(
-  /* in */ bHYPRE_IJParCSRMatrix A)
+  /* in */ bHYPRE_IJParCSRMatrix A,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Create) */
   /* Insert-Code-Here {bHYPRE.Schwarz.Create} (Create method) */
 
    int ierr = 0;
    HYPRE_Solver dummy;
    HYPRE_Solver * Hsolver = &dummy;
-   bHYPRE_Schwarz solver = bHYPRE_Schwarz__create();
+   bHYPRE_Schwarz solver = bHYPRE_Schwarz__create(_ex); SIDL_CHECK(*_ex);
    struct bHYPRE_Schwarz__data * data = bHYPRE_Schwarz__get_data( solver );
 
    ierr += HYPRE_SchwarzCreate( Hsolver );
@@ -171,17 +219,232 @@ impl_bHYPRE_Schwarz_Create(
    data -> solver = *Hsolver;
 
    data->matrix = A;
-   bHYPRE_IJParCSRMatrix_addRef( data->matrix );
+   bHYPRE_IJParCSRMatrix_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
 
    return solver;
 
+   hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Create) */
+  }
+}
+
+/*
+ * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Schwarz_SetOperator"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_Schwarz_SetOperator(
+  /* in */ bHYPRE_Schwarz self,
+  /* in */ bHYPRE_Operator A,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetOperator) */
+  /* Insert-Code-Here {bHYPRE.Schwarz.SetOperator} (SetOperator method) */
+
+   int ierr = 0;
+   struct bHYPRE_Schwarz__data * data;
+   bHYPRE_IJParCSRMatrix Amat;
+
+   Amat = (bHYPRE_IJParCSRMatrix) bHYPRE_Operator__cast2( A, "bHYPRE.IJParCSRMatrix", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( Amat!=NULL );
+
+   data = bHYPRE_Schwarz__get_data( self );
+   data->matrix = Amat;
+   bHYPRE_IJParCSRMatrix_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
+
+   return ierr;
+
+   hypre_babel_exception_return_error(_ex);
+  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetOperator) */
+  }
+}
+
+/*
+ * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Schwarz_SetTolerance"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_Schwarz_SetTolerance(
+  /* in */ bHYPRE_Schwarz self,
+  /* in */ double tolerance,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetTolerance) */
+  /* Insert-Code-Here {bHYPRE.Schwarz.SetTolerance} (SetTolerance method) */
+
+   return 1;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetTolerance) */
+  }
+}
+
+/*
+ * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Schwarz_SetMaxIterations"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_Schwarz_SetMaxIterations(
+  /* in */ bHYPRE_Schwarz self,
+  /* in */ int32_t max_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetMaxIterations) */
+  /* Insert-Code-Here {bHYPRE.Schwarz.SetMaxIterations} (SetMaxIterations method) */
+
+   return 1;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetMaxIterations) */
+  }
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Schwarz_SetLogging"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_Schwarz_SetLogging(
+  /* in */ bHYPRE_Schwarz self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetLogging) */
+  /* Insert-Code-Here {bHYPRE.Schwarz.SetLogging} (SetLogging method) */
+
+   return 0; /* ignored */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetLogging) */
+  }
+}
+
+/*
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Schwarz_SetPrintLevel"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_Schwarz_SetPrintLevel(
+  /* in */ bHYPRE_Schwarz self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetPrintLevel) */
+  /* Insert-Code-Here {bHYPRE.Schwarz.SetPrintLevel} (SetPrintLevel method) */
+
+   return 0;  /* ignored */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetPrintLevel) */
+  }
+}
+
+/*
+ * (Optional) Return the number of iterations taken.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Schwarz_GetNumIterations"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_Schwarz_GetNumIterations(
+  /* in */ bHYPRE_Schwarz self,
+  /* out */ int32_t* num_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetNumIterations) */
+  /* Insert-Code-Here {bHYPRE.Schwarz.GetNumIterations} (GetNumIterations method) */
+
+   return 1;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetNumIterations) */
+  }
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Schwarz_GetRelResidualNorm"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_Schwarz_GetRelResidualNorm(
+  /* in */ bHYPRE_Schwarz self,
+  /* out */ double* norm,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetRelResidualNorm) */
+  /* Insert-Code-Here {bHYPRE.Schwarz.GetRelResidualNorm} (GetRelResidualNorm method) */
+
+   return 1;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetRelResidualNorm) */
+  }
 }
 
 /*
  * Set the MPI Communicator.
  * DEPRECATED, use Create:
- * 
  */
 
 #undef __FUNC__
@@ -193,18 +456,21 @@ extern "C"
 int32_t
 impl_bHYPRE_Schwarz_SetCommunicator(
   /* in */ bHYPRE_Schwarz self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetCommunicator} (SetCommunicator method) */
    return 1;  /* no MPI in this solver, and if there were I still wouldn't
                  implement this deprecated function */
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetCommunicator) */
+  }
 }
 
 /*
  * Set the int parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -217,8 +483,11 @@ int32_t
 impl_bHYPRE_Schwarz_SetIntParameter(
   /* in */ bHYPRE_Schwarz self,
   /* in */ const char* name,
-  /* in */ int32_t value)
+  /* in */ int32_t value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetIntParameter} (SetIntParameter method) */
 
@@ -249,11 +518,11 @@ impl_bHYPRE_Schwarz_SetIntParameter(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetIntParameter) */
+  }
 }
 
 /*
  * Set the double parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -266,8 +535,11 @@ int32_t
 impl_bHYPRE_Schwarz_SetDoubleParameter(
   /* in */ bHYPRE_Schwarz self,
   /* in */ const char* name,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetDoubleParameter} (SetDoubleParameter method) */
 
@@ -290,11 +562,11 @@ impl_bHYPRE_Schwarz_SetDoubleParameter(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetDoubleParameter) */
+  }
 }
 
 /*
  * Set the string parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -307,19 +579,22 @@ int32_t
 impl_bHYPRE_Schwarz_SetStringParameter(
   /* in */ bHYPRE_Schwarz self,
   /* in */ const char* name,
-  /* in */ const char* value)
+  /* in */ const char* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetStringParameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetStringParameter} (SetStringParameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetStringParameter) */
+  }
 }
 
 /*
  * Set the int 1-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -333,19 +608,22 @@ impl_bHYPRE_Schwarz_SetIntArray1Parameter(
   /* in */ bHYPRE_Schwarz self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ int32_t* value,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetIntArray1Parameter) */
+  }
 }
 
 /*
  * Set the int 2-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -358,19 +636,22 @@ int32_t
 impl_bHYPRE_Schwarz_SetIntArray2Parameter(
   /* in */ bHYPRE_Schwarz self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetIntArray2Parameter) */
+  }
 }
 
 /*
  * Set the double 1-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -384,19 +665,22 @@ impl_bHYPRE_Schwarz_SetDoubleArray1Parameter(
   /* in */ bHYPRE_Schwarz self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ double* value,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetDoubleArray1Parameter) */
+  }
 }
 
 /*
  * Set the double 2-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -409,19 +693,22 @@ int32_t
 impl_bHYPRE_Schwarz_SetDoubleArray2Parameter(
   /* in */ bHYPRE_Schwarz self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetDoubleArray2Parameter) */
+  }
 }
 
 /*
  * Set the int parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -434,19 +721,22 @@ int32_t
 impl_bHYPRE_Schwarz_GetIntValue(
   /* in */ bHYPRE_Schwarz self,
   /* in */ const char* name,
-  /* out */ int32_t* value)
+  /* out */ int32_t* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.Schwarz.GetIntValue} (GetIntValue method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetIntValue) */
+  }
 }
 
 /*
  * Get the double parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -459,20 +749,23 @@ int32_t
 impl_bHYPRE_Schwarz_GetDoubleValue(
   /* in */ bHYPRE_Schwarz self,
   /* in */ const char* name,
-  /* out */ double* value)
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.Schwarz.GetDoubleValue} (GetDoubleValue method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetDoubleValue) */
+  }
 }
 
 /*
  * (Optional) Do any preprocessing that may be necessary in
  * order to execute {\tt Apply}.
- * 
  */
 
 #undef __FUNC__
@@ -485,8 +778,11 @@ int32_t
 impl_bHYPRE_Schwarz_Setup(
   /* in */ bHYPRE_Schwarz self,
   /* in */ bHYPRE_Vector b,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Setup) */
   /* Insert-Code-Here {bHYPRE.Schwarz.Setup} (Setup method) */
 
@@ -512,32 +808,18 @@ impl_bHYPRE_Schwarz_Setup(
    ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
    HA = (HYPRE_ParCSRMatrix) objectA;
 
-   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHb = bHYPRE_IJParCSRVector__cast( b );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bHb = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( b, "bHYPRE.IJParCSRVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bHb!=NULL );
 
    datab = bHYPRE_IJParCSRVector__get_data( bHb );
-   bHYPRE_IJParCSRVector_deleteRef( bHb );
    ij_b = datab -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
 
-   if ( bHYPRE_Vector_queryInt( x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHx = bHYPRE_IJParCSRVector__cast( x );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)(x) );
-   }
+   bHx = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( x, "bHYPRE.IJParCSRVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bHx!=NULL );
 
    datax = bHYPRE_IJParCSRVector__get_data( bHx );
-   bHYPRE_IJParCSRVector_deleteRef( bHx );
    ij_x = datax -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
@@ -545,12 +827,13 @@ impl_bHYPRE_Schwarz_Setup(
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Setup) */
+  }
 }
 
 /*
  * Apply the operator to {\tt b}, returning {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -563,8 +846,11 @@ int32_t
 impl_bHYPRE_Schwarz_Apply(
   /* in */ bHYPRE_Schwarz self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x)
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Apply) */
   /* Insert-Code-Here {bHYPRE.Schwarz.Apply} (Apply method) */
 
@@ -591,17 +877,10 @@ impl_bHYPRE_Schwarz_Apply(
    ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
    bHA = (HYPRE_ParCSRMatrix) objectA;
 
-   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHb = bHYPRE_IJParCSRVector__cast( b );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)x );
-   }
+   bHb = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( b, "bHYPRE.IJParCSRVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bHb!=NULL );
 
    datab = bHYPRE_IJParCSRVector__get_data( bHb );
-   bHYPRE_IJParCSRVector_deleteRef( bHb );
    ij_b = datab -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
@@ -612,20 +891,14 @@ impl_bHYPRE_Schwarz_Apply(
       /* There's no good way to check the size of x.  It would be good
        * to do something similar if x had zero length.  Or hypre_assert(x
        * has the right size) */
-      bHYPRE_Vector_Clone( b, x );
-      bHYPRE_Vector_Clear( *x );
-   }
-   if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector" ) )
-   {
-      bHx = bHYPRE_IJParCSRVector__cast( *x );
-   }
-   else
-   {
-      hypre_assert( "Unrecognized vector type."==(char *)(*x) );
+      bHYPRE_Vector_Clone( b, x, _ex ); SIDL_CHECK(*_ex);
+      bHYPRE_Vector_Clear( *x, _ex ); SIDL_CHECK(*_ex);
    }
 
+   bHx = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( *x, "bHYPRE.IJParCSRVector", _ex ); SIDL_CHECK(*_ex);
+   hypre_assert( bHx!=NULL );
+
    datax = bHYPRE_IJParCSRVector__get_data( bHx );
-   bHYPRE_IJParCSRVector_deleteRef( bHx );
    ij_x = datax -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
@@ -634,12 +907,13 @@ impl_bHYPRE_Schwarz_Apply(
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Apply) */
+  }
 }
 
 /*
  * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -652,292 +926,109 @@ int32_t
 impl_bHYPRE_Schwarz_ApplyAdjoint(
   /* in */ bHYPRE_Schwarz self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x)
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.Schwarz.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.ApplyAdjoint) */
-}
-
-/*
- * Set the operator for the linear system being solved.
- * DEPRECATED.  use Create
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_Schwarz_SetOperator"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_Schwarz_SetOperator(
-  /* in */ bHYPRE_Schwarz self,
-  /* in */ bHYPRE_Operator A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetOperator) */
-  /* Insert-Code-Here {bHYPRE.Schwarz.SetOperator} (SetOperator method) */
-
-   int ierr = 0;
-   struct bHYPRE_Schwarz__data * data;
-   bHYPRE_IJParCSRMatrix Amat;
-
-   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.IJParCSRMatrix" ) )
-   {
-      Amat = bHYPRE_IJParCSRMatrix__cast( A );
-      bHYPRE_IJParCSRMatrix_deleteRef( Amat ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized operator type."==(char *)A );
-   }
-
-   data = bHYPRE_Schwarz__get_data( self );
-   data->matrix = Amat;
-   bHYPRE_IJParCSRMatrix_addRef( data->matrix );
-
-   return ierr;
-
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetOperator) */
-}
-
-/*
- * (Optional) Set the convergence tolerance.
- * DEPRECATED.  use SetDoubleParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_Schwarz_SetTolerance"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_Schwarz_SetTolerance(
-  /* in */ bHYPRE_Schwarz self,
-  /* in */ double tolerance)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetTolerance) */
-  /* Insert-Code-Here {bHYPRE.Schwarz.SetTolerance} (SetTolerance method) */
-
-   return 1;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetTolerance) */
-}
-
-/*
- * (Optional) Set maximum number of iterations.
- * DEPRECATED   use SetIntParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_Schwarz_SetMaxIterations"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_Schwarz_SetMaxIterations(
-  /* in */ bHYPRE_Schwarz self,
-  /* in */ int32_t max_iterations)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetMaxIterations) */
-  /* Insert-Code-Here {bHYPRE.Schwarz.SetMaxIterations} (SetMaxIterations method) */
-
-   return 1;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetMaxIterations) */
-}
-
-/*
- * (Optional) Set the {\it logging level}, specifying the degree
- * of additional informational data to be accumulated.  Does
- * nothing by default (level = 0).  Other levels (if any) are
- * implementation-specific.  Must be called before {\tt Setup}
- * and {\tt Apply}.
- * DEPRECATED   use SetIntParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_Schwarz_SetLogging"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_Schwarz_SetLogging(
-  /* in */ bHYPRE_Schwarz self,
-  /* in */ int32_t level)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetLogging) */
-  /* Insert-Code-Here {bHYPRE.Schwarz.SetLogging} (SetLogging method) */
-
-   return 0; /* ignored */
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetLogging) */
-}
-
-/*
- * (Optional) Set the {\it print level}, specifying the degree
- * of informational data to be printed either to the screen or
- * to a file.  Does nothing by default (level=0).  Other levels
- * (if any) are implementation-specific.  Must be called before
- * {\tt Setup} and {\tt Apply}.
- * DEPRECATED   use SetIntParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_Schwarz_SetPrintLevel"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_Schwarz_SetPrintLevel(
-  /* in */ bHYPRE_Schwarz self,
-  /* in */ int32_t level)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetPrintLevel) */
-  /* Insert-Code-Here {bHYPRE.Schwarz.SetPrintLevel} (SetPrintLevel method) */
-
-   return 0;  /* ignored */
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetPrintLevel) */
-}
-
-/*
- * (Optional) Return the number of iterations taken.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_Schwarz_GetNumIterations"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_Schwarz_GetNumIterations(
-  /* in */ bHYPRE_Schwarz self,
-  /* out */ int32_t* num_iterations)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetNumIterations) */
-  /* Insert-Code-Here {bHYPRE.Schwarz.GetNumIterations} (GetNumIterations method) */
-
-   return 1;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetNumIterations) */
-}
-
-/*
- * (Optional) Return the norm of the relative residual.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_Schwarz_GetRelResidualNorm"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_Schwarz_GetRelResidualNorm(
-  /* in */ bHYPRE_Schwarz self,
-  /* out */ double* norm)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetRelResidualNorm) */
-  /* Insert-Code-Here {bHYPRE.Schwarz.GetRelResidualNorm} (GetRelResidualNorm method) */
-
-   return 1;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetRelResidualNorm) */
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct bHYPRE_Solver__object* impl_bHYPRE_Schwarz_fconnect_bHYPRE_Solver(char* 
-  url, sidl_BaseInterface *_ex) {
-  return bHYPRE_Solver__connect(url, _ex);
-}
-char * impl_bHYPRE_Schwarz_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* 
-  obj) {
-  return bHYPRE_Solver__getURL(obj);
-}
-struct bHYPRE_Schwarz__object* 
-  impl_bHYPRE_Schwarz_fconnect_bHYPRE_Schwarz(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Schwarz__connect(url, _ex);
-}
-char * impl_bHYPRE_Schwarz_fgetURL_bHYPRE_Schwarz(struct 
-  bHYPRE_Schwarz__object* obj) {
-  return bHYPRE_Schwarz__getURL(obj);
-}
-struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Schwarz_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_MPICommunicator__connect(url, _ex);
-}
-char * impl_bHYPRE_Schwarz_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj) {
-  return bHYPRE_MPICommunicator__getURL(obj);
-}
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_Schwarz_fconnect_bHYPRE_Operator(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Operator__connect(url, _ex);
-}
-char * impl_bHYPRE_Schwarz_fgetURL_bHYPRE_Operator(struct 
-  bHYPRE_Operator__object* obj) {
-  return bHYPRE_Operator__getURL(obj);
+struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_Schwarz_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_IJParCSRMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_Schwarz_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  impl_bHYPRE_Schwarz_fcast_bHYPRE_IJParCSRMatrix(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_IJParCSRMatrix__cast(bi, _ex);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_Schwarz_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_Schwarz_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MPICommunicator__cast(bi, _ex);
+}
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_Schwarz_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) {
-  return bHYPRE_IJParCSRMatrix__connect(url, _ex);
+  return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_Schwarz_fgetURL_bHYPRE_IJParCSRMatrix(struct 
-  bHYPRE_IJParCSRMatrix__object* obj) {
-  return bHYPRE_IJParCSRMatrix__getURL(obj);
+struct bHYPRE_Operator__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Operator(void* 
+  bi, sidl_BaseInterface* _ex) {
+  return bHYPRE_Operator__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_Schwarz_fconnect_sidl_ClassInfo(char* url,
+struct bHYPRE_Schwarz__object* 
+  impl_bHYPRE_Schwarz_fconnect_bHYPRE_Schwarz(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
+  return bHYPRE_Schwarz__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_Schwarz_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
+struct bHYPRE_Schwarz__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Schwarz(void* 
+  bi, sidl_BaseInterface* _ex) {
+  return bHYPRE_Schwarz__cast(bi, _ex);
 }
-struct bHYPRE_Vector__object* impl_bHYPRE_Schwarz_fconnect_bHYPRE_Vector(char* 
-  url, sidl_BaseInterface *_ex) {
-  return bHYPRE_Vector__connect(url, _ex);
+struct bHYPRE_Solver__object* impl_bHYPRE_Schwarz_fconnect_bHYPRE_Solver(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_Schwarz_fgetURL_bHYPRE_Vector(struct bHYPRE_Vector__object* 
-  obj) {
-  return bHYPRE_Vector__getURL(obj);
+struct bHYPRE_Solver__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Solver(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Solver__cast(bi, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Schwarz_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
+struct bHYPRE_Vector__object* impl_bHYPRE_Schwarz_fconnect_bHYPRE_Vector(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_Schwarz_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
+struct bHYPRE_Vector__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Vector(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Vector__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_Schwarz_fconnect_sidl_BaseClass(char* url,
+  impl_bHYPRE_Schwarz_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_Schwarz_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseClass__object* impl_bHYPRE_Schwarz_fcast_sidl_BaseClass(void* 
+  bi, sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_Schwarz_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_Schwarz_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_Schwarz_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* impl_bHYPRE_Schwarz_fcast_sidl_ClassInfo(void* 
+  bi, sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_Schwarz_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_Schwarz_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
 }

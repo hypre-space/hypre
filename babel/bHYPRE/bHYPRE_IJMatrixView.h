@@ -2,12 +2,11 @@
  * File:          bHYPRE_IJMatrixView.h
  * Symbol:        bHYPRE.IJMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for bHYPRE.IJMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_IJMatrixView_h
@@ -19,7 +18,6 @@
  * This interface represents a linear-algebraic conceptual view of a
  * linear system.  The 'I' and 'J' in the name are meant to be
  * mnemonic for the traditional matrix notation A(I,J).
- * 
  */
 struct bHYPRE_IJMatrixView__object;
 struct bHYPRE_IJMatrixView__array;
@@ -35,67 +33,42 @@ typedef struct bHYPRE_IJMatrixView__object* bHYPRE_IJMatrixView;
 #ifndef included_bHYPRE_MPICommunicator_h
 #include "bHYPRE_MPICommunicator.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
+#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_bHYPRE_IJMatrixView_IOR_h
+#include "bHYPRE_IJMatrixView_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 bHYPRE_IJMatrixView
 bHYPRE_IJMatrixView__connect(const char *, sidl_BaseInterface *_ex);
-void
-bHYPRE_IJMatrixView_addRef(
-  /* in */ bHYPRE_IJMatrixView self);
-
-void
-bHYPRE_IJMatrixView_deleteRef(
-  /* in */ bHYPRE_IJMatrixView self);
-
-sidl_bool
-bHYPRE_IJMatrixView_isSame(
-  /* in */ bHYPRE_IJMatrixView self,
-  /* in */ sidl_BaseInterface iobj);
-
-sidl_BaseInterface
-bHYPRE_IJMatrixView_queryInt(
-  /* in */ bHYPRE_IJMatrixView self,
-  /* in */ const char* name);
-
-sidl_bool
-bHYPRE_IJMatrixView_isType(
-  /* in */ bHYPRE_IJMatrixView self,
-  /* in */ const char* name);
-
-sidl_ClassInfo
-bHYPRE_IJMatrixView_getClassInfo(
-  /* in */ bHYPRE_IJMatrixView self);
-
-int32_t
-bHYPRE_IJMatrixView_SetCommunicator(
-  /* in */ bHYPRE_IJMatrixView self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
-
-int32_t
-bHYPRE_IJMatrixView_Initialize(
-  /* in */ bHYPRE_IJMatrixView self);
-
-int32_t
-bHYPRE_IJMatrixView_Assemble(
-  /* in */ bHYPRE_IJMatrixView self);
 
 /**
  * Set the local range for a matrix object.  Each process owns
@@ -118,15 +91,30 @@ bHYPRE_IJMatrixView_Assemble(
  * of the matrix separately from the rest of the matrix.
  * 
  * Collective.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_IJMatrixView_SetLocalRange(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t ilower,
   /* in */ int32_t iupper,
   /* in */ int32_t jlower,
-  /* in */ int32_t jupper);
+  /* in */ int32_t jupper,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetLocalRange)(
+    self->d_object,
+    ilower,
+    iupper,
+    jlower,
+    jupper,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Sets values for {\tt nrows} of the matrix.  The arrays {\tt
@@ -143,7 +131,6 @@ bHYPRE_IJMatrixView_SetLocalRange(
  * inserts a new one.
  * 
  * Not collective.
- * 
  */
 int32_t
 bHYPRE_IJMatrixView_SetValues(
@@ -153,7 +140,8 @@ bHYPRE_IJMatrixView_SetValues(
   /* in rarray[nrows] */ int32_t* rows,
   /* in rarray[nnonzeros] */ int32_t* cols,
   /* in rarray[nnonzeros] */ double* values,
-  /* in */ int32_t nnonzeros);
+  /* in */ int32_t nnonzeros,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Adds to values for {\tt nrows} of the matrix.  Usage details
@@ -162,7 +150,6 @@ bHYPRE_IJMatrixView_SetValues(
  * there before, inserts a new one.
  * 
  * Not collective.
- * 
  */
 int32_t
 bHYPRE_IJMatrixView_AddToValues(
@@ -172,38 +159,53 @@ bHYPRE_IJMatrixView_AddToValues(
   /* in rarray[nrows] */ int32_t* rows,
   /* in rarray[nnonzeros] */ int32_t* cols,
   /* in rarray[nnonzeros] */ double* values,
-  /* in */ int32_t nnonzeros);
+  /* in */ int32_t nnonzeros,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Gets range of rows owned by this processor and range of
  * column partitioning for this processor.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_IJMatrixView_GetLocalRange(
   /* in */ bHYPRE_IJMatrixView self,
   /* out */ int32_t* ilower,
   /* out */ int32_t* iupper,
   /* out */ int32_t* jlower,
-  /* out */ int32_t* jupper);
+  /* out */ int32_t* jupper,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetLocalRange)(
+    self->d_object,
+    ilower,
+    iupper,
+    jlower,
+    jupper,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Gets number of nonzeros elements for {\tt nrows} rows
  * specified in {\tt rows} and returns them in {\tt ncols},
  * which needs to be allocated by the user.
- * 
  */
 int32_t
 bHYPRE_IJMatrixView_GetRowCounts(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t nrows,
   /* in rarray[nrows] */ int32_t* rows,
-  /* inout rarray[nrows] */ int32_t* ncols);
+  /* inout rarray[nrows] */ int32_t* ncols,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the
  * matrix.  Usage details are analogous to {\tt SetValues}.
- * 
  */
 int32_t
 bHYPRE_IJMatrixView_GetValues(
@@ -213,7 +215,8 @@ bHYPRE_IJMatrixView_GetValues(
   /* in rarray[nrows] */ int32_t* rows,
   /* in rarray[nnonzeros] */ int32_t* cols,
   /* inout rarray[nnonzeros] */ double* values,
-  /* in */ int32_t nnonzeros);
+  /* in */ int32_t nnonzeros,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * (Optional) Set the max number of nonzeros to expect in each
@@ -224,41 +227,219 @@ bHYPRE_IJMatrixView_GetValues(
  * utilized if possible.
  * 
  * Not collective.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_IJMatrixView_SetRowSizes(
   /* in */ bHYPRE_IJMatrixView self,
   /* in rarray[nrows] */ int32_t* sizes,
-  /* in */ int32_t nrows);
+  /* in */ int32_t nrows,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  int32_t sizes_lower[1], sizes_upper[1], sizes_stride[1]; 
+  struct sidl_int__array sizes_real;
+  struct sidl_int__array*sizes_tmp = &sizes_real;
+  sizes_upper[0] = nrows-1;
+  sidl_int__array_init(sizes, sizes_tmp, 1, sizes_lower, sizes_upper,
+    sizes_stride);
+  return (*self->d_epv->f_SetRowSizes)(
+    self->d_object,
+    sizes_tmp,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Print the matrix to file.  This is mainly for debugging
  * purposes.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_IJMatrixView_Print(
   /* in */ bHYPRE_IJMatrixView self,
-  /* in */ const char* filename);
+  /* in */ const char* filename,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Print)(
+    self->d_object,
+    filename,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Read the matrix from file.  This is mainly for debugging
  * purposes.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_IJMatrixView_Read(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ const char* filename,
-  /* in */ bHYPRE_MPICommunicator comm);
+  /* in */ bHYPRE_MPICommunicator comm,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Read)(
+    self->d_object,
+    filename,
+    comm,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_IJMatrixView_SetCommunicator(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self->d_object,
+    mpi_comm,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_IJMatrixView_Initialize(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Initialize)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_IJMatrixView_Assemble(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Assemble)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+void
+bHYPRE_IJMatrixView_addRef(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+void
+bHYPRE_IJMatrixView_deleteRef(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_IJMatrixView_isSame(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_IJMatrixView_isType(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self->d_object,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_ClassInfo
+bHYPRE_IJMatrixView_getClassInfo(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_IJMatrixView__object*
 bHYPRE_IJMatrixView__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -266,23 +447,94 @@ bHYPRE_IJMatrixView__cast(
 void*
 bHYPRE_IJMatrixView__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 bHYPRE_IJMatrixView__exec(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self->d_object,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 bHYPRE_IJMatrixView__getURL(
-  /* in */ bHYPRE_IJMatrixView self);
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_IJMatrixView__raddRef(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_IJMatrixView__isRemote(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+bHYPRE_IJMatrixView__isLocal(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex);
 struct bHYPRE_IJMatrixView__array*
 bHYPRE_IJMatrixView__array_createCol(
   int32_t       dimen,
@@ -510,6 +762,25 @@ bHYPRE_IJMatrixView__array_ensure(
   struct bHYPRE_IJMatrixView__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak bHYPRE_IJMatrixView__connectI
+
+#pragma weak bHYPRE_IJMatrixView__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct bHYPRE_IJMatrixView__object*
+bHYPRE_IJMatrixView__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct bHYPRE_IJMatrixView__object*
+bHYPRE_IJMatrixView__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

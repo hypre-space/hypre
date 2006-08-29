@@ -2,12 +2,11 @@
  * File:          bHYPRE_SStructMatrix.h
  * Symbol:        bHYPRE.SStructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for bHYPRE.SStructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_SStructMatrix_h
@@ -20,7 +19,6 @@
  * 
  * Objects of this type can be cast to SStructMatrixView or
  * Operator objects using the {\tt \_\_cast} methods.
- * 
  */
 struct bHYPRE_SStructMatrix__object;
 struct bHYPRE_SStructMatrix__array;
@@ -42,19 +40,33 @@ typedef struct bHYPRE_SStructMatrix__object* bHYPRE_SStructMatrix;
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
+#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_bHYPRE_SStructMatrix_IOR_h
+#include "bHYPRE_SStructMatrix_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -63,45 +75,25 @@ extern "C" {
  * Constructor function for the class.
  */
 struct bHYPRE_SStructMatrix__object*
-bHYPRE_SStructMatrix__create(void);
+bHYPRE_SStructMatrix__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 bHYPRE_SStructMatrix
-bHYPRE_SStructMatrix__createRemote(const char *, sidl_BaseInterface *_ex);
+bHYPRE_SStructMatrix__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * RMI connector function for the class.
+ * Wraps up the private data struct pointer (struct bHYPRE_SStructMatrix__data) passed in rather than running the constructor.
+ */
+bHYPRE_SStructMatrix
+bHYPRE_SStructMatrix__wrapObj(void * data, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.(addrefs)
  */
 bHYPRE_SStructMatrix
 bHYPRE_SStructMatrix__connect(const char *, sidl_BaseInterface *_ex);
-void
-bHYPRE_SStructMatrix_addRef(
-  /* in */ bHYPRE_SStructMatrix self);
-
-void
-bHYPRE_SStructMatrix_deleteRef(
-  /* in */ bHYPRE_SStructMatrix self);
-
-sidl_bool
-bHYPRE_SStructMatrix_isSame(
-  /* in */ bHYPRE_SStructMatrix self,
-  /* in */ sidl_BaseInterface iobj);
-
-sidl_BaseInterface
-bHYPRE_SStructMatrix_queryInt(
-  /* in */ bHYPRE_SStructMatrix self,
-  /* in */ const char* name);
-
-sidl_bool
-bHYPRE_SStructMatrix_isType(
-  /* in */ bHYPRE_SStructMatrix self,
-  /* in */ const char* name);
-
-sidl_ClassInfo
-bHYPRE_SStructMatrix_getClassInfo(
-  /* in */ bHYPRE_SStructMatrix self);
 
 /**
  * Method:  Create[]
@@ -109,68 +101,135 @@ bHYPRE_SStructMatrix_getClassInfo(
 bHYPRE_SStructMatrix
 bHYPRE_SStructMatrix_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_SStructGraph graph);
+  /* in */ bHYPRE_SStructGraph graph,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Method:  SetObjectType[]
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetObjectType(
   /* in */ bHYPRE_SStructMatrix self,
-  /* in */ int32_t type);
+  /* in */ int32_t type,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetObjectType)(
+    self,
+    type,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Set the MPI Communicator.  DEPRECATED, Use Create()
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_SetCommunicator(
+
+SIDL_C_INLINE_DECL
+void
+bHYPRE_SStructMatrix_addRef(
   /* in */ bHYPRE_SStructMatrix self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_Initialize(
-  /* in */ bHYPRE_SStructMatrix self);
 
-/**
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_Assemble(
-  /* in */ bHYPRE_SStructMatrix self);
-
-/**
- *  A semi-structured matrix or vector contains a Struct or IJ matrix
- *  or vector.  GetObject returns it.
- * The returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_GetObject(
+SIDL_C_INLINE_DECL
+void
+bHYPRE_SStructMatrix_deleteRef(
   /* in */ bHYPRE_SStructMatrix self,
-  /* out */ sidl_BaseInterface* A);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_SStructMatrix_isSame(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_SStructMatrix_isType(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_ClassInfo
+bHYPRE_SStructMatrix_getClassInfo(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the matrix graph.
  * DEPRECATED     Use Create
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetGraph(
   /* in */ bHYPRE_SStructMatrix self,
-  /* in */ bHYPRE_SStructGraph graph);
+  /* in */ bHYPRE_SStructGraph graph,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetGraph)(
+    self,
+    graph,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set matrix coefficients index by index.
@@ -188,8 +247,6 @@ bHYPRE_SStructMatrix_SetGraph(
  * If the matrix is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
- * 
  */
 int32_t
 bHYPRE_SStructMatrix_SetValues(
@@ -200,7 +257,8 @@ bHYPRE_SStructMatrix_SetValues(
   /* in */ int32_t var,
   /* in */ int32_t nentries,
   /* in rarray[nentries] */ int32_t* entries,
-  /* in rarray[nentries] */ double* values);
+  /* in rarray[nentries] */ double* values,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Set matrix coefficients a box at a time.
@@ -218,7 +276,6 @@ bHYPRE_SStructMatrix_SetValues(
  * If the matrix is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 int32_t
 bHYPRE_SStructMatrix_SetBoxValues(
@@ -231,7 +288,8 @@ bHYPRE_SStructMatrix_SetBoxValues(
   /* in */ int32_t nentries,
   /* in rarray[nentries] */ int32_t* entries,
   /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Add to matrix coefficients index by index.
@@ -248,7 +306,6 @@ bHYPRE_SStructMatrix_SetBoxValues(
  * If the matrix is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 int32_t
 bHYPRE_SStructMatrix_AddToValues(
@@ -259,7 +316,8 @@ bHYPRE_SStructMatrix_AddToValues(
   /* in */ int32_t var,
   /* in */ int32_t nentries,
   /* in rarray[nentries] */ int32_t* entries,
-  /* in rarray[nentries] */ double* values);
+  /* in rarray[nentries] */ double* values,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Add to matrix coefficients a box at a time.
@@ -275,7 +333,6 @@ bHYPRE_SStructMatrix_AddToValues(
  * If the matrix is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 int32_t
 bHYPRE_SStructMatrix_AddToBoxValues(
@@ -288,7 +345,8 @@ bHYPRE_SStructMatrix_AddToBoxValues(
   /* in */ int32_t nentries,
   /* in rarray[nentries] */ int32_t* entries,
   /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Define symmetry properties for the stencil entries in the
@@ -304,174 +362,482 @@ bHYPRE_SStructMatrix_AddToBoxValues(
  * By default, matrices are assumed to be nonsymmetric.
  * Significant storage savings can be made if the matrix is
  * symmetric.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetSymmetric(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
   /* in */ int32_t var,
   /* in */ int32_t to_var,
-  /* in */ int32_t symmetric);
+  /* in */ int32_t symmetric,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetSymmetric)(
+    self,
+    part,
+    var,
+    to_var,
+    symmetric,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Define symmetry properties for all non-stencil matrix
  * entries.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetNSSymmetric(
   /* in */ bHYPRE_SStructMatrix self,
-  /* in */ int32_t symmetric);
+  /* in */ int32_t symmetric,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetNSSymmetric)(
+    self,
+    symmetric,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the matrix to be complex.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetComplex(
-  /* in */ bHYPRE_SStructMatrix self);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetComplex)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Print the matrix to file.  This is mainly for debugging
  * purposes.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_Print(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* filename,
-  /* in */ int32_t all);
+  /* in */ int32_t all,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Print)(
+    self,
+    filename,
+    all,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * A semi-structured matrix or vector contains a Struct or IJ matrix
+ * or vector.  GetObject returns it.
+ * The returned type is a sidl.BaseInterface.
+ * A cast must be used on the returned object to convert it into a known type.
+ */
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_SStructMatrix_GetObject(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface* A,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetObject)(
+    self,
+    A,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ */
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_SStructMatrix_SetCommunicator(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self,
+    mpi_comm,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ */
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_SStructMatrix_Initialize(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Initialize)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ */
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_SStructMatrix_Assemble(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Assemble)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the int parameter associated with {\tt name}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetIntParameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in */ int32_t value);
+  /* in */ int32_t value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetIntParameter)(
+    self,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the double parameter associated with {\tt name}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetDoubleParameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in */ double value);
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the string parameter associated with {\tt name}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetStringParameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in */ const char* value);
+  /* in */ const char* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetStringParameter)(
+    self,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the int 1-D array parameter associated with {\tt name}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ int32_t* value,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  int32_t value_lower[1], value_upper[1], value_stride[1]; 
+  struct sidl_int__array value_real;
+  struct sidl_int__array*value_tmp = &value_real;
+  value_upper[0] = nvalues-1;
+  sidl_int__array_init(value, value_tmp, 1, value_lower, value_upper,
+    value_stride);
+  return (*self->d_epv->f_SetIntArray1Parameter)(
+    self,
+    name,
+    value_tmp,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetIntArray2Parameter)(
+    self,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ double* value,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  int32_t value_lower[1], value_upper[1], value_stride[1]; 
+  struct sidl_double__array value_real;
+  struct sidl_double__array*value_tmp = &value_real;
+  value_upper[0] = nvalues-1;
+  sidl_double__array_init(value, value_tmp, 1, value_lower, value_upper,
+    value_stride);
+  return (*self->d_epv->f_SetDoubleArray1Parameter)(
+    self,
+    name,
+    value_tmp,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetDoubleArray2Parameter)(
+    self,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the int parameter associated with {\tt name}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_GetIntValue(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* out */ int32_t* value);
+  /* out */ int32_t* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Get the double parameter associated with {\tt name}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_GetDoubleValue(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* out */ double* value);
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * (Optional) Do any preprocessing that may be necessary in
  * order to execute {\tt Apply}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_Setup(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ bHYPRE_Vector b,
-  /* in */ bHYPRE_Vector x);
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Setup)(
+    self,
+    b,
+    x,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Apply the operator to {\tt b}, returning {\tt x}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_Apply(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x);
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Apply)(
+    self,
+    b,
+    x,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructMatrix_ApplyAdjoint(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x);
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_ApplyAdjoint)(
+    self,
+    b,
+    x,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_SStructMatrix__object*
 bHYPRE_SStructMatrix__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -479,23 +845,94 @@ bHYPRE_SStructMatrix__cast(
 void*
 bHYPRE_SStructMatrix__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 bHYPRE_SStructMatrix__exec(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 bHYPRE_SStructMatrix__getURL(
-  /* in */ bHYPRE_SStructMatrix self);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_SStructMatrix__raddRef(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_SStructMatrix__isRemote(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+bHYPRE_SStructMatrix__isLocal(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface *_ex);
 struct bHYPRE_SStructMatrix__array*
 bHYPRE_SStructMatrix__array_createCol(
   int32_t       dimen,
@@ -723,6 +1160,25 @@ bHYPRE_SStructMatrix__array_ensure(
   struct bHYPRE_SStructMatrix__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak bHYPRE_SStructMatrix__connectI
+
+#pragma weak bHYPRE_SStructMatrix__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct bHYPRE_SStructMatrix__object*
+bHYPRE_SStructMatrix__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct bHYPRE_SStructMatrix__object*
+bHYPRE_SStructMatrix__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

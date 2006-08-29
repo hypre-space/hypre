@@ -2,12 +2,11 @@
  * File:          bHYPRE_GMRES_Impl.h
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_GMRES_Impl_h
@@ -16,32 +15,35 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
-#ifndef included_bHYPRE_Solver_h
-#include "bHYPRE_Solver.h"
+#ifndef included_bHYPRE_GMRES_h
+#include "bHYPRE_GMRES.h"
 #endif
 #ifndef included_bHYPRE_MPICommunicator_h
 #include "bHYPRE_MPICommunicator.h"
 #endif
-#ifndef included_bHYPRE_GMRES_h
-#include "bHYPRE_GMRES.h"
-#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
-#ifndef included_sidl_ClassInfo_h
-#include "sidl_ClassInfo.h"
+#ifndef included_bHYPRE_PreconditionedSolver_h
+#include "bHYPRE_PreconditionedSolver.h"
+#endif
+#ifndef included_bHYPRE_Solver_h
+#include "bHYPRE_Solver.h"
 #endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
-#ifndef included_sidl_BaseInterface_h
-#include "sidl_BaseInterface.h"
-#endif
 #ifndef included_sidl_BaseClass_h
 #include "sidl_BaseClass.h"
 #endif
-#ifndef included_bHYPRE_PreconditionedSolver_h
-#include "bHYPRE_PreconditionedSolver.h"
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
+#endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._includes) */
@@ -131,17 +133,26 @@ bHYPRE_GMRES__set_data(
 extern
 void
 impl_bHYPRE_GMRES__load(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_bHYPRE_GMRES__ctor(
-  /* in */ bHYPRE_GMRES self);
+  /* in */ bHYPRE_GMRES self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_bHYPRE_GMRES__ctor2(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_bHYPRE_GMRES__dtor(
-  /* in */ bHYPRE_GMRES self);
+  /* in */ bHYPRE_GMRES self,
+  /* out */ sidl_BaseInterface *_ex);
 
 /*
  * User-defined object methods
@@ -151,74 +162,162 @@ extern
 bHYPRE_GMRES
 impl_bHYPRE_GMRES_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+  /* in */ bHYPRE_Operator A,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(struct 
-  bHYPRE_Solver__object* obj);
-extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_GMRES__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_GMRES(struct 
-  bHYPRE_GMRES__object* obj);
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct bHYPRE_GMRES__object* impl_bHYPRE_GMRES_fcast_bHYPRE_GMRES(void* 
+  bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_Operator(char* url,
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Operator(struct 
-  bHYPRE_Operator__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_GMRES_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_Vector(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Vector(struct 
-  bHYPRE_Vector__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_GMRES_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_GMRES_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_Operator(void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_PreconditionedSolver(char* url,
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_PreconditionedSolver__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_PreconditionedSolver(struct 
-  bHYPRE_PreconditionedSolver__object* obj);
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_Solver(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_GMRES_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_GMRES_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_GMRES_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_GMRES_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_GMRES_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_GMRES_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_bHYPRE_GMRES_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_bHYPRE_GMRES_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern
+int32_t
+impl_bHYPRE_GMRES_SetPreconditioner(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ bHYPRE_Solver s,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_GMRES_GetPreconditioner(
+  /* in */ bHYPRE_GMRES self,
+  /* out */ bHYPRE_Solver* s,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_GMRES_Clone(
+  /* in */ bHYPRE_GMRES self,
+  /* out */ bHYPRE_PreconditionedSolver* x,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_GMRES_SetOperator(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ bHYPRE_Operator A,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_GMRES_SetTolerance(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ double tolerance,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_GMRES_SetMaxIterations(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ int32_t max_iterations,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_GMRES_SetLogging(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_GMRES_SetPrintLevel(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_GMRES_GetNumIterations(
+  /* in */ bHYPRE_GMRES self,
+  /* out */ int32_t* num_iterations,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_GMRES_GetRelResidualNorm(
+  /* in */ bHYPRE_GMRES self,
+  /* out */ double* norm,
+  /* out */ sidl_BaseInterface *_ex);
+
 extern
 int32_t
 impl_bHYPRE_GMRES_SetCommunicator(
   /* in */ bHYPRE_GMRES self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_SetIntParameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in */ int32_t value);
+  /* in */ int32_t value,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_SetDoubleParameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in */ double value);
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_SetStringParameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in */ const char* value);
+  /* in */ const char* value,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
@@ -226,14 +325,16 @@ impl_bHYPRE_GMRES_SetIntArray1Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ int32_t* value,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_SetIntArray2Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
@@ -241,150 +342,110 @@ impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ double* value,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_SetDoubleArray2Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_GetIntValue(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* out */ int32_t* value);
+  /* out */ int32_t* value,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_GetDoubleValue(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* out */ double* value);
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_Setup(
   /* in */ bHYPRE_GMRES self,
   /* in */ bHYPRE_Vector b,
-  /* in */ bHYPRE_Vector x);
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_Apply(
   /* in */ bHYPRE_GMRES self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x);
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_GMRES_ApplyAdjoint(
   /* in */ bHYPRE_GMRES self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x);
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern
-int32_t
-impl_bHYPRE_GMRES_SetOperator(
-  /* in */ bHYPRE_GMRES self,
-  /* in */ bHYPRE_Operator A);
-
-extern
-int32_t
-impl_bHYPRE_GMRES_SetTolerance(
-  /* in */ bHYPRE_GMRES self,
-  /* in */ double tolerance);
-
-extern
-int32_t
-impl_bHYPRE_GMRES_SetMaxIterations(
-  /* in */ bHYPRE_GMRES self,
-  /* in */ int32_t max_iterations);
-
-extern
-int32_t
-impl_bHYPRE_GMRES_SetLogging(
-  /* in */ bHYPRE_GMRES self,
-  /* in */ int32_t level);
-
-extern
-int32_t
-impl_bHYPRE_GMRES_SetPrintLevel(
-  /* in */ bHYPRE_GMRES self,
-  /* in */ int32_t level);
-
-extern
-int32_t
-impl_bHYPRE_GMRES_GetNumIterations(
-  /* in */ bHYPRE_GMRES self,
-  /* out */ int32_t* num_iterations);
-
-extern
-int32_t
-impl_bHYPRE_GMRES_GetRelResidualNorm(
-  /* in */ bHYPRE_GMRES self,
-  /* out */ double* norm);
-
-extern
-int32_t
-impl_bHYPRE_GMRES_SetPreconditioner(
-  /* in */ bHYPRE_GMRES self,
-  /* in */ bHYPRE_Solver s);
-
-extern
-int32_t
-impl_bHYPRE_GMRES_GetPreconditioner(
-  /* in */ bHYPRE_GMRES self,
-  /* out */ bHYPRE_Solver* s);
-
-extern
-int32_t
-impl_bHYPRE_GMRES_Clone(
-  /* in */ bHYPRE_GMRES self,
-  /* out */ bHYPRE_PreconditionedSolver* x);
-
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(struct 
-  bHYPRE_Solver__object* obj);
-extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_GMRES__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_GMRES(struct 
-  bHYPRE_GMRES__object* obj);
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct bHYPRE_GMRES__object* impl_bHYPRE_GMRES_fcast_bHYPRE_GMRES(void* 
+  bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_Operator(char* url,
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Operator(struct 
-  bHYPRE_Operator__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_GMRES_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_Vector(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Vector(struct 
-  bHYPRE_Vector__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_GMRES_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_GMRES_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_Operator(void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_PreconditionedSolver(char* url,
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_PreconditionedSolver__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_PreconditionedSolver(struct 
-  bHYPRE_PreconditionedSolver__object* obj);
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_Solver(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_GMRES_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_GMRES_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_GMRES_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_GMRES_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_GMRES_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_GMRES_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_GMRES_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_bHYPRE_GMRES_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_bHYPRE_GMRES_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 }
 #endif

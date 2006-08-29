@@ -2,12 +2,11 @@
  * File:          bHYPRE_HPCG_Impl.c
  * Symbol:        bHYPRE.HPCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for bHYPRE.HPCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -36,12 +35,11 @@
  * matrix, vector: StructMatrix, StructVector
  * preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
  * preconditioner: StructSMG, StructPFMG
- * 
- * 
- * 
  */
 
 #include "bHYPRE_HPCG_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG._includes) */
 /* Insert-Code-Here {bHYPRE.HPCG._includes} (includes and arbitrary code) */
@@ -94,11 +92,20 @@
 #include "bHYPRE_StructSMG_Impl.h"
 #include "bHYPRE_StructPFMG.h"
 #include "bHYPRE_StructPFMG_Impl.h"
+#include "bHYPRE_StructDiagScale.h"
+#include "bHYPRE_SStructDiagScale.h"
 #include "bHYPRE_IdentitySolver_Impl.h"
 #include "struct_ls.h"
 #include "sstruct_ls.h"
 #include <assert.h>
-#include "bHYPRE_MPICommunicator_Impl.h"
+#include "hypre_babel_exception_handler.h"
+
+#include "bHYPRE_MPICommunicator.h"
+/* compiler bug workaround, this are just copied from bHYPRE_MPICommunicator.h...*/
+struct bHYPRE_MPICommunicator__data { MPI_Comm mpi_comm; };
+extern struct bHYPRE_MPICommunicator__data*
+bHYPRE_MPICommunicator__get_data(bHYPRE_MPICommunicator);
+/* ... end of compiler bug workaround */
 
 /* This function should be used to initialize the parameter cache
  * in the bHYPRE_HPCG__data object. */
@@ -179,6 +186,8 @@ int impl_bHYPRE_HPCG_Copy_Parameters_to_HYPRE_struct( bHYPRE_HPCG self )
 }
 /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG._includes) */
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -191,11 +200,14 @@ extern "C"
 #endif
 void
 impl_bHYPRE_HPCG__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG._load) */
   /* Insert-Code-Here {bHYPRE.HPCG._load} (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG._load) */
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -209,8 +221,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_HPCG__ctor(
-  /* in */ bHYPRE_HPCG self)
+  /* in */ bHYPRE_HPCG self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG._ctor) */
   /* Insert-Code-Here {bHYPRE.HPCG._ctor} (constructor method) */
 
@@ -260,8 +275,38 @@ impl_bHYPRE_HPCG__ctor(
    bHYPRE_HPCG__set_data( self, data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG._ctor) */
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_HPCG__ctor2(
+  /* in */ bHYPRE_HPCG self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG._ctor2) */
+    /* Insert-Code-Here {bHYPRE.HPCG._ctor2} (special constructor method) */
+    /*
+     * This method has not been implemented
+     */
+
+    SIDL_THROW(*_ex, sidl_NotImplementedException,     "This method has not been implemented");
+  EXIT:;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -274,8 +319,11 @@ extern "C"
 #endif
 void
 impl_bHYPRE_HPCG__dtor(
-  /* in */ bHYPRE_HPCG self)
+  /* in */ bHYPRE_HPCG self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG._dtor) */
   /* Insert-Code-Here {bHYPRE.HPCG._dtor} (destructor method) */
 
@@ -301,11 +349,13 @@ impl_bHYPRE_HPCG__dtor(
       /* Unsupported vector type.  We're unlikely to reach this point. */
       ierr++;
    }
-   bHYPRE_Operator_deleteRef( data->matrix );
+   bHYPRE_Operator_deleteRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
    /* delete any nontrivial data components here */
    hypre_TFree( data );
 
+   return; hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG._dtor) */
+  }
 }
 
 /*
@@ -320,28 +370,551 @@ extern "C"
 #endif
 bHYPRE_HPCG
 impl_bHYPRE_HPCG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.Create) */
   /* Insert-Code-Here {bHYPRE.HPCG.Create} (Create method) */
 
    /* HYPRE_ParCSRPCGCreate or HYPRE_StructPCGCreate or ... cannot be
       called until later because we don't know the vector type yet */
 
-   bHYPRE_HPCG solver = bHYPRE_HPCG__create();
+   bHYPRE_HPCG solver = bHYPRE_HPCG__create(_ex); SIDL_CHECK(*_ex);
    struct bHYPRE_HPCG__data * data;
+
    data = bHYPRE_HPCG__get_data( solver );
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return solver;
 
+   hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.Create) */
+  }
+}
+
+/*
+ * Set the preconditioner.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_SetPreconditioner"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_SetPreconditioner(
+  /* in */ bHYPRE_HPCG self,
+  /* in */ bHYPRE_Solver s,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetPreconditioner) */
+  /* Insert-Code-Here {bHYPRE.HPCG.SetPreconditioner} (SetPreconditioner method) */
+
+   /* PCG_Setup will not be called until _after_ this function is called,
+      but the new preconditioner's setup function should have been called
+      _before_ this point. */
+
+   int ierr = 0;
+   char * precond_name;
+   HYPRE_Solver * solverprecond;
+   struct bHYPRE_HPCG__data * dataself;
+   struct bHYPRE_BoomerAMG__data * AMG_dataprecond;
+   bHYPRE_BoomerAMG AMG_s;
+   struct bHYPRE_ParaSails__data * PS_dataprecond;
+   bHYPRE_ParaSails PS_s;
+   bHYPRE_ParCSRDiagScale PCDS_s;
+   bHYPRE_StructDiagScale SDS_s;
+   bHYPRE_SStructDiagScale SSDS_s;
+   struct bHYPRE_StructSMG__data * SMG_dataprecond;
+   bHYPRE_StructSMG SMG_s;
+   struct bHYPRE_StructPFMG__data * PFMG_dataprecond;
+   bHYPRE_StructPFMG PFMG_s;
+   struct bHYPRE_IdentitySolver__data * Id_dataprecond;
+   bHYPRE_IdentitySolver Id_s;
+   HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
+
+   dataself = bHYPRE_HPCG__get_data( self );
+   dataself -> bprecond = s;
+
+   AMG_s = (bHYPRE_BoomerAMG) bHYPRE_Solver__cast2( s, "bHYPRE.BoomerAMG", _ex ); SIDL_CHECK(*_ex);
+   PS_s = (bHYPRE_ParaSails) bHYPRE_Solver__cast2( s, "bHYPRE.ParaSails", _ex ); SIDL_CHECK(*_ex);
+   PCDS_s = (bHYPRE_ParCSRDiagScale) bHYPRE_Solver__cast2( s, "bHYPRE.ParCSRDiagScale", _ex );
+   SIDL_CHECK(*_ex);
+   SDS_s = (bHYPRE_StructDiagScale) bHYPRE_Solver__cast2( s, "bHYPRE.StructDiagScale", _ex );
+   SIDL_CHECK(*_ex);
+   SSDS_s = (bHYPRE_SStructDiagScale) bHYPRE_Solver__cast2( s, "bHYPRE.SStructDiagScale", _ex );
+   SIDL_CHECK(*_ex);
+   SMG_s = (bHYPRE_StructSMG) bHYPRE_Solver__cast2( s, "bHYPRE.StructSMG", _ex ); SIDL_CHECK(*_ex);
+   PFMG_s = (bHYPRE_StructPFMG) bHYPRE_Solver__cast2( s, "bHYPRE.StructPFMG", _ex ); SIDL_CHECK(*_ex);
+   Id_s = (bHYPRE_IdentitySolver) bHYPRE_Solver__cast2( s, "bHYPRE.IdentitySolver", _ex ); SIDL_CHECK(*_ex);
+   if ( AMG_s != NULL )
+   {
+      precond_name = "BoomerAMG";
+      AMG_dataprecond = bHYPRE_BoomerAMG__get_data( AMG_s );
+      solverprecond = &AMG_dataprecond->solver;
+      hypre_assert( solverprecond != NULL );
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
+      bHYPRE_BoomerAMG_deleteRef( AMG_s, _ex ); SIDL_CHECK(*_ex);
+   }
+   else if ( PS_s != NULL )
+   {
+      precond_name = "ParaSails";
+      PS_dataprecond = bHYPRE_ParaSails__get_data( PS_s );
+      solverprecond = &PS_dataprecond->solver;
+      hypre_assert( solverprecond != NULL );
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup;
+      bHYPRE_ParaSails_deleteRef( PS_s, _ex ); SIDL_CHECK(*_ex);
+   }
+   else if ( PCDS_s != NULL )
+   {
+      precond_name = "ParCSRDiagScale";
+      bHYPRE_Solver_deleteRef( s, _ex ); SIDL_CHECK(*_ex);
+      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
+      /* ... HYPRE diagonal scaling needs no solver object, but we
+       * must provide a HYPRE_Solver object.  It will be totally
+       * ignored. */
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup;
+   }
+   else if ( SDS_s != NULL )
+   {
+      precond_name = "StructDiagScale";
+      bHYPRE_Solver_deleteRef( s, _ex ); SIDL_CHECK(*_ex);
+      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
+      /* ... HYPRE diagonal scaling needs no solver object, but we
+       * must provide a HYPRE_Solver object.  It will be totally
+       * ignored. */
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup;
+   }
+   else if ( SSDS_s != NULL )
+   {
+      precond_name = "SStructDiagScale";
+      bHYPRE_Solver_deleteRef( s, _ex ); SIDL_CHECK(*_ex);
+      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
+      /* ... HYPRE diagonal scaling needs no solver object, but we
+       * must provide a HYPRE_Solver object.  It will be totally
+       * ignored. */
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup;
+   }
+   else if ( SMG_s != NULL )
+   {
+      precond_name = "StructSMG";
+      SMG_dataprecond = bHYPRE_StructSMG__get_data( SMG_s );
+      solverprecond = (HYPRE_Solver *) &SMG_dataprecond->solver;
+      hypre_assert( solverprecond != NULL );
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup;
+      bHYPRE_StructSMG_deleteRef( SMG_s, _ex ); SIDL_CHECK(*_ex);
+   }
+   else if ( PFMG_s != NULL )
+   {
+      precond_name = "StructPFMG";
+      PFMG_dataprecond = bHYPRE_StructPFMG__get_data( PFMG_s );
+      solverprecond = (HYPRE_Solver *) &PFMG_dataprecond->solver;
+      hypre_assert( solverprecond != NULL );
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup;
+      bHYPRE_StructPFMG_deleteRef( PFMG_s, _ex ); SIDL_CHECK(*_ex);
+   }
+   else if ( Id_s != NULL )
+   {
+      /* s is an IdentitySolver, a dummy which just "solves" the identity matrix */
+      precond_name = "IdentitySolver";
+      bHYPRE_Solver_deleteRef( s, _ex ); SIDL_CHECK(*_ex);
+      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
+      /* ... almost any garbage will do here, but we need something */
+      Id_dataprecond = bHYPRE_IdentitySolver__get_data( Id_s );
+
+      /* The right thing at this point is to check for vector type, then specify
+         the right hypre identity solver (_really_ the right thing is to use the
+         babel-level identity solver, but that requires PCG to be implemented at the
+         babel level). */
+
+      if ( strcmp(Id_dataprecond->vector_type,"ParVector")==0 )
+      {
+         precond = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentity;
+         precond_setup = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup;
+      }
+      else if ( strcmp(Id_dataprecond->vector_type,"StructVector")==0 )
+      {
+         precond = (HYPRE_PtrToSolverFcn) hypre_StructKrylovIdentity;
+         precond_setup = (HYPRE_PtrToSolverFcn) hypre_StructKrylovIdentitySetup;
+      }
+      else if ( strcmp(Id_dataprecond->vector_type,"SStructVector")==0 )
+      {
+         precond = (HYPRE_PtrToSolverFcn) hypre_SStructKrylovIdentity;
+         precond_setup = (HYPRE_PtrToSolverFcn) hypre_SStructKrylovIdentitySetup;
+      }
+      else
+      {
+         hypre_assert( "unrecognized vector type, can't set up PCG as CG\n"==0 );
+      }
+   }
+   /* put other preconditioner types here */
+   else
+   {
+      hypre_assert( "PCG_SetPreconditioner cannot recognize preconditioner"==0 );
+   }
+
+   /* We can't actually set the HYPRE preconditioner, because that
+    * requires knowing what the solver object is - but that requires
+    * knowing its data type but _that_ requires knowing the kind of
+    * matrix and vectors we'll need; not known until Apply is called.
+    * So save the information in the bHYPRE data structure, and stick
+    * it in HYPRE later... */
+   dataself->precond_name = precond_name;
+   dataself->precond = precond;
+   dataself->precond_setup = precond_setup;
+   dataself->solverprecond = solverprecond;
+   /* For an example call, see test/IJ_linear_solvers.c, line 1686.
+    * The four arguments are: self's (solver) data; and, for the
+    * preconditioner: solver function, setup function, data */
+
+   return ierr;
+
+   hypre_babel_exception_return_error(_ex);
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetPreconditioner) */
+  }
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_GetPreconditioner"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_GetPreconditioner(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ bHYPRE_Solver* s,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.GetPreconditioner) */
+  /* Insert-Code-Here {bHYPRE.HPCG.GetPreconditioner} (GetPreconditioner method) */
+
+   int ierr = 0;
+   struct bHYPRE_HPCG__data * dataself = bHYPRE_HPCG__get_data( self );
+   *s = dataself -> bprecond ;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.GetPreconditioner) */
+  }
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_Clone"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_Clone(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ bHYPRE_PreconditionedSolver* x,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.Clone) */
+  /* Insert-Code-Here {bHYPRE.HPCG.Clone} (Clone method) */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.Clone) */
+  }
+}
+
+/*
+ * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_SetOperator"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_SetOperator(
+  /* in */ bHYPRE_HPCG self,
+  /* in */ bHYPRE_Operator A,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetOperator) */
+  /* Insert-Code-Here {bHYPRE.HPCG.SetOperator} (SetOperator method) */
+
+   int ierr = 0;
+   struct bHYPRE_HPCG__data * data;
+
+   data = bHYPRE_HPCG__get_data( self );
+   data->matrix = A;
+   bHYPRE_Operator_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
+
+   return ierr;
+
+   hypre_babel_exception_return_error(_ex);
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetOperator) */
+  }
+}
+
+/*
+ * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_SetTolerance"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_SetTolerance(
+  /* in */ bHYPRE_HPCG self,
+  /* in */ double tolerance,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetTolerance) */
+  /* Insert-Code-Here {bHYPRE.HPCG.SetTolerance} (SetTolerance method) */
+
+   int ierr = 0;
+   struct bHYPRE_HPCG__data * data;
+   data = bHYPRE_HPCG__get_data( self );
+
+   data -> tol = tolerance;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetTolerance) */
+  }
+}
+
+/*
+ * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_SetMaxIterations"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_SetMaxIterations(
+  /* in */ bHYPRE_HPCG self,
+  /* in */ int32_t max_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetMaxIterations) */
+  /* Insert-Code-Here {bHYPRE.HPCG.SetMaxIterations} (SetMaxIterations method) */
+
+   int ierr = 0;
+   struct bHYPRE_HPCG__data * data;
+   data = bHYPRE_HPCG__get_data( self );
+
+   data -> maxiter = max_iterations;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetMaxIterations) */
+  }
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_SetLogging"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_SetLogging(
+  /* in */ bHYPRE_HPCG self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetLogging) */
+  /* Insert-Code-Here {bHYPRE.HPCG.SetLogging} (SetLogging method) */
+
+   /* The normal way to implement this function would be to call the
+    * corresponding HYPRE function to set the print level.  That can't
+    * always be done because the HYPRE struct may not exist.  The
+    * HYPRE struct may not exist because it can't be created until we
+    * know the vector type - and that is not known until Apply is
+    * first called.  So what we do is save the print level in a cache
+    * belonging to this Babel interface, and copy it into the HYPRE
+    * struct once Apply is called.  */
+   int ierr = 0;
+   struct bHYPRE_HPCG__data * data;
+   data = bHYPRE_HPCG__get_data( self );
+
+   data -> log_level = level;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetLogging) */
+  }
+}
+
+/*
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_SetPrintLevel"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_SetPrintLevel(
+  /* in */ bHYPRE_HPCG self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetPrintLevel) */
+  /* Insert-Code-Here {bHYPRE.HPCG.SetPrintLevel} (SetPrintLevel method) */
+
+   /* The normal way to implement this function would be to call the
+    * corresponding HYPRE function to set the print level.  That can't
+    * always be done because the HYPRE struct may not exist.  The
+    * HYPRE struct may not exist because it can't be created until we
+    * know the vector type - and that is not known until Apply is
+    * first called.  So what we do is save the print level in a cache
+    * belonging to this Babel interface, and copy it into the HYPRE
+    * struct once Apply is called.  */
+   int ierr = 0;
+   struct bHYPRE_HPCG__data * data;
+   data = bHYPRE_HPCG__get_data( self );
+
+   data -> printlevel = level;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetPrintLevel) */
+  }
+}
+
+/*
+ * (Optional) Return the number of iterations taken.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_GetNumIterations"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_GetNumIterations(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ int32_t* num_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.GetNumIterations) */
+  /* Insert-Code-Here {bHYPRE.HPCG.GetNumIterations} (GetNumIterations method) */
+
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct bHYPRE_HPCG__data * data;
+
+   data = bHYPRE_HPCG__get_data( self );
+   hypre_assert( data->solver != NULL );
+   solver = data->solver;
+
+   ierr += HYPRE_PCGGetNumIterations( solver, num_iterations );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.GetNumIterations) */
+  }
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_GetRelResidualNorm"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_GetRelResidualNorm(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ double* norm,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.GetRelResidualNorm) */
+  /* Insert-Code-Here {bHYPRE.HPCG.GetRelResidualNorm} (GetRelResidualNorm method) */
+
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct bHYPRE_HPCG__data * data;
+
+   data = bHYPRE_HPCG__get_data( self );
+   hypre_assert( data->solver != NULL );
+   solver = data->solver;
+
+   ierr += HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.GetRelResidualNorm) */
+  }
 }
 
 /*
  * Set the MPI Communicator.
  * DEPRECATED, use Create:
- * 
  */
 
 #undef __FUNC__
@@ -353,8 +926,11 @@ extern "C"
 int32_t
 impl_bHYPRE_HPCG_SetCommunicator(
   /* in */ bHYPRE_HPCG self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetCommunicator} (SetCommunicator method) */
 
@@ -367,11 +943,11 @@ impl_bHYPRE_HPCG_SetCommunicator(
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetCommunicator) */
+  }
 }
 
 /*
  * Set the int parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -384,8 +960,11 @@ int32_t
 impl_bHYPRE_HPCG_SetIntParameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* in */ int32_t value)
+  /* in */ int32_t value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetIntParameter} (SetIntParameter method) */
 
@@ -429,11 +1008,11 @@ impl_bHYPRE_HPCG_SetIntParameter(
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetIntParameter) */
+  }
 }
 
 /*
  * Set the double parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -446,8 +1025,11 @@ int32_t
 impl_bHYPRE_HPCG_SetDoubleParameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetDoubleParameter} (SetDoubleParameter method) */
 
@@ -484,11 +1066,11 @@ impl_bHYPRE_HPCG_SetDoubleParameter(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetDoubleParameter) */
+  }
 }
 
 /*
  * Set the string parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -501,19 +1083,22 @@ int32_t
 impl_bHYPRE_HPCG_SetStringParameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* in */ const char* value)
+  /* in */ const char* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetStringParameter) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetStringParameter} (SetStringParameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetStringParameter) */
+  }
 }
 
 /*
  * Set the int 1-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -527,19 +1112,22 @@ impl_bHYPRE_HPCG_SetIntArray1Parameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ int32_t* value,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetIntArray1Parameter) */
+  }
 }
 
 /*
  * Set the int 2-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -552,19 +1140,22 @@ int32_t
 impl_bHYPRE_HPCG_SetIntArray2Parameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetIntArray2Parameter) */
+  }
 }
 
 /*
  * Set the double 1-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -578,19 +1169,22 @@ impl_bHYPRE_HPCG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ double* value,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetDoubleArray1Parameter) */
+  }
 }
 
 /*
  * Set the double 2-D array parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -603,19 +1197,22 @@ int32_t
 impl_bHYPRE_HPCG_SetDoubleArray2Parameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetDoubleArray2Parameter) */
+  }
 }
 
 /*
  * Set the int parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -628,8 +1225,11 @@ int32_t
 impl_bHYPRE_HPCG_GetIntValue(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* out */ int32_t* value)
+  /* out */ int32_t* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.HPCG.GetIntValue} (GetIntValue method) */
 
@@ -686,11 +1286,11 @@ impl_bHYPRE_HPCG_GetIntValue(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.GetIntValue) */
+  }
 }
 
 /*
  * Get the double parameter associated with {\tt name}.
- * 
  */
 
 #undef __FUNC__
@@ -703,8 +1303,11 @@ int32_t
 impl_bHYPRE_HPCG_GetDoubleValue(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* out */ double* value)
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.HPCG.GetDoubleValue} (GetDoubleValue method) */
 
@@ -753,12 +1356,12 @@ impl_bHYPRE_HPCG_GetDoubleValue(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.GetDoubleValue) */
+  }
 }
 
 /*
  * (Optional) Do any preprocessing that may be necessary in
  * order to execute {\tt Apply}.
- * 
  */
 
 #undef __FUNC__
@@ -771,8 +1374,11 @@ int32_t
 impl_bHYPRE_HPCG_Setup(
   /* in */ bHYPRE_HPCG self,
   /* in */ bHYPRE_Vector b,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.Setup) */
   /* Insert-Code-Here {bHYPRE.HPCG.Setup} (Setup method) */
 
@@ -818,25 +1424,28 @@ impl_bHYPRE_HPCG_Setup(
    {
       /* This is the first time this Babel PCG object has seen a
        * vector.  So we are ready to create the bHYPRE PCG object. */
-      if ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") )
+      if ( bHYPRE_Vector__cast2( b, "bHYPRE.IJParCSRVector", _ex) )
       {
-         bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
+         SIDL_CHECK(*_ex);   
+         bHYPRE_Vector_deleteRef( b, _ex ); SIDL_CHECK(*_ex);   
          data -> vector_type = "ParVector";
          HYPRE_ParCSRPCGCreate( comm, psolver );
          hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
-      else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.SStructVector") )
+      else if ( bHYPRE_Vector__cast2( b, "bHYPRE.SStructVector", _ex) )
       {
-         bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
+         SIDL_CHECK(*_ex);
+         bHYPRE_Vector_deleteRef( b, _ex ); SIDL_CHECK(*_ex);
          data -> vector_type = "SStructVector";
          HYPRE_SStructPCGCreate( comm, (HYPRE_SStructSolver *) psolver );
          hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
-      else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") )
+      else if ( bHYPRE_Vector__cast2( b, "bHYPRE.StructVector", _ex) )
       {
-         bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
+         SIDL_CHECK(*_ex);
+         bHYPRE_Vector_deleteRef( b, _ex ); SIDL_CHECK(*_ex);
          data -> vector_type = "StructVector";
          HYPRE_StructPCGCreate( comm, (HYPRE_StructSolver *) psolver );
          hypre_assert( solver != NULL );
@@ -845,6 +1454,7 @@ impl_bHYPRE_HPCG_Setup(
       /* Add more vector types here */
       else
       {
+         SIDL_CHECK(*_ex);
          hypre_assert( "only IJParCSRVector and StructVector supported by PCG"==0 );
       }
       bHYPRE_HPCG__set_data( self, data );
@@ -863,29 +1473,25 @@ impl_bHYPRE_HPCG_Setup(
    ierr += impl_bHYPRE_HPCG_Copy_Parameters_to_HYPRE_struct( self );
    if ( data->vector_type == "ParVector" )
    {
-      bHYPREP_b = bHYPRE_IJParCSRVector__cast
-         ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") );
+      bHYPREP_b = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( b, "bHYPRE.IJParCSRVector", _ex );
       datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b ); /* extra reference from queryInt */
       ij_b = datab -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
       bb = (HYPRE_ParVector) objectb;
       HYPRE_b = (HYPRE_Vector) bb;
 
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast
-         ( bHYPRE_Vector_queryInt( x, "bHYPRE.IJParCSRVector") );
+      bHYPREP_x = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( x, "bHYPRE.IJParCSRVector", _ex );
+      SIDL_CHECK(*_ex);
       datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra reference from queryInt */
       ij_x = datax -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
       xx = (HYPRE_ParVector) objectx;
       HYPRE_x = (HYPRE_Vector) xx;
 
-      bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
-         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
+      bHYPREP_A = (bHYPRE_IJParCSRMatrix) bHYPRE_Operator__cast2( mat, "bHYPRE.IJParCSRMatrix", _ex );
+      SIDL_CHECK(*_ex);
       hypre_assert( bHYPREP_A != NULL );
       dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
-      bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A ); /* extra reference from queryInt */
       ij_A = dataA -> ij_A;
       ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
       AA = (HYPRE_ParCSRMatrix) objectA;
@@ -893,49 +1499,43 @@ impl_bHYPRE_HPCG_Setup(
    }
    else if ( data->vector_type == "StructVector" )
    {
-      bHYPRES_b = bHYPRE_StructVector__cast
-         ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") );
+      bHYPRES_b = (bHYPRE_StructVector) bHYPRE_Vector__cast2( b, "bHYPRE.StructVector", _ex );
+      SIDL_CHECK(*_ex);
       datab_S = bHYPRE_StructVector__get_data( bHYPRES_b );
-      bHYPRE_StructVector_deleteRef( bHYPRES_b ); /* extra reference from queryInt */
       HS_b = datab_S -> vec;
       HYPRE_b = (HYPRE_Vector) HS_b;
 
-      bHYPRES_x = bHYPRE_StructVector__cast
-         ( bHYPRE_Vector_queryInt( x, "bHYPRE.StructVector") );
+      bHYPRES_x = (bHYPRE_StructVector) bHYPRE_Vector__cast2( x, "bHYPRE.StructVector", _ex );
+      SIDL_CHECK(*_ex);
       datax_S = bHYPRE_StructVector__get_data( bHYPRES_x );
-      bHYPRE_StructVector_deleteRef( bHYPRES_x ); /* extra reference from queryInt */
       HS_x = datax_S -> vec;
       HYPRE_x = (HYPRE_Vector) HS_x;
 
-      bHYPRES_A = bHYPRE_StructMatrix__cast
-         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.StructMatrix") );
+      bHYPRES_A = (bHYPRE_StructMatrix) bHYPRE_Operator__cast2( mat, "bHYPRE.StructMatrix", _ex );
+      SIDL_CHECK(*_ex);
       hypre_assert( bHYPRES_A != NULL );
       dataA_S = bHYPRE_StructMatrix__get_data( bHYPRES_A );
-      bHYPRE_StructMatrix_deleteRef( bHYPRES_A ); /* extra reference from queryInt */
       HS_A = dataA_S -> matrix;
       HYPRE_A = (HYPRE_Matrix) HS_A;
    }
    else if ( data->vector_type == "SStructVector" )
    {
-      bHYPRESS_b = bHYPRE_SStructVector__cast
-         ( bHYPRE_Vector_queryInt( b, "bHYPRE.SStructVector") );
+      bHYPRESS_b = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( b, "bHYPRE.SStructVector", _ex );
+      SIDL_CHECK(*_ex);
       datab_SS = bHYPRE_SStructVector__get_data( bHYPRESS_b );
-      bHYPRE_SStructVector_deleteRef( bHYPRESS_b ); /* extra reference from queryInt */
       HSS_b = datab_SS -> vec;
       HYPRE_b = (HYPRE_Vector) HSS_b;
 
-      bHYPRESS_x = bHYPRE_SStructVector__cast
-         ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructVector") );
+      bHYPRESS_x = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( x, "bHYPRE.SStructVector", _ex );
+      SIDL_CHECK(*_ex);
       datax_SS = bHYPRE_SStructVector__get_data( bHYPRESS_x );
-      bHYPRE_SStructVector_deleteRef( bHYPRESS_x ); /* extra reference from queryInt */
       HSS_x = datax_SS -> vec;
       HYPRE_x = (HYPRE_Vector) HSS_x;
 
-      bHYPRESS_A = bHYPRE_SStructMatrix__cast
-         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.SStructMatrix") );
+      bHYPRESS_A = (bHYPRE_SStructMatrix) bHYPRE_Operator__cast2( mat, "bHYPRE.SStructMatrix", _ex );
+      SIDL_CHECK(*_ex);
       hypre_assert( bHYPRESS_A != NULL );
       dataA_SS = bHYPRE_SStructMatrix__get_data( bHYPRESS_A );
-      bHYPRE_SStructMatrix_deleteRef( bHYPRESS_A ); /* extra reference from queryInt */
       HSS_A = dataA_SS -> matrix;
       HYPRE_A = (HYPRE_Matrix) HSS_A;
    }
@@ -950,12 +1550,13 @@ impl_bHYPRE_HPCG_Setup(
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.Setup) */
+  }
 }
 
 /*
  * Apply the operator to {\tt b}, returning {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -968,8 +1569,11 @@ int32_t
 impl_bHYPRE_HPCG_Apply(
   /* in */ bHYPRE_HPCG self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x)
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.Apply) */
   /* Insert-Code-Here {bHYPRE.HPCG.Apply} (Apply method) */
 
@@ -1022,25 +1626,28 @@ impl_bHYPRE_HPCG_Apply(
    {
       /* This is the first time this Babel PCG object has seen a
        * vector.  So we are ready to create the bHYPRE PCG object. */
-      if ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") )
+      if ( bHYPRE_Vector__cast2( b, "bHYPRE.IJParCSRVector", _ex) )
       {
-         bHYPRE_Vector_deleteRef( b ); /* extra ref created by queryInt */
+         SIDL_CHECK(*_ex);
+         bHYPRE_Vector_deleteRef( b, _ex ); SIDL_CHECK(*_ex);
          data -> vector_type = "ParVector";
          HYPRE_ParCSRPCGCreate( comm, psolver );
          hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
-      else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") )
+      else if ( bHYPRE_Vector__cast2( b, "bHYPRE.StructVector", _ex) )
       {
-         bHYPRE_Vector_deleteRef( b ); /* extra ref created by queryInt */
+         SIDL_CHECK(*_ex);
+         bHYPRE_Vector_deleteRef( b, _ex ); SIDL_CHECK(*_ex);
          data -> vector_type = "StructVector";
          HYPRE_StructPCGCreate( comm, (HYPRE_StructSolver *) psolver );
          hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
-      else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.SStructVector") )
+      else if ( bHYPRE_Vector__cast2( b, "bHYPRE.SStructVector", _ex) )
       {
-         bHYPRE_Vector_deleteRef( b ); /* extra ref created by queryInt */
+         SIDL_CHECK(*_ex);
+         bHYPRE_Vector_deleteRef( b, _ex ); SIDL_CHECK(*_ex);
          data -> vector_type = "SStructVector";
          HYPRE_SStructPCGCreate( comm, (HYPRE_SStructSolver *) psolver );
          hypre_assert( solver != NULL );
@@ -1049,6 +1656,7 @@ impl_bHYPRE_HPCG_Apply(
       /* Add more vector types here */
       else
       {
+         SIDL_CHECK(*_ex);
          hypre_assert( "PCG supports only IJParCSRVector, StructVector, and SStructVector"==0 );
       }
       bHYPRE_HPCG__set_data( self, data );
@@ -1067,29 +1675,26 @@ impl_bHYPRE_HPCG_Apply(
    ierr += impl_bHYPRE_HPCG_Copy_Parameters_to_HYPRE_struct( self );
    if ( data->vector_type == "ParVector" )
    {
-      bHYPREP_b = bHYPRE_IJParCSRVector__cast
-         ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") );
+      bHYPREP_b = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( b, "bHYPRE.IJParCSRVector", _ex );
+      SIDL_CHECK(*_ex);
       datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b ); /* extra ref created by queryInt */
       ij_b = datab -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
       bb = (HYPRE_ParVector) objectb;
       HYPRE_b = (HYPRE_Vector) bb;
 
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast
-         ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector") );
+      bHYPREP_x = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2( *x, "bHYPRE.IJParCSRVector", _ex );
+      SIDL_CHECK(*_ex);
       datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra ref created by queryInt */
       ij_x = datax -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
       xx = (HYPRE_ParVector) objectx;
       HYPRE_x = (HYPRE_Vector) xx;
 
-      bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
-         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
+      bHYPREP_A = (bHYPRE_IJParCSRMatrix) bHYPRE_Operator__cast2( mat, "bHYPRE.IJParCSRMatrix", _ex );
+      SIDL_CHECK(*_ex);
       hypre_assert( bHYPREP_A != NULL );
       dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
-      bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A ); /* extra ref created by queryInt */
       ij_A = dataA -> ij_A;
       ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
       AA = (HYPRE_ParCSRMatrix) objectA;
@@ -1097,49 +1702,43 @@ impl_bHYPRE_HPCG_Apply(
    }
    else if ( data->vector_type == "StructVector" )
    {
-      bHYPRES_b = bHYPRE_StructVector__cast
-         ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") );
+      bHYPRES_b = (bHYPRE_StructVector) bHYPRE_Vector__cast2( b, "bHYPRE.StructVector", _ex );
+      SIDL_CHECK(*_ex);
       datab_S = bHYPRE_StructVector__get_data( bHYPRES_b );
-      bHYPRE_StructVector_deleteRef( bHYPRES_b ); /* extra ref created by queryInt */
       HS_b = datab_S -> vec;
       HYPRE_b = (HYPRE_Vector) HS_b;
 
-      bHYPRES_x = bHYPRE_StructVector__cast
-         ( bHYPRE_Vector_queryInt( *x, "bHYPRE.StructVector") );
+      bHYPRES_x = (bHYPRE_StructVector) bHYPRE_Vector__cast2( *x, "bHYPRE.StructVector", _ex );
+      SIDL_CHECK(*_ex);
       datax_S = bHYPRE_StructVector__get_data( bHYPRES_x );
-      bHYPRE_StructVector_deleteRef( bHYPRES_x ); /* extra ref created by queryInt */
       HS_x = datax_S -> vec;
       HYPRE_x = (HYPRE_Vector) HS_x;
 
-      bHYPRES_A = bHYPRE_StructMatrix__cast
-         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.StructMatrix") );
+      bHYPRES_A = (bHYPRE_StructMatrix) bHYPRE_Operator__cast2( mat, "bHYPRE.StructMatrix", _ex );
+      SIDL_CHECK(*_ex);
       hypre_assert( bHYPRES_A != NULL );
       dataA_S = bHYPRE_StructMatrix__get_data( bHYPRES_A );
-      bHYPRE_StructMatrix_deleteRef( bHYPRES_A ); /* extra ref created by queryInt */
       HS_A = dataA_S -> matrix;
       HYPRE_A = (HYPRE_Matrix) HS_A;
    }
    else if ( data->vector_type == "SStructVector" )
    {
-      bHYPRESS_b = bHYPRE_SStructVector__cast
-         ( bHYPRE_Vector_queryInt( b, "bHYPRE.SStructVector") );
+      bHYPRESS_b = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( b, "bHYPRE.SStructVector", _ex );
+      SIDL_CHECK(*_ex);
       datab_SS = bHYPRE_SStructVector__get_data( bHYPRESS_b );
-      bHYPRE_SStructVector_deleteRef( bHYPRESS_b ); /* extra ref created by queryInt */
       HSS_b = datab_SS -> vec;
       HYPRE_b = (HYPRE_Vector) HSS_b;
 
-      bHYPRESS_x = bHYPRE_SStructVector__cast
-         ( bHYPRE_Vector_queryInt( *x, "bHYPRE.SStructVector") );
+      bHYPRESS_x = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( *x, "bHYPRE.SStructVector", _ex );
+      SIDL_CHECK(*_ex);
       datax_SS = bHYPRE_SStructVector__get_data( bHYPRESS_x );
-      bHYPRE_SStructVector_deleteRef( bHYPRESS_x ); /* extra ref created by queryInt */
       HSS_x = datax_SS -> vec;
       HYPRE_x = (HYPRE_Vector) HSS_x;
 
-      bHYPRESS_A = bHYPRE_SStructMatrix__cast
-         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.SStructMatrix") );
+      bHYPRESS_A = (bHYPRE_SStructMatrix) bHYPRE_Operator__cast2( mat, "bHYPRE.SStructMatrix", _ex );
+      SIDL_CHECK(*_ex);
       hypre_assert( bHYPRESS_A != NULL );
       dataA_SS = bHYPRE_SStructMatrix__get_data( bHYPRESS_A );
-      bHYPRE_SStructMatrix_deleteRef( bHYPRESS_A ); /* extra ref created by queryInt */
       HSS_A = dataA_SS -> matrix;
       HYPRE_A = (HYPRE_Matrix) HSS_A;
    }
@@ -1155,12 +1754,13 @@ impl_bHYPRE_HPCG_Apply(
 
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.Apply) */
+  }
 }
 
 /*
  * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
- * 
  */
 
 #undef __FUNC__
@@ -1173,572 +1773,104 @@ int32_t
 impl_bHYPRE_HPCG_ApplyAdjoint(
   /* in */ bHYPRE_HPCG self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x)
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.HPCG.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1; /* not implemented */
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.ApplyAdjoint) */
-}
-
-/*
- * Set the operator for the linear system being solved.
- * DEPRECATED.  use Create
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_SetOperator"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_SetOperator(
-  /* in */ bHYPRE_HPCG self,
-  /* in */ bHYPRE_Operator A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetOperator) */
-  /* Insert-Code-Here {bHYPRE.HPCG.SetOperator} (SetOperator method) */
-
-   int ierr = 0;
-   struct bHYPRE_HPCG__data * data;
-
-   data = bHYPRE_HPCG__get_data( self );
-   data->matrix = A;
-   bHYPRE_Operator_addRef( data->matrix );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetOperator) */
-}
-
-/*
- * (Optional) Set the convergence tolerance.
- * DEPRECATED.  use SetDoubleParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_SetTolerance"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_SetTolerance(
-  /* in */ bHYPRE_HPCG self,
-  /* in */ double tolerance)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetTolerance) */
-  /* Insert-Code-Here {bHYPRE.HPCG.SetTolerance} (SetTolerance method) */
-
-   int ierr = 0;
-   struct bHYPRE_HPCG__data * data;
-   data = bHYPRE_HPCG__get_data( self );
-
-   data -> tol = tolerance;
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetTolerance) */
-}
-
-/*
- * (Optional) Set maximum number of iterations.
- * DEPRECATED   use SetIntParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_SetMaxIterations"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_SetMaxIterations(
-  /* in */ bHYPRE_HPCG self,
-  /* in */ int32_t max_iterations)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetMaxIterations) */
-  /* Insert-Code-Here {bHYPRE.HPCG.SetMaxIterations} (SetMaxIterations method) */
-
-   int ierr = 0;
-   struct bHYPRE_HPCG__data * data;
-   data = bHYPRE_HPCG__get_data( self );
-
-   data -> maxiter = max_iterations;
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetMaxIterations) */
-}
-
-/*
- * (Optional) Set the {\it logging level}, specifying the degree
- * of additional informational data to be accumulated.  Does
- * nothing by default (level = 0).  Other levels (if any) are
- * implementation-specific.  Must be called before {\tt Setup}
- * and {\tt Apply}.
- * DEPRECATED   use SetIntParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_SetLogging"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_SetLogging(
-  /* in */ bHYPRE_HPCG self,
-  /* in */ int32_t level)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetLogging) */
-  /* Insert-Code-Here {bHYPRE.HPCG.SetLogging} (SetLogging method) */
-
-   /* The normal way to implement this function would be to call the
-    * corresponding HYPRE function to set the print level.  That can't
-    * always be done because the HYPRE struct may not exist.  The
-    * HYPRE struct may not exist because it can't be created until we
-    * know the vector type - and that is not known until Apply is
-    * first called.  So what we do is save the print level in a cache
-    * belonging to this Babel interface, and copy it into the HYPRE
-    * struct once Apply is called.  */
-   int ierr = 0;
-   struct bHYPRE_HPCG__data * data;
-   data = bHYPRE_HPCG__get_data( self );
-
-   data -> log_level = level;
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetLogging) */
-}
-
-/*
- * (Optional) Set the {\it print level}, specifying the degree
- * of informational data to be printed either to the screen or
- * to a file.  Does nothing by default (level=0).  Other levels
- * (if any) are implementation-specific.  Must be called before
- * {\tt Setup} and {\tt Apply}.
- * DEPRECATED   use SetIntParameter
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_SetPrintLevel"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_SetPrintLevel(
-  /* in */ bHYPRE_HPCG self,
-  /* in */ int32_t level)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetPrintLevel) */
-  /* Insert-Code-Here {bHYPRE.HPCG.SetPrintLevel} (SetPrintLevel method) */
-
-   /* The normal way to implement this function would be to call the
-    * corresponding HYPRE function to set the print level.  That can't
-    * always be done because the HYPRE struct may not exist.  The
-    * HYPRE struct may not exist because it can't be created until we
-    * know the vector type - and that is not known until Apply is
-    * first called.  So what we do is save the print level in a cache
-    * belonging to this Babel interface, and copy it into the HYPRE
-    * struct once Apply is called.  */
-   int ierr = 0;
-   struct bHYPRE_HPCG__data * data;
-   data = bHYPRE_HPCG__get_data( self );
-
-   data -> printlevel = level;
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetPrintLevel) */
-}
-
-/*
- * (Optional) Return the number of iterations taken.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_GetNumIterations"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_GetNumIterations(
-  /* in */ bHYPRE_HPCG self,
-  /* out */ int32_t* num_iterations)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.GetNumIterations) */
-  /* Insert-Code-Here {bHYPRE.HPCG.GetNumIterations} (GetNumIterations method) */
-
-   int ierr = 0;
-   HYPRE_Solver solver;
-   struct bHYPRE_HPCG__data * data;
-
-   data = bHYPRE_HPCG__get_data( self );
-   hypre_assert( data->solver != NULL );
-   solver = data->solver;
-
-   ierr += HYPRE_PCGGetNumIterations( solver, num_iterations );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.GetNumIterations) */
-}
-
-/*
- * (Optional) Return the norm of the relative residual.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_GetRelResidualNorm"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_GetRelResidualNorm(
-  /* in */ bHYPRE_HPCG self,
-  /* out */ double* norm)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.GetRelResidualNorm) */
-  /* Insert-Code-Here {bHYPRE.HPCG.GetRelResidualNorm} (GetRelResidualNorm method) */
-
-   int ierr = 0;
-   HYPRE_Solver solver;
-   struct bHYPRE_HPCG__data * data;
-
-   data = bHYPRE_HPCG__get_data( self );
-   hypre_assert( data->solver != NULL );
-   solver = data->solver;
-
-   ierr += HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.GetRelResidualNorm) */
-}
-
-/*
- * Set the preconditioner.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_SetPreconditioner"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_SetPreconditioner(
-  /* in */ bHYPRE_HPCG self,
-  /* in */ bHYPRE_Solver s)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetPreconditioner) */
-  /* Insert-Code-Here {bHYPRE.HPCG.SetPreconditioner} (SetPreconditioner method) */
-
-   /* PCG_Setup will not be called until _after_ this function is called,
-      but the new preconditioner's setup function should have been called
-      _before_ this point. */
-
-   int ierr = 0;
-   char * precond_name;
-   HYPRE_Solver * solverprecond;
-   struct bHYPRE_HPCG__data * dataself;
-   struct bHYPRE_BoomerAMG__data * AMG_dataprecond;
-   bHYPRE_BoomerAMG AMG_s;
-   struct bHYPRE_ParaSails__data * PS_dataprecond;
-   bHYPRE_ParaSails PS_s;
-   struct bHYPRE_StructSMG__data * SMG_dataprecond;
-   bHYPRE_StructSMG SMG_s;
-   struct bHYPRE_StructPFMG__data * PFMG_dataprecond;
-   bHYPRE_StructPFMG PFMG_s;
-   struct bHYPRE_IdentitySolver__data * Id_dataprecond;
-   bHYPRE_IdentitySolver Id_s;
-   HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
-
-   dataself = bHYPRE_HPCG__get_data( self );
-   dataself -> bprecond = s;
-
-   if ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG" ) )
-   {
-      precond_name = "BoomerAMG";
-      AMG_s = bHYPRE_BoomerAMG__cast
-         ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG") );
-      AMG_dataprecond = bHYPRE_BoomerAMG__get_data( AMG_s );
-      solverprecond = &AMG_dataprecond->solver;
-      hypre_assert( solverprecond != NULL );
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
-      bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
-      bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParaSails" ) )
-   {
-      precond_name = "ParaSails";
-      PS_s = bHYPRE_ParaSails__cast
-         ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParaSails") );
-      PS_dataprecond = bHYPRE_ParaSails__get_data( PS_s );
-      solverprecond = &PS_dataprecond->solver;
-      hypre_assert( solverprecond != NULL );
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup;
-      bHYPRE_ParaSails_deleteRef( PS_s ); /* extra reference from queryInt */
-      bHYPRE_ParaSails_deleteRef( PS_s ); /* extra reference from queryInt */
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParCSRDiagScale" ) )
-   {
-      precond_name = "ParCSRDiagScale";
-      bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
-      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
-      /* ... HYPRE diagonal scaling needs no solver object, but we
-       * must provide a HYPRE_Solver object.  It will be totally
-       * ignored. */
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup;
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructDiagScale" ) )
-   {
-      precond_name = "StructDiagScale";
-      bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
-      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
-      /* ... HYPRE diagonal scaling needs no solver object, but we
-       * must provide a HYPRE_Solver object.  It will be totally
-       * ignored. */
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup;
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.SStructDiagScale" ) )
-   {
-      precond_name = "SStructDiagScale";
-      bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
-      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
-      /* ... HYPRE diagonal scaling needs no solver object, but we
-       * must provide a HYPRE_Solver object.  It will be totally
-       * ignored. */
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup;
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructSMG" ) )
-   {
-      precond_name = "StructSMG";
-      SMG_s = bHYPRE_StructSMG__cast
-         ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructSMG") );
-      SMG_dataprecond = bHYPRE_StructSMG__get_data( SMG_s );
-      solverprecond = (HYPRE_Solver *) &SMG_dataprecond->solver;
-      hypre_assert( solverprecond != NULL );
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup;
-      bHYPRE_StructSMG_deleteRef( SMG_s ); /* extra reference from queryInt */
-      bHYPRE_StructSMG_deleteRef( SMG_s ); /* extra reference from queryInt */
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructPFMG" ) )
-   {
-      precond_name = "StructPFMG";
-      PFMG_s = bHYPRE_StructPFMG__cast
-         ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructPFMG") );
-      PFMG_dataprecond = bHYPRE_StructPFMG__get_data( PFMG_s );
-      solverprecond = (HYPRE_Solver *) &PFMG_dataprecond->solver;
-      hypre_assert( solverprecond != NULL );
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup;
-      bHYPRE_StructPFMG_deleteRef( PFMG_s ); /* extra reference from queryInt */
-      bHYPRE_StructPFMG_deleteRef( PFMG_s ); /* extra reference from queryInt */
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.IdentitySolver" ) )
-   {
-      /* s is an IdentitySolver, a dummy which just "solves" the identity matrix */
-      precond_name = "IdentitySolver";
-      bHYPRE_Solver_deleteRef( s ); /* extra ref from queryInt */
-      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
-      /* ... almost any garbage will do here, but we need something */
-      Id_s = bHYPRE_IdentitySolver__cast
-         ( bHYPRE_Solver_queryInt( s, "bHYPRE.IdentitySolver") );
-      bHYPRE_Solver_deleteRef( s ); /* extra ref from queryInt */
-      Id_dataprecond = bHYPRE_IdentitySolver__get_data( Id_s );
-
-      /* The right thing at this point is to check for vector type, then specify
-         the right hypre identity solver (_really_ the right thing is to use the
-         babel-level identity solver, but that requires PCG to be implemented at the
-         babel level). */
-
-      if ( strcmp(Id_dataprecond->vector_type,"ParVector")==0 )
-      {
-         precond = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentity;
-         precond_setup = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup;
-      }
-      else if ( strcmp(Id_dataprecond->vector_type,"StructVector")==0 )
-      {
-         precond = (HYPRE_PtrToSolverFcn) hypre_StructKrylovIdentity;
-         precond_setup = (HYPRE_PtrToSolverFcn) hypre_StructKrylovIdentitySetup;
-      }
-      else if ( strcmp(Id_dataprecond->vector_type,"SStructVector")==0 )
-      {
-         precond = (HYPRE_PtrToSolverFcn) hypre_SStructKrylovIdentity;
-         precond_setup = (HYPRE_PtrToSolverFcn) hypre_SStructKrylovIdentitySetup;
-      }
-      else
-      {
-         hypre_assert( "unrecognized vector type, can't set up PCG as CG\n"==0 );
-      }
-   }
-   /* put other preconditioner types here */
-   else
-   {
-      hypre_assert( "PCG_SetPreconditioner cannot recognize preconditioner"==0 );
-   }
-
-   /* We can't actually set the HYPRE preconditioner, because that
-    * requires knowing what the solver object is - but that requires
-    * knowing its data type but _that_ requires knowing the kind of
-    * matrix and vectors we'll need; not known until Apply is called.
-    * So save the information in the bHYPRE data structure, and stick
-    * it in HYPRE later... */
-   dataself->precond_name = precond_name;
-   dataself->precond = precond;
-   dataself->precond_setup = precond_setup;
-   dataself->solverprecond = solverprecond;
-   /* For an example call, see test/IJ_linear_solvers.c, line 1686.
-    * The four arguments are: self's (solver) data; and, for the
-    * preconditioner: solver function, setup function, data */
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetPreconditioner) */
-}
-
-/*
- * Method:  GetPreconditioner[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_GetPreconditioner"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_GetPreconditioner(
-  /* in */ bHYPRE_HPCG self,
-  /* out */ bHYPRE_Solver* s)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.GetPreconditioner) */
-  /* Insert-Code-Here {bHYPRE.HPCG.GetPreconditioner} (GetPreconditioner method) */
-
-   int ierr = 0;
-   struct bHYPRE_HPCG__data * dataself = bHYPRE_HPCG__get_data( self );
-   *s = dataself -> bprecond ;
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.GetPreconditioner) */
-}
-
-/*
- * Method:  Clone[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_HPCG_Clone"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_HPCG_Clone(
-  /* in */ bHYPRE_HPCG self,
-  /* out */ bHYPRE_PreconditionedSolver* x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.Clone) */
-  /* Insert-Code-Here {bHYPRE.HPCG.Clone} (Clone method) */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.Clone) */
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct bHYPRE_Solver__object* impl_bHYPRE_HPCG_fconnect_bHYPRE_Solver(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Solver__connect(url, _ex);
+struct bHYPRE_HPCG__object* impl_bHYPRE_HPCG_fconnect_bHYPRE_HPCG(const char* 
+  url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_HPCG__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_HPCG_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* 
-  obj) {
-  return bHYPRE_Solver__getURL(obj);
+struct bHYPRE_HPCG__object* impl_bHYPRE_HPCG_fcast_bHYPRE_HPCG(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_HPCG__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_HPCG_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_MPICommunicator__connect(url, _ex);
+  impl_bHYPRE_HPCG_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_HPCG_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj) {
-  return bHYPRE_MPICommunicator__getURL(obj);
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_HPCG_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
-struct bHYPRE_Operator__object* impl_bHYPRE_HPCG_fconnect_bHYPRE_Operator(char* 
-  url, sidl_BaseInterface *_ex) {
-  return bHYPRE_Operator__connect(url, _ex);
+struct bHYPRE_Operator__object* impl_bHYPRE_HPCG_fconnect_bHYPRE_Operator(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_HPCG_fgetURL_bHYPRE_Operator(struct bHYPRE_Operator__object* 
-  obj) {
-  return bHYPRE_Operator__getURL(obj);
-}
-struct bHYPRE_HPCG__object* impl_bHYPRE_HPCG_fconnect_bHYPRE_HPCG(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_HPCG__connect(url, _ex);
-}
-char * impl_bHYPRE_HPCG_fgetURL_bHYPRE_HPCG(struct bHYPRE_HPCG__object* obj) {
-  return bHYPRE_HPCG__getURL(obj);
-}
-struct sidl_ClassInfo__object* impl_bHYPRE_HPCG_fconnect_sidl_ClassInfo(char* 
-  url, sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_bHYPRE_HPCG_fgetURL_sidl_ClassInfo(struct sidl_ClassInfo__object* 
-  obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct bHYPRE_Vector__object* impl_bHYPRE_HPCG_fconnect_bHYPRE_Vector(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_Vector__connect(url, _ex);
-}
-char * impl_bHYPRE_HPCG_fgetURL_bHYPRE_Vector(struct bHYPRE_Vector__object* 
-  obj) {
-  return bHYPRE_Vector__getURL(obj);
-}
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_HPCG_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
-}
-char * impl_bHYPRE_HPCG_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
-}
-struct sidl_BaseClass__object* impl_bHYPRE_HPCG_fconnect_sidl_BaseClass(char* 
-  url, sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
-}
-char * impl_bHYPRE_HPCG_fgetURL_sidl_BaseClass(struct sidl_BaseClass__object* 
-  obj) {
-  return sidl_BaseClass__getURL(obj);
+struct bHYPRE_Operator__object* impl_bHYPRE_HPCG_fcast_bHYPRE_Operator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Operator__cast(bi, _ex);
 }
 struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_HPCG_fconnect_bHYPRE_PreconditionedSolver(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_PreconditionedSolver__connect(url, _ex);
+  impl_bHYPRE_HPCG_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_PreconditionedSolver__connectI(url, ar, _ex);
 }
-char * impl_bHYPRE_HPCG_fgetURL_bHYPRE_PreconditionedSolver(struct 
-  bHYPRE_PreconditionedSolver__object* obj) {
-  return bHYPRE_PreconditionedSolver__getURL(obj);
+struct bHYPRE_PreconditionedSolver__object* 
+  impl_bHYPRE_HPCG_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_PreconditionedSolver__cast(bi, _ex);
+}
+struct bHYPRE_Solver__object* impl_bHYPRE_HPCG_fconnect_bHYPRE_Solver(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Solver__connectI(url, ar, _ex);
+}
+struct bHYPRE_Solver__object* impl_bHYPRE_HPCG_fcast_bHYPRE_Solver(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Solver__cast(bi, _ex);
+}
+struct bHYPRE_Vector__object* impl_bHYPRE_HPCG_fconnect_bHYPRE_Vector(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connectI(url, ar, _ex);
+}
+struct bHYPRE_Vector__object* impl_bHYPRE_HPCG_fcast_bHYPRE_Vector(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Vector__cast(bi, _ex);
+}
+struct sidl_BaseClass__object* impl_bHYPRE_HPCG_fconnect_sidl_BaseClass(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
+}
+struct sidl_BaseClass__object* impl_bHYPRE_HPCG_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_HPCG_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_HPCG_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* impl_bHYPRE_HPCG_fconnect_sidl_ClassInfo(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* impl_bHYPRE_HPCG_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_HPCG_fconnect_sidl_RuntimeException(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_HPCG_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
 }

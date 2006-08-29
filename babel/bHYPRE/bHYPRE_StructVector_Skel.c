@@ -2,12 +2,11 @@
  * File:          bHYPRE_StructVector_Skel.c
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side glue code for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #include "bHYPRE_StructVector_IOR.h"
@@ -17,102 +16,114 @@
 extern
 void
 impl_bHYPRE_StructVector__load(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_bHYPRE_StructVector__ctor(
-  /* in */ bHYPRE_StructVector self);
+  /* in */ bHYPRE_StructVector self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_bHYPRE_StructVector__ctor2(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_bHYPRE_StructVector__dtor(
-  /* in */ bHYPRE_StructVector self);
+  /* in */ bHYPRE_StructVector self,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 bHYPRE_StructVector
 impl_bHYPRE_StructVector_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_StructGrid grid);
+  /* in */ bHYPRE_StructGrid grid,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructGrid(struct 
-  bHYPRE_StructGrid__object* obj);
-extern struct bHYPRE_StructVectorView__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVectorView(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVectorView(struct 
-  bHYPRE_StructVectorView__object* obj);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_Vector(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_Vector(struct 
-  bHYPRE_Vector__object* obj);
-extern struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_ProblemDefinition(struct 
-  bHYPRE_ProblemDefinition__object* obj);
-extern struct bHYPRE_StructVector__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVector(struct 
-  bHYPRE_StructVector__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructVector_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex);
 extern struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_MatrixVectorView(char* url,
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_MatrixVectorView(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_ProblemDefinition(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_StructGrid__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_StructGrid__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_StructGrid(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_StructVector__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_StructVector__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_StructVector(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_StructVectorView__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_StructVectorView__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_StructVectorView(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_MatrixVectorView(struct 
-  bHYPRE_MatrixVectorView__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_Vector(void* bi,
+  sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructVector_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
-extern
-int32_t
-impl_bHYPRE_StructVector_SetCommunicator(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_Initialize(
-  /* in */ bHYPRE_StructVector self);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_Assemble(
-  /* in */ bHYPRE_StructVector self);
-
+  impl_bHYPRE_StructVector_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_StructVector_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructVector_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructVector_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructVector_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_bHYPRE_StructVector_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_bHYPRE_StructVector_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
 extern
 int32_t
 impl_bHYPRE_StructVector_SetGrid(
   /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_StructGrid grid);
+  /* in */ bHYPRE_StructGrid grid,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_SetNumGhost(
   /* in */ bHYPRE_StructVector self,
   /* in rarray[dim2] */ int32_t* num_ghost,
-  /* in */ int32_t dim2);
+  /* in */ int32_t dim2,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
@@ -120,7 +131,8 @@ impl_bHYPRE_StructVector_SetValue(
   /* in */ bHYPRE_StructVector self,
   /* in rarray[dim] */ int32_t* grid_index,
   /* in */ int32_t dim,
-  /* in */ double value);
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
@@ -130,99 +142,142 @@ impl_bHYPRE_StructVector_SetBoxValues(
   /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetCommunicator(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_Initialize(
+  /* in */ bHYPRE_StructVector self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_Assemble(
+  /* in */ bHYPRE_StructVector self,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_Clear(
-  /* in */ bHYPRE_StructVector self);
+  /* in */ bHYPRE_StructVector self,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_Copy(
   /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_Vector x);
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_Clone(
   /* in */ bHYPRE_StructVector self,
-  /* out */ bHYPRE_Vector* x);
+  /* out */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_Scale(
   /* in */ bHYPRE_StructVector self,
-  /* in */ double a);
+  /* in */ double a,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_Dot(
   /* in */ bHYPRE_StructVector self,
   /* in */ bHYPRE_Vector x,
-  /* out */ double* d);
+  /* out */ double* d,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_Axpy(
   /* in */ bHYPRE_StructVector self,
   /* in */ double a,
-  /* in */ bHYPRE_Vector x);
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructGrid(struct 
-  bHYPRE_StructGrid__object* obj);
-extern struct bHYPRE_StructVectorView__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVectorView(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVectorView(struct 
-  bHYPRE_StructVectorView__object* obj);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_Vector(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_Vector(struct 
-  bHYPRE_Vector__object* obj);
-extern struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_ProblemDefinition(struct 
-  bHYPRE_ProblemDefinition__object* obj);
-extern struct bHYPRE_StructVector__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVector(struct 
-  bHYPRE_StructVector__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructVector_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex);
 extern struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_MatrixVectorView(char* url,
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_MatrixVectorView(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_ProblemDefinition(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_StructGrid__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_StructGrid__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_StructGrid(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_StructVector__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_StructVector__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_StructVector(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_StructVectorView__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_StructVectorView__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_StructVectorView(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_MatrixVectorView(struct 
-  bHYPRE_MatrixVectorView__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructVector_fcast_bHYPRE_Vector(void* bi,
+  sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructVector_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_bHYPRE_StructVector_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_StructVector_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructVector_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructVector_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructVector_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_bHYPRE_StructVector_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_bHYPRE_StructVector_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
 static int32_t
 skel_bHYPRE_StructVector_SetNumGhost(
   /* in */ bHYPRE_StructVector self,
-/* in rarray[dim2] */ struct sidl_int__array* num_ghost)
+  /* in rarray[dim2] */ struct sidl_int__array* num_ghost,
+/* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
   struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,
@@ -233,7 +288,8 @@ skel_bHYPRE_StructVector_SetNumGhost(
     impl_bHYPRE_StructVector_SetNumGhost(
       self,
       num_ghost_tmp,
-      dim2);
+      dim2,
+      _ex);
   return _return;
 }
 
@@ -241,7 +297,8 @@ static int32_t
 skel_bHYPRE_StructVector_SetValue(
   /* in */ bHYPRE_StructVector self,
   /* in rarray[dim] */ struct sidl_int__array* grid_index,
-/* in */ double value)
+  /* in */ double value,
+/* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
   struct sidl_int__array* grid_index_proxy = sidl_int__array_ensure(grid_index,
@@ -253,7 +310,8 @@ skel_bHYPRE_StructVector_SetValue(
       self,
       grid_index_tmp,
       dim,
-      value);
+      value,
+      _ex);
   return _return;
 }
 
@@ -262,7 +320,8 @@ skel_bHYPRE_StructVector_SetBoxValues(
   /* in */ bHYPRE_StructVector self,
   /* in rarray[dim] */ struct sidl_int__array* ilower,
   /* in rarray[dim] */ struct sidl_int__array* iupper,
-/* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in rarray[nvalues] */ struct sidl_double__array* values,
+/* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -283,7 +342,8 @@ skel_bHYPRE_StructVector_SetBoxValues(
       iupper_tmp,
       dim,
       values_tmp,
-      nvalues);
+      nvalues,
+      _ex);
   return _return;
 }
 
@@ -295,14 +355,15 @@ void
 bHYPRE_StructVector__set_epv(struct bHYPRE_StructVector__epv *epv)
 {
   epv->f__ctor = impl_bHYPRE_StructVector__ctor;
+  epv->f__ctor2 = impl_bHYPRE_StructVector__ctor2;
   epv->f__dtor = impl_bHYPRE_StructVector__dtor;
-  epv->f_SetCommunicator = impl_bHYPRE_StructVector_SetCommunicator;
-  epv->f_Initialize = impl_bHYPRE_StructVector_Initialize;
-  epv->f_Assemble = impl_bHYPRE_StructVector_Assemble;
   epv->f_SetGrid = impl_bHYPRE_StructVector_SetGrid;
   epv->f_SetNumGhost = skel_bHYPRE_StructVector_SetNumGhost;
   epv->f_SetValue = skel_bHYPRE_StructVector_SetValue;
   epv->f_SetBoxValues = skel_bHYPRE_StructVector_SetBoxValues;
+  epv->f_SetCommunicator = impl_bHYPRE_StructVector_SetCommunicator;
+  epv->f_Initialize = impl_bHYPRE_StructVector_Initialize;
+  epv->f_Assemble = impl_bHYPRE_StructVector_Assemble;
   epv->f_Clear = impl_bHYPRE_StructVector_Clear;
   epv->f_Copy = impl_bHYPRE_StructVector_Copy;
   epv->f_Clone = impl_bHYPRE_StructVector_Clone;
@@ -333,116 +394,142 @@ extern "C" {
 #endif
 
 void bHYPRE_StructVector__call_load(void) { 
-  impl_bHYPRE_StructVector__load();
+  sidl_BaseInterface _throwaway_exception = NULL;
+  impl_bHYPRE_StructVector__load(&_throwaway_exception);
 }
-struct bHYPRE_StructGrid__object* 
-  skel_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(url, _ex);
-}
-
-char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_StructGrid(struct 
-  bHYPRE_StructGrid__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructGrid(obj);
-}
-
-struct bHYPRE_StructVectorView__object* 
-  skel_bHYPRE_StructVector_fconnect_bHYPRE_StructVectorView(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVectorView(url, _ex);
-}
-
-char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_StructVectorView(struct 
-  bHYPRE_StructVectorView__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVectorView(obj);
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(url, ar, _ex);
 }
 
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  skel_bHYPRE_StructVector_fcast_bHYPRE_MPICommunicator(void* bi,
   sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(url, _ex);
-}
-
-char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_MPICommunicator(struct 
-  bHYPRE_MPICommunicator__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_bHYPRE_MPICommunicator(obj);
-}
-
-struct sidl_ClassInfo__object* 
-  skel_bHYPRE_StructVector_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(url, _ex);
-}
-
-char* skel_bHYPRE_StructVector_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_sidl_ClassInfo(obj);
-}
-
-struct bHYPRE_Vector__object* 
-  skel_bHYPRE_StructVector_fconnect_bHYPRE_Vector(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_bHYPRE_Vector(url, _ex);
-}
-
-char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_Vector(struct 
-  bHYPRE_Vector__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_bHYPRE_Vector(obj);
-}
-
-struct bHYPRE_ProblemDefinition__object* 
-  skel_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(url, _ex);
-}
-
-char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_ProblemDefinition(struct 
-  bHYPRE_ProblemDefinition__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_bHYPRE_ProblemDefinition(obj);
-}
-
-struct bHYPRE_StructVector__object* 
-  skel_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(url, _ex);
-}
-
-char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_StructVector(struct 
-  bHYPRE_StructVector__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVector(obj);
-}
-
-struct sidl_BaseInterface__object* 
-  skel_bHYPRE_StructVector_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_sidl_BaseInterface(url, _ex);
-}
-
-char* skel_bHYPRE_StructVector_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_sidl_BaseInterface(obj);
+  return impl_bHYPRE_StructVector_fcast_bHYPRE_MPICommunicator(bi, _ex);
 }
 
 struct bHYPRE_MatrixVectorView__object* 
-  skel_bHYPRE_StructVector_fconnect_bHYPRE_MatrixVectorView(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_bHYPRE_MatrixVectorView(url, _ex);
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_bHYPRE_MatrixVectorView(url, ar,
+    _ex);
 }
 
-char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_MatrixVectorView(struct 
-  bHYPRE_MatrixVectorView__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_bHYPRE_MatrixVectorView(obj);
+struct bHYPRE_MatrixVectorView__object* 
+  skel_bHYPRE_StructVector_fcast_bHYPRE_MatrixVectorView(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_bHYPRE_MatrixVectorView(bi, _ex);
+}
+
+struct bHYPRE_ProblemDefinition__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(url, ar,
+    _ex);
+}
+
+struct bHYPRE_ProblemDefinition__object* 
+  skel_bHYPRE_StructVector_fcast_bHYPRE_ProblemDefinition(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_bHYPRE_ProblemDefinition(bi, _ex);
+}
+
+struct bHYPRE_StructGrid__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(url, ar, _ex);
+}
+
+struct bHYPRE_StructGrid__object* 
+  skel_bHYPRE_StructVector_fcast_bHYPRE_StructGrid(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_bHYPRE_StructGrid(bi, _ex);
+}
+
+struct bHYPRE_StructVector__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(url, ar, _ex);
+}
+
+struct bHYPRE_StructVector__object* 
+  skel_bHYPRE_StructVector_fcast_bHYPRE_StructVector(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_bHYPRE_StructVector(bi, _ex);
+}
+
+struct bHYPRE_StructVectorView__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_StructVectorView(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVectorView(url, ar,
+    _ex);
+}
+
+struct bHYPRE_StructVectorView__object* 
+  skel_bHYPRE_StructVector_fcast_bHYPRE_StructVectorView(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_bHYPRE_StructVectorView(bi, _ex);
+}
+
+struct bHYPRE_Vector__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_bHYPRE_Vector(url, ar, _ex);
+}
+
+struct bHYPRE_Vector__object* 
+  skel_bHYPRE_StructVector_fcast_bHYPRE_Vector(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_bHYPRE_Vector(bi, _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_bHYPRE_StructVector_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_StructVector_fconnect_sidl_BaseClass(url, _ex);
+  skel_bHYPRE_StructVector_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
-char* skel_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) { 
-  return impl_bHYPRE_StructVector_fgetURL_sidl_BaseClass(obj);
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_StructVector_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_sidl_BaseClass(bi, _ex);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_StructVector_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_sidl_BaseInterface(url, ar, _ex);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_StructVector_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_sidl_BaseInterface(bi, _ex);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_StructVector_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(url, ar, _ex);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_StructVector_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_sidl_ClassInfo(bi, _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_bHYPRE_StructVector_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fconnect_sidl_RuntimeException(url, ar, _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_bHYPRE_StructVector_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_StructVector_fcast_sidl_RuntimeException(bi, _ex);
 }
 
 struct bHYPRE_StructVector__data*

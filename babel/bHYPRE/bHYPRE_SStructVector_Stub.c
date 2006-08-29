@@ -2,12 +2,11 @@
  * File:          bHYPRE_SStructVector_Stub.c
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #include "bHYPRE_SStructVector.h"
@@ -21,6 +20,7 @@
 #ifndef included_sidl_rmi_ConnectRegistry_h
 #include "sidl_rmi_ConnectRegistry.h"
 #endif
+#include "sidl_Exception.h"
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
@@ -34,6 +34,7 @@
 #include "sidl_Loader.h"
 #endif
 
+#define LANG_SPECIFIC_INIT()
 /*
  * connect_loaded is a boolean value showing if the IHConnect for this object has been loaded into the connectRegistry
  */
@@ -61,6 +62,8 @@ static const struct bHYPRE_SStructVector__external* _loadIOR(void)
   _externals = (struct 
     bHYPRE_SStructVector__external*)sidl_dynamicLoadIOR("bHYPRE.SStructVector",
     "bHYPRE_SStructVector__externals") ;
+  sidl_checkIORVersion("bHYPRE.SStructVector", _externals->d_ior_major_version,
+    _externals->d_ior_minor_version, 0, 10);
 #endif
   return _externals;
 }
@@ -88,12 +91,21 @@ static const struct bHYPRE_SStructVector__sepv *_sepv = NULL;
  */
 
 bHYPRE_SStructVector
-bHYPRE_SStructVector__create()
+bHYPRE_SStructVector__create(sidl_BaseInterface* _ex)
 {
-  return (*(_getExternals()->createObject))();
+  return (*(_getExternals()->createObject))(NULL,_ex);
 }
 
-static bHYPRE_SStructVector bHYPRE_SStructVector__remote(const char* url,
+/**
+ * Wraps up the private data struct pointer (struct bHYPRE_SStructVector__data) passed in rather than running the constructor.
+ */
+bHYPRE_SStructVector
+bHYPRE_SStructVector__wrapObj(void* data, sidl_BaseInterface* _ex)
+{
+  return (*(_getExternals()->createObject))(data,_ex);
+}
+
+static bHYPRE_SStructVector bHYPRE_SStructVector__remoteCreate(const char* url,
   sidl_BaseInterface *_ex);
 /*
  * RMI constructor function for the class.
@@ -102,14 +114,15 @@ static bHYPRE_SStructVector bHYPRE_SStructVector__remote(const char* url,
 bHYPRE_SStructVector
 bHYPRE_SStructVector__createRemote(const char* url, sidl_BaseInterface *_ex)
 {
-  return bHYPRE_SStructVector__remote(url, _ex);
+  return bHYPRE_SStructVector__remoteCreate(url, _ex);
 }
 
 static struct bHYPRE_SStructVector__object* 
-  bHYPRE_SStructVector__remoteConnect(const char* url, sidl_BaseInterface *_ex);
-static struct bHYPRE_SStructVector__object* 
-  bHYPRE_SStructVector__IHConnect(sidl_rmi_InstanceHandle instance,
+  bHYPRE_SStructVector__remoteConnect(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
+static struct bHYPRE_SStructVector__object* 
+  bHYPRE_SStructVector__IHConnect(struct sidl_rmi_InstanceHandle__object* 
+  instance, sidl_BaseInterface *_ex);
 /*
  * RMI connector function for the class.
  */
@@ -117,8 +130,45 @@ static struct bHYPRE_SStructVector__object*
 bHYPRE_SStructVector
 bHYPRE_SStructVector__connect(const char* url, sidl_BaseInterface *_ex)
 {
-  return bHYPRE_SStructVector__remoteConnect(url, _ex);
+  return bHYPRE_SStructVector__remoteConnect(url, TRUE, _ex);
 }
+
+/*
+ * Method:  Create[]
+ */
+
+bHYPRE_SStructVector
+bHYPRE_SStructVector_Create(
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  return (_getSEPV()->f_Create)(
+    mpi_comm,
+    grid,
+    _ex);
+}
+
+/*
+ * Method:  SetObjectType[]
+ */
+
+SIDL_C_INLINE_DEFN
+int32_t
+bHYPRE_SStructVector_SetObjectType(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ int32_t type,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  return (*self->d_epv->f_SetObjectType)(
+    self,
+    type,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * <p>
@@ -135,13 +185,20 @@ bHYPRE_SStructVector__connect(const char* url, sidl_BaseInterface *_ex)
  * </p>
  */
 
+SIDL_C_INLINE_DEFN
 void
 bHYPRE_SStructVector_addRef(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   (*self->d_epv->f_addRef)(
-    self);
+    self,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Decrease by one the intrinsic reference count in the underlying
@@ -151,48 +208,42 @@ bHYPRE_SStructVector_addRef(
  * reference to an object or interface.
  */
 
+SIDL_C_INLINE_DEFN
 void
 bHYPRE_SStructVector_deleteRef(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   (*self->d_epv->f_deleteRef)(
-    self);
+    self,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
 
+SIDL_C_INLINE_DEFN
 sidl_bool
 bHYPRE_SStructVector_isSame(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ sidl_BaseInterface iobj)
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_isSame)(
     self,
-    iobj);
+    iobj,
+    _ex);
 }
-
-/*
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-
-sidl_BaseInterface
-bHYPRE_SStructVector_queryInt(
-  /* in */ bHYPRE_SStructVector self,
-  /* in */ const char* name)
-{
-  return (*self->d_epv->f_queryInt)(
-    self,
-    name);
-}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Return whether this object is an instance of the specified type.
@@ -201,135 +252,62 @@ bHYPRE_SStructVector_queryInt(
  * the string type name would succeed.
  */
 
+SIDL_C_INLINE_DEFN
 sidl_bool
 bHYPRE_SStructVector_isType(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ const char* name)
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_isType)(
     self,
-    name);
+    name,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Return the meta-data about the class implementing this interface.
  */
 
+SIDL_C_INLINE_DEFN
 sidl_ClassInfo
 bHYPRE_SStructVector_getClassInfo(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_getClassInfo)(
-    self);
-}
-
-/*
- * Method:  Create[]
- */
-
-bHYPRE_SStructVector
-bHYPRE_SStructVector_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_SStructGrid grid)
-{
-  return (_getSEPV()->f_Create)(
-    mpi_comm,
-    grid);
-}
-
-/*
- * Method:  SetObjectType[]
- */
-
-int32_t
-bHYPRE_SStructVector_SetObjectType(
-  /* in */ bHYPRE_SStructVector self,
-  /* in */ int32_t type)
-{
-  return (*self->d_epv->f_SetObjectType)(
     self,
-    type);
+    _ex);
 }
-
-/*
- * Set the MPI Communicator.  DEPRECATED, Use Create()
- * 
- */
-
-int32_t
-bHYPRE_SStructVector_SetCommunicator(
-  /* in */ bHYPRE_SStructVector self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
-{
-  return (*self->d_epv->f_SetCommunicator)(
-    self,
-    mpi_comm);
-}
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-int32_t
-bHYPRE_SStructVector_Initialize(
-  /* in */ bHYPRE_SStructVector self)
-{
-  return (*self->d_epv->f_Initialize)(
-    self);
-}
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-int32_t
-bHYPRE_SStructVector_Assemble(
-  /* in */ bHYPRE_SStructVector self)
-{
-  return (*self->d_epv->f_Assemble)(
-    self);
-}
-
-/*
- *  A semi-structured matrix or vector contains a Struct or IJ matrix
- *  or vector.  GetObject returns it.
- * The returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-int32_t
-bHYPRE_SStructVector_GetObject(
-  /* in */ bHYPRE_SStructVector self,
-  /* out */ sidl_BaseInterface* A)
-{
-  return (*self->d_epv->f_GetObject)(
-    self,
-    A);
-}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Set the vector grid.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_SetGrid(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ bHYPRE_SStructGrid grid)
+  /* in */ bHYPRE_SStructGrid grid,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_SetGrid)(
     self,
-    grid);
+    grid,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Set vector coefficients index by index.
@@ -341,9 +319,9 @@ bHYPRE_SStructVector_SetGrid(
  * If the vector is complex, then {\tt value} consists of a pair
  * of doubles representing the real and imaginary parts of the
  * complex value.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_SetValues(
   /* in */ bHYPRE_SStructVector self,
@@ -351,7 +329,9 @@ bHYPRE_SStructVector_SetValues(
   /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
@@ -364,8 +344,12 @@ bHYPRE_SStructVector_SetValues(
     part,
     index_tmp,
     var,
-    value);
+    value,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Set vector coefficients a box at a time.
@@ -377,7 +361,6 @@ bHYPRE_SStructVector_SetValues(
  * If the vector is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 
 int32_t
@@ -389,7 +372,8 @@ bHYPRE_SStructVector_SetBoxValues(
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
   struct sidl_int__array ilower_real;
@@ -415,7 +399,8 @@ bHYPRE_SStructVector_SetBoxValues(
     ilower_tmp,
     iupper_tmp,
     var,
-    values_tmp);
+    values_tmp,
+    _ex);
 }
 
 /*
@@ -428,9 +413,9 @@ bHYPRE_SStructVector_SetBoxValues(
  * If the vector is complex, then {\tt value} consists of a pair
  * of doubles representing the real and imaginary parts of the
  * complex value.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_AddToValues(
   /* in */ bHYPRE_SStructVector self,
@@ -438,7 +423,9 @@ bHYPRE_SStructVector_AddToValues(
   /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
@@ -451,8 +438,12 @@ bHYPRE_SStructVector_AddToValues(
     part,
     index_tmp,
     var,
-    value);
+    value,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Set vector coefficients a box at a time.
@@ -464,7 +455,6 @@ bHYPRE_SStructVector_AddToValues(
  * If the vector is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 
 int32_t
@@ -476,7 +466,8 @@ bHYPRE_SStructVector_AddToBoxValues(
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
   struct sidl_int__array ilower_real;
@@ -502,21 +493,28 @@ bHYPRE_SStructVector_AddToBoxValues(
     ilower_tmp,
     iupper_tmp,
     var,
-    values_tmp);
+    values_tmp,
+    _ex);
 }
 
 /*
  * Gather vector data before calling {\tt GetValues}.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_Gather(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_Gather)(
-    self);
+    self,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Get vector coefficients index by index.
@@ -527,9 +525,9 @@ bHYPRE_SStructVector_Gather(
  * If the vector is complex, then {\tt value} consists of a pair
  * of doubles representing the real and imaginary parts of the
  * complex value.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_GetValues(
   /* in */ bHYPRE_SStructVector self,
@@ -537,7 +535,9 @@ bHYPRE_SStructVector_GetValues(
   /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* out */ double* value)
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
@@ -550,8 +550,12 @@ bHYPRE_SStructVector_GetValues(
     part,
     index_tmp,
     var,
-    value);
+    value,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Get vector coefficients a box at a time.
@@ -562,7 +566,6 @@ bHYPRE_SStructVector_GetValues(
  * If the vector is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 
 int32_t
@@ -574,7 +577,8 @@ bHYPRE_SStructVector_GetBoxValues(
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* inout rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues)
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
   struct sidl_int__array ilower_real;
@@ -600,67 +604,180 @@ bHYPRE_SStructVector_GetBoxValues(
     ilower_tmp,
     iupper_tmp,
     var,
-    &values_tmp);
+    &values_tmp,
+    _ex);
 }
 
 /*
  * Set the vector to be complex.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_SetComplex(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_SetComplex)(
-    self);
+    self,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Print the vector to file.  This is mainly for debugging
  * purposes.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_Print(
   /* in */ bHYPRE_SStructVector self,
   /* in */ const char* filename,
-  /* in */ int32_t all)
+  /* in */ int32_t all,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_Print)(
     self,
     filename,
-    all);
+    all,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+/*
+ * A semi-structured matrix or vector contains a Struct or IJ matrix
+ * or vector.  GetObject returns it.
+ * The returned type is a sidl.BaseInterface.
+ * A cast must be used on the returned object to convert it into a known type.
+ */
+
+SIDL_C_INLINE_DEFN
+int32_t
+bHYPRE_SStructVector_GetObject(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface* A,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  return (*self->d_epv->f_GetObject)(
+    self,
+    A,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+/*
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ */
+
+SIDL_C_INLINE_DEFN
+int32_t
+bHYPRE_SStructVector_SetCommunicator(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self,
+    mpi_comm,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ */
+
+SIDL_C_INLINE_DEFN
+int32_t
+bHYPRE_SStructVector_Initialize(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  return (*self->d_epv->f_Initialize)(
+    self,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ */
+
+SIDL_C_INLINE_DEFN
+int32_t
+bHYPRE_SStructVector_Assemble(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  return (*self->d_epv->f_Assemble)(
+    self,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Set {\tt self} to 0.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_Clear(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_Clear)(
-    self);
+    self,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Copy data from x into {\tt self}.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_Copy(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_Copy)(
     self,
-    x);
+    x,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Create an {\tt x} compatible with {\tt self}.
@@ -669,67 +786,91 @@ bHYPRE_SStructVector_Copy(
  * NOTE: When this method is used in an inherited class, the
  * cloned {\tt Vector} object can be cast to an object with the
  * inherited class type.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_Clone(
   /* in */ bHYPRE_SStructVector self,
-  /* out */ bHYPRE_Vector* x)
+  /* out */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_Clone)(
     self,
-    x);
+    x,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Scale {\tt self} by {\tt a}.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_Scale(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ double a)
+  /* in */ double a,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_Scale)(
     self,
-    a);
+    a,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_Dot(
   /* in */ bHYPRE_SStructVector self,
   /* in */ bHYPRE_Vector x,
-  /* out */ double* d)
+  /* out */ double* d,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_Dot)(
     self,
     x,
-    d);
+    d,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
+ * Add {\tt a}{\tt x} to {\tt self}.
  */
 
+SIDL_C_INLINE_DEFN
 int32_t
 bHYPRE_SStructVector_Axpy(
   /* in */ bHYPRE_SStructVector self,
   /* in */ double a,
-  /* in */ bHYPRE_Vector x)
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f_Axpy)(
     self,
     a,
-    x);
+    x,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
  * Cast method for interface and class type conversions.
@@ -737,22 +878,24 @@ bHYPRE_SStructVector_Axpy(
 
 bHYPRE_SStructVector
 bHYPRE_SStructVector__cast(
-  void* obj)
+  void* obj,
+  sidl_BaseInterface* _ex)
 {
   bHYPRE_SStructVector cast = NULL;
 
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.SStructVector",
-      (void*)bHYPRE_SStructVector__IHConnect);
     connect_loaded = 1;
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.SStructVector",
+      (void*)bHYPRE_SStructVector__IHConnect,_ex);SIDL_CHECK(*_ex);
   }
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
     cast = (bHYPRE_SStructVector) (*base->d_epv->f__cast)(
       base->d_object,
-      "bHYPRE.SStructVector");
+      "bHYPRE.SStructVector", _ex); SIDL_CHECK(*_ex);
   }
 
+  EXIT:
   return cast;
 }
 
@@ -763,45 +906,150 @@ bHYPRE_SStructVector__cast(
 void*
 bHYPRE_SStructVector__cast2(
   void* obj,
-  const char* type)
+  const char* type,
+  sidl_BaseInterface* _ex)
 {
   void* cast = NULL;
 
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
-    cast = (*base->d_epv->f__cast)(base->d_object, type);
+    cast = (*base->d_epv->f__cast)(base->d_object, type, _ex); SIDL_CHECK(*_ex);
   }
 
+  EXIT:
   return cast;
 }
 /*
  * Select and execute a method by name
  */
 
+SIDL_C_INLINE_DEFN
 void
 bHYPRE_SStructVector__exec(
   /* in */ bHYPRE_SStructVector self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs)
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   (*self->d_epv->f__exec)(
-  self,
-  methodName,
-  inArgs,
-  outArgs);
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
 }
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
 
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */
 
+SIDL_C_INLINE_DEFN
 char*
 bHYPRE_SStructVector__getURL(
-  /* in */ bHYPRE_SStructVector self)
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
 {
   return (*self->d_epv->f__getURL)(
-  self);
+    self,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+
+/*
+ * On a remote object, addrefs the remote instance.
+ */
+
+SIDL_C_INLINE_DEFN
+void
+bHYPRE_SStructVector__raddRef(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+
+/*
+ * Method to enable/disable static hooks execution.
+ */
+
+void
+bHYPRE_SStructVector__set_hooks_static(
+  int32_t on,
+  struct sidl_BaseInterface__object **_ex)
+{
+  (_getSEPV()->f__set_hooks_static)(
+  on, _ex);
+  _resetSEPV();
+}
+
+/*
+ * Method to set whether or not method hooks should be invoked.
+ */
+
+SIDL_C_INLINE_DEFN
+void
+bHYPRE_SStructVector__set_hooks(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ sidl_bool on,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  (*self->d_epv->f__set_hooks)(
+    self,
+    on,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+/*
+ * TRUE if this object is remote, false if local
+ */
+
+SIDL_C_INLINE_DEFN
+sidl_bool
+bHYPRE_SStructVector__isRemote(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+
+/*
+ * TRUE if this object is remote, false if local
+ */
+
+sidl_bool
+bHYPRE_SStructVector__isLocal(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  return !bHYPRE_SStructVector__isRemote(self,_ex);
 }
 
 struct bHYPRE_SStructVector__array*
@@ -1195,9 +1443,31 @@ bHYPRE_SStructVector__array_ensure(
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_rmi_ProtocolFactory_h
 #include "sidl_rmi_ProtocolFactory.h"
+#endif
+#ifndef included_sidl_rmi_InstanceRegistry_h
+#include "sidl_rmi_InstanceRegistry.h"
+#endif
+#ifndef included_sidl_rmi_InstanceHandle_h
+#include "sidl_rmi_InstanceHandle.h"
+#endif
+#ifndef included_sidl_rmi_Invocation_h
 #include "sidl_rmi_Invocation.h"
+#endif
+#ifndef included_sidl_rmi_Response_h
 #include "sidl_rmi_Response.h"
+#endif
+#ifndef included_sidl_rmi_ServerRegistry_h
+#include "sidl_rmi_ServerRegistry.h"
+#endif
+#ifndef included_sidl_rmi_ConnectRegistry_h
+#include "sidl_rmi_ConnectRegistry.h"
+#endif
+#ifndef included_sidl_io_Serializable_h
+#include "sidl_io_Serializable.h"
+#endif
+#include "sidl_Exception.h"
 
 #ifndef NULL
 #define NULL 0
@@ -1217,7 +1487,7 @@ static struct sidl_recursive_mutex_t bHYPRE_SStructVector__mutex= SIDL_RECURSIVE
 
 /* Static variables to hold version of IOR */
 static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 9;
+static const int32_t s_IOR_MINOR_VERSION = 10;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -1239,894 +1509,1527 @@ static struct sidl_BaseClass__epv  s_rem_epv__sidl_baseclass;
 
 static struct sidl_BaseInterface__epv  s_rem_epv__sidl_baseinterface;
 
+
 /* REMOTE CAST: dynamic type casting for remote objects. */
 static void* remote_bHYPRE_SStructVector__cast(
-struct bHYPRE_SStructVector__object* self,
-const char* name)
+  struct bHYPRE_SStructVector__object* self,
+  const char* name, sidl_BaseInterface* _ex)
 {
+  int
+    cmp0,
+    cmp1,
+    cmp2,
+    cmp3;
   void* cast = NULL;
-
-  struct bHYPRE_SStructVector__object* s0;
-  struct sidl_BaseClass__object* s1;
-   s0 =                               self;
-   s1 =                               &s0->d_sidl_baseclass;
-
-  if (!strcmp(name, "bHYPRE.SStructVector")) {
-    cast = (void*) s0;
-  } else if (!strcmp(name, "bHYPRE.MatrixVectorView")) {
-    cast = (void*) &s0->d_bhypre_matrixvectorview;
-  } else if (!strcmp(name, "bHYPRE.ProblemDefinition")) {
-    cast = (void*) &s0->d_bhypre_problemdefinition;
-  } else if (!strcmp(name, "bHYPRE.SStructMatrixVectorView")) {
-    cast = (void*) &s0->d_bhypre_sstructmatrixvectorview;
-  } else if (!strcmp(name, "bHYPRE.SStructVectorView")) {
-    cast = (void*) &s0->d_bhypre_sstructvectorview;
-  } else if (!strcmp(name, "bHYPRE.Vector")) {
-    cast = (void*) &s0->d_bhypre_vector;
-  } else if (!strcmp(name, "sidl.BaseClass")) {
-    cast = (void*) s1;
-  } else if (!strcmp(name, "sidl.BaseInterface")) {
-    cast = (void*) &s1->d_sidl_baseinterface;
+  *_ex = NULL; /* default to no exception */
+  cmp0 = strcmp(name, "bHYPRE.SStructVectorView");
+  if (!cmp0) {
+    (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+    cast = &((*self).d_bhypre_sstructvectorview);
+    return cast;
   }
-  else if(bHYPRE_SStructVector_isType(self, name)) {
-    void* (*func)(sidl_rmi_InstanceHandle) = 
-      (void* (*)(sidl_rmi_InstanceHandle)) 
-      sidl_rmi_ConnectRegistry_getConnect(name);
-    cast =  (*func)((sidl_rmi_InstanceHandle)self->d_data);
+  else if (cmp0 < 0) {
+    cmp1 = strcmp(name, "bHYPRE.SStructMatrixVectorView");
+    if (!cmp1) {
+      (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+      cast = &((*self).d_bhypre_sstructmatrixvectorview);
+      return cast;
+    }
+    else if (cmp1 < 0) {
+      cmp2 = strcmp(name, "bHYPRE.ProblemDefinition");
+      if (!cmp2) {
+        (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+        cast = &((*self).d_bhypre_problemdefinition);
+        return cast;
+      }
+      else if (cmp2 < 0) {
+        cmp3 = strcmp(name, "bHYPRE.MatrixVectorView");
+        if (!cmp3) {
+          (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+          cast = &((*self).d_bhypre_matrixvectorview);
+          return cast;
+        }
+      }
+    }
+    else if (cmp1 > 0) {
+      cmp2 = strcmp(name, "bHYPRE.SStructVector");
+      if (!cmp2) {
+        (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+        cast = self;
+        return cast;
+      }
+    }
+  }
+  else if (cmp0 > 0) {
+    cmp1 = strcmp(name, "sidl.BaseClass");
+    if (!cmp1) {
+      (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+      cast = self;
+      return cast;
+    }
+    else if (cmp1 < 0) {
+      cmp2 = strcmp(name, "bHYPRE.Vector");
+      if (!cmp2) {
+        (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+        cast = &((*self).d_bhypre_vector);
+        return cast;
+      }
+    }
+    else if (cmp1 > 0) {
+      cmp2 = strcmp(name, "sidl.BaseInterface");
+      if (!cmp2) {
+        (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+        cast = &((*self).d_sidl_baseclass.d_sidl_baseinterface);
+        return cast;
+      }
+    }
+  }
+  if ((*self->d_epv->f_isType)(self,name, _ex)) {
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*,
+      struct sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*,
+        struct sidl_BaseInterface__object**)) 
+      sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
+    cast =  (*func)(((struct bHYPRE_SStructVector__remote*)self->d_data)->d_ih,
+      _ex);
   }
 
   return cast;
+  EXIT:
+  return NULL;
 }
 
 /* REMOTE DELETE: call the remote destructor for the object. */
 static void remote_bHYPRE_SStructVector__delete(
-  struct bHYPRE_SStructVector__object* self)
+  struct bHYPRE_SStructVector__object* self,
+  sidl_BaseInterface* _ex)
 {
+  *_ex = NULL;
   free((void*) self);
 }
 
 /* REMOTE GETURL: call the getURL function for the object. */
 static char* remote_bHYPRE_SStructVector__getURL(
-  struct bHYPRE_SStructVector__object* self)
+  struct bHYPRE_SStructVector__object* self, sidl_BaseInterface* _ex)
 {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
+  struct sidl_rmi_InstanceHandle__object *conn = ((struct 
+    bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+  *_ex = NULL;
   if(conn != NULL) {
-    return sidl_rmi_InstanceHandle_getURL(conn, &_ex);
+    return sidl_rmi_InstanceHandle_getObjectURL(conn, _ex);
   }
   return NULL;
 }
 
+/* REMOTE ADDREF: For internal babel use only! Remote addRef. */
+static void remote_bHYPRE_SStructVector__raddRef(
+  struct bHYPRE_SStructVector__object* self,sidl_BaseInterface* _ex)
+{
+  sidl_BaseException netex = NULL;
+  /* initialize a new invocation */
+  sidl_BaseInterface _throwaway = NULL;
+  struct sidl_rmi_InstanceHandle__object *_conn = ((struct 
+    bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+  sidl_rmi_Response _rsvp = NULL;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "addRef", _ex ); SIDL_CHECK(*_ex);
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
+  /* Check for exceptions */
+  netex = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);
+  if(netex != NULL) {
+    sidl_BaseInterface throwaway_exception = NULL;
+    *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(netex,
+      &throwaway_exception);
+    return;
+  }
+
+  /* cleanup and return */
+  EXIT:
+  if(_inv) { sidl_rmi_Invocation_deleteRef(_inv,&_throwaway); }
+  if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp,&_throwaway); }
+  return;
+}
+
+/* REMOTE ISREMOTE: returns true if this object is Remote (it is). */
+static sidl_bool
+remote_bHYPRE_SStructVector__isRemote(
+    struct bHYPRE_SStructVector__object* self, 
+    sidl_BaseInterface *_ex) {
+  *_ex = NULL;
+  return TRUE;
+}
+
+/* REMOTE METHOD STUB:_set_hooks */
+static void
+remote_bHYPRE_SStructVector__set_hooks(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* in */ sidl_bool on,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "_set_hooks", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packBool( _inv, "on", on, _ex);SIDL_CHECK(*_ex);
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector._set_hooks.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return;
+  }
+}
+
 /* REMOTE EXEC: call the exec function for the object. */
 static void remote_bHYPRE_SStructVector__exec(
-  struct bHYPRE_SStructVector__object* self,
-  const char* methodName,
-  sidl_io_Deserializer inArgs,
-  sidl_io_Serializer outArgs)
+  struct bHYPRE_SStructVector__object* self,const char* methodName,
+  sidl_rmi_Call inArgs,
+  sidl_rmi_Return outArgs,
+  sidl_BaseInterface* _ex)
 {
-}
-
-/* REMOTE METHOD STUB:addRef */
-static void
-remote_bHYPRE_SStructVector_addRef(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */)
-{
-  /* FIXME  need to think through all of these special cases */
-}
-
-/* REMOTE METHOD STUB:deleteRef */
-static void
-remote_bHYPRE_SStructVector_deleteRef(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "deleteRef", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-
-  /* pack in and inout arguments */
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-
-  /* unpack out and inout arguments */
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-}
-
-/* REMOTE METHOD STUB:isSame */
-static sidl_bool
-remote_bHYPRE_SStructVector_isSame(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* in */ struct sidl_BaseInterface__object* iobj)
-{
-  /* FIXME  need to think through all of these special cases */
-  return 0;
-}
-
-/* REMOTE METHOD STUB:queryInt */
-static struct sidl_BaseInterface__object*
-remote_bHYPRE_SStructVector_queryInt(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* in */ const char* name)
-{
-  /* FIXME  need to think through all of these special cases */
-  return 0;
-}
-
-/* REMOTE METHOD STUB:isType */
-static sidl_bool
-remote_bHYPRE_SStructVector_isType(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* in */ const char* name)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "isType", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  sidl_bool _retval;
-
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "name", name, _ex2);
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
-/* REMOTE METHOD STUB:getClassInfo */
-static struct sidl_ClassInfo__object*
-remote_bHYPRE_SStructVector_getClassInfo(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */)
-{
-  /* FIXME  need to think through all of these special cases */
-  return 0;
+  *_ex = NULL;
 }
 
 /* REMOTE METHOD STUB:SetObjectType */
 static int32_t
 remote_bHYPRE_SStructVector_SetObjectType(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* in */ int32_t type)
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* in */ int32_t type,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "SetObjectType", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "SetObjectType", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "type", type, _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packInt( _inv, "type", type, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.SetObjectType.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
-/* REMOTE METHOD STUB:SetCommunicator */
-static int32_t
-remote_bHYPRE_SStructVector_SetCommunicator(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm)
+/* REMOTE METHOD STUB:addRef */
+static void
+remote_bHYPRE_SStructVector_addRef(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "SetCommunicator", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "mpi_comm",
-    bHYPRE_MPICommunicator__getURL(mpi_comm), _ex2);
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    struct bHYPRE_SStructVector__remote* r_obj = (struct 
+      bHYPRE_SStructVector__remote*)self->d_data;
+    LOCK_STATIC_GLOBALS;
+    r_obj->d_refcount++;
+    UNLOCK_STATIC_GLOBALS;
+  }
 }
 
-/* REMOTE METHOD STUB:Initialize */
-static int32_t
-remote_bHYPRE_SStructVector_Initialize(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */)
+/* REMOTE METHOD STUB:deleteRef */
+static void
+remote_bHYPRE_SStructVector_deleteRef(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Initialize", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    struct bHYPRE_SStructVector__remote* r_obj = (struct 
+      bHYPRE_SStructVector__remote*)self->d_data;
+    LOCK_STATIC_GLOBALS;
+    r_obj->d_refcount--;
+    if(r_obj->d_refcount == 0) {
+      sidl_rmi_InstanceHandle_deleteRef(r_obj->d_ih, _ex);
+      free(r_obj);
+      free(self);
+    }
+    UNLOCK_STATIC_GLOBALS;
+  }
 }
 
-/* REMOTE METHOD STUB:Assemble */
-static int32_t
-remote_bHYPRE_SStructVector_Assemble(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */)
+/* REMOTE METHOD STUB:isSame */
+static sidl_bool
+remote_bHYPRE_SStructVector_isSame(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* in */ struct sidl_BaseInterface__object* iobj,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Assemble", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    sidl_bool _retval = FALSE;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "isSame", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
+    /* pack in and inout arguments */
+    if(iobj){
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,
+        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(*_ex);
+      free((void*)_url);
+    } else {
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(*_ex);
+    }
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.isSame.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
-/* REMOTE METHOD STUB:GetObject */
-static int32_t
-remote_bHYPRE_SStructVector_GetObject(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* out */ struct sidl_BaseInterface__object** A)
+/* REMOTE METHOD STUB:isType */
+static sidl_bool
+remote_bHYPRE_SStructVector_isType(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* in */ const char* name,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "GetObject", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  char* A_str= NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    sidl_bool _retval = FALSE;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "isType", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packString( _inv, "name", name, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.isType.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
-  sidl_BaseInterface__connect(A_str, _ex2);
+    /* extract return value */
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:getClassInfo */
+static struct sidl_ClassInfo__object*
+remote_bHYPRE_SStructVector_getClassInfo(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    char*_retval_str = NULL;
+    struct sidl_ClassInfo__object* _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "getClassInfo", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.getClassInfo.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:SetGrid */
 static int32_t
 remote_bHYPRE_SStructVector_SetGrid(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* in */ struct bHYPRE_SStructGrid__object* grid)
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* in */ struct bHYPRE_SStructGrid__object* grid,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "SetGrid", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "SetGrid", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "grid",
-    bHYPRE_SStructGrid__getURL(grid), _ex2);
+    /* pack in and inout arguments */
+    if(grid){
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)grid,
+        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "grid", _url, _ex);SIDL_CHECK(*_ex);
+      free((void*)_url);
+    } else {
+      sidl_rmi_Invocation_packString( _inv, "grid", NULL, _ex);SIDL_CHECK(*_ex);
+    }
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.SetGrid.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:SetValues */
 static int32_t
 remote_bHYPRE_SStructVector_SetValues(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_SStructVector__object* self ,
   /* in */ int32_t part,
   /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "SetValues", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "SetValues", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
-  sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packInt( _inv, "part", part, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packIntArray( _inv, "index", index,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "var", var, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.SetValues.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:SetBoxValues */
 static int32_t
 remote_bHYPRE_SStructVector_SetBoxValues(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_SStructVector__object* self ,
   /* in */ int32_t part,
   /* in rarray[dim] */ struct sidl_int__array* ilower,
   /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in rarray[nvalues] */ struct sidl_double__array* values,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "SetBoxValues", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "SetBoxValues", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packInt( _inv, "part", part, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packIntArray( _inv, "ilower", ilower,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packIntArray( _inv, "iupper", iupper,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "var", var, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packDoubleArray( _inv, "values", values,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.SetBoxValues.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:AddToValues */
 static int32_t
 remote_bHYPRE_SStructVector_AddToValues(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_SStructVector__object* self ,
   /* in */ int32_t part,
   /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ double value)
+  /* in */ double value,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "AddToValues", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "AddToValues", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
-  sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packInt( _inv, "part", part, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packIntArray( _inv, "index", index,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "var", var, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.AddToValues.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:AddToBoxValues */
 static int32_t
 remote_bHYPRE_SStructVector_AddToBoxValues(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_SStructVector__object* self ,
   /* in */ int32_t part,
   /* in rarray[dim] */ struct sidl_int__array* ilower,
   /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in rarray[nvalues] */ struct sidl_double__array* values,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "AddToBoxValues", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "AddToBoxValues", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packInt( _inv, "part", part, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packIntArray( _inv, "ilower", ilower,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packIntArray( _inv, "iupper", iupper,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "var", var, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packDoubleArray( _inv, "values", values,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.AddToBoxValues.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:Gather */
 static int32_t
 remote_bHYPRE_SStructVector_Gather(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */)
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Gather", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Gather", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
+    /* pack in and inout arguments */
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Gather.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:GetValues */
 static int32_t
 remote_bHYPRE_SStructVector_GetValues(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_SStructVector__object* self ,
   /* in */ int32_t part,
   /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* out */ double* value)
+  /* out */ double* value,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "GetValues", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "GetValues", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packInt( _inv, "part", part, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packIntArray( _inv, "index", index,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "var", var, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.GetValues.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackDouble( _rsvp, "value", value, _ex2);
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+    sidl_rmi_Response_unpackDouble( _rsvp, "value", value,
+      _ex);SIDL_CHECK(*_ex);
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:GetBoxValues */
 static int32_t
 remote_bHYPRE_SStructVector_GetBoxValues(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_SStructVector__object* self ,
   /* in */ int32_t part,
   /* in rarray[dim] */ struct sidl_int__array* ilower,
   /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* inout rarray[nvalues] */ struct sidl_double__array** values)
+  /* inout rarray[nvalues] */ struct sidl_double__array** values,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "GetBoxValues", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "GetBoxValues", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packInt( _inv, "part", part, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packIntArray( _inv, "ilower", ilower,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packIntArray( _inv, "iupper", iupper,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "var", var, _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packDoubleArray( _inv, "values", *values,
+      sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.GetBoxValues.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+    sidl_rmi_Response_unpackDoubleArray( _rsvp, "values", values,
+      sidl_column_major_order,1,TRUE, _ex);SIDL_CHECK(*_ex);
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:SetComplex */
 static int32_t
 remote_bHYPRE_SStructVector_SetComplex(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */)
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "SetComplex", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "SetComplex", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
+    /* pack in and inout arguments */
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.SetComplex.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:Print */
 static int32_t
 remote_bHYPRE_SStructVector_Print(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_SStructVector__object* self ,
   /* in */ const char* filename,
-  /* in */ int32_t all)
+  /* in */ int32_t all,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Print", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Print", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "filename", filename, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "all", all, _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packString( _inv, "filename", filename,
+      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "all", all, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Print.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:GetObject */
+static int32_t
+remote_bHYPRE_SStructVector_GetObject(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object** A,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    char* A_str= NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "GetObject", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.GetObject.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+    sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex);SIDL_CHECK(*_ex);
+    *A = sidl_BaseInterface__connectI(A_str, FALSE, _ex);SIDL_CHECK(*_ex);
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:SetCommunicator */
+static int32_t
+remote_bHYPRE_SStructVector_SetCommunicator(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "SetCommunicator", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+    if(mpi_comm){
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)mpi_comm,
+        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "mpi_comm", _url,
+        _ex);SIDL_CHECK(*_ex);
+      free((void*)_url);
+    } else {
+      sidl_rmi_Invocation_packString( _inv, "mpi_comm", NULL,
+        _ex);SIDL_CHECK(*_ex);
+    }
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.SetCommunicator.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:Initialize */
+static int32_t
+remote_bHYPRE_SStructVector_Initialize(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Initialize", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Initialize.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:Assemble */
+static int32_t
+remote_bHYPRE_SStructVector_Assemble(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Assemble", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Assemble.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:Clear */
 static int32_t
 remote_bHYPRE_SStructVector_Clear(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */)
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Clear", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Clear", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
+    /* pack in and inout arguments */
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Clear.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:Copy */
 static int32_t
 remote_bHYPRE_SStructVector_Copy(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* in */ struct bHYPRE_Vector__object* x)
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* in */ struct bHYPRE_Vector__object* x,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Copy", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Copy", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
+    /* pack in and inout arguments */
+    if(x){
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)x,
+        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "x", _url, _ex);SIDL_CHECK(*_ex);
+      free((void*)_url);
+    } else {
+      sidl_rmi_Invocation_packString( _inv, "x", NULL, _ex);SIDL_CHECK(*_ex);
+    }
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Copy.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:Clone */
 static int32_t
 remote_bHYPRE_SStructVector_Clone(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* out */ struct bHYPRE_Vector__object** x)
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct bHYPRE_Vector__object** x,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Clone", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  char* x_str= NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    char* x_str= NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Clone", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
+    /* pack in and inout arguments */
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Clone.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex2);
-  bHYPRE_Vector__connect(x_str, _ex2);
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+    sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex);SIDL_CHECK(*_ex);
+    *x = bHYPRE_Vector__connectI(x_str, FALSE, _ex);SIDL_CHECK(*_ex);
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:Scale */
 static int32_t
 remote_bHYPRE_SStructVector_Scale(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* in */ double a)
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* in */ double a,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Scale", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Scale", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex);SIDL_CHECK(*_ex);
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Scale.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:Dot */
 static int32_t
 remote_bHYPRE_SStructVector_Dot(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_SStructVector__object* self ,
   /* in */ struct bHYPRE_Vector__object* x,
-  /* out */ double* d)
+  /* out */ double* d,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Dot", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Dot", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
+    /* pack in and inout arguments */
+    if(x){
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)x,
+        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "x", _url, _ex);SIDL_CHECK(*_ex);
+      free((void*)_url);
+    } else {
+      sidl_rmi_Invocation_packString( _inv, "x", NULL, _ex);SIDL_CHECK(*_ex);
+    }
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Dot.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackDouble( _rsvp, "d", d, _ex2);
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+    sidl_rmi_Response_unpackDouble( _rsvp, "d", d, _ex);SIDL_CHECK(*_ex);
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE METHOD STUB:Axpy */
 static int32_t
 remote_bHYPRE_SStructVector_Axpy(
-  /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_SStructVector__object* self ,
   /* in */ double a,
-  /* in */ struct bHYPRE_Vector__object* x)
+  /* in */ struct bHYPRE_Vector__object* x,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
 {
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Axpy", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    int32_t _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Axpy", _ex ); SIDL_CHECK(*_ex);
 
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex2);
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex);SIDL_CHECK(*_ex);
+    if(x){
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)x,
+        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "x", _url, _ex);SIDL_CHECK(*_ex);
+      free((void*)_url);
+    } else {
+      sidl_rmi_Invocation_packString( _inv, "x", NULL, _ex);SIDL_CHECK(*_ex);
+    }
 
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
 
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Axpy.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
 
-  /* unpack out and inout arguments */
+    /* extract return value */
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
+      _ex);SIDL_CHECK(*_ex);
 
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
 }
 
 /* REMOTE EPV: create remote entry point vectors (EPVs). */
@@ -2152,19 +3055,18 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   epv->f__delete              = remote_bHYPRE_SStructVector__delete;
   epv->f__exec                = remote_bHYPRE_SStructVector__exec;
   epv->f__getURL              = remote_bHYPRE_SStructVector__getURL;
+  epv->f__raddRef             = remote_bHYPRE_SStructVector__raddRef;
+  epv->f__isRemote            = remote_bHYPRE_SStructVector__isRemote;
+  epv->f__set_hooks           = remote_bHYPRE_SStructVector__set_hooks;
   epv->f__ctor                = NULL;
+  epv->f__ctor2               = NULL;
   epv->f__dtor                = NULL;
+  epv->f_SetObjectType        = remote_bHYPRE_SStructVector_SetObjectType;
   epv->f_addRef               = remote_bHYPRE_SStructVector_addRef;
   epv->f_deleteRef            = remote_bHYPRE_SStructVector_deleteRef;
   epv->f_isSame               = remote_bHYPRE_SStructVector_isSame;
-  epv->f_queryInt             = remote_bHYPRE_SStructVector_queryInt;
   epv->f_isType               = remote_bHYPRE_SStructVector_isType;
   epv->f_getClassInfo         = remote_bHYPRE_SStructVector_getClassInfo;
-  epv->f_SetObjectType        = remote_bHYPRE_SStructVector_SetObjectType;
-  epv->f_SetCommunicator      = remote_bHYPRE_SStructVector_SetCommunicator;
-  epv->f_Initialize           = remote_bHYPRE_SStructVector_Initialize;
-  epv->f_Assemble             = remote_bHYPRE_SStructVector_Assemble;
-  epv->f_GetObject            = remote_bHYPRE_SStructVector_GetObject;
   epv->f_SetGrid              = remote_bHYPRE_SStructVector_SetGrid;
   epv->f_SetValues            = remote_bHYPRE_SStructVector_SetValues;
   epv->f_SetBoxValues         = remote_bHYPRE_SStructVector_SetBoxValues;
@@ -2175,6 +3077,10 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   epv->f_GetBoxValues         = remote_bHYPRE_SStructVector_GetBoxValues;
   epv->f_SetComplex           = remote_bHYPRE_SStructVector_SetComplex;
   epv->f_Print                = remote_bHYPRE_SStructVector_Print;
+  epv->f_GetObject            = remote_bHYPRE_SStructVector_GetObject;
+  epv->f_SetCommunicator      = remote_bHYPRE_SStructVector_SetCommunicator;
+  epv->f_Initialize           = remote_bHYPRE_SStructVector_Initialize;
+  epv->f_Assemble             = remote_bHYPRE_SStructVector_Assemble;
   epv->f_Clear                = remote_bHYPRE_SStructVector_Clear;
   epv->f_Copy                 = remote_bHYPRE_SStructVector_Copy;
   epv->f_Clone                = remote_bHYPRE_SStructVector_Clone;
@@ -2182,186 +3088,286 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   epv->f_Dot                  = remote_bHYPRE_SStructVector_Dot;
   epv->f_Axpy                 = remote_bHYPRE_SStructVector_Axpy;
 
-  e0->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e0->f__delete         = (void (*)(void*)) epv->f__delete;
+  e0->f__cast           = (void* (*)(void*,const char*,
+    sidl_BaseInterface*)) epv->f__cast;
+  e0->f__delete         = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
+  e0->f__getURL         = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
+  e0->f__raddRef        = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
+  e0->f__isRemote       = (sidl_bool (*)(void*,
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e0->f__set_hooks      = (void (*)(void*,int32_t,
+    sidl_BaseInterface*)) epv->f__set_hooks;
   e0->f__exec           = (void (*)(void*,const char*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_io_Serializer__object*)) epv->f__exec;
-  e0->f_addRef          = (void (*)(void*)) epv->f_addRef;
-  e0->f_deleteRef       = (void (*)(void*)) epv->f_deleteRef;
-  e0->f_isSame          = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e0->f_queryInt        = (struct sidl_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInt;
-  e0->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e0->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
-    epv->f_getClassInfo;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
+    struct sidl_BaseInterface__object **)) epv->f__exec;
   e0->f_SetCommunicator = (int32_t (*)(void*,
-    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
-  e0->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
-  e0->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
+    struct bHYPRE_MPICommunicator__object*,
+    struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e0->f_Initialize      = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Initialize;
+  e0->f_Assemble        = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Assemble;
+  e0->f_addRef          = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef       = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame          = (sidl_bool (*)(void*,
+    struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e0->f_isType          = (sidl_bool (*)(void*,const char*,
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e0->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e1->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete         = (void (*)(void*)) epv->f__delete;
+  e1->f__cast           = (void* (*)(void*,const char*,
+    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__delete         = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
+  e1->f__getURL         = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
+  e1->f__raddRef        = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
+  e1->f__isRemote       = (sidl_bool (*)(void*,
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e1->f__set_hooks      = (void (*)(void*,int32_t,
+    sidl_BaseInterface*)) epv->f__set_hooks;
   e1->f__exec           = (void (*)(void*,const char*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_io_Serializer__object*)) epv->f__exec;
-  e1->f_addRef          = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef       = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame          = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt        = (struct sidl_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInt;
-  e1->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e1->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
-    epv->f_getClassInfo;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
+    struct sidl_BaseInterface__object **)) epv->f__exec;
   e1->f_SetCommunicator = (int32_t (*)(void*,
-    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
-  e1->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
-  e1->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
+    struct bHYPRE_MPICommunicator__object*,
+    struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e1->f_Initialize      = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Initialize;
+  e1->f_Assemble        = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Assemble;
+  e1->f_addRef          = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e1->f_deleteRef       = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e1->f_isSame          = (sidl_bool (*)(void*,
+    struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e1->f_isType          = (sidl_bool (*)(void*,const char*,
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e2->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete         = (void (*)(void*)) epv->f__delete;
+  e2->f__cast           = (void* (*)(void*,const char*,
+    sidl_BaseInterface*)) epv->f__cast;
+  e2->f__delete         = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
+  e2->f__getURL         = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
+  e2->f__raddRef        = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
+  e2->f__isRemote       = (sidl_bool (*)(void*,
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e2->f__set_hooks      = (void (*)(void*,int32_t,
+    sidl_BaseInterface*)) epv->f__set_hooks;
   e2->f__exec           = (void (*)(void*,const char*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_io_Serializer__object*)) epv->f__exec;
-  e2->f_addRef          = (void (*)(void*)) epv->f_addRef;
-  e2->f_deleteRef       = (void (*)(void*)) epv->f_deleteRef;
-  e2->f_isSame          = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInt        = (struct sidl_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInt;
-  e2->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e2->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
-    epv->f_getClassInfo;
-  e2->f_SetCommunicator = (int32_t (*)(void*,
-    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
-  e2->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
-  e2->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
+    struct sidl_BaseInterface__object **)) epv->f__exec;
   e2->f_GetObject       = (int32_t (*)(void*,
-    struct sidl_BaseInterface__object**)) epv->f_GetObject;
+    struct sidl_BaseInterface__object**,
+    struct sidl_BaseInterface__object **)) epv->f_GetObject;
+  e2->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*,
+    struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e2->f_Initialize      = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Initialize;
+  e2->f_Assemble        = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Assemble;
+  e2->f_addRef          = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e2->f_deleteRef       = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e2->f_isSame          = (sidl_bool (*)(void*,
+    struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e2->f_isType          = (sidl_bool (*)(void*,const char*,
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e2->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e3->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e3->f__delete         = (void (*)(void*)) epv->f__delete;
+  e3->f__cast           = (void* (*)(void*,const char*,
+    sidl_BaseInterface*)) epv->f__cast;
+  e3->f__delete         = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
+  e3->f__getURL         = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
+  e3->f__raddRef        = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
+  e3->f__isRemote       = (sidl_bool (*)(void*,
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e3->f__set_hooks      = (void (*)(void*,int32_t,
+    sidl_BaseInterface*)) epv->f__set_hooks;
   e3->f__exec           = (void (*)(void*,const char*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_io_Serializer__object*)) epv->f__exec;
-  e3->f_addRef          = (void (*)(void*)) epv->f_addRef;
-  e3->f_deleteRef       = (void (*)(void*)) epv->f_deleteRef;
-  e3->f_isSame          = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e3->f_queryInt        = (struct sidl_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInt;
-  e3->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e3->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
-    epv->f_getClassInfo;
-  e3->f_SetCommunicator = (int32_t (*)(void*,
-    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
-  e3->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
-  e3->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
-  e3->f_GetObject       = (int32_t (*)(void*,
-    struct sidl_BaseInterface__object**)) epv->f_GetObject;
-  e3->f_SetGrid         = (int32_t (*)(void*,
-    struct bHYPRE_SStructGrid__object*)) epv->f_SetGrid;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e3->f_SetGrid         = (int32_t (*)(void*,struct bHYPRE_SStructGrid__object*,
+    struct sidl_BaseInterface__object **)) epv->f_SetGrid;
   e3->f_SetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    int32_t,double)) epv->f_SetValues;
+    int32_t,double,struct sidl_BaseInterface__object **)) epv->f_SetValues;
   e3->f_SetBoxValues    = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    struct sidl_int__array*,int32_t,
-    struct sidl_double__array*)) epv->f_SetBoxValues;
+    struct sidl_int__array*,int32_t,struct sidl_double__array*,
+    struct sidl_BaseInterface__object **)) epv->f_SetBoxValues;
   e3->f_AddToValues     = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    int32_t,double)) epv->f_AddToValues;
+    int32_t,double,struct sidl_BaseInterface__object **)) epv->f_AddToValues;
   e3->f_AddToBoxValues  = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    struct sidl_int__array*,int32_t,
-    struct sidl_double__array*)) epv->f_AddToBoxValues;
-  e3->f_Gather          = (int32_t (*)(void*)) epv->f_Gather;
+    struct sidl_int__array*,int32_t,struct sidl_double__array*,
+    struct sidl_BaseInterface__object **)) epv->f_AddToBoxValues;
+  e3->f_Gather          = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Gather;
   e3->f_GetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    int32_t,double*)) epv->f_GetValues;
+    int32_t,double*,struct sidl_BaseInterface__object **)) epv->f_GetValues;
   e3->f_GetBoxValues    = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    struct sidl_int__array*,int32_t,
-    struct sidl_double__array**)) epv->f_GetBoxValues;
-  e3->f_SetComplex      = (int32_t (*)(void*)) epv->f_SetComplex;
-  e3->f_Print           = (int32_t (*)(void*,const char*,int32_t)) epv->f_Print;
+    struct sidl_int__array*,int32_t,struct sidl_double__array**,
+    struct sidl_BaseInterface__object **)) epv->f_GetBoxValues;
+  e3->f_SetComplex      = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_SetComplex;
+  e3->f_Print           = (int32_t (*)(void*,const char*,int32_t,
+    struct sidl_BaseInterface__object **)) epv->f_Print;
+  e3->f_GetObject       = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object**,
+    struct sidl_BaseInterface__object **)) epv->f_GetObject;
+  e3->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*,
+    struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e3->f_Initialize      = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Initialize;
+  e3->f_Assemble        = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Assemble;
+  e3->f_addRef          = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e3->f_deleteRef       = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e3->f_isSame          = (sidl_bool (*)(void*,
+    struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e3->f_isType          = (sidl_bool (*)(void*,const char*,
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e3->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e4->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
-  e4->f__delete      = (void (*)(void*)) epv->f__delete;
+  e4->f__cast        = (void* (*)(void*,const char*,
+    sidl_BaseInterface*)) epv->f__cast;
+  e4->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
+  e4->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
+  e4->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
+  e4->f__isRemote    = (sidl_bool (*)(void*,
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e4->f__set_hooks   = (void (*)(void*,int32_t,
+    sidl_BaseInterface*)) epv->f__set_hooks;
   e4->f__exec        = (void (*)(void*,const char*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_io_Serializer__object*)) epv->f__exec;
-  e4->f_addRef       = (void (*)(void*)) epv->f_addRef;
-  e4->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
-  e4->f_isSame       = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e4->f_queryInt     = (struct sidl_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInt;
-  e4->f_isType       = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e4->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*)) 
-    epv->f_getClassInfo;
-  e4->f_Clear        = (int32_t (*)(void*)) epv->f_Clear;
-  e4->f_Copy         = (int32_t (*)(void*,
-    struct bHYPRE_Vector__object*)) epv->f_Copy;
-  e4->f_Clone        = (int32_t (*)(void*,
-    struct bHYPRE_Vector__object**)) epv->f_Clone;
-  e4->f_Scale        = (int32_t (*)(void*,double)) epv->f_Scale;
-  e4->f_Dot          = (int32_t (*)(void*,struct bHYPRE_Vector__object*,
-    double*)) epv->f_Dot;
-  e4->f_Axpy         = (int32_t (*)(void*,double,
-    struct bHYPRE_Vector__object*)) epv->f_Axpy;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e4->f_Clear        = (int32_t (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Clear;
+  e4->f_Copy         = (int32_t (*)(void*,struct bHYPRE_Vector__object*,
+    struct sidl_BaseInterface__object **)) epv->f_Copy;
+  e4->f_Clone        = (int32_t (*)(void*,struct bHYPRE_Vector__object**,
+    struct sidl_BaseInterface__object **)) epv->f_Clone;
+  e4->f_Scale        = (int32_t (*)(void*,double,
+    struct sidl_BaseInterface__object **)) epv->f_Scale;
+  e4->f_Dot          = (int32_t (*)(void*,struct bHYPRE_Vector__object*,double*,
+    struct sidl_BaseInterface__object **)) epv->f_Dot;
+  e4->f_Axpy         = (int32_t (*)(void*,double,struct bHYPRE_Vector__object*,
+    struct sidl_BaseInterface__object **)) epv->f_Axpy;
+  e4->f_addRef       = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e4->f_deleteRef    = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e4->f_isSame       = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e4->f_isType       = (sidl_bool (*)(void*,const char*,
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e4->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e5->f__cast        = (void* (*)(struct sidl_BaseClass__object*,
-    const char*)) epv->f__cast;
-  e5->f__delete      = (void (*)(struct sidl_BaseClass__object*)) 
-    epv->f__delete;
+  e5->f__cast        = (void* (*)(struct sidl_BaseClass__object*,const char*,
+    sidl_BaseInterface*)) epv->f__cast;
+  e5->f__delete      = (void (*)(struct sidl_BaseClass__object*,
+    sidl_BaseInterface*)) epv->f__delete;
+  e5->f__getURL      = (char* (*)(struct sidl_BaseClass__object*,
+    sidl_BaseInterface*)) epv->f__getURL;
+  e5->f__raddRef     = (void (*)(struct sidl_BaseClass__object*,
+    sidl_BaseInterface*)) epv->f__raddRef;
+  e5->f__isRemote    = (sidl_bool (*)(struct sidl_BaseClass__object*,
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e5->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,
+    sidl_BaseInterface*)) epv->f__set_hooks;
   e5->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_io_Serializer__object*)) epv->f__exec;
-  e5->f_addRef       = (void (*)(struct sidl_BaseClass__object*)) epv->f_addRef;
-  e5->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*)) 
-    epv->f_deleteRef;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e5->f_addRef       = (void (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e5->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
   e5->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e5->f_queryInt     = (struct sidl_BaseInterface__object* (*)(struct 
-    sidl_BaseClass__object*,const char*)) epv->f_queryInt;
+    struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
   e5->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    const char*)) epv->f_isType;
+    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e5->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e6->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
-  e6->f__delete      = (void (*)(void*)) epv->f__delete;
+  e6->f__cast        = (void* (*)(void*,const char*,
+    sidl_BaseInterface*)) epv->f__cast;
+  e6->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
+  e6->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
+  e6->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
+  e6->f__isRemote    = (sidl_bool (*)(void*,
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e6->f__set_hooks   = (void (*)(void*,int32_t,
+    sidl_BaseInterface*)) epv->f__set_hooks;
   e6->f__exec        = (void (*)(void*,const char*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_io_Serializer__object*)) epv->f__exec;
-  e6->f_addRef       = (void (*)(void*)) epv->f_addRef;
-  e6->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
-  e6->f_isSame       = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e6->f_queryInt     = (struct sidl_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInt;
-  e6->f_isType       = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e6->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*)) 
-    epv->f_getClassInfo;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e6->f_addRef       = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e6->f_deleteRef    = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e6->f_isSame       = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e6->f_isType       = (sidl_bool (*)(void*,const char*,
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e6->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   s_remote_initialized = 1;
 }
 
 /* Create an instance that connects to an existing remote object. */
 static struct bHYPRE_SStructVector__object*
-bHYPRE_SStructVector__remoteConnect(const char *url, sidl_BaseInterface *_ex)
+bHYPRE_SStructVector__remoteConnect(const char *url, sidl_bool ar,
+  sidl_BaseInterface *_ex)
 {
   struct bHYPRE_SStructVector__object* self;
 
   struct bHYPRE_SStructVector__object* s0;
   struct sidl_BaseClass__object* s1;
 
-  sidl_rmi_InstanceHandle instance = 
-    sidl_rmi_ProtocolFactory_connectInstance(url, _ex );
+  struct bHYPRE_SStructVector__remote* r_obj;
+  sidl_rmi_InstanceHandle instance = NULL;
+  char* objectID = NULL;
+  objectID = NULL;
+  *_ex = NULL;
+  if(url == NULL) {return NULL;}
+  objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
+  if(objectID) {
+    sidl_BaseInterface bi = 
+      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
+      objectID, _ex); SIDL_CHECK(*_ex);
+    return bHYPRE_SStructVector__rmicast(bi,_ex);SIDL_CHECK(*_ex);
+  }
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,
+    _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct bHYPRE_SStructVector__object*) malloc(
       sizeof(struct bHYPRE_SStructVector__object));
 
-   s0 =                               self;
-   s1 =                               &s0->d_sidl_baseclass;
+  r_obj =
+    (struct bHYPRE_SStructVector__remote*) malloc(
+      sizeof(struct bHYPRE_SStructVector__remote));
+
+  r_obj->d_refcount = 1;
+  r_obj->d_ih = instance;
+  s0 =                                self;
+  s1 =                                &s0->d_sidl_baseclass;
 
   LOCK_STATIC_GLOBALS;
   if (!s_remote_initialized) {
@@ -2372,7 +3378,7 @@ bHYPRE_SStructVector__remoteConnect(const char *url, sidl_BaseInterface *_ex)
   s1->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
   s1->d_sidl_baseinterface.d_object = (void*) self;
 
-  s1->d_data = (void*) instance;
+  s1->d_data = (void*) r_obj;
   s1->d_epv  = &s_rem_epv__sidl_baseclass;
 
   s0->d_bhypre_matrixvectorview.d_epv    = &s_rem_epv__bhypre_matrixvectorview;
@@ -2393,21 +3399,17 @@ bHYPRE_SStructVector__remoteConnect(const char *url, sidl_BaseInterface *_ex)
   s0->d_bhypre_vector.d_epv    = &s_rem_epv__bhypre_vector;
   s0->d_bhypre_vector.d_object = (void*) self;
 
-  s0->d_data = (void*) instance;
+  s0->d_data = (void*) r_obj;
   s0->d_epv  = &s_rem_epv__bhypre_sstructvector;
 
-  self->d_data = (void*) instance;
-  LOCK_STATIC_GLOBALS;
-  if (!s_remote_initialized) {
-    bHYPRE_SStructVector__init_remote_epv();
-  }
-  UNLOCK_STATIC_GLOBALS;
-
+  self->d_data = (void*) r_obj;
 
   return self;
+  EXIT:
+  return NULL;
 }
-/* Create an instance that uses an already existing InstanceHandel to connect 
-  to an existing remote object. */
+/* Create an instance that uses an already existing  */
+/* InstanceHandle to connect to an existing remote object. */
 static struct bHYPRE_SStructVector__object*
 bHYPRE_SStructVector__IHConnect(sidl_rmi_InstanceHandle instance,
   sidl_BaseInterface *_ex)
@@ -2417,12 +3419,19 @@ bHYPRE_SStructVector__IHConnect(sidl_rmi_InstanceHandle instance,
   struct bHYPRE_SStructVector__object* s0;
   struct sidl_BaseClass__object* s1;
 
+  struct bHYPRE_SStructVector__remote* r_obj;
   self =
     (struct bHYPRE_SStructVector__object*) malloc(
       sizeof(struct bHYPRE_SStructVector__object));
 
-   s0 =                               self;
-   s1 =                               &s0->d_sidl_baseclass;
+  r_obj =
+    (struct bHYPRE_SStructVector__remote*) malloc(
+      sizeof(struct bHYPRE_SStructVector__remote));
+
+  r_obj->d_refcount = 1;
+  r_obj->d_ih = instance;
+  s0 =                                self;
+  s1 =                                &s0->d_sidl_baseclass;
 
   LOCK_STATIC_GLOBALS;
   if (!s_remote_initialized) {
@@ -2433,7 +3442,7 @@ bHYPRE_SStructVector__IHConnect(sidl_rmi_InstanceHandle instance,
   s1->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
   s1->d_sidl_baseinterface.d_object = (void*) self;
 
-  s1->d_data = (void*) instance;
+  s1->d_data = (void*) r_obj;
   s1->d_epv  = &s_rem_epv__sidl_baseclass;
 
   s0->d_bhypre_matrixvectorview.d_epv    = &s_rem_epv__bhypre_matrixvectorview;
@@ -2454,32 +3463,43 @@ bHYPRE_SStructVector__IHConnect(sidl_rmi_InstanceHandle instance,
   s0->d_bhypre_vector.d_epv    = &s_rem_epv__bhypre_vector;
   s0->d_bhypre_vector.d_object = (void*) self;
 
-  s0->d_data = (void*) instance;
+  s0->d_data = (void*) r_obj;
   s0->d_epv  = &s_rem_epv__bhypre_sstructvector;
 
-  self->d_data = (void*) instance;
+  self->d_data = (void*) r_obj;
 
-  sidl_rmi_InstanceHandle_addRef(instance);
+  sidl_rmi_InstanceHandle_addRef(instance,_ex);SIDL_CHECK(*_ex);
   return self;
+  EXIT:
+  return NULL;
 }
 /* REMOTE: generate remote instance given URL string. */
 static struct bHYPRE_SStructVector__object*
-bHYPRE_SStructVector__remote(const char *url, sidl_BaseInterface *_ex)
+bHYPRE_SStructVector__remoteCreate(const char *url, sidl_BaseInterface *_ex)
 {
+  sidl_BaseInterface _throwaway_exception = NULL;
   struct bHYPRE_SStructVector__object* self;
 
   struct bHYPRE_SStructVector__object* s0;
   struct sidl_BaseClass__object* s1;
 
+  struct bHYPRE_SStructVector__remote* r_obj;
   sidl_rmi_InstanceHandle instance = 
-    sidl_rmi_ProtocolFactory_createInstance(url, "bHYPRE.SStructVector", _ex );
+    sidl_rmi_ProtocolFactory_createInstance(url, "bHYPRE.SStructVector",
+    _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct bHYPRE_SStructVector__object*) malloc(
       sizeof(struct bHYPRE_SStructVector__object));
 
-   s0 =                               self;
-   s1 =                               &s0->d_sidl_baseclass;
+  r_obj =
+    (struct bHYPRE_SStructVector__remote*) malloc(
+      sizeof(struct bHYPRE_SStructVector__remote));
+
+  r_obj->d_refcount = 1;
+  r_obj->d_ih = instance;
+  s0 =                                self;
+  s1 =                                &s0->d_sidl_baseclass;
 
   LOCK_STATIC_GLOBALS;
   if (!s_remote_initialized) {
@@ -2490,7 +3510,7 @@ bHYPRE_SStructVector__remote(const char *url, sidl_BaseInterface *_ex)
   s1->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
   s1->d_sidl_baseinterface.d_object = (void*) self;
 
-  s1->d_data = (void*) instance;
+  s1->d_data = (void*) r_obj;
   s1->d_epv  = &s_rem_epv__sidl_baseclass;
 
   s0->d_bhypre_matrixvectorview.d_epv    = &s_rem_epv__bhypre_matrixvectorview;
@@ -2511,10 +3531,55 @@ bHYPRE_SStructVector__remote(const char *url, sidl_BaseInterface *_ex)
   s0->d_bhypre_vector.d_epv    = &s_rem_epv__bhypre_vector;
   s0->d_bhypre_vector.d_object = (void*) self;
 
-  s0->d_data = (void*) instance;
+  s0->d_data = (void*) r_obj;
   s0->d_epv  = &s_rem_epv__bhypre_sstructvector;
 
-  self->d_data = (void*) instance;
+  self->d_data = (void*) r_obj;
 
   return self;
+  EXIT:
+  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance,
+    &_throwaway_exception); }
+  return NULL;
 }
+/*
+ * Cast method for interface and class type conversions.
+ */
+
+struct bHYPRE_SStructVector__object*
+bHYPRE_SStructVector__rmicast(
+  void* obj,
+  sidl_BaseInterface* _ex)
+{
+  struct bHYPRE_SStructVector__object* cast = NULL;
+
+  *_ex = NULL;
+  if(!connect_loaded) {
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.SStructVector",
+      (void*)bHYPRE_SStructVector__IHConnect, _ex);
+    connect_loaded = 1;
+  }
+  if (obj != NULL) {
+    struct sidl_BaseInterface__object* base = (struct 
+      sidl_BaseInterface__object*) obj;
+    cast = (struct bHYPRE_SStructVector__object*) (*base->d_epv->f__cast)(
+      base->d_object,
+      "bHYPRE.SStructVector", _ex); SIDL_CHECK(*_ex);
+  }
+
+  return cast;
+  EXIT:
+  return NULL;
+}
+
+/*
+ * RMI connector function for the class.
+ */
+
+struct bHYPRE_SStructVector__object*
+bHYPRE_SStructVector__connectI(const char* url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex)
+{
+  return bHYPRE_SStructVector__remoteConnect(url, ar, _ex);
+}
+
