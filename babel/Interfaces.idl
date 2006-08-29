@@ -324,8 +324,7 @@ package bHYPRE version 1.0.0
        *  A semi-structured matrix or vector contains a Struct or IJ matrix
        *  or vector.  GetObject returns it.
        * The returned type is a sidl.BaseInterface.
-       * QueryInterface or Cast must be used on the returned object to
-       * convert it into a known type.
+       * A cast must be used on the returned object to convert it into a known type.
        **/
       int GetObject(out sidl.BaseInterface A);
    }
@@ -902,14 +901,17 @@ package bHYPRE version 1.0.0
 
    /**
     * MPICommunicator class
-    *  two Create functions: use CreateC if called from C code,
-    *  CreateF if called from Fortran code
+    *  - two general Create functions: use CreateC if called from C code,
+    *  CreateF if called from Fortran code.
+    *  - Create_MPICommWorld will create a MPICommunicator to represent
+    *  MPI_Comm_World, and can be called from any language.
     *
     **/
    class MPICommunicator
    {
       static MPICommunicator CreateC( in opaque mpi_comm );
       static MPICommunicator CreateF( in opaque mpi_comm );
+      static MPICommunicator Create_MPICommWorld();
    }
 
    /**
