@@ -43,7 +43,7 @@ HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl
 ###  when python option is enabled, uncomment the following line and move it
 ###  to the all and install targets, repsectively, with the other cp commands
 ###   cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_BUILD_DIR}/include
-###   cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_INC_INSTALL}/include
+###   cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_INC_INSTALL}
 
 all:
 	@ \
@@ -57,6 +57,7 @@ all:
 	done
 	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_BUILD_DIR}/include
 	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/.libs/libs* ${HYPRE_BUILD_DIR}/lib
+	cp -fp hypre_babel_exception_handler.h ${HYPRE_BUILD_DIR}/include
 
 install:
 	@ \
@@ -69,6 +70,7 @@ install:
 	  fi; \
 	done
 	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_INC_INSTALL}
+	cp -fp hypre_babel_exception_handler.h ${HYPRE_INC_INSTALL}
 
 clean:
 	@ \
