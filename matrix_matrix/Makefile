@@ -44,11 +44,10 @@ EXTRA_FILES =\
 HEADERS = HYPRE_matrix_matrix_protos.h
  
 FILES =\
- HYPRE_BuildIJMatrixFromDistributedMatrix.c\
  HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
  HYPRE_ConvertPETScMatrixToDistributedMatrix.c
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -63,8 +62,8 @@ install: libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o *.lo lib*
-	rm -rf pchdir tca.map *inslog* .libs
+	rm -f *.o lib*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
@@ -72,9 +71,13 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_MatrixMatrix.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_MatrixMatrix.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}

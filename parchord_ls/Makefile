@@ -61,8 +61,8 @@ FILES =\
 DRIVER_FILES =\
  driver.c
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
-DRIVER_OBJS = ${DRIVER_FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
+DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -82,7 +82,7 @@ install: all
 	@cp -f libHYPRE_* $(HYPRE_LIB_INSTALL)/.
  
 clean:
-	@rm -f *.o *.lo lib* driver
+	@rm -f *.o lib* driver
 
 veryclean: clean
 
@@ -90,10 +90,14 @@ veryclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_parcsr_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR}  $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_parcsr_mv.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}
 

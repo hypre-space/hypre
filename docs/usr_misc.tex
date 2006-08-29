@@ -72,6 +72,10 @@ refine the defaults for any system. The best way to find out what options are
 available is to display the help package, by executing \file{./configure --help}, which 
 also includes the usage information.
 
+The configure option  \file{--enable-shared} is used to build \hypre{} shared 
+libraries.  In order to use the resulting shared libraries the user MUST have 
+the path to the libraries defined in the environment variable \file{LD\_LIBRARY\_PATH}. 
+
 The user can mix and match the configure options and variable settings to meet their 
 needs.  It should be noted that \hypre{} can be configured with external BLAS and/or
 LAPACK libraries, which can be combined with any other option.  This is done with

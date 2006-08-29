@@ -82,8 +82,8 @@ DRIVER_FILES =\
  driver_matvec.c\
  driver_multivec.c
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
-DRIVER_OBJS = ${DRIVER_FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
+DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -124,9 +124,9 @@ install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
  
 clean:
-	rm -f *.o *.lo libHYPRE*
+	rm -f *.o libHYPRE*
 	rm -f driver driver_matvec driver_matmul
-	rm -rf pchdir tca.map *inslog* .libs
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
@@ -134,10 +134,14 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_parcsr_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_parcsr_mv.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}
 

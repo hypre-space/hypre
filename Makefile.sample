@@ -49,9 +49,9 @@ FILESCXX =  ## all CXX source code files ##
 FILESF =    ## all F source code files ##
 FILES = ${FILESC} ${FILESCXX} ${FILESF}
 
-OBJSC = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}       ## object files for C ##
-OBJSCXX = ${FILES:.cxx=${HYPRE_OBJ_SUFFIX}}   ## object files for C++ ##
-OBJSF = ${FILES:.f=${HYPRE_OBJ_SUFFIX}}       ## object files for F77 ##
+OBJSC = ${FILES:.c=.o}       ## object files for C ##
+OBJSCXX = ${FILES:.cxx=.o}   ## object files for C++ ##
+OBJSF = ${FILES:.f=.o}       ## object files for F77 ##
 OBJS = ${OBJSC} ${OBJSCXX} ${OBJSF}
 
 ##################################################################
@@ -66,7 +66,7 @@ install: all
 	@cp -fp $(srcdir)/***.h $(HYPRE_INC_INSTALL)/.
 	@cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)/.
 clean:
-	@rm -f *.o *.lo libHYPRE*
+	@rm -f *.o libHYPRE*
 
 distclean: clean
 
@@ -75,9 +75,13 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_***${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_***.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_***.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${LINK_CC} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}

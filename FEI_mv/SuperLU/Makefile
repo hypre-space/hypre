@@ -79,7 +79,7 @@ FILES =\
  superlu_timer.c \
  superlu_util.c
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -95,8 +95,8 @@ install: libHYPRE_superlu${HYPRE_LIB_SUFFIX}
 	@echo  " "
 
 clean:
-	rm -f *.o *.lo libHYPRE*
-	rm -rf pchdir tca.map *inslog* .libs
+	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
@@ -104,9 +104,13 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_superlu${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_superlu.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_superlu.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}

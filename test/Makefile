@@ -53,7 +53,7 @@ F77_COMPILE_FLAGS = \
  ${CINCLUDES}
  
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS} 
-LIBFLAGS = ${LIBDIRS} ${LIBS} -lstdc++
+LIBFLAGS = ${LIBDIRS} ${LIBS} 
 LDLIBFLAGS = ${LDLIBDIRS} ${LDLIBS} ${LIBM} ${LDFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
@@ -118,6 +118,7 @@ STRUCT_LFLAGS =\
  -lHYPRE_MatrixMatrix \
  -lHYPRE_DistributedMatrix \
  -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_block_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
@@ -263,7 +264,7 @@ install:
 
 clean:
 	rm -f *.o
-	rm -rf pchdir tca.map *inslog* .libs
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 	rm -f ${HYPRE_DRIVER_EXECS}

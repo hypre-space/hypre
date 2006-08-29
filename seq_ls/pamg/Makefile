@@ -99,7 +99,7 @@ FILES =\
  HYPRE_csr_pcg.c\
  HYPRE_csr_gmres.c
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -112,7 +112,7 @@ all: libHYPRE_amg_ls${HYPRE_LIB_SUFFIX} driver
 install: all
 
 clean:
-	rm -f *.o *.lo lib*
+	rm -f *.o lib*
 
 distclean: clean
 	rm -f driver
@@ -125,9 +125,13 @@ driver: driver.o libHYPRE_amg_ls${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
-libHYPRE_amg_ls${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_amg_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_amg_ls.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}

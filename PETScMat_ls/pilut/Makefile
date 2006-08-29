@@ -44,7 +44,7 @@ LOCALFILES =
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
 
 
 ${OBJS}: ${HEADERS}
@@ -93,6 +93,6 @@ lib: ${PROTOS} ${OBJS}
 # Targets
 ##################################################################
 clean:
-	@rm -f *.o *.lo lib*
+	@rm -f *.o lib*
 
 distclean: clean

@@ -1011,12 +1011,12 @@ if test "$casc_using_fei" = "yes"
 then
    HYPRE_FEI_SRC_DIR="HYPRE_TOP_SRC_DIR/FEI_mv"
    HYPRE_FEI_SUBDIRS="fei-hypre femli"
-   HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.o"
-   HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.o"
+   HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.*o"
+   HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.*o"
    if test "$casc_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.o"
+      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.*o"
    else
       HYPRE_FEI_SUPERLU_FILES=
    fi
@@ -1034,11 +1034,15 @@ else
    HYPRE_FEI_FEMLI_FILES=
 fi
 
-
 dnl *********************************************************************
-dnl * Find libm.a
+dnl * Find libm
 dnl *********************************************************************
 AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
+
+dnl *********************************************************************
+dnl * Find libstdc++
+dnl *********************************************************************
+AC_CHECK_LIB(stdc++, __gxx_personality_v0, LIBS="$LIBS -lstdc++")
 
 dnl *********************************************************************
 dnl * Set debug/optimization flags  
@@ -1051,6 +1055,25 @@ else
 fi
 
 dnl *********************************************************************
+dnl * Set installation directories
+dnl *********************************************************************
+HYPRE_INSTALLDIR="${prefix}"
+HYPRE_LIBINSTALL="${libdir}"
+HYPRE_INCINSTALL="${includedir}"
+
+dnl *********************************************************************
+dnl * Set large page option that is needed by all AIX platforms.
+dnl *********************************************************************
+hypre_platform=`uname`
+case $hypre_platform in
+   AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
+                       CFLAGS="${CFLAGS} -blpdata"
+                       CXXFLAGS="${CXXFLAGS} -blpdata"
+                       FFLAGS="${FFLAGS} -blpdata"
+   ;;
+esac
+
+dnl *********************************************************************
 dnl * Set default link commands and suffix values
 dnl *********************************************************************
 LINK_F77="${F77}"
@@ -1058,7 +1081,6 @@ LINK_CC="${CC}"
 LINK_CXX="${CXX}"
 
 HYPRE_LIBSUFFIX=".a"
-HYPRE_OBJSUFFIX=".o"
 
 dnl *********************************************************************
 dnl * Set flags if needed to enable shared libraries 
@@ -1066,11 +1088,25 @@ dnl *********************************************************************
 if test "$casc_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-   HYPRE_OBJSUFFIX=".lo"
-   HYPRE_LIBTOOL="libtool --mode=compile"
-   LINK_F77="libtool --mode=link ${F77}"
-   LINK_CC="libtool --mode=link ${CC}"
-   LINK_CXX="libtool --mode=link ${CXX}"
+   case $hypre_platform in
+      AIX* | aix* | Aix*) FFLAGS="${FFLAGS} -qmkshrobj"
+                          CFLAGS="${CFLAGS} -qmkshrobj"
+                          CXXFLAGS="${CXXFLAGS} -qmkshrobj"
+                          BUILD_F77_SHARED="${F77} -G"
+                          BUILD_CC_SHARED="${CC} -G"
+                          BUILD_CXX_SHARED="${CXX} -G"
+                          LINK_F77="${F77} -brtl"
+                          LINK_CC="${CC} -brtl"
+                          LINK_CXX="${CXX} -brtl"
+                          ;;
+                       *) FFLAGS="${FFLAGS} -fPIC"
+                          CFLAGS="${CFLAGS} -fPIC"
+                          CXXFLAGS="${CXXFLAGS} -fPIC"
+                          BUILD_F77_SHARED="${F77} -shared"
+                          BUILD_CC_SHARED="${CC} -shared"
+                          BUILD_CXX_SHARED="${CXX} -shared"
+                          ;;
+   esac
 fi
 
 dnl *********************************************************************
@@ -1099,28 +1135,9 @@ then
 fi
 
 dnl *********************************************************************
-dnl * Set installation directories
-dnl *********************************************************************
-HYPRE_INSTALLDIR="${prefix}"
-HYPRE_LIBINSTALL="${libdir}"
-HYPRE_INCINSTALL="${includedir}"
-
-dnl *********************************************************************
 dnl * Define machine architecture
 dnl *********************************************************************
 HYPRE_SET_ARCH
-
-dnl *********************************************************************
-dnl * Set large page option that is needed by all AIX platforms.
-dnl *********************************************************************
-hypre_platform=`uname`
-case $hypre_platform in
-   AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
-                       CFLAGS="${CFLAGS} -blpdata"
-                       CXXFLAGS="${CXXFLAGS} -blpdata"
-                       FFLAGS="${FFLAGS} -blpdata"
-   ;;
-esac
 
 
 dnl *********************************************************************
@@ -1242,7 +1259,9 @@ AC_SUBST(LINK_F77)
 AC_SUBST(LINK_CC)
 AC_SUBST(LINK_CXX)
 
-AC_SUBST(HYPRE_LIBTOOL)
+AC_SUBST(BUILD_F77_SHARED)
+AC_SUBST(BUILD_CC_SHARED)
+AC_SUBST(BUILD_CXX_SHARED)
 
 dnl *********************************************************************
 dnl * Installation Directories
@@ -1267,7 +1286,6 @@ dnl *********************************************************************
 dnl * suffix for hypre libraries
 dnl *********************************************************************
 AC_SUBST(HYPRE_LIBSUFFIX)
-AC_SUBST(HYPRE_OBJSUFFIX)
 
 dnl *********************************************************************
 dnl * MPI-related header files and libraries and directories for

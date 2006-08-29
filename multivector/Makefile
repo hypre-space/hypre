@@ -43,7 +43,7 @@ FILES =\
  multivector.c\
  temp_multivector.c
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -58,8 +58,8 @@ install: libHYPRE_multivector${HYPRE_LIB_SUFFIX}
 	cp -f libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o *.lo libHYPRE*
-	rm -rf pchdir tca.map *inslog* .libs
+	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
@@ -67,9 +67,13 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_multivector${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_multivector.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_multivector.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}

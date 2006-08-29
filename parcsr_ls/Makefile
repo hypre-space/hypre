@@ -123,7 +123,7 @@ FILES =\
  block_tridiag.c\
  ams.c
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -140,8 +140,8 @@ install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
  
 clean:
-	rm -f *.o *.lo libHYPRE*
-	rm -rf pchdir tca.map *inslog* .libs
+	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
@@ -150,9 +150,13 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_parcsr_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_parcsr_ls.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
  
 ${OBJS}: ${HEADERS}

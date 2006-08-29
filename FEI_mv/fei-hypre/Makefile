@@ -24,14 +24,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-### ************************************************************************
-### This is the template file for FEI_mv/fei-hypre.  When configure determines
-### whether or not the internal files are needed, the ${FEIINTERNAL} variable
-### will be replaced with either a space to commetn symbol and the proper
-### Makefile will be generated.
-### ************************************************************************
-
 include ../../config/Makefile.config
 
 BASE_DIR = ${HYPRE_FEI_BASE_DIR}
@@ -163,8 +155,8 @@ FILESCXX = \
  hypre_schur_reduce.cxx\
  hypre_slide_reduce.cxx
 
-OBJSC = ${FILESC:.c=${HYPRE_OBJ_SUFFIX}}
-OBJSCXX = ${FILESCXX:.cxx=${HYPRE_OBJ_SUFFIX}}
+OBJSC = ${FILESC:.c=.o}
+OBJSCXX = ${FILESCXX:.cxx=.o}
 OBJS = ${OBJSC} ${OBJSCXX}
 
 ##################################################################
@@ -197,17 +189,22 @@ install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	@echo  ""
 
 clean:
-	rm -rf *.o *.lo libHYPRE*
-	rm -rf pchdir tca.map *inslog* .libs
+	rm -rf *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
 ##################################################################
 # Rules
 ##################################################################
-libHYPRE_FEI${HYPRE_LIB_SUFFIX}: ${OBJS}
+
+libHYPRE_FEI.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_FEI.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}

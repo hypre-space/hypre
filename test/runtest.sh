@@ -34,7 +34,7 @@ RunString=""
 ExecFileNames=""         #string of executable file names used
 TestDirNames=""          #string of names of TEST_* directories used
 
-function usage ()
+function usage
 {
    printf "\n"
    printf "$0 [-n|-norun] [-h|-help] [-t|-trace] {test_path}/{test_name}.sh\n"

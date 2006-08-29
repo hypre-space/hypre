@@ -58,7 +58,7 @@ HEADERS =\
 ##################################################################
 # Utilities Files
 ##################################################################
-UTIL_FILES =\
+FILES =\
  amg_linklist.c\
  binsearch.c\
  exchange_data.c\
@@ -77,9 +77,7 @@ UTIL_FILES =\
  hypre_mpi_comm_f2c.c\
  hypre_error.c
 
-FILES = ${UTIL_FILES}
-
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -98,8 +96,8 @@ install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o *.lo libHYPRE* f2c.h *blas.h *lapack.h 
-	rm -rf pchdir tca.map *inslog* .libs
+	rm -f *.o libHYPRE* f2c.h *blas.h *lapack.h 
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
@@ -107,9 +105,13 @@ distclean: clean
 # Rules
 ##################################################################
  
-libHYPRE_utilities${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_utilities.a: ${OBJS}
 	@echo  "Building $@ ... "
-	${AR} $@ *${HYPRE_OBJ_SUFFIX}
+	${AR} $@ *.o
 	${RANLIB} $@
+ 
+libHYPRE_utilities.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ *.o
 
 ${OBJS}: ${HEADERS}

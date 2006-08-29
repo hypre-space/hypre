@@ -31,42 +31,42 @@ include ../config/Makefile.config
 SUPERLUFILES = ${HYPRE_FEI_SUPERLU_FILES}
 FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
 FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
-IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*${HYPRE_OBJ_SUFFIX}
-EUCLIDFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/*${HYPRE_OBJ_SUFFIX}
-PARASAILSFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*${HYPRE_OBJ_SUFFIX}
-PILUTFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*${HYPRE_OBJ_SUFFIX}
-DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*${HYPRE_OBJ_SUFFIX}
-KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*${HYPRE_OBJ_SUFFIX}
-MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*${HYPRE_OBJ_SUFFIX}
-MULTIVECFILES = ${HYPRE_SRC_TOP_DIR}/multivector/*${HYPRE_OBJ_SUFFIX}
-PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*${HYPRE_OBJ_SUFFIX}
-PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*${HYPRE_OBJ_SUFFIX}
-PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*${HYPRE_OBJ_SUFFIX}
-SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*${HYPRE_OBJ_SUFFIX}
-SSTRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*${HYPRE_OBJ_SUFFIX}
-SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*${HYPRE_OBJ_SUFFIX}
-STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*${HYPRE_OBJ_SUFFIX}
-STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*${HYPRE_OBJ_SUFFIX}
-UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*${HYPRE_OBJ_SUFFIX}
+IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
+EUCLIDFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/*.o
+PARASAILSFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o
+PILUTFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*.o
+DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o
+KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*.o
+MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
+MULTIVECFILES = ${HYPRE_SRC_TOP_DIR}/multivector/*.o
+PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o
+PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o
+PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o
+SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o
+SSTRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
+SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
+STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
+STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
+UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
 
 UTILFILES = \
- ${HYPRE_SRC_TOP_DIR}/utilities/amg_linklist${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/binsearch${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/exchange_data${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/fortran_matrix${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_memory${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_qsort${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/memory_dmalloc${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/mpistubs${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/qsplit${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/random${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/thread_mpistubs${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/threading${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/timer${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/timing${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c${HYPRE_OBJ_SUFFIX}\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error${HYPRE_OBJ_SUFFIX}
+ ${HYPRE_SRC_TOP_DIR}/utilities/amg_linklist.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/binsearch.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/exchange_data.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/fortran_matrix.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_memory.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_qsort.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/memory_dmalloc.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/mpistubs.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/qsplit.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/random.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/thread_mpistubs.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/threading.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/timer.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/timing.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error.*o
 
 FILES1 = \
 $(SUPERLUFILES)\
@@ -117,22 +117,40 @@ $(UTILFILES)
 # Targets
 ##################################################################
 
-all:
-	@echo  "Building libHYPRE ... "
-	cp -fp ${FILES1} .
-	cp -fp ${FILES2} .
-	${AR} libHYPRE${HYPRE_LIB_SUFFIX} *${HYPRE_OBJ_SUFFIX}
-	${RANLIB} libHYPRE${HYPRE_LIB_SUFFIX}
-	@echo  "Building libHYPRE_LSI ... "
-	${AR} libHYPRE_LSI${HYPRE_LIB_SUFFIX} ${FILES_LSI}
-	${RANLIB} libHYPRE_LSI${HYPRE_LIB_SUFFIX}
+all: libHYPRE${HYPRE_LIB_SUFFIX} libHYPRE_LSI${HYPRE_LIB_SUFFIX}
 	cp -fp libHYPRE* ${HYPRE_BUILD_DIR}/lib
 
 install: all
 	cp -fp libHYPRE* ${HYPRE_LIB_INSTALL}
 
 clean:
-	rm -f *.o *.lo libHYPRE*
+	rm -f *.o libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE.a:
+	@echo  "Building libHYPRE ... "
+	cp -fp ${FILES1} .
+	cp -fp ${FILES2} .
+	${AR} $@ *.o
+	${RANLIB} $@
+
+libHYPRE.so:
+	@echo  "Building libHYPRE ... "
+	cp -fp ${FILES1} .
+	cp -fp ${FILES2} .
+	${BUILD_CC_SHARED} -o $@ *.o
+
+libHYPRE_LSI.a:
+	@echo  "Building libHYPRE_LSI ... "
+	${AR} $@ ${FILES_LSI}
+	${RANLIB} $@
+
+libHYPRE_LSI.so:
+	@echo  "Building libHYPRE_LSI ... "
+	${BUILD_CC_SHARED} -o $@ ${FILES_LSI}

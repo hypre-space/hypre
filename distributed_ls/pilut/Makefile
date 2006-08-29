@@ -61,7 +61,8 @@ FILES =\
  trifactor.c\
  util.c
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
+
 
 ##################################################################
 # Targets
@@ -76,8 +77,8 @@ install: libHYPRE_DistributedMatrixPilutSolver${HYPRE_LIB_SUFFIX}
 	cp -f libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o *.lo libHYPRE*
-	rm -rf pchdir tca.map *inslog* .libs
+	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
@@ -85,9 +86,13 @@ distclean: clean
 # Main rules
 ##################################################################
 
-libHYPRE_DistributedMatrixPilutSolver${HYPRE_LIB_SUFFIX}: ${OBJS}
+libHYPRE_DistributedMatrixPilutSolver.a: ${OBJS}
 	@echo "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_DistributedMatrixPilutSolver.so: ${OBJS}
+	@echo "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}

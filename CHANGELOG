@@ -40,6 +40,8 @@ Version 1.12.0b released, 2006/??/??.
   NOTE: the directory where the shared libraries reside MUST be defined in the
         LD_LIBRARY_PATH variable.
 
+-incorporated GNU Lesser General Public License
+
 ********************************************************************
 Version 1.12.0a released, 2006/07/26.
 
