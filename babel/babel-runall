@@ -14,9 +14,14 @@
 
 babel --version
 
-babel --output-directory=bHYPRE --comment-local-only --suppress-timestamp -sC Interfaces.idl
-babel --output-directory=bHYPREClient-C --comment-local-only --suppress-timestamp -cC Interfaces.idl
-babel --output-directory=bHYPREClient-F --comment-local-only --suppress-timestamp -cF77 Interfaces.idl
+babel --output-directory=bHYPRE --comment-local-only -sC Interfaces.idl
+babel --output-directory=bHYPREClient-C --comment-local-only -cC Interfaces.idl
+babel --output-directory=bHYPREClient-F --comment-local-only --include-referenced -cF77 Interfaces.idl
 
-babel --output-directory=bHYPREClient-CX --comment-local-only --suppress-timestamp -cUC++ Interfaces.idl
-# babel --output-directory=bHYPREClient-P --comment-local-only --suppress-timestamp -cPython Interfaces.idl
+babel --output-directory=bHYPREClient-CX --comment-local-only -cUC++ Interfaces.idl
+# babel --output-directory=bHYPREClient-P --comment-local-only -cPython Interfaces.idl
+
+# Notes:
+# The --include-referenced argument copies a slew of Babel's sidl*.h files into the bHYPREClient*
+# directory.  It is necessary for Fortran.  So far I haven't seen anything which would require
+# it in other languages.
