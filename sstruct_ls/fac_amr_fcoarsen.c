@@ -390,6 +390,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
               *--------------------------------------------------------------------*/
              hypre_StructMapCoarseToFine(hypre_BoxIMin(&intersect_box), index_temp,
                                          refine_factors, hypre_BoxIMin(&fine_box));
+
+             /* the following index2 shift for ndim<3 is no problem since 
+                refine_factors[j]= 1 for j>=ndim. */
              hypre_SetIndex(index2, refine_factors[0]-1, refine_factors[1]-1,
                             refine_factors[2]-1);
              hypre_StructMapCoarseToFine(hypre_BoxIMax(&intersect_box), index2,
@@ -476,6 +479,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
      *  Agglomerated coarse cell info. These are needed in defining the looping
      *  extents for averaging- i.e., we loop over extents determined by the 
      *  size of the agglomerated coarse cell.
+     *  Note that the agglomerated coarse cell is constructed correctly for
+     *  any dimensions (1, 2, or 3).
      *--------------------------------------------------------------------------*/
     hypre_ClearIndex(index_temp);
     hypre_CopyIndex(index_temp, hypre_BoxIMin(&coarse_cell_box));
@@ -667,6 +672,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                *  Get mappings between stencil entries and ranks and vice versa;
                *  fine grid looping extents for averaging of the fine coefficients;
                *  and the number of fine grid values to be averaged.
+               *  Note that the shift_boxes are constructed correctly for any
+               *  dimensions. For j>=ndim, 
+               *  hypre_BoxIMin(shift_box[i])[j]=hypre_BoxIMax(shift_box[i])[j]= 0.
                *-----------------------------------------------------------------*/
               for (i= 0; i< stencil_size; i++)
               {
@@ -694,6 +702,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
               /*-----------------------------------------------------------------
                *  Derive the contribution info. 
                *  The above rank table is used to determine the direction indices.
+               *  Weight construction procedure valid for any dimensions.
                *-----------------------------------------------------------------*/
 
               /* east */
@@ -1828,6 +1837,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                  
                    /*---------------------------------------------------------------
                     *  Compute the offsets for pointing to the correct data.
+                    *  Note that for 1-d, OffsetA[j][i]= 0. Therefore, this ptr
+                    *  will be correct for 1-d.
                     *---------------------------------------------------------------*/
                    for (j= 0; j< 2; j++)
                    {
@@ -1892,6 +1903,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                  vals[m]= 0.0;
                               }
 
+                              /*--------------------------------------------------------
+                               * For 1-d, index1[l]= index2[l]= 0, l>=1. So 
+                               *    iA_shift_zyx= j,
+                               * which is correct. Similarly, 2-d is correct.
+                               *--------------------------------------------------------*/
                               for (l= index1[2]; l<= index2[2]; l++)
                               {
                                  iA_shift_z= iA + OffsetA[1][l];
@@ -2109,6 +2125,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         hypre_CopyIndex(hypre_BoxIMax(&coarse_cell_box), index2);
 
                         temp3= hypre_CTAlloc(double, volume_coarse_cell_box);
+                    
+                        /*---------------------------------------------------------------
+                         *  iA_shift_zyx is computed correctly for 1 & 2-d. Also,
+                         *  ll= 0 for 2-d, and ll= kk= 0 for 1-d. Correct ptrs.
+                         *---------------------------------------------------------------*/
                         for (l= index1[2]; l<= index2[2]; l++)
                         {
                            iA_shift_z= iA + OffsetA[1][l];
@@ -2997,13 +3018,14 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   *  the value of abs_stencil_shape can be used to determine the
                   *  stencil:
                   *     abs_stencil_shape=   3   only corners in 3-d
-                  *                          2   corners in 2-d or the centre plane
+                  *                          2   corners in 2-d; or the centre plane
                   *                              in 3-d, or e,w,n,s of the bottom
                   *                              or top plane in 3-d
-                  *                          1   e,w,n,s in 2-d or the centre plane
-                  *                              in 3-d, or c of the bottom or top
-                  *                              plane in 3-d
-                  *                          0   c in 2-d and 3-d.
+                  *                          1   e,w in 1-d; or e,w,n,s in 2-d; 
+                  *                              or the centre plane in 3-d,
+                  *                              or c of the bottom or top plane
+                  *                              in 3-d
+                  *                          0   c in 1-d, 2-d, or 3-d.
                   *-----------------------------------------------------------------*/
 
                   switch(abs_stencil_shape)
@@ -3156,9 +3178,15 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                       break;
 
-                      case 1:     /* edges in 2-d or faces in 3-d */
+                      case 1:     /* e,w in 1-d, or edges in 2-d, or faces in 3-d */
 
-                      if (ndim == 2)
+                      if (ndim == 1)
+                      {
+                          l= common_stencil_i[j];
+                          crse_ptr[fine_interface_ranks[i]]= stencil_vals[l];
+                      }
+
+                      else if (ndim == 2)
                       {
                           l    =  common_stencil_ranks[j];
                           temp1=  hypre_TAlloc(int, 2);
@@ -3227,9 +3255,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                           hypre_TFree(temp1);
 
-                      }    /* if (ndim == 2) */
+                      }   /* else if (ndim == 2) */
 
-                      else if (ndim == 3)
+                      else /* 3-d */
                       {
                           l    =  common_stencil_ranks[j];
                           temp1=  hypre_TAlloc(int, 8);
@@ -3339,7 +3367,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                           hypre_TFree(temp1);
 
-                      }    /* if (ndim == 3) */
+                      }    /* else */
 
                       break;
 
