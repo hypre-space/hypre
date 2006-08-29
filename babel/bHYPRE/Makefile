@@ -64,7 +64,7 @@ HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
 FILES = ${IMPLSRCS} ${IORSRCS_NONNULL} ${SKELSRCS} ${STUBSRCS} \
  bHYPRE_Extensions.c
 
-OBJS = ${FILES:.c=${HYPRE_OBJ_SUFFIX}}
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
