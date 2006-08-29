@@ -22,7 +22,6 @@ bHYPRE_CGNR_IOR.h: sidl_BaseClass_IOR.h
 bHYPRE_CoefficientAccess_IOR.h:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CoefficientAccess_IOR.h: sidl_header.h
-bHYPRE_CoefficientAccess_IOR.h: bHYPRE_CoefficientAccess_IOR.h
 bHYPRE_CoefficientAccess_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_Euclid_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -60,7 +59,6 @@ bHYPRE_Hybrid_IOR.h: sidl_BaseClass_IOR.h
 
 bHYPRE_IJMatrixView_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJMatrixView_IOR.h: sidl_header.h
-bHYPRE_IJMatrixView_IOR.h: bHYPRE_IJMatrixView_IOR.h
 bHYPRE_IJMatrixView_IOR.h: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_IJMatrixView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_IJMatrixView_IOR.h: sidl_BaseInterface_IOR.h
@@ -84,7 +82,6 @@ bHYPRE_IJParCSRVector_IOR.h: sidl_BaseClass_IOR.h
 
 bHYPRE_IJVectorView_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJVectorView_IOR.h: sidl_header.h
-bHYPRE_IJVectorView_IOR.h: bHYPRE_IJVectorView_IOR.h
 bHYPRE_IJVectorView_IOR.h: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_IJVectorView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_IJVectorView_IOR.h: sidl_BaseInterface_IOR.h
@@ -154,13 +151,11 @@ bHYPRE_MPICommunicator_IOR.h: sidl_BaseClass_IOR.h
 bHYPRE_MatrixVectorView_IOR.h:                                                \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_MatrixVectorView_IOR.h: sidl_header.h
-bHYPRE_MatrixVectorView_IOR.h: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_MatrixVectorView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_MatrixVectorView_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_Operator_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Operator_IOR.h: sidl_header.h
-bHYPRE_Operator_IOR.h: bHYPRE_Operator_IOR.h
 bHYPRE_Operator_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_PCG_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -193,14 +188,12 @@ bHYPRE_PreconditionedSolver_IOR.h:                                            \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_PreconditionedSolver_IOR.h: sidl_header.h
 bHYPRE_PreconditionedSolver_IOR.h: bHYPRE_Operator_IOR.h
-bHYPRE_PreconditionedSolver_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
 bHYPRE_PreconditionedSolver_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_PreconditionedSolver_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_ProblemDefinition_IOR.h:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ProblemDefinition_IOR.h: sidl_header.h
-bHYPRE_ProblemDefinition_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_ProblemDefinition_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_SStructDiagScale_IOR.h:                                                \
@@ -225,7 +218,6 @@ bHYPRE_SStructMatrixVectorView_IOR.h:                                         \
 bHYPRE_SStructMatrixVectorView_IOR.h: sidl_header.h
 bHYPRE_SStructMatrixVectorView_IOR.h: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_SStructMatrixVectorView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
-bHYPRE_SStructMatrixVectorView_IOR.h: bHYPRE_SStructMatrixVectorView_IOR.h
 bHYPRE_SStructMatrixVectorView_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_SStructMatrixView_IOR.h:                                               \
@@ -234,7 +226,6 @@ bHYPRE_SStructMatrixView_IOR.h: sidl_header.h
 bHYPRE_SStructMatrixView_IOR.h: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_SStructMatrixView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_SStructMatrixView_IOR.h: bHYPRE_SStructMatrixVectorView_IOR.h
-bHYPRE_SStructMatrixView_IOR.h: bHYPRE_SStructMatrixView_IOR.h
 bHYPRE_SStructMatrixView_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_SStructMatrix_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -276,8 +267,6 @@ bHYPRE_SStructStencil_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructStencil_IOR.h: sidl_header.h
 bHYPRE_SStructStencil_IOR.h: sidl_BaseClass_IOR.h
 
-bHYPRE_SStructVariable_IOR.h:                                                 \
-  /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructVariable_IOR.h: sidlType.h
 
 bHYPRE_SStructVectorView_IOR.h:                                               \
@@ -286,7 +275,6 @@ bHYPRE_SStructVectorView_IOR.h: sidl_header.h
 bHYPRE_SStructVectorView_IOR.h: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_SStructVectorView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_SStructVectorView_IOR.h: bHYPRE_SStructMatrixVectorView_IOR.h
-bHYPRE_SStructVectorView_IOR.h: bHYPRE_SStructVectorView_IOR.h
 bHYPRE_SStructVectorView_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_SStructVector_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -307,7 +295,6 @@ bHYPRE_Schwarz_IOR.h: sidl_BaseClass_IOR.h
 bHYPRE_Solver_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Solver_IOR.h: sidl_header.h
 bHYPRE_Solver_IOR.h: bHYPRE_Operator_IOR.h
-bHYPRE_Solver_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_Solver_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_StructDiagScale_IOR.h:                                                 \
@@ -332,7 +319,6 @@ bHYPRE_StructMatrixView_IOR.h:                                                \
 bHYPRE_StructMatrixView_IOR.h: sidl_header.h
 bHYPRE_StructMatrixView_IOR.h: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_StructMatrixView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
-bHYPRE_StructMatrixView_IOR.h: bHYPRE_StructMatrixView_IOR.h
 bHYPRE_StructMatrixView_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_StructMatrix_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -364,7 +350,6 @@ bHYPRE_StructVectorView_IOR.h:                                                \
 bHYPRE_StructVectorView_IOR.h: sidl_header.h
 bHYPRE_StructVectorView_IOR.h: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_StructVectorView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
-bHYPRE_StructVectorView_IOR.h: bHYPRE_StructVectorView_IOR.h
 bHYPRE_StructVectorView_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_StructVector_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -377,7 +362,6 @@ bHYPRE_StructVector_IOR.h: sidl_BaseClass_IOR.h
 
 bHYPRE_Vector_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Vector_IOR.h: sidl_header.h
-bHYPRE_Vector_IOR.h: bHYPRE_Vector_IOR.h
 bHYPRE_Vector_IOR.h: sidl_BaseInterface_IOR.h
 
 
@@ -440,10 +424,14 @@ bHYPRE_BiCGSTAB.h: bHYPRE_Operator.h
 bHYPRE_BiCGSTAB.h: bHYPRE_PreconditionedSolver.h
 bHYPRE_BiCGSTAB.h: bHYPRE_Solver.h
 bHYPRE_BiCGSTAB.h: bHYPRE_Vector.h
+bHYPRE_BiCGSTAB.h: sidl_BaseException.h
 bHYPRE_BiCGSTAB.h: sidl_BaseInterface.h
 bHYPRE_BiCGSTAB.h: sidl_ClassInfo.h
-bHYPRE_BiCGSTAB.h: sidl_io_Serializer.h
-bHYPRE_BiCGSTAB.h: sidl_io_Deserializer.h
+bHYPRE_BiCGSTAB.h: sidl_RuntimeException.h
+bHYPRE_BiCGSTAB.h: sidl_SIDLException.h
+bHYPRE_BiCGSTAB.h: sidl_rmi_Call.h
+bHYPRE_BiCGSTAB.h: sidl_rmi_Return.h
+bHYPRE_BiCGSTAB.h: bHYPRE_BiCGSTAB_IOR.h
 
 bHYPRE_BoomerAMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG.h: sidl_header.h
@@ -451,10 +439,14 @@ bHYPRE_BoomerAMG.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE_BoomerAMG.h: bHYPRE_MPICommunicator.h
 bHYPRE_BoomerAMG.h: bHYPRE_Operator.h
 bHYPRE_BoomerAMG.h: bHYPRE_Vector.h
+bHYPRE_BoomerAMG.h: sidl_BaseException.h
 bHYPRE_BoomerAMG.h: sidl_BaseInterface.h
 bHYPRE_BoomerAMG.h: sidl_ClassInfo.h
-bHYPRE_BoomerAMG.h: sidl_io_Serializer.h
-bHYPRE_BoomerAMG.h: sidl_io_Deserializer.h
+bHYPRE_BoomerAMG.h: sidl_RuntimeException.h
+bHYPRE_BoomerAMG.h: sidl_SIDLException.h
+bHYPRE_BoomerAMG.h: sidl_rmi_Call.h
+bHYPRE_BoomerAMG.h: sidl_rmi_Return.h
+bHYPRE_BoomerAMG.h: bHYPRE_BoomerAMG_IOR.h
 
 bHYPRE_CGNR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CGNR.h: sidl_header.h
@@ -463,17 +455,25 @@ bHYPRE_CGNR.h: bHYPRE_Operator.h
 bHYPRE_CGNR.h: bHYPRE_PreconditionedSolver.h
 bHYPRE_CGNR.h: bHYPRE_Solver.h
 bHYPRE_CGNR.h: bHYPRE_Vector.h
+bHYPRE_CGNR.h: sidl_BaseException.h
 bHYPRE_CGNR.h: sidl_BaseInterface.h
 bHYPRE_CGNR.h: sidl_ClassInfo.h
-bHYPRE_CGNR.h: sidl_io_Serializer.h
-bHYPRE_CGNR.h: sidl_io_Deserializer.h
+bHYPRE_CGNR.h: sidl_RuntimeException.h
+bHYPRE_CGNR.h: sidl_SIDLException.h
+bHYPRE_CGNR.h: sidl_rmi_Call.h
+bHYPRE_CGNR.h: sidl_rmi_Return.h
+bHYPRE_CGNR.h: bHYPRE_CGNR_IOR.h
 
 bHYPRE_CoefficientAccess.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CoefficientAccess.h: sidl_header.h
+bHYPRE_CoefficientAccess.h: sidl_BaseException.h
 bHYPRE_CoefficientAccess.h: sidl_BaseInterface.h
 bHYPRE_CoefficientAccess.h: sidl_ClassInfo.h
-bHYPRE_CoefficientAccess.h: sidl_io_Serializer.h
-bHYPRE_CoefficientAccess.h: sidl_io_Deserializer.h
+bHYPRE_CoefficientAccess.h: sidl_RuntimeException.h
+bHYPRE_CoefficientAccess.h: sidl_SIDLException.h
+bHYPRE_CoefficientAccess.h: sidl_rmi_Call.h
+bHYPRE_CoefficientAccess.h: sidl_rmi_Return.h
+bHYPRE_CoefficientAccess.h: bHYPRE_CoefficientAccess_IOR.h
 
 bHYPRE_Euclid.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Euclid.h: sidl_header.h
@@ -481,10 +481,14 @@ bHYPRE_Euclid.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE_Euclid.h: bHYPRE_MPICommunicator.h
 bHYPRE_Euclid.h: bHYPRE_Operator.h
 bHYPRE_Euclid.h: bHYPRE_Vector.h
+bHYPRE_Euclid.h: sidl_BaseException.h
 bHYPRE_Euclid.h: sidl_BaseInterface.h
 bHYPRE_Euclid.h: sidl_ClassInfo.h
-bHYPRE_Euclid.h: sidl_io_Serializer.h
-bHYPRE_Euclid.h: sidl_io_Deserializer.h
+bHYPRE_Euclid.h: sidl_RuntimeException.h
+bHYPRE_Euclid.h: sidl_SIDLException.h
+bHYPRE_Euclid.h: sidl_rmi_Call.h
+bHYPRE_Euclid.h: sidl_rmi_Return.h
+bHYPRE_Euclid.h: bHYPRE_Euclid_IOR.h
 
 bHYPRE_GMRES.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES.h: sidl_header.h
@@ -493,10 +497,14 @@ bHYPRE_GMRES.h: bHYPRE_Operator.h
 bHYPRE_GMRES.h: bHYPRE_PreconditionedSolver.h
 bHYPRE_GMRES.h: bHYPRE_Solver.h
 bHYPRE_GMRES.h: bHYPRE_Vector.h
+bHYPRE_GMRES.h: sidl_BaseException.h
 bHYPRE_GMRES.h: sidl_BaseInterface.h
 bHYPRE_GMRES.h: sidl_ClassInfo.h
-bHYPRE_GMRES.h: sidl_io_Serializer.h
-bHYPRE_GMRES.h: sidl_io_Deserializer.h
+bHYPRE_GMRES.h: sidl_RuntimeException.h
+bHYPRE_GMRES.h: sidl_SIDLException.h
+bHYPRE_GMRES.h: sidl_rmi_Call.h
+bHYPRE_GMRES.h: sidl_rmi_Return.h
+bHYPRE_GMRES.h: bHYPRE_GMRES_IOR.h
 
 bHYPRE_HGMRES.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_HGMRES.h: sidl_header.h
@@ -505,10 +513,14 @@ bHYPRE_HGMRES.h: bHYPRE_Operator.h
 bHYPRE_HGMRES.h: bHYPRE_PreconditionedSolver.h
 bHYPRE_HGMRES.h: bHYPRE_Solver.h
 bHYPRE_HGMRES.h: bHYPRE_Vector.h
+bHYPRE_HGMRES.h: sidl_BaseException.h
 bHYPRE_HGMRES.h: sidl_BaseInterface.h
 bHYPRE_HGMRES.h: sidl_ClassInfo.h
-bHYPRE_HGMRES.h: sidl_io_Serializer.h
-bHYPRE_HGMRES.h: sidl_io_Deserializer.h
+bHYPRE_HGMRES.h: sidl_RuntimeException.h
+bHYPRE_HGMRES.h: sidl_SIDLException.h
+bHYPRE_HGMRES.h: sidl_rmi_Call.h
+bHYPRE_HGMRES.h: sidl_rmi_Return.h
+bHYPRE_HGMRES.h: bHYPRE_HGMRES_IOR.h
 
 bHYPRE_HPCG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_HPCG.h: sidl_header.h
@@ -517,10 +529,14 @@ bHYPRE_HPCG.h: bHYPRE_Operator.h
 bHYPRE_HPCG.h: bHYPRE_PreconditionedSolver.h
 bHYPRE_HPCG.h: bHYPRE_Solver.h
 bHYPRE_HPCG.h: bHYPRE_Vector.h
+bHYPRE_HPCG.h: sidl_BaseException.h
 bHYPRE_HPCG.h: sidl_BaseInterface.h
 bHYPRE_HPCG.h: sidl_ClassInfo.h
-bHYPRE_HPCG.h: sidl_io_Serializer.h
-bHYPRE_HPCG.h: sidl_io_Deserializer.h
+bHYPRE_HPCG.h: sidl_RuntimeException.h
+bHYPRE_HPCG.h: sidl_SIDLException.h
+bHYPRE_HPCG.h: sidl_rmi_Call.h
+bHYPRE_HPCG.h: sidl_rmi_Return.h
+bHYPRE_HPCG.h: bHYPRE_HPCG_IOR.h
 
 bHYPRE_Hybrid.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Hybrid.h: sidl_header.h
@@ -528,78 +544,114 @@ bHYPRE_Hybrid.h: bHYPRE_MPICommunicator.h
 bHYPRE_Hybrid.h: bHYPRE_Operator.h
 bHYPRE_Hybrid.h: bHYPRE_PreconditionedSolver.h
 bHYPRE_Hybrid.h: bHYPRE_Vector.h
+bHYPRE_Hybrid.h: sidl_BaseException.h
 bHYPRE_Hybrid.h: sidl_BaseInterface.h
 bHYPRE_Hybrid.h: sidl_ClassInfo.h
-bHYPRE_Hybrid.h: sidl_io_Serializer.h
-bHYPRE_Hybrid.h: sidl_io_Deserializer.h
+bHYPRE_Hybrid.h: sidl_RuntimeException.h
+bHYPRE_Hybrid.h: sidl_SIDLException.h
+bHYPRE_Hybrid.h: sidl_rmi_Call.h
+bHYPRE_Hybrid.h: sidl_rmi_Return.h
+bHYPRE_Hybrid.h: bHYPRE_Hybrid_IOR.h
 
 bHYPRE_IJMatrixView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJMatrixView.h: sidl_header.h
 bHYPRE_IJMatrixView.h: bHYPRE_MPICommunicator.h
+bHYPRE_IJMatrixView.h: sidl_BaseException.h
 bHYPRE_IJMatrixView.h: sidl_BaseInterface.h
 bHYPRE_IJMatrixView.h: sidl_ClassInfo.h
-bHYPRE_IJMatrixView.h: sidl_io_Serializer.h
-bHYPRE_IJMatrixView.h: sidl_io_Deserializer.h
+bHYPRE_IJMatrixView.h: sidl_RuntimeException.h
+bHYPRE_IJMatrixView.h: sidl_SIDLException.h
+bHYPRE_IJMatrixView.h: sidl_rmi_Call.h
+bHYPRE_IJMatrixView.h: sidl_rmi_Return.h
+bHYPRE_IJMatrixView.h: bHYPRE_IJMatrixView_IOR.h
 
 bHYPRE_IJParCSRMatrix.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJParCSRMatrix.h: sidl_header.h
 bHYPRE_IJParCSRMatrix.h: bHYPRE_MPICommunicator.h
 bHYPRE_IJParCSRMatrix.h: bHYPRE_Vector.h
+bHYPRE_IJParCSRMatrix.h: sidl_BaseException.h
 bHYPRE_IJParCSRMatrix.h: sidl_BaseInterface.h
 bHYPRE_IJParCSRMatrix.h: sidl_ClassInfo.h
-bHYPRE_IJParCSRMatrix.h: sidl_io_Serializer.h
-bHYPRE_IJParCSRMatrix.h: sidl_io_Deserializer.h
+bHYPRE_IJParCSRMatrix.h: sidl_RuntimeException.h
+bHYPRE_IJParCSRMatrix.h: sidl_SIDLException.h
+bHYPRE_IJParCSRMatrix.h: sidl_rmi_Call.h
+bHYPRE_IJParCSRMatrix.h: sidl_rmi_Return.h
+bHYPRE_IJParCSRMatrix.h: bHYPRE_IJParCSRMatrix_IOR.h
 
 bHYPRE_IJParCSRVector.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJParCSRVector.h: sidl_header.h
 bHYPRE_IJParCSRVector.h: bHYPRE_MPICommunicator.h
 bHYPRE_IJParCSRVector.h: bHYPRE_Vector.h
+bHYPRE_IJParCSRVector.h: sidl_BaseException.h
 bHYPRE_IJParCSRVector.h: sidl_BaseInterface.h
 bHYPRE_IJParCSRVector.h: sidl_ClassInfo.h
-bHYPRE_IJParCSRVector.h: sidl_io_Serializer.h
-bHYPRE_IJParCSRVector.h: sidl_io_Deserializer.h
+bHYPRE_IJParCSRVector.h: sidl_RuntimeException.h
+bHYPRE_IJParCSRVector.h: sidl_SIDLException.h
+bHYPRE_IJParCSRVector.h: sidl_rmi_Call.h
+bHYPRE_IJParCSRVector.h: sidl_rmi_Return.h
+bHYPRE_IJParCSRVector.h: bHYPRE_IJParCSRVector_IOR.h
 
 bHYPRE_IJVectorView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJVectorView.h: sidl_header.h
 bHYPRE_IJVectorView.h: bHYPRE_MPICommunicator.h
+bHYPRE_IJVectorView.h: sidl_BaseException.h
 bHYPRE_IJVectorView.h: sidl_BaseInterface.h
 bHYPRE_IJVectorView.h: sidl_ClassInfo.h
-bHYPRE_IJVectorView.h: sidl_io_Serializer.h
-bHYPRE_IJVectorView.h: sidl_io_Deserializer.h
+bHYPRE_IJVectorView.h: sidl_RuntimeException.h
+bHYPRE_IJVectorView.h: sidl_SIDLException.h
+bHYPRE_IJVectorView.h: sidl_rmi_Call.h
+bHYPRE_IJVectorView.h: sidl_rmi_Return.h
+bHYPRE_IJVectorView.h: bHYPRE_IJVectorView_IOR.h
 
 bHYPRE_IdentitySolver.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IdentitySolver.h: sidl_header.h
 bHYPRE_IdentitySolver.h: bHYPRE_MPICommunicator.h
 bHYPRE_IdentitySolver.h: bHYPRE_Operator.h
 bHYPRE_IdentitySolver.h: bHYPRE_Vector.h
+bHYPRE_IdentitySolver.h: sidl_BaseException.h
 bHYPRE_IdentitySolver.h: sidl_BaseInterface.h
 bHYPRE_IdentitySolver.h: sidl_ClassInfo.h
-bHYPRE_IdentitySolver.h: sidl_io_Serializer.h
-bHYPRE_IdentitySolver.h: sidl_io_Deserializer.h
+bHYPRE_IdentitySolver.h: sidl_RuntimeException.h
+bHYPRE_IdentitySolver.h: sidl_SIDLException.h
+bHYPRE_IdentitySolver.h: sidl_rmi_Call.h
+bHYPRE_IdentitySolver.h: sidl_rmi_Return.h
+bHYPRE_IdentitySolver.h: bHYPRE_IdentitySolver_IOR.h
 
 bHYPRE_MPICommunicator.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_MPICommunicator.h: sidl_header.h
+bHYPRE_MPICommunicator.h: sidl_BaseException.h
 bHYPRE_MPICommunicator.h: sidl_BaseInterface.h
 bHYPRE_MPICommunicator.h: sidl_ClassInfo.h
-bHYPRE_MPICommunicator.h: sidl_io_Serializer.h
-bHYPRE_MPICommunicator.h: sidl_io_Deserializer.h
+bHYPRE_MPICommunicator.h: sidl_RuntimeException.h
+bHYPRE_MPICommunicator.h: sidl_SIDLException.h
+bHYPRE_MPICommunicator.h: sidl_rmi_Call.h
+bHYPRE_MPICommunicator.h: sidl_rmi_Return.h
+bHYPRE_MPICommunicator.h: bHYPRE_MPICommunicator_IOR.h
 
 bHYPRE_MatrixVectorView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_MatrixVectorView.h: sidl_header.h
 bHYPRE_MatrixVectorView.h: bHYPRE_MPICommunicator.h
+bHYPRE_MatrixVectorView.h: sidl_BaseException.h
 bHYPRE_MatrixVectorView.h: sidl_BaseInterface.h
 bHYPRE_MatrixVectorView.h: sidl_ClassInfo.h
-bHYPRE_MatrixVectorView.h: sidl_io_Serializer.h
-bHYPRE_MatrixVectorView.h: sidl_io_Deserializer.h
+bHYPRE_MatrixVectorView.h: sidl_RuntimeException.h
+bHYPRE_MatrixVectorView.h: sidl_SIDLException.h
+bHYPRE_MatrixVectorView.h: sidl_rmi_Call.h
+bHYPRE_MatrixVectorView.h: sidl_rmi_Return.h
+bHYPRE_MatrixVectorView.h: bHYPRE_MatrixVectorView_IOR.h
 
 bHYPRE_Operator.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Operator.h: sidl_header.h
 bHYPRE_Operator.h: bHYPRE_MPICommunicator.h
 bHYPRE_Operator.h: bHYPRE_Vector.h
+bHYPRE_Operator.h: sidl_BaseException.h
 bHYPRE_Operator.h: sidl_BaseInterface.h
 bHYPRE_Operator.h: sidl_ClassInfo.h
-bHYPRE_Operator.h: sidl_io_Serializer.h
-bHYPRE_Operator.h: sidl_io_Deserializer.h
+bHYPRE_Operator.h: sidl_RuntimeException.h
+bHYPRE_Operator.h: sidl_SIDLException.h
+bHYPRE_Operator.h: sidl_rmi_Call.h
+bHYPRE_Operator.h: sidl_rmi_Return.h
+bHYPRE_Operator.h: bHYPRE_Operator_IOR.h
 
 bHYPRE_PCG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_PCG.h: sidl_header.h
@@ -608,10 +660,14 @@ bHYPRE_PCG.h: bHYPRE_Operator.h
 bHYPRE_PCG.h: bHYPRE_PreconditionedSolver.h
 bHYPRE_PCG.h: bHYPRE_Solver.h
 bHYPRE_PCG.h: bHYPRE_Vector.h
+bHYPRE_PCG.h: sidl_BaseException.h
 bHYPRE_PCG.h: sidl_BaseInterface.h
 bHYPRE_PCG.h: sidl_ClassInfo.h
-bHYPRE_PCG.h: sidl_io_Serializer.h
-bHYPRE_PCG.h: sidl_io_Deserializer.h
+bHYPRE_PCG.h: sidl_RuntimeException.h
+bHYPRE_PCG.h: sidl_SIDLException.h
+bHYPRE_PCG.h: sidl_rmi_Call.h
+bHYPRE_PCG.h: sidl_rmi_Return.h
+bHYPRE_PCG.h: bHYPRE_PCG_IOR.h
 
 bHYPRE_ParCSRDiagScale.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ParCSRDiagScale.h: sidl_header.h
@@ -619,10 +675,14 @@ bHYPRE_ParCSRDiagScale.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE_ParCSRDiagScale.h: bHYPRE_MPICommunicator.h
 bHYPRE_ParCSRDiagScale.h: bHYPRE_Operator.h
 bHYPRE_ParCSRDiagScale.h: bHYPRE_Vector.h
+bHYPRE_ParCSRDiagScale.h: sidl_BaseException.h
 bHYPRE_ParCSRDiagScale.h: sidl_BaseInterface.h
 bHYPRE_ParCSRDiagScale.h: sidl_ClassInfo.h
-bHYPRE_ParCSRDiagScale.h: sidl_io_Serializer.h
-bHYPRE_ParCSRDiagScale.h: sidl_io_Deserializer.h
+bHYPRE_ParCSRDiagScale.h: sidl_RuntimeException.h
+bHYPRE_ParCSRDiagScale.h: sidl_SIDLException.h
+bHYPRE_ParCSRDiagScale.h: sidl_rmi_Call.h
+bHYPRE_ParCSRDiagScale.h: sidl_rmi_Return.h
+bHYPRE_ParCSRDiagScale.h: bHYPRE_ParCSRDiagScale_IOR.h
 
 bHYPRE_ParaSails.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ParaSails.h: sidl_header.h
@@ -630,20 +690,28 @@ bHYPRE_ParaSails.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE_ParaSails.h: bHYPRE_MPICommunicator.h
 bHYPRE_ParaSails.h: bHYPRE_Operator.h
 bHYPRE_ParaSails.h: bHYPRE_Vector.h
+bHYPRE_ParaSails.h: sidl_BaseException.h
 bHYPRE_ParaSails.h: sidl_BaseInterface.h
 bHYPRE_ParaSails.h: sidl_ClassInfo.h
-bHYPRE_ParaSails.h: sidl_io_Serializer.h
-bHYPRE_ParaSails.h: sidl_io_Deserializer.h
+bHYPRE_ParaSails.h: sidl_RuntimeException.h
+bHYPRE_ParaSails.h: sidl_SIDLException.h
+bHYPRE_ParaSails.h: sidl_rmi_Call.h
+bHYPRE_ParaSails.h: sidl_rmi_Return.h
+bHYPRE_ParaSails.h: bHYPRE_ParaSails_IOR.h
 
 bHYPRE_Pilut.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Pilut.h: sidl_header.h
 bHYPRE_Pilut.h: bHYPRE_MPICommunicator.h
 bHYPRE_Pilut.h: bHYPRE_Operator.h
 bHYPRE_Pilut.h: bHYPRE_Vector.h
+bHYPRE_Pilut.h: sidl_BaseException.h
 bHYPRE_Pilut.h: sidl_BaseInterface.h
 bHYPRE_Pilut.h: sidl_ClassInfo.h
-bHYPRE_Pilut.h: sidl_io_Serializer.h
-bHYPRE_Pilut.h: sidl_io_Deserializer.h
+bHYPRE_Pilut.h: sidl_RuntimeException.h
+bHYPRE_Pilut.h: sidl_SIDLException.h
+bHYPRE_Pilut.h: sidl_rmi_Call.h
+bHYPRE_Pilut.h: sidl_rmi_Return.h
+bHYPRE_Pilut.h: bHYPRE_Pilut_IOR.h
 
 bHYPRE_PreconditionedSolver.h:                                                \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -652,75 +720,107 @@ bHYPRE_PreconditionedSolver.h: bHYPRE_MPICommunicator.h
 bHYPRE_PreconditionedSolver.h: bHYPRE_Operator.h
 bHYPRE_PreconditionedSolver.h: bHYPRE_Solver.h
 bHYPRE_PreconditionedSolver.h: bHYPRE_Vector.h
+bHYPRE_PreconditionedSolver.h: sidl_BaseException.h
 bHYPRE_PreconditionedSolver.h: sidl_BaseInterface.h
 bHYPRE_PreconditionedSolver.h: sidl_ClassInfo.h
-bHYPRE_PreconditionedSolver.h: sidl_io_Serializer.h
-bHYPRE_PreconditionedSolver.h: sidl_io_Deserializer.h
+bHYPRE_PreconditionedSolver.h: sidl_RuntimeException.h
+bHYPRE_PreconditionedSolver.h: sidl_SIDLException.h
+bHYPRE_PreconditionedSolver.h: sidl_rmi_Call.h
+bHYPRE_PreconditionedSolver.h: sidl_rmi_Return.h
+bHYPRE_PreconditionedSolver.h: bHYPRE_PreconditionedSolver_IOR.h
 
 bHYPRE_ProblemDefinition.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ProblemDefinition.h: sidl_header.h
 bHYPRE_ProblemDefinition.h: bHYPRE_MPICommunicator.h
+bHYPRE_ProblemDefinition.h: sidl_BaseException.h
 bHYPRE_ProblemDefinition.h: sidl_BaseInterface.h
 bHYPRE_ProblemDefinition.h: sidl_ClassInfo.h
-bHYPRE_ProblemDefinition.h: sidl_io_Serializer.h
-bHYPRE_ProblemDefinition.h: sidl_io_Deserializer.h
+bHYPRE_ProblemDefinition.h: sidl_RuntimeException.h
+bHYPRE_ProblemDefinition.h: sidl_SIDLException.h
+bHYPRE_ProblemDefinition.h: sidl_rmi_Call.h
+bHYPRE_ProblemDefinition.h: sidl_rmi_Return.h
+bHYPRE_ProblemDefinition.h: bHYPRE_ProblemDefinition_IOR.h
 
 bHYPRE_SStructDiagScale.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructDiagScale.h: sidl_header.h
 bHYPRE_SStructDiagScale.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructDiagScale.h: bHYPRE_Operator.h
 bHYPRE_SStructDiagScale.h: bHYPRE_Vector.h
+bHYPRE_SStructDiagScale.h: sidl_BaseException.h
 bHYPRE_SStructDiagScale.h: sidl_BaseInterface.h
 bHYPRE_SStructDiagScale.h: sidl_ClassInfo.h
-bHYPRE_SStructDiagScale.h: sidl_io_Serializer.h
-bHYPRE_SStructDiagScale.h: sidl_io_Deserializer.h
+bHYPRE_SStructDiagScale.h: sidl_RuntimeException.h
+bHYPRE_SStructDiagScale.h: sidl_SIDLException.h
+bHYPRE_SStructDiagScale.h: sidl_rmi_Call.h
+bHYPRE_SStructDiagScale.h: sidl_rmi_Return.h
+bHYPRE_SStructDiagScale.h: bHYPRE_SStructDiagScale_IOR.h
 
 bHYPRE_SStructGraph.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph.h: sidl_header.h
 bHYPRE_SStructGraph.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructGraph.h: bHYPRE_SStructGrid.h
 bHYPRE_SStructGraph.h: bHYPRE_SStructStencil.h
+bHYPRE_SStructGraph.h: sidl_BaseException.h
 bHYPRE_SStructGraph.h: sidl_BaseInterface.h
 bHYPRE_SStructGraph.h: sidl_ClassInfo.h
-bHYPRE_SStructGraph.h: sidl_io_Serializer.h
-bHYPRE_SStructGraph.h: sidl_io_Deserializer.h
+bHYPRE_SStructGraph.h: sidl_RuntimeException.h
+bHYPRE_SStructGraph.h: sidl_SIDLException.h
+bHYPRE_SStructGraph.h: sidl_rmi_Call.h
+bHYPRE_SStructGraph.h: sidl_rmi_Return.h
+bHYPRE_SStructGraph.h: bHYPRE_SStructGraph_IOR.h
 
 bHYPRE_SStructGrid.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGrid.h: sidl_header.h
 bHYPRE_SStructGrid.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructGrid.h: bHYPRE_SStructVariable.h
+bHYPRE_SStructGrid.h: sidl_BaseException.h
 bHYPRE_SStructGrid.h: sidl_BaseInterface.h
 bHYPRE_SStructGrid.h: sidl_ClassInfo.h
-bHYPRE_SStructGrid.h: sidl_io_Serializer.h
-bHYPRE_SStructGrid.h: sidl_io_Deserializer.h
+bHYPRE_SStructGrid.h: sidl_RuntimeException.h
+bHYPRE_SStructGrid.h: sidl_SIDLException.h
+bHYPRE_SStructGrid.h: sidl_rmi_Call.h
+bHYPRE_SStructGrid.h: sidl_rmi_Return.h
+bHYPRE_SStructGrid.h: bHYPRE_SStructGrid_IOR.h
 
 bHYPRE_SStructMatrix.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructMatrix.h: sidl_header.h
 bHYPRE_SStructMatrix.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructMatrix.h: bHYPRE_SStructGraph.h
 bHYPRE_SStructMatrix.h: bHYPRE_Vector.h
+bHYPRE_SStructMatrix.h: sidl_BaseException.h
 bHYPRE_SStructMatrix.h: sidl_BaseInterface.h
 bHYPRE_SStructMatrix.h: sidl_ClassInfo.h
-bHYPRE_SStructMatrix.h: sidl_io_Serializer.h
-bHYPRE_SStructMatrix.h: sidl_io_Deserializer.h
+bHYPRE_SStructMatrix.h: sidl_RuntimeException.h
+bHYPRE_SStructMatrix.h: sidl_SIDLException.h
+bHYPRE_SStructMatrix.h: sidl_rmi_Call.h
+bHYPRE_SStructMatrix.h: sidl_rmi_Return.h
+bHYPRE_SStructMatrix.h: bHYPRE_SStructMatrix_IOR.h
 
 bHYPRE_SStructMatrixVectorView.h:                                             \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructMatrixVectorView.h: sidl_header.h
 bHYPRE_SStructMatrixVectorView.h: bHYPRE_MPICommunicator.h
+bHYPRE_SStructMatrixVectorView.h: sidl_BaseException.h
 bHYPRE_SStructMatrixVectorView.h: sidl_BaseInterface.h
 bHYPRE_SStructMatrixVectorView.h: sidl_ClassInfo.h
-bHYPRE_SStructMatrixVectorView.h: sidl_io_Serializer.h
-bHYPRE_SStructMatrixVectorView.h: sidl_io_Deserializer.h
+bHYPRE_SStructMatrixVectorView.h: sidl_RuntimeException.h
+bHYPRE_SStructMatrixVectorView.h: sidl_SIDLException.h
+bHYPRE_SStructMatrixVectorView.h: sidl_rmi_Call.h
+bHYPRE_SStructMatrixVectorView.h: sidl_rmi_Return.h
+bHYPRE_SStructMatrixVectorView.h: bHYPRE_SStructMatrixVectorView_IOR.h
 
 bHYPRE_SStructMatrixView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructMatrixView.h: sidl_header.h
 bHYPRE_SStructMatrixView.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructMatrixView.h: bHYPRE_SStructGraph.h
+bHYPRE_SStructMatrixView.h: sidl_BaseException.h
 bHYPRE_SStructMatrixView.h: sidl_BaseInterface.h
 bHYPRE_SStructMatrixView.h: sidl_ClassInfo.h
-bHYPRE_SStructMatrixView.h: sidl_io_Serializer.h
-bHYPRE_SStructMatrixView.h: sidl_io_Deserializer.h
+bHYPRE_SStructMatrixView.h: sidl_RuntimeException.h
+bHYPRE_SStructMatrixView.h: sidl_SIDLException.h
+bHYPRE_SStructMatrixView.h: sidl_rmi_Call.h
+bHYPRE_SStructMatrixView.h: sidl_rmi_Return.h
+bHYPRE_SStructMatrixView.h: bHYPRE_SStructMatrixView_IOR.h
 
 bHYPRE_SStructParCSRMatrix.h:                                                 \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -728,10 +828,14 @@ bHYPRE_SStructParCSRMatrix.h: sidl_header.h
 bHYPRE_SStructParCSRMatrix.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructParCSRMatrix.h: bHYPRE_SStructGraph.h
 bHYPRE_SStructParCSRMatrix.h: bHYPRE_Vector.h
+bHYPRE_SStructParCSRMatrix.h: sidl_BaseException.h
 bHYPRE_SStructParCSRMatrix.h: sidl_BaseInterface.h
 bHYPRE_SStructParCSRMatrix.h: sidl_ClassInfo.h
-bHYPRE_SStructParCSRMatrix.h: sidl_io_Serializer.h
-bHYPRE_SStructParCSRMatrix.h: sidl_io_Deserializer.h
+bHYPRE_SStructParCSRMatrix.h: sidl_RuntimeException.h
+bHYPRE_SStructParCSRMatrix.h: sidl_SIDLException.h
+bHYPRE_SStructParCSRMatrix.h: sidl_rmi_Call.h
+bHYPRE_SStructParCSRMatrix.h: sidl_rmi_Return.h
+bHYPRE_SStructParCSRMatrix.h: bHYPRE_SStructParCSRMatrix_IOR.h
 
 bHYPRE_SStructParCSRVector.h:                                                 \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -739,29 +843,40 @@ bHYPRE_SStructParCSRVector.h: sidl_header.h
 bHYPRE_SStructParCSRVector.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructParCSRVector.h: bHYPRE_SStructGrid.h
 bHYPRE_SStructParCSRVector.h: bHYPRE_Vector.h
+bHYPRE_SStructParCSRVector.h: sidl_BaseException.h
 bHYPRE_SStructParCSRVector.h: sidl_BaseInterface.h
 bHYPRE_SStructParCSRVector.h: sidl_ClassInfo.h
-bHYPRE_SStructParCSRVector.h: sidl_io_Serializer.h
-bHYPRE_SStructParCSRVector.h: sidl_io_Deserializer.h
+bHYPRE_SStructParCSRVector.h: sidl_RuntimeException.h
+bHYPRE_SStructParCSRVector.h: sidl_SIDLException.h
+bHYPRE_SStructParCSRVector.h: sidl_rmi_Call.h
+bHYPRE_SStructParCSRVector.h: sidl_rmi_Return.h
+bHYPRE_SStructParCSRVector.h: bHYPRE_SStructParCSRVector_IOR.h
 
 bHYPRE_SStructSplit.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructSplit.h: sidl_header.h
 bHYPRE_SStructSplit.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructSplit.h: bHYPRE_Operator.h
 bHYPRE_SStructSplit.h: bHYPRE_Vector.h
+bHYPRE_SStructSplit.h: sidl_BaseException.h
 bHYPRE_SStructSplit.h: sidl_BaseInterface.h
 bHYPRE_SStructSplit.h: sidl_ClassInfo.h
-bHYPRE_SStructSplit.h: sidl_io_Serializer.h
-bHYPRE_SStructSplit.h: sidl_io_Deserializer.h
+bHYPRE_SStructSplit.h: sidl_RuntimeException.h
+bHYPRE_SStructSplit.h: sidl_SIDLException.h
+bHYPRE_SStructSplit.h: sidl_rmi_Call.h
+bHYPRE_SStructSplit.h: sidl_rmi_Return.h
+bHYPRE_SStructSplit.h: bHYPRE_SStructSplit_IOR.h
 
 bHYPRE_SStructStencil.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructStencil.h: sidl_header.h
+bHYPRE_SStructStencil.h: sidl_BaseException.h
 bHYPRE_SStructStencil.h: sidl_BaseInterface.h
 bHYPRE_SStructStencil.h: sidl_ClassInfo.h
-bHYPRE_SStructStencil.h: sidl_io_Serializer.h
-bHYPRE_SStructStencil.h: sidl_io_Deserializer.h
+bHYPRE_SStructStencil.h: sidl_RuntimeException.h
+bHYPRE_SStructStencil.h: sidl_SIDLException.h
+bHYPRE_SStructStencil.h: sidl_rmi_Call.h
+bHYPRE_SStructStencil.h: sidl_rmi_Return.h
+bHYPRE_SStructStencil.h: bHYPRE_SStructStencil_IOR.h
 
-bHYPRE_SStructVariable.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructVariable.h: bHYPRE_SStructVariable_IOR.h
 
 bHYPRE_SStructVector.h: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -769,19 +884,27 @@ bHYPRE_SStructVector.h: sidl_header.h
 bHYPRE_SStructVector.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructVector.h: bHYPRE_SStructGrid.h
 bHYPRE_SStructVector.h: bHYPRE_Vector.h
+bHYPRE_SStructVector.h: sidl_BaseException.h
 bHYPRE_SStructVector.h: sidl_BaseInterface.h
 bHYPRE_SStructVector.h: sidl_ClassInfo.h
-bHYPRE_SStructVector.h: sidl_io_Serializer.h
-bHYPRE_SStructVector.h: sidl_io_Deserializer.h
+bHYPRE_SStructVector.h: sidl_RuntimeException.h
+bHYPRE_SStructVector.h: sidl_SIDLException.h
+bHYPRE_SStructVector.h: sidl_rmi_Call.h
+bHYPRE_SStructVector.h: sidl_rmi_Return.h
+bHYPRE_SStructVector.h: bHYPRE_SStructVector_IOR.h
 
 bHYPRE_SStructVectorView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructVectorView.h: sidl_header.h
 bHYPRE_SStructVectorView.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructVectorView.h: bHYPRE_SStructGrid.h
+bHYPRE_SStructVectorView.h: sidl_BaseException.h
 bHYPRE_SStructVectorView.h: sidl_BaseInterface.h
 bHYPRE_SStructVectorView.h: sidl_ClassInfo.h
-bHYPRE_SStructVectorView.h: sidl_io_Serializer.h
-bHYPRE_SStructVectorView.h: sidl_io_Deserializer.h
+bHYPRE_SStructVectorView.h: sidl_RuntimeException.h
+bHYPRE_SStructVectorView.h: sidl_SIDLException.h
+bHYPRE_SStructVectorView.h: sidl_rmi_Call.h
+bHYPRE_SStructVectorView.h: sidl_rmi_Return.h
+bHYPRE_SStructVectorView.h: bHYPRE_SStructVectorView_IOR.h
 
 bHYPRE_Schwarz.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Schwarz.h: sidl_header.h
@@ -789,20 +912,28 @@ bHYPRE_Schwarz.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE_Schwarz.h: bHYPRE_MPICommunicator.h
 bHYPRE_Schwarz.h: bHYPRE_Operator.h
 bHYPRE_Schwarz.h: bHYPRE_Vector.h
+bHYPRE_Schwarz.h: sidl_BaseException.h
 bHYPRE_Schwarz.h: sidl_BaseInterface.h
 bHYPRE_Schwarz.h: sidl_ClassInfo.h
-bHYPRE_Schwarz.h: sidl_io_Serializer.h
-bHYPRE_Schwarz.h: sidl_io_Deserializer.h
+bHYPRE_Schwarz.h: sidl_RuntimeException.h
+bHYPRE_Schwarz.h: sidl_SIDLException.h
+bHYPRE_Schwarz.h: sidl_rmi_Call.h
+bHYPRE_Schwarz.h: sidl_rmi_Return.h
+bHYPRE_Schwarz.h: bHYPRE_Schwarz_IOR.h
 
 bHYPRE_Solver.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Solver.h: sidl_header.h
 bHYPRE_Solver.h: bHYPRE_MPICommunicator.h
 bHYPRE_Solver.h: bHYPRE_Operator.h
 bHYPRE_Solver.h: bHYPRE_Vector.h
+bHYPRE_Solver.h: sidl_BaseException.h
 bHYPRE_Solver.h: sidl_BaseInterface.h
 bHYPRE_Solver.h: sidl_ClassInfo.h
-bHYPRE_Solver.h: sidl_io_Serializer.h
-bHYPRE_Solver.h: sidl_io_Deserializer.h
+bHYPRE_Solver.h: sidl_RuntimeException.h
+bHYPRE_Solver.h: sidl_SIDLException.h
+bHYPRE_Solver.h: sidl_rmi_Call.h
+bHYPRE_Solver.h: sidl_rmi_Return.h
+bHYPRE_Solver.h: bHYPRE_Solver_IOR.h
 
 bHYPRE_StructDiagScale.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructDiagScale.h: sidl_header.h
@@ -810,18 +941,26 @@ bHYPRE_StructDiagScale.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructDiagScale.h: bHYPRE_Operator.h
 bHYPRE_StructDiagScale.h: bHYPRE_StructMatrix.h
 bHYPRE_StructDiagScale.h: bHYPRE_Vector.h
+bHYPRE_StructDiagScale.h: sidl_BaseException.h
 bHYPRE_StructDiagScale.h: sidl_BaseInterface.h
 bHYPRE_StructDiagScale.h: sidl_ClassInfo.h
-bHYPRE_StructDiagScale.h: sidl_io_Serializer.h
-bHYPRE_StructDiagScale.h: sidl_io_Deserializer.h
+bHYPRE_StructDiagScale.h: sidl_RuntimeException.h
+bHYPRE_StructDiagScale.h: sidl_SIDLException.h
+bHYPRE_StructDiagScale.h: sidl_rmi_Call.h
+bHYPRE_StructDiagScale.h: sidl_rmi_Return.h
+bHYPRE_StructDiagScale.h: bHYPRE_StructDiagScale_IOR.h
 
 bHYPRE_StructGrid.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructGrid.h: sidl_header.h
 bHYPRE_StructGrid.h: bHYPRE_MPICommunicator.h
+bHYPRE_StructGrid.h: sidl_BaseException.h
 bHYPRE_StructGrid.h: sidl_BaseInterface.h
 bHYPRE_StructGrid.h: sidl_ClassInfo.h
-bHYPRE_StructGrid.h: sidl_io_Serializer.h
-bHYPRE_StructGrid.h: sidl_io_Deserializer.h
+bHYPRE_StructGrid.h: sidl_RuntimeException.h
+bHYPRE_StructGrid.h: sidl_SIDLException.h
+bHYPRE_StructGrid.h: sidl_rmi_Call.h
+bHYPRE_StructGrid.h: sidl_rmi_Return.h
+bHYPRE_StructGrid.h: bHYPRE_StructGrid_IOR.h
 
 bHYPRE_StructJacobi.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructJacobi.h: sidl_header.h
@@ -829,10 +968,14 @@ bHYPRE_StructJacobi.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructJacobi.h: bHYPRE_Operator.h
 bHYPRE_StructJacobi.h: bHYPRE_StructMatrix.h
 bHYPRE_StructJacobi.h: bHYPRE_Vector.h
+bHYPRE_StructJacobi.h: sidl_BaseException.h
 bHYPRE_StructJacobi.h: sidl_BaseInterface.h
 bHYPRE_StructJacobi.h: sidl_ClassInfo.h
-bHYPRE_StructJacobi.h: sidl_io_Serializer.h
-bHYPRE_StructJacobi.h: sidl_io_Deserializer.h
+bHYPRE_StructJacobi.h: sidl_RuntimeException.h
+bHYPRE_StructJacobi.h: sidl_SIDLException.h
+bHYPRE_StructJacobi.h: sidl_rmi_Call.h
+bHYPRE_StructJacobi.h: sidl_rmi_Return.h
+bHYPRE_StructJacobi.h: bHYPRE_StructJacobi_IOR.h
 
 bHYPRE_StructMatrix.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructMatrix.h: sidl_header.h
@@ -840,20 +983,28 @@ bHYPRE_StructMatrix.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructMatrix.h: bHYPRE_StructGrid.h
 bHYPRE_StructMatrix.h: bHYPRE_StructStencil.h
 bHYPRE_StructMatrix.h: bHYPRE_Vector.h
+bHYPRE_StructMatrix.h: sidl_BaseException.h
 bHYPRE_StructMatrix.h: sidl_BaseInterface.h
 bHYPRE_StructMatrix.h: sidl_ClassInfo.h
-bHYPRE_StructMatrix.h: sidl_io_Serializer.h
-bHYPRE_StructMatrix.h: sidl_io_Deserializer.h
+bHYPRE_StructMatrix.h: sidl_RuntimeException.h
+bHYPRE_StructMatrix.h: sidl_SIDLException.h
+bHYPRE_StructMatrix.h: sidl_rmi_Call.h
+bHYPRE_StructMatrix.h: sidl_rmi_Return.h
+bHYPRE_StructMatrix.h: bHYPRE_StructMatrix_IOR.h
 
 bHYPRE_StructMatrixView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructMatrixView.h: sidl_header.h
 bHYPRE_StructMatrixView.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructMatrixView.h: bHYPRE_StructGrid.h
 bHYPRE_StructMatrixView.h: bHYPRE_StructStencil.h
+bHYPRE_StructMatrixView.h: sidl_BaseException.h
 bHYPRE_StructMatrixView.h: sidl_BaseInterface.h
 bHYPRE_StructMatrixView.h: sidl_ClassInfo.h
-bHYPRE_StructMatrixView.h: sidl_io_Serializer.h
-bHYPRE_StructMatrixView.h: sidl_io_Deserializer.h
+bHYPRE_StructMatrixView.h: sidl_RuntimeException.h
+bHYPRE_StructMatrixView.h: sidl_SIDLException.h
+bHYPRE_StructMatrixView.h: sidl_rmi_Call.h
+bHYPRE_StructMatrixView.h: sidl_rmi_Return.h
+bHYPRE_StructMatrixView.h: bHYPRE_StructMatrixView_IOR.h
 
 bHYPRE_StructPFMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructPFMG.h: sidl_header.h
@@ -861,10 +1012,14 @@ bHYPRE_StructPFMG.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructPFMG.h: bHYPRE_Operator.h
 bHYPRE_StructPFMG.h: bHYPRE_StructMatrix.h
 bHYPRE_StructPFMG.h: bHYPRE_Vector.h
+bHYPRE_StructPFMG.h: sidl_BaseException.h
 bHYPRE_StructPFMG.h: sidl_BaseInterface.h
 bHYPRE_StructPFMG.h: sidl_ClassInfo.h
-bHYPRE_StructPFMG.h: sidl_io_Serializer.h
-bHYPRE_StructPFMG.h: sidl_io_Deserializer.h
+bHYPRE_StructPFMG.h: sidl_RuntimeException.h
+bHYPRE_StructPFMG.h: sidl_SIDLException.h
+bHYPRE_StructPFMG.h: sidl_rmi_Call.h
+bHYPRE_StructPFMG.h: sidl_rmi_Return.h
+bHYPRE_StructPFMG.h: bHYPRE_StructPFMG_IOR.h
 
 bHYPRE_StructSMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructSMG.h: sidl_header.h
@@ -872,43 +1027,63 @@ bHYPRE_StructSMG.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructSMG.h: bHYPRE_Operator.h
 bHYPRE_StructSMG.h: bHYPRE_StructMatrix.h
 bHYPRE_StructSMG.h: bHYPRE_Vector.h
+bHYPRE_StructSMG.h: sidl_BaseException.h
 bHYPRE_StructSMG.h: sidl_BaseInterface.h
 bHYPRE_StructSMG.h: sidl_ClassInfo.h
-bHYPRE_StructSMG.h: sidl_io_Serializer.h
-bHYPRE_StructSMG.h: sidl_io_Deserializer.h
+bHYPRE_StructSMG.h: sidl_RuntimeException.h
+bHYPRE_StructSMG.h: sidl_SIDLException.h
+bHYPRE_StructSMG.h: sidl_rmi_Call.h
+bHYPRE_StructSMG.h: sidl_rmi_Return.h
+bHYPRE_StructSMG.h: bHYPRE_StructSMG_IOR.h
 
 bHYPRE_StructStencil.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructStencil.h: sidl_header.h
+bHYPRE_StructStencil.h: sidl_BaseException.h
 bHYPRE_StructStencil.h: sidl_BaseInterface.h
 bHYPRE_StructStencil.h: sidl_ClassInfo.h
-bHYPRE_StructStencil.h: sidl_io_Serializer.h
-bHYPRE_StructStencil.h: sidl_io_Deserializer.h
+bHYPRE_StructStencil.h: sidl_RuntimeException.h
+bHYPRE_StructStencil.h: sidl_SIDLException.h
+bHYPRE_StructStencil.h: sidl_rmi_Call.h
+bHYPRE_StructStencil.h: sidl_rmi_Return.h
+bHYPRE_StructStencil.h: bHYPRE_StructStencil_IOR.h
 
 bHYPRE_StructVector.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructVector.h: sidl_header.h
 bHYPRE_StructVector.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructVector.h: bHYPRE_StructGrid.h
 bHYPRE_StructVector.h: bHYPRE_Vector.h
+bHYPRE_StructVector.h: sidl_BaseException.h
 bHYPRE_StructVector.h: sidl_BaseInterface.h
 bHYPRE_StructVector.h: sidl_ClassInfo.h
-bHYPRE_StructVector.h: sidl_io_Serializer.h
-bHYPRE_StructVector.h: sidl_io_Deserializer.h
+bHYPRE_StructVector.h: sidl_RuntimeException.h
+bHYPRE_StructVector.h: sidl_SIDLException.h
+bHYPRE_StructVector.h: sidl_rmi_Call.h
+bHYPRE_StructVector.h: sidl_rmi_Return.h
+bHYPRE_StructVector.h: bHYPRE_StructVector_IOR.h
 
 bHYPRE_StructVectorView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructVectorView.h: sidl_header.h
 bHYPRE_StructVectorView.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructVectorView.h: bHYPRE_StructGrid.h
+bHYPRE_StructVectorView.h: sidl_BaseException.h
 bHYPRE_StructVectorView.h: sidl_BaseInterface.h
 bHYPRE_StructVectorView.h: sidl_ClassInfo.h
-bHYPRE_StructVectorView.h: sidl_io_Serializer.h
-bHYPRE_StructVectorView.h: sidl_io_Deserializer.h
+bHYPRE_StructVectorView.h: sidl_RuntimeException.h
+bHYPRE_StructVectorView.h: sidl_SIDLException.h
+bHYPRE_StructVectorView.h: sidl_rmi_Call.h
+bHYPRE_StructVectorView.h: sidl_rmi_Return.h
+bHYPRE_StructVectorView.h: bHYPRE_StructVectorView_IOR.h
 
 bHYPRE_Vector.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Vector.h: sidl_header.h
+bHYPRE_Vector.h: sidl_BaseException.h
 bHYPRE_Vector.h: sidl_BaseInterface.h
 bHYPRE_Vector.h: sidl_ClassInfo.h
-bHYPRE_Vector.h: sidl_io_Serializer.h
-bHYPRE_Vector.h: sidl_io_Deserializer.h
+bHYPRE_Vector.h: sidl_RuntimeException.h
+bHYPRE_Vector.h: sidl_SIDLException.h
+bHYPRE_Vector.h: sidl_rmi_Call.h
+bHYPRE_Vector.h: sidl_rmi_Return.h
+bHYPRE_Vector.h: bHYPRE_Vector_IOR.h
 
 
 # STUBSRCS dependencies.
@@ -918,10 +1093,19 @@ bHYPRE_BiCGSTAB_Stub.c: bHYPRE_BiCGSTAB_IOR.h
 bHYPRE_BiCGSTAB_Stub.c: sidl_interface_IOR.h
 bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_Exception.h
 bHYPRE_BiCGSTAB_Stub.c: sidl_interface_IOR.h
 bHYPRE_BiCGSTAB_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_BiCGSTAB_Stub.c: sidl_BaseClass.h
 bHYPRE_BiCGSTAB_Stub.c: sidl_ClassInfo.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_Response.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_BoomerAMG_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_Stub.c: bHYPRE_BoomerAMG.h
@@ -929,10 +1113,19 @@ bHYPRE_BoomerAMG_Stub.c: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_BoomerAMG_Stub.c: sidl_interface_IOR.h
 bHYPRE_BoomerAMG_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_BoomerAMG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_BoomerAMG_Stub.c: sidl_Exception.h
 bHYPRE_BoomerAMG_Stub.c: sidl_interface_IOR.h
 bHYPRE_BoomerAMG_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_BoomerAMG_Stub.c: sidl_BaseClass.h
 bHYPRE_BoomerAMG_Stub.c: sidl_ClassInfo.h
+bHYPRE_BoomerAMG_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_BoomerAMG_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_BoomerAMG_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_BoomerAMG_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_BoomerAMG_Stub.c: sidl_rmi_Response.h
+bHYPRE_BoomerAMG_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_BoomerAMG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_BoomerAMG_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_CGNR_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CGNR_Stub.c: bHYPRE_CGNR.h
@@ -940,10 +1133,19 @@ bHYPRE_CGNR_Stub.c: bHYPRE_CGNR_IOR.h
 bHYPRE_CGNR_Stub.c: sidl_interface_IOR.h
 bHYPRE_CGNR_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_CGNR_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_CGNR_Stub.c: sidl_Exception.h
 bHYPRE_CGNR_Stub.c: sidl_interface_IOR.h
 bHYPRE_CGNR_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_CGNR_Stub.c: sidl_BaseClass.h
 bHYPRE_CGNR_Stub.c: sidl_ClassInfo.h
+bHYPRE_CGNR_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_CGNR_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_CGNR_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_CGNR_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_CGNR_Stub.c: sidl_rmi_Response.h
+bHYPRE_CGNR_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_CGNR_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_CGNR_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_CoefficientAccess_Stub.c:                                              \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -952,8 +1154,19 @@ bHYPRE_CoefficientAccess_Stub.c: bHYPRE_CoefficientAccess_IOR.h
 bHYPRE_CoefficientAccess_Stub.c: sidl_interface_IOR.h
 bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_Exception.h
 bHYPRE_CoefficientAccess_Stub.c: sidl_interface_IOR.h
 bHYPRE_CoefficientAccess_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_BaseClass.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_ClassInfo.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_Response.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_CoefficientAccess_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_Euclid_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Euclid_Stub.c: bHYPRE_Euclid.h
@@ -961,10 +1174,19 @@ bHYPRE_Euclid_Stub.c: bHYPRE_Euclid_IOR.h
 bHYPRE_Euclid_Stub.c: sidl_interface_IOR.h
 bHYPRE_Euclid_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_Euclid_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Euclid_Stub.c: sidl_Exception.h
 bHYPRE_Euclid_Stub.c: sidl_interface_IOR.h
 bHYPRE_Euclid_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_Euclid_Stub.c: sidl_BaseClass.h
 bHYPRE_Euclid_Stub.c: sidl_ClassInfo.h
+bHYPRE_Euclid_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_Euclid_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_Euclid_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_Euclid_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_Euclid_Stub.c: sidl_rmi_Response.h
+bHYPRE_Euclid_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_Euclid_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Euclid_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_GMRES_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_Stub.c: bHYPRE_GMRES.h
@@ -972,10 +1194,19 @@ bHYPRE_GMRES_Stub.c: bHYPRE_GMRES_IOR.h
 bHYPRE_GMRES_Stub.c: sidl_interface_IOR.h
 bHYPRE_GMRES_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_GMRES_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_GMRES_Stub.c: sidl_Exception.h
 bHYPRE_GMRES_Stub.c: sidl_interface_IOR.h
 bHYPRE_GMRES_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_GMRES_Stub.c: sidl_BaseClass.h
 bHYPRE_GMRES_Stub.c: sidl_ClassInfo.h
+bHYPRE_GMRES_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_GMRES_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_GMRES_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_GMRES_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_GMRES_Stub.c: sidl_rmi_Response.h
+bHYPRE_GMRES_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_GMRES_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_GMRES_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_HGMRES_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_HGMRES_Stub.c: bHYPRE_HGMRES.h
@@ -983,10 +1214,19 @@ bHYPRE_HGMRES_Stub.c: bHYPRE_HGMRES_IOR.h
 bHYPRE_HGMRES_Stub.c: sidl_interface_IOR.h
 bHYPRE_HGMRES_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_HGMRES_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_HGMRES_Stub.c: sidl_Exception.h
 bHYPRE_HGMRES_Stub.c: sidl_interface_IOR.h
 bHYPRE_HGMRES_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_HGMRES_Stub.c: sidl_BaseClass.h
 bHYPRE_HGMRES_Stub.c: sidl_ClassInfo.h
+bHYPRE_HGMRES_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_HGMRES_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_HGMRES_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_HGMRES_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_HGMRES_Stub.c: sidl_rmi_Response.h
+bHYPRE_HGMRES_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_HGMRES_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_HGMRES_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_HPCG_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_HPCG_Stub.c: bHYPRE_HPCG.h
@@ -994,10 +1234,19 @@ bHYPRE_HPCG_Stub.c: bHYPRE_HPCG_IOR.h
 bHYPRE_HPCG_Stub.c: sidl_interface_IOR.h
 bHYPRE_HPCG_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_HPCG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_HPCG_Stub.c: sidl_Exception.h
 bHYPRE_HPCG_Stub.c: sidl_interface_IOR.h
 bHYPRE_HPCG_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_HPCG_Stub.c: sidl_BaseClass.h
 bHYPRE_HPCG_Stub.c: sidl_ClassInfo.h
+bHYPRE_HPCG_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_HPCG_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_HPCG_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_HPCG_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_HPCG_Stub.c: sidl_rmi_Response.h
+bHYPRE_HPCG_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_HPCG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_HPCG_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_Hybrid_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Hybrid_Stub.c: bHYPRE_Hybrid.h
@@ -1005,10 +1254,19 @@ bHYPRE_Hybrid_Stub.c: bHYPRE_Hybrid_IOR.h
 bHYPRE_Hybrid_Stub.c: sidl_interface_IOR.h
 bHYPRE_Hybrid_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_Hybrid_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Hybrid_Stub.c: sidl_Exception.h
 bHYPRE_Hybrid_Stub.c: sidl_interface_IOR.h
 bHYPRE_Hybrid_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_Hybrid_Stub.c: sidl_BaseClass.h
 bHYPRE_Hybrid_Stub.c: sidl_ClassInfo.h
+bHYPRE_Hybrid_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_Hybrid_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_Hybrid_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_Hybrid_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_Hybrid_Stub.c: sidl_rmi_Response.h
+bHYPRE_Hybrid_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_Hybrid_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Hybrid_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_IJMatrixView_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJMatrixView_Stub.c: bHYPRE_IJMatrixView.h
@@ -1016,8 +1274,19 @@ bHYPRE_IJMatrixView_Stub.c: bHYPRE_IJMatrixView_IOR.h
 bHYPRE_IJMatrixView_Stub.c: sidl_interface_IOR.h
 bHYPRE_IJMatrixView_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_IJMatrixView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IJMatrixView_Stub.c: sidl_Exception.h
 bHYPRE_IJMatrixView_Stub.c: sidl_interface_IOR.h
 bHYPRE_IJMatrixView_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_IJMatrixView_Stub.c: sidl_BaseClass.h
+bHYPRE_IJMatrixView_Stub.c: sidl_ClassInfo.h
+bHYPRE_IJMatrixView_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_IJMatrixView_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_IJMatrixView_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_IJMatrixView_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_IJMatrixView_Stub.c: sidl_rmi_Response.h
+bHYPRE_IJMatrixView_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_IJMatrixView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IJMatrixView_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_IJParCSRMatrix_Stub.c:                                                 \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1026,10 +1295,19 @@ bHYPRE_IJParCSRMatrix_Stub.c: bHYPRE_IJParCSRMatrix_IOR.h
 bHYPRE_IJParCSRMatrix_Stub.c: sidl_interface_IOR.h
 bHYPRE_IJParCSRMatrix_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_IJParCSRMatrix_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IJParCSRMatrix_Stub.c: sidl_Exception.h
 bHYPRE_IJParCSRMatrix_Stub.c: sidl_interface_IOR.h
 bHYPRE_IJParCSRMatrix_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_IJParCSRMatrix_Stub.c: sidl_BaseClass.h
 bHYPRE_IJParCSRMatrix_Stub.c: sidl_ClassInfo.h
+bHYPRE_IJParCSRMatrix_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_IJParCSRMatrix_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_IJParCSRMatrix_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_IJParCSRMatrix_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_IJParCSRMatrix_Stub.c: sidl_rmi_Response.h
+bHYPRE_IJParCSRMatrix_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_IJParCSRMatrix_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IJParCSRMatrix_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_IJParCSRVector_Stub.c:                                                 \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1038,10 +1316,19 @@ bHYPRE_IJParCSRVector_Stub.c: bHYPRE_IJParCSRVector_IOR.h
 bHYPRE_IJParCSRVector_Stub.c: sidl_interface_IOR.h
 bHYPRE_IJParCSRVector_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_IJParCSRVector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IJParCSRVector_Stub.c: sidl_Exception.h
 bHYPRE_IJParCSRVector_Stub.c: sidl_interface_IOR.h
 bHYPRE_IJParCSRVector_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_IJParCSRVector_Stub.c: sidl_BaseClass.h
 bHYPRE_IJParCSRVector_Stub.c: sidl_ClassInfo.h
+bHYPRE_IJParCSRVector_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_IJParCSRVector_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_IJParCSRVector_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_IJParCSRVector_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_IJParCSRVector_Stub.c: sidl_rmi_Response.h
+bHYPRE_IJParCSRVector_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_IJParCSRVector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IJParCSRVector_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_IJVectorView_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJVectorView_Stub.c: bHYPRE_IJVectorView.h
@@ -1049,8 +1336,19 @@ bHYPRE_IJVectorView_Stub.c: bHYPRE_IJVectorView_IOR.h
 bHYPRE_IJVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_IJVectorView_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_IJVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IJVectorView_Stub.c: sidl_Exception.h
 bHYPRE_IJVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_IJVectorView_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_IJVectorView_Stub.c: sidl_BaseClass.h
+bHYPRE_IJVectorView_Stub.c: sidl_ClassInfo.h
+bHYPRE_IJVectorView_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_IJVectorView_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_IJVectorView_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_IJVectorView_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_IJVectorView_Stub.c: sidl_rmi_Response.h
+bHYPRE_IJVectorView_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_IJVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IJVectorView_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_IdentitySolver_Stub.c:                                                 \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1059,10 +1357,19 @@ bHYPRE_IdentitySolver_Stub.c: bHYPRE_IdentitySolver_IOR.h
 bHYPRE_IdentitySolver_Stub.c: sidl_interface_IOR.h
 bHYPRE_IdentitySolver_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_IdentitySolver_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IdentitySolver_Stub.c: sidl_Exception.h
 bHYPRE_IdentitySolver_Stub.c: sidl_interface_IOR.h
 bHYPRE_IdentitySolver_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_IdentitySolver_Stub.c: sidl_BaseClass.h
 bHYPRE_IdentitySolver_Stub.c: sidl_ClassInfo.h
+bHYPRE_IdentitySolver_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_IdentitySolver_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_IdentitySolver_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_IdentitySolver_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_IdentitySolver_Stub.c: sidl_rmi_Response.h
+bHYPRE_IdentitySolver_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_IdentitySolver_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_IdentitySolver_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_MPICommunicator_Stub.c:                                                \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1071,10 +1378,19 @@ bHYPRE_MPICommunicator_Stub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_MPICommunicator_Stub.c: sidl_interface_IOR.h
 bHYPRE_MPICommunicator_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_MPICommunicator_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_MPICommunicator_Stub.c: sidl_Exception.h
 bHYPRE_MPICommunicator_Stub.c: sidl_interface_IOR.h
 bHYPRE_MPICommunicator_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_MPICommunicator_Stub.c: sidl_BaseClass.h
 bHYPRE_MPICommunicator_Stub.c: sidl_ClassInfo.h
+bHYPRE_MPICommunicator_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_MPICommunicator_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_MPICommunicator_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_MPICommunicator_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_MPICommunicator_Stub.c: sidl_rmi_Response.h
+bHYPRE_MPICommunicator_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_MPICommunicator_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_MPICommunicator_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_MatrixVectorView_Stub.c:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1083,8 +1399,19 @@ bHYPRE_MatrixVectorView_Stub.c: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_MatrixVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_MatrixVectorView_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_MatrixVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_Exception.h
 bHYPRE_MatrixVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_MatrixVectorView_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_BaseClass.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_ClassInfo.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_rmi_Response.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_MatrixVectorView_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_Operator_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Operator_Stub.c: bHYPRE_Operator.h
@@ -1092,8 +1419,19 @@ bHYPRE_Operator_Stub.c: bHYPRE_Operator_IOR.h
 bHYPRE_Operator_Stub.c: sidl_interface_IOR.h
 bHYPRE_Operator_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_Operator_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Operator_Stub.c: sidl_Exception.h
 bHYPRE_Operator_Stub.c: sidl_interface_IOR.h
 bHYPRE_Operator_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_Operator_Stub.c: sidl_BaseClass.h
+bHYPRE_Operator_Stub.c: sidl_ClassInfo.h
+bHYPRE_Operator_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_Operator_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_Operator_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_Operator_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_Operator_Stub.c: sidl_rmi_Response.h
+bHYPRE_Operator_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_Operator_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Operator_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_PCG_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_PCG_Stub.c: bHYPRE_PCG.h
@@ -1101,10 +1439,19 @@ bHYPRE_PCG_Stub.c: bHYPRE_PCG_IOR.h
 bHYPRE_PCG_Stub.c: sidl_interface_IOR.h
 bHYPRE_PCG_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_PCG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_PCG_Stub.c: sidl_Exception.h
 bHYPRE_PCG_Stub.c: sidl_interface_IOR.h
 bHYPRE_PCG_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_PCG_Stub.c: sidl_BaseClass.h
 bHYPRE_PCG_Stub.c: sidl_ClassInfo.h
+bHYPRE_PCG_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_PCG_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_PCG_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_PCG_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_PCG_Stub.c: sidl_rmi_Response.h
+bHYPRE_PCG_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_PCG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_PCG_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_ParCSRDiagScale_Stub.c:                                                \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1113,10 +1460,19 @@ bHYPRE_ParCSRDiagScale_Stub.c: bHYPRE_ParCSRDiagScale_IOR.h
 bHYPRE_ParCSRDiagScale_Stub.c: sidl_interface_IOR.h
 bHYPRE_ParCSRDiagScale_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_ParCSRDiagScale_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_ParCSRDiagScale_Stub.c: sidl_Exception.h
 bHYPRE_ParCSRDiagScale_Stub.c: sidl_interface_IOR.h
 bHYPRE_ParCSRDiagScale_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_ParCSRDiagScale_Stub.c: sidl_BaseClass.h
 bHYPRE_ParCSRDiagScale_Stub.c: sidl_ClassInfo.h
+bHYPRE_ParCSRDiagScale_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_ParCSRDiagScale_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_ParCSRDiagScale_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_ParCSRDiagScale_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_ParCSRDiagScale_Stub.c: sidl_rmi_Response.h
+bHYPRE_ParCSRDiagScale_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_ParCSRDiagScale_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_ParCSRDiagScale_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_ParaSails_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ParaSails_Stub.c: bHYPRE_ParaSails.h
@@ -1124,10 +1480,19 @@ bHYPRE_ParaSails_Stub.c: bHYPRE_ParaSails_IOR.h
 bHYPRE_ParaSails_Stub.c: sidl_interface_IOR.h
 bHYPRE_ParaSails_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_ParaSails_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_ParaSails_Stub.c: sidl_Exception.h
 bHYPRE_ParaSails_Stub.c: sidl_interface_IOR.h
 bHYPRE_ParaSails_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_ParaSails_Stub.c: sidl_BaseClass.h
 bHYPRE_ParaSails_Stub.c: sidl_ClassInfo.h
+bHYPRE_ParaSails_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_ParaSails_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_ParaSails_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_ParaSails_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_ParaSails_Stub.c: sidl_rmi_Response.h
+bHYPRE_ParaSails_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_ParaSails_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_ParaSails_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_Pilut_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Pilut_Stub.c: bHYPRE_Pilut.h
@@ -1135,10 +1500,19 @@ bHYPRE_Pilut_Stub.c: bHYPRE_Pilut_IOR.h
 bHYPRE_Pilut_Stub.c: sidl_interface_IOR.h
 bHYPRE_Pilut_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_Pilut_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Pilut_Stub.c: sidl_Exception.h
 bHYPRE_Pilut_Stub.c: sidl_interface_IOR.h
 bHYPRE_Pilut_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_Pilut_Stub.c: sidl_BaseClass.h
 bHYPRE_Pilut_Stub.c: sidl_ClassInfo.h
+bHYPRE_Pilut_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_Pilut_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_Pilut_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_Pilut_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_Pilut_Stub.c: sidl_rmi_Response.h
+bHYPRE_Pilut_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_Pilut_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Pilut_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_PreconditionedSolver_Stub.c:                                           \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1147,8 +1521,19 @@ bHYPRE_PreconditionedSolver_Stub.c: bHYPRE_PreconditionedSolver_IOR.h
 bHYPRE_PreconditionedSolver_Stub.c: sidl_interface_IOR.h
 bHYPRE_PreconditionedSolver_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_PreconditionedSolver_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_Exception.h
 bHYPRE_PreconditionedSolver_Stub.c: sidl_interface_IOR.h
 bHYPRE_PreconditionedSolver_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_BaseClass.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_ClassInfo.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_rmi_Response.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_PreconditionedSolver_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_ProblemDefinition_Stub.c:                                              \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1157,8 +1542,19 @@ bHYPRE_ProblemDefinition_Stub.c: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_ProblemDefinition_Stub.c: sidl_interface_IOR.h
 bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_Exception.h
 bHYPRE_ProblemDefinition_Stub.c: sidl_interface_IOR.h
 bHYPRE_ProblemDefinition_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_BaseClass.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_ClassInfo.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_Response.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_ProblemDefinition_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructDiagScale_Stub.c:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1167,10 +1563,19 @@ bHYPRE_SStructDiagScale_Stub.c: bHYPRE_SStructDiagScale_IOR.h
 bHYPRE_SStructDiagScale_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_Exception.h
 bHYPRE_SStructDiagScale_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructDiagScale_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_SStructDiagScale_Stub.c: sidl_BaseClass.h
 bHYPRE_SStructDiagScale_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructGraph_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph_Stub.c: bHYPRE_SStructGraph.h
@@ -1178,10 +1583,19 @@ bHYPRE_SStructGraph_Stub.c: bHYPRE_SStructGraph_IOR.h
 bHYPRE_SStructGraph_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructGraph_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructGraph_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructGraph_Stub.c: sidl_Exception.h
 bHYPRE_SStructGraph_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructGraph_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_SStructGraph_Stub.c: sidl_BaseClass.h
 bHYPRE_SStructGraph_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructGraph_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructGraph_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructGraph_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructGraph_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructGraph_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructGraph_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructGraph_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructGraph_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructGrid_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGrid_Stub.c: bHYPRE_SStructGrid.h
@@ -1189,10 +1603,19 @@ bHYPRE_SStructGrid_Stub.c: bHYPRE_SStructGrid_IOR.h
 bHYPRE_SStructGrid_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructGrid_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructGrid_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructGrid_Stub.c: sidl_Exception.h
 bHYPRE_SStructGrid_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructGrid_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_SStructGrid_Stub.c: sidl_BaseClass.h
 bHYPRE_SStructGrid_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructGrid_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructGrid_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructGrid_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructGrid_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructGrid_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructGrid_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructGrid_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructGrid_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructMatrixVectorView_Stub.c:                                        \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1201,8 +1624,19 @@ bHYPRE_SStructMatrixVectorView_Stub.c: bHYPRE_SStructMatrixVectorView_IOR.h
 bHYPRE_SStructMatrixVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructMatrixVectorView_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructMatrixVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_Exception.h
 bHYPRE_SStructMatrixVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructMatrixVectorView_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_BaseClass.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructMatrixVectorView_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructMatrixView_Stub.c:                                              \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1211,8 +1645,19 @@ bHYPRE_SStructMatrixView_Stub.c: bHYPRE_SStructMatrixView_IOR.h
 bHYPRE_SStructMatrixView_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructMatrixView_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructMatrixView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_Exception.h
 bHYPRE_SStructMatrixView_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructMatrixView_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_BaseClass.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructMatrixView_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructMatrix_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructMatrix_Stub.c: bHYPRE_SStructMatrix.h
@@ -1220,10 +1665,19 @@ bHYPRE_SStructMatrix_Stub.c: bHYPRE_SStructMatrix_IOR.h
 bHYPRE_SStructMatrix_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructMatrix_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructMatrix_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructMatrix_Stub.c: sidl_Exception.h
 bHYPRE_SStructMatrix_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructMatrix_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_SStructMatrix_Stub.c: sidl_BaseClass.h
 bHYPRE_SStructMatrix_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructMatrix_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructMatrix_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructMatrix_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructMatrix_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructMatrix_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructMatrix_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructMatrix_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructMatrix_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructParCSRMatrix_Stub.c:                                            \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1232,10 +1686,19 @@ bHYPRE_SStructParCSRMatrix_Stub.c: bHYPRE_SStructParCSRMatrix_IOR.h
 bHYPRE_SStructParCSRMatrix_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructParCSRMatrix_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructParCSRMatrix_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructParCSRMatrix_Stub.c: sidl_Exception.h
 bHYPRE_SStructParCSRMatrix_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructParCSRMatrix_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_SStructParCSRMatrix_Stub.c: sidl_BaseClass.h
 bHYPRE_SStructParCSRMatrix_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructParCSRMatrix_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructParCSRMatrix_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructParCSRMatrix_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructParCSRMatrix_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructParCSRMatrix_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructParCSRMatrix_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructParCSRMatrix_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructParCSRMatrix_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructParCSRVector_Stub.c:                                            \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1244,10 +1707,19 @@ bHYPRE_SStructParCSRVector_Stub.c: bHYPRE_SStructParCSRVector_IOR.h
 bHYPRE_SStructParCSRVector_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructParCSRVector_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructParCSRVector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructParCSRVector_Stub.c: sidl_Exception.h
 bHYPRE_SStructParCSRVector_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructParCSRVector_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_SStructParCSRVector_Stub.c: sidl_BaseClass.h
 bHYPRE_SStructParCSRVector_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructParCSRVector_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructParCSRVector_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructParCSRVector_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructParCSRVector_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructParCSRVector_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructParCSRVector_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructParCSRVector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructParCSRVector_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructSplit_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructSplit_Stub.c: bHYPRE_SStructSplit.h
@@ -1255,10 +1727,19 @@ bHYPRE_SStructSplit_Stub.c: bHYPRE_SStructSplit_IOR.h
 bHYPRE_SStructSplit_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructSplit_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructSplit_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructSplit_Stub.c: sidl_Exception.h
 bHYPRE_SStructSplit_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructSplit_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_SStructSplit_Stub.c: sidl_BaseClass.h
 bHYPRE_SStructSplit_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructSplit_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructSplit_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructSplit_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructSplit_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructSplit_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructSplit_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructSplit_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructSplit_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructStencil_Stub.c:                                                 \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1267,13 +1748,20 @@ bHYPRE_SStructStencil_Stub.c: bHYPRE_SStructStencil_IOR.h
 bHYPRE_SStructStencil_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructStencil_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructStencil_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructStencil_Stub.c: sidl_Exception.h
 bHYPRE_SStructStencil_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructStencil_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_SStructStencil_Stub.c: sidl_BaseClass.h
 bHYPRE_SStructStencil_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructStencil_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructStencil_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructStencil_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructStencil_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructStencil_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructStencil_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructStencil_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructStencil_Stub.c: sidl_io_Serializable.h
 
-bHYPRE_SStructVariable_Stub.c:                                                \
-  /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructVariable_Stub.c: bHYPRE_SStructVariable.h
 bHYPRE_SStructVariable_Stub.c: sidl_int_IOR.h
 
@@ -1284,8 +1772,19 @@ bHYPRE_SStructVectorView_Stub.c: bHYPRE_SStructVectorView_IOR.h
 bHYPRE_SStructVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructVectorView_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructVectorView_Stub.c: sidl_Exception.h
 bHYPRE_SStructVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructVectorView_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_SStructVectorView_Stub.c: sidl_BaseClass.h
+bHYPRE_SStructVectorView_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructVectorView_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructVectorView_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructVectorView_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructVectorView_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructVectorView_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructVectorView_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructVectorView_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_SStructVector_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructVector_Stub.c: bHYPRE_SStructVector.h
@@ -1293,10 +1792,19 @@ bHYPRE_SStructVector_Stub.c: bHYPRE_SStructVector_IOR.h
 bHYPRE_SStructVector_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructVector_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStructVector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructVector_Stub.c: sidl_Exception.h
 bHYPRE_SStructVector_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStructVector_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_SStructVector_Stub.c: sidl_BaseClass.h
 bHYPRE_SStructVector_Stub.c: sidl_ClassInfo.h
+bHYPRE_SStructVector_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_SStructVector_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_SStructVector_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructVector_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_SStructVector_Stub.c: sidl_rmi_Response.h
+bHYPRE_SStructVector_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_SStructVector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructVector_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_Schwarz_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Schwarz_Stub.c: bHYPRE_Schwarz.h
@@ -1304,10 +1812,19 @@ bHYPRE_Schwarz_Stub.c: bHYPRE_Schwarz_IOR.h
 bHYPRE_Schwarz_Stub.c: sidl_interface_IOR.h
 bHYPRE_Schwarz_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_Schwarz_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Schwarz_Stub.c: sidl_Exception.h
 bHYPRE_Schwarz_Stub.c: sidl_interface_IOR.h
 bHYPRE_Schwarz_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_Schwarz_Stub.c: sidl_BaseClass.h
 bHYPRE_Schwarz_Stub.c: sidl_ClassInfo.h
+bHYPRE_Schwarz_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_Schwarz_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_Schwarz_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_Schwarz_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_Schwarz_Stub.c: sidl_rmi_Response.h
+bHYPRE_Schwarz_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_Schwarz_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Schwarz_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_Solver_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Solver_Stub.c: bHYPRE_Solver.h
@@ -1315,8 +1832,19 @@ bHYPRE_Solver_Stub.c: bHYPRE_Solver_IOR.h
 bHYPRE_Solver_Stub.c: sidl_interface_IOR.h
 bHYPRE_Solver_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_Solver_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Solver_Stub.c: sidl_Exception.h
 bHYPRE_Solver_Stub.c: sidl_interface_IOR.h
 bHYPRE_Solver_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_Solver_Stub.c: sidl_BaseClass.h
+bHYPRE_Solver_Stub.c: sidl_ClassInfo.h
+bHYPRE_Solver_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_Solver_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_Solver_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_Solver_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_Solver_Stub.c: sidl_rmi_Response.h
+bHYPRE_Solver_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_Solver_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Solver_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructDiagScale_Stub.c:                                                \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1325,10 +1853,19 @@ bHYPRE_StructDiagScale_Stub.c: bHYPRE_StructDiagScale_IOR.h
 bHYPRE_StructDiagScale_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructDiagScale_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructDiagScale_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructDiagScale_Stub.c: sidl_Exception.h
 bHYPRE_StructDiagScale_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructDiagScale_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_StructDiagScale_Stub.c: sidl_BaseClass.h
 bHYPRE_StructDiagScale_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructDiagScale_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructDiagScale_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructDiagScale_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructDiagScale_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructDiagScale_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructDiagScale_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructDiagScale_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructDiagScale_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructGrid_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructGrid_Stub.c: bHYPRE_StructGrid.h
@@ -1336,10 +1873,19 @@ bHYPRE_StructGrid_Stub.c: bHYPRE_StructGrid_IOR.h
 bHYPRE_StructGrid_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructGrid_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructGrid_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructGrid_Stub.c: sidl_Exception.h
 bHYPRE_StructGrid_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructGrid_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_StructGrid_Stub.c: sidl_BaseClass.h
 bHYPRE_StructGrid_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructGrid_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructGrid_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructGrid_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructGrid_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructGrid_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructGrid_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructGrid_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructGrid_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructJacobi_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructJacobi_Stub.c: bHYPRE_StructJacobi.h
@@ -1347,10 +1893,19 @@ bHYPRE_StructJacobi_Stub.c: bHYPRE_StructJacobi_IOR.h
 bHYPRE_StructJacobi_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructJacobi_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructJacobi_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructJacobi_Stub.c: sidl_Exception.h
 bHYPRE_StructJacobi_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructJacobi_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_StructJacobi_Stub.c: sidl_BaseClass.h
 bHYPRE_StructJacobi_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructJacobi_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructJacobi_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructJacobi_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructJacobi_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructJacobi_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructJacobi_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructJacobi_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructJacobi_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructMatrixView_Stub.c:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1359,8 +1914,19 @@ bHYPRE_StructMatrixView_Stub.c: bHYPRE_StructMatrixView_IOR.h
 bHYPRE_StructMatrixView_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructMatrixView_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructMatrixView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructMatrixView_Stub.c: sidl_Exception.h
 bHYPRE_StructMatrixView_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructMatrixView_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_StructMatrixView_Stub.c: sidl_BaseClass.h
+bHYPRE_StructMatrixView_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructMatrixView_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructMatrixView_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructMatrixView_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructMatrixView_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructMatrixView_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructMatrixView_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructMatrixView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructMatrixView_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructMatrix_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructMatrix_Stub.c: bHYPRE_StructMatrix.h
@@ -1368,10 +1934,19 @@ bHYPRE_StructMatrix_Stub.c: bHYPRE_StructMatrix_IOR.h
 bHYPRE_StructMatrix_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructMatrix_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructMatrix_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructMatrix_Stub.c: sidl_Exception.h
 bHYPRE_StructMatrix_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructMatrix_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_StructMatrix_Stub.c: sidl_BaseClass.h
 bHYPRE_StructMatrix_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructMatrix_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructMatrix_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructMatrix_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructMatrix_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructMatrix_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructMatrix_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructMatrix_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructMatrix_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructPFMG_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructPFMG_Stub.c: bHYPRE_StructPFMG.h
@@ -1379,10 +1954,19 @@ bHYPRE_StructPFMG_Stub.c: bHYPRE_StructPFMG_IOR.h
 bHYPRE_StructPFMG_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructPFMG_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructPFMG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructPFMG_Stub.c: sidl_Exception.h
 bHYPRE_StructPFMG_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructPFMG_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_StructPFMG_Stub.c: sidl_BaseClass.h
 bHYPRE_StructPFMG_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructPFMG_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructPFMG_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructPFMG_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructPFMG_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructPFMG_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructPFMG_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructPFMG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructPFMG_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructSMG_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructSMG_Stub.c: bHYPRE_StructSMG.h
@@ -1390,10 +1974,19 @@ bHYPRE_StructSMG_Stub.c: bHYPRE_StructSMG_IOR.h
 bHYPRE_StructSMG_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructSMG_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructSMG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructSMG_Stub.c: sidl_Exception.h
 bHYPRE_StructSMG_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructSMG_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_StructSMG_Stub.c: sidl_BaseClass.h
 bHYPRE_StructSMG_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructSMG_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructSMG_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructSMG_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructSMG_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructSMG_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructSMG_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructSMG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructSMG_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructStencil_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructStencil_Stub.c: bHYPRE_StructStencil.h
@@ -1401,10 +1994,19 @@ bHYPRE_StructStencil_Stub.c: bHYPRE_StructStencil_IOR.h
 bHYPRE_StructStencil_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructStencil_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructStencil_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructStencil_Stub.c: sidl_Exception.h
 bHYPRE_StructStencil_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructStencil_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_StructStencil_Stub.c: sidl_BaseClass.h
 bHYPRE_StructStencil_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructStencil_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructStencil_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructStencil_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructStencil_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructStencil_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructStencil_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructStencil_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructStencil_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructVectorView_Stub.c:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1413,8 +2015,19 @@ bHYPRE_StructVectorView_Stub.c: bHYPRE_StructVectorView_IOR.h
 bHYPRE_StructVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructVectorView_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructVectorView_Stub.c: sidl_Exception.h
 bHYPRE_StructVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructVectorView_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_StructVectorView_Stub.c: sidl_BaseClass.h
+bHYPRE_StructVectorView_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructVectorView_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructVectorView_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructVectorView_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructVectorView_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructVectorView_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructVectorView_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructVectorView_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_StructVector_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructVector_Stub.c: bHYPRE_StructVector.h
@@ -1422,10 +2035,19 @@ bHYPRE_StructVector_Stub.c: bHYPRE_StructVector_IOR.h
 bHYPRE_StructVector_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructVector_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_StructVector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructVector_Stub.c: sidl_Exception.h
 bHYPRE_StructVector_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructVector_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_StructVector_Stub.c: sidl_BaseClass.h
 bHYPRE_StructVector_Stub.c: sidl_ClassInfo.h
+bHYPRE_StructVector_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_StructVector_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_StructVector_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructVector_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_StructVector_Stub.c: sidl_rmi_Response.h
+bHYPRE_StructVector_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_StructVector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructVector_Stub.c: sidl_io_Serializable.h
 
 bHYPRE_Vector_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Vector_Stub.c: bHYPRE_Vector.h
@@ -1433,7 +2055,18 @@ bHYPRE_Vector_Stub.c: bHYPRE_Vector_IOR.h
 bHYPRE_Vector_Stub.c: sidl_interface_IOR.h
 bHYPRE_Vector_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_Vector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Vector_Stub.c: sidl_Exception.h
 bHYPRE_Vector_Stub.c: sidl_interface_IOR.h
 bHYPRE_Vector_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_Vector_Stub.c: sidl_BaseClass.h
+bHYPRE_Vector_Stub.c: sidl_ClassInfo.h
+bHYPRE_Vector_Stub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_Vector_Stub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_Vector_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_Vector_Stub.c: sidl_rmi_Invocation.h
+bHYPRE_Vector_Stub.c: sidl_rmi_Response.h
+bHYPRE_Vector_Stub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_Vector_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Vector_Stub.c: sidl_io_Serializable.h
 
 

@@ -2,12 +2,11 @@
  * File:          bHYPRE_SStructVectorView.h
  * Symbol:        bHYPRE.SStructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for bHYPRE.SStructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_SStructVectorView_h
@@ -33,81 +32,63 @@ typedef struct bHYPRE_SStructVectorView__object* bHYPRE_SStructVectorView;
 #ifndef included_bHYPRE_SStructGrid_h
 #include "bHYPRE_SStructGrid.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
+#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_bHYPRE_SStructVectorView_IOR_h
+#include "bHYPRE_SStructVectorView_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 bHYPRE_SStructVectorView
 bHYPRE_SStructVectorView__connect(const char *, sidl_BaseInterface *_ex);
-void
-bHYPRE_SStructVectorView_addRef(
-  /* in */ bHYPRE_SStructVectorView self);
-
-void
-bHYPRE_SStructVectorView_deleteRef(
-  /* in */ bHYPRE_SStructVectorView self);
-
-sidl_bool
-bHYPRE_SStructVectorView_isSame(
-  /* in */ bHYPRE_SStructVectorView self,
-  /* in */ sidl_BaseInterface iobj);
-
-sidl_BaseInterface
-bHYPRE_SStructVectorView_queryInt(
-  /* in */ bHYPRE_SStructVectorView self,
-  /* in */ const char* name);
-
-sidl_bool
-bHYPRE_SStructVectorView_isType(
-  /* in */ bHYPRE_SStructVectorView self,
-  /* in */ const char* name);
-
-sidl_ClassInfo
-bHYPRE_SStructVectorView_getClassInfo(
-  /* in */ bHYPRE_SStructVectorView self);
-
-int32_t
-bHYPRE_SStructVectorView_SetCommunicator(
-  /* in */ bHYPRE_SStructVectorView self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
-
-int32_t
-bHYPRE_SStructVectorView_Initialize(
-  /* in */ bHYPRE_SStructVectorView self);
-
-int32_t
-bHYPRE_SStructVectorView_Assemble(
-  /* in */ bHYPRE_SStructVectorView self);
-
-int32_t
-bHYPRE_SStructVectorView_GetObject(
-  /* in */ bHYPRE_SStructVectorView self,
-  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the vector grid.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructVectorView_SetGrid(
   /* in */ bHYPRE_SStructVectorView self,
-  /* in */ bHYPRE_SStructGrid grid);
+  /* in */ bHYPRE_SStructGrid grid,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetGrid)(
+    self->d_object,
+    grid,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set vector coefficients index by index.
@@ -119,8 +100,8 @@ bHYPRE_SStructVectorView_SetGrid(
  * If the vector is complex, then {\tt value} consists of a pair
  * of doubles representing the real and imaginary parts of the
  * complex value.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructVectorView_SetValues(
   /* in */ bHYPRE_SStructVectorView self,
@@ -128,7 +109,28 @@ bHYPRE_SStructVectorView_SetValues(
   /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double value);
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  int32_t index_lower[1], index_upper[1], index_stride[1]; 
+  struct sidl_int__array index_real;
+  struct sidl_int__array*index_tmp = &index_real;
+  index_upper[0] = dim-1;
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+    index_stride);
+  return (*self->d_epv->f_SetValues)(
+    self->d_object,
+    part,
+    index_tmp,
+    var,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set vector coefficients a box at a time.
@@ -140,7 +142,6 @@ bHYPRE_SStructVectorView_SetValues(
  * If the vector is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 int32_t
 bHYPRE_SStructVectorView_SetBoxValues(
@@ -151,7 +152,8 @@ bHYPRE_SStructVectorView_SetBoxValues(
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Set vector coefficients index by index.
@@ -163,8 +165,8 @@ bHYPRE_SStructVectorView_SetBoxValues(
  * If the vector is complex, then {\tt value} consists of a pair
  * of doubles representing the real and imaginary parts of the
  * complex value.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructVectorView_AddToValues(
   /* in */ bHYPRE_SStructVectorView self,
@@ -172,7 +174,28 @@ bHYPRE_SStructVectorView_AddToValues(
   /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double value);
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  int32_t index_lower[1], index_upper[1], index_stride[1]; 
+  struct sidl_int__array index_real;
+  struct sidl_int__array*index_tmp = &index_real;
+  index_upper[0] = dim-1;
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+    index_stride);
+  return (*self->d_epv->f_AddToValues)(
+    self->d_object,
+    part,
+    index_tmp,
+    var,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set vector coefficients a box at a time.
@@ -184,7 +207,6 @@ bHYPRE_SStructVectorView_AddToValues(
  * If the vector is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 int32_t
 bHYPRE_SStructVectorView_AddToBoxValues(
@@ -195,15 +217,27 @@ bHYPRE_SStructVectorView_AddToBoxValues(
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Gather vector data before calling {\tt GetValues}.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructVectorView_Gather(
-  /* in */ bHYPRE_SStructVectorView self);
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Gather)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Get vector coefficients index by index.
@@ -214,8 +248,8 @@ bHYPRE_SStructVectorView_Gather(
  * If the vector is complex, then {\tt value} consists of a pair
  * of doubles representing the real and imaginary parts of the
  * complex value.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructVectorView_GetValues(
   /* in */ bHYPRE_SStructVectorView self,
@@ -223,7 +257,28 @@ bHYPRE_SStructVectorView_GetValues(
   /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* out */ double* value);
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  int32_t index_lower[1], index_upper[1], index_stride[1]; 
+  struct sidl_int__array index_real;
+  struct sidl_int__array*index_tmp = &index_real;
+  index_upper[0] = dim-1;
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+    index_stride);
+  return (*self->d_epv->f_GetValues)(
+    self->d_object,
+    part,
+    index_tmp,
+    var,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Get vector coefficients a box at a time.
@@ -234,7 +289,6 @@ bHYPRE_SStructVectorView_GetValues(
  * If the vector is complex, then {\tt values} consists of pairs
  * of doubles representing the real and imaginary parts of each
  * complex value.
- * 
  */
 int32_t
 bHYPRE_SStructVectorView_GetBoxValues(
@@ -245,33 +299,211 @@ bHYPRE_SStructVectorView_GetBoxValues(
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* inout rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Set the vector to be complex.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructVectorView_SetComplex(
-  /* in */ bHYPRE_SStructVectorView self);
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetComplex)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Print the vector to file.  This is mainly for debugging
  * purposes.
- * 
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_SStructVectorView_Print(
   /* in */ bHYPRE_SStructVectorView self,
   /* in */ const char* filename,
-  /* in */ int32_t all);
+  /* in */ int32_t all,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Print)(
+    self->d_object,
+    filename,
+    all,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_SStructVectorView_GetObject(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface* A,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetObject)(
+    self->d_object,
+    A,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_SStructVectorView_SetCommunicator(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self->d_object,
+    mpi_comm,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_SStructVectorView_Initialize(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Initialize)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_SStructVectorView_Assemble(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Assemble)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+void
+bHYPRE_SStructVectorView_addRef(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+void
+bHYPRE_SStructVectorView_deleteRef(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_SStructVectorView_isSame(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_SStructVectorView_isType(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self->d_object,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_ClassInfo
+bHYPRE_SStructVectorView_getClassInfo(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_SStructVectorView__object*
 bHYPRE_SStructVectorView__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -279,23 +511,94 @@ bHYPRE_SStructVectorView__cast(
 void*
 bHYPRE_SStructVectorView__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 bHYPRE_SStructVectorView__exec(
   /* in */ bHYPRE_SStructVectorView self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self->d_object,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 bHYPRE_SStructVectorView__getURL(
-  /* in */ bHYPRE_SStructVectorView self);
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_SStructVectorView__raddRef(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_SStructVectorView__isRemote(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+bHYPRE_SStructVectorView__isLocal(
+  /* in */ bHYPRE_SStructVectorView self,
+  /* out */ sidl_BaseInterface *_ex);
 struct bHYPRE_SStructVectorView__array*
 bHYPRE_SStructVectorView__array_createCol(
   int32_t       dimen,
@@ -523,6 +826,25 @@ bHYPRE_SStructVectorView__array_ensure(
   struct bHYPRE_SStructVectorView__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak bHYPRE_SStructVectorView__connectI
+
+#pragma weak bHYPRE_SStructVectorView__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct bHYPRE_SStructVectorView__object*
+bHYPRE_SStructVectorView__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct bHYPRE_SStructVectorView__object*
+bHYPRE_SStructVectorView__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

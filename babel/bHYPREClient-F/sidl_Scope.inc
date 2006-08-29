@@ -1,8 +1,8 @@
 C       
 C       File:          sidl_Scope.inc
-C       Symbol:        sidl.Scope-v0.9.3
+C       Symbol:        sidl.Scope-v0.9.15
 C       Symbol Type:   enumeration
-C       Babel Version: 0.10.12
+C       Babel Version: 1.0.0
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side glue code for sidl.Scope
@@ -32,37 +32,19 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.12
-C       xml-url       = /home/painter/babel-0.10.12/bin/.././share/repository/sidl.Scope-v0.9.3.xml
-C       
 
 
 C       
-C       Symbol "sidl.Scope" (version 0.9.3)
+C       Symbol "sidl.Scope" (version 0.9.15)
 C       
 C       When loading a dynamically linked library, there are three 
 C       settings: LOCAL, GLOBAL and SCLSCOPE.
 C       
 
 
-C       
-C       Attempt to load the symbols into a local namespace. 
-C       
-
         integer*4 LOCAL
         parameter (LOCAL = 0)
-
-C       
-C       Attempt to load the symbols into the global namespace. 
-C       
-
         integer*4 GLOBAL
         parameter (GLOBAL = 1)
-
-C       
-C       Use the scope setting from the SCL file. 
-C       
-
         integer*4 SCLSCOPE
         parameter (SCLSCOPE = 2)
-

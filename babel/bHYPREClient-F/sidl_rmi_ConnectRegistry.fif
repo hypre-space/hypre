@@ -1,8 +1,8 @@
 C       
 C       File:          sidl_rmi_ConnectRegistry_Impl.f
-C       Symbol:        sidl.rmi.ConnectRegistry-v0.9.3
+C       Symbol:        sidl.rmi.ConnectRegistry-v0.9.15
 C       Symbol Type:   class
-C       Babel Version: 0.10.12
+C       Babel Version: 1.0.0
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.rmi.ConnectRegistry
@@ -32,19 +32,21 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.12
-C       xml-url       = /home/painter/babel-0.10.12/bin/.././share/repository/sidl.rmi.ConnectRegistry-v0.9.3.xml
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "sidl.rmi.ConnectRegistry" (version 0.9.3)
+C       Symbol "sidl.rmi.ConnectRegistry" (version 0.9.15)
 C       
-C       This singleton class is implemented by Babel's runtime for to allow RMI 
-C       downcasting of objects.  When we downcast an RMI object, we may be required to
-C       create a new derived class object with a connect function.  We store all the
-C       connect functions in this table for easy access.
+C        
+C       This singleton class is implemented by Babel's runtime for to
+C       allow RMI downcasting of objects.  When we downcast an RMI
+C       object, we may be required to create a new derived class object
+C       with a connect function.  We store all the connect functions in
+C       this table for easy access.
+C       
+C       This Class is for Babel internal use only.
 C       
 
 
@@ -57,7 +59,7 @@ C
 
         subroutine sidl_rmi_ConnectRegistry__create_f(retval)
         implicit none
-C       out sidl.rmi.ConnectRegistry retval
+C        out sidl.rmi.ConnectRegistry retval
         integer*8 retval
         end
 
@@ -67,12 +69,15 @@ C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine sidl_rmi_ConnectRegistry__cast_f(ref, retval)
+        subroutine sidl_rmi_ConnectRegistry__cast_f(ref, retval,
+     &     exception)
         implicit none
-C       in opaque ref
+C        in opaque ref
         integer*8 ref
-C       out sidl.rmi.ConnectRegistry retval
+C        out sidl.rmi.ConnectRegistry retval
         integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -81,14 +86,17 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_rmi_ConnectRegistry__cast2_f(self, name, retval)
+        subroutine sidl_rmi_ConnectRegistry__cast2_f(self, name, retval,
+     &     exception)
         implicit none
-C       in sidl.rmi.ConnectRegistry self
+C        in sidl.rmi.ConnectRegistry self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       out opaque retval
+C        out opaque retval
         integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -108,10 +116,12 @@ C       class.
 C       </p>
 C       
 
-        subroutine sidl_rmi_ConnectRegistry_addRef_f(self)
+        subroutine sidl_rmi_ConnectRegistry_addRef_f(self, exception)
         implicit none
-C       in sidl.rmi.ConnectRegistry self
+C        in sidl.rmi.ConnectRegistry self
         integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -124,10 +134,12 @@ C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
 
-        subroutine sidl_rmi_ConnectRegistry_deleteRef_f(self)
+        subroutine sidl_rmi_ConnectRegistry_deleteRef_f(self, exception)
         implicit none
-C       in sidl.rmi.ConnectRegistry self
+C        in sidl.rmi.ConnectRegistry self
         integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -137,37 +149,17 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_rmi_ConnectRegistry_isSame_f(self, iobj, retval)
+        subroutine sidl_rmi_ConnectRegistry_isSame_f(self, iobj, retval,
+     &     exception)
         implicit none
-C       in sidl.rmi.ConnectRegistry self
+C        in sidl.rmi.ConnectRegistry self
         integer*8 self
-C       in sidl.BaseInterface iobj
+C        in sidl.BaseInterface iobj
         integer*8 iobj
-C       out bool retval
+C        out bool retval
         logical retval
-        end
-
-
-C       
-C       Method:  queryInt[]
-C       Check whether the object can support the specified interface or
-C       class.  If the <code>sidl</code> type name in <code>name</code>
-C       is supported, then a reference to that object is returned with the
-C       reference count incremented.  The callee will be responsible for
-C       calling <code>deleteRef</code> on the returned object.  If
-C       the specified type is not supported, then a null reference is
-C       returned.
-C       
-
-        subroutine sidl_rmi_ConnectRegistry_queryInt_f(self, name,
-     &     retval)
-        implicit none
-C       in sidl.rmi.ConnectRegistry self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out sidl.BaseInterface retval
-        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -179,14 +171,17 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_rmi_ConnectRegistry_isType_f(self, name, retval)
+        subroutine sidl_rmi_ConnectRegistry_isType_f(self, name, retval,
+     &     exception)
         implicit none
-C       in sidl.rmi.ConnectRegistry self
+C        in sidl.rmi.ConnectRegistry self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       out bool retval
+C        out bool retval
         logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -195,55 +190,175 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_rmi_ConnectRegistry_getClassInfo_f(self, retval)
+        subroutine sidl_rmi_ConnectRegistry_getClassInfo_f(self, retval,
+     &     exception)
         implicit none
-C       in sidl.rmi.ConnectRegistry self
+C        in sidl.rmi.ConnectRegistry self
         integer*8 self
-C       out sidl.ClassInfo retval
+C        out sidl.ClassInfo retval
         integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
 C       
 C       Method:  registerConnect[]
-C       register an instance of a class
-C        the registry will return a string guaranteed to be unique for
-C        the lifetime of the process
+C        
+C       The key is the SIDL classname the registered connect belongs
+C       to.  Multiple registrations under the same key are possible,
+C       this must be protected against in the user code.  Babel does
+C       this internally with a static boolean.
 C       
 
-        subroutine sidl_rmi_ConnectRegistry_registerConnect_f(key, func)
+        subroutine sidl_rmi_ConnectRegistry_registerConnect_f(key, func,
+     &     exception)
         implicit none
-C       in string key
+C        in string key
         character*(*) key
-C       in opaque func
+C        in opaque func
         integer*8 func
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
 C       
 C       Method:  getConnect[]
-C       returns a handle to the class based on the unique string
+C        
+C       Returns the connect method for the class named in the key
 C       
 
-        subroutine sidl_rmi_ConnectRegistry_getConnect_f(key, retval)
+        subroutine sidl_rmi_ConnectRegistry_getConnect_f(key, retval,
+     &     exception)
         implicit none
-C       in string key
+C        in string key
         character*(*) key
-C       out opaque retval
+C        out opaque retval
         integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
 C       
 C       Method:  removeConnect[]
-C       returns a handle to the class based on the unique string
-C       and removes the instance from the table.  
+C        
+C       Returns the connect method for the class named in the key,
+C       and removes it from the table.
 C       
 
-        subroutine sidl_rmi_ConnectRegistry_removeConnect_f(key, retval)
+        subroutine sidl_rmi_ConnectRegistry_removeConnect_f(key, retval,
+     &     exception)
         implicit none
-C       in string key
+C        in string key
         character*(*) key
-C       out opaque retval
+C        out opaque retval
         integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _exec[]
+C       Select and execute a method by name
+C       
+
+        subroutine sidl_rmi_ConnectRegistry__exec_f(self, methodName,
+     &     inArgs, outArgs, exception)
+        implicit none
+C        in sidl.rmi.ConnectRegistry self
+        integer*8 self
+C        in string methodName
+        character*(*) methodName
+C        in sidl.rmi.Call inArgs
+        integer*8 inArgs
+C        in sidl.rmi.Return outArgs
+        integer*8 outArgs
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _getURL[]
+C       Get the URL of the Implementation of this object (for RMI)
+C       
+
+        subroutine sidl_rmi_ConnectRegistry__getURL_f(self, retval,
+     &     exception)
+        implicit none
+C        in sidl.rmi.ConnectRegistry self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isRemote[]
+C       TRUE if this object is remote, false if local
+C       
+
+        subroutine sidl_rmi_ConnectRegistry__isRemote_f(self, retval,
+     &     exception)
+        implicit none
+C        in sidl.rmi.ConnectRegistry self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isLocal[]
+C       TRUE if this object is local, false if remote
+C       
+
+        subroutine sidl_rmi_ConnectRegistry__isLocal_f(self, retval,
+     &     exception)
+        implicit none
+C        in sidl.rmi.ConnectRegistry self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks[]
+C       Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine sidl_rmi_ConnectRegistry__set_hooks_f(self, on,
+     &     exception)
+        implicit none
+C        in sidl.rmi.ConnectRegistry self
+        integer*8 self
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks_static[]
+C       Static Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine sidl_rmi_ConnectRegistry__set_hooks_static_f(on,
+     &     exception)
+        implicit none
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end

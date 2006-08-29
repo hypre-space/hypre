@@ -2,12 +2,11 @@
  * File:          bHYPRE_PreconditionedSolver.h
  * Symbol:        bHYPRE.PreconditionedSolver-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for bHYPRE.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_PreconditionedSolver_h
@@ -39,200 +38,595 @@ typedef struct bHYPRE_PreconditionedSolver__object* bHYPRE_PreconditionedSolver;
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
+#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_bHYPRE_PreconditionedSolver_IOR_h
+#include "bHYPRE_PreconditionedSolver_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 bHYPRE_PreconditionedSolver
 bHYPRE_PreconditionedSolver__connect(const char *, sidl_BaseInterface *_ex);
-void
-bHYPRE_PreconditionedSolver_addRef(
-  /* in */ bHYPRE_PreconditionedSolver self);
 
-void
-bHYPRE_PreconditionedSolver_deleteRef(
-  /* in */ bHYPRE_PreconditionedSolver self);
-
-sidl_bool
-bHYPRE_PreconditionedSolver_isSame(
+/**
+ * Set the preconditioner.
+ */
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_SetPreconditioner(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_Solver s,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetPreconditioner)(
+    self->d_object,
+    s,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-sidl_BaseInterface
-bHYPRE_PreconditionedSolver_queryInt(
+
+/**
+ * Method:  GetPreconditioner[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_GetPreconditioner(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ const char* name);
+  /* out */ bHYPRE_Solver* s,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetPreconditioner)(
+    self->d_object,
+    s,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-sidl_bool
-bHYPRE_PreconditionedSolver_isType(
+
+/**
+ * Method:  Clone[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_Clone(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ const char* name);
+  /* out */ bHYPRE_PreconditionedSolver* x,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Clone)(
+    self->d_object,
+    x,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-sidl_ClassInfo
-bHYPRE_PreconditionedSolver_getClassInfo(
-  /* in */ bHYPRE_PreconditionedSolver self);
 
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_SetOperator(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* in */ bHYPRE_Operator A,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetOperator)(
+    self->d_object,
+    A,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_SetTolerance(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* in */ double tolerance,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetTolerance)(
+    self->d_object,
+    tolerance,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_SetMaxIterations(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* in */ int32_t max_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetMaxIterations)(
+    self->d_object,
+    max_iterations,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_SetLogging(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetLogging)(
+    self->d_object,
+    level,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_SetPrintLevel(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetPrintLevel)(
+    self->d_object,
+    level,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_GetNumIterations(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* out */ int32_t* num_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetNumIterations)(
+    self->d_object,
+    num_iterations,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+int32_t
+bHYPRE_PreconditionedSolver_GetRelResidualNorm(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* out */ double* norm,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetRelResidualNorm)(
+    self->d_object,
+    norm,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_SetCommunicator(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self->d_object,
+    mpi_comm,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_SetIntParameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in */ int32_t value);
+  /* in */ int32_t value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetIntParameter)(
+    self->d_object,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_SetDoubleParameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in */ double value);
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self->d_object,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_SetStringParameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in */ const char* value);
+  /* in */ const char* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetStringParameter)(
+    self->d_object,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_SetIntArray1Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ int32_t* value,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  int32_t value_lower[1], value_upper[1], value_stride[1]; 
+  struct sidl_int__array value_real;
+  struct sidl_int__array*value_tmp = &value_real;
+  value_upper[0] = nvalues-1;
+  sidl_int__array_init(value, value_tmp, 1, value_lower, value_upper,
+    value_stride);
+  return (*self->d_epv->f_SetIntArray1Parameter)(
+    self->d_object,
+    name,
+    value_tmp,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_SetIntArray2Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetIntArray2Parameter)(
+    self->d_object,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_SetDoubleArray1Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
   /* in rarray[nvalues] */ double* value,
-  /* in */ int32_t nvalues);
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  int32_t value_lower[1], value_upper[1], value_stride[1]; 
+  struct sidl_double__array value_real;
+  struct sidl_double__array*value_tmp = &value_real;
+  value_upper[0] = nvalues-1;
+  sidl_double__array_init(value, value_tmp, 1, value_lower, value_upper,
+    value_stride);
+  return (*self->d_epv->f_SetDoubleArray1Parameter)(
+    self->d_object,
+    name,
+    value_tmp,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_SetDoubleArray2Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetDoubleArray2Parameter)(
+    self->d_object,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_GetIntValue(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* out */ int32_t* value);
+  /* out */ int32_t* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self->d_object,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_GetDoubleValue(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* out */ double* value);
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self->d_object,
+    name,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_Setup(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ bHYPRE_Vector b,
-  /* in */ bHYPRE_Vector x);
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Setup)(
+    self->d_object,
+    b,
+    x,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_Apply(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x);
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_Apply)(
+    self->d_object,
+    b,
+    x,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_PreconditionedSolver_ApplyAdjoint(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ bHYPRE_Vector b,
-  /* inout */ bHYPRE_Vector* x);
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_ApplyAdjoint)(
+    self->d_object,
+    b,
+    x,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-int32_t
-bHYPRE_PreconditionedSolver_SetOperator(
-  /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ bHYPRE_Operator A);
 
-int32_t
-bHYPRE_PreconditionedSolver_SetTolerance(
+SIDL_C_INLINE_DECL
+void
+bHYPRE_PreconditionedSolver_addRef(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ double tolerance);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-int32_t
-bHYPRE_PreconditionedSolver_SetMaxIterations(
-  /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ int32_t max_iterations);
 
-int32_t
-bHYPRE_PreconditionedSolver_SetLogging(
+SIDL_C_INLINE_DECL
+void
+bHYPRE_PreconditionedSolver_deleteRef(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ int32_t level);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-int32_t
-bHYPRE_PreconditionedSolver_SetPrintLevel(
-  /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ int32_t level);
 
-int32_t
-bHYPRE_PreconditionedSolver_GetNumIterations(
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_PreconditionedSolver_isSame(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* out */ int32_t* num_iterations);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-int32_t
-bHYPRE_PreconditionedSolver_GetRelResidualNorm(
-  /* in */ bHYPRE_PreconditionedSolver self,
-  /* out */ double* norm);
 
-/**
- * Set the preconditioner.
- * 
- */
-int32_t
-bHYPRE_PreconditionedSolver_SetPreconditioner(
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_PreconditionedSolver_isType(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ bHYPRE_Solver s);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self->d_object,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Method:  GetPreconditioner[]
- */
-int32_t
-bHYPRE_PreconditionedSolver_GetPreconditioner(
-  /* in */ bHYPRE_PreconditionedSolver self,
-  /* out */ bHYPRE_Solver* s);
 
-/**
- * Method:  Clone[]
- */
-int32_t
-bHYPRE_PreconditionedSolver_Clone(
+SIDL_C_INLINE_DECL
+sidl_ClassInfo
+bHYPRE_PreconditionedSolver_getClassInfo(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* out */ bHYPRE_PreconditionedSolver* x);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_PreconditionedSolver__object*
 bHYPRE_PreconditionedSolver__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -240,23 +634,94 @@ bHYPRE_PreconditionedSolver__cast(
 void*
 bHYPRE_PreconditionedSolver__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 bHYPRE_PreconditionedSolver__exec(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self->d_object,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 bHYPRE_PreconditionedSolver__getURL(
-  /* in */ bHYPRE_PreconditionedSolver self);
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_PreconditionedSolver__raddRef(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_PreconditionedSolver__isRemote(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+bHYPRE_PreconditionedSolver__isLocal(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* out */ sidl_BaseInterface *_ex);
 struct bHYPRE_PreconditionedSolver__array*
 bHYPRE_PreconditionedSolver__array_createCol(
   int32_t       dimen,
@@ -484,6 +949,25 @@ bHYPRE_PreconditionedSolver__array_ensure(
   struct bHYPRE_PreconditionedSolver__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak bHYPRE_PreconditionedSolver__connectI
+
+#pragma weak bHYPRE_PreconditionedSolver__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct bHYPRE_PreconditionedSolver__object*
+bHYPRE_PreconditionedSolver__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct bHYPRE_PreconditionedSolver__object*
+bHYPRE_PreconditionedSolver__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

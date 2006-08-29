@@ -2,12 +2,10 @@
  * File:          bHYPRE_SStructVariable_fStub.c
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost
- * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_int_IOR_h
@@ -94,9 +92,9 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_get1_f,
                   bHYPRE_SStructVariable__array_get1_f)
   (int64_t *array, 
    int32_t *i1, 
-   int64_t *result)
+   int32_t *result)
 {
-  *result = (ptrdiff_t)
+  *result = 
     sidl_int__array_get1((const struct sidl_int__array *)(ptrdiff_t)*array
     , *i1);
 }
@@ -108,9 +106,9 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_get2_f,
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
-   int64_t *result)
+   int32_t *result)
 {
-  *result = (ptrdiff_t)
+  *result = 
     sidl_int__array_get2((const struct sidl_int__array *)(ptrdiff_t)*array
     , *i1, *i2);
 }
@@ -123,9 +121,9 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_get3_f,
    int32_t *i1, 
    int32_t *i2, 
    int32_t *i3, 
-   int64_t *result)
+   int32_t *result)
 {
-  *result = (ptrdiff_t)
+  *result = 
     sidl_int__array_get3((const struct sidl_int__array *)(ptrdiff_t)*array
     , *i1, *i2, *i3);
 }
@@ -139,9 +137,9 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_get4_f,
    int32_t *i2, 
    int32_t *i3, 
    int32_t *i4, 
-   int64_t *result)
+   int32_t *result)
 {
-  *result = (ptrdiff_t)
+  *result = 
     sidl_int__array_get4((const struct sidl_int__array *)(ptrdiff_t)*array
     , *i1, *i2, *i3, *i4);
 }
@@ -156,9 +154,9 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_get5_f,
    int32_t *i3, 
    int32_t *i4, 
    int32_t *i5, 
-   int64_t *result)
+   int32_t *result)
 {
-  *result = (ptrdiff_t)
+  *result = 
     sidl_int__array_get5((const struct sidl_int__array *)(ptrdiff_t)*array
     , *i1, *i2, *i3, *i4, *i5);
 }
@@ -174,9 +172,9 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_get6_f,
    int32_t *i4, 
    int32_t *i5, 
    int32_t *i6, 
-   int64_t *result)
+   int32_t *result)
 {
-  *result = (ptrdiff_t)
+  *result = 
     sidl_int__array_get6((const struct sidl_int__array *)(ptrdiff_t)*array
     , *i1, *i2, *i3, *i4, *i5, *i6);
 }
@@ -193,9 +191,9 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_get7_f,
    int32_t *i5, 
    int32_t *i6, 
    int32_t *i7, 
-   int64_t *result)
+   int32_t *result)
 {
-  *result = (ptrdiff_t)
+  *result = 
     sidl_int__array_get7((const struct sidl_int__array *)(ptrdiff_t)*array
     , *i1, *i2, *i3, *i4, *i5, *i6, *i7);
 }
@@ -206,9 +204,9 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_get_f,
                   bHYPRE_SStructVariable__array_get_f)
   (int64_t *array,
    int32_t indices[],
-   int64_t *result)
+   int32_t *result)
 {
-  *result = (ptrdiff_t)
+  *result = 
     sidl_int__array_get((const struct sidl_int__array *)(ptrdiff_t)*array,
       indices);
 }
@@ -219,10 +217,10 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_set1_f,
                   bHYPRE_SStructVariable__array_set1_f)
   (int64_t *array,
    int32_t *i1,
-   int64_t *value)
+   int32_t *value)
 {
   sidl_int__array_set1((struct sidl_int__array *)(ptrdiff_t)*array
-  , *i1, (int32_t)(ptrdiff_t)*value);
+  , *i1, *value);
 }
 
 void
@@ -232,10 +230,10 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_set2_f,
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
-   int64_t *value)
+   int32_t *value)
 {
   sidl_int__array_set2((struct sidl_int__array *)(ptrdiff_t)*array
-  , *i1, *i2, (int32_t)(ptrdiff_t)*value);
+  , *i1, *i2, *value);
 }
 
 void
@@ -246,10 +244,10 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_set3_f,
    int32_t *i1,
    int32_t *i2,
    int32_t *i3,
-   int64_t *value)
+   int32_t *value)
 {
   sidl_int__array_set3((struct sidl_int__array *)(ptrdiff_t)*array
-  , *i1, *i2, *i3, (int32_t)(ptrdiff_t)*value);
+  , *i1, *i2, *i3, *value);
 }
 
 void
@@ -261,10 +259,10 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_set4_f,
    int32_t *i2,
    int32_t *i3,
    int32_t *i4,
-   int64_t *value)
+   int32_t *value)
 {
   sidl_int__array_set4((struct sidl_int__array *)(ptrdiff_t)*array
-  , *i1, *i2, *i3, *i4, (int32_t)(ptrdiff_t)*value);
+  , *i1, *i2, *i3, *i4, *value);
 }
 
 void
@@ -277,10 +275,10 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_set5_f,
    int32_t *i3,
    int32_t *i4,
    int32_t *i5,
-   int64_t *value)
+   int32_t *value)
 {
   sidl_int__array_set5((struct sidl_int__array *)(ptrdiff_t)*array
-  , *i1, *i2, *i3, *i4, *i5, (int32_t)(ptrdiff_t)*value);
+  , *i1, *i2, *i3, *i4, *i5, *value);
 }
 
 void
@@ -294,10 +292,10 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_set6_f,
    int32_t *i4,
    int32_t *i5,
    int32_t *i6,
-   int64_t *value)
+   int32_t *value)
 {
   sidl_int__array_set6((struct sidl_int__array *)(ptrdiff_t)*array
-  , *i1, *i2, *i3, *i4, *i5, *i6, (int32_t)(ptrdiff_t)*value);
+  , *i1, *i2, *i3, *i4, *i5, *i6, *value);
 }
 
 void
@@ -312,10 +310,10 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_set7_f,
    int32_t *i5,
    int32_t *i6,
    int32_t *i7,
-   int64_t *value)
+   int32_t *value)
 {
   sidl_int__array_set7((struct sidl_int__array *)(ptrdiff_t)*array
-  , *i1, *i2, *i3, *i4, *i5, *i6, *i7, (int32_t)(ptrdiff_t)*value);
+  , *i1, *i2, *i3, *i4, *i5, *i6, *i7, *value);
 }
 
 void
@@ -324,10 +322,10 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_set_f,
                   bHYPRE_SStructVariable__array_set_f)
   (int64_t *array,
   int32_t indices[],
-  int64_t *value)
+  int32_t *value)
 {
   sidl_int__array_set((struct sidl_int__array *)(ptrdiff_t)*array, indices,
-    (int32_t)(ptrdiff_t)*value);
+    *value);
 }
 
 void

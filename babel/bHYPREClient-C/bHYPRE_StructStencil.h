@@ -2,12 +2,11 @@
  * File:          bHYPRE_StructStencil.h
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_StructStencil_h
@@ -20,7 +19,6 @@
  * description.  More than one implementation is not envisioned,
  * thus the decision has been made to make this a class rather than
  * an interface.
- * 
  */
 struct bHYPRE_StructStencil__object;
 struct bHYPRE_StructStencil__array;
@@ -33,19 +31,33 @@ typedef struct bHYPRE_StructStencil__object* bHYPRE_StructStencil;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
+#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_bHYPRE_StructStencil_IOR_h
+#include "bHYPRE_StructStencil_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,45 +66,25 @@ extern "C" {
  * Constructor function for the class.
  */
 struct bHYPRE_StructStencil__object*
-bHYPRE_StructStencil__create(void);
+bHYPRE_StructStencil__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 bHYPRE_StructStencil
-bHYPRE_StructStencil__createRemote(const char *, sidl_BaseInterface *_ex);
+bHYPRE_StructStencil__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * RMI connector function for the class.
+ * Wraps up the private data struct pointer (struct bHYPRE_StructStencil__data) passed in rather than running the constructor.
+ */
+bHYPRE_StructStencil
+bHYPRE_StructStencil__wrapObj(void * data, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.(addrefs)
  */
 bHYPRE_StructStencil
 bHYPRE_StructStencil__connect(const char *, sidl_BaseInterface *_ex);
-void
-bHYPRE_StructStencil_addRef(
-  /* in */ bHYPRE_StructStencil self);
-
-void
-bHYPRE_StructStencil_deleteRef(
-  /* in */ bHYPRE_StructStencil self);
-
-sidl_bool
-bHYPRE_StructStencil_isSame(
-  /* in */ bHYPRE_StructStencil self,
-  /* in */ sidl_BaseInterface iobj);
-
-sidl_BaseInterface
-bHYPRE_StructStencil_queryInt(
-  /* in */ bHYPRE_StructStencil self,
-  /* in */ const char* name);
-
-sidl_bool
-bHYPRE_StructStencil_isType(
-  /* in */ bHYPRE_StructStencil self,
-  /* in */ const char* name);
-
-sidl_ClassInfo
-bHYPRE_StructStencil_getClassInfo(
-  /* in */ bHYPRE_StructStencil self);
 
 /**
  * Method:  Create[]
@@ -100,40 +92,172 @@ bHYPRE_StructStencil_getClassInfo(
 bHYPRE_StructStencil
 bHYPRE_StructStencil_Create(
   /* in */ int32_t ndim,
-  /* in */ int32_t size);
+  /* in */ int32_t size,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Method:  SetDimension[]
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_StructStencil_SetDimension(
   /* in */ bHYPRE_StructStencil self,
-  /* in */ int32_t dim);
+  /* in */ int32_t dim,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetDimension)(
+    self,
+    dim,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  SetSize[]
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_StructStencil_SetSize(
   /* in */ bHYPRE_StructStencil self,
-  /* in */ int32_t size);
+  /* in */ int32_t size,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_SetSize)(
+    self,
+    size,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  SetElement[]
  */
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_StructStencil_SetElement(
   /* in */ bHYPRE_StructStencil self,
   /* in */ int32_t index,
   /* in rarray[dim] */ int32_t* offset,
-  /* in */ int32_t dim);
+  /* in */ int32_t dim,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  int32_t offset_lower[1], offset_upper[1], offset_stride[1]; 
+  struct sidl_int__array offset_real;
+  struct sidl_int__array*offset_tmp = &offset_real;
+  offset_upper[0] = dim-1;
+  sidl_int__array_init(offset, offset_tmp, 1, offset_lower, offset_upper,
+    offset_stride);
+  return (*self->d_epv->f_SetElement)(
+    self,
+    index,
+    offset_tmp,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+void
+bHYPRE_StructStencil_addRef(
+  /* in */ bHYPRE_StructStencil self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+void
+bHYPRE_StructStencil_deleteRef(
+  /* in */ bHYPRE_StructStencil self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_StructStencil_isSame(
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_StructStencil_isType(
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
+sidl_ClassInfo
+bHYPRE_StructStencil_getClassInfo(
+  /* in */ bHYPRE_StructStencil self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_StructStencil__object*
 bHYPRE_StructStencil__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -141,23 +265,94 @@ bHYPRE_StructStencil__cast(
 void*
 bHYPRE_StructStencil__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 bHYPRE_StructStencil__exec(
   /* in */ bHYPRE_StructStencil self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 bHYPRE_StructStencil__getURL(
-  /* in */ bHYPRE_StructStencil self);
+  /* in */ bHYPRE_StructStencil self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_StructStencil__raddRef(
+  /* in */ bHYPRE_StructStencil self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+bHYPRE_StructStencil__isRemote(
+  /* in */ bHYPRE_StructStencil self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+bHYPRE_StructStencil__isLocal(
+  /* in */ bHYPRE_StructStencil self,
+  /* out */ sidl_BaseInterface *_ex);
 struct bHYPRE_StructStencil__array*
 bHYPRE_StructStencil__array_createCol(
   int32_t       dimen,
@@ -385,6 +580,25 @@ bHYPRE_StructStencil__array_ensure(
   struct bHYPRE_StructStencil__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak bHYPRE_StructStencil__connectI
+
+#pragma weak bHYPRE_StructStencil__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct bHYPRE_StructStencil__object*
+bHYPRE_StructStencil__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct bHYPRE_StructStencil__object*
+bHYPRE_StructStencil__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

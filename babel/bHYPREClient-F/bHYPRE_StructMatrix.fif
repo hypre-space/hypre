@@ -2,12 +2,11 @@ C
 C       File:          bHYPRE_StructMatrix_Impl.f
 C       Symbol:        bHYPRE.StructMatrix-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.10.12
+C       Babel Version: 1.0.0
 C       Description:   Client-side documentation text for bHYPRE.StructMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.12
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -22,7 +21,6 @@ C       One function unique to a StructMatrix is SetConstantEntries.
 C       This declares that matrix entries corresponding to certain stencil points
 C       (supplied as stencil element indices) will be constant throughout the grid.
 C       
-C       
 
 
 
@@ -34,7 +32,21 @@ C
 
         subroutine bHYPRE_StructMatrix__create_f(retval)
         implicit none
-C       out bHYPRE.StructMatrix retval
+C        out bHYPRE.StructMatrix retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  _wrapObj[]
+C       Create an instance of class that wraps the passed in private_databHYPRE.StructMatrix
+C       
+
+        subroutine bHYPRE_StructMatrix__wrapObj_f(private_data, retval)
+        implicit none
+C        in opaque private_data
+        integer*8 private_data
+C        out bHYPRE.StructMatrix retval
         integer*8 retval
         end
 
@@ -44,12 +56,14 @@ C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine bHYPRE_StructMatrix__cast_f(ref, retval)
+        subroutine bHYPRE_StructMatrix__cast_f(ref, retval, exception)
         implicit none
-C       in opaque ref
+C        in opaque ref
         integer*8 ref
-C       out bHYPRE.StructMatrix retval
+C        out bHYPRE.StructMatrix retval
         integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -58,14 +72,37 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_StructMatrix__cast2_f(self, name, retval)
+        subroutine bHYPRE_StructMatrix__cast2_f(self, name, retval,
+     &     exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       out opaque retval
+C        out opaque retval
         integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Create[]
+C       
+
+        subroutine bHYPRE_StructMatrix_Create_f(mpi_comm, grid, stencil,
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.MPICommunicator mpi_comm
+        integer*8 mpi_comm
+C        in bHYPRE.StructGrid grid
+        integer*8 grid
+C        in bHYPRE.StructStencil stencil
+        integer*8 stencil
+C        out bHYPRE.StructMatrix retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -85,10 +122,12 @@ C       class.
 C       </p>
 C       
 
-        subroutine bHYPRE_StructMatrix_addRef_f(self)
+        subroutine bHYPRE_StructMatrix_addRef_f(self, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -101,10 +140,12 @@ C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
 
-        subroutine bHYPRE_StructMatrix_deleteRef_f(self)
+        subroutine bHYPRE_StructMatrix_deleteRef_f(self, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -114,36 +155,17 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_StructMatrix_isSame_f(self, iobj, retval)
+        subroutine bHYPRE_StructMatrix_isSame_f(self, iobj, retval,
+     &     exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in sidl.BaseInterface iobj
+C        in sidl.BaseInterface iobj
         integer*8 iobj
-C       out bool retval
+C        out bool retval
         logical retval
-        end
-
-
-C       
-C       Method:  queryInt[]
-C       Check whether the object can support the specified interface or
-C       class.  If the <code>sidl</code> type name in <code>name</code>
-C       is supported, then a reference to that object is returned with the
-C       reference count incremented.  The callee will be responsible for
-C       calling <code>deleteRef</code> on the returned object.  If
-C       the specified type is not supported, then a null reference is
-C       returned.
-C       
-
-        subroutine bHYPRE_StructMatrix_queryInt_f(self, name, retval)
-        implicit none
-C       in bHYPRE.StructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out sidl.BaseInterface retval
-        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -155,14 +177,17 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_StructMatrix_isType_f(self, name, retval)
+        subroutine bHYPRE_StructMatrix_isType_f(self, name, retval,
+     &     exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       out bool retval
+C        out bool retval
         logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -171,30 +196,192 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_StructMatrix_getClassInfo_f(self, retval)
+        subroutine bHYPRE_StructMatrix_getClassInfo_f(self, retval,
+     &     exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       out sidl.ClassInfo retval
+C        out sidl.ClassInfo retval
         integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
 C       
-C       Method:  Create[]
+C       Method:  SetGrid[]
 C       
 
-        subroutine bHYPRE_StructMatrix_Create_f(mpi_comm, grid, stencil,
-     &     retval)
+        subroutine bHYPRE_StructMatrix_SetGrid_f(self, grid, retval,
+     &     exception)
         implicit none
-C       in bHYPRE.MPICommunicator mpi_comm
-        integer*8 mpi_comm
-C       in bHYPRE.StructGrid grid
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in bHYPRE.StructGrid grid
         integer*8 grid
-C       in bHYPRE.StructStencil stencil
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetStencil[]
+C       
+
+        subroutine bHYPRE_StructMatrix_SetStencil_f(self, stencil,
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in bHYPRE.StructStencil stencil
         integer*8 stencil
-C       out bHYPRE.StructMatrix retval
-        integer*8 retval
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetValues[]
+C       
+
+        subroutine bHYPRE_StructMatrix_SetValues_f(self, index, dim,
+     &     num_stencil_indices, stencil_indices, values, retval,
+     &     exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in int dim
+        integer*4 dim
+C        in int num_stencil_indices
+        integer*4 num_stencil_indices
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<int> index(dim)
+        integer*4 index(0:dim-1)
+C        in rarray<int> stencil_indices(num_stencil_indices)
+        integer*4 stencil_indices(0:num_stencil_indices-1)
+C        in rarray<double> values(num_stencil_indices)
+        double precision values(0:num_stencil_indices-1)
+        end
+
+
+C       
+C       Method:  SetBoxValues[]
+C       
+
+        subroutine bHYPRE_StructMatrix_SetBoxValues_f(self, ilower,
+     &     iupper, dim, num_stencil_indices, stencil_indices, values,
+     &     nvalues, retval, exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in int dim
+        integer*4 dim
+C        in int num_stencil_indices
+        integer*4 num_stencil_indices
+C        in int nvalues
+        integer*4 nvalues
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C        in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
+C        in rarray<int> stencil_indices(num_stencil_indices)
+        integer*4 stencil_indices(0:num_stencil_indices-1)
+C        in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
+        end
+
+
+C       
+C       Method:  SetNumGhost[]
+C       
+
+        subroutine bHYPRE_StructMatrix_SetNumGhost_f(self, num_ghost,
+     &     dim2, retval, exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in int dim2
+        integer*4 dim2
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<int> num_ghost(dim2)
+        integer*4 num_ghost(0:dim2-1)
+        end
+
+
+C       
+C       Method:  SetSymmetric[]
+C       
+
+        subroutine bHYPRE_StructMatrix_SetSymmetric_f(self, symmetric,
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in int symmetric
+        integer*4 symmetric
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetConstantEntries[]
+C       
+
+        subroutine bHYPRE_StructMatrix_SetConstantEntries_f(self,
+     &     num_stencil_constant_points, stencil_constant_points, retval,
+     &     exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in int num_stencil_constant_points
+        integer*4 num_stencil_constant_points
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<int> stencil_constant_points(num_stencil_constant_points)
+        integer*4 
+     &     stencil_constant_points(0:num_stencil_constant_points-1)
+        end
+
+
+C       
+C       Method:  SetConstantValues[]
+C       
+
+        subroutine bHYPRE_StructMatrix_SetConstantValues_f(self,
+     &     num_stencil_indices, stencil_indices, values, retval,
+     &     exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in int num_stencil_indices
+        integer*4 num_stencil_indices
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<int> stencil_indices(num_stencil_indices)
+        integer*4 stencil_indices(0:num_stencil_indices-1)
+C        in rarray<double> values(num_stencil_indices)
+        double precision values(0:num_stencil_indices-1)
         end
 
 
@@ -202,17 +389,18 @@ C
 C       Method:  SetCommunicator[]
 C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_SetCommunicator_f(self, mpi_comm,
-     &     retval)
+     &     retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in bHYPRE.MPICommunicator mpi_comm
+C        in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -221,14 +409,16 @@ C       Method:  Initialize[]
 C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
-C       
 
-        subroutine bHYPRE_StructMatrix_Initialize_f(self, retval)
+        subroutine bHYPRE_StructMatrix_Initialize_f(self, retval,
+     &     exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -240,154 +430,16 @@ C       and {\tt Assemble} always appear in a matched set, with
 C       Initialize preceding Assemble. Values can only be set in
 C       between a call to Initialize and Assemble.
 C       
-C       
 
-        subroutine bHYPRE_StructMatrix_Assemble_f(self, retval)
+        subroutine bHYPRE_StructMatrix_Assemble_f(self, retval,
+     &     exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       out int retval
+C        out int retval
         integer*4 retval
-        end
-
-
-C       
-C       Method:  SetGrid[]
-C       
-
-        subroutine bHYPRE_StructMatrix_SetGrid_f(self, grid, retval)
-        implicit none
-C       in bHYPRE.StructMatrix self
-        integer*8 self
-C       in bHYPRE.StructGrid grid
-        integer*8 grid
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetStencil[]
-C       
-
-        subroutine bHYPRE_StructMatrix_SetStencil_f(self, stencil,
-     &     retval)
-        implicit none
-C       in bHYPRE.StructMatrix self
-        integer*8 self
-C       in bHYPRE.StructStencil stencil
-        integer*8 stencil
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetValues[]
-C       
-
-        subroutine bHYPRE_StructMatrix_SetValues_f(self, index,
-     &     stencil_indices, values, retval)
-        implicit none
-C       in bHYPRE.StructMatrix self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-C       in rarray<int> index(dim)
-        integer*4 index(0:dim-1)
-C       in rarray<int> stencil_indices(num_stencil_indices)
-        integer*4 stencil_indices(0:num_stencil_indices-1)
-C       in rarray<double> values(num_stencil_indices)
-        double precision values(0:num_stencil_indices-1)
-        end
-
-
-C       
-C       Method:  SetBoxValues[]
-C       
-
-        subroutine bHYPRE_StructMatrix_SetBoxValues_f(self, ilower,
-     &     iupper, stencil_indices, values, retval)
-        implicit none
-C       in bHYPRE.StructMatrix self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-C       in rarray<int> ilower(dim)
-        integer*4 ilower(0:dim-1)
-C       in rarray<int> iupper(dim)
-        integer*4 iupper(0:dim-1)
-C       in rarray<int> stencil_indices(num_stencil_indices)
-        integer*4 stencil_indices(0:num_stencil_indices-1)
-C       in rarray<double> values(nvalues)
-        double precision values(0:nvalues-1)
-        end
-
-
-C       
-C       Method:  SetNumGhost[]
-C       
-
-        subroutine bHYPRE_StructMatrix_SetNumGhost_f(self, num_ghost,
-     &     retval)
-        implicit none
-C       in bHYPRE.StructMatrix self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-C       in rarray<int> num_ghost(dim2)
-        integer*4 num_ghost(0:dim2-1)
-        end
-
-
-C       
-C       Method:  SetSymmetric[]
-C       
-
-        subroutine bHYPRE_StructMatrix_SetSymmetric_f(self, symmetric,
-     &     retval)
-        implicit none
-C       in bHYPRE.StructMatrix self
-        integer*8 self
-C       in int symmetric
-        integer*4 symmetric
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetConstantEntries[]
-C       
-
-        subroutine bHYPRE_StructMatrix_SetConstantEntries_f(self,
-     &     stencil_constant_points, retval)
-        implicit none
-C       in bHYPRE.StructMatrix self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-C       in rarray<int> stencil_constant_points(num_stencil_constant_points)
-        integer*4 
-     &     stencil_constant_points(0:num_stencil_constant_points-1)
-        end
-
-
-C       
-C       Method:  SetConstantValues[]
-C       
-
-        subroutine bHYPRE_StructMatrix_SetConstantValues_f(self,
-     &     stencil_indices, values, retval)
-        implicit none
-C       in bHYPRE.StructMatrix self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-C       in rarray<int> stencil_indices(num_stencil_indices)
-        integer*4 stencil_indices(0:num_stencil_indices-1)
-C       in rarray<double> values(num_stencil_indices)
-        double precision values(0:num_stencil_indices-1)
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -395,19 +447,20 @@ C
 C       Method:  SetIntParameter[]
 C       Set the int parameter associated with {\tt name}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_SetIntParameter_f(self, name,
-     &     value, retval)
+     &     value, retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       in int value
+C        in int value
         integer*4 value
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -415,19 +468,20 @@ C
 C       Method:  SetDoubleParameter[]
 C       Set the double parameter associated with {\tt name}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_SetDoubleParameter_f(self, name,
-     &     value, retval)
+     &     value, retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       in double value
+C        in double value
         double precision value
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -435,19 +489,20 @@ C
 C       Method:  SetStringParameter[]
 C       Set the string parameter associated with {\tt name}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_SetStringParameter_f(self, name,
-     &     value, retval)
+     &     value, retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       in string value
+C        in string value
         character*(*) value
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -455,18 +510,21 @@ C
 C       Method:  SetIntArray1Parameter[]
 C       Set the int 1-D array parameter associated with {\tt name}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_SetIntArray1Parameter_f(self,
-     &     name, value, retval)
+     &     name, value, nvalues, retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       out int retval
+C        in int nvalues
+        integer*4 nvalues
+C        out int retval
         integer*4 retval
-C       in rarray<int> value(nvalues)
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<int> value(nvalues)
         integer*4 value(0:nvalues-1)
         end
 
@@ -475,19 +533,20 @@ C
 C       Method:  SetIntArray2Parameter[]
 C       Set the int 2-D array parameter associated with {\tt name}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_SetIntArray2Parameter_f(self,
-     &     name, value, retval)
+     &     name, value, retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       in array<int,2,column-major> value
+C        in array<int,2,column-major> value
         integer*8 value
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -495,18 +554,21 @@ C
 C       Method:  SetDoubleArray1Parameter[]
 C       Set the double 1-D array parameter associated with {\tt name}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_SetDoubleArray1Parameter_f(self,
-     &     name, value, retval)
+     &     name, value, nvalues, retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       out int retval
+C        in int nvalues
+        integer*4 nvalues
+C        out int retval
         integer*4 retval
-C       in rarray<double> value(nvalues)
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<double> value(nvalues)
         double precision value(0:nvalues-1)
         end
 
@@ -515,19 +577,20 @@ C
 C       Method:  SetDoubleArray2Parameter[]
 C       Set the double 2-D array parameter associated with {\tt name}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_SetDoubleArray2Parameter_f(self,
-     &     name, value, retval)
+     &     name, value, retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       in array<double,2,column-major> value
+C        in array<double,2,column-major> value
         integer*8 value
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -535,19 +598,20 @@ C
 C       Method:  GetIntValue[]
 C       Set the int parameter associated with {\tt name}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_GetIntValue_f(self, name, value,
-     &     retval)
+     &     retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       out int value
+C        out int value
         integer*4 value
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -555,19 +619,20 @@ C
 C       Method:  GetDoubleValue[]
 C       Get the double parameter associated with {\tt name}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_GetDoubleValue_f(self, name,
-     &     value, retval)
+     &     value, retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in string name
+C        in string name
         character*(*) name
-C       out double value
+C        out double value
         double precision value
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -576,18 +641,20 @@ C       Method:  Setup[]
 C       (Optional) Do any preprocessing that may be necessary in
 C       order to execute {\tt Apply}.
 C       
-C       
 
-        subroutine bHYPRE_StructMatrix_Setup_f(self, b, x, retval)
+        subroutine bHYPRE_StructMatrix_Setup_f(self, b, x, retval,
+     &     exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in bHYPRE.Vector b
+C        in bHYPRE.Vector b
         integer*8 b
-C       in bHYPRE.Vector x
+C        in bHYPRE.Vector x
         integer*8 x
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -595,18 +662,20 @@ C
 C       Method:  Apply[]
 C       Apply the operator to {\tt b}, returning {\tt x}.
 C       
-C       
 
-        subroutine bHYPRE_StructMatrix_Apply_f(self, b, x, retval)
+        subroutine bHYPRE_StructMatrix_Apply_f(self, b, x, retval,
+     &     exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in bHYPRE.Vector b
+C        in bHYPRE.Vector b
         integer*8 b
-C       inout bHYPRE.Vector x
+C        inout bHYPRE.Vector x
         integer*8 x
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end
 
 
@@ -614,17 +683,121 @@ C
 C       Method:  ApplyAdjoint[]
 C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
 C       
-C       
 
         subroutine bHYPRE_StructMatrix_ApplyAdjoint_f(self, b, x,
-     &     retval)
+     &     retval, exception)
         implicit none
-C       in bHYPRE.StructMatrix self
+C        in bHYPRE.StructMatrix self
         integer*8 self
-C       in bHYPRE.Vector b
+C        in bHYPRE.Vector b
         integer*8 b
-C       inout bHYPRE.Vector x
+C        inout bHYPRE.Vector x
         integer*8 x
-C       out int retval
+C        out int retval
         integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _exec[]
+C       Select and execute a method by name
+C       
+
+        subroutine bHYPRE_StructMatrix__exec_f(self, methodName, inArgs,
+     &     outArgs, exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in string methodName
+        character*(*) methodName
+C        in sidl.rmi.Call inArgs
+        integer*8 inArgs
+C        in sidl.rmi.Return outArgs
+        integer*8 outArgs
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _getURL[]
+C       Get the URL of the Implementation of this object (for RMI)
+C       
+
+        subroutine bHYPRE_StructMatrix__getURL_f(self, retval,
+     &     exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isRemote[]
+C       TRUE if this object is remote, false if local
+C       
+
+        subroutine bHYPRE_StructMatrix__isRemote_f(self, retval,
+     &     exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isLocal[]
+C       TRUE if this object is local, false if remote
+C       
+
+        subroutine bHYPRE_StructMatrix__isLocal_f(self, retval,
+     &     exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks[]
+C       Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine bHYPRE_StructMatrix__set_hooks_f(self, on, exception)
+        implicit none
+C        in bHYPRE.StructMatrix self
+        integer*8 self
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks_static[]
+C       Static Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine bHYPRE_StructMatrix__set_hooks_static_f(on,
+     &     exception)
+        implicit none
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
         end

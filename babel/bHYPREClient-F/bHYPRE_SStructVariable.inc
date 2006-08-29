@@ -2,12 +2,10 @@ C
 C       File:          bHYPRE_SStructVariable.inc
 C       Symbol:        bHYPRE.SStructVariable-v1.0.0
 C       Symbol Type:   enumeration
-C       Babel Version: 0.10.12
+C       Babel Version: 1.0.0
 C       Description:   Client-side glue code for bHYPRE.SStructVariable
 C       
 C       WARNING: Automatically generated; changes will be lost
-C       
-C       babel-version = 0.10.12
 C       
 
 
@@ -29,13 +27,13 @@ C       index in the following way:
 C       \begin{itemize}
 C       \item cell centered variables are aligned with the index;
 C       \item node centered variables are aligned with the cell corner
-C             at relative index (1/2, 1/2, 1/2);
+C       at relative index (1/2, 1/2, 1/2);
 C       \item x-face, y-face, and z-face centered variables are aligned
-C             with the faces at relative indexes (1/2, 0, 0), (0, 1/2, 0),
-C             and (0, 0, 1/2), respectively;
+C       with the faces at relative indexes (1/2, 0, 0), (0, 1/2, 0),
+C       and (0, 0, 1/2), respectively;
 C       \item x-edge, y-edge, and z-edge centered variables are aligned
-C             with the edges at relative indexes (0, 1/2, 1/2), (1/2, 0, 1/2),
-C             and (1/2, 1/2, 0), respectively.
+C       with the edges at relative indexes (0, 1/2, 1/2), (1/2, 0, 1/2),
+C       and (1/2, 1/2, 0), respectively.
 C       \end{itemize}
 C       
 C       The supported identifiers are:
@@ -57,7 +55,6 @@ C       variables in 3D are associated with 8 cells (away from
 C       boundaries).  Although grid cells are distributed uniquely to
 C       different processes, variables may be owned by multiple
 C       processes because they may be associated with multiple cells.
-C       
 C       
 
 

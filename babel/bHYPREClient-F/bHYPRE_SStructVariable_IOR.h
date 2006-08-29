@@ -2,12 +2,10 @@
  * File:          bHYPRE_SStructVariable_IOR.h
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Intermediate Object Representation for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost
- * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_SStructVariable_IOR_h
@@ -38,13 +36,13 @@ extern "C" {
  * \begin{itemize}
  * \item cell centered variables are aligned with the index;
  * \item node centered variables are aligned with the cell corner
- *       at relative index (1/2, 1/2, 1/2);
+ * at relative index (1/2, 1/2, 1/2);
  * \item x-face, y-face, and z-face centered variables are aligned
- *       with the faces at relative indexes (1/2, 0, 0), (0, 1/2, 0),
- *       and (0, 0, 1/2), respectively;
+ * with the faces at relative indexes (1/2, 0, 0), (0, 1/2, 0),
+ * and (0, 0, 1/2), respectively;
  * \item x-edge, y-edge, and z-edge centered variables are aligned
- *       with the edges at relative indexes (0, 1/2, 1/2), (1/2, 0, 1/2),
- *       and (1/2, 1/2, 0), respectively.
+ * with the edges at relative indexes (0, 1/2, 1/2), (1/2, 0, 1/2),
+ * and (1/2, 1/2, 0), respectively.
  * \end{itemize}
  * 
  * The supported identifiers are:
@@ -66,7 +64,6 @@ extern "C" {
  * boundaries).  Although grid cells are distributed uniquely to
  * different processes, variables may be owned by multiple
  * processes because they may be associated with multiple cells.
- * 
  */
 
 
