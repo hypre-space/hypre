@@ -3,6 +3,10 @@
 #ifndef __HASHTABLE_CWC22_H__
 #define __HASHTABLE_CWC22_H__
 
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
+#endif
+
 struct hashtable;
 
 /* Example of use:
@@ -68,13 +72,14 @@ struct hashtable;
  * @param   minsize         minimum initial size of hashtable
  * @param   hashfunction    function for hashing keys
  * @param   key_eq_fn       function for determining key equality
+ * @param   fk              boolean, if true, freekeys on removal, false, don't.
  * @return                  newly created hashtable or NULL on failure
  */
 
-struct hashtable *
-create_hashtable(unsigned int minsize,
-                 unsigned int (*hashfunction) (void*),
-                 int (*key_eq_fn) (void*,void*));
+struct hashtable* create_hashtable(unsigned int minsize,
+				   unsigned int (*hashfunction) (void*),
+				   int (*key_eq_fn) (void*,void*),
+				   int fk);
 
 /*****************************************************************************
  * hashtable_insert

@@ -19,16 +19,13 @@ sidl_cv_f77_str_minsize=512
 
 AC_CACHE_CHECK([the integer value of F77's .true.], sidl_cv_f77_true,[dnl
 AC_LANG_PUSH(Fortran 77)dnl
-dnl should be AC_TRY_RUN, but the macro destroys conftest$ac_exeext too soon
-dnl ignore the warnings this issues from automake: F77 does not use the 1st argument (includes)
-AC_TRY_LINK(dnl
-,[
+AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
         logical log
         integer value
         equivalence (log, value)
         log = .true.
         write (*,*) value
-],[
+])],[
 sidl_cv_f77_true=`./conftest$ac_exeext`
 llnl_status=$?
 if test -z "$sidl_cv_f77_true"; then
@@ -40,15 +37,13 @@ AC_LANG_POP(Fortran 77)dnl])
 
 AC_CACHE_CHECK([the integer value of F77's .false.], sidl_cv_f77_false,[dnl
 AC_LANG_PUSH(Fortran 77)dnl
-dnl should be AC_TRY_RUN, but the macro destroys conftest$ac_exeext too soon
-dnl ignore the warnings this issues from automake: F77 does not use the 1st argument (includes)
-AC_TRY_LINK(,[
+AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
         logical log
         integer value
         equivalence (log, value)
         log = .false.
 	write (*,*) value
-],[
+])],[
 sidl_cv_f77_false=`./conftest$ac_exeext`
 if test -z "$sidl_cv_f77_false"; then
   AC_MSG_ERROR([Unable to determine integer value of F77 .false. (running ./conftest$ac_exeext produced no output)])

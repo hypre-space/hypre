@@ -74,6 +74,15 @@ void sidl_String_strcpy(char* s1, const char* s2);
 char* sidl_String_strdup(const char* s);
 
 /**
+ * Duplicate at most the first n characters of the string, if s is longer than
+ * n, only n characters are copied and a terminal NUL is added.
+ * This new string should be deallocated by a call to the string free
+ * function <code>sidl_String_free</code>.
+ */
+char* sidl_String_strndup(const char* s, size_t n);
+
+
+/**
  * Return whether the two strings are equal.  Either or both of the two
  * argument strings may be null.
  */

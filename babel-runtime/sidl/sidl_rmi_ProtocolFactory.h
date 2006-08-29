@@ -1,8 +1,8 @@
 /*
  * File:          sidl_rmi_ProtocolFactory.h
- * Symbol:        sidl.rmi.ProtocolFactory-v0.9.3
+ * Symbol:        sidl.rmi.ProtocolFactory-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.rmi.ProtocolFactory
@@ -32,18 +32,20 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_rmi_ProtocolFactory_h
 #define included_sidl_rmi_ProtocolFactory_h
 
 /**
- * Symbol "sidl.rmi.ProtocolFactory" (version 0.9.3)
+ * Symbol "sidl.rmi.ProtocolFactory" (version 0.9.15)
  * 
- * This singleton class keeps a table of string prefixes (e.g. "babel" or "proteus")
- * to protocol implementations.  The intent is to parse a URL (e.g. "babel://server:port/class")
- * and create classes that implement <code>sidl.rmi.InstanceHandle</code>.
+ *  
+ * This singleton class keeps a table of string prefixes
+ * (e.g. "babel" or "proteus") to protocol implementations.  The
+ * intent is to parse a URL (e.g. "babel://server:port/class") and
+ * create classes that implement
+ * <code>sidl.rmi.InstanceHandle</code>.
  */
 struct sidl_rmi_ProtocolFactory__object;
 struct sidl_rmi_ProtocolFactory__array;
@@ -65,22 +67,30 @@ typedef struct sidl_rmi_ProtocolFactory__object* sidl_rmi_ProtocolFactory;
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
 #ifndef included_sidl_SIDLException_h
 #include "sidl_SIDLException.h"
+#endif
+#ifndef included_sidl_io_Serializable_h
+#include "sidl_io_Serializable.h"
 #endif
 #ifndef included_sidl_rmi_InstanceHandle_h
 #include "sidl_rmi_InstanceHandle.h"
 #endif
-#ifndef included_sidl_rmi_NetworkException_h
-#include "sidl_rmi_NetworkException.h"
-#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidl_rmi_ProtocolFactory_IOR_h
+#include "sidl_rmi_ProtocolFactory_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -89,93 +99,29 @@ extern "C" {
  * Constructor function for the class.
  */
 struct sidl_rmi_ProtocolFactory__object*
-sidl_rmi_ProtocolFactory__create(void);
+sidl_rmi_ProtocolFactory__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 sidl_rmi_ProtocolFactory
-sidl_rmi_ProtocolFactory__createRemote(const char *, sidl_BaseInterface *_ex);
+sidl_rmi_ProtocolFactory__createRemote(const char * url,
+  sidl_BaseInterface *_ex);
+
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 sidl_rmi_ProtocolFactory
 sidl_rmi_ProtocolFactory__connect(const char *, sidl_BaseInterface *_ex);
-/**
- * <p>
- * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>sidl</code> have an intrinsic reference count.
- * Objects continue to exist as long as the reference count is
- * positive. Clients should call this method whenever they
- * create another ongoing reference to an object or interface.
- * </p>
- * <p>
- * This does not have a return value because there is no language
- * independent type that can refer to an interface or a
- * class.
- * </p>
- */
-void
-sidl_rmi_ProtocolFactory_addRef(
-  /* in */ sidl_rmi_ProtocolFactory self);
 
 /**
- * Decrease by one the intrinsic reference count in the underlying
- * object, and delete the object if the reference is non-positive.
- * Objects in <code>sidl</code> have an intrinsic reference count.
- * Clients should call this method whenever they remove a
- * reference to an object or interface.
- */
-void
-sidl_rmi_ProtocolFactory_deleteRef(
-  /* in */ sidl_rmi_ProtocolFactory self);
-
-/**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-sidl_bool
-sidl_rmi_ProtocolFactory_isSame(
-  /* in */ sidl_rmi_ProtocolFactory self,
-  /* in */ sidl_BaseInterface iobj);
-
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidl_rmi_ProtocolFactory_queryInt(
-  /* in */ sidl_rmi_ProtocolFactory self,
-  /* in */ const char* name);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>sidl</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-sidl_bool
-sidl_rmi_ProtocolFactory_isType(
-  /* in */ sidl_rmi_ProtocolFactory self,
-  /* in */ const char* name);
-
-/**
- * Return the meta-data about the class implementing this interface.
- */
-sidl_ClassInfo
-sidl_rmi_ProtocolFactory_getClassInfo(
-  /* in */ sidl_rmi_ProtocolFactory self);
-
-/**
- * Associate a particular prefix in the URL to a typeName <code>sidl.Loader</code> can find.
- * The actual type is expected to implement <code>sidl.rmi.InstanceHandle</code>
- * Return true iff the addition is successful.  (no collisions allowed)
+ *  
+ * Associate a particular prefix in the URL to a typeName
+ * <code>sidl.Loader</code> can find.  The actual type is
+ * expected to implement <code>sidl.rmi.InstanceHandle</code>
+ * Return true iff the addition is successful.  (no collisions
+ * allowed)
  */
 sidl_bool
 sidl_rmi_ProtocolFactory_addProtocol(
@@ -201,7 +147,8 @@ sidl_rmi_ProtocolFactory_deleteProtocol(
   /* out */ sidl_BaseInterface *_ex);
 
 /**
- * Create a new remote object and a return an instance handle for that object. 
+ * Create a new remote object and return an instance handle for that
+ * object. 
  * The server and port number are in the url.  Return nil 
  * if protocol unknown or InstanceHandle.init() failed.
  */
@@ -212,22 +159,157 @@ sidl_rmi_ProtocolFactory_createInstance(
   /* out */ sidl_BaseInterface *_ex);
 
 /**
- * Create an new connection linked to an already existing object on a remote 
- * server.  The server and port number are in the url, the objectID is the unique ID
- * of the remote object in the remote instance registry. 
- * Return nil if protocol unknown or InstanceHandle.init() failed.
+ *  
+ * Create an new connection linked to an already existing
+ * object on a remote server.  The server and port number are in
+ * the url, the objectID is the unique ID of the remote object
+ * in the remote instance registry.  Return null if protocol
+ * unknown or InstanceHandle.init() failed.  The boolean addRef
+ * should be true if connect should remotely addRef
  */
 sidl_rmi_InstanceHandle
 sidl_rmi_ProtocolFactory_connectInstance(
   /* in */ const char* url,
+  /* in */ sidl_bool ar,
   /* out */ sidl_BaseInterface *_ex);
+
+/**
+ *  
+ * Request that a remote object be serialized to you.  The server 
+ * and port number are in the url, the objectID is the unique ID 
+ * of the remote object in the remote instance registry.  Return 
+ * null if protocol unknown or InstanceHandle.init() failed.  
+ */
+sidl_io_Serializable
+sidl_rmi_ProtocolFactory_unserializeInstance(
+  /* in */ const char* url,
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ * <p>
+ * Add one to the intrinsic reference count in the underlying object.
+ * Object in <code>sidl</code> have an intrinsic reference count.
+ * Objects continue to exist as long as the reference count is
+ * positive. Clients should call this method whenever they
+ * create another ongoing reference to an object or interface.
+ * </p>
+ * <p>
+ * This does not have a return value because there is no language
+ * independent type that can refer to an interface or a
+ * class.
+ * </p>
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_rmi_ProtocolFactory_addRef(
+  /* in */ sidl_rmi_ProtocolFactory self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Decrease by one the intrinsic reference count in the underlying
+ * object, and delete the object if the reference is non-positive.
+ * Objects in <code>sidl</code> have an intrinsic reference count.
+ * Clients should call this method whenever they remove a
+ * reference to an object or interface.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_rmi_ProtocolFactory_deleteRef(
+  /* in */ sidl_rmi_ProtocolFactory self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_rmi_ProtocolFactory_isSame(
+  /* in */ sidl_rmi_ProtocolFactory self,
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>sidl</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_rmi_ProtocolFactory_isType(
+  /* in */ sidl_rmi_ProtocolFactory self,
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Return the meta-data about the class implementing this interface.
+ */
+SIDL_C_INLINE_DECL
+sidl_ClassInfo
+sidl_rmi_ProtocolFactory_getClassInfo(
+  /* in */ sidl_rmi_ProtocolFactory self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidl_rmi_ProtocolFactory__object*
 sidl_rmi_ProtocolFactory__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -235,23 +317,94 @@ sidl_rmi_ProtocolFactory__cast(
 void*
 sidl_rmi_ProtocolFactory__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidl_rmi_ProtocolFactory__exec(
   /* in */ sidl_rmi_ProtocolFactory self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidl_rmi_ProtocolFactory__getURL(
-  /* in */ sidl_rmi_ProtocolFactory self);
+  /* in */ sidl_rmi_ProtocolFactory self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_rmi_ProtocolFactory__raddRef(
+  /* in */ sidl_rmi_ProtocolFactory self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_rmi_ProtocolFactory__isRemote(
+  /* in */ sidl_rmi_ProtocolFactory self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidl_rmi_ProtocolFactory__isLocal(
+  /* in */ sidl_rmi_ProtocolFactory self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -739,6 +892,25 @@ sidl_rmi_ProtocolFactory__array_ensure(
   struct sidl_rmi_ProtocolFactory__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidl_rmi_ProtocolFactory__connectI
+
+#pragma weak sidl_rmi_ProtocolFactory__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidl_rmi_ProtocolFactory__object*
+sidl_rmi_ProtocolFactory__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidl_rmi_ProtocolFactory__object*
+sidl_rmi_ProtocolFactory__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

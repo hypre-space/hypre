@@ -1,8 +1,8 @@
 #
 # File:          __init__.py
-# Symbol:        sidl-v0.9.3
+# Symbol:        sidl-v0.9.15
 # Symbol Type:   package
-# Babel Version: 0.10.12
+# Babel Version: 1.0.0
 # Release:       $Name$
 # Revision:      @(#) $Id$
 # Description:   package initialization code
@@ -32,7 +32,6 @@
 # 
 # WARNING: Automatically generated; changes will be lost
 # 
-# babel-version = 0.10.12
 #
 
 
@@ -41,27 +40,31 @@ definitions for the <code>sidl</code> interface definition language.  It
 defines common run-time libraries and common base classes and interfaces.
 Every interface implicitly inherits from <code>sidl.BaseInterface</code>
 and every class implicitly inherits from <code>sidl.BaseClass</code>.
-
 """
 
 __all__ = [
-   "DFinder",
-   "ClassInfoI",
-   "SIDLException",
-   "Finder",
-   "rmi",
-   "InvViolation",
-   "Resolve",
-   "PreViolation",
-   "Loader",
-   "BaseException",
    "BaseClass",
-   "io",
-   "PostViolation",
-   "ClassInfo",
-   "DLL",
+   "BaseException",
    "BaseInterface",
-   "Scope" ]
+   "CastException",
+   "ClassInfo",
+   "ClassInfoI",
+   "DFinder",
+   "DLL",
+   "Finder",
+   "InvViolation",
+   "LangSpecificException",
+   "Loader",
+   "MemoryAllocationException",
+   "NotImplementedException",
+   "PostViolation",
+   "PreViolation",
+   "Resolve",
+   "RuntimeException",
+   "SIDLException",
+   "Scope",
+   "io",
+   "rmi" ]
 
 try:
   from pkgutil import extend_path

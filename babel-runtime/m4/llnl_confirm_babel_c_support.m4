@@ -21,13 +21,15 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
     AC_MSG_RESULT([no])
     AC_MSG_ERROR([The C compiler $CC fails to compile a trivial program (see config.log)])])
   AC_LANG_POP([])
+  AC_DEFINE(SIDL_CAST_INCREMENTS_REFCOUNT,,[This should always be defined for Babel 0.11.0 and beyond])
   LLNL_WHICH_PROG(WHICH_CC)
   # a. Libraries (existence)
   # b. Header Files.
   AC_HEADER_DIRENT
   AC_HEADER_STDC
   AC_HEADER_STDBOOL
-  AC_CHECK_HEADERS([argz.h float.h inttypes.h limits.h malloc.h memory.h netinet/in.h stddef.h stdlib.h string.h strings.h sys/socket.h unistd.h ctype.h sys/stat.h sys/types.h])
+  AC_CHECK_HEADERS([argz.h float.h inttypes.h limits.h malloc.h memory.h netinet/in.h stddef.h stdlib.h string.h strings.h sys/socket.h unistd.h ctype.h sys/stat.h sys/types.h sys/time.h])
+  AC_HEADER_TIME
   # c. Typedefs, Structs, Compiler Characteristics
   AC_C_CONST
   AC_TYPE_SIZE_T
@@ -46,6 +48,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
   AC_C_INLINE
   AC_C_RESTRICT
   AC_C_VOLATILE
+  LLNL_C_HAS_INLINE
   # d. Specific Library Functions.
   AC_FUNC_MALLOC
   AC_FUNC_REALLOC
@@ -54,6 +57,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
   AC_FUNC_CLOSEDIR_VOID
   AC_FUNC_ERROR_AT_LINE
   AC_FUNC_FORK
+  AC_FUNC_SELECT_ARGTYPES
   AC_LANG_C
   AC_LANG_PUSH([C])
   if test "$ac_compiler_gnu" = yes; then

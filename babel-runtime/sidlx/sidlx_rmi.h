@@ -2,12 +2,11 @@
  * File:          sidlx_rmi.h
  * Symbol:        sidlx.rmi-v0.1
  * Symbol Type:   package
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for sidlx.rmi
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_CallType_h
@@ -31,6 +30,9 @@
 #ifndef included_sidlx_rmi_JimEchoServer_h
 #include "sidlx_rmi_JimEchoServer.h"
 #endif
+#ifndef included_sidlx_rmi_NoServerException_h
+#include "sidlx_rmi_NoServerException.h"
+#endif
 #ifndef included_sidlx_rmi_ServerSocket_h
 #include "sidlx_rmi_ServerSocket.h"
 #endif
@@ -48,6 +50,12 @@
 #endif
 #ifndef included_sidlx_rmi_SimpleServer_h
 #include "sidlx_rmi_SimpleServer.h"
+#endif
+#ifndef included_sidlx_rmi_SimpleTicket_h
+#include "sidlx_rmi_SimpleTicket.h"
+#endif
+#ifndef included_sidlx_rmi_SimpleTicketBook_h
+#include "sidlx_rmi_SimpleTicketBook.h"
 #endif
 #ifndef included_sidlx_rmi_Simsponse_h
 #include "sidlx_rmi_Simsponse.h"

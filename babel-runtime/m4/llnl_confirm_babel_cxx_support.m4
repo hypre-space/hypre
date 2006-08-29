@@ -28,6 +28,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_CXX_SUPPORT],[
         AS_HELP_STRING(--enable-cxx@<:@=C++@:>@,C++ language bindings @<:@default=yes@:>@),
                [enable_cxx="$enableval"],
                [enable_cxx=yes])
+dnl  AC_DEFINE(SIDL_USE_UCXX, 0, [Use the UCXX namespace ::ucxx for the UCxx binding.])
   test -z "$enable_cxx" && enable_cxx=yes
   if test "$enable_cxx" != no; then
     if test $enable_cxx != yes; then 

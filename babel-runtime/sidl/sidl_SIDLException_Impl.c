@@ -1,8 +1,8 @@
 /*
  * File:          sidl_SIDLException_Impl.c
- * Symbol:        sidl.SIDLException-v0.9.3
+ * Symbol:        sidl.SIDLException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.SIDLException
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -41,7 +40,7 @@
  */
 
 /*
- * Symbol "sidl.SIDLException" (version 0.9.3)
+ * Symbol "sidl.SIDLException" (version 0.9.15)
  * 
  * <code>SIDLException</code> provides the basic functionality of the
  * <code>BaseException</code> interface for getting and setting error
@@ -49,20 +48,23 @@
  */
 
 #include "sidl_SIDLException_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
-#line 53 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._includes) */
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "sidl_Exception.h"
 
 struct sidl_SIDLException_Trace {
   struct sidl_SIDLException_Trace  *next;
   char                             *line;
 };
 /* DO-NOT-DELETE splicer.end(sidl.SIDLException._includes) */
-#line 64 "sidl_SIDLException_Impl.c"
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -75,13 +77,14 @@ extern "C"
 #endif
 void
 impl_sidl_SIDLException__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 78 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidl.SIDLException._load) */
-#line 84 "sidl_SIDLException_Impl.c"
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -95,9 +98,11 @@ extern "C"
 #endif
 void
 impl_sidl_SIDLException__ctor(
-  /* in */ sidl_SIDLException self)
+  /* in */ sidl_SIDLException self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 96 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
+  *_ex = 0;
+  {
    /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._ctor) */
   struct sidl_SIDLException__data *data = 
     (struct sidl_SIDLException__data *)
@@ -113,9 +118,32 @@ impl_sidl_SIDLException__ctor(
 
   sidl_SIDLException__set_data(self, data);
    /* DO-NOT-DELETE splicer.end(sidl.SIDLException._ctor) */
-#line 116 "sidl_SIDLException_Impl.c"
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_SIDLException__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_SIDLException__ctor2(
+  /* in */ sidl_SIDLException self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._ctor2) */
+  /* Insert-Code-Here {sidl.SIDLException._ctor2} (special constructor method) */
+  /* DO-NOT-DELETE splicer.end(sidl.SIDLException._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -128,9 +156,11 @@ extern "C"
 #endif
 void
 impl_sidl_SIDLException__dtor(
-  /* in */ sidl_SIDLException self)
+  /* in */ sidl_SIDLException self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 127 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
+  *_ex = 0;
+  {
    /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._dtor) */
   struct sidl_SIDLException__data *data = 
     (self ? sidl_SIDLException__get_data(self) : NULL);
@@ -163,7 +193,7 @@ impl_sidl_SIDLException__dtor(
     sidl_SIDLException__set_data(self, NULL);
   }
    /* DO-NOT-DELETE splicer.end(sidl.SIDLException._dtor) */
-#line 166 "sidl_SIDLException_Impl.c"
+  }
 }
 
 /*
@@ -178,9 +208,11 @@ extern "C"
 #endif
 char*
 impl_sidl_SIDLException_getNote(
-  /* in */ sidl_SIDLException self)
+  /* in */ sidl_SIDLException self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 175 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
+  *_ex = 0;
+  {
    /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.getNote) */
   struct sidl_SIDLException__data *data = 
     (self ? sidl_SIDLException__get_data(self) : NULL);
@@ -191,7 +223,7 @@ impl_sidl_SIDLException_getNote(
      : NULL);
   return result;
    /* DO-NOT-DELETE splicer.end(sidl.SIDLException.getNote) */
-#line 194 "sidl_SIDLException_Impl.c"
+  }
 }
 
 /*
@@ -207,9 +239,11 @@ extern "C"
 void
 impl_sidl_SIDLException_setNote(
   /* in */ sidl_SIDLException self,
-  /* in */ const char* message)
+  /* in */ const char* message,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 202 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
+  *_ex = 0;
+  {
    /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.setNote) */
   struct sidl_SIDLException__data *data = 
     (self ? sidl_SIDLException__get_data(self) : NULL);
@@ -223,7 +257,7 @@ impl_sidl_SIDLException_setNote(
        : NULL);
   }
    /* DO-NOT-DELETE splicer.end(sidl.SIDLException.setNote) */
-#line 226 "sidl_SIDLException_Impl.c"
+  }
 }
 
 /*
@@ -239,9 +273,11 @@ extern "C"
 #endif
 char*
 impl_sidl_SIDLException_getTrace(
-  /* in */ sidl_SIDLException self)
+  /* in */ sidl_SIDLException self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 232 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.getTrace) */
   char* tmp = NULL;
   struct sidl_SIDLException__data *data = 
@@ -266,7 +302,7 @@ impl_sidl_SIDLException_getTrace(
   }
   return tmp;
   /* DO-NOT-DELETE splicer.end(sidl.SIDLException.getTrace) */
-#line 269 "sidl_SIDLException_Impl.c"
+  }
 }
 
 /*
@@ -282,9 +318,11 @@ extern "C"
 void
 impl_sidl_SIDLException_addLine(
   /* in */ sidl_SIDLException self,
-  /* in */ const char* traceline)
+  /* in */ const char* traceline,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 273 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.addLine) */
   struct sidl_SIDLException__data *data = 
     (self ? sidl_SIDLException__get_data(self) : NULL);
@@ -320,7 +358,7 @@ impl_sidl_SIDLException_addLine(
     }
   }
   /* DO-NOT-DELETE splicer.end(sidl.SIDLException.addLine) */
-#line 323 "sidl_SIDLException_Impl.c"
+  }
 }
 
 /*
@@ -339,9 +377,11 @@ impl_sidl_SIDLException_add(
   /* in */ sidl_SIDLException self,
   /* in */ const char* filename,
   /* in */ int32_t lineno,
-  /* in */ const char* methodname)
+  /* in */ const char* methodname,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 328 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.add) */
   /*
    *  The estimated length of the trace line is the sum of the lengths of
@@ -382,55 +422,191 @@ impl_sidl_SIDLException_add(
 
   if (tmpline) {
     sprintf(tmpline, "in %s at %s:%d", tmpmn, tmpfn, lineno), 
-    sidl_SIDLException_addLine(self,tmpline); 
+    sidl_SIDLException_addLine(self,tmpline, _ex); 
     free((void*)tmpline);
   }
   /* DO-NOT-DELETE splicer.end(sidl.SIDLException.add) */
-#line 389 "sidl_SIDLException_Impl.c"
+  }
+}
+
+/*
+ * Method:  packObj[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_SIDLException_packObj"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_SIDLException_packObj(
+  /* in */ sidl_SIDLException self,
+  /* in */ sidl_io_Serializer ser,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.packObj) */
+  struct sidl_SIDLException__data *data = NULL;
+  int32_t i = 0;
+  struct sidl_SIDLException_Trace *cur = NULL;
+
+  data  = sidl_SIDLException__get_data(self);
+  if(data) {
+    sidl_io_Serializer_packString(ser, "d_message", data->d_message, _ex);SIDL_CHECK(*_ex); 
+    cur = data->d_trace_head;
+    while(cur) {
+      ++i;
+      cur = cur->next;
+    }
+    sidl_io_Serializer_packInt(ser, "traceSize", i, _ex);SIDL_CHECK(*_ex);   /*Serialize length of the trace*/
+    cur = data->d_trace_head;
+    while(cur) {
+      sidl_io_Serializer_packString(ser, "traceLine", cur->line, _ex);SIDL_CHECK(*_ex);  /*Serialize each line*/
+      cur = cur->next;
+    }
+  } else {
+    sidl_io_Serializer_packString(ser, "d_message", NULL, _ex); SIDL_CHECK(*_ex); 
+    sidl_io_Serializer_packInt(ser, "traceSize", 0, _ex); SIDL_CHECK(*_ex); 
+
+  }
+ EXIT:
+  return;
+  /* DO-NOT-DELETE splicer.end(sidl.SIDLException.packObj) */
+  }
+}
+
+/*
+ * Method:  unpackObj[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_SIDLException_unpackObj"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_SIDLException_unpackObj(
+  /* in */ sidl_SIDLException self,
+  /* in */ sidl_io_Deserializer des,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.unpackObj) */
+  struct sidl_SIDLException__data *data = NULL;
+  int32_t size = 0;
+  int32_t i;
+  char* tmp_line = NULL;
+
+  data  = sidl_SIDLException__get_data(self);
+  if(!data) {
+    data = (struct sidl_SIDLException__data *)
+      malloc(sizeof (struct sidl_SIDLException__data));
+    sidl_SIDLException__set_data(self,data);
+  }
+  sidl_io_Deserializer_unpackString(des, "d_message", &(data->d_message), _ex);SIDL_CHECK(*_ex); 
+  sidl_io_Deserializer_unpackInt(des, "traceSize", &size, _ex); SIDL_CHECK(*_ex);
+  for(i=0;i<size;++i) {
+    sidl_io_Deserializer_unpackString(des, "d_message", &tmp_line, _ex);SIDL_CHECK(*_ex);
+    impl_sidl_SIDLException_addLine(self, tmp_line, _ex);SIDL_CHECK(*_ex);
+  }
+  
+ EXIT:
+  return;
+  /* DO-NOT-DELETE splicer.end(sidl.SIDLException.unpackObj) */
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct sidl_SIDLException__object* 
-  impl_sidl_SIDLException_fconnect_sidl_SIDLException(char* url,
+struct sidl_BaseClass__object* 
+  impl_sidl_SIDLException_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) {
-  return sidl_SIDLException__connect(url, _ex);
-}
-char * impl_sidl_SIDLException_fgetURL_sidl_SIDLException(struct 
-  sidl_SIDLException__object* obj) {
-  return sidl_SIDLException__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_sidl_SIDLException_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_sidl_SIDLException_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct sidl_BaseInterface__object* 
-  impl_sidl_SIDLException_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
-}
-char * impl_sidl_SIDLException_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
-}
-struct sidl_BaseException__object* 
-  impl_sidl_SIDLException_fconnect_sidl_BaseException(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseException__connect(url, _ex);
-}
-char * impl_sidl_SIDLException_fgetURL_sidl_BaseException(struct 
-  sidl_BaseException__object* obj) {
-  return sidl_BaseException__getURL(obj);
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_sidl_SIDLException_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  impl_sidl_SIDLException_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
 }
-char * impl_sidl_SIDLException_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseException__object* 
+  impl_sidl_SIDLException_fconnect_sidl_BaseException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseException__connectI(url, ar, _ex);
+}
+struct sidl_BaseException__object* 
+  impl_sidl_SIDLException_fcast_sidl_BaseException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseException__cast(bi, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidl_SIDLException_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidl_SIDLException_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidl_SIDLException_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidl_SIDLException_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_SIDLException_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_SIDLException_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
+}
+struct sidl_SIDLException__object* 
+  impl_sidl_SIDLException_fconnect_sidl_SIDLException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_SIDLException__connectI(url, ar, _ex);
+}
+struct sidl_SIDLException__object* 
+  impl_sidl_SIDLException_fcast_sidl_SIDLException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_SIDLException__cast(bi, _ex);
+}
+struct sidl_io_Deserializer__object* 
+  impl_sidl_SIDLException_fconnect_sidl_io_Deserializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_io_Deserializer__connectI(url, ar, _ex);
+}
+struct sidl_io_Deserializer__object* 
+  impl_sidl_SIDLException_fcast_sidl_io_Deserializer(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_io_Deserializer__cast(bi, _ex);
+}
+struct sidl_io_Serializable__object* 
+  impl_sidl_SIDLException_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_io_Serializable__connectI(url, ar, _ex);
+}
+struct sidl_io_Serializable__object* 
+  impl_sidl_SIDLException_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_io_Serializable__cast(bi, _ex);
+}
+struct sidl_io_Serializer__object* 
+  impl_sidl_SIDLException_fconnect_sidl_io_Serializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_io_Serializer__connectI(url, ar, _ex);
+}
+struct sidl_io_Serializer__object* 
+  impl_sidl_SIDLException_fcast_sidl_io_Serializer(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_io_Serializer__cast(bi, _ex);
 }

@@ -1,8 +1,8 @@
 /*
  * File:          sidl_rmi_InstanceRegistry.h
- * Symbol:        sidl.rmi.InstanceRegistry-v0.9.3
+ * Symbol:        sidl.rmi.InstanceRegistry-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.rmi.InstanceRegistry
@@ -32,35 +32,33 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_rmi_InstanceRegistry_h
 #define included_sidl_rmi_InstanceRegistry_h
 
 /**
- * Symbol "sidl.rmi.InstanceRegistry" (version 0.9.3)
+ * Symbol "sidl.rmi.InstanceRegistry" (version 0.9.15)
  * 
- * This singleton class is implemented by Babel's runtime for RMI libraries to 
- * invoke methods on server objects.  It is assumed that the RMI library
- * has a self-describing stream of data, but the data may be reordered
- * from the natural argument list.
+ *  
+ * This singleton class is implemented by Babel's runtime for RMI
+ * libraries to invoke methods on server objects.  It maps
+ * objectID strings to sidl_BaseClass objects and vice-versa.
  * 
+ * The InstanceRegistry creates and returns a unique string when a
+ * new object is added to the registry.  When an object's refcount
+ * reaches 0 and it is collected, it is removed from the Instance
+ * Registry.
  * 
- * In the case of the RMI library receiving a self-describing stream
- * and wishing to invoke a method on a class... the RMI library would 
- * make a sequence of calls like:
- * 
- *       sidl_BaseClass bc = sidl_rmi_InstanceRegistry_getInstance( "instanceID" );
- *       sidl_rmi_TypeMap inArgs = sidl_rmi_TypeMap__create();
- *       
- *       sidl_rmi_TypeMap_putDouble( inArgs, "input_val" , 2.0 );
- *       sidl_rmi_TypeMap_putString( inArgs, "input_str", "Hello" );
- *       ...
- *       sidl_rmi_TypeMap ourArgs = sidl_BaseClass_execMethod( bc, "methodName" , t );
- * 
- *       sidl_rmi_Response_unpackBool( i, "_retval", &succeeded );
- *       sidl_rmi_Response_unpackFloat( i, "output_val", &f );
+ * Objects are added to the registry in 3 ways:
+ * 1) Added to the server's registry when an object is
+ * create[Remote]'d.
+ * 2) Implicity added to the local registry when an object is
+ * passed as an argument in a remote call.
+ * 3) A user may manually add a reference to the local registry
+ * for publishing purposes.  The user hsould keep a reference
+ * to the object.  Currently, the user cannot provide their own
+ * objectID, this capability should probably be added.
  */
 struct sidl_rmi_InstanceRegistry__object;
 struct sidl_rmi_InstanceRegistry__array;
@@ -85,19 +83,24 @@ typedef struct sidl_rmi_InstanceRegistry__object* sidl_rmi_InstanceRegistry;
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
 #ifndef included_sidl_SIDLException_h
 #include "sidl_SIDLException.h"
 #endif
-#ifndef included_sidl_rmi_NetworkException_h
-#include "sidl_rmi_NetworkException.h"
-#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidl_rmi_InstanceRegistry_IOR_h
+#include "sidl_rmi_InstanceRegistry_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -106,19 +109,89 @@ extern "C" {
  * Constructor function for the class.
  */
 struct sidl_rmi_InstanceRegistry__object*
-sidl_rmi_InstanceRegistry__create(void);
+sidl_rmi_InstanceRegistry__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 sidl_rmi_InstanceRegistry
-sidl_rmi_InstanceRegistry__createRemote(const char *, sidl_BaseInterface *_ex);
+sidl_rmi_InstanceRegistry__createRemote(const char * url,
+  sidl_BaseInterface *_ex);
+
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 sidl_rmi_InstanceRegistry
 sidl_rmi_InstanceRegistry__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ *  
+ * Register an instance of a class.
+ * 
+ * the registry will return an objectID string guaranteed to be
+ * unique for the lifetime of the process
+ */
+char*
+sidl_rmi_InstanceRegistry_registerInstance(
+  /* in */ sidl_BaseClass instance,
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ *  
+ * Register an instance of a class with the given instanceID
+ * 
+ * If a different object already exists in registry under
+ * the supplied name, a false is returned, if the object was 
+ * successfully registered, true is returned.
+ */
+char*
+sidl_rmi_InstanceRegistry_registerInstanceByString(
+  /* in */ sidl_BaseClass instance,
+  /* in */ const char* instanceID,
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ *  
+ * returns a handle to the class based on the unique objectID
+ * string, (null if the handle isn't in the table)
+ */
+sidl_BaseClass
+sidl_rmi_InstanceRegistry_getInstanceByString(
+  /* in */ const char* instanceID,
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ *  
+ * takes a class and returns the objectID string associated
+ * with it.  (null if the handle isn't in the table)
+ */
+char*
+sidl_rmi_InstanceRegistry_getInstanceByClass(
+  /* in */ sidl_BaseClass instance,
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ *  
+ * removes an instance from the table based on its objectID
+ * string..  returns a pointer to the object, which must be
+ * destroyed.
+ */
+sidl_BaseClass
+sidl_rmi_InstanceRegistry_removeInstanceByString(
+  /* in */ const char* instanceID,
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ *  
+ * removes an instance from the table based on its BaseClass
+ * pointer.  returns the objectID string, which much be freed.
+ */
+char*
+sidl_rmi_InstanceRegistry_removeInstanceByClass(
+  /* in */ sidl_BaseClass instance,
+  /* out */ sidl_BaseInterface *_ex);
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -133,9 +206,21 @@ sidl_rmi_InstanceRegistry__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidl_rmi_InstanceRegistry_addRef(
-  /* in */ sidl_rmi_InstanceRegistry self);
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -144,32 +229,43 @@ sidl_rmi_InstanceRegistry_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidl_rmi_InstanceRegistry_deleteRef(
-  /* in */ sidl_rmi_InstanceRegistry self);
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_rmi_InstanceRegistry_isSame(
   /* in */ sidl_rmi_InstanceRegistry self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidl_rmi_InstanceRegistry_queryInt(
-  /* in */ sidl_rmi_InstanceRegistry self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -177,51 +273,50 @@ sidl_rmi_InstanceRegistry_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_rmi_InstanceRegistry_isType(
   /* in */ sidl_rmi_InstanceRegistry self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidl_rmi_InstanceRegistry_getClassInfo(
-  /* in */ sidl_rmi_InstanceRegistry self);
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * register an instance of a class
- *  the registry will return a string guaranteed to be unique for
- *  the lifetime of the process
- */
-char*
-sidl_rmi_InstanceRegistry_registerInstance(
-  /* in */ sidl_BaseClass instance,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * returns a handle to the class based on the unique string
- */
-sidl_BaseClass
-sidl_rmi_InstanceRegistry_getInstance(
-  /* in */ const char* instanceID,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * returns a handle to the class based on the unique string
- * and removes the instance from the table.  
- */
-sidl_BaseClass
-sidl_rmi_InstanceRegistry_removeInstance(
-  /* in */ const char* instanceID,
-  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidl_rmi_InstanceRegistry__object*
 sidl_rmi_InstanceRegistry__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -229,23 +324,94 @@ sidl_rmi_InstanceRegistry__cast(
 void*
 sidl_rmi_InstanceRegistry__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidl_rmi_InstanceRegistry__exec(
   /* in */ sidl_rmi_InstanceRegistry self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidl_rmi_InstanceRegistry__getURL(
-  /* in */ sidl_rmi_InstanceRegistry self);
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_rmi_InstanceRegistry__raddRef(
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_rmi_InstanceRegistry__isRemote(
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidl_rmi_InstanceRegistry__isLocal(
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -733,6 +899,25 @@ sidl_rmi_InstanceRegistry__array_ensure(
   struct sidl_rmi_InstanceRegistry__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidl_rmi_InstanceRegistry__connectI
+
+#pragma weak sidl_rmi_InstanceRegistry__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidl_rmi_InstanceRegistry__object*
+sidl_rmi_InstanceRegistry__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidl_rmi_InstanceRegistry__object*
+sidl_rmi_InstanceRegistry__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

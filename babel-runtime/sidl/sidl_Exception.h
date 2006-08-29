@@ -88,18 +88,24 @@
  * WARNINGS:
  * Do not use this within an EXIT block!
  */
-#define SIDL_THROW(EX_VAR,EX_CLS,MSG) {                                    \
-  if (EX_VAR == NULL) {                                                    \
-    EX_VAR = (sidl_BaseInterface) EX_CLS##__create();                      \
-    if (EX_VAR != NULL) {                                                  \
-      sidl_BaseException _s_b_e = sidl_BaseException__cast(EX_VAR);        \
-      sidl_BaseException_setNote(_s_b_e, MSG);                             \
-      sidl_BaseException_add(_s_b_e, __FILE__, __LINE__, __FUNC__); \
-    }                                                                      \
-  }                                                                        \
-  goto EXIT;                                                               \
+#define SIDL_THROW(EX_VAR,EX_CLS,MSG) {                                                    \
+  if (EX_VAR == NULL) {                                                                    \
+    sidl_BaseInterface _throwaway_exception=NULL;                                               \
+    EX_VAR = (sidl_BaseInterface) EX_CLS##__create(&_throwaway_exception);                 \
+    if (EX_VAR != NULL) {                                                                  \
+      sidl_BaseException _s_b_e = sidl_BaseException__cast(EX_VAR, &_throwaway_exception); \
+      sidl_BaseException_setNote(_s_b_e, MSG, &_throwaway_exception);                      \
+      sidl_BaseException_add(_s_b_e, __FILE__, __LINE__, __FUNC__, &_throwaway_exception); \
+      sidl_BaseException_deleteRef(_s_b_e, &_throwaway_exception);			   \
+    }                                                                                      \
+  }                                                                                        \
+  goto EXIT;                                                                               \
 } 
 
+void sidl_update_exception(struct sidl_BaseInterface__object *ex,
+                           const char *filename,
+                           const int32_t line,
+                           const char *funcname);
 /**
  * sidl helper macro that checks the status of an exception.  If the exception
  * is not set, then this macro does nothing.  If the exception is set, then
@@ -123,12 +129,11 @@
  * WARNINGS:  
  * Do not use this within an EXIT block!
  */
-#define SIDL_CHECK(EX_VAR) {                                             \
-  if (EX_VAR != NULL) {                                                  \
-    sidl_BaseException _s_b_e = sidl_BaseException__cast(EX_VAR);        \
-    sidl_BaseException_add(_s_b_e, __FILE__, __LINE__, __FUNC__);        \
-    goto EXIT;                                                           \
-  }                                                                      \
+#define SIDL_CHECK(EX_VAR) {\
+  if ((EX_VAR) != NULL) {\
+    sidl_update_exception((EX_VAR),__FILE__, __LINE__, __FUNC__); \
+    goto EXIT; \
+  } \
 } 
 
 /**
@@ -147,11 +152,12 @@
  *     SIDL_CLEAR(*_ex); /
  * }
  */
-#define SIDL_CLEAR(EX_VAR) {                    \
-  if (EX_VAR != NULL) {                         \
-    sidl_BaseInterface_deleteRef(EX_VAR);       \
-    EX_VAR = NULL;                              \
-  }                                             \
+#define SIDL_CLEAR(EX_VAR) {                                    \
+  if (EX_VAR != NULL) {                                         \
+    sidl_BaseInterface _throwaway_exception=NULL;                    \
+    sidl_BaseInterface_deleteRef(EX_VAR,&_throwaway_exception); \
+    EX_VAR = NULL;                                              \
+  }                                                             \
 }
 
 /**
@@ -180,7 +186,8 @@
  *     ...
  * }
  */
-#define SIDL_CATCH(EX_VAR,sidl_NAME) \
-  ((EX_VAR != NULL) && sidl_BaseInterface_isType(EX_VAR, sidl_NAME))
+int
+SIDL_CATCH(struct sidl_BaseInterface__object *ex_var,
+           const char *sidl_Name);
 
 #endif

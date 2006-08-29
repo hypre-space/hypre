@@ -53,6 +53,8 @@ while test $[@%:@] != 1; do
   shift
   ac_arg=$[1]
   case $ac_arg in
+	*libgcc.a | *libgcc_s.a)
+	  ;;
         [[\\/]]*.a | ?:[[\\/]]*.a)
           _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_[]_AC_LANG_ABBREV[]_libs, ,
               ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_arg")
@@ -62,7 +64,7 @@ while test $[@%:@] != 1; do
              [_AC_LINKER_OPTION([$ac_arg], ac_cv_[]_AC_LANG_ABBREV[]_libs)])
           ;;
           # Ignore these flags.
-        -lang* | -lcrt[[012]].o | -lcrtbegin.o | -lc | -lgcc | -libmil | -LANG:=* | -lgfortranbegin )
+        -lang* | -lcrt[[012]].o | -lcrtbegin.o | -lc | -lgcc* | -libmil | -LANG:=* | -lgfortranbegin )
           ;;
         -lkernel32)
           test x"$CYGWIN" != xyes && ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_arg"
@@ -87,6 +89,15 @@ while test $[@%:@] != 1; do
                                ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_j"])
           done
           ;;
+	-lcxa | -lunwind)
+	  case $FC in
+	  *ifort* | *ifc*)  ;;
+	  *)
+            _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_[]_AC_LANG_ABBREV[]_libs, ,
+                               ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_arg")
+	  ;;
+	  esac
+	  ;;
         -[[lLR]]*)
           _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_[]_AC_LANG_ABBREV[]_libs, ,
                              ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_arg")

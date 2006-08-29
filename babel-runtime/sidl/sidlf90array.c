@@ -38,7 +38,7 @@
 static F90_CompilerCharacteristics s_cc;
 
 static int
-getCompilerCharacteristics()
+getCompilerCharacteristics(void)
 {
   static int s_notInitialized = 1;
   if (s_notInitialized) {

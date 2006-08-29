@@ -1,8 +1,8 @@
 /*
  * File:          sidl_ClassInfoI_Skel.c
- * Symbol:        sidl.ClassInfoI-v0.9.3
+ * Symbol:        sidl.ClassInfoI-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for sidl.ClassInfoI
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #include "sidl_ClassInfoI_IOR.h"
@@ -42,81 +41,108 @@
 extern
 void
 impl_sidl_ClassInfoI__load(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_ClassInfoI__ctor(
-  /* in */ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidl_ClassInfoI__ctor2(
+  /* in */ sidl_ClassInfoI self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_ClassInfoI__dtor(
-  /* in */ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidl_ClassInfoI__object* 
-  impl_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_ClassInfoI_fgetURL_sidl_ClassInfoI(struct 
-  sidl_ClassInfoI__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_ClassInfoI_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_ClassInfoI_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidl_ClassInfoI_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_ClassInfoI_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_ClassInfoI_fconnect_sidl_BaseClass(char* url,
+  impl_sidl_ClassInfoI_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
-extern char* impl_sidl_ClassInfoI_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_ClassInfoI_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_ClassInfoI_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfoI__object* 
+  impl_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfoI__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_ClassInfoI(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_ClassInfoI_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
 extern
 void
 impl_sidl_ClassInfoI_setName(
   /* in */ sidl_ClassInfoI self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_ClassInfoI_setIORVersion(
   /* in */ sidl_ClassInfoI self,
   /* in */ int32_t major,
-  /* in */ int32_t minor);
+  /* in */ int32_t minor,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 char*
 impl_sidl_ClassInfoI_getName(
-  /* in */ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 char*
 impl_sidl_ClassInfoI_getIORVersion(
-  /* in */ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidl_ClassInfoI__object* 
-  impl_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_ClassInfoI_fgetURL_sidl_ClassInfoI(struct 
-  sidl_ClassInfoI__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_ClassInfoI_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_ClassInfoI_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidl_ClassInfoI_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_ClassInfoI_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_ClassInfoI_fconnect_sidl_BaseClass(char* url,
+  impl_sidl_ClassInfoI_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
-extern char* impl_sidl_ClassInfoI_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_ClassInfoI_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_ClassInfoI_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfoI__object* 
+  impl_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfoI__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_ClassInfoI(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_ClassInfoI_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_ClassInfoI_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -125,6 +151,7 @@ void
 sidl_ClassInfoI__set_epv(struct sidl_ClassInfoI__epv *epv)
 {
   epv->f__ctor = impl_sidl_ClassInfoI__ctor;
+  epv->f__ctor2 = impl_sidl_ClassInfoI__ctor2;
   epv->f__dtor = impl_sidl_ClassInfoI__dtor;
   epv->f_setName = impl_sidl_ClassInfoI_setName;
   epv->f_setIORVersion = impl_sidl_ClassInfoI_setIORVersion;
@@ -141,50 +168,65 @@ extern "C" {
 #endif
 
 void sidl_ClassInfoI__call_load(void) { 
-  impl_sidl_ClassInfoI__load();
+  sidl_BaseInterface _throwaway_exception = NULL;
+  impl_sidl_ClassInfoI__load(&_throwaway_exception);
 }
-struct sidl_ClassInfoI__object* 
-  skel_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(char* url,
+struct sidl_BaseClass__object* 
+  skel_sidl_ClassInfoI_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) { 
-  return impl_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(url, _ex);
+  return impl_sidl_ClassInfoI_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
-char* skel_sidl_ClassInfoI_fgetURL_sidl_ClassInfoI(struct 
-  sidl_ClassInfoI__object* obj) { 
-  return impl_sidl_ClassInfoI_fgetURL_sidl_ClassInfoI(obj);
-}
-
-struct sidl_ClassInfo__object* 
-  skel_sidl_ClassInfoI_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidl_ClassInfoI_fconnect_sidl_ClassInfo(url, _ex);
-}
-
-char* skel_sidl_ClassInfoI_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) { 
-  return impl_sidl_ClassInfoI_fgetURL_sidl_ClassInfo(obj);
+struct sidl_BaseClass__object* skel_sidl_ClassInfoI_fcast_sidl_BaseClass(void* 
+  bi, sidl_BaseInterface *_ex) { 
+  return impl_sidl_ClassInfoI_fcast_sidl_BaseClass(bi, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidl_ClassInfoI_fconnect_sidl_BaseInterface(char* url,
+  skel_sidl_ClassInfoI_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_ClassInfoI_fconnect_sidl_BaseInterface(url, ar, _ex);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_sidl_ClassInfoI_fcast_sidl_BaseInterface(void* bi,
   sidl_BaseInterface *_ex) { 
-  return impl_sidl_ClassInfoI_fconnect_sidl_BaseInterface(url, _ex);
+  return impl_sidl_ClassInfoI_fcast_sidl_BaseInterface(bi, _ex);
 }
 
-char* skel_sidl_ClassInfoI_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) { 
-  return impl_sidl_ClassInfoI_fgetURL_sidl_BaseInterface(obj);
-}
-
-struct sidl_BaseClass__object* 
-  skel_sidl_ClassInfoI_fconnect_sidl_BaseClass(char* url,
+struct sidl_ClassInfo__object* 
+  skel_sidl_ClassInfoI_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) { 
-  return impl_sidl_ClassInfoI_fconnect_sidl_BaseClass(url, _ex);
+  return impl_sidl_ClassInfoI_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
-char* skel_sidl_ClassInfoI_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) { 
-  return impl_sidl_ClassInfoI_fgetURL_sidl_BaseClass(obj);
+struct sidl_ClassInfo__object* skel_sidl_ClassInfoI_fcast_sidl_ClassInfo(void* 
+  bi, sidl_BaseInterface *_ex) { 
+  return impl_sidl_ClassInfoI_fcast_sidl_ClassInfo(bi, _ex);
+}
+
+struct sidl_ClassInfoI__object* 
+  skel_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(url, ar, _ex);
+}
+
+struct sidl_ClassInfoI__object* 
+  skel_sidl_ClassInfoI_fcast_sidl_ClassInfoI(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_ClassInfoI_fcast_sidl_ClassInfoI(bi, _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_sidl_ClassInfoI_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_ClassInfoI_fconnect_sidl_RuntimeException(url, ar, _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_sidl_ClassInfoI_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_ClassInfoI_fcast_sidl_RuntimeException(bi, _ex);
 }
 
 struct sidl_ClassInfoI__data*

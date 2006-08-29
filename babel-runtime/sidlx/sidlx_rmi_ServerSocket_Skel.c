@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_ServerSocket_Skel.c
  * Symbol:        sidlx.rmi.ServerSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side glue code for sidlx.rmi.ServerSocket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #include "sidlx_rmi_ServerSocket_IOR.h"
@@ -17,54 +16,69 @@
 extern
 void
 impl_sidlx_rmi_ServerSocket__load(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidlx_rmi_ServerSocket__ctor(
-  /* in */ sidlx_rmi_ServerSocket self);
+  /* in */ sidlx_rmi_ServerSocket self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_ServerSocket__ctor2(
+  /* in */ sidlx_rmi_ServerSocket self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidlx_rmi_ServerSocket__dtor(
-  /* in */ sidlx_rmi_ServerSocket self);
+  /* in */ sidlx_rmi_ServerSocket self,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidlx_rmi_ServerSocket__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_ServerSocket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_ServerSocket(struct 
-  sidlx_rmi_ServerSocket__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj);
-extern struct sidl_rmi_NetworkException__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* 
-  impl_sidlx_rmi_ServerSocket_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidlx_rmi_IPv4Socket__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_IPv4Socket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_IPv4Socket(struct 
-  sidlx_rmi_IPv4Socket__object* obj);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_IPv4Socket__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_IPv4Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_IPv4Socket__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_IPv4Socket(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_ServerSocket__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_ServerSocket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_ServerSocket__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_ServerSocket(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface* _ex);
 extern
 int32_t
 impl_sidlx_rmi_ServerSocket_init(
@@ -78,42 +92,48 @@ impl_sidlx_rmi_ServerSocket_accept(
   /* in */ sidlx_rmi_ServerSocket self,
   /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidlx_rmi_ServerSocket__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_ServerSocket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_ServerSocket(struct 
-  sidlx_rmi_ServerSocket__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj);
-extern struct sidl_rmi_NetworkException__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* 
-  impl_sidlx_rmi_ServerSocket_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidlx_rmi_IPv4Socket__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_IPv4Socket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_IPv4Socket(struct 
-  sidlx_rmi_IPv4Socket__object* obj);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_ServerSocket_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_IPv4Socket__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_IPv4Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_IPv4Socket__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_IPv4Socket(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_ServerSocket__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_ServerSocket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_ServerSocket__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_ServerSocket(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -122,6 +142,7 @@ void
 sidlx_rmi_ServerSocket__set_epv(struct sidlx_rmi_ServerSocket__epv *epv)
 {
   epv->f__ctor = impl_sidlx_rmi_ServerSocket__ctor;
+  epv->f__ctor2 = impl_sidlx_rmi_ServerSocket__ctor2;
   epv->f__dtor = impl_sidlx_rmi_ServerSocket__dtor;
   epv->f_init = impl_sidlx_rmi_ServerSocket_init;
   epv->f_accept = impl_sidlx_rmi_ServerSocket_accept;
@@ -136,84 +157,94 @@ extern "C" {
 #endif
 
 void sidlx_rmi_ServerSocket__call_load(void) { 
-  impl_sidlx_rmi_ServerSocket__load();
+  sidl_BaseInterface _throwaway_exception = NULL;
+  impl_sidlx_rmi_ServerSocket__load(&_throwaway_exception);
 }
-struct sidlx_rmi_ServerSocket__object* 
-  skel_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_ServerSocket(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_ServerSocket(url, _ex);
-}
-
-char* skel_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_ServerSocket(struct 
-  sidlx_rmi_ServerSocket__object* obj) { 
-  return impl_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_ServerSocket(obj);
-}
-
-struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_ServerSocket_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_ServerSocket_fconnect_sidl_ClassInfo(url, _ex);
-}
-
-char* skel_sidlx_rmi_ServerSocket_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) { 
-  return impl_sidlx_rmi_ServerSocket_fgetURL_sidl_ClassInfo(obj);
-}
-
-struct sidlx_rmi_Socket__object* 
-  skel_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_Socket(url, _ex);
-}
-
-char* skel_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj) { 
-  return impl_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_Socket(obj);
-}
-
-struct sidl_rmi_NetworkException__object* 
-  skel_sidlx_rmi_ServerSocket_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_ServerSocket_fconnect_sidl_rmi_NetworkException(url,
-    _ex);
-}
-
-char* skel_sidlx_rmi_ServerSocket_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj) { 
-  return impl_sidlx_rmi_ServerSocket_fgetURL_sidl_rmi_NetworkException(obj);
-}
-
-struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_ServerSocket_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseInterface(url, _ex);
-}
-
-char* skel_sidlx_rmi_ServerSocket_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) { 
-  return impl_sidlx_rmi_ServerSocket_fgetURL_sidl_BaseInterface(obj);
-}
-
-struct sidlx_rmi_IPv4Socket__object* 
-  skel_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_IPv4Socket(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_IPv4Socket(url, _ex);
-}
-
-char* skel_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_IPv4Socket(struct 
-  sidlx_rmi_IPv4Socket__object* obj) { 
-  return impl_sidlx_rmi_ServerSocket_fgetURL_sidlx_rmi_IPv4Socket(obj);
+struct sidl_BaseClass__object* 
+  skel_sidlx_rmi_ServerSocket_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_ServerSocket_fconnect_sidl_BaseClass(char* url,
+  skel_sidlx_rmi_ServerSocket_fcast_sidl_BaseClass(void* bi,
   sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseClass(url, _ex);
+  return impl_sidlx_rmi_ServerSocket_fcast_sidl_BaseClass(bi, _ex);
 }
 
-char* skel_sidlx_rmi_ServerSocket_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) { 
-  return impl_sidlx_rmi_ServerSocket_fgetURL_sidl_BaseClass(obj);
+struct sidl_BaseInterface__object* 
+  skel_sidlx_rmi_ServerSocket_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fconnect_sidl_BaseInterface(url, ar, _ex);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_sidlx_rmi_ServerSocket_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fcast_sidl_BaseInterface(bi, _ex);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_sidlx_rmi_ServerSocket_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fconnect_sidl_ClassInfo(url, ar, _ex);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_sidlx_rmi_ServerSocket_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fcast_sidl_ClassInfo(bi, _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_sidlx_rmi_ServerSocket_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fconnect_sidl_RuntimeException(url, ar,
+    _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_sidlx_rmi_ServerSocket_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fcast_sidl_RuntimeException(bi, _ex);
+}
+
+struct sidlx_rmi_IPv4Socket__object* 
+  skel_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_IPv4Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_IPv4Socket(url, ar,
+    _ex);
+}
+
+struct sidlx_rmi_IPv4Socket__object* 
+  skel_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_IPv4Socket(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_IPv4Socket(bi, _ex);
+}
+
+struct sidlx_rmi_ServerSocket__object* 
+  skel_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_ServerSocket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_ServerSocket(url, ar,
+    _ex);
+}
+
+struct sidlx_rmi_ServerSocket__object* 
+  skel_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_ServerSocket(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_ServerSocket(bi, _ex);
+}
+
+struct sidlx_rmi_Socket__object* 
+  skel_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fconnect_sidlx_rmi_Socket(url, ar, _ex);
+}
+
+struct sidlx_rmi_Socket__object* 
+  skel_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_ServerSocket_fcast_sidlx_rmi_Socket(bi, _ex);
 }
 
 struct sidlx_rmi_ServerSocket__data*

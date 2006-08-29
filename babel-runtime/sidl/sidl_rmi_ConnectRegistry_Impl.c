@@ -1,8 +1,8 @@
 /*
  * File:          sidl_rmi_ConnectRegistry_Impl.c
- * Symbol:        sidl.rmi.ConnectRegistry-v0.9.3
+ * Symbol:        sidl.rmi.ConnectRegistry-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.ConnectRegistry
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -41,20 +40,34 @@
  */
 
 /*
- * Symbol "sidl.rmi.ConnectRegistry" (version 0.9.3)
+ * Symbol "sidl.rmi.ConnectRegistry" (version 0.9.15)
  * 
- * This singleton class is implemented by Babel's runtime for to allow RMI 
- * downcasting of objects.  When we downcast an RMI object, we may be required to
- * create a new derived class object with a connect function.  We store all the
- * connect functions in this table for easy access.
+ *  
+ * This singleton class is implemented by Babel's runtime for to
+ * allow RMI downcasting of objects.  When we downcast an RMI
+ * object, we may be required to create a new derived class object
+ * with a connect function.  We store all the connect functions in
+ * this table for easy access.
+ * 
+ * This Class is for Babel internal use only.
  */
 
 #include "sidl_rmi_ConnectRegistry_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
-#line 54 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._includes) */
 #include "sidl_String.h"
-static struct hashtable *hshtbl;
+#include <stdlib.h>
+#include "sidlOps.h"
+
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+static pthread_mutex_t                s_hash_mutex; /*lock for the hashtables*/
+#endif /* HAVE_PTHREAD */
+
+static struct hashtable *s_hshtbl = NULL;
+
 
 /*
  *  We are, of course, assuming that the key is actually a string.
@@ -67,7 +80,7 @@ hashfromkey(void *ky)
   char* str = (char*)ky;
 
   if(ky != 0){
-    while(c = (*str++))
+    while((c = (*str++)))
       hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
     
     return hash;
@@ -75,9 +88,25 @@ hashfromkey(void *ky)
     return 0;
 }
 
-/* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._includes) */
-#line 79 "sidl_rmi_ConnectRegistry_Impl.c"
+static void
+cleanupRegistry(void *ignored)
+{
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  if (s_hshtbl) {
+    hashtable_destroy(s_hshtbl, 0);
+    s_hshtbl = NULL;
+  }
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+}
 
+/* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._includes) */
+
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -90,13 +119,27 @@ extern "C"
 #endif
 void
 impl_sidl_rmi_ConnectRegistry__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 93 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._load) */
-  hshtbl = create_hashtable(16, hashfromkey, (int(*)(void*,void*))sidl_String_equals);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_init(&(s_hash_mutex), NULL);
+#endif /* HAVE_PTHREAD */
+
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  s_hshtbl = create_hashtable(16, hashfromkey, (int(*)(void*,void*))sidl_String_equals, TRUE);
+  sidl_atexit(cleanupRegistry, NULL);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+
+
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._load) */
-#line 99 "sidl_rmi_ConnectRegistry_Impl.c"
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -110,15 +153,40 @@ extern "C"
 #endif
 void
 impl_sidl_rmi_ConnectRegistry__ctor(
-  /* in */ sidl_rmi_ConnectRegistry self)
+  /* in */ sidl_rmi_ConnectRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 111 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._ctor) */
   /* Insert-Code-Here {sidl.rmi.ConnectRegistry._ctor} (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._ctor) */
-#line 119 "sidl_rmi_ConnectRegistry_Impl.c"
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_rmi_ConnectRegistry__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_rmi_ConnectRegistry__ctor2(
+  /* in */ sidl_rmi_ConnectRegistry self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._ctor2) */
+  /* Insert-Code-Here {sidl.rmi.ConnectRegistry._ctor2} (special constructor method) */
+  /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -131,19 +199,23 @@ extern "C"
 #endif
 void
 impl_sidl_rmi_ConnectRegistry__dtor(
-  /* in */ sidl_rmi_ConnectRegistry self)
+  /* in */ sidl_rmi_ConnectRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 130 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._dtor) */
   /* Insert-Code-Here {sidl.rmi.ConnectRegistry._dtor} (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._dtor) */
-#line 140 "sidl_rmi_ConnectRegistry_Impl.c"
+  }
 }
 
 /*
- * register an instance of a class
- *  the registry will return a string guaranteed to be unique for
- *  the lifetime of the process
+ *  
+ * The key is the SIDL classname the registered connect belongs
+ * to.  Multiple registrations under the same key are possible,
+ * this must be protected against in the user code.  Babel does
+ * this internally with a static boolean.
  */
 
 #undef __FUNC__
@@ -155,18 +227,30 @@ extern "C"
 void
 impl_sidl_rmi_ConnectRegistry_registerConnect(
   /* in */ const char* key,
-  /* in */ void* func)
+  /* in */ void* func,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 152 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry.registerConnect) */
-  hashtable_insert(hshtbl, (void*)key, (void*)func);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  if (s_hshtbl) {
+    char *key_copy = sidl_String_strdup(key);
+    hashtable_insert(s_hshtbl, (void*)key_copy, (void*)func);
+  }
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
   return;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry.registerConnect) */
-#line 165 "sidl_rmi_ConnectRegistry_Impl.c"
+  }
 }
 
 /*
- * returns a handle to the class based on the unique string
+ *  
+ * Returns the connect method for the class named in the key
  */
 
 #undef __FUNC__
@@ -177,21 +261,31 @@ extern "C"
 #endif
 void*
 impl_sidl_rmi_ConnectRegistry_getConnect(
-  /* in */ const char* key)
+  /* in */ const char* key,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 172 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry.getConnect) */
   void * func = NULL;
-  func = hashtable_search(hshtbl, (void*)key);
+
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  if (s_hshtbl) func = hashtable_search(s_hshtbl, (void*)key);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
   /* If not found, returns NULL*/
   return func;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry.getConnect) */
-#line 189 "sidl_rmi_ConnectRegistry_Impl.c"
+  }
 }
 
 /*
- * returns a handle to the class based on the unique string
- * and removes the instance from the table.  
+ *  
+ * Returns the connect method for the class named in the key,
+ * and removes it from the table.
  */
 
 #undef __FUNC__
@@ -202,51 +296,75 @@ extern "C"
 #endif
 void*
 impl_sidl_rmi_ConnectRegistry_removeConnect(
-  /* in */ const char* key)
+  /* in */ const char* key,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 195 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry.removeConnect) */
   void * func = NULL;
-  func = (sidl_BaseClass) hashtable_remove(hshtbl, (void*)key);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  if (s_hshtbl) 
+    func = (sidl_BaseClass) hashtable_remove(s_hshtbl, (void*)key);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+
   /* If not found, returns NULL*/
   return func;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry.removeConnect) */
-#line 214 "sidl_rmi_ConnectRegistry_Impl.c"
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct sidl_rmi_ConnectRegistry__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_rmi_ConnectRegistry(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_rmi_ConnectRegistry__connect(url, _ex);
-}
-char * impl_sidl_rmi_ConnectRegistry_fgetURL_sidl_rmi_ConnectRegistry(struct 
-  sidl_rmi_ConnectRegistry__object* obj) {
-  return sidl_rmi_ConnectRegistry__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_sidl_rmi_ConnectRegistry_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
-}
-char * impl_sidl_rmi_ConnectRegistry_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
+struct sidl_BaseClass__object* 
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
 }
-char * impl_sidl_rmi_ConnectRegistry_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseInterface__object* 
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
+}
+struct sidl_rmi_ConnectRegistry__object* 
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_rmi_ConnectRegistry(const char* 
+  url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_rmi_ConnectRegistry__connectI(url, ar, _ex);
+}
+struct sidl_rmi_ConnectRegistry__object* 
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_rmi_ConnectRegistry(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_rmi_ConnectRegistry__cast(bi, _ex);
 }

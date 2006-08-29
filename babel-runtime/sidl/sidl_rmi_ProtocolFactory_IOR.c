@@ -1,8 +1,8 @@
 /*
  * File:          sidl_rmi_ProtocolFactory_IOR.c
- * Symbol:        sidl.rmi.ProtocolFactory-v0.9.3
+ * Symbol:        sidl.rmi.ProtocolFactory-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.rmi.ProtocolFactory
@@ -32,10 +32,25 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
+ */
+
+/*
+ * Begin: RMI includes
  */
 
 #include "sidl_rmi_InstanceHandle.h"
+#include "sidl_rmi_InstanceRegistry.h"
+#include "sidl_rmi_ServerRegistry.h"
+#include "sidl_rmi_Call.h"
+#include "sidl_rmi_Return.h"
+#include "sidl_Exception.h"
+#include "sidl_exec_err.h"
+#include "sidl_PreViolation.h"
+#include <stdio.h>
+/*
+ * End: RMI includes
+ */
+
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
@@ -74,14 +89,13 @@ static struct sidl_recursive_mutex_t sidl_rmi_ProtocolFactory__mutex= SIDL_RECUR
  */
 
 static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 9;
+static const int32_t s_IOR_MINOR_VERSION = 10;
 
 /*
  * Static variable to hold shared ClassInfo interface.
  */
 
 static sidl_ClassInfo s_classInfo = NULL;
-static int s_classInfo_init = 1;
 
 /*
  * Static variable to make sure _load called no more than once
@@ -100,11 +114,20 @@ static struct sidl_rmi_ProtocolFactory__epv
 static struct sidl_rmi_ProtocolFactory__sepv 
   s_stc_epv__sidl_rmi_protocolfactory;
 
+static struct sidl_rmi_ProtocolFactory__epv  
+  s_new_epv_hooks__sidl_rmi_protocolfactory;
+static struct sidl_rmi_ProtocolFactory__sepv 
+  s_stc_epv_hooks__sidl_rmi_protocolfactory;
+
 static struct sidl_BaseClass__epv  s_new_epv__sidl_baseclass;
+static struct sidl_BaseClass__epv  s_new_epv_hooks__sidl_baseclass;
 static struct sidl_BaseClass__epv* s_old_epv__sidl_baseclass;
+static struct sidl_BaseClass__epv* s_old_epv_hooks__sidl_baseclass;
 
 static struct sidl_BaseInterface__epv  s_new_epv__sidl_baseinterface;
+static struct sidl_BaseInterface__epv  s_new_epv_hooks__sidl_baseinterface;
 static struct sidl_BaseInterface__epv* s_old_epv__sidl_baseinterface;
+static struct sidl_BaseInterface__epv* s_old_epv_hooks__sidl_baseinterface;
 
 /*
  * Declare EPV routines defined in the skeleton file.
@@ -126,125 +149,216 @@ extern void sidl_rmi_ProtocolFactory__call_load(void);
 static void
 sidl_rmi_ProtocolFactory_addRef__exec(
         struct sidl_rmi_ProtocolFactory__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
   /* stack space for arguments */
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
 
   /* make the call */
   (self->d_epv->f_addRef)(
-    self);
+    self,
+    _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
   /* pack out and inout argments */
+  /* clean-up dangling references */
+  return;
 
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
 }
 
 static void
 sidl_rmi_ProtocolFactory_deleteRef__exec(
         struct sidl_rmi_ProtocolFactory__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
   /* stack space for arguments */
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
 
   /* make the call */
   (self->d_epv->f_deleteRef)(
-    self);
+    self,
+    _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
   /* pack out and inout argments */
+  /* clean-up dangling references */
+  return;
 
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
 }
 
 static void
 sidl_rmi_ProtocolFactory_isSame__exec(
         struct sidl_rmi_ProtocolFactory__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj = 0;
+  char* iobj_str = NULL;
+  struct sidl_BaseInterface__object* iobj = NULL;
   sidl_bool _retval = FALSE;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
+  sidl_rmi_Call_unpackString( inArgs, "iobj", &iobj_str, _ex);SIDL_CHECK(*_ex);
+  iobj = skel_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseInterface(iobj_str,
+    TRUE, _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
   _retval = (self->d_epv->f_isSame)(
     self,
-    iobj);
+    iobj,
+    _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
-  sidl_io_Serializer_packBool( outArgs, "_retval", _retval, _ex2);
-
+  sidl_rmi_Return_packBool( outArgs, "_retval", _retval, _ex);SIDL_CHECK(*_ex);
   /* pack out and inout argments */
+  /* clean-up dangling references */
+  if(iobj) {
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)iobj,
+      _ex); SIDL_CHECK(*_ex);
+    if(iobj_str) {free(iobj_str);}
+  }
+  return;
 
-}
-
-static void
-sidl_rmi_ProtocolFactory_queryInt__exec(
-        struct sidl_rmi_ProtocolFactory__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* name= NULL;
-  struct sidl_BaseInterface__object* _retval = 0;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackString( inArgs, "name", &name, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_queryInt)(
-    self,
-    name);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
 }
 
 static void
 sidl_rmi_ProtocolFactory_isType__exec(
         struct sidl_rmi_ProtocolFactory__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
   /* stack space for arguments */
   char* name= NULL;
   sidl_bool _retval = FALSE;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackString( inArgs, "name", &name, _ex2);
+  sidl_rmi_Call_unpackString( inArgs, "name", &name, _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
   _retval = (self->d_epv->f_isType)(
     self,
-    name);
+    name,
+    _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
-  sidl_io_Serializer_packBool( outArgs, "_retval", _retval, _ex2);
-
+  sidl_rmi_Return_packBool( outArgs, "_retval", _retval, _ex);SIDL_CHECK(*_ex);
   /* pack out and inout argments */
+  /* clean-up dangling references */
+  if(name) {free(name);}
+  return;
 
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
 }
 
 static void
 sidl_rmi_ProtocolFactory_getClassInfo__exec(
         struct sidl_rmi_ProtocolFactory__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval = 0;
+  struct sidl_ClassInfo__object* _retval = NULL;
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
 
   /* make the call */
   _retval = (self->d_epv->f_getClassInfo)(
-    self);
+    self,
+    _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
+  if(_retval){
+    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval,
+      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Return_packString( outArgs, "_retval", _url, _ex);SIDL_CHECK(*_ex);
+    free((void*)_url);
+  } else {
+    sidl_rmi_Return_packString( outArgs, "_retval", NULL, _ex);SIDL_CHECK(*_ex);
+  }
   /* pack out and inout argments */
+  /* clean-up dangling references */
+  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval,
+    _ex)) {
+    (*((sidl_BaseInterface)_retval)->d_epv->f__raddRef)(((
+      sidl_BaseInterface)_retval)->d_object, _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval,
+      _ex); SIDL_CHECK(*_ex);
+  }
+  return;
 
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
 }
 
 static void ior_sidl_rmi_ProtocolFactory__ensure_load_called(void) {
@@ -257,28 +371,69 @@ static void ior_sidl_rmi_ProtocolFactory__ensure_load_called(void) {
     s_load_called=1;
   }
 }
-/*
- * CAST: dynamic type casting support.
- */
 
+/* CAST: dynamic type casting support. */
 static void* ior_sidl_rmi_ProtocolFactory__cast(
   struct sidl_rmi_ProtocolFactory__object* self,
-  const char* name)
+  const char* name, sidl_BaseInterface* _ex)
 {
+  int
+    cmp0,
+    cmp1;
   void* cast = NULL;
-
-  struct sidl_rmi_ProtocolFactory__object* s0 = self;
-  struct sidl_BaseClass__object*           s1 = &s0->d_sidl_baseclass;
-
-  if (!strcmp(name, "sidl.rmi.ProtocolFactory")) {
-    cast = (void*) s0;
-  } else if (!strcmp(name, "sidl.BaseClass")) {
-    cast = (void*) s1;
-  } else if (!strcmp(name, "sidl.BaseInterface")) {
-    cast = (void*) &s1->d_sidl_baseinterface;
+  *_ex = NULL; /* default to no exception */
+  cmp0 = strcmp(name, "sidl.BaseInterface");
+  if (!cmp0) {
+    (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+    cast = &((*self).d_sidl_baseclass.d_sidl_baseinterface);
+    return cast;
   }
-
+  else if (cmp0 < 0) {
+    cmp1 = strcmp(name, "sidl.BaseClass");
+    if (!cmp1) {
+      (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+      cast = self;
+      return cast;
+    }
+  }
+  else if (cmp0 > 0) {
+    cmp1 = strcmp(name, "sidl.rmi.ProtocolFactory");
+    if (!cmp1) {
+      (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+      cast = self;
+      return cast;
+    }
+  }
   return cast;
+  EXIT:
+  return NULL;
+}
+
+/*
+ * HOOKS: set static hooks activation.
+ */
+
+static void ior_sidl_rmi_ProtocolFactory__set_hooks_static(
+  int on, struct sidl_BaseInterface__object **_ex ) { 
+  *_ex = NULL;
+  /*
+   * Nothing else to do since hooks support not needed.
+   */
+
+}
+
+/*
+ * HOOKS: set hooks activation.
+ */
+
+static void ior_sidl_rmi_ProtocolFactory__set_hooks(
+  struct sidl_rmi_ProtocolFactory__object* self,
+  int on, struct sidl_BaseInterface__object **_ex ) { 
+  *_ex = NULL;
+  /*
+   * Nothing else to do since hooks support not needed.
+   */
+
 }
 
 /*
@@ -286,48 +441,76 @@ static void* ior_sidl_rmi_ProtocolFactory__cast(
  */
 
 static void ior_sidl_rmi_ProtocolFactory__delete(
-  struct sidl_rmi_ProtocolFactory__object* self)
+  struct sidl_rmi_ProtocolFactory__object* self,
+    struct sidl_BaseInterface__object **_ex)
 {
-  sidl_rmi_ProtocolFactory__fini(self);
+  *_ex = NULL; /* default to no exception */
+  sidl_rmi_ProtocolFactory__fini(self,_ex);
   memset((void*)self, 0, sizeof(struct sidl_rmi_ProtocolFactory__object));
   free((void*) self);
 }
 
 static char*
 ior_sidl_rmi_ProtocolFactory__getURL(
-    struct sidl_rmi_ProtocolFactory__object* self) {
-  /* TODO: Make this work for local object! */
+    struct sidl_rmi_ProtocolFactory__object* self,
+    struct sidl_BaseInterface__object **_ex) {
+  char* ret = NULL;
+  char* objid = 
+    sidl_rmi_InstanceRegistry_getInstanceByClass((sidl_BaseClass)self,
+    _ex); SIDL_CHECK(*_ex);
+  if(!objid) {
+    objid = sidl_rmi_InstanceRegistry_registerInstance((sidl_BaseClass)self,
+      _ex); SIDL_CHECK(*_ex);
+  }
+  ret = sidl_rmi_ServerRegistry_getServerURL(objid, _ex); SIDL_CHECK(*_ex);
+  return ret;
+  EXIT:
   return NULL;
 }
+static void
+ior_sidl_rmi_ProtocolFactory__raddRef(
+    struct sidl_rmi_ProtocolFactory__object* self, sidl_BaseInterface* _ex) {
+  sidl_BaseInterface_addRef((sidl_BaseInterface)self, _ex);
+}
+
+static sidl_bool
+ior_sidl_rmi_ProtocolFactory__isRemote(
+    struct sidl_rmi_ProtocolFactory__object* self, sidl_BaseInterface* _ex) {
+  *_ex = NULL; /* default to no exception */
+  return FALSE;
+}
+
 struct sidl_rmi_ProtocolFactory__method {
   const char *d_name;
   void (*d_func)(struct sidl_rmi_ProtocolFactory__object*,
-    struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
+    struct sidl_rmi_Call__object *,
+    struct sidl_rmi_Return__object *,
+    struct sidl_BaseInterface__object **);
 };
 
 static void
 ior_sidl_rmi_ProtocolFactory__exec(
     struct sidl_rmi_ProtocolFactory__object* self,
     const char* methodName,
-    struct sidl_io_Deserializer__object* inArgs,
-    struct sidl_io_Serializer__object* outArgs ) { 
+    struct sidl_rmi_Call__object* inArgs,
+    struct sidl_rmi_Return__object* outArgs,
+    struct sidl_BaseInterface__object **_ex ) { 
   static const struct sidl_rmi_ProtocolFactory__method  s_methods[] = {
     { "addRef", sidl_rmi_ProtocolFactory_addRef__exec },
     { "deleteRef", sidl_rmi_ProtocolFactory_deleteRef__exec },
     { "getClassInfo", sidl_rmi_ProtocolFactory_getClassInfo__exec },
     { "isSame", sidl_rmi_ProtocolFactory_isSame__exec },
     { "isType", sidl_rmi_ProtocolFactory_isType__exec },
-    { "queryInt", sidl_rmi_ProtocolFactory_queryInt__exec }
   };
   int i, cmp, l = 0;
   int u = sizeof(s_methods)/sizeof(struct sidl_rmi_ProtocolFactory__method);
+  *_ex = NULL; /* default to no exception */
   if (methodName) {
     /* Use binary search to locate method */
     while (l < u) {
       i = (l + u) >> 1;
       if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(self, inArgs, outArgs);
+        (s_methods[i].d_func)(self, inArgs, outArgs, _ex); SIDL_CHECK(*_ex);
         return;
       }
       else if (cmp < 0) u = i;
@@ -335,86 +518,128 @@ ior_sidl_rmi_ProtocolFactory__exec(
     }
   }
   /* TODO: add code for method not found */
+  SIDL_THROW(*_ex,sidl_PreViolation,"method name not found");
+  EXIT:
+  return;
 }
 /*
  * EPV: create method entry point vector (EPV) structure.
  */
 
-static void sidl_rmi_ProtocolFactory__init_epv(
-  struct sidl_rmi_ProtocolFactory__object* self)
+static void sidl_rmi_ProtocolFactory__init_epv(void)
 {
 /*
  * assert( HAVE_LOCKED_STATIC_GLOBALS );
  */
 
-  struct sidl_rmi_ProtocolFactory__object* s0 = self;
-  struct sidl_BaseClass__object*           s1 = &s0->d_sidl_baseclass;
-
   struct sidl_rmi_ProtocolFactory__epv*  epv  = 
     &s_new_epv__sidl_rmi_protocolfactory;
+  struct sidl_rmi_ProtocolFactory__epv*  hepv = 
+    &s_new_epv_hooks__sidl_rmi_protocolfactory;
   struct sidl_BaseClass__epv*            e0   = &s_new_epv__sidl_baseclass;
+  struct sidl_BaseClass__epv*            he0  = 
+    &s_new_epv_hooks__sidl_baseclass;
   struct sidl_BaseInterface__epv*        e1   = &s_new_epv__sidl_baseinterface;
+  struct sidl_BaseInterface__epv*        he1  = 
+    &s_new_epv_hooks__sidl_baseinterface;
 
-  s_old_epv__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
-  s_old_epv__sidl_baseclass     = s1->d_epv;
+  struct sidl_BaseClass__epv*           s1 = NULL;
+  struct sidl_BaseClass__epv*           h1 = NULL;
+
+  sidl_BaseClass__getEPVs(
+    &s_old_epv__sidl_baseinterface,
+    &s_old_epv_hooks__sidl_baseinterface,
+    &s_old_epv__sidl_baseclass,&s_old_epv_hooks__sidl_baseclass);
+  /*
+   * Here we alias the static epvs to some handy small names
+   */
+
+  s1  =  s_old_epv__sidl_baseclass;
+  h1  =  s_old_epv_hooks__sidl_baseclass;
 
   epv->f__cast                    = ior_sidl_rmi_ProtocolFactory__cast;
   epv->f__delete                  = ior_sidl_rmi_ProtocolFactory__delete;
   epv->f__exec                    = ior_sidl_rmi_ProtocolFactory__exec;
   epv->f__getURL                  = ior_sidl_rmi_ProtocolFactory__getURL;
+  epv->f__raddRef                 = ior_sidl_rmi_ProtocolFactory__raddRef;
+  epv->f__isRemote                = ior_sidl_rmi_ProtocolFactory__isRemote;
+  epv->f__set_hooks               = ior_sidl_rmi_ProtocolFactory__set_hooks;
   epv->f__ctor                    = NULL;
+  epv->f__ctor2                   = NULL;
   epv->f__dtor                    = NULL;
   epv->f_addRef                   = (void (*)(struct 
-    sidl_rmi_ProtocolFactory__object*)) s1->d_epv->f_addRef;
-  epv->f_deleteRef                = (void (*)(struct 
-    sidl_rmi_ProtocolFactory__object*)) s1->d_epv->f_deleteRef;
-  epv->f_isSame                   = (sidl_bool (*)(struct 
     sidl_rmi_ProtocolFactory__object*,
-    struct sidl_BaseInterface__object*)) s1->d_epv->f_isSame;
-  epv->f_queryInt                 = (struct sidl_BaseInterface__object* 
-    (*)(struct sidl_rmi_ProtocolFactory__object*,
-    const char*)) s1->d_epv->f_queryInt;
+    struct sidl_BaseInterface__object **)) s1->f_addRef;
+  epv->f_deleteRef                = (void (*)(struct 
+    sidl_rmi_ProtocolFactory__object*,
+    struct sidl_BaseInterface__object **)) s1->f_deleteRef;
+  epv->f_isSame                   = (sidl_bool (*)(struct 
+    sidl_rmi_ProtocolFactory__object*,struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) s1->f_isSame;
   epv->f_isType                   = (sidl_bool (*)(struct 
-    sidl_rmi_ProtocolFactory__object*,const char*)) s1->d_epv->f_isType;
+    sidl_rmi_ProtocolFactory__object*,const char*,
+    struct sidl_BaseInterface__object **)) s1->f_isType;
   epv->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_rmi_ProtocolFactory__object*)) s1->d_epv->f_getClassInfo;
+    sidl_rmi_ProtocolFactory__object*,
+    struct sidl_BaseInterface__object **)) s1->f_getClassInfo;
 
   sidl_rmi_ProtocolFactory__set_epv(epv);
 
+  memcpy((void*)hepv, epv, sizeof(struct sidl_rmi_ProtocolFactory__epv));
   e0->f__cast               = (void* (*)(struct sidl_BaseClass__object*,
-    const char*)) epv->f__cast;
-  e0->f__delete             = (void (*)(struct sidl_BaseClass__object*)) 
-    epv->f__delete;
+    const char*, struct sidl_BaseInterface__object**)) epv->f__cast;
+  e0->f__delete             = (void (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f__delete;
+  e0->f__getURL             = (char* (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f__getURL;
+  e0->f__raddRef            = (void (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f__raddRef;
+  e0->f__isRemote           = (sidl_bool (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f__isRemote;
   e0->f__exec               = (void (*)(struct sidl_BaseClass__object*,
-    const char*,struct sidl_io_Deserializer__object*,
-    struct sidl_io_Serializer__object*)) epv->f__exec;
-  e0->f_addRef              = (void (*)(struct sidl_BaseClass__object*)) 
-    epv->f_addRef;
-  e0->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*)) 
-    epv->f_deleteRef;
+    const char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef              = (void (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
   e0->f_isSame              = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e0->f_queryInt            = (struct sidl_BaseInterface__object* (*)(struct 
-    sidl_BaseClass__object*,const char*)) epv->f_queryInt;
+    struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
   e0->f_isType              = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    const char*)) epv->f_isType;
+    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e1->f__cast               = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete             = (void (*)(void*)) epv->f__delete;
+  memcpy((void*) he0, e0, sizeof(struct sidl_BaseClass__epv));
+
+  e1->f__cast               = (void* (*)(void*,const char*,
+    struct sidl_BaseInterface__object**)) epv->f__cast;
+  e1->f__delete             = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f__delete;
+  e1->f__getURL             = (char* (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f__getURL;
+  e1->f__raddRef            = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f__raddRef;
+  e1->f__isRemote           = (sidl_bool (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f__isRemote;
   e1->f__exec               = (void (*)(void*,const char*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_io_Serializer__object*)) epv->f__exec;
-  e1->f_addRef              = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef           = (void (*)(void*)) epv->f_deleteRef;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef              = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e1->f_deleteRef           = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
   e1->f_isSame              = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt            = (struct sidl_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInt;
-  e1->f_isType              = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*)) 
-    epv->f_getClassInfo;
+    struct sidl_BaseInterface__object*,
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e1->f_isType              = (sidl_bool (*)(void*,const char*,
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+
+  memcpy((void*) he1, e1, sizeof(struct sidl_BaseInterface__epv));
 
   s_method_initialized = 1;
   ior_sidl_rmi_ProtocolFactory__ensure_load_called();
@@ -430,21 +655,53 @@ static void sidl_rmi_ProtocolFactory__init_sepv(void)
    * assert( HAVE_LOCKED_STATIC_GLOBALS );
    */
 
+  struct sidl_BaseInterface__object *throwaway_exception = NULL;
   struct sidl_rmi_ProtocolFactory__sepv*  s = 
     &s_stc_epv__sidl_rmi_protocolfactory;
+  struct sidl_rmi_ProtocolFactory__sepv* hs = 
+    &s_stc_epv_hooks__sidl_rmi_protocolfactory;
 
-  s->f_addProtocol             = NULL;
-  s->f_getProtocol             = NULL;
-  s->f_deleteProtocol          = NULL;
-  s->f_createInstance          = NULL;
-  s->f_connectInstance         = NULL;
+  s->f__set_hooks_static                     = 
+    ior_sidl_rmi_ProtocolFactory__set_hooks_static;
+  s->f_addProtocol                 = NULL;
+  s->f_getProtocol                 = NULL;
+  s->f_deleteProtocol              = NULL;
+  s->f_createInstance              = NULL;
+  s->f_connectInstance             = NULL;
+  s->f_unserializeInstance         = NULL;
 
   sidl_rmi_ProtocolFactory__set_sepv(s);
 
+  memcpy((void*)hs, s, sizeof(struct sidl_rmi_ProtocolFactory__sepv));
+
+  ior_sidl_rmi_ProtocolFactory__set_hooks_static(FALSE, &throwaway_exception);
   s_static_initialized = 1;
   ior_sidl_rmi_ProtocolFactory__ensure_load_called();
 }
 
+void sidl_rmi_ProtocolFactory__getEPVs(
+  struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
+  struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
+    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_rmi_ProtocolFactory__epv **s_arg_epv__sidl_rmi_protocolfactory,
+    struct sidl_rmi_ProtocolFactory__epv 
+    **s_arg_epv_hooks__sidl_rmi_protocolfactory)
+{
+  LOCK_STATIC_GLOBALS;
+  if (!s_method_initialized) {
+    sidl_rmi_ProtocolFactory__init_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+  *s_arg_epv__sidl_baseinterface = &s_new_epv__sidl_baseinterface;
+  *s_arg_epv_hooks__sidl_baseinterface = &s_new_epv_hooks__sidl_baseinterface;
+  *s_arg_epv__sidl_baseclass = &s_new_epv__sidl_baseclass;
+  *s_arg_epv_hooks__sidl_baseclass = &s_new_epv_hooks__sidl_baseclass;
+  *s_arg_epv__sidl_rmi_protocolfactory = &s_new_epv__sidl_rmi_protocolfactory;
+  *s_arg_epv_hooks__sidl_rmi_protocolfactory = 
+    &s_new_epv_hooks__sidl_rmi_protocolfactory;
+}
 /*
  * STATIC: return pointer to static EPV structure.
  */
@@ -461,20 +718,11 @@ sidl_rmi_ProtocolFactory__statics(void)
 }
 
 /*
- * SUPER: return's parent's non-overrided EPV
+ * SUPER: returns parent's non-overrided EPV
  */
 
 static struct sidl_BaseClass__epv* sidl_rmi_ProtocolFactory__super(void) {
   return s_old_epv__sidl_baseclass;
-}
-
-static void
-cleanupClassInfo(void) {
-  if (s_classInfo) {
-    sidl_ClassInfo_deleteRef(s_classInfo);
-  }
-  s_classInfo_init = 1;
-  s_classInfo = NULL;
 }
 
 /*
@@ -482,29 +730,30 @@ cleanupClassInfo(void) {
  */
 
 static void
-initClassInfo(sidl_ClassInfo *info)
+initClassInfo(sidl_ClassInfo *info, struct sidl_BaseInterface__object **_ex)
 {
   LOCK_STATIC_GLOBALS;
-  if (s_classInfo_init) {
+  *_ex = NULL; /* default to no exception */
+  if (!s_classInfo) {
     sidl_ClassInfoI impl;
-    s_classInfo_init = 0;
-    impl = sidl_ClassInfoI__create();
-    s_classInfo = sidl_ClassInfo__cast(impl);
+    impl = sidl_ClassInfoI__create(_ex);
+    s_classInfo = sidl_ClassInfo__cast(impl,_ex);
     if (impl) {
-      sidl_ClassInfoI_setName(impl, "sidl.rmi.ProtocolFactory");
+      sidl_ClassInfoI_setName(impl, "sidl.rmi.ProtocolFactory",_ex);
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
-        s_IOR_MINOR_VERSION);
-      atexit(cleanupClassInfo);
+        s_IOR_MINOR_VERSION,_ex);
+      sidl_ClassInfoI_deleteRef(impl,_ex);
+      sidl_atexit(sidl_deleteRef_atexit, &s_classInfo);
     }
   }
+  UNLOCK_STATIC_GLOBALS;
   if (s_classInfo) {
     if (*info) {
-      sidl_ClassInfo_deleteRef(*info);
+      sidl_ClassInfo_deleteRef(*info,_ex);
     }
     *info = s_classInfo;
-    sidl_ClassInfo_addRef(*info);
+    sidl_ClassInfo_addRef(*info,_ex);
   }
-UNLOCK_STATIC_GLOBALS;
 }
 
 /*
@@ -512,17 +761,21 @@ UNLOCK_STATIC_GLOBALS;
  */
 
 static void
-initMetadata(struct sidl_rmi_ProtocolFactory__object* self)
+initMetadata(struct sidl_rmi_ProtocolFactory__object* self,
+  sidl_BaseInterface* _ex)
 {
+  *_ex = 0; /* default no exception */
   if (self) {
-    struct sidl_BaseClass__data *data = 
-      sidl_BaseClass__get_data(sidl_BaseClass__cast(self));
+    struct sidl_BaseClass__data *data = (struct 
+      sidl_BaseClass__data*)((*self).d_sidl_baseclass.d_data);
     if (data) {
       data->d_IOR_major_version = s_IOR_MAJOR_VERSION;
       data->d_IOR_minor_version = s_IOR_MINOR_VERSION;
-      initClassInfo(&(data->d_classinfo));
+      initClassInfo(&(data->d_classinfo),_ex); SIDL_CHECK(*_ex);
     }
   }
+EXIT:
+return;
 }
 
 /*
@@ -530,14 +783,18 @@ initMetadata(struct sidl_rmi_ProtocolFactory__object* self)
  */
 
 struct sidl_rmi_ProtocolFactory__object*
-sidl_rmi_ProtocolFactory__new(void)
+sidl_rmi_ProtocolFactory__new(void* ddata,
+  struct sidl_BaseInterface__object ** _ex)
 {
   struct sidl_rmi_ProtocolFactory__object* self =
     (struct sidl_rmi_ProtocolFactory__object*) malloc(
       sizeof(struct sidl_rmi_ProtocolFactory__object));
-  sidl_rmi_ProtocolFactory__init(self);
-  initMetadata(self);
+  *_ex = NULL; /* default to no exception */
+  sidl_rmi_ProtocolFactory__init(self, ddata, _ex); SIDL_CHECK(*_ex);
+  initMetadata(self, _ex); SIDL_CHECK(*_ex);
   return self;
+  EXIT:
+  return NULL;
 }
 
 /*
@@ -545,18 +802,21 @@ sidl_rmi_ProtocolFactory__new(void)
  */
 
 void sidl_rmi_ProtocolFactory__init(
-  struct sidl_rmi_ProtocolFactory__object* self)
+  struct sidl_rmi_ProtocolFactory__object* self,
+   void* ddata,
+  struct sidl_BaseInterface__object **_ex)
 {
   struct sidl_rmi_ProtocolFactory__object* s0 = self;
   struct sidl_BaseClass__object*           s1 = &s0->d_sidl_baseclass;
 
-  sidl_BaseClass__init(s1);
-
+  *_ex = 0; /* default no exception */
   LOCK_STATIC_GLOBALS;
   if (!s_method_initialized) {
-    sidl_rmi_ProtocolFactory__init_epv(s0);
+    sidl_rmi_ProtocolFactory__init_epv();
   }
   UNLOCK_STATIC_GLOBALS;
+
+  sidl_BaseClass__init(s1, NULL, _ex); SIDL_CHECK(*_ex);
 
   s1->d_sidl_baseinterface.d_epv = &s_new_epv__sidl_baseinterface;
   s1->d_epv                      = &s_new_epv__sidl_baseclass;
@@ -565,8 +825,16 @@ void sidl_rmi_ProtocolFactory__init(
 
   s0->d_data = NULL;
 
+  ior_sidl_rmi_ProtocolFactory__set_hooks(s0, FALSE, _ex);
 
-  (*(self->d_epv->f__ctor))(self);
+  if(ddata) {
+    self->d_data = ddata;
+    (*(self->d_epv->f__ctor2))(self,ddata,_ex); SIDL_CHECK(*_ex);
+  } else { 
+    (*(self->d_epv->f__ctor))(self,_ex); SIDL_CHECK(*_ex);
+  }
+  EXIT:
+  return;
 }
 
 /*
@@ -574,17 +842,22 @@ void sidl_rmi_ProtocolFactory__init(
  */
 
 void sidl_rmi_ProtocolFactory__fini(
-  struct sidl_rmi_ProtocolFactory__object* self)
+  struct sidl_rmi_ProtocolFactory__object* self,
+  struct sidl_BaseInterface__object **_ex)
 {
   struct sidl_rmi_ProtocolFactory__object* s0 = self;
   struct sidl_BaseClass__object*           s1 = &s0->d_sidl_baseclass;
 
-  (*(s0->d_epv->f__dtor))(s0);
+  *_ex = NULL; /* default to no exception */
+  (*(s0->d_epv->f__dtor))(s0,_ex);
+  SIDL_CHECK(*_ex);
 
   s1->d_sidl_baseinterface.d_epv = s_old_epv__sidl_baseinterface;
   s1->d_epv                      = s_old_epv__sidl_baseclass;
 
-  sidl_BaseClass__fini(s1);
+  sidl_BaseClass__fini(s1, _ex); SIDL_CHECK(*_ex);
+  EXIT:
+  return;
 }
 
 /*
@@ -602,7 +875,9 @@ static const struct sidl_rmi_ProtocolFactory__external
 s_externalEntryPoints = {
   sidl_rmi_ProtocolFactory__new,
   sidl_rmi_ProtocolFactory__statics,
-  sidl_rmi_ProtocolFactory__super
+  sidl_rmi_ProtocolFactory__super,
+  0, 
+  10
 };
 
 /*

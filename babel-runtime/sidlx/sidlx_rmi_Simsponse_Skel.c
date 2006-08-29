@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_Simsponse_Skel.c
  * Symbol:        sidlx.rmi.Simsponse-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side glue code for sidlx.rmi.Simsponse
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #include "sidlx_rmi_Simsponse_IOR.h"
@@ -17,76 +16,108 @@
 extern
 void
 impl_sidlx_rmi_Simsponse__load(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidlx_rmi_Simsponse__ctor(
-  /* in */ sidlx_rmi_Simsponse self);
+  /* in */ sidlx_rmi_Simsponse self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse__ctor2(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidlx_rmi_Simsponse__dtor(
-  /* in */ sidlx_rmi_Simsponse self);
+  /* in */ sidlx_rmi_Simsponse self,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidl_rmi_Response__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_rmi_Response(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_rmi_Response(struct 
-  sidl_rmi_Response__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_io_Deserializer__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_io_Deserializer(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_io_Deserializer(struct 
-  sidl_io_Deserializer__object* obj);
-extern struct sidlx_rmi_Simsponse__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Simsponse(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidlx_rmi_Simsponse(struct 
-  sidlx_rmi_Simsponse__object* obj);
-extern struct sidl_io_IOException__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_io_IOException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_io_IOException(struct 
-  sidl_io_IOException__object* obj);
-extern struct sidl_rmi_NetworkException__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj);
-extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidl_BaseException__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_BaseException(struct 
-  sidl_BaseException__object* obj);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseException__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseException__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_BaseException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Deserializer__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_io_Deserializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Deserializer__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_io_Deserializer(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_rmi_Response__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_rmi_Response(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_rmi_Response__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_rmi_Response(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_Simsponse__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Simsponse(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_Simsponse__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidlx_rmi_Simsponse(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface* _ex);
 extern
 void
 impl_sidlx_rmi_Simsponse_init(
   /* in */ sidlx_rmi_Simsponse self,
   /* in */ const char* methodName,
-  /* in */ const char* className,
   /* in */ const char* objectid,
   /* in */ sidlx_rmi_Socket sock,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+sidl_bool
+impl_sidlx_rmi_Simsponse_test(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ int32_t secs,
+  /* in */ int32_t usecs,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_pullData(
+  /* in */ sidlx_rmi_Simsponse self,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -97,13 +128,13 @@ impl_sidlx_rmi_Simsponse_getMethodName(
 
 extern
 char*
-impl_sidlx_rmi_Simsponse_getClassName(
+impl_sidlx_rmi_Simsponse_getObjectID(
   /* in */ sidlx_rmi_Simsponse self,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
-char*
-impl_sidlx_rmi_Simsponse_getObjectID(
+sidl_BaseException
+impl_sidlx_rmi_Simsponse_getExceptionThrown(
   /* in */ sidlx_rmi_Simsponse self,
   /* out */ sidl_BaseInterface *_ex);
 
@@ -137,6 +168,14 @@ impl_sidlx_rmi_Simsponse_unpackLong(
   /* in */ sidlx_rmi_Simsponse self,
   /* in */ const char* key,
   /* out */ int64_t* value,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackOpaque(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out */ void** value,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -180,67 +219,203 @@ impl_sidlx_rmi_Simsponse_unpackString(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
-sidl_BaseException
-impl_sidlx_rmi_Simsponse_getExceptionThrown(
+void
+impl_sidlx_rmi_Simsponse_unpackSerializable(
   /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out */ sidl_io_Serializable* value,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
-sidl_bool
-impl_sidlx_rmi_Simsponse_done(
+void
+impl_sidlx_rmi_Simsponse_unpackBoolArray(
   /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<bool> */ struct sidl_bool__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
   /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidl_rmi_Response__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_rmi_Response(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_rmi_Response(struct 
-  sidl_rmi_Response__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_io_Deserializer__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_io_Deserializer(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_io_Deserializer(struct 
-  sidl_io_Deserializer__object* obj);
-extern struct sidlx_rmi_Simsponse__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Simsponse(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidlx_rmi_Simsponse(struct 
-  sidlx_rmi_Simsponse__object* obj);
-extern struct sidl_io_IOException__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_io_IOException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_io_IOException(struct 
-  sidl_io_IOException__object* obj);
-extern struct sidl_rmi_NetworkException__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj);
-extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidl_BaseException__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_BaseException(struct 
-  sidl_BaseException__object* obj);
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackCharArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<char> */ struct sidl_char__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackIntArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<int> */ struct sidl_int__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackLongArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<long> */ struct sidl_long__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackOpaqueArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<opaque> */ struct sidl_opaque__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackFloatArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<float> */ struct sidl_float__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackDoubleArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<double> */ struct sidl_double__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackFcomplexArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<fcomplex> */ struct sidl_fcomplex__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackDcomplexArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<dcomplex> */ struct sidl_dcomplex__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackStringArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<string> */ struct sidl_string__array** value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackGenericArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<> */ struct sidl__array** value,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_Simsponse_unpackSerializableArray(
+  /* in */ sidlx_rmi_Simsponse self,
+  /* in */ const char* key,
+  /* out array<sidl.io.Serializable> */ struct sidl_io_Serializable__array** 
+    value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool isRarray,
+  /* out */ sidl_BaseInterface *_ex);
+
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_Simsponse_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseException__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseException__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_BaseException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Deserializer__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_io_Deserializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Deserializer__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_io_Deserializer(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_rmi_Response__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidl_rmi_Response(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_rmi_Response__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidl_rmi_Response(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_Simsponse__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Simsponse(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_Simsponse__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidlx_rmi_Simsponse(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_Simsponse_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -249,22 +424,38 @@ void
 sidlx_rmi_Simsponse__set_epv(struct sidlx_rmi_Simsponse__epv *epv)
 {
   epv->f__ctor = impl_sidlx_rmi_Simsponse__ctor;
+  epv->f__ctor2 = impl_sidlx_rmi_Simsponse__ctor2;
   epv->f__dtor = impl_sidlx_rmi_Simsponse__dtor;
   epv->f_init = impl_sidlx_rmi_Simsponse_init;
+  epv->f_test = impl_sidlx_rmi_Simsponse_test;
+  epv->f_pullData = impl_sidlx_rmi_Simsponse_pullData;
   epv->f_getMethodName = impl_sidlx_rmi_Simsponse_getMethodName;
-  epv->f_getClassName = impl_sidlx_rmi_Simsponse_getClassName;
   epv->f_getObjectID = impl_sidlx_rmi_Simsponse_getObjectID;
+  epv->f_getExceptionThrown = impl_sidlx_rmi_Simsponse_getExceptionThrown;
   epv->f_unpackBool = impl_sidlx_rmi_Simsponse_unpackBool;
   epv->f_unpackChar = impl_sidlx_rmi_Simsponse_unpackChar;
   epv->f_unpackInt = impl_sidlx_rmi_Simsponse_unpackInt;
   epv->f_unpackLong = impl_sidlx_rmi_Simsponse_unpackLong;
+  epv->f_unpackOpaque = impl_sidlx_rmi_Simsponse_unpackOpaque;
   epv->f_unpackFloat = impl_sidlx_rmi_Simsponse_unpackFloat;
   epv->f_unpackDouble = impl_sidlx_rmi_Simsponse_unpackDouble;
   epv->f_unpackFcomplex = impl_sidlx_rmi_Simsponse_unpackFcomplex;
   epv->f_unpackDcomplex = impl_sidlx_rmi_Simsponse_unpackDcomplex;
   epv->f_unpackString = impl_sidlx_rmi_Simsponse_unpackString;
-  epv->f_getExceptionThrown = impl_sidlx_rmi_Simsponse_getExceptionThrown;
-  epv->f_done = impl_sidlx_rmi_Simsponse_done;
+  epv->f_unpackSerializable = impl_sidlx_rmi_Simsponse_unpackSerializable;
+  epv->f_unpackBoolArray = impl_sidlx_rmi_Simsponse_unpackBoolArray;
+  epv->f_unpackCharArray = impl_sidlx_rmi_Simsponse_unpackCharArray;
+  epv->f_unpackIntArray = impl_sidlx_rmi_Simsponse_unpackIntArray;
+  epv->f_unpackLongArray = impl_sidlx_rmi_Simsponse_unpackLongArray;
+  epv->f_unpackOpaqueArray = impl_sidlx_rmi_Simsponse_unpackOpaqueArray;
+  epv->f_unpackFloatArray = impl_sidlx_rmi_Simsponse_unpackFloatArray;
+  epv->f_unpackDoubleArray = impl_sidlx_rmi_Simsponse_unpackDoubleArray;
+  epv->f_unpackFcomplexArray = impl_sidlx_rmi_Simsponse_unpackFcomplexArray;
+  epv->f_unpackDcomplexArray = impl_sidlx_rmi_Simsponse_unpackDcomplexArray;
+  epv->f_unpackStringArray = impl_sidlx_rmi_Simsponse_unpackStringArray;
+  epv->f_unpackGenericArray = impl_sidlx_rmi_Simsponse_unpackGenericArray;
+  epv->f_unpackSerializableArray = 
+    impl_sidlx_rmi_Simsponse_unpackSerializableArray;
 
 }
 #ifdef __cplusplus
@@ -276,116 +467,127 @@ extern "C" {
 #endif
 
 void sidlx_rmi_Simsponse__call_load(void) { 
-  impl_sidlx_rmi_Simsponse__load();
+  sidl_BaseInterface _throwaway_exception = NULL;
+  impl_sidlx_rmi_Simsponse__load(&_throwaway_exception);
 }
-struct sidl_rmi_Response__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidl_rmi_Response(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidl_rmi_Response(url, _ex);
-}
-
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidl_rmi_Response(struct 
-  sidl_rmi_Response__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidl_rmi_Response(obj);
-}
-
-struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidl_ClassInfo(url, _ex);
-}
-
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidl_ClassInfo(obj);
-}
-
-struct sidl_io_Deserializer__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidl_io_Deserializer(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidl_io_Deserializer(url, _ex);
-}
-
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidl_io_Deserializer(struct 
-  sidl_io_Deserializer__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidl_io_Deserializer(obj);
-}
-
-struct sidlx_rmi_Simsponse__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Simsponse(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Simsponse(url, _ex);
-}
-
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidlx_rmi_Simsponse(struct 
-  sidlx_rmi_Simsponse__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidlx_rmi_Simsponse(obj);
-}
-
-struct sidl_io_IOException__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidl_io_IOException(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidl_io_IOException(url, _ex);
-}
-
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidl_io_IOException(struct 
-  sidl_io_IOException__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidl_io_IOException(obj);
-}
-
-struct sidl_rmi_NetworkException__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidl_rmi_NetworkException(url, _ex);
-}
-
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidl_rmi_NetworkException(obj);
-}
-
-struct sidlx_rmi_Socket__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Socket(url, _ex);
-}
-
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidlx_rmi_Socket(obj);
-}
-
-struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseInterface(url, _ex);
-}
-
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidl_BaseInterface(obj);
-}
-
-struct sidl_BaseException__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidl_BaseException(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseException(url, _ex);
-}
-
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidl_BaseException(struct 
-  sidl_BaseException__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidl_BaseException(obj);
+struct sidl_BaseClass__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_Simsponse_fconnect_sidl_BaseClass(char* url,
+  skel_sidlx_rmi_Simsponse_fcast_sidl_BaseClass(void* bi,
   sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseClass(url, _ex);
+  return impl_sidlx_rmi_Simsponse_fcast_sidl_BaseClass(bi, _ex);
 }
 
-char* skel_sidlx_rmi_Simsponse_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) { 
-  return impl_sidlx_rmi_Simsponse_fgetURL_sidl_BaseClass(obj);
+struct sidl_BaseException__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidl_BaseException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseException(url, ar, _ex);
+}
+
+struct sidl_BaseException__object* 
+  skel_sidlx_rmi_Simsponse_fcast_sidl_BaseException(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fcast_sidl_BaseException(bi, _ex);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidl_BaseInterface(url, ar, _ex);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_sidlx_rmi_Simsponse_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fcast_sidl_BaseInterface(bi, _ex);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidl_ClassInfo(url, ar, _ex);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_sidlx_rmi_Simsponse_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fcast_sidl_ClassInfo(bi, _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidl_RuntimeException(url, ar, _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_sidlx_rmi_Simsponse_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fcast_sidl_RuntimeException(bi, _ex);
+}
+
+struct sidl_io_Deserializer__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidl_io_Deserializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidl_io_Deserializer(url, ar, _ex);
+}
+
+struct sidl_io_Deserializer__object* 
+  skel_sidlx_rmi_Simsponse_fcast_sidl_io_Deserializer(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fcast_sidl_io_Deserializer(bi, _ex);
+}
+
+struct sidl_io_Serializable__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidl_io_Serializable(url, ar, _ex);
+}
+
+struct sidl_io_Serializable__object* 
+  skel_sidlx_rmi_Simsponse_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fcast_sidl_io_Serializable(bi, _ex);
+}
+
+struct sidl_rmi_Response__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidl_rmi_Response(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidl_rmi_Response(url, ar, _ex);
+}
+
+struct sidl_rmi_Response__object* 
+  skel_sidlx_rmi_Simsponse_fcast_sidl_rmi_Response(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fcast_sidl_rmi_Response(bi, _ex);
+}
+
+struct sidlx_rmi_Simsponse__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Simsponse(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Simsponse(url, ar, _ex);
+}
+
+struct sidlx_rmi_Simsponse__object* 
+  skel_sidlx_rmi_Simsponse_fcast_sidlx_rmi_Simsponse(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fcast_sidlx_rmi_Simsponse(bi, _ex);
+}
+
+struct sidlx_rmi_Socket__object* 
+  skel_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fconnect_sidlx_rmi_Socket(url, ar, _ex);
+}
+
+struct sidlx_rmi_Socket__object* 
+  skel_sidlx_rmi_Simsponse_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidlx_rmi_Simsponse_fcast_sidlx_rmi_Socket(bi, _ex);
 }
 
 struct sidlx_rmi_Simsponse__data*

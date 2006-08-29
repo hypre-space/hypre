@@ -1,8 +1,8 @@
 /*
  * File:          sidl_rmi.h
- * Symbol:        sidl.rmi-v0.9.3
+ * Symbol:        sidl.rmi-v0.9.15
  * Symbol Type:   package
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.rmi
@@ -32,9 +32,17 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
+#ifndef included_sidl_rmi_BindException_h
+#include "sidl_rmi_BindException.h"
+#endif
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
+#endif
+#ifndef included_sidl_rmi_ConnectException_h
+#include "sidl_rmi_ConnectException.h"
+#endif
 #ifndef included_sidl_rmi_ConnectRegistry_h
 #include "sidl_rmi_ConnectRegistry.h"
 #endif
@@ -47,13 +55,52 @@
 #ifndef included_sidl_rmi_Invocation_h
 #include "sidl_rmi_Invocation.h"
 #endif
+#ifndef included_sidl_rmi_MalformedURLException_h
+#include "sidl_rmi_MalformedURLException.h"
+#endif
 #ifndef included_sidl_rmi_NetworkException_h
 #include "sidl_rmi_NetworkException.h"
+#endif
+#ifndef included_sidl_rmi_NoRouteToHostException_h
+#include "sidl_rmi_NoRouteToHostException.h"
+#endif
+#ifndef included_sidl_rmi_NoServerException_h
+#include "sidl_rmi_NoServerException.h"
+#endif
+#ifndef included_sidl_rmi_ObjectDoesNotExistException_h
+#include "sidl_rmi_ObjectDoesNotExistException.h"
+#endif
+#ifndef included_sidl_rmi_ProtocolException_h
+#include "sidl_rmi_ProtocolException.h"
 #endif
 #ifndef included_sidl_rmi_ProtocolFactory_h
 #include "sidl_rmi_ProtocolFactory.h"
 #endif
 #ifndef included_sidl_rmi_Response_h
 #include "sidl_rmi_Response.h"
+#endif
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
+#endif
+#ifndef included_sidl_rmi_ServerInfo_h
+#include "sidl_rmi_ServerInfo.h"
+#endif
+#ifndef included_sidl_rmi_ServerRegistry_h
+#include "sidl_rmi_ServerRegistry.h"
+#endif
+#ifndef included_sidl_rmi_Ticket_h
+#include "sidl_rmi_Ticket.h"
+#endif
+#ifndef included_sidl_rmi_TicketBook_h
+#include "sidl_rmi_TicketBook.h"
+#endif
+#ifndef included_sidl_rmi_TimeOutException_h
+#include "sidl_rmi_TimeOutException.h"
+#endif
+#ifndef included_sidl_rmi_UnexpectedCloseException_h
+#include "sidl_rmi_UnexpectedCloseException.h"
+#endif
+#ifndef included_sidl_rmi_UnknownHostException_h
+#include "sidl_rmi_UnknownHostException.h"
 #endif
 

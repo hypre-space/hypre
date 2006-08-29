@@ -1,8 +1,8 @@
 /*
  * File:          sidl_io.h
- * Symbol:        sidl.io-v0.9.3
+ * Symbol:        sidl.io-v0.9.15
  * Symbol Type:   package
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.io
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_io_Deserializer_h
@@ -41,8 +40,8 @@
 #ifndef included_sidl_io_IOException_h
 #include "sidl_io_IOException.h"
 #endif
-#ifndef included_sidl_io_Serializeable_h
-#include "sidl_io_Serializeable.h"
+#ifndef included_sidl_io_Serializable_h
+#include "sidl_io_Serializable.h"
 #endif
 #ifndef included_sidl_io_Serializer_h
 #include "sidl_io_Serializer.h"

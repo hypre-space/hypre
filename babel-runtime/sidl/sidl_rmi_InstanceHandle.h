@@ -1,8 +1,8 @@
 /*
  * File:          sidl_rmi_InstanceHandle.h
- * Symbol:        sidl.rmi.InstanceHandle-v0.9.3
+ * Symbol:        sidl.rmi.InstanceHandle-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.rmi.InstanceHandle
@@ -32,32 +32,46 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_rmi_InstanceHandle_h
 #define included_sidl_rmi_InstanceHandle_h
 
 /**
- * Symbol "sidl.rmi.InstanceHandle" (version 0.9.3)
+ * Symbol "sidl.rmi.InstanceHandle" (version 0.9.15)
  * 
- * This interface holds the state information for handles to remote
- * objects.  Client-side messaging libraries are expected to implement
- * <code>sidl.rmi.InstanceHandle</code>, <code>sidl.rmi.Invocation</code>
- * and <code>sidl.rmi.Response</code>.
+ *  
+ * This interface holds the state information for handles to
+ * remote objects.  Client-side messaging libraries are expected
+ * to implement <code>sidl.rmi.InstanceHandle</code>,
+ * <code>sidl.rmi.Invocation</code> and
+ * <code>sidl.rmi.Response</code>.
  * 
- *  When a connection is created between a stub and a real object:
- *       sidl_rmi_InstanceHandle c = sidl_rmi_ProtocolFactory_createInstance( url, typeName );
+ * Every stub with a connection to a remote object holds a pointer
+ * to an InstanceHandle that manages the connection. Multiple
+ * stubs may point to the same InstanceHandle, however.  Babel
+ * takes care of the reference counting, but the developer should
+ * keep concurrency issues in mind.
  * 
- *  When a method is invoked:
- *       sidl_rmi_Invocation i = sidl_rmi_InstanceHandle_createInvocationHandle( methodname );
- *       sidl_rmi_Invocation_packDouble( i, "input_val" , 2.0 );
- *       sidl_rmi_Invocation_packString( i, "input_str", "Hello" );
- *       ...
- *       sidl_rmi_Response r = sidl_rmi_Invocation_invokeMethod( i );
- *       sidl_rmi_Response_unpackBool( i, "_retval", &succeeded );
- *       sidl_rmi_Response_unpackFloat( i, "output_val", &f );
+ * When a new remote object is created:
+ * sidl_rmi_InstanceHandle c = 
+ * sidl_rmi_ProtocolFactory_createInstance( url, typeName,
+ * _ex );
  * 
+ * When a new stub is created to connect to an existing remote
+ * instance:
+ * sidl_rmi_InstanceHandle c = 
+ * sidl_rmi_ProtocolFactory_connectInstance( url, _ex );
+ * 
+ * When a method is invoked:
+ * sidl_rmi_Invocation i = 
+ * sidl_rmi_InstanceHandle_createInvocation( methodname );
+ * sidl_rmi_Invocation_packDouble( i, "input_val" , 2.0 );
+ * sidl_rmi_Invocation_packString( i, "input_str", "Hello" );
+ * ...
+ * sidl_rmi_Response r = sidl_rmi_Invocation_invokeMethod( i );
+ * sidl_rmi_Response_unpackBool( i, "_retval", &succeeded );
+ * sidl_rmi_Response_unpackFloat( i, "output_val", &f );
  */
 struct sidl_rmi_InstanceHandle__object;
 struct sidl_rmi_InstanceHandle__array;
@@ -79,31 +93,218 @@ typedef struct sidl_rmi_InstanceHandle__object* sidl_rmi_InstanceHandle;
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
 #ifndef included_sidl_SIDLException_h
 #include "sidl_SIDLException.h"
+#endif
+#ifndef included_sidl_io_Serializable_h
+#include "sidl_io_Serializable.h"
 #endif
 #ifndef included_sidl_rmi_Invocation_h
 #include "sidl_rmi_Invocation.h"
 #endif
-#ifndef included_sidl_rmi_NetworkException_h
-#include "sidl_rmi_NetworkException.h"
-#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidl_rmi_InstanceHandle_IOR_h
+#include "sidl_rmi_InstanceHandle_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 sidl_rmi_InstanceHandle
 sidl_rmi_InstanceHandle__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ *  initialize a connection (intended for use by the
+ * ProtocolFactory, (see above).  This should parse the url and
+ * do everything necessary to create the remote object.
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_rmi_InstanceHandle_initCreate(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* in */ const char* url,
+  /* in */ const char* typeName,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_initCreate)(
+    self->d_object,
+    url,
+    typeName,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * initialize a connection (intended for use by the ProtocolFactory) 
+ * This should parse the url and do everything necessary to connect 
+ * to a remote object.
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_rmi_InstanceHandle_initConnect(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* in */ const char* url,
+  /* in */ sidl_bool ar,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_initConnect)(
+    self->d_object,
+    url,
+    ar,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ *  Get a connection specifically for the purpose for requesting a 
+ * serialization of a remote object (intended for use by the
+ * ProtocolFactory, (see above).  This should parse the url and
+ * request the object.  It should return a deserializer..
+ */
+SIDL_C_INLINE_DECL
+sidl_io_Serializable
+sidl_rmi_InstanceHandle_initUnserialize(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* in */ const char* url,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_initUnserialize)(
+    self->d_object,
+    url,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ *  return the short name of the protocol 
+ */
+SIDL_C_INLINE_DECL
+char*
+sidl_rmi_InstanceHandle_getProtocol(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getProtocol)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ *  return the object ID for the remote object
+ */
+SIDL_C_INLINE_DECL
+char*
+sidl_rmi_InstanceHandle_getObjectID(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getObjectID)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ *  
+ * return the full URL for this object, takes the form: 
+ * protocol://serviceID/objectID (where serviceID would = server:port 
+ * on TCP/IP)
+ * So usually, like this: protocol://server:port/objectID
+ */
+SIDL_C_INLINE_DECL
+char*
+sidl_rmi_InstanceHandle_getObjectURL(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getObjectURL)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ *  create a serializer handle to invoke the named method 
+ */
+SIDL_C_INLINE_DECL
+sidl_rmi_Invocation
+sidl_rmi_InstanceHandle_createInvocation(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* in */ const char* methodName,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_createInvocation)(
+    self->d_object,
+    methodName,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ *  
+ * closes the connection (called by the destructor, if not done
+ * explicitly) returns true if successful, false otherwise
+ * (including subsequent calls)
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_rmi_InstanceHandle_close(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_close)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -118,9 +319,21 @@ sidl_rmi_InstanceHandle__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidl_rmi_InstanceHandle_addRef(
-  /* in */ sidl_rmi_InstanceHandle self);
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -129,32 +342,43 @@ sidl_rmi_InstanceHandle_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidl_rmi_InstanceHandle_deleteRef(
-  /* in */ sidl_rmi_InstanceHandle self);
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_rmi_InstanceHandle_isSame(
   /* in */ sidl_rmi_InstanceHandle self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidl_rmi_InstanceHandle_queryInt(
-  /* in */ sidl_rmi_InstanceHandle self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -162,86 +386,50 @@ sidl_rmi_InstanceHandle_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_rmi_InstanceHandle_isType(
   /* in */ sidl_rmi_InstanceHandle self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self->d_object,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidl_rmi_InstanceHandle_getClassInfo(
-  /* in */ sidl_rmi_InstanceHandle self);
-
-/**
- * initialize a connection (intended for use by the ProtocolFactory) 
- */
-sidl_bool
-sidl_rmi_InstanceHandle_initCreate(
   /* in */ sidl_rmi_InstanceHandle self,
-  /* in */ const char* url,
-  /* in */ const char* typeName,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * initialize a connection (intended for use by the ProtocolFactory) 
- */
-sidl_bool
-sidl_rmi_InstanceHandle_initConnect(
-  /* in */ sidl_rmi_InstanceHandle self,
-  /* in */ const char* url,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * return the name of the protocol 
- */
-char*
-sidl_rmi_InstanceHandle_getProtocol(
-  /* in */ sidl_rmi_InstanceHandle self,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * return the session ID 
- */
-char*
-sidl_rmi_InstanceHandle_getObjectID(
-  /* in */ sidl_rmi_InstanceHandle self,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * return the full URL for this object, takes the form: 
- *  protocol://server:port/class/objectID
- */
-char*
-sidl_rmi_InstanceHandle_getURL(
-  /* in */ sidl_rmi_InstanceHandle self,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * create a handle to invoke a named method 
- */
-sidl_rmi_Invocation
-sidl_rmi_InstanceHandle_createInvocation(
-  /* in */ sidl_rmi_InstanceHandle self,
-  /* in */ const char* methodName,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * closes the connection (called be destructor, if not done explicitly) 
- * returns true if successful, false otherwise (including subsequent calls)
- */
-sidl_bool
-sidl_rmi_InstanceHandle_close(
-  /* in */ sidl_rmi_InstanceHandle self,
-  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidl_rmi_InstanceHandle__object*
 sidl_rmi_InstanceHandle__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -249,23 +437,94 @@ sidl_rmi_InstanceHandle__cast(
 void*
 sidl_rmi_InstanceHandle__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidl_rmi_InstanceHandle__exec(
   /* in */ sidl_rmi_InstanceHandle self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self->d_object,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidl_rmi_InstanceHandle__getURL(
-  /* in */ sidl_rmi_InstanceHandle self);
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_rmi_InstanceHandle__raddRef(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_rmi_InstanceHandle__isRemote(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidl_rmi_InstanceHandle__isLocal(
+  /* in */ sidl_rmi_InstanceHandle self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -753,6 +1012,25 @@ sidl_rmi_InstanceHandle__array_ensure(
   struct sidl_rmi_InstanceHandle__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidl_rmi_InstanceHandle__connectI
+
+#pragma weak sidl_rmi_InstanceHandle__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidl_rmi_InstanceHandle__object*
+sidl_rmi_InstanceHandle__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidl_rmi_InstanceHandle__object*
+sidl_rmi_InstanceHandle__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

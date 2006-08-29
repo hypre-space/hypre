@@ -30,11 +30,9 @@ AC_DEFUN([LLNL_HEADER_JNI],[
 AC_CACHE_CHECK([for location of jni.h],[llnl_cv_header_jni_h],[
 llnl_cv_header_jni_h=no;
 if test -n "$JNI_INCLUDES"; then
-changequote(, )dnl
 
-  incl_guess=`echo "$JNI_INCLUDES" | sed 's,\-I,,g'`
+  incl_guess=`echo "$JNI_INCLUDES" | sed 's,\-I, ,g'`
 
-changequote([, ])dnl
   for i in $incl_guess ; do
     if test -e "$i/jni.h"; then
       llnl_cv_header_jni_h="$i/jni.h";
@@ -44,7 +42,7 @@ fi
 if test "x$llnl_cv_header_jni_h" = xno; then
   if test "x$ac_cv_path_JAVAH" != x ; then 
 changequote(, )dnl
-     javah_guess=`echo $ac_cv_path_JAVAH | sed 's,\(.*\)//*[^/]*//*[^/]*$,\1/include,'`
+     javah_guess="`echo $ac_cv_path_JAVAH | sed 's,\(.*\)//*[^/]*//*[^/]*$,\1/include,'` /usr/java/include /usr/local/java/include /System/Library/Frameworks/JavaVM.framework/Headers"
 changequote([, ])dnl
      for i in $javah_guess ; do
       if test -e "$i/jni.h"; then
@@ -66,14 +64,40 @@ AC_DEFUN([LLNL_JNI_INCLUDE_FLAGS],[
 AC_CACHE_CHECK([what additional include directives are needed for <jni.h>],[llnl_cv_jni_includes],[
 ac_save_CPPFLAGS="$CPPFLAGS"
 llnl_cv_jni_includes="no"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <jni.h>]],[])],
+if test -n "$JNI_INCLUDES"; then
+  llnl_fix_jni_includes="$JNI_INCLUDES -I"
+  JNI_INCLUDES=""
+  for i in $llnl_fix_jni_includes; do
+    case $i in
+    -I) 
+        ;;
+    -I*)
+       JNI_INCLUDES="$JNI_INCLUDES $i"
+       ;;
+    *)
+       if test -d $i; then
+         JNI_INCLUDES="$JNI_INCLUDES -I$i"
+       fi
+       ;;
+    esac
+  done
+  unset llnl_fix_jni_includes
+fi
+if test -z "$JNI_INCLUDES"; then
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <jni.h>]],[])],
 	[llnl_cv_jni_includes="none needed"])
+fi
 dnl next try with JNI_INCLUDES
 if test "x$llnl_cv_jni_includes" = xno; then 
   if test -n "$JNI_INCLUDES"; then
     CPPFLAGS="$ac_save_CPPFLAGS $JNI_INCLUDES"
   fi 
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <jni.h>]],[])],[llnl_cv_jni_includes="$JNI_INCLUDES"])
+fi
+if test "x$llnl_cv_jni_includes" = xno -a -n "$JNI_INCLUDES"; then
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <jni.h>]],[])],
+	[AC_MSG_WARN([ignoring JNI_INCLUDES setting])
+         llnl_cv_jni_includes="none needed"])
 fi
 dnl finally, try to compute exactly
  if test "x$llnl_cv_jni_includes" = xno; then

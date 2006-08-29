@@ -47,6 +47,7 @@
 #include "sidl_DLL.h"
 #include "sidl_Loader.h"
 #include "sidl_String.h"
+#include "sidl_Exception.h"
 #include "sidlArray.h"
 
 #ifndef FALSE
@@ -83,7 +84,7 @@ static JavaVM* s_jvm = NULL;
 static void sidl_Java_getJVM(void)
 {
   typedef jint (*jvmf_t)(JavaVM**,JNIEnv**,JavaVMInitArgs*);
-
+  sidl_BaseInterface _ex; /*TODO: a way to not throw these away? */
   if (s_jvm == NULL) {
     JavaVMInitArgs vm_args;
     JavaVMOption*  options = NULL;
@@ -124,27 +125,27 @@ static void sidl_Java_getJVM(void)
     options[0].optionString = "-Djava.compiler=NONE";
     options[1].optionString = clspath;
 
-
     vm_args.version            = 0x00010002;
     vm_args.options            = options;
     vm_args.nOptions           = num_flags;
     vm_args.ignoreUnrecognized = 1;
 
-    dll = sidl_DLL__create();
+    dll = sidl_DLL__create(&_ex); SIDL_CHECK(_ex);
     if (dll) {
-      if (sidl_DLL_loadLibrary(dll, "main:", TRUE, TRUE)) {
-        jvmf = (jvmf_t) sidl_DLL_lookupSymbol(dll, "JNI_CreateJavaVM");
+      sidl_bool loaded = sidl_DLL_loadLibrary(dll, "main:", TRUE, TRUE, &_ex); SIDL_CHECK(_ex);
+      if (loaded) { 
+        jvmf = (jvmf_t) sidl_DLL_lookupSymbol(dll, "JNI_CreateJavaVM", &_ex); SIDL_CHECK(_ex);
       }
-      sidl_DLL_deleteRef(dll);
+      sidl_DLL_deleteRef(dll, &_ex);SIDL_CHECK(_ex);
     }
     if (!jvmf) { /* not in main: */
 #ifdef JVM_SHARED_LIBRARY
       char *url = sidl_String_concat2("file:", JVM_SHARED_LIBRARY);
       if (url) {
-        dll = sidl_Loader_loadLibrary(url, TRUE, TRUE);
+        dll = sidl_Loader_loadLibrary(url, TRUE, TRUE,&_ex);SIDL_CHECK(_ex);
         if (dll) {
-          jvmf = (jvmf_t) sidl_DLL_lookupSymbol(dll, "JNI_CreateJavaVM");
-          sidl_DLL_deleteRef(dll);
+          jvmf = (jvmf_t) sidl_DLL_lookupSymbol(dll, "JNI_CreateJavaVM",&_ex); SIDL_CHECK(_ex);
+          sidl_DLL_deleteRef(dll,&_ex); SIDL_CHECK(_ex);
         }
         sidl_String_free(url);
       }
@@ -161,7 +162,8 @@ Babel: JVM shared library not found during Babel configuration.\n");
     sidl_String_free(clspath);
     free(options);  /*calloced above*/
   }
-
+ EXIT:
+  return;
 }
 
 /*
@@ -190,6 +192,7 @@ void Java_gov_llnl_sidl_BaseClass__1registerNatives(
   jstring name)
 {
   const char* s = NULL;
+  sidl_BaseInterface _ex; /*TODO: a way to not throw these away? */
 
   /*
    * Get a handle to the Java virtual machine if we have
@@ -214,12 +217,13 @@ void Java_gov_llnl_sidl_BaseClass__1registerNatives(
     sidl_String_replace(symbol, '.', '_');
 
     /* search the global namespace first */
-    dll = sidl_DLL__create();
+    dll = sidl_DLL__create(&_ex); SIDL_CHECK(_ex);
     if (dll) {
-      if (sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
-        address = sidl_DLL_lookupSymbol(dll, symbol);
+      sidl_bool loaded = sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE, &_ex); SIDL_CHECK(_ex);
+      if (loaded) { 
+        address = sidl_DLL_lookupSymbol(dll, symbol, &_ex); SIDL_CHECK(_ex);
       }
-      sidl_DLL_deleteRef(dll);
+      sidl_DLL_deleteRef(dll,&_ex);SIDL_CHECK(_ex);
     }
 
     if (!address) {
@@ -229,10 +233,10 @@ void Java_gov_llnl_sidl_BaseClass__1registerNatives(
        */
       dll = sidl_Loader_findLibrary(s, "java",
                                     sidl_Scope_SCLSCOPE,
-                                    sidl_Resolve_SCLRESOLVE);
+                                    sidl_Resolve_SCLRESOLVE, &_ex);SIDL_CHECK(_ex);
       if (dll) {
-        address = sidl_DLL_lookupSymbol(dll, symbol);
-        sidl_DLL_deleteRef(dll);
+        address = sidl_DLL_lookupSymbol(dll, symbol,&_ex);SIDL_CHECK(_ex);
+        sidl_DLL_deleteRef(dll,&_ex);SIDL_CHECK(_ex);
       }
     }
     if (address) {
@@ -251,6 +255,8 @@ void Java_gov_llnl_sidl_BaseClass__1registerNatives(
     sidl_String_free(symbol);
     (*env)->ReleaseStringUTFChars(env, name, s);
   }
+ EXIT:
+  return;
 }
 
 /*
@@ -262,6 +268,7 @@ jlong Java_gov_llnl_sidl_BaseClass__1cast_1ior(
   jstring name)
 {
   jlong ior = 0;
+  sidl_BaseInterface ex = NULL;
 
   if (name != (jstring) NULL) {
     jclass    cls = (*env)->GetObjectClass(env, obj);
@@ -271,15 +278,168 @@ jlong Java_gov_llnl_sidl_BaseClass__1cast_1ior(
     (*env)->DeleteLocalRef(env, cls);
 
     if (ptr != NULL) {
+      
       const char* utf = (*env)->GetStringUTFChars(env, name, NULL);
-      ior = POINTER_TO_JLONG(sidl_BaseInterface__cast2(ptr, utf));
+      ior = POINTER_TO_JLONG(sidl_BaseInterface__cast2(ptr, utf, &ex)); SIDL_CHECK(ex);
       (*env)->ReleaseStringUTFChars(env, name, utf);
     }
   }
 
   return ior;
+ EXIT:
+  sidl_Java_CheckException(env,
+			   ex,
+			   "sidl.RuntimeException",
+			   NULL);
+  
+  return 0;
+  
 }
 
+/*
+ * JNI method called by Java base class to get the url of this object.
+ */
+jstring Java_gov_llnl_sidl_BaseClass__1getURL(
+  JNIEnv* env,
+  jobject obj)
+{
+  char* _ior_res = (char*) NULL;
+  jstring _res = (jstring) NULL;
+  sidl_BaseInterface ex = NULL;
+
+  jclass    cls = (*env)->GetObjectClass(env, obj);
+  jmethodID mid = (*env)->GetMethodID(env, cls, "_get_ior", "()J");
+  void*     ptr = JLONG_TO_POINTER((*env)->CallLongMethod(env, obj, mid));
+  
+  (*env)->DeleteLocalRef(env, cls);
+  
+  if (ptr != NULL) {
+    _ior_res = sidl_BaseInterface__getURL(ptr, &ex); SIDL_CHECK(ex);
+    _res = sidl_Java_I2J_string(env, _ior_res);
+    sidl_String_free(_ior_res);
+  }
+
+  return _res;
+ EXIT:
+  sidl_Java_CheckException(env,
+			   ex,
+			   "sidl.RuntimeException",
+			   NULL);
+  
+  return _res;
+  
+}
+
+/*
+ * JNI method called by Java base class to see if this object is implemented remotely
+ */
+jboolean Java_gov_llnl_sidl_BaseClass__1isRemote(
+  JNIEnv* env,
+  jobject obj)
+{
+ 
+  jboolean _res = (jboolean) NULL;
+  sidl_BaseInterface ex = NULL;
+
+  jclass    cls = (*env)->GetObjectClass(env, obj);
+  jmethodID mid = (*env)->GetMethodID(env, cls, "_get_ior", "()J");
+  void*     ptr = JLONG_TO_POINTER((*env)->CallLongMethod(env, obj, mid));
+  
+  (*env)->DeleteLocalRef(env, cls);
+  
+  if (ptr != NULL) {
+    _res = (jboolean) sidl_BaseInterface__isRemote(ptr, &ex); SIDL_CHECK(ex);
+  }
+
+  return _res;
+ EXIT:
+  sidl_Java_CheckException(env,
+			   ex,
+			   "sidl.RuntimeException",
+			   NULL);
+  
+  return _res;
+  
+}
+
+/*
+ * JNI method called by Java base class to see if this object is implemented locally
+ */
+jboolean Java_gov_llnl_sidl_BaseClass__1isLocal(
+  JNIEnv* env,
+  jobject obj)
+{
+ 
+  jboolean _res = (jboolean) NULL;
+  sidl_BaseInterface ex = NULL;
+
+  jclass    cls = (*env)->GetObjectClass(env, obj);
+  jmethodID mid = (*env)->GetMethodID(env, cls, "_get_ior", "()J");
+  void*     ptr = JLONG_TO_POINTER((*env)->CallLongMethod(env, obj, mid));
+  
+  (*env)->DeleteLocalRef(env, cls);
+  
+  if (ptr != NULL) {
+    _res = (jboolean) sidl_BaseInterface__isRemote(ptr, &ex); SIDL_CHECK(ex);
+  }
+
+  return !_res;
+ EXIT:
+  sidl_Java_CheckException(env,
+			   ex,
+			   "sidl.RuntimeException",
+			   NULL);
+  
+  return _res;
+  
+}
+
+/*
+ * JNI method called by Java base class to see if this object is implemented locally
+ */
+/*void Java_gov_llnl_sidl_BaseClass__1exec(
+  JNIEnv* env,
+  jobject obj,
+  jstring methodName,
+  jobject inArgs,
+  jobject outArgs)
+{
+ 
+  sidl_BaseInterface ex = NULL;
+
+  jclass    cls = (*env)->GetObjectClass(env, obj);
+  jmethodID mid = (*env)->GetMethodID(env, cls, "_get_ior", "()J");
+  void*     ptr = JLONG_TO_POINTER((*env)->CallLongMethod(env, obj, mid));
+  struct sidl_rmi_Call__object* _tmp_inArgs = NULL;
+  struct sidl_rmi_Return__object* _tmp_outArgs = NULL;
+  char* _tmp_methodName = NULL;
+
+  (*env)->DeleteLocalRef(env, cls);
+
+  if (ptr != NULL) {
+    _tmp_inArgs = (struct sidl_rmi_Call__object*) sidl_Java_J2I_cls(env,
+      inArgs);JAVA_CHECK(env);
+    _tmp_outArgs = (struct sidl_rmi_Return__object*) sidl_Java_J2I_cls(env,
+      outArgs);JAVA_CHECK(env);
+    _tmp_methodName = sidl_Java_J2I_string(env, methodName);
+
+    sidl_BaseInterface__exec(ptr, _tmp_methodName, _tmp_inArgs, _tmp_outArgs, &ex); 
+    SIDL_CHECK(ex);
+  }
+
+  return;
+  
+ EXIT:
+  sidl_Java_CheckException(env,
+			   ex,
+			   "sidl.RuntimeException",
+			   NULL);
+ JAVA_EXIT:
+
+  return;
+  
+}
+*/
 /*
  * JNI method called by Java base class to dereference sidl IOR objects.
  */
@@ -288,7 +448,8 @@ void Java_gov_llnl_sidl_BaseClass__1finalize(
   jobject obj)
 {
   void* ptr = NULL;
-   
+  sidl_BaseInterface _ex; /*TODO: a way to not throw these away? */
+
   /*
    * Initialize the IOR data member reference to avoid repeated lookups.
    */
@@ -308,7 +469,7 @@ void Java_gov_llnl_sidl_BaseClass__1finalize(
 
   if (ptr != NULL) {
     struct sidl_BaseInterface__object* bi = (struct sidl_BaseInterface__object*) ptr;
-    (bi->d_epv->f_deleteRef)(bi->d_object);
+    (bi->d_epv->f_deleteRef)(bi->d_object, &_ex);
    
   }
   (*env)->SetLongField(env, obj, s_ior_field, (jlong) NULL);
@@ -324,18 +485,43 @@ sidl_bool sidl_Java_isClass(
   struct sidl_BaseInterface__object* ptr, 
   const char* type)
 {
-  sidl_bool is = FALSE;
-  jstring holdee = sidl_Java_I2J_string(env, type);
-  jobject obj = sidl_Java_I2J_cls(env, ptr, type);
-  if(obj) {
-    jclass cls = (*env)->GetObjectClass(env, obj);
-    jmethodID mid = (*env)->GetMethodID(env, cls, "isType", 
-					"(Ljava/lang/String;)Z");
-    is = (*env)->CallBooleanMethod(env, obj, mid, holdee) ? TRUE : FALSE;
-    (*env)->DeleteLocalRef(env, cls);
+  struct sidl_BaseInterface__object* ex = NULL;
+  jclass cls = (jclass) NULL;
+  char* name = NULL; 
+
+  /*If the type is wrong, this is not the class you're looking for*/
+  if(ptr == NULL) {
+    int is_type = sidl_BaseInterface_isType(ptr, type, &ex);SIDL_CHECK(ex);
+    if(!is_type){
+      return FALSE;
+    }
   }
-  (*env)->DeleteLocalRef(env, holdee);
-  return is;
+  /*If the type works, check if it's actually a class by trying to
+   * find its constructor */
+    
+  name = sidl_String_strdup(type);
+  sidl_String_replace(name, '.', '/');
+
+  cls = (*env)->FindClass(env, name);
+  if ((*env)->ExceptionCheck(env)) {
+    (*env)->ExceptionClear(env);
+    return FALSE;
+  }
+  jmethodID ctor = (*env)->GetMethodID(env, cls, "<init>", "(J)V");
+  if ((*env)->ExceptionCheck(env) || ctor == NULL) {
+    (*env)->ExceptionClear(env);
+    return FALSE;
+  }
+  
+  /*If it has a constructor, it must be a class.*/
+  return TRUE;
+ EXIT:
+  sidl_Java_CheckException(env,
+			   ex,
+			   "sidl.RuntimeException",
+			   NULL);
+  
+  return FALSE;
 }
 
 /*
@@ -351,7 +537,7 @@ void sidl_Java_CheckException(
 {
   va_list args;
   const char* type = NULL;
-
+  sidl_BaseInterface throwaway_ex = NULL;
   if (ex != NULL) {
 
     /*
@@ -361,13 +547,13 @@ void sidl_Java_CheckException(
 
     va_start(args, ex);
     while ((type = va_arg(args, const char*)) != NULL) {
-      void* ptr = sidl_BaseInterface__cast2(ex, type);
+      void* ptr = sidl_BaseInterface__cast2(ex, type, &throwaway_ex);
       if (ptr != NULL) {
-        jthrowable obj;
-        if (sidl_Java_isClass(env, ptr, type)) {
-	  obj = (jthrowable) sidl_Java_I2J_cls(env, ptr, type);
-	} else {
-	  obj = (jthrowable) sidl_Java_I2J_ifc(env, ptr, type);
+	sidl_BaseInterface_deleteRef((sidl_BaseInterface)ptr, &throwaway_ex);
+	jthrowable obj;
+	obj = (jthrowable) sidl_Java_I2J_cls(env, ptr, type);JAVA_CHECK(env);
+	if(!obj) {
+	  obj = (jthrowable) sidl_Java_I2J_ifc(env, ptr, type);JAVA_CHECK(env);
 	}
 	if (obj != NULL) {
 	  if((*env)->Throw(env, obj) != 0)
@@ -391,6 +577,10 @@ void sidl_Java_CheckException(
       }
     }
   }
+  return;
+ JAVA_EXIT:
+  fprintf(stderr,"Exception caught in sidl_Java_CheckException\n");
+  return;
 }
 
 /*
@@ -404,8 +594,10 @@ sidl_bool sidl_Java_isSIDLException(
     jclass cls = (*env)->GetObjectClass(env, obj);
     if(cls != NULL) {
       jmethodID mid = (*env)->GetMethodID(env, cls, "_get_ior", "()J");
-      if(mid != NULL)
+      if(mid != NULL) {
 	return TRUE;
+      }
+      (*env)->ExceptionClear(env);
     }
   }
   return FALSE;
@@ -424,7 +616,7 @@ struct sidl_BaseInterface__object* sidl_Java_catch_SIDLException(
 {
   va_list args;
   const char* type = NULL;
-
+  struct sidl_BaseInterface__object* ex2;
   if (obj != NULL) {
     jclass cls = (*env)->GetObjectClass(env, obj);
     if(cls != NULL) {
@@ -434,11 +626,12 @@ struct sidl_BaseInterface__object* sidl_Java_catch_SIDLException(
      * Search the varargs list of possible exception types.  Throw a particular
      * exception type if a match is found.
      */
-
       va_start(args, obj);
       while ((type = va_arg(args, const char*)) != NULL) {
-	void* ptr = sidl_BaseInterface__cast2(ex, type);
+	void* ptr = sidl_BaseInterface__cast2(ex, type,&ex2);SIDL_CHECK(ex2);
 	if (ptr != NULL) {
+	  sidl_BaseInterface_deleteRef((struct sidl_BaseInterface__object *)ex, 
+				       &ex2);SIDL_CHECK(ex2);
 	  return ex;
 	}
       }
@@ -446,6 +639,13 @@ struct sidl_BaseInterface__object* sidl_Java_catch_SIDLException(
       
     }
   }
+  return NULL;
+ EXIT:
+  sidl_Java_CheckException(env,
+			   ex2,
+			   "sidl.RuntimeException",
+			   NULL);
+  
   return NULL;
 }
 
@@ -1006,6 +1206,7 @@ void* sidl_Java_J2I_cls_holder(
   sidl_String_free(signature);
 
   return ptr;
+
 }
 
 /*
@@ -1020,15 +1221,22 @@ void sidl_Java_I2J_cls_holder(
 {
   
   jmethodID mid = (jmethodID) NULL;
-  jobject holdee = sidl_Java_I2J_cls(env, value, java_name);
-  jclass cls = (*env)->GetObjectClass(env, obj);
-  char* signature = sidl_String_concat3("(L", java_name, ";)V");
+  jobject holdee = (jobject) NULL;
+  jclass cls = NULL;
+  char* signature = NULL;
+  cls = (*env)->GetObjectClass(env, obj);
+  holdee = sidl_Java_I2J_cls(env, value, java_name); JAVA_CHECK(env);
+  signature = sidl_String_concat3("(L", java_name, ";)V");
   sidl_String_replace(signature, '.', '/');
-
+  
   mid = (*env)->GetMethodID(env, cls, "set", signature);
   (*env)->CallVoidMethod(env, obj, mid, holdee);
   (*env)->DeleteLocalRef(env, cls);
   sidl_String_free(signature);
+  return;
+ JAVA_EXIT:
+  if(cls) {(*env)->DeleteLocalRef(env, cls);}
+  return;
 }
 
 /*
@@ -1061,8 +1269,10 @@ jobject sidl_Java_I2J_cls(
   void* value,
   const char* java_name)
 {
-  struct sidl_BaseInterface__object* ptr = NULL;
+  sidl_BaseInterface ex;
+ 
   jobject obj = (jobject) NULL;
+  
   if (value != NULL) {
     jclass cls = (jclass) NULL;
     char* name = sidl_String_strdup(java_name);
@@ -1079,14 +1289,20 @@ jobject sidl_Java_I2J_cls(
       } else {
 	obj = (*env)->NewObject(env, cls, ctor, POINTER_TO_JLONG(value));
       }
-      /* addRef because of the new reference to this object!*/
-      ptr = sidl_BaseInterface__cast2(value, "sidl.BaseInterface");
-      sidl_BaseInterface_addRef(ptr);
+      sidl_BaseInterface_addRef((struct sidl_BaseInterface__object*)value, &ex);SIDL_CHECK(ex);
+      
       (*env)->DeleteLocalRef(env, cls);
     }
     sidl_String_free(name);
   }
   return obj;
+ EXIT:
+  sidl_Java_CheckException(env,
+			   ex,
+			   "sidl.RuntimeException",
+			   NULL);
+  
+  return NULL;
 }
 
 /*
@@ -1140,13 +1356,17 @@ void* sidl_Java_J2I_ifc_holder(
   mid    = (*env)->GetMethodID(env, cls, "get", signature);
 
   holdee = (*env)->CallObjectMethod(env, obj, mid);
-  ptr    = sidl_Java_J2I_ifc(env, holdee, java_name);
+  ptr    = sidl_Java_J2I_ifc(env, holdee, java_name);JAVA_CHECK(env);
 
   (*env)->DeleteLocalRef(env, cls);
   (*env)->DeleteLocalRef(env, holdee);
   sidl_String_free(signature);
 
   return ptr;
+ JAVA_EXIT:
+  if(cls) {(*env)->DeleteLocalRef(env, cls);}
+  if(holdee) {(*env)->DeleteLocalRef(env, holdee);}
+  return NULL;
 }
 
 /*
@@ -1160,9 +1380,13 @@ void sidl_Java_I2J_ifc_holder(
   const char* java_name)
 {
   jmethodID mid = (jmethodID) NULL;
-  jobject holdee = sidl_Java_I2J_ifc(env, value, java_name);
-  jclass cls = (*env)->GetObjectClass(env, obj);
-  char* signature = sidl_String_concat3("(L", java_name, ";)V");
+  jobject holdee = NULL;
+  jclass cls = NULL;
+  char* signature = NULL;
+
+  signature = sidl_String_concat3("(L", java_name, ";)V");
+  holdee = sidl_Java_I2J_ifc(env, value, java_name); JAVA_CHECK(env);
+  cls = (*env)->GetObjectClass(env, obj);
 
   sidl_String_replace(signature, '.', '/');
 
@@ -1171,6 +1395,8 @@ void sidl_Java_I2J_ifc_holder(
 
   (*env)->DeleteLocalRef(env, cls);
   sidl_String_free(signature);
+ JAVA_EXIT:
+  return;
 }
 
 /*
@@ -1185,6 +1411,7 @@ void* sidl_Java_J2I_ifc(
   const char* sidl_name)
 {
   void* ptr = NULL;
+  struct sidl_BaseInterface__object* ex = NULL;;
 
   if (obj != NULL) {
     jclass    cls = (*env)->GetObjectClass(env, obj);
@@ -1202,11 +1429,20 @@ void* sidl_Java_J2I_ifc(
     if ((*env)->ExceptionCheck(env)) {
       (*env)->ExceptionClear(env);
     }
-    ptr = sidl_BaseInterface__cast2(ior, sidl_name);
     
-  } 
+    ptr = sidl_BaseInterface__cast2(ior, sidl_name, &ex);SIDL_CHECK(ex);
+    sidl_BaseInterface_deleteRef(ptr, &ex);SIDL_CHECK(ex);
+    
+  }  
   
   return ptr;
+ EXIT:
+  sidl_Java_CheckException(env,
+			   ex,
+			   "sidl.RuntimeException",
+			   NULL);
+  
+  return NULL;
 }
 
 /*
@@ -1221,7 +1457,7 @@ jobject sidl_Java_I2J_ifc(
   void* value,
   const char* java_name)
 {
-  struct sidl_BaseInterface__object* ptr = NULL;
+  struct sidl_BaseInterface__object* _throwaway_exception = NULL;
   jobject obj = (jobject) NULL;
   if (value != NULL) {
     jclass cls = (jclass) NULL;
@@ -1242,11 +1478,8 @@ jobject sidl_Java_I2J_ifc(
 	(*env)->ExceptionDescribe(env);
     	(*env)->ExceptionClear(env);
       }
-  
-      /* Artifically add ref the Wrapper class reference*/ 
-      ptr = sidl_BaseInterface__cast2(value, "sidl.BaseInterface");
-      sidl_BaseInterface_addRef(ptr);
-     
+      /* Artifically add ref the Wrapper class reference */
+      sidl_BaseInterface_addRef(value, &_throwaway_exception);
       (*env)->DeleteLocalRef(env, cls);
     }
     sidl_String_free(wrapper);

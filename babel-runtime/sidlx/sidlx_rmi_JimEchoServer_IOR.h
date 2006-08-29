@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_JimEchoServer_IOR.h
  * Symbol:        sidlx.rmi.JimEchoServer-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Intermediate Object Representation for sidlx.rmi.JimEchoServer
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_JimEchoServer_IOR_h
@@ -16,6 +15,7 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+struct sidl_rmi_InstanceHandle__object;
 #ifndef included_sidlx_rmi_SimpleServer_IOR_h
 #include "sidlx_rmi_SimpleServer_IOR.h"
 #endif
@@ -27,21 +27,12 @@ extern "C" {
 /*
  * Symbol "sidlx.rmi.JimEchoServer" (version 0.1)
  * 
- * Echos the string back to the client using Jim's test protocol
+ *  
+ * Echos strings back to the client using Jim's echo protocol
  */
 
 struct sidlx_rmi_JimEchoServer__array;
 struct sidlx_rmi_JimEchoServer__object;
-
-extern struct sidlx_rmi_JimEchoServer__object*
-sidlx_rmi_JimEchoServer__new(void);
-
-extern void sidlx_rmi_JimEchoServer__init(
-  struct sidlx_rmi_JimEchoServer__object* self);
-extern void sidlx_rmi_JimEchoServer__fini(
-  struct sidlx_rmi_JimEchoServer__object* self);
-extern void sidlx_rmi_JimEchoServer__IOR_version(int32_t *major,
-  int32_t *minor);
 
 /*
  * Forward references for external classes and interfaces.
@@ -53,12 +44,14 @@ struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
-struct sidl_SIDLException__array;
-struct sidl_SIDLException__object;
-struct sidl_io_Deserializer__array;
-struct sidl_io_Deserializer__object;
-struct sidl_io_Serializer__array;
-struct sidl_io_Serializer__object;
+struct sidl_RuntimeException__array;
+struct sidl_RuntimeException__object;
+struct sidl_io_Serializable__array;
+struct sidl_io_Serializable__object;
+struct sidl_rmi_Call__array;
+struct sidl_rmi_Call__object;
+struct sidl_rmi_Return__array;
+struct sidl_rmi_Return__object;
 struct sidlx_rmi_Socket__array;
 struct sidlx_rmi_Socket__object;
 
@@ -68,45 +61,111 @@ struct sidlx_rmi_Socket__object;
 
 struct sidlx_rmi_JimEchoServer__epv {
   /* Implicit builtin methods */
+  /* 0 */
   void* (*f__cast)(
     /* in */ struct sidlx_rmi_JimEchoServer__object* self,
-    /* in */ const char* name);
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 1 */
   void (*f__delete)(
-    /* in */ struct sidlx_rmi_JimEchoServer__object* self);
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 2 */
   void (*f__exec)(
     /* in */ struct sidlx_rmi_JimEchoServer__object* self,
     /* in */ const char* methodName,
-    /* in */ struct sidl_io_Deserializer__object* inArgs,
-    /* in */ struct sidl_io_Serializer__object* outArgs);
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 3 */
   char* (*f__getURL)(
-    /* in */ struct sidlx_rmi_JimEchoServer__object* self);
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 4 */
+  void (*f__raddRef)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 5 */
+  sidl_bool (*f__isRemote)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 6 */
+  void (*f__set_hooks)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 7 */
   void (*f__ctor)(
-    /* in */ struct sidlx_rmi_JimEchoServer__object* self);
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 8 */
+  void (*f__ctor2)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* in */ void* private_data,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 9 */
   void (*f__dtor)(
-    /* in */ struct sidlx_rmi_JimEchoServer__object* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 10 */
+  /* 11 */
+  /* 12 */
+  /* 13 */
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
   void (*f_addRef)(
-    /* in */ struct sidlx_rmi_JimEchoServer__object* self);
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_deleteRef)(
-    /* in */ struct sidlx_rmi_JimEchoServer__object* self);
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_isSame)(
     /* in */ struct sidlx_rmi_JimEchoServer__object* self,
-    /* in */ struct sidl_BaseInterface__object* iobj);
-  struct sidl_BaseInterface__object* (*f_queryInt)(
-    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
-    /* in */ const char* name);
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_isType)(
     /* in */ struct sidlx_rmi_JimEchoServer__object* self,
-    /* in */ const char* name);
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    /* in */ struct sidlx_rmi_JimEchoServer__object* self);
-  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseClass-v0.9.15 */
+  /* Methods introduced in sidl.rmi.ServerInfo-v0.9.15 */
+  char* (*f_getServerURL)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* in */ const char* objID,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  char* (*f_isLocalObject)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* in */ const char* url,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_io_Serializable__array* (*f_getExceptions)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   /* Methods introduced in sidlx.rmi.SimpleServer-v0.1 */
-  void (*f_setPort)(
+  void (*f_setMaxThreadPool)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* in */ int32_t max,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_requestPort)(
     /* in */ struct sidlx_rmi_JimEchoServer__object* self,
     /* in */ int32_t port,
     /* out */ struct sidl_BaseInterface__object* *_ex);
-  void (*f_run)(
+  sidl_bool (*f_requestPortInRange)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* in */ int32_t minport,
+    /* in */ int32_t maxport,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_getPort)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  char* (*f_getServerName)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int64_t (*f_run)(
+    /* in */ struct sidlx_rmi_JimEchoServer__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_shutdown)(
     /* in */ struct sidlx_rmi_JimEchoServer__object* self,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_serviceRequest)(
@@ -116,6 +175,14 @@ struct sidlx_rmi_JimEchoServer__epv {
   /* Methods introduced in sidlx.rmi.JimEchoServer-v0.1 */
 };
 
+/*
+ * Define the controls structure.
+ */
+
+
+struct sidlx_rmi_JimEchoServer__controls {
+  int     use_hooks;
+};
 /*
  * Define the class object structure.
  */
@@ -128,9 +195,11 @@ struct sidlx_rmi_JimEchoServer__object {
 
 struct sidlx_rmi_JimEchoServer__external {
   struct sidlx_rmi_JimEchoServer__object*
-  (*createObject)(void);
+  (*createObject)(void* ddata, struct sidl_BaseInterface__object **_ex);
 
   struct sidlx_rmi_SimpleServer__epv*(*getSuperEPV)(void);
+  int d_ior_major_version;
+  int d_ior_minor_version;
 };
 
 /*
@@ -142,49 +211,101 @@ struct sidlx_rmi_JimEchoServer__external {
 const struct sidlx_rmi_JimEchoServer__external*
 sidlx_rmi_JimEchoServer__externals(void);
 
-struct sidl_SIDLException__object* 
-  skel_sidlx_rmi_JimEchoServer_fconnect_sidl_SIDLException(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_JimEchoServer_fgetURL_sidl_SIDLException(struct 
-  sidl_SIDLException__object* obj); 
+extern struct sidlx_rmi_JimEchoServer__object*
+sidlx_rmi_JimEchoServer__new(void* ddata,
+  struct sidl_BaseInterface__object ** _ex);
 
-struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_JimEchoServer_fconnect_sidl_ClassInfo(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_JimEchoServer_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj); 
+extern void sidlx_rmi_JimEchoServer__init(
+  struct sidlx_rmi_JimEchoServer__object* self, void* ddata,
+    struct sidl_BaseInterface__object ** _ex);
+extern void sidlx_rmi_JimEchoServer__getEPVs(
+  struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
+  struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
+    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_rmi_ServerInfo__epv **s_arg_epv__sidl_rmi_serverinfo,
+  struct sidl_rmi_ServerInfo__epv **s_arg_epv_hooks__sidl_rmi_serverinfo,
+  struct sidlx_rmi_SimpleServer__epv **s_arg_epv__sidlx_rmi_simpleserver,
+    struct sidlx_rmi_SimpleServer__epv 
+    **s_arg_epv_hooks__sidlx_rmi_simpleserver,
+  struct sidlx_rmi_JimEchoServer__epv **s_arg_epv__sidlx_rmi_jimechoserver,
+    struct sidlx_rmi_JimEchoServer__epv 
+    **s_arg_epv_hooks__sidlx_rmi_jimechoserver);
+  extern void sidlx_rmi_JimEchoServer__fini(
+    struct sidlx_rmi_JimEchoServer__object* self,
+      struct sidl_BaseInterface__object ** _ex);
+  extern void sidlx_rmi_JimEchoServer__IOR_version(int32_t *major,
+    int32_t *minor);
 
-struct sidlx_rmi_JimEchoServer__object* 
-  skel_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_JimEchoServer(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_JimEchoServer_fgetURL_sidlx_rmi_JimEchoServer(struct 
-  sidlx_rmi_JimEchoServer__object* obj); 
+  struct sidl_BaseClass__object* 
+    skel_sidlx_rmi_JimEchoServer_fconnect_sidl_BaseClass(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseClass__object* 
+    skel_sidlx_rmi_JimEchoServer_fcast_sidl_BaseClass(void *bi,
+    struct sidl_BaseInterface__object **_ex);
 
-struct sidlx_rmi_Socket__object* 
-  skel_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_Socket(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_JimEchoServer_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj); 
+  struct sidl_BaseInterface__object* 
+    skel_sidlx_rmi_JimEchoServer_fconnect_sidl_BaseInterface(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseInterface__object* 
+    skel_sidlx_rmi_JimEchoServer_fcast_sidl_BaseInterface(void *bi,
+    struct sidl_BaseInterface__object **_ex);
 
-struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_JimEchoServer_fconnect_sidl_BaseInterface(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_JimEchoServer_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj); 
+  struct sidl_ClassInfo__object* 
+    skel_sidlx_rmi_JimEchoServer_fconnect_sidl_ClassInfo(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfo__object* 
+    skel_sidlx_rmi_JimEchoServer_fcast_sidl_ClassInfo(void *bi,
+    struct sidl_BaseInterface__object **_ex);
 
-struct sidlx_rmi_SimpleServer__object* 
-  skel_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_SimpleServer(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_JimEchoServer_fgetURL_sidlx_rmi_SimpleServer(struct 
-  sidlx_rmi_SimpleServer__object* obj); 
+  struct sidl_RuntimeException__object* 
+    skel_sidlx_rmi_JimEchoServer_fconnect_sidl_RuntimeException(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_RuntimeException__object* 
+    skel_sidlx_rmi_JimEchoServer_fcast_sidl_RuntimeException(void *bi,
+    struct sidl_BaseInterface__object **_ex);
 
-struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_JimEchoServer_fconnect_sidl_BaseClass(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_JimEchoServer_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj); 
+  struct sidl_io_Serializable__object* 
+    skel_sidlx_rmi_JimEchoServer_fconnect_sidl_io_Serializable(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_io_Serializable__object* 
+    skel_sidlx_rmi_JimEchoServer_fcast_sidl_io_Serializable(void *bi,
+    struct sidl_BaseInterface__object **_ex);
 
-#ifdef __cplusplus
-}
-#endif
-#endif
+  struct sidl_rmi_ServerInfo__object* 
+    skel_sidlx_rmi_JimEchoServer_fconnect_sidl_rmi_ServerInfo(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_rmi_ServerInfo__object* 
+    skel_sidlx_rmi_JimEchoServer_fcast_sidl_rmi_ServerInfo(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidlx_rmi_JimEchoServer__object* 
+    skel_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_JimEchoServer(const char* 
+    url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidlx_rmi_JimEchoServer__object* 
+    skel_sidlx_rmi_JimEchoServer_fcast_sidlx_rmi_JimEchoServer(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidlx_rmi_SimpleServer__object* 
+    skel_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_SimpleServer(const char* 
+    url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidlx_rmi_SimpleServer__object* 
+    skel_sidlx_rmi_JimEchoServer_fcast_sidlx_rmi_SimpleServer(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidlx_rmi_Socket__object* 
+    skel_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_Socket(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidlx_rmi_Socket__object* 
+    skel_sidlx_rmi_JimEchoServer_fcast_sidlx_rmi_Socket(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidlx_rmi_JimEchoServer__remote{
+    int d_refcount;
+    struct sidl_rmi_InstanceHandle__object *d_ih;
+  };
+
+  #ifdef __cplusplus
+  }
+  #endif
+  #endif

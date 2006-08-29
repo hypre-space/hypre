@@ -3,14 +3,16 @@
 #include <stdlib.h>
 #include "sidlx_common.h"
 #include "sidl_String.h"
-
+#include "sidl_rmi_NetworkException.h"
+#include "sidl_rmi_MalformedURLException.h"
+#include "sidl_io_IOException.h"
 
 int s_socket( int family, int type, int protocol, sidl_BaseInterface *_ex) { 
   int n;
   
 /* socket() returns nonnegative descriptor if ok, -1 on error */
   if ((n=socket(family,type,protocol))< 0) { 
-    SIDL_THROW( *_ex, sidlx_io_IOException, "socket() error");
+    SIDL_THROW( *_ex, sidl_io_IOException, "socket() error");
   }
  EXIT:
   return(n);
@@ -22,7 +24,7 @@ int s_bind( int sockfd, const struct sockaddr * myaddr, socklen_t addrlen,
 
   /* bind() returns 0 if ok, -1 on error */
   if ((n=bind(sockfd, myaddr, addrlen)) < 0 ) { 
-    SIDL_THROW( *_ex, sidlx_io_IOException, "bind() error");
+    SIDL_THROW( *_ex, sidl_io_IOException, "bind() error");
   }
  EXIT:
   return n; 
@@ -34,7 +36,7 @@ int s_listen( int sockfd, int backlog, sidl_BaseInterface *_ex) {
   
   /* listen() returns 0 if ok, -1 on error */
   if ((n=listen(sockfd,backlog))<0) { 
-    SIDL_THROW( *_ex, sidlx_io_IOException, "listen() error");
+    SIDL_THROW( *_ex, sidl_io_IOException, "listen() error");
   }
  EXIT:
   return n;
@@ -46,7 +48,7 @@ int s_accept( int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen,
   
   /* accept() returns nonnegative descriptor if OK, -1 on error */
   if ((n=accept(sockfd, cliaddr, addrlen)) < 0 ) { 
-    SIDL_THROW( *_ex, sidlx_io_IOException, "accept() error");
+    SIDL_THROW( *_ex, sidl_io_IOException, "accept() error");
   }
  EXIT:
   return n;
@@ -59,7 +61,7 @@ int s_connect( int sockfd, const struct sockaddr *servaddr, socklen_t addrlen,
   
   /* returns 0 if OK, -1 on error */
   if ((n = connect( sockfd, servaddr, addrlen )) < 0 ) { 
-    SIDL_THROW( *_ex, sidlx_io_IOException, "connect() error");
+    SIDL_THROW( *_ex, sidl_io_IOException, "connect() error");
   }
  EXIT:
   return n;
@@ -72,7 +74,7 @@ pid_t s_fork( sidl_BaseInterface *_ex ) {
   
   /* returns 0 in child, PID in parent, -1 on error */
   if ((pid=fork()) < 0) { 
-    SIDL_THROW( *_ex, sidlx_io_IOException, "fork() error");
+    SIDL_THROW( *_ex, sidl_io_IOException, "fork() error");
   }
  EXIT:
   return pid;
@@ -84,7 +86,7 @@ int s_close( int sockfd, sidl_BaseInterface *_ex) {
   
   /* returns 0 if okay, -1 on error */
   if ((n=close(sockfd)) < 0 ) { 
-    SIDL_THROW( *_ex, sidlx_io_IOException, "close() error");
+    SIDL_THROW( *_ex, sidl_io_IOException, "close() error");
   }
  EXIT:
   return n;
@@ -98,7 +100,7 @@ int s_getsockname( int sockfd, struct sockaddr *localaddr, socklen_t *addrlen,
   
   /* returns 0 if OK, -1 on error */
   if ((n=getsockname(sockfd, localaddr, addrlen))<0) { 
-    SIDL_THROW( *_ex, sidlx_io_IOException, "getsockname() error");
+    SIDL_THROW( *_ex, sidl_io_IOException, "getsockname() error");
   }
  EXIT:
   return n;
@@ -111,7 +113,7 @@ int s_getpeername( int sockfd, struct sockaddr *peeraddr, socklen_t *addrlen,
   
   /* returns 0 if OK, -1 on error */
   if ((n=getpeername(sockfd, peeraddr, addrlen))<0) { 
-    SIDL_THROW( *_ex, sidlx_io_IOException, "getpeername() error");
+    SIDL_THROW( *_ex, sidl_io_IOException, "getpeername() error");
   }
  EXIT:
   return n;
@@ -264,7 +266,7 @@ int32_t s_readn2( int filedes, int32_t nbytes, char ** data,
 	nread = 0; /* and call read() again */
       } else { 
 	nleft = nbytes+1;
-	SIDL_THROW( *_ex, sidlx_io_IOException, "read() error");
+	SIDL_THROW( *_ex, sidl_io_IOException, "read() error");
       } 
     } else if ( nread == 0 ) { 
       break; /* EOF */
@@ -312,7 +314,7 @@ int32_t s_readline2( int filedes, int32_t nbytes,
       if (errno==EINTR) { 
 	n--; continue;
       } else { 
-	SIDL_THROW( *_ex, sidlx_io_IOException, "read() error");
+	SIDL_THROW( *_ex, sidl_io_IOException, "read() error");
       }
     }
   }
@@ -344,7 +346,7 @@ int32_t s_writen2( int filedes, const int32_t nbytes, const char * data,
       if (errno==EINTR) { 
 	nwritten=0; /* and call write() again */
       } else { 
-	SIDL_THROW( *_ex, sidlx_io_IOException, "write() error");
+	SIDL_THROW( *_ex, sidl_io_IOException, "write() error");
       }
     }
     nleft -= nwritten;
@@ -420,7 +422,7 @@ int32_t s_read_string_alloc( int filedes,
   int32_t n;
   int32_t lower[1], upper[1];
   if(data ==NULL) {
-    SIDL_THROW( *_ex, sidlx_io_IOException, "read() error: data is NULL!");
+    SIDL_THROW( *_ex, sidl_io_IOException, "read() error: data is NULL!");
     return 0;
   }
   if(*data != NULL)
@@ -430,7 +432,7 @@ int32_t s_read_string_alloc( int filedes,
 
   n = s_readInt(filedes, &inLen, _ex); SIDL_CHECK(*_ex);
   if(inLen <= 0) {
-    SIDL_THROW( *_ex, sidlx_io_IOException, "read() error: Length of string <= 0");
+    SIDL_THROW( *_ex, sidl_io_IOException, "read() error: Length of string <= 0");
     return 0;
   }
 
@@ -447,5 +449,115 @@ int32_t s_read_string_alloc( int filedes,
 
   EXIT:
   return 0;
+
+}
+
+/* This function parses a url into the pointers provided (they are all out parameters)
+   url, protocol, and server are required, and the method will throw an if they are
+   null.  port, className, and objectID are optional, and may be passed in as NULL
+   Support Port Ranges.  If a range is not detected, start_port has the real port
+*/ 
+void sidlx_parseURL(const char* url, char** protocol, char** server, 
+		    int* start_port, int* end_port, 
+		    char** objectID, sidl_BaseInterface *_ex) {
+
+  int i = 0;
+  int start=0;
+  int length = 0;
+
+  if(url == NULL || protocol == NULL || server == NULL) {
+    SIDL_THROW(*_ex, sidl_rmi_NetworkException, 
+	       "sidl_rmi_ProtocolFactory.praseURL: Required arg is NULL\n");
+  }
+  
+  length = sidl_String_strlen(url);
+  
+  /* extract the protocol name */
+  while ((i<length) && (url[i]!=':')) { 
+    i++;
+  }
+  if ( (i==start) || (i==length) ) { 
+    SIDL_THROW(*_ex, sidl_rmi_MalformedURLException, "could not extract prefix from URL\n");
+  }
+  
+  if(protocol != NULL) {
+    *protocol=sidl_String_strndup(url,i); /* copies (i-1) chars plus a '\0'*/
+  }
+
+  /* skip colons & slashes (should be "://") */
+  if ( ((i+3)>=length) || (url[i]!=':') || (url[i+1]!='/') || (url[i+2]!='/')) { 
+    SIDL_THROW(*_ex, sidl_rmi_MalformedURLException, "expected :// next in URL\n");
+  } else { 
+    i+=3;
+  }
+  /* extract server name */
+  start=i;
+  while ( (i<length) && url[i]!=':'&& url[i]!='/') { 
+    i++;
+  }
+
+  if (i==start) { 
+    SIDL_THROW(*_ex, sidl_rmi_MalformedURLException, "could not extract host from URL");
+  }
+  if(server != NULL) {
+    *server = sidl_String_strndup(url + start, i-start);
+  }
+
+  /* extract port number (if it exists ) */
+  if ( (i<length) && (url[i]==':')) {
+    ++i;
+    start=i;
+    while ((i<length) && (url[i] != '/') && (url[i] != '-')) { 
+      if ( (url[i]<'0') || url[i]>'9') { 
+	SIDL_THROW(*_ex, sidl_rmi_MalformedURLException, "could not extract port number from URL");
+      }
+      i++;
+    }
+    if(start_port!=NULL) {
+      char buffer[256];
+      strncpy( buffer, url+start, i-start );
+      buffer[i-start] = '\0';
+      *start_port = atoi( buffer );
+    }
+  }
+
+  /* extract end_port number (if a range exists exists ) */
+  if ( (i<length) && (url[i]=='-')) {
+    ++i;
+    start=i;
+    while ((i<length) && (url[i] != '/')) { 
+      if ( (url[i]<'0') || url[i]>'9') { 
+	SIDL_THROW(*_ex, sidl_rmi_MalformedURLException, "could not extract max port from URL\n");
+      }
+      i++;
+    }
+    if(end_port!=NULL) {
+      char buffer[256];
+      strncpy ( buffer, url+start, i-start);
+      *end_port = atoi( buffer );
+    }
+  } else {  /*If an end_port was requested, but isn't in the URL, end_port =
+              0; */
+    if(end_port!=NULL) {
+      *end_port = 0;
+    }
+  }
+
+  /* Continue onward to extract the objectid, if it exists*/
+  if ( (i<length) && (url[i]=='/')) {
+    ++i;
+    start=i;
+    while ((i<length) && (url[i] != '/')) { 
+      i++;
+    }
+    if(objectID!=NULL) {
+      *objectID = sidl_String_strndup( url+start,i-start );
+    }
+  } else {
+    return;
+  }
+
+ EXIT:
+  return;
 
 }

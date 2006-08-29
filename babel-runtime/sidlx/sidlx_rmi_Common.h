@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_Common.h
  * Symbol:        sidlx.rmi.Common-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for sidlx.rmi.Common
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_Common_h
@@ -38,19 +37,24 @@ typedef struct sidlx_rmi_Common__object* sidlx_rmi_Common;
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
 #ifndef included_sidl_SIDLException_h
 #include "sidl_SIDLException.h"
 #endif
-#ifndef included_sidl_rmi_NetworkException_h
-#include "sidl_rmi_NetworkException.h"
-#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidlx_rmi_Common_IOR_h
+#include "sidlx_rmi_Common_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -59,19 +63,49 @@ extern "C" {
  * Constructor function for the class.
  */
 struct sidlx_rmi_Common__object*
-sidlx_rmi_Common__create(void);
+sidlx_rmi_Common__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 sidlx_rmi_Common
-sidlx_rmi_Common__createRemote(const char *, sidl_BaseInterface *_ex);
+sidlx_rmi_Common__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * RMI connector function for the class.
+ * Wraps up the private data struct pointer (struct sidlx_rmi_Common__data) passed in rather than running the constructor.
+ */
+sidlx_rmi_Common
+sidlx_rmi_Common__wrapObj(void * data, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.(addrefs)
  */
 sidlx_rmi_Common
 sidlx_rmi_Common__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * Method:  fork[]
+ */
+int32_t
+sidlx_rmi_Common_fork(
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ * Method:  getHostIP[]
+ */
+int32_t
+sidlx_rmi_Common_getHostIP(
+  /* in */ const char* hostname,
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ * Method:  getCanonicalName[]
+ */
+char*
+sidlx_rmi_Common_getCanonicalName(
+  /* in */ const char* hostname,
+  /* out */ sidl_BaseInterface *_ex);
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -86,9 +120,21 @@ sidlx_rmi_Common__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Common_addRef(
-  /* in */ sidlx_rmi_Common self);
+  /* in */ sidlx_rmi_Common self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -97,32 +143,43 @@ sidlx_rmi_Common_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Common_deleteRef(
-  /* in */ sidlx_rmi_Common self);
+  /* in */ sidlx_rmi_Common self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_Common_isSame(
   /* in */ sidlx_rmi_Common self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidlx_rmi_Common_queryInt(
-  /* in */ sidlx_rmi_Common self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -130,39 +187,50 @@ sidlx_rmi_Common_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_Common_isType(
   /* in */ sidlx_rmi_Common self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidlx_rmi_Common_getClassInfo(
-  /* in */ sidlx_rmi_Common self);
+  /* in */ sidlx_rmi_Common self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Method:  fork[]
- */
-int32_t
-sidlx_rmi_Common_fork(
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  gethostbyname[]
- */
-int32_t
-sidlx_rmi_Common_gethostbyname(
-  /* in */ const char* hostname,
-  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidlx_rmi_Common__object*
 sidlx_rmi_Common__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -170,23 +238,94 @@ sidlx_rmi_Common__cast(
 void*
 sidlx_rmi_Common__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Common__exec(
   /* in */ sidlx_rmi_Common self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidlx_rmi_Common__getURL(
-  /* in */ sidlx_rmi_Common self);
+  /* in */ sidlx_rmi_Common self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Common__raddRef(
+  /* in */ sidlx_rmi_Common self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidlx_rmi_Common__isRemote(
+  /* in */ sidlx_rmi_Common self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidlx_rmi_Common__isLocal(
+  /* in */ sidlx_rmi_Common self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -674,6 +813,25 @@ sidlx_rmi_Common__array_ensure(
   struct sidlx_rmi_Common__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidlx_rmi_Common__connectI
+
+#pragma weak sidlx_rmi_Common__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidlx_rmi_Common__object*
+sidlx_rmi_Common__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidlx_rmi_Common__object*
+sidlx_rmi_Common__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

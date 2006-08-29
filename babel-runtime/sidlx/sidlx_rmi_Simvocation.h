@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_Simvocation.h
  * Symbol:        sidlx.rmi.Simvocation-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for sidlx.rmi.Simvocation
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_Simvocation_h
@@ -16,8 +15,7 @@
 /**
  * Symbol "sidlx.rmi.Simvocation" (version 0.1)
  * 
- * implementation of Invocation using the Simocol (simple-protocol), 
- * 	contains all the serialization code
+ * implementation of Invocation using the Simhandle Protocol (written by Jim)
  */
 struct sidlx_rmi_Simvocation__object;
 struct sidlx_rmi_Simvocation__array;
@@ -39,28 +37,36 @@ typedef struct sidlx_rmi_Simvocation__object* sidlx_rmi_Simvocation;
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
 #ifndef included_sidl_SIDLException_h
 #include "sidl_SIDLException.h"
 #endif
-#ifndef included_sidl_io_IOException_h
-#include "sidl_io_IOException.h"
-#endif
-#ifndef included_sidl_rmi_NetworkException_h
-#include "sidl_rmi_NetworkException.h"
+#ifndef included_sidl_io_Serializable_h
+#include "sidl_io_Serializable.h"
 #endif
 #ifndef included_sidl_rmi_Response_h
 #include "sidl_rmi_Response.h"
+#endif
+#ifndef included_sidl_rmi_Ticket_h
+#include "sidl_rmi_Ticket.h"
 #endif
 #ifndef included_sidlx_rmi_Socket_h
 #include "sidlx_rmi_Socket.h"
 #endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidlx_rmi_Simvocation_IOR_h
+#include "sidlx_rmi_Simvocation_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -69,19 +75,70 @@ extern "C" {
  * Constructor function for the class.
  */
 struct sidlx_rmi_Simvocation__object*
-sidlx_rmi_Simvocation__create(void);
+sidlx_rmi_Simvocation__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 sidlx_rmi_Simvocation
-sidlx_rmi_Simvocation__createRemote(const char *, sidl_BaseInterface *_ex);
+sidlx_rmi_Simvocation__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * RMI connector function for the class.
+ * Wraps up the private data struct pointer (struct sidlx_rmi_Simvocation__data) passed in rather than running the constructor.
+ */
+sidlx_rmi_Simvocation
+sidlx_rmi_Simvocation__wrapObj(void * data, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.(addrefs)
  */
 sidlx_rmi_Simvocation
 sidlx_rmi_Simvocation__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * Method:  init[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_init(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* methodName,
+  /* in */ const char* objectid,
+  /* in */ sidlx_rmi_Socket sock,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_init)(
+    self,
+    methodName,
+    objectid,
+    sock,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  getMethodName[]
+ */
+SIDL_C_INLINE_DECL
+char*
+sidlx_rmi_Simvocation_getMethodName(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getMethodName)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -96,9 +153,21 @@ sidlx_rmi_Simvocation__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_addRef(
-  /* in */ sidlx_rmi_Simvocation self);
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -107,32 +176,43 @@ sidlx_rmi_Simvocation_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_deleteRef(
-  /* in */ sidlx_rmi_Simvocation self);
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_Simvocation_isSame(
   /* in */ sidlx_rmi_Simvocation self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidlx_rmi_Simvocation_queryInt(
-  /* in */ sidlx_rmi_Simvocation self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -140,142 +220,720 @@ sidlx_rmi_Simvocation_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_Simvocation_isType(
   /* in */ sidlx_rmi_Simvocation self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidlx_rmi_Simvocation_getClassInfo(
-  /* in */ sidlx_rmi_Simvocation self);
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
- * Method:  init[]
+ *  
+ * this method is one of a triad.  Only one of which 
+ * may be called, and it must the the last method called
+ * in the object's lifetime.
  */
+SIDL_C_INLINE_DECL
+sidl_rmi_Response
+sidlx_rmi_Simvocation_invokeMethod(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_invokeMethod)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * This method is second of the triad.  It returns
+ * a Ticket, from which a Response is later extracted.
+ */
+SIDL_C_INLINE_DECL
+sidl_rmi_Ticket
+sidlx_rmi_Simvocation_invokeNonblocking(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_invokeNonblocking)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * This method is third of the triad.  It returns
+ * and exception iff the invocation cannot be delivered
+ * reliably.  It does not wait for the invocation to 
+ * be acted upon and returns no values from the invocation.
+ */
+SIDL_C_INLINE_DECL
 void
-sidlx_rmi_Simvocation_init(
+sidlx_rmi_Simvocation_invokeOneWay(
   /* in */ sidlx_rmi_Simvocation self,
-  /* in */ const char* methodName,
-  /* in */ const char* className,
-  /* in */ const char* objectid,
-  /* in */ sidlx_rmi_Socket sock,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_invokeOneWay)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Method:  getMethodName[]
- */
-char*
-sidlx_rmi_Simvocation_getMethodName(
-  /* in */ sidlx_rmi_Simvocation self,
-  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Method:  packBool[]
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_packBool(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* key,
   /* in */ sidl_bool value,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packBool)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  packChar[]
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_packChar(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* key,
   /* in */ char value,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packChar)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  packInt[]
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_packInt(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* key,
   /* in */ int32_t value,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packInt)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  packLong[]
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_packLong(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* key,
   /* in */ int64_t value,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packLong)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packOpaque[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packOpaque(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in */ void* value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packOpaque)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  packFloat[]
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_packFloat(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* key,
   /* in */ float value,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packFloat)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  packDouble[]
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_packDouble(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* key,
   /* in */ double value,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packDouble)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  packFcomplex[]
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_packFcomplex(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* key,
   /* in */ struct sidl_fcomplex value,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packFcomplex)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  packDcomplex[]
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_packDcomplex(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* key,
   /* in */ struct sidl_dcomplex value,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packDcomplex)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Method:  packString[]
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation_packString(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* key,
   /* in */ const char* value,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packString)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
- * this method may be called only once at the end of the object's lifetime 
+ * Method:  packSerializable[]
  */
-sidl_rmi_Response
-sidlx_rmi_Simvocation_invokeMethod(
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packSerializable(
   /* in */ sidlx_rmi_Simvocation self,
-  /* out */ sidl_BaseInterface *_ex);
+  /* in */ const char* key,
+  /* in */ sidl_io_Serializable value,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packSerializable)(
+    self,
+    key,
+    value,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ *  
+ * pack arrays of values.  It is possible to ensure an array is
+ * in a certain order by passing in ordering and dimension
+ * requirements.  ordering should represent a value in the
+ * sidl_array_ordering enumeration in sidlArray.h If either
+ * argument is 0, it means there is no restriction on that
+ * aspect.  The boolean reuse_array flag is set to true if the
+ * remote unserializer should try to reuse the array that is
+ * passed into it or not.
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packBoolArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<bool> */ struct sidl_bool__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packBoolArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packCharArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packCharArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<char> */ struct sidl_char__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packCharArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packIntArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packIntArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<int> */ struct sidl_int__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packIntArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packLongArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packLongArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<long> */ struct sidl_long__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packLongArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packOpaqueArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packOpaqueArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<opaque> */ struct sidl_opaque__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packOpaqueArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packFloatArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packFloatArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<float> */ struct sidl_float__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packFloatArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packDoubleArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packDoubleArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<double> */ struct sidl_double__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packDoubleArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packFcomplexArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packFcomplexArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<fcomplex> */ struct sidl_fcomplex__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packFcomplexArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packDcomplexArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packDcomplexArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<dcomplex> */ struct sidl_dcomplex__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packDcomplexArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packStringArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packStringArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<string> */ struct sidl_string__array* value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packStringArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packGenericArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packGenericArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<> */ struct sidl__array* value,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packGenericArray)(
+    self,
+    key,
+    value,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packSerializableArray[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation_packSerializableArray(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* in */ const char* key,
+  /* in array<sidl.io.Serializable> */ struct sidl_io_Serializable__array* 
+    value,
+  /* in */ int32_t ordering,
+  /* in */ int32_t dimen,
+  /* in */ sidl_bool reuse_array,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packSerializableArray)(
+    self,
+    key,
+    value,
+    ordering,
+    dimen,
+    reuse_array,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidlx_rmi_Simvocation__object*
 sidlx_rmi_Simvocation__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -283,23 +941,94 @@ sidlx_rmi_Simvocation__cast(
 void*
 sidlx_rmi_Simvocation__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Simvocation__exec(
   /* in */ sidlx_rmi_Simvocation self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidlx_rmi_Simvocation__getURL(
-  /* in */ sidlx_rmi_Simvocation self);
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Simvocation__raddRef(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidlx_rmi_Simvocation__isRemote(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidlx_rmi_Simvocation__isLocal(
+  /* in */ sidlx_rmi_Simvocation self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -787,6 +1516,25 @@ sidlx_rmi_Simvocation__array_ensure(
   struct sidlx_rmi_Simvocation__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidlx_rmi_Simvocation__connectI
+
+#pragma weak sidlx_rmi_Simvocation__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidlx_rmi_Simvocation__object*
+sidlx_rmi_Simvocation__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidlx_rmi_Simvocation__object*
+sidlx_rmi_Simvocation__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

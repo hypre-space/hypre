@@ -1,8 +1,8 @@
 #
 # File:          __init__.py
-# Symbol:        sidl.rmi-v0.9.3
+# Symbol:        sidl.rmi-v0.9.15
 # Symbol Type:   package
-# Babel Version: 0.10.12
+# Babel Version: 1.0.0
 # Release:       $Name$
 # Revision:      @(#) $Id$
 # Description:   package initialization code
@@ -32,25 +32,41 @@
 # 
 # WARNING: Automatically generated; changes will be lost
 # 
-# babel-version = 0.10.12
 #
 
 
-"""This package contains necessary interfaces for RMI protocols to 
-hook into Babel, plus a Protocol Factory class.  The intention is 
+""" 
+This package contains necessary interfaces for RMI protocols to
+hook into Babel, plus a Protocol Factory class.  The intention is
 that authors of new protocols will create classes that implement
-InstanceHandle, Invocation and Response (they could even have one object
-that implements all three interfaces).
+InstanceHandle, Invocation and Response (they could even have one
+object that implements all three interfaces).
 """
 
 __all__ = [
-   "InstanceHandle",
-   "Response",
-   "InstanceRegistry",
+   "BindException",
+   "Call",
+   "ConnectException",
    "ConnectRegistry",
+   "InstanceHandle",
+   "InstanceRegistry",
    "Invocation",
+   "MalformedURLException",
    "NetworkException",
-   "ProtocolFactory" ]
+   "NoRouteToHostException",
+   "NoServerException",
+   "ObjectDoesNotExistException",
+   "ProtocolException",
+   "ProtocolFactory",
+   "Response",
+   "Return",
+   "ServerInfo",
+   "ServerRegistry",
+   "Ticket",
+   "TicketBook",
+   "TimeOutException",
+   "UnexpectedCloseException",
+   "UnknownHostException" ]
 
 try:
   from pkgutil import extend_path

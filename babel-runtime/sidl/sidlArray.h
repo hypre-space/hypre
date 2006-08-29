@@ -46,8 +46,8 @@
 
 enum sidl_array_ordering {
   sidl_general_order=0, /* this must be zero (i.e. a false value) */
-  sidl_column_major_order,
-  sidl_row_major_order
+  sidl_column_major_order=1,
+  sidl_row_major_order=2
 };
 
 enum sidl_array_type {

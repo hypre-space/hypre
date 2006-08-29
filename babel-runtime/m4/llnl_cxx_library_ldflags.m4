@@ -42,6 +42,9 @@ for arg in $cxx_output; do
   case "$old_want_arg" in
     '')
       case $arg in
+	*libgcc.a | *libgcc_s.a)
+	  arg=
+	;;
         /*.a) 
           orig_arg=$arg
           arg=-L`dirname $arg`
@@ -62,6 +65,9 @@ for arg in $cxx_output; do
         -lang* | -lcrt[012].o)
           arg=
         ;;
+	-lgcc*)
+	  arg=
+	;;
         -[lLR])
           want_arg=$arg
           arg=

@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_ClientSocket_Impl.c
  * Symbol:        sidlx.rmi.ClientSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for sidlx.rmi.ClientSocket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -22,14 +21,16 @@
  */
 
 #include "sidlx_rmi_ClientSocket_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
-#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket._includes) */
 #include "sidlx_rmi_Socket.h"
 #include "sidlx_rmi_Common.h"
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket._includes) */
-#line 31 "sidlx_rmi_ClientSocket_Impl.c"
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -42,13 +43,14 @@ extern "C"
 #endif
 void
 impl_sidlx_rmi_ClientSocket__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 45 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket._load) */
   /* insert implementation here: sidlx.rmi.ClientSocket._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket._load) */
-#line 51 "sidlx_rmi_ClientSocket_Impl.c"
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -62,15 +64,40 @@ extern "C"
 #endif
 void
 impl_sidlx_rmi_ClientSocket__ctor(
-  /* in */ sidlx_rmi_ClientSocket self)
+  /* in */ sidlx_rmi_ClientSocket self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 63 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket._ctor) */
   /* insert implementation here: sidlx.rmi.ClientSocket._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket._ctor) */
-#line 71 "sidlx_rmi_ClientSocket_Impl.c"
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidlx_rmi_ClientSocket__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidlx_rmi_ClientSocket__ctor2(
+  /* in */ sidlx_rmi_ClientSocket self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket._ctor2) */
+  /* Insert-Code-Here {sidlx.rmi.ClientSocket._ctor2} (special constructor method) */
+  /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -83,13 +110,15 @@ extern "C"
 #endif
 void
 impl_sidlx_rmi_ClientSocket__dtor(
-  /* in */ sidlx_rmi_ClientSocket self)
+  /* in */ sidlx_rmi_ClientSocket self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 82 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket._dtor) */
   /* insert implementation here: sidlx.rmi.ClientSocket._dtor (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket._dtor) */
-#line 92 "sidlx_rmi_ClientSocket_Impl.c"
+  }
 }
 
 /*
@@ -109,32 +138,27 @@ impl_sidlx_rmi_ClientSocket_init(
   /* in */ int32_t port,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 104 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket.init) */
   int sockfd;
-  int n;
-  int port_number,address;
-  int32_t data;
-  struct sockaddr_in servaddr;
-  struct sidl_char__array * sendline = NULL;
-  struct sidl_char__array * recvline = NULL;
-  sidlx_rmi_Socket osock = NULL;/* sidlx_rmi_IPv4Socket__create(); */
-  struct sidlx_rmi_ClientSocket__data *dptr;
+  int address;
+  struct sidlx_rmi_ClientSocket__data client_data;
+  sidl_BaseInterface _throwaway_exception = NULL;
+  address = sidlx_rmi_Common_getHostIP(hostname, _ex); SIDL_CHECK(*_ex);
 
-  address = sidlx_rmi_Common_gethostbyname(hostname, _ex); SIDL_CHECK(*_ex);
-
-  dptr = malloc(sizeof(struct sidlx_rmi_ClientSocket__data));
-  dptr->d_serv_addr.sin_family = AF_INET;
-  dptr->d_serv_addr.sin_addr.s_addr = htonl(address);
-  dptr->d_serv_addr.sin_port = htons( port );
-  dptr->addrlen = sizeof(struct sockaddr_in);
+  client_data.d_serv_addr.sin_family = AF_INET;
+  client_data.d_serv_addr.sin_addr.s_addr = htonl(address);
+  client_data.d_serv_addr.sin_port = htons( port );
+  client_data.addrlen = sizeof(struct sockaddr_in);
 
   if ( (sockfd = socket(AF_INET, SOCK_STREAM,0)) < 0 ) { 
-    SIDL_THROW( *_ex, sidlx_rmi_GenNetworkException, "socket() error");
+    SIDL_THROW( *_ex, sidl_rmi_NetworkException, "socket() error");
   }
 
-  if ( connect( sockfd, (struct sockaddr *) &(dptr->d_serv_addr), dptr->addrlen) < 0) {
-    SIDL_THROW( *_ex, sidlx_rmi_GenNetworkException, "connect() error");
+  if ( connect( sockfd, (struct sockaddr *) &(client_data.d_serv_addr), client_data.addrlen) < 0) {
+    sidlx_rmi_ClientSocket_setFileDescriptor(self, sockfd, &_throwaway_exception); 
+    SIDL_THROW( *_ex, sidl_rmi_NetworkException, "connect() error");
   }
 
   sidlx_rmi_ClientSocket_setFileDescriptor(self, sockfd, _ex); SIDL_CHECK(*_ex);
@@ -142,69 +166,76 @@ impl_sidlx_rmi_ClientSocket_init(
  EXIT:
   return -1;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket.init) */
-#line 145 "sidlx_rmi_ClientSocket_Impl.c"
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct sidlx_rmi_ClientSocket__object* 
-  impl_sidlx_rmi_ClientSocket_fconnect_sidlx_rmi_ClientSocket(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidlx_rmi_ClientSocket__connect(url, _ex);
-}
-char * impl_sidlx_rmi_ClientSocket_fgetURL_sidlx_rmi_ClientSocket(struct 
-  sidlx_rmi_ClientSocket__object* obj) {
-  return sidlx_rmi_ClientSocket__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_ClientSocket_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_sidlx_rmi_ClientSocket_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_ClientSocket_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidlx_rmi_Socket__connect(url, _ex);
-}
-char * impl_sidlx_rmi_ClientSocket_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj) {
-  return sidlx_rmi_Socket__getURL(obj);
-}
-struct sidl_rmi_NetworkException__object* 
-  impl_sidlx_rmi_ClientSocket_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_rmi_NetworkException__connect(url, _ex);
-}
-char * impl_sidlx_rmi_ClientSocket_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj) {
-  return sidl_rmi_NetworkException__getURL(obj);
-}
-struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_ClientSocket_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
-}
-char * impl_sidlx_rmi_ClientSocket_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
-}
-struct sidlx_rmi_IPv4Socket__object* 
-  impl_sidlx_rmi_ClientSocket_fconnect_sidlx_rmi_IPv4Socket(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidlx_rmi_IPv4Socket__connect(url, _ex);
-}
-char * impl_sidlx_rmi_ClientSocket_fgetURL_sidlx_rmi_IPv4Socket(struct 
-  sidlx_rmi_IPv4Socket__object* obj) {
-  return sidlx_rmi_IPv4Socket__getURL(obj);
+struct sidl_BaseClass__object* 
+  impl_sidlx_rmi_ClientSocket_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_ClientSocket_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  impl_sidlx_rmi_ClientSocket_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
 }
-char * impl_sidlx_rmi_ClientSocket_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_ClientSocket_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_ClientSocket_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_ClientSocket_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_ClientSocket_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_ClientSocket_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_ClientSocket_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
+}
+struct sidlx_rmi_ClientSocket__object* 
+  impl_sidlx_rmi_ClientSocket_fconnect_sidlx_rmi_ClientSocket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidlx_rmi_ClientSocket__connectI(url, ar, _ex);
+}
+struct sidlx_rmi_ClientSocket__object* 
+  impl_sidlx_rmi_ClientSocket_fcast_sidlx_rmi_ClientSocket(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidlx_rmi_ClientSocket__cast(bi, _ex);
+}
+struct sidlx_rmi_IPv4Socket__object* 
+  impl_sidlx_rmi_ClientSocket_fconnect_sidlx_rmi_IPv4Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidlx_rmi_IPv4Socket__connectI(url, ar, _ex);
+}
+struct sidlx_rmi_IPv4Socket__object* 
+  impl_sidlx_rmi_ClientSocket_fcast_sidlx_rmi_IPv4Socket(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidlx_rmi_IPv4Socket__cast(bi, _ex);
+}
+struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_ClientSocket_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidlx_rmi_Socket__connectI(url, ar, _ex);
+}
+struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_ClientSocket_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidlx_rmi_Socket__cast(bi, _ex);
 }

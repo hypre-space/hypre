@@ -1,8 +1,8 @@
 /*
  * File:          sidl_DFinder_Impl.h
- * Symbol:        sidl.DFinder-v0.9.3
+ * Symbol:        sidl.DFinder-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.DFinder
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_DFinder_Impl_h
@@ -41,42 +40,41 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
-#ifndef included_sidl_DFinder_h
-#include "sidl_DFinder.h"
-#endif
-#ifndef included_sidl_Finder_h
-#include "sidl_Finder.h"
-#endif
-#ifndef included_sidl_ClassInfo_h
-#include "sidl_ClassInfo.h"
-#endif
-#ifndef included_sidl_DLL_h
-#include "sidl_DLL.h"
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
 #endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
-#ifndef included_sidl_BaseClass_h
-#include "sidl_BaseClass.h"
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
+#ifndef included_sidl_DFinder_h
+#include "sidl_DFinder.h"
+#endif
+#ifndef included_sidl_DLL_h
+#include "sidl_DLL.h"
+#endif
+#ifndef included_sidl_Finder_h
+#include "sidl_Finder.h"
+#endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
 #endif
 
-#line 63 "../../../babel/runtime/sidl/sidl_DFinder_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.DFinder._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidl.DFinder._includes) */
-#line 67 "sidl_DFinder_Impl.h"
 
 /*
  * Private data for class sidl.DFinder
  */
 
 struct sidl_DFinder__data {
-#line 72 "../../../babel/runtime/sidl/sidl_DFinder_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder._data) */
   /* Put private data members here... */
   char*     d_search_path;
   /* DO-NOT-DELETE splicer.end(sidl.DFinder._data) */
-#line 79 "sidl_DFinder_Impl.h"
 };
 
 #ifdef __cplusplus
@@ -99,46 +97,65 @@ sidl_DFinder__set_data(
 extern
 void
 impl_sidl_DFinder__load(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_DFinder__ctor(
-  /* in */ sidl_DFinder self);
+  /* in */ sidl_DFinder self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidl_DFinder__ctor2(
+  /* in */ sidl_DFinder self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_DFinder__dtor(
-  /* in */ sidl_DFinder self);
+  /* in */ sidl_DFinder self,
+  /* out */ sidl_BaseInterface *_ex);
 
 /*
  * User-defined object methods
  */
 
-extern struct sidl_DFinder__object* 
-  impl_sidl_DFinder_fconnect_sidl_DFinder(char* url, sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_DFinder(struct 
-  sidl_DFinder__object* obj);
-extern struct sidl_Finder__object* impl_sidl_DFinder_fconnect_sidl_Finder(char* 
-  url, sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_Finder(struct sidl_Finder__object* 
-  obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_DFinder_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_DLL__object* impl_sidl_DFinder_fconnect_sidl_DLL(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_DLL(struct sidl_DLL__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidl_DFinder_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_DFinder_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidl_DFinder_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_DFinder_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_DFinder_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_DFinder_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_DFinder_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_DFinder_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_DFinder__object* 
+  impl_sidl_DFinder_fconnect_sidl_DFinder(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_DFinder__object* impl_sidl_DFinder_fcast_sidl_DFinder(void* 
+  bi, sidl_BaseInterface* _ex);
+extern struct sidl_DLL__object* impl_sidl_DFinder_fconnect_sidl_DLL(const char* 
+  url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_DLL__object* impl_sidl_DFinder_fcast_sidl_DLL(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_Finder__object* impl_sidl_DFinder_fconnect_sidl_Finder(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_Finder__object* impl_sidl_DFinder_fcast_sidl_Finder(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_DFinder_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_DFinder_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
 extern
 sidl_DLL
 impl_sidl_DFinder_findLibrary(
@@ -146,49 +163,63 @@ impl_sidl_DFinder_findLibrary(
   /* in */ const char* sidl_name,
   /* in */ const char* target,
   /* in */ enum sidl_Scope__enum lScope,
-  /* in */ enum sidl_Resolve__enum lResolve);
+  /* in */ enum sidl_Resolve__enum lResolve,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_DFinder_setSearchPath(
   /* in */ sidl_DFinder self,
-  /* in */ const char* path_name);
+  /* in */ const char* path_name,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 char*
 impl_sidl_DFinder_getSearchPath(
-  /* in */ sidl_DFinder self);
+  /* in */ sidl_DFinder self,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_DFinder_addSearchPath(
   /* in */ sidl_DFinder self,
-  /* in */ const char* path_fragment);
+  /* in */ const char* path_fragment,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidl_DFinder__object* 
-  impl_sidl_DFinder_fconnect_sidl_DFinder(char* url, sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_DFinder(struct 
-  sidl_DFinder__object* obj);
-extern struct sidl_Finder__object* impl_sidl_DFinder_fconnect_sidl_Finder(char* 
-  url, sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_Finder(struct sidl_Finder__object* 
-  obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_DFinder_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_DLL__object* impl_sidl_DFinder_fconnect_sidl_DLL(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_DLL(struct sidl_DLL__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidl_DFinder_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_DFinder_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
-extern char* impl_sidl_DFinder_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidl_DFinder_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_DFinder_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_DFinder_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_DFinder_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_DFinder_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_DFinder_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_DFinder__object* 
+  impl_sidl_DFinder_fconnect_sidl_DFinder(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex);
+extern struct sidl_DFinder__object* impl_sidl_DFinder_fcast_sidl_DFinder(void* 
+  bi, sidl_BaseInterface* _ex);
+extern struct sidl_DLL__object* impl_sidl_DFinder_fconnect_sidl_DLL(const char* 
+  url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_DLL__object* impl_sidl_DFinder_fcast_sidl_DLL(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_Finder__object* impl_sidl_DFinder_fconnect_sidl_Finder(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_Finder__object* impl_sidl_DFinder_fcast_sidl_Finder(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_DFinder_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_DFinder_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 }
 #endif

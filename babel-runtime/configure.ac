@@ -43,7 +43,7 @@ msgs="
 #
 # Basic startup stuff
 #
-AC_INIT([babel-runtime],[0.10.12],[babel-bugs@cca-forum.org])
+AC_INIT([babel-runtime],[1.0.0],[babel-bugs@cca-forum.org])
 AC_CONFIG_SRCDIR([sidl/sidlArray.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
@@ -51,8 +51,10 @@ AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE([foreign no-dependencies no-installinfo no-installman no-texinfo.tex 1.8])
 AC_CONFIG_HEADERS([sidl/babel_internal.h])
+AC_DEFINE([BABEL_VERSION_HEX],[0x01000000],
+	[Hexified form of release number: 2 hex digits each for major, minor, bugfix, and alpha/beta/candidate/distributed ])
 
-LLNL_CHECK_AUTOMAKE(1.9.3)
+LLNL_CHECK_AUTOMAKE(1.9.6)
 LLNL_CHECK_AUTOCONF(2.59)
 
 
@@ -164,11 +166,18 @@ fi
 #
 # Experimental sidl extensions
 #
-if test -z "$with_sidlx"; then
+#if test -z "$with_sidlx"; then
   with_sidlx=yes
-fi
-AC_ARG_WITH(sidlx,   [  --without-sidlx         disable experimental (undocumented) libsidlx.{a,so}])
+#fi
+#AC_ARG_WITH(sidlx,   [  --without-sidlx         disable experimental (undocumented) libsidlx.{a,so}])
 AM_CONDITIONAL(WITH_SIDLX, test "X$with_sidlx" != "Xno" )
+
+############################################################
+#
+# Experimental MPI extensions
+#
+
+LLNL_PROG_MPI
 
 ############################################################
 #
@@ -203,6 +212,9 @@ AH_BOTTOM([
 #if (!defined(SIDL_STATIC_LIBRARY) && !defined(SIDL_DYNAMIC_LIBRARY))
 #error Must define one of SIDL_STATIC_LIBRARY or SIDL_DYNAMIC_LIBRARY
 #endif
+
+#define UCXX
+#define UCXX_LOCAL
 
 /*
  * The USE_DL_IMPORT flag is required for proper Python linking under CYGWIN.
@@ -247,3 +259,5 @@ echo "$msgs
 " >&5
 echo "$msgs
 "
+echo "When reporting issues to $PACKAGE_BUGREPORT, please include the"
+echo "output from babel-config --version-full."

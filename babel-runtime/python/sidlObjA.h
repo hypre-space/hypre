@@ -134,7 +134,17 @@ typedef struct sidlPythonObject SPObject;
 #define sidl_PyType_PROTO \
   (void)
 
-#define sidl_API_pointers 7
+#define sidl_Handle_Unexpected_NUM 7
+#define sidl_Handle_Unexpected_RETURN struct sidl_BaseInterface__object *
+#define sidl_Handle_Unexpected_PROTO \
+  (const char *func)
+
+#define sidl_AddTrace_NUM 8
+#define sidl_AddTrace_RETURN void
+#define sidl_AddTrace_PROTO \
+  (PyObject *exc, const char *func)
+
+#define sidl_API_pointers 9
 
 #ifdef sidlOBJA_MODULE
 /*
@@ -162,6 +172,12 @@ sidl_PyExceptionCast sidl_PyExceptionCast_PROTO;
 
 static sidl_PyType_RETURN
 sidl_PyType sidl_PyType_PROTO;
+
+static sidl_Handle_Unexpected_RETURN
+sidl_Handle_Unexpected sidl_Handle_Unexpected_PROTO;
+
+static sidl_AddTrace_RETURN
+sidl_AddTrace sidl_AddTrace_PROTO;
 
 #else
 /*
@@ -266,6 +282,14 @@ sidl_Object_Adaptor_API[sidl_PyExceptionCast_NUM])
 #define sidl_PyType \
 (*(sidl_PyType_RETURN (*)sidl_PyType_PROTO) \
 sidl_Object_Adaptor_API[sidl_PyType_NUM])
+
+#define sidl_Handle_Unexpected \
+(*(sidl_Handle_Unexpected_RETURN (*)sidl_Handle_Unexpected_PROTO) \
+sidl_Object_Adaptor_API[sidl_Handle_Unexpected_NUM])
+
+#define sidl_AddTrace \
+(*(sidl_AddTrace_RETURN (*)sidl_AddTrace_PROTO) \
+sidl_Object_Adaptor_API[sidl_AddTrace_NUM])
 
 
 #define import_SIDLObjA() \

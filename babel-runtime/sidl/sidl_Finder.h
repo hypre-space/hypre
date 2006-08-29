@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Finder.h
- * Symbol:        sidl.Finder-v0.9.3
+ * Symbol:        sidl.Finder-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Finder
@@ -32,14 +32,13 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_Finder_h
 #define included_sidl_Finder_h
 
 /**
- * Symbol "sidl.Finder" (version 0.9.3)
+ * Symbol "sidl.Finder" (version 0.9.15)
  * 
  * Interface <code>Finder</code> is an interface for classes that resolve 
  * dynamic libraries.  
@@ -58,6 +57,9 @@ typedef struct sidl_Finder__object* sidl_Finder;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
@@ -70,25 +72,154 @@ typedef struct sidl_Finder__object* sidl_Finder;
 #ifndef included_sidl_Resolve_h
 #include "sidl_Resolve.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
+#endif
 #ifndef included_sidl_Scope_h
 #include "sidl_Scope.h"
 #endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidl_Finder_IOR_h
+#include "sidl_Finder_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 sidl_Finder
 sidl_Finder__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * Find a DLL containing the specified information for a sidl
+ * class. This method searches through the files in set set path
+ * looking for a shared library that contains the client-side or IOR
+ * for a particular sidl class.
+ * 
+ * @param sidl_name  the fully qualified (long) name of the
+ * class/interface to be found. Package names
+ * are separated by period characters from each
+ * other and the class/interface name.
+ * @param target     to find a client-side binding, this is
+ * normally the name of the language.
+ * To find the implementation of a class
+ * in order to make one, you should pass
+ * the string "ior/impl" here.
+ * @param lScope     this specifies whether the symbols should
+ * be loaded into the global scope, a local
+ * scope, or use the setting in the file.
+ * @param lResolve   this specifies whether symbols should be
+ * resolved as needed (LAZY), completely
+ * resolved at load time (NOW), or use the
+ * setting from the file.
+ * @return a non-NULL object means the search was successful.
+ * The DLL has already been added.
+ */
+SIDL_C_INLINE_DECL
+sidl_DLL
+sidl_Finder_findLibrary(
+  /* in */ sidl_Finder self,
+  /* in */ const char* sidl_name,
+  /* in */ const char* target,
+  /* in */ enum sidl_Scope__enum lScope,
+  /* in */ enum sidl_Resolve__enum lResolve,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_findLibrary)(
+    self->d_object,
+    sidl_name,
+    target,
+    lScope,
+    lResolve,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Set the search path, which is a semi-colon separated sequence of
+ * URIs as described in class <code>DLL</code>.  This method will
+ * invalidate any existing search path.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_Finder_setSearchPath(
+  /* in */ sidl_Finder self,
+  /* in */ const char* path_name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_setSearchPath)(
+    self->d_object,
+    path_name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Return the current search path.  If the search path has not been
+ * set, then the search path will be taken from environment variable
+ * SIDL_DLL_PATH.
+ */
+SIDL_C_INLINE_DECL
+char*
+sidl_Finder_getSearchPath(
+  /* in */ sidl_Finder self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getSearchPath)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Append the specified path fragment to the beginning of the
+ * current search path.  If the search path has not yet been set
+ * by a call to <code>setSearchPath</code>, then this fragment will
+ * be appended to the path in environment variable SIDL_DLL_PATH.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_Finder_addSearchPath(
+  /* in */ sidl_Finder self,
+  /* in */ const char* path_fragment,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addSearchPath)(
+    self->d_object,
+    path_fragment,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -103,9 +234,21 @@ sidl_Finder__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidl_Finder_addRef(
-  /* in */ sidl_Finder self);
+  /* in */ sidl_Finder self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -114,32 +257,43 @@ sidl_Finder_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidl_Finder_deleteRef(
-  /* in */ sidl_Finder self);
+  /* in */ sidl_Finder self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_Finder_isSame(
   /* in */ sidl_Finder self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidl_Finder_queryInt(
-  /* in */ sidl_Finder self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -147,87 +301,50 @@ sidl_Finder_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_Finder_isType(
   /* in */ sidl_Finder self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self->d_object,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidl_Finder_getClassInfo(
-  /* in */ sidl_Finder self);
-
-/**
- * Find a DLL containing the specified information for a sidl
- * class. This method searches through the files in set set path
- * looking for a shared library that contains the client-side or IOR
- * for a particular sidl class.
- * 
- * @param sidl_name  the fully qualified (long) name of the
- *                   class/interface to be found. Package names
- *                   are separated by period characters from each
- *                   other and the class/interface name.
- * @param target     to find a client-side binding, this is
- *                   normally the name of the language.
- *                   To find the implementation of a class
- *                   in order to make one, you should pass
- *                   the string "ior/impl" here.
- * @param lScope     this specifies whether the symbols should
- *                   be loaded into the global scope, a local
- *                   scope, or use the setting in the file.
- * @param lResolve   this specifies whether symbols should be
- *                   resolved as needed (LAZY), completely
- *                   resolved at load time (NOW), or use the
- *                   setting from the file.
- * @return a non-NULL object means the search was successful.
- *         The DLL has already been added.
- */
-sidl_DLL
-sidl_Finder_findLibrary(
   /* in */ sidl_Finder self,
-  /* in */ const char* sidl_name,
-  /* in */ const char* target,
-  /* in */ enum sidl_Scope__enum lScope,
-  /* in */ enum sidl_Resolve__enum lResolve);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Set the search path, which is a semi-colon separated sequence of
- * URIs as described in class <code>DLL</code>.  This method will
- * invalidate any existing search path.
- */
-void
-sidl_Finder_setSearchPath(
-  /* in */ sidl_Finder self,
-  /* in */ const char* path_name);
-
-/**
- * Return the current search path.  If the search path has not been
- * set, then the search path will be taken from environment variable
- * SIDL_DLL_PATH.
- */
-char*
-sidl_Finder_getSearchPath(
-  /* in */ sidl_Finder self);
-
-/**
- * Append the specified path fragment to the beginning of the
- * current search path.  If the search path has not yet been set
- * by a call to <code>setSearchPath</code>, then this fragment will
- * be appended to the path in environment variable SIDL_DLL_PATH.
- */
-void
-sidl_Finder_addSearchPath(
-  /* in */ sidl_Finder self,
-  /* in */ const char* path_fragment);
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidl_Finder__object*
 sidl_Finder__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -235,23 +352,94 @@ sidl_Finder__cast(
 void*
 sidl_Finder__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidl_Finder__exec(
   /* in */ sidl_Finder self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self->d_object,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidl_Finder__getURL(
-  /* in */ sidl_Finder self);
+  /* in */ sidl_Finder self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_Finder__raddRef(
+  /* in */ sidl_Finder self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_Finder__isRemote(
+  /* in */ sidl_Finder self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidl_Finder__isLocal(
+  /* in */ sidl_Finder self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -739,6 +927,25 @@ sidl_Finder__array_ensure(
   struct sidl_Finder__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidl_Finder__connectI
+
+#pragma weak sidl_Finder__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidl_Finder__object*
+sidl_Finder__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidl_Finder__object*
+sidl_Finder__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

@@ -1,8 +1,8 @@
 /*
  * File:          sidl_io_Serializer_Module.h
- * Symbol:        sidl.io.Serializer-v0.9.3
+ * Symbol:        sidl.io.Serializer-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   expose a constructor for the Python wrapper
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -54,7 +53,10 @@
 #define included_sidl_io_Serializer_MODULE
 
 #include <Python.h>
-#include "babel_config.h"
+#include "sidlType.h"
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif /* HAVE_PTHREAD */
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,6 +67,7 @@ struct sidl__array;
 /* Forward declaration of IOR structure */
 struct sidl_io_Serializer__object;
 struct sidl_io_Serializer__array;
+struct sidl_BaseInterface__object;
 
 #define sidl_io_Serializer__wrap_NUM 0
 #define sidl_io_Serializer__wrap_RETURN PyObject *
@@ -102,9 +105,20 @@ struct sidl_io_Serializer__array;
 #define sidl_io_Serializer_PyType_RETURN PyTypeObject *
 #define sidl_io_Serializer_PyType_PROTO (void)
 
-#define sidl_io_Serializer__API_NUM 9
+#define sidl_io_Serializer__connectI_NUM 9
+#define sidl_io_Serializer__connectI_RETURN struct sidl_io_Serializer__object* 
+#define sidl_io_Serializer__connectI_PROTO (const char* url, sidl_bool ar, struct sidl_BaseInterface__object ** _ex)
+
+#define sidl_io_Serializer__rmicast_NUM 10
+#define sidl_io_Serializer__rmicast_RETURN struct sidl_io_Serializer__object* 
+#define sidl_io_Serializer__rmicast_PROTO (void* bi, struct sidl_BaseInterface__object ** _ex)
+
+#define sidl_io_Serializer__API_NUM 11
 
 #ifdef sidl_io_Serializer_INTERNAL
+
+#define sidl_io_Serializer__import() ;
+
 
 /*
  * This declaration is not for clients.
@@ -148,7 +162,7 @@ sidl_io_Serializer_PyType_PROTO;
 
 #else
 
-static void **sidl_io_Serializer__API;
+static void **sidl_io_Serializer__API = NULL;
 
 #define sidl_io_Serializer__wrap \
   (*((sidl_io_Serializer__wrap_RETURN (*) \
@@ -204,8 +218,43 @@ static void **sidl_io_Serializer__API;
   (sidl_io_Serializer__API \
   [sidl_io_Serializer_PyType_NUM])))
 
+#define sidl_io_Serializer__connectI \
+  (*((sidl_io_Serializer__connectI_RETURN (*) \
+  sidl_io_Serializer__connectI_PROTO) \
+  (sidl_io_Serializer__API \
+  [sidl_io_Serializer__connectI_NUM])))
+
+#define sidl_io_Serializer__rmicast \
+  (*((sidl_io_Serializer__rmicast_RETURN (*) \
+  sidl_io_Serializer__rmicast_PROTO) \
+  (sidl_io_Serializer__API \
+  [sidl_io_Serializer__rmicast_NUM])))
+
+#ifdef HAVE_PTHREAD
 #define sidl_io_Serializer__import() \
 { \
+  pthread_mutex_t __sidl_pyapi_mutex = PTHREAD_MUTEX_INITIALIZER; \
+  pthread_mutex_lock(&__sidl_pyapi_mutex); \
+  if (!sidl_io_Serializer__API) { \
+    PyObject *module = PyImport_ImportModule("sidl.io.Serializer"); \
+    if (module != NULL) { \
+      PyObject *module_dict = PyModule_GetDict(module); \
+      PyObject *c_api_object = \
+        PyDict_GetItemString(module_dict, "_C_API"); \
+      if (c_api_object && PyCObject_Check(c_api_object)) { \
+        sidl_io_Serializer__API = \
+          (void **)PyCObject_AsVoidPtr(c_api_object); \
+      } \
+      else { fprintf(stderr, "babel: sidl_io_Serializer__import failed to lookup _C_API (%p %p %s).\n", c_api_object, c_api_object ? c_api_object->ob_type : NULL, c_api_object ? c_api_object->ob_type->tp_name : ""); }\
+      Py_DECREF(module); \
+    } else { fprintf(stderr, "babel: sidl_io_Serializer__import failed to import its module.\n"); }\
+  }\
+  pthread_mutex_unlock(&__sidl_pyapi_mutex); \
+  pthread_mutex_destroy(&__sidl_pyapi_mutex); \
+}
+#else /* !HAVE_PTHREAD */
+#define sidl_io_Serializer__import() \
+if (!sidl_io_Serializer__API) { \
   PyObject *module = PyImport_ImportModule("sidl.io.Serializer"); \
   if (module != NULL) { \
     PyObject *module_dict = PyModule_GetDict(module); \
@@ -219,6 +268,7 @@ static void **sidl_io_Serializer__API;
     Py_DECREF(module); \
   } else { fprintf(stderr, "babel: sidl_io_Serializer__import failed to import its module.\n"); }\
 }
+#endif /* HAVE_PTHREAD */
 
 #endif
 

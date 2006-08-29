@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_Common_IOR.h
  * Symbol:        sidlx.rmi.Common-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Intermediate Object Representation for sidlx.rmi.Common
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_Common_IOR_h
@@ -16,6 +15,7 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+struct sidl_rmi_InstanceHandle__object;
 #ifndef included_sidl_BaseClass_IOR_h
 #include "sidl_BaseClass_IOR.h"
 #endif
@@ -34,18 +34,6 @@ struct sidlx_rmi_Common__array;
 struct sidlx_rmi_Common__object;
 struct sidlx_rmi_Common__sepv;
 
-extern struct sidlx_rmi_Common__object*
-sidlx_rmi_Common__new(void);
-
-extern struct sidlx_rmi_Common__sepv*
-sidlx_rmi_Common__statics(void);
-
-extern void sidlx_rmi_Common__init(
-  struct sidlx_rmi_Common__object* self);
-extern void sidlx_rmi_Common__fini(
-  struct sidlx_rmi_Common__object* self);
-extern void sidlx_rmi_Common__IOR_version(int32_t *major, int32_t *minor);
-
 /*
  * Forward references for external classes and interfaces.
  */
@@ -56,12 +44,12 @@ struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
-struct sidl_io_Deserializer__array;
-struct sidl_io_Deserializer__object;
-struct sidl_io_Serializer__array;
-struct sidl_io_Serializer__object;
-struct sidl_rmi_NetworkException__array;
-struct sidl_rmi_NetworkException__object;
+struct sidl_RuntimeException__array;
+struct sidl_RuntimeException__object;
+struct sidl_rmi_Call__array;
+struct sidl_rmi_Call__object;
+struct sidl_rmi_Return__array;
+struct sidl_rmi_Return__object;
 
 /*
  * Declare the static method entry point vector.
@@ -69,12 +57,32 @@ struct sidl_rmi_NetworkException__object;
 
 struct sidlx_rmi_Common__sepv {
   /* Implicit builtin methods */
-  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
-  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+  /* 0 */
+  /* 1 */
+  /* 2 */
+  /* 3 */
+  /* 4 */
+  /* 5 */
+  /* 6 */
+  void (*f__set_hooks_static)(
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 7 */
+  /* 8 */
+  /* 9 */
+  /* 10 */
+  /* 11 */
+  /* 12 */
+  /* 13 */
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
+  /* Methods introduced in sidl.BaseClass-v0.9.15 */
   /* Methods introduced in sidlx.rmi.Common-v0.1 */
   int32_t (*f_fork)(
     /* out */ struct sidl_BaseInterface__object* *_ex);
-  int32_t (*f_gethostbyname)(
+  int32_t (*f_getHostIP)(
+    /* in */ const char* hostname,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  char* (*f_getCanonicalName)(
     /* in */ const char* hostname,
     /* out */ struct sidl_BaseInterface__object* *_ex);
 };
@@ -85,42 +93,86 @@ struct sidlx_rmi_Common__sepv {
 
 struct sidlx_rmi_Common__epv {
   /* Implicit builtin methods */
+  /* 0 */
   void* (*f__cast)(
     /* in */ struct sidlx_rmi_Common__object* self,
-    /* in */ const char* name);
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 1 */
   void (*f__delete)(
-    /* in */ struct sidlx_rmi_Common__object* self);
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 2 */
   void (*f__exec)(
     /* in */ struct sidlx_rmi_Common__object* self,
     /* in */ const char* methodName,
-    /* in */ struct sidl_io_Deserializer__object* inArgs,
-    /* in */ struct sidl_io_Serializer__object* outArgs);
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 3 */
   char* (*f__getURL)(
-    /* in */ struct sidlx_rmi_Common__object* self);
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 4 */
+  void (*f__raddRef)(
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 5 */
+  sidl_bool (*f__isRemote)(
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 6 */
+  void (*f__set_hooks)(
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 7 */
   void (*f__ctor)(
-    /* in */ struct sidlx_rmi_Common__object* self);
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 8 */
+  void (*f__ctor2)(
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* in */ void* private_data,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 9 */
   void (*f__dtor)(
-    /* in */ struct sidlx_rmi_Common__object* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 10 */
+  /* 11 */
+  /* 12 */
+  /* 13 */
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
   void (*f_addRef)(
-    /* in */ struct sidlx_rmi_Common__object* self);
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_deleteRef)(
-    /* in */ struct sidlx_rmi_Common__object* self);
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_isSame)(
     /* in */ struct sidlx_rmi_Common__object* self,
-    /* in */ struct sidl_BaseInterface__object* iobj);
-  struct sidl_BaseInterface__object* (*f_queryInt)(
-    /* in */ struct sidlx_rmi_Common__object* self,
-    /* in */ const char* name);
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_isType)(
     /* in */ struct sidlx_rmi_Common__object* self,
-    /* in */ const char* name);
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    /* in */ struct sidlx_rmi_Common__object* self);
-  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+    /* in */ struct sidlx_rmi_Common__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseClass-v0.9.15 */
   /* Methods introduced in sidlx.rmi.Common-v0.1 */
 };
 
+/*
+ * Define the controls structure.
+ */
+
+
+struct sidlx_rmi_Common__controls {
+  int     use_hooks;
+};
 /*
  * Define the class object structure.
  */
@@ -133,11 +185,13 @@ struct sidlx_rmi_Common__object {
 
 struct sidlx_rmi_Common__external {
   struct sidlx_rmi_Common__object*
-  (*createObject)(void);
+  (*createObject)(void* ddata, struct sidl_BaseInterface__object **_ex);
 
   struct sidlx_rmi_Common__sepv*
   (*getStaticEPV)(void);
   struct sidl_BaseClass__epv*(*getSuperEPV)(void);
+  int d_ior_major_version;
+  int d_ior_minor_version;
 };
 
 /*
@@ -149,37 +203,68 @@ struct sidlx_rmi_Common__external {
 const struct sidlx_rmi_Common__external*
 sidlx_rmi_Common__externals(void);
 
-struct sidlx_rmi_Common__object* 
-  skel_sidlx_rmi_Common_fconnect_sidlx_rmi_Common(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_Common_fgetURL_sidlx_rmi_Common(struct 
-  sidlx_rmi_Common__object* obj); 
+extern struct sidlx_rmi_Common__object*
+sidlx_rmi_Common__new(void* ddata,struct sidl_BaseInterface__object ** _ex);
 
-struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_Common_fconnect_sidl_ClassInfo(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_Common_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj); 
+extern struct sidlx_rmi_Common__sepv*
+sidlx_rmi_Common__statics(void);
 
-struct sidl_rmi_NetworkException__object* 
-  skel_sidlx_rmi_Common_fconnect_sidl_rmi_NetworkException(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_Common_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj); 
+extern void sidlx_rmi_Common__init(
+  struct sidlx_rmi_Common__object* self, void* ddata,
+    struct sidl_BaseInterface__object ** _ex);
+extern void sidlx_rmi_Common__getEPVs(
+  struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
+  struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
+    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidlx_rmi_Common__epv **s_arg_epv__sidlx_rmi_common,
+    struct sidlx_rmi_Common__epv **s_arg_epv_hooks__sidlx_rmi_common);
+  extern void sidlx_rmi_Common__fini(
+    struct sidlx_rmi_Common__object* self,
+      struct sidl_BaseInterface__object ** _ex);
+  extern void sidlx_rmi_Common__IOR_version(int32_t *major, int32_t *minor);
 
-struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_Common_fconnect_sidl_BaseInterface(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_Common_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj); 
+  struct sidl_BaseClass__object* 
+    skel_sidlx_rmi_Common_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+    struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseClass__object* 
+    skel_sidlx_rmi_Common_fcast_sidl_BaseClass(void *bi,
+    struct sidl_BaseInterface__object **_ex);
 
-struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_Common_fconnect_sidl_BaseClass(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_sidlx_rmi_Common_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj); 
+  struct sidl_BaseInterface__object* 
+    skel_sidlx_rmi_Common_fconnect_sidl_BaseInterface(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseInterface__object* 
+    skel_sidlx_rmi_Common_fcast_sidl_BaseInterface(void *bi,
+    struct sidl_BaseInterface__object **_ex);
 
-#ifdef __cplusplus
-}
-#endif
-#endif
+  struct sidl_ClassInfo__object* 
+    skel_sidlx_rmi_Common_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+    struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfo__object* 
+    skel_sidlx_rmi_Common_fcast_sidl_ClassInfo(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_RuntimeException__object* 
+    skel_sidlx_rmi_Common_fconnect_sidl_RuntimeException(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_RuntimeException__object* 
+    skel_sidlx_rmi_Common_fcast_sidl_RuntimeException(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidlx_rmi_Common__object* 
+    skel_sidlx_rmi_Common_fconnect_sidlx_rmi_Common(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidlx_rmi_Common__object* 
+    skel_sidlx_rmi_Common_fcast_sidlx_rmi_Common(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidlx_rmi_Common__remote{
+    int d_refcount;
+    struct sidl_rmi_InstanceHandle__object *d_ih;
+  };
+
+  #ifdef __cplusplus
+  }
+  #endif
+  #endif

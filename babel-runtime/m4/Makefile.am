@@ -30,14 +30,15 @@ LLNL_M4_FILES=\
 	llnl_check_int64_t.m4\
 	llnl_check_java_addclasspath_flag.m4\
 	llnl_check_long_long.m4\
+	llnl_apple_restfp.m4\
 	llnl_confirm_babel_c_support.m4\
 	llnl_confirm_babel_cxx_support.m4\
-	llnl_enable_regression.m4\
 	llnl_confirm_babel_f77_support.m4\
 	llnl_confirm_babel_f90_support.m4\
 	llnl_confirm_babel_java_support.m4\
 	llnl_confirm_babel_java_support_runtime.m4\
 	llnl_confirm_babel_python_support.m4\
+	llnl_enable_regression.m4\
 	llnl_cxx_library_ldflags.m4\
 	llnl_cxx_old_header_suffix.m4\
 	llnl_f77_c_config.m4\
@@ -70,6 +71,7 @@ LLNL_M4_FILES=\
 	llnl_python_shared_library.m4\
 	llnl_sort_fclibs.m4\
 	llnl_sort_flibs.m4\
+	llnl_c_inline.m4\
 	llnl_which_prog.m4
 
 MISC_M4_FILES=libtool.m4 ltdl.m4 cca_bundle_tag.m4

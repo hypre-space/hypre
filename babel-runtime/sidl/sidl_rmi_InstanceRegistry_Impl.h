@@ -1,8 +1,8 @@
 /*
  * File:          sidl_rmi_InstanceRegistry_Impl.h
- * Symbol:        sidl.rmi.InstanceRegistry-v0.9.3
+ * Symbol:        sidl.rmi.InstanceRegistry-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.InstanceRegistry
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_rmi_InstanceRegistry_Impl_h
@@ -41,40 +40,38 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
-#ifndef included_sidl_rmi_InstanceRegistry_h
-#include "sidl_rmi_InstanceRegistry.h"
-#endif
-#ifndef included_sidl_ClassInfo_h
-#include "sidl_ClassInfo.h"
-#endif
-#ifndef included_sidl_rmi_NetworkException_h
-#include "sidl_rmi_NetworkException.h"
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
 #endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
-#ifndef included_sidl_BaseClass_h
-#include "sidl_BaseClass.h"
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_rmi_InstanceRegistry_h
+#include "sidl_rmi_InstanceRegistry.h"
 #endif
 
-#line 60 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._includes) */
 #include "sidl_hashtable.h"
 /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._includes) */
-#line 64 "sidl_rmi_InstanceRegistry_Impl.h"
 
 /*
  * Private data for class sidl.rmi.InstanceRegistry
  */
 
 struct sidl_rmi_InstanceRegistry__data {
-#line 69 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._data) */
   /* Put private data members here... */
-  char* counter;
-  struct hashtable *hshtbl;
+  /*char* counter;
+  struct hashtable * s2ohshtbl; 
+  struct hashtable * o2shshtbl; 
+  */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._data) */
-#line 77 "sidl_rmi_InstanceRegistry_Impl.h"
 };
 
 #ifdef __cplusplus
@@ -97,17 +94,26 @@ sidl_rmi_InstanceRegistry__set_data(
 extern
 void
 impl_sidl_rmi_InstanceRegistry__load(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_rmi_InstanceRegistry__ctor(
-  /* in */ sidl_rmi_InstanceRegistry self);
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidl_rmi_InstanceRegistry__ctor2(
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_rmi_InstanceRegistry__dtor(
-  /* in */ sidl_rmi_InstanceRegistry self);
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex);
 
 /*
  * User-defined object methods
@@ -120,71 +126,96 @@ impl_sidl_rmi_InstanceRegistry_registerInstance(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
-sidl_BaseClass
-impl_sidl_rmi_InstanceRegistry_getInstance(
+char*
+impl_sidl_rmi_InstanceRegistry_registerInstanceByString(
+  /* in */ sidl_BaseClass instance,
   /* in */ const char* instanceID,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
 sidl_BaseClass
-impl_sidl_rmi_InstanceRegistry_removeInstance(
+impl_sidl_rmi_InstanceRegistry_getInstanceByString(
   /* in */ const char* instanceID,
   /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidl_rmi_InstanceRegistry__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_rmi_InstanceRegistry(char* url,
-  sidl_BaseInterface *_ex);
-extern char* 
-  impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_rmi_InstanceRegistry(struct 
-  sidl_rmi_InstanceRegistry__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_rmi_NetworkException__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* 
-  impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
+extern
+char*
+impl_sidl_rmi_InstanceRegistry_getInstanceByClass(
+  /* in */ sidl_BaseClass instance,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+sidl_BaseClass
+impl_sidl_rmi_InstanceRegistry_removeInstanceByString(
+  /* in */ const char* instanceID,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+char*
+impl_sidl_rmi_InstanceRegistry_removeInstanceByClass(
+  /* in */ sidl_BaseClass instance,
+  /* out */ sidl_BaseInterface *_ex);
+
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
-extern struct sidl_rmi_InstanceRegistry__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_rmi_InstanceRegistry(char* url,
-  sidl_BaseInterface *_ex);
-extern char* 
-  impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_rmi_InstanceRegistry(struct 
-  sidl_rmi_InstanceRegistry__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_rmi_NetworkException__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* 
-  impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_rmi_InstanceRegistry__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_rmi_InstanceRegistry(const char* 
+  url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_rmi_InstanceRegistry__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_rmi_InstanceRegistry(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_rmi_InstanceRegistry__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_rmi_InstanceRegistry(const char* 
+  url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_rmi_InstanceRegistry__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_rmi_InstanceRegistry(void* bi,
+  sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 }
 #endif

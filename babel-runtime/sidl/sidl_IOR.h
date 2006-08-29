@@ -1,8 +1,8 @@
 /*
  * File:          sidl_IOR.h
- * Symbol:        sidl-v0.9.3
+ * Symbol:        sidl-v0.9.15
  * Symbol Type:   package
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl
@@ -32,21 +32,19 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_IOR_h
 #define included_sidl_IOR_h
 
 /*
- * Symbol "sidl" (version 0.9.3)
+ * Symbol "sidl" (version 0.9.15)
  * 
  * The <code>sidl</code> package contains the fundamental type and interface
  * definitions for the <code>sidl</code> interface definition language.  It
  * defines common run-time libraries and common base classes and interfaces.
  * Every interface implicitly inherits from <code>sidl.BaseInterface</code>
  * and every class implicitly inherits from <code>sidl.BaseClass</code>.
- * 
  */
 
 #ifndef included_sidl_BaseClass_IOR_h
@@ -57,6 +55,9 @@
 #endif
 #ifndef included_sidl_BaseInterface_IOR_h
 #include "sidl_BaseInterface_IOR.h"
+#endif
+#ifndef included_sidl_CastException_IOR_h
+#include "sidl_CastException_IOR.h"
 #endif
 #ifndef included_sidl_ClassInfo_IOR_h
 #include "sidl_ClassInfo_IOR.h"
@@ -76,8 +77,17 @@
 #ifndef included_sidl_InvViolation_IOR_h
 #include "sidl_InvViolation_IOR.h"
 #endif
+#ifndef included_sidl_LangSpecificException_IOR_h
+#include "sidl_LangSpecificException_IOR.h"
+#endif
 #ifndef included_sidl_Loader_IOR_h
 #include "sidl_Loader_IOR.h"
+#endif
+#ifndef included_sidl_MemoryAllocationException_IOR_h
+#include "sidl_MemoryAllocationException_IOR.h"
+#endif
+#ifndef included_sidl_NotImplementedException_IOR_h
+#include "sidl_NotImplementedException_IOR.h"
 #endif
 #ifndef included_sidl_PostViolation_IOR_h
 #include "sidl_PostViolation_IOR.h"
@@ -87,6 +97,9 @@
 #endif
 #ifndef included_sidl_Resolve_IOR_h
 #include "sidl_Resolve_IOR.h"
+#endif
+#ifndef included_sidl_RuntimeException_IOR_h
+#include "sidl_RuntimeException_IOR.h"
 #endif
 #ifndef included_sidl_SIDLException_IOR_h
 #include "sidl_SIDLException_IOR.h"

@@ -33,14 +33,15 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F77_SUPPORT], [
     # confirm that that F77 compiler can compile a trivial file issue146
     AC_MSG_CHECKING([if F77 compiler works])
     AC_LANG_PUSH(Fortran 77)dnl
-    AC_TRY_COMPILE([],[       write (*,*) 'Hello world'
-],AC_MSG_RESULT([yes]),[
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[       write (*,*) 'Hello world'])],
+      AC_MSG_RESULT([yes]),[
       AC_MSG_RESULT([no])
       AC_MSG_ERROR([The F77 compiler $F77 fails to compile a trivial program (see config.log)])])
     AC_LANG_POP([])
     # 5.a. Libraries (existence)
     LLNL_LIB_FMAIN
     LLNL_F77_LIBRARY_LDFLAGS
+    _STAR_RESTFP_FIX_F77
     LLNL_F77_DUMMY_MAIN
     case $target_os in
     "darwin7"*) ;; # ignore

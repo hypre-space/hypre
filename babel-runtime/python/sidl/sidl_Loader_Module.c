@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Loader_Module.c
- * Symbol:        sidl.Loader-v0.9.3
+ * Symbol:        sidl.Loader-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -47,7 +46,7 @@
 
 
 /**
- * Symbol "sidl.Loader" (version 0.9.3)
+ * Symbol "sidl.Loader" (version 0.9.15)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the sidl runtime system.  The <code>Loader</code> class
@@ -62,6 +61,57 @@
  * environment variable SIDL_DLL_PATH, which is a semi-colon
  * separated sequence of URIs as described in class <code>DLL</code>.
  */
+#include <Python.h>
+#include <stdlib.h>
+#include <string.h>
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
+#endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
+#ifndef included_sidl_rmi_ProtocolFactory_h
+#include "sidl_rmi_ProtocolFactory.h"
+#endif
+#ifndef included_sidl_rmi_InstanceRegistry_h
+#include "sidl_rmi_InstanceRegistry.h"
+#endif
+#ifndef included_sidl_rmi_InstanceHandle_h
+#include "sidl_rmi_InstanceHandle.h"
+#endif
+#ifndef included_sidl_rmi_Invocation_h
+#include "sidl_rmi_Invocation.h"
+#endif
+#ifndef included_sidl_rmi_Response_h
+#include "sidl_rmi_Response.h"
+#endif
+#ifndef included_sidl_rmi_ServerRegistry_h
+#include "sidl_rmi_ServerRegistry.h"
+#endif
+#ifndef included_sidl_rmi_ConnectRegistry_h
+#include "sidl_rmi_ConnectRegistry.h"
+#endif
+#ifndef included_sidl_io_Serializable_h
+#include "sidl_io_Serializable.h"
+#endif
+#include "sidl_Exception.h"
+
+#ifndef NULL
+#define NULL 0
+#endif
+
+#include "sidl_thread.h"
+#ifdef HAVE_PTHREAD
+static struct sidl_recursive_mutex_t sidl_Loader__mutex= SIDL_RECURSIVE_MUTEX_INITIALIZER;
+#define LOCK_STATIC_GLOBALS sidl_recursive_mutex_lock( &sidl_Loader__mutex )
+#define UNLOCK_STATIC_GLOBALS sidl_recursive_mutex_unlock( &sidl_Loader__mutex )
+/* #define HAVE_LOCKED_STATIC_GLOBALS (sidl_recursive_mutex_trylock( &sidl_Loader__mutex )==EDEADLOCK) */
+#else
+#define LOCK_STATIC_GLOBALS
+#define UNLOCK_STATIC_GLOBALS
+/* #define HAVE_LOCKED_STATIC_GLOBALS (1) */
+#endif
+
 #define sidl_Loader_INTERNAL 1
 #include "sidl_Loader_Module.h"
 #ifndef included_sidl_Loader_IOR_h
@@ -79,13 +129,749 @@
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
+#include "sidl_rmi_NetworkException_Module.h"
 #include "sidl_BaseClass_Module.h"
 #include "sidl_BaseInterface_Module.h"
 #include "sidl_ClassInfo_Module.h"
 #include "sidl_DLL_Module.h"
 #include "sidl_Finder_Module.h"
+#include "sidl_RuntimeException_Module.h"
+#include "sidl_rmi_Call_Module.h"
+#include "sidl_rmi_Return_Module.h"
+#include "sidl_rmi_Ticket_Module.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+/*
+ * connect_loaded is a boolean value showing if the IHConnect for this object has been loaded into the connectRegistry
+ */
+
+static int connect_loaded = 0;
+
+/*
+ * lang_inited is a boolean value showing if we have already imported all the nescessary modules
+ */
+
+static int lang_inited = 0;
+
+#define LANG_SPECIFIC_INIT() if(!lang_inited) { \
+  lang_inited = 1; \
+  sidl_BaseClass__import(); \
+  sidl_BaseInterface__import(); \
+  sidl_ClassInfo__import(); \
+  sidl_DLL__import(); \
+  sidl_Finder__import(); \
+  sidl_Loader__import(); \
+  sidl_RuntimeException__import(); \
+  sidl_rmi_Ticket__import(); \
+}
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidl_Loader__object*
+sidl_Loader__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidl_Loader__object*
+sidl_Loader__connectI(const char * url, sidl_bool ar,                         \
+  struct sidl_BaseInterface__object **_ex);
+
+/* Static variables to hold version of IOR */
+static const int32_t s_IOR_MAJOR_VERSION = 0;
+static const int32_t s_IOR_MINOR_VERSION = 10;
+
+/* Static variables for managing EPV initialization. */
+static int s_remote_initialized = 0;
+
+static struct sidl_Loader__epv s_rem_epv__sidl_loader;
+
+static struct sidl_BaseClass__epv  s_rem_epv__sidl_baseclass;
+
+static struct sidl_BaseInterface__epv  s_rem_epv__sidl_baseinterface;
+
+
+/* REMOTE CAST: dynamic type casting for remote objects. */
+static void* remote_sidl_Loader__cast(
+  struct sidl_Loader__object* self,
+  const char* name, sidl_BaseInterface* _ex)
+{
+  int
+    cmp0,
+    cmp1;
+  void* cast = NULL;
+  *_ex = NULL; /* default to no exception */
+  cmp0 = strcmp(name, "sidl.BaseInterface");
+  if (!cmp0) {
+    (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+    cast = &((*self).d_sidl_baseclass.d_sidl_baseinterface);
+    return cast;
+  }
+  else if (cmp0 < 0) {
+    cmp1 = strcmp(name, "sidl.BaseClass");
+    if (!cmp1) {
+      (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+      cast = self;
+      return cast;
+    }
+  }
+  else if (cmp0 > 0) {
+    cmp1 = strcmp(name, "sidl.Loader");
+    if (!cmp1) {
+      (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+      cast = self;
+      return cast;
+    }
+  }
+  if ((*self->d_epv->f_isType)(self,name, _ex)) {
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*,                    \
+      struct sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*,                     \
+        struct sidl_BaseInterface__object**)) 
+      sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
+    cast =  (*func)(((struct sidl_Loader__remote*)self->d_data)->d_ih, _ex);
+  }
+
+  return cast;
+  EXIT:
+  return NULL;
+}
+
+/* REMOTE DELETE: call the remote destructor for the object. */
+static void remote_sidl_Loader__delete(
+  struct sidl_Loader__object* self,
+  sidl_BaseInterface* _ex)
+{
+  *_ex = NULL;
+  free((void*) self);
+}
+
+/* REMOTE GETURL: call the getURL function for the object. */
+static char* remote_sidl_Loader__getURL(
+  struct sidl_Loader__object* self, sidl_BaseInterface* _ex)
+{
+  struct sidl_rmi_InstanceHandle__object *conn = ((struct                     \
+    sidl_Loader__remote*)self->d_data)->d_ih;
+  *_ex = NULL;
+  if(conn != NULL) {
+    return sidl_rmi_InstanceHandle_getObjectURL(conn, _ex);
+  }
+  return NULL;
+}
+
+/* REMOTE ADDREF: For internal babel use only! Remote addRef. */
+static void remote_sidl_Loader__raddRef(
+  struct sidl_Loader__object* self,sidl_BaseInterface* _ex)
+{
+  sidl_BaseException netex = NULL;
+  /* initialize a new invocation */
+  sidl_BaseInterface _throwaway = NULL;
+  struct sidl_rmi_InstanceHandle__object *_conn = ((struct                    \
+    sidl_Loader__remote*)self->d_data)->d_ih;
+  sidl_rmi_Response _rsvp = NULL;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, \
+    "addRef", _ex ); SIDL_CHECK(*_ex);
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
+  /* Check for exceptions */
+  netex = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);
+  if(netex != NULL) {
+    sidl_BaseInterface throwaway_exception = NULL;
+    *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(netex,            \
+      &throwaway_exception);
+    return;
+  }
+
+  /* cleanup and return */
+  EXIT:
+  if(_inv) { sidl_rmi_Invocation_deleteRef(_inv,&_throwaway); }
+  if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp,&_throwaway); }
+  return;
+}
+
+/* REMOTE ISREMOTE: returns true if this object is Remote (it is). */
+static sidl_bool
+remote_sidl_Loader__isRemote(
+    struct sidl_Loader__object* self, 
+    sidl_BaseInterface *_ex) {
+  *_ex = NULL;
+  return TRUE;
+}
+
+/* REMOTE METHOD STUB:_set_hooks */
+static void
+remote_sidl_Loader__set_hooks(
+  /* in */ struct sidl_Loader__object* self ,
+  /* in */ sidl_bool on,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl_Loader__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "_set_hooks", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packBool( _inv, "on", on, _ex);SIDL_CHECK(*_ex);
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl.Loader._set_hooks.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return;
+  }
+}
+
+/* REMOTE EXEC: call the exec function for the object. */
+static void remote_sidl_Loader__exec(
+  struct sidl_Loader__object* self,const char* methodName,
+  sidl_rmi_Call inArgs,
+  sidl_rmi_Return outArgs,
+  sidl_BaseInterface* _ex)
+{
+  *_ex = NULL;
+}
+
+/* REMOTE METHOD STUB:addRef */
+static void
+remote_sidl_Loader_addRef(
+  /* in */ struct sidl_Loader__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    struct sidl_Loader__remote* r_obj = (struct                               \
+      sidl_Loader__remote*)self->d_data;
+    LOCK_STATIC_GLOBALS;
+    r_obj->d_refcount++;
+    UNLOCK_STATIC_GLOBALS;
+  }
+}
+
+/* REMOTE METHOD STUB:deleteRef */
+static void
+remote_sidl_Loader_deleteRef(
+  /* in */ struct sidl_Loader__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    struct sidl_Loader__remote* r_obj = (struct                               \
+      sidl_Loader__remote*)self->d_data;
+    LOCK_STATIC_GLOBALS;
+    r_obj->d_refcount--;
+    if(r_obj->d_refcount == 0) {
+      sidl_rmi_InstanceHandle_deleteRef(r_obj->d_ih, _ex);
+      free(r_obj);
+      free(self);
+    }
+    UNLOCK_STATIC_GLOBALS;
+  }
+}
+
+/* REMOTE METHOD STUB:isSame */
+static sidl_bool
+remote_sidl_Loader_isSame(
+  /* in */ struct sidl_Loader__object* self ,
+  /* in */ struct sidl_BaseInterface__object* iobj,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    sidl_bool _retval = FALSE;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl_Loader__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "isSame", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+    if(iobj){
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,       \
+        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url,                     \
+        _ex);SIDL_CHECK(*_ex);
+      free((void*)_url);
+    } else {
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL,                     \
+        _ex);SIDL_CHECK(*_ex);
+    }
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl.Loader.isSame.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:isType */
+static sidl_bool
+remote_sidl_Loader_isType(
+  /* in */ struct sidl_Loader__object* self ,
+  /* in */ const char* name,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    sidl_bool _retval = FALSE;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl_Loader__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "isType", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packString( _inv, "name", name, _ex);SIDL_CHECK(*_ex);
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl.Loader.isType.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:getClassInfo */
+static struct sidl_ClassInfo__object*
+remote_sidl_Loader_getClassInfo(
+  /* in */ struct sidl_Loader__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    char*_retval_str = NULL;
+    struct sidl_ClassInfo__object* _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl_Loader__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "getClassInfo", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl.Loader.getClassInfo.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
+      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,                    \
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE EPV: create remote entry point vectors (EPVs). */
+static void sidl_Loader__init_remote_epv(void)
+{
+  /* assert( HAVE_LOCKED_STATIC_GLOBALS ); */
+  struct sidl_Loader__epv*        epv = &s_rem_epv__sidl_loader;
+  struct sidl_BaseClass__epv*     e0  = &s_rem_epv__sidl_baseclass;
+  struct sidl_BaseInterface__epv* e1  = &s_rem_epv__sidl_baseinterface;
+
+  epv->f__cast             = remote_sidl_Loader__cast;
+  epv->f__delete           = remote_sidl_Loader__delete;
+  epv->f__exec             = remote_sidl_Loader__exec;
+  epv->f__getURL           = remote_sidl_Loader__getURL;
+  epv->f__raddRef          = remote_sidl_Loader__raddRef;
+  epv->f__isRemote         = remote_sidl_Loader__isRemote;
+  epv->f__set_hooks        = remote_sidl_Loader__set_hooks;
+  epv->f__ctor             = NULL;
+  epv->f__ctor2            = NULL;
+  epv->f__dtor             = NULL;
+  epv->f_addRef            = remote_sidl_Loader_addRef;
+  epv->f_deleteRef         = remote_sidl_Loader_deleteRef;
+  epv->f_isSame            = remote_sidl_Loader_isSame;
+  epv->f_isType            = remote_sidl_Loader_isType;
+  epv->f_getClassInfo      = remote_sidl_Loader_getClassInfo;
+
+  e0->f__cast        = (void* (*)(struct sidl_BaseClass__object*,const char*, \
+    sidl_BaseInterface*)) epv->f__cast;
+  e0->f__delete      = (void (*)(struct sidl_BaseClass__object*,              \
+    sidl_BaseInterface*)) epv->f__delete;
+  e0->f__getURL      = (char* (*)(struct sidl_BaseClass__object*,             \
+    sidl_BaseInterface*)) epv->f__getURL;
+  e0->f__raddRef     = (void (*)(struct sidl_BaseClass__object*,              \
+    sidl_BaseInterface*)) epv->f__raddRef;
+  e0->f__isRemote    = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,      \
+    sidl_BaseInterface*)) epv->f__set_hooks;
+  e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,  \
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,              \
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,              \
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
+    struct sidl_BaseInterface__object*,                                       \
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
+    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+  e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct             \
+    sidl_BaseClass__object*,                                                  \
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+
+  e1->f__cast        = (void* (*)(void*,const char*,                          \
+    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
+  e1->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
+  e1->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
+  e1->f__isRemote    = (sidl_bool (*)(void*,                                  \
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e1->f__set_hooks   = (void (*)(void*,int32_t,                               \
+    sidl_BaseInterface*)) epv->f__set_hooks;
+  e1->f__exec        = (void (*)(void*,const char*,                           \
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef       = (void (*)(void*,                                       \
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*,                                       \
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e1->f_isSame       = (sidl_bool (*)(void*,                                  \
+    struct sidl_BaseInterface__object*,                                       \
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*,                      \
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,             \
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+
+  s_remote_initialized = 1;
+}
+
+/* Create an instance that connects to an existing remote object. */
+static struct sidl_Loader__object*
+sidl_Loader__remoteConnect(const char *url, sidl_bool ar,                     \
+  sidl_BaseInterface *_ex)
+{
+  struct sidl_Loader__object* self;
+
+  struct sidl_Loader__object* s0;
+  struct sidl_BaseClass__object* s1;
+
+  struct sidl_Loader__remote* r_obj;
+  sidl_rmi_InstanceHandle instance = NULL;
+  char* objectID = NULL;
+  objectID = NULL;
+  *_ex = NULL;
+  if(url == NULL) {return NULL;}
+  objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
+  if(objectID) {
+    sidl_BaseInterface bi =                                                   \
+      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(      \
+      objectID, _ex); SIDL_CHECK(*_ex);
+    return sidl_Loader__rmicast(bi,_ex);SIDL_CHECK(*_ex);
+  }
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,                \
+    _ex ); SIDL_CHECK(*_ex);
+  if ( instance == NULL) { return NULL; }
+  self =
+    (struct sidl_Loader__object*) malloc(
+      sizeof(struct sidl_Loader__object));
+
+  r_obj =
+    (struct sidl_Loader__remote*) malloc(
+      sizeof(struct sidl_Loader__remote));
+
+  r_obj->d_refcount = 1;
+  r_obj->d_ih = instance;
+  s0 =                          self;
+  s1 =                          &s0->d_sidl_baseclass;
+
+  LOCK_STATIC_GLOBALS;
+  if (!s_remote_initialized) {
+    sidl_Loader__init_remote_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+  s1->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
+  s1->d_sidl_baseinterface.d_object = (void*) self;
+
+  s1->d_data = (void*) r_obj;
+  s1->d_epv  = &s_rem_epv__sidl_baseclass;
+
+  s0->d_data = (void*) r_obj;
+  s0->d_epv  = &s_rem_epv__sidl_loader;
+
+  self->d_data = (void*) r_obj;
+
+  return self;
+  EXIT:
+  return NULL;
+}
+/* Create an instance that uses an already existing  */
+/* InstanceHandle to connect to an existing remote object. */
+static struct sidl_Loader__object*
+sidl_Loader__IHConnect(sidl_rmi_InstanceHandle instance,                      \
+  sidl_BaseInterface *_ex)
+{
+  struct sidl_Loader__object* self;
+
+  struct sidl_Loader__object* s0;
+  struct sidl_BaseClass__object* s1;
+
+  struct sidl_Loader__remote* r_obj;
+  self =
+    (struct sidl_Loader__object*) malloc(
+      sizeof(struct sidl_Loader__object));
+
+  r_obj =
+    (struct sidl_Loader__remote*) malloc(
+      sizeof(struct sidl_Loader__remote));
+
+  r_obj->d_refcount = 1;
+  r_obj->d_ih = instance;
+  s0 =                          self;
+  s1 =                          &s0->d_sidl_baseclass;
+
+  LOCK_STATIC_GLOBALS;
+  if (!s_remote_initialized) {
+    sidl_Loader__init_remote_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+  s1->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
+  s1->d_sidl_baseinterface.d_object = (void*) self;
+
+  s1->d_data = (void*) r_obj;
+  s1->d_epv  = &s_rem_epv__sidl_baseclass;
+
+  s0->d_data = (void*) r_obj;
+  s0->d_epv  = &s_rem_epv__sidl_loader;
+
+  self->d_data = (void*) r_obj;
+
+  sidl_rmi_InstanceHandle_addRef(instance,_ex);SIDL_CHECK(*_ex);
+  return self;
+  EXIT:
+  return NULL;
+}
+/* REMOTE: generate remote instance given URL string. */
+static struct sidl_Loader__object*
+sidl_Loader__remoteCreate(const char *url, sidl_BaseInterface *_ex)
+{
+  sidl_BaseInterface _throwaway_exception = NULL;
+  struct sidl_Loader__object* self;
+
+  struct sidl_Loader__object* s0;
+  struct sidl_BaseClass__object* s1;
+
+  struct sidl_Loader__remote* r_obj;
+  sidl_rmi_InstanceHandle instance =                                          \
+    sidl_rmi_ProtocolFactory_createInstance(url, "sidl.Loader",               \
+    _ex ); SIDL_CHECK(*_ex);
+  if ( instance == NULL) { return NULL; }
+  self =
+    (struct sidl_Loader__object*) malloc(
+      sizeof(struct sidl_Loader__object));
+
+  r_obj =
+    (struct sidl_Loader__remote*) malloc(
+      sizeof(struct sidl_Loader__remote));
+
+  r_obj->d_refcount = 1;
+  r_obj->d_ih = instance;
+  s0 =                          self;
+  s1 =                          &s0->d_sidl_baseclass;
+
+  LOCK_STATIC_GLOBALS;
+  if (!s_remote_initialized) {
+    sidl_Loader__init_remote_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+  s1->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
+  s1->d_sidl_baseinterface.d_object = (void*) self;
+
+  s1->d_data = (void*) r_obj;
+  s1->d_epv  = &s_rem_epv__sidl_baseclass;
+
+  s0->d_data = (void*) r_obj;
+  s0->d_epv  = &s_rem_epv__sidl_loader;
+
+  self->d_data = (void*) r_obj;
+
+  return self;
+  EXIT:
+  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance,                  \
+    &_throwaway_exception); }
+  return NULL;
+}
+/*
+ * Cast method for interface and class type conversions.
+ */
+
+struct sidl_Loader__object*
+sidl_Loader__rmicast(
+  void* obj,
+  sidl_BaseInterface* _ex)
+{
+  struct sidl_Loader__object* cast = NULL;
+
+  *_ex = NULL;
+  if(!connect_loaded) {
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.Loader",                   \
+      (void*)sidl_Loader__IHConnect, _ex);
+    connect_loaded = 1;
+  }
+  if (obj != NULL) {
+    struct sidl_BaseInterface__object* base = (struct                         \
+      sidl_BaseInterface__object*) obj;
+    cast = (struct sidl_Loader__object*) (*base->d_epv->f__cast)(
+      base->d_object,
+      "sidl.Loader", _ex); SIDL_CHECK(*_ex);
+  }
+
+  return cast;
+  EXIT:
+  return NULL;
+}
+
+/*
+ * RMI connector function for the class.
+ */
+
+struct sidl_Loader__object*
+sidl_Loader__connectI(const char* url, sidl_bool ar,                          \
+  struct sidl_BaseInterface__object **_ex)
+{
+  return sidl_Loader__remoteConnect(url, ar, _ex);
+}
+
+static PyObject *
+pStub_Loader__connect(PyObject *_ignored, PyObject *_args,                    \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_Loader__object* self = NULL;
+  char* url = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    "url",
+    NULL
+  };
+  int _okay;
+  sidl_rmi_NetworkException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "z", _kwlist,
+    &url);
+  if (_okay) {
+    self = sidl_Loader__remoteConnect(url,1,&_exception);
+    if (_exception) {
+      struct sidl_rmi_NetworkException__object *_ex0;
+      if ((_ex0 = (struct sidl_rmi_NetworkException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_BuildValue(
+        "O&",
+        (void *)sidl_Loader__wrap, self);
+    }
+  }
+  return _return_value;
+}
 
 staticforward PyTypeObject _sidl_LoaderType;
 
@@ -94,23 +880,376 @@ static struct sidl_Loader__sepv *_sepv = NULL;
 static const struct sidl_Loader__external *_implEPV = NULL;
 
 static PyObject *
-pStub_Loader_setFinder(PyObject *_ignored, PyObject *_args,                   \
+pStub_Loader__exec(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_Loader__object *_self_ior =
+    ((struct sidl_Loader__object *)
+     sidl_Cast(_self, "sidl.Loader"));
+  if (_self_ior) {
+    char* methodName = NULL;
+    struct sidl_rmi_Call__object* inArgs = NULL;
+    struct sidl_rmi_Return__object* outArgs = NULL;
+    struct sidl_BaseInterface__object *_exception = NULL;
+    static char *_kwlist[] = {
+      "methodName",
+      "inArgs",
+      "outArgs",
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    sidl_rmi_Call__import();
+    sidl_rmi_Return__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "zO&O&", _kwlist,
+      &methodName,
+      (void *)sidl_rmi_Call__convert, &inArgs,
+      (void *)sidl_rmi_Return__convert, &outArgs);
+    if (_okay) {
+      (*(_self_ior->d_epv->f__exec))(_self_ior, methodName, inArgs, outArgs,  \
+        &_exception);
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_None;
+        Py_INCREF(_return_value);
+      }
+      sidl_rmi_Call_deref(inArgs);
+      sidl_rmi_Return_deref(outArgs);
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior, &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.Loader");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader__getURL(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_Loader__object *_self_ior =
+    ((struct sidl_Loader__object *)
+     sidl_Cast(_self, "sidl.Loader"));
+  if (_self_ior) {
+    struct sidl_BaseInterface__object *_exception = NULL;
+    static char *_kwlist[] = {
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "", _kwlist);
+    if (_okay) {
+      char* _return = NULL;
+      _return = (*(_self_ior->d_epv->f__getURL))(_self_ior, &_exception);
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_BuildValue(
+          "z",
+          _return);
+      }
+      free((void *)_return);
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior, &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.Loader");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader__isLocal(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_Loader__object *_self_ior =
+    ((struct sidl_Loader__object *)
+     sidl_Cast(_self, "sidl.Loader"));
+  if (_self_ior) {
+    struct sidl_BaseInterface__object *_exception = NULL;
+    static char *_kwlist[] = {
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "", _kwlist);
+    if (_okay) {
+      sidl_bool _return = (sidl_bool) 0;
+      int _proxy__return;
+      _return = !(*(_self_ior->d_epv->f__isRemote))(_self_ior, &_exception);
+      _proxy__return = _return;
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_BuildValue(
+          "i",
+          _proxy__return);
+      }
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior, &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.Loader");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader__isRemote(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_Loader__object *_self_ior =
+    ((struct sidl_Loader__object *)
+     sidl_Cast(_self, "sidl.Loader"));
+  if (_self_ior) {
+    struct sidl_BaseInterface__object *_exception = NULL;
+    static char *_kwlist[] = {
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "", _kwlist);
+    if (_okay) {
+      sidl_bool _return = (sidl_bool) 0;
+      int _proxy__return;
+      _return = (*(_self_ior->d_epv->f__isRemote))(_self_ior, &_exception);
+      _proxy__return = _return;
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_BuildValue(
+          "i",
+          _proxy__return);
+      }
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior, &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.Loader");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader__set_hooks(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_Loader__object *_self_ior =
+    ((struct sidl_Loader__object *)
+     sidl_Cast(_self, "sidl.Loader"));
+  if (_self_ior) {
+    sidl_bool on = (sidl_bool) 0;
+    struct sidl_BaseInterface__object *_exception = NULL;
+    int _proxy_on;
+    static char *_kwlist[] = {
+      "on",
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "i", _kwlist,
+      &_proxy_on);
+    if (_okay) {
+      on = (_proxy_on ? (TRUE) : (FALSE));
+      (*(_self_ior->d_epv->f__set_hooks))(_self_ior, on, &_exception);
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_None;
+        Py_INCREF(_return_value);
+      }
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior, &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.Loader");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader__set_hooks_static(PyObject *_ignored, PyObject *_args,           \
   PyObject *_kwdict) {
   PyObject *_return_value = NULL;
-  struct sidl_Finder__object* f = NULL;
+  sidl_bool on = (sidl_bool) 0;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  int _proxy_on;
   static char *_kwlist[] = {
-    "f",
+    "on",
     NULL
   };
-  const int _okay = PyArg_ParseTupleAndKeywords(
+  int _okay;
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "i", _kwlist,
+    &_proxy_on);
+  if (_okay) {
+    on = (_proxy_on ? (TRUE) : (FALSE));
+    (*(_sepv->f__set_hooks_static))(on, &_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_None;
+      Py_INCREF(_return_value);
+    }
+  }
+  if(_implEPV) {
+    _sepv = (*_implEPV->getStaticEPV)();
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader_addDLL(PyObject *_ignored, PyObject *_args, PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_DLL__object* dll = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    "dll",
+    NULL
+  };
+  int _okay;
+  sidl_DLL__import();
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
     _args, _kwdict, 
     "O&", _kwlist,
-    (void *)sidl_Finder__convert, &f);
+    (void *)sidl_DLL__convert, &dll);
   if (_okay) {
-    (*(_sepv->f_setFinder))(f);
-    _return_value = Py_None;
-    Py_INCREF(_return_value);
-    sidl_Finder_deref(f);
+    (*(_sepv->f_addDLL))(dll, &_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_None;
+      Py_INCREF(_return_value);
+    }
+    sidl_DLL_deref(dll);
   }
   return _return_value;
 }
@@ -120,152 +1259,39 @@ pStub_Loader_addSearchPath(PyObject *_ignored, PyObject *_args,               \
   PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   char* path_fragment = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
   static char *_kwlist[] = {
     "path_fragment",
     NULL
   };
-  const int _okay = PyArg_ParseTupleAndKeywords(
+  int _okay;
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
     _args, _kwdict, 
     "z", _kwlist,
     &path_fragment);
   if (_okay) {
-    (*(_sepv->f_addSearchPath))(path_fragment);
-    _return_value = Py_None;
-    Py_INCREF(_return_value);
-  }
-  return _return_value;
-}
-
-static PyObject *
-pStub_Loader_setSearchPath(PyObject *_ignored, PyObject *_args,               \
-  PyObject *_kwdict) {
-  PyObject *_return_value = NULL;
-  char* path_name = NULL;
-  static char *_kwlist[] = {
-    "path_name",
-    NULL
-  };
-  const int _okay = PyArg_ParseTupleAndKeywords(
-    _args, _kwdict, 
-    "z", _kwlist,
-    &path_name);
-  if (_okay) {
-    (*(_sepv->f_setSearchPath))(path_name);
-    _return_value = Py_None;
-    Py_INCREF(_return_value);
-  }
-  return _return_value;
-}
-
-static PyObject *
-pStub_Loader_addDLL(PyObject *_ignored, PyObject *_args, PyObject *_kwdict) {
-  PyObject *_return_value = NULL;
-  struct sidl_DLL__object* dll = NULL;
-  static char *_kwlist[] = {
-    "dll",
-    NULL
-  };
-  const int _okay = PyArg_ParseTupleAndKeywords(
-    _args, _kwdict, 
-    "O&", _kwlist,
-    (void *)sidl_DLL__convert, &dll);
-  if (_okay) {
-    (*(_sepv->f_addDLL))(dll);
-    _return_value = Py_None;
-    Py_INCREF(_return_value);
-    sidl_DLL_deref(dll);
-  }
-  return _return_value;
-}
-
-static PyObject *
-pStub_Loader_loadLibrary(PyObject *_ignored, PyObject *_args,                 \
-  PyObject *_kwdict) {
-  PyObject *_return_value = NULL;
-  char* uri = NULL;
-  sidl_bool loadGlobally = (sidl_bool) 0;
-  sidl_bool loadLazy = (sidl_bool) 0;
-  int _proxy_loadGlobally;
-  int _proxy_loadLazy;
-  static char *_kwlist[] = {
-    "uri",
-    "loadGlobally",
-    "loadLazy",
-    NULL
-  };
-  const int _okay = PyArg_ParseTupleAndKeywords(
-    _args, _kwdict, 
-    "zii", _kwlist,
-    &uri,
-    &_proxy_loadGlobally,
-    &_proxy_loadLazy);
-  if (_okay) {
-    struct sidl_DLL__object* _return = NULL;
-    loadGlobally = (_proxy_loadGlobally ? (TRUE) : (FALSE));
-    loadLazy = (_proxy_loadLazy ? (TRUE) : (FALSE));
-    _return = (*(_sepv->f_loadLibrary))(uri, loadGlobally, loadLazy);
-    _return_value = Py_BuildValue(
-      "O&",
-      (void *)sidl_DLL__wrap, _return);
-  }
-  return _return_value;
-}
-
-static PyObject *
-pStub_Loader_getFinder(PyObject *_ignored, PyObject *_args,                   \
-  PyObject *_kwdict) {
-  PyObject *_return_value = NULL;
-  static char *_kwlist[] = {
-    NULL
-  };
-  const int _okay = PyArg_ParseTupleAndKeywords(
-    _args, _kwdict, 
-    "", _kwlist);
-  if (_okay) {
-    struct sidl_Finder__object* _return = NULL;
-    _return = (*(_sepv->f_getFinder))();
-    _return_value = Py_BuildValue(
-      "O&",
-      (void *)sidl_Finder__wrap, _return);
-  }
-  return _return_value;
-}
-
-static PyObject *
-pStub_Loader_getSearchPath(PyObject *_ignored, PyObject *_args,               \
-  PyObject *_kwdict) {
-  PyObject *_return_value = NULL;
-  static char *_kwlist[] = {
-    NULL
-  };
-  const int _okay = PyArg_ParseTupleAndKeywords(
-    _args, _kwdict, 
-    "", _kwlist);
-  if (_okay) {
-    char* _return = NULL;
-    _return = (*(_sepv->f_getSearchPath))();
-    _return_value = Py_BuildValue(
-      "z",
-      _return);
-    free((void *)_return);
-  }
-  return _return_value;
-}
-
-static PyObject *
-pStub_Loader_unloadLibraries(PyObject *_ignored, PyObject *_args,             \
-  PyObject *_kwdict) {
-  PyObject *_return_value = NULL;
-  static char *_kwlist[] = {
-    NULL
-  };
-  const int _okay = PyArg_ParseTupleAndKeywords(
-    _args, _kwdict, 
-    "", _kwlist);
-  if (_okay) {
-    (*(_sepv->f_unloadLibraries))();
-    _return_value = Py_None;
-    Py_INCREF(_return_value);
+    (*(_sepv->f_addSearchPath))(path_fragment, &_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_None;
+      Py_INCREF(_return_value);
+    }
   }
   return _return_value;
 }
@@ -278,6 +1304,7 @@ pStub_Loader_findLibrary(PyObject *_ignored, PyObject *_args,                 \
   char* target = NULL;
   enum sidl_Scope__enum lScope = (enum sidl_Scope__enum) 0;
   enum sidl_Resolve__enum lResolve = (enum sidl_Resolve__enum) 0;
+  struct sidl_BaseInterface__object *_exception = NULL;
   long _proxy_lScope;
   long _proxy_lResolve;
   static char *_kwlist[] = {
@@ -287,7 +1314,10 @@ pStub_Loader_findLibrary(PyObject *_ignored, PyObject *_args,                 \
     "lResolve",
     NULL
   };
-  const int _okay = PyArg_ParseTupleAndKeywords(
+  int _okay;
+  sidl_DLL__import();
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
     _args, _kwdict, 
     "zzll", _kwlist,
     &sidl_name,
@@ -298,10 +1328,294 @@ pStub_Loader_findLibrary(PyObject *_ignored, PyObject *_args,                 \
     struct sidl_DLL__object* _return = NULL;
     lScope = _proxy_lScope;
     lResolve = _proxy_lResolve;
-    _return = (*(_sepv->f_findLibrary))(sidl_name, target, lScope, lResolve);
-    _return_value = Py_BuildValue(
-      "O&",
-      (void *)sidl_DLL__wrap, _return);
+    _return = (*(_sepv->f_findLibrary))(sidl_name, target, lScope, lResolve,  \
+      &_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_BuildValue(
+        "O&",
+        (void *)sidl_DLL__wrap, _return);
+    }
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader_getFinder(PyObject *_ignored, PyObject *_args,                   \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    NULL
+  };
+  int _okay;
+  sidl_Finder__import();
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "", _kwlist);
+  if (_okay) {
+    struct sidl_Finder__object* _return = NULL;
+    _return = (*(_sepv->f_getFinder))(&_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_BuildValue(
+        "O&",
+        (void *)sidl_Finder__wrap, _return);
+    }
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader_getSearchPath(PyObject *_ignored, PyObject *_args,               \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    NULL
+  };
+  int _okay;
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "", _kwlist);
+  if (_okay) {
+    char* _return = NULL;
+    _return = (*(_sepv->f_getSearchPath))(&_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_BuildValue(
+        "z",
+        _return);
+    }
+    free((void *)_return);
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader_loadLibrary(PyObject *_ignored, PyObject *_args,                 \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  char* uri = NULL;
+  sidl_bool loadGlobally = (sidl_bool) 0;
+  sidl_bool loadLazy = (sidl_bool) 0;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  int _proxy_loadGlobally;
+  int _proxy_loadLazy;
+  static char *_kwlist[] = {
+    "uri",
+    "loadGlobally",
+    "loadLazy",
+    NULL
+  };
+  int _okay;
+  sidl_DLL__import();
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "zii", _kwlist,
+    &uri,
+    &_proxy_loadGlobally,
+    &_proxy_loadLazy);
+  if (_okay) {
+    struct sidl_DLL__object* _return = NULL;
+    loadGlobally = (_proxy_loadGlobally ? (TRUE) : (FALSE));
+    loadLazy = (_proxy_loadLazy ? (TRUE) : (FALSE));
+    _return = (*(_sepv->f_loadLibrary))(uri, loadGlobally, loadLazy,          \
+      &_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_BuildValue(
+        "O&",
+        (void *)sidl_DLL__wrap, _return);
+    }
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader_setFinder(PyObject *_ignored, PyObject *_args,                   \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_Finder__object* f = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    "f",
+    NULL
+  };
+  int _okay;
+  sidl_Finder__import();
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "O&", _kwlist,
+    (void *)sidl_Finder__convert, &f);
+  if (_okay) {
+    (*(_sepv->f_setFinder))(f, &_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_None;
+      Py_INCREF(_return_value);
+    }
+    sidl_Finder_deref(f);
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader_setSearchPath(PyObject *_ignored, PyObject *_args,               \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  char* path_name = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    "path_name",
+    NULL
+  };
+  int _okay;
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "z", _kwlist,
+    &path_name);
+  if (_okay) {
+    (*(_sepv->f_setSearchPath))(path_name, &_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_None;
+      Py_INCREF(_return_value);
+    }
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader_unloadLibraries(PyObject *_ignored, PyObject *_args,             \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    NULL
+  };
+  int _okay;
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "", _kwlist);
+  if (_okay) {
+    (*(_sepv->f_unloadLibraries))(&_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_None;
+      Py_INCREF(_return_value);
+    }
   }
   return _return_value;
 }
@@ -309,28 +1623,106 @@ pStub_Loader_findLibrary(PyObject *_ignored, PyObject *_args,                 \
 static int
 sidl_Loader_createCast(PyObject *self, PyObject *args, PyObject *kwds) {
   struct sidl_Loader__object *optarg = NULL;
-  static char *_kwlist[] = { "sobj", NULL };
-  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&", _kwlist,         \
-    (void *)sidl_Loader__convert, &optarg);
+  char* url = NULL;
+  PyObject * implObj = NULL;
+  static char *_kwlist[] = {"sobj",  "url", "impl", NULL };
+  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&zO", _kwlist,       \
+    (void *)sidl_Loader__convert, &optarg, &url, &implObj);
   if (_okay) {
-    if (!optarg) {
-      optarg = (*(_implEPV->createObject))();
+    if (!optarg && !url && !implObj) {
+      struct sidl_BaseInterface__object *_exception;
+      optarg = (*(_implEPV->createObject))(NULL,&_exception);
+      if (_exception) {
+        sidl_RuntimeException__import();
+        {
+          struct sidl_RuntimeException__object *_ex0;
+          if ((_ex0 = (struct sidl_RuntimeException__object *)
+          sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+            struct sidl_BaseInterface__object *throwaway_exception;
+            PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+            PyObject *_args = PyTuple_New(1);
+            PyTuple_SetItem(_args, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyErr_SetObject(sidl_RuntimeException__type, _obj);
+            Py_XDECREF(_obj);
+            (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
+              &throwaway_exception);
+            Py_XDECREF(_args);
+          }
+          return -1;
+        }
+      }
     }
-    return sidl_Object_Init(
-      (SPObject *)self,
-      (struct sidl_BaseInterface__object *)optarg,
-      sidl_PyStealRef);
+    else if (!optarg && !url && implObj) {
+      struct sidl_BaseInterface__object *_exception;
+      Py_INCREF(implObj);
+      optarg = (*(_implEPV->createObject))((void*)implObj,&_exception);
+      if (_exception) {
+        sidl_RuntimeException__import();
+        {
+          struct sidl_RuntimeException__object *_ex0;
+          if ((_ex0 = (struct sidl_RuntimeException__object *)
+          sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+            struct sidl_BaseInterface__object *throwaway_exception;
+            PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+            PyObject *_args = PyTuple_New(1);
+            PyTuple_SetItem(_args, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyErr_SetObject(sidl_RuntimeException__type, _obj);
+            Py_XDECREF(_obj);
+            (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
+              &throwaway_exception);
+            Py_XDECREF(_args);
+          }
+          return -1;
+        }
+      }
   }
-  return -1;
+  else if(url && !optarg && !implObj) {
+    struct sidl_BaseInterface__object *_exception = NULL;
+    optarg = sidl_Loader__remoteCreate(url,&_exception);
+    if (_exception) {
+      sidl_rmi_NetworkException__import();
+      struct sidl_rmi_NetworkException__object *_ex0;
+      if ((_ex0 = (struct sidl_rmi_NetworkException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+      return -1;
+    }
+  }
+  /* OK, but fall though */
+  else if(!url && optarg && !implObj) {}
+  /* Error case. */
+  else {
+    return -1;
+  }
+  return sidl_Object_Init(
+    (SPObject *)self,
+    (struct sidl_BaseInterface__object *)optarg,
+    sidl_PyStealRef);
+}
+return -1;
 }
 
 static PyMethodDef _LoaderModuleMethods[] = {
   { "addDLL", (PyCFunction)pStub_Loader_addDLL,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-addDLL(in sidl.DLL dll)\n\
+addDLL( in sidl.DLL dll)\n\
 RETURNS\n\
     None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 Append the specified DLL to the beginning of the list of already\n\
@@ -339,9 +1731,11 @@ loaded DLLs."
   { "addSearchPath", (PyCFunction)pStub_Loader_addSearchPath,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-addSearchPath(in string path_fragment)\n\
+addSearchPath( in string path_fragment)\n\
 RETURNS\n\
     None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 Append the specified path fragment to the beginning of the\n\
@@ -353,12 +1747,14 @@ from the SIDL_DLL_PATH environment variable."
   { "findLibrary", (PyCFunction)pStub_Loader_findLibrary,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-findLibrary(in string sidl_name,\n\
-            in string target,\n\
-            in sidl.Scope lScope,\n\
-            in sidl.Resolve lResolve)\n\
+findLibrary( in string sidl_name,\n\
+             in string target,\n\
+             in sidl.Scope lScope,\n\
+             in sidl.Resolve lResolve)\n\
 RETURNS\n\
    (sidl.DLL _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 Find a DLL containing the specified information for a sidl\n\
@@ -372,23 +1768,23 @@ file system for <code>.scl</code> files to locate the\n\
 target class/interface.\n\
 \n\
 @param sidl_name  the fully qualified (long) name of the\n\
-                  class/interface to be found. Package names\n\
-                  are separated by period characters from each\n\
-                  other and the class/interface name.\n\
+class/interface to be found. Package names\n\
+are separated by period characters from each\n\
+other and the class/interface name.\n\
 @param target     to find a client-side binding, this is\n\
-                  normally the name of the language.\n\
-                  To find the implementation of a class\n\
-                  in order to make one, you should pass\n\
-                  the string \"ior/impl\" here.\n\
+normally the name of the language.\n\
+To find the implementation of a class\n\
+in order to make one, you should pass\n\
+the string \"ior/impl\" here.\n\
 @param lScope     this specifies whether the symbols should\n\
-                  be loaded into the global scope, a local\n\
-                  scope, or use the setting in the SCL file.\n\
+be loaded into the global scope, a local\n\
+scope, or use the setting in the SCL file.\n\
 @param lResolve   this specifies whether symbols should be\n\
-                  resolved as needed (LAZY), completely\n\
-                  resolved at load time (NOW), or use the\n\
-                  setting from the SCL file.\n\
+resolved as needed (LAZY), completely\n\
+resolved at load time (NOW), or use the\n\
+setting from the SCL file.\n\
 @return a non-NULL object means the search was successful.\n\
-        The DLL has already been added."
+The DLL has already been added."
    },
   { "getFinder", (PyCFunction)pStub_Loader_getFinder,
   (METH_VARARGS | METH_KEYWORDS),
@@ -396,6 +1792,8 @@ target class/interface.\n\
 getFinder()\n\
 RETURNS\n\
    (sidl.Finder _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 This method gets the <code>Finder</code> that <code>Loader</code>\n\
@@ -407,21 +1805,24 @@ uses to find DLLs.  "
 getSearchPath()\n\
 RETURNS\n\
    (string _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 Return the current search path.  The default\n\
 <code>Finder</code> initializes the search path\n\
-from environment variable SIDL_DLL_PATH.\n\
-"
+from environment variable SIDL_DLL_PATH."
    },
   { "loadLibrary", (PyCFunction)pStub_Loader_loadLibrary,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-loadLibrary(in string uri,\n\
-            in bool loadGlobally,\n\
-            in bool loadLazy)\n\
+loadLibrary( in string uri,\n\
+             in bool loadGlobally,\n\
+             in bool loadLazy)\n\
 RETURNS\n\
    (sidl.DLL _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 Load the specified library if it has not already been loaded.\n\
@@ -429,29 +1830,31 @@ The URI format is defined in class <code>DLL</code>.  The search\n\
 path is not searched to resolve the library name.\n\
 \n\
 @param uri          the URI to load. This can be a .la file\n\
-                    (a metadata file produced by libtool) or\n\
-                    a shared library binary (i.e., .so,\n\
-                    .dll or whatever is appropriate for your\n\
-                    OS)\n\
+(a metadata file produced by libtool) or\n\
+a shared library binary (i.e., .so,\n\
+.dll or whatever is appropriate for your\n\
+OS)\n\
 @param loadGlobally <code>true</code> means that the shared\n\
-                    library symbols will be loaded into the\n\
-                    global namespace; <code>false</code> \n\
-                    means they will be loaded into a \n\
-                    private namespace. Some operating systems\n\
-                    may not be able to honor the value presented\n\
-                    here.\n\
+library symbols will be loaded into the\n\
+global namespace; <code>false</code> \n\
+means they will be loaded into a \n\
+private namespace. Some operating systems\n\
+may not be able to honor the value presented\n\
+here.\n\
 @param loadLazy     <code>true</code> instructs the loader to\n\
-                    that symbols can be resolved as needed (lazy)\n\
-                    instead of requiring everything to be resolved\n\
-                    now.\n\
+that symbols can be resolved as needed (lazy)\n\
+instead of requiring everything to be resolved\n\
+now.\n\
 @return if the load was successful, a non-NULL DLL object is returned."
    },
   { "setFinder", (PyCFunction)pStub_Loader_setFinder,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-setFinder(in sidl.Finder f)\n\
+setFinder( in sidl.Finder f)\n\
 RETURNS\n\
     None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 This method sets the <code>Finder</code> that\n\
@@ -467,9 +1870,11 @@ Future calls to <code>findLibrary</code>,\n\
   { "setSearchPath", (PyCFunction)pStub_Loader_setSearchPath,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-setSearchPath(in string path_name)\n\
+setSearchPath( in string path_name)\n\
 RETURNS\n\
     None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 Set the search path, which is a semi-colon separated sequence of\n\
@@ -484,6 +1889,8 @@ This updates the search path in the current <code>Finder</code>."
 unloadLibraries()\n\
 RETURNS\n\
     None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 Unload all dynamic link libraries.  The library may no longer\n\
@@ -491,10 +1898,94 @@ be used to access symbol names.  When the library is actually\n\
 unloaded from the memory image depends on details of the operating\n\
 system."
    },
+  { "_connect", (PyCFunction)pStub_Loader__connect,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_connect( in string url)\n\
+RETURNS\n\
+   ( out sidl.Loader self)\n\
+RAISES\n\
+    sidl.rmi.NetworkException\n\
+"
+   },
+  { "_set_hooks_static", (PyCFunction)pStub_Loader__set_hooks_static,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_set_hooks_static( in bool on)\n\
+RETURNS\n\
+    None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+Static Method to set whether or not method hooks should be invoked."
+   },
   { NULL, NULL }
 };
 
 static PyMethodDef _LoaderObjectMethods[] = {
+  { "_exec", (PyCFunction)pStub_Loader__exec,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_exec( in string methodName,\n\
+       in sidl.rmi.Call inArgs,\n\
+       in sidl.rmi.Return outArgs)\n\
+RETURNS\n\
+    None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+Select and execute a method by name"
+   },
+  { "_getURL", (PyCFunction)pStub_Loader__getURL,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_getURL()\n\
+RETURNS\n\
+   (string _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+Get the URL of the Implementation of this object (for RMI)"
+   },
+  { "_isLocal", (PyCFunction)pStub_Loader__isLocal,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_isLocal()\n\
+RETURNS\n\
+   (bool _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+TRUE if this object is local, false if remote"
+   },
+  { "_isRemote", (PyCFunction)pStub_Loader__isRemote,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_isRemote()\n\
+RETURNS\n\
+   (bool _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+TRUE if this object is remote, false if local"
+   },
+  { "_set_hooks", (PyCFunction)pStub_Loader__set_hooks,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_set_hooks( in bool on)\n\
+RETURNS\n\
+    None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+Method to set whether or not method hooks should be invoked."
+   },
   { NULL, NULL }
 };
 
@@ -602,7 +2093,8 @@ sidl_Loader__weakRef sidl_Loader__weakRef_PROTO {
 sidl_Loader_deref_RETURN
 sidl_Loader_deref sidl_Loader_deref_PROTO {
   if (sidlobj) {
-    (*(sidlobj->d_epv->f_deleteRef))(sidlobj);
+    struct sidl_BaseInterface__object *throwaway_exception;
+    (*(sidlobj->d_epv->f_deleteRef))(sidlobj, &throwaway_exception);
   }
 }
 
@@ -632,7 +2124,8 @@ sidl_Loader__newRef sidl_Loader__newRef_PROTO {
 sidl_Loader__addRef_RETURN
 sidl_Loader__addRef sidl_Loader__addRef_PROTO {
   if (sidlobj) {
-    (*(sidlobj->d_epv->f_addRef))(sidlobj);
+    struct sidl_BaseInterface__object *throwaway_exception;
+    (*(sidlobj->d_epv->f_addRef))(sidlobj, &throwaway_exception);
   }
 }
 
@@ -645,10 +2138,7 @@ sidl_Loader_PyType sidl_Loader_PyType_PROTO {
 sidl_Loader__convert_RETURN
 sidl_Loader__convert sidl_Loader__convert_PROTO {
   *sidlobj = sidl_Cast(obj, "sidl.Loader");
-  if (*sidlobj) {
-    (*((*sidlobj)->d_epv->f_addRef))(*sidlobj);
-  }
-  else if (obj != Py_None) {
+  if ((!(*sidlobj)) && (obj != Py_None)) {
     PyErr_SetString(PyExc_TypeError, 
       "argument is not a(n) sidl.Loader");
     return 0;
@@ -664,8 +2154,10 @@ _convertPython(void *sidlarray, const int *ind, PyObject *pyobj)
     sidl_interface__array_set((struct sidl_interface__array *)sidlarray,
     ind, (struct sidl_BaseInterface__object *)sidlobj);
     if (sidlobj) {
-      sidl_BaseInterface_deleteRef((struct sidl_BaseInterface__object         \
-        *)sidlobj);
+      struct sidl_BaseInterface__object *asInt = (struct                      \
+        sidl_BaseInterface__object *)sidlobj;
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*asInt->d_epv->f_deleteRef)(asInt->d_object, &throwaway_exception);
     }
     return FALSE;
   }
@@ -755,6 +2247,7 @@ void
 initLoader(void) {
   PyObject *module, *dict, *c_api;
   static void *ExternalAPI[sidl_Loader__API_NUM];
+  struct sidl_BaseInterface__object *throwaway_exception;
   module = Py_InitModule3("Loader", _LoaderModuleMethods, "\
 \
 Class <code>Loader</code> manages dyanamic loading and symbol name\n\
@@ -782,6 +2275,8 @@ separated sequence of URIs as described in class <code>DLL</code>."
   ExternalAPI[sidl_Loader__newRef_NUM] = (void*)sidl_Loader__newRef;
   ExternalAPI[sidl_Loader__addRef_NUM] = (void*)sidl_Loader__addRef;
   ExternalAPI[sidl_Loader_PyType_NUM] = (void*)sidl_Loader_PyType;
+  ExternalAPI[sidl_Loader__connectI_NUM] = (void*)sidl_Loader__connectI;
+  ExternalAPI[sidl_Loader__rmicast_NUM] = (void*)sidl_Loader__rmicast;
   import_SIDLObjA();
   if (PyErr_Occurred()) {
     Py_FatalError("Error importing sidlObjA module.");
@@ -809,10 +2304,6 @@ separated sequence of URIs as described in class <code>DLL</code>."
   }
   Py_INCREF(&_sidl_LoaderType);
   PyDict_SetItemString(dict, "Loader", (PyObject *)&_sidl_LoaderType);
-  sidl_ClassInfo__import();
-  sidl_BaseInterface__import();
-  sidl_DLL__import();
-  sidl_Finder__import();
   _implEPV = sidl_Loader__externals();
   if (_implEPV) {
     _sepv = (*_implEPV->getStaticEPV)();
@@ -823,4 +2314,7 @@ separated sequence of URIs as described in class <code>DLL</code>."
   else {
     Py_FatalError("Cannot load implementation for sidl class sidl.Loader");
   }
+
+  sidl_rmi_ConnectRegistry_registerConnect("sidl.Loader",                     \
+    (void*)sidl_Loader__IHConnect, &throwaway_exception);
 }

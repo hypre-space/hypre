@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Loader.h
- * Symbol:        sidl.Loader-v0.9.3
+ * Symbol:        sidl.Loader-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Loader
@@ -32,14 +32,13 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_Loader_h
 #define included_sidl_Loader_h
 
 /**
- * Symbol "sidl.Loader" (version 0.9.3)
+ * Symbol "sidl.Loader" (version 0.9.15)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the sidl runtime system.  The <code>Loader</code> class
@@ -65,6 +64,9 @@ typedef struct sidl_Loader__object* sidl_Loader;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
@@ -80,16 +82,27 @@ typedef struct sidl_Loader__object* sidl_Loader;
 #ifndef included_sidl_Resolve_h
 #include "sidl_Resolve.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
+#endif
 #ifndef included_sidl_Scope_h
 #include "sidl_Scope.h"
 #endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidl_Loader_IOR_h
+#include "sidl_Loader_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -98,88 +111,20 @@ extern "C" {
  * Constructor function for the class.
  */
 struct sidl_Loader__object*
-sidl_Loader__create(void);
+sidl_Loader__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 sidl_Loader
-sidl_Loader__createRemote(const char *, sidl_BaseInterface *_ex);
+sidl_Loader__createRemote(const char * url, sidl_BaseInterface *_ex);
+
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 sidl_Loader
 sidl_Loader__connect(const char *, sidl_BaseInterface *_ex);
-/**
- * <p>
- * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>sidl</code> have an intrinsic reference count.
- * Objects continue to exist as long as the reference count is
- * positive. Clients should call this method whenever they
- * create another ongoing reference to an object or interface.
- * </p>
- * <p>
- * This does not have a return value because there is no language
- * independent type that can refer to an interface or a
- * class.
- * </p>
- */
-void
-sidl_Loader_addRef(
-  /* in */ sidl_Loader self);
-
-/**
- * Decrease by one the intrinsic reference count in the underlying
- * object, and delete the object if the reference is non-positive.
- * Objects in <code>sidl</code> have an intrinsic reference count.
- * Clients should call this method whenever they remove a
- * reference to an object or interface.
- */
-void
-sidl_Loader_deleteRef(
-  /* in */ sidl_Loader self);
-
-/**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-sidl_bool
-sidl_Loader_isSame(
-  /* in */ sidl_Loader self,
-  /* in */ sidl_BaseInterface iobj);
-
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidl_Loader_queryInt(
-  /* in */ sidl_Loader self,
-  /* in */ const char* name);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>sidl</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-sidl_bool
-sidl_Loader_isType(
-  /* in */ sidl_Loader self,
-  /* in */ const char* name);
-
-/**
- * Return the meta-data about the class implementing this interface.
- */
-sidl_ClassInfo
-sidl_Loader_getClassInfo(
-  /* in */ sidl_Loader self);
 
 /**
  * Load the specified library if it has not already been loaded.
@@ -187,28 +132,29 @@ sidl_Loader_getClassInfo(
  * path is not searched to resolve the library name.
  * 
  * @param uri          the URI to load. This can be a .la file
- *                     (a metadata file produced by libtool) or
- *                     a shared library binary (i.e., .so,
- *                     .dll or whatever is appropriate for your
- *                     OS)
+ * (a metadata file produced by libtool) or
+ * a shared library binary (i.e., .so,
+ * .dll or whatever is appropriate for your
+ * OS)
  * @param loadGlobally <code>true</code> means that the shared
- *                     library symbols will be loaded into the
- *                     global namespace; <code>false</code> 
- *                     means they will be loaded into a 
- *                     private namespace. Some operating systems
- *                     may not be able to honor the value presented
- *                     here.
+ * library symbols will be loaded into the
+ * global namespace; <code>false</code> 
+ * means they will be loaded into a 
+ * private namespace. Some operating systems
+ * may not be able to honor the value presented
+ * here.
  * @param loadLazy     <code>true</code> instructs the loader to
- *                     that symbols can be resolved as needed (lazy)
- *                     instead of requiring everything to be resolved
- *                     now.
+ * that symbols can be resolved as needed (lazy)
+ * instead of requiring everything to be resolved
+ * now.
  * @return if the load was successful, a non-NULL DLL object is returned.
  */
 sidl_DLL
 sidl_Loader_loadLibrary(
   /* in */ const char* uri,
   /* in */ sidl_bool loadGlobally,
-  /* in */ sidl_bool loadLazy);
+  /* in */ sidl_bool loadLazy,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Append the specified DLL to the beginning of the list of already
@@ -216,7 +162,8 @@ sidl_Loader_loadLibrary(
  */
 void
 sidl_Loader_addDLL(
-  /* in */ sidl_DLL dll);
+  /* in */ sidl_DLL dll,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Unload all dynamic link libraries.  The library may no longer
@@ -226,7 +173,7 @@ sidl_Loader_addDLL(
  */
 void
 sidl_Loader_unloadLibraries(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Find a DLL containing the specified information for a sidl
@@ -240,30 +187,31 @@ sidl_Loader_unloadLibraries(
  * target class/interface.
  * 
  * @param sidl_name  the fully qualified (long) name of the
- *                   class/interface to be found. Package names
- *                   are separated by period characters from each
- *                   other and the class/interface name.
+ * class/interface to be found. Package names
+ * are separated by period characters from each
+ * other and the class/interface name.
  * @param target     to find a client-side binding, this is
- *                   normally the name of the language.
- *                   To find the implementation of a class
- *                   in order to make one, you should pass
- *                   the string "ior/impl" here.
+ * normally the name of the language.
+ * To find the implementation of a class
+ * in order to make one, you should pass
+ * the string "ior/impl" here.
  * @param lScope     this specifies whether the symbols should
- *                   be loaded into the global scope, a local
- *                   scope, or use the setting in the SCL file.
+ * be loaded into the global scope, a local
+ * scope, or use the setting in the SCL file.
  * @param lResolve   this specifies whether symbols should be
- *                   resolved as needed (LAZY), completely
- *                   resolved at load time (NOW), or use the
- *                   setting from the SCL file.
+ * resolved as needed (LAZY), completely
+ * resolved at load time (NOW), or use the
+ * setting from the SCL file.
  * @return a non-NULL object means the search was successful.
- *         The DLL has already been added.
+ * The DLL has already been added.
  */
 sidl_DLL
 sidl_Loader_findLibrary(
   /* in */ const char* sidl_name,
   /* in */ const char* target,
   /* in */ enum sidl_Scope__enum lScope,
-  /* in */ enum sidl_Resolve__enum lResolve);
+  /* in */ enum sidl_Resolve__enum lResolve,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Set the search path, which is a semi-colon separated sequence of
@@ -274,17 +222,17 @@ sidl_Loader_findLibrary(
  */
 void
 sidl_Loader_setSearchPath(
-  /* in */ const char* path_name);
+  /* in */ const char* path_name,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Return the current search path.  The default
  * <code>Finder</code> initializes the search path
  * from environment variable SIDL_DLL_PATH.
- * 
  */
 char*
 sidl_Loader_getSearchPath(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Append the specified path fragment to the beginning of the
@@ -295,7 +243,8 @@ sidl_Loader_getSearchPath(
  */
 void
 sidl_Loader_addSearchPath(
-  /* in */ const char* path_fragment);
+  /* in */ const char* path_fragment,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * This method sets the <code>Finder</code> that
@@ -310,7 +259,8 @@ sidl_Loader_addSearchPath(
  */
 void
 sidl_Loader_setFinder(
-  /* in */ sidl_Finder f);
+  /* in */ sidl_Finder f,
+  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * This method gets the <code>Finder</code> that <code>Loader</code>
@@ -318,14 +268,133 @@ sidl_Loader_setFinder(
  */
 sidl_Finder
 sidl_Loader_getFinder(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ * <p>
+ * Add one to the intrinsic reference count in the underlying object.
+ * Object in <code>sidl</code> have an intrinsic reference count.
+ * Objects continue to exist as long as the reference count is
+ * positive. Clients should call this method whenever they
+ * create another ongoing reference to an object or interface.
+ * </p>
+ * <p>
+ * This does not have a return value because there is no language
+ * independent type that can refer to an interface or a
+ * class.
+ * </p>
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_Loader_addRef(
+  /* in */ sidl_Loader self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Decrease by one the intrinsic reference count in the underlying
+ * object, and delete the object if the reference is non-positive.
+ * Objects in <code>sidl</code> have an intrinsic reference count.
+ * Clients should call this method whenever they remove a
+ * reference to an object or interface.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_Loader_deleteRef(
+  /* in */ sidl_Loader self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_Loader_isSame(
+  /* in */ sidl_Loader self,
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>sidl</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_Loader_isType(
+  /* in */ sidl_Loader self,
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Return the meta-data about the class implementing this interface.
+ */
+SIDL_C_INLINE_DECL
+sidl_ClassInfo
+sidl_Loader_getClassInfo(
+  /* in */ sidl_Loader self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidl_Loader__object*
 sidl_Loader__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -333,23 +402,94 @@ sidl_Loader__cast(
 void*
 sidl_Loader__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidl_Loader__exec(
   /* in */ sidl_Loader self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidl_Loader__getURL(
-  /* in */ sidl_Loader self);
+  /* in */ sidl_Loader self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_Loader__raddRef(
+  /* in */ sidl_Loader self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_Loader__isRemote(
+  /* in */ sidl_Loader self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidl_Loader__isLocal(
+  /* in */ sidl_Loader self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -837,6 +977,25 @@ sidl_Loader__array_ensure(
   struct sidl_Loader__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidl_Loader__connectI
+
+#pragma weak sidl_Loader__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidl_Loader__object*
+sidl_Loader__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidl_Loader__object*
+sidl_Loader__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

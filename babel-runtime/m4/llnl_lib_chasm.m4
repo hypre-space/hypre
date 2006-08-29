@@ -53,7 +53,8 @@ AC_DEFUN([LLNL_LIB_CHASM],
     size = (cc.getArrayDescSize)(i);
     if (size > maxSize) maxSize = size;
   }
-  printf("%d\n", maxSize);fflush(stdout);
+  printf("%d\n", maxSize);
+  fflush(stdout); /* needed for GNU gfortran */
   return 0;
 ]])],[
   chasm_max_descriptor_size=`./conftest$ac_exeext 2>/dev/null`

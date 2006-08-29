@@ -23,15 +23,13 @@ AC_CACHE_CHECK([the integer value of F90's .true.], sidl_cv_f90_true,[dnl
 ac_save_ext=$ac_ext
 ac_ext=f90
 AC_LANG_PUSH(Fortran)dnl
-dnl should be AC_TRY_RUN, but the macro destroys conftest$ac_exeext too soon
-dnl ignore the warnings this issues from automake: F77 does not use the 1st argument (includes)
-AC_TRY_LINK([],[
+AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
   logical log
   integer value
   equivalence (log, value)
   log = .true.
   write (*,*) value
-],[dnl
+])],[dnl
 sidl_cv_f90_true=`./conftest$ac_exeext`
 llnl_status=$?
 if test -z "$sidl_cv_f90_true"; then
@@ -44,16 +42,13 @@ ac_ext=$ac_save_ext
 
 AC_CACHE_CHECK([the integer value of F90's .false.], sidl_cv_f90_false,[dnl
 AC_LANG_PUSH(Fortran)dnl
-dnl should be AC_TRY_RUN, but the macro destroys conftest$ac_exeext too soon
-dnl ignore the warnings this issues from automake: F77 does not use the 1st argument (includes)
-AC_TRY_LINK(dnl
-,[
+AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
   logical log
   integer value
   equivalence (log, value)
   log = .false.
   write (*,*) value
-],[dnl
+])],[dnl
 sidl_cv_f90_false=`./conftest$ac_exeext`
 if test -z "$sidl_cv_f90_false"; then
   AC_MSG_ERROR([Unable to determine integer value of F90 .false. (running ./conftest$ac_exeext produced no output)])

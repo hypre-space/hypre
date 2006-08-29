@@ -2,12 +2,10 @@
  * File:          sidlx_rmi_CallType.h
  * Symbol:        sidlx.rmi.CallType-v0.1
  * Symbol Type:   enumeration
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for sidlx.rmi.CallType
  * 
  * WARNING: Automatically generated; changes will be lost
- * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_CallType_h

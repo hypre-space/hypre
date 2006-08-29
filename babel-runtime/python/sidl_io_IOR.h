@@ -1,8 +1,8 @@
 /*
  * File:          sidl_io_IOR.h
- * Symbol:        sidl.io-v0.9.3
+ * Symbol:        sidl.io-v0.9.15
  * Symbol Type:   package
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.io
@@ -32,15 +32,15 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_io_IOR_h
 #define included_sidl_io_IOR_h
 
 /*
- * Symbol "sidl.io" (version 0.9.3)
+ * Symbol "sidl.io" (version 0.9.15)
  * 
+ *  
  * This package has some I/O capability that's not core to the 
  * SIDL object model, but still needed by parts of the generated code
  */
@@ -51,8 +51,8 @@
 #ifndef included_sidl_io_IOException_IOR_h
 #include "sidl_io_IOException_IOR.h"
 #endif
-#ifndef included_sidl_io_Serializeable_IOR_h
-#include "sidl_io_Serializeable_IOR.h"
+#ifndef included_sidl_io_Serializable_IOR_h
+#include "sidl_io_Serializable_IOR.h"
 #endif
 #ifndef included_sidl_io_Serializer_IOR_h
 #include "sidl_io_Serializer_IOR.h"

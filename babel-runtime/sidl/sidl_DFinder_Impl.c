@@ -1,8 +1,8 @@
 /*
  * File:          sidl_DFinder_Impl.c
- * Symbol:        sidl.DFinder-v0.9.3
+ * Symbol:        sidl.DFinder-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.DFinder
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -41,19 +40,20 @@
  */
 
 /*
- * Symbol "sidl.DFinder" (version 0.9.3)
+ * Symbol "sidl.DFinder" (version 0.9.15)
  * 
- *  This class is the Default Finder.  If no Finder is set in class Loader,
- *  this finder is used.  It uses SCL files from the filesystem to
- *  resolve dynamic libraries.
+ * This class is the Default Finder.  If no Finder is set in class Loader,
+ * this finder is used.  It uses SCL files from the filesystem to
+ * resolve dynamic libraries.
  * 
  * The initial search path is taken from the SIDL_DLL_PATH
  * environment variable.
  */
 
 #include "sidl_DFinder_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
-#line 56 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.DFinder._includes) */
 #include "sidl_DLL.h"
 #include "sidl_String.h"
@@ -152,17 +152,20 @@ sidl_DLL
 loadLibraryFromSCL(struct sidl_scl_entry *scl,
                    const char *sidl_name,
                    enum sidl_Scope__enum   lScope,
-                   enum sidl_Resolve__enum lResolve)
+                   enum sidl_Resolve__enum lResolve,
+		   sidl_BaseInterface* _ex)
 {
   return 
     sidl_Loader_loadLibrary(scl->d_uri,
                             chooseScope(lScope, scl->d_scope),
-                            chooseResolve(lResolve, scl->d_resolve));
+                            chooseResolve(lResolve, scl->d_resolve),
+			    _ex);
 }
 
 /* DO-NOT-DELETE splicer.end(sidl.DFinder._includes) */
-#line 164 "sidl_DFinder_Impl.c"
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -175,13 +178,14 @@ extern "C"
 #endif
 void
 impl_sidl_DFinder__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 178 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidl.DFinder._load) */
-#line 184 "sidl_DFinder_Impl.c"
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -195,9 +199,11 @@ extern "C"
 #endif
 void
 impl_sidl_DFinder__ctor(
-  /* in */ sidl_DFinder self)
+  /* in */ sidl_DFinder self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 196 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder._ctor) */
   struct sidl_DFinder__data *dptr =
     (struct sidl_DFinder__data *)
@@ -207,9 +213,32 @@ impl_sidl_DFinder__ctor(
   }
   sidl_DFinder__set_data(self, dptr);
   /* DO-NOT-DELETE splicer.end(sidl.DFinder._ctor) */
-#line 210 "sidl_DFinder_Impl.c"
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_DFinder__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_DFinder__ctor2(
+  /* in */ sidl_DFinder self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.DFinder._ctor2) */
+  /* Insert-Code-Here {sidl.DFinder._ctor2} (special constructor method) */
+  /* DO-NOT-DELETE splicer.end(sidl.DFinder._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -222,9 +251,11 @@ extern "C"
 #endif
 void
 impl_sidl_DFinder__dtor(
-  /* in */ sidl_DFinder self)
+  /* in */ sidl_DFinder self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 221 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder._dtor) */
   struct sidl_DFinder__data *dptr =
     sidl_DFinder__get_data(self);
@@ -233,7 +264,7 @@ impl_sidl_DFinder__dtor(
     sidl_DFinder__set_data(self, NULL);
   }
   /* DO-NOT-DELETE splicer.end(sidl.DFinder._dtor) */
-#line 236 "sidl_DFinder_Impl.c"
+  }
 }
 
 /*
@@ -243,23 +274,23 @@ impl_sidl_DFinder__dtor(
  * for a particular sidl class.
  * 
  * @param sidl_name  the fully qualified (long) name of the
- *                   class/interface to be found. Package names
- *                   are separated by period characters from each
- *                   other and the class/interface name.
+ * class/interface to be found. Package names
+ * are separated by period characters from each
+ * other and the class/interface name.
  * @param target     to find a client-side binding, this is
- *                   normally the name of the language.
- *                   To find the implementation of a class
- *                   in order to make one, you should pass
- *                   the string "ior/impl" here.
+ * normally the name of the language.
+ * To find the implementation of a class
+ * in order to make one, you should pass
+ * the string "ior/impl" here.
  * @param lScope     this specifies whether the symbols should
- *                   be loaded into the global scope, a local
- *                   scope, or use the setting in the file.
+ * be loaded into the global scope, a local
+ * scope, or use the setting in the file.
  * @param lResolve   this specifies whether symbols should be
- *                   resolved as needed (LAZY), completely
- *                   resolved at load time (NOW), or use the
- *                   setting from the file.
+ * resolved as needed (LAZY), completely
+ * resolved at load time (NOW), or use the
+ * setting from the file.
  * @return a non-NULL object means the search was successful.
- *         The DLL has already been added.
+ * The DLL has already been added.
  */
 
 #undef __FUNC__
@@ -274,20 +305,22 @@ impl_sidl_DFinder_findLibrary(
   /* in */ const char* sidl_name,
   /* in */ const char* target,
   /* in */ enum sidl_Scope__enum lScope,
-  /* in */ enum sidl_Resolve__enum lResolve)
+  /* in */ enum sidl_Resolve__enum lResolve,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 271 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder.findLibrary) */
   sidl_DLL result = NULL;
   struct sidl_scl_entry *scl = findSCLEntry(self, sidl_name, target);
   if (scl) {
-    result = loadLibraryFromSCL(scl, sidl_name, lScope, lResolve);
+    result = loadLibraryFromSCL(scl, sidl_name, lScope, lResolve, _ex);
     sidl_destroy_scl(scl);
   }
   return result;
 
   /* DO-NOT-DELETE splicer.end(sidl.DFinder.findLibrary) */
-#line 290 "sidl_DFinder_Impl.c"
+  }
 }
 
 /*
@@ -305,9 +338,11 @@ extern "C"
 void
 impl_sidl_DFinder_setSearchPath(
   /* in */ sidl_DFinder self,
-  /* in */ const char* path_name)
+  /* in */ const char* path_name,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 300 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder.setSearchPath) */
   struct sidl_DFinder__data *dptr = sidl_DFinder__get_data(self);
   sidl_String_free(dptr->d_search_path);
@@ -316,7 +351,7 @@ impl_sidl_DFinder_setSearchPath(
     dptr->d_search_path = sidl_String_strdup("");
   }
   /* DO-NOT-DELETE splicer.end(sidl.DFinder.setSearchPath) */
-#line 319 "sidl_DFinder_Impl.c"
+  }
 }
 
 /*
@@ -333,13 +368,15 @@ extern "C"
 #endif
 char*
 impl_sidl_DFinder_getSearchPath(
-  /* in */ sidl_DFinder self)
+  /* in */ sidl_DFinder self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 326 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder.getSearchPath) */
   return sidl_String_strdup(get_search_path(self));
   /* DO-NOT-DELETE splicer.end(sidl.DFinder.getSearchPath) */
-#line 342 "sidl_DFinder_Impl.c"
+  }
 }
 
 /*
@@ -358,9 +395,11 @@ extern "C"
 void
 impl_sidl_DFinder_addSearchPath(
   /* in */ sidl_DFinder self,
-  /* in */ const char* path_fragment)
+  /* in */ const char* path_fragment,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 349 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder.addSearchPath) */
   struct sidl_DFinder__data *dptr = sidl_DFinder__get_data(self);
   if (path_fragment) {
@@ -369,53 +408,66 @@ impl_sidl_DFinder_addSearchPath(
     dptr->d_search_path = s;
   }
   /* DO-NOT-DELETE splicer.end(sidl.DFinder.addSearchPath) */
-#line 372 "sidl_DFinder_Impl.c"
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct sidl_DFinder__object* impl_sidl_DFinder_fconnect_sidl_DFinder(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_DFinder__connect(url, _ex);
+struct sidl_BaseClass__object* impl_sidl_DFinder_fconnect_sidl_BaseClass(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
-char * impl_sidl_DFinder_fgetURL_sidl_DFinder(struct sidl_DFinder__object* obj) 
-  {
-  return sidl_DFinder__getURL(obj);
-}
-struct sidl_Finder__object* impl_sidl_DFinder_fconnect_sidl_Finder(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_Finder__connect(url, _ex);
-}
-char * impl_sidl_DFinder_fgetURL_sidl_Finder(struct sidl_Finder__object* obj) {
-  return sidl_Finder__getURL(obj);
-}
-struct sidl_ClassInfo__object* impl_sidl_DFinder_fconnect_sidl_ClassInfo(char* 
-  url, sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_sidl_DFinder_fgetURL_sidl_ClassInfo(struct sidl_ClassInfo__object* 
-  obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct sidl_DLL__object* impl_sidl_DFinder_fconnect_sidl_DLL(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_DLL__connect(url, _ex);
-}
-char * impl_sidl_DFinder_fgetURL_sidl_DLL(struct sidl_DLL__object* obj) {
-  return sidl_DLL__getURL(obj);
+struct sidl_BaseClass__object* impl_sidl_DFinder_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidl_DFinder_fconnect_sidl_BaseInterface(char* url,
+  impl_sidl_DFinder_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
+  return sidl_BaseInterface__connectI(url, ar, _ex);
 }
-char * impl_sidl_DFinder_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
+struct sidl_BaseInterface__object* 
+  impl_sidl_DFinder_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* impl_sidl_DFinder_fconnect_sidl_BaseClass(char* 
-  url, sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+struct sidl_ClassInfo__object* impl_sidl_DFinder_fconnect_sidl_ClassInfo(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-char * impl_sidl_DFinder_fgetURL_sidl_BaseClass(struct sidl_BaseClass__object* 
-  obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_ClassInfo__object* impl_sidl_DFinder_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_DFinder__object* impl_sidl_DFinder_fconnect_sidl_DFinder(const 
+  char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_DFinder__connectI(url, ar, _ex);
+}
+struct sidl_DFinder__object* impl_sidl_DFinder_fcast_sidl_DFinder(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_DFinder__cast(bi, _ex);
+}
+struct sidl_DLL__object* impl_sidl_DFinder_fconnect_sidl_DLL(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_DLL__connectI(url, ar, _ex);
+}
+struct sidl_DLL__object* impl_sidl_DFinder_fcast_sidl_DLL(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_DLL__cast(bi, _ex);
+}
+struct sidl_Finder__object* impl_sidl_DFinder_fconnect_sidl_Finder(const char* 
+  url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_Finder__connectI(url, ar, _ex);
+}
+struct sidl_Finder__object* impl_sidl_DFinder_fcast_sidl_Finder(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_Finder__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_DFinder_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_DFinder_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
 }

@@ -1,8 +1,8 @@
 /*
  * File:          sidl_rmi_InstanceRegistry_Impl.c
- * Symbol:        sidl.rmi.InstanceRegistry-v0.9.3
+ * Symbol:        sidl.rmi.InstanceRegistry-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.InstanceRegistry
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -41,61 +40,90 @@
  */
 
 /*
- * Symbol "sidl.rmi.InstanceRegistry" (version 0.9.3)
+ * Symbol "sidl.rmi.InstanceRegistry" (version 0.9.15)
  * 
- * This singleton class is implemented by Babel's runtime for RMI libraries to 
- * invoke methods on server objects.  It is assumed that the RMI library
- * has a self-describing stream of data, but the data may be reordered
- * from the natural argument list.
+ *  
+ * This singleton class is implemented by Babel's runtime for RMI
+ * libraries to invoke methods on server objects.  It maps
+ * objectID strings to sidl_BaseClass objects and vice-versa.
  * 
+ * The InstanceRegistry creates and returns a unique string when a
+ * new object is added to the registry.  When an object's refcount
+ * reaches 0 and it is collected, it is removed from the Instance
+ * Registry.
  * 
- * In the case of the RMI library receiving a self-describing stream
- * and wishing to invoke a method on a class... the RMI library would 
- * make a sequence of calls like:
- * 
- *       sidl_BaseClass bc = sidl_rmi_InstanceRegistry_getInstance( "instanceID" );
- *       sidl_rmi_TypeMap inArgs = sidl_rmi_TypeMap__create();
- *       
- *       sidl_rmi_TypeMap_putDouble( inArgs, "input_val" , 2.0 );
- *       sidl_rmi_TypeMap_putString( inArgs, "input_str", "Hello" );
- *       ...
- *       sidl_rmi_TypeMap ourArgs = sidl_BaseClass_execMethod( bc, "methodName" , t );
- * 
- *       sidl_rmi_Response_unpackBool( i, "_retval", &succeeded );
- *       sidl_rmi_Response_unpackFloat( i, "output_val", &f );
+ * Objects are added to the registry in 3 ways:
+ * 1) Added to the server's registry when an object is
+ * create[Remote]'d.
+ * 2) Implicity added to the local registry when an object is
+ * passed as an argument in a remote call.
+ * 3) A user may manually add a reference to the local registry
+ * for publishing purposes.  The user hsould keep a reference
+ * to the object.  Currently, the user cannot provide their own
+ * objectID, this capability should probably be added.
  */
 
 #include "sidl_rmi_InstanceRegistry_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
-#line 70 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._includes) */
+#include <stdlib.h>
 #include "sidl_String.h"
+#include "sidl_Exception.h"
 
-static char* counter;
-static struct hashtable *hshtbl;
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+static pthread_mutex_t                s_hash_mutex; /*lock for the hashtables*/
+static pthread_mutex_t                s_counter_mutex; /*lock for the hashtables*/
+#endif /* HAVE_PTHREAD */
+
+
+static char* s_counter;
+
+static struct hashtable *s_s2ohshtbl; /* Hash table to map strings to objects*/
+static struct hashtable *s_o2shshtbl; /* Hash table to map objects to strings*/
 
 static unsigned int
-hashfromkey(void *ky)
+stringhash(void *ky)
 {
-  unsigned long hash = 5381;
-  int c;
+  unsigned int hash = 5381;
+  unsigned int c;
   char* str = (char*)ky;
 
-  if(ky != 0){
-    while(c = (*str++))
+  if(ky != NULL){
+    while((c = (*str++)))
       hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
     
     return hash;
   } else
-    return 0;
+    return 0U;
 }
 
+/* TODO: Find a better hash function for the BaseClass case*/
+static unsigned int
+objecthash(void *ky)
+{
+  return (int) ky;
+}
+
+/*Object equivilence function*/
+static int 
+pointer_equals(void* a, void* b) {
+  return a == b;
+}
 
 /* next_string generates unique alpha-numeric strings to label 
    objects in the instance registry */
-char * next_string(char * buf) {
+char * next_string(void) {
   int i, len;
-  char *str = buf;
+  char *str;
+  char *ret;
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_counter_mutex));
+#endif /* HAVE_PTHREAD */
+
+  str = s_counter;
   while(*str != '\0') {
     if(*str < 'z') {
       if(*str == '9') {
@@ -105,24 +133,63 @@ char * next_string(char * buf) {
       } else { 
 	++(*str);
       }
-      return buf;
+      ret = sidl_String_strdup(s_counter);
+#ifdef HAVE_PTHREAD
+      (void)pthread_mutex_unlock(&(s_counter_mutex));
+#endif /* HAVE_PTHREAD */
+      return ret;
     } else {
       *str='0';
       ++str;
     }
   }
-  len = sidl_String_strlen(buf);
-  sidl_String_free(buf);
-  buf=sidl_String_alloc(len*2);
-  for(i = 0; i <= len*2; ++i)
-    buf[i] = '!';
-  buf[(len*2)+1] = '\0';
-  return buf;
+  len = sidl_String_strlen(s_counter);
+  sidl_String_free(s_counter);
+  len <<= 1;
+  s_counter=sidl_String_alloc(len);
+  for(i = 0; i < len; ++i)
+    s_counter[i] = '0';
+  s_counter[len] = '\0';
+  ret = sidl_String_strdup(s_counter);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_counter_mutex));
+#endif /* HAVE_PTHREAD */
+  return ret;
+}
+
+static void
+rmi_InstanceRegistry_cleanup(void)
+{
+#ifdef HAVE_PTHREAD
+     (void)pthread_mutex_lock(&(s_counter_mutex));
+#endif /* HAVE_PTHREAD */
+  if (s_counter) {
+    sidl_String_free(s_counter);
+    s_counter = NULL;
+  }
+#ifdef HAVE_PTHREAD
+     (void)pthread_mutex_unlock(&(s_counter_mutex));
+#endif /* HAVE_PTHREAD */
+#ifdef HAVE_PTHREAD
+     (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+     if (s_s2ohshtbl) {
+       hashtable_destroy(s_s2ohshtbl, 0);
+       s_s2ohshtbl = NULL;
+     }
+     if (s_o2shshtbl) {
+       hashtable_destroy(s_o2shshtbl, 0);
+       s_o2shshtbl = NULL;
+     }
+#ifdef HAVE_PTHREAD
+     (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
 }
 
 /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._includes) */
-#line 124 "sidl_rmi_InstanceRegistry_Impl.c"
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -135,20 +202,48 @@ extern "C"
 #endif
 void
 impl_sidl_rmi_InstanceRegistry__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 138 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._load) */
   /* Insert the implementation of the static class initializer method here... */
   int i = 0;
-  counter = (char*)sidl_String_alloc(10);
-  for(i = 0; i<10; ++i) {
-    counter[i] = '0';
+
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_init(&(s_hash_mutex), NULL);
+  (void)pthread_mutex_init(&(s_counter_mutex), NULL);
+#endif /* HAVE_PTHREAD */
+
+
+  /* Since this should really only happen once, before any threads have started do I need mutexs?*/
+#ifdef HAVE_PTHREAD
+     (void)pthread_mutex_lock(&(s_counter_mutex));
+#endif /* HAVE_PTHREAD */
+  s_counter = (char*)sidl_String_alloc(4);
+  for(i = 0; i<4; ++i) {
+    s_counter[i] = '0';
   }
-  counter[10] = '\0';
-  hshtbl = create_hashtable(16, hashfromkey, (int(*)(void*,void*))sidl_String_equals);
+  s_counter[4] = '\0';
+#ifdef HAVE_PTHREAD
+     (void)pthread_mutex_unlock(&(s_counter_mutex));
+#endif /* HAVE_PTHREAD */
+
+
+#ifdef HAVE_PTHREAD
+     (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  s_s2ohshtbl = create_hashtable(16, stringhash, 
+			       (int(*)(void*,void*))sidl_String_equals, FALSE);
+  s_o2shshtbl = create_hashtable(16, objecthash, 
+			       (int(*)(void*,void*))pointer_equals, FALSE);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+
+  (void)atexit(rmi_InstanceRegistry_cleanup);
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._load) */
-#line 151 "sidl_rmi_InstanceRegistry_Impl.c"
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -162,15 +257,40 @@ extern "C"
 #endif
 void
 impl_sidl_rmi_InstanceRegistry__ctor(
-  /* in */ sidl_rmi_InstanceRegistry self)
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 163 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._ctor) */
 
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._ctor) */
-#line 171 "sidl_rmi_InstanceRegistry_Impl.c"
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_rmi_InstanceRegistry__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_rmi_InstanceRegistry__ctor2(
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._ctor2) */
+  /* Insert-Code-Here {sidl.rmi.InstanceRegistry._ctor2} (special constructor method) */
+  /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -183,27 +303,23 @@ extern "C"
 #endif
 void
 impl_sidl_rmi_InstanceRegistry__dtor(
-  /* in */ sidl_rmi_InstanceRegistry self)
+  /* in */ sidl_rmi_InstanceRegistry self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 182 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._dtor) */
-  /*struct sidl_rmi_InstanceRegistry__data *dptr =
-     sidl_rmi_InstanceRegistry__get_data(self);
-   if(dptr) {
-     hashtable_destroy(dptr->hshtbl,0);
-     sidl_String_free(dptr->counter);
-     free(dptr);
-     sidl_rmi_InstanceRegistry__set_data(self, 0);
-   }
-  */
+
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._dtor) */
-#line 200 "sidl_rmi_InstanceRegistry_Impl.c"
+  }
 }
 
 /*
- * register an instance of a class
- *  the registry will return a string guaranteed to be unique for
- *  the lifetime of the process
+ *  
+ * Register an instance of a class.
+ * 
+ * the registry will return an objectID string guaranteed to be
+ * unique for the lifetime of the process
  */
 
 #undef __FUNC__
@@ -217,139 +333,335 @@ impl_sidl_rmi_InstanceRegistry_registerInstance(
   /* in */ sidl_BaseClass instance,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 212 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.registerInstance) */
-
+  char* key = NULL;
   /* 
-    DUE TO THE FACT THAT getClassInfo DOES NOT WORK FOR REMOTE OBJECT YET, THIS
-    CODE IS LEFT ON THE SHELF.  WHEN CLASSINFO IS FIXED, USE THIS CODE:
+   *   DUE TO THE FACT THAT getClassInfo DOES NOT WORK FOR REMOTE OBJECT YET, THIS
+   * CODE IS LEFT ON THE SHELF.  WHEN CLASSINFO IS FIXED, TRY THIS CODE:
+   * 
+   * We create an identifing name for the class from the classname + unique string
+   *  sidl_ClassInfo clsinfo = sidl_BaseClass_getClassInfo(instance);
+   *   char * clsName = sidl_ClassInfo_getName(clsinfo);
+   *  char * instName = sidl_String_concat2(clsName,next_string(s_counter));
+   *  sidl_String_free(clsName);
+   *  sidl_ClassInfo_deleteRef(clsinfo);
+   *  
+   *  hashtable_insert(hshtbl, (void*)instName, (void*)instance);
+   *  return sidl_String_strdup(instName);
+   *  
+   *  UNTIL THEN, WE USE THIS CODE:
+   */
 
-    We create an identifing name for the class from the classname + unique string
-  sidl_ClassInfo clsinfo = sidl_BaseClass_getClassInfo(instance);
-  char * clsName = sidl_ClassInfo_getName(clsinfo);
-  char * instName = sidl_String_concat2(clsName,next_string(counter));
-  sidl_String_free(clsName);
-  sidl_ClassInfo_deleteRef(clsinfo);
-
-  hashtable_insert(hshtbl, (void*)instName, (void*)instance);
-  return sidl_String_strdup(instName);
-
-  UNTIL THEN, WE USE THIS CODE:
-  */
-  next_string(counter);
-  hashtable_insert(hshtbl, (void*)counter, (void*)instance);
-  return sidl_String_strdup(counter);
+  
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  key = (char*) hashtable_search(s_o2shshtbl, (void*)instance);
+  if(!key) {
+    key = next_string();
+    hashtable_insert(s_s2ohshtbl, (void*)key, (void*)instance);
+    hashtable_insert(s_o2shshtbl, (void*)instance, (void*)key);
+  }
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  
+  return sidl_String_strdup(key);
 
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.registerInstance) */
-#line 244 "sidl_rmi_InstanceRegistry_Impl.c"
-}
-
-/*
- * returns a handle to the class based on the unique string
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_sidl_rmi_InstanceRegistry_getInstance"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-sidl_BaseClass
-impl_sidl_rmi_InstanceRegistry_getInstance(
-  /* in */ const char* instanceID,
-  /* out */ sidl_BaseInterface *_ex)
-{
-#line 252 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
-  /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.getInstance) */
-  sidl_BaseClass bc = 0;
-  /*
-  struct sidl_rmi_InstanceRegistry__data *dptr =
-    sidl_rmi_InstanceRegistry__get_data(self);
-  if(dptr) {
-  */
-  bc = (sidl_BaseClass) hashtable_search(hshtbl, (void*)instanceID);
-  if(bc == 0)
-    return 0;
-  sidl_BaseClass_addRef(bc);
-  return bc;
-  /*
   }
-  */
-
-  /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.getInstance) */
-#line 280 "sidl_rmi_InstanceRegistry_Impl.c"
 }
 
 /*
- * returns a handle to the class based on the unique string
- * and removes the instance from the table.  
+ *  
+ * Register an instance of a class with the given instanceID
+ * 
+ * If a different object already exists in registry under
+ * the supplied name, a false is returned, if the object was 
+ * successfully registered, true is returned.
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_sidl_rmi_InstanceRegistry_removeInstance"
+#define __FUNC__ "impl_sidl_rmi_InstanceRegistry_registerInstanceByString"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char*
+impl_sidl_rmi_InstanceRegistry_registerInstanceByString(
+  /* in */ sidl_BaseClass instance,
+  /* in */ const char* instanceID,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.registerInstanceByString) */
+  sidl_BaseClass bc = NULL;
+  char * key = NULL;
+  char * tmpkey = NULL;
+
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  bc = (sidl_BaseClass) hashtable_search(s_s2ohshtbl, (void*)instanceID);
+  key = (char*) instanceID;
+
+  if(bc != NULL && instance != bc) {
+    do {
+      /* Create a new key that's (almost) certainly unique, by combining the
+       * the user requested instanceID, which some other object has, and putting
+       * a unique string provided by next_string on the end of it.*/
+      tmpkey = next_string();
+      key = sidl_String_concat2(instanceID, tmpkey);
+      sidl_String_free(tmpkey);
+      
+    } while (hashtable_search(s_s2ohshtbl, (void*)key));    
+    hashtable_insert(s_s2ohshtbl, (void*)key, (void*)instance);
+    hashtable_insert(s_o2shshtbl, (void*)instance, (void*)key);
+  }
+  
+  /* If there was no object of that name, add this one.*/
+  if(bc == NULL) {
+    key = sidl_String_strdup(instanceID);
+    hashtable_insert(s_s2ohshtbl, (void*)key, (void*)instance);
+    hashtable_insert(s_o2shshtbl, (void*)instance, (void*)key);
+  }
+
+  /*If the object was already in the registry, we have done nothing*/
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  return sidl_String_strdup(key);
+  /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.registerInstanceByString) */
+  }
+}
+
+/*
+ *  
+ * returns a handle to the class based on the unique objectID
+ * string, (null if the handle isn't in the table)
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_rmi_InstanceRegistry_getInstanceByString"
 
 #ifdef __cplusplus
 extern "C"
 #endif
 sidl_BaseClass
-impl_sidl_rmi_InstanceRegistry_removeInstance(
+impl_sidl_rmi_InstanceRegistry_getInstanceByString(
   /* in */ const char* instanceID,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 287 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
-  /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.removeInstance) */
-  sidl_BaseClass bc = 0;
-  bc = (sidl_BaseClass) hashtable_remove(hshtbl, (void*)instanceID);
-  if(bc == 0)
-    return 0;
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.getInstanceByString) */
+  sidl_BaseClass bc = NULL;
+  
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  bc = (sidl_BaseClass) hashtable_search(s_s2ohshtbl, (void*)instanceID);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  
+  if(bc != NULL) {
+    sidl_BaseClass_addRef(bc, _ex);
+  }
   return bc;
+  
+  /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.getInstanceByString) */
+  }
+}
 
-  /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.removeInstance) */
-#line 308 "sidl_rmi_InstanceRegistry_Impl.c"
+/*
+ *  
+ * takes a class and returns the objectID string associated
+ * with it.  (null if the handle isn't in the table)
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_rmi_InstanceRegistry_getInstanceByClass"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char*
+impl_sidl_rmi_InstanceRegistry_getInstanceByClass(
+  /* in */ sidl_BaseClass instance,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.getInstanceByClass) */
+  char* str = NULL;
+  
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  str = (char*) hashtable_search(s_o2shshtbl, (void*)instance);
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  
+  if(str == NULL) {
+    return NULL;
+  }
+  return str;
+  /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.getInstanceByClass) */
+  }
+}
+
+/*
+ *  
+ * removes an instance from the table based on its objectID
+ * string..  returns a pointer to the object, which must be
+ * destroyed.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_rmi_InstanceRegistry_removeInstanceByString"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+sidl_BaseClass
+impl_sidl_rmi_InstanceRegistry_removeInstanceByString(
+  /* in */ const char* instanceID,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.removeInstanceByString) */
+  sidl_BaseClass bc = NULL;
+  char* str = NULL;
+  
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  if (s_s2ohshtbl) { /* might be NULL during process shutdown */
+    bc = (sidl_BaseClass) hashtable_remove(s_s2ohshtbl, (void*)instanceID);
+    
+    if(bc) {
+      if (s_o2shshtbl) { /* might be NULL during process shutdown */
+        /* Should be removed from both tables*/
+        str = (char*) hashtable_remove(s_o2shshtbl, (void*)bc); 
+	sidl_String_free(str);
+      }
+    }
+  }
+  
+  
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  if(bc != NULL) {
+    sidl_BaseClass_addRef(bc, _ex);
+  }
+  return bc;
+  /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.removeInstanceByString) */
+  }
+}
+
+/*
+ *  
+ * removes an instance from the table based on its BaseClass
+ * pointer.  returns the objectID string, which much be freed.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_rmi_InstanceRegistry_removeInstanceByClass"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char*
+impl_sidl_rmi_InstanceRegistry_removeInstanceByClass(
+  /* in */ sidl_BaseClass instance,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.removeInstanceByClass) */
+  char* str = NULL;
+  
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_lock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+
+  /* It's possible to have multiple names to one object, so keep pulling 
+   * out names until we get them all */
+  if (s_o2shshtbl) { /* might be NULL during process shutdown */
+    do {
+      sidl_String_free(str); /* free is a no-op if str is NULL*/
+      str = (char*) hashtable_remove(s_o2shshtbl, (void*)instance);
+      
+      if(str) {
+	if (s_s2ohshtbl) { /* might be NULL during process shutdown */
+	  hashtable_remove(s_s2ohshtbl, (void*)str); /* Should be removed from
+                                                      both tables*/
+	}
+      }
+    } while(str);
+  }
+#ifdef HAVE_PTHREAD
+  (void)pthread_mutex_unlock(&(s_hash_mutex));
+#endif /* HAVE_PTHREAD */
+  return str;
+  /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.removeInstanceByClass) */
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct sidl_rmi_InstanceRegistry__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_rmi_InstanceRegistry(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_rmi_InstanceRegistry__connect(url, _ex);
-}
-char * impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_rmi_InstanceRegistry(struct 
-  sidl_rmi_InstanceRegistry__object* obj) {
-  return sidl_rmi_InstanceRegistry__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct sidl_rmi_NetworkException__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_rmi_NetworkException(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_rmi_NetworkException__connect(url, _ex);
-}
-char * impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_rmi_NetworkException(struct 
-  sidl_rmi_NetworkException__object* obj) {
-  return sidl_rmi_NetworkException__getURL(obj);
-}
-struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
-}
-char * impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
+struct sidl_BaseClass__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
 }
-char * impl_sidl_rmi_InstanceRegistry_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseInterface__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
+}
+struct sidl_rmi_InstanceRegistry__object* 
+  impl_sidl_rmi_InstanceRegistry_fconnect_sidl_rmi_InstanceRegistry(const char* 
+  url, sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_rmi_InstanceRegistry__connectI(url, ar, _ex);
+}
+struct sidl_rmi_InstanceRegistry__object* 
+  impl_sidl_rmi_InstanceRegistry_fcast_sidl_rmi_InstanceRegistry(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_rmi_InstanceRegistry__cast(bi, _ex);
 }

@@ -60,91 +60,215 @@ PYTHONISHFILES = python/sidlObjA.h python/sidlObjA.c			\
 		 python/sidlsetup.py python/__init__.py			\
 		 python/sidlBaseException.py
 
-RUNTIME_ONLY_FILES=python/sidl/__init__.py \
+# USE runtime/python/genmakefile.py to GENERATE THIS LIST
+# ./configure ; make ; cd runtime/python ; python genmakefile.py
+RUNTIME_ONLY_FILES=\
+		python/setup.py \
+		python/sidl/Resolve.py \
+		python/sidl/Scope.py \
+		python/sidl/__init__.py \
+		python/sidl/io/__init__.py \
+		python/sidl/io/sidl_io_Deserializer_Module.c \
+		python/sidl/io/sidl_io_IOException_Module.c \
+		python/sidl/io/sidl_io_Serializable_Module.c \
+		python/sidl/io/sidl_io_Serializer_Module.c \
+		python/sidl/rmi/__init__.py \
+		python/sidl/rmi/sidl_rmi_BindException_Module.c \
+		python/sidl/rmi/sidl_rmi_Call_Module.c \
+		python/sidl/rmi/sidl_rmi_ConnectException_Module.c \
+		python/sidl/rmi/sidl_rmi_ConnectRegistry_Module.c \
+		python/sidl/rmi/sidl_rmi_InstanceHandle_Module.c \
+		python/sidl/rmi/sidl_rmi_InstanceRegistry_Module.c \
+		python/sidl/rmi/sidl_rmi_Invocation_Module.c \
+		python/sidl/rmi/sidl_rmi_MalformedURLException_Module.c \
+		python/sidl/rmi/sidl_rmi_NetworkException_Module.c \
+		python/sidl/rmi/sidl_rmi_NoRouteToHostException_Module.c \
+		python/sidl/rmi/sidl_rmi_NoServerException_Module.c \
+		python/sidl/rmi/sidl_rmi_ObjectDoesNotExistException_Module.c \
+		python/sidl/rmi/sidl_rmi_ProtocolException_Module.c \
+		python/sidl/rmi/sidl_rmi_ProtocolFactory_Module.c \
+		python/sidl/rmi/sidl_rmi_Response_Module.c \
+		python/sidl/rmi/sidl_rmi_Return_Module.c \
+		python/sidl/rmi/sidl_rmi_ServerInfo_Module.c \
+		python/sidl/rmi/sidl_rmi_ServerRegistry_Module.c \
+		python/sidl/rmi/sidl_rmi_TicketBook_Module.c \
+		python/sidl/rmi/sidl_rmi_Ticket_Module.c \
+		python/sidl/rmi/sidl_rmi_TimeOutException_Module.c \
+		python/sidl/rmi/sidl_rmi_UnexpectedCloseException_Module.c \
+		python/sidl/rmi/sidl_rmi_UnknownHostException_Module.c \
 		python/sidl/sidl_BaseClass_Module.c \
 		python/sidl/sidl_BaseException_Module.c \
 		python/sidl/sidl_BaseInterface_Module.c \
+		python/sidl/sidl_CastException_Module.c \
 		python/sidl/sidl_ClassInfoI_Module.c \
 		python/sidl/sidl_ClassInfo_Module.c \
 		python/sidl/sidl_DFinder_Module.c \
 		python/sidl/sidl_DLL_Module.c \
 		python/sidl/sidl_Finder_Module.c \
 		python/sidl/sidl_InvViolation_Module.c \
+		python/sidl/sidl_LangSpecificException_Module.c \
 		python/sidl/sidl_Loader_Module.c \
+		python/sidl/sidl_MemoryAllocationException_Module.c \
+		python/sidl/sidl_NotImplementedException_Module.c \
 		python/sidl/sidl_PostViolation_Module.c \
 		python/sidl/sidl_PreViolation_Module.c \
+		python/sidl/sidl_RuntimeException_Module.c \
 		python/sidl/sidl_SIDLException_Module.c \
-		python/sidl/io/__init__.py \
-		python/sidl/io/sidl_io_Deserializer_Module.c \
-		python/sidl/io/sidl_io_IOException_Module.c \
-		python/sidl/io/sidl_io_Serializeable_Module.c \
-		python/sidl/io/sidl_io_Serializer_Module.c \
-		python/sidl/rmi/__init__.py \
-		python/sidl/rmi/sidl_rmi_InArgs_Module.c \
-		python/sidl/rmi/sidl_rmi_InstanceHandle_Module.c \
-		python/sidl/rmi/sidl_rmi_InstanceRegistry_Module.c \
-		python/sidl/rmi/sidl_rmi_ConnectRegistry_Module.c \
-		python/sidl/rmi/sidl_rmi_Invocation_Module.c \
-		python/sidl/rmi/sidl_rmi_NetworkException_Module.c \
-		python/sidl/rmi/sidl_rmi_OutArgs_Module.c \
-		python/sidl/rmi/sidl_rmi_ProtocolFactory_Module.c \
-		python/sidl/rmi/sidl_rmi_Response_Module.c \
-		python/sidl_BaseClass_Module.h \
-		python/sidl_BaseException_Module.h \
-		python/sidl_BaseInterface_Module.h \
-		python/sidl_ClassInfoI_Module.h \
-		python/sidl_ClassInfo_Module.h \
-		python/sidl_DFinder_Module.h \
-		python/sidl_DLL_Module.h \
-		python/sidl_Finder_Module.h \
-		python/sidl_InvViolation_Module.h \
-		python/sidl_Loader_Module.h \
-		python/sidl_PostViolation_Module.h \
-		python/sidl_PreViolation_Module.h \
-		python/sidl_SIDLException_Module.h \
-		python/sidl_io_Deserializer_Module.h \
-		python/sidl_io_IOException_Module.h \
-		python/sidl_io_Serializeable_Module.h \
-		python/sidl_io_Serializer_Module.h \
-		python/sidl_rmi_InArgs_Module.h \
-		python/sidl_rmi_InstanceHandle_Module.h \
-		python/sidl_rmi_InstanceRegistry_Module.h \
-		python/sidl_rmi_ConnectRegistry_Module.h \
-		python/sidl_rmi_Invocation_Module.h \
-		python/sidl_rmi_NetworkException_Module.h \
-		python/sidl_rmi_OutArgs_Module.h \
-		python/sidl_rmi_ProtocolFactory_Module.h \
-		python/sidl_rmi_Response_Module.h \
 		python/sidl_BaseClass_IOR.h \
+		python/sidl_BaseClass_Module.h \
 		python/sidl_BaseException_IOR.h \
+		python/sidl_BaseException_Module.h \
 		python/sidl_BaseInterface_IOR.h \
+		python/sidl_BaseInterface_Module.h \
+		python/sidl_CastException_IOR.h \
+		python/sidl_CastException_Module.h \
 		python/sidl_ClassInfoI_IOR.h \
+		python/sidl_ClassInfoI_Module.h \
 		python/sidl_ClassInfo_IOR.h \
+		python/sidl_ClassInfo_Module.h \
 		python/sidl_DFinder_IOR.h \
+		python/sidl_DFinder_Module.h \
 		python/sidl_DLL_IOR.h \
+		python/sidl_DLL_Module.h \
 		python/sidl_Finder_IOR.h \
-		python/sidl_InvViolation_IOR.h \
-		python/sidl_Loader_IOR.h \
-		python/sidl_PostViolation_IOR.h \
-		python/sidl_PreViolation_IOR.h \
-		python/sidl_SIDLException_IOR.h \
-		python/sidl_io_IOR.h \
-		python/sidl_io_Deserializer_IOR.h \
-		python/sidl_io_IOException_IOR.h \
-		python/sidl_io_Serializeable_IOR.h \
-		python/sidl_io_Serializer_IOR.h \
-		python/sidl_rmi_InArgs_IOR.h \
-		python/sidl_rmi_InstanceHandle_IOR.h \
-		python/sidl_rmi_InstanceRegistry_IOR.h \
-		python/sidl_rmi_ConnectRegistry_IOR.h \
-		python/sidl_rmi_Invocation_IOR.h \
-		python/sidl_rmi_IOR.h \
-		python/sidl_rmi_NetworkException_IOR.h \
-		python/sidl_rmi_OutArgs_IOR.h \
-		python/sidl_rmi_ProtocolFactory_IOR.h \
-		python/sidl_rmi_Response_IOR.h \
+		python/sidl_Finder_Module.h \
 		python/sidl_IOR.h \
-		python/setup.py
+		python/sidl_InvViolation_IOR.h \
+		python/sidl_InvViolation_Module.h \
+		python/sidl_LangSpecificException_IOR.h \
+		python/sidl_LangSpecificException_Module.h \
+		python/sidl_Loader_IOR.h \
+		python/sidl_Loader_Module.h \
+		python/sidl_MemoryAllocationException_IOR.h \
+		python/sidl_MemoryAllocationException_Module.h \
+		python/sidl_NotImplementedException_IOR.h \
+		python/sidl_NotImplementedException_Module.h \
+		python/sidl_PostViolation_IOR.h \
+		python/sidl_PostViolation_Module.h \
+		python/sidl_PreViolation_IOR.h \
+		python/sidl_PreViolation_Module.h \
+		python/sidl_Resolve_IOR.h \
+		python/sidl_RuntimeException_IOR.h \
+		python/sidl_RuntimeException_Module.h \
+		python/sidl_SIDLException_IOR.h \
+		python/sidl_SIDLException_Module.h \
+		python/sidl_Scope_IOR.h \
+		python/sidl_io_Deserializer_IOR.h \
+		python/sidl_io_Deserializer_Module.h \
+		python/sidl_io_IOException_IOR.h \
+		python/sidl_io_IOException_Module.h \
+		python/sidl_io_IOR.h \
+		python/sidl_io_Serializable_IOR.h \
+		python/sidl_io_Serializable_Module.h \
+		python/sidl_io_Serializer_IOR.h \
+		python/sidl_io_Serializer_Module.h \
+		python/sidl_rmi_BindException_IOR.h \
+		python/sidl_rmi_BindException_Module.h \
+		python/sidl_rmi_Call_IOR.h \
+		python/sidl_rmi_Call_Module.h \
+		python/sidl_rmi_ConnectException_IOR.h \
+		python/sidl_rmi_ConnectException_Module.h \
+		python/sidl_rmi_ConnectRegistry_IOR.h \
+		python/sidl_rmi_ConnectRegistry_Module.h \
+		python/sidl_rmi_IOR.h \
+		python/sidl_rmi_InstanceHandle_IOR.h \
+		python/sidl_rmi_InstanceHandle_Module.h \
+		python/sidl_rmi_InstanceRegistry_IOR.h \
+		python/sidl_rmi_InstanceRegistry_Module.h \
+		python/sidl_rmi_Invocation_IOR.h \
+		python/sidl_rmi_Invocation_Module.h \
+		python/sidl_rmi_MalformedURLException_IOR.h \
+		python/sidl_rmi_MalformedURLException_Module.h \
+		python/sidl_rmi_NetworkException_IOR.h \
+		python/sidl_rmi_NetworkException_Module.h \
+		python/sidl_rmi_NoRouteToHostException_IOR.h \
+		python/sidl_rmi_NoRouteToHostException_Module.h \
+		python/sidl_rmi_NoServerException_IOR.h \
+		python/sidl_rmi_NoServerException_Module.h \
+		python/sidl_rmi_ObjectDoesNotExistException_IOR.h \
+		python/sidl_rmi_ObjectDoesNotExistException_Module.h \
+		python/sidl_rmi_ProtocolException_IOR.h \
+		python/sidl_rmi_ProtocolException_Module.h \
+		python/sidl_rmi_ProtocolFactory_IOR.h \
+		python/sidl_rmi_ProtocolFactory_Module.h \
+		python/sidl_rmi_Response_IOR.h \
+		python/sidl_rmi_Response_Module.h \
+		python/sidl_rmi_Return_IOR.h \
+		python/sidl_rmi_Return_Module.h \
+		python/sidl_rmi_ServerInfo_IOR.h \
+		python/sidl_rmi_ServerInfo_Module.h \
+		python/sidl_rmi_ServerRegistry_IOR.h \
+		python/sidl_rmi_ServerRegistry_Module.h \
+		python/sidl_rmi_TicketBook_IOR.h \
+		python/sidl_rmi_TicketBook_Module.h \
+		python/sidl_rmi_Ticket_IOR.h \
+		python/sidl_rmi_Ticket_Module.h \
+		python/sidl_rmi_TimeOutException_IOR.h \
+		python/sidl_rmi_TimeOutException_Module.h \
+		python/sidl_rmi_UnexpectedCloseException_IOR.h \
+		python/sidl_rmi_UnexpectedCloseException_Module.h \
+		python/sidl_rmi_UnknownHostException_IOR.h \
+		python/sidl_rmi_UnknownHostException_Module.h \
+		python/sidlx/__init__.py \
+		python/sidlx/rmi/CallType.py \
+		python/sidlx/rmi/__init__.py \
+		python/sidlx/rmi/sidlx_rmi_ChildSocket_Module.c \
+		python/sidlx/rmi/sidlx_rmi_ClientSocket_Module.c \
+		python/sidlx/rmi/sidlx_rmi_Common_Module.c \
+		python/sidlx/rmi/sidlx_rmi_GenNetworkException_Module.c \
+		python/sidlx/rmi/sidlx_rmi_IPv4Socket_Module.c \
+		python/sidlx/rmi/sidlx_rmi_JimEchoServer_Module.c \
+		python/sidlx/rmi/sidlx_rmi_NoServerException_Module.c \
+		python/sidlx/rmi/sidlx_rmi_ServerSocket_Module.c \
+		python/sidlx/rmi/sidlx_rmi_SimCall_Module.c \
+		python/sidlx/rmi/sidlx_rmi_SimHandle_Module.c \
+		python/sidlx/rmi/sidlx_rmi_SimReturn_Module.c \
+		python/sidlx/rmi/sidlx_rmi_SimpleOrb_Module.c \
+		python/sidlx/rmi/sidlx_rmi_SimpleServer_Module.c \
+		python/sidlx/rmi/sidlx_rmi_SimpleTicketBook_Module.c \
+		python/sidlx/rmi/sidlx_rmi_SimpleTicket_Module.c \
+		python/sidlx/rmi/sidlx_rmi_Simsponse_Module.c \
+		python/sidlx/rmi/sidlx_rmi_Simvocation_Module.c \
+		python/sidlx/rmi/sidlx_rmi_Socket_Module.c \
+		python/sidlx_IOR.h \
+		python/sidlx_rmi_CallType_IOR.h \
+		python/sidlx_rmi_ChildSocket_IOR.h \
+		python/sidlx_rmi_ChildSocket_Module.h \
+		python/sidlx_rmi_ClientSocket_IOR.h \
+		python/sidlx_rmi_ClientSocket_Module.h \
+		python/sidlx_rmi_Common_IOR.h \
+		python/sidlx_rmi_Common_Module.h \
+		python/sidlx_rmi_GenNetworkException_IOR.h \
+		python/sidlx_rmi_GenNetworkException_Module.h \
+		python/sidlx_rmi_IOR.h \
+		python/sidlx_rmi_IPv4Socket_IOR.h \
+		python/sidlx_rmi_IPv4Socket_Module.h \
+		python/sidlx_rmi_JimEchoServer_IOR.h \
+		python/sidlx_rmi_JimEchoServer_Module.h \
+		python/sidlx_rmi_NoServerException_IOR.h \
+		python/sidlx_rmi_NoServerException_Module.h \
+		python/sidlx_rmi_ServerSocket_IOR.h \
+		python/sidlx_rmi_ServerSocket_Module.h \
+		python/sidlx_rmi_SimCall_IOR.h \
+		python/sidlx_rmi_SimCall_Module.h \
+		python/sidlx_rmi_SimHandle_IOR.h \
+		python/sidlx_rmi_SimHandle_Module.h \
+		python/sidlx_rmi_SimReturn_IOR.h \
+		python/sidlx_rmi_SimReturn_Module.h \
+		python/sidlx_rmi_SimpleOrb_IOR.h \
+		python/sidlx_rmi_SimpleOrb_Module.h \
+		python/sidlx_rmi_SimpleServer_IOR.h \
+		python/sidlx_rmi_SimpleServer_Module.h \
+		python/sidlx_rmi_SimpleTicketBook_IOR.h \
+		python/sidlx_rmi_SimpleTicketBook_Module.h \
+		python/sidlx_rmi_SimpleTicket_IOR.h \
+		python/sidlx_rmi_SimpleTicket_Module.h \
+		python/sidlx_rmi_Simsponse_IOR.h \
+		python/sidlx_rmi_Simsponse_Module.h \
+		python/sidlx_rmi_Simvocation_IOR.h \
+		python/sidlx_rmi_Simvocation_Module.h \
+		python/sidlx_rmi_Socket_IOR.h \
+		python/sidlx_rmi_Socket_Module.h
 
 if BABEL_RUNTIME_ONLY
 babelpythonsrc=$(srcdir)
@@ -160,17 +284,21 @@ all-local-python: all-local-python1
 clean-local-python: clean-local-python1
 endif
 
-dist-hook: sidl/libsidl.la dist-hook-python
+dist-hook: sidl/libsidl.la dist-hook-python dist-hook-patch
 
 if SUPPORT_PYTHON
 all-local: all-local-python
 clean-local: clean-local-python
-install-data-am: install-data-am-python
-uninstall-am: uninstall-data-am-python
+runtime_install_data=install-data-am-patch install-data-am-python
+runtime_uninstall_data=uninstall-data-am-patch uninstall-data-am-python
 else
-all-local clean-local install-data-am uninstall-am:
+all-local clean-local:
 	@echo "Python not supported"
+runtime_install_data=install-data-am-patch
+runtime_uninstall_data=uninstall-data-am-patch
 endif
+install-data-am: $(runtime_install_data)
+uninstall-am: $(runtime_uninstall_data)
 
 sidl/libsidl.la:
 	@-cd sidl && $(MAKE) libsidl.la
@@ -186,18 +314,18 @@ python/babel-stamp: $(PYTHONISHFILES)
 	    || mkdir -p $$d						\
 	    || exit 1;							\
 	    echo cp -p $(srcdir)/$$file $$file;				\
-	    cp -p $(srcdir)/$$file $$file;				\
+	    cp -p $(srcdir)/$$file $$file || exit 1;			\
 	  done;								\
 	fi
 	@if test -d python; then					\
 	  abspath=`cd $(srcdir) && pwd`;				\
 	  cd python;							\
-	  echo $(SHELL) ../../bin/babel --suppress-timestamp -!		\
+	  echo $(SHELL) ../../bin/babel -!		\
 	    --generate-sidl-stdlib -cpython				\
-	    $$abspath/sidl/sidl.sidl;					\
-	  $(SHELL) ../../bin/babel --suppress-timestamp	 -!		\
+	    $$abspath/sidl/sidl.sidl $$abspath/sidlx/sidlx.sidl;	\
+	  $(SHELL) ../../bin/babel -!		\
 	    --generate-sidl-stdlib -cpython  				\
-	    $$abspath/sidl/sidl.sidl;					\
+	    $$abspath/sidl/sidl.sidl $$abspath/sidlx/sidlx.sidl;	\
 	  $(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs \
 	   --include-dirs=../sidl --include-dirs=../config  $(PYTHON_SETUP_ARGS) build_ext   \
 	   --inplace --rpath=$(libdir);					\
@@ -218,7 +346,7 @@ python/babel-stamp2:
 	    || mkdir -p $$d						\
 	    || exit 1;							\
 	    echo cp -p $(srcdir)/$$file $$file;				\
-	    cp -p $(srcdir)/$$file $$file;				\
+	    cp -p $(srcdir)/$$file $$file || exit 1;			\
 	  done;								\
 	fi
 	@if test -d python; then					\
@@ -304,6 +432,18 @@ clean-local-python2:
 	  rm -rf python/build; \
 	fi
 
+dist-hook-patch:
+	mkdir -p $(DESTDIR)$(distdir)/patches
+	@if test -d $(srcdir)/patches; then \
+	    cp -pf $(srcdir)/patches/README $(DESTDIR)$(distdir)/patches/; \
+	    if test "`echo "$(srcdir)"/patches/*.txt`" != "$(srcdir)/patches/*.txt"; then \
+	    	for file in $(srcdir)/patches/*.txt; do \
+		    echo cp -p $$file $(DESTDIR)$(distdir)/patches/`basename $$file`; \
+		    cp -p $$file $(DESTDIR)$(distdir)/patches/`basename $$file`; \
+	   	done; \
+	    fi; \
+	fi
+
 dist-hook-python: all-local-python
 	@for file in $(PYTHONISHFILES); do				\
 	  d=`dirname $(distdir)/$$file`;				\
@@ -311,7 +451,7 @@ dist-hook-python: all-local-python
 	  || mkdir -p $$d						\
 	  || exit 1;							\
 	  echo cp -p $(srcdir)/$$file $(DESTDIR)$(distdir)/$$file;	\
-	  cp -p $(srcdir)/$$file $(DESTDIR)$(distdir)/$$file;		\
+	  cp -p $(srcdir)/$$file $(DESTDIR)$(distdir)/$$file || exit 1;	\
 	done
 	@for file in $(RUNTIME_ONLY_FILES); do				\
 	  d=`dirname $(distdir)/$$file`;				\
@@ -319,11 +459,20 @@ dist-hook-python: all-local-python
 	  || mkdir -p $$d						\
 	  || exit 1;							\
 	  echo cp -p $$file $(DESTDIR)$(distdir)/$$file;		\
-	  cp -p $$file $(DESTDIR)$(distdir)/$$file;			\
+	  cp -p $$file $(DESTDIR)$(distdir)/$$file || exit 1;		\
 	done
 
-install-data-am-python:
+install-data-am-patch:
 	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(datadir)/$(PACKAGE)-$(VERSION)/patches
+	@if test "`echo "$(srcdir)"/patches/*.txt`" != "$(srcdir)/patches/*.txt"; then \
+	    for f in $(srcdir)/patches/*.txt; do \
+		echo $(INSTALL_DATA) $$f $(DESTDIR)$(datadir)/$(PACKAGE)-$(VERSION)/patches/`basename $$f`; \
+		$(INSTALL_DATA) $$f $(DESTDIR)$(datadir)/$(PACKAGE)-$(VERSION)/patches/`basename $$f`; \
+	    done; \
+	fi
+
+install-data-am-python: install-data-am-patch
 	test -d python || exit 1
 	cd python ;							\
 	$(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs \
@@ -345,8 +494,11 @@ install-data-am-python:
 	   --exec-prefix=$(DESTDIR)$(exec_prefix)			\
 	   --record=setup.installed
 
-uninstall-data-am-python:
+uninstall-data-am-patch:
 	@$(NORMAL_UNINSTALL)
+	rm -rf $(DESTDIR)$(datadir)/$(PACKAGE)-$(VERSION)/patches
+
+uninstall-data-am-python: uninstall-data-am-patch
 	@test -d python && test -f python/setup.installed &&		\
 	 rm -f `cat python/setup.installed`
 	@test -d python && test -f python/sidlsetup.installed &&	\

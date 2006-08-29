@@ -1,8 +1,8 @@
 /*
  * File:          sidl_io_IOException_Skel.c
- * Symbol:        sidl.io.IOException-v0.9.3
+ * Symbol:        sidl.io.IOException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for sidl.io.IOException
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #include "sidl_io_IOException_IOR.h"
@@ -42,78 +41,147 @@
 extern
 void
 impl_sidl_io_IOException__load(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_io_IOException__ctor(
-  /* in */ sidl_io_IOException self);
+  /* in */ sidl_io_IOException self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidl_io_IOException__ctor2(
+  /* in */ sidl_io_IOException self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidl_io_IOException__dtor(
-  /* in */ sidl_io_IOException self);
+  /* in */ sidl_io_IOException self,
+  /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidl_SIDLException__object* 
-  impl_sidl_io_IOException_fconnect_sidl_SIDLException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_SIDLException(struct 
-  sidl_SIDLException__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_io_IOException_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_io_IOException__object* 
-  impl_sidl_io_IOException_fconnect_sidl_io_IOException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_io_IOException(struct 
-  sidl_io_IOException__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidl_io_IOException_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidl_BaseException__object* 
-  impl_sidl_io_IOException_fconnect_sidl_BaseException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_BaseException(struct 
-  sidl_BaseException__object* obj);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_io_IOException_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
-extern struct sidl_SIDLException__object* 
-  impl_sidl_io_IOException_fconnect_sidl_SIDLException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_SIDLException(struct 
-  sidl_SIDLException__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_io_IOException_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidl_io_IOException__object* 
-  impl_sidl_io_IOException_fconnect_sidl_io_IOException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_io_IOException(struct 
-  sidl_io_IOException__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidl_io_IOException_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidl_BaseException__object* 
-  impl_sidl_io_IOException_fconnect_sidl_BaseException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_BaseException(struct 
-  sidl_BaseException__object* obj);
+  impl_sidl_io_IOException_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_io_IOException_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidl_io_IOException_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidl_io_IOException_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseException__object* 
+  impl_sidl_io_IOException_fconnect_sidl_BaseException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseException__object* 
+  impl_sidl_io_IOException_fcast_sidl_BaseException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_io_IOException_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_io_IOException_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_io_IOException_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_io_IOException_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_io_IOException_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_io_IOException_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_SIDLException__object* 
+  impl_sidl_io_IOException_fconnect_sidl_SIDLException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_SIDLException__object* 
+  impl_sidl_io_IOException_fcast_sidl_SIDLException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Deserializer__object* 
+  impl_sidl_io_IOException_fconnect_sidl_io_Deserializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Deserializer__object* 
+  impl_sidl_io_IOException_fcast_sidl_io_Deserializer(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_IOException__object* 
+  impl_sidl_io_IOException_fconnect_sidl_io_IOException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_IOException__object* 
+  impl_sidl_io_IOException_fcast_sidl_io_IOException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidl_io_IOException_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidl_io_IOException_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Serializer__object* 
+  impl_sidl_io_IOException_fconnect_sidl_io_Serializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Serializer__object* 
+  impl_sidl_io_IOException_fcast_sidl_io_Serializer(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_io_IOException_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_io_IOException_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseException__object* 
+  impl_sidl_io_IOException_fconnect_sidl_BaseException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseException__object* 
+  impl_sidl_io_IOException_fcast_sidl_BaseException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_io_IOException_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_io_IOException_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_io_IOException_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_io_IOException_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_io_IOException_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidl_io_IOException_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_SIDLException__object* 
+  impl_sidl_io_IOException_fconnect_sidl_SIDLException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_SIDLException__object* 
+  impl_sidl_io_IOException_fcast_sidl_SIDLException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Deserializer__object* 
+  impl_sidl_io_IOException_fconnect_sidl_io_Deserializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Deserializer__object* 
+  impl_sidl_io_IOException_fcast_sidl_io_Deserializer(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_IOException__object* 
+  impl_sidl_io_IOException_fconnect_sidl_io_IOException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_IOException__object* 
+  impl_sidl_io_IOException_fcast_sidl_io_IOException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidl_io_IOException_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidl_io_IOException_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Serializer__object* 
+  impl_sidl_io_IOException_fconnect_sidl_io_Serializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Serializer__object* 
+  impl_sidl_io_IOException_fcast_sidl_io_Serializer(void* bi,
+  sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -122,6 +190,7 @@ void
 sidl_io_IOException__set_epv(struct sidl_io_IOException__epv *epv)
 {
   epv->f__ctor = impl_sidl_io_IOException__ctor;
+  epv->f__ctor2 = impl_sidl_io_IOException__ctor2;
   epv->f__dtor = impl_sidl_io_IOException__dtor;
 
 }
@@ -134,72 +203,127 @@ extern "C" {
 #endif
 
 void sidl_io_IOException__call_load(void) { 
-  impl_sidl_io_IOException__load();
+  sidl_BaseInterface _throwaway_exception = NULL;
+  impl_sidl_io_IOException__load(&_throwaway_exception);
 }
-struct sidl_SIDLException__object* 
-  skel_sidl_io_IOException_fconnect_sidl_SIDLException(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidl_io_IOException_fconnect_sidl_SIDLException(url, _ex);
-}
-
-char* skel_sidl_io_IOException_fgetURL_sidl_SIDLException(struct 
-  sidl_SIDLException__object* obj) { 
-  return impl_sidl_io_IOException_fgetURL_sidl_SIDLException(obj);
-}
-
-struct sidl_ClassInfo__object* 
-  skel_sidl_io_IOException_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidl_io_IOException_fconnect_sidl_ClassInfo(url, _ex);
-}
-
-char* skel_sidl_io_IOException_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) { 
-  return impl_sidl_io_IOException_fgetURL_sidl_ClassInfo(obj);
-}
-
-struct sidl_io_IOException__object* 
-  skel_sidl_io_IOException_fconnect_sidl_io_IOException(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidl_io_IOException_fconnect_sidl_io_IOException(url, _ex);
-}
-
-char* skel_sidl_io_IOException_fgetURL_sidl_io_IOException(struct 
-  sidl_io_IOException__object* obj) { 
-  return impl_sidl_io_IOException_fgetURL_sidl_io_IOException(obj);
-}
-
-struct sidl_BaseInterface__object* 
-  skel_sidl_io_IOException_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidl_io_IOException_fconnect_sidl_BaseInterface(url, _ex);
-}
-
-char* skel_sidl_io_IOException_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) { 
-  return impl_sidl_io_IOException_fgetURL_sidl_BaseInterface(obj);
-}
-
-struct sidl_BaseException__object* 
-  skel_sidl_io_IOException_fconnect_sidl_BaseException(char* url,
-  sidl_BaseInterface *_ex) { 
-  return impl_sidl_io_IOException_fconnect_sidl_BaseException(url, _ex);
-}
-
-char* skel_sidl_io_IOException_fgetURL_sidl_BaseException(struct 
-  sidl_BaseException__object* obj) { 
-  return impl_sidl_io_IOException_fgetURL_sidl_BaseException(obj);
+struct sidl_BaseClass__object* 
+  skel_sidl_io_IOException_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_sidl_io_IOException_fconnect_sidl_BaseClass(char* url,
+  skel_sidl_io_IOException_fcast_sidl_BaseClass(void* bi,
   sidl_BaseInterface *_ex) { 
-  return impl_sidl_io_IOException_fconnect_sidl_BaseClass(url, _ex);
+  return impl_sidl_io_IOException_fcast_sidl_BaseClass(bi, _ex);
 }
 
-char* skel_sidl_io_IOException_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) { 
-  return impl_sidl_io_IOException_fgetURL_sidl_BaseClass(obj);
+struct sidl_BaseException__object* 
+  skel_sidl_io_IOException_fconnect_sidl_BaseException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_BaseException(url, ar, _ex);
+}
+
+struct sidl_BaseException__object* 
+  skel_sidl_io_IOException_fcast_sidl_BaseException(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fcast_sidl_BaseException(bi, _ex);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_sidl_io_IOException_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_BaseInterface(url, ar, _ex);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_sidl_io_IOException_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fcast_sidl_BaseInterface(bi, _ex);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_sidl_io_IOException_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_ClassInfo(url, ar, _ex);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_sidl_io_IOException_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fcast_sidl_ClassInfo(bi, _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_sidl_io_IOException_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_RuntimeException(url, ar, _ex);
+}
+
+struct sidl_RuntimeException__object* 
+  skel_sidl_io_IOException_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fcast_sidl_RuntimeException(bi, _ex);
+}
+
+struct sidl_SIDLException__object* 
+  skel_sidl_io_IOException_fconnect_sidl_SIDLException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_SIDLException(url, ar, _ex);
+}
+
+struct sidl_SIDLException__object* 
+  skel_sidl_io_IOException_fcast_sidl_SIDLException(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fcast_sidl_SIDLException(bi, _ex);
+}
+
+struct sidl_io_Deserializer__object* 
+  skel_sidl_io_IOException_fconnect_sidl_io_Deserializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_io_Deserializer(url, ar, _ex);
+}
+
+struct sidl_io_Deserializer__object* 
+  skel_sidl_io_IOException_fcast_sidl_io_Deserializer(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fcast_sidl_io_Deserializer(bi, _ex);
+}
+
+struct sidl_io_IOException__object* 
+  skel_sidl_io_IOException_fconnect_sidl_io_IOException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_io_IOException(url, ar, _ex);
+}
+
+struct sidl_io_IOException__object* 
+  skel_sidl_io_IOException_fcast_sidl_io_IOException(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fcast_sidl_io_IOException(bi, _ex);
+}
+
+struct sidl_io_Serializable__object* 
+  skel_sidl_io_IOException_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_io_Serializable(url, ar, _ex);
+}
+
+struct sidl_io_Serializable__object* 
+  skel_sidl_io_IOException_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fcast_sidl_io_Serializable(bi, _ex);
+}
+
+struct sidl_io_Serializer__object* 
+  skel_sidl_io_IOException_fconnect_sidl_io_Serializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fconnect_sidl_io_Serializer(url, ar, _ex);
+}
+
+struct sidl_io_Serializer__object* 
+  skel_sidl_io_IOException_fcast_sidl_io_Serializer(void* bi,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_io_IOException_fcast_sidl_io_Serializer(bi, _ex);
 }
 
 struct sidl_io_IOException__data*

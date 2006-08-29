@@ -35,7 +35,7 @@ INCLUDEDIR2 = .
 LIBSIDL    = $(top_builddir)/sidl/libsidl.la
 
 dist_data_DATA = sidlx.sidl
-include_HEADERS = $(STUBHDRS) sidlx_common.h
+include_HEADERS = $(STUBHDRS) $(IORHDRS) sidlx_common.h
 
 lib_LTLIBRARIES = libsidlx.la 
 libsidlx_la_SOURCES = $(IMPLSRCS) $(IMPLHDRS) sidlx_common.c sidlx_common.h \
@@ -62,7 +62,7 @@ CLEANFILES = babel-stamp babel-temp libsidlx.scl \
 	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) \
 	babel.make.package babel.make.depends
 
-$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHEDRS) $(IMPLSRCS) $(IMPLHDRS) : babel-stamp
+$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) $(IMPLSRCS) $(IMPLHDRS) : babel-stamp
 	@if test -f $@; then \
 		touch $@; \
 	 else \
@@ -74,7 +74,7 @@ babel-stamp: $(srcdir)/sidlx.sidl libsidlx.scl
 	@rm -f babel-temp
 	@touch babel-temp
 	$(SHELL) ../../bin/babel --vpath="$(srcdir)" --server=C \
-	  --suppress-timestamp -! $(srcdir)/../sidl/sidl.sidl \
+	  -! $(srcdir)/../sidl/sidl.sidl \
 	$(srcdir)/sidlx.sidl
 	@mv -f babel-temp $@
 endif

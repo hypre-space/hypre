@@ -4,6 +4,12 @@
 #error Ignore this file.  Use babel_config.h instead.  This file exists to placate automake.
 
 
+/* Hexified form of release number: 2 hex digits each for major, minor,
+   bugfix, and alpha/beta/candidate/distributed */
+#ifndef BABEL_VERSION_HEX
+#undef BABEL_VERSION_HEX
+#endif
+
 /* Define to 1 if the `closedir' function returns void instead of `int'. */
 #ifndef CLOSEDIR_VOID
 #undef CLOSEDIR_VOID
@@ -431,6 +437,11 @@
 #undef HAVE_SYS_NDIR_H
 #endif
 
+/* Define to 1 if you have the <sys/select.h> header file. */
+#ifndef HAVE_SYS_SELECT_H
+#undef HAVE_SYS_SELECT_H
+#endif
+
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #ifndef HAVE_SYS_SOCKET_H
 #undef HAVE_SYS_SOCKET_H
@@ -439,6 +450,11 @@
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #ifndef HAVE_SYS_STAT_H
 #undef HAVE_SYS_STAT_H
+#endif
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#ifndef HAVE_SYS_TIME_H
+#undef HAVE_SYS_TIME_H
 #endif
 
 /* Define to 1 if you have the <sys/types.h> header file. */
@@ -593,6 +609,31 @@
 /* define if C++ requires old .h-style header includes */
 #ifndef REQUIRE_OLD_CXX_HEADER_SUFFIX
 #undef REQUIRE_OLD_CXX_HEADER_SUFFIX
+#endif
+
+/* Define to the type of arg 1 for `select'. */
+#ifndef SELECT_TYPE_ARG1
+#undef SELECT_TYPE_ARG1
+#endif
+
+/* Define to the type of args 2, 3 and 4 for `select'. */
+#ifndef SELECT_TYPE_ARG234
+#undef SELECT_TYPE_ARG234
+#endif
+
+/* Define to the type of arg 5 for `select'. */
+#ifndef SELECT_TYPE_ARG5
+#undef SELECT_TYPE_ARG5
+#endif
+
+/* This should always be defined for Babel 0.11.0 and beyond */
+#ifndef SIDL_CAST_INCREMENTS_REFCOUNT
+#undef SIDL_CAST_INCREMENTS_REFCOUNT
+#endif
+
+/* Define to 1 if the C compiler supports inline. */
+#ifndef SIDL_C_HAS_INLINE
+#undef SIDL_C_HAS_INLINE
 #endif
 
 /* Define SIDL_DYNAMIC_LIBRARY to force dynamic loading of libraries */
@@ -788,6 +829,11 @@
 /* Define to 1 if you have the ANSI C header files. */
 #ifndef STDC_HEADERS
 #undef STDC_HEADERS
+#endif
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#ifndef TIME_WITH_SYS_TIME
+#undef TIME_WITH_SYS_TIME
 #endif
 
 /* Version number of package */

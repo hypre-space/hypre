@@ -36,6 +36,25 @@
 #ifndef included_sidlType_h
 #include "sidlType.h"
 #endif
+
+#ifndef SIDL_INLINE_DECL
+#ifdef SIDL_C_HAS_INLINE
+#if (defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)) || !defined(__GNUC__)
+#define SIDL_C_INLINE_DECL inline
+#define SIDL_C_INLINE_DEFN extern
+#define SIDL_C_INLINE_REPEAT_DEFN 0
+#else
+#define SIDL_C_INLINE_DECL extern inline
+#define SIDL_C_INLINE_DEFN
+#define SIDL_C_INLINE_REPEAT_DEFN 1
+#endif
+#else /* !defined(SIDL_C_HAS_INLINE) */ 
+#define SIDL_C_INLINE_DECL
+#define SIDL_C_INLINE_DEFN
+#define SIDL_C_INLINE_REPEAT_DEFN 1
+#endif /* SIDL_C_HAS_INLINE */
+#endif /* SIDL_INLINE_DECL */
+
 #ifndef included_sidlArray_h
 #include "sidlArray.h"
 #endif

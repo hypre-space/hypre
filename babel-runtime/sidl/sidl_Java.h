@@ -46,6 +46,12 @@ typedef long long __int64;
 #include "sidl_BaseInterface_IOR.h"
 #include "sidl_BaseException_IOR.h"
 
+#define JAVA_CHECK(ENV_VAR) {\
+  if ((*ENV_VAR)-> ExceptionCheck(ENV_VAR)) {			  \
+    goto JAVA_EXIT; \
+  } \
+} 
+
 #ifdef __cplusplus
 extern "C" {
 #endif

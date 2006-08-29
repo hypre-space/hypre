@@ -65,18 +65,19 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT2],[
         # confirm that that F90 compiler can compile a trivial file issue146
 	AC_MSG_CHECKING([if F90 compiler works])
         AC_LANG_PUSH(Fortran)dnl
-        AC_TRY_COMPILE([],[       write (*,*) 'Hello world'
-],AC_MSG_RESULT([yes]),[
-        AC_MSG_RESULT([no])
-	AC_MSG_WARN([The F90 compiler $FC fails to compile a trivial program (see config.log).])
-	AC_MSG_WARN([Disabling F90 Support])
-	enable_fortran90="broken"
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[       write (*,*) 'Hello world'])],
+	  AC_MSG_RESULT([yes]),[
+          AC_MSG_RESULT([no])
+	  AC_MSG_WARN([The F90 compiler $FC fails to compile a trivial program (see config.log).])
+	  AC_MSG_WARN([Disabling F90 Support])
+	  enable_fortran90="broken"
         ])
         AC_LANG_POP([])
 	if test "X$enable_fortran90" != "Xbroken"; then
            # 5.a. Libraries (existence)
 	   dnl LLNL_F90_LIBRARY_LDFLAGS dnl slight mod to AC_FC_LIBRARY_LDFLAGS
 	   LLNL_FC_MAIN dnl changed to requie LLNL_FC_LIBRARY_LDFLAGS
+	   _STAR_RESTFP_FIX_FC
 	   LLNL_LIB_FCMAIN dnl needed to define the lib to include
            AC_FC_DUMMY_MAIN 
            LLNL_SORT_FCLIBS
@@ -117,6 +118,17 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT3],[
     FC=""
   fi
   AM_CONDITIONAL(SUPPORT_FORTRAN90, test "X$enable_fortran90" = "Xyes")
+  case "$target_os" in
+  "darwin"*) 
+     dnl Mac OSX's filesystem is case insensitive (i.e., brain damaged);
+     dnl hence, it needs a different suffix.
+     F90CPPSUFFIX=.f95
+     ;;
+  *)
+     F90CPPSUFFIX=.f90
+     ;;
+  esac
+  AC_SUBST(F90CPPSUFFIX)
   LLNL_WHICH_PROG(WHICH_FC)
   #end LLNL_CONFIRM_BABEL_F90_SUPPORT3
 ])

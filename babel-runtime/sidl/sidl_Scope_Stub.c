@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Scope_Stub.c
- * Symbol:        sidl.Scope-v0.9.3
+ * Symbol:        sidl.Scope-v0.9.15
  * Symbol Type:   enumeration
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Scope
@@ -31,8 +31,6 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  * 
  * WARNING: Automatically generated; changes will be lost
- * 
- * babel-version = 0.10.12
  */
 
 #include "sidl_Scope.h"

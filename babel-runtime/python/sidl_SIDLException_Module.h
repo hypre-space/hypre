@@ -1,8 +1,8 @@
 /*
  * File:          sidl_SIDLException_Module.h
- * Symbol:        sidl.SIDLException-v0.9.3
+ * Symbol:        sidl.SIDLException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   expose a constructor for the Python wrapper
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -63,7 +62,10 @@
 #define included_sidl_SIDLException_MODULE
 
 #include <Python.h>
-#include "babel_config.h"
+#include "sidlType.h"
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif /* HAVE_PTHREAD */
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,6 +76,7 @@ struct sidl__array;
 /* Forward declaration of IOR structure */
 struct sidl_SIDLException__object;
 struct sidl_SIDLException__array;
+struct sidl_BaseInterface__object;
 
 #define sidl_SIDLException__wrap_NUM 0
 #define sidl_SIDLException__wrap_RETURN PyObject *
@@ -111,11 +114,22 @@ struct sidl_SIDLException__array;
 #define sidl_SIDLException_PyType_RETURN PyTypeObject *
 #define sidl_SIDLException_PyType_PROTO (void)
 
-#define sidl_SIDLException__type_NUM 9
+#define sidl_SIDLException__connectI_NUM 9
+#define sidl_SIDLException__connectI_RETURN struct sidl_SIDLException__object* 
+#define sidl_SIDLException__connectI_PROTO (const char* url, sidl_bool ar, struct sidl_BaseInterface__object ** _ex)
 
-#define sidl_SIDLException__API_NUM 10
+#define sidl_SIDLException__rmicast_NUM 10
+#define sidl_SIDLException__rmicast_RETURN struct sidl_SIDLException__object* 
+#define sidl_SIDLException__rmicast_PROTO (void* bi, struct sidl_BaseInterface__object ** _ex)
+
+#define sidl_SIDLException__type_NUM 11
+
+#define sidl_SIDLException__API_NUM 12
 
 #ifdef sidl_SIDLException_INTERNAL
+
+#define sidl_SIDLException__import() ;
+
 
 /*
  * This declaration is not for clients.
@@ -162,7 +176,7 @@ sidl_SIDLException__type;
 
 #else
 
-static void **sidl_SIDLException__API;
+static void **sidl_SIDLException__API = NULL;
 
 #define sidl_SIDLException__wrap \
   (*((sidl_SIDLException__wrap_RETURN (*) \
@@ -218,11 +232,46 @@ static void **sidl_SIDLException__API;
   (sidl_SIDLException__API \
   [sidl_SIDLException_PyType_NUM])))
 
+#define sidl_SIDLException__connectI \
+  (*((sidl_SIDLException__connectI_RETURN (*) \
+  sidl_SIDLException__connectI_PROTO) \
+  (sidl_SIDLException__API \
+  [sidl_SIDLException__connectI_NUM])))
+
+#define sidl_SIDLException__rmicast \
+  (*((sidl_SIDLException__rmicast_RETURN (*) \
+  sidl_SIDLException__rmicast_PROTO) \
+  (sidl_SIDLException__API \
+  [sidl_SIDLException__rmicast_NUM])))
+
 #define sidl_SIDLException__type \
   ((PyObject *)(sidl_SIDLException__API[sidl_SIDLException__type_NUM]))
 
+#ifdef HAVE_PTHREAD
 #define sidl_SIDLException__import() \
 { \
+  pthread_mutex_t __sidl_pyapi_mutex = PTHREAD_MUTEX_INITIALIZER; \
+  pthread_mutex_lock(&__sidl_pyapi_mutex); \
+  if (!sidl_SIDLException__API) { \
+    PyObject *module = PyImport_ImportModule("sidl.SIDLException"); \
+    if (module != NULL) { \
+      PyObject *module_dict = PyModule_GetDict(module); \
+      PyObject *c_api_object = \
+        PyDict_GetItemString(module_dict, "_C_API"); \
+      if (c_api_object && PyCObject_Check(c_api_object)) { \
+        sidl_SIDLException__API = \
+          (void **)PyCObject_AsVoidPtr(c_api_object); \
+      } \
+      else { fprintf(stderr, "babel: sidl_SIDLException__import failed to lookup _C_API (%p %p %s).\n", c_api_object, c_api_object ? c_api_object->ob_type : NULL, c_api_object ? c_api_object->ob_type->tp_name : ""); }\
+      Py_DECREF(module); \
+    } else { fprintf(stderr, "babel: sidl_SIDLException__import failed to import its module.\n"); }\
+  }\
+  pthread_mutex_unlock(&__sidl_pyapi_mutex); \
+  pthread_mutex_destroy(&__sidl_pyapi_mutex); \
+}
+#else /* !HAVE_PTHREAD */
+#define sidl_SIDLException__import() \
+if (!sidl_SIDLException__API) { \
   PyObject *module = PyImport_ImportModule("sidl.SIDLException"); \
   if (module != NULL) { \
     PyObject *module_dict = PyModule_GetDict(module); \
@@ -236,6 +285,7 @@ static void **sidl_SIDLException__API;
     Py_DECREF(module); \
   } else { fprintf(stderr, "babel: sidl_SIDLException__import failed to import its module.\n"); }\
 }
+#endif /* HAVE_PTHREAD */
 
 #endif
 

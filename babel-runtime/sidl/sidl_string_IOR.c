@@ -29,6 +29,7 @@ static void swap_i32(int32_t *i1, int32_t *i2)
 }
 
 #include "sidl_String.h"
+#define HELPER_VARIABLE
 #define COPY_VALUE(x) sidl_String_strdup((x))
 #define DESTROY_VALUE(x) sidl_String_free((x))
 #define INIT_VALUES(ptr,size) if (ptr) memset((ptr), 0, (size))
@@ -72,6 +73,7 @@ sidl_string__array_destroy(struct sidl_string__array* array)
     char * *ptr = array->d_firstElement;
     int32_t i;
     int32_t size = 1;
+    HELPER_VARIABLE;
     for(i = 0; i < array->d_metadata.d_dimen;++i){
       size *= (1 + array->d_metadata.d_upper[i] -
                    array->d_metadata.d_lower[i]);
@@ -358,6 +360,7 @@ sidl_string__array_create1dInit(int32_t len,
       const char * * restrict src =
         (const char * * restrict)data;
       char * * restrict dest;
+      HELPER_VARIABLE;
       result->d_metadata.d_stride[0] = 1;
       result->d_firstElement =
         (char * *)malloc(len*sizeof(char *));
@@ -620,6 +623,7 @@ sidl_string__array_get1(const struct sidl_string__array* array,
   if (array && (1 == array->d_metadata.d_dimen) &&
       ((array->d_metadata.d_lower[0] <= i1) &&
       (array->d_metadata.d_upper[0] >= i1))) {
+    HELPER_VARIABLE;
     return COPY_VALUE(*(array->d_firstElement +
                         (i1 - array->d_metadata.d_lower[0])*
                         array->d_metadata.d_stride[0]));
@@ -642,6 +646,7 @@ sidl_string__array_get2(const struct sidl_string__array* array,
     register int c2 = (array->d_metadata.d_upper[0] >= i1);
     register int c3 = (array->d_metadata.d_lower[1] <= i2);
     register int c4 = (array->d_metadata.d_upper[1] >= i2);
+    HELPER_VARIABLE;
     c1 = c1 && c2;
     c3 = c3 && c4;
     if (c1 && c3) {
@@ -670,6 +675,7 @@ sidl_string__array_get3(const struct sidl_string__array* array,
     register int c1 = (array->d_metadata.d_lower[0] <= i1);
     register int c2 = (array->d_metadata.d_lower[1] <= i2);
     register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    HELPER_VARIABLE;
     c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
     c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
     c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -703,6 +709,7 @@ sidl_string__array_get4(const struct sidl_string__array* array,
     register int c2 = (array->d_metadata.d_lower[1] <= i2);
     register int c3 = (array->d_metadata.d_lower[2] <= i3);
     register int c4 = (array->d_metadata.d_lower[3] <= i4);
+    HELPER_VARIABLE;
     c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
     c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
     c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -743,6 +750,7 @@ sidl_string__array_get5(const struct sidl_string__array* array,
     register int c3 = (array->d_metadata.d_lower[2] <= i3);
     register int c4 = (array->d_metadata.d_lower[3] <= i4);
     register int c5 = (array->d_metadata.d_lower[4] <= i5);
+    HELPER_VARIABLE;
     c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
     c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
     c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -789,6 +797,7 @@ sidl_string__array_get6(const struct sidl_string__array* array,
     register int c4 = (array->d_metadata.d_lower[3] <= i4);
     register int c5 = (array->d_metadata.d_lower[4] <= i5);
     register int c6 = (array->d_metadata.d_lower[5] <= i6);
+    HELPER_VARIABLE;
     c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
     c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
     c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -850,6 +859,7 @@ sidl_string__array_get7(const struct sidl_string__array* array,
         register int c5 = (array->d_metadata.d_lower[4] <= i5);
         register int c6 = (array->d_metadata.d_lower[5] <= i6);
         register int c7 = (array->d_metadata.d_lower[6] <= i7);
+        HELPER_VARIABLE;
         c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
         c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
         c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -896,6 +906,7 @@ sidl_string__array_get(const struct sidl_string__array* array,
   if (array) {
     char * *result = array->d_firstElement;
     int32_t i = 0;
+    HELPER_VARIABLE;
     while (i < array->d_metadata.d_dimen) {
       if ((indices[i] < array->d_metadata.d_lower[i]) ||
           (indices[i] > array->d_metadata.d_upper[i]))
@@ -920,6 +931,7 @@ sidl_string__array_set1(struct sidl_string__array* array,
   if (array && (1 == array->d_metadata.d_dimen) &&
       ((array->d_metadata.d_lower[0] <= i1) &&
        (array->d_metadata.d_upper[0] >= i1))) {
+    HELPER_VARIABLE;
     DESTROY_VALUE(*(array->d_firstElement +
       (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0]));
     *(array->d_firstElement +
@@ -944,6 +956,7 @@ sidl_string__array_set2(struct sidl_string__array* array,
     register int c2 = (array->d_metadata.d_upper[0] >= i1);
     register int c3 = (array->d_metadata.d_lower[1] <= i2);
     register int c4 = (array->d_metadata.d_upper[1] >= i2);
+    HELPER_VARIABLE;
     c1 = c1 && c2;
     c3 = c3 && c4;
     if (c1 && c3) {
@@ -974,6 +987,7 @@ sidl_string__array_set3(struct sidl_string__array* array,
     register int c1 = (array->d_metadata.d_lower[0] <= i1);
     register int c2 = (array->d_metadata.d_lower[1] <= i2);
     register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    HELPER_VARIABLE;
     c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
     c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
     c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -1009,6 +1023,7 @@ sidl_string__array_set4(struct sidl_string__array* array,
     register int c2 = (array->d_metadata.d_lower[1] <= i2);
     register int c3 = (array->d_metadata.d_lower[2] <= i3);
     register int c4 = (array->d_metadata.d_lower[3] <= i4);
+    HELPER_VARIABLE;
     c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
     c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
     c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -1052,6 +1067,7 @@ sidl_string__array_set5(struct sidl_string__array* array,
     register int c3 = (array->d_metadata.d_lower[2] <= i3);
     register int c4 = (array->d_metadata.d_lower[3] <= i4);
     register int c5 = (array->d_metadata.d_lower[4] <= i5);
+    HELPER_VARIABLE;
     c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
     c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
     c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -1100,6 +1116,7 @@ sidl_string__array_set6(struct sidl_string__array* array,
     register int c4 = (array->d_metadata.d_lower[3] <= i4);
     register int c5 = (array->d_metadata.d_lower[4] <= i5);
     register int c6 = (array->d_metadata.d_lower[5] <= i6);
+    HELPER_VARIABLE;
     c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
     c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
     c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -1163,6 +1180,7 @@ sidl_string__array_set7(struct sidl_string__array* array,
         register int c5 = (array->d_metadata.d_lower[4] <= i5);
         register int c6 = (array->d_metadata.d_lower[5] <= i6);
         register int c7 = (array->d_metadata.d_lower[6] <= i7);
+        HELPER_VARIABLE;
         c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
         c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
         c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
@@ -1211,6 +1229,7 @@ sidl_string__array_set(struct sidl_string__array* array,
   if (array) {
     char * *result = array->d_firstElement;
     int32_t i = 0;
+    HELPER_VARIABLE;
     while (i < array->d_metadata.d_dimen) {
       if ((indices[i] < array->d_metadata.d_lower[i]) ||
           (indices[i] > array->d_metadata.d_upper[i])) return;
@@ -1330,6 +1349,7 @@ sidl_string__array_copy(const struct sidl_string__array* src,
       src->d_metadata.d_dimen) {
     const int32_t dimen = src->d_metadata.d_dimen;
     int32_t * restrict overlap = (int32_t *)malloc(sizeof(int32_t)*dimen*4);
+    HELPER_VARIABLE;
     if (overlap) {
       register char * const * restrict srcFirst =
         src->d_firstElement;
@@ -1433,14 +1453,18 @@ sidl_string__array_copy(const struct sidl_string__array* src,
         do {
           DESTROY_VALUE(*destFirst);
           *destFirst = COPY_VALUE(*srcFirst);
+          /* the whole point of this for-loop is to move forward one element */
           for(i = dimen - 1; i >= 0; --i) {
             ++(current[i]);
             if (current[i] >= overlap[i]) {
+            /* this dimension has been enumerated already reset to beginning */
               current[i] = 0;
+              /* prepare to next iteration of for-loop for i-1 */
               destFirst -= ((overlap[i]-1) * dst_stride[i]);
               srcFirst -= ((overlap[i]-1) * src_stride[i]);
             }
             else {
+              /* move forward one element in dimension i */
               destFirst += dst_stride[i];
               srcFirst += src_stride[i];
               break; /* exit for loop */

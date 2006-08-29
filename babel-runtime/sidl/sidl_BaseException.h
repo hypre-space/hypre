@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseException.h
- * Symbol:        sidl.BaseException-v0.9.3
+ * Symbol:        sidl.BaseException-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseException
@@ -32,14 +32,13 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_BaseException_h
 #define included_sidl_BaseException_h
 
 /**
- * Symbol "sidl.BaseException" (version 0.9.3)
+ * Symbol "sidl.BaseException" (version 0.9.15)
  * 
  * Every exception implements <code>BaseException</code>. This interface
  * declares the basic functionality to get and set error messages and stack
@@ -62,22 +61,189 @@ typedef struct sidl_BaseException__object* sidl_BaseException;
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
-
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
 #endif
 #ifndef included_sidl_io_Deserializer_h
 #include "sidl_io_Deserializer.h"
 #endif
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
+#endif
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
+#endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidl_BaseException_IOR_h
+#include "sidl_BaseException_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 sidl_BaseException
 sidl_BaseException__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * Return the message associated with the exception.
+ */
+SIDL_C_INLINE_DECL
+char*
+sidl_BaseException_getNote(
+  /* in */ sidl_BaseException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getNote)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Set the message associated with the exception.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_BaseException_setNote(
+  /* in */ sidl_BaseException self,
+  /* in */ const char* message,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_setNote)(
+    self->d_object,
+    message,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Returns formatted string containing the concatenation of all 
+ * tracelines.
+ */
+SIDL_C_INLINE_DECL
+char*
+sidl_BaseException_getTrace(
+  /* in */ sidl_BaseException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getTrace)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Adds a stringified entry/line to the stack trace.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_BaseException_addLine(
+  /* in */ sidl_BaseException self,
+  /* in */ const char* traceline,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addLine)(
+    self->d_object,
+    traceline,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Formats and adds an entry to the stack trace based on the 
+ * file name, line number, and method name.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_BaseException_add(
+  /* in */ sidl_BaseException self,
+  /* in */ const char* filename,
+  /* in */ int32_t lineno,
+  /* in */ const char* methodname,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_add)(
+    self->d_object,
+    filename,
+    lineno,
+    methodname,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packObj[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_BaseException_packObj(
+  /* in */ sidl_BaseException self,
+  /* in */ sidl_io_Serializer ser,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packObj)(
+    self->d_object,
+    ser,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  unpackObj[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_BaseException_unpackObj(
+  /* in */ sidl_BaseException self,
+  /* in */ sidl_io_Deserializer des,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_unpackObj)(
+    self->d_object,
+    des,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -92,9 +258,21 @@ sidl_BaseException__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidl_BaseException_addRef(
-  /* in */ sidl_BaseException self);
+  /* in */ sidl_BaseException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -103,32 +281,43 @@ sidl_BaseException_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidl_BaseException_deleteRef(
-  /* in */ sidl_BaseException self);
+  /* in */ sidl_BaseException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_BaseException_isSame(
   /* in */ sidl_BaseException self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidl_BaseException_queryInt(
-  /* in */ sidl_BaseException self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -136,66 +325,50 @@ sidl_BaseException_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_BaseException_isType(
   /* in */ sidl_BaseException self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self->d_object,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidl_BaseException_getClassInfo(
-  /* in */ sidl_BaseException self);
-
-/**
- * Return the message associated with the exception.
- */
-char*
-sidl_BaseException_getNote(
-  /* in */ sidl_BaseException self);
-
-/**
- * Set the message associated with the exception.
- */
-void
-sidl_BaseException_setNote(
   /* in */ sidl_BaseException self,
-  /* in */ const char* message);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Returns formatted string containing the concatenation of all 
- * tracelines.
- */
-char*
-sidl_BaseException_getTrace(
-  /* in */ sidl_BaseException self);
-
-/**
- * Adds a stringified entry/line to the stack trace.
- */
-void
-sidl_BaseException_addLine(
-  /* in */ sidl_BaseException self,
-  /* in */ const char* traceline);
-
-/**
- * Formats and adds an entry to the stack trace based on the 
- * file name, line number, and method name.
- */
-void
-sidl_BaseException_add(
-  /* in */ sidl_BaseException self,
-  /* in */ const char* filename,
-  /* in */ int32_t lineno,
-  /* in */ const char* methodname);
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidl_BaseException__object*
 sidl_BaseException__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -203,23 +376,94 @@ sidl_BaseException__cast(
 void*
 sidl_BaseException__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidl_BaseException__exec(
   /* in */ sidl_BaseException self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self->d_object,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidl_BaseException__getURL(
-  /* in */ sidl_BaseException self);
+  /* in */ sidl_BaseException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_BaseException__raddRef(
+  /* in */ sidl_BaseException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_BaseException__isRemote(
+  /* in */ sidl_BaseException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidl_BaseException__isLocal(
+  /* in */ sidl_BaseException self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -707,6 +951,25 @@ sidl_BaseException__array_ensure(
   struct sidl_BaseException__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidl_BaseException__connectI
+
+#pragma weak sidl_BaseException__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidl_BaseException__object*
+sidl_BaseException__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidl_BaseException__object*
+sidl_BaseException__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

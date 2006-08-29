@@ -1,8 +1,8 @@
 /*
  * File:          sidl_rmi_InstanceHandle_IOR.h
- * Symbol:        sidl.rmi.InstanceHandle-v0.9.3
+ * Symbol:        sidl.rmi.InstanceHandle-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.rmi.InstanceHandle
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_rmi_InstanceHandle_IOR_h
@@ -41,30 +40,50 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+struct sidl_rmi_InstanceHandle__object;
+#ifndef included_sidl_BaseInterface_IOR_h
+#include "sidl_BaseInterface_IOR.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*
- * Symbol "sidl.rmi.InstanceHandle" (version 0.9.3)
+ * Symbol "sidl.rmi.InstanceHandle" (version 0.9.15)
  * 
- * This interface holds the state information for handles to remote
- * objects.  Client-side messaging libraries are expected to implement
- * <code>sidl.rmi.InstanceHandle</code>, <code>sidl.rmi.Invocation</code>
- * and <code>sidl.rmi.Response</code>.
+ *  
+ * This interface holds the state information for handles to
+ * remote objects.  Client-side messaging libraries are expected
+ * to implement <code>sidl.rmi.InstanceHandle</code>,
+ * <code>sidl.rmi.Invocation</code> and
+ * <code>sidl.rmi.Response</code>.
  * 
- *  When a connection is created between a stub and a real object:
- *       sidl_rmi_InstanceHandle c = sidl_rmi_ProtocolFactory_createInstance( url, typeName );
+ * Every stub with a connection to a remote object holds a pointer
+ * to an InstanceHandle that manages the connection. Multiple
+ * stubs may point to the same InstanceHandle, however.  Babel
+ * takes care of the reference counting, but the developer should
+ * keep concurrency issues in mind.
  * 
- *  When a method is invoked:
- *       sidl_rmi_Invocation i = sidl_rmi_InstanceHandle_createInvocationHandle( methodname );
- *       sidl_rmi_Invocation_packDouble( i, "input_val" , 2.0 );
- *       sidl_rmi_Invocation_packString( i, "input_str", "Hello" );
- *       ...
- *       sidl_rmi_Response r = sidl_rmi_Invocation_invokeMethod( i );
- *       sidl_rmi_Response_unpackBool( i, "_retval", &succeeded );
- *       sidl_rmi_Response_unpackFloat( i, "output_val", &f );
+ * When a new remote object is created:
+ * sidl_rmi_InstanceHandle c = 
+ * sidl_rmi_ProtocolFactory_createInstance( url, typeName,
+ * _ex );
  * 
+ * When a new stub is created to connect to an existing remote
+ * instance:
+ * sidl_rmi_InstanceHandle c = 
+ * sidl_rmi_ProtocolFactory_connectInstance( url, _ex );
+ * 
+ * When a method is invoked:
+ * sidl_rmi_Invocation i = 
+ * sidl_rmi_InstanceHandle_createInvocation( methodname );
+ * sidl_rmi_Invocation_packDouble( i, "input_val" , 2.0 );
+ * sidl_rmi_Invocation_packString( i, "input_str", "Hello" );
+ * ...
+ * sidl_rmi_Response r = sidl_rmi_Invocation_invokeMethod( i );
+ * sidl_rmi_Response_unpackBool( i, "_retval", &succeeded );
+ * sidl_rmi_Response_unpackFloat( i, "output_val", &f );
  */
 
 struct sidl_rmi_InstanceHandle__array;
@@ -76,18 +95,18 @@ struct sidl_rmi_InstanceHandle__object;
 
 struct sidl_BaseException__array;
 struct sidl_BaseException__object;
-struct sidl_BaseInterface__array;
-struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
-struct sidl_io_Deserializer__array;
-struct sidl_io_Deserializer__object;
-struct sidl_io_Serializer__array;
-struct sidl_io_Serializer__object;
+struct sidl_RuntimeException__array;
+struct sidl_RuntimeException__object;
+struct sidl_io_Serializable__array;
+struct sidl_io_Serializable__object;
+struct sidl_rmi_Call__array;
+struct sidl_rmi_Call__object;
 struct sidl_rmi_Invocation__array;
 struct sidl_rmi_Invocation__object;
-struct sidl_rmi_NetworkException__array;
-struct sidl_rmi_NetworkException__object;
+struct sidl_rmi_Return__array;
+struct sidl_rmi_Return__object;
 
 /*
  * Declare the method entry point vector.
@@ -95,41 +114,69 @@ struct sidl_rmi_NetworkException__object;
 
 struct sidl_rmi_InstanceHandle__epv {
   /* Implicit builtin methods */
+  /* 0 */
   void* (*f__cast)(
     /* in */ void* self,
-    /* in */ const char* name);
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 1 */
   void (*f__delete)(
-    /* in */ void* self);
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 2 */
   void (*f__exec)(
     /* in */ void* self,
     /* in */ const char* methodName,
-    /* in */ struct sidl_io_Deserializer__object* inArgs,
-    /* in */ struct sidl_io_Serializer__object* outArgs);
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 3 */
   char* (*f__getURL)(
-    /* in */ void* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 4 */
+  void (*f__raddRef)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 5 */
+  sidl_bool (*f__isRemote)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 6 */
+  void (*f__set_hooks)(
+    /* in */ void* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
   void (*f_addRef)(
-    /* in */ void* self);
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_deleteRef)(
-    /* in */ void* self);
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_isSame)(
     /* in */ void* self,
-    /* in */ struct sidl_BaseInterface__object* iobj);
-  struct sidl_BaseInterface__object* (*f_queryInt)(
-    /* in */ void* self,
-    /* in */ const char* name);
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_isType)(
     /* in */ void* self,
-    /* in */ const char* name);
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    /* in */ void* self);
-  /* Methods introduced in sidl.rmi.InstanceHandle-v0.9.3 */
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.rmi.InstanceHandle-v0.9.15 */
   sidl_bool (*f_initCreate)(
     /* in */ void* self,
     /* in */ const char* url,
     /* in */ const char* typeName,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_initConnect)(
+    /* in */ void* self,
+    /* in */ const char* url,
+    /* in */ sidl_bool ar,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_io_Serializable__object* (*f_initUnserialize)(
     /* in */ void* self,
     /* in */ const char* url,
     /* out */ struct sidl_BaseInterface__object* *_ex);
@@ -139,7 +186,7 @@ struct sidl_rmi_InstanceHandle__epv {
   char* (*f_getObjectID)(
     /* in */ void* self,
     /* out */ struct sidl_BaseInterface__object* *_ex);
-  char* (*f_getURL)(
+  char* (*f_getObjectURL)(
     /* in */ void* self,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   struct sidl_rmi_Invocation__object* (*f_createInvocation)(
@@ -167,13 +214,6 @@ struct sidl_rmi_InstanceHandle__object {
  * 
  * 
  */
-#ifndef included_sidl_BaseInterface_IOR_h
-#include "sidl_BaseInterface_IOR.h"
-#endif
-#ifndef included_sidl_rmi_InstanceHandle_IOR_h
-#include "sidl_rmi_InstanceHandle_IOR.h"
-#endif
-
 /*
  * Symbol "sidl.rmi._InstanceHandle" (version 1.0)
  */
@@ -189,43 +229,70 @@ struct sidl_rmi__InstanceHandle__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
     /* in */ struct sidl_rmi__InstanceHandle__object* self,
-    /* in */ const char* name);
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f__delete)(
-    /* in */ struct sidl_rmi__InstanceHandle__object* self);
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f__exec)(
     /* in */ struct sidl_rmi__InstanceHandle__object* self,
     /* in */ const char* methodName,
-    /* in */ struct sidl_io_Deserializer__object* inArgs,
-    /* in */ struct sidl_io_Serializer__object* outArgs);
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   char* (*f__getURL)(
-    /* in */ struct sidl_rmi__InstanceHandle__object* self);
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__raddRef)(
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f__isRemote)(
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__set_hooks)(
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f__ctor)(
-    /* in */ struct sidl_rmi__InstanceHandle__object* self);
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__ctor2)(
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* in */ void* private_data,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f__dtor)(
-    /* in */ struct sidl_rmi__InstanceHandle__object* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
   void (*f_addRef)(
-    /* in */ struct sidl_rmi__InstanceHandle__object* self);
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_deleteRef)(
-    /* in */ struct sidl_rmi__InstanceHandle__object* self);
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_isSame)(
     /* in */ struct sidl_rmi__InstanceHandle__object* self,
-    /* in */ struct sidl_BaseInterface__object* iobj);
-  struct sidl_BaseInterface__object* (*f_queryInt)(
-    /* in */ struct sidl_rmi__InstanceHandle__object* self,
-    /* in */ const char* name);
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_isType)(
     /* in */ struct sidl_rmi__InstanceHandle__object* self,
-    /* in */ const char* name);
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    /* in */ struct sidl_rmi__InstanceHandle__object* self);
-  /* Methods introduced in sidl.rmi.InstanceHandle-v0.9.3 */
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.rmi.InstanceHandle-v0.9.15 */
   sidl_bool (*f_initCreate)(
     /* in */ struct sidl_rmi__InstanceHandle__object* self,
     /* in */ const char* url,
     /* in */ const char* typeName,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   sidl_bool (*f_initConnect)(
+    /* in */ struct sidl_rmi__InstanceHandle__object* self,
+    /* in */ const char* url,
+    /* in */ sidl_bool ar,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_io_Serializable__object* (*f_initUnserialize)(
     /* in */ struct sidl_rmi__InstanceHandle__object* self,
     /* in */ const char* url,
     /* out */ struct sidl_BaseInterface__object* *_ex);
@@ -235,7 +302,7 @@ struct sidl_rmi__InstanceHandle__epv {
   char* (*f_getObjectID)(
     /* in */ struct sidl_rmi__InstanceHandle__object* self,
     /* out */ struct sidl_BaseInterface__object* *_ex);
-  char* (*f_getURL)(
+  char* (*f_getObjectURL)(
     /* in */ struct sidl_rmi__InstanceHandle__object* self,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   struct sidl_rmi_Invocation__object* (*f_createInvocation)(
@@ -259,6 +326,11 @@ struct sidl_rmi__InstanceHandle__object {
   void*                                  d_data;
 };
 
+
+struct sidl_rmi__InstanceHandle__remote{
+  int d_refcount;
+  struct sidl_rmi_InstanceHandle__object *d_ih;
+};
 
 #ifdef __cplusplus
 }

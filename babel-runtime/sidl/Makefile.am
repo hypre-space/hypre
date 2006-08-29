@@ -114,10 +114,9 @@ CUSTOMHDRS = \
 	sidl_opaque_IOR.h \
 	sidl_string_IOR.h \
 	sidl_interface_IOR.h \
-	sidl_ucxx.hh \
-	sidl_cxx.hh \
+	sidl_cxx.hxx \
 	sidl_thread.h \
-	sidl_net.h \
+	sidl_exec_err.h \
 	sidl_hashtable.h \
 	sidl_hashtable_private.h
 
@@ -127,6 +126,7 @@ CUSTOMSRCS = \
 	$(PYTHON_SOURCES) \
 	sidlAssertUtils.c \
 	sidl_String.c \
+	sidl_Exception.c \
 	sidlArray.c \
 	sidlMemory.c \
 	sidlOps.c \
@@ -143,7 +143,6 @@ CUSTOMSRCS = \
 	sidl_string_IOR.c \
 	sidl_interface_IOR.c \
 	sidl_thread.c \
-	sidl_net.c \
 	sidl_hashtable.c
 
 libsidl.scl: 
@@ -181,7 +180,7 @@ $(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) $(IMPLSRCS
 babel-stamp: $(srcdir)/sidl.sidl libsidl.scl 
 	@rm -f babel-temp
 	@touch babel-temp
-	$(SHELL) ../../bin/babel --suppress-timestamp --no-default-repository\
+	$(SHELL) ../../bin/babel --include-referenced --no-default-repository\
 	  --generate-sidl-stdlib --server=c --vpath=$(srcdir) \
 	  $(srcdir)/sidl.sidl 
 	@if test "X$(srcdir)" != "X." ; then \

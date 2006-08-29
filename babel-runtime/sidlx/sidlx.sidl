@@ -8,318 +8,284 @@
 package sidlx version 0.1 { 
   
   /** 
-   * various things dealing with input/output
-   */
-  package io { 
-    
-    class IOException extends sidl.SIDLException {
-    }
-    
-    /**
-     * A generic interface for an input stream
-     */
-    interface IStream {            
-      
-      /** returns true iff the stream is at its end, or closed */
-      bool atEnd();
-      
-      /** low level read an array of bytes */
-      int read( in int nbytes, out array<char,1,row-major> data ) throws IOException;
-      
-      /** low level read */
-      int readline( out array<char,1,row-major> data ) throws IOException;
-	
-      /* get items */      
-      void get[Bool]( out bool item ) throws IOException ;
-      void get[Char]( out char item ) throws IOException ;
-      void get[Int]( out int item ) throws IOException ;
-      void get[Long]( out long item ) throws IOException ;
-      void get[Float]( out float item ) throws IOException ;
-      void get[Double]( out double item ) throws IOException ;
-      void get[Fcomplex]( out fcomplex item ) throws IOException ;
-      void get[Dcomplex]( out dcomplex item ) throws IOException ;
-      void get[String]( out string item ) throws IOException ;
-      // void get[Serializable]( out Serializable item ) throws IOException;
-      
-      /* get arrays of items */
-     // void get[BoolArray]( out array<bool> item ) throws IOException ;
-     // void get[CharArray]( out array<char> item ) throws IOException ;
-     // void get[IntArray]( out array<int> item ) throws IOException ;
-     // void get[LongArray]( out array<long> item ) throws IOException ;
-     // void get[FloatArray]( out array<float> item ) throws IOException ;
-     // void get[DoubleArray]( out array<double> item ) throws IOException ;
-     // void get[FcomplexArray]( out array<fcomplex> item ) throws IOException ;
-     // void get[DcomplexArray]( out array<dcomplex> item ) throws IOException ;
-     // void get[StringArray]( out array<string> item ) throws IOException ;
-     // void get[SerializableArray]( out array<Serializable> item ) throws IOException ;
-      
-    }
-    
-    /**
-     * A generic interface for an output stream
-     */
-    interface OStream { 
-      
-      /** flushes the buffer, if any */
-      void flush();
-      
-      /** low level write for an array of bytes */
-      int write( in array<char,1,row-major> data ) throws IOException;
-      
-      /* put items */
-     void put[Bool]( in bool item ) throws IOException ;
-     void put[Char]( in char item ) throws IOException ;
-     void put[Int]( in int item ) throws IOException ;
-     void put[Long]( in long item ) throws IOException ;
-     void put[Float]( in float item ) throws IOException ;
-     void put[Double]( in double item ) throws IOException ;
-     void put[Fcomplex]( in fcomplex item ) throws IOException ;
-     void put[Dcomplex]( in dcomplex item ) throws IOException ;
-     void put[String]( in string item ) throws IOException ;
-        //void put[Serializable]( in Serializable item ) throws IOException;
-      
-      /* put arrays of items */
-      // void put[BoolArray]( in array<bool> item ) throws IOException ;
-      // void put[CharArray]( in array<char> item ) throws IOException ;
-      // void put[IntArray]( in array<int> item ) throws IOException ;
-      // void put[LongArray]( in array<long> item ) throws IOException ;
-      // void put[FloatArray]( in array<float> item ) throws IOException ;
-      // void put[DoubleArray]( in array<double> item ) throws IOException ;
-      // void put[FcomplexArray]( in array<fcomplex> item ) throws IOException ;
-      // void put[DcomplexArray](in array<dcomplex> item ) throws IOException ;
-      // void put[StringArray]( in array<string> item ) throws IOException ;
-      // void put[SerializableArray]( in array<Serializable> item ) throws IOException;
-    }
-    
-    interface IOStream extends IStream, OStream {}
-
-    interface Serializable {
-      void pack( in OStream ostr );
-      void unpack( in IStream istr );
-    } 
-
-    /**
-     * Simple text-based input stream 
-     * some datatypes (e.g. strings, arrays, etc require special formatting)
-     * undefined behavior with non-whitespace separated fields.
-     */
-    class TxtIStream implements-all IStream {
-      /* set file descriptor */
-      void setFD(in int fd);
-    }
-
-    /**
-     * Simple text-based output stream appends spaces
-     */
-    class TxtOStream implements-all OStream {
-      /* set file descriptor */
-      void setFD( in int fd );
-    }
-
-    /**
-     * Simple text-based output stream appends spaces
-     */
-    class TxtIOStream implements-all IOStream {
-      /* set file descriptor */
-      void setFD( in int fd );
-    }
-
-    /*
-     * Binary stream: expects network-ordered bytes
-     */
-    // class BinIStream implements-all IStream {}
-
-    /*
-     * Binary Output Stream: writes in network-ordered bytes.
-     */
-    // class BinOStream implements-all OStream {}
-  }
-  
-  /** 
    *
    */
   package rmi { 
-        /**
-     * Generic exception for network failures  (this has been turned into sidl.rmi.NetworkException)
-     */
-    //interface NetworkException extends sidl.BaseException {}
-
     /**
      * Generic Network Exception
      */
     class GenNetworkException extends sidl.rmi.NetworkException {}	
 
-   /**
-    *  Basic socket functionality, writeline, readline, etc.  Should be threadsafe
-    *  (As long as you don't have multiple threads on the same socket) 	
-    */
-    interface Socket {
-      int close() throws sidl.rmi.NetworkException;
-      int readn(in int nbytes, inout array<char> data) throws sidl.rmi.NetworkException; 	
-      int readline( in int nbytes, inout array<char> data) throws sidl.rmi.NetworkException; 	
-      int readstring( in int nbytes, inout array<char> data) throws sidl.rmi.NetworkException; 
-      int readstring_alloc(inout array<char> data) throws sidl.rmi.NetworkException; 
-      int readint(inout int data) throws sidl.rmi.NetworkException;
-      int writen(in int nbytes, in array<char> data) throws sidl.rmi.NetworkException;
-      int writestring(in int nbytes, in array<char> data) throws sidl.rmi.NetworkException; 
-      int writeint(in int data) throws sidl.rmi.NetworkException;
-      void setFileDescriptor(in int fd) throws sidl.rmi.NetworkException;
-      int  getFileDescriptor() throws sidl.rmi.NetworkException;
-    }
-
-  /**
-   *  Basic functionality for an IPv4 Socket.  Implements most of the functions in Socket
-   */ 	
-    class IPv4Socket implements-all Socket {
-      int getsockname(inout int address, inout int port) throws sidl.rmi.NetworkException;
-      int getpeername(inout int address, inout int port) throws sidl.rmi.NetworkException;
-    }	
-
-  /**
-   * Automatically sets up a port for listening for new connections
-   */	
-    class ServerSocket extends IPv4Socket {
-      int init(in int port) throws sidl.rmi.NetworkException;
-      Socket accept() throws sidl.rmi.NetworkException;
-   }
-
-  /**
-   * Automatically sets up a port for listening for new connections
-   */
-   class ClientSocket extends IPv4Socket {
-      int init(in string hostname, in int port) throws sidl.rmi.NetworkException;
-   }
-
-  /**
-   * Simple socket passed back by accept
-   */
-   class ChildSocket extends IPv4Socket {
-      void init(in int fileDes) throws sidl.rmi.NetworkException;
-   }
+    /**
+     * No Server Exception: No server has been initilizaed in the Server Registry
+     */
+    class NoServerException extends sidl.rmi.NetworkException {}	
 
     /**
      * A multi-threaded base class for simple network servers.
+     *
+     * This server takes the following flags:
+     *  1: verbose output (to stdout)
      */
-    abstract class SimpleServer { 
+    abstract class SimpleServer implements sidl.rmi.ServerInfo { 
       
       /**
-       * set which port number to bind to
+       * Set the maximum size of the client thread pool.
+       * (default = 1024)
        */
-      void setPort( in int port ) throws sidl.SIDLException;
+      void setMaxThreadPool( in int max );
+
+      /**
+       * request a specific port number
+       * returns true iff request is satisfied
+       */ 
+      bool requestPort( in int port );
+
+      /**
+       * Request the minimum available port in 
+       * a range.  Returns true
+       *
+       */
+      bool requestPort[InRange]( in int minport, in int maxport );
+	 
+
+      /**
+       * get the port that this Server is bound to
+       */
+      int getPort();
+
+      /**
+       * get the network name of this computer
+       */
+      string getServerName();
+
+      /**
+       * get the full URL for exporting objects
+       */
+      string getServerURL(in string objID);
+
+      /**
+       * run the server (must have port specified first), if a threaded server,
+       * returns the tid of the server thread for joining.
+       */
+      long run();
+
+      /**
+       * cleanly shutdown the orb.
+       */
+      void shutdown();
+
       
       /**
-       * run the server (must have port specified first)
+       * invoked by child processes, takes a connected socket, ready for
+       * communications. 
        */
-      void run() throws sidl.SIDLException;
-      
+      abstract void serviceRequest( in Socket sock );
+
       /**
-       * invoked by child processes, client_fd is a UNIX-style file descriptor 
-       * that is an essential the socket to the connecting client
+       * This gets an array of logged exceptions.  If an exception can
+       * not be thrown back to the caller, we log it with the Server.  This 
+       * gets the array of all those exceptions.
+       *  THIS IS SOMETHING OF A TEST! THIS MAY CHANGE!
        */
-      abstract void serviceRequest( in Socket sock ) throws sidl.SIDLException;
-      
+      abstract array<sidl.io.Serializable,1> getExceptions();
     }
 
     /**
-     * Echos the string back to the client... useful for network debuggin
+     * A simple example orb, using the simhandle protocol (written by Jim)
      */
-    //class EchoServer extends SimpleServer { 
-    //  void serviceRequest( in Socket sock ) throws sidl.SIDLException;
-    //}
+    class SimpleOrb extends SimpleServer { 
+      void serviceRequest( in Socket sock );
+
+      /**
+       * Get the full URL for exporting objects
+       */	
+      string getServerURL(in string objID);
+
+      /* Needed by Babel to determine if a url points to a local or remote object
+       * users should never need this.  Returns the objectID if is local, Null otherwise. 
+       */	
+      string isLocalObject(in string url);
+
+      /**
+       * Get the short name of the protocol this ORB supports
+       */
+      string getProtocol();
+
+      /**
+       * This gets an array of logged exceptions.  If an exception can
+       * not be thrown back to the caller, we log it with the Server.  This 
+       * gets the array of all those exceptions.
+       *  THIS IS SOMETHING OF A TEST! THIS MAY CHANGE!
+       */
+      array<sidl.io.Serializable,1> getExceptions();
+	
+    }
+      	
+    /**
+     * implementation of InstanceHandle using the Simhandle Protocol (written by Jim)
+     */
+    class SimHandle implements-all sidl.rmi.InstanceHandle{
+
+    }
+	
+    /**
+     * implementation of Invocation using the Simhandle Protocol (written by Jim)
+     */
+    class Simvocation implements-all sidl.rmi.Invocation{
+      void init(in string methodName, in string objectid, in Socket sock);
+      string getMethodName();	
+    }
 
     /**
-     * Echos the string back to the client using Jim's test protocol
+     * implementation of Response using the Simhandle Protocol (written by Jim)
      */
-    class JimEchoServer extends SimpleServer { 
-      void serviceRequest( in Socket sock  ) throws sidl.SIDLException;
+    class Simsponse implements-all sidl.rmi.Response{
+      void init(in string methodName, in string objectid, in Socket sock);
+      bool test(in int secs, in int usecs);
+      void pullData();	
+      string getMethodName();	
+      string getObjectID();	
     }	
 
     /**
-     * An incomplete crack at a an orb
+     * implementation of a Ticket 
      */
-    class SimpleOrb extends SimpleServer { 
-      void serviceRequest( in Socket sock ) throws sidl.SIDLException;
+    class SimpleTicket implements-all sidl.rmi.Ticket { 
+      void setResponse( in sidl.rmi.Response r );
     }
-      	
 
+    class SimpleTicketBook implements-all sidl.rmi.TicketBook {
+    }
 
-  /**
-   * Some basic useful functions
-   */
-   class Common {
-     static int fork() throws sidl.rmi.NetworkException; 
-     static int gethostbyname(in string hostname) throws sidl.rmi.NetworkException; 
-   }
-
-  /**
-   * implementation of InstanceHandle using the Simocol (simple-protocol), 
-   *	contains all the serialization code
-   */
-   class SimHandle implements-all sidl.rmi.InstanceHandle{
-
-   }
-	
-
-  /**
-   * implementation of Invocation using the Simocol (simple-protocol), 
-   *	contains all the serialization code
-   */
-   class Simvocation implements-all sidl.rmi.Invocation{
-     void init(in string methodName, in string className, in string objectid, in Socket sock) throws sidl.rmi.NetworkException;
-     string getMethodName() throws sidl.rmi.NetworkException;	
-   }
-
-  /**
-   * implementation of Response using the Simocol (simple-protocol), 
-   *	contains all the serialization code
-   */
-   class Simsponse implements-all sidl.rmi.Response{
-     void init(in string methodName, in string className, in string objectid, in Socket sock) throws sidl.rmi.NetworkException;
-     string getMethodName() throws sidl.rmi.NetworkException;	
-     string getClassName() throws sidl.rmi.NetworkException;	
-     string getObjectID() throws sidl.rmi.NetworkException;	
-   }	
-
-   /**
-    * There are 3 basic types of calls on the server side, CREATE, EXEC, and CONNECT.
-    * This definese them 
-    */
+    /**
+     * There are 3 basic types of calls on the server side, CREATE, EXEC, and SERIAL.
+     * This enumeration defines them.  
+     */
     enum CallType {
-     /** Create and register a new instance. */
-     CREATE,
-     /** Call a method. */
-     EXEC,
-     /** Connect to an existing instance. */
-     CONNECT
-  }
+      /** Create and register a new instance. */
+      CREATE,
+        /** Call a method. */
+        EXEC,
+        /** Request a serializable object */
+        SERIAL
+        }
 
+    /**
+     * This type is used to pack return (out/inout) arguments on the server
+     * side after a method has been exececuted.
+     */	 
+    class SimReturn implements-all sidl.rmi.Return {
 
-      /**
-       * This type is used to pack return (out/inout) arguments on the server
-       * side after a method has been exec'd.
-       */	 
-      class SimReturn implements-all sidl.io.Serializer {
-
-          void init(in string methodName, in string className, in string objectid, in Socket sock) throws sidl.rmi.NetworkException;
+      void init(in string methodName, in string objectid, in Socket sock);
 	  
-          string getMethodName() throws sidl.rmi.NetworkException;	
+      string getMethodName();	
 
-	  /** this method may be called only once at the end of the object's lifetime */
-	  void SendReturn() throws sidl.rmi.NetworkException;
-      }
+      /** this method is the last call on a return object.*/
+      void SendReturn();
+    }
+
+    /**
+     * This type is created on the server side to get inargs off the network and 
+     * pass them into exec.	
+     */
+    class SimCall implements-all sidl.rmi.Call { 
+      void init(in Socket sock);
+
+      string getMethodName();	  	
+      string getObjectID();
+
+      CallType getCallType();
+    }
+
+    /**
+     * Some basic useful functions
+     */
+    class Common {
+      static int fork();
+      static int getHostIP(in string hostname); 
+      static string getCanonicalName(in string hostname);	
+    }
+
+
+    /** NOT REALLY BABEL RMI RELATED BELOW THIS LINE-------------------------------------*/ 
+
+    /**
+     *  Basic socket functionality, writeline, readline, etc.  Should be threadsafe
+     *  (As long as you don't have multiple threads on the same socket) 	
+     */
+    interface Socket {
+      int close();
+      int readn(in int nbytes, inout array<char> data); 	
+      int readline( in int nbytes, inout array<char> data); 	
+      int readstring( in int nbytes, inout array<char> data); 
+      int readstring_alloc(inout array<char> data); 
+      int readint(inout int data);
+      int writen(in int nbytes, in array<char> data);
+      int writestring(in int nbytes, in array<char> data); 
+      int writeint(in int data);
+      void setFileDescriptor(in int fd);
+      int  getFileDescriptor();
+      bool test(in int secs, in int usecs);
+    }
+
+ 
+    /** 
+     * Echos strings back to the client using Jim's echo protocol
+     */
+    class JimEchoServer extends SimpleServer { 
+      void serviceRequest( in Socket sock  );
 
       /**
-       * This type is created on the server side to get inargs off the network and 
-       * pass them into exec.	
-       */
-      class SimCall implements-all sidl.io.Deserializer { 
-        void init(in Socket sock) throws sidl.rmi.NetworkException;
+       * Get the full URL for exporting objects (Doesn't do anything in this server)
+       */	
+      string getServerURL(in string objID);
 
-        string getMethodName() throws sidl.rmi.NetworkException;	  	
-	string getObjectID() throws sidl.rmi.NetworkException;
-	string getClassName() throws sidl.rmi.NetworkException;
-	CallType getCallType() throws sidl.rmi.NetworkException;
-      }
+      /* Needed by Babel to determine if a url points to a local or remote object
+       * users should never need this.  Returns the objectID if is local, Null otherwise. 
+       * Doesn't do anything in this server.
+       */	
+      string isLocalObject(in string url);
+ 
+      /**
+       * This gets an array of logged exceptions.  If an exception can
+       * not be thrown back to the caller, we log it with the Server.  This 
+       * gets the array of all those exceptions.
+       *  THIS IS SOMETHING OF A TEST! THIS MAY CHANGE!
+       */
+      array<sidl.io.Serializable,1> getExceptions();	
+    }	
+
+    /**
+     *  Basic functionality for an IPv4 Socket.  Implements most of the functions in Socket
+     */ 	
+    class IPv4Socket implements-all Socket {
+      int getsockname(inout int address, inout int port);
+      int getpeername(inout int address, inout int port);
+    }	
+
+    /**
+     * Automatically sets up a port for listening for new connections
+     */	
+    class ServerSocket extends IPv4Socket {
+      /** if successful, returns 0 */
+      int init(in int port);
+      Socket accept();
+    }
+
+    /**
+     * Automatically sets up a port for listening for new connections
+     */
+    class ClientSocket extends IPv4Socket {
+      int init(in string hostname, in int port);
+    }
+
+    /**
+     * Simple socket passed back by accept
+     */
+    class ChildSocket extends IPv4Socket {
+      void init(in int fileDes);
+    }
 
   } // end package sidlx.rmi
 

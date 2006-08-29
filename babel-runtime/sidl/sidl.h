@@ -1,8 +1,8 @@
 /*
  * File:          sidl.h
- * Symbol:        sidl-v0.9.3
+ * Symbol:        sidl-v0.9.15
  * Symbol Type:   package
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_BaseClass_h
@@ -43,6 +42,9 @@
 #endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
+#endif
+#ifndef included_sidl_CastException_h
+#include "sidl_CastException.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
@@ -62,8 +64,17 @@
 #ifndef included_sidl_InvViolation_h
 #include "sidl_InvViolation.h"
 #endif
+#ifndef included_sidl_LangSpecificException_h
+#include "sidl_LangSpecificException.h"
+#endif
 #ifndef included_sidl_Loader_h
 #include "sidl_Loader.h"
+#endif
+#ifndef included_sidl_MemoryAllocationException_h
+#include "sidl_MemoryAllocationException.h"
+#endif
+#ifndef included_sidl_NotImplementedException_h
+#include "sidl_NotImplementedException.h"
 #endif
 #ifndef included_sidl_PostViolation_h
 #include "sidl_PostViolation.h"
@@ -73,6 +84,9 @@
 #endif
 #ifndef included_sidl_Resolve_h
 #include "sidl_Resolve.h"
+#endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
 #endif
 #ifndef included_sidl_SIDLException_h
 #include "sidl_SIDLException.h"

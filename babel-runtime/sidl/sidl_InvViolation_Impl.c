@@ -1,8 +1,8 @@
 /*
  * File:          sidl_InvViolation_Impl.c
- * Symbol:        sidl.InvViolation-v0.9.3
+ * Symbol:        sidl.InvViolation-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.InvViolation
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -41,20 +40,22 @@
  */
 
 /*
- * Symbol "sidl.InvViolation" (version 0.9.3)
+ * Symbol "sidl.InvViolation" (version 0.9.15)
  * 
  * <code>InvViolation</code> provides the basic marker for 
  * a invariant exception.
  */
 
 #include "sidl_InvViolation_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
-#line 52 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._includes) */
 /* Put additional includes or other arbitrary code here... */
 /* DO-NOT-DELETE splicer.end(sidl.InvViolation._includes) */
-#line 56 "sidl_InvViolation_Impl.c"
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -67,13 +68,14 @@ extern "C"
 #endif
 void
 impl_sidl_InvViolation__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 70 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._load) */
   /* Insert implementation here: sidl.InvViolation._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidl.InvViolation._load) */
-#line 76 "sidl_InvViolation_Impl.c"
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -87,15 +89,40 @@ extern "C"
 #endif
 void
 impl_sidl_InvViolation__ctor(
-  /* in */ sidl_InvViolation self)
+  /* in */ sidl_InvViolation self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 88 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._ctor) */
   /* Insert the implementation of the constructor method here... */
   /* DO-NOT-DELETE splicer.end(sidl.InvViolation._ctor) */
-#line 96 "sidl_InvViolation_Impl.c"
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_InvViolation__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_InvViolation__ctor2(
+  /* in */ sidl_InvViolation self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._ctor2) */
+  /* Insert-Code-Here {sidl.InvViolation._ctor2} (special constructor method) */
+  /* DO-NOT-DELETE splicer.end(sidl.InvViolation._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -108,66 +135,114 @@ extern "C"
 #endif
 void
 impl_sidl_InvViolation__dtor(
-  /* in */ sidl_InvViolation self)
+  /* in */ sidl_InvViolation self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 107 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._dtor) */
   /* Insert the implementation of the destructor method here... */
   /* DO-NOT-DELETE splicer.end(sidl.InvViolation._dtor) */
-#line 117 "sidl_InvViolation_Impl.c"
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct sidl_SIDLException__object* 
-  impl_sidl_InvViolation_fconnect_sidl_SIDLException(char* url,
+struct sidl_BaseClass__object* 
+  impl_sidl_InvViolation_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex) {
-  return sidl_SIDLException__connect(url, _ex);
-}
-char * impl_sidl_InvViolation_fgetURL_sidl_SIDLException(struct 
-  sidl_SIDLException__object* obj) {
-  return sidl_SIDLException__getURL(obj);
-}
-struct sidl_InvViolation__object* 
-  impl_sidl_InvViolation_fconnect_sidl_InvViolation(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_InvViolation__connect(url, _ex);
-}
-char * impl_sidl_InvViolation_fgetURL_sidl_InvViolation(struct 
-  sidl_InvViolation__object* obj) {
-  return sidl_InvViolation__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_sidl_InvViolation_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_sidl_InvViolation_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct sidl_BaseInterface__object* 
-  impl_sidl_InvViolation_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
-}
-char * impl_sidl_InvViolation_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
-}
-struct sidl_BaseException__object* 
-  impl_sidl_InvViolation_fconnect_sidl_BaseException(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseException__connect(url, _ex);
-}
-char * impl_sidl_InvViolation_fgetURL_sidl_BaseException(struct 
-  sidl_BaseException__object* obj) {
-  return sidl_BaseException__getURL(obj);
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_sidl_InvViolation_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  impl_sidl_InvViolation_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
 }
-char * impl_sidl_InvViolation_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseException__object* 
+  impl_sidl_InvViolation_fconnect_sidl_BaseException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseException__connectI(url, ar, _ex);
+}
+struct sidl_BaseException__object* 
+  impl_sidl_InvViolation_fcast_sidl_BaseException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseException__cast(bi, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidl_InvViolation_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidl_InvViolation_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidl_InvViolation_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidl_InvViolation_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_InvViolation__object* 
+  impl_sidl_InvViolation_fconnect_sidl_InvViolation(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_InvViolation__connectI(url, ar, _ex);
+}
+struct sidl_InvViolation__object* 
+  impl_sidl_InvViolation_fcast_sidl_InvViolation(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_InvViolation__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_InvViolation_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidl_InvViolation_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
+}
+struct sidl_SIDLException__object* 
+  impl_sidl_InvViolation_fconnect_sidl_SIDLException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_SIDLException__connectI(url, ar, _ex);
+}
+struct sidl_SIDLException__object* 
+  impl_sidl_InvViolation_fcast_sidl_SIDLException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_SIDLException__cast(bi, _ex);
+}
+struct sidl_io_Deserializer__object* 
+  impl_sidl_InvViolation_fconnect_sidl_io_Deserializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_io_Deserializer__connectI(url, ar, _ex);
+}
+struct sidl_io_Deserializer__object* 
+  impl_sidl_InvViolation_fcast_sidl_io_Deserializer(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_io_Deserializer__cast(bi, _ex);
+}
+struct sidl_io_Serializable__object* 
+  impl_sidl_InvViolation_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_io_Serializable__connectI(url, ar, _ex);
+}
+struct sidl_io_Serializable__object* 
+  impl_sidl_InvViolation_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_io_Serializable__cast(bi, _ex);
+}
+struct sidl_io_Serializer__object* 
+  impl_sidl_InvViolation_fconnect_sidl_io_Serializer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_io_Serializer__connectI(url, ar, _ex);
+}
+struct sidl_io_Serializer__object* 
+  impl_sidl_InvViolation_fcast_sidl_io_Serializer(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_io_Serializer__cast(bi, _ex);
 }

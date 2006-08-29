@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_JimEchoServer_Impl.c
  * Symbol:        sidlx.rmi.JimEchoServer-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for sidlx.rmi.JimEchoServer
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -18,19 +17,45 @@
 /*
  * Symbol "sidlx.rmi.JimEchoServer" (version 0.1)
  * 
- * Echos the string back to the client using Jim's test protocol
+ *  
+ * Echos strings back to the client using Jim's echo protocol
  */
 
 #include "sidlx_rmi_JimEchoServer_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
-#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer._includes) */
+#include "sidl_String.h"
 #include "sidlx_common.h"
 #include "sidlx_rmi_Socket.h"
 #include "sidlx_rmi_ServerSocket.h"
 #include "sidlx_rmi_ChildSocket.h"
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer._includes) */
-#line 33 "sidlx_rmi_JimEchoServer_Impl.c"
+
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
+static const struct sidlx_rmi_SimpleServer__epv* superEPV = NULL;
+
+void sidlx_rmi_JimEchoServer__superEPV(
+struct sidlx_rmi_SimpleServer__epv* parentEPV){
+  superEPV = parentEPV;
+}
+/*
+ * Get the full URL for exporting objects (Doesn't do anything in this server)
+ */
+
+static char*
+super_getServerURL(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ const char* objID,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  return (*superEPV->f_getServerURL)((struct sidlx_rmi_SimpleServer__object*)
+    self,
+    objID,
+    _ex);
+}
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -44,13 +69,14 @@ extern "C"
 #endif
 void
 impl_sidlx_rmi_JimEchoServer__load(
-  void)
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 47 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer._load) */
   /* insert implementation here: sidlx.rmi.JimEchoServer._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer._load) */
-#line 53 "sidlx_rmi_JimEchoServer_Impl.c"
+  }
 }
 /*
  * Class constructor called when the class is created.
@@ -64,15 +90,40 @@ extern "C"
 #endif
 void
 impl_sidlx_rmi_JimEchoServer__ctor(
-  /* in */ sidlx_rmi_JimEchoServer self)
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 65 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer._ctor) */
   /* insert implementation here: sidlx.rmi.JimEchoServer._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer._ctor) */
-#line 73 "sidlx_rmi_JimEchoServer_Impl.c"
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidlx_rmi_JimEchoServer__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidlx_rmi_JimEchoServer__ctor2(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer._ctor2) */
+  /* Insert-Code-Here {sidlx.rmi.JimEchoServer._ctor2} (special constructor method) */
+  /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -85,13 +136,15 @@ extern "C"
 #endif
 void
 impl_sidlx_rmi_JimEchoServer__dtor(
-  /* in */ sidlx_rmi_JimEchoServer self)
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
 {
-#line 84 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer._dtor) */
   /* insert implementation here: sidlx.rmi.JimEchoServer._dtor (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer._dtor) */
-#line 94 "sidlx_rmi_JimEchoServer_Impl.c"
+  }
 }
 
 /*
@@ -110,123 +163,191 @@ impl_sidlx_rmi_JimEchoServer_serviceRequest(
   /* in */ sidlx_rmi_Socket sock,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 105 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer.serviceRequest) */
-  anysockaddr un;
-  socklen_t len;
-  char buff[MAXLINE];
   struct sidl_char__array * data=NULL; 
   int i, n;
-  int32_t num;
-  sidl_BaseException s_b_e = NULL;
-  char * str = NULL;
-  /*  
-   len=MAXSOCKADDR;
-   s_getsockname(client_fd, (struct sockaddr  * ) un.data, &len, 
-	 	_ex);
-   if (*_ex) { printf("exception in s_getsockname\n"); }     SIDL_CHECK(*_ex);
-
-   if (un.sa.sa_family == AF_INET ) { 
-     struct sockaddr_in * cliaddr = (struct sockaddr_in *) &(un.sa);
-     printf("EchoServer: connection to %s port %d\n",
- 	   inet_ntop(AF_INET, &cliaddr->sin_addr, buff, sizeof(buff)),
- 	   ntohs(cliaddr->sin_port )); 
-   } else { 
-     printf("connection using family %d\n", un.sa.sa_family );
-   }
-  */
-  printf("about to start Maxline=%d\n",MAXLINE);
-  for ( i=0; i>-1; i++ ) { 
-    printf("%d. ready to read...\n", i);
-    n = sidlx_rmi_Socket_readstring_alloc(sock, &data, _ex);
-    /*n = s_read_string_alloc(client_fd, &data, _ex);*/
-    if (*_ex) { printf("exception in s_readstring\n"); }     SIDL_CHECK(*_ex);
+  for (;;) { 
+    i = sidlx_rmi_Socket_getFileDescriptor(sock, _ex); SIDL_CHECK(*_ex);
+    n = sidlx_rmi_Socket_readstring_alloc(sock, &data, _ex);   SIDL_CHECK(*_ex);
     if (n == 0) {
      break;
     }
-    printf("got %d bytes\n", n );
- 
-    sidlx_rmi_Socket_writestring(sock, n,data, _ex);
-    /*s_write_string(client_fd, n, data, _ex);*/
+    sidlx_rmi_Socket_writestring(sock, n,data, _ex); SIDL_CHECK(*_ex);
     sidl_char__array_deleteRef(data);
-    data = NULL;
-    if (*_ex) { printf("exception in s_writen\n"); }     SIDL_CHECK(*_ex);
   }
  EXIT:
-  s_b_e = sidl_BaseException__cast(*_ex);
-  str = sidl_BaseException_getNote(s_b_e);
-
-  printf("Exiting %s \n", str);
   if (data) { 
     sidl_char__array_deleteRef(data);
     data=NULL;
   }
   return;
-
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer.serviceRequest) */
-#line 167 "sidlx_rmi_JimEchoServer_Impl.c"
+  }
+}
+
+/*
+ * Get the full URL for exporting objects (Doesn't do anything in this server)
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidlx_rmi_JimEchoServer_getServerURL"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char*
+impl_sidlx_rmi_JimEchoServer_getServerURL(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ const char* objID,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer.getServerURL) */
+  return NULL;
+  /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer.getServerURL) */
+  }
+}
+
+/*
+ * Method:  isLocalObject[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidlx_rmi_JimEchoServer_isLocalObject"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char*
+impl_sidlx_rmi_JimEchoServer_isLocalObject(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ const char* url,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer.isLocalObject) */
+  return NULL;
+  /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer.isLocalObject) */
+  }
+}
+
+/*
+ * This gets an array of logged exceptions.  If an exception can
+ * not be thrown back to the caller, we log it with the Server.  This 
+ * gets the array of all those exceptions.
+ * THIS IS SOMETHING OF A TEST! THIS MAY CHANGE!
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidlx_rmi_JimEchoServer_getExceptions"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+struct sidl_io_Serializable__array*
+impl_sidlx_rmi_JimEchoServer_getExceptions(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer.getExceptions) */
+  return NULL;
+  /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer.getExceptions) */
+  }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct sidl_SIDLException__object* 
-  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_SIDLException(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_SIDLException__connect(url, _ex);
-}
-char * impl_sidlx_rmi_JimEchoServer_fgetURL_sidl_SIDLException(struct 
-  sidl_SIDLException__object* obj) {
-  return sidl_SIDLException__getURL(obj);
-}
-struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_ClassInfo__connect(url, _ex);
-}
-char * impl_sidlx_rmi_JimEchoServer_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj) {
-  return sidl_ClassInfo__getURL(obj);
-}
-struct sidlx_rmi_JimEchoServer__object* 
-  impl_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_JimEchoServer(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidlx_rmi_JimEchoServer__connect(url, _ex);
-}
-char * impl_sidlx_rmi_JimEchoServer_fgetURL_sidlx_rmi_JimEchoServer(struct 
-  sidlx_rmi_JimEchoServer__object* obj) {
-  return sidlx_rmi_JimEchoServer__getURL(obj);
-}
-struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidlx_rmi_Socket__connect(url, _ex);
-}
-char * impl_sidlx_rmi_JimEchoServer_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj) {
-  return sidlx_rmi_Socket__getURL(obj);
-}
-struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseInterface__connect(url, _ex);
-}
-char * impl_sidlx_rmi_JimEchoServer_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj) {
-  return sidl_BaseInterface__getURL(obj);
-}
-struct sidlx_rmi_SimpleServer__object* 
-  impl_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_SimpleServer(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidlx_rmi_SimpleServer__connect(url, _ex);
-}
-char * impl_sidlx_rmi_JimEchoServer_fgetURL_sidlx_rmi_SimpleServer(struct 
-  sidlx_rmi_SimpleServer__object* obj) {
-  return sidlx_rmi_SimpleServer__getURL(obj);
+struct sidl_BaseClass__object* 
+  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex) {
-  return sidl_BaseClass__connect(url, _ex);
+  impl_sidlx_rmi_JimEchoServer_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
 }
-char * impl_sidlx_rmi_JimEchoServer_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj) {
-  return sidl_BaseClass__getURL(obj);
+struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_JimEchoServer_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_JimEchoServer_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_JimEchoServer_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
+}
+struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_io_Serializable__connectI(url, ar, _ex);
+}
+struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_JimEchoServer_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_io_Serializable__cast(bi, _ex);
+}
+struct sidl_rmi_ServerInfo__object* 
+  impl_sidlx_rmi_JimEchoServer_fconnect_sidl_rmi_ServerInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_rmi_ServerInfo__connectI(url, ar, _ex);
+}
+struct sidl_rmi_ServerInfo__object* 
+  impl_sidlx_rmi_JimEchoServer_fcast_sidl_rmi_ServerInfo(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_rmi_ServerInfo__cast(bi, _ex);
+}
+struct sidlx_rmi_JimEchoServer__object* 
+  impl_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_JimEchoServer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidlx_rmi_JimEchoServer__connectI(url, ar, _ex);
+}
+struct sidlx_rmi_JimEchoServer__object* 
+  impl_sidlx_rmi_JimEchoServer_fcast_sidlx_rmi_JimEchoServer(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidlx_rmi_JimEchoServer__cast(bi, _ex);
+}
+struct sidlx_rmi_SimpleServer__object* 
+  impl_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_SimpleServer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidlx_rmi_SimpleServer__connectI(url, ar, _ex);
+}
+struct sidlx_rmi_SimpleServer__object* 
+  impl_sidlx_rmi_JimEchoServer_fcast_sidlx_rmi_SimpleServer(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidlx_rmi_SimpleServer__cast(bi, _ex);
+}
+struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_JimEchoServer_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidlx_rmi_Socket__connectI(url, ar, _ex);
+}
+struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_JimEchoServer_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidlx_rmi_Socket__cast(bi, _ex);
 }

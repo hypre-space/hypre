@@ -244,6 +244,7 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
 
   /** 
    *  Returns the imaginary part of a FloatComplex object. 
+   *  @param  z  A FloatComplex object.
    *  @return  The imaginary part of z.
    */
   public float imag() {
@@ -397,7 +398,7 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
 
   /** 
    *  Returns the difference of this FloatComplex object and a float, this-y.
-   *  @param  x  A float value.
+   *  @param  y  A float value.
    *  @return A newly constructed FloatComplex initialized to x-this.
    */
   public FloatComplex minusReverse(float x) {
@@ -525,7 +526,7 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
 
   /** 
    *  Returns the product of a float and this FloatComplex, x*this. 
-   *  @param  x  A float value.
+   *  @param  y  A float value.
    *  @return A newly constructed FloatComplex initialized to x*this.
    */
   public FloatComplex timesReverse(float x) {

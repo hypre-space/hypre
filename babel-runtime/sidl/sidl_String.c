@@ -108,6 +108,35 @@ char* sidl_String_strdup(const char* s)
    return str;
 }
 
+
+/*
+ * Duplicate the string.  If the argument is null, then the return value is
+ * null.  This new string should be deallocated by a call to the string free
+ * function <code>sidl_String_free</code>.
+ */
+char* sidl_String_strndup(const char* s, size_t n)
+{
+   char* str = NULL;
+   const char* p = s;
+   if (s && n>0) {
+     /* find  len=min(strlen(s),n) safely! */
+     int len=1;
+     while( (*p!='\0') && (len<n) ) { 
+       p++; len++;
+     }
+     if (len < n) { 
+       str = sidl_String_alloc(len);
+       memcpy(str,s,len-1);
+       str[len-1]='\0';
+     } else { 
+       str = sidl_String_alloc(n+1);
+       memcpy(str, s, n);
+       str[n]='\0';
+     }
+   }
+   return str;
+}
+
 /*
  * Return whether the two strings are equal.  Either or both of the two
  * argument strings may be null.

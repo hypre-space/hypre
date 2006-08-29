@@ -1,8 +1,8 @@
 /*
  * File:          sidl_ClassInfo_Module.h
- * Symbol:        sidl.ClassInfo-v0.9.3
+ * Symbol:        sidl.ClassInfo-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   expose a constructor for the Python wrapper
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -54,7 +53,10 @@
 #define included_sidl_ClassInfo_MODULE
 
 #include <Python.h>
-#include "babel_config.h"
+#include "sidlType.h"
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif /* HAVE_PTHREAD */
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,6 +67,7 @@ struct sidl__array;
 /* Forward declaration of IOR structure */
 struct sidl_ClassInfo__object;
 struct sidl_ClassInfo__array;
+struct sidl_BaseInterface__object;
 
 #define sidl_ClassInfo__wrap_NUM 0
 #define sidl_ClassInfo__wrap_RETURN PyObject *
@@ -102,9 +105,20 @@ struct sidl_ClassInfo__array;
 #define sidl_ClassInfo_PyType_RETURN PyTypeObject *
 #define sidl_ClassInfo_PyType_PROTO (void)
 
-#define sidl_ClassInfo__API_NUM 9
+#define sidl_ClassInfo__connectI_NUM 9
+#define sidl_ClassInfo__connectI_RETURN struct sidl_ClassInfo__object* 
+#define sidl_ClassInfo__connectI_PROTO (const char* url, sidl_bool ar, struct sidl_BaseInterface__object ** _ex)
+
+#define sidl_ClassInfo__rmicast_NUM 10
+#define sidl_ClassInfo__rmicast_RETURN struct sidl_ClassInfo__object* 
+#define sidl_ClassInfo__rmicast_PROTO (void* bi, struct sidl_BaseInterface__object ** _ex)
+
+#define sidl_ClassInfo__API_NUM 11
 
 #ifdef sidl_ClassInfo_INTERNAL
+
+#define sidl_ClassInfo__import() ;
+
 
 /*
  * This declaration is not for clients.
@@ -148,7 +162,7 @@ sidl_ClassInfo_PyType_PROTO;
 
 #else
 
-static void **sidl_ClassInfo__API;
+static void **sidl_ClassInfo__API = NULL;
 
 #define sidl_ClassInfo__wrap \
   (*((sidl_ClassInfo__wrap_RETURN (*) \
@@ -204,8 +218,43 @@ static void **sidl_ClassInfo__API;
   (sidl_ClassInfo__API \
   [sidl_ClassInfo_PyType_NUM])))
 
+#define sidl_ClassInfo__connectI \
+  (*((sidl_ClassInfo__connectI_RETURN (*) \
+  sidl_ClassInfo__connectI_PROTO) \
+  (sidl_ClassInfo__API \
+  [sidl_ClassInfo__connectI_NUM])))
+
+#define sidl_ClassInfo__rmicast \
+  (*((sidl_ClassInfo__rmicast_RETURN (*) \
+  sidl_ClassInfo__rmicast_PROTO) \
+  (sidl_ClassInfo__API \
+  [sidl_ClassInfo__rmicast_NUM])))
+
+#ifdef HAVE_PTHREAD
 #define sidl_ClassInfo__import() \
 { \
+  pthread_mutex_t __sidl_pyapi_mutex = PTHREAD_MUTEX_INITIALIZER; \
+  pthread_mutex_lock(&__sidl_pyapi_mutex); \
+  if (!sidl_ClassInfo__API) { \
+    PyObject *module = PyImport_ImportModule("sidl.ClassInfo"); \
+    if (module != NULL) { \
+      PyObject *module_dict = PyModule_GetDict(module); \
+      PyObject *c_api_object = \
+        PyDict_GetItemString(module_dict, "_C_API"); \
+      if (c_api_object && PyCObject_Check(c_api_object)) { \
+        sidl_ClassInfo__API = \
+          (void **)PyCObject_AsVoidPtr(c_api_object); \
+      } \
+      else { fprintf(stderr, "babel: sidl_ClassInfo__import failed to lookup _C_API (%p %p %s).\n", c_api_object, c_api_object ? c_api_object->ob_type : NULL, c_api_object ? c_api_object->ob_type->tp_name : ""); }\
+      Py_DECREF(module); \
+    } else { fprintf(stderr, "babel: sidl_ClassInfo__import failed to import its module.\n"); }\
+  }\
+  pthread_mutex_unlock(&__sidl_pyapi_mutex); \
+  pthread_mutex_destroy(&__sidl_pyapi_mutex); \
+}
+#else /* !HAVE_PTHREAD */
+#define sidl_ClassInfo__import() \
+if (!sidl_ClassInfo__API) { \
   PyObject *module = PyImport_ImportModule("sidl.ClassInfo"); \
   if (module != NULL) { \
     PyObject *module_dict = PyModule_GetDict(module); \
@@ -219,6 +268,7 @@ static void **sidl_ClassInfo__API;
     Py_DECREF(module); \
   } else { fprintf(stderr, "babel: sidl_ClassInfo__import failed to import its module.\n"); }\
 }
+#endif /* HAVE_PTHREAD */
 
 #endif
 

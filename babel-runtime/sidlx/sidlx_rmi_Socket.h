@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_Socket.h
  * Symbol:        sidlx.rmi.Socket-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for sidlx.rmi.Socket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_Socket_h
@@ -16,8 +15,8 @@
 /**
  * Symbol "sidlx.rmi.Socket" (version 0.1)
  * 
- *  Basic socket functionality, writeline, readline, etc.  Should be threadsafe
- *  (As long as you don't have multiple threads on the same socket) 	
+ * Basic socket functionality, writeline, readline, etc.  Should be threadsafe
+ * (As long as you don't have multiple threads on the same socket) 	
  */
 struct sidlx_rmi_Socket__object;
 struct sidlx_rmi_Socket__array;
@@ -39,28 +38,294 @@ typedef struct sidlx_rmi_Socket__object* sidlx_rmi_Socket;
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
 #ifndef included_sidl_SIDLException_h
 #include "sidl_SIDLException.h"
 #endif
-#ifndef included_sidl_rmi_NetworkException_h
-#include "sidl_rmi_NetworkException.h"
-#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidlx_rmi_Socket_IOR_h
+#include "sidlx_rmi_Socket_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 sidlx_rmi_Socket
 sidlx_rmi_Socket__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * Method:  close[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_close(
+  /* in */ sidlx_rmi_Socket self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_close)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  readn[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_readn(
+  /* in */ sidlx_rmi_Socket self,
+  /* in */ int32_t nbytes,
+  /* inout array<char> */ struct sidl_char__array** data,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_readn)(
+    self->d_object,
+    nbytes,
+    data,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  readline[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_readline(
+  /* in */ sidlx_rmi_Socket self,
+  /* in */ int32_t nbytes,
+  /* inout array<char> */ struct sidl_char__array** data,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_readline)(
+    self->d_object,
+    nbytes,
+    data,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  readstring[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_readstring(
+  /* in */ sidlx_rmi_Socket self,
+  /* in */ int32_t nbytes,
+  /* inout array<char> */ struct sidl_char__array** data,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_readstring)(
+    self->d_object,
+    nbytes,
+    data,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  readstring_alloc[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_readstring_alloc(
+  /* in */ sidlx_rmi_Socket self,
+  /* inout array<char> */ struct sidl_char__array** data,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_readstring_alloc)(
+    self->d_object,
+    data,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  readint[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_readint(
+  /* in */ sidlx_rmi_Socket self,
+  /* inout */ int32_t* data,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_readint)(
+    self->d_object,
+    data,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  writen[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_writen(
+  /* in */ sidlx_rmi_Socket self,
+  /* in */ int32_t nbytes,
+  /* in array<char> */ struct sidl_char__array* data,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_writen)(
+    self->d_object,
+    nbytes,
+    data,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  writestring[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_writestring(
+  /* in */ sidlx_rmi_Socket self,
+  /* in */ int32_t nbytes,
+  /* in array<char> */ struct sidl_char__array* data,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_writestring)(
+    self->d_object,
+    nbytes,
+    data,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  writeint[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_writeint(
+  /* in */ sidlx_rmi_Socket self,
+  /* in */ int32_t data,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_writeint)(
+    self->d_object,
+    data,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  setFileDescriptor[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Socket_setFileDescriptor(
+  /* in */ sidlx_rmi_Socket self,
+  /* in */ int32_t fd,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_setFileDescriptor)(
+    self->d_object,
+    fd,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  getFileDescriptor[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_Socket_getFileDescriptor(
+  /* in */ sidlx_rmi_Socket self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getFileDescriptor)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  test[]
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidlx_rmi_Socket_test(
+  /* in */ sidlx_rmi_Socket self,
+  /* in */ int32_t secs,
+  /* in */ int32_t usecs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_test)(
+    self->d_object,
+    secs,
+    usecs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -75,9 +340,21 @@ sidlx_rmi_Socket__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Socket_addRef(
-  /* in */ sidlx_rmi_Socket self);
+  /* in */ sidlx_rmi_Socket self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -86,32 +363,43 @@ sidlx_rmi_Socket_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Socket_deleteRef(
-  /* in */ sidlx_rmi_Socket self);
+  /* in */ sidlx_rmi_Socket self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_Socket_isSame(
   /* in */ sidlx_rmi_Socket self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidlx_rmi_Socket_queryInt(
-  /* in */ sidlx_rmi_Socket self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -119,126 +407,50 @@ sidlx_rmi_Socket_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_Socket_isType(
   /* in */ sidlx_rmi_Socket self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self->d_object,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidlx_rmi_Socket_getClassInfo(
-  /* in */ sidlx_rmi_Socket self);
-
-/**
- * Method:  close[]
- */
-int32_t
-sidlx_rmi_Socket_close(
   /* in */ sidlx_rmi_Socket self,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Method:  readn[]
- */
-int32_t
-sidlx_rmi_Socket_readn(
-  /* in */ sidlx_rmi_Socket self,
-  /* in */ int32_t nbytes,
-  /* inout array<char> */ struct sidl_char__array** data,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  readline[]
- */
-int32_t
-sidlx_rmi_Socket_readline(
-  /* in */ sidlx_rmi_Socket self,
-  /* in */ int32_t nbytes,
-  /* inout array<char> */ struct sidl_char__array** data,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  readstring[]
- */
-int32_t
-sidlx_rmi_Socket_readstring(
-  /* in */ sidlx_rmi_Socket self,
-  /* in */ int32_t nbytes,
-  /* inout array<char> */ struct sidl_char__array** data,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  readstring_alloc[]
- */
-int32_t
-sidlx_rmi_Socket_readstring_alloc(
-  /* in */ sidlx_rmi_Socket self,
-  /* inout array<char> */ struct sidl_char__array** data,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  readint[]
- */
-int32_t
-sidlx_rmi_Socket_readint(
-  /* in */ sidlx_rmi_Socket self,
-  /* inout */ int32_t* data,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  writen[]
- */
-int32_t
-sidlx_rmi_Socket_writen(
-  /* in */ sidlx_rmi_Socket self,
-  /* in */ int32_t nbytes,
-  /* in array<char> */ struct sidl_char__array* data,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  writestring[]
- */
-int32_t
-sidlx_rmi_Socket_writestring(
-  /* in */ sidlx_rmi_Socket self,
-  /* in */ int32_t nbytes,
-  /* in array<char> */ struct sidl_char__array* data,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  writeint[]
- */
-int32_t
-sidlx_rmi_Socket_writeint(
-  /* in */ sidlx_rmi_Socket self,
-  /* in */ int32_t data,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  setFileDescriptor[]
- */
-void
-sidlx_rmi_Socket_setFileDescriptor(
-  /* in */ sidlx_rmi_Socket self,
-  /* in */ int32_t fd,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  getFileDescriptor[]
- */
-int32_t
-sidlx_rmi_Socket_getFileDescriptor(
-  /* in */ sidlx_rmi_Socket self,
-  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidlx_rmi_Socket__object*
 sidlx_rmi_Socket__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -246,23 +458,94 @@ sidlx_rmi_Socket__cast(
 void*
 sidlx_rmi_Socket__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_Socket__exec(
   /* in */ sidlx_rmi_Socket self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self->d_object,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidlx_rmi_Socket__getURL(
-  /* in */ sidlx_rmi_Socket self);
+  /* in */ sidlx_rmi_Socket self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_Socket__raddRef(
+  /* in */ sidlx_rmi_Socket self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidlx_rmi_Socket__isRemote(
+  /* in */ sidlx_rmi_Socket self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidlx_rmi_Socket__isLocal(
+  /* in */ sidlx_rmi_Socket self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -750,6 +1033,25 @@ sidlx_rmi_Socket__array_ensure(
   struct sidlx_rmi_Socket__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidlx_rmi_Socket__connectI
+
+#pragma weak sidlx_rmi_Socket__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidlx_rmi_Socket__object*
+sidlx_rmi_Socket__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidlx_rmi_Socket__object*
+sidlx_rmi_Socket__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

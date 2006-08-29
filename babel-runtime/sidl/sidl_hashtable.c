@@ -28,7 +28,8 @@ const float max_load_factor = 0.65;
 struct hashtable *
 create_hashtable(unsigned int minsize,
                  unsigned int (*hashf) (void*),
-                 int (*eqf) (void*,void*))
+                 int (*eqf) (void*,void*),
+		 int fk)
 {
     struct hashtable *h;
     unsigned int pindex, size = primes[0];
@@ -49,6 +50,7 @@ create_hashtable(unsigned int minsize,
     h->hashfn       = hashf;
     h->eqfn         = eqf;
     h->loadlimit    = (unsigned int) (size * max_load_factor) + 1;
+    h->freekeys     = fk;
     return h;
 }
 
@@ -200,7 +202,9 @@ hashtable_remove(struct hashtable *h, void *k)
             *pE = e->next;
             h->entrycount--;
             v = e->v;
-            freekey(e->k);
+            if(h->freekeys) {
+	      freekey(e->k);
+	    }
             free(e);
             return v;
         }
@@ -215,29 +219,31 @@ hashtable_remove(struct hashtable *h, void *k)
 void
 hashtable_destroy(struct hashtable *h, int free_values)
 {
-    unsigned int i;
-    struct entry *e, *f;
-    struct entry **table = h->table;
-    if (free_values)
+
+  unsigned int i;
+  struct entry *e, *f;
+  struct entry **table = h->table;
+  if (free_values)
     {
-        for (i = 0; i < h->tablelength; i++)
+      for (i = 0; i < h->tablelength; i++)
         {
-            e = table[i];
-            while (NULL != e)
-            { f = e; e = e->next; freekey(f->k); free(f->v); free(f); }
+	  e = table[i];
+	  while (NULL != e)
+            { f = e; e = e->next; if(h->freekeys) {freekey(f->k);} free(f->v); free(f); }
         }
     }
-    else
+  else
     {
-        for (i = 0; i < h->tablelength; i++)
+      for (i = 0; i < h->tablelength; i++)
         {
-            e = table[i];
-            while (NULL != e)
-            { f = e; e = e->next; freekey(f->k); free(f); }
+	  e = table[i];
+	  while (NULL != e)
+            { f = e; e = e->next; if(h->freekeys) {freekey(f->k);} free(f); }
         }
     }
-    free(h->table);
-    free(h);
+  free(h->table);
+  free(h);
+
 }
 
 /*

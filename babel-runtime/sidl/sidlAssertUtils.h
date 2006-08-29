@@ -52,7 +52,7 @@ static const int s_CHECK_TIMING          = 11;
 static const int s_CHECK_RANDOMLY        = 12;
 static const int s_CHECK_ASSERTIONS      = 13; /* for description only! */
 
-static const char* s_CHECK_DESCRIPTION[] = {
+static const char* const s_CHECK_DESCRIPTION[] = {
   "no assertions", "preconditions", "postconditions", "invariants", 
   "pre- and post-conditions", "preconditions and invariants", 
   "postconditions and invariants", "all assertions", "",

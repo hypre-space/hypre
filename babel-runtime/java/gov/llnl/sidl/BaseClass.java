@@ -114,9 +114,9 @@ abstract public class BaseClass extends Exception implements BaseInterface {
         try {
           Constructor ctor = java_class.getConstructor(sigs);
           cast = (BaseInterface) ctor.newInstance(args);
-          addRef();
+
         } catch (Exception ex) {
-ex.printStackTrace(System.err);
+          ex.printStackTrace(System.err);
           // ignore exception
         }
       }
@@ -144,4 +144,20 @@ ex.printStackTrace(System.err);
     _finalize();
     super.finalize();
   }
+  /**
+   * Returns the URL of this object
+   */
+  public final native String _getURL();
+
+  /**
+   * Returns true if this object is remotely implemented, false otherwise
+   */
+  public final native boolean _isRemote();
+
+  /**
+   * Returns true if this object is locally implemented, false otherwise
+   */
+  public final native boolean _isLocal();
+
+
 }

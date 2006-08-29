@@ -54,4 +54,26 @@ public interface BaseInterface {
    * base object class.
    */
   public abstract void addRef();
+
+  /**
+   * Returns the URL of this object
+   */
+  public abstract String _getURL();
+
+  /**
+   * Returns true if this object is remotely implemented, false otherwise
+   */
+  public abstract boolean _isRemote();
+
+  /**
+   * Returns true if this object is locally implemented, false otherwise
+   */
+  public abstract boolean _isLocal();
+
+  /**
+   * calls a method by name
+   */
+  //public abstract void _exec(String methodName, sidl.rmi.Call inArgs, sidl.rmi.Return outArgs);
+
+
 }

@@ -1,8 +1,8 @@
 /*
  * File:          sidl_ClassInfoI.h
- * Symbol:        sidl.ClassInfoI-v0.9.3
+ * Symbol:        sidl.ClassInfoI-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.ClassInfoI
@@ -32,18 +32,18 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_ClassInfoI_h
 #define included_sidl_ClassInfoI_h
 
 /**
- * Symbol "sidl.ClassInfoI" (version 0.9.3)
+ * Symbol "sidl.ClassInfoI" (version 0.9.15)
  * 
- * An implementation of the <code>ClassInfo</code> interface. This provides
- * methods to set all the attributes that are read-only in the
- * <code>ClassInfo</code> interface.
+ *  
+ * An implementation of the <code>ClassInfo</code> interface. This
+ * provides methods to set all the attributes that are read-only in
+ * the <code>ClassInfo</code> interface.
  */
 struct sidl_ClassInfoI__object;
 struct sidl_ClassInfoI__array;
@@ -56,19 +56,33 @@ typedef struct sidl_ClassInfoI__object* sidl_ClassInfoI;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
+#endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidl_ClassInfoI_IOR_h
+#include "sidl_ClassInfoI_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -77,19 +91,65 @@ extern "C" {
  * Constructor function for the class.
  */
 struct sidl_ClassInfoI__object*
-sidl_ClassInfoI__create(void);
+sidl_ClassInfoI__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 sidl_ClassInfoI
-sidl_ClassInfoI__createRemote(const char *, sidl_BaseInterface *_ex);
+sidl_ClassInfoI__createRemote(const char * url, sidl_BaseInterface *_ex);
+
 
 /**
- * RMI connector function for the class.
+ * RMI connector function for the class.(addrefs)
  */
 sidl_ClassInfoI
 sidl_ClassInfoI__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * Set the name of the class.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_ClassInfoI_setName(
+  /* in */ sidl_ClassInfoI self,
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_setName)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Set the IOR major and minor version numbers.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_ClassInfoI_setIORVersion(
+  /* in */ sidl_ClassInfoI self,
+  /* in */ int32_t major,
+  /* in */ int32_t minor,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_setIORVersion)(
+    self,
+    major,
+    minor,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -104,9 +164,21 @@ sidl_ClassInfoI__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidl_ClassInfoI_addRef(
-  /* in */ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -115,32 +187,43 @@ sidl_ClassInfoI_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidl_ClassInfoI_deleteRef(
-  /* in */ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_ClassInfoI_isSame(
   /* in */ sidl_ClassInfoI self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidl_ClassInfoI_queryInt(
-  /* in */ sidl_ClassInfoI self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -148,56 +231,89 @@ sidl_ClassInfoI_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidl_ClassInfoI_isType(
   /* in */ sidl_ClassInfoI self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidl_ClassInfoI_getClassInfo(
-  /* in */ sidl_ClassInfoI self);
-
-/**
- * Set the name of the class.
- */
-void
-sidl_ClassInfoI_setName(
   /* in */ sidl_ClassInfoI self,
-  /* in */ const char* name);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Set the IOR major and minor version numbers.
- */
-void
-sidl_ClassInfoI_setIORVersion(
-  /* in */ sidl_ClassInfoI self,
-  /* in */ int32_t major,
-  /* in */ int32_t minor);
 
 /**
  * Return the name of the class.
  */
+SIDL_C_INLINE_DECL
 char*
 sidl_ClassInfoI_getName(
-  /* in */ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getName)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Get the version of the intermediate object representation.
  * This will be in the form of major_version.minor_version.
  */
+SIDL_C_INLINE_DECL
 char*
 sidl_ClassInfoI_getIORVersion(
-  /* in */ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getIORVersion)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidl_ClassInfoI__object*
 sidl_ClassInfoI__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -205,23 +321,94 @@ sidl_ClassInfoI__cast(
 void*
 sidl_ClassInfoI__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidl_ClassInfoI__exec(
   /* in */ sidl_ClassInfoI self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidl_ClassInfoI__getURL(
-  /* in */ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidl_ClassInfoI__raddRef(
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidl_ClassInfoI__isRemote(
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidl_ClassInfoI__isLocal(
+  /* in */ sidl_ClassInfoI self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -709,6 +896,25 @@ sidl_ClassInfoI__array_ensure(
   struct sidl_ClassInfoI__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidl_ClassInfoI__connectI
+
+#pragma weak sidl_ClassInfoI__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidl_ClassInfoI__object*
+sidl_ClassInfoI__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidl_ClassInfoI__object*
+sidl_ClassInfoI__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_JimEchoServer.h
  * Symbol:        sidlx.rmi.JimEchoServer-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for sidlx.rmi.JimEchoServer
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_JimEchoServer_h
@@ -16,7 +15,8 @@
 /**
  * Symbol "sidlx.rmi.JimEchoServer" (version 0.1)
  * 
- * Echos the string back to the client using Jim's test protocol
+ *  
+ * Echos strings back to the client using Jim's echo protocol
  */
 struct sidlx_rmi_JimEchoServer__object;
 struct sidlx_rmi_JimEchoServer__array;
@@ -38,19 +38,30 @@ typedef struct sidlx_rmi_JimEchoServer__object* sidlx_rmi_JimEchoServer;
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
 #ifndef included_sidl_SIDLException_h
 #include "sidl_SIDLException.h"
+#endif
+#ifndef included_sidl_io_Serializable_h
+#include "sidl_io_Serializable.h"
 #endif
 #ifndef included_sidlx_rmi_Socket_h
 #include "sidlx_rmi_Socket.h"
 #endif
 
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
 #endif
-#ifndef included_sidl_io_Deserializer_h
-#include "sidl_io_Deserializer.h"
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
 #endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidlx_rmi_JimEchoServer_IOR_h
+#include "sidlx_rmi_JimEchoServer_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -59,19 +70,257 @@ extern "C" {
  * Constructor function for the class.
  */
 struct sidlx_rmi_JimEchoServer__object*
-sidlx_rmi_JimEchoServer__create(void);
+sidlx_rmi_JimEchoServer__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 sidlx_rmi_JimEchoServer
-sidlx_rmi_JimEchoServer__createRemote(const char *, sidl_BaseInterface *_ex);
+sidlx_rmi_JimEchoServer__createRemote(const char * url,
+  sidl_BaseInterface *_ex);
 
 /**
- * RMI connector function for the class.
+ * Wraps up the private data struct pointer (struct sidlx_rmi_JimEchoServer__data) passed in rather than running the constructor.
+ */
+sidlx_rmi_JimEchoServer
+sidlx_rmi_JimEchoServer__wrapObj(void * data, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.(addrefs)
  */
 sidlx_rmi_JimEchoServer
 sidlx_rmi_JimEchoServer__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * Method:  serviceRequest[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_JimEchoServer_serviceRequest(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ sidlx_rmi_Socket sock,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_serviceRequest)(
+    self,
+    sock,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  isLocalObject[]
+ */
+SIDL_C_INLINE_DECL
+char*
+sidlx_rmi_JimEchoServer_isLocalObject(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ const char* url,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isLocalObject)(
+    self,
+    url,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * This gets an array of logged exceptions.  If an exception can
+ * not be thrown back to the caller, we log it with the Server.  This 
+ * gets the array of all those exceptions.
+ * THIS IS SOMETHING OF A TEST! THIS MAY CHANGE!
+ */
+SIDL_C_INLINE_DECL
+struct sidl_io_Serializable__array*
+sidlx_rmi_JimEchoServer_getExceptions(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getExceptions)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Set the maximum size of the client thread pool.
+ * (default = 1024)
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_JimEchoServer_setMaxThreadPool(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ int32_t max,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_setMaxThreadPool)(
+    self,
+    max,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * request a specific port number
+ * returns true iff request is satisfied
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidlx_rmi_JimEchoServer_requestPort(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ int32_t port,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_requestPort)(
+    self,
+    port,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Request the minimum available port in 
+ * a range.  Returns true
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidlx_rmi_JimEchoServer_requestPortInRange(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ int32_t minport,
+  /* in */ int32_t maxport,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_requestPortInRange)(
+    self,
+    minport,
+    maxport,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * get the port that this Server is bound to
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_JimEchoServer_getPort(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getPort)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * get the network name of this computer
+ */
+SIDL_C_INLINE_DECL
+char*
+sidlx_rmi_JimEchoServer_getServerName(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getServerName)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * get the full URL for exporting objects
+ */
+SIDL_C_INLINE_DECL
+char*
+sidlx_rmi_JimEchoServer_getServerURL(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* in */ const char* objID,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getServerURL)(
+    self,
+    objID,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * run the server (must have port specified first), if a threaded server,
+ * returns the tid of the server thread for joining.
+ */
+SIDL_C_INLINE_DECL
+int64_t
+sidlx_rmi_JimEchoServer_run(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_run)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * cleanly shutdown the orb.
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_JimEchoServer_shutdown(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_shutdown)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -86,9 +335,21 @@ sidlx_rmi_JimEchoServer__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_JimEchoServer_addRef(
-  /* in */ sidlx_rmi_JimEchoServer self);
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -97,32 +358,43 @@ sidlx_rmi_JimEchoServer_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_JimEchoServer_deleteRef(
-  /* in */ sidlx_rmi_JimEchoServer self);
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_JimEchoServer_isSame(
   /* in */ sidlx_rmi_JimEchoServer self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidlx_rmi_JimEchoServer_queryInt(
-  /* in */ sidlx_rmi_JimEchoServer self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -130,50 +402,50 @@ sidlx_rmi_JimEchoServer_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_JimEchoServer_isType(
   /* in */ sidlx_rmi_JimEchoServer self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidlx_rmi_JimEchoServer_getClassInfo(
-  /* in */ sidlx_rmi_JimEchoServer self);
-
-/**
- * set which port number to bind to
- */
-void
-sidlx_rmi_JimEchoServer_setPort(
   /* in */ sidlx_rmi_JimEchoServer self,
-  /* in */ int32_t port,
-  /* out */ sidl_BaseInterface *_ex);
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * run the server (must have port specified first)
- */
-void
-sidlx_rmi_JimEchoServer_run(
-  /* in */ sidlx_rmi_JimEchoServer self,
-  /* out */ sidl_BaseInterface *_ex);
-
-/**
- * Method:  serviceRequest[]
- */
-void
-sidlx_rmi_JimEchoServer_serviceRequest(
-  /* in */ sidlx_rmi_JimEchoServer self,
-  /* in */ sidlx_rmi_Socket sock,
-  /* out */ sidl_BaseInterface *_ex);
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidlx_rmi_JimEchoServer__object*
 sidlx_rmi_JimEchoServer__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -181,23 +453,94 @@ sidlx_rmi_JimEchoServer__cast(
 void*
 sidlx_rmi_JimEchoServer__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_JimEchoServer__exec(
   /* in */ sidlx_rmi_JimEchoServer self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidlx_rmi_JimEchoServer__getURL(
-  /* in */ sidlx_rmi_JimEchoServer self);
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_JimEchoServer__raddRef(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidlx_rmi_JimEchoServer__isRemote(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidlx_rmi_JimEchoServer__isLocal(
+  /* in */ sidlx_rmi_JimEchoServer self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -685,6 +1028,25 @@ sidlx_rmi_JimEchoServer__array_ensure(
   struct sidlx_rmi_JimEchoServer__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidlx_rmi_JimEchoServer__connectI
+
+#pragma weak sidlx_rmi_JimEchoServer__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidlx_rmi_JimEchoServer__object*
+sidlx_rmi_JimEchoServer__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidlx_rmi_JimEchoServer__object*
+sidlx_rmi_JimEchoServer__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

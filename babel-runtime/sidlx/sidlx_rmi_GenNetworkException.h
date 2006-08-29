@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_GenNetworkException.h
  * Symbol:        sidlx.rmi.GenNetworkException-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Client-side glue code for sidlx.rmi.GenNetworkException
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_GenNetworkException_h
@@ -30,19 +29,39 @@ typedef struct sidlx_rmi_GenNetworkException__object*
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_sidl_BaseException_h
+#include "sidl_BaseException.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
-
-#ifndef included_sidl_io_Serializer_h
-#include "sidl_io_Serializer.h"
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_SIDLException_h
+#include "sidl_SIDLException.h"
 #endif
 #ifndef included_sidl_io_Deserializer_h
 #include "sidl_io_Deserializer.h"
 #endif
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+
+#ifndef included_sidl_rmi_Call_h
+#include "sidl_rmi_Call.h"
+#endif
+#ifndef included_sidl_rmi_Return_h
+#include "sidl_rmi_Return.h"
+#endif
+#ifdef SIDL_C_HAS_INLINE
+#ifndef included_sidlx_rmi_GenNetworkException_IOR_h
+#include "sidlx_rmi_GenNetworkException_IOR.h"
+#endif
+#endif /* SIDL_C_HAS_INLINE */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -51,20 +70,46 @@ extern "C" {
  * Constructor function for the class.
  */
 struct sidlx_rmi_GenNetworkException__object*
-sidlx_rmi_GenNetworkException__create(void);
+sidlx_rmi_GenNetworkException__create(sidl_BaseInterface* _ex);
 
 /**
  * RMI constructor function for the class.
  */
 sidlx_rmi_GenNetworkException
-sidlx_rmi_GenNetworkException__createRemote(const char *,
+sidlx_rmi_GenNetworkException__createRemote(const char * url,
   sidl_BaseInterface *_ex);
 
 /**
- * RMI connector function for the class.
+ * Wraps up the private data struct pointer (struct sidlx_rmi_GenNetworkException__data) passed in rather than running the constructor.
+ */
+sidlx_rmi_GenNetworkException
+sidlx_rmi_GenNetworkException__wrapObj(void * data, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.(addrefs)
  */
 sidlx_rmi_GenNetworkException
 sidlx_rmi_GenNetworkException__connect(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * Method:  getHopCount[]
+ */
+SIDL_C_INLINE_DECL
+int32_t
+sidlx_rmi_GenNetworkException_getHopCount(
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getHopCount)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -79,9 +124,21 @@ sidlx_rmi_GenNetworkException__connect(const char *, sidl_BaseInterface *_ex);
  * class.
  * </p>
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_GenNetworkException_addRef(
-  /* in */ sidlx_rmi_GenNetworkException self);
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -90,32 +147,43 @@ sidlx_rmi_GenNetworkException_addRef(
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_GenNetworkException_deleteRef(
-  /* in */ sidlx_rmi_GenNetworkException self);
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_deleteRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_GenNetworkException_isSame(
   /* in */ sidlx_rmi_GenNetworkException self,
-  /* in */ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface iobj,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
 
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>sidl</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteRef</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-sidl_BaseInterface
-sidlx_rmi_GenNetworkException_queryInt(
-  /* in */ sidlx_rmi_GenNetworkException self,
-  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -123,66 +191,199 @@ sidlx_rmi_GenNetworkException_queryInt(
  * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
+SIDL_C_INLINE_DECL
 sidl_bool
 sidlx_rmi_GenNetworkException_isType(
   /* in */ sidlx_rmi_GenNetworkException self,
-  /* in */ const char* name);
+  /* in */ const char* name,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_isType)(
+    self,
+    name,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
+SIDL_C_INLINE_DECL
 sidl_ClassInfo
 sidlx_rmi_GenNetworkException_getClassInfo(
-  /* in */ sidlx_rmi_GenNetworkException self);
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getClassInfo)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Return the message associated with the exception.
  */
+SIDL_C_INLINE_DECL
 char*
 sidlx_rmi_GenNetworkException_getNote(
-  /* in */ sidlx_rmi_GenNetworkException self);
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getNote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Set the message associated with the exception.
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_GenNetworkException_setNote(
   /* in */ sidlx_rmi_GenNetworkException self,
-  /* in */ const char* message);
+  /* in */ const char* message,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_setNote)(
+    self,
+    message,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Returns formatted string containing the concatenation of all 
  * tracelines.
  */
+SIDL_C_INLINE_DECL
 char*
 sidlx_rmi_GenNetworkException_getTrace(
-  /* in */ sidlx_rmi_GenNetworkException self);
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f_getTrace)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Adds a stringified entry/line to the stack trace.
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_GenNetworkException_addLine(
   /* in */ sidlx_rmi_GenNetworkException self,
-  /* in */ const char* traceline);
+  /* in */ const char* traceline,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_addLine)(
+    self,
+    traceline,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Formats and adds an entry to the stack trace based on the 
  * file name, line number, and method name.
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_GenNetworkException_add(
   /* in */ sidlx_rmi_GenNetworkException self,
   /* in */ const char* filename,
   /* in */ int32_t lineno,
-  /* in */ const char* methodname);
+  /* in */ const char* methodname,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_add)(
+    self,
+    filename,
+    lineno,
+    methodname,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  packObj[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_GenNetworkException_packObj(
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* in */ sidl_io_Serializer ser,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_packObj)(
+    self,
+    ser,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * Method:  unpackObj[]
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_GenNetworkException_unpackObj(
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* in */ sidl_io_Deserializer des,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_unpackObj)(
+    self,
+    des,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 /**
  * Cast method for interface and class type conversions.
  */
 struct sidlx_rmi_GenNetworkException__object*
 sidlx_rmi_GenNetworkException__cast(
-  void* obj);
+  void* obj,
+  sidl_BaseInterface* _ex);
 
 /**
  * String cast method for interface and class type conversions.
@@ -190,23 +391,94 @@ sidlx_rmi_GenNetworkException__cast(
 void*
 sidlx_rmi_GenNetworkException__cast2(
   void* obj,
-  const char* type);
+  const char* type,
+  sidl_BaseInterface *_ex);
 
 /**
  * Select and execute a method by name
  */
+SIDL_C_INLINE_DECL
 void
 sidlx_rmi_GenNetworkException__exec(
   /* in */ sidlx_rmi_GenNetworkException self,
   /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
+  /* in */ sidl_rmi_Call inArgs,
+  /* in */ sidl_rmi_Return outArgs,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__exec)(
+    self,
+    methodName,
+    inArgs,
+    outArgs,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 /**
  * Get the URL of the Implementation of this object (for RMI)
  */
+SIDL_C_INLINE_DECL
 char*
 sidlx_rmi_GenNetworkException__getURL(
-  /* in */ sidlx_rmi_GenNetworkException self);
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__getURL)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * On a remote object, addrefs the remote instance.
+ */
+SIDL_C_INLINE_DECL
+void
+sidlx_rmi_GenNetworkException__raddRef(
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f__raddRef)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+SIDL_C_INLINE_DECL
+sidl_bool
+sidlx_rmi_GenNetworkException__isRemote(
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  return (*self->d_epv->f__isRemote)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+/**
+ * TRUE if this object is remote, false if local
+ */
+sidl_bool
+sidlx_rmi_GenNetworkException__isLocal(
+  /* in */ sidlx_rmi_GenNetworkException self,
+  /* out */ sidl_BaseInterface *_ex);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -694,6 +966,25 @@ sidlx_rmi_GenNetworkException__array_ensure(
   struct sidlx_rmi_GenNetworkException__array* src,
   int32_t dimen,
   int     ordering);
+
+
+#pragma weak sidlx_rmi_GenNetworkException__connectI
+
+#pragma weak sidlx_rmi_GenNetworkException__rmicast
+
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidlx_rmi_GenNetworkException__object*
+sidlx_rmi_GenNetworkException__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidlx_rmi_GenNetworkException__object*
+sidlx_rmi_GenNetworkException__connectI(const char * url, sidl_bool ar,
+  struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

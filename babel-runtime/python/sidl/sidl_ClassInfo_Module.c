@@ -1,8 +1,8 @@
 /*
  * File:          sidl_ClassInfo_Module.c
- * Symbol:        sidl.ClassInfo-v0.9.3
+ * Symbol:        sidl.ClassInfo-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.12
  */
 
 /*
@@ -47,11 +46,62 @@
 
 
 /**
- * Symbol "sidl.ClassInfo" (version 0.9.3)
+ * Symbol "sidl.ClassInfo" (version 0.9.15)
  * 
  * This provides an interface to the meta-data available on the
  * class.
  */
+#include <Python.h>
+#include <stdlib.h>
+#include <string.h>
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
+#endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
+#ifndef included_sidl_rmi_ProtocolFactory_h
+#include "sidl_rmi_ProtocolFactory.h"
+#endif
+#ifndef included_sidl_rmi_InstanceRegistry_h
+#include "sidl_rmi_InstanceRegistry.h"
+#endif
+#ifndef included_sidl_rmi_InstanceHandle_h
+#include "sidl_rmi_InstanceHandle.h"
+#endif
+#ifndef included_sidl_rmi_Invocation_h
+#include "sidl_rmi_Invocation.h"
+#endif
+#ifndef included_sidl_rmi_Response_h
+#include "sidl_rmi_Response.h"
+#endif
+#ifndef included_sidl_rmi_ServerRegistry_h
+#include "sidl_rmi_ServerRegistry.h"
+#endif
+#ifndef included_sidl_rmi_ConnectRegistry_h
+#include "sidl_rmi_ConnectRegistry.h"
+#endif
+#ifndef included_sidl_io_Serializable_h
+#include "sidl_io_Serializable.h"
+#endif
+#include "sidl_Exception.h"
+
+#ifndef NULL
+#define NULL 0
+#endif
+
+#include "sidl_thread.h"
+#ifdef HAVE_PTHREAD
+static struct sidl_recursive_mutex_t sidl__ClassInfo__mutex= SIDL_RECURSIVE_MUTEX_INITIALIZER;
+#define LOCK_STATIC_GLOBALS sidl_recursive_mutex_lock( &sidl__ClassInfo__mutex )
+#define UNLOCK_STATIC_GLOBALS sidl_recursive_mutex_unlock( &sidl__ClassInfo__mutex )
+/* #define HAVE_LOCKED_STATIC_GLOBALS (sidl_recursive_mutex_trylock( &sidl__ClassInfo__mutex )==EDEADLOCK) */
+#else
+#define LOCK_STATIC_GLOBALS
+#define UNLOCK_STATIC_GLOBALS
+/* #define HAVE_LOCKED_STATIC_GLOBALS (1) */
+#endif
+
 #define sidl_ClassInfo_INTERNAL 1
 #include "sidl_ClassInfo_Module.h"
 #ifndef included_sidl_ClassInfo_IOR_h
@@ -69,11 +119,1077 @@
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
+#include "sidl_rmi_NetworkException_Module.h"
 #include "sidl_BaseInterface_Module.h"
+#include "sidl_RuntimeException_Module.h"
+#include "sidl_rmi_Call_Module.h"
+#include "sidl_rmi_Return_Module.h"
+#include "sidl_rmi_Ticket_Module.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+/*
+ * connect_loaded is a boolean value showing if the IHConnect for this object has been loaded into the connectRegistry
+ */
+
+static int connect_loaded = 0;
+
+/*
+ * lang_inited is a boolean value showing if we have already imported all the nescessary modules
+ */
+
+static int lang_inited = 0;
+
+#define LANG_SPECIFIC_INIT() if(!lang_inited) { \
+  lang_inited = 1; \
+  sidl_BaseInterface__import(); \
+  sidl_ClassInfo__import(); \
+  sidl_RuntimeException__import(); \
+  sidl_rmi_Ticket__import(); \
+}
+/**
+ * Cast method for interface and class type conversions.
+ */
+struct sidl_ClassInfo__object*
+sidl_ClassInfo__rmicast(
+  void* obj, struct sidl_BaseInterface__object **_ex);
+
+/**
+ * RMI connector function for the class. (no addref)
+ */
+struct sidl_ClassInfo__object*
+sidl_ClassInfo__connectI(const char * url, sidl_bool ar,                      \
+  struct sidl_BaseInterface__object **_ex);
+
+/* Static variables to hold version of IOR */
+static const int32_t s_IOR_MAJOR_VERSION = 0;
+static const int32_t s_IOR_MINOR_VERSION = 10;
+
+/* Static variables for managing EPV initialization. */
+static int s_remote_initialized = 0;
+
+static struct sidl__ClassInfo__epv s_rem_epv__sidl__classinfo;
+
+static struct sidl_BaseInterface__epv s_rem_epv__sidl_baseinterface;
+
+static struct sidl_ClassInfo__epv s_rem_epv__sidl_classinfo;
+
+
+/* REMOTE CAST: dynamic type casting for remote objects. */
+static void* remote_sidl__ClassInfo__cast(
+  struct sidl__ClassInfo__object* self,
+  const char* name, sidl_BaseInterface* _ex)
+{
+  int
+    cmp0,
+    cmp1;
+  void* cast = NULL;
+  *_ex = NULL; /* default to no exception */
+  cmp0 = strcmp(name, "sidl.ClassInfo");
+  if (!cmp0) {
+    (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+    cast = &((*self).d_sidl_classinfo);
+    return cast;
+  }
+  else if (cmp0 < 0) {
+    cmp1 = strcmp(name, "sidl.BaseInterface");
+    if (!cmp1) {
+      (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+      cast = &((*self).d_sidl_baseinterface);
+      return cast;
+    }
+  }
+  else if (cmp0 > 0) {
+    cmp1 = strcmp(name, "sidl._ClassInfo");
+    if (!cmp1) {
+      (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
+      cast = self;
+      return cast;
+    }
+  }
+  if ((*self->d_epv->f_isType)(self,name, _ex)) {
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*,                    \
+      struct sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*,                     \
+        struct sidl_BaseInterface__object**)) 
+      sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
+    cast =  (*func)(((struct sidl__ClassInfo__remote*)self->d_data)->d_ih,    \
+      _ex);
+  }
+
+  return cast;
+  EXIT:
+  return NULL;
+}
+
+/* REMOTE DELETE: call the remote destructor for the object. */
+static void remote_sidl__ClassInfo__delete(
+  struct sidl__ClassInfo__object* self,
+  sidl_BaseInterface* _ex)
+{
+  *_ex = NULL;
+  free((void*) self);
+}
+
+/* REMOTE GETURL: call the getURL function for the object. */
+static char* remote_sidl__ClassInfo__getURL(
+  struct sidl__ClassInfo__object* self, sidl_BaseInterface* _ex)
+{
+  struct sidl_rmi_InstanceHandle__object *conn = ((struct                     \
+    sidl__ClassInfo__remote*)self->d_data)->d_ih;
+  *_ex = NULL;
+  if(conn != NULL) {
+    return sidl_rmi_InstanceHandle_getObjectURL(conn, _ex);
+  }
+  return NULL;
+}
+
+/* REMOTE ADDREF: For internal babel use only! Remote addRef. */
+static void remote_sidl__ClassInfo__raddRef(
+  struct sidl__ClassInfo__object* self,sidl_BaseInterface* _ex)
+{
+  sidl_BaseException netex = NULL;
+  /* initialize a new invocation */
+  sidl_BaseInterface _throwaway = NULL;
+  struct sidl_rmi_InstanceHandle__object *_conn = ((struct                    \
+    sidl__ClassInfo__remote*)self->d_data)->d_ih;
+  sidl_rmi_Response _rsvp = NULL;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, \
+    "addRef", _ex ); SIDL_CHECK(*_ex);
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
+  /* Check for exceptions */
+  netex = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);
+  if(netex != NULL) {
+    sidl_BaseInterface throwaway_exception = NULL;
+    *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(netex,            \
+      &throwaway_exception);
+    return;
+  }
+
+  /* cleanup and return */
+  EXIT:
+  if(_inv) { sidl_rmi_Invocation_deleteRef(_inv,&_throwaway); }
+  if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp,&_throwaway); }
+  return;
+}
+
+/* REMOTE ISREMOTE: returns true if this object is Remote (it is). */
+static sidl_bool
+remote_sidl__ClassInfo__isRemote(
+    struct sidl__ClassInfo__object* self, 
+    sidl_BaseInterface *_ex) {
+  *_ex = NULL;
+  return TRUE;
+}
+
+/* REMOTE METHOD STUB:_set_hooks */
+static void
+remote_sidl__ClassInfo__set_hooks(
+  /* in */ struct sidl__ClassInfo__object* self ,
+  /* in */ sidl_bool on,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl__ClassInfo__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "_set_hooks", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packBool( _inv, "on", on, _ex);SIDL_CHECK(*_ex);
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl._ClassInfo._set_hooks.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return;
+  }
+}
+
+/* REMOTE EXEC: call the exec function for the object. */
+static void remote_sidl__ClassInfo__exec(
+  struct sidl__ClassInfo__object* self,const char* methodName,
+  sidl_rmi_Call inArgs,
+  sidl_rmi_Return outArgs,
+  sidl_BaseInterface* _ex)
+{
+  *_ex = NULL;
+}
+
+/* REMOTE METHOD STUB:getName */
+static char*
+remote_sidl__ClassInfo_getName(
+  /* in */ struct sidl__ClassInfo__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    char* _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl__ClassInfo__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "getName", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl._ClassInfo.getName.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval,               \
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:getIORVersion */
+static char*
+remote_sidl__ClassInfo_getIORVersion(
+  /* in */ struct sidl__ClassInfo__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    char* _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl__ClassInfo__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "getIORVersion", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl._ClassInfo.getIORVersion.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval,               \
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:addRef */
+static void
+remote_sidl__ClassInfo_addRef(
+  /* in */ struct sidl__ClassInfo__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    struct sidl__ClassInfo__remote* r_obj = (struct                           \
+      sidl__ClassInfo__remote*)self->d_data;
+    LOCK_STATIC_GLOBALS;
+    r_obj->d_refcount++;
+    UNLOCK_STATIC_GLOBALS;
+  }
+}
+
+/* REMOTE METHOD STUB:deleteRef */
+static void
+remote_sidl__ClassInfo_deleteRef(
+  /* in */ struct sidl__ClassInfo__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    struct sidl__ClassInfo__remote* r_obj = (struct                           \
+      sidl__ClassInfo__remote*)self->d_data;
+    LOCK_STATIC_GLOBALS;
+    r_obj->d_refcount--;
+    if(r_obj->d_refcount == 0) {
+      sidl_rmi_InstanceHandle_deleteRef(r_obj->d_ih, _ex);
+      free(r_obj);
+      free(self);
+    }
+    UNLOCK_STATIC_GLOBALS;
+  }
+}
+
+/* REMOTE METHOD STUB:isSame */
+static sidl_bool
+remote_sidl__ClassInfo_isSame(
+  /* in */ struct sidl__ClassInfo__object* self ,
+  /* in */ struct sidl_BaseInterface__object* iobj,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    sidl_bool _retval = FALSE;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl__ClassInfo__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "isSame", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+    if(iobj){
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,       \
+        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url,                     \
+        _ex);SIDL_CHECK(*_ex);
+      free((void*)_url);
+    } else {
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL,                     \
+        _ex);SIDL_CHECK(*_ex);
+    }
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl._ClassInfo.isSame.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:isType */
+static sidl_bool
+remote_sidl__ClassInfo_isType(
+  /* in */ struct sidl__ClassInfo__object* self ,
+  /* in */ const char* name,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    sidl_bool _retval = FALSE;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl__ClassInfo__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "isType", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+    sidl_rmi_Invocation_packString( _inv, "name", name, _ex);SIDL_CHECK(*_ex);
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl._ClassInfo.isType.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE METHOD STUB:getClassInfo */
+static struct sidl_ClassInfo__object*
+remote_sidl__ClassInfo_getClassInfo(
+  /* in */ struct sidl__ClassInfo__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    char*_retval_str = NULL;
+    struct sidl_ClassInfo__object* _retval = 0;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct                 \
+      sidl__ClassInfo__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation(      \
+      _conn, "getClassInfo", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from sidl._ClassInfo.getClassInfo.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,            \
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* extract return value */
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
+      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,                    \
+      _ex);SIDL_CHECK(*_ex);
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return _retval;
+  }
+}
+
+/* REMOTE EPV: create remote entry point vectors (EPVs). */
+static void sidl__ClassInfo__init_remote_epv(void)
+{
+  /* assert( HAVE_LOCKED_STATIC_GLOBALS ); */
+  struct sidl__ClassInfo__epv*    epv = &s_rem_epv__sidl__classinfo;
+  struct sidl_BaseInterface__epv* e0  = &s_rem_epv__sidl_baseinterface;
+  struct sidl_ClassInfo__epv*     e1  = &s_rem_epv__sidl_classinfo;
+
+  epv->f__cast              = remote_sidl__ClassInfo__cast;
+  epv->f__delete            = remote_sidl__ClassInfo__delete;
+  epv->f__exec              = remote_sidl__ClassInfo__exec;
+  epv->f__getURL            = remote_sidl__ClassInfo__getURL;
+  epv->f__raddRef           = remote_sidl__ClassInfo__raddRef;
+  epv->f__isRemote          = remote_sidl__ClassInfo__isRemote;
+  epv->f__set_hooks         = remote_sidl__ClassInfo__set_hooks;
+  epv->f__ctor              = NULL;
+  epv->f__ctor2             = NULL;
+  epv->f__dtor              = NULL;
+  epv->f_getName            = remote_sidl__ClassInfo_getName;
+  epv->f_getIORVersion      = remote_sidl__ClassInfo_getIORVersion;
+  epv->f_addRef             = remote_sidl__ClassInfo_addRef;
+  epv->f_deleteRef          = remote_sidl__ClassInfo_deleteRef;
+  epv->f_isSame             = remote_sidl__ClassInfo_isSame;
+  epv->f_isType             = remote_sidl__ClassInfo_isType;
+  epv->f_getClassInfo       = remote_sidl__ClassInfo_getClassInfo;
+
+  e0->f__cast        = (void* (*)(void*,const char*,                          \
+    sidl_BaseInterface*)) epv->f__cast;
+  e0->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
+  e0->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
+  e0->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
+  e0->f__isRemote    = (sidl_bool (*)(void*,                                  \
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e0->f__set_hooks   = (void (*)(void*,int32_t,                               \
+    sidl_BaseInterface*)) epv->f__set_hooks;
+  e0->f__exec        = (void (*)(void*,const char*,                           \
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(void*,                                       \
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(void*,                                       \
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(void*,                                  \
+    struct sidl_BaseInterface__object*,                                       \
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(void*,const char*,                      \
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,             \
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+
+  e1->f__cast         = (void* (*)(void*,const char*,                         \
+    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__delete       = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
+  e1->f__getURL       = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
+  e1->f__raddRef      = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
+  e1->f__isRemote     = (sidl_bool (*)(void*,                                 \
+    sidl_BaseInterface*)) epv->f__isRemote;
+  e1->f__set_hooks    = (void (*)(void*,int32_t,                              \
+    sidl_BaseInterface*)) epv->f__set_hooks;
+  e1->f__exec         = (void (*)(void*,const char*,                          \
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
+    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_getName       = (char* (*)(void*,                                     \
+    struct sidl_BaseInterface__object **)) epv->f_getName;
+  e1->f_getIORVersion = (char* (*)(void*,                                     \
+    struct sidl_BaseInterface__object **)) epv->f_getIORVersion;
+  e1->f_addRef        = (void (*)(void*,                                      \
+    struct sidl_BaseInterface__object **)) epv->f_addRef;
+  e1->f_deleteRef     = (void (*)(void*,                                      \
+    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e1->f_isSame        = (sidl_bool (*)(void*,                                 \
+    struct sidl_BaseInterface__object*,                                       \
+    struct sidl_BaseInterface__object **)) epv->f_isSame;
+  e1->f_isType        = (sidl_bool (*)(void*,const char*,                     \
+    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo  = (struct sidl_ClassInfo__object* (*)(void*,            \
+    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+
+  s_remote_initialized = 1;
+}
+
+/* Create an instance that connects to an existing remote object. */
+static struct sidl_ClassInfo__object*
+sidl_ClassInfo__remoteConnect(const char *url, sidl_bool ar,                  \
+  sidl_BaseInterface *_ex)
+{
+  struct sidl__ClassInfo__object* self;
+
+  struct sidl__ClassInfo__object* s0;
+
+  struct sidl__ClassInfo__remote* r_obj;
+  sidl_rmi_InstanceHandle instance = NULL;
+  char* objectID = NULL;
+  objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
+  if(objectID) {
+    sidl_BaseInterface bi =                                                   \
+      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(      \
+      objectID, _ex);
+    if(ar) {
+      sidl_BaseInterface_addRef(bi, _ex);
+    }
+    return sidl_ClassInfo__rmicast(bi, _ex);
+  }
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex );
+  if ( instance == NULL) { return NULL; }
+  self =
+    (struct sidl__ClassInfo__object*) malloc(
+      sizeof(struct sidl__ClassInfo__object));
+
+  r_obj =
+    (struct sidl__ClassInfo__remote*) malloc(
+      sizeof(struct sidl__ClassInfo__remote));
+
+  r_obj->d_refcount = 1;
+  r_obj->d_ih = instance;
+  s0 =                           self;
+
+  LOCK_STATIC_GLOBALS;
+  if (!s_remote_initialized) {
+    sidl__ClassInfo__init_remote_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+  s0->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
+  s0->d_sidl_baseinterface.d_object = (void*) self;
+
+  s0->d_sidl_classinfo.d_epv    = &s_rem_epv__sidl_classinfo;
+  s0->d_sidl_classinfo.d_object = (void*) self;
+
+  s0->d_data = (void*) r_obj;
+  s0->d_epv  = &s_rem_epv__sidl__classinfo;
+
+  self->d_data = (void*) r_obj;
+
+  return sidl_ClassInfo__rmicast(self, _ex);
+}
+/* Create an instance that uses an already existing  */
+/* InstanceHandel to connect to an existing remote object. */
+static struct sidl_ClassInfo__object*
+sidl_ClassInfo__IHConnect(sidl_rmi_InstanceHandle instance,                   \
+  sidl_BaseInterface *_ex)
+{
+  struct sidl__ClassInfo__object* self;
+
+  struct sidl__ClassInfo__object* s0;
+
+  struct sidl__ClassInfo__remote* r_obj;
+  self =
+    (struct sidl__ClassInfo__object*) malloc(
+      sizeof(struct sidl__ClassInfo__object));
+
+  r_obj =
+    (struct sidl__ClassInfo__remote*) malloc(
+      sizeof(struct sidl__ClassInfo__remote));
+
+  r_obj->d_refcount = 1;
+  r_obj->d_ih = instance;
+  s0 =                           self;
+
+  LOCK_STATIC_GLOBALS;
+  if (!s_remote_initialized) {
+    sidl__ClassInfo__init_remote_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+  s0->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
+  s0->d_sidl_baseinterface.d_object = (void*) self;
+
+  s0->d_sidl_classinfo.d_epv    = &s_rem_epv__sidl_classinfo;
+  s0->d_sidl_classinfo.d_object = (void*) self;
+
+  s0->d_data = (void*) r_obj;
+  s0->d_epv  = &s_rem_epv__sidl__classinfo;
+
+  self->d_data = (void*) r_obj;
+
+  sidl_rmi_InstanceHandle_addRef(instance, _ex);
+  return sidl_ClassInfo__rmicast(self, _ex);
+}
+/*
+ * Cast method for interface and class type conversions.
+ */
+
+struct sidl_ClassInfo__object*
+sidl_ClassInfo__rmicast(
+  void* obj,
+  sidl_BaseInterface* _ex)
+{
+  struct sidl_ClassInfo__object* cast = NULL;
+
+  *_ex = NULL;
+  if(!connect_loaded) {
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.ClassInfo",                \
+      (void*)sidl_ClassInfo__IHConnect, _ex);
+    connect_loaded = 1;
+  }
+  if (obj != NULL) {
+    struct sidl_BaseInterface__object* base = (struct                         \
+      sidl_BaseInterface__object*) obj;
+    cast = (struct sidl_ClassInfo__object*) (*base->d_epv->f__cast)(
+      base->d_object,
+      "sidl.ClassInfo", _ex); SIDL_CHECK(*_ex);
+  }
+
+  return cast;
+  EXIT:
+  return NULL;
+}
+
+/*
+ * RMI connector function for the class.
+ */
+
+struct sidl_ClassInfo__object*
+sidl_ClassInfo__connectI(const char* url, sidl_bool ar,                       \
+  struct sidl_BaseInterface__object **_ex)
+{
+  return sidl_ClassInfo__remoteConnect(url, ar, _ex);
+}
+
+static PyObject *
+pStub_ClassInfo__connect(PyObject *_ignored, PyObject *_args,                 \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_ClassInfo__object* self = NULL;
+  char* url = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    "url",
+    NULL
+  };
+  int _okay;
+  sidl_rmi_NetworkException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "z", _kwlist,
+    &url);
+  if (_okay) {
+    self = sidl_ClassInfo__remoteConnect(url,1,&_exception);
+    if (_exception) {
+      struct sidl_rmi_NetworkException__object *_ex0;
+      if ((_ex0 = (struct sidl_rmi_NetworkException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
+        PyObject *_args = PyTuple_New(1);
+        PyTuple_SetItem(_args, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_args);
+      }
+    }
+    else {
+      _return_value = Py_BuildValue(
+        "O&",
+        (void *)sidl_ClassInfo__wrap, self);
+    }
+  }
+  return _return_value;
+}
 
 staticforward PyTypeObject _sidl_ClassInfoType;
+
+static PyObject *
+pStub_ClassInfo__exec(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_ClassInfo__object *_self_ior =
+    ((struct sidl_ClassInfo__object *)
+     sidl_Cast(_self, "sidl.ClassInfo"));
+  if (_self_ior) {
+    char* methodName = NULL;
+    struct sidl_rmi_Call__object* inArgs = NULL;
+    struct sidl_rmi_Return__object* outArgs = NULL;
+    struct sidl_BaseInterface__object *_exception = NULL;
+    static char *_kwlist[] = {
+      "methodName",
+      "inArgs",
+      "outArgs",
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    sidl_rmi_Call__import();
+    sidl_rmi_Return__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "zO&O&", _kwlist,
+      &methodName,
+      (void *)sidl_rmi_Call__convert, &inArgs,
+      (void *)sidl_rmi_Return__convert, &outArgs);
+    if (_okay) {
+      (*(_self_ior->d_epv->f__exec))(_self_ior->d_object, methodName, inArgs, \
+        outArgs, &_exception);
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_None;
+        Py_INCREF(_return_value);
+      }
+      sidl_rmi_Call_deref(inArgs);
+      sidl_rmi_Return_deref(outArgs);
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior->d_object,                 \
+        &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.ClassInfo");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_ClassInfo__getURL(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_ClassInfo__object *_self_ior =
+    ((struct sidl_ClassInfo__object *)
+     sidl_Cast(_self, "sidl.ClassInfo"));
+  if (_self_ior) {
+    struct sidl_BaseInterface__object *_exception = NULL;
+    static char *_kwlist[] = {
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "", _kwlist);
+    if (_okay) {
+      char* _return = NULL;
+      _return = (*(_self_ior->d_epv->f__getURL))(_self_ior->d_object,         \
+        &_exception);
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_BuildValue(
+          "z",
+          _return);
+      }
+      free((void *)_return);
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior->d_object,                 \
+        &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.ClassInfo");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_ClassInfo__isLocal(PyObject *_self, PyObject *_args,                    \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_ClassInfo__object *_self_ior =
+    ((struct sidl_ClassInfo__object *)
+     sidl_Cast(_self, "sidl.ClassInfo"));
+  if (_self_ior) {
+    struct sidl_BaseInterface__object *_exception = NULL;
+    static char *_kwlist[] = {
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "", _kwlist);
+    if (_okay) {
+      sidl_bool _return = (sidl_bool) 0;
+      int _proxy__return;
+      _return = !(*(_self_ior->d_epv->f__isRemote))(_self_ior->d_object,      \
+        &_exception);
+      _proxy__return = _return;
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_BuildValue(
+          "i",
+          _proxy__return);
+      }
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior->d_object,                 \
+        &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.ClassInfo");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_ClassInfo__isRemote(PyObject *_self, PyObject *_args,                   \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_ClassInfo__object *_self_ior =
+    ((struct sidl_ClassInfo__object *)
+     sidl_Cast(_self, "sidl.ClassInfo"));
+  if (_self_ior) {
+    struct sidl_BaseInterface__object *_exception = NULL;
+    static char *_kwlist[] = {
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "", _kwlist);
+    if (_okay) {
+      sidl_bool _return = (sidl_bool) 0;
+      int _proxy__return;
+      _return = (*(_self_ior->d_epv->f__isRemote))(_self_ior->d_object,       \
+        &_exception);
+      _proxy__return = _return;
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_BuildValue(
+          "i",
+          _proxy__return);
+      }
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior->d_object,                 \
+        &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.ClassInfo");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_ClassInfo__set_hooks(PyObject *_self, PyObject *_args,                  \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_ClassInfo__object *_self_ior =
+    ((struct sidl_ClassInfo__object *)
+     sidl_Cast(_self, "sidl.ClassInfo"));
+  if (_self_ior) {
+    sidl_bool on = (sidl_bool) 0;
+    struct sidl_BaseInterface__object *_exception = NULL;
+    int _proxy_on;
+    static char *_kwlist[] = {
+      "on",
+      NULL
+    };
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "i", _kwlist,
+      &_proxy_on);
+    if (_okay) {
+      on = (_proxy_on ? (TRUE) : (FALSE));
+      (*(_self_ior->d_epv->f__set_hooks))(_self_ior->d_object, on,            \
+        &_exception);
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_None;
+        Py_INCREF(_return_value);
+      }
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior->d_object,                 \
+        &throwaway_exception);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a sidl.ClassInfo");
+  }
+  return _return_value;
+}
 
 static PyObject *
 pStub_ClassInfo_getIORVersion(PyObject *_self, PyObject *_args,               \
@@ -83,19 +1199,46 @@ pStub_ClassInfo_getIORVersion(PyObject *_self, PyObject *_args,               \
     ((struct sidl_ClassInfo__object *)
      sidl_Cast(_self, "sidl.ClassInfo"));
   if (_self_ior) {
+    struct sidl_BaseInterface__object *_exception = NULL;
     static char *_kwlist[] = {
       NULL
     };
-    const int _okay = PyArg_ParseTupleAndKeywords(
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
       _args, _kwdict, 
       "", _kwlist);
     if (_okay) {
       char* _return = NULL;
-      _return = (*(_self_ior->d_epv->f_getIORVersion))(_self_ior->d_object);
-      _return_value = Py_BuildValue(
-        "z",
-        _return);
+      _return = (*(_self_ior->d_epv->f_getIORVersion))(_self_ior->d_object,   \
+        &_exception);
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_BuildValue(
+          "z",
+          _return);
+      }
       free((void *)_return);
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior->d_object,                 \
+        &throwaway_exception);
     }
   }
   else {
@@ -112,19 +1255,46 @@ pStub_ClassInfo_getName(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
     ((struct sidl_ClassInfo__object *)
      sidl_Cast(_self, "sidl.ClassInfo"));
   if (_self_ior) {
+    struct sidl_BaseInterface__object *_exception = NULL;
     static char *_kwlist[] = {
       NULL
     };
-    const int _okay = PyArg_ParseTupleAndKeywords(
+    int _okay;
+    sidl_RuntimeException__import();
+    _okay = PyArg_ParseTupleAndKeywords(
       _args, _kwdict, 
       "", _kwlist);
     if (_okay) {
       char* _return = NULL;
-      _return = (*(_self_ior->d_epv->f_getName))(_self_ior->d_object);
-      _return_value = Py_BuildValue(
-        "z",
-        _return);
+      _return = (*(_self_ior->d_epv->f_getName))(_self_ior->d_object,         \
+        &_exception);
+      if (_exception) {
+        struct sidl_RuntimeException__object *_ex0;
+        if ((_ex0 = (struct sidl_RuntimeException__object *)
+        sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+          PyObject *_args = PyTuple_New(1);
+          PyTuple_SetItem(_args, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyErr_SetObject(sidl_RuntimeException__type, _obj);
+          Py_XDECREF(_obj);
+          (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
+            &throwaway_exception);
+          Py_XDECREF(_args);
+        }
+      }
+      else {
+        _return_value = Py_BuildValue(
+          "z",
+          _return);
+      }
       free((void *)_return);
+    }
+    {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior->d_object,                 \
+        &throwaway_exception);
     }
   }
   else {
@@ -150,16 +1320,90 @@ sidl_ClassInfo_createCast(PyObject *self, PyObject *args, PyObject *kwds) {
 }
 
 static PyMethodDef _ClassInfoModuleMethods[] = {
+  { "_connect", (PyCFunction)pStub_ClassInfo__connect,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_connect( in string url)\n\
+RETURNS\n\
+   ( out sidl.ClassInfo self)\n\
+RAISES\n\
+    sidl.rmi.NetworkException\n\
+"
+   },
   { NULL, NULL }
 };
 
 static PyMethodDef _ClassInfoObjectMethods[] = {
+  { "_exec", (PyCFunction)pStub_ClassInfo__exec,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_exec( in string methodName,\n\
+       in sidl.rmi.Call inArgs,\n\
+       in sidl.rmi.Return outArgs)\n\
+RETURNS\n\
+    None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+Select and execute a method by name"
+   },
+  { "_getURL", (PyCFunction)pStub_ClassInfo__getURL,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_getURL()\n\
+RETURNS\n\
+   (string _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+Get the URL of the Implementation of this object (for RMI)"
+   },
+  { "_isLocal", (PyCFunction)pStub_ClassInfo__isLocal,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_isLocal()\n\
+RETURNS\n\
+   (bool _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+TRUE if this object is local, false if remote"
+   },
+  { "_isRemote", (PyCFunction)pStub_ClassInfo__isRemote,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_isRemote()\n\
+RETURNS\n\
+   (bool _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+TRUE if this object is remote, false if local"
+   },
+  { "_set_hooks", (PyCFunction)pStub_ClassInfo__set_hooks,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+_set_hooks( in bool on)\n\
+RETURNS\n\
+    None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+Method to set whether or not method hooks should be invoked."
+   },
   { "getIORVersion", (PyCFunction)pStub_ClassInfo_getIORVersion,
   (METH_VARARGS | METH_KEYWORDS),
 "\
 getIORVersion()\n\
 RETURNS\n\
    (string _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 Get the version of the intermediate object representation.\n\
@@ -171,6 +1415,8 @@ This will be in the form of major_version.minor_version."
 getName()\n\
 RETURNS\n\
    (string _return)\n\
+RAISES\n\
+    sidl.RuntimeException\n\
 \n\
 \
 Return the name of the class."
@@ -272,7 +1518,8 @@ sidl_ClassInfo__weakRef sidl_ClassInfo__weakRef_PROTO {
 sidl_ClassInfo_deref_RETURN
 sidl_ClassInfo_deref sidl_ClassInfo_deref_PROTO {
   if (sidlobj) {
-    (*(sidlobj->d_epv->f_deleteRef))(sidlobj->d_object);
+    struct sidl_BaseInterface__object *throwaway_exception;
+    (*(sidlobj->d_epv->f_deleteRef))(sidlobj->d_object, &throwaway_exception);
   }
 }
 
@@ -302,7 +1549,8 @@ sidl_ClassInfo__newRef sidl_ClassInfo__newRef_PROTO {
 sidl_ClassInfo__addRef_RETURN
 sidl_ClassInfo__addRef sidl_ClassInfo__addRef_PROTO {
   if (sidlobj) {
-    (*(sidlobj->d_epv->f_addRef))(sidlobj->d_object);
+    struct sidl_BaseInterface__object *throwaway_exception;
+    (*(sidlobj->d_epv->f_addRef))(sidlobj->d_object, &throwaway_exception);
   }
 }
 
@@ -315,10 +1563,7 @@ sidl_ClassInfo_PyType sidl_ClassInfo_PyType_PROTO {
 sidl_ClassInfo__convert_RETURN
 sidl_ClassInfo__convert sidl_ClassInfo__convert_PROTO {
   *sidlobj = sidl_Cast(obj, "sidl.ClassInfo");
-  if (*sidlobj) {
-    (*((*sidlobj)->d_epv->f_addRef))((*sidlobj)->d_object);
-  }
-  else if (obj != Py_None) {
+  if ((!(*sidlobj)) && (obj != Py_None)) {
     PyErr_SetString(PyExc_TypeError, 
       "argument is not a(n) sidl.ClassInfo");
     return 0;
@@ -334,8 +1579,10 @@ _convertPython(void *sidlarray, const int *ind, PyObject *pyobj)
     sidl_interface__array_set((struct sidl_interface__array *)sidlarray,
     ind, (struct sidl_BaseInterface__object *)sidlobj);
     if (sidlobj) {
-      sidl_BaseInterface_deleteRef((struct sidl_BaseInterface__object         \
-        *)sidlobj);
+      struct sidl_BaseInterface__object *asInt = (struct                      \
+        sidl_BaseInterface__object *)sidlobj;
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*asInt->d_epv->f_deleteRef)(asInt->d_object, &throwaway_exception);
     }
     return FALSE;
   }
@@ -426,6 +1673,7 @@ void
 initClassInfo(void) {
   PyObject *module, *dict, *c_api;
   static void *ExternalAPI[sidl_ClassInfo__API_NUM];
+  struct sidl_BaseInterface__object *throwaway_exception;
   module = Py_InitModule3("ClassInfo", _ClassInfoModuleMethods, "\
 \
 This provides an interface to the meta-data available on the\n\
@@ -443,6 +1691,8 @@ class."
   ExternalAPI[sidl_ClassInfo__newRef_NUM] = (void*)sidl_ClassInfo__newRef;
   ExternalAPI[sidl_ClassInfo__addRef_NUM] = (void*)sidl_ClassInfo__addRef;
   ExternalAPI[sidl_ClassInfo_PyType_NUM] = (void*)sidl_ClassInfo_PyType;
+  ExternalAPI[sidl_ClassInfo__connectI_NUM] = (void*)sidl_ClassInfo__connectI;
+  ExternalAPI[sidl_ClassInfo__rmicast_NUM] = (void*)sidl_ClassInfo__rmicast;
   import_SIDLObjA();
   if (PyErr_Occurred()) {
     Py_FatalError("Error importing sidlObjA module.");
@@ -470,4 +1720,7 @@ class."
   }
   Py_INCREF(&_sidl_ClassInfoType);
   PyDict_SetItemString(dict, "ClassInfo", (PyObject *)&_sidl_ClassInfoType);
+
+  sidl_rmi_ConnectRegistry_registerConnect("sidl.ClassInfo",                  \
+    (void*)sidl_ClassInfo__IHConnect, &throwaway_exception);
 }

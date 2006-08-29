@@ -60,6 +60,15 @@ case $ac_f77_v_output in
   *mGLOB_options_string*)
     ac_f77_v_output=`echo $ac_f77_v_output | sed 's/\"-mGLOB[[^\"]]*\"/ /g'` ;;
 
+  # Portland Group compiler has singly- or doubly-quoted -cmdline argument
+  # Singly-quoted arguments were reported for versions 5.2-4 and 6.0-4.
+  # Doubly-quoted arguments were reported for "PGF90/x86 Linux/x86 5.0-2".
+  *-cmdline\ \'*)
+    ac_f77_v_output=`echo $ac_f77_v_output | sed "s/-cmdline  *'[[^']]*'/ /g"` ;;
+
+  *-cmdline*)
+    ac_f77_v_output=`echo $ac_f77_v_output | sed 's/-cmdline  *"[[^"]]*"/ /g'` ;;
+
   # If we are using Cray Fortran then delete quotes.
   # Use "\"" instead of '"' for font-lock-mode.
   # FIXME: a more general fix for quoted arguments with spaces?
@@ -150,6 +159,8 @@ while test $[@%:@] != 1; do
   shift
   ac_arg=$[1]
   case $ac_arg in
+	*libgcc.a | *libgcc_s.a)
+	  ;;
         [[\\/]]*.a | ?:[[\\/]]*.a)
           _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_flibs, ,
               ac_cv_flibs="$ac_cv_flibs $ac_arg")

@@ -2,12 +2,11 @@
  * File:          sidlx_rmi_SimpleOrb_Impl.h
  * Symbol:        sidlx.rmi.SimpleOrb-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for sidlx.rmi.SimpleOrb
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_SimpleOrb_Impl_h
@@ -16,45 +15,52 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
-#ifndef included_sidlx_rmi_SimpleOrb_h
-#include "sidlx_rmi_SimpleOrb.h"
-#endif
-#ifndef included_sidl_SIDLException_h
-#include "sidl_SIDLException.h"
-#endif
-#ifndef included_sidl_ClassInfo_h
-#include "sidl_ClassInfo.h"
-#endif
-#ifndef included_sidlx_rmi_Socket_h
-#include "sidlx_rmi_Socket.h"
-#endif
-#ifndef included_sidl_BaseInterface_h
-#include "sidl_BaseInterface.h"
-#endif
-#ifndef included_sidlx_rmi_SimpleServer_h
-#include "sidlx_rmi_SimpleServer.h"
+#ifndef included_sidlx_rmi_SimpleOrb_IOR_h
+#include "sidlx_rmi_SimpleOrb_IOR.h"
 #endif
 #ifndef included_sidl_BaseClass_h
 #include "sidl_BaseClass.h"
 #endif
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
+#endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
+#ifndef included_sidl_RuntimeException_h
+#include "sidl_RuntimeException.h"
+#endif
+#ifndef included_sidl_io_Serializable_h
+#include "sidl_io_Serializable.h"
+#endif
+#ifndef included_sidl_rmi_ServerInfo_h
+#include "sidl_rmi_ServerInfo.h"
+#endif
+#ifndef included_sidlx_rmi_SimpleOrb_h
+#include "sidlx_rmi_SimpleOrb.h"
+#endif
+#ifndef included_sidlx_rmi_SimpleServer_h
+#include "sidlx_rmi_SimpleServer.h"
+#endif
+#ifndef included_sidlx_rmi_Socket_h
+#include "sidlx_rmi_Socket.h"
+#endif
 
-#line 41 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleOrb_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleOrb._includes) */
-/* Put additional include files here... */
+#include "sidl_io_Serializable.h"
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleOrb._includes) */
-#line 45 "sidlx_rmi_SimpleOrb_Impl.h"
 
 /*
  * Private data for class sidlx.rmi.SimpleOrb
  */
 
 struct sidlx_rmi_SimpleOrb__data {
-#line 50 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleOrb_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleOrb._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+  struct sidl_io_Serializable__array* d_exceptions;
+  int32_t d_used;
+  
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleOrb._data) */
-#line 57 "sidlx_rmi_SimpleOrb_Impl.h"
 };
 
 #ifdef __cplusplus
@@ -74,60 +80,91 @@ sidlx_rmi_SimpleOrb__set_data(
   sidlx_rmi_SimpleOrb,
   struct sidlx_rmi_SimpleOrb__data*);
 
+extern void sidlx_rmi_SimpleOrb__superEPV(
+struct sidlx_rmi_SimpleServer__epv*);
+
 extern
 void
 impl_sidlx_rmi_SimpleOrb__load(
-  void);
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidlx_rmi_SimpleOrb__ctor(
-  /* in */ sidlx_rmi_SimpleOrb self);
+  /* in */ sidlx_rmi_SimpleOrb self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_sidlx_rmi_SimpleOrb__ctor2(
+  /* in */ sidlx_rmi_SimpleOrb self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex);
 
 extern
 void
 impl_sidlx_rmi_SimpleOrb__dtor(
-  /* in */ sidlx_rmi_SimpleOrb self);
+  /* in */ sidlx_rmi_SimpleOrb self,
+  /* out */ sidl_BaseInterface *_ex);
 
 /*
  * User-defined object methods
  */
 
-extern struct sidlx_rmi_SimpleOrb__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_SimpleOrb(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidlx_rmi_SimpleOrb(struct 
-  sidlx_rmi_SimpleOrb__object* obj);
-extern struct sidl_SIDLException__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_SIDLException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidl_SIDLException(struct 
-  sidl_SIDLException__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidlx_rmi_SimpleServer__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_SimpleServer(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidlx_rmi_SimpleServer(struct 
-  sidlx_rmi_SimpleServer__object* obj);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_rmi_ServerInfo__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_rmi_ServerInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_rmi_ServerInfo__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_rmi_ServerInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_SimpleOrb__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_SimpleOrb(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_SimpleOrb__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidlx_rmi_SimpleOrb(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_SimpleServer__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_SimpleServer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_SimpleServer__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidlx_rmi_SimpleServer(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface* _ex);
 extern
 void
 impl_sidlx_rmi_SimpleOrb_serviceRequest(
@@ -135,41 +172,86 @@ impl_sidlx_rmi_SimpleOrb_serviceRequest(
   /* in */ sidlx_rmi_Socket sock,
   /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidlx_rmi_SimpleOrb__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_SimpleOrb(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidlx_rmi_SimpleOrb(struct 
-  sidlx_rmi_SimpleOrb__object* obj);
-extern struct sidl_SIDLException__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_SIDLException(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidl_SIDLException(struct 
-  sidl_SIDLException__object* obj);
-extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_ClassInfo(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidl_ClassInfo(struct 
-  sidl_ClassInfo__object* obj);
-extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_Socket(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidlx_rmi_Socket(struct 
-  sidlx_rmi_Socket__object* obj);
-extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseInterface(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidl_BaseInterface(struct 
-  sidl_BaseInterface__object* obj);
-extern struct sidlx_rmi_SimpleServer__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_SimpleServer(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidlx_rmi_SimpleServer(struct 
-  sidlx_rmi_SimpleServer__object* obj);
+extern
+char*
+impl_sidlx_rmi_SimpleOrb_getServerURL(
+  /* in */ sidlx_rmi_SimpleOrb self,
+  /* in */ const char* objID,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+char*
+impl_sidlx_rmi_SimpleOrb_isLocalObject(
+  /* in */ sidlx_rmi_SimpleOrb self,
+  /* in */ const char* url,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+char*
+impl_sidlx_rmi_SimpleOrb_getProtocol(
+  /* in */ sidlx_rmi_SimpleOrb self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+struct sidl_io_Serializable__array*
+impl_sidlx_rmi_SimpleOrb_getExceptions(
+  /* in */ sidlx_rmi_SimpleOrb self,
+  /* out */ sidl_BaseInterface *_ex);
+
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseClass(char* url,
-  sidl_BaseInterface *_ex);
-extern char* impl_sidlx_rmi_SimpleOrb_fgetURL_sidl_BaseClass(struct 
-  sidl_BaseClass__object* obj);
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseClass(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_BaseClass(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseInterface__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_ClassInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_ClassInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_RuntimeException__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_io_Serializable(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_io_Serializable__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_io_Serializable(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidl_rmi_ServerInfo__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidl_rmi_ServerInfo(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_rmi_ServerInfo__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidl_rmi_ServerInfo(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_SimpleOrb__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_SimpleOrb(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_SimpleOrb__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidlx_rmi_SimpleOrb(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_SimpleServer__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_SimpleServer(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_SimpleServer__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidlx_rmi_SimpleServer(void* bi,
+  sidl_BaseInterface* _ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_Socket(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidlx_rmi_Socket__object* 
+  impl_sidlx_rmi_SimpleOrb_fcast_sidlx_rmi_Socket(void* bi,
+  sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 }
 #endif

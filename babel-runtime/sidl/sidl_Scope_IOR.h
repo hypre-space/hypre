@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Scope_IOR.h
- * Symbol:        sidl.Scope-v0.9.3
+ * Symbol:        sidl.Scope-v0.9.15
  * Symbol Type:   enumeration
- * Babel Version: 0.10.12
+ * Babel Version: 1.0.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.Scope
@@ -31,8 +31,6 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  * 
  * WARNING: Automatically generated; changes will be lost
- * 
- * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_Scope_IOR_h
@@ -46,7 +44,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "sidl.Scope" (version 0.9.3)
+ * Symbol "sidl.Scope" (version 0.9.15)
  * 
  * When loading a dynamically linked library, there are three 
  * settings: LOCAL, GLOBAL and SCLSCOPE.
@@ -57,19 +55,10 @@ extern "C" {
 struct sidl_Scope__array;
 
 enum sidl_Scope__enum {
-  /**
-   * Attempt to load the symbols into a local namespace. 
-   */
   sidl_Scope_LOCAL    = 0,
 
-  /**
-   * Attempt to load the symbols into the global namespace. 
-   */
   sidl_Scope_GLOBAL   = 1,
 
-  /**
-   * Use the scope setting from the SCL file. 
-   */
   sidl_Scope_SCLSCOPE = 2
 
 };
