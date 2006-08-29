@@ -94,7 +94,7 @@ libbHYPRE.a: ${OBJS}
 
 libbHYPRE.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${LINK_CC} -o $@ ${OBJS} -L${HYPRE_LIB_INSTALL} -lHYPRE -lsidl-0.10.12
+	${LINK_CC} -o $@ -shared ${OBJS} -L${HYPRE_LIB_INSTALL} -lHYPRE -lsidl-1.0.0
 
 
 ${OBJS}: ${HEADERS}
