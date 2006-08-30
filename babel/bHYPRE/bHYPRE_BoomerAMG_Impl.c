@@ -1565,9 +1565,9 @@ impl_bHYPRE_BoomerAMG_Apply(
 
    ierr += HYPRE_BoomerAMGSolve( solver, bHYPREP_A, bb, xx );
 
-   hypre_babel_exception_return_error(_ex);
    return ierr;
 
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.Apply) */
   }
 }
