@@ -182,23 +182,28 @@ impl_bHYPRE_MPICommunicator_CreateC(
   /* in */ void* mpi_comm,
   /* out */ sidl_BaseInterface *_ex)
 {
-  *_ex = 0;
-  {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator.CreateC) */
-  /* Insert-Code-Here {bHYPRE.MPICommunicator.CreateC} (CreateC method) */
+   *_ex = 0;
+   {
+      /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator.CreateC) */
+      /* Insert-Code-Here {bHYPRE.MPICommunicator.CreateC} (CreateC method) */
 
-   MPI_Comm mpicomm = *( (MPI_Comm *) mpi_comm );
-   bHYPRE_MPICommunicator bmpicomm = bHYPRE_MPICommunicator__create(_ex); SIDL_CHECK(*_ex);
-   struct bHYPRE_MPICommunicator__data * data =
-      bHYPRE_MPICommunicator__get_data(bmpicomm);
+      MPI_Comm mpicomm;
+      bHYPRE_MPICommunicator bmpicomm = bHYPRE_MPICommunicator__create(_ex); SIDL_CHECK(*_ex);
+      struct bHYPRE_MPICommunicator__data * data;
 
-   data -> mpi_comm = mpicomm;
+      if ( mpi_comm )
+      {
+         mpicomm = *( (MPI_Comm *) mpi_comm );
+         data = bHYPRE_MPICommunicator__get_data(bmpicomm);
+         data -> mpi_comm = mpicomm;
+      }
+      /* If mpi_comm is NULL, the default, MPI_COMM_NULL, is fine */
 
-   return bmpicomm;
+      return bmpicomm;
 
-   hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator.CreateC) */
-  }
+      hypre_babel_exception_no_return(_ex);
+      /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator.CreateC) */
+   }
 }
 
 /*
