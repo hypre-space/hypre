@@ -32,6 +32,7 @@
 #include "bHYPRE_IJParCSRVector.h"
 #include "bHYPRE_ParCSRDiagScale.h"
 #include "bHYPRE_BoomerAMG.h"
+#include "sidl_Exception.h"
 
 int main (int argc, char *argv[])
 {
@@ -66,12 +67,13 @@ int main (int argc, char *argv[])
    bHYPRE_ParaSails ps_solver;
    bHYPRE_PCG pcg_solver;
    bHYPRE_IdentitySolver identity;
+   sidl_BaseInterface _ex = NULL;
 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-   mpi_comm = bHYPRE_MPICommunicator_CreateC( &mpicommworld );
+   mpi_comm = bHYPRE_MPICommunicator_CreateC( &mpicommworld, &_ex );
 
    /* Default problem parameters */
    n = 33;
@@ -159,9 +161,9 @@ int main (int argc, char *argv[])
       Note that this is a square matrix, so we indicate the row partition
       size twice (since number of rows = number of cols) */
    parcsr_A = bHYPRE_IJParCSRMatrix_Create( mpi_comm,
-                                            ilower, iupper, ilower, iupper );
+                                            ilower, iupper, ilower, iupper, &_ex );
 
-   op_A = bHYPRE_Operator__cast( parcsr_A ); /* needed later as a function argument */
+   op_A = bHYPRE_Operator__cast( parcsr_A, &_ex ); /* needed later as a function argument */
 
    /* Choose a parallel csr format storage (see the User's Manual) */
    /* Note: Here the HYPRE interface requires a SetObjectType call.
@@ -169,7 +171,7 @@ int main (int argc, char *argv[])
       the object type is already specified through the class name. */
 
    /* Initialize before setting coefficients */
-   bHYPRE_IJParCSRMatrix_Initialize( parcsr_A );
+   bHYPRE_IJParCSRMatrix_Initialize( parcsr_A, &_ex );
 
    /* Now go through my local rows and set the matrix entries.
       Each row has at most 5 entries. For example, if n=3:
@@ -227,25 +229,25 @@ int main (int argc, char *argv[])
          }
 
          /* Set the values for row i */
-         bHYPRE_IJParCSRMatrix_SetValues( parcsr_A, 1, &nnz, &i, cols, values, 5 );
+         bHYPRE_IJParCSRMatrix_SetValues( parcsr_A, 1, &nnz, &i, cols, values, 5, &_ex );
       }
    }
 
    /* Assemble after setting the coefficients */
-   bHYPRE_IJParCSRMatrix_Assemble( parcsr_A );
+   bHYPRE_IJParCSRMatrix_Assemble( parcsr_A, &_ex );
 
    /* Create the rhs and solution */
-   par_b = bHYPRE_IJParCSRVector_Create( mpi_comm, ilower, iupper );
+   par_b = bHYPRE_IJParCSRVector_Create( mpi_comm, ilower, iupper, &_ex );
 
-   vec_b = bHYPRE_Vector__cast( par_b ); /* needed later for function arguments */
+   vec_b = bHYPRE_Vector__cast( par_b, &_ex ); /* needed later for function arguments */
 
-   bHYPRE_IJParCSRVector_Initialize( par_b );
+   bHYPRE_IJParCSRVector_Initialize( par_b, &_ex );
 
-   par_x = bHYPRE_IJParCSRVector_Create( mpi_comm, ilower, iupper );
+   par_x = bHYPRE_IJParCSRVector_Create( mpi_comm, ilower, iupper, &_ex );
 
-   vec_x = bHYPRE_Vector__cast( par_x ); /* needed later for function arguments */
+   vec_x = bHYPRE_Vector__cast( par_x, &_ex ); /* needed later for function arguments */
 
-   bHYPRE_IJParCSRVector_Initialize( par_x );
+   bHYPRE_IJParCSRVector_Initialize( par_x, &_ex );
 
    /* Set the rhs values to h^2 and the solution to zero */
    {
@@ -263,16 +265,16 @@ int main (int argc, char *argv[])
          rows[i] = ilower + i;
       }
 
-      bHYPRE_IJParCSRVector_SetValues( par_b, local_size, rows, rhs_values );
-      bHYPRE_IJParCSRVector_SetValues( par_x, local_size, rows, x_values );
+      bHYPRE_IJParCSRVector_SetValues( par_b, local_size, rows, rhs_values, &_ex );
+      bHYPRE_IJParCSRVector_SetValues( par_x, local_size, rows, x_values, &_ex );
 
       free(x_values);
       free(rhs_values);
       free(rows);
    }
 
-   bHYPRE_IJParCSRVector_Assemble( par_b );
-   bHYPRE_IJParCSRVector_Assemble( par_x );
+   bHYPRE_IJParCSRVector_Assemble( par_b, &_ex );
+   bHYPRE_IJParCSRVector_Assemble( par_x, &_ex );
 
    /* Choose a solver and solve the system */
 
@@ -283,23 +285,23 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, parcsr_A );
+      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, parcsr_A, &_ex );
 
       /* Set some parameters (See Reference Manual for more parameters) */
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 3 );  /* print solve info + parameters */
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6); /* Falgout coarsening */
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 3);   /* G-S/Jacobi hybrid relaxation */
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "NumSweeps", 1);   /* Sweeeps on each level */
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "MaxLevels", 20);  /* maximum number of levels */
-      bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-7);      /* conv. tolerance */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 3, &_ex );  /* print solve info + parameters */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6, &_ex ); /* Falgout coarsening */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 3, &_ex );   /* G-S/Jacobi hybrid relaxation */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "NumSweeps", 1, &_ex );   /* Sweeeps on each level */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "MaxLevels", 20, &_ex );  /* maximum number of levels */
+      bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-7, &_ex );      /* conv. tolerance */
 
       /* Now setup and solve! */
-      bHYPRE_BoomerAMG_Setup( amg_solver, vec_b, vec_x );
-      bHYPRE_BoomerAMG_Apply( amg_solver, vec_b, &vec_x );
+      bHYPRE_BoomerAMG_Setup( amg_solver, vec_b, vec_x, &_ex );
+      bHYPRE_BoomerAMG_Apply( amg_solver, vec_b, &vec_x, &_ex );
 
       /* Run info - needed logging turned on */
-      ierr += bHYPRE_BoomerAMG_GetIntValue( amg_solver, "NumIterations", &num_iterations );
-      bHYPRE_BoomerAMG_GetDoubleValue( amg_solver, "RelResidualNorm", &final_res_norm );
+      ierr += bHYPRE_BoomerAMG_GetIntValue( amg_solver, "NumIterations", &num_iterations, &_ex );
+      bHYPRE_BoomerAMG_GetDoubleValue( amg_solver, "RelResidualNorm", &final_res_norm, &_ex );
 
       if (myid == 0)
       {
@@ -310,7 +312,7 @@ int main (int argc, char *argv[])
       }
 
       /* Destroy solver */
-      bHYPRE_BoomerAMG_deleteRef( amg_solver );
+      bHYPRE_BoomerAMG_deleteRef( amg_solver, &_ex );
    }
 
    /* PCG */
@@ -320,26 +322,26 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      pcg_solver = bHYPRE_PCG_Create( mpi_comm, op_A );
+      pcg_solver = bHYPRE_PCG_Create( mpi_comm, op_A, &_ex );
 
       /* Set some parameters (See Reference Manual for more parameters) */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000 ); /* max iterations */
-      bHYPRE_PCG_SetDoubleParameter( pcg_solver, "Tolerance", 1e-7 ); /* conv. tolerance */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "TwoNorm", 1 ); /* use the two norm as the stopping criteria */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "PrintLevel", 2 ); /* prints out the iteration info */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000, &_ex ); /* max iterations */
+      bHYPRE_PCG_SetDoubleParameter( pcg_solver, "Tolerance", 1e-7, &_ex ); /* conv. tolerance */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "TwoNorm", 1, &_ex ); /* use the two norm as the stopping criteria */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "PrintLevel", 2, &_ex ); /* prints out the iteration info */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1, &_ex ); /* needed to get run info later */
 
-      identity = bHYPRE_IdentitySolver_Create( mpi_comm );
-      precond = bHYPRE_Solver__cast( identity );
-      bHYPRE_PCG_SetPreconditioner( pcg_solver, precond );
+      identity = bHYPRE_IdentitySolver_Create( mpi_comm, &_ex );
+      precond = bHYPRE_Solver__cast( identity, &_ex );
+      bHYPRE_PCG_SetPreconditioner( pcg_solver, precond, &_ex );
 
       /* Now setup and solve! */
-      bHYPRE_PCG_Setup( pcg_solver, vec_b, vec_x );
-      bHYPRE_PCG_Apply( pcg_solver, vec_b, &vec_x );
+      bHYPRE_PCG_Setup( pcg_solver, vec_b, vec_x, &_ex );
+      bHYPRE_PCG_Apply( pcg_solver, vec_b, &vec_x, &_ex );
 
       /* Run info - needed logging turned on */
-      bHYPRE_PCG_GetIntValue( pcg_solver, "NumIterations", &num_iterations );
-      bHYPRE_PCG_GetDoubleValue( pcg_solver, "RelResidualNorm", &final_res_norm );
+      bHYPRE_PCG_GetIntValue( pcg_solver, "NumIterations", &num_iterations, &_ex );
+      bHYPRE_PCG_GetDoubleValue( pcg_solver, "RelResidualNorm", &final_res_norm, &_ex );
       if (myid == 0)
       {
          printf("\n");
@@ -349,8 +351,8 @@ int main (int argc, char *argv[])
       }
 
       /* Destroy solvers */
-      bHYPRE_PCG_deleteRef( pcg_solver );
-      bHYPRE_Solver_deleteRef( precond );
+      bHYPRE_PCG_deleteRef( pcg_solver, &_ex );
+      bHYPRE_Solver_deleteRef( precond, &_ex );
    }
    /* PCG with AMG preconditioner */
    else if (solver_id == 1)
@@ -359,35 +361,35 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      pcg_solver = bHYPRE_PCG_Create( mpi_comm, op_A );
+      pcg_solver = bHYPRE_PCG_Create( mpi_comm, op_A, &_ex );
 
       /* Set some parameters (See Reference Manual for more parameters) */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000 ); /* max iterations */
-      bHYPRE_PCG_SetDoubleParameter( pcg_solver, "Tolerance", 1e-7 ); /* conv. tolerance */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "TwoNorm", 1 ); /* use the two norm as the stopping criteria */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "PrintLevel", 2 ); /* prints out the iteration info */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000, &_ex ); /* max iterations */
+      bHYPRE_PCG_SetDoubleParameter( pcg_solver, "Tolerance", 1e-7, &_ex ); /* conv. tolerance */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "TwoNorm", 1, &_ex ); /* use the two norm as the stopping criteria */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "PrintLevel", 2, &_ex ); /* prints out the iteration info */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1, &_ex ); /* needed to get run info later */
 
       /* Now set up the AMG preconditioner and specify any parameters */
-      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, parcsr_A );
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 1 ); /* print amg solution info*/
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6); /* Falgout coarsening */
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 6);   /* Sym G-S/Jacobi hybrid relaxation */
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "NumSweeps", 1);   /* Sweeeps on each level */
-      bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-3);      /* conv. tolerance */
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "MaxIter", 1 ); /* do only one iteration! */
+      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, parcsr_A, &_ex );
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 1, &_ex ); /* print amg solution info*/
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6, &_ex ); /* Falgout coarsening */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 6, &_ex );   /* Sym G-S/Jacobi hybrid relaxation */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "NumSweeps", 1, &_ex );   /* Sweeeps on each level */
+      bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-3, &_ex);      /* conv. tolerance */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "MaxIter", 1, &_ex ); /* do only one iteration! */
 
       /* Set the PCG preconditioner */
-      precond = bHYPRE_Solver__cast( amg_solver );
-      bHYPRE_PCG_SetPreconditioner( pcg_solver, precond );
+      precond = bHYPRE_Solver__cast( amg_solver, &_ex );
+      bHYPRE_PCG_SetPreconditioner( pcg_solver, precond, &_ex );
 
       /* Now setup and solve! */
-      bHYPRE_PCG_Setup( pcg_solver, vec_b, vec_x );
-      bHYPRE_PCG_Apply( pcg_solver, vec_b, &vec_x );
+      bHYPRE_PCG_Setup( pcg_solver, vec_b, vec_x, &_ex );
+      bHYPRE_PCG_Apply( pcg_solver, vec_b, &vec_x, &_ex );
 
       /* Run info - needed logging turned on */
-      bHYPRE_PCG_GetIntValue( pcg_solver, "NumIterations", &num_iterations );
-      bHYPRE_PCG_GetDoubleValue( pcg_solver, "RelResidualNorm", &final_res_norm );
+      bHYPRE_PCG_GetIntValue( pcg_solver, "NumIterations", &num_iterations, &_ex );
+      bHYPRE_PCG_GetDoubleValue( pcg_solver, "RelResidualNorm", &final_res_norm, &_ex );
       if (myid == 0)
       {
          printf("\n");
@@ -397,8 +399,8 @@ int main (int argc, char *argv[])
       }
 
       /* Destroy solver and preconditioner */
-      bHYPRE_PCG_deleteRef( pcg_solver );
-      bHYPRE_Solver_deleteRef( precond );
+      bHYPRE_PCG_deleteRef( pcg_solver, &_ex );
+      bHYPRE_Solver_deleteRef( precond, &_ex );
    }
 
    /* PCG with Parasails Preconditioner */
@@ -413,37 +415,37 @@ int main (int argc, char *argv[])
       int      sai_sym = 1;
 
       /* Create solver */
-      pcg_solver = bHYPRE_PCG_Create( mpi_comm, op_A );
+      pcg_solver = bHYPRE_PCG_Create( mpi_comm, op_A, &_ex );
 
       /* Set some parameters (See Reference Manual for more parameters) */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000 ); /* max iterations */
-      bHYPRE_PCG_SetDoubleParameter( pcg_solver, "Tolerance", 1e-7 ); /* conv. tolerance */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "TwoNorm", 1 ); /* use the two norm as the stopping criteria */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "PrintLevel", 2 ); /* prints out the iteration info */
-      bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000, &_ex ); /* max iterations */
+      bHYPRE_PCG_SetDoubleParameter( pcg_solver, "Tolerance", 1e-7, &_ex ); /* conv. tolerance */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "TwoNorm", 1, &_ex ); /* use the two norm as the stopping criteria */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "PrintLevel", 2, &_ex ); /* prints out the iteration info */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1, &_ex ); /* needed to get run info later */
 
       /* Now set up the ParaSails preconditioner and specify any parameters */
-      ps_solver = bHYPRE_ParaSails_Create( mpi_comm, parcsr_A );
+      ps_solver = bHYPRE_ParaSails_Create( mpi_comm, parcsr_A, &_ex );
 
       /* Set some parameters (See Reference Manual for more parameters) */
-      bHYPRE_ParaSails_SetDoubleParameter( ps_solver, "Thresh", sai_threshold );
-      bHYPRE_ParaSails_SetIntParameter( ps_solver, "Nlevels", sai_max_levels );
-      bHYPRE_ParaSails_SetDoubleParameter( ps_solver, "Filter", sai_filter );
-      bHYPRE_ParaSails_SetIntParameter( ps_solver, "Sym", sai_sym );
-      bHYPRE_ParaSails_SetIntParameter( ps_solver, "Logging", 3 );
+      bHYPRE_ParaSails_SetDoubleParameter( ps_solver, "Thresh", sai_threshold, &_ex );
+      bHYPRE_ParaSails_SetIntParameter( ps_solver, "Nlevels", sai_max_levels, &_ex );
+      bHYPRE_ParaSails_SetDoubleParameter( ps_solver, "Filter", sai_filter, &_ex );
+      bHYPRE_ParaSails_SetIntParameter( ps_solver, "Sym", sai_sym, &_ex );
+      bHYPRE_ParaSails_SetIntParameter( ps_solver, "Logging", 3, &_ex );
 
       /* Set the PCG preconditioner */
-      precond = bHYPRE_Solver__cast( ps_solver );
-      bHYPRE_PCG_SetPreconditioner( pcg_solver, precond );
+      precond = bHYPRE_Solver__cast( ps_solver, &_ex );
+      bHYPRE_PCG_SetPreconditioner( pcg_solver, precond, &_ex );
 
       /* Now setup and solve! */
-      bHYPRE_PCG_Setup( pcg_solver, vec_b, vec_x);
-      bHYPRE_PCG_Apply( pcg_solver, vec_b, &vec_x);
+      bHYPRE_PCG_Setup( pcg_solver, vec_b, vec_x, &_ex );
+      bHYPRE_PCG_Apply( pcg_solver, vec_b, &vec_x, &_ex );
 
 
       /* Run info - needed logging turned on */
-      bHYPRE_PCG_GetIntValue( pcg_solver, "NumIterations", &num_iterations );
-      bHYPRE_PCG_GetDoubleValue( pcg_solver, "RelResidualNorm", &final_res_norm );
+      bHYPRE_PCG_GetIntValue( pcg_solver, "NumIterations", &num_iterations, &_ex );
+      bHYPRE_PCG_GetDoubleValue( pcg_solver, "RelResidualNorm", &final_res_norm, &_ex );
       if (myid == 0)
       {
          printf("\n");
@@ -453,8 +455,8 @@ int main (int argc, char *argv[])
       }
 
       /* Destory solver and preconditioner */
-      bHYPRE_PCG_deleteRef( pcg_solver );
-      bHYPRE_Solver_deleteRef( precond );
+      bHYPRE_PCG_deleteRef( pcg_solver, &_ex );
+      bHYPRE_Solver_deleteRef( precond, &_ex );
    }
    else
    {
@@ -463,13 +465,13 @@ int main (int argc, char *argv[])
 
    /* Print the solution */
    if (print_solution)
-      bHYPRE_IJParCSRVector_Print( par_x, "ij.out.x" );
+      bHYPRE_IJParCSRVector_Print( par_x, "ij.out.x", &_ex );
 
    /* Clean up */
-   bHYPRE_IJParCSRMatrix_deleteRef( parcsr_A );
-   bHYPRE_IJParCSRVector_deleteRef( par_b );
-   bHYPRE_IJParCSRVector_deleteRef( par_x );
-   bHYPRE_MPICommunicator_deleteRef( mpi_comm );
+   bHYPRE_IJParCSRMatrix_deleteRef( parcsr_A, &_ex );
+   bHYPRE_IJParCSRVector_deleteRef( par_b, &_ex );
+   bHYPRE_IJParCSRVector_deleteRef( par_x, &_ex );
+   bHYPRE_MPICommunicator_deleteRef( mpi_comm, &_ex );
 
    hypre_assert( ierr == 0 );
 
