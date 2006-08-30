@@ -9,7 +9,7 @@ HYPRE_DIR = ../hypre
 ########################################################################
 # Compiling and linking options
 ########################################################################
-COPTS     = -g -ansi -pedantic -Wall
+COPTS     = -g -pedantic -Wall
 CINCLUDES = -I$(HYPRE_DIR)/include
 CDEFS     = -DHAVE_CONFIG_H -DHYPRE_TIMING
 CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
