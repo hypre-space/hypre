@@ -28,6 +28,7 @@
 #include "bHYPRE_SStructSplit.h"
 #include "bHYPRE_SStructDiagScale.h"
 #include "bHYPRE_IdentitySolver.h"
+#include "sidl_Exception.h"
 
 #define DEBUG 0
 #define DO_THIS_LATER 0
@@ -1516,6 +1517,7 @@ main( int   argc,
    double                cf_tol;
 
    int                   arg_index, part, box, var, entry, s, i, j, k;
+   sidl_BaseInterface _ex = NULL;
                         
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1526,7 +1528,7 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-   bmpicomm = bHYPRE_MPICommunicator_CreateC( (void *)(&mpi_comm) );
+   bmpicomm = bHYPRE_MPICommunicator_CreateC( (void *)(&mpi_comm), &_ex );
 
    hypre_InitMemoryDebug(myid);
 
@@ -1708,7 +1710,7 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          PrintUsage(argv[0], myid);
-         bHYPRE_MPICommunicator_deleteRef( bmpicomm );
+         bHYPRE_MPICommunicator_deleteRef( bmpicomm, &_ex );
          MPI_Finalize();
          exit(1);
          break;
@@ -1774,7 +1776,7 @@ main( int   argc,
    time_index = hypre_InitializeTiming("SStruct Interface");
    hypre_BeginTiming(time_index);
 
-   b_grid = bHYPRE_SStructGrid_Create( bmpicomm, data.ndim, data.nparts );
+   b_grid = bHYPRE_SStructGrid_Create( bmpicomm, data.ndim, data.nparts, &_ex );
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1782,12 +1784,12 @@ main( int   argc,
       for (box = 0; box < pdata.nboxes; box++)
       {
          bHYPRE_SStructGrid_SetExtents( b_grid, part, pdata.ilowers[box],
-                                        pdata.iuppers[box], data.ndim );
+                                        pdata.iuppers[box], data.ndim, &_ex );
       }
 
       for ( var=0; var<pdata.nvars; ++var )
       {
-         bHYPRE_SStructGrid_SetVariable( b_grid, part, var, pdata.nvars, pdata.vartypes[var] );
+         bHYPRE_SStructGrid_SetVariable( b_grid, part, var, pdata.nvars, pdata.vartypes[var], &_ex );
       }
 
       /* GridAddVariabes */
@@ -1800,13 +1802,13 @@ main( int   argc,
             pdata.glue_ilowers[box], pdata.glue_iuppers[box],
             pdata.glue_nbor_parts[box],
             pdata.glue_nbor_ilowers[box], pdata.glue_nbor_iuppers[box],
-            pdata.glue_index_maps[box], data.ndim );
+            pdata.glue_index_maps[box], data.ndim, &_ex );
       }
 
-      bHYPRE_SStructGrid_SetPeriodic( b_grid, part, pdata.periodic, data.ndim );
+      bHYPRE_SStructGrid_SetPeriodic( b_grid, part, pdata.periodic, data.ndim, &_ex );
    }
 
-   bHYPRE_SStructGrid_Assemble( b_grid );
+   bHYPRE_SStructGrid_Assemble( b_grid, &_ex );
 
    /*-----------------------------------------------------------
     * Set up the stencils
@@ -1815,13 +1817,13 @@ main( int   argc,
    b_stencils = hypre_CTAlloc( bHYPRE_SStructStencil, data.nstencils );
    for (s = 0; s < data.nstencils; s++)
    {
-      b_stencils[s] = bHYPRE_SStructStencil_Create( data.ndim, data.stencil_sizes[s] );
+      b_stencils[s] = bHYPRE_SStructStencil_Create( data.ndim, data.stencil_sizes[s], &_ex );
 
       for (i = 0; i < data.stencil_sizes[s]; i++)
       {
          bHYPRE_SStructStencil_SetEntry( b_stencils[s], i,
                                          data.stencil_offsets[s][i], data.ndim,
-                                         data.stencil_vars[s][i] );
+                                         data.stencil_vars[s][i], &_ex );
       }
    }
 
@@ -1848,9 +1850,9 @@ main( int   argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   b_graph = bHYPRE_SStructGraph_Create( bmpicomm, b_grid );
+   b_graph = bHYPRE_SStructGraph_Create( bmpicomm, b_grid, &_ex );
 
-   bHYPRE_SStructGraph_SetObjectType( b_graph, object_type );
+   bHYPRE_SStructGraph_SetObjectType( b_graph, object_type, &_ex );
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1860,7 +1862,7 @@ main( int   argc,
       for (var = 0; var < pdata.nvars; var++)
       {
          bHYPRE_SStructGraph_SetStencil( b_graph, part, var,
-                                         b_stencils[pdata.stencil_num[var]] );
+                                         b_stencils[pdata.stencil_num[var]], &_ex );
       }
 
       /* add entries */
@@ -1890,14 +1892,14 @@ main( int   argc,
                   bHYPRE_SStructGraph_AddEntries
                      ( b_graph, part, index, 3, pdata.graph_vars[entry],
                        pdata.graph_to_parts[entry], to_index,
-                       pdata.graph_to_vars[entry] );
+                       pdata.graph_to_vars[entry], &_ex );
                }
             }
          }
       }
    }
 
-   bHYPRE_SStructGraph_Assemble( b_graph );
+   bHYPRE_SStructGraph_Assemble( b_graph, &_ex );
 
    /*-----------------------------------------------------------
     * Set up the matrix
@@ -1908,7 +1910,7 @@ main( int   argc,
 
    if ( object_type == HYPRE_PARCSR )
    {
-      b_spA = bHYPRE_SStructParCSRMatrix_Create( bmpicomm, b_graph );
+      b_spA = bHYPRE_SStructParCSRMatrix_Create( bmpicomm, b_graph, &_ex );
 
       /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
       for (entry = 0; entry < data.symmetric_nentries; entry++)
@@ -1917,16 +1919,16 @@ main( int   argc,
                                                   data.symmetric_parts[entry],
                                                   data.symmetric_vars[entry],
                                                   data.symmetric_to_vars[entry],
-                                                  data.symmetric_booleans[entry] );
+                                                  data.symmetric_booleans[entry], &_ex );
       }
-      bHYPRE_SStructParCSRMatrix_SetNSSymmetric( b_spA, data.ns_symmetric );
+      bHYPRE_SStructParCSRMatrix_SetNSSymmetric( b_spA, data.ns_symmetric, &_ex );
       /* this Initialize calls SetObjectType */
-      bHYPRE_SStructParCSRMatrix_Initialize( b_spA );
+      bHYPRE_SStructParCSRMatrix_Initialize( b_spA, &_ex );
    }
 
    else
    {
-      b_A = bHYPRE_SStructMatrix_Create( bmpicomm, b_graph );
+      b_A = bHYPRE_SStructMatrix_Create( bmpicomm, b_graph, &_ex );
 
       /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
       for (entry = 0; entry < data.symmetric_nentries; entry++)
@@ -1935,13 +1937,13 @@ main( int   argc,
                                             data.symmetric_parts[entry],
                                             data.symmetric_vars[entry],
                                             data.symmetric_to_vars[entry],
-                                            data.symmetric_booleans[entry] );
+                                            data.symmetric_booleans[entry], &_ex );
       }
-      bHYPRE_SStructMatrix_SetNSSymmetric( b_A, data.ns_symmetric );
+      bHYPRE_SStructMatrix_SetNSSymmetric( b_A, data.ns_symmetric, &_ex );
        /* this Initialize can't call SetObjectType because object_type could be
           HYPRE_SSTRUCT or HYPRE_STRUCT */
-      bHYPRE_SStructMatrix_SetObjectType(b_A, object_type);
-      bHYPRE_SStructMatrix_Initialize( b_A );
+      bHYPRE_SStructMatrix_SetObjectType(b_A, object_type, &_ex );
+      bHYPRE_SStructMatrix_Initialize( b_A, &_ex );
    }
 
    for (part = 0; part < data.nparts; part++)
@@ -1967,13 +1969,13 @@ main( int   argc,
                {
                bHYPRE_SStructParCSRMatrix_SetBoxValues
                   ( b_spA, part, ilower, iupper, data.ndim, var,
-                    1, &i, values, pdata.max_boxsize );
+                    1, &i, values, pdata.max_boxsize, &_ex );
                }
                else
                {
                   bHYPRE_SStructMatrix_SetBoxValues
                      ( b_A, part, ilower, iupper, data.ndim, var,
-                       1, &i, values, pdata.max_boxsize );
+                       1, &i, values, pdata.max_boxsize, &_ex );
                }
             }
          }
@@ -1999,14 +2001,14 @@ main( int   argc,
                      bHYPRE_SStructParCSRMatrix_SetValues
                         ( b_spA, part, index, 3, pdata.graph_vars[entry],
                           1, &(pdata.graph_entries[entry]),
-                          &(pdata.graph_values[entry]) );
+                          &(pdata.graph_values[entry]), &_ex );
                   }
                   else
                   {
                      bHYPRE_SStructMatrix_SetValues
                         ( b_A, part, index, 3, pdata.graph_vars[entry],
                           1, &(pdata.graph_entries[entry]),
-                          &(pdata.graph_values[entry]) );
+                          &(pdata.graph_values[entry]), &_ex );
                   }
                }
             }
@@ -2040,13 +2042,13 @@ main( int   argc,
                   {
                      bHYPRE_SStructParCSRMatrix_SetValues
                         ( b_spA, part, index, 3, pdata.matrix_vars[entry],
-                          1, &(pdata.matrix_entries[entry]), &(pdata.matrix_values[entry]) );
+                          1, &(pdata.matrix_entries[entry]), &(pdata.matrix_values[entry]), &_ex );
                   }
                   else
                   {
                      bHYPRE_SStructMatrix_SetValues
                         ( b_A, part, index, 3, pdata.matrix_vars[entry],
-                          1, &(pdata.matrix_entries[entry]), &(pdata.matrix_values[entry]) );
+                          1, &(pdata.matrix_entries[entry]), &(pdata.matrix_values[entry]), &_ex );
                   }
                }
             }
@@ -2056,21 +2058,21 @@ main( int   argc,
 
    if ( object_type == HYPRE_PARCSR )
    {
-      bHYPRE_SStructParCSRMatrix_Assemble( b_spA );
+      bHYPRE_SStructParCSRMatrix_Assemble( b_spA, &_ex );
 
-      bHYPRE_SStructParCSRMatrix_GetObject( b_spA, &b_BI );
-      b_pA = bHYPRE_IJParCSRMatrix__cast( b_BI );
+      bHYPRE_SStructParCSRMatrix_GetObject( b_spA, &b_BI, &_ex );
+      b_pA = bHYPRE_IJParCSRMatrix__cast( b_BI, &_ex );
    }
    else if ( object_type == HYPRE_STRUCT )
    {
-      bHYPRE_SStructMatrix_Assemble( b_A );
+      bHYPRE_SStructMatrix_Assemble( b_A, &_ex );
 
-      bHYPRE_SStructMatrix_GetObject( b_A, &b_BI );
-      b_sA = bHYPRE_StructMatrix__cast( b_BI );
+      bHYPRE_SStructMatrix_GetObject( b_A, &b_BI, &_ex );
+      b_sA = bHYPRE_StructMatrix__cast( b_BI, &_ex );
    }
    else if ( object_type == HYPRE_SSTRUCT )
    {
-      bHYPRE_SStructMatrix_Assemble( b_A );
+      bHYPRE_SStructMatrix_Assemble( b_A, &_ex );
    }
 
    /*-----------------------------------------------------------
@@ -2082,17 +2084,17 @@ main( int   argc,
 
    if ( object_type == HYPRE_PARCSR )
    {
-      b_spb = bHYPRE_SStructParCSRVector_Create( bmpicomm, b_grid );
+      b_spb = bHYPRE_SStructParCSRVector_Create( bmpicomm, b_grid, &_ex );
       /* this Initialize calls SetObjectType */
-      bHYPRE_SStructParCSRVector_Initialize( b_spb );
+      bHYPRE_SStructParCSRVector_Initialize( b_spb, &_ex );
    }
    else
    {
-      b_b = bHYPRE_SStructVector_Create( bmpicomm, b_grid );
+      b_b = bHYPRE_SStructVector_Create( bmpicomm, b_grid, &_ex );
        /* this Initialize can't call SetObjectType because object_type could be
           HYPRE_SSTRUCT or HYPRE_STRUCT */
-      bHYPRE_SStructVector_SetObjectType(b_b, object_type);
-      bHYPRE_SStructVector_Initialize( b_b );
+      bHYPRE_SStructVector_SetObjectType(b_b, object_type, &_ex );
+      bHYPRE_SStructVector_Initialize( b_b, &_ex );
    }
 
 
@@ -2113,12 +2115,12 @@ main( int   argc,
             if ( object_type == HYPRE_PARCSR )
             {
                bHYPRE_SStructParCSRVector_SetBoxValues
-                  ( b_spb, part, ilower, iupper, data.ndim, var, values, pdata.max_boxsize );
+                  ( b_spb, part, ilower, iupper, data.ndim, var, values, pdata.max_boxsize, &_ex );
             }
             else
             {
                bHYPRE_SStructVector_SetBoxValues
-                  ( b_b, part, ilower, iupper, data.ndim, var, values, pdata.max_boxsize );
+                  ( b_b, part, ilower, iupper, data.ndim, var, values, pdata.max_boxsize, &_ex );
             }
          }
       }
@@ -2127,38 +2129,38 @@ main( int   argc,
 
    if ( object_type == HYPRE_PARCSR )
    {
-      bHYPRE_SStructParCSRVector_Assemble( b_spb );
+      bHYPRE_SStructParCSRVector_Assemble( b_spb, &_ex );
 
-      bHYPRE_SStructParCSRVector_GetObject( b_spb, &b_BI );
-      b_pb = bHYPRE_IJParCSRVector__cast( b_BI );
+      bHYPRE_SStructParCSRVector_GetObject( b_spb, &b_BI, &_ex );
+      b_pb = bHYPRE_IJParCSRVector__cast( b_BI, &_ex );
    }
    else if ( object_type == HYPRE_STRUCT )
    {
-      bHYPRE_SStructVector_Assemble( b_b );
+      bHYPRE_SStructVector_Assemble( b_b, &_ex );
 
-      bHYPRE_SStructVector_GetObject( b_b, &b_BI );
-      b_sb = bHYPRE_StructVector__cast( b_BI );
+      bHYPRE_SStructVector_GetObject( b_b, &b_BI, &_ex );
+      b_sb = bHYPRE_StructVector__cast( b_BI, &_ex );
    }
    else if ( object_type == HYPRE_SSTRUCT )
    {
-      bHYPRE_SStructVector_Assemble( b_b );
+      bHYPRE_SStructVector_Assemble( b_b, &_ex );
    }
 
    /************* x ***************/
 
    if ( object_type == HYPRE_PARCSR )
    {
-      b_spx = bHYPRE_SStructParCSRVector_Create( bmpicomm, b_grid );
+      b_spx = bHYPRE_SStructParCSRVector_Create( bmpicomm, b_grid, &_ex );
       /* this Initialize calls SetObjectType */
-      bHYPRE_SStructParCSRVector_Initialize( b_spx );
+      bHYPRE_SStructParCSRVector_Initialize( b_spx, &_ex );
    }
    else
    {
-      b_x = bHYPRE_SStructVector_Create( bmpicomm, b_grid );
+      b_x = bHYPRE_SStructVector_Create( bmpicomm, b_grid, &_ex );
        /* this Initialize can't call SetObjectType because object_type could be
           HYPRE_SSTRUCT or HYPRE_STRUCT */
-      bHYPRE_SStructVector_SetObjectType(b_x, object_type);
-      bHYPRE_SStructVector_Initialize( b_x );
+      bHYPRE_SStructVector_SetObjectType(b_x, object_type, &_ex );
+      bHYPRE_SStructVector_Initialize( b_x, &_ex );
    }
 
    for (j = 0; j < data.max_boxsize; j++)
@@ -2179,13 +2181,13 @@ main( int   argc,
             {
                bHYPRE_SStructParCSRVector_SetBoxValues
                   ( b_spx, part, ilower, iupper, data.ndim, var,
-                    values, pdata.max_boxsize );
+                    values, pdata.max_boxsize, &_ex );
             }
             else
             {
                bHYPRE_SStructVector_SetBoxValues
                   ( b_x, part, ilower, iupper, data.ndim, var,
-                    values, pdata.max_boxsize );
+                    values, pdata.max_boxsize, &_ex );
             }
          }
       }
@@ -2193,21 +2195,21 @@ main( int   argc,
 
    if ( object_type == HYPRE_PARCSR )
    {
-      bHYPRE_SStructParCSRVector_Assemble( b_spx );
+      bHYPRE_SStructParCSRVector_Assemble( b_spx, &_ex );
 
-      bHYPRE_SStructParCSRVector_GetObject( b_spx, &b_BI );
-      b_px = bHYPRE_IJParCSRVector__cast( b_BI );
+      bHYPRE_SStructParCSRVector_GetObject( b_spx, &b_BI, &_ex );
+      b_px = bHYPRE_IJParCSRVector__cast( b_BI, &_ex );
    }
    else if ( object_type == HYPRE_STRUCT )
    {
-      bHYPRE_SStructVector_Assemble( b_x );
+      bHYPRE_SStructVector_Assemble( b_x, &_ex );
 
-      bHYPRE_SStructVector_GetObject( b_x, &b_BI );
-      b_sx = bHYPRE_StructVector__cast( b_BI );
+      bHYPRE_SStructVector_GetObject( b_x, &b_BI, &_ex );
+      b_sx = bHYPRE_StructVector__cast( b_BI, &_ex );
    }
    else if ( object_type == HYPRE_SSTRUCT )
    {
-      bHYPRE_SStructVector_Assemble( b_x );
+      bHYPRE_SStructVector_Assemble( b_x, &_ex );
    }
 
    hypre_EndTiming(time_index);
@@ -2245,20 +2247,20 @@ main( int   argc,
                                  ilower, iupper);
                   SetCosineVector(scale, ilower, iupper, values);
                   bHYPRE_SStructParCSRVector_SetBoxValues(
-                     b_spx, part, ilower, iupper, data.ndim, var, values, 1 );
+                     b_spx, part, ilower, iupper, data.ndim, var, values, 1, &_ex );
                   /* ... last arg should be size of values, 1 may work even if wrong */
                }
             }
          }
 
-         bHYPRE_SStructParCSRVector_Assemble( b_spx );
+         bHYPRE_SStructParCSRVector_Assemble( b_spx, &_ex );
 
          /* Apply A to cosine vector to yield righthand side, b=A*x */
-         bV_b = bHYPRE_Vector__cast( b_spb );
-         bV_x = bHYPRE_Vector__cast( b_spx );
-         ierr += bHYPRE_SStructParCSRMatrix_Apply( b_spA, bV_x, &bV_b );
+         bV_b = bHYPRE_Vector__cast( b_spb, &_ex );
+         bV_x = bHYPRE_Vector__cast( b_spx, &_ex );
+         ierr += bHYPRE_SStructParCSRMatrix_Apply( b_spA, bV_x, &bV_b, &_ex );
          /* Reset initial guess to zero, x=0 */
-         ierr += bHYPRE_SStructParCSRVector_Clear( b_spx );
+         ierr += bHYPRE_SStructParCSRVector_Clear( b_spx, &_ex );
       }
       else
       {
@@ -2274,19 +2276,19 @@ main( int   argc,
                                  ilower, iupper);
                   SetCosineVector(scale, ilower, iupper, values);
                   bHYPRE_SStructVector_SetBoxValues(
-                     b_x, part, ilower, iupper, data.ndim, var, values, 1);
+                     b_x, part, ilower, iupper, data.ndim, var, values, 1, &_ex );
                   /* ... last arg should be size of values, 1 may work even if wrong */
                }
             }
          }
-         bHYPRE_SStructVector_Assemble( b_x );
+         bHYPRE_SStructVector_Assemble( b_x, &_ex );
 
          /* Apply A to cosine vector to yield righthand side, b=A*x */
-         bV_b = bHYPRE_Vector__cast( b_b );
-         bV_x = bHYPRE_Vector__cast( b_x );
-         ierr += bHYPRE_SStructMatrix_Apply( b_A, bV_x, &bV_b );
+         bV_b = bHYPRE_Vector__cast( b_b, &_ex );
+         bV_x = bHYPRE_Vector__cast( b_x, &_ex );
+         ierr += bHYPRE_SStructMatrix_Apply( b_A, bV_x, &bV_b, &_ex );
          /* Reset initial guess to zero, x=0 */
-         ierr += bHYPRE_SStructVector_Clear( b_x );
+         ierr += bHYPRE_SStructVector_Clear( b_x, &_ex );
       }
       hypre_assert( ierr == 0 );
    }
@@ -2297,15 +2299,15 @@ main( int   argc,
 
       if ( object_type == HYPRE_PARCSR )
       {
-         bHYPRE_SStructParCSRMatrix_Print( b_spA, "sstruct_b.out.A", 0 );
-         bHYPRE_SStructParCSRVector_Print( b_spb, "sstruct_b.out.b", 0 );
-         bHYPRE_SStructParCSRVector_Print( b_spx, "sstruct_b.out.x0", 0 );
+         bHYPRE_SStructParCSRMatrix_Print( b_spA, "sstruct_b.out.A", 0, &_ex );
+         bHYPRE_SStructParCSRVector_Print( b_spb, "sstruct_b.out.b", 0, &_ex );
+         bHYPRE_SStructParCSRVector_Print( b_spx, "sstruct_b.out.x0", 0, &_ex );
       }
       else
       {
-         bHYPRE_SStructMatrix_Print( b_A, "sstruct_b.out.A", 0 );
-         bHYPRE_SStructVector_Print( b_b, "sstruct_b.out.b", 0 );
-         bHYPRE_SStructVector_Print( b_x, "sstruct_b.out.x0", 0 );
+         bHYPRE_SStructMatrix_Print( b_A, "sstruct_b.out.A", 0, &_ex );
+         bHYPRE_SStructVector_Print( b_b, "sstruct_b.out.b", 0, &_ex );
+         bHYPRE_SStructVector_Print( b_x, "sstruct_b.out.x0", 0, &_ex );
       }
 
    /*-----------------------------------------------------------
@@ -2446,40 +2448,40 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
-      b_A_O = bHYPRE_Operator__cast( b_A );
-      b_solver_PCG = bHYPRE_PCG_Create( bmpicomm, b_A_O );
-      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "MaxIter", 100 );
-      ierr += bHYPRE_PCG_SetDoubleParameter( b_solver_PCG, "Tolerance", 1.0e-06 );
-      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "TwoNorm", 1 );
-      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "RelChange", 0 );
-      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "PrintLevel", 1 );
+      b_A_O = bHYPRE_Operator__cast( b_A, &_ex );
+      b_solver_PCG = bHYPRE_PCG_Create( bmpicomm, b_A_O, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "MaxIter", 100, &_ex );
+      ierr += bHYPRE_PCG_SetDoubleParameter( b_solver_PCG, "Tolerance", 1.0e-06, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "TwoNorm", 1, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "RelChange", 0, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "PrintLevel", 1, &_ex );
       hypre_assert( ierr==0 );
 
-      bV_b = bHYPRE_Vector__cast( b_b );
-      bV_x = bHYPRE_Vector__cast( b_x );
+      bV_b = bHYPRE_Vector__cast( b_b, &_ex );
+      bV_x = bHYPRE_Vector__cast( b_x, &_ex );
 
       if ((solver_id == 10) || (solver_id == 11))
       {
          /* use Split solver as preconditioner */
-         solver_Split = bHYPRE_SStructSplit_Create( bmpicomm, b_A_O );
-         ierr += bHYPRE_SStructSplit_SetIntParameter( solver_Split, "MaxIter", 1 );
+         solver_Split = bHYPRE_SStructSplit_Create( bmpicomm, b_A_O, &_ex );
+         ierr += bHYPRE_SStructSplit_SetIntParameter( solver_Split, "MaxIter", 1, &_ex );
          ierr += bHYPRE_SStructSplit_SetDoubleParameter(
-            solver_Split, "Tolerance", 0 );
+            solver_Split, "Tolerance", 0, &_ex );
          ierr += bHYPRE_SStructSplit_SetIntParameter(
-            solver_Split, "ZeroGuess", 1 );
+            solver_Split, "ZeroGuess", 1, &_ex );
          if (solver_id == 10)
          {
             ierr += bHYPRE_SStructSplit_SetStringParameter(
-               solver_Split, "StructSolver", "SMG" );
+               solver_Split, "StructSolver", "SMG", &_ex );
          }
          else if (solver_id == 11)
          {
             ierr += bHYPRE_SStructSplit_SetStringParameter(
-               solver_Split, "StructSolver", "PFMG" );
+               solver_Split, "StructSolver", "PFMG", &_ex );
          }
          b_precond = (bHYPRE_Solver) bHYPRE_SStructDiagScale__cast2
-            ( solver_Split, "bHYPRE.Solver" ); 
-         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond );
+            ( solver_Split, "bHYPRE.Solver", &_ex ); 
+         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond, &_ex );
          hypre_assert( ierr==0 );
       }
 
@@ -2508,27 +2510,27 @@ main( int   argc,
       else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
-         solver_DS = bHYPRE_SStructDiagScale_Create( bmpicomm, b_A_O );
-         ierr += bHYPRE_SStructDiagScale_Setup( solver_DS, bV_b, bV_x );
+         solver_DS = bHYPRE_SStructDiagScale_Create( bmpicomm, b_A_O, &_ex );
+         ierr += bHYPRE_SStructDiagScale_Setup( solver_DS, bV_b, bV_x, &_ex );
          b_precond = (bHYPRE_Solver) bHYPRE_SStructDiagScale__cast2
-            ( solver_DS, "bHYPRE.Solver" ); 
-         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond );
+            ( solver_DS, "bHYPRE.Solver", &_ex ); 
+         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond, &_ex );
          hypre_assert( ierr==0 );
       }
       else if (solver_id == 19)
       {
          /* no preconditioner */
-         solver_Id = bHYPRE_IdentitySolver_Create( bmpicomm );
-         ierr += bHYPRE_IdentitySolver_Setup( solver_Id, bV_b, bV_x );
+         solver_Id = bHYPRE_IdentitySolver_Create( bmpicomm, &_ex );
+         ierr += bHYPRE_IdentitySolver_Setup( solver_Id, bV_b, bV_x, &_ex );
          b_precond = (bHYPRE_Solver) bHYPRE_SStructDiagScale__cast2
-            ( solver_Id, "bHYPRE.Solver" ); 
-         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond );
+            ( solver_Id, "bHYPRE.Solver", &_ex ); 
+         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond, &_ex );
          hypre_assert( ierr==0 );
       }
       else
          hypre_assert( "unknown solver"==0 );
 
-      ierr += bHYPRE_PCG_Setup( b_solver_PCG, bV_b, bV_x );
+      ierr += bHYPRE_PCG_Setup( b_solver_PCG, bV_b, bV_x, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -2538,19 +2540,19 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
 
-      ierr += bHYPRE_PCG_Apply( b_solver_PCG, bV_b, &bV_x );
+      ierr += bHYPRE_PCG_Apply( b_solver_PCG, bV_b, &bV_x, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      ierr += bHYPRE_PCG_GetIntValue( b_solver_PCG, "NumIterations", &num_iterations );
-      ierr += bHYPRE_PCG_GetDoubleValue( b_solver_PCG, "RelResidualNorm", &final_res_norm );
+      ierr += bHYPRE_PCG_GetIntValue( b_solver_PCG, "NumIterations", &num_iterations, &_ex );
+      ierr += bHYPRE_PCG_GetDoubleValue( b_solver_PCG, "RelResidualNorm", &final_res_norm, &_ex );
 
       if ((solver_id == 10) || (solver_id == 11))
       {
-         bHYPRE_SStructSplit_deleteRef( solver_Split );
+         bHYPRE_SStructSplit_deleteRef( solver_Split, &_ex );
       }
       else if (solver_id == 13)
       {
@@ -2558,14 +2560,14 @@ main( int   argc,
       }
       else if (solver_id == 18)
       {
-         bHYPRE_SStructDiagScale_deleteRef( solver_DS );
+         bHYPRE_SStructDiagScale_deleteRef( solver_DS, &_ex );
       }
       else if (solver_id == 19)
       {
-         bHYPRE_IdentitySolver_deleteRef( solver_Id );
+         bHYPRE_IdentitySolver_deleteRef( solver_Id, &_ex );
       }
 
-      bHYPRE_PCG_deleteRef( b_solver_PCG );
+      bHYPRE_PCG_deleteRef( b_solver_PCG, &_ex );
 
    }
 
@@ -2578,45 +2580,45 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
-      b_A_O = bHYPRE_Operator__cast( b_pA );
-      b_solver_PCG = bHYPRE_PCG_Create( bmpicomm, b_A_O );
-      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "MaxIter", 100 );
-      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "TwoNorm", 1 );
-      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "RelChange", 0 );
-      ierr += bHYPRE_PCG_SetDoubleParameter( b_solver_PCG, "Tol", 1.0e-6 );
-      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "PrintLevel", 1 );
+      b_A_O = bHYPRE_Operator__cast( b_pA, &_ex );
+      b_solver_PCG = bHYPRE_PCG_Create( bmpicomm, b_A_O, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "MaxIter", 100, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "TwoNorm", 1, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "RelChange", 0, &_ex );
+      ierr += bHYPRE_PCG_SetDoubleParameter( b_solver_PCG, "Tol", 1.0e-6, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "PrintLevel", 1, &_ex );
 
       hypre_assert( ierr==0 );
 
       if (solver_id == 20)
       {
          /* use BoomerAMG as preconditioner */
-         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_pA );
-         ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6 );
-         ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "PrintLevel", 1 );
+         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_pA, &_ex );
+         ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6, &_ex );
+         ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "PrintLevel", 1, &_ex );
          ierr += bHYPRE_BoomerAMG_SetDoubleParameter(
-            b_boomeramg, "StrongThreshold", 0.25 );
-         ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "MaxIter", 1 );
+            b_boomeramg, "StrongThreshold", 0.25, &_ex );
+         ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "MaxIter", 1, &_ex );
          ierr += bHYPRE_BoomerAMG_SetDoubleParameter(
-            b_boomeramg, "Tol", 0.0 );
+            b_boomeramg, "Tol", 0.0, &_ex );
          ierr += bHYPRE_BoomerAMG_SetStringParameter(
-            b_boomeramg, "PrintFileName", "sstruct.out.log");
+            b_boomeramg, "PrintFileName", "sstruct.out.log", &_ex );
 
          b_precond = (bHYPRE_Solver) bHYPRE_BoomerAMG__cast2(
-            b_boomeramg, "bHYPRE.Solver" );
-         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond );
+            b_boomeramg, "bHYPRE.Solver", &_ex );
+         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond, &_ex );
          hypre_assert( ierr==0 );
       }
       else if (solver_id == 22)
       {
          /* use ParaSails as preconditioner */
-         b_parasails = bHYPRE_ParaSails_Create( bmpicomm, b_pA );
-         ierr += bHYPRE_ParaSails_SetDoubleParameter( b_parasails, "Thresh", 0.1 );
-         ierr += bHYPRE_ParaSails_SetIntParameter( b_parasails, "Nlevels", 1 );
+         b_parasails = bHYPRE_ParaSails_Create( bmpicomm, b_pA, &_ex );
+         ierr += bHYPRE_ParaSails_SetDoubleParameter( b_parasails, "Thresh", 0.1, &_ex );
+         ierr += bHYPRE_ParaSails_SetIntParameter( b_parasails, "Nlevels", 1, &_ex );
 
          b_precond = (bHYPRE_Solver) bHYPRE_ParaSails__cast2(
-            b_parasails, "bHYPRE.Solver" );
-         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond );
+            b_parasails, "bHYPRE.Solver", &_ex );
+         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond, &_ex );
          hypre_assert( ierr==0 );
       }
       else if (solver_id == 28)
@@ -2635,9 +2637,9 @@ main( int   argc,
       else
          hypre_assert( "solver not implemented"==0 );
 
-      bV_b = bHYPRE_Vector__cast( b_pb );
-      bV_x = bHYPRE_Vector__cast( b_px );
-      ierr += bHYPRE_PCG_Setup( b_solver_PCG, bV_b, bV_x );
+      bV_b = bHYPRE_Vector__cast( b_pb, &_ex );
+      bV_x = bHYPRE_Vector__cast( b_px, &_ex );
+      ierr += bHYPRE_PCG_Setup( b_solver_PCG, bV_b, bV_x, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -2647,7 +2649,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
 
-      ierr += bHYPRE_PCG_Apply( b_solver_PCG, bV_b, &bV_x );
+      ierr += bHYPRE_PCG_Apply( b_solver_PCG, bV_b, &bV_x, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
@@ -2656,19 +2658,19 @@ main( int   argc,
 
 
       ierr += bHYPRE_PCG_GetIntValue(
-         b_solver_PCG, "NumIterations", &num_iterations );
+         b_solver_PCG, "NumIterations", &num_iterations, &_ex );
       ierr += bHYPRE_PCG_GetDoubleValue(
-         b_solver_PCG, "RelResidualNorm", &final_res_norm );
+         b_solver_PCG, "RelResidualNorm", &final_res_norm, &_ex );
 
       if (solver_id == 20)
       {
-         bHYPRE_BoomerAMG_deleteRef( b_boomeramg );
+         bHYPRE_BoomerAMG_deleteRef( b_boomeramg, &_ex );
       }
       else if (solver_id == 22)
       {
-         bHYPRE_ParaSails_deleteRef( b_parasails );
+         bHYPRE_ParaSails_deleteRef( b_parasails, &_ex );
       }
-      bHYPRE_PCG_deleteRef( b_solver_PCG );
+      bHYPRE_PCG_deleteRef( b_solver_PCG, &_ex );
       hypre_assert( ierr==0 );
    }
 
@@ -2759,31 +2761,31 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
-      b_A_O = bHYPRE_Operator__cast( b_pA );
-      b_solver_GMRES = bHYPRE_GMRES_Create( bmpicomm, b_A_O );
-      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "KDim", 5 );
-      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "MaxIter", 100 );
-      bHYPRE_GMRES_SetDoubleParameter( b_solver_GMRES, "Tolerance", 1.0e-06 );
-      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "PrintLevel", 1 );
-      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "Logging", 1 );
+      b_A_O = bHYPRE_Operator__cast( b_pA, &_ex );
+      b_solver_GMRES = bHYPRE_GMRES_Create( bmpicomm, b_A_O, &_ex );
+      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "KDim", 5, &_ex );
+      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "MaxIter", 100, &_ex );
+      bHYPRE_GMRES_SetDoubleParameter( b_solver_GMRES, "Tolerance", 1.0e-06, &_ex );
+      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "PrintLevel", 1, &_ex );
+      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "Logging", 1, &_ex );
 
       hypre_assert( ierr==0 );
 
       if (solver_id == 40)
       {
          /* use BoomerAMG as preconditioner */
-         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_pA );
-         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6);
-         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "StrongThreshold", 0.25);
-         bHYPRE_BoomerAMG_SetDoubleParameter( b_boomeramg, "Tolerance", 0.0 );
-         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "PrintLevel", 1 );
+         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_pA, &_ex );
+         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6, &_ex );
+         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "StrongThreshold", 0.25, &_ex );
+         bHYPRE_BoomerAMG_SetDoubleParameter( b_boomeramg, "Tolerance", 0.0, &_ex );
+         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "PrintLevel", 1, &_ex );
          bHYPRE_BoomerAMG_SetStringParameter( b_boomeramg,
-                                              "PrintFileName", "sstruct.out.log");
-         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "MaxIterations", 1 );
+                                              "PrintFileName", "sstruct.out.log", &_ex);
+         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "MaxIterations", 1, &_ex );
 
          b_precond = (bHYPRE_Solver) bHYPRE_BoomerAMG__cast2
-            ( b_boomeramg, "bHYPRE.Solver" ); 
-         bHYPRE_GMRES_SetPreconditioner( b_solver_GMRES, b_precond );
+            ( b_boomeramg, "bHYPRE.Solver", &_ex ); 
+         bHYPRE_GMRES_SetPreconditioner( b_solver_GMRES, b_precond, &_ex );
       }
 #if DO_THIS_LATER
       else if (solver_id == 41)
@@ -2804,9 +2806,9 @@ main( int   argc,
       }
 #endif /* DO_THIS_LATER */
 
-      bV_b = bHYPRE_Vector__cast( b_pb );
-      bV_x = bHYPRE_Vector__cast( b_px );
-      ierr += bHYPRE_GMRES_Setup( b_solver_GMRES, bV_b, bV_x );
+      bV_b = bHYPRE_Vector__cast( b_pb, &_ex );
+      bV_x = bHYPRE_Vector__cast( b_px, &_ex );
+      ierr += bHYPRE_GMRES_Setup( b_solver_GMRES, bV_b, bV_x, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -2816,19 +2818,19 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Solve");
       hypre_BeginTiming(time_index);
 
-      bHYPRE_GMRES_Apply( b_solver_GMRES, bV_b, &bV_x );
+      bHYPRE_GMRES_Apply( b_solver_GMRES, bV_b, &bV_x, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      ierr += bHYPRE_GMRES_GetIntValue( b_solver_GMRES, "NumIterations", &num_iterations );
-      ierr += bHYPRE_GMRES_GetDoubleValue( b_solver_GMRES, "RelResidualNorm", &final_res_norm );
+      ierr += bHYPRE_GMRES_GetIntValue( b_solver_GMRES, "NumIterations", &num_iterations, &_ex );
+      ierr += bHYPRE_GMRES_GetDoubleValue( b_solver_GMRES, "RelResidualNorm", &final_res_norm, &_ex );
 
       if (solver_id == 40)
       {
-         bHYPRE_BoomerAMG_deleteRef( b_boomeramg );
+         bHYPRE_BoomerAMG_deleteRef( b_boomeramg, &_ex );
       }
 #if DO_THIS_LATER
       else if (solver_id == 41)
@@ -2841,7 +2843,7 @@ main( int   argc,
       }
 #endif /* DO_THIS_LATER */
 
-      bHYPRE_GMRES_deleteRef( b_solver_GMRES );
+      bHYPRE_GMRES_deleteRef( b_solver_GMRES, &_ex );
    }
 
    /*-----------------------------------------------------------
@@ -3058,19 +3060,19 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      b_solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, b_sA );
-      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MemoryUse", 0);
-      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MaxIter", 50);
-      bHYPRE_StructSMG_SetDoubleParameter( b_solver_SMG, "Tol", 1.0e-6);
-      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "RelChange", 0);
-      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "NumPreRelax", n_pre);
-      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "NumPostRelax", n_post);
-      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "PrintLevel", 1);
-      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "Logging", 1);
+      b_solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, b_sA, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MemoryUse", 0, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MaxIter", 50, &_ex );
+      bHYPRE_StructSMG_SetDoubleParameter( b_solver_SMG, "Tol", 1.0e-6, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "RelChange", 0, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "NumPreRelax", n_pre, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "NumPostRelax", n_post, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "PrintLevel", 1, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "Logging", 1, &_ex );
 
-      bV_b = bHYPRE_Vector__cast( b_sb );
-      bV_x = bHYPRE_Vector__cast( b_sx );
-      ierr += bHYPRE_StructSMG_Setup( b_solver_SMG, bV_b, bV_x );
+      bV_b = bHYPRE_Vector__cast( b_sb, &_ex );
+      bV_x = bHYPRE_Vector__cast( b_sx, &_ex );
+      ierr += bHYPRE_StructSMG_Setup( b_solver_SMG, bV_b, bV_x, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -3080,17 +3082,17 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Solve");
       hypre_BeginTiming(time_index);
 
-      bHYPRE_StructSMG_Apply( b_solver_SMG, bV_b, &bV_x );
+      bHYPRE_StructSMG_Apply( b_solver_SMG, bV_b, &bV_x, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      ierr += bHYPRE_StructSMG_GetIntValue( b_solver_SMG, "NumIterations", &num_iterations );
-      ierr += bHYPRE_StructSMG_GetDoubleValue( b_solver_SMG, "RelResidualNorm", &final_res_norm );
+      ierr += bHYPRE_StructSMG_GetIntValue( b_solver_SMG, "NumIterations", &num_iterations, &_ex );
+      ierr += bHYPRE_StructSMG_GetDoubleValue( b_solver_SMG, "RelResidualNorm", &final_res_norm, &_ex );
 
-      bHYPRE_StructSMG_deleteRef( b_solver_SMG );
+      bHYPRE_StructSMG_deleteRef( b_solver_SMG, &_ex );
    }
 
 #if DO_THIS_LATER
@@ -3748,11 +3750,11 @@ main( int   argc,
 
    if ( object_type == HYPRE_PARCSR )
    {
-      bHYPRE_SStructParCSRVector_Gather( b_spx );
+      bHYPRE_SStructParCSRVector_Gather( b_spx, &_ex );
    }
    else
    {
-      bHYPRE_SStructVector_Gather( b_x );
+      bHYPRE_SStructVector_Gather( b_x, &_ex );
    }
 
    /*-----------------------------------------------------------
@@ -3763,11 +3765,11 @@ main( int   argc,
    {
       if ( object_type == HYPRE_PARCSR )
       {
-         bHYPRE_SStructParCSRVector_Print( b_spx, "sstruct_b.out.x", 0 );
+         bHYPRE_SStructParCSRVector_Print( b_spx, "sstruct_b.out.x", 0, &_ex );
       }
       else
       {
-         bHYPRE_SStructVector_Print( b_x, "sstruct_b.out.x", 0 );
+         bHYPRE_SStructVector_Print( b_x, "sstruct_b.out.x", 0, &_ex );
       }
    }
 
@@ -3783,35 +3785,35 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   bHYPRE_SStructGraph_deleteRef( b_graph );
-   bHYPRE_SStructGrid_deleteRef( b_grid );
+   bHYPRE_SStructGraph_deleteRef( b_graph, &_ex );
+   bHYPRE_SStructGrid_deleteRef( b_grid, &_ex );
    for (s = 0; s < data.nstencils; s++)
-      bHYPRE_SStructStencil_deleteRef( b_stencils[s] );
+      bHYPRE_SStructStencil_deleteRef( b_stencils[s], &_ex );
    hypre_TFree( b_stencils );
 
    if ( object_type == HYPRE_PARCSR )
    {
-      bHYPRE_IJParCSRMatrix_deleteRef( b_pA );
-      bHYPRE_IJParCSRVector_deleteRef( b_pb );
-      bHYPRE_IJParCSRVector_deleteRef( b_px );
-      bHYPRE_SStructParCSRMatrix_deleteRef(  b_spA);
-      bHYPRE_SStructParCSRVector_deleteRef(  b_spb);
-      bHYPRE_SStructParCSRVector_deleteRef(  b_spx);
+      bHYPRE_IJParCSRMatrix_deleteRef( b_pA, &_ex );
+      bHYPRE_IJParCSRVector_deleteRef( b_pb, &_ex );
+      bHYPRE_IJParCSRVector_deleteRef( b_px, &_ex );
+      bHYPRE_SStructParCSRMatrix_deleteRef( b_spA, &_ex);
+      bHYPRE_SStructParCSRVector_deleteRef( b_spb, &_ex );
+      bHYPRE_SStructParCSRVector_deleteRef( b_spx, &_ex );
    }
    else if ( object_type == HYPRE_STRUCT )
    {
-      bHYPRE_SStructMatrix_deleteRef( b_A );
-      bHYPRE_SStructVector_deleteRef( b_b );
-      bHYPRE_SStructVector_deleteRef( b_x );
-      bHYPRE_StructMatrix_deleteRef( b_sA );
-      bHYPRE_StructVector_deleteRef( b_sb );
-      bHYPRE_StructVector_deleteRef( b_sx );
+      bHYPRE_SStructMatrix_deleteRef( b_A, &_ex );
+      bHYPRE_SStructVector_deleteRef( b_b, &_ex );
+      bHYPRE_SStructVector_deleteRef( b_x, &_ex );
+      bHYPRE_StructMatrix_deleteRef( b_sA, &_ex );
+      bHYPRE_StructVector_deleteRef( b_sb, &_ex );
+      bHYPRE_StructVector_deleteRef( b_sx, &_ex );
    }
    else if ( object_type == HYPRE_SSTRUCT )
    {
-      bHYPRE_SStructMatrix_deleteRef( b_A );
-      bHYPRE_SStructVector_deleteRef( b_b );
-      bHYPRE_SStructVector_deleteRef( b_x );
+      bHYPRE_SStructMatrix_deleteRef( b_A, &_ex );
+      bHYPRE_SStructVector_deleteRef( b_b, &_ex );
+      bHYPRE_SStructVector_deleteRef( b_x, &_ex );
    }
 
    DestroyData(data);
@@ -3824,7 +3826,7 @@ main( int   argc,
    hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
-   bHYPRE_MPICommunicator_deleteRef( bmpicomm );
+   bHYPRE_MPICommunicator_deleteRef( bmpicomm, &_ex );
    MPI_Finalize();
 
    return (0);

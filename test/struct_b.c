@@ -20,6 +20,7 @@
 #include "bHYPRE_StructGrid.h"
 #include "bHYPRE_StructStencil.h"
 #include "bHYPRE_StructGrid_Impl.h"
+#include "sidl_Exception.h"
 
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
@@ -122,6 +123,7 @@ main( int   argc,
    int                 ix, iy, iz, ib;
 
    int                 periodic_error = 0;
+   sidl_BaseInterface _ex = NULL;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -134,7 +136,7 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
-   bmpicomm = bHYPRE_MPICommunicator_CreateC( (void *)(&mpi_comm) );
+   bmpicomm = bHYPRE_MPICommunicator_CreateC( (void *)(&mpi_comm), &_ex );
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
@@ -311,7 +313,7 @@ main( int   argc,
       /* >>> TO DO SOON: solvers 18,19 <<< */
       printf("\n");
 
-      bHYPRE_MPICommunicator_deleteRef( bmpicomm );
+      bHYPRE_MPICommunicator_deleteRef( bmpicomm, &_ex );
       MPI_Finalize();
       exit(1);
    }
@@ -560,25 +562,25 @@ main( int   argc,
          break;
    } 
 
-   grid = bHYPRE_StructGrid_Create( bmpicomm, dim );
+   grid = bHYPRE_StructGrid_Create( bmpicomm, dim, &_ex );
    for (ib = 0; ib < nblocks; ib++)
    {
-      bHYPRE_StructGrid_SetExtents( grid, ilower[ib], iupper[ib], dim );
+      bHYPRE_StructGrid_SetExtents( grid, ilower[ib], iupper[ib], dim, &_ex );
    }
 
-   bHYPRE_StructGrid_SetPeriodic( grid, periodic, dim );
+   bHYPRE_StructGrid_SetPeriodic( grid, periodic, dim, &_ex );
 
-   bHYPRE_StructGrid_Assemble( grid );
+   bHYPRE_StructGrid_Assemble( grid, &_ex );
 
    /*-----------------------------------------------------------
     * Set up the stencil structure
     *-----------------------------------------------------------*/
  
-   stencil = bHYPRE_StructStencil_Create( dim, dim+1 );
+   stencil = bHYPRE_StructStencil_Create( dim, dim+1, &_ex );
 
    for (s = 0; s < dim + 1; s++)
    {
-      bHYPRE_StructStencil_SetElement( stencil, s, offsets[s], dim );
+      bHYPRE_StructStencil_SetElement( stencil, s, offsets[s], dim, &_ex );
    };
 
    /*-----------------------------------------------------------
@@ -593,17 +595,17 @@ main( int   argc,
       It may not be a big deal to test & support nonsymmetric storage. */
    hypre_assert( symmetric== 1 );
 
-   A_b = bHYPRE_StructMatrix_Create( bmpicomm, grid, stencil );
+   A_b = bHYPRE_StructMatrix_Create( bmpicomm, grid, stencil, &_ex );
 
-   ierr += bHYPRE_StructMatrix_SetSymmetric( A_b, symmetric );
-   ierr += bHYPRE_StructMatrix_SetNumGhost( A_b, A_num_ghost, 2*dim );
+   ierr += bHYPRE_StructMatrix_SetSymmetric( A_b, symmetric, &_ex );
+   ierr += bHYPRE_StructMatrix_SetNumGhost( A_b, A_num_ghost, 2*dim, &_ex );
 
    if ( solver_id == 3 || solver_id == 4 || solver_id == 13 || solver_id == 14 )
    {
-      bHYPRE_StructMatrix_SetConstantEntries( A_b, dim+1, constant_stencil_points );
+      bHYPRE_StructMatrix_SetConstantEntries( A_b, dim+1, constant_stencil_points, &_ex );
    }
 
-   ierr += bHYPRE_StructMatrix_Initialize( A_b );
+   ierr += bHYPRE_StructMatrix_Initialize( A_b, &_ex );
 
    /*-----------------------------------------------------------
     * Fill in the matrix elements
@@ -616,10 +618,10 @@ main( int   argc,
    /* Zero out stencils reaching to real boundary */
    if ( constant_coefficient == 0 ) ierr += SetStencilBndry( A_b, grid, periodic); 
 
-   ierr += bHYPRE_StructMatrix_Assemble( A_b );
+   ierr += bHYPRE_StructMatrix_Assemble( A_b, &_ex );
 
 #if 0
-   bHYPRE_StructMatrix_print( A_b );
+   bHYPRE_StructMatrix_print( A_b, &_ex );
 /*   HYPRE_StructMatrixPrint("driver.out.A", A, 0); */
 #endif
 
@@ -629,9 +631,9 @@ main( int   argc,
 
    values = hypre_CTAlloc(double, volume);
 
-   b_SV = bHYPRE_StructVector_Create( bmpicomm, grid );
+   b_SV = bHYPRE_StructVector_Create( bmpicomm, grid, &_ex );
 
-   ierr += bHYPRE_StructVector_Initialize( b_SV );
+   ierr += bHYPRE_StructVector_Initialize( b_SV, &_ex );
 
    /*-----------------------------------------------------------
     * For periodic b.c. in all directions, need rhs to satisfy 
@@ -660,18 +662,18 @@ main( int   argc,
    for (ib = 0; ib < nblocks; ib++)
    {
       ierr += bHYPRE_StructVector_SetBoxValues( b_SV, ilower[ib], iupper[ib],
-                                                dim, values, volume );
+                                                dim, values, volume, &_ex );
    }
 
-   bHYPRE_StructVector_Assemble( b_SV );
+   bHYPRE_StructVector_Assemble( b_SV, &_ex );
 
 #if 0
-   bHYPRE_StructVector_Print( b_SV );
+   bHYPRE_StructVector_Print( b_SV, &_ex );
 #endif
 
-   x_SV = bHYPRE_StructVector_Create( bmpicomm, grid );
+   x_SV = bHYPRE_StructVector_Create( bmpicomm, grid, &_ex );
 
-   ierr += bHYPRE_StructVector_Initialize( x_SV );
+   ierr += bHYPRE_StructVector_Initialize( x_SV, &_ex );
 
    for (i = 0; i < volume; i++)
    {
@@ -680,13 +682,13 @@ main( int   argc,
    for (ib = 0; ib < nblocks; ib++)
    {
       ierr += bHYPRE_StructVector_SetBoxValues( x_SV, ilower[ib], iupper[ib],
-                                                dim, values, volume );
+                                                dim, values, volume, &_ex );
    }
 
-   bHYPRE_StructVector_Assemble( b_SV );
+   bHYPRE_StructVector_Assemble( b_SV, &_ex );
 
 #if 0
-   bHYPRE_StructVector_Print( x_SV );
+   bHYPRE_StructVector_Print( x_SV, &_ex );
 #endif
  
    hypre_TFree(values);
@@ -706,12 +708,12 @@ main( int   argc,
       time_index = hypre_InitializeTiming("Jacobi Setup");
       hypre_BeginTiming(time_index);
 
-      solver_SJ = bHYPRE_StructJacobi_Constructor( comm );
+      solver_SJ = bHYPRE_StructJacobi_Constructor( comm, &_ex );
 
-      bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "tol", 1.0e-4 );
-      bHYPRE_StructJacobi_SetParameterInt( solver_SJ, "max_iter", 500 );
+      bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "tol", 1.0e-4, &_ex );
+      bHYPRE_StructJacobi_SetParameterInt( solver_SJ, "max_iter", 500, &_ex );
 
-      bHYPRE_StructJacobi_Setup( solver_SJ, A_LO, b_V, x_V );
+      bHYPRE_StructJacobi_Setup( solver_SJ, A_LO, b_V, x_V, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -721,7 +723,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("Jacobi Solve");
       hypre_BeginTiming(time_index);
 
-      bHYPRE_StructJacobi_Apply( solver_SJ, b_V, &x_V );
+      bHYPRE_StructJacobi_Apply( solver_SJ, b_V, &x_V, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
@@ -736,10 +738,10 @@ main( int   argc,
    bHYPRE_StructJacobi object.
    */
       solver = (bHYPRE_Solver) bHYPRE_StructJacobi_castTo( solver_SJ,
-                                                         "bHYPRE.Solver" ); 
-      bHYPRE_Solver_GetSystemOperator( solver, &lo_test );
+                                                         "bHYPRE.Solver", &_ex ); 
+      bHYPRE_Solver_GetSystemOperator( solver, &lo_test, &_ex );
 
-      bHYPRE_StructJacobi_destructor( solver_SJ );
+      bHYPRE_StructJacobi_destructor( solver_SJ, &_ex );
    }
 #endif
 
@@ -752,18 +754,18 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_b );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 50 );
-      bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "Tol", 1.0e-6 );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "RelChange", 0 );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPrerelax", n_pre );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPostrelax", n_post );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 1 );
+      solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_b, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 50, &_ex );
+      bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "Tol", 1.0e-6, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "RelChange", 0, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPrerelax", n_pre, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPostrelax", n_post, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 1, &_ex );
 
-      b_V = bHYPRE_Vector__cast( b_SV );
-      x_V = bHYPRE_Vector__cast( x_SV );
-      ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V );
+      b_V = bHYPRE_Vector__cast( b_SV, &_ex );
+      x_V = bHYPRE_Vector__cast( x_SV, &_ex );
+      ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -773,17 +775,17 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Solve");
       hypre_BeginTiming(time_index);
 
-      bHYPRE_StructSMG_Apply( solver_SMG, b_V, &x_V );
+      bHYPRE_StructSMG_Apply( solver_SMG, b_V, &x_V, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
    
-      ierr += bHYPRE_StructSMG_GetIntValue( solver_SMG, "NumIterations", &num_iterations );
-      ierr += bHYPRE_StructSMG_GetDoubleValue( solver_SMG, "RelResidualNorm", &final_res_norm );
+      ierr += bHYPRE_StructSMG_GetIntValue( solver_SMG, "NumIterations", &num_iterations, &_ex );
+      ierr += bHYPRE_StructSMG_GetDoubleValue( solver_SMG, "RelResidualNorm", &final_res_norm, &_ex );
 
-      bHYPRE_StructSMG_deleteRef( solver_SMG );
+      bHYPRE_StructSMG_deleteRef( solver_SMG, &_ex );
    }
 
 
@@ -797,25 +799,25 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
 
-      solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_b );
+      solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_b, &_ex );
 
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIter", 50 );
-      bHYPRE_StructPFMG_SetDoubleParameter( solver_PFMG, "Tol", 1.0e-6 );
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelChange", 0 );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIter", 50, &_ex );
+      bHYPRE_StructPFMG_SetDoubleParameter( solver_PFMG, "Tol", 1.0e-6, &_ex );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelChange", 0, &_ex );
       /* weighted Jacobi = 1; red-black GS = 2 */
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelaxType", relax );
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPrerelax", n_pre );
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPostrelax", n_post );
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "SkipRelax", skip );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelaxType", relax, &_ex );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPrerelax", n_pre, &_ex );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPostrelax", n_post, &_ex );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "SkipRelax", skip, &_ex );
       /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Logging", 1 );
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "PrintLevel", 1 );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Logging", 1, &_ex );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "PrintLevel", 1, &_ex );
 
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "rap type", rap );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "rap type", rap, &_ex );
 
-      b_V = bHYPRE_Vector__cast( b_SV );
-      x_V = bHYPRE_Vector__cast( x_SV );
-      ierr += bHYPRE_StructPFMG_Setup( solver_PFMG, b_V, x_V );
+      b_V = bHYPRE_Vector__cast( b_SV, &_ex );
+      x_V = bHYPRE_Vector__cast( x_SV, &_ex );
+      ierr += bHYPRE_StructPFMG_Setup( solver_PFMG, b_V, x_V, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -825,17 +827,17 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PFMG Solve");
       hypre_BeginTiming(time_index);
 
-      bHYPRE_StructPFMG_Apply( solver_PFMG, b_V, &x_V );
+      bHYPRE_StructPFMG_Apply( solver_PFMG, b_V, &x_V, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
    
-      ierr += bHYPRE_StructPFMG_GetIntValue( solver_PFMG, "NumIterations", &num_iterations );
-      ierr += bHYPRE_StructPFMG_GetDoubleValue( solver_PFMG, "RelResidualNorm", &final_res_norm );
+      ierr += bHYPRE_StructPFMG_GetIntValue( solver_PFMG, "NumIterations", &num_iterations, &_ex );
+      ierr += bHYPRE_StructPFMG_GetDoubleValue( solver_PFMG, "RelResidualNorm", &final_res_norm, &_ex );
 
-      bHYPRE_StructPFMG_deleteRef( solver_PFMG );
+      bHYPRE_StructPFMG_deleteRef( solver_PFMG, &_ex );
    }
 
    /*-----------------------------------------------------------
@@ -894,56 +896,56 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
 
-      A_O = bHYPRE_Operator__cast( A_b );
-      solver_PCG = bHYPRE_PCG_Create( bmpicomm, A_O );
-      b_V = bHYPRE_Vector__cast( b_SV );
-      x_V = bHYPRE_Vector__cast( x_SV );
+      A_O = bHYPRE_Operator__cast( A_b, &_ex );
+      solver_PCG = bHYPRE_PCG_Create( bmpicomm, A_O, &_ex );
+      b_V = bHYPRE_Vector__cast( b_SV, &_ex );
+      x_V = bHYPRE_Vector__cast( x_SV, &_ex );
 
-      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "MaxIter", 50 );
-      ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "Tol", 1.0e-06);
-      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "2-norm", 1);
-      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "relative change test", 0);
-      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "Logging", 1);
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "MaxIter", 50, &_ex );
+      ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "Tol", 1.0e-06, &_ex);
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "2-norm", 1, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "relative change test", 0, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "Logging", 1, &_ex );
 
       if (solver_id == 10)
       {
          /* use symmetric SMG as preconditioner */
-         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_b );
+         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_b, &_ex );
 
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 1 );
-         ierr += bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "Tol", 0.0 );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "ZeroGuess", 1 );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "RelChange", 0 );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPreRelax", n_pre );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPostRelax", n_post );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 0 );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 1, &_ex );
+         ierr += bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "Tol", 0.0, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "ZeroGuess", 1, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "RelChange", 0, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPreRelax", n_pre, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPostRelax", n_post, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 0, &_ex );
 
-         ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V );
+         ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V, &_ex );
          hypre_assert( ierr==0 );
 
          precond = (bHYPRE_Solver) bHYPRE_StructSMG__cast2
-            ( solver_SMG, "bHYPRE.Solver" ); 
+            ( solver_SMG, "bHYPRE.Solver", &_ex ); 
       }
       else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
       {
          /* use symmetric PFMG as preconditioner */
-         solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_b );
+         solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_b, &_ex );
 
-         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIterations", 1 );
-         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Tolerance", 0.0 );
-         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "ZeroGuess", 1 );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIterations", 1, &_ex );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Tolerance", 0.0, &_ex );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "ZeroGuess", 1, &_ex );
          /* weighted Jacobi = 1; red-black GS = 2 */
-         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelaxType", 1 );
-         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPreRelax", n_pre );
-         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPostRelax", n_post );
-         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "SkipRelax", skip );
-         /*bHYPRE_StructPFMG_SetDxyz( solver_PFMG, dxyz);*/
-         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Logging", 0 );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelaxType", 1, &_ex );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPreRelax", n_pre, &_ex );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPostRelax", n_post, &_ex );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "SkipRelax", skip, &_ex );
+         /*bHYPRE_StructPFMG_SetDxyz( solver_PFMG, dxyz, &_ex );*/
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Logging", 0, &_ex );
 
-         ierr += bHYPRE_StructPFMG_Setup( solver_PFMG, b_V, x_V );
+         ierr += bHYPRE_StructPFMG_Setup( solver_PFMG, b_V, x_V, &_ex );
          precond = (bHYPRE_Solver) bHYPRE_StructPFMG__cast2
-            ( solver_PFMG, "bHYPRE.Solver" ); 
+            ( solver_PFMG, "bHYPRE.Solver", &_ex ); 
 
       }
 /* not implemented yet (JfP jan2000) ... */
@@ -971,42 +973,42 @@ main( int   argc,
       else if (solver_id == 17)
       {
          /* use two-step Jacobi as preconditioner */
-         solver_SJ = bHYPRE_StructJacobi_Create( bmpicomm, A_b );
-         ierr += bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "MaxIter", 2 );
-         ierr += bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "Tol", 0.0 );
-         ierr += bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "ZeroGuess", 1 );
+         solver_SJ = bHYPRE_StructJacobi_Create( bmpicomm, A_b, &_ex );
+         ierr += bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "MaxIter", 2, &_ex );
+         ierr += bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "Tol", 0.0, &_ex );
+         ierr += bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "ZeroGuess", 1, &_ex );
          hypre_assert( ierr==0 );
          precond = (bHYPRE_Solver) bHYPRE_StructJacobi__cast2
-            ( solver_SJ, "bHYPRE.Solver" );
+            ( solver_SJ, "bHYPRE.Solver", &_ex );
       }
       else if ( solver_id == 18 )
       {
          /* use diagonal scaling as preconditioner */
-         solver_DS = bHYPRE_StructDiagScale_Create( bmpicomm, A_b );
-         ierr += bHYPRE_StructDiagScale_Setup( solver_DS, b_V, x_V );
+         solver_DS = bHYPRE_StructDiagScale_Create( bmpicomm, A_b, &_ex );
+         ierr += bHYPRE_StructDiagScale_Setup( solver_DS, b_V, x_V, &_ex );
          hypre_assert( ierr==0 );
 
          precond = (bHYPRE_Solver) bHYPRE_StructDiagScale__cast2
-            ( solver_DS, "bHYPRE.Solver" ); 
+            ( solver_DS, "bHYPRE.Solver", &_ex ); 
       }
       else if ( solver_id == 19 )
       {
          /* no preconditioner; with PCG we use the "identity preconditioner" */
-         solver_Id = bHYPRE_IdentitySolver_Create( bmpicomm );
-         ierr += bHYPRE_IdentitySolver_Setup( solver_Id, b_V, x_V );
+         solver_Id = bHYPRE_IdentitySolver_Create( bmpicomm, &_ex );
+         ierr += bHYPRE_IdentitySolver_Setup( solver_Id, b_V, x_V, &_ex );
          hypre_assert( ierr==0 );
 
          precond = (bHYPRE_Solver) bHYPRE_IdentitySolver__cast2
-            ( solver_Id, "bHYPRE.Solver" ); 
+            ( solver_Id, "bHYPRE.Solver", &_ex );
 
       }
       else {
          printf( "Preconditioner not supported! Solver_id=%i\n", solver_id );
       }
       
-      bHYPRE_PCG_SetPreconditioner( solver_PCG, precond );
+      bHYPRE_PCG_SetPreconditioner( solver_PCG, precond, &_ex );
 
-      ierr += bHYPRE_PCG_Setup( solver_PCG, b_V, x_V );
+      ierr += bHYPRE_PCG_Setup( solver_PCG, b_V, x_V, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1016,25 +1018,25 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
 
-      bHYPRE_PCG_Apply( solver_PCG, b_V, &x_V );
+      bHYPRE_PCG_Apply( solver_PCG, b_V, &x_V, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      ierr += bHYPRE_PCG_GetIntValue( solver_PCG, "NumIterations", &num_iterations );
-      ierr += bHYPRE_PCG_GetDoubleValue( solver_PCG, "RelResidualNorm", &final_res_norm );
+      ierr += bHYPRE_PCG_GetIntValue( solver_PCG, "NumIterations", &num_iterations, &_ex );
+      ierr += bHYPRE_PCG_GetDoubleValue( solver_PCG, "RelResidualNorm", &final_res_norm, &_ex );
 
-      bHYPRE_PCG_deleteRef( solver_PCG );
+      bHYPRE_PCG_deleteRef( solver_PCG, &_ex );
 
       if (solver_id == 10)
       {
-         bHYPRE_StructSMG_deleteRef( solver_SMG );
+         bHYPRE_StructSMG_deleteRef( solver_SMG, &_ex );
       }
       else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
       {
-         bHYPRE_StructPFMG_deleteRef( solver_PFMG );
+         bHYPRE_StructPFMG_deleteRef( solver_PFMG, &_ex );
       }
       else if (solver_id == 12)
       {
@@ -1043,15 +1045,15 @@ main( int   argc,
       }
       else if (solver_id == 17)
       {
-         bHYPRE_StructJacobi_deleteRef( solver_SJ );
+         bHYPRE_StructJacobi_deleteRef( solver_SJ, &_ex );
       }
       else if ( solver_id == 18 )
       {
-         bHYPRE_StructDiagScale_deleteRef( solver_DS );
+         bHYPRE_StructDiagScale_deleteRef( solver_DS, &_ex );
       }
       else if ( solver_id == 19 )
       {
-         bHYPRE_IdentitySolver_deleteRef( solver_Id );
+         bHYPRE_IdentitySolver_deleteRef( solver_Id, &_ex );
       }
 
    }
@@ -1069,36 +1071,36 @@ main( int   argc,
       /* The Hybrid scheme is built on top of a PCG solver; so
          make the PCG solver first */
 
-      A_O = bHYPRE_Operator__cast( A_b );
-      solver_PCG = bHYPRE_PCG_Create( bmpicomm, A_O );
-      b_V = bHYPRE_Vector__cast( b_SV );
-      x_V = bHYPRE_Vector__cast( x_SV );
+      A_O = bHYPRE_Operator__cast( A_b, &_ex );
+      solver_PCG = bHYPRE_PCG_Create( bmpicomm, A_O, &_ex );
+      b_V = bHYPRE_Vector__cast( b_SV, &_ex );
+      x_V = bHYPRE_Vector__cast( x_SV, &_ex );
 
-      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "MaxIter", 50 );
-      ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "Tol", 1.0e-06);
-      ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "ConvergenceFactorTol", 0.90 );
-      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "2-norm", 1);
-      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "relative change test", 0);
-      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "Logging", 1);
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "MaxIter", 50, &_ex );
+      ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "Tol", 1.0e-06, &_ex );
+      ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "ConvergenceFactorTol", 0.90, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "2-norm", 1, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "relative change test", 0, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "Logging", 1, &_ex );
 
       if (solver_id == 20)
       {
          /* use symmetric SMG as preconditioner */
-         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_b );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 1 );
+         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_b, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 1, &_ex );
          ierr += bHYPRE_StructSMG_SetDoubleParameter(
-            solver_SMG, "Tolerance", 0.0 );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "ZeroGuess", 1 );
+            solver_SMG, "Tolerance", 0.0, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "ZeroGuess", 1, &_ex );
          ierr += bHYPRE_StructSMG_SetIntParameter(
-            solver_SMG, "NumPreRelax", n_pre );
+            solver_SMG, "NumPreRelax", n_pre, &_ex );
          ierr += bHYPRE_StructSMG_SetIntParameter(
-            solver_SMG, "NumPostRelax", n_post );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 0 );
+            solver_SMG, "NumPostRelax", n_post, &_ex );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 0, &_ex );
 
          precond = (bHYPRE_Solver) bHYPRE_StructSMG__cast2(
-            solver_SMG, "bHYPRE.Solver" );
-         ierr += bHYPRE_PCG_SetPreconditioner( solver_PCG, precond );
+            solver_SMG, "bHYPRE.Solver", &_ex );
+         ierr += bHYPRE_PCG_SetPreconditioner( solver_PCG, precond, &_ex );
       }
 
       else if (solver_id == 21)
@@ -1152,16 +1154,16 @@ main( int   argc,
          (diagonal-scaling-preconditioned) solver */
 
       krylov_solver = (bHYPRE_PreconditionedSolver) bHYPRE_PCG__cast2(
-         solver_PCG, "bHYPRE.PreconditionedSolver" );
-      solver_Hybrid = bHYPRE_Hybrid_Create( bmpicomm, krylov_solver, A_O );
+         solver_PCG, "bHYPRE.PreconditionedSolver", &_ex );
+      solver_Hybrid = bHYPRE_Hybrid_Create( bmpicomm, krylov_solver, A_O, &_ex );
 
       /* This Setup call does Setup on the PCG solvers as well. */
-      ierr += bHYPRE_Hybrid_Setup( solver_Hybrid, b_V, x_V );
+      ierr += bHYPRE_Hybrid_Setup( solver_Hybrid, b_V, x_V, &_ex );
 
-      ierr += bHYPRE_Hybrid_GetFirstSolver( solver_Hybrid, &krylov_solver );
-      bHYPRE_PreconditionedSolver_addRef( krylov_solver );
-      solver_PCG_1 = (bHYPRE_PCG) bHYPRE_PCG__cast( krylov_solver );
-      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG_1, "MaxIter", 100 );
+      ierr += bHYPRE_Hybrid_GetFirstSolver( solver_Hybrid, &krylov_solver, &_ex );
+      bHYPRE_PreconditionedSolver_addRef( krylov_solver, &_ex );
+      solver_PCG_1 = (bHYPRE_PCG) bHYPRE_PCG__cast( krylov_solver, &_ex );
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG_1, "MaxIter", 100, &_ex );
 
       hypre_assert( ierr==0 );
 
@@ -1173,22 +1175,22 @@ main( int   argc,
       time_index = hypre_InitializeTiming("Hybrid Solve");
       hypre_BeginTiming(time_index);
 
-      ierr += bHYPRE_Hybrid_Apply( solver_Hybrid, b_V, &x_V );
+      ierr += bHYPRE_Hybrid_Apply( solver_Hybrid, b_V, &x_V, &_ex );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      ierr += bHYPRE_Hybrid_GetNumIterations( solver_Hybrid, &num_iterations);
-      ierr += bHYPRE_Hybrid_GetRelResidualNorm( solver_Hybrid, &final_res_norm);
+      ierr += bHYPRE_Hybrid_GetNumIterations( solver_Hybrid, &num_iterations, &_ex );
+      ierr += bHYPRE_Hybrid_GetRelResidualNorm( solver_Hybrid, &final_res_norm, &_ex );
 
-      bHYPRE_Hybrid_deleteRef( solver_Hybrid );
+      bHYPRE_Hybrid_deleteRef( solver_Hybrid, &_ex );
       if (solver_id == 20)
       {
-         bHYPRE_PCG_deleteRef( solver_PCG );
-         bHYPRE_PCG_deleteRef( solver_PCG_1 );
-         bHYPRE_StructSMG_deleteRef( solver_SMG );
+         bHYPRE_PCG_deleteRef( solver_PCG, &_ex );
+         bHYPRE_PCG_deleteRef( solver_PCG_1, &_ex );
+         bHYPRE_StructSMG_deleteRef( solver_SMG, &_ex );
       }
 #if 0
       else if (solver_id == 21)
@@ -1208,7 +1210,7 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
 #if 0
-   bHYPRE_StructVector_Print( x );
+   bHYPRE_StructVector_Print( x, &_ex );
 #endif
 
    if (myid == 0)
@@ -1223,11 +1225,11 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   bHYPRE_StructStencil_deleteRef( stencil );
-   bHYPRE_StructGrid_deleteRef( grid );
-   bHYPRE_StructMatrix_deleteRef( A_b );
-   bHYPRE_StructVector_deleteRef( b_SV );
-   bHYPRE_StructVector_deleteRef( x_SV );
+   bHYPRE_StructStencil_deleteRef( stencil, &_ex );
+   bHYPRE_StructGrid_deleteRef( grid, &_ex );
+   bHYPRE_StructMatrix_deleteRef( A_b, &_ex );
+   bHYPRE_StructVector_deleteRef( b_SV, &_ex );
+   bHYPRE_StructVector_deleteRef( x_SV, &_ex );
 
    for (i = 0; i < nblocks; i++)
    {
@@ -1246,7 +1248,7 @@ main( int   argc,
    hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
-   bHYPRE_MPICommunicator_deleteRef( bmpicomm );
+   bHYPRE_MPICommunicator_deleteRef( bmpicomm, &_ex );
    MPI_Finalize();
 
    return (0);
@@ -1274,6 +1276,7 @@ int SetStencilBndry
   int                volume, dim;
   int               *stencil_indices;
   int                constant_coefficient;
+  sidl_BaseInterface _ex = NULL;
 
   struct bHYPRE_StructGrid__data * grid_data;
   HYPRE_StructGrid Hgrid;
@@ -1291,7 +1294,7 @@ int SetStencilBndry
   stencil_indices = hypre_CTAlloc(int, 1);
 
   bHYPRE_StructMatrix_GetIntValue( A_b, "ConstantCoefficient",
-                                   &constant_coefficient );
+                                   &constant_coefficient, &_ex );
   if ( constant_coefficient>0 ) return 1;
   /*...no space dependence if constant_coefficient==1,
     and space dependence only for diagonal if constant_coefficient==2 --
@@ -1345,7 +1348,7 @@ int SetStencilBndry
 
               bHYPRE_StructMatrix_SetBoxValues
                  ( A_b, ilower[ib], iupper[ib], dim, 1, stencil_indices,
-                   values, vol[ib] );
+                   values, vol[ib], &_ex );
               /* HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
                  1, stencil_indices, values);*/
               iupper[ib][d] = j;
@@ -1358,7 +1361,7 @@ int SetStencilBndry
               stencil_indices[0] = dim + 1 + d;
               bHYPRE_StructMatrix_SetBoxValues
                  ( A_b, ilower[ib], iupper[ib], dim, 1, stencil_indices,
-                   values, vol[ib] );
+                   values, vol[ib], &_ex );
               /* HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
                  1, stencil_indices, values);*/
               ilower[ib][d] = j;
@@ -1407,6 +1410,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
   int                 volume ;
   int                *stencil_indices;
   int                 stencil_size, size;
+  sidl_BaseInterface _ex = NULL;
 
   bi=0;
 
@@ -1465,7 +1469,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
 
               bHYPRE_StructMatrix_SetBoxValues(
                  A_b, ilower[bi], iupper[bi], dim, stencil_size,
-                 stencil_indices, values, size );
+                 stencil_indices, values, size, &_ex );
 
               hypre_TFree(values);
            }
@@ -1494,7 +1498,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
 
         bHYPRE_StructMatrix_SetConstantValues(
            A_b, stencil_size,
-           stencil_indices, values );
+           stencil_indices, values, &_ex );
 
         hypre_TFree(values);
      }
@@ -1522,7 +1526,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
 
         bHYPRE_StructMatrix_SetConstantValues(
            A_b, stencil_size-1,
-           stencil_indices, values );
+           stencil_indices, values, &_ex );
 
         hypre_TFree(values);
 
@@ -1542,7 +1546,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
 
               bHYPRE_StructMatrix_SetBoxValues(
                  A_b, ilower[bi], iupper[bi], dim, 1,
-                 &(stencil_indices[dim]), values, volume );
+                 &(stencil_indices[dim]), values, volume, &_ex );
 
               hypre_TFree(values);
            }
@@ -1623,7 +1627,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
 
               bHYPRE_StructMatrix_SetBoxValues(
                  A_b, ilower[bi], iupper[bi], dim, stencil_size,
-                 stencil_indices, values, size );
+                 stencil_indices, values, size, &_ex );
 
               hypre_TFree(values);
            }
@@ -1659,7 +1663,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
 
         bHYPRE_StructMatrix_SetConstantValues(
            A_b, stencil_size,
-           stencil_indices, values );
+           stencil_indices, values, &_ex );
 
         hypre_TFree(values);
      }
@@ -1703,7 +1707,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
 
         bHYPRE_StructMatrix_SetConstantValues(
            A_b, stencil_size-1,
-           stencil_indices, values );
+           stencil_indices, values, &_ex );
 
         hypre_TFree(values);
 
@@ -1727,7 +1731,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
 
               bHYPRE_StructMatrix_SetBoxValues(
                  A_b, ilower[bi], iupper[bi], dim, 1,
-                 &(stencil_indices[dim]), values, size );
+                 &(stencil_indices[dim]), values, size, &_ex );
 
               hypre_TFree(values);
            }
