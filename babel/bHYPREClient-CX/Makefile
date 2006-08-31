@@ -69,7 +69,7 @@ HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
 
 FILES = ${IMPLSRCS} ${IORSRCS} ${SKELSRCS} ${STUBSRCS} 
 
-OBJS = ${FILES:.cc=.o}
+OBJS = ${FILES:.cxx=.o}
 
 ##################################################################
 # Targets
@@ -77,12 +77,12 @@ OBJS = ${FILES:.cc=.o}
 
 all: libbHYPREClient-CX.a
 	cp -fp $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
-	cp -fp $(srcdir)/*.hh ${HYPRE_BUILD_DIR}/include/.
+	cp -fp $(srcdir)/*.hxx ${HYPRE_BUILD_DIR}/include/.
 	cp -fp libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
  
 install: all
 	cp -fp $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
-	cp -fp $(srcdir)/*.hh ${HYPRE_INC_INSTALL}/.
+	cp -fp $(srcdir)/*.hxx ${HYPRE_INC_INSTALL}/.
 	cp -fp libbHYPRE* ${HYPRE_LIB_INSTALL}/.
  
 clean:
