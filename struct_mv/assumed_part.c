@@ -69,7 +69,6 @@ int hypre_APSubdivideRegion( hypre_Box *region, int dim, int level,
                      hypre_BoxArray *box_array, int *num_new_boxes)
 {
    
-   int          ierr = 0;
    int          i, j, k, width, sz;
    int          total, start, div[3];
    int          extra, points, count;
@@ -90,7 +89,7 @@ int hypre_APSubdivideRegion( hypre_Box *region, int dim, int level,
       hypre_BoxArraySetSize(box_array, 1);
       hypre_CopyBox(region, hypre_BoxArrayBox(box_array, 0));
       *num_new_boxes = 1;
-      return ierr;
+      return hypre_error_flag;
    }
    
   /* get the size of the box in each dimension */
@@ -189,7 +188,7 @@ int hypre_APSubdivideRegion( hypre_Box *region, int dim, int level,
      hypre_TFree(ypart);
      hypre_TFree(zpart);
      
-     return ierr;
+     return hypre_error_flag;
    
    
 }
@@ -208,7 +207,7 @@ int hypre_APFindMyBoxesInRegions( hypre_BoxArray *region_array,
 {
 
    int                  i,j, d, grow;
-   int                  myid, ierr = 0;
+   int                  myid;
    int                  num_boxes, num_regions;
    int                 *count_array;
    double              *vol_array;
@@ -293,7 +292,7 @@ int hypre_APFindMyBoxesInRegions( hypre_BoxArray *region_array,
    *p_vol_array = vol_array;
    
  
-   return ierr;
+   return hypre_error_flag;
 
 }
 
@@ -312,7 +311,7 @@ int hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array,
                                   MPI_Comm comm )
 {
    
-   int      i, ierr = 0;
+   int      i;
    int     *count_array;
    int      num_regions;
    int     *send_buf_count;
@@ -365,7 +364,7 @@ int hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array,
    *p_count_array = count_array;
    *p_vol_array = vol_array;
    
-   return ierr;
+   return hypre_error_flag;
    
 }
 
@@ -384,7 +383,7 @@ int hypre_APShrinkRegions( hypre_BoxArray *region_array,
 
 
    int                  i,j, d;
-   int                  myid, ierr = 0;
+   int                  myid;
    int                  num_boxes, num_regions;
    int                  *indices, *recvbuf;
    int                  count = 0;
@@ -538,7 +537,7 @@ int hypre_APShrinkRegions( hypre_BoxArray *region_array,
    hypre_BoxDestroy(grow_box);
    
 
-   return ierr;
+   return hypre_error_flag;
    
 
    
@@ -567,7 +566,7 @@ int hypre_APPruneRegions( hypre_BoxArray *region_array,  int **p_count_array,
     *-------------------------------------------*/
 
 
-   int                i, j, ierr = 0;
+   int                i, j;
    int                num_regions;
    int                count;
    int                *delete_indices;
@@ -623,7 +622,7 @@ int hypre_APPruneRegions( hypre_BoxArray *region_array,  int **p_count_array,
    *p_count_array = count_array;
    *p_vol_array = vol_array;
 
-   return ierr;
+   return hypre_error_flag;
 
 }                                                
 
@@ -643,7 +642,7 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
 {
 
 
-   int                i, count, ierr = 0, loop;
+   int                i, count, loop;
    int                num_regions, init_num_regions;
    int               *delete_indices;
    
@@ -665,7 +664,7 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
    if (!num_regions)
    {
       *return_code = 1; /* no regions - so no subdividing*/
-      return ierr;
+      return hypre_error_flag;
       
    }
    
@@ -803,7 +802,7 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
    
 
 
-   return ierr;
+   return hypre_error_flag;
    
    
 }
@@ -813,21 +812,23 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
  *
  *   Construct an assumed partition   
  *
- *   it is assumed that the local boxes have boxnums 0 to num(local_boxes)-1
+ *   8/06 - changed the assumption that
+ *   that the local boxes have boxnums 0 to num(local_boxes)-1 (now need to pass in
+ *   boxnums)
  *****************************************************************************/
 
 
 int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box, 
                                        double global_boxes_size, 
                                        int global_num_boxes,
-                                       hypre_BoxArray *local_boxes, 
+                                       hypre_BoxArray *local_boxes, int *local_boxnums,
                                        int max_regions, int max_refinements, 
                                        double gamma,
                                        MPI_Comm comm, 
                                        hypre_StructAssumedPart **p_assumed_partition)
 {
    
-   int                i, j, d, ierr = 0;
+   int                i, j, d;
    int                size;
    int                myid, num_procs;
    int                count_array_size;
@@ -992,9 +993,9 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
        size = hypre_BoxArraySize(region_array);
 
        /* divide regions that are not full enough */
-       ierr = hypre_APRefineRegionsByVol( region_array, vol_array, 
-                                          max_regions, 
-                                          gamma, dim, &return_code, comm );
+       hypre_APRefineRegionsByVol( region_array, vol_array, 
+                                   max_regions, 
+                                   gamma, dim, &return_code, comm );
 
      
        if (return_code == 1 || return_code == 4) /* 1 = all regions are at least 
@@ -1522,7 +1523,8 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
            for (j = 0; j< proc_count; j++)
            {
 
-              tmp_box_nums[count] = i; /*box numbers correspond to box order */
+              /* tmp_box_nums[count] = i;*/ /*box numbers correspond to box order */
+              tmp_box_nums[count] = local_boxnums[i];
               tmp_proc_ids[count] = proc_array[j];
               count++;
               
@@ -1644,7 +1646,7 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
     *p_assumed_partition = assumed_part;
     
 
- return ierr;
+ return hypre_error_flag;
    
 }
 
@@ -1658,24 +1660,24 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
 int hypre_StructAssumedPartitionDestroy(hypre_StructAssumedPart *assumed_part)
 {
 
-   int ierr = 0;
+   if (assumed_part)
+   {
+      
+
+      hypre_BoxArrayDestroy( hypre_StructAssumedPartRegions(assumed_part));
+      hypre_TFree(hypre_StructAssumedPartProcPartitions(assumed_part));
+      hypre_TFree(hypre_StructAssumedPartDivisions(assumed_part));
+      hypre_BoxArrayDestroy( hypre_StructAssumedPartMyPartition(assumed_part));
+      hypre_BoxArrayDestroy( hypre_StructAssumedPartMyPartitionBoxes(assumed_part));
+      hypre_TFree(hypre_StructAssumedPartMyPartitionProcIds(assumed_part));
+      hypre_TFree( hypre_StructAssumedPartMyPartitionBoxnums(assumed_part));
+      
+      /* this goes last! */
+      hypre_TFree(assumed_part);
+   }
    
 
-   hypre_BoxArrayDestroy( hypre_StructAssumedPartRegions(assumed_part));
-   hypre_TFree(hypre_StructAssumedPartProcPartitions(assumed_part));
-   hypre_TFree(hypre_StructAssumedPartDivisions(assumed_part));
-   hypre_BoxArrayDestroy( hypre_StructAssumedPartMyPartition(assumed_part));
-   hypre_BoxArrayDestroy( hypre_StructAssumedPartMyPartitionBoxes(assumed_part));
-   hypre_TFree(hypre_StructAssumedPartMyPartitionProcIds(assumed_part));
-   hypre_TFree( hypre_StructAssumedPartMyPartitionBoxnums(assumed_part));
-   
-
-
-   /* this goes last! */
-   hypre_TFree(assumed_part);
-   
-
-   return ierr;
+   return hypre_error_flag;
    
    
 }
@@ -1766,7 +1768,7 @@ hypre_APFillResponseStructAssumedPart(void *p_recv_contact_buf,
    hypre_BoxDestroy(box);
    
    
-   return(0);
+   return hypre_error_flag;
    
 }
 
@@ -1784,7 +1786,7 @@ int hypre_StructAssumedPartitionGetRegionsFromProc( hypre_StructAssumedPart *ass
 {
    
 
-   int          i, ierr = 0;
+   int          i;
    int          in_region, proc_count, proc_start, num_partitions;
    int          part_num, adj_part_num, x_row, y_row, extra, points, width;
    int          plane, xyplane, adj_proc_id;
@@ -1954,7 +1956,7 @@ int hypre_StructAssumedPartitionGetRegionsFromProc( hypre_StructAssumedPart *ass
       I think it may be better to leave them seperate in the interest of 
       reducing the search space for neighbor calculations */  
 
-   return ierr;
+   return hypre_error_flag;
    
    
 }
@@ -1976,7 +1978,7 @@ int hypre_StructAssumedPartitionGetProcsFromBox( hypre_StructAssumedPart *assume
                                         int **p_proc_array)
 {
    
-   int             i,j,k,r,myid, ierr = 0;
+   int             i,j,k,r,myid;
    int             num_regions, in_regions, this_region, proc_count, proc_start;
    int             adj_proc_id, extra, num_partitions, part_num;
    int             gridpt[2], xyplane, extra_procs, switch_proc, points, width;
@@ -2232,7 +2234,7 @@ int hypre_StructAssumedPartitionGetProcsFromBox( hypre_StructAssumedPart *assume
    hypre_TFree(proc_ids);
    
 
-   return ierr;
+   return hypre_error_flag;
    
    
 }

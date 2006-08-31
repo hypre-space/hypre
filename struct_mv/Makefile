@@ -39,6 +39,7 @@ C_COMPILE_FLAGS = \
 HEADERS =\
  assumed_part.h\
  box.h\
+ box_manager.h\
  box_neighbors.h\
  box_pthreads.h\
  computation.h\
@@ -58,6 +59,7 @@ FILES =\
  box_alloc.c\
  box_boundary.c\
  box.c\
+ box_manager.c\
  box_neighbors.c\
  communication_info.c\
  computation.c\

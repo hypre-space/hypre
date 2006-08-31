@@ -87,6 +87,8 @@ int hypre_StructGridAssembleWithAP( hypre_StructGrid *grid )
    int                  max_distance = hypre_StructGridMaxDistance(grid);
    hypre_IndexRef       periodic     = hypre_StructGridPeriodic(grid);
 
+   int                 *local_boxnums;
+
    double               dbl_global_size, tmp_dbl;
    
    hypre_BoxArray       *my_partition;
@@ -395,6 +397,7 @@ int hypre_StructGridAssembleWithAP( hypre_StructGrid *grid )
    }
    
 
+
   
 /*---------------------------------------------
   Step 3:  Create an assumed partition 
@@ -442,13 +445,26 @@ int hypre_StructGridAssembleWithAP( hypre_StructGrid *grid )
     gamma = .6; /* percentage a region must be full to 
                    avoid refinement */  
     
+
+    /* assign boxnums */
+    local_boxnums = hypre_CTAlloc(int, num_local_boxes);
+    for (i = 0; i< num_local_boxes; i++)
+    {
+       local_boxnums[i] = i;
+    }
  
+
     ierr = hypre_StructAssumedPartitionCreate(dim, bounding_box, dbl_global_size, 
                                               global_num_boxes,
-                                              local_boxes, 
+                                              local_boxes, local_boxnums,
                                               max_regions, 
                                               max_refinements, gamma, 
                                               comm, &assumed_part);
+
+    
+    hypre_TFree(local_boxnums);
+    
+
 
     /*Now we have the assumed partition built */
 
