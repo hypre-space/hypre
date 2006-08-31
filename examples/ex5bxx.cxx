@@ -27,7 +27,7 @@
 #include "HYPRE_parcsr_ls.h"
 
 /* Babel interface headers */
-#include "bHYPRE.hh"
+#include "bHYPRE.hxx"
 #include "bHYPRE_Vector.h"
 #include "bHYPRE_IJParCSRMatrix.h"
 #include "bHYPRE_IJParCSRVector.h"
@@ -36,7 +36,7 @@
 
 int main (int argc, char *argv[])
 {
-   using namespace ::ucxx::bHYPRE;
+   using namespace ::bHYPRE;
    int i;
    int myid, num_procs;
    int N, n;

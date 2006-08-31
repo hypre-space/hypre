@@ -20,7 +20,8 @@ FFLAGS    = $(FOPTS) $(FINCLUDES) $(FDEFS)
 CXXOPTS   = $(COPTS)
 CXXINCLUDES = $(CINCLUDES)
 CXXDEFS   = $(CDEFS)
-CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS)
+IFLAGS_BXX = -I../babel-runtime/sidl
+CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS) $(IFLAGS_BXX)
 
 LINKOPTS  = $(COPTS)
 LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lg2c -lm
@@ -28,10 +29,10 @@ LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
 LFLAGS_B =\
  -L${HYPRE_DIR}/lib\
  -L${HYPRE_DIR}/../babel-runtime/sidl/.libs\
- -lbHYPRE\
  -lbHYPREClient-C\
  -lbHYPREClient-CX\
  -lbHYPREClient-F\
+ -lbHYPRE\
  -lsidl -ldl -lxml2
 
 ########################################################################
