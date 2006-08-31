@@ -18,10 +18,10 @@ babel --output-directory=bHYPRE --comment-local-only -sC Interfaces.idl
 babel --output-directory=bHYPREClient-C --comment-local-only -cC Interfaces.idl
 babel --output-directory=bHYPREClient-F --comment-local-only --include-referenced -cF77 Interfaces.idl
 
-babel --output-directory=bHYPREClient-CX --comment-local-only -cUC++ Interfaces.idl
-# babel --output-directory=bHYPREClient-P --comment-local-only -cPython Interfaces.idl
+babel --output-directory=bHYPREClient-CX --comment-local-only --include-referenced -cUC++ Interfaces.idl
+# babel --output-directory=bHYPREClient-P --comment-local-only --include-referenced -cPython Interfaces.idl
 
 # Notes:
 # The --include-referenced argument copies a slew of Babel's sidl*.h files into the bHYPREClient*
-# directory.  It is necessary for Fortran.  So far I haven't seen anything which would require
-# it in other languages.
+# directory.  It is necessary for Fortran and C++.  So far I haven't seen anything which would require
+# it in C and Python, but I am using this argument for Python anyway.
