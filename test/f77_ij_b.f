@@ -65,8 +65,11 @@ c     parameters for BoomerAMG
       integer             upper_rw(1)
       integer             stride_ngs(1), stride_grt(1)
       integer             stride_rw(1)
-      integer             refindex_ngs(1), refindex_grt(1)
-      integer             refindex_rw(1)
+      integer*8           refindex_ngs(1), refindex_grt(1)
+      integer*8           refindex_rw(1)
+c     ...Note: as of Babel 1.0.0, refindex* (as named here) becomes
+c      int64_t * index (in sidl_int__array_access_f).  So to keep the refindex's
+c     from clobbering something, we have to make sure they are 64 bits long here.
       double precision    strong_threshold, trunc_factor
       double precision    max_row_sum
       data                max_row_sum /1.0/
@@ -103,6 +106,8 @@ c     Babel-interface variables
       data   max_levels /25/
       double precision relax_weight(MAXLEVELS)
       integer*8 mpi_comm
+      integer*8  except
+c     ... except is for Babel exceptions, which we shall ignore
 
 
 c-----------------------------------------------------------------------
@@ -115,7 +120,8 @@ c-----------------------------------------------------------------------
       mpi_comm = MPI_COMM_WORLD
 c     MPI_COMM_WORLD cannot be directly passed through the Babel interface
 c     because its byte length is unspecified.
-      call bHYPRE_MPICommunicator_CreateF_f( mpi_comm, bHYPRE_mpicomm )
+      call bHYPRE_MPICommunicator_CreateF_f( mpi_comm, bHYPRE_mpicomm,
+     1     except )
 
 c-----------------------------------------------------------------------
 c     Set the former input parameters
@@ -231,19 +237,20 @@ c     more C function calls to get the data out of it, as double* etc.
 
       call bHYPRE_IJParCSRMatrix_GenerateLaplacian_f(
      1     bHYPRE_mpicomm, nx, ny, nz, Px, Py, Pz,
-     2     p, q, r, values, 4, 7, bHYPRE_parcsr_A )
+     2     p, q, r, values, 4, 7, bHYPRE_parcsr_A, except )
 
       call bHYPRE_IJParCSRMatrix_GetLocalRange_f( bHYPRE_parcsr_A,
      &     first_local_row, last_local_row,
-     &     first_local_col, last_local_col, ierr)
+     &     first_local_col, last_local_col, ierr, except )
       local_num_rows = last_local_row - first_local_row + 1
       local_num_cols = last_local_col - first_local_col + 1
 
       call bHYPRE_IJParCSRMatrix_Print_f(
-     1     bHYPRE_parcsr_A, "driver.out", ierrtmp )
+     1     bHYPRE_parcsr_A, "driver.out", ierrtmp, except )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJParCSRMatrix_Assemble_f( bHYPRE_parcsr_A, ierrtmp )
+      call bHYPRE_IJParCSRMatrix_Assemble_f( bHYPRE_parcsr_A, ierrtmp,
+     1     except )
       ierr = ierr + ierrtmp
 
 
@@ -259,46 +266,48 @@ c-----------------------------------------------------------------------
 
       call bHYPRE_IJParCSRVector_Create_f(
      1     bHYPRE_mpicomm, first_local_col, last_local_col,
-     2     bHYPRE_parcsr_x )
+     2     bHYPRE_parcsr_x, except )
 
-      call bHYPRE_IJParCSRVector__create_f( bHYPRE_parcsr_b )
+      call bHYPRE_IJParCSRVector__create_f( bHYPRE_parcsr_b, except )
       call bHYPRE_IJParCSRVector_SetCommunicator_f( bHYPRE_parcsr_b,
-     1     bHYPRE_mpicomm, ierrtmp )
+     1     bHYPRE_mpicomm, ierrtmp, except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJParCSRVector_SetLocalRange_f( bHYPRE_parcsr_b,
-     1      first_local_row, last_local_row, ierrtmp )
+     1      first_local_row, last_local_row, ierrtmp, except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJParCSRVector_Initialize_f( bHYPRE_parcsr_b,
-     1     ierrtmp )
+     1     ierrtmp, except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJParCSRVector_SetValues_f( bHYPRE_parcsr_b,
-     1     local_num_cols, indices, vals1, ierrtmp )
+     1     local_num_cols, indices, vals1, ierrtmp, except )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJParCSRVector_Assemble_f( bHYPRE_parcsr_b, ierrtmp )
+      call bHYPRE_IJParCSRVector_Assemble_f( bHYPRE_parcsr_b, ierrtmp,
+     1     except )
       ierr = ierr + ierrtmp
 
 
       call bHYPRE_IJParCSRVector_print_f(
-     1     bHYPRE_parcsr_b, "driver.out.b", ierrtmp )
+     1     bHYPRE_parcsr_b, "driver.out.b", ierrtmp, except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJParCSRVector_Initialize_f( bHYPRE_parcsr_x,
-     1     ierrtmp )
+     1     ierrtmp, except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJParCSRVector_SetValues_f( bHYPRE_parcsr_x,
-     1     local_num_cols, indices, vals0, ierrtmp )
+     1     local_num_cols, indices, vals0, ierrtmp, except )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJParCSRVector_Assemble_f( bHYPRE_parcsr_x, ierrtmp )
+      call bHYPRE_IJParCSRVector_Assemble_f( bHYPRE_parcsr_x, ierrtmp,
+     1     except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJParCSRVector_print_f(
-     1     bHYPRE_parcsr_x, "driver.out.x0", ierrtmp )
+     1     bHYPRE_parcsr_x, "driver.out.x0", ierrtmp, except )
       ierr = ierr + ierrtmp
 
 c-----------------------------------------------------------------------
@@ -329,46 +338,48 @@ c     Set defaults for BoomerAMG
 
 c      print *, 'Solver: AMG'
 
-      call bHYPRE_BoomerAMG__create_f( bHYPRE_AMG )
+      call bHYPRE_BoomerAMG__create_f( bHYPRE_AMG, except )
       call bHYPRE_IJParCSRVector__cast2_f
-     1     ( bHYPRE_parcsr_b, "bHYPRE.Vector", bHYPRE_Vector_b )
+     1     ( bHYPRE_parcsr_b, "bHYPRE.Vector", bHYPRE_Vector_b, except )
       call bHYPRE_IJParCSRVector__cast2_f
-     1     ( bHYPRE_parcsr_x, "bHYPRE.Vector", bHYPRE_Vector_x )
+     1     ( bHYPRE_parcsr_x, "bHYPRE.Vector", bHYPRE_Vector_x, except )
       call bHYPRE_IJParCSRVector__cast2_f
-     1     ( bHYPRE_parcsr_A, "bHYPRE.Operator", bHYPRE_op_A )
+     1     ( bHYPRE_parcsr_A, "bHYPRE.Operator", bHYPRE_op_A, except )
       call bHYPRE_BoomerAMG_SetCommunicator_f(
-     1     bHYPRE_AMG, bHYPRE_mpicomm, ierrtmp )
+     1     bHYPRE_AMG, bHYPRE_mpicomm, ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetOperator_f( bHYPRE_AMG, bHYPRE_op_A,
-     1     ierrtmp )
+     1     ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1     bHYPRE_AMG, "CoarsenType", hybrid*coarsen_type, ierrtmp )
+     1     bHYPRE_AMG, "CoarsenType", hybrid*coarsen_type, ierrtmp,
+     2     except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1     bHYPRE_AMG, "MeasureType", measure_type, ierrtmp )
+     1     bHYPRE_AMG, "MeasureType", measure_type, ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetDoubleParameter_f(
-     1     bHYPRE_AMG, "StrongThreshold", strong_threshold, ierrtmp )
+     1     bHYPRE_AMG, "StrongThreshold", strong_threshold, ierrtmp,
+     2     except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetDoubleParameter_f(
-     1     bHYPRE_AMG, "TruncFactor", trunc_factor, ierrtmp )
+     1     bHYPRE_AMG, "TruncFactor", trunc_factor, ierrtmp, except )
       ierr = ierr + ierrtmp
 c     /* note: log output not specified ... */
       call bHYPRE_BoomerAMG_SetPrintLevel_f(
-     1     bHYPRE_AMG, ioutdat, ierrtmp )
+     1     bHYPRE_AMG, ioutdat, ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1     bHYPRE_AMG, "CycleType", cycle_type, ierrtmp )
+     1     bHYPRE_AMG, "CycleType", cycle_type, ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetDoubleParameter_f(
-     1     bHYPRE_AMG, "Tol", tol, ierrtmp )
+     1     bHYPRE_AMG, "Tol", tol, ierrtmp, except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_BoomerAMG_InitGridRelaxation_f( bHYPRE_AMG,
      &     bHYPRE_num_grid_sweeps, bHYPRE_grid_relax_type,
      &     bHYPRE_grid_relax_points, coarsen_type, bHYPRE_relax_weight,
-     &     MAXLEVELS, ierrtmp )
+     &     MAXLEVELS, ierrtmp, except )
       ierr = ierr + ierrtmp
       call sidl_int__array_access_f(
      &     bHYPRE_num_grid_sweeps, num_grid_sweeps, lower_ngs,
@@ -382,37 +393,39 @@ c     /* note: log output not specified ... */
 
       call bHYPRE_BoomerAMG_SetIntArray1Parameter_f( bHYPRE_AMG,
      1     "NumGridSweeps", num_grid_sweeps(refindex_ngs(1)),
-     2     upper_ngs(1)-lower_ngs(1), ierrtmp )
+     2     upper_ngs(1)-lower_ngs(1), ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetIntArray1Parameter_f( bHYPRE_AMG,
      1     "GridRelaxType", grid_relax_type(refindex_grt(1)),
-     2     upper_grt(1)-lower_grt(1), ierrtmp )
+     2     upper_grt(1)-lower_grt(1), ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetDoubleArray1Parameter_f(
      1     bHYPRE_AMG, "RelaxWeight", relax_weight(refindex_rw(1)),
-     2     upper_rw(1)-lower_rw(1), ierrtmp )
+     2     upper_rw(1)-lower_rw(1), ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetIntArray2Parameter_f(
      1     bHYPRE_AMG, "GridRelaxPoints", bHYPRE_grid_relax_points,
-     2     ierrtmp )
+     2     ierrtmp, except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1     bHYPRE_AMG, "MaxLevels", max_levels, ierrtmp )
+     1     bHYPRE_AMG, "MaxLevels", max_levels, ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1     bHYPRE_AMG, "DebugFlag", debug_flag, ierrtmp )
+     1     bHYPRE_AMG, "DebugFlag", debug_flag, ierrtmp, except )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetDoubleParameter_f(
-     1     bHYPRE_AMG, "MaxRowSum", max_row_sum, ierrtmp )
+     1     bHYPRE_AMG, "MaxRowSum", max_row_sum, ierrtmp, except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_BoomerAMG_Setup_f(
-     1     bHYPRE_AMG, bHYPRE_Vector_b, bHYPRE_Vector_x, ierrtmp )
+     1     bHYPRE_AMG, bHYPRE_Vector_b, bHYPRE_Vector_x, ierrtmp,
+     2     except )
       ierr = ierr + ierrtmp
 
       call bHYPRE_BoomerAMG_Apply_f(
-     1     bHYPRE_AMG, bHYPRE_Vector_b, bHYPRE_Vector_x, ierrtmp )
+     1     bHYPRE_AMG, bHYPRE_Vector_b, bHYPRE_Vector_x, ierrtmp,
+     2     except )
       ierr = ierr + ierrtmp
 
 
@@ -422,16 +435,16 @@ c     Print the solution and other info
 c-----------------------------------------------------------------------
 
       call bHYPRE_IJParCSRVector_print_f(
-     1     bHYPRE_parcsr_x, "driver.out.x", ierrtmp )
+     1     bHYPRE_parcsr_x, "driver.out.x", ierrtmp, except )
       ierr = ierr + ierrtmp
 
       if (myid .eq. 0) then
          call bHYPRE_BoomerAMG_GetNumIterations_f(
-     1        bHYPRE_AMG, num_iterations, ierrtmp )
+     1        bHYPRE_AMG, num_iterations, ierrtmp, except )
          ierr = ierr + ierrtmp
          call bHYPRE_BoomerAMG_GetRelResidualNorm_f(
      1        bHYPRE_AMG,
-     1        final_res_norm, ierrtmp )
+     1        final_res_norm, ierrtmp, except )
          ierr = ierr + ierrtmp
          print *, 'Iterations = ', num_iterations
          print *, 'Final Residual Norm = ', final_res_norm
@@ -442,13 +455,13 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call bHYPRE_BoomerAMG_deleteref_f( bHYPRE_AMG )
-      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_x )
-      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_b )
-      call bHYPRE_IJParCSRMatrix_deleteref_f( bHYPRE_parcsr_A )
-c      call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
-c      call HYPRE_IJVectorDestroy(b, ierr)
-c      call HYPRE_IJVectorDestroy(x, ierr)
+      call bHYPRE_BoomerAMG_deleteref_f( bHYPRE_AMG, except )
+      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_x, except )
+      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_b, except )
+      call bHYPRE_IJParCSRMatrix_deleteref_f( bHYPRE_parcsr_A, except )
+c      call HYPRE_ParCSRMatrixDestroy(A_storage, ierr, except)
+c      call HYPRE_IJVectorDestroy(b, ierr, except)
+c      call HYPRE_IJVectorDestroy(x, ierr, except)
 
 c     Finalize MPI
 
