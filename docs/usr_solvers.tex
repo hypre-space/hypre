@@ -29,8 +29,8 @@ SysPFMG    &   & X &   &   \\
 Split      &   & X &   &   \\
 FAC        &   & X &   &   \\
 Maxwell    &   & X &   &   \\
-AMS        &   & X & X & X \\
 BoomerAMG  &   & X & X & X \\
+AMS        &   & X & X & X \\
 MLI        &   & X & X & X \\
 ParaSails  &   & X & X & X \\
 Euclid     &   & X & X & X \\
@@ -436,6 +436,295 @@ via HYPRE$\_$BoomerAMGSetTruncFactor.
 For a complete listing of all parameters see the reference manual.
 %-----------------------------------------------------------------------------
 
+\section{AMS}
+\label{AMS}
+
+AMS (Auxiliary space Maxwell Solver) is a parallel unstructured Maxwell
+solver for edge finite element discretizations of the variational problem
+\begin{equation} \label{ams-maxwell}
+\mbox{Find } {\mathbf u} \in {\mathbf V}_h \>:\qquad
+(\alpha\, \nabla \times {\mathbf u},  \nabla \times {\mathbf v}) +
+(\beta\, {\mathbf u},  {\mathbf v}) = ({\mathbf f},  {\mathbf v})\,,
+\qquad \mbox{for all } {\mathbf v} \in {\mathbf V}_h \,.
+\end{equation}
+Here ${\mathbf V}_h$ is the lowest order Nedelec (edge) finite element space,
+and $\alpha>0$ and $\beta \ge 0$ are scalar, or SPD matrix coefficients.
+AMS was designed to be scalable on problems with variable coefficients,
+and allows for $\beta$ to be zero in part or the whole domain.
+In either  case the resulting problem is only semidefinite, and for solvability
+the right-hand side should be chosen to satisfy compatibility conditions.
+
+AMS is based on the auxiliary space methods for definite Maxwell
+problems proposed in \cite{xu_H_curl}.
+For more details, see \cite{h_curl_amg_report,ams_report}.
+
+\subsection{Overview}
+Let ${\mathbf A}$ and ${\mathbf b}$ be the stiffness matrix and  the
+load vector corresponding to (\ref{ams-maxwell}). Then the resulting
+linear system of interest reads,
+\begin{equation} \label{ams-maxwell-ls}
+{\mathbf A}\, {\mathbf x} = {\mathbf b} \,.
+\end{equation}
+The coefficients $\alpha$ and $\beta$ are naturally associated with
+the ``stiffness'' and ``mass'' terms of ${\mathbf A}$.
+Besides ${\mathbf A}$ and ${\mathbf b}$, AMS requires the following
+additional user input:
+\begin{enumerate}
+\item The discrete gradient matrix $G$ representing the edges of
+the mesh in terms of its vertices. $G$ has as many rows as the number
+of edges in the mesh, with each row having two nonzero entries:
+$+1$ and $-1$ in the columns corresponding to the vertices composing
+the edge. The sign is determined based on the orientation of the edge.
+We require that $G$ includes all (interior and boundary) edges
+and vertices.
+
+\item The representations of the constant vector fields $(1,0,0)$,$(0,1,0)$ and
+$(0,0,1)$ in the ${\mathbf V}_h$ basis, given as three vectors: $G_x$, $G_y$, and $G_z$.
+Note that since no boundary conditions are imposed on $G$, the above vectors
+can be computed as $G_x = G x$, $G_y = G y$ and $G_z = G z$, where
+$x$, $y$, and $z$ are vectors representing the coordinates of the vertices of the mesh.
+\end{enumerate}
+
+In addition to the above quantities, AMS can utilize
+the following (optional) information:
+\begin{enumerate}
+\item[(3.)] The Poisson matrices $A_\alpha$ and $A_\beta$, corresponding to
+assembling of the forms $(\alpha\, \nabla u, \nabla v)$
+and $(\beta\, \nabla u, \nabla v)$ using standard linear finite elements on
+the same mesh.
+\end{enumerate}
+
+\noindent
+Internally, AMS proceeds with the construction of the following additional objects:
+\begin{itemize}
+\item $A_G$ -- a matrix associated with the mass term which is either $G^{\,T} {\mathbf A} G$, or the Poisson matrix $A_\beta$ (if given).
+\item ${\mathbf \Pi}$ -- the matrix representation of the interpolation operator
+from vector linear to edge finite elements.
+\item ${\mathbf A}_{{\mathbf \Pi}}$ -- a matrix associated with the stiffness term which is either  ${\mathbf \Pi}^{\,T} {\mathbf A} {\mathbf \Pi}$ or a block-diagonal matrix with diagonal blocks $A_\alpha$ (if given).
+\item $B_G$ and ${\mathbf B}_{{\mathbf \Pi}}$ -- efficient (AMG) solvers for $A_G$ and ${\mathbf A}_{{\mathbf \Pi}}$.
+\end{itemize}
+The solution procedure then is a three-level method using smoothing in
+the original edge space and subspace corrections based on $B_G$ and ${\mathbf B}_{{\mathbf \Pi}}$.
+We can employ a number of options here utilizing various combinations of the smoother
+and solvers in additive or multiplicative fashion.
+If $\beta$ is identically zero one can skip the subspace correction associated
+with $G$, in which case the solver is a two-level method.
+
+\subsection{Sample usage}
+AMS can be used either as a solver or as a preconditioner.
+Below we list the sequence of \hypre{} calls
+needed to create and use it as a solver.
+We start with the allocation of the \code{HYPRE_Solver} object:
+\begin{display}\begin{verbatim}
+HYPRE_Solver solver;
+HYPRE_AMSCreate(&solver);
+\end{verbatim}\end{display}
+
+Next, we set a number of solver parameters. Some of them are
+optional, while others are necessary in order to perform the
+solver setup.
+
+AMS offers the option to set the space dimension.
+By default we consider the dimension to be $3$. The only
+other option is $2$, and it can be set with the function given below.
+We note that a 3D solver will still work for a 2D problem,
+but it will be slower and will require more memory than necessary.
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetDimension(solver, dim);
+\end{verbatim}\end{display}
+
+The user is required to provide the discrete gradient matrix $G$.
+AMS expects a matrix defined on the whole mesh with no
+boundary edges/nodes excluded. It is essential to {\bf not} impose any boundary
+conditions on $G$.
+Regardless of which \hypre{} conceptual interface was used to construct $G$,
+one can obtain a ParCSR version of it. This is the expected
+format in the following function.
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetDiscreteGradient(solver, G);
+\end{verbatim}\end{display}
+
+In addition to $G$, we need one additional piece of information in order
+to construct the solver.
+The user has the option to choose either the coordinates of the vertices
+in the mesh or the representations of the constant vector fields
+in the edge element basis.
+In both cases three \hypre{} parallel vectors should be provided.
+For 2D problems, the user can set the third vector to NULL.
+The corresponding function calls read:
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetCoordinateVectors(solver,x,y,z);
+\end{verbatim}\end{display}
+or
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetEdgeConstantVectors(solver,
+                                one_zero_zero,
+                                zero_one_zero,
+                                zero_zero_one);
+\end{verbatim}\end{display}
+The vectors \code{one_zero_zero}, \code{zero_one_zero} and \code{zero_zero_one}
+above correspond to the constant vector fields $(1,0,0)$, $(0,1,0)$ and $(0,0,1)$.
+
+The remaining solver parameters are optional.
+For example, the user can choose a different cycle type by calling
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetCycleType(solver, cycle_type); /* default value: 1 */
+\end{verbatim}\end{display}
+
+\noindent
+The available cycle types in AMS are:
+\begin{itemize}
+\item \code{cycle_type=1}: multiplicative solver $(01210)$
+\item \code{cycle_type=2}: additive solver $(0+1+2)$
+\item \code{cycle_type=3}: multiplicative solver $(02120)$
+\item \code{cycle_type=4}: additive solver $(010+2)$
+\item \code{cycle_type=5}: multiplicative solver $(0102010)$
+\item \code{cycle_type=6}: additive solver $(1+020)$
+\item \code{cycle_type=7}: multiplicative solver $(0201020)$
+\item \code{cycle_type=8}: additive solver $(010+020)$
+\end{itemize}
+Here we use the following convention for the
+three subspace correction methods:
+$0$ refers to smoothing, $1$ stands for BoomerAMG based on $B_G$, and
+$2$ refers to a call to BoomerAMG for ${\mathbf B}_{{\mathbf \Pi}}$.
+The abbreviation $xyyz$  for $x,y,z \in \{0,1,2\}$
+refers to a multiplicative subspace correction based on solvers $x$, $y$, $y$, and $z$ (in that order).
+The abbreviation $x+y+z$ stands for an additive subspace correction method
+based on $x$, $y$ and $z$ solvers.
+The additive cycles are meant to be used only when AMS is called
+as a preconditioner.
+In our experience the choices \code{cycle_type=1} and \code{cycle_type=5} often produced
+fastest solution times, while \code{cycle_type=7} resulted in smallest
+number of iterations.
+
+Additional solver parameters, as the maximum number of iterations,
+the convergence tolerance and the output level, can be set with
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetMaxIter(solver, maxit);     /* default value: 20 */
+HYPRE_AMSSetTol(solver, tol);           /* default value: 1e-6 */
+HYPRE_AMSSetPrintLevel(solver, print);  /* default value: 1 */
+\end{verbatim}\end{display}
+
+More advanced parameters, affecting the smoothing and the
+internal AMG solvers, can be set with the following three
+functions:
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetSmoothingOptions(solver, 2, 1, 1.0, 1.0);
+HYPRE_AMSSetAlphaAMGOptions(solver, 10, 1, 3, 0.25);
+HYPRE_AMSSetBetaAMGOptions(solver, 10, 1, 3, 0.25);
+\end{verbatim}\end{display}
+
+For (singular) problems where $\beta = 0$ in the whole domain,
+different (in fact simpler) version of the AMS solver is offered.
+To allow for this simplification, use the following \hypre{} call
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetBetaPoissonMatrix(solver, NULL);
+\end{verbatim}\end{display}
+If $\beta$ is zero only in parts of the domain, the problem is still
+singular, but the AMS solver will try to detect this and construct
+a non-singular preconditioner.
+
+Two additional matrices are constructed in the setup of the
+AMS method---one corresponding to the coefficient $\alpha$
+and another corresponding to $\beta$.
+This may  lead to prohibitively high memory requirements, and
+the next two function calls may help to save some memory.
+For example, if the Poisson matrix with coefficient $\beta$
+(denoted by \code{Abeta}) is
+available then one can avoid one matrix construction by calling
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetBetaPoissonMatrix(solver, Abeta);
+\end{verbatim}\end{display}
+Similarly, if the Poisson matrix with coefficient $\alpha$ is available
+(denoted by \code{Aalpha})
+the second matrix construction can also be avoided by calling
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetAlphaPoissonMatrix(solver, Aalpha);
+\end{verbatim}\end{display}
+Note the following regarding these functions:
+\begin{itemize}
+\item Both of them change their input. More specifically,
+the diagonal entries of the input matrix corresponding to eliminated
+degrees of freedom (due to essential boundary conditions)
+are penalized.
+\item \code{HYPRE_AMSSetAlphaPoissonMatrix} forces the
+AMS method to use a simpler, but weaker (in terms of convergence) method.
+With this option, the multiplicative AMS cycle
+is not guaranteed to converge with the
+default parameters. The reason for this is the fact the solver is not
+variationally obtained from the original matrix (it utilizes
+the auxiliary Poisson--like matrices \code{Abeta} and \code{Aalpha}).
+Therefore, it is recommended in this case to use AMS as preconditioner
+only.
+\end{itemize}
+
+After the above calls, the solver is ready to be constructed.
+The user has to provide the stiffness matrix ${\mathbf A}$ (in ParCSR format) and
+the \hypre{} parallel vectors ${\mathbf b}$ and ${\mathbf x}$. (The vectors
+are actually not used in the current AMS setup.) The setup call reads,
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetup(solver, A, b, x);
+\end{verbatim}\end{display}
+It is important to note the order of the calling sequence. For example, do {\bf not}
+call \code{HYPRE_AMSSetup} before calling
+\code{HYPRE_AMSSetDiscreteGradient}
+and one of the functions
+\code{HYPRE_AMSSetCoordinateVectors} or \code{HYPRE_AMSSetEdgeConstantVectors}.
+
+\noindent
+Once the setup has completed, we can solve the linear system by calling
+\begin{display}\begin{verbatim}
+HYPRE_AMSSolve(solver, A, b, x);
+\end{verbatim}\end{display}
+
+\noindent
+Finally, the solver can be destroyed with
+\begin{display}\begin{verbatim}
+HYPRE_AMSDestroy(&solver);
+\end{verbatim}\end{display}
+
+\noindent
+More details can be found in the files \file{ams.h} and \file{ams.c}
+located in the \file{parcsr_ls} directory.
+
+%-----------------------------------------------------------------------------
+
+\section{The MLI Package}
+                                                                                   
+MLI is an object-oriented module that implements the class of algebraic
+multigrid algorithms based on Vanek and Brezina's smoothed aggregation
+method \cite{VaMB96, VaBM01}.  There are two main algorithms in this module - the original
+smoothed aggregation algorithm and the modified version that uses
+the finite element substructure matrices to construct the prolongation
+operators.  As such, the later algorithm can only be used in the
+finite element context via the finite element interface.  In addition,
+the nodal coordinates obtained via the finite element interface can be
+used to construct a better prolongation operator than the pure
+translation modes.
+
+Below is an example on how to set up MLI as a preconditioner
+for conjugate gradient.
+
+\begin{display}\begin{verbatim}
+HYPRE_LSI_MLICreate(MPI_COMM_WORLD, &pcg_precond);
+
+HYPRE_LSI_MLISetParams(pcg_precond, "MLI strengthThreshold 0.08");
+...
+
+HYPRE_PCGSetPrecond(pcg_solver,
+		    (HYPRE_PtrToSolverFcn) HYPRE_LSI_MLISolve,
+		    (HYPRE_PtrToSolverFcn) HYPRE_LSI_MLISetup,
+		    pcg_precond);
+\end{verbatim}\end{display}
+
+\noindent
+Note that parameters are set via \code{HYPRE_LSI_MLISetParams}. A list of
+valid parameters that can be set using this routine can be found in the reference manual.
+%Details of how to set this preconditioners up can be
+%found in the next section.
+
+
+%-----------------------------------------------------------------------------
 \section{ParaSails}
 
 ParaSails is a parallel implementation of a sparse approximate inverse
@@ -880,255 +1169,4 @@ also lead to increases in the time to calculate the preconditioner.
 \end{itemize}
 
 %-----------------------------------------------------------------------------
-
-\section{AMS}
-\label{AMS}
-
-AMS (Auxiliary space Maxwell Solver) is a parallel unstructured Maxwell
-solver for edge finite element discretizations of the variational problem
-\begin{equation} \label{ams-maxwell}
-\mbox{Find } {\mathbf u} \in {\mathbf V}_h \>:\qquad
-(\alpha\, \nabla \times {\mathbf u},  \nabla \times {\mathbf v}) +
-(\beta\, {\mathbf u},  {\mathbf v}) = ({\mathbf f},  {\mathbf v})\,,
-\qquad \mbox{for all } {\mathbf v} \in {\mathbf V}_h \,.
-\end{equation}
-Here ${\mathbf V}_h$ is the lowest order Nedelec (edge) finite element space,
-and $\alpha>0$ and $\beta \ge 0$ are scalar, or SPD matrix coefficients.
-AMS was designed to be scalable on problems with variable coefficients,
-and allows for $\beta$ to be zero in part or the whole domain.
-In either  case the resulting problem is only semidefinite, and for solvability
-the right-hand side should be chosen to satisfy compatibility conditions.
-
-AMS is based on the auxiliary space methods for definite Maxwell
-problems proposed in \cite{xu_H_curl}.
-For more details, see \cite{h_curl_amg_report,ams_report}.
-
-\subsection{Overview}
-Let ${\mathbf A}$ and ${\mathbf b}$ be the stiffness matrix and  the
-load vector corresponding to (\ref{ams-maxwell}). Then the resulting
-linear system of interest reads,
-\begin{equation} \label{ams-maxwell-ls}
-{\mathbf A}\, {\mathbf x} = {\mathbf b} \,.
-\end{equation}
-The coefficients $\alpha$ and $\beta$ are naturally associated with
-the ``stiffness'' and ``mass'' terms of ${\mathbf A}$.
-Besides ${\mathbf A}$ and ${\mathbf b}$, AMS requires the following
-additional user input:
-\begin{enumerate}
-\item The discrete gradient matrix $G$ representing the edges of
-the mesh in terms of its vertices. $G$ has as many rows as the number
-of edges in the mesh, with each row having two nonzero entries:
-$+1$ and $-1$ in the columns corresponding to the vertices composing
-the edge. The sign is determined based on the orientation of the edge.
-We require that $G$ includes all (interior and boundary) edges
-and vertices.
-
-\item The representations of the constant vector fields $(1,0,0)$,$(0,1,0)$ and
-$(0,0,1)$ in the ${\mathbf V}_h$ basis, given as three vectors: $G_x$, $G_y$, and $G_z$.
-Note that since no boundary conditions are imposed on $G$, the above vectors
-can be computed as $G_x = G x$, $G_y = G y$ and $G_z = G z$, where
-$x$, $y$, and $z$ are vectors representing the coordinates of the vertices of the mesh.
-\end{enumerate}
-
-In addition to the above quantities, AMS can utilize
-the following (optional) information:
-\begin{enumerate}
-\item[(3.)] The Poisson matrices $A_\alpha$ and $A_\beta$, corresponding to
-assembling of the forms $(\alpha\, \nabla u, \nabla v)$
-and $(\beta\, \nabla u, \nabla v)$ using standard linear finite elements on
-the same mesh.
-\end{enumerate}
-
-\noindent
-Internally, AMS proceeds with the construction of the following additional objects:
-\begin{itemize}
-\item $A_G$ -- a matrix associated with the mass term which is either $G^{\,T} {\mathbf A} G$, or the Poisson matrix $A_\beta$ (if given).
-\item ${\mathbf \Pi}$ -- the matrix representation of the interpolation operator
-from vector linear to edge finite elements.
-\item ${\mathbf A}_{{\mathbf \Pi}}$ -- a matrix associated with the stiffness term which is either  ${\mathbf \Pi}^{\,T} {\mathbf A} {\mathbf \Pi}$ or a block-diagonal matrix with diagonal blocks $A_\alpha$ (if given).
-\item $B_G$ and ${\mathbf B}_{{\mathbf \Pi}}$ -- efficient (AMG) solvers for $A_G$ and ${\mathbf A}_{{\mathbf \Pi}}$.
-\end{itemize}
-The solution procedure then is a three-level method using smoothing in
-the original edge space and subspace corrections based on $B_G$ and ${\mathbf B}_{{\mathbf \Pi}}$.
-We can employ a number of options here utilizing various combinations of the smoother
-and solvers in additive or multiplicative fashion.
-If $\beta$ is identically zero one can skip the subspace correction associated
-with $G$, in which case the solver is a two-level method.
-
-\subsection{Sample usage}
-AMS can be used either as a solver or as a preconditioner.
-Below we list the sequence of \hypre{} calls
-needed to create and use it as a solver.
-We start with the allocation of the \code{HYPRE_Solver} object:
-\begin{display}\begin{verbatim}
-HYPRE_Solver solver;
-HYPRE_AMSCreate(&solver);
-\end{verbatim}\end{display}
-
-Next, we set a number of solver parameters. Some of them are
-optional, while others are necessary in order to perform the
-solver setup.
-
-AMS offers the option to set the space dimension.
-By default we consider the dimension to be $3$. The only
-other option is $2$, and it can be set with the function given below.
-We note that a 3D solver will still work for a 2D problem,
-but it will be slower and will require more memory than necessary.
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetDimension(solver, dim);
-\end{verbatim}\end{display}
-
-The user is required to provide the discrete gradient matrix $G$.
-AMS expects a matrix defined on the whole mesh with no
-boundary edges/nodes excluded. It is essential to {\bf not} impose any boundary
-conditions on $G$.
-Regardless of which \hypre{} conceptual interface was used to construct $G$,
-one can obtain a ParCSR version of it. This is the expected
-format in the following function.
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetDiscreteGradient(solver, G);
-\end{verbatim}\end{display}
-
-In addition to $G$, we need one additional piece of information in order
-to construct the solver.
-The user has the option to choose either the coordinates of the vertices
-in the mesh or the representations of the constant vector fields
-in the edge element basis.
-In both cases three \hypre{} parallel vectors should be provided.
-For 2D problems, the user can set the third vector to NULL.
-The corresponding function calls read:
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetCoordinateVectors(solver,x,y,z);
-\end{verbatim}\end{display}
-or
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetEdgeConstantVectors(solver,
-                                one_zero_zero,
-                                zero_one_zero,
-                                zero_zero_one);
-\end{verbatim}\end{display}
-The vectors \code{one_zero_zero}, \code{zero_one_zero} and \code{zero_zero_one}
-above correspond to the constant vector fields $(1,0,0)$, $(0,1,0)$ and $(0,0,1)$.
-
-The remaining solver parameters are optional.
-For example, the user can choose a different cycle type by calling
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetCycleType(solver, cycle_type); /* default value: 1 */
-\end{verbatim}\end{display}
-
-\noindent
-The available cycle types in AMS are:
-\begin{itemize}
-\item \code{cycle_type=1}: multiplicative solver $(01210)$
-\item \code{cycle_type=2}: additive solver $(0+1+2)$
-\item \code{cycle_type=3}: multiplicative solver $(02120)$
-\item \code{cycle_type=4}: additive solver $(010+2)$
-\item \code{cycle_type=5}: multiplicative solver $(0102010)$
-\item \code{cycle_type=6}: additive solver $(1+020)$
-\item \code{cycle_type=7}: multiplicative solver $(0201020)$
-\item \code{cycle_type=8}: additive solver $(010+020)$
-\end{itemize}
-Here we use the following convention for the
-three subspace correction methods:
-$0$ refers to smoothing, $1$ stands for BoomerAMG based on $B_G$, and
-$2$ refers to a call to BoomerAMG for ${\mathbf B}_{{\mathbf \Pi}}$.
-The abbreviation $xyyz$  for $x,y,z \in \{0,1,2\}$
-refers to a multiplicative subspace correction based on solvers $x$, $y$, $y$, and $z$ (in that order).
-The abbreviation $x+y+z$ stands for an additive subspace correction method
-based on $x$, $y$ and $z$ solvers.
-The additive cycles are meant to be used only when AMS is called
-as a preconditioner.
-In our experience the choices \code{cycle_type=1} and \code{cycle_type=5} often produced
-fastest solution times, while \code{cycle_type=7} resulted in smallest
-number of iterations.
-
-Additional solver parameters, as the maximum number of iterations,
-the convergence tolerance and the output level, can be set with
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetMaxIter(solver, maxit);     /* default value: 20 */
-HYPRE_AMSSetTol(solver, tol);           /* default value: 1e-6 */
-HYPRE_AMSSetPrintLevel(solver, print);  /* default value: 1 */
-\end{verbatim}\end{display}
-
-More advanced parameters, affecting the smoothing and the
-internal AMG solvers, can be set with the following three
-functions:
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetSmoothingOptions(solver, 2, 1, 1.0, 1.0);
-HYPRE_AMSSetAlphaAMGOptions(solver, 10, 1, 3, 0.25);
-HYPRE_AMSSetBetaAMGOptions(solver, 10, 1, 3, 0.25);
-\end{verbatim}\end{display}
-
-For (singular) problems where $\beta = 0$ in the whole domain,
-different (in fact simpler) version of the AMS solver is offered.
-To allow for this simplification, use the following \hypre{} call
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetBetaPoissonMatrix(solver, NULL);
-\end{verbatim}\end{display}
-If $\beta$ is zero only in parts of the domain, the problem is still
-singular, but the AMS solver will try to detect this and construct
-a non-singular preconditioner.
-
-Two additional matrices are constructed in the setup of the
-AMS method---one corresponding to the coefficient $\alpha$
-and another corresponding to $\beta$.
-This may  lead to prohibitively high memory requirements, and
-the next two function calls may help to save some memory.
-For example, if the Poisson matrix with coefficient $\beta$
-(denoted by \code{Abeta}) is
-available then one can avoid one matrix construction by calling
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetBetaPoissonMatrix(solver, Abeta);
-\end{verbatim}\end{display}
-Similarly, if the Poisson matrix with coefficient $\alpha$ is available
-(denoted by \code{Aalpha})
-the second matrix construction can also be avoided by calling
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetAlphaPoissonMatrix(solver, Aalpha);
-\end{verbatim}\end{display}
-Note the following regarding these functions:
-\begin{itemize}
-\item Both of them change their input. More specifically,
-the diagonal entries of the input matrix corresponding to eliminated
-degrees of freedom (due to essential boundary conditions)
-are penalized.
-\item \code{HYPRE_AMSSetAlphaPoissonMatrix} forces the
-AMS method to use a simpler, but weaker (in terms of convergence) method.
-With this option, the multiplicative AMS cycle
-is not guaranteed to converge with the
-default parameters. The reason for this is the fact the solver is not
-variationally obtained from the original matrix (it utilizes
-the auxiliary Poisson--like matrices \code{Abeta} and \code{Aalpha}).
-Therefore, it is recommended in this case to use AMS as preconditioner
-only.
-\end{itemize}
-
-After the above calls, the solver is ready to be constructed.
-The user has to provide the stiffness matrix ${\mathbf A}$ (in ParCSR format) and
-the \hypre{} parallel vectors ${\mathbf b}$ and ${\mathbf x}$. (The vectors
-are actually not used in the current AMS setup.) The setup call reads,
-\begin{display}\begin{verbatim}
-HYPRE_AMSSetup(solver, A, b, x);
-\end{verbatim}\end{display}
-It is important to note the order of the calling sequence. For example, do {\bf not}
-call \code{HYPRE_AMSSetup} before calling
-\code{HYPRE_AMSSetDiscreteGradient}
-and one of the functions
-\code{HYPRE_AMSSetCoordinateVectors} or \code{HYPRE_AMSSetEdgeConstantVectors}.
-
-\noindent
-Once the setup has completed, we can solve the linear system by calling
-\begin{display}\begin{verbatim}
-HYPRE_AMSSolve(solver, A, b, x);
-\end{verbatim}\end{display}
-
-\noindent
-Finally, the solver can be destroyed with
-\begin{display}\begin{verbatim}
-HYPRE_AMSDestroy(&solver);
-\end{verbatim}\end{display}
-
-\noindent
-More details can be found in the files \file{ams.h} and \file{ams.c}
-located in the \file{parcsr_ls} directory.
 
