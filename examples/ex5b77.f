@@ -50,6 +50,8 @@ c                 Parasails preconditioners.
       integer*8  vec_b
       integer*8  vec_x
       integer*8  amg_solver
+      integer*8  except
+c     ... except is for Babel exceptions, which we shall ignore
 
 c-----------------------------------------------------------------------
 c     Initialize MPI
@@ -59,7 +61,8 @@ c-----------------------------------------------------------------------
       call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
       mpi_comm = MPI_COMM_WORLD
-      call bHYPRE_MPICommunicator_CreateF_f( mpi_comm, bHYPRE_mpicomm )
+      call bHYPRE_MPICommunicator_CreateF_f( mpi_comm, bHYPRE_mpicomm,
+     1      except )
 
 c   Default problem parameters
       n = 33
@@ -98,10 +101,10 @@ c     Create the matrix.
 c     Note that this is a square matrix, so we indicate the row partition
 c     size twice (since number of rows = number of cols)
       call bHYPRE_IJParCSRMatrix_Create_f( bHYPRE_mpicomm, ilower,
-     1     iupper, ilower, iupper, parcsr_A )
+     1     iupper, ilower, iupper, parcsr_A, except )
 
 c     op_A will be needed later as a function argument
-      call bHYPRE_Operator__cast_f( parcsr_A, op_A )
+      call bHYPRE_Operator__cast_f( parcsr_A, op_A, except )
 
 c     Choose a parallel csr format storage (see the User's Manual)
 c     Note: Here the HYPRE interface requires a SetObjectType call.
@@ -109,7 +112,8 @@ c     I am using the bHYPRE interface in a way which does not because
 c     the object type is already specified through the class name.
 
 c     Initialize before setting coefficients
-      call bHYPRE_IJParCSRMatrix_Initialize_f( parcsr_A, ierrtmp )
+      call bHYPRE_IJParCSRMatrix_Initialize_f( parcsr_A, ierrtmp,
+     1     except )
 
 c     Now go through my local rows and set the matrix entries.
 c     Each row has at most 5 entries. For example, if n=3:
@@ -158,28 +162,28 @@ c        The right identity block:position i+n
 
 c        Set the values for row i
          call bHYPRE_IJParCSRMatrix_SetValues_f(
-     1        parcsr_A, 1, nnz-1, i, cols, values, 5, ierrtmp )
+     1        parcsr_A, 1, nnz-1, i, cols, values, 5, ierrtmp, except )
 
       enddo
 
 
 c     Assemble after setting the coefficients
-      call bHYPRE_IJParCSRMatrix_Assemble_f( parcsr_A, ierrtmp )
+      call bHYPRE_IJParCSRMatrix_Assemble_f( parcsr_A, ierrtmp, except )
 
 c     Create the rhs and solution
       call bHYPRE_IJParCSRVector_Create_f( bHYPRE_mpicomm,
-     1     ilower, iupper, par_b )
+     1     ilower, iupper, par_b, except )
 c     vec_b will be needed later for function arguments
-      call bHYPRE_Vector__cast_f( par_b, vec_b )
+      call bHYPRE_Vector__cast_f( par_b, vec_b, except )
 
-      call bHYPRE_IJParCSRVector_Initialize_f( par_b, ierrtmp )
+      call bHYPRE_IJParCSRVector_Initialize_f( par_b, ierrtmp, except )
 
       call bHYPRE_IJParCSRVector_Create_f( bHYPRE_mpicomm,
-     1     ilower, iupper, par_x )
+     1     ilower, iupper, par_x, except )
 c     vec_x will be needed later for function arguments
-      call bHYPRE_Vector__cast_f( par_x, vec_x )
+      call bHYPRE_Vector__cast_f( par_x, vec_x, except )
 
-      call bHYPRE_IJParCSRVector_Initialize_f( par_x, ierrtmp )
+      call bHYPRE_IJParCSRVector_Initialize_f( par_x, ierrtmp, except )
 
 c     Set the rhs values to h^2 and the solution to zero
       do i = 1, local_size
@@ -188,13 +192,13 @@ c     Set the rhs values to h^2 and the solution to zero
          rows(i) = ilower + i -1
       enddo
       call bHYPRE_IJParCSRVector_SetValues_f(
-     1     par_b, local_size, rows, rhs_values, ierrtmp )
+     1     par_b, local_size, rows, rhs_values, ierrtmp, except )
       call bHYPRE_IJParCSRVector_SetValues_f(
-     1     par_x, local_size, rows, x_values, ierrtmp )
+     1     par_x, local_size, rows, x_values, ierrtmp, except )
 
 
-      call bHYPRE_IJParCSRVector_Assemble_f( par_b, ierrtmp )
-      call bHYPRE_IJParCSRVector_Assemble_f( par_x, ierrtmp )
+      call bHYPRE_IJParCSRVector_Assemble_f( par_b, ierrtmp, except )
+      call bHYPRE_IJParCSRVector_Assemble_f( par_x, ierrtmp, except )
 
 c     Choose a solver and solve the system
 
@@ -203,37 +207,39 @@ c      AMG
 
 c        Create solver
          call bHYPRE_BoomerAMG_Create_f(
-     1        bHYPRE_mpicomm, parcsr_A, amg_solver)
+     1        bHYPRE_mpicomm, parcsr_A, amg_solver, except )
 
 c        Set some parameters (See Reference Manual for more parameters)
 c        PrintLevel=3 means print solve info + parameters
 c        CoarsenType=6 means Falgout coarsening
 c        RelaxType=3 means Gauss-Seidel/Jacobi hybrid relaxation
          call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1        amg_solver, "PrintLevel", 3, ierrtmp )
+     1        amg_solver, "PrintLevel", 3, ierrtmp, except )
          call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1        amg_solver, "CoarsenType", 6, ierrtmp )
+     1        amg_solver, "CoarsenType", 6, ierrtmp, except )
          call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1        amg_solver, "RelaxType", 3, ierrtmp )
+     1        amg_solver, "RelaxType", 3, ierrtmp, except )
          call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1        amg_solver, "NumSweeps", 1, ierrtmp )
+     1        amg_solver, "NumSweeps", 1, ierrtmp, except )
          call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1        amg_solver, "MaxLevels", 20, ierrtmp )
+     1        amg_solver, "MaxLevels", 20, ierrtmp, except )
          call bHYPRE_BoomerAMG_SetDoubleParameter_f(
-     1        amg_solver, "Tolerance", tol, ierrtmp )
+     1        amg_solver, "Tolerance", tol, ierrtmp, except )
 
 c        Now setup and solve!
          call bHYPRE_BoomerAMG_Setup_f(
-     1        amg_solver, vec_b, vec_x, ierrtmp )
+     1        amg_solver, vec_b, vec_x, ierrtmp, except )
          call bHYPRE_BoomerAMG_Apply_f(
-     1        amg_solver, vec_b, vec_x, ierrtmp )
+     1        amg_solver, vec_b, vec_x, ierrtmp, except )
 
 c        Run info - needed logging turned on 
          call bHYPRE_BoomerAMG_GetIntValue_f(
-     1        amg_solver, "NumIterations", num_iterations, ierrtmp )
+     1        amg_solver, "NumIterations", num_iterations, ierrtmp,
+     2        except )
          ierr = ierr + ierrtmp
          call bHYPRE_BoomerAMG_GetDoubleValue_f(
-     1        amg_solver, "RelResidualNorm", final_res_norm, ierrtmp )
+     1        amg_solver, "RelResidualNorm", final_res_norm, ierrtmp,
+     2        except )
 
       if (myid .eq. 0) then
          print *
@@ -243,7 +249,7 @@ c        Run info - needed logging turned on
       endif
 
 c     Destroy solver
-      call bHYPRE_BoomerAMG_deleteRef_f( amg_solver )
+      call bHYPRE_BoomerAMG_deleteRef_f( amg_solver, except )
 
       endif
 
@@ -252,14 +258,14 @@ c     The calls of other solvers are not implemented yet.
 
 c     Print the solution
       if ( print_solution .ne. 0 ) then
-         call bHYPRE_IJParCSRVector_Print_f( par_x, "ij.out.x" )
+         call bHYPRE_IJParCSRVector_Print_f( par_x, "ij.out.x", except )
       endif
 
 c     Clean up
-      call bHYPRE_IJParCSRMatrix_deleteRef_f( parcsr_A )
-      call bHYPRE_IJParCSRVector_deleteRef_f( par_b )
-      call bHYPRE_IJParCSRVector_deleteRef_f( par_x )
-      call bHYPRE_MPICommunicator_deleteRef_f( bHYPRE_mpicomm )
+      call bHYPRE_IJParCSRMatrix_deleteRef_f( parcsr_A, except )
+      call bHYPRE_IJParCSRVector_deleteRef_f( par_b, except )
+      call bHYPRE_IJParCSRVector_deleteRef_f( par_x, except )
+      call bHYPRE_MPICommunicator_deleteRef_f( bHYPRE_mpicomm, except )
 
 c     We need a multi-language equivalent of hypre_assert.
       if ( ierr .ne. 0 ) then
