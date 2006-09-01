@@ -27,7 +27,7 @@
 
 
 # globals
-DefaultTestDirs="TEST_fac TEST_fei TEST_ij TEST_sstruct TEST_struct"
+DefaultTestDirs="TEST_ams TEST_fac TEST_fei TEST_ij TEST_sstruct TEST_struct"
 InputString=""
 
 function usage ()
