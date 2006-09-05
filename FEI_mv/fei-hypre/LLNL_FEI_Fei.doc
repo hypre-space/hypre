@@ -238,6 +238,117 @@ int  parameters(int numParams, char **paramStrings);
 
 
 /**
+ * @name LinSysCore Functions
+ **/
+/*@{*/
+
+/**
+  * Create LinSysCore object
+ **/
+HYPRE_LinSysCore_create(LinSysCore **lsc, MPI_Comm comm);
+
+/**
+  * Destroy LinSysCore object
+ **/
+HYPRE_LinSysCore_destroy(LinSysCore **lsc);
+
+/**
+  * Set desired parameters
+ **/
+HYPRE_parameters(LinSysCore *lsc, int nParams, char **params);
+
+/**
+  *
+ **/
+HYPRE_setGlobalOffsets(LinSysCore* lsc, int leng, int* nodeOffsets,
+int* eqnOffsets, int* blkEqnOffsets);
+
+/**
+  *
+ **/
+HYPRE_setMatrixStructure(LinSysCore *lsc, int** ptColIndices,
+int* ptRowLengths, int** blkColIndices, int* blkRowLengths, int* ptRowsPerBlkRow);
+
+/**
+  *
+ **/
+HYPRE_resetMatrixAndVector(LinSysCore *lsc, double val);
+
+/**
+  *
+ **/
+HYPRE_resetMatrix(LinSysCore *lsc, double val);
+
+/**
+  *
+ **/
+HYPRE_resetRHSVector(LinSysCore *lsc, double val);
+
+/**
+  *
+ **/
+HYPRE_sumIntoSystemMatrix(LinSysCore *lsc, int numPtRows, const int* ptRows,
+int numPtCols, const int* ptCols, int numBlkRows, const int* blkRows,
+int numBlkCols, const int* blkCols, const double* const* values);
+
+/**
+  *
+ **/
+HYPRE_sumIntoRHSVector(LinSysCore *lsc, int num, const double* values, const int* indices);
+
+/**
+  *
+ **/
+HYPRE_matrixLoadComplete(LinSysCore *lsc);
+
+/**
+  *
+ **/
+HYPRE_enforceEssentialBC(LinSysCore *lsc, int* globalEqn, double* alpha,
+                             double* gamma, int leng);
+
+/**
+  *
+ **/
+HYPRE_enforceRemoteEssBCs(LinSysCore *lsc,int numEqns,int* globalEqns, int** colIndices,
+int* colIndLen, double** coefs);
+
+/**
+  *
+ **/
+HYPRE_enforceOtherBC(LinSysCore *lsc, int* globalEqn, double* alpha, double *beta
+double* gamma, int leng);
+
+/**
+  *
+ **/
+HYPRE_putInitialGuess(LinSysCore *lsc, const int* eqnNumbers,
+                          const double* values, int leng);
+
+/**
+  *
+ **/
+HYPRE_getSolution(LinSysCore *lsc, double *answers, int leng);
+
+/**
+  *
+ **/
+HYPRE_getSolnEntry(LinSysCore *lsc, int eqnNumber, double *answer);
+
+/**
+  *
+ **/
+HYPRE_formResidual(LinSysCore *lsc, double *values, int leng);
+
+/**
+  *
+ **/
+HYPRE_launchSolver(LinSysCore *lsc, int *solveStatus, int *iter);
+
+/*@}*/
+
+
+/**
  * @name LinSysCore Parameters
  **/
 /*@{*/
