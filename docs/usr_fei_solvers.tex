@@ -1,13 +1,16 @@
-\section{\hypre{} Solvers Available through the FEI} 
+\section{\hypre{} Solvers Available Only through the FEI} 
 
-On the other side of the {\sf LinearSystemCore} interface is the linear
-solver package. Any linear solver package can be used as long as there
-is an implementation of the interface in the solver package itself. The
-{\sf LinearSystemCore} implementation in \hypre{} is encapsulated in the 
-\hypre{} finite element conceptual interface called {\sf HYPRE\_LinSysCore}.
-The incoming element stiffness matrices and other information are 
-converted into \hypre{}'s internal data structures. In this section we
-briefly describe some of these internal data structures and capabilities.
+%On the other side of the {\sf LinearSystemCore} interface is the linear
+%solver package. Any linear solver package can be used as long as there
+%is an implementation of the interface in the solver package itself. The
+%{\sf LinearSystemCore} implementation in \hypre{} is encapsulated in the 
+%\hypre{} finite element conceptual interface called {\sf HYPRE\_LinSysCore}.
+%The incoming element stiffness matrices and other information are 
+%converted into \hypre{}'s internal data structures. 
+All ParCSR solvers that have been described in the previous
+sections are available through the FEI interface.
+The solvers and preconditioners that are available 
+only through the FEI interface are briefly described in this section.
 
 %\subsection{Parallel Matrix and Vector Construction} 
 %
@@ -33,8 +36,7 @@ Berkeley) suitable to small problems (may be up to the size of $10000$).
 In the following we list some of these internal solvers.
 
 \begin{enumerate}
-\item Krylov solvers (CG, GMRES, FGMRES, TFQMR, BiCGSTAB, symmetric QMR),
-\item Boomeramg (a parallel algebraic multigrid solver),
+\item Additional Krylov solvers (FGMRES, TFQMR, symmetric QMR),
 \item SuperLU direct solver (sequential),
 \item SuperLU direct solver with iterative refinement (sequential), 
 \end{enumerate}
@@ -42,17 +44,13 @@ In the following we list some of these internal solvers.
 \subsection{Parallel Preconditioners} 
 
 The performance of the Krylov solvers can be improved by clever selection
-of preconditioners. \hypre{} currently has the following preconditioners 
+of preconditioners. Besides those mentioned previously
+in this chapter, the following preconditioners are
 available via the {\sf LinearSystemCore} interface: 
 
 \begin{enumerate}
-\item no preconditioning,
-\item diagonal, 
-\item another parallel incomplete LU ({\sf Euclid}),
-\item parallel sparse approximate inverse ({\sf ParaSails}),
-\item parallel algebraic multigrid ({\sf BoomerAMG}),
-\item another parallel algebraic multigrid ({\sf MLI} based on
-the smoothed aggregation multigrid methods),
+\item the modified version of MLI, which requires the finite element substructure matrices
+to construct the prolongation operators,
 \item parallel domain decomposition with inexact local solves ({\sf DDIlut}), 
 \item least-squares polynomial preconditioner,
 \item $2 \times 2$ block preconditioner, and
@@ -60,8 +58,7 @@ the smoothed aggregation multigrid methods),
 \end{enumerate}
 
 Some of these preconditioners can be tuned by a number of internal parameters
-modifiable by users. A description of these parameters is given in later
-sections.
+modifiable by users. A description of these parameters is given in the reference manual.
 
 \subsection{Matrix Reduction} 
 

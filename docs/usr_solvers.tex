@@ -6,6 +6,9 @@
 
 There are several solvers available in \hypre{} via different
 conceptual interfaces (see Table \ref{table-solver-availability}).
+Note that there are a few additional solvers and preconditioners not
+mentioned in the table that can be used only through the FEI interface
+and are described in Paragraph 6.14.
 The procedure for setup and use of solvers and preconditioners is
 largely the same. We will refer to them both as solvers in the sequel
 except when noted.  In normal usage, the preconditioner is chosen and
@@ -724,7 +727,8 @@ located in the \file{parcsr_ls} directory.
                                                                                    
 MLI is an object-oriented module that implements the class of algebraic
 multigrid algorithms based on Vanek and Brezina's smoothed aggregation
-method \cite{VaMB96, VaBM01}.  There are two main algorithms in this module - the original
+method \cite{VaMB96, VaBM01}.  There are two main algorithms in this module - 
+the original
 smoothed aggregation algorithm and the modified version that uses
 the finite element substructure matrices to construct the prolongation
 operators.  As such, the later algorithm can only be used in the
