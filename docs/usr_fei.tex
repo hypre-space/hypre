@@ -171,14 +171,29 @@ where the variables at node $i$ is returned in {\sf solnValues}.
 As described before, users who prefer to create their own finite element
 interface package can also take advantage of the rich solver capabilities
 in \hypre{}. In this section we show how to access {\sf HYPRE\_LinSysCore}'s
-internal solver directly.  Users who choose this path need first to 
+internal solver directly.  
+The matrix class in \hypre{} accessible via the {\sf LinearSystemCore} interface
+is the parallel compressed sparse row ({\sf ParCSR}) matrix.  The
+requirements about how the global matrix is partitioned among the
+processors are that each processor holds a contiguous block of rows and columns
+and the equation numbers in processors of lower rank are lower than those
+in processors of higher rank.  The {\sf FEI} is responsible for ensuring
+that these two requirements are followed. The matrix can be loaded in
+parallel - a row or a block of rows at a time.  The solution and right
+hand side vectors are constructed accordingly. The matrix rows corresponding
+to the shared nodes can be assigned to either processor, and is determined
+by the {\sf FEI} itself. Once the incoming matrix and vector data have
+been captured in the \hypre{} {\sf ParCSR} format, a whole of matrix and
+vector operators are available for use in the \hypre{} solvers.
+
+The following program segment describes the function calls to set up
+the internal matrix and solve the linear system.
+Users need first to 
 construct an array (say, {\sf eqnOffsets} describing the matrix row
 partitioning across all processors (so {\sf eqnOffsets[p]} and
 {\sf eqnOffset[p+1]} have the starting and ending row indices for processor
 p). Furthermore, suppose the local submatrix has been constructed as a
 compressed sparse row (CSR) matrix in the {\sf ia, ja, val} arrays. 
-The following program segment describes the function calls to set up
-the internal matrix and solve the linear system.
 
 \begin{tabbing}
 \hspace{0.5in} \= {\sf Program Segment} \\[1mm]
@@ -208,43 +223,43 @@ the internal matrix and solve the linear system.
 \> {\sf HYPRE\_launchSolver(\&status, \&iterations);}
 \end{tabbing}
 
-A list of available functions is given in the following.
+A list of available functions are given in the reference manual.
+%
+%\begin{tabbing}
+%{\sf HYPRE\_LinSysCore\_create(LinSysCore **lsc, MPI\_Comm comm)} \\[1mm]
+%{\sf HYPRE\_LinSysCore\_destroy(LinSysCore **lsc)} \\[1mm]
+%{\sf HYPRE\_parameters(LinSysCore *lsc, int nParams, char **params)} \\[1mm]
+%{\sf HYPRE\_setGlobalOffsets(LinSysCore* lsc, int leng, int* nodeOffsets,} \\
+%\hspace{1.0in} {\sf int* eqnOffsets, int* blkEqnOffsets)} \\[1mm]
+%{\sf HYPRE\_setMatrixStructure(LinSysCore *lsc, int** ptColIndices,} \\
+%\hspace{1.0in} {\sf int* ptRowLengths, int** blkColIndices, int* blkRowLengths, int* ptRowsPerBlkRow)} \\[1mm]
+%{\sf HYPRE\_resetMatrixAndVector(LinSysCore *lsc, double val)} \\[1mm]
+%{\sf HYPRE\_resetMatrix(LinSysCore *lsc, double val)} \\[1mm]
+%{\sf HYPRE\_resetRHSVector(LinSysCore *lsc, double val)} \\[1mm]
+%{\sf HYPRE\_sumIntoSystemMatrix(LinSysCore *lsc, int numPtRows, const int* ptRows,}\\
+%\hspace{1.0in} {\sf int numPtCols, const int* ptCols, int numBlkRows, const int* blkRows,} \\
+%\hspace{1.0in} {\sf int numBlkCols, const int* blkCols, const double* const* values)} \\[1mm]
+%{\sf HYPRE\_sumIntoRHSVector(LinSysCore *lsc, int num, const double* values, const int* indices)} \\[1mm]
+%{\sf HYPRE\_matrixLoadComplete(LinSysCore *lsc)} \\[1mm]
+%{\sf HYPRE\_enforceEssentialBC(LinSysCore *lsc, int* globalEqn, double* alpha,
+%                             double* gamma, int leng)} \\[1mm]
+%
+%{\sf HYPRE\_enforceRemoteEssBCs(LinSysCore *lsc,int numEqns,int* globalEqns, int** colIndices,} \\
+%\hspace{1.0in} {\sf int* colIndLen, double** coefs)} \\[1mm]
 
-\begin{tabbing}
-{\sf HYPRE\_LinSysCore\_create(LinSysCore **lsc, MPI\_Comm comm)} \\[1mm]
-{\sf HYPRE\_LinSysCore\_destroy(LinSysCore **lsc)} \\[1mm]
-{\sf HYPRE\_parameters(LinSysCore *lsc, int nParams, char **params)} \\[1mm]
-{\sf HYPRE\_setGlobalOffsets(LinSysCore* lsc, int leng, int* nodeOffsets,} \\
-\hspace{1.0in} {\sf int* eqnOffsets, int* blkEqnOffsets)} \\[1mm]
-{\sf HYPRE\_setMatrixStructure(LinSysCore *lsc, int** ptColIndices,} \\
-\hspace{1.0in} {\sf int* ptRowLengths, int** blkColIndices, int* blkRowLengths, int* ptRowsPerBlkRow)} \\[1mm]
-{\sf HYPRE\_resetMatrixAndVector(LinSysCore *lsc, double val)} \\[1mm]
-{\sf HYPRE\_resetMatrix(LinSysCore *lsc, double val)} \\[1mm]
-{\sf HYPRE\_resetRHSVector(LinSysCore *lsc, double val)} \\[1mm]
-{\sf HYPRE\_sumIntoSystemMatrix(LinSysCore *lsc, int numPtRows, const int* ptRows,}\\
-\hspace{1.0in} {\sf int numPtCols, const int* ptCols, int numBlkRows, const int* blkRows,} \\
-\hspace{1.0in} {\sf int numBlkCols, const int* blkCols, const double* const* values)} \\[1mm]
-{\sf HYPRE\_sumIntoRHSVector(LinSysCore *lsc, int num, const double* values, const int* indices)} \\[1mm]
-{\sf HYPRE\_matrixLoadComplete(LinSysCore *lsc)} \\[1mm]
-{\sf HYPRE\_enforceEssentialBC(LinSysCore *lsc, int* globalEqn, double* alpha,
-                             double* gamma, int leng)} \\[1mm]
+%{\sf HYPRE\_enforceOtherBC(LinSysCore *lsc, int* globalEqn, double* alpha, double *beta} \\
+%\hspace{1.0in} {\sf double* gamma, int leng)} \\[1mm]
 
-{\sf HYPRE\_enforceRemoteEssBCs(LinSysCore *lsc,int numEqns,int* globalEqns, int** colIndices,} \\
-\hspace{1.0in} {\sf int* colIndLen, double** coefs)} \\[1mm]
+%{\sf HYPRE\_putInitialGuess(LinSysCore *lsc, const int* eqnNumbers,
+%                          const double* values, int leng)} \\[1mm]
+%{\sf HYPRE\_getSolution(LinSysCore *lsc, double *answers, int leng)} \\[1mm]
 
-{\sf HYPRE\_enforceOtherBC(LinSysCore *lsc, int* globalEqn, double* alpha, double *beta} \\
-\hspace{1.0in} {\sf double* gamma, int leng)} \\[1mm]
+%{\sf HYPRE\_getSolnEntry(LinSysCore *lsc, int eqnNumber, double *answer)} \\[1mm]
 
-{\sf HYPRE\_putInitialGuess(LinSysCore *lsc, const int* eqnNumbers,
-                          const double* values, int leng)} \\[1mm]
-{\sf HYPRE\_getSolution(LinSysCore *lsc, double *answers, int leng)} \\[1mm]
+%{\sf HYPRE\_formResidual(LinSysCore *lsc, double *values, int leng)} \\[1mm]
 
-{\sf HYPRE\_getSolnEntry(LinSysCore *lsc, int eqnNumber, double *answer)} \\[1mm]
-
-{\sf HYPRE\_formResidual(LinSysCore *lsc, double *values, int leng)} \\[1mm]
-
-{\sf HYPRE\_launchSolver(LinSysCore *lsc, int *solveStatus, int *iter)} \\[1mm]
-\end{tabbing}
+%{\sf HYPRE\_launchSolver(LinSysCore *lsc, int *solveStatus, int *iter)} \\[1mm]
+%\end{tabbing}
 
 \section{HYPRE LinearSystemCore Installation}
 

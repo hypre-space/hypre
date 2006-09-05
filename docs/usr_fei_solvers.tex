@@ -9,22 +9,22 @@ The incoming element stiffness matrices and other information are
 converted into \hypre{}'s internal data structures. In this section we
 briefly describe some of these internal data structures and capabilities.
 
-\subsection{Parallel Matrix and Vector Construction} 
-
-The matrix class in \hypre{} accessible via the {\sf LinearSystemCore} interface
-is the parallel compressed sparse row ({\sf ParCSR}) matrix.  The 
-requirements about how the global matrix is partitioned among the
-processors are that each processor holds a contiguous block of rows and columns
-and the equation numbers in processors of lower rank are lower than those
-in processors of higher rank.  The {\sf FEI} is responsible for ensuring
-that these two requirements are followed. The matrix can be loaded in
-parallel - a row or a block of rows at a time.  The solution and right
-hand side vectors are constructed accordingly. The matrix rows corresponding
-to the shared nodes can be assigned to either processor, and is determined
-by the {\sf FEI} itself. Once the incoming matrix and vector data have
-been captured in the \hypre{} {\sf ParCSR} format, a whole of matrix and
-vector operators are available for use in the \hypre{} solvers.
-
+%\subsection{Parallel Matrix and Vector Construction} 
+%
+%The matrix class in \hypre{} accessible via the {\sf LinearSystemCore} interface
+%is the parallel compressed sparse row ({\sf ParCSR}) matrix.  The 
+%requirements about how the global matrix is partitioned among the
+%processors are that each processor holds a contiguous block of rows and columns
+%and the equation numbers in processors of lower rank are lower than those
+%in processors of higher rank.  The {\sf FEI} is responsible for ensuring
+%that these two requirements are followed. The matrix can be loaded in
+%parallel - a row or a block of rows at a time.  The solution and right
+%hand side vectors are constructed accordingly. The matrix rows corresponding
+%to the shared nodes can be assigned to either processor, and is determined
+%by the {\sf FEI} itself. Once the incoming matrix and vector data have
+%been captured in the \hypre{} {\sf ParCSR} format, a whole of matrix and
+%vector operators are available for use in the \hypre{} solvers.
+%
 \subsection{Sequential and Parallel Solvers} 
 
 \hypre{} currently has many iterative solvers. There is also internally a
