@@ -777,10 +777,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    {
       refine_factors[i]= 1;
    }
-   hypre_ClearIndex(stridec);
+   hypre_SetIndex(stridec, 1, 1, 1);
    for (i= 0; i< ndim; i++)
    {
-       stridec[i]= 1;
        refine_factors_half[i]= refine_factors[i]/2;
    }
 
@@ -888,8 +887,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
               ownbox= hypre_BoxArrayBox(own_abox, bi);
               hypre_StructMapCoarseToFine(hypre_BoxIMin(ownbox), zero_index,
                                           refine_factors, hypre_BoxIMin(&refined_box));
-              hypre_SetIndex(temp_index1, refine_factors[0]-1, refine_factors[1]-1,
-                             refine_factors[2]-1);
+              hypre_ClearIndex(temp_index1);
+              for (j= 0; j< ndim; j++)
+              {
+                 temp_index1[j]= refine_factors[j]-1;
+              }
               hypre_StructMapCoarseToFine(hypre_BoxIMax(ownbox), temp_index1,
                                           refine_factors, hypre_BoxIMax(&refined_box));
               hypre_IntersectBoxes(fbox, &refined_box, &intersect_box);
@@ -907,7 +909,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
               *-----------------------------------------------------------------*/
               hypre_CopyIndex(hypre_BoxIMin(&intersect_box), start);
               hypre_CopyIndex(hypre_BoxIMax(&intersect_box), intersect_size);
-              for (i= 0; i< ndim; i++)
+              for (i= 0; i< 3; i++)
               {
                  intersect_size[i]-= (start[i]-1);
               }
@@ -1220,8 +1222,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
              hypre_StructMapCoarseToFine(hypre_BoxIMin(ownbox), zero_index,
                                     refine_factors, hypre_BoxIMin(&refined_box));
-             hypre_SetIndex(temp_index1, refine_factors[0]-1, refine_factors[1]-1,
-                            refine_factors[2]-1);
+             hypre_ClearIndex(temp_index1);
+             for (j= 0; j< ndim; j++)
+             {
+                temp_index1[j]= refine_factors[j]-1;
+             }
              hypre_StructMapCoarseToFine(hypre_BoxIMax(ownbox), temp_index1,
                                     refine_factors, hypre_BoxIMax(&refined_box));
              hypre_IntersectBoxes(fbox, &refined_box, &intersect_box);
@@ -1236,7 +1241,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
              *-----------------------------------------------------------------*/
              hypre_CopyIndex(hypre_BoxIMin(&intersect_box), start);
              hypre_CopyIndex(hypre_BoxIMax(&intersect_box), intersect_size);
-             for (i= 0; i< ndim; i++)
+             for (i= 0; i< 3; i++)
              {
                 intersect_size[i]-= (start[i]-1);
              }
