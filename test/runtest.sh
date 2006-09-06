@@ -25,14 +25,15 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-# globals
+# global variables
 BatchMode=0
 NoRun=0
-JobCheckInterval=10      # sleep time between jobs finished check
+JobCheckInterval=10        #sleep time between jobs finished check
 InputString=""
 RunString=""
-ExecFileNames=""         #string of executable file names used
-TestDirNames=""          #string of names of TEST_* directories used
+ExecFileNames=""           #string of executable file names used
+TestDirNames=""            #string of names of TEST_* directories used
+HOST=`hostname|cut -c1-4`  #first 4 characters of host platform name
 
 function usage
 {
@@ -43,7 +44,7 @@ function usage
    printf "        {test_name} is a user defined name for the test script\n"
    printf "\n"
    printf "        -help          prints this usage information and exits\n"
-   printf "        -norun         turn off execute, echo mode\n"
+   printf "        -norun         turn off execute mode, echo what would be run\n"
    printf "        -trace         echo each command\n"
    printf "\n"
    printf " This is the hypre test driver script.  It is run stand-alone\n"
@@ -61,57 +62,59 @@ function usage
    printf "\n"
    printf " NOTE: This script knows about most of the ASC machines\n"
    printf " and will automatically use the Livermore Computing Resource\n" 
-   printf " Management (LCRM) batch system if required.\n"
+   printf " Management (LCRM) batch system as needed.\n"
    printf "\n"
    printf " Example usage: ./runtest.sh -t TEST_sstruct/*.sh\n"
    printf "\n"
 }
 
-# generate default mpirun or psub command based on the first 4 characters of
-# the platform hostname
-
+# generate default command based on the first 4 characters of the platform name
 function MpirunString
 {
-   HOST=`hostname|cut -c1-4`
-   POE_NUM_PROCS=1
-   POE_NUM_NODES=1
-   CPUS_PER_NODE=1
    case $HOST in
-      gps*) MPIRUN=`type mpirun|sed -e 's/^.* //'`
-         RunString="$MPIRUN $*"
+      alc*) shift
+         RunString="srun -p pdebug -n$*"
          ;;
-      uv*) CPUS_PER_NODE=8
+      mcr*) shift
+         RunString="srun -p pdebug -n$*"
+         ;;
+      peng*) shift
+         RunString="srun -p pdebug -n$*"
+         ;;
+      thun*) shift
+         RunString="srun -p pdebug -n$*"
+         ;;
+      vert*) shift
+         RunString="srun -p pdebug -n$*"
+         ;;
+      *bgl*) shift
+         BatchMode=1
+         MY_NUM_TASKS=$1  
+         MY_EXECUTE_DIR=`pwd`
+         MY_EXECUTE_JOB=`pwd`/$EXECFILE
+         shift
+         shift
+         MY_ARGS="$*"
+         RunString="mpirun -verbose 1 -np $MY_NUM_TASKS -exe $MY_EXECUTE_JOB"
+         RunString="${RunString} -cwd $MY_EXECUTE_DIR -args \" $MY_ARGS \" "
+         ;;
+      up*) CPUS_PER_NODE=8
          POE_NUM_PROCS=$2
          POE_NUM_NODES=`expr $POE_NUM_PROCS + $CPUS_PER_NODE - 1`
          POE_NUM_NODES=`expr $POE_NUM_NODES / $CPUS_PER_NODE`
          shift
          shift
-         RunString="poe $* -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
+         MY_ARGS="$*"
+         RunString="poe $EXECFILE -rmpool pdebug -procs $POE_NUM_PROCS"
+         RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          ;;
-      peng*) shift
-         RunString="srun -n$*"
-         ;;
-      alc*) shift
-         RunString="srun -n$*"
-         ;;
-      mcr*) shift
-         RunString="srun -n$*"
-         ;;
-      ilx*) MPIRUN=`type mpirun|sed -e 's/^.* //'`
-         RunString="$MPIRUN $*"
-         ;;
-      tux*) MACHINES_FILE="hostname"
+      tux*) BatchMode=0
+         MACHINES_FILE="hostname"
          if [ ! -f $MACHINES_FILE ] ; then
             hostname > $MACHINES_FILE
          fi
          MPIRUN=`type mpirun|sed -e 's/^.* //'`
          RunString="$MPIRUN -machinefile $MACHINES_FILE $*"
-         ;;
-      vivi*) MPIRUN=`type mpirun|sed -e 's/^.* //'`
-         RunString="$MPIRUN $*"
-         ;;
-      ript*) MPIRUN=`type mpirun|sed -e 's/^.* //'`
-         RunString="$MPIRUN $*"
          ;;
       *) MPIRUN=`type mpirun|sed -e 's/^.* //'`
          RunString="$MPIRUN $*"
@@ -119,70 +122,28 @@ function MpirunString
    esac
 }
 
-# determine if host can process psub (batch queues)
-
-function CheckBatch
-{
-   BATCH_MODE=0
-   HOST=`hostname|cut -c1-4`
-   case $HOST in
-      gps*) BATCH_MODE=1
-         ;;
-      uv*) BATCH_MODE=1
-         ;;
-      peng*) BATCH_MODE=1
-         ;;
-      alc*) BATCH_MODE=1
-         ;;
-      mcr*) BATCH_MODE=1
-         ;;
-      ilx*) BATCH_MODE=1
-         ;;
-      *) BATCH_MODE=0
-         ;;
-   esac
-   return $BATCH_MODE
-}
-
-# determine if host can process script file directly
-
-function CheckSimpleRun
-{
-   BATCH_MODE=0
-   HOST=`hostname|cut -c1-4`
-   case $HOST in
-      vivi*) BATCH_MODE=1
-         ;;
-      ript*) BATCH_MODE=1
-         ;;
-      *) BATCH_MODE=0
-         ;;
-   esac
-   return $BATCH_MODE
-}
-
 # determine the "number of nodes" desired by dividing the "number of processes"
 # by the "number of CPU's per node" which can't be determined dynamically (real
 # ugly hack)
-
 function CalcNodes
 {
    NUM_PROCS=1
    NUM_NODES=1
    CPUS_PER_NODE=1
-   HOST=`hostname|cut -c1-4`
    case $HOST in
-      gps*) CPUS_PER_NODE=4
-         ;;
-      uv*) CPUS_PER_NODE=8
-         ;;
-      peng*) CPUS_PER_NODE=2
-         ;;
       alc*) CPUS_PER_NODE=2
          ;;
       mcr*) CPUS_PER_NODE=2
          ;;
-      ilx*) CPUS_PER_NODE=2
+      peng*) CPUS_PER_NODE=2
+         ;;
+      thun*) CPUS_PER_NODE=4
+         ;;
+      *bgl*) CPUS_PER_NODE=2
+         ;;
+      up*) CPUS_PER_NODE=8
+         ;;
+      vert*) CPUS_PER_NODE=2
          ;;
       *) CPUS_PER_NODE=1
          ;;
@@ -203,8 +164,7 @@ function CalcNodes
    return 1
 }
 
-# extract the "number of processes|task"
-
+# extract the "number of processes/task"
 function CalcProcs
 {
    while [ "$1" ]
@@ -219,9 +179,32 @@ function CalcProcs
    return 1
 }
 
+# determine if HOST machine can process batch queues
+function CheckBatch
+{
+   case $HOST in
+      alc*) BATCH_MODE=1
+         ;;
+      mcr*) BATCH_MODE=1
+         ;;
+      peng*) BATCH_MODE=1
+         ;;
+      thun*) BATCH_MODE=1
+         ;;
+      *bgl*) BATCH_MODE=1
+         ;;
+      up*) BATCH_MODE=1
+         ;;
+      vert*) BATCH_MODE=1
+         ;;
+      *) BATCH_MODE=0
+         ;;
+   esac
+   return $BATCH_MODE
+}
+
 # check the path to the executable if the executable exists; save the name to
 # ExecFileNames
-
 function CheckPath
 {
    while [ "$1" ]
@@ -245,44 +228,31 @@ function CheckPath
    return 1
 }
 
-function ExecuteScripts
-{
-   StartDir=$1
-   WorkingDir=$2
-   InputFile=$3
-   SavePWD=`pwd`
-   cd $WorkingDir
-   ./$InputFile.jobs > $InputFile.err 2>&1 
-   ./$InputFile.sh  >> $InputFile.err 2>&1
-   cd $SavePWD
-}
-
 # initialize the common part of the " PsubCmd" string, ugly global vars!
 # global "RunName" is assumed to be predefined
-
+#
+# on ubgl, as of 8/2006, only allowable number of nodes are 32, 128 and 
+# multiples of 512
 function PsubCmdStub
 {
    CalcNodes "$@"
    NumNodes=$?
    CalcProcs "$@"
    NumProcs=$?
-   HOST=`hostname|cut -c1-4`
    case $HOST in
-      gps*) PsubCmd="psub -c gps320 -b casc -r $RunName -cpn $NumProcs"
-         ;;
-      uv*) PsubCmd="psub -c uv,pbatch -b a_casc -nettype css0 -r $RunName"
-         PsubCmd="$PsubCmd -ln $NumNodes -g $NumProcs"
-         ;;
-      peng*) PsubCmd="psub -c pengra,pbatch -b casc -r $RunName -ln $NumProcs"
-         PsubCmd="$PsubCmd -standby"
-         ;;
       alc*) PsubCmd="psub -c alc,pbatch -b casc -r $RunName -ln $NumProcs"
-         PsubCmd="$PsubCmd -standby"
          ;;
       mcr*) PsubCmd="psub -c mcr,pbatch -b casc -r $RunName -ln $NumProcs"
-         PsubCmd="$PsubCmd -standby"
          ;;
-      ilx*) PsubCmd="psub -c ilx -b casc -r $RunName -cpn $NumProcs"
+      peng*) PsubCmd="psub -c pengra,pbatch -b casc -r $RunName -ln $NumProcs"
+         ;;
+      thun*) PsubCmd="psub -c thunder,pbatch -b casc -r $RunName -ln $NumNodes -g $NumProcs"
+         ;;
+      ubgl*) PsubCmd="psub -c ubgl -pool pbatch -b science -r $RunName -ln 32"
+         ;;
+      up*) PsubCmd="psub -b casc -r $RunName -ln $NumProcs"
+         ;;
+      vert*) PsubCmd="psub -c vertex,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       *) PsubCmd="psub -b casc -r $RunName -ln $NumProcs"
          ;;
@@ -290,7 +260,6 @@ function PsubCmdStub
 }
 
 # read job file line by line saving arguments
-
 function ExecuteJobs
 {
    StartDir=$1
@@ -301,9 +270,11 @@ function ExecuteJobs
    BatchCount=0              # different numbering for #Batch option
    PrevPid=0
    SavePWD=`pwd`
+##
+##     move to specified directory
    cd $WorkingDir
 
-   # open *.jobs files for reading
+##     open *.jobs files for reading
    while read InputLine
    do
       case $InputLine in
@@ -320,7 +291,7 @@ function ExecuteJobs
             PrevPid=`echo $CmdReply | cut -d \  -f 2`
             while [ "`pstat | grep $PrevPid`" ]
             do
-               sleep $JobCheckInterval      # global, see runtest.sh
+               sleep $JobCheckInterval
             done
             BatchFile=""
             ;;
@@ -342,8 +313,11 @@ EOF
                break
             fi
             MpirunString $RunCmd            # construct "RunString"
+            case $HOST in
+               *bgl*) RunString="${RunString} > `pwd`/$OutFile 2>`pwd`/$ErrFile"
+            esac
             if [ "$BatchMode" -eq 0 ] ; then
-               sh ${RunString} > $OutFile 2> $ErrFile </dev/null
+               ${RunString} > $OutFile 2> $ErrFile </dev/null
             else
                if [ "$BatchFlag" -eq 0 ] ; then
                   BatchFile=`echo $OutFile | sed -e 's/\.out\./.batch./'`
@@ -354,14 +328,18 @@ ${RunString}
 EOF
                   chmod +x $BatchFile
                   PsubCmdStub ${RunCmd}
-                  PsubCmd="$PsubCmd -o $OutFile -e $ErrFile `pwd`/$BatchFile"
+                  case $HOST in
+                     *bgl*) PsubCmd="$PsubCmd `pwd`/$BatchFile"
+                            ;;
+                         *) PsubCmd="$PsubCmd -o $OutFile -e $ErrFile `pwd`/$BatchFile"
+                            ;;
+                  esac
                   if [ "$NoRun" -eq 0 ] ; then
                      CmdReply=`$PsubCmd`
                   fi
                   PrevPid=`echo $CmdReply | cut -d \  -f 2`
                   while [ "`pstat | grep $PrevPid`" ]
                   do
-                     # JobCheckInterval is a global variable
                      sleep $JobCheckInterval
                   done
                else                          # BatchFlag set
@@ -400,6 +378,7 @@ EOF
    return $ReturnFlag
 }
 
+#   compare output files as defined in *.sh files
 function ExecuteTest
 {
    StartDir=$1
@@ -412,6 +391,7 @@ function ExecuteTest
    cd $SavePWD
 }
 
+#  report errors from PURIFY and/or INSURE if run 
 function PostProcess
 {
    StartDir=$1
@@ -432,7 +412,6 @@ function PostProcess
 }
 
 # removes executable and hostname files from all TEST_* directories
-
 function CleanUp
 {
    if [ "$BatchMode" -eq 0 ] ; then
@@ -455,21 +434,15 @@ function CleanUp
 }
 
 # process files
-
 function StartCrunch
 {
-   CheckSimpleRun                # check if host can just execute scripts
+   CheckBatch
+   BatchMode=$?
+   ExecuteJobs "$@"
    RtnCode=$?
-   if [ "$RtnCode" -ne 0 ] ; then
-      ExecuteScripts "$@"
+   if [ "$RtnCode" -eq 0 ] ; then
+      ExecuteTest "$@"
       RtnCode=$?
-   else
-      ExecuteJobs "$@"
-      RtnCode=$?
-      if [ "$RtnCode" -eq 0 ] ; then
-         ExecuteTest "$@"
-         RtnCode=$?
-      fi
    fi
    if [ "$RtnCode" -eq 0 ] ; then
       PostProcess "$@"
@@ -477,7 +450,6 @@ function StartCrunch
 }
 
 # main
-
 while [ "$*" ]
 do
    case $1 in
@@ -515,12 +487,7 @@ do
                      cd $CurDir
                      ;;
                esac
-               if [ "$BatchMode" -eq 0 ] ; then      # machine DCSP capable
-                  CheckBatch
-                  BatchMode=$?
-               fi
                if [ -r $DirPart/$FilePart.jobs ] ; then
-                  # strict serial execution
                   StartCrunch $CurDir $DirPart $FilePart
                else
                   printf "%s: test command file %s/%s.jobs does not exist\n" \

@@ -14,6 +14,7 @@ DIR="\
  sles_9_ppc64\
  chaos_3_ia64_elan4\
  chaos_3_x86\
+ chaos_3_x86_64_ib\
  chaos_3_x86_elan3"
 # 
 ## Verify that there is an argument given on the command line
