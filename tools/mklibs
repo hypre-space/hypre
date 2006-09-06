@@ -178,7 +178,7 @@ then
         HYPRE_INSTALL_DIR=$DIST_DIR
         export HYPRE_INSTALL_DIR
         cd src
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
@@ -189,7 +189,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --enable-debug --prefix=$HYPRE_INSTALL_DIR
         $MAKE install
         $MAKE distclean
@@ -205,7 +205,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --without-MPI --with-COMM_SIMPLE --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
@@ -216,7 +216,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
@@ -236,7 +236,7 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --with-openmp --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
@@ -247,12 +247,39 @@ then
 	mkdir -p $HYPRE_INSTALL_DIR
         
         cd src
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --with-openmp --enable-debug --prefix=$HYPRE_INSTALL_DIR 
         $MAKE install
         $MAKE distclean
     )
   fi
+fi
+
+# shared library version. (Do this only once)
+if [ ! -d shared/lib ]
+then
+   (
+      HYPRE_INSTALL_DIR=$DIST_DIR/shared
+      export HYPRE_INSTALL_DIR
+      mkdir -p $HYPRE_INSTALL_DIR
+        
+      cd src
+      rm -f config.log config.status
+      $CONFIGURE --enable-shared --prefix=$HYPRE_INSTALL_DIR 
+      $MAKE install
+      $MAKE distclean
+   )
+   (
+      HYPRE_INSTALL_DIR=$DIST_DIR/shared/debug
+      export HYPRE_INSTALL_DIR
+      mkdir -p $HYPRE_INSTALL_DIR
+        
+      cd src
+      rm -f config.log config.status
+      $CONFIGURE --enable-shared --enable-debug --prefix=$HYPRE_INSTALL_DIR 
+      $MAKE install
+      $MAKE distclean
+   )
 fi
 
 if [ "$3" = "install" ]

@@ -184,9 +184,8 @@ then
         HYPRE_INSTALL_DIR=$DIST_DIR
         export HYPRE_INSTALL_DIR
         cd src
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE\
-          CC=mpcc CXX=mpCC F77=mpxlf\
           CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           F77FLAGS="-q32 -O3 -qstrict"\
@@ -198,9 +197,8 @@ then
         done
         cd $DIST_DIR/src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE \
-          CC=mpcc CXX=mpCC F77=mpxlf\
           CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
           F77FLAGS="-q64 -O3 -qstrict"\
@@ -229,9 +227,8 @@ then
         
         cd src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --enable-debug\
-          CC=mpcc CXX=mpCC F77=mpxlf\
           CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           F77FLAGS="-q32 -g"\
@@ -243,9 +240,8 @@ then
         done
         cd $DIST_DIR/src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --enable-debug\
-          CC=mpcc CXX=mpCC F77=mpxlf\
           CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
           F77FLAGS="-q64 -g"\
@@ -279,7 +275,7 @@ then
         
         cd src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --without-MPI --with-COMM_SIMPLE\
           CC=xlc CXX=xlC F77=xlf\
           CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
@@ -293,7 +289,7 @@ then
         done
         cd $DIST_DIR/src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --without-MPI --with-COMM_SIMPLE\
           CC=xlc CXX=xlC F77=xlf\
           CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
@@ -324,7 +320,7 @@ then
         
         cd src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug\
           CC=xlc CXX=xlC F77=xlf\
           CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
@@ -338,7 +334,7 @@ then
         done
         cd $DIST_DIR/src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --without-MPI --with-COMM_SIMPLE --enable-debug\
           CC=xlc CXX=xlC F77=xlf\
           CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
@@ -378,7 +374,7 @@ then
         
         cd src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --with-openmp\
           CC=mpguidec CXX=mpguidec++ F77=mpguidef77\
           CFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
@@ -392,7 +388,7 @@ then
         done
         cd $DIST_DIR/src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --with-openmp\
           CC=mpguidec CXX=mpguidec++ F77=mpguidef77\
           CFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
@@ -423,7 +419,7 @@ then
         
         cd src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --with-openmp --enable-debug\
           CC=mpguidec CXX=mpguidec++ F77=mpguidef77\
           CFLAGS="-q32 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
@@ -437,7 +433,7 @@ then
         done
         cd $DIST_DIR/src
         $MAKE distclean
-        rm -f config.cache
+        rm -f config.log config.status
         $CONFIGURE --with-openmp --enable-debug\
           CC=mpguidec CXX=mpguidec++ F77=mpguidef77\
           CFLAGS="-q64 -qsmp=omp -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
@@ -464,6 +460,94 @@ then
         $MAKE distclean
     )
   fi
+fi
+
+# shared library version. (Do this only once)
+if [ ! -d shared/lib ]
+then
+    (
+        HYPRE_INSTALL_DIR=$DIST_DIR/shared
+        export HYPRE_INSTALL_DIR
+        cd src
+        rm -f config.log config.status
+        $CONFIGURE --enable-shared\
+          CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          F77FLAGS="-q32 -O3 -qstrict"\
+          LDFLAGS="-q32" AR="ar -X32 -rcu" --prefix=$HYPRE_INSTALL_DIR
+        $MAKE install
+        cd $HYPRE_INSTALL_DIR/lib
+        for i in *.a;do
+          mv $i ${i}_32
+        done
+        cd $DIST_DIR/src
+        $MAKE distclean
+        rm -f config.log config.status
+        $CONFIGURE --enable-shared\
+          CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict"\
+          F77FLAGS="-q64 -O3 -qstrict"\
+          LDFLAGS="-q64" AR="ar -X64 -rcu" --prefix=$HYPRE_INSTALL_DIR
+        $MAKE install
+        cd $HYPRE_INSTALL_DIR/lib
+        for i in *.a;do
+          mv $i ${i}_64
+        done
+        for i in *.a_32; do
+          mkdir 32 64
+          cd 32
+          ar -X32 -x ../${i}
+          cd ../64
+          ar -X64 -x ../${i%%_32}_64
+          cd ..
+          ar -X32_64 -q ${i%%_32} 32/*.o 64/*.o
+          rm -Rf 32 64
+        done 
+        rm -f *.a_32 *.a_64
+    )
+    (
+        HYPRE_INSTALL_DIR=$DIST_DIR/shared/debug
+        export HYPRE_INSTALL_DIR
+	mkdir -p $HYPRE_INSTALL_DIR
+        
+        cd src
+        $MAKE distclean
+        rm -f config.log config.status
+        $CONFIGURE --enable-shared --enable-debug\
+          CFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          CXXFLAGS="-q32 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          F77FLAGS="-q32 -g"\
+          LDFLAGS="-q32" AR="ar -X32 -rcu" --prefix=$HYPRE_INSTALL_DIR
+        $MAKE install
+        cd $HYPRE_INSTALL_DIR/lib
+        for i in *.a;do
+          mv $i ${i}_32
+        done
+        cd $DIST_DIR/src
+        $MAKE distclean
+        rm -f config.log config.status
+        $CONFIGURE --enable-shared --enable-debug\
+          CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -g"\
+          F77FLAGS="-q64 -g"\
+          LDFLAGS="-q64" AR="ar -X64 -rcu" --prefix=$HYPRE_INSTALL_DIR
+        $MAKE install
+        cd $HYPRE_INSTALL_DIR/lib
+        for i in *.a;do
+          mv $i ${i}_64
+        done
+        for i in *.a_32; do
+          mkdir 32 64
+          cd 32
+          ar -X32 -x ../${i}
+          cd ../64
+          ar -X64 -x ../${i%%_32}_64
+          cd ..
+          ar -X32_64 -q ${i%%_32} 32/*.o 64/*.o
+          rm -Rf 32 64
+        done 
+        rm -f *.a_32 *.a_64
+    )
 fi
 
 if [ "$3" = "install" ]
