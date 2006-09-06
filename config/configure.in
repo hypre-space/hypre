@@ -759,7 +759,7 @@ then
       AC_CHECK_PROGS(CC, [mpguidec guidec icc xlc pgcc cc], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, [gcc icc xlc pgcc cc kcc], [""])
+      AC_CHECK_PROGS(CC, [xlc pgcc gcc icc cc kcc], [""])
    else
       AC_CHECK_PROGS(CC, [mpxlc mpcc mpicc mpiicc mpipgcc], [""])
    fi
@@ -777,7 +777,7 @@ then
       AC_CHECK_PROGS(CXX, [mpguidec++ guidec++ icc xlC pgCC CC], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CXX, [g++ gcc icpc icc xlC cxx pgCC KCC], [""])
+      AC_CHECK_PROGS(CXX, [xlC icpc icc pgCC g++ gcc cxx KCC], [""])
    else
       AC_CHECK_PROGS(CXX, [mpxlC mpCC mpicxx mpiCC mpiicc mpipgCC], [""])
    fi
@@ -795,7 +795,7 @@ then
       AC_CHECK_PROGS(F77, [mpguidef77 guidef77 ifort xlf pg77 f77], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(F77, [g77 ifort xlf pgf77 f77 kf77], [""])
+      AC_CHECK_PROGS(F77, [xlf ifort g77 pgf77 f77 kf77], [""])
    else
       AC_CHECK_PROGS(F77, [mpxlf mpf77 mpif77 mpiifort mpipgf77], [""])
    fi
