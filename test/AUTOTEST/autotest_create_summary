@@ -100,25 +100,23 @@ apply_error_filters ()
   if [ -s "${ErrorFile}" ] ; then
     HOST=`hostname`
     case $HOST in
-      uv*)
+      up*)
         for ii in \
           '===\ End\ of\ Compilation'\
-          'Compilation\ successful'\
           'cpu\ clock'\
           'wall\ clock'\
+          'Compilation\ successful'\
           '^\ Guide\ \ \ '\
           ':\ 0\ errors\ in\ file'\
-          '1500-030:\ \(I\)\ INFORMATION:'\
-          '1500-010:\ \(W\)\ WARNING\ in'\
-          ':\ 1506-068\ \(W\)\ Operation\ between\ types'\
-          '^No\ begin\ line'\
+          '1501-050:\ \(I\)'\
+          '1500-010:\ \(W\)'\
           'autoconf\ has\ been\ disabled'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           'configure:\ WARNING:\ '
         do process_filter $ErrorFile "${ii}"
         done
         ;;
-      peng*)
+      alc* | mcr* | peng*)
         for ii in \
           '[A-Za-z0-9_]*\.[cCf]$'\
           '[A-Za-z0-9_]*\.cxx$'\
@@ -126,25 +124,27 @@ apply_error_filters ()
           '^[0-9]*\ Lines\ Compiled$'\
           'cpu\ clock'\
           'wall\ clock'\
-          'external\ (subroutine|function)'\
-          'EXTERNAL\ (SUBROUTINE|FUNCTION)'\
-          'remark:\ LOOP\ WAS\ VECTORIZED'\
-          '^icc:\ Command\ line\ warning:\ overriding'\
+          'queued'\
+          'allocated'\
           '\ remark:\ '
         do process_filter $ErrorFile "${ii}"
         done
-      ;;
-      gps*)
+        ;;
+      *bgl*)
         for ii in \
-          '^No\ suffix\ list'\
-          '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
-          'WARNING:\ \ guidef77\ has\ implied\ '\
-          'cpu\ clock'\
-          'wall\ clock'\
-          '^cc:\ Info:\ '
+          'readonly\ variable'\
+          'BE_MPI'\
+          'FE_MPI\ '
         do process_filter $ErrorFile "${ii}"
         done
-      ;;
+        ;;
+      thun*)
+        for ii in \
+          'queued'\
+          'allocated'
+        do process_filter $ErrorFile "${ii}"
+        done
+        ;;
       tux*)
         for ii in \
           'autoconf\ has\ been\ disabled'\
@@ -171,15 +171,7 @@ apply_error_filters ()
           'sed:\ Couldn.t\ close\ '
         do process_filter $ErrorFile "${ii}"
         done
-      ;;
-      vivid*)
-        for ii in \
-          'cpu\ clock'\
-          'wall\ clock'\
-          'xauth:\ \ error\ in\ locking\ authority\ file\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
+        ;;
     esac
   fi
 }
@@ -216,14 +208,20 @@ search_error_files()
 get_hypre_test_name()
 {
    case ${remote_dir} in
-      *tru64_5*)
-         hypre_test_name="SECONDARY[GPS/OpenMP-GPS]"
-         ;;
-      *chaos_3_x86/AUTOTEST)
-         hypre_test_name="SECONDARY[ILX]"
+      *aix_5_64_fed/AUTOTEST)
+         hypre_test_name="SECONDARY[uP]"
          ;;
       *chaos_3_x86_elan3/AUTOTEST)
-         hypre_test_name="SECONDARY[MCR/Pengra]"
+         hypre_test_name="SECONDARY[ALC/MCR/Pengra]"
+         ;;
+      *chaos_3_x86_elan4/AUTOTEST)
+         hypre_test_name="SECONDARY[Thunder]"
+         ;;
+      *chaos_3_x86_64_ib/AUTOTEST)
+         hypre_test_name="SECONDARY[vertex]"
+         ;;
+      *sles_9_ppc64/AUTOTEST)
+         hypre_test_name="SECONDARY[ubgl]"
          ;;
       *i686-pc-linux-gnu/AUTOTEST)
          hypre_test_name="PRIMARY[default]"
@@ -273,9 +271,11 @@ HYPRE_SUMMARY_DIR="/usr/casc/hypre/AUTOTEST"
  
 HYPRE_DEFAULT_REMOTE_DIRS="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-insure/AUTOTEST\
+                           /usr/casc/hypre/aix_5_64_fed/AUTOTEST\
                            /usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST\
-                           /usr/casc/hypre/chaos_3_x86/AUTOTEST\
-                           /usr/casc/hypre/tru64_5/AUTOTEST\
+                           /usr/casc/hypre/chaos_3_x86_elan4/AUTOTEST\
+                           /usr/casc/hypre/chaos_3_x86_64_ib/AUTOTEST\
+                           /usr/gapps/hypre/sles_9_ppc64/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-kai/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"

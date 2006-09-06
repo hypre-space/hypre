@@ -78,7 +78,7 @@ perform_test()
     echo "Begin running remote tests...."
     ssh -f ${HYPRE_COMPILE_MACHINE} "\
     (/bin/sh -c \"\
-      cd ${HYPRE_REMOTE_DIR##*:};\
+      cd ${HYPRE_REMOTE_DIR};\
       echo "Autotest Started" > "autotest_start";\
       [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
@@ -106,30 +106,31 @@ help () {
   printf "determines which systems autotest_test is to be executed on, and the\n"
   printf "options to use.\n"
   printf "\n"
-  printf "%s\n" "-nocvs    Do not checkout the latest source code from CVS.\n"
-  printf "                 Use the existing ./linear_solvers/ directory for\n"
+  printf "%s\n" "-nocvs    Do not checkout the latest source code from CVS."
+  printf "                 Use the existing ./linear_solvers directory for\n"
   printf "                 testing.\n"
-  printf "%s\n" "-rev Rev# Check out the specified revision or tagged source\n" 
-  printf "%s\n" "          from CVS.\n" 
-  printf "%s\n" "-help     Print this information and exit.\n" 
-  printf "%s\n" "-debug    Turn on debug mode.\n" 
+  printf "%s\n" "-rev Rev# Check out the specified revision or tagged source" 
+  printf "%s\n" "          from CVS." 
+  printf "%s\n" "-help     Print this information and exit."
+  printf "%s\n" "-debug    Turn on debug mode."
   printf "\n"
   printf "HostOptions      Host ID or configuration on which autotest_test is to be run.\n"
   printf "                 Valid host IDs are:\n"
-  printf "%s\n" "     -gps       Compaq gps320 system."
-  printf "%s\n" "     -gpsmp     Compaq gps320 system executing OpenMP."
-  printf "%s\n" "     -ilx       Intel running Linux."
-  printf "%s\n" "     -insure    CASC Linux, executing insure++."
-  printf "%s\n" "     -mcr       Intel Linux, CHAOS."
-  printf "%s\n" "     -pengra    Intel Linux, CHAOS."
-  printf "%s\n" "     -red       ASCI Red"
-  printf "%s\n" "     -tux149    CASC running RedHat Enterprise Linux."
-  printf "%s\n" "     -tuxgcc    CASC running latest gcc compilers"
-  printf "%s\n" "     -tuxpgi    CASC running latest PGI compilers"
-  printf "%s\n" "     -tuxabsoft CASC running Absoft-Pro8.0 Fortran 90"
-  printf "%s\n" "     -tuxlahey  CASC running Lahey Fortran compiler"
-  printf "%s\n" "     -tuxintel  CASC running latest Intel compilers"
-  printf "%s\n" "     -tuxkai    CASC running latest KAI KCC compiler"
+  printf "%s\n" "     -alc       LC - CHAOS."
+  printf "%s\n" "     -mcr       LC - CHAOS."
+  printf "%s\n" "     -pengra    LC - CHAOS."
+  printf "%s\n" "     -thunder   LC - CHAOS."
+  printf "%s\n" "     -ubgl      LC - SLES."
+  printf "%s\n" "     -up        LC - AIX."
+  printf "%s\n" "     -vertex    LC - Opteron."
+  printf "%s\n" "     -tux149    CASC - Linux."
+  printf "%s\n" "     -insure    CASC - Linux, executing insure++."
+  printf "%s\n" "     -tuxgcc    CASC - gcc compilers"
+  printf "%s\n" "     -tuxpgi    CASC - PGI compilers"
+  printf "%s\n" "     -tuxabsoft CASC - Absoft-Pro8.0 Fortran 90"
+  printf "%s\n" "     -tuxlahey  CASC - Lahey Fortran compiler"
+  printf "%s\n" "     -tuxintel  CASC - Intel compilers"
+  printf "%s\n" "     -tuxkai    CASC - KAI KCC compiler"
   printf "\n"
 }
 
@@ -146,37 +147,13 @@ usage ()
 hypre_set_machine_options()
 {
   case $1 in
-     -gps)
-        HYPRE_ARCH="dec"
-        HYPRE_COMPILE_MACHINE="gps"
-        HYPRE_RUN_MACHINE="gps320"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/tru64_5/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -Bcf"
-        HYPRE_MESSAGE='SECONDARY[GPS]'
-        ;;
-     -gpsmp)
-        HYPRE_ARCH="dec"
-        HYPRE_COMPILE_MACHINE="gps"
-        HYPRE_RUN_MACHINE="gps320"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/tru64_5/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 1 -cfo 2"
-        HYPRE_MESSAGE='SECONDARY[OpenMP-GPS]'
-        ;;
-     -ilx)
+     -alc)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="ilx"
-        HYPRE_RUN_MACHINE="ilx"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ne 1 -a 2 -cf"
-        HYPRE_MESSAGE='SECONDARY[ILX]'
-        ;;
-     -insure)
-        HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-insure/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -i 2"
-        HYPRE_MESSAGE='PRIMARY[insure++]'
+        HYPRE_COMPILE_MACHINE="alc"
+        HYPRE_RUN_MACHINE="alc"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ne 1 -a 2 -l 2 -cf"
+        HYPRE_MESSAGE='SECONDARY[ALC]'
         ;;
      -mcr)
         HYPRE_ARCH="linux"
@@ -194,20 +171,52 @@ hypre_set_machine_options()
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Pengra]'
         ;;
-     -red)
-        HYPRE_ARCH="red"
-        HYPRE_COMPILE_MACHINE="sasn100"
-        HYPRE_RUN_MACHINE="janus"
-        HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
-        HYPRE_MESSAGE='OTHER[RED]'
+     -thunder)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="thunder"
+        HYPRE_RUN_MACHINE="thunder"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_elan4/AUTOTEST"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -l 2 -cf"
+        HYPRE_MESSAGE='SECONDARY[Thunder]'
+        ;;
+     -ubgl)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="ubgl"
+        HYPRE_RUN_MACHINE="ubgl"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/sles_9_ppc64/AUTOTEST"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -l 2 -cf"
+        HYPRE_MESSAGE='SECONDARY[uBGL]'
+        ;;
+     -up)
+        HYPRE_ARCH="blue"
+        HYPRE_COMPILE_MACHINE="up"
+        HYPRE_RUN_MACHINE="up"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/aix_5_64_fed/AUTOTEST"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -l 2 -cf"
+        HYPRE_MESSAGE='SECONDARY[uP]'
+        ;;
+     -vertex)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="vertex"
+        HYPRE_RUN_MACHINE="vertex"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/chaos_3_x86_64_ib/AUTOTEST"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -l 2 -cf"
+        HYPRE_MESSAGE='SECONDARY[vertex]'
+        ;;
+     -insure)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux149"
+        HYPRE_RUN_MACHINE="tux149"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-insure/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -i 2"
+        HYPRE_MESSAGE='PRIMARY[insure++]'
         ;;
      -tux149)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nsde 1 -a 2 -ABcf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nsde 1 -a 2 -l 2 -ABcf"
         HYPRE_MESSAGE='PRIMARY[default]'
         COMPILERSELECT="default"
         ;;
@@ -261,7 +270,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="`pwd`"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ABEe 2"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -l 1 -a 2"
         HYPRE_MESSAGE='LOCAL-TEST[default]'
         COMPILERSELECT="default"
         ;;

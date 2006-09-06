@@ -41,7 +41,8 @@ initialize_variables ()
   EXAMPLES_TEST_CASES="TEST_examples/*.sh"
   TEST_DIRS="ams ij fac sstruct struct examples"
   STD_CONFIGOPTIONS="all++ all77 babel debug default docs insure no_mpi \
-                     openmp strict_checking test_alpha test_beta test_general examples"
+                     openmp shared strict_checking test_alpha test_beta \
+                     test_general examples"
   STD_MAKEOPTIONS="all configure"
   DEBUG_MODE="no"
   Build=1
@@ -80,7 +81,7 @@ initialize_variables ()
   StdTestDir=${HYPRE_REMOTE_DIR}/${SRC}/test
 
 #
-# Define architecture of current platform
+# Define architecture of current platform if not already defined
   if [ -z "$HYPRE_ARCH" ]
   then
      if [ -f "/bin/uname" ] 
@@ -113,7 +114,7 @@ initialize_variables ()
 #
 # Need the nopoe script for AIX platforms to force single task
   if [ "$HYPRE_ARCH" = "blue" ] ; then
-     CONFIGURE="./nopoe ./configure"
+     CONFIGURE="nopoe configure"
   else
      CONFIGURE="./configure"
   fi
@@ -167,7 +168,7 @@ parse_arguments ()
 usage () 
 {
   printf "Usage: %s [-ABcDdEfGhmns] [-a opt] [-b opt] [-e opt]\n" $0
-  printf "          [-i opt] [-o opt] [-r host] [-v text]\n"
+  printf "             [-i opt] [-l opt] [-o opt] [-r host] [-v text]\n"
   printf "\n"
   printf "All options are sequentially executed in left-to-right order as\n"
   printf "entered on the command line.\n"
@@ -185,12 +186,13 @@ usage ()
   printf "%s\n" "-c       C++; make all++."
   printf "%s\n" "-D       Turn on debug messages."
   printf "%s\n" "-d       Docs; make the documentation directory."
-  printf "%s\n" "-E       configure, build and run example codes.\n"
+  printf "%s\n" "-E       configure, build and run example codes."
   printf "%s\n" "-e opt   Debug; configure --enable-debug."
   printf "%s\n" "-f       F77; make all77."
   printf "%s\n" "-h       Help; display this help message."
   printf "%s\n" "-i opt   Insure++; perform configure --with-insure. Output"
   printf "                is appended to a file called insure.log.\n"
+  printf "%s\n" "-l opt   Shared libraries; configure --enable-shared."
   printf "%s\n" "-m       Mail; mail error summary to developers."
   printf "%s\n" "-n       NoMPI; configure --without-MPI."
   printf "%s\n" "-o opt   openMP; configure --with-openmp."
@@ -272,7 +274,7 @@ apply_error_filters ()
   if [ -s "${ErrorFile}" ] ; then
     HOST=`hostname`
     case $HOST in
-      uv*)
+      up*)
         for ii in \
           '===\ End\ of\ Compilation'\
           'cpu\ clock'\
@@ -280,17 +282,15 @@ apply_error_filters ()
           'Compilation\ successful'\
           '^\ Guide\ \ \ '\
           ':\ 0\ errors\ in\ file'\
-          '1500-030:\ \(I\)\ INFORMATION:'\
-          '1500-010:\ \(W\)\ WARNING\ in'\
-          ':\ 1506-068\ \(W\)\ Operation\ between\ types'\
-          '^No\ begin\ line'\
+          '1501-050:\ \(I\)'\
+          '1500-010:\ \(W\)'\
           'autoconf\ has\ been\ disabled'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           'configure:\ WARNING:\ '
         do process_filter $ErrorFile "${ii}"
         done
         ;;
-      peng*)
+      alc* | mcr* | peng*)
         for ii in \
           '[A-Za-z0-9_]*\.[cCf]$'\
           '[A-Za-z0-9_]*\.cxx$'\
@@ -298,25 +298,27 @@ apply_error_filters ()
           '^[0-9]*\ Lines\ Compiled$'\
           'cpu\ clock'\
           'wall\ clock'\
-          'external\ (subroutine|function)'\
-          'EXTERNAL\ (SUBROUTINE|FUNCTION)'\
-          'remark:\ LOOP\ WAS\ VECTORIZED'\
-          '^icc:\ Command\ line\ warning:\ overriding'\
+          'queued'\
+          'allocated'\
           '\ remark:\ '
         do process_filter $ErrorFile "${ii}"
         done
-      ;;
-      gps*)
+        ;;
+      *bgl*)
         for ii in \
-          '^No\ suffix\ list'\
-          '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
-          'WARNING:\ \ guidef77\ has\ implied\ '\
-          'cpu\ clock'\
-          'wall\ clock'\
-          '^cc:\ Info:\ '
+          'readonly\ variable'\
+          'BE_MPI'\
+          'FE_MPI'
         do process_filter $ErrorFile "${ii}"
         done
-      ;;
+        ;;
+      thun*)
+        for ii in \
+          'queued'\
+          'allocated'
+        do process_filter $ErrorFile "${ii}"
+        done
+        ;;
       tux*)
         for ii in \
           'autoconf\ has\ been\ disabled'\
@@ -343,15 +345,7 @@ apply_error_filters ()
           'sed:\ Couldn.t\ close\ '
         do process_filter $ErrorFile "${ii}"
         done
-      ;;
-      vivid*)
-        for ii in \
-          'cpu\ clock'\
-          'wall\ clock'\
-          'xauth:\ \ error\ in\ locking\ authority\ file\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
+        ;;
     esac
   fi
 }
@@ -582,12 +576,6 @@ confbuildtest ()
    then
       $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
                  2> ${Hdr}.${MessageStr}.configure.err
-   elif [ "$ConfigOpt" = "--with-babel" ]          ## need to disable Fortran90
-   then                                               ## ONLY when building Babel
-      ExtraConfigOpt="--disable-fortran90"
-      $CONFIGURE "$ConfigOpt" "$ExtraConfigOpt"  \
-                              1> ${Hdr}.${MessageStr}.configure.log \
-	                      2> ${Hdr}.${MessageStr}.configure.err
    else
       $CONFIGURE "$ConfigOpt" 1> ${Hdr}.${MessageStr}.configure.log \
                               2> ${Hdr}.${MessageStr}.configure.err
@@ -621,7 +609,7 @@ confbuildtest ()
 
       if [ "${HYPRE_RUN_MACHINE}" = "" -o "${HYPRE_RUN_MACHINE}" = " " ]
       then
-         HYPRE_RUN_MACHINE=$HOSTNAME
+         HYPRE_RUN_MACHINE=`hostname|cut -c1-6`
       fi
 #
 #               if examples/ex1 is executable then examples codes are being 

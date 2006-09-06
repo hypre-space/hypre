@@ -1,14 +1,14 @@
-0 2 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxkai -tux149 -insure | tee autotest.cron.Sun.log
+0 2 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -alc -tuxkai -tux149 -insure | tee autotest.cron.Sun.log
 0 5 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxpgi -gps -tux149 -insure | tee autotest.cron.Mon.log
+0 1 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -thunder  -tuxpgi -tux149 -insure | tee autotest.cron.Mon.log
 0 5 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
 0 1 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -mcr -tux149 -insure | tee autotest.cron.Tue.log
 0 5 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxlahey -tux149 -insure | tee autotest.cron.Wed.log
+0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -alc -tuxintel -tux149 -insure | tee autotest.cron.Wed.log
 0 5 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -gpsmp -tuxgcc -tux149 -insure | tee autotest.cron.Thu.log
+0 1 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -pengra -tuxgcc -tux149 -insure | tee autotest.cron.Thu.log
 0 5 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxintel -tux149 -insure | tee autotest.cron.Fri.log
+0 1 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -up -tuxlahey -tux149 -insure | tee autotest.cron.Fri.log
 0 5 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -pengra -ilx -tuxabsoft -tux149 | tee autotest.cron.Sat.log
+0 1 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -ubgl -tuxabsoft -tux149 | tee autotest.cron.Sat.log
 0 5 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
