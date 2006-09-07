@@ -253,6 +253,9 @@ impl_bHYPRE_PCG_Create(
    bHYPRE_IdentitySolver Id  = bHYPRE_IdentitySolver_Create( mpi_comm, _ex ); SIDL_CHECK(*_ex);
    bHYPRE_Solver IdS = bHYPRE_Solver__cast( Id, _ex ); SIDL_CHECK(*_ex);
 
+   if (data->mpicomm) {
+      bHYPRE_MPICommunicator_deleteRef( data->mpicomm, _ex ); SIDL_CHECK(*_ex);
+   }
    data->mpicomm = mpi_comm;
    if( data->matrix != (bHYPRE_Operator)NULL )
    {
@@ -263,6 +266,9 @@ impl_bHYPRE_PCG_Create(
    bHYPRE_Operator_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
 
    data->precond = IdS;
+
+   bHYPRE_IdentitySolver_deleteRef( Id, _ex ); SIDL_CHECK(*_ex);
+   /* ...Create and cast created 2 references, we're keeping only one (data->precond) */
 
    return solver;
 
@@ -1101,6 +1107,11 @@ impl_bHYPRE_PCG_Setup(
          hypre_TFree( data -> rel_norms );
       data->rel_norms = hypre_CTAlloc( double, max_iter + 1 );
    }
+
+   bHYPRE_MatrixVectorView_deleteRef( Vp, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_MatrixVectorView_deleteRef( Vs, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_MatrixVectorView_deleteRef( Vr, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
    
      hypre_babel_exception_return_error(_ex);

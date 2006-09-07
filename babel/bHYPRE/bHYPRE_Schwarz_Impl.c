@@ -825,6 +825,9 @@ impl_bHYPRE_Schwarz_Setup(
    xx = (HYPRE_ParVector) objectx;
    ierr += HYPRE_SchwarzSetup( solver, HA, bb, xx );
 
+   bHYPRE_IJParCSRVector_deleteRef( bHb, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHx, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
@@ -905,6 +908,8 @@ impl_bHYPRE_Schwarz_Apply(
 
    ierr += HYPRE_SchwarzSolve( solver, bHA, bb, xx );
 
+   bHYPRE_IJParCSRVector_deleteRef( bHb, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHx, _ex ); SIDL_CHECK(*_ex);
    return ierr;
 
    hypre_babel_exception_return_error(_ex);

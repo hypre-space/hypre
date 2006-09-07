@@ -1312,6 +1312,9 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
 
    ierr += HYPRE_ParCSRMatrixMatvec( 1.0, A, bb, 0.0, xx );
 
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
    return( ierr );
 
    hypre_babel_exception_return_error(_ex);
@@ -1381,6 +1384,9 @@ impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
    bb = (HYPRE_ParVector) object;
 
    ierr += HYPRE_ParCSRMatrixMatvecT( 1.0, A, bb, 0.0, xx );
+
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 

@@ -832,6 +832,9 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
    /* does x = y/diagA as approximation to solving Ax=y for x ... */
    ierr += HYPRE_ParCSRDiagScale( *solver, AA, bb, xx );
 
+   bHYPRE_IJParCSRVector_deleteRef( bH_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bH_x, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);

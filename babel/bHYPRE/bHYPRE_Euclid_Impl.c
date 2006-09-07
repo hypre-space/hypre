@@ -879,6 +879,9 @@ impl_bHYPRE_Euclid_Setup(
    xx = (HYPRE_ParVector) objectx;
    ierr += HYPRE_EuclidSetup( solver, bHYPREP_A, bb, xx );
 
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
@@ -959,6 +962,9 @@ impl_bHYPRE_Euclid_Apply(
    xx = (HYPRE_ParVector) objectx;
 
    ierr += HYPRE_EuclidSolve( solver, bHYPREP_A, bb, xx );
+
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 

@@ -1485,6 +1485,9 @@ impl_bHYPRE_BoomerAMG_Setup(
    xx = (HYPRE_ParVector) objectx;
    ierr += HYPRE_BoomerAMGSetup( solver, bHYPREP_A, bb, xx );
 
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
@@ -1564,6 +1567,9 @@ impl_bHYPRE_BoomerAMG_Apply(
    xx = (HYPRE_ParVector) objectx;
 
    ierr += HYPRE_BoomerAMGSolve( solver, bHYPREP_A, bb, xx );
+
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 
@@ -1645,6 +1651,8 @@ impl_bHYPRE_BoomerAMG_ApplyAdjoint(
 
    ierr += HYPRE_BoomerAMGSolveT( solver, bHYPREP_A, bb, xx );
 
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
    return ierr;
 
    hypre_babel_exception_return_error(_ex);

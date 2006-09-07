@@ -719,6 +719,8 @@ impl_bHYPRE_IJParCSRVector_Copy(
 
    ierr += HYPRE_ParVectorCopy( xx, yy );
 
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
    return( ierr );
 
    hypre_babel_exception_return_error(_ex);
@@ -790,6 +792,9 @@ impl_bHYPRE_IJParCSRVector_Clone(
    ierr += bHYPRE_IJVectorView_Initialize( bHYPRE_ij_x, _ex ); SIDL_CHECK(*_ex);
 
    *x = bHYPRE_Vector__cast( bHYPRE_ij_x, _ex ); SIDL_CHECK(*_ex);
+
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJVectorView_deleteRef( bHYPRE_ij_x, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 
@@ -884,6 +889,8 @@ impl_bHYPRE_IJParCSRVector_Dot(
 
    ierr += HYPRE_ParVectorInnerProd( xx, yy, d );
 
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
    return( ierr );
 
    hypre_babel_exception_return_error(_ex);
@@ -946,6 +953,8 @@ impl_bHYPRE_IJParCSRVector_Axpy(
 
    ierr += hypre_ParVectorAxpy( a, (hypre_ParVector *) xx,
                                 (hypre_ParVector *) yy );
+
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 

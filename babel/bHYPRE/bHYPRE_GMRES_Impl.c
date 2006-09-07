@@ -212,9 +212,13 @@ impl_bHYPRE_GMRES__dtor(
       } 
 
       if ( data -> r != (bHYPRE_Vector)NULL )
+      {
          bHYPRE_Vector_deleteRef( data->r, _ex ); SIDL_CHECK(*_ex);
+      }
       if ( data -> w != (bHYPRE_Vector)NULL )
+      {
          bHYPRE_Vector_deleteRef( data->w, _ex ); SIDL_CHECK(*_ex);
+      }
       if ( data -> p != (bHYPRE_Vector *)NULL )
       {
          for ( i=0; i<(data->k_dim + 1); ++i )
@@ -267,6 +271,9 @@ impl_bHYPRE_GMRES_Create(
    bHYPRE_IdentitySolver Id  = bHYPRE_IdentitySolver_Create( mpi_comm, _ex ); SIDL_CHECK(*_ex);
    bHYPRE_Solver IdS = bHYPRE_Solver__cast( Id, _ex ); SIDL_CHECK(*_ex);
 
+   if (data->bmpicomm) {
+      bHYPRE_MPICommunicator_deleteRef( data->bmpicomm, _ex ); SIDL_CHECK(*_ex);
+   }
    data->bmpicomm = mpi_comm;
    if( data->matrix != (bHYPRE_Operator)NULL )
    {
@@ -277,6 +284,9 @@ impl_bHYPRE_GMRES_Create(
    bHYPRE_Operator_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
 
    data->precond = IdS;
+
+   bHYPRE_IdentitySolver_deleteRef( Id, _ex ); SIDL_CHECK(*_ex);
+   /* ...Create and cast created 2 references, we're keeping only one (data->precond) */
 
    return solver;
 
@@ -1110,6 +1120,7 @@ impl_bHYPRE_GMRES_Setup(
       if ( Vp )
       {
          ierr += bHYPRE_MatrixVectorView_Assemble( Vp, _ex ); SIDL_CHECK(*_ex);
+         bHYPRE_MatrixVectorView_deleteRef( Vp, _ex ); SIDL_CHECK(*_ex);
       }
    }
    ierr += bHYPRE_Vector_Clone( b, &(data->r), _ex ); SIDL_CHECK(*_ex);
@@ -1119,12 +1130,14 @@ impl_bHYPRE_GMRES_Setup(
    if ( Vr )
    {
       ierr += bHYPRE_MatrixVectorView_Assemble( Vr, _ex ); SIDL_CHECK(*_ex);
+      bHYPRE_MatrixVectorView_deleteRef( Vr, _ex ); SIDL_CHECK(*_ex);
    }
    Vw = (bHYPRE_MatrixVectorView) bHYPRE_Vector__cast2( data->w, "bHYPRE.MatrixVectorView", _ex );
    SIDL_CHECK(*_ex);
    if ( Vw )
    {
       ierr += bHYPRE_MatrixVectorView_Assemble( Vw, _ex ); SIDL_CHECK(*_ex);
+      bHYPRE_MatrixVectorView_deleteRef( Vw, _ex ); SIDL_CHECK(*_ex);
    }
 
 

@@ -258,6 +258,9 @@ impl_bHYPRE_BiCGSTAB_Create(
    bHYPRE_IdentitySolver Id  = bHYPRE_IdentitySolver_Create( mpi_comm, _ex ); SIDL_CHECK(*_ex);
    bHYPRE_Solver IdS = bHYPRE_Solver__cast( Id, _ex ); SIDL_CHECK(*_ex);
 
+   if (data->mpicomm) {
+      bHYPRE_MPICommunicator_deleteRef( data->mpicomm, _ex ); SIDL_CHECK(*_ex);
+   }
    data->mpicomm = mpi_comm;
    if( data->matrix != (bHYPRE_Operator)NULL )
       bHYPRE_Operator_deleteRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
@@ -266,6 +269,9 @@ impl_bHYPRE_BiCGSTAB_Create(
    bHYPRE_Operator_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
 
    data->precond = IdS;
+
+   bHYPRE_IdentitySolver_deleteRef( Id, _ex ); SIDL_CHECK(*_ex);
+   /* ...Create and cast created 2 references, we're keeping only one (data->precond) */
 
    return solver;
 
@@ -1125,6 +1131,13 @@ impl_bHYPRE_BiCGSTAB_Setup(
       if ( data->log_file_name == NULL )
          data->log_file_name = "bicgstab.out.log";
    }
+
+   bHYPRE_MatrixVectorView_deleteRef( Vp, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_MatrixVectorView_deleteRef( Vq, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_MatrixVectorView_deleteRef( Vr, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_MatrixVectorView_deleteRef( Vr0, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_MatrixVectorView_deleteRef( Vs, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_MatrixVectorView_deleteRef( Vv, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 

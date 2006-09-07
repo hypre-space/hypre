@@ -908,6 +908,9 @@ impl_bHYPRE_ParaSails_Setup(
    xx = (HYPRE_ParVector) objectx;
    ierr += HYPRE_ParaSailsSetup( solver, bHYPREP_A, bb, xx );
 
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
@@ -987,6 +990,9 @@ impl_bHYPRE_ParaSails_Apply(
    xx = (HYPRE_ParVector) objectx;
 
    ierr += HYPRE_ParaSailsSolve( solver, bHYPREP_A, bb, xx );
+
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 

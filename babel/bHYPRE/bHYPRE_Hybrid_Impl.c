@@ -239,6 +239,9 @@ impl_bHYPRE_Hybrid_Create(
    bHYPRE_Hybrid solver = bHYPRE_Hybrid__create(_ex); SIDL_CHECK(*_ex);
    struct bHYPRE_Hybrid__data * data = bHYPRE_Hybrid__get_data( solver );
 
+   if (data->mpicomm) {
+      bHYPRE_MPICommunicator_deleteRef( data->mpicomm, _ex ); SIDL_CHECK(*_ex);
+   }
    data->mpicomm = mpi_comm;
    data->krylov_solver_2 = SecondSolver;
    bHYPRE_PreconditionedSolver_addRef( data->krylov_solver_2, _ex ); SIDL_CHECK(*_ex);
