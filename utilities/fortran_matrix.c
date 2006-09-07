@@ -730,7 +730,7 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] ) {
 	
   for ( j = 0, p = mtx->value; j < w; j++ ) {
     for ( i = 0; i < h; i++, p++ )
-      fprintf(fp,"%22.16e\n",*p);
+      fprintf(fp,"%.14e\n",*p);
     p += jump;
   }
 

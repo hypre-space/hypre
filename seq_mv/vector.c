@@ -223,7 +223,7 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
          fprintf(fp, "vector %d\n", j );
          for (i = 0; i < size; i++)
          {
-            fprintf(fp, "%e\n",  data[ j*vecstride + i*idxstride ] );
+            fprintf(fp, "%.14e\n",  data[ j*vecstride + i*idxstride ] );
          }
       }
    }
@@ -231,7 +231,7 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
    {
       for (i = 0; i < size; i++)
       {
-         fprintf(fp, "%e\n", data[i]);
+         fprintf(fp, "%.14e\n", data[i]);
       }
    }
 

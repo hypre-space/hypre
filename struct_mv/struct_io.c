@@ -87,7 +87,7 @@ hypre_PrintBoxArrayData( FILE            *file,
             {
                for (j = 0; j < num_values; j++)
                {
-		  fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
+		  fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
                           i,
                           hypre_IndexX(start) + loopi,
                           hypre_IndexY(start) + loopj,
@@ -145,7 +145,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
    {
       if (symm_elements[j] < 0 && j!=center_rank )
       {
-         fprintf( file, "*: (*, *, *; %d) %e\n",
+         fprintf( file, "*: (*, *, *; %d) %.14e\n",
                   j, data[0] );
       }
       ++data;
@@ -169,7 +169,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop1For(loopi, loopj, loopk, datai)
             {
-               fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
+               fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
                        i,
                        hypre_IndexX(start) + loopi,
                        hypre_IndexY(start) + loopj,
@@ -220,7 +220,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
 
          for (j = 0; j < num_values; j++)
          {
-         fprintf( file, "*: (*, *, *; %d) %e\n",
+         fprintf( file, "*: (*, *, *; %d) %.14e\n",
                   j, data[datai + j] );
          }
 

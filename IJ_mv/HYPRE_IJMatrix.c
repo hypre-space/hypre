@@ -887,7 +887,7 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
 
       for (j = 0; j < ncols; j++)
       {
-         fprintf(file, "%d %d %e\n", i, cols[j], values[j]);
+         fprintf(file, "%d %d %.14e\n", i, cols[j], values[j]);
       }
 
       if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )

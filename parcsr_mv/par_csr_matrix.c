@@ -593,7 +593,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
       {
          J = first_col_diag + diag_j[j] + base_j;
          if ( diag_data )
-            fprintf(file, "%d %d %e\n", I, J, diag_data[j]);
+            fprintf(file, "%d %d %.14e\n", I, J, diag_data[j]);
          else
             fprintf(file, "%d %d\n", I, J);
       }
@@ -605,7 +605,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
          {
             J = col_map_offd[offd_j[j]] + base_j;
          if ( offd_data )
-            fprintf(file, "%d %d %e\n", I, J, offd_data[j]);
+            fprintf(file, "%d %d %.14e\n", I, J, offd_data[j]);
          else
             fprintf(file, "%d %d\n", I, J );
          }
