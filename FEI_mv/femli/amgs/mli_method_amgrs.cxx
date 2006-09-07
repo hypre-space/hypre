@@ -72,6 +72,7 @@ MLI_Method_AMGRS::MLI_Method_AMGRS( MPI_Comm comm ) : MLI_Method( comm )
    symmetric_        = 1;
    useInjectionForR_ = 0;
    truncFactor_      = 0.0;
+   mxelmtsP_         = 0;
    strcpy(smoother_, "Jacobi");
    smootherNSweeps_ = 2;
    smootherWeights_  = new double[2];
@@ -155,6 +156,11 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
    else if ( !strcmp(param1, "setTruncationFactor" ))
    {
       sscanf(in_name,"%s %lg", param1, &truncFactor_);
+      return 0;
+   }
+   else if ( !strcmp(param1, "setPMaxElmts" ))
+   {
+      sscanf(in_name,"%s %d", param1, &mxelmtsP_);
       return 0;
    }
    else if ( !strcmp(param1, "setNodeDOF" ))
@@ -482,7 +488,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       {
          hypre_BoomerAMGBuildInterp(hypreA, CFMarkers, hypreS, 
                      coarsePartition, nodeDOF_, dofArray, outputLevel_, 
-                     truncFactor_, mapStoA, &hypreP);
+                     truncFactor_, mxelmtsP_, mapStoA, &hypreP);
          funcPtr = new MLI_Function();
          MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
          sprintf(paramString, "HYPRE_ParCSR" ); 
@@ -547,7 +553,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       {
          hypre_BoomerAMGBuildInterp(hypreAT, CFMarkers, hypreST, 
                      coarsePartition, nodeDOF_, dofArray, outputLevel_, 
-                     truncFactor_, mapStoA, &hypreRT);
+                     truncFactor_, mxelmtsP_, mapStoA, &hypreRT);
          hypreRT->owns_col_starts = 0;
          hypre_ParCSRMatrixTranspose( hypreRT, &hypreR, one );
          funcPtr = new MLI_Function();
@@ -840,6 +846,7 @@ int MLI_Method_AMGRS::print()
       printf("\t*** measure type            = %d\n", measureType_);
       printf("\t*** strength threshold      = %e\n", threshold_);
       printf("\t*** truncation factor       = %e\n", truncFactor_);
+      printf("\t*** P max elments           = %d\n", mxelmtsP_);
       printf("\t*** nodal degree of freedom = %d\n", nodeDOF_);
       printf("\t*** symmetric flag          = %d\n", symmetric_);
       printf("\t*** R injection flag        = %d\n", useInjectionForR_);

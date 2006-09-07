@@ -59,6 +59,7 @@ class MLI_Method_AMGRS : public MLI_Method
    int      measureType_;            /* local or local measure           */
    double   threshold_;              /* strength threshold               */
    double   truncFactor_;            /* truncation factor                */
+   int      mxelmtsP_;               /* max no. of elmts per row for P   */
    int      nodeDOF_;                /* equation block size (fixed)      */
    int      minCoarseSize_;          /* tell when to stop coarsening     */
    double   maxRowSum_;              /* used in Boomeramg                */
