@@ -108,9 +108,13 @@ apply_error_filters ()
           'Compilation\ successful'\
           '^\ Guide\ \ \ '\
           ':\ 0\ errors\ in\ file'\
+          'autoconf\ has\ been\ disabled'\
+          'automake\ has\ been\ disabled'\
+          'autoheader\ has\ been\ disabled'\
+          'ltdl.c:'\
+          'sidl'\
           '1501-050:\ \(I\)'\
           '1500-010:\ \(W\)'\
-          'autoconf\ has\ been\ disabled'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           'configure:\ WARNING:\ '
         do process_filter $ErrorFile "${ii}"
@@ -122,6 +126,11 @@ apply_error_filters ()
           '[A-Za-z0-9_]*\.cxx$'\
           '^[ \t]*$'\
           '^[0-9]*\ Lines\ Compiled$'\
+          'autoconf\ has\ been\ disabled'\
+          'automake\ has\ been\ disabled'\
+          'autoheader\ has\ been\ disabled'\
+          'ltdl.c:'\
+          'sidl'\
           'cpu\ clock'\
           'wall\ clock'\
           'queued'\
