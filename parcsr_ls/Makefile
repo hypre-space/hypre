@@ -52,6 +52,7 @@ C_COMPILE_FLAGS =\
  
  
 HEADERS =\
+ aux_interp.h\
  Common.h\
  headers.h\
  HYPRE_parcsr_int.h\
@@ -63,6 +64,7 @@ HEADERS =\
 
 FILES =\
  amg_hybrid.c\
+ aux_interp.c\
  F90_hypre_laplace.c\
  F90_HYPRE_parcsr_amg.c\
  F90_HYPRE_parcsr_bicgstab.c\
@@ -107,6 +109,7 @@ FILES =\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
  par_laplace.c\
+ par_lr_interp.c\
  par_nodal_systems.c\
  par_rap.c\
  par_rap_communication.c\

@@ -40,6 +40,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                    int                 *dof_func,
                    int                  debug_flag,
                    double               trunc_factor,
+                   int		 	P_max_elmts,
                    int                  weight_option,
                    int                 *col_offd_S_to_A,
                    hypre_ParCSRMatrix **P_ptr )
@@ -1662,11 +1663,12 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
    hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
-   /* Compress P, removing coefficients smaller than trunc_factor * Max */
+   /* Compress P, removing coefficients smaller than trunc_factor * Max 
+      and/or keep yat most <P_max_elmts> per row absolutely maximal coefficients */
 
-   if (trunc_factor != 0.0)
+   if (trunc_factor != 0.0 || P_max_elmts != 0)
    {
-      hypre_BoomerAMGInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor, P_max_elmts);
       P_diag_data = hypre_CSRMatrixData(P_diag);
       P_diag_i = hypre_CSRMatrixI(P_diag);
       P_diag_j = hypre_CSRMatrixJ(P_diag);

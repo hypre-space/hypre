@@ -195,6 +195,26 @@ HYPRE_BoomerAMGGetTruncFactor( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetPMaxElmts, HYPRE_BoomerAMGGetPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetPMaxElmts( HYPRE_Solver solver,
+                            int   P_max_elmts  )
+{
+   return( hypre_BoomerAMGSetPMaxElmts( (void *) solver,
+                                           P_max_elmts ) );
+}
+
+int
+HYPRE_BoomerAMGGetPMaxElmts( HYPRE_Solver solver,
+                            int   * P_max_elmts  )
+{
+   return( hypre_BoomerAMGGetPMaxElmts( (void *) solver,
+                                           P_max_elmts ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetJacobiTruncThreshold, HYPRE_BoomerAMGGetJacobiTruncThreshold
  *--------------------------------------------------------------------------*/
 
@@ -1064,6 +1084,17 @@ HYPRE_BoomerAMGSetISType( HYPRE_Solver  solver,
                               int          IS_type  )
 {
    return( hypre_BoomerAMGSetISType( (void *) solver, IS_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCRUseCG
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetCRUseCG( HYPRE_Solver  solver,
+                          int    CR_use_CG  )
+{
+   return( hypre_BoomerAMGSetCRUseCG( (void *) solver, CR_use_CG ) );
 }
 
 /*--------------------------------------------------------------------------

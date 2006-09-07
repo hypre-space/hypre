@@ -1219,7 +1219,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    if (trunc_factor != 0.0)
    {
-      hypre_BoomerAMGInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor, 0);
       P_diag_data = hypre_CSRMatrixData(P_diag);
       P_diag_i = hypre_CSRMatrixI(P_diag);
       P_diag_j = hypre_CSRMatrixJ(P_diag);
@@ -2075,7 +2075,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
                                                                                 
    if (trunc_factor != 0.0)
    {
-      hypre_BoomerAMGInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor, 0);
       P_diag_data = hypre_CSRMatrixData(P_diag);
       P_diag_i = hypre_CSRMatrixI(P_diag);
       P_diag_j = hypre_CSRMatrixJ(P_diag);

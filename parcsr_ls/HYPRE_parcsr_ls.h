@@ -457,6 +457,13 @@ int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
                                   double       trunc_factor);
 
 /**
+ * (Optional) Defines the maximal number of elements per row for the interpolation.
+ * The default is 0.
+ **/
+int HYPRE_BoomerAMGSetPMaxElmts(HYPRE_Solver solver,
+                                 int       P_max_elmts);
+
+/**
  * (Optional) Defines the largest strength threshold for which 
  * the strength matrix S uses the communication package of the operator A.
  * If the strength threshold is larger than this values,

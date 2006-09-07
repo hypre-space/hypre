@@ -56,6 +56,7 @@ hypre_BoomerAMGCreate()
    int      coarsen_type;
    int      measure_type;
    int      setup_type;
+   int      P_max_elmts;
    int 	    num_functions;
    int 	    nodal;
    int 	    num_paths;
@@ -63,6 +64,7 @@ hypre_BoomerAMGCreate()
    int      post_interp_type;
    int 	    num_CR_relax_steps;
    int 	    IS_type;
+   int 	    CR_use_CG;
 
    /* solve params */
    int      min_iter;
@@ -117,6 +119,7 @@ hypre_BoomerAMGCreate()
    coarsen_type = 6;
    measure_type = 0;
    setup_type = 1;
+   P_max_elmts = 0;
    num_functions = 1;
    nodal = 0;
    num_paths = 1;
@@ -125,6 +128,7 @@ hypre_BoomerAMGCreate()
    num_CR_relax_steps = 2;
    CR_rate = 0.7;
    IS_type = 1;
+   CR_use_CG = 0;
 
    variant = 0;
    overlap = 1;
@@ -184,6 +188,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
    hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
    hypre_BoomerAMGSetSetupType(amg_data, setup_type);
+   hypre_BoomerAMGSetPMaxElmts(amg_data, P_max_elmts);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
    hypre_BoomerAMGSetNodal(amg_data, nodal);
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
@@ -192,6 +197,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetNumCRRelaxSteps(amg_data, num_CR_relax_steps);
    hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
    hypre_BoomerAMGSetISType(amg_data, IS_type);
+   hypre_BoomerAMGSetCRUseCG(amg_data, CR_use_CG);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
@@ -530,6 +536,30 @@ hypre_BoomerAMGGetTruncFactor( void     *data,
    hypre_ParAMGData  *amg_data = data;
 
    *trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetPMaxElmts( void     *data,
+                            int    P_max_elmts )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataPMaxElmts(amg_data) = P_max_elmts;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGGetPMaxElmts( void     *data,
+                            int *  P_max_elmts )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   *P_max_elmts = hypre_ParAMGDataPMaxElmts(amg_data);
 
    return (ierr);
 }
@@ -1583,6 +1613,22 @@ hypre_BoomerAMGSetISType( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataISType(amg_data) = IS_type;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates whether to use CG for compatible relaxation
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetCRUseCG( void     *data,
+                            int      CR_use_CG )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataCRUseCG(amg_data) = CR_use_CG;
 
    return (ierr);
 }

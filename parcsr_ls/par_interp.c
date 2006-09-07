@@ -5,7 +5,7 @@
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
  * disclaimer and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -39,6 +39,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                          int                  *dof_func,
                          int                   debug_flag,
                          double                trunc_factor,
+                         int		       max_elmts,
                          int 		      *col_offd_S_to_A,
                          hypre_ParCSRMatrix  **P_ptr)
 {
@@ -920,9 +921,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
-   if (trunc_factor != 0.0)
+   if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor, max_elmts);
       P_diag_data = hypre_CSRMatrixData(P_diag);
       P_diag_i = hypre_CSRMatrixI(P_diag);
       P_diag_j = hypre_CSRMatrixJ(P_diag);
@@ -1017,6 +1018,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
                          int                  *dof_func,
                          int                   debug_flag,
                          double                trunc_factor,
+                         int		       max_elmts,
                          int		      *col_offd_S_to_A,
                          hypre_ParCSRMatrix  **P_ptr)
 {
@@ -1835,9 +1837,9 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
-   if (trunc_factor != 0.0)
+   if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor, max_elmts);
       P_diag_data = hypre_CSRMatrixData(P_diag);
       P_diag_i = hypre_CSRMatrixI(P_diag);
       P_diag_j = hypre_CSRMatrixJ(P_diag);
@@ -1929,6 +1931,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
                          int                  *dof_func,
                          int                   debug_flag,
                          double                trunc_factor,
+                         int		       max_elmts,
                          int 		      *col_offd_S_to_A,
                          hypre_ParCSRMatrix  **P_ptr)
 {
@@ -2549,9 +2552,9 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
-   if (trunc_factor != 0.0)
+   if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor, max_elmts);
       P_diag_data = hypre_CSRMatrixData(P_diag);
       P_diag_i = hypre_CSRMatrixI(P_diag);
       P_diag_j = hypre_CSRMatrixJ(P_diag);
@@ -2629,7 +2632,8 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
 int
 hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
-				 double trunc_factor)        
+				 double trunc_factor,        
+				 int max_elmts)        
 {
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    int *P_diag_i = hypre_CSRMatrixI(P_diag);
@@ -2646,6 +2650,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    double *P_offd_data_new;
 
    int n_fine = hypre_CSRMatrixNumRows(P_diag);
+   int num_cols = hypre_CSRMatrixNumCols(P_diag);
    int i, j, start_j;
    int ierr = 0;
    int next_open = 0;
@@ -2656,12 +2661,16 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    int num_lost_offd = 0;
    int P_diag_size;
    int P_offd_size;
+   int num_elmts;
+   int cnt, cnt_diag, cnt_offd;
    double max_coef;
    double row_sum;
    double scale;
 
-   for (i = 0; i < n_fine; i++)
+   if (trunc_factor > 0)
    {
+    for (i = 0; i < n_fine; i++)
+    {
       max_coef = 0;
       for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
          max_coef = (max_coef < fabs(P_diag_data[j])) ? 
@@ -2726,10 +2735,118 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
       	        P_offd_data[j] *= scale;
 	 }
       }
+    }
+    P_diag_i[n_fine] -= num_lost;
+    P_offd_i[n_fine] -= num_lost_offd;
    }
-   P_diag_i[n_fine] -= num_lost;
-   P_offd_i[n_fine] -= num_lost_offd;
+   if (max_elmts > 0)
+   {
+    int P_mxnum, cnt1;
+    int *P_aux_j;
+    double *P_aux_data;
 
+    P_mxnum = 2*(P_diag_i[1]+P_offd_i[1]);
+    P_aux_j = hypre_CTAlloc(int, P_mxnum);
+    P_aux_data = hypre_CTAlloc(double, P_mxnum);
+    cnt_diag = 0;
+    cnt_offd = 0;
+
+    for (i = 0; i < n_fine; i++)
+    {
+     row_sum = 0;
+     num_elmts = P_diag_i[i+1]-P_diag_i[i]+P_offd_i[i+1]-P_offd_i[i];
+     if (max_elmts < num_elmts)
+     {
+       if (num_elmts > P_mxnum)
+       {
+	   P_mxnum = num_elmts;
+	   P_aux_j = hypre_TReAlloc(P_aux_j,int,P_mxnum);
+	   P_aux_data = hypre_TReAlloc(P_aux_data,double,P_mxnum);
+       } 
+       cnt = 0;
+       for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
+       {
+	  P_aux_j[cnt] = P_diag_j[j];
+	  P_aux_data[cnt++] = P_diag_data[j];
+	  row_sum += P_diag_data[j];
+       }
+       num_lost += cnt;
+       cnt1 = cnt;
+       for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
+       {
+	  P_aux_j[cnt] = P_offd_j[j]+num_cols;
+	  P_aux_data[cnt++] = P_offd_data[j];
+	  row_sum += P_offd_data[j];
+       }
+       num_lost_offd += cnt-cnt1;
+       /* sort data */
+       hypre_qsort2abs(P_aux_j,P_aux_data,0,cnt-1);
+       scale = 0;
+       P_diag_i[i] = cnt_diag;
+       P_offd_i[i] = cnt_offd;
+       for (j = 0; j < max_elmts; j++)
+       {
+	  scale += P_aux_data[j];
+          if (P_aux_j[j] < num_cols)
+	  {
+	     P_diag_j[cnt_diag] = P_aux_j[j];
+	     P_diag_data[cnt_diag++] = P_aux_data[j];
+	  }
+          else
+	  {
+	     P_offd_j[cnt_offd] = P_aux_j[j]-num_cols;
+	     P_offd_data[cnt_offd++] = P_aux_data[j];
+	  }
+       }
+       num_lost -= cnt_diag-P_diag_i[i];
+       num_lost_offd -= cnt_offd-P_offd_i[i];
+      /* normalize row of P */
+
+       if (scale != 0.)
+       {
+	  if (scale != row_sum)
+	  {
+   	     scale = row_sum/scale;
+   	     for (j = P_diag_i[i]; j < cnt_diag; j++)
+      	        P_diag_data[j] *= scale;
+   	     for (j = P_offd_i[i]; j < cnt_offd; j++)
+      	        P_offd_data[j] *= scale;
+	  }
+       }
+     }
+     else
+     {
+        if (P_diag_i[i] != cnt_diag)
+        {
+	   start_j = P_diag_i[i];
+	   P_diag_i[i] = cnt_diag;
+	   for (j = start_j; j < P_diag_i[i+1]; j++)
+	   {
+	      P_diag_j[cnt_diag] = P_diag_j[j];
+	      P_diag_data[cnt_diag++] = P_diag_data[j];
+	   }
+        }
+        else
+           cnt_diag += P_diag_i[i+1]-P_diag_i[i];
+        if (P_offd_i[i] != cnt_offd)
+        {
+	   start_j = P_offd_i[i];
+	   P_offd_i[i] = cnt_offd;
+	   for (j = start_j; j < P_offd_i[i+1]; j++)
+	   {
+	      P_offd_j[cnt_offd] = P_offd_j[j];
+	      P_offd_data[cnt_offd++] = P_offd_data[j];
+	   }
+        }
+        else
+           cnt_offd += P_offd_i[i+1]-P_offd_i[i];
+     }
+    }
+    P_diag_i[n_fine] = cnt_diag;
+    P_offd_i[n_fine] = cnt_offd;
+    hypre_TFree(P_aux_j);
+    hypre_TFree(P_aux_data);
+   }
    if (num_lost)
    {
       P_diag_size = P_diag_i[n_fine];
@@ -2763,4 +2880,24 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
       hypre_CSRMatrixNumNonzeros(P_offd) = P_offd_size;
    }
    return ierr;
+}
+
+void hypre_qsort2abs( int *v,
+             double *w,
+             int  left,
+             int  right )
+{
+   int i, last;
+   if (left >= right)
+      return;
+   swap2( v, w, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+      if (fabs(w[i]) > fabs(w[left]))
+      {
+         swap2(v, w, ++last, i);
+      }
+   swap2(v, w, left, last);
+   hypre_qsort2abs(v, w, left, last-1);
+   hypre_qsort2abs(v, w, last+1, right);
 }

@@ -51,6 +51,7 @@ typedef struct
    int      measure_type;
    int      setup_type;
    int      coarsen_type;
+   int      P_max_elmts;
    int      interp_type;
    int      restr_par;
    int      agg_num_levels;
@@ -58,6 +59,7 @@ typedef struct
    int      post_interp_type;
    int      num_CR_relax_steps;
    int      IS_type;
+   int      CR_use_CG;
 
    /* solve params */
    int      max_iter;
@@ -166,12 +168,14 @@ typedef struct
 #define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_ParAMGDataMeasureType(amg_data) ((amg_data)->measure_type)
 #define hypre_ParAMGDataSetupType(amg_data) ((amg_data)->setup_type)
+#define hypre_ParAMGDataPMaxElmts(amg_data) ((amg_data)->P_max_elmts)
 #define hypre_ParAMGDataNumPaths(amg_data) ((amg_data)->num_paths)
 #define hypre_ParAMGDataAggNumLevels(amg_data) ((amg_data)->agg_num_levels)
 #define hypre_ParAMGDataPostInterpType(amg_data) ((amg_data)->post_interp_type)
 #define hypre_ParAMGDataNumCRRelaxSteps(amg_data) ((amg_data)->num_CR_relax_steps)
 #define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
+#define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 
 /* solve params */
 
