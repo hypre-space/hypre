@@ -442,6 +442,7 @@ main( int   argc,
  
       bH_op_A = bHYPRE_Operator__cast( bH_parcsr_A, &_ex );
       bH_PCG = bHYPRE_PCG_Create( bmpicomm, bH_op_A, &_ex );
+      bHYPRE_Operator_deleteRef( bH_op_A, &_ex );
       bH_Vector_b = bHYPRE_Vector__cast( bH_b, &_ex );
       bH_Vector_x = bHYPRE_Vector__cast( bH_x, &_ex );
 
@@ -476,6 +477,7 @@ main( int   argc,
                                                bH_Vector_b, bH_Vector_x, &_ex );
          bH_SolverPC =
             bHYPRE_Solver__cast( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
          ierr += bHYPRE_PCG_SetPreconditioner( bH_PCG, bH_SolverPC, &_ex );
          ierr += bHYPRE_PCG_Setup( bH_PCG, bH_Vector_b, bH_Vector_x, &_ex );
 
@@ -496,6 +498,7 @@ main( int   argc,
                                                    clp->ioutdat, &_ex );
          hypre_assert( ierr==0 );
          bH_SolverPC = bHYPRE_Solver__cast( bH_ParaSails, &_ex );
+         bHYPRE_ParaSails_deleteRef( bH_ParaSails, &_ex );
          ierr += bHYPRE_PCG_SetPreconditioner( bH_PCG, bH_SolverPC, &_ex );
          ierr += bHYPRE_PCG_Setup( bH_PCG, bH_Vector_b, bH_Vector_x, &_ex );
 
@@ -515,6 +518,7 @@ main( int   argc,
             bH_Schwarz, "RelaxWeight", clp->schwarz_rlx_weight, &_ex );
          hypre_assert( ierr==0 );
          bH_SolverPC = bHYPRE_Solver__cast( bH_Schwarz, &_ex );
+         bHYPRE_Schwarz_deleteRef( bH_Schwarz, &_ex );
          ierr += bHYPRE_PCG_SetPreconditioner( bH_PCG, bH_SolverPC, &_ex );
          ierr += bHYPRE_PCG_Setup( bH_PCG, bH_Vector_b, bH_Vector_x, &_ex );
       }
@@ -534,6 +538,7 @@ main( int   argc,
          ierr += bHYPRE_Euclid_SetParameters( bH_Euclid, argc, argv, &_ex );
 
          bH_SolverPC = bHYPRE_Solver__cast( bH_Euclid, &_ex );
+         bHYPRE_Euclid_deleteRef( bH_Euclid, &_ex );
          ierr += bHYPRE_PCG_SetPreconditioner( bH_PCG, bH_SolverPC, &_ex );
          ierr += bHYPRE_PCG_Setup( bH_PCG, bH_Vector_b, bH_Vector_x, &_ex );
       }
@@ -559,6 +564,8 @@ main( int   argc,
       ierr += bHYPRE_PCG_GetDoubleValue( bH_PCG, "Final Relative Residual Norm",
                                          &final_res_norm, &_ex );
 
+      bHYPRE_Vector_deleteRef( bH_Vector_b, &_ex );
+      bHYPRE_Vector_deleteRef( bH_Vector_x, &_ex );
       bHYPRE_PCG_deleteRef( bH_PCG, &_ex );
       if ( clp->solver_id == 1 )
       {
@@ -566,19 +573,19 @@ main( int   argc,
       }
       else if ( clp->solver_id == 2 )
       {
-         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
       else if (clp->solver_id == 8)
       {
-         bHYPRE_ParaSails_deleteRef( bH_ParaSails, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
       else if (clp->solver_id == 12)
       {
-         bHYPRE_Schwarz_deleteRef( bH_Schwarz, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
       else if (clp->solver_id == 43)
       {
-         bHYPRE_Euclid_deleteRef( bH_Euclid, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
 
       if (myid == 0)
@@ -713,6 +720,7 @@ main( int   argc,
                                                bH_Vector_b, bH_Vector_x, &_ex );
          bH_SolverPC =
             bHYPRE_Solver__cast( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
          ierr += bHYPRE_HPCG_SetPreconditioner( bH_HPCG, bH_SolverPC, &_ex );
          ierr += bHYPRE_HPCG_Setup( bH_HPCG, bH_Vector_b, bH_Vector_x, &_ex );
 
@@ -733,6 +741,7 @@ main( int   argc,
                                                    clp->ioutdat, &_ex );
          hypre_assert( ierr==0 );
          bH_SolverPC = bHYPRE_Solver__cast( bH_ParaSails, &_ex );
+         bHYPRE_ParaSails_deleteRef( bH_ParaSails, &_ex );
          ierr += bHYPRE_HPCG_SetPreconditioner( bH_HPCG, bH_SolverPC, &_ex );
          ierr += bHYPRE_HPCG_Setup( bH_HPCG, bH_Vector_b, bH_Vector_x, &_ex );
 
@@ -798,6 +807,9 @@ main( int   argc,
       ierr += bHYPRE_HPCG_GetDoubleValue( bH_HPCG, "Final Relative Residual Norm",
                                          &final_res_norm, &_ex );
 
+      bHYPRE_Vector_deleteRef( bH_Vector_b, &_ex );
+      bHYPRE_Vector_deleteRef( bH_Vector_x, &_ex );
+      bHYPRE_Operator_deleteRef( bH_op_A, &_ex );
       bHYPRE_HPCG_deleteRef( bH_HPCG, &_ex );
       if ( clp->solver_id == 1 )
       {
@@ -805,11 +817,11 @@ main( int   argc,
       }
       else if ( clp->solver_id == 2 )
       {
-         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
       else if (clp->solver_id == 8)
       {
-         bHYPRE_ParaSails_deleteRef( bH_ParaSails, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
 #ifdef DO_THIS_LATER
    else if (clp->solver_id == 12)
@@ -846,6 +858,7 @@ main( int   argc,
 
       bH_op_A = bHYPRE_Operator__cast( bH_parcsr_A, &_ex );
       bH_GMRES = bHYPRE_GMRES_Create( bmpicomm, bH_op_A, &_ex );
+      bHYPRE_Operator_deleteRef( bH_op_A, &_ex );
       bH_Vector_b = bHYPRE_Vector__cast( bH_b, &_ex );
       bH_Vector_x = bHYPRE_Vector__cast( bH_x, &_ex );
 
@@ -875,6 +888,7 @@ main( int   argc,
                                                bH_Vector_b, bH_Vector_x, &_ex );
          bH_SolverPC =
             bHYPRE_Solver__cast( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
          ierr += bHYPRE_GMRES_SetPreconditioner( bH_GMRES, bH_SolverPC, &_ex );
          ierr += bHYPRE_GMRES_Setup( bH_GMRES, bH_Vector_b,
                                      bH_Vector_x, &_ex );
@@ -922,6 +936,7 @@ main( int   argc,
          ierr += bHYPRE_ParaSails_SetIntParameter( bH_ParaSails, "Sym", 0, &_ex );
          hypre_assert( ierr==0 );
          bH_SolverPC = bHYPRE_Solver__cast( bH_ParaSails, &_ex );
+         bHYPRE_ParaSails_deleteRef( bH_ParaSails, &_ex );
          ierr += bHYPRE_GMRES_SetPreconditioner( bH_GMRES, bH_SolverPC, &_ex );
          ierr += bHYPRE_GMRES_Setup( bH_GMRES, bH_Vector_b,
                                      bH_Vector_x, &_ex );
@@ -971,13 +986,15 @@ main( int   argc,
  
       bHYPRE_GMRES_deleteRef( bH_GMRES, &_ex );
  
+      bHYPRE_Vector_deleteRef( bH_Vector_b, &_ex );
+      bHYPRE_Vector_deleteRef( bH_Vector_x, &_ex );
       if (clp->solver_id == 3)
       {
          bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex ); /* don't need if's if always do this */
       }
       else if ( clp->solver_id == 4 )
       {
-         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
 #ifdef DO_THIS_LATER
       if (clp->solver_id == 7)
@@ -987,7 +1004,7 @@ main( int   argc,
 #endif  /*DO_THIS_LATER*/
       else if (clp->solver_id == 18)
       {
-	 bHYPRE_ParaSails_deleteRef ( bH_ParaSails, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
 #ifdef DO_THIS_LATER
       else if (clp->solver_id == 44)
@@ -1022,6 +1039,7 @@ main( int   argc,
       bH_Vector_x = bHYPRE_Vector__cast( bH_x, &_ex );
       bH_op_A = bHYPRE_Operator__cast( bH_parcsr_A, &_ex );
       bHYPRE_HGMRES_SetOperator( bH_HGMRES, bH_op_A, &_ex );
+      bHYPRE_Operator_deleteRef( bH_op_A, &_ex );
 
       ierr += bHYPRE_HGMRES_SetIntParameter( bH_HGMRES, "KDim", clp->k_dim, &_ex );
       ierr += bHYPRE_HGMRES_SetIntParameter( bH_HGMRES, "MaxIter", 1000, &_ex );
@@ -1117,6 +1135,7 @@ main( int   argc,
                                                bH_Vector_b, bH_Vector_x, &_ex );
          bH_SolverPC =
             bHYPRE_Solver__cast( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
          ierr += bHYPRE_HGMRES_SetPreconditioner( bH_HGMRES, bH_SolverPC, &_ex );
          ierr += bHYPRE_HGMRES_Setup( bH_HGMRES, bH_Vector_b,
                                      bH_Vector_x, &_ex );
@@ -1164,6 +1183,7 @@ main( int   argc,
          ierr += bHYPRE_ParaSails_SetIntParameter( bH_ParaSails, "Sym", 0, &_ex );
          hypre_assert( ierr==0 );
          bH_SolverPC = bHYPRE_Solver__cast( bH_ParaSails, &_ex );
+	 bHYPRE_ParaSails_deleteRef ( bH_ParaSails, &_ex );
          ierr += bHYPRE_HGMRES_SetPreconditioner( bH_HGMRES, bH_SolverPC, &_ex );
          ierr += bHYPRE_HGMRES_Setup( bH_HGMRES, bH_Vector_b,
                                      bH_Vector_x, &_ex );
@@ -1211,15 +1231,17 @@ main( int   argc,
       ierr += bHYPRE_HGMRES_GetDoubleValue( bH_HGMRES, "Final Relative Residual Norm",
                                            &final_res_norm, &_ex );
  
+      bHYPRE_Vector_deleteRef( bH_Vector_b, &_ex );
+      bHYPRE_Vector_deleteRef( bH_Vector_x, &_ex );
       bHYPRE_HGMRES_deleteRef( bH_HGMRES, &_ex );
  
       if (clp->solver_id == 3)
       {
          bHYPRE_BoomerAMG_deleteRef( bH_AMG, &_ex );
       }
-      else if ( clp->solver_id == 2 )
+      else if ( clp->solver_id == 4 )
       {
-         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
 #ifdef DO_THIS_LATER
       if (clp->solver_id == 7)
@@ -1229,7 +1251,7 @@ main( int   argc,
 #endif  /*DO_THIS_LATER*/
       else if (clp->solver_id == 18)
       {
-	 bHYPRE_ParaSails_deleteRef ( bH_ParaSails, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
 #ifdef DO_THIS_LATER
       else if (clp->solver_id == 44)
@@ -1259,6 +1281,7 @@ main( int   argc,
  
       bH_op_A = bHYPRE_Operator__cast( bH_parcsr_A, &_ex );
       bH_BiCGSTAB = bHYPRE_BiCGSTAB_Create( bmpicomm, bH_op_A, &_ex );
+      bHYPRE_Operator_deleteRef( bH_op_A, &_ex );
       bH_Vector_b = bHYPRE_Vector__cast( bH_b, &_ex );
       bH_Vector_x = bHYPRE_Vector__cast( bH_x, &_ex );
 
@@ -1290,6 +1313,7 @@ main( int   argc,
                                                bH_Vector_b, bH_Vector_x, &_ex );
          bH_SolverPC =
             bHYPRE_Solver__cast( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
          ierr += bHYPRE_BiCGSTAB_SetPreconditioner(
             bH_BiCGSTAB, bH_SolverPC, &_ex );
          ierr += bHYPRE_BiCGSTAB_Setup(
@@ -1368,13 +1392,15 @@ main( int   argc,
 
       bHYPRE_BiCGSTAB_deleteRef( bH_BiCGSTAB, &_ex );
  
+      bHYPRE_Vector_deleteRef( bH_Vector_b, &_ex );
+      bHYPRE_Vector_deleteRef( bH_Vector_x, &_ex );
       if (clp->solver_id == 9)
       {
          bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex ); /* don't need if's if always do this */
       }
       else if (clp->solver_id == 10)
       {
-         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
       else if (clp->solver_id == 11)
       {
@@ -1409,6 +1435,7 @@ main( int   argc,
 
       bH_op_A = bHYPRE_Operator__cast( bH_parcsr_A, &_ex );
       bH_CGNR = bHYPRE_CGNR_Create( bmpicomm, bH_op_A, &_ex );
+      bHYPRE_Operator_deleteRef( bH_op_A, &_ex );
       bH_Vector_b = bHYPRE_Vector__cast( bH_b, &_ex );
       bH_Vector_x = bHYPRE_Vector__cast( bH_x, &_ex );
 
@@ -1438,6 +1465,7 @@ main( int   argc,
                                                bH_Vector_b, bH_Vector_x, &_ex );
          bH_SolverPC =
             bHYPRE_Solver__cast( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
          ierr += bHYPRE_CGNR_SetPreconditioner( bH_CGNR, bH_SolverPC, &_ex );
          ierr += bHYPRE_CGNR_Setup( bH_CGNR, bH_Vector_b, bH_Vector_x, &_ex );
 
@@ -1465,13 +1493,15 @@ main( int   argc,
 
       bHYPRE_CGNR_deleteRef( bH_CGNR, &_ex );
  
+      bHYPRE_Vector_deleteRef( bH_Vector_b, &_ex );
+      bHYPRE_Vector_deleteRef( bH_Vector_x, &_ex );
       if (clp->solver_id == 5)
       {
          bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex ); /* don't need if's if always do this */
       }
       else if ( clp->solver_id == 6 )
       {
-         bHYPRE_ParCSRDiagScale_deleteRef( bH_ParCSRDiagScale, &_ex );
+         bHYPRE_Solver_deleteRef( bH_SolverPC, &_ex );
       }
       if (myid == 0)
       {
@@ -3555,6 +3585,8 @@ int Test_AMG( CommandLineParameters *clp, bHYPRE_IJParCSRMatrix bH_parcsr_A,
    hypre_ClearTiming();
 
    bHYPRE_BoomerAMG_deleteRef( bH_AMG, &_ex );
+   bHYPRE_Vector_deleteRef( bH_Vector_x, &_ex );
+   bHYPRE_Vector_deleteRef( bH_Vector_b, &_ex );
 
    return ierr;
 }
@@ -3647,5 +3679,6 @@ int PrecondAMG( CommandLineParameters *clp, int myid,
                                         "SchwarzRlxWeight",
                                         clp->schwarz_rlx_weight, &_ex );
    *bH_SolverPC = bHYPRE_Solver__cast( bH_AMG, &_ex );
+   bHYPRE_BoomerAMG_deleteRef( bH_AMG, &_ex );
    return ierr;
 }
