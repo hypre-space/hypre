@@ -130,7 +130,6 @@ main( int   argc,
    int      IS_type;   
    int      num_CR_relax_steps = 2;   
    int      relax_type;   
-   int      relax_fine = -1;   
    int      relax_coarse = -1;   
    int      relax_up = -1;   
    int      relax_down = -1;   
@@ -466,11 +465,6 @@ main( int   argc,
       {
          arg_index++;
          relax_type = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-rlx_fine") == 0 )
-      {
-         arg_index++;
-         relax_fine = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rlx_coarse") == 0 )
       {
@@ -828,22 +822,40 @@ main( int   argc,
       printf("  -pmis                 : PMIS coarsening \n");
        printf("  -pmis1                : PMIS coarsening, fixed random \n");
       printf("  -hmis                 : HMIS coarsening \n");
-      printf("  -ruge                 : Ruge coarsening (local)\n");
-      printf("  -ruge1p               : Ruge coarsening 1st pass only(local)\n");
+      printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
+      printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
       printf("  -ruge3                : third pass on boundary\n");
       printf("  -ruge3c               : third pass on boundary, keep c-points\n");
-      printf("  -ruge2b               : 2nd pass is global\n");
-      printf("  -rugerlx              : relaxes special points\n");
-      printf("  -falgout              : local ruge followed by LJP\n");
+      printf("  -falgout              : local Ruge_Stueben followed by CLJP\n");
       printf("  -gm                   : use global measures\n");
+      printf("\n");
+      printf("  -interptype  <val>    : set interpolation type\n");
+      printf("       0=Classical modified interpolation (default)  \n");
+      printf("       1=least squares interpolation (for GSMG only)  \n");
+      printf("       0=Classical modified interpolation for hyperbolic PDEs \n");
+      printf("       3=direct interpolation with separation of weights  \n");
+      printf("       4=multipass interpolation  \n");
+      printf("       5=multipass interpolation with separation of weights  \n");
+      printf("       6=extended interpolation  \n");
+      printf("       7=F-F interpolation  \n");
+      printf("       8=standard interpolation  \n");
+      printf("       9=standard interpolation with separation of weights  \n");
+      printf("      10=classical block interpolation for nodal systems AMG\n");
+      printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
       printf("\n");
       printf("  -rlx  <val>            : relaxation type\n");
       printf("       0=Weighted Jacobi  \n");
       printf("       1=Gauss-Seidel (very slow!)  \n");
-      printf("       3=Hybrid Jacobi/Gauss-Seidel  \n");
+      printf("       3=Hybrid Gauss-Seidel  \n");
+      printf("       4=Hybrid backward Gauss-Seidel  \n");
+      printf("       6=Hybrid symmetric Gauss-Seidel  \n");
+      printf("       9=Gauss elimination (use for coarsest grid only)  \n");
       printf("       20= Nodal Weighted Jacobi (for systems only) \n");
       printf("       23= Nodal Hybrid Jacobi/Gauss-Seidel (for systems only) \n");
       printf("       26= Nodal Hybrid Symmetric Gauss-Seidel  (for systems only)\n");
+      printf("  -rlx_coarse  <val>       : set relaxation type for coarsest grid\n");
+      printf("  -rlx_down    <val>       : set relaxation type for down cycle\n");
+      printf("  -rlx_up      <val>       : set relaxation type for up cycle\n");
       printf("  -nodal  <val>            : nodal system type\n");
       printf("       0 = Unknown approach \n");
       printf("       1 = Frobenius norm  \n");
@@ -853,6 +865,9 @@ main( int   argc,
       printf("       5 = One norm  \n");
       printf("  -ns <val>              : Use <val> sweeps on each level\n");
       printf("                           (default C/F down, F/C up, F/C fine\n");
+      printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
+      printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
+      printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");
       printf("\n"); 
       printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
       printf("  -th   <val>            : set AMG threshold Theta = val \n");
@@ -1638,8 +1653,6 @@ main( int   argc,
       HYPRE_ParCSRHybridSetNumPaths(amg_solver, num_paths);
       HYPRE_ParCSRHybridSetNumFunctions(amg_solver, num_functions);
       HYPRE_ParCSRHybridSetNodal(amg_solver, nodal);
-      if (relax_fine > -1)
-         HYPRE_ParCSRHybridSetCycleRelaxType(amg_solver, relax_fine, 0);
       if (relax_down > -1)
          HYPRE_ParCSRHybridSetCycleRelaxType(amg_solver, relax_down, 1);
       if (relax_up > -1)
@@ -1744,8 +1757,6 @@ main( int   argc,
       HYPRE_BoomerAMGSetNumCRRelaxSteps(amg_solver, num_CR_relax_steps);
       HYPRE_BoomerAMGSetCRRate(amg_solver, CR_rate);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
-      if (relax_fine > -1)
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_fine, 0);
       if (relax_down > -1)
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
       if (relax_up > -1)
@@ -1837,8 +1848,6 @@ main( int   argc,
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
-      if (relax_fine > -1)
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_fine, 0);
       if (relax_down > -1)
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
       if (relax_up > -1)
@@ -1965,8 +1974,6 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -2076,8 +2083,6 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -2250,8 +2255,6 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -2351,8 +2354,6 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -2531,8 +2532,6 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -2712,8 +2711,6 @@ main( int   argc,
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
