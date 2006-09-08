@@ -34,6 +34,15 @@
 
 Version 1.12.0b released, 2006/??/??.
 
+- Various modifications to BoomerAMG:
+  - Eliminated the possibility to set relaxation on the finest grid
+  - Added various new long-range interpolation algorithms: standard (with and without
+    weight separation), extended and F-F interpolation. These routines will improve
+    convergence for low complexity coarsening algorithms PMIS and HMIS.
+  - Added the possibility to set a maximal number of weights per row <n> when truncating
+    the interpolation operator. When this option is used, only the absolutely largest
+    <n> weights per row are kept. 
+
 - Modifications to the fac user interface to permit easier set up of the problem.
 
 - shared libraries can be built by using the --enable-shared option when configuring.
