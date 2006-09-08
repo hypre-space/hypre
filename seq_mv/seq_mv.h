@@ -257,6 +257,7 @@ hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B 
 /* csr_matvec.c */
 int hypre_CSRMatrixMatvec ( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
 int hypre_CSRMatrixMatvecT ( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
+int hypre_CSRMatrixMatvec_FF( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y , int *CF_marker_x , int *CF_marker_y , int fpt );
 
 /* genpart.c */
 int hypre_GeneratePartitioning ( int length , int num_procs , int **part_ptr );
