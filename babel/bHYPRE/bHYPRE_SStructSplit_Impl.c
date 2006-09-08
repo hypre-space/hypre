@@ -221,6 +221,7 @@ impl_bHYPRE_SStructSplit_Create(
 
    data->matrix = Amat;
    bHYPRE_SStructMatrix_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_SStructMatrix_deleteRef( Amat, _ex ); SIDL_CHECK(*_ex);
 
    return solver;
 
@@ -261,6 +262,7 @@ impl_bHYPRE_SStructSplit_SetOperator(
    data = bHYPRE_SStructSplit__get_data( self );
    data->matrix = Amat;
    bHYPRE_SStructMatrix_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_SStructMatrix_deleteRef( Amat, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 
@@ -916,6 +918,9 @@ impl_bHYPRE_SStructSplit_Setup(
 
    ierr += HYPRE_SStructSplitSetup( solver, HA, Hb, Hx );
 
+   bHYPRE_SStructVector_deleteRef( bHb, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_SStructVector_deleteRef( bHx, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
@@ -984,6 +989,9 @@ impl_bHYPRE_SStructSplit_Apply(
    Hx = datax -> vec;
 
    ierr += HYPRE_SStructSplitSolve( solver, HA, Hb, Hx );
+
+   bHYPRE_SStructVector_deleteRef( bHb, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_SStructVector_deleteRef( bHx, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 

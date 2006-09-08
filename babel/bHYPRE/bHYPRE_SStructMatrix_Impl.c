@@ -758,6 +758,7 @@ impl_bHYPRE_SStructMatrix_GetObject(
       be needed- they are just used for creation of the HYPRE_StructMatrix object.
     */
    *A = sidl_BaseInterface__cast( sA, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructMatrix_deleteRef( sA, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 
@@ -1205,6 +1206,9 @@ impl_bHYPRE_SStructMatrix_Apply(
    Hb = data_b -> vec;
 
    ierr += HYPRE_SStructMatrixMatvec( 1.0, HA, Hb, 0.0, Hx );
+
+   bHYPRE_SStructVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_SStructVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 

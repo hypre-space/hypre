@@ -739,7 +739,8 @@ impl_bHYPRE_SStructParCSRVector_GetObject(
    p_data -> ij_b = Hijx;
    p_data -> comm = data->comm;
 
-   *A = sidl_BaseInterface__cast( px, _ex );
+   *A = sidl_BaseInterface__cast( px, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( px, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 
@@ -937,6 +938,8 @@ impl_bHYPRE_SStructParCSRVector_Copy(
 
    ierr += HYPRE_ParVectorCopy( px, pself );
 
+   bHYPRE_SStructParCSRVector_deleteRef( bSSx, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
@@ -1002,6 +1005,8 @@ impl_bHYPRE_SStructParCSRVector_Clone(
    ierr += bHYPRE_SStructVectorView_Initialize( bHYPRE_x, _ex ); SIDL_CHECK(*_ex);
 
    *x = bHYPRE_Vector__cast( bHYPRE_x, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_SStructVectorView_deleteRef( bHYPRE_x, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_SStructParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 
@@ -1091,6 +1096,8 @@ impl_bHYPRE_SStructParCSRVector_Dot(
 
    ierr += HYPRE_ParVectorInnerProd( pself, px, d );
 
+   bHYPRE_SStructParCSRVector_deleteRef( bSSx, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
@@ -1141,6 +1148,8 @@ impl_bHYPRE_SStructParCSRVector_Axpy(
    HYPRE_SStructVectorGetObject( Hx, (void **) &px );
 
    ierr += HYPRE_ParVectorAxpy( a, px, pself );
+
+   bHYPRE_SStructParCSRVector_deleteRef( bSSx, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 

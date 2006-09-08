@@ -812,6 +812,10 @@ impl_bHYPRE_SStructDiagScale_Apply(
    /* does x = y/diagA as approximation to solving Ax=y for x ... */
    ierr += HYPRE_SStructDiagScale( HSSdummy, HA, Hb, Hx );
 
+   bHYPRE_SStructVector_deleteRef( b_b, _ex );
+   bHYPRE_SStructVector_deleteRef( b_x, _ex );
+   bHYPRE_SStructMatrix_deleteRef( bA, _ex );
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
