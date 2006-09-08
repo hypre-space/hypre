@@ -29,7 +29,6 @@
 #include "bHYPRE_SStructDiagScale.h"
 #include "bHYPRE_IdentitySolver.h"
 #include "sidl_Exception.h"
-#include "../babel/debug_utilities.h"
 
 #define DEBUG 0
 #define DO_THIS_LATER 0
