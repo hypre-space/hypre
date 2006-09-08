@@ -395,6 +395,8 @@ impl_bHYPRE_PCG_Clone(
    bHYPRE_PCG_SetPreconditioner( PCG_x, data->precond, _ex ); SIDL_CHECK(*_ex);
 
    *x = bHYPRE_PreconditionedSolver__cast( PCG_x, _ex ); SIDL_CHECK(*_ex);
+
+   bHYPRE_PCG_deleteRef( PCG_x,_ex ); SIDL_CHECK(*_ex);
    return ierr;
 
    return; hypre_babel_exception_no_return(_ex);

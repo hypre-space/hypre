@@ -416,6 +416,8 @@ impl_bHYPRE_GMRES_Clone(
    bHYPRE_GMRES_SetPreconditioner( GMRES_x, data->precond, _ex ); SIDL_CHECK(*_ex);
 
    *x = bHYPRE_PreconditionedSolver__cast( GMRES_x, _ex ); SIDL_CHECK(*_ex);
+
+   bHYPRE_GMRES_deleteRef( GMRES_x,_ex ); SIDL_CHECK(*_ex);
    return ierr;
 
    hypre_babel_exception_return_error(_ex);

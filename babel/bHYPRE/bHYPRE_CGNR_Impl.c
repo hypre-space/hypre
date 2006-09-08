@@ -389,6 +389,8 @@ impl_bHYPRE_CGNR_Clone(
    bHYPRE_CGNR_SetPreconditioner( CGNR_x, data->precond, _ex ); SIDL_CHECK(*_ex);
 
    *x = bHYPRE_PreconditionedSolver__cast( CGNR_x, _ex ); SIDL_CHECK(*_ex);
+
+   bHYPRE_CGNR_deleteRef( CGNR_x,_ex ); SIDL_CHECK(*_ex);
    return ierr;
 
    hypre_babel_exception_return_error(_ex);

@@ -1052,6 +1052,9 @@ impl_bHYPRE_StructMatrix_Apply(
 
    ierr += HYPRE_StructMatrixMatvec( 1.0, HA, Hb, 0.0, Hx );
 
+   bHYPRE_StructVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
    return( ierr );
 
    hypre_babel_exception_return_error(_ex);

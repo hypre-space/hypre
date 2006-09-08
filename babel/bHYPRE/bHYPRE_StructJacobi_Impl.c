@@ -955,6 +955,9 @@ impl_bHYPRE_StructJacobi_Setup(
 
    ierr += HYPRE_StructJacobiSetup( solver, HA, Hb, Hx );
 
+   bHYPRE_StructVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
@@ -1044,6 +1047,10 @@ impl_bHYPRE_StructJacobi_Apply(
    if ( bnorm2 == 0 ) bnorm2 = 1.0; /* there are plenty of other possible overflow
                                        conditions, which I'll deal with if needed. */
    data -> rel_resid_norm = sqrt( rnorm2 / bnorm2 );
+   bHYPRE_StructVector_deleteRef( bHr, _ex ); SIDL_CHECK(*_ex);
+
+   bHYPRE_StructVector_deleteRef( bHb, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHx, _ex ); SIDL_CHECK(*_ex);
    bHYPRE_StructVector_deleteRef( bHr, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;

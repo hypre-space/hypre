@@ -310,7 +310,6 @@ main( int   argc,
       printf("                         21*- Hybrid with PFMG precond\n");
       printf("                         22*- Hybrid with SparseMSG precond\n");
       printf("Solvers marked with '*' have not yet been implemented.\n");
-      /* >>> TO DO SOON: solvers 18,19 <<< */
       printf("\n");
 
       bHYPRE_MPICommunicator_deleteRef( bmpicomm, &_ex );
@@ -785,6 +784,8 @@ main( int   argc,
       ierr += bHYPRE_StructSMG_GetIntValue( solver_SMG, "NumIterations", &num_iterations, &_ex );
       ierr += bHYPRE_StructSMG_GetDoubleValue( solver_SMG, "RelResidualNorm", &final_res_norm, &_ex );
 
+      bHYPRE_Vector_deleteRef( b_V, &_ex );
+      bHYPRE_Vector_deleteRef( x_V, &_ex );
       bHYPRE_StructSMG_deleteRef( solver_SMG, &_ex );
    }
 
@@ -837,6 +838,8 @@ main( int   argc,
       ierr += bHYPRE_StructPFMG_GetIntValue( solver_PFMG, "NumIterations", &num_iterations, &_ex );
       ierr += bHYPRE_StructPFMG_GetDoubleValue( solver_PFMG, "RelResidualNorm", &final_res_norm, &_ex );
 
+      bHYPRE_Vector_deleteRef( b_V, &_ex );
+      bHYPRE_Vector_deleteRef( x_V, &_ex );
       bHYPRE_StructPFMG_deleteRef( solver_PFMG, &_ex );
    }
 
@@ -898,6 +901,7 @@ main( int   argc,
 
       A_O = bHYPRE_Operator__cast( A_b, &_ex );
       solver_PCG = bHYPRE_PCG_Create( bmpicomm, A_O, &_ex );
+      bHYPRE_Operator_deleteRef( A_O, &_ex );
       b_V = bHYPRE_Vector__cast( b_SV, &_ex );
       x_V = bHYPRE_Vector__cast( x_SV, &_ex );
 
@@ -1028,8 +1032,10 @@ main( int   argc,
       ierr += bHYPRE_PCG_GetIntValue( solver_PCG, "NumIterations", &num_iterations, &_ex );
       ierr += bHYPRE_PCG_GetDoubleValue( solver_PCG, "RelResidualNorm", &final_res_norm, &_ex );
 
+      bHYPRE_Vector_deleteRef( b_V, &_ex );
+      bHYPRE_Vector_deleteRef( x_V, &_ex );
       bHYPRE_PCG_deleteRef( solver_PCG, &_ex );
-
+      bHYPRE_Solver_deleteRef( precond, &_ex );
       if (solver_id == 10)
       {
          bHYPRE_StructSMG_deleteRef( solver_SMG, &_ex );
@@ -1156,6 +1162,7 @@ main( int   argc,
       krylov_solver = (bHYPRE_PreconditionedSolver) bHYPRE_PCG__cast2(
          solver_PCG, "bHYPRE.PreconditionedSolver", &_ex );
       solver_Hybrid = bHYPRE_Hybrid_Create( bmpicomm, krylov_solver, A_O, &_ex );
+      bHYPRE_PreconditionedSolver_deleteRef( krylov_solver, &_ex );
 
       /* This Setup call does Setup on the PCG solvers as well. */
       ierr += bHYPRE_Hybrid_Setup( solver_Hybrid, b_V, x_V, &_ex );
@@ -1164,6 +1171,8 @@ main( int   argc,
       bHYPRE_PreconditionedSolver_addRef( krylov_solver, &_ex );
       solver_PCG_1 = (bHYPRE_PCG) bHYPRE_PCG__cast( krylov_solver, &_ex );
       ierr += bHYPRE_PCG_SetIntParameter( solver_PCG_1, "MaxIter", 100, &_ex );
+      bHYPRE_PreconditionedSolver_deleteRef( krylov_solver, &_ex );
+      bHYPRE_PCG_deleteRef( solver_PCG_1, &_ex );
 
       hypre_assert( ierr==0 );
 
@@ -1185,11 +1194,14 @@ main( int   argc,
       ierr += bHYPRE_Hybrid_GetNumIterations( solver_Hybrid, &num_iterations, &_ex );
       ierr += bHYPRE_Hybrid_GetRelResidualNorm( solver_Hybrid, &final_res_norm, &_ex );
 
+      bHYPRE_Operator_deleteRef( A_O, &_ex );
+      bHYPRE_Vector_deleteRef( b_V, &_ex );
+      bHYPRE_Vector_deleteRef( x_V, &_ex );
       bHYPRE_Hybrid_deleteRef( solver_Hybrid, &_ex );
+      bHYPRE_Solver_deleteRef( precond, &_ex );
+      bHYPRE_PCG_deleteRef( solver_PCG, &_ex );
       if (solver_id == 20)
       {
-         bHYPRE_PCG_deleteRef( solver_PCG, &_ex );
-         bHYPRE_PCG_deleteRef( solver_PCG_1, &_ex );
          bHYPRE_StructSMG_deleteRef( solver_SMG, &_ex );
       }
 #if 0

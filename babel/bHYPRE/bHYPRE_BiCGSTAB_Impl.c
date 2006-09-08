@@ -396,6 +396,8 @@ impl_bHYPRE_BiCGSTAB_Clone(
    bHYPRE_BiCGSTAB_SetPreconditioner( BiCGSTAB_x, data->precond, _ex ); SIDL_CHECK(*_ex);
 
    *x = bHYPRE_PreconditionedSolver__cast( BiCGSTAB_x, _ex ); SIDL_CHECK(*_ex);
+
+   bHYPRE_BiCGSTAB_deleteRef( BiCGSTAB_x,_ex ); SIDL_CHECK(*_ex);
    return ierr;
 
    hypre_babel_exception_return_error(_ex);

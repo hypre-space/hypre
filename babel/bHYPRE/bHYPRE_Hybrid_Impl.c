@@ -927,16 +927,22 @@ impl_bHYPRE_Hybrid_Setup(
       bHYPRE_Solver_deleteRef( precond_2, _ex ); SIDL_CHECK(*_ex);
       /* The default preconditioner depends on the matrix/vector type. */
       if ( bHYPRE_Vector__cast2( b, "bHYPRE_StructVector", _ex ) )
-      {
+     {
          SIDL_CHECK(*_ex);
          bHYPRE_Vector_deleteRef( b, _ex ); SIDL_CHECK(*_ex);
          bHS_A = (bHYPRE_StructMatrix) bHYPRE_Operator__cast2( data->operator, "bHYPRE.StructMatrix", _ex );
          SIDL_CHECK(*_ex);
          hypre_assert( bHS_A!=NULL );
          SMG = bHYPRE_StructSMG_Create( data->mpicomm, bHS_A, _ex ); SIDL_CHECK(*_ex);
+         bHYPRE_StructMatrix_deleteRef( bHS_A, _ex ); SIDL_CHECK(*_ex );
+         if ( precond_2!=(bHYPRE_Solver)NULL )
+         {
+            bHYPRE_Solver_deleteRef( precond_2, _ex ); SIDL_CHECK(*_ex);
+         }
          precond_2 = bHYPRE_Solver__cast( SMG, _ex ); SIDL_CHECK(*_ex);
          ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
             data->krylov_solver_2, precond_2, _ex ); SIDL_CHECK(*_ex);
+         bHYPRE_Solver_deleteRef( precond_2, _ex ); SIDL_CHECK(*_ex );
       }
       else
       {  /* default preconditioner not defined yet */
@@ -949,6 +955,10 @@ impl_bHYPRE_Hybrid_Setup(
    /* Make krylov_solver_1, same as krylov_solver_2 but with diagonal scaling as
     * preconditioner. */
    
+   if ( data->krylov_solver_1 != (bHYPRE_PreconditionedSolver)NULL )
+   {
+      bHYPRE_PreconditionedSolver_deleteRef( data->krylov_solver_1, _ex ); SIDL_CHECK(*_ex);
+   }
    ierr += bHYPRE_PreconditionedSolver_Clone( data->krylov_solver_2,
                                               &data->krylov_solver_1, _ex ); SIDL_CHECK(*_ex);
    if ( bHYPRE_Vector__cast2( b, "bHYPRE.StructVector", _ex ) )
@@ -962,9 +972,15 @@ impl_bHYPRE_Hybrid_Setup(
 
       StructDiagScale = bHYPRE_StructDiagScale_Create(
          data->mpicomm, bHS_A, _ex ); SIDL_CHECK(*_ex);
+      bHYPRE_StructMatrix_deleteRef( bHS_A, _ex ); SIDL_CHECK(*_ex );
+      if ( precond_1!=(bHYPRE_Solver)NULL )
+      {
+         bHYPRE_Solver_deleteRef( precond_1, _ex ); SIDL_CHECK(*_ex);
+      }
       precond_1 = bHYPRE_Solver__cast( StructDiagScale, _ex ); SIDL_CHECK(*_ex);
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1, _ex ); SIDL_CHECK(*_ex);
+      bHYPRE_Solver_deleteRef( precond_1, _ex ); SIDL_CHECK(*_ex );
       bHYPRE_StructDiagScale_deleteRef(StructDiagScale, _ex); SIDL_CHECK(*_ex);
    }
    else SIDL_CHECK(*_ex);
@@ -978,9 +994,14 @@ impl_bHYPRE_Hybrid_Setup(
 
       ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create(
          data->mpicomm, bHIJ_A, _ex ); SIDL_CHECK(*_ex);
+      if ( precond_1!=(bHYPRE_Solver)NULL )
+      {
+         bHYPRE_Solver_deleteRef( precond_1, _ex ); SIDL_CHECK(*_ex);
+      }
       precond_1 = bHYPRE_Solver__cast( ParCSRDiagScale, _ex ); SIDL_CHECK(*_ex);
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1, _ex ); SIDL_CHECK(*_ex);
+      bHYPRE_Solver_deleteRef( precond_1, _ex ); SIDL_CHECK(*_ex );
       bHYPRE_ParCSRDiagScale_deleteRef(ParCSRDiagScale, _ex); SIDL_CHECK(*_ex);
    }
    else SIDL_CHECK(*_ex);
@@ -990,9 +1011,14 @@ impl_bHYPRE_Hybrid_Setup(
       bHYPRE_Vector_deleteRef( b, _ex ); SIDL_CHECK(*_ex);
       SStructDiagScale = bHYPRE_SStructDiagScale_Create(
          data->mpicomm, data->operator, _ex ); SIDL_CHECK(*_ex);
+      if ( precond_1!=(bHYPRE_Solver)NULL )
+      {
+         bHYPRE_Solver_deleteRef( precond_1, _ex ); SIDL_CHECK(*_ex);
+      }
       precond_1 = bHYPRE_Solver__cast( SStructDiagScale, _ex ); SIDL_CHECK(*_ex);
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1, _ex ); SIDL_CHECK(*_ex);
+      bHYPRE_Solver_deleteRef( precond_1, _ex ); SIDL_CHECK(*_ex );
       bHYPRE_SStructDiagScale_deleteRef(SStructDiagScale, _ex); SIDL_CHECK(*_ex);
    }
    else SIDL_CHECK(*_ex);
