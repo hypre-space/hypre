@@ -618,7 +618,8 @@ int formu ( int *cf , int n , double *e1 , int *A_i , double rho );
 int hypre_BoomerAMGIndepRS ( hypre_ParCSRMatrix *S , int measure_type , int debug_flag , int *CF_marker );
 int hypre_BoomerAMGIndepHMIS ( hypre_ParCSRMatrix *S , int measure_type , int debug_flag , int *CF_marker );
 int hypre_BoomerAMGIndepPMIS ( hypre_ParCSRMatrix *S , int CF_init , int debug_flag , int *CF_marker );
-int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A , int **CF_marker_ptr , int *coarse_size_ptr , int num_CR_relax_steps , int IS_type , int num_functions , int rlx_type , double relax_weight , double omega , double theta , HYPRE_Solver smoother , hypre_ParCSRMatrix *AN , int CRaddCpoints );
+int hypre_BoomerAMGIndepPMISa ( hypre_ParCSRMatrix *S , int CF_init , int debug_flag , int *CF_marker );
+int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A , int **CF_marker_ptr , int *coarse_size_ptr , int num_CR_relax_steps , int IS_type , int num_functions , int rlx_type , double relax_weight , double omega , double theta , HYPRE_Solver smoother , hypre_ParCSRMatrix *AN , int useCG , hypre_ParCSRMatrix *S );
 
 /* par_cycle.c */
 int hypre_BoomerAMGCycle ( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array );

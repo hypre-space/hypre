@@ -86,6 +86,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int      P_max_elmts;
    int      IS_type;
    int      num_CR_relax_steps;
+   int      CR_use_CG; 
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array;
  
@@ -175,6 +176,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    IS_type = hypre_ParAMGDataISType(amg_data);
    num_CR_relax_steps = hypre_ParAMGDataNumCRRelaxSteps(amg_data);
    CR_rate = hypre_ParAMGDataCRRate(amg_data);
+   CR_use_CG = hypre_ParAMGDataCRUseCG(amg_data);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    hypre_ParCSRMatrixSetDNumNonzeros(A);
@@ -965,10 +967,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                         &coarse_size,
                         num_CR_relax_steps, IS_type, 1, grid_relax_type[0],
 			relax_weight[level], omega[level], CR_rate, 
-			NULL,NULL,0);
+			NULL,NULL,CR_use_CG,S);
              else if (nodal > 0) 
              {
-                hypre_BoomerAMGCoarsenCR(A, &CFN_marker,
+                printf("Warning! Currently not implemented!\n");
+                /*hypre_BoomerAMGCoarsenCR(A, &CFN_marker,
                         &coarse_size, num_CR_relax_steps, IS_type, num_functions, 
 			grid_relax_type[0], relax_weight[level], omega[level], 
 			CR_rate, NULL, AN, nodal);
@@ -980,7 +983,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   col_offd_S_to_A = NULL;
                 hypre_TFree(CFN_marker);
                 hypre_TFree(col_offd_SN_to_AN);
-                hypre_ParCSRMatrixDestroy(SN);
+                hypre_ParCSRMatrixDestroy(SN);*/
             }
          }
 
