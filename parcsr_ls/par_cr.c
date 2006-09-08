@@ -609,6 +609,7 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
             }
          }
       }
+      hypre_TFree(CF_marker_offd);
       /* now send those locally calculated values for the external nodes to the neighboring processors */
       if (num_procs > 1)
          comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg,
