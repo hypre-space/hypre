@@ -114,7 +114,7 @@ initialize_variables ()
 #
 # Need the nopoe script for AIX platforms to force single task
   if [ "$HYPRE_ARCH" = "blue" ] ; then
-     CONFIGURE="nopoe configure"
+     CONFIGURE="./nopoe ./configure"
   else
      CONFIGURE="./configure"
   fi
