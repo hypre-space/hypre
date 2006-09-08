@@ -829,6 +829,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion ( hypre_ParCSRMatrix *A , hypre_ParC
 /* par_csr_matvec.c */
 int hypre_ParCSRMatrixMatvec ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
 int hypre_ParCSRMatrixMatvecT ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
+int hypre_ParCSRMatrixMatvec_FF( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y , int *CF_marker , int fpt );
 
 /* par_vector.c */
 hypre_ParVector *hypre_ParVectorCreate ( MPI_Comm comm , int global_size , int *partitioning );
