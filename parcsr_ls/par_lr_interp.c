@@ -1813,7 +1813,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int             *P_node_add;  
   int             *CF_marker_offd, *tmp_CF_marker_offd;
   int             *dof_func_offd = NULL;
-  //int             **ext_p, **ext_p_offd;
+  /*int             **ext_p, **ext_p_offd;*/
   int              ccounter_offd;
   int             *clist_offd;
   int              common_c;
