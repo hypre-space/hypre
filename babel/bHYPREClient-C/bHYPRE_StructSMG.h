@@ -89,7 +89,7 @@ bHYPRE_StructSMG
 bHYPRE_StructSMG__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE_StructSMG__data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE\_StructSMG\_\_data) passed in rather than running the constructor.
  */
 bHYPRE_StructSMG
 bHYPRE_StructSMG__wrapObj(void * data, sidl_BaseInterface *_ex);

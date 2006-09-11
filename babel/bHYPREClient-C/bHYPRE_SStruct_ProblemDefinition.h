@@ -14,7 +14,7 @@
 #define included_bHYPRE_SStruct_ProblemDefinition_h
 
 /**
- * Symbol "bHYPRE.SStruct_ProblemDefinition" (version 1.0.0)
+ * Symbol "bHYPRE.SStruct\_ProblemDefinition" (version 1.0.0)
  */
 struct bHYPRE_SStruct_ProblemDefinition__object;
 struct bHYPRE_SStruct_ProblemDefinition__array;

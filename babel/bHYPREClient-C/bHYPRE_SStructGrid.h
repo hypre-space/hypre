@@ -78,7 +78,7 @@ bHYPRE_SStructGrid
 bHYPRE_SStructGrid__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE_SStructGrid__data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE\_SStructGrid\_\_data) passed in rather than running the constructor.
  */
 bHYPRE_SStructGrid
 bHYPRE_SStructGrid__wrapObj(void * data, sidl_BaseInterface *_ex);

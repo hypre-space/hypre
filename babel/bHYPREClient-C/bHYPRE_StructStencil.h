@@ -75,7 +75,7 @@ bHYPRE_StructStencil
 bHYPRE_StructStencil__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE_StructStencil__data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE\_StructStencil\_\_data) passed in rather than running the constructor.
  */
 bHYPRE_StructStencil
 bHYPRE_StructStencil__wrapObj(void * data, sidl_BaseInterface *_ex);
