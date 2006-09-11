@@ -181,7 +181,7 @@ hypre_set_machine_options()
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="thunder"
         HYPRE_RUN_MACHINE="thunder"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_elan4/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_ia64_elan4/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -l 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Thunder]'
         ;;

@@ -223,7 +223,7 @@ get_hypre_test_name()
       *chaos_3_x86_elan3/AUTOTEST)
          hypre_test_name="SECONDARY[ALC/MCR/Pengra]"
          ;;
-      *chaos_3_x86_elan4/AUTOTEST)
+      *chaos_3_ia64_elan4/AUTOTEST)
          hypre_test_name="SECONDARY[Thunder]"
          ;;
       *chaos_3_x86_64_ib/AUTOTEST)
@@ -282,7 +282,7 @@ HYPRE_DEFAULT_REMOTE_DIRS="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-insure/AUTOTEST\
                            /usr/casc/hypre/aix_5_64_fed/AUTOTEST\
                            /usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST\
-                           /usr/casc/hypre/chaos_3_x86_elan4/AUTOTEST\
+                           /usr/casc/hypre/chaos_3_ia64_elan4/AUTOTEST\
                            /usr/casc/hypre/chaos_3_x86_64_ib/AUTOTEST\
                            /usr/gapps/hypre/sles_9_ppc64/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST\
