@@ -386,12 +386,11 @@ to use''.
 \section{Symmetric Matrices}
 \label{sec-Symmetric-Matrices}
 
-Some solvers and matrix storage schemes provide capabilities for
-significantly reducing memory usage when the coefficient matrix is
-symmetric.  In this situation, each off-diagonal coefficient appears
-twice in the matrix, but only one copy needs to be stored.  The
-\code{Struct} interface provides support for matrix and solver
-implementations that use symmetric storage via the
+Some solvers and matrix storage schemes provide capabilities for significantly
+reducing memory usage when the coefficient matrix is symmetric.  In this
+situation, each off-diagonal coefficient appears twice in the matrix, but only
+one copy needs to be stored.  The \code{Struct} interface provides support for
+matrix and solver implementations that use symmetric storage via the
 \code{SetSymmetric()} routine.
 
 To describe this in more detail, consider again the 5-pt finite-volume
@@ -407,18 +406,18 @@ HYPRE_StructMatrixSetSymmetric(A, 1);
 
 \end{verbatim}
 \end{display}
-Note that symmetric storage may or may not actually be used, depending
-on the underlying storage scheme.  Currently in \hypre{}, symmetric
-storage is always used when indicated.
+The coefficients for the entire stencil can be passed in as before.  Note that
+symmetric storage may or may not actually be used, depending on the underlying
+storage scheme.  Currently in \hypre{}, the \code{Struct} interface always uses
+symmetric storage.
 
-To most efficiently utilize the \code{Struct} interface for symmetric
-matrices, notice that only half of the off-diagonal coefficients need
-to be set.  To do this for the example being considered, we simply
-need to redefine the 5-pt stencil of Section
-\ref{sec-Struct-Stencil} to an ``appropriate'' 3-pt stencil, then
-set matrix coefficients (as in Section \ref{sec-Struct-Matrix})
-for these three stencil elements {\em only}.  For example, we could
-use the following stencil
+To most efficiently utilize the \code{Struct} interface for symmetric matrices,
+notice that only half of the off-diagonal coefficients need to be set.  To do
+this for the example being considered, we simply need to redefine the 5-pt
+stencil of Section \ref{sec-Struct-Stencil} to an ``appropriate'' 3-pt stencil,
+then set matrix coefficients (as in Section \ref{sec-Struct-Matrix}) for these
+three stencil elements {\em only}.  For example, we could use the following
+stencil
 \begin{equation}\label{eqn-symmetric-stencil}
 \left [
 \begin{array}{ccc}
@@ -428,5 +427,5 @@ use the following stencil
 \end{array}
 \right ] .
 \end{equation}
-This 3-pt stencil provides enough information to recover the full 5-pt
-stencil geometry and associated matrix coefficients.
+This 3-pt stencil provides enough information to recover the full 5-pt stencil
+geometry and associated matrix coefficients.
