@@ -592,8 +592,8 @@ confbuildtest ()
 
 #
 # Make Section
-# Remove all *.o files before building for current options unless testing
-# public versions
+# Remove all *.o and existing libHYPRE* files before building for current 
+# options unless testing public versions
    if [ "${MessageStr}" != "test_alpha" -a "${MessageStr}" != "test_beta"  -a \
         "${MessageStr}" != "test_general" ]
    then
@@ -603,6 +603,7 @@ confbuildtest ()
          cd $MakeDir
       fi
       $MAKE clean
+      rm -rf $StdBuildDir/hypre/lib/*
       $MAKE ${MakeOpt} 1>> ${Hdr}.${MessageStr}.all.log \
                        2>> ${Hdr}.${MessageStr}.all.err
    fi
