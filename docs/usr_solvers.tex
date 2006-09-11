@@ -135,25 +135,25 @@ usually required.
 
 \section* {Synopsis}
 
-In general, a solver (let's call it PHOO) is set up and run using the following routines,
+In general, a solver (let's call it {\tt SOLVER}) is set up and run using the following routines,
 where A is the matrix, b the right hand side and x the solution vector
 of the linear system to be solved:
 
 \begin{display}
 \begin{verbatim}
 /* Create Solver */
-int HYPRE_PHOOCreate(MPI_COMM_WORLD, &solver); 
+int HYPRE_SOLVERCreate(MPI_COMM_WORLD, &solver); 
 
 /* set certain parameters if desired */
-HYPRE_PHOOSetTol(solver, 1.e-8);
+HYPRE_SOLVERSetTol(solver, 1.e-8);
 .
 .
 /* Set up Solver */
-HYPRE_PHOOSetup(solver, A, b, x);
+HYPRE_SOLVERSetup(solver, A, b, x);
 /* Solve the system */
-HYPRE_PHOOSolve(solver, A, b, x);
+HYPRE_SOLVERSolve(solver, A, b, x);
 /* Destroy the solver */
-HYPRE_PHOODestroy(solver);
+HYPRE_SOLVERDestroy(solver);
 \end{verbatim}
 \end{display}
 
@@ -419,9 +419,8 @@ Various interpolation techniques can be set using \code{HYPRE_BoomerAMGSetInterp
 \item direct interpolation \cite{Stueben_1999},
 \item standard interpolation \cite{Stueben_1999},
 \item multipass interpolation \cite{Stueben_1999},
-\item multipass interpolation \cite{Stueben_1999},
 \item an extended ``classical" interpolation, which is a long range interpolation and is recommended to be used with PMIS and HMIS coarsening for harder problems,
-\item Jacobi interpolation,
+\item Jacobi interpolation \cite{Stueben_1999},
 \item the ``classical" interpolation modified for hyperbolic PDEs.
 \end{itemize}
 Jacobi interpolation is only use to improve certain interpolation operators and can be 

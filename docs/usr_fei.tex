@@ -9,7 +9,7 @@ and the finite element to linear solver interface (called
 {\tt LinearSystemCore}). The purpose of {\tt FEI} is to allow users 
 to submit the global matrices in the form of element connectivities, 
 element stiffness matrices, element loads, and boundary conditions. 
-These element information are processed by an implementation of the 
+The element information is processed by an implementation of the 
 {\tt FEI} (see \cite{FEI-ref}) which loads the global matrix and right
 hand side vectors to the linear solver libraries via the 
 {\tt LinearSystemCore} interface.
@@ -20,8 +20,8 @@ with little change in the user code.
 The specification of the {\tt FEI} and its implementation was first
 developed at Sandia. A simplified implementation has been implemented
 at LLNL in \hypre{}'s finite element module. While most of \hypre{}
-is written in {\tt C}, the {\tt FEI} and {\tt LinearSystemCore}
-interfaces are written in {\tt C++}. In the next section, we 
+is written in C, the {\tt FEI} and {\tt LinearSystemCore}
+interfaces are written in C++. In the next section, we 
 describe the basic {\tt FEI} functions and a sample program to 
 demonstrate how to use them. 
 %A brief description of \hypre{}'s 
@@ -226,7 +226,7 @@ compressed sparse row (CSR) matrix in the {\tt ia, ja, val} arrays.
 \> {\tt HYPRE\_launchSolver(\&status, \&iterations);}
 \end{tabbing}
 
-A list of available functions are given in the reference manual.
+A list of available functions is given in the reference manual.
 %
 %\begin{tabbing}
 %{\tt HYPRE\_LinSysCore\_create(LinSysCore **lsc, MPI\_Comm comm)} \\[1mm]
