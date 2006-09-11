@@ -2064,6 +2064,10 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    double           *e2;
    double           alpha, beta, gamma, gammaold;
    int		    num_coarse, global_num_variables, global_nc = 0;
+   double candmeas=0.0e0, local_max=0.0e0, global_max = 0;
+   double thresh=1-rho;
+   /*double thresh=0.5;*/
+
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
    if (AN) AN_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AN));
@@ -2292,9 +2296,6 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
             }
          }
          /*formu(CF_marker,num_variables,e1,A_i,rho);*/
-         double candmeas=0.0e0, local_max=0.0e0, global_max = 0;
-         double thresh=1-rho;
-         /*double thresh=0.5;*/
          if (nstages)
             thresh=0.5;
          else
