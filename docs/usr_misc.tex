@@ -83,7 +83,13 @@ Some of the commonly used options include:
                                         the libraries defined in the environment 
                                         variable LD_LIBRARY_PATH. 
    --with-print-errors            Print HYPRE errors
-   --with-no-global-partitioning  Do NOT use global partitioning options
+   --with-no-global-partitioning  Do NOT store a global partition of the data
+                                  NOTE: this option reduces storage and improves
+                                        performance when using many thousands of
+                                        processors (not recommended for < 1000 
+                                        processors).
+
+
 \end{verbatim}
 
 The user can mix and match the configure options and variable settings to meet their 
