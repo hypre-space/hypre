@@ -24,101 +24,87 @@ examples in the examples directory.
 
 You do not need to have the Babel software to use the Babel-based
 interface of \hypre{}.  Prebuilt interfaces for the C, C++, and
-Fortran languages are included with the \hypre{} distribution.  We
-will enlarge the distribution with more such interfaces whenever \hypre{}
+Fortran languages are included with the \hypre{} distribution.  A
+prebuilt Python interface will appear in the near future.  We will
+enlarge the distribution with more such interfaces whenever \hypre{}
 users indicate that they need them, and our tools such as Babel
 support them.  Although you do not need to know about Babel to use the
 Babel-based interface of \hypre{}, if you are curious about Babel you
-can look at its documentation at \url{http://www.llnl.gov/CASC/components}.
+can look at its documentation at
+\url{http://www.llnl.gov/CASC/components}.
 
-% >>> Someplace we should say that we can't do Python until shared
-% >>> library support is put back into hypre (it would be better to be
-% >>> able to build shared libraries again!)
+\section{Interfaces are Similar}
 
-\section{The HYPRE Object Structure}
+In most respects, the older C-only interface and the Babel-based
+interface are very similar. The function names always differ a little,
+and often there are minor differences in the argument lists.  The
+following sections will discuss the more significant differences, but
+this example shows how similar the interfaces can be.  The first
+example is for the C-only interface, and the other examples are for
+the Babel interface in the C, C++, Fortran, and Python languages.
 
-Even though it is written in C, \hypre{} is object-oriented in its
-conceptual design.  The object structure of \hypre{} is often visible
-in names of structs and functions.  Because Babel is explicitly
-object-oriented, the Babel-based interface of \hypre{} makes the
-\hypre{} object system more visible, at least at the level of the
-user interface.  Understanding the \hypre{} object structure can be
-helpful but is not necessary for using \hypre{} and its Babel
-interface.
-
-The object structure of the Babel-based interface is explicitly
-defined in the SIDL (Scientific Interface Definition Language) file
-\code{Interfaces.idl}.  Babel translates this object structure as
-appropriate for the language the user uses - from SIDL's interfaces
-and classes to C++ classes, or to mangled names in C and Fortran.
-For more information about the SIDL language, visit the Babel project
-website, \url{http://www.llnl.gov/CASC/components}.
-
-Here is an example: In the SIDL file defining the Babel interface, the
-StructVector class inherits from the StructVectorView and Vector
-interfaces.  StructVectorView extends MatrixVectorView interface,
-which extends the ProblemDefinition interface.  The Babel StructVector
-class can appear as a C++ class also named \code{StructVector} (in the
-\code{bHYPRE} namespace), as a C struct named
-\code{bHYPRE_StructVector}, or as a Fortran
-\code{integer*8}.  Its member function SetValues can appear in C++ as a
-member function \code{SetValues}, in C as a function
-\code{bHYPRE_StructVector_SetValues}, or in Fortran as a subroutine
-\code{bHYPRE_StructVector_SetValues}.
-
-The inheritance structure matters in use because you can cast an
-object up and down its inheritance hierarchy.  Sometimes you must cast
-it in order to provide an object of the right data type in a function
-call.  For example, the PCG solver works on any kind of vector, so PCG
-functions expect Vector objects among their arguments.  If you have a
-StructVector, and you want to use PCG, you might write C and Fortran
-code containing cast functions like the following.  In C++, of course,
-such explicit casts are unnecessary.
 \begin{verbatim}
-    bHYPRE_StructVector b_S = bHYPRE_StructVector_Create(...);
-    bHYPRE_Vector       b = bHYPRE_Vector__cast( b_S );
-    hypre_Vector        x;
-    bHYPRE_PCG          PCG_solver;
-    bHYPRE_PCG_Apply( PCG_solver, b, &x );
+   HYPRE_IJVectorInitialize( b );
+   bHYPRE_IJParCSRVector_Initialize( b, &_ex );
+   b.Initialize();
+   call bHYPRE_IJParCSRVector_Initialize_f( b, ierr, ex )
+   bHYPRE.IJParCSRVector.Initialize( b )
 \end{verbatim}
+
+
+\section{Interfaces are Different}
+
+Function names usually differ in minor ways, as decribed in the
+following section ``Names and Conventions.''  But sometimes they
+differ more; for example to apply a solver to solve linear equations,
+you say \code{Solve} in the C-only interface and \code{Apply} in the
+Babel-based interface.  For information on particular functions, see
+the reference manuals or example files.
+
+Function argument lists look mainly the same.  The data types of many
+arguments are different as required, for example in C a preconditioner
+would be a \code{HYPRE_Solver} in the C-only interface, or a
+\code{bHYPRE_Solver} in the Babel-based interface.  Sometimes there
+are greater differences; the greatest ones are discussed below.
+Again, see the reference manuals or example files for more specific
+information.
+
+In C or Fortran, the Babel-based interface requires an extra argument
+at the end, called the ``exception.''  It is not necessary for C++ or
+Python.  You should ignore it, but it has to be there.  In C you
+should declare it as follows.
 \begin{verbatim}
-      integer*8 b_S
-      integer*8 b
-      integer*8 x
-      integer*8 PCG_solver
-      call bHYPRE_StructVector_Create_f(...,b_S)
-      call bHYPRE_Vector__cast_f( b_S, b )
-      call bHYPRE_PCG_Apply_f( PCG_solver, b, x, ierr )
+  #include "sidl_Exception.h"
+  sidl_BaseInterface_ex;
 \end{verbatim}
-(Other code not shown would set up the matrix, provide it and
-parameters to the solver, set up the vectors, and so forth).
+And in Fortran you should declare it as follows.
+\begin{verbatim}
+      integer*8  ex
+\end{verbatim}
 
-Figure~\ref{figObjectModel} describes in abbreviated form the most
-important ideas of the \hypre{} inheritance hierarchy.
+Parameters are set differently in the C-only and Babel-based
+interfaces.  In the C interface there is a different \code{Set}
+function for each parameter; the parameter name is part of the
+function name.  In the Babel-based interface there are just a few
+\code{Set*Parameter} interfaces.  The parameter is one of the
+arguments.  For details see the following section on parameters, or
+look in an example file.
 
+MPI communicators are passed differently, in the native form in the
+C-only interface and as a language-neutral object in the Babel-based
+interface.  For details see the section on MPI communicators.
 
-\begin{figure}
-\centering
-\includegraphics[width=5in]{figObjectModel}
-\caption{%
-Graphic illustrating the ideas of the object model.}
-\label{figObjectModel}
-\end{figure}
+In two rare cases, the Babel-based interface of \hypre{} provides
+output arrays in a special format.  See the section on arrays if you
+need to deal with it.
 
-% The same chart appears in the following two places, among others.
-% 1. page 5 of ``The Design and Implementation of hypre, a Library of
-% Parallel High Performance Preconditioners''
-% (jfp has this in an email from Rob Falgout on May 13, 2005)
-% 2. slide 79 of ACTS viewgraphs on hypre dated August 23, 2005 (jfp
-% has this in an email from Rob Falgout dated July 19, 2006)
+With the Babel-based interface in the C or Fortran languages, you will
+occasionally need to explicitly cast an object between different data
+types.  You do this with a special \code{cast} function.  Moreover,
+for every time you create or cast an object you need a corresponding
+call of a \code{Destroy} or \code{deleteRef} function. See the
+sections on memory management and casting for details.
 
-
-% >>>>>>> a more complete chart would be nice, if it would fit! <<<<<<<<
-
-% >>>>>>> a verbal description of the object system, e.g. what is a
-% view, is ESSENTIAL ! <<<<<<<<<
-% concepts to include:
-% conceptual interface (e.g. IJ) vs 'underlying storage type' (e.g. ParCSR)
 
 \section{Names and Conventions}
 
@@ -129,7 +115,8 @@ interface is similar: most function names look like
 \code{bHYPRE_Class_Function}.  In the Fortran-Babel interface, most
 function names look like \code{bHYPRE_Class_Function_f}.  In the
 C++-Babel interface, SIDL (Babel) classes are actually implemented as
-classes, so functions look like Class.Function.  In C++, the
+classes, so functions generally look like Instance.Function, where
+Instance is an instance of the class.  In C++, the
 Babel-interface functions live in the namespace \code{::ucxx::bHYPRE}.
 
 This function naming pattern is slightly broken in the case of service
@@ -162,53 +149,269 @@ Most \hypre{} objects need to be supplied with an MPI communicator.
 The Babel interface has a special class for the MPI communicator; for
 details see the section on MPI communicators.
 
-\section{Arrays}
-Babel supports a two different kinds of array.  In the \hypre{}
-Babel-based interface, almost all the arrays are ``raw arrays'' or
-``rarrays'', the native array of the language you use.  And all our
-rarrays are one-dimensional arrays.  Thus, you will almost always deal
-with arrays as in the following examples of an array \code{rows} for
-C, C++, and Fortran.
+\section{Parameters and Error Flags}
 
+Most \hypre{} objects can be modified by setting parameters.  In the
+C-only interface, there is a separate function to set each parameter.
+The Babel-based interface has just a few parameter-setting functions
+for each object.  The parameters are identified by their names, as
+strings.  See below for some examples.
+
+Most \hypre{} functions return error flags, as discussed elsewhere in
+this manual. The following examples simply show how they are returned,
+not how to handle them.
+
+\subsubsection{C-only}
 \begin{verbatim}
-      /* C */
-      int    *rows;
-      rows = calloc( size, sizeof(int) );
-      for ( i=0; i<size; i++ )
-         rows[i] = ilower + i;
-      bHYPRE_IJParCSRVector_SetValues( b, size, rows, values );
-      free(rows);
-
-      // C++
-      int    *rows;
-      rows = new int[size];
-      for ( i=0; i<size; i++ )
-         rows[i] = ilower + i;
-      b.SetValues( size, rows, values );
-      delete[] rows;
-
-c     Fortran
-      integer    rows(MAX_SIZE)
-      do i = 1, local_size
-         rows(i) = ilower + i -1
-      enddo
-      call bHYPRE_IJParCSRVector_SetValues_f(
-     1     par_b, size, rows, values, ierr )
+    HYPRE_Solver amg_solver;
+    int ierr;
+    ierr = HYPRE_BoomerAMGSetCoarsenType( amg_solver, 6 );
+    ierr = HYPRE_BoomerAMGSetTol( amg_solver, 1e-7 );
 \end{verbatim}
 
-The other kind of Babel array is the ``SIDL array'', which has more
-structure than the arrays native to languages like C or Fortran - it
-accomodates reference counting and knows its own size, for example.
-In the \hypre{} Babel-based interface, we presently use SIDL arrays
-only for output-only arrays in two functions, GetRow and
-CoefficientAccess. In the past they have been used for two-dimensional
-input arrays as well.
+\subsubsection{C-Babel}
+\begin{verbatim}
+    bHYPRE_BoomerAMG amg_solver;
+    int ierr;
+    ierr = bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6);
+    ierr = bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-7);
+\end{verbatim}
+
+\subsubsection{Fortran-Babel}
+\begin{verbatim}
+          integer*8  amg_solver
+          integer ierr
+          call bHYPRE_BoomerAMG_SetIntParameter_f(
+         1        amg_solver, "CoarsenType", 6, ierr )
+          call bHYPRE_BoomerAMG_SetDoubleParameter_f(
+         1        amg_solver, "Tolerance", tol, ierr )
+\end{verbatim}
+
+\subsubsection{C++-Babel}
+\begin{verbatim}
+    using namespace ::ucxx::bHYPRE;
+    BoomerAMG amg_solver;
+    ierr = amg_solver.SetIntParameter( "CoarsenType", 6);
+    ierr = amg_solver.SetDoubleParameter( "Tolerance", 1e-7);
+\end{verbatim}
+
+\section{MPI communicator}
+
+In the C-only \hypre{} interface, and most normal MPI usage, one often
+needs an MPI communicator of type \code{MPI_Comm}.  What an
+\code{MPI_Comm} really is depends on the language and the MPI
+implementation.
+
+But the Babel interface is supposed to be fundamentally independent of
+languages and implementations.  So the MPI communicator is wrapped in
+a special \code{bHYPRE_MPICommunicator} object.  This, not an
+\code{MPI_Comm} object, is what you pass to all the Babel-interface
+functions which need an MPI communicator.  Thus the language
+dependence of MPI is isolated in the function which creates the
+\code{bHYPRE_MPICommunicator} object.  Here are examples of how to use
+this function:
+
+\subsubsection{C-Babel}
+\begin{verbatim}
+    bHYPRE_MPICommunicator mpi_comm;
+    MPI_Comm mpicommworld = MPI_COMM_WORLD;
+    MPI_Comm * C_mpi_comm = &mpicommworld;
+    mpi_comm = bHYPRE_MPICommunicator_CreateC( C_mpi_comm );
+       ...
+    parcsr_A = bHYPRE_IJParCSRMatrix_Create( mpi_comm,... );
+\end{verbatim}
+
+\subsubsection{C++-Babel}
+\begin{verbatim}
+    using namespace ::ucxx::bHYPRE;
+    MPICommunicator mpi_comm;
+    MPI_Comm mpicommworld = MPI_COMM_WORLD;
+    MPI_Comm * C_mpi_comm = &mpicommworld;
+    mpi_comm = MPICommunicator::CreateC( C_mpi_comm );
+       ...
+    parcsr_A = IJParCSRMatrix::Create( mpi_comm,... );
+\end{verbatim}
+
+\subsubsection{Fortran-Babel}
+\begin{verbatim}
+          integer*8  mpi_comm
+          integer*8  F_mpi_comm
+          F_mpi_comm = MPI_COMM_WORLD
+          call bHYPRE_MPICommunicator_CreateF_f( F_mpi_comm, mpi_comm )
+             ...
+          call bHYPRE_IJParCSRMatrix_Create_f( mpi_comm, ... )
+\end{verbatim}
+
+\section{Memory Management}
+
+You will want to destroy whatever objects you create.  In C and
+Fortran, you must do this explicitly.  Through the Babel-based
+interface to \hypre{}, there are two ways to create something: by
+calling a \code{Create} function or by calling a
+\code{cast} function. You can destroy things with a \code{Destroy}
+or \code{deleteRef} function.  For every call of \code{Create} or
+\code{cast} there must be a call of \code{Destroy} or
+\code{deleteRef}.  Here is an example in C:
+\begin{verbatim}
+    b = bHYPRE_IJParCSRVector_Create( mpi_comm, ilower, iupper, ex );
+    vb = bHYPRE_Vector__cast( b, ex );
+    bHYPRE_Vector_deleteRef( vb, ex );
+    bHYPRE_IJParCSRVector_deleteRef( b, ex );
+\end{verbatim}
+Here it is in Fortran:
+\begin{verbatim}
+      call bHYPRE_IJParCSRVector_Create_f( mpi_comm, ilower, iupper,
+     1                                     b, ex )
+      call bHYPRE_Vector__cast_f( b, vb, ex )
+      call bHYPRE_IJParCSRVector_deleteRef_f( vb, ex )
+      call bHYPRE_IJParCSRVector_deleteRef_f( b, ex )
+\end{verbatim}
+
+What is actually going on here is memory management by reference
+counting.  Babel references-counts all its objects.  Reference
+counting means that the object contains an integer which counts the
+number of outside references to the object.  Babel will bump up the
+reference count by one when you call a \code{Create} or \code{cast}
+function.  Note that each of those functions normally is used to
+assign an object to a variable.  In C and Fortran it is up to you do
+decrement the reference count when that variable is no longer needed.
+
+With Babel, reference counting is automatic in C++, so you will not
+normally need to do any memory management yourself.
+
+If you are interested in doing more with reference counting, see the
+Babel users' manual for more information.  In some cases you may find
+Babel's memory tools useful, e.g. if you copy pointers to Babel
+objects.
+
+
+\section{Casting}
+
+If your code is written in C or Fortran, you will occasionally need to
+call a Babel \code{cast} function.  This section tells you why and
+how.
+
+Functions are generally written in as much generality as possible.
+For example, the PCG algorithm works the same for any kind of matrix
+and vector, as long as it can multiply a matrix and vector, compute an
+inner product, and so forth.  So two of its argument types are
+\code{bHYPRE_Vector}.  But when you create a vector you have to decide
+how it's going to be stored!  So you have to declare it as a more
+specific data type, e.g. \code{bHYPRE_StructVector}.  To apply the PCG
+solver to that vector in C or Fortran, you have to call a \code{cast}
+function to change its data type.
+
+In C++ and Python, you do not normally need to call a \code{cast}
+function.
+
+Be careful to call a \code{deleteRef} or \code{Destroy} function to
+correspond to every \code{cast} function, as discussed in the section
+on memory management.
+
+Here are examples of casting in C and Fortran.
+\begin{verbatim}
+    bHYPRE_StructVector b_S = bHYPRE_StructVector_Create(...);
+    bHYPRE_Vector       b = bHYPRE_Vector__cast( b_S, ex );
+    hypre_Vector        x;
+    bHYPRE_PCG          PCG_solver;
+    bHYPRE_PCG_Apply( PCG_solver, b, &x, ex );
+    bHYPRE_Vector_deleteRef( b, ex );
+    bHYPRE_StructVector_deleteRef( b_S, ex );
+\end{verbatim}
+\begin{verbatim}
+      integer*8 b_S
+      integer*8 b
+      integer*8 x
+      integer*8 PCG_solver
+      call bHYPRE_StructVector_Create_f(...,b_S, ex )
+      call bHYPRE_Vector__cast_f( b_S, b, ex )
+      call bHYPRE_PCG_Apply_f( PCG_solver, b, x, ierr, ex )
+      call bHYPRE_Vector_deleteRef_f( b, ex )
+      call bHYPRE_StructVector_deleteRef_f( b_S, ex )
+\end{verbatim}
+(Other code not shown would set up the matrix, provide it and
+parameters to the solver, set up the vectors, and so forth).
+
+\section{The HYPRE Object Structure}
+
+Even though it is written in C, \hypre{} is object-oriented in its
+conceptual design.  The object structure of \hypre{} is often visible,
+for example in names of structs and functions.  It is even more
+visible in the Babel-based interface than in the C-only interface.  In
+both interfaces, you can use \hypre{} without any knowledge of its
+object structure or object-oriented programming.  This section is for
+you if you have some basic knowledge of object-oriented concepts and
+if you are curious about how they appear in \hypre{}.
+
+The object structure of the Babel-based interface is explicitly
+defined in the SIDL (Scientific Interface Definition Language) file
+\code{Interfaces.idl}.  Babel translates this object structure as
+appropriate for the language the user uses - from SIDL's interfaces
+and classes to C++ classes, or to mangled names in C and Fortran.
+For more information about the SIDL language, visit the Babel project
+website, \url{http://www.llnl.gov/CASC/components}.
+
+Here is an example: In the SIDL file defining the Babel interface, the
+StructVector class inherits from the StructVectorView and Vector
+interfaces.  StructVectorView extends MatrixVectorView interface,
+which extends the ProblemDefinition interface.  The Babel StructVector
+class can appear as a C++ class also named \code{StructVector} (in the
+\code{bHYPRE} namespace), as a C struct named
+\code{bHYPRE_StructVector}, or as a Fortran
+\code{integer*8}.  Its member function SetValues can appear in C++ as a
+member function \code{SetValues}, in C as a function
+\code{bHYPRE_StructVector_SetValues}, or in Fortran as a subroutine
+\code{bHYPRE_StructVector_SetValues}.
+
+The inheritance structure matters in use because sometimes you must
+cast an object up and down its inheritance hierarchy to provide an
+object of the right data type in a function call.  See the section on
+casting.
+
+Figure~\ref{figObjectModel} describes in abbreviated form the most
+important ideas of the \hypre{} inheritance hierarchy.
+
+
+\begin{figure}
+\centering
+\includegraphics[width=5in]{figObjectModel}
+\caption{%
+The ideas of the hypre object model.}
+\label{figObjectModel}
+\end{figure}
+
+% The same chart appears in the following two places, among others.
+% 1. page 5 of ``The Design and Implementation of hypre, a Library of
+% Parallel High Performance Preconditioners''
+% (jfp has this in an email from Rob Falgout on May 13, 2005)
+% 2. slide 79 of ACTS viewgraphs on hypre dated August 23, 2005 (jfp
+% has this in an email from Rob Falgout dated July 19, 2006)
+
+
+% >>>>>>> a more complete chart would be nice, if it would fit! <<<<<<<<
+
+% >>>>>>> a verbal description of the object system, e.g. what is a
+% view, is ESSENTIAL ! <<<<<<<<<
+% concepts to include:
+% conceptual interface (e.g. IJ) vs 'underlying storage type' (e.g. ParCSR)
+
+\section{Arrays}
+Almost always, when you pass an array through the Babel-based
+interface, you do it in the natural way - you build and use the array
+type which is native to your language.  Babel calls this kind or array
+a ``raw array'' or ``rarray.''  In \hypre{}, they are
+one-dimensional too.  It is usually obvious how to use them.
+
+Just two functions in \hypre{}, \code{GetRow} and
+\code{CoefficentAccess}, require a special type of array, which Babel
+calls a ``SIDL array.''  This has more structure than the arrays
+native to languages like C or Fortran - it accomodates reference
+counting and knows its own size, for example.
 
 The following examples show a way to declare, read, and destroy a SIDL
-array (see the section on Memory Management for more about the
-deleteRef function).  The GetRow and CoefficentAccess functions create
-their output arrays, so there is no need to create your own.  For more
-information, read the Babel documentation at
+array.  The GetRow and CoefficentAccess functions create their output
+arrays, so there is no need to create your own.  For more information
+on these arrays, read the Babel documentation at
 \url{http://www.llnl.gov/CASC/components}.
 
 % I've never done any of this.  This should be put in the test
@@ -222,8 +425,8 @@ information, read the Babel documentation at
     for ( k=0; k<row_size; ++k )
        col[k]  = sidl_int__array_get1( row_js, k );
        data[k] = sidl_double__array_get1( row_data, k );
-   sidl_int__array_deleteRef( row_j );
-   sidl_double__array_deleteRef( row_data );
+    sidl_int__array_deleteRef( row_j );
+    sidl_double__array_deleteRef( row_data );
 \end{verbatim}
 \subsubsection{Fortran}
 \begin{verbatim}
@@ -237,132 +440,6 @@ information, read the Babel documentation at
       call sidl_int__array_deleteRef( row_j )
       call sidl_double__array_deleteRef( row_data )
 \end{verbatim}
-
-
-\section{Memory Management}
-
-Babel references-counts all its objects, ``object'' meaning here an
-instance of a SIDL class.  Reference counting means that the object
-contains an integer which counts the number of outside references to
-the object.  The purpose of reference counting is to make sure that an
-object gets automatically deleted at exactly the right time - when it
-is no longer needed.
-
-With Babel, reference counting is automatic in C++.  But in other
-Babel-supported languages you will need to insert a few function calls
-to make memory management work.
-
-When you create an object, you get a pointer and normally assign it to
-a variable, say \code{Object}.  At that point the object's reference
-count starts as 1.  If you copy the pointer,
-e.g. \code{SameObject=Object}, you have two references to the same
-object.  So you should make sure that the object's reference count
-goes up to 2.  You do that with a call of the Babel \code{addRef}
-function, as in the following examples.
-
-If you put a Babel object into a struct, or return one through a
-function call, you are making a copy.  You will need to call
-\code{addRef} at about the time you do this.
-
-You also need to decrement the reference count if one of your
-references to an object disappears.  In the above example, if
-\code{SameObject} were declared within the scope of the function
-\code{MyFunction}, you would need to decrement the reference count
-before \code{MyFunction} returns.  You do that by calling the Babel
-\code{deleteRef} function, as in the following examples.  For every
-object creation, and every \code{addRef} function call, there should
-be a corresponding \code{deleteRef} call.
-
-In the simplest and most typical use, you won't copy pointers, so
-there is no need for \code{addRef} calls.  But before the end of your
-program, or the end of the function which calls \hypre{} through the
-Babel interface, you will need to call \code{deleteRef} for every
-Babel object which has been created and returned to you.
-
-When a copy is made and abandoned within a short simple stretch of
-code, most people can get away without inserting an \code{addRef},
-\code{deleteRef} pair.
-
-Here is an example in C showing the life of a vector (the type
-\code{bHYPRE_IJParCSRVector} is actually a pointer).  In C:
-\begin{verbatim}
-    bHYPRE_IJParCSRVector b;
-    b = bHYPRE_IJParCSRVector_Create( mpi_comm, ilower, iupper );
-    /* do something with b here */
-    bHYPRE_IJParCSRVector_deleteRef( b );
-\end{verbatim}
-
-If you copy the object, there's a bit more to do.  This example makes
-two copies, one with an assignment operator, and one with a cast.  The
-argument of \code{addRef} and \code{deleteRef} doesn't matter as long
-as it points to the right object, and the data type is what the
-function needs.
-
-\begin{verbatim}
-    bHYPRE_IJParCSRVector b, b2;
-    bHYPRE_Vector vb;
-    b = bHYPRE_IJParCSRVector_Create( mpi_comm, ilower, iupper );
-    b2 = b;
-    bHYPRE_IJParCSRVector_addRef( b );
-    vb = bHYPRE_Vector__cast( b );
-    bHYPRE_IJParCSRVector_addRef( b );
-    /* do something with b,b2,vb here */
-    bHYPRE_IJParCSRVector_deleteRef( b );
-    bHYPRE_IJParCSRVector_deleteRef( b );
-    bHYPRE_IJParCSRVector_deleteRef( b );
-\end{verbatim}
-
-This example is just the same, but with a minimum of reference
-counting calls.
-\begin{verbatim}
-    bHYPRE_IJParCSRVector b, b2;
-    bHYPRE_Vector vb;
-    b = bHYPRE_IJParCSRVector_Create( mpi_comm, ilower, iupper );
-    b2 = b;
-    vb = bHYPRE_Vector__cast( b );
-    /* do something short and simple with b,b2,vb here */
-    bHYPRE_IJParCSRVector_deleteRef( b );
-\end{verbatim}
-
-
-
-Memory management is easier in C++.  Babel objects are ``smart
-pointers'', meaning that \code{addRef} and \code{deleteRef} calls are
-handled automatically wherever possible.
-
-Following are the above examples in Fortran.
-
-\begin{verbatim}
-      integer*8 b
-      call bHYPRE_IJParCSRVector_Create_f( mpi_comm, ilower, iupper, b )
-c     do something with b here
-      call bHYPRE_IJParCSRVector_deleteRef_f( b )
-\end{verbatim}
-
-\begin{verbatim}
-      integer*8 b, b2
-      integer*8 vb
-      call bHYPRE_IJParCSRVector_Create_f( mpi_comm, ilower, iupper, b )
-      b2 = b
-      call bHYPRE_IJParCSRVector_addRef_f( b )
-      call bHYPRE_Vector__cast_f( b, vb )
-      call bHYPRE_IJParCSRVector_addRef_f( b )
-c     do something with b,b2,vb here
-      call bHYPRE_IJParCSRVector_deleteRef_f( b )
-      call bHYPRE_IJParCSRVector_deleteRef_f( b )
-      call bHYPRE_IJParCSRVector_deleteRef_f( b )
-\end{verbatim}
-
-\begin{verbatim}
-      integer*8 b, b2
-      integer*8 vb
-      call bHYPRE_IJParCSRVector_Create_f( mpi_comm, ilower, iupper, b )
-      b2 = b
-      call bHYPRE_Vector__cast_f( b, vb )
-c     do something short and simple with b,b2,vb here
-      call bHYPRE_IJParCSRVector_deleteRef_f( b )
-\end{verbatim}
-
 
 
 \section{Matrices and Vectors}
@@ -612,105 +689,12 @@ The C-only interface is very similar:
 \end{verbatim}
 
 
-\section{Parameters and Error Flags}
-
-Most \hypre{} objects can be modified by setting parameters.  In the
-C-only interface, there is a separate function to set each parameter.
-The Babel-based interface has just a few parameter-setting functions
-for each object.  The parameters are identified by their names, as
-strings.  See below for some examples.
-
-Most \hypre{} functions return error flags, as discussed elsewhere in
-this manual. The following examples simply show how they are returned,
-not how to handle them.
-
-\subsubsection{C-only}
-\begin{verbatim}
-    HYPRE_Solver amg_solver;
-    int ierr;
-    ierr = HYPRE_BoomerAMGSetCoarsenType( amg_solver, 6 );
-    ierr = HYPRE_BoomerAMGSetTol( amg_solver, 1e-7 );
-\end{verbatim}
-
-\subsubsection{C-Babel}
-\begin{verbatim}
-    bHYPRE_BoomerAMG amg_solver;
-    int ierr;
-    ierr = bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6);
-    ierr = bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-7);
-\end{verbatim}
-
-\subsubsection{Fortran-Babel}
-\begin{verbatim}
-          integer*8  amg_solver
-          integer ierr
-          call bHYPRE_BoomerAMG_SetIntParameter_f(
-         1        amg_solver, "CoarsenType", 6, ierr )
-          call bHYPRE_BoomerAMG_SetDoubleParameter_f(
-         1        amg_solver, "Tolerance", tol, ierr )
-\end{verbatim}
-
-\subsubsection{C++-Babel}
-\begin{verbatim}
-    using namespace ::ucxx::bHYPRE;
-    BoomerAMG amg_solver;
-    ierr = amg_solver.SetIntParameter( "CoarsenType", 6);
-    ierr = amg_solver.SetDoubleParameter( "Tolerance", 1e-7);
-\end{verbatim}
-
 % >>>>>>>>>>>>>> Not done: vectors, stencils, graphs, grids, note that some
 % have versions for different matrix storage types
 
 % >>>>>>>>>>>>>> Not done: all solvers: PCG, GMRES, BiCGSTAB, CGNR, Euclid,
 % Hybrid, ParaSails, Pilut, Schwarz, Split, and DiagScale, Identity;
 %note that some have versions for different matrix storage types
-
-\section{MPI communicator}
-
-In the C-only \hypre{} interface, and most normal MPI usage, one often
-needs an MPI communicator of type \code{MPI_Comm}.  What an
-\code{MPI_Comm} really is depends on the language and the MPI
-implementation.
-
-But the Babel interface is supposed to be fundamentally independent of
-languages and implementations.  So the MPI communicator is wrapped in
-a special \code{bHYPRE_MPICommunicator} object.  This, not an
-\code{MPI_Comm} object, is what you pass to all the Babel-interface
-functions which need an MPI communicator.  Thus the language
-dependence of MPI is isolated in the function which creates the
-\code{bHYPRE_MPICommunicator} object.  Here are examples of how to use
-this function:
-
-\subsubsection{C-Babel}
-\begin{verbatim}
-    bHYPRE_MPICommunicator mpi_comm;
-    MPI_Comm mpicommworld = MPI_COMM_WORLD;
-    MPI_Comm * C_mpi_comm = &mpicommworld;
-    mpi_comm = bHYPRE_MPICommunicator_CreateC( C_mpi_comm );
-       ...
-    parcsr_A = bHYPRE_IJParCSRMatrix_Create( mpi_comm,... );
-\end{verbatim}
-
-\subsubsection{C++-Babel}
-\begin{verbatim}
-    using namespace ::ucxx::bHYPRE;
-    MPICommunicator mpi_comm;
-    MPI_Comm mpicommworld = MPI_COMM_WORLD;
-    MPI_Comm * C_mpi_comm = &mpicommworld;
-    mpi_comm = MPICommunicator::CreateC( C_mpi_comm );
-       ...
-    parcsr_A = IJParCSRMatrix::Create( mpi_comm,... );
-\end{verbatim}
-
-\subsubsection{Fortran-Babel}
-\begin{verbatim}
-          integer*8  mpi_comm
-          integer*8  F_mpi_comm
-          F_mpi_comm = MPI_COMM_WORLD
-          call bHYPRE_MPICommunicator_CreateF_f( F_mpi_comm, mpi_comm )
-             ...
-          call bHYPRE_IJParCSRMatrix_Create_f( mpi_comm, ... )
-\end{verbatim}
 
 \section{Building HYPRE with the Babel Interface}
 
