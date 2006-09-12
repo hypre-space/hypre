@@ -468,6 +468,9 @@ int main (int argc, char *argv[])
       bHYPRE_IJParCSRVector_Print( par_x, "ij.out.x", &_ex );
 
    /* Clean up */
+   bHYPRE_Operator_deleteRef( op_A, &_ex );
+   bHYPRE_Vector_deleteRef( vec_b, &_ex );
+   bHYPRE_Vector_deleteRef( vec_x, &_ex );
    bHYPRE_IJParCSRMatrix_deleteRef( parcsr_A, &_ex );
    bHYPRE_IJParCSRVector_deleteRef( par_b, &_ex );
    bHYPRE_IJParCSRVector_deleteRef( par_x, &_ex );

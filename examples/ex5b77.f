@@ -262,6 +262,9 @@ c     Print the solution
       endif
 
 c     Clean up
+      call bHYPRE_Operator_deleteRef_f( op_A, except )
+      call bHYPRE_Vector_deleteRef_f( vec_b, except )
+      call bHYPRE_Vector_deleteRef_f( vec_x, except )
       call bHYPRE_IJParCSRMatrix_deleteRef_f( parcsr_A, except )
       call bHYPRE_IJParCSRVector_deleteRef_f( par_b, except )
       call bHYPRE_IJParCSRVector_deleteRef_f( par_x, except )
