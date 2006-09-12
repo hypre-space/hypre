@@ -43,8 +43,8 @@ extern "C" {
 /**
  * @name SStruct System Interface
  *
- * This interface represents a semi-structured-grid conceptual view of
- * a linear system.
+ * This interface represents a semi-structured-grid conceptual view of a linear
+ * system.
  *
  * @memo A semi-structured-grid conceptual interface
  **/
@@ -60,9 +60,9 @@ extern "C" {
 
 struct hypre_SStructGrid_struct;
 /**
- * A grid object is constructed out of several structured ``parts''
- * and an optional unstructured ``part''.  Each structured part has
- * its own abstract index space.
+ * A grid object is constructed out of several structured ``parts'' and an
+ * optional unstructured ``part''.  Each structured part has its own abstract
+ * index space.
  **/
 typedef struct hypre_SStructGrid_struct *HYPRE_SStructGrid;
 
@@ -79,15 +79,15 @@ enum hypre_SStructVariable_enum
    HYPRE_SSTRUCT_VARIABLE_ZEDGE     =  7
 };
 /**
- * An enumerated type that supports cell centered, node centered, face
- * centered, and edge centered variables.  Face centered variables are
- * split into x-face, y-face, and z-face variables, and edge centered
- * variables are split into x-edge, y-edge, and z-edge variables.  The
- * edge centered variable types are only used in 3D.  In 2D, edge
- * centered variables are handled by the face centered types.
+ * An enumerated type that supports cell centered, node centered, face centered,
+ * and edge centered variables.  Face centered variables are split into x-face,
+ * y-face, and z-face variables, and edge centered variables are split into
+ * x-edge, y-edge, and z-edge variables.  The edge centered variable types are
+ * only used in 3D.  In 2D, edge centered variables are handled by the face
+ * centered types.
  *
- * Variables are referenced relative to an abstract (cell centered)
- * index in the following way:
+ * Variables are referenced relative to an abstract (cell centered) index in the
+ * following way:
  * \begin{itemize}
  * \item cell centered variables are aligned with the index;
  * \item node centered variables are aligned with the cell corner
@@ -112,19 +112,18 @@ enum hypre_SStructVariable_enum
  * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_ZEDGE}
  * \end{itemize}
  *
- * NOTE: Although variables are referenced relative to a unique
- * abstract cell-centered index, some variables are associated with
- * multiple grid cells.  For example, node centered variables in 3D
- * are associated with 8 cells (away from boundaries).  Although grid
- * cells are distributed uniquely to different processes, variables
- * may be owned by multiple processes because they may be associated
- * with multiple cells.
+ * NOTE: Although variables are referenced relative to a unique abstract
+ * cell-centered index, some variables are associated with multiple grid cells.
+ * For example, node centered variables in 3D are associated with 8 cells (away
+ * from boundaries).  Although grid cells are distributed uniquely to different
+ * processes, variables may be owned by multiple processes because they may be
+ * associated with multiple cells.
  **/
 typedef enum hypre_SStructVariable_enum HYPRE_SStructVariable;
 
 /**
- * Create an {\tt ndim}-dimensional grid object with {\tt nparts}
- * structured parts.
+ * Create an {\tt ndim}-dimensional grid object with {\tt nparts} structured
+ * parts.
  **/
 int HYPRE_SStructGridCreate(MPI_Comm           comm,
                             int                ndim,
@@ -132,13 +131,12 @@ int HYPRE_SStructGridCreate(MPI_Comm           comm,
                             HYPRE_SStructGrid *grid);
 
 /**
- * Destroy a grid object.  An object should be explicitly destroyed
- * using this destructor when the user's code no longer needs direct
- * access to it.  Once destroyed, the object must not be referenced
- * again.  Note that the object may not be deallocated at the
- * completion of this call, since there may be internal package
- * references to the object.  The object will then be destroyed when
- * all internal reference counts go to zero.
+ * Destroy a grid object.  An object should be explicitly destroyed using this
+ * destructor when the user's code no longer needs direct access to it.  Once
+ * destroyed, the object must not be referenced again.  Note that the object may
+ * not be deallocated at the completion of this call, since there may be
+ * internal package references to the object.  The object will then be destroyed
+ * when all internal reference counts go to zero.
  **/
 int HYPRE_SStructGridDestroy(HYPRE_SStructGrid grid);
 
@@ -159,8 +157,8 @@ int HYPRE_SStructGridSetVariables(HYPRE_SStructGrid      grid,
                                   HYPRE_SStructVariable *vartypes);
 
 /**
- * Describe additional variables that live at a particular index.
- * These variables are appended to the array of variables set in
+ * Describe additional variables that live at a particular index.  These
+ * variables are appended to the array of variables set in
  * \Ref{HYPRE_SStructGridSetVariables}, and are referenced as such.
  **/
 int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
@@ -170,27 +168,24 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
                                   HYPRE_SStructVariable *vartypes);
 
 /**
- * Describe how regions just outside of a part relate to other parts.
- * This is done a box at a time.
+ * Describe how regions just outside of a part relate to other parts.  This is
+ * done a box at a time.
  *
- * The indexes {\tt ilower} and {\tt iupper} map directly to the
- * indexes {\tt nbor\_ilower} and {\tt nbor\_iupper}.  Although, it is
- * required that indexes increase from {\tt ilower} to {\tt iupper},
- * indexes may increase and/or decrease from {\tt nbor\_ilower} to
- * {\tt nbor\_iupper}.
+ * The indexes {\tt ilower} and {\tt iupper} map directly to the indexes {\tt
+ * nbor\_ilower} and {\tt nbor\_iupper}.  Although, it is required that indexes
+ * increase from {\tt ilower} to {\tt iupper}, indexes may increase and/or
+ * decrease from {\tt nbor\_ilower} to {\tt nbor\_iupper}.
  * 
- * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2
- * on part {\tt part} to the corresponding indexes on part {\tt
- * nbor\_part}.  For example, triple (1, 2, 0) means that indexes 0,
- * 1, and 2 on part {\tt part} map to indexes 1, 2, and 0 on part {\tt
- * nbor\_part}, respectively.
+ * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
+ * {\tt part} to the corresponding indexes on part {\tt nbor\_part}.  For
+ * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
+ * map to indexes 1, 2, and 0 on part {\tt nbor\_part}, respectively.
  *
- * NOTE: All parts related to each other via this routine must have an
- * identical list of variables and variable types.  For example, if
- * part 0 has only two variables on it, a cell centered variable and a
- * node centered variable, and we declare part 1 to be a neighbor of
- * part 0, then part 1 must also have only two variables on it, and
- * they must be of type cell and node.
+ * NOTE: All parts related to each other via this routine must have an identical
+ * list of variables and variable types.  For example, if part 0 has only two
+ * variables on it, a cell centered variable and a node centered variable, and
+ * we declare part 1 to be a neighbor of part 0, then part 1 must also have only
+ * two variables on it, and they must be of type cell and node.
  **/
 int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
                                     int                part,
@@ -212,9 +207,9 @@ int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
  * somehow.  When SetNeighborBox couples the index spaces of two different
  * parts, hypre can resolve this redundancy issue very easily.  However, when
  * SetNeighborBox couples the index space of a part to itself, resolving the
- * redundancey is much more complex and costly in general.  The best solution
- * to this problem is to let the user dictate which variables are primary
- * variables and which are secondary variables.
+ * redundancey is much more complex and costly in general.  The best solution to
+ * this problem is to let the user dictate which variables are primary variables
+ * and which are secondary variables.
  *
  * The last argument 'primary' works as follows:
  *
@@ -234,14 +229,12 @@ int HYPRE_SStructGridSetNeighborBoxZ(HYPRE_SStructGrid  grid,
                                      int                primary);
 
 /**
- * Add an unstructured part to the grid.  The variables in the
- * unstructured part of the grid are referenced by a global rank
- * between 0 and the total number of unstructured variables minus one.
- * Each process owns some unique consecutive range of variables,
- * defined by {\tt ilower} and {\tt iupper}.
+ * Add an unstructured part to the grid.  The variables in the unstructured part
+ * of the grid are referenced by a global rank between 0 and the total number of
+ * unstructured variables minus one.  Each process owns some unique consecutive
+ * range of variables, defined by {\tt ilower} and {\tt iupper}.
  *
- * NOTE: This is just a placeholder.  This part of the interface
- * is not finished.
+ * NOTE: This is just a placeholder.  This part of the interface is not finished.
  **/
 int HYPRE_SStructGridAddUnstructuredPart(HYPRE_SStructGrid grid,
                                          int               ilower,
@@ -253,7 +246,7 @@ int HYPRE_SStructGridAddUnstructuredPart(HYPRE_SStructGrid grid,
 int HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
 
 /**
- * (Optional) Set periodic for a particular part.
+ * Set periodic for a particular part.
  **/
 int HYPRE_SStructGridSetPeriodic(HYPRE_SStructGrid  grid,
                                  int                part,
@@ -281,8 +274,8 @@ struct hypre_SStructStencil_struct;
 typedef struct hypre_SStructStencil_struct *HYPRE_SStructStencil;
 
 /**
- * Create a stencil object for the specified number of spatial dimensions
- * and stencil entries.
+ * Create a stencil object for the specified number of spatial dimensions and
+ * stencil entries.
  **/
 int HYPRE_SStructStencilCreate(int                   ndim,
                                int                   size,
@@ -313,8 +306,7 @@ int HYPRE_SStructStencilSetEntry(HYPRE_SStructStencil  stencil,
 
 struct hypre_SStructGraph_struct;
 /**
- * The graph object is used to describe the nonzero structure of a
- * matrix.
+ * The graph object is used to describe the nonzero structure of a matrix.
  **/
 typedef struct hypre_SStructGraph_struct *HYPRE_SStructGraph;
 
@@ -339,13 +331,11 @@ int HYPRE_SStructGraphSetStencil(HYPRE_SStructGraph   graph,
                                  HYPRE_SStructStencil stencil);
 
 /**
- * Add a non-stencil graph entry at a particular index.  This graph
- * entry is appended to the existing graph entries, and is referenced
- * as such.
+ * Add a non-stencil graph entry at a particular index.  This graph entry is
+ * appended to the existing graph entries, and is referenced as such.
  *
- * NOTE: Users are required to set graph entries on all processes that
- * own the associated variables.  This means that some data will be
- * multiply defined.
+ * NOTE: Users are required to set graph entries on all processes that own the
+ * associated variables.  This means that some data will be multiply defined.
  **/
 int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
                                  int                  part,
@@ -356,14 +346,16 @@ int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
                                  int                  to_var);
 
 /**
- * It is used before AddEntries and Assemble
- *  to compute the right ranks in the graph.
- *  Currently, {\tt type} can be either {\tt HYPRE\_SSTRUCT} (the
- *  default) or {\tt HYPRE\_PARCSR}.  
+ * Set the storage type of the associated matrix object.  It is used before
+ * AddEntries and Assemble to compute the right ranks in the graph.
  * 
+ * NOTE: This routine is only necessary for implementation reasons, and will
+ * eventually be removed.
+ *
+ * @see HYPRE_SStructMatrixSetObjectType
  **/
   int HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
-                                       int                 type);
+                                      int                 type);
 /**
  * Finalize the construction of the graph before using.
  **/
@@ -403,21 +395,22 @@ int HYPRE_SStructMatrixDestroy(HYPRE_SStructMatrix matrix);
 int HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
 
 /**
- * Set matrix coefficients index by index.
+ * Set matrix coefficients index by index.  The {\tt values} array is of length
+ * {\tt nentries}.
  *
- * NOTE: Users are required to set values on all processes that own
- * the associated variables.  This means that some data will be
- * multiply defined.
+ * NOTE: For better efficiency, use \Ref{HYPRE_SStructMatrixSetBoxValues} to set
+ * coefficients a box at a time.
  *
- * NOTE: The entries in this routine must all be of the same type:
- * either stencil or non-stencil, but not both.  Also, if they are
- * stencil entries, they must all represent couplings to the same
- * variable type (there are no such restrictions for non-stencil
- * entries).
+ * NOTE: Users are required to set values on all processes that own the
+ * associated variables.  This means that some data will be multiply defined.
  *
- * If the matrix is complex, then {\tt values} consists of pairs of
- * doubles representing the real and imaginary parts of each complex
- * value.
+ * NOTE: The entries in this routine must all be of the same type: either
+ * stencil or non-stencil, but not both.  Also, if they are stencil entries,
+ * they must all represent couplings to the same variable type (there are no
+ * such restrictions for non-stencil entries).
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
@@ -430,47 +423,21 @@ int HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
                                  double              *values);
 
 /**
- * Set matrix coefficients a box at a time.
+ * Add to matrix coefficients index by index.  The {\tt values} array is of
+ * length {\tt nentries}.
  *
- * NOTE: Users are required to set values on all processes that own
- * the associated variables.  This means that some data will be
- * multiply defined.
+ * NOTE: For better efficiency, use \Ref{HYPRE_SStructMatrixAddToBoxValues} to
+ * set coefficients a box at a time.
  *
- * NOTE: The entries in this routine must all be of the same type:
- * either stencil or non-stencil, but not both.  Also, if they are
- * stencil entries, they must all represent couplings to the same
- * variable type (there are no such restrictions for non-stencil
- * entries).
+ * NOTE: Users are required to set values on all processes that own the
+ * associated variables.  This means that some data will be multiply defined.
  *
- * If the matrix is complex, then {\tt values} consists of pairs of
- * doubles representing the real and imaginary parts of each complex
- * value.
+ * NOTE: The entries in this routine must all be of the same type: either
+ * stencil or non-stencil, but not both.  Also, if they are stencil entries,
+ * they must all represent couplings to the same variable type.
  *
- * @see HYPRE_SStructMatrixSetComplex
- **/
-int HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
-                                    int                  part,
-                                    int                 *ilower,
-                                    int                 *iupper,
-                                    int                  var,
-                                    int                  nentries,
-                                    int                 *entries,
-                                    double              *values);
-/**
- * Add to matrix coefficients index by index.
- *
- * NOTE: Users are required to set values on all processes that own
- * the associated variables.  This means that some data will be
- * multiply defined.
- *
- * NOTE: The entries in this routine must all be of the same type:
- * either stencil or non-stencil, but not both.  Also, if they are
- * stencil entries, they must all represent couplings to the same
- * variable type.
- *
- * If the matrix is complex, then {\tt values} consists of pairs of
- * doubles representing the real and imaginary parts of each complex
- * value.
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
@@ -483,18 +450,54 @@ int HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
                                    double              *values);
 
 /**
- * Add to matrix coefficients a box at a time.
+ * Set matrix coefficients a box at a time.  The data in {\tt values} is ordered
+ * as follows:
  *
- * NOTE: Users are required to set values on all processes that own
- * the associated variables.  This means that some data will be
- * multiply defined.
+   \begin{verbatim}
+   m = 0;
+   for (k = ilower[2]; k <= iupper[2]; k++)
+      for (j = ilower[1]; j <= iupper[1]; j++)
+         for (i = ilower[0]; i <= iupper[0]; i++)
+            for (entry = 0; entry < nentries; entry++)
+            {
+               values[m] = ...;
+               m++;
+            }
+   \end{verbatim}
  *
- * NOTE: The entries in this routine must all be of stencil type.
- * Also, they must all represent couplings to the same variable type.
+ * NOTE: Users are required to set values on all processes that own the
+ * associated variables.  This means that some data will be multiply defined.
  *
- * If the matrix is complex, then {\tt values} consists of pairs of
- * doubles representing the real and imaginary parts of each complex
- * value.
+ * NOTE: The entries in this routine must all be of the same type: either
+ * stencil or non-stencil, but not both.  Also, if they are stencil entries,
+ * they must all represent couplings to the same variable type (there are no
+ * such restrictions for non-stencil entries).
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructMatrixSetComplex
+ **/
+int HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
+                                    int                  part,
+                                    int                 *ilower,
+                                    int                 *iupper,
+                                    int                  var,
+                                    int                  nentries,
+                                    int                 *entries,
+                                    double              *values);
+/**
+ * Add to matrix coefficients a box at a time.  The data in {\tt values} is
+ * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues}.
+ *
+ * NOTE: Users are required to set values on all processes that own the
+ * associated variables.  This means that some data will be multiply defined.
+ *
+ * NOTE: The entries in this routine must all be of stencil type.  Also, they
+ * must all represent couplings to the same variable type.
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
@@ -513,14 +516,13 @@ int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
 int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
 
 /**
- * Define symmetry properties for the stencil entries in the matrix.
- * The boolean argument {\tt symmetric} is applied to stencil entries
- * on part {\tt part} that couple variable {\tt var} to variable {\tt
- * to\_var}.  A value of -1 may be used for {\tt part}, {\tt var}, or
- * {\tt to\_var} to specify ``all''.  For example, if {\tt part} and
- * {\tt to\_var} are set to -1, then the boolean is applied to stencil
- * entries on all parts that couple variable {\tt var} to all other
- * variables.
+ * Define symmetry properties for the stencil entries in the matrix.  The
+ * boolean argument {\tt symmetric} is applied to stencil entries on part {\tt
+ * part} that couple variable {\tt var} to variable {\tt to\_var}.  A value of
+ * -1 may be used for {\tt part}, {\tt var}, or {\tt to\_var} to specify
+ * ``all''.  For example, if {\tt part} and {\tt to\_var} are set to -1, then
+ * the boolean is applied to stencil entries on all parts that couple variable
+ * {\tt var} to all other variables.
  * 
  * By default, matrices are assumed to be nonsymmetric.  Significant
  * storage savings can be made if the matrix is symmetric.
@@ -538,9 +540,9 @@ int HYPRE_SStructMatrixSetNSSymmetric(HYPRE_SStructMatrix matrix,
                                       int                 symmetric);
 
 /**
- * Set the storage type of the matrix object to be constructed.
- * Currently, {\tt type} can be either {\tt HYPRE\_SSTRUCT} (the
- * default), {\tt HYPRE\_STRUCT}, or {\tt HYPRE\_PARCSR}.
+ * Set the storage type of the matrix object to be constructed.  Currently, {\tt
+ * type} can be either {\tt HYPRE\_SSTRUCT} (the default), {\tt HYPRE\_STRUCT},
+ * or {\tt HYPRE\_PARCSR}.
  *
  * @see HYPRE_SStructMatrixGetObject
  **/
@@ -603,13 +605,14 @@ int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
 /**
  * Set vector coefficients index by index.
  *
- * NOTE: Users are required to set values on all processes that own
- * the associated variables.  This means that some data will be
- * multiply defined.
+ * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorSetBoxValues} to set
+ * coefficients a box at a time.
  *
- * If the vector is complex, then {\tt value} consists of a pair of
- * doubles representing the real and imaginary parts of the complex
- * value.
+ * NOTE: Users are required to set values on all processes that own the
+ * associated variables.  This means that some data will be multiply defined.
+ *
+ * If the vector is complex, then {\tt value} consists of a pair of doubles
+ * representing the real and imaginary parts of the complex value.
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
@@ -620,34 +623,16 @@ int HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
                                  double              *value);
 
 /**
- * Set vector coefficients a box at a time.
+ * Add to vector coefficients index by index.
  *
- * NOTE: Users are required to set values on all processes that own
- * the associated variables.  This means that some data will be
- * multiply defined.
+ * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorAddToBoxValues} to
+ * set coefficients a box at a time.
  *
- * If the vector is complex, then {\tt values} consists of pairs of
- * doubles representing the real and imaginary parts of each complex
- * value.
+ * NOTE: Users are required to set values on all processes that own the
+ * associated variables.  This means that some data will be multiply defined.
  *
- * @see HYPRE_SStructVectorSetComplex
- **/
-int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
-                                    int                  part,
-                                    int                 *ilower,
-                                    int                 *iupper,
-                                    int                  var,
-                                    double              *values);
-/**
- * Set vector coefficients index by index.
- *
- * NOTE: Users are required to set values on all processes that own
- * the associated variables.  This means that some data will be
- * multiply defined.
- *
- * If the vector is complex, then {\tt value} consists of a pair of
- * doubles representing the real and imaginary parts of the complex
- * value.
+ * If the vector is complex, then {\tt value} consists of a pair of doubles
+ * representing the real and imaginary parts of the complex value.
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
@@ -658,15 +643,43 @@ int HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
                                    double              *value);
 
 /**
- * Set vector coefficients a box at a time.
+ * Set vector coefficients a box at a time.  The data in {\tt values} is ordered
+ * as follows:
  *
- * NOTE: Users are required to set values on all processes that own
- * the associated variables.  This means that some data will be
- * multiply defined.
+   \begin{verbatim}
+   m = 0;
+   for (k = ilower[2]; k <= iupper[2]; k++)
+      for (j = ilower[1]; j <= iupper[1]; j++)
+         for (i = ilower[0]; i <= iupper[0]; i++)
+         {
+            values[m] = ...;
+            m++;
+         }
+   \end{verbatim}
  *
- * If the vector is complex, then {\tt values} consists of pairs of
- * doubles representing the real and imaginary parts of each complex
- * value.
+ * NOTE: Users are required to set values on all processes that own the
+ * associated variables.  This means that some data will be multiply defined.
+ *
+ * If the vector is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructVectorSetComplex
+ **/
+int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
+                                    int                  part,
+                                    int                 *ilower,
+                                    int                 *iupper,
+                                    int                  var,
+                                    double              *values);
+/**
+ * Add to vector coefficients a box at a time.  The data in {\tt values} is
+ * ordered as in \Ref{HYPRE_SStructVectorSetBoxValues}.
+ *
+ * NOTE: Users are required to set values on all processes that own the
+ * associated variables.  This means that some data will be multiply defined.
+ *
+ * If the vector is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
@@ -684,7 +697,10 @@ int HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
 
 
 /**
- * Gather vector data so that efficient {\tt GetValues} can be done.
+ * Gather vector data so that efficient {\tt GetValues} can be done.  This
+ * routine must be called prior to calling {\tt GetValues} to insure that
+ * correct and consistent values are returned, especially for non cell-centered
+ * data that is shared between more than one processor.
  **/
 int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
 
@@ -692,12 +708,14 @@ int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
 /**
  * Get vector coefficients index by index.
  *
- * NOTE: Users may only get values on processes that own the
- * associated variables.
+ * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorGetBoxValues} to get
+ * coefficients a box at a time.
  *
- * If the vector is complex, then {\tt value} consists of a pair of
- * doubles representing the real and imaginary parts of the complex
- * value.
+ * NOTE: Users may only get values on processes that own the associated
+ * variables.
+ *
+ * If the vector is complex, then {\tt value} consists of a pair of doubles
+ * representing the real and imaginary parts of the complex value.
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
@@ -708,14 +726,14 @@ int HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
                                  double              *value);
 
 /**
- * Get vector coefficients a box at a time.
+ * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
+ * as in \Ref{HYPRE_SStructVectorSetBoxValues}.
  *
- * NOTE: Users may only get values on processes that own the
- * associated variables.
+ * NOTE: Users may only get values on processes that own the associated
+ * variables.
  *
- * If the vector is complex, then {\tt values} consists of pairs of
- * doubles representing the real and imaginary parts of each complex
- * value.
+ * If the vector is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
@@ -727,9 +745,9 @@ int HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                     double              *values);
 
 /**
- * Set the storage type of the vector object to be constructed.
- * Currently, {\tt type} can be either {\tt HYPRE\_SSTRUCT} (the
- * default) or {\tt HYPRE\_PARCSR}.
+ * Set the storage type of the vector object to be constructed.  Currently, {\tt
+ * type} can be either {\tt HYPRE\_SSTRUCT} (the default), {\tt HYPRE\_STRUCT},
+ * or {\tt HYPRE\_PARCSR}.
  *
  * @see HYPRE_SStructVectorGetObject
  **/
