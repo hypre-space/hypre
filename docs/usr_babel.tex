@@ -133,8 +133,8 @@ member function \code{Apply}.  In C++, C, and Fortran this concept is
 expressed as:
 \begin{verbatim}
       pcg_solver.Apply( b, x );   (C++;in the ::ucxx::bHYPRE namespace)
-      bHYPRE_PCG_Apply( PCG_solver, b, &x );   (C)
-      call bHYPRE_PCG_Apply_f( PCG_solver, b, x, ierr )   (Fortran)
+      bHYPRE_PCG_Apply( PCG_solver, b, &x, ex );   (C)
+      call bHYPRE_PCG_Apply_f( PCG_solver, b, x, ierr, ex )   (Fortran)
 \end{verbatim}
 
 In the Babel interface, data types usually look like \code{Class} in
@@ -173,8 +173,9 @@ not how to handle them.
 \begin{verbatim}
     bHYPRE_BoomerAMG amg_solver;
     int ierr;
-    ierr = bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6);
-    ierr = bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-7);
+    ierr = bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6, ex );
+    ierr = bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver,
+                                                "Tolerance", 1e-7, ex);
 \end{verbatim}
 
 \subsubsection{Fortran-Babel}
@@ -182,9 +183,9 @@ not how to handle them.
           integer*8  amg_solver
           integer ierr
           call bHYPRE_BoomerAMG_SetIntParameter_f(
-         1        amg_solver, "CoarsenType", 6, ierr )
+         1        amg_solver, "CoarsenType", 6, ierr, ex )
           call bHYPRE_BoomerAMG_SetDoubleParameter_f(
-         1        amg_solver, "Tolerance", tol, ierr )
+         1        amg_solver, "Tolerance", tol, ierr, ex )
 \end{verbatim}
 
 \subsubsection{C++-Babel}
@@ -216,7 +217,7 @@ this function:
     bHYPRE_MPICommunicator mpi_comm;
     MPI_Comm mpicommworld = MPI_COMM_WORLD;
     MPI_Comm * C_mpi_comm = &mpicommworld;
-    mpi_comm = bHYPRE_MPICommunicator_CreateC( C_mpi_comm );
+    mpi_comm = bHYPRE_MPICommunicator_CreateC( C_mpi_comm, ex );
        ...
     parcsr_A = bHYPRE_IJParCSRMatrix_Create( mpi_comm,... );
 \end{verbatim}
@@ -237,7 +238,7 @@ this function:
           integer*8  mpi_comm
           integer*8  F_mpi_comm
           F_mpi_comm = MPI_COMM_WORLD
-          call bHYPRE_MPICommunicator_CreateF_f( F_mpi_comm, mpi_comm )
+          call bHYPRE_MPICommunicator_CreateF_f(F_mpi_comm,mpi_comm,ex)
              ...
           call bHYPRE_IJParCSRMatrix_Create_f( mpi_comm, ... )
 \end{verbatim}
@@ -421,24 +422,25 @@ on these arrays, read the Babel documentation at
 \begin{verbatim}
     struct sidl_int__array *row_js;
     struct sidl_double__array *row_data;
-    bHYPRE_IJParCSRMatrix_GetRow( A, i, &row_size, &row_js, &row_data );
+    bHYPRE_IJParCSRMatrix_GetRow( A, i, &row_size, &row_js, &row_data, ex );
     for ( k=0; k<row_size; ++k )
        col[k]  = sidl_int__array_get1( row_js, k );
        data[k] = sidl_double__array_get1( row_data, k );
-    sidl_int__array_deleteRef( row_j );
-    sidl_double__array_deleteRef( row_data );
+    sidl_int__array_deleteRef( row_j, ex );
+    sidl_double__array_deleteRef( row_data, ex );
 \end{verbatim}
 \subsubsection{Fortran}
 \begin{verbatim}
       integer*8 row_js;
       integer*8 row_data;
-      call bHYPRE_IJParCSRMatrix_GetRow_f( A, i, row_size, row_js, row_data )
+      call bHYPRE_IJParCSRMatrix_GetRow_f( A, i, row_size, row_js,
+     1                                     row_data, ex )
       do k = 1, row_size
          call sidl_int__array_get1_f( row_js, k-1, col(k) )
          call sidl_double__array_get1_f( row_data, k-1, data(k) )
       enddo
-      call sidl_int__array_deleteRef( row_j )
-      call sidl_double__array_deleteRef( row_data )
+      call sidl_int__array_deleteRef( row_j, ex )
+      call sidl_double__array_deleteRef( row_data, ex )
 \end{verbatim}
 
 
@@ -453,15 +455,16 @@ In C with the Babel-based interface, a ParCSR matrix is typically built as follo
     bHYPRE_MPICommunicator mpi_comm;
     bHYPRE_IJParCSRMatrix parcsr_A;
     parcsr_A = bHYPRE_IJParCSRMatrix_Create(
-      mpi_comm, row_lower, row_upper, col_lower, col_upper );
+      mpi_comm, row_lower, row_upper, col_lower, col_upper, ex );
 
-    bHYPRE_IJParCSRMatrix_Initialize( parcsr_A );
+    bHYPRE_IJParCSRMatrix_Initialize( parcsr_A, ex );
 
     /* SetValues sets values for matrix rows; normally there
        are many SetValues calls inside a loop ... */
-    bHYPRE_IJParCSRMatrix_SetValues( parcsr_A, n_rows, n_cols, rows, cols, values, n_nonzeros );
+    bHYPRE_IJParCSRMatrix_SetValues( parcsr_A, n_rows, n_cols, rows, cols,
+                                     values, n_nonzeros, ex );
 
-    bHYPRE_IJParCSRMatrix_Assemble( parcsr_A );
+    bHYPRE_IJParCSRMatrix_Assemble( parcsr_A, ex );
 \end{verbatim}
 
 \subsubsection{C-only}
@@ -523,18 +526,18 @@ from C are interesting.
 \begin{verbatim}
           integer*8  bHYPRE_mpicomm
           integer*8  parcsr_A
-          call bHYPRE_IJParCSRMatrix_Create_f( bHYPRE_mpicomm, row_lower,
-         1     row_upper, col_lower, col_upper, parcsr_A )
+          call bHYPRE_IJParCSRMatrix_Create_f(bHYPRE_mpicomm, row_lower,
+         1     row_upper, col_lower, col_upper, parcsr_A, ex )
 
-          call bHYPRE_IJParCSRMatrix_Initialize_f( parcsr_A, ierrtmp )
+          call bHYPRE_IJParCSRMatrix_Initialize_f(parcsr_A,ierrtmp,ex )
 
     c        SetValues sets values for matrix rows; normally there
     c        are many SetValues calls inside a loop ...
              call bHYPRE_IJParCSRMatrix_SetValues_f(
          1        parcsr_A, n_rows, n_cols, rows, cols, values,
-         2        n_nonzeros, ierrtmp )
+         2        n_nonzeros, ierrtmp, ex )
 
-          call bHYPRE_IJParCSRMatrix_Assemble_f( parcsr_A, ierrtmp )
+          call bHYPRE_IJParCSRMatrix_Assemble_f( parcsr_A, ierrtmp, ex )
 \end{verbatim}
 
 
@@ -557,15 +560,15 @@ the Babel interface:
     int *box_lower, *box_upper, *stencil_indices;
     double *values;
 
-    A_b = bHYPRE_StructMatrix_Create( mpi_comm, grid, stencil );
-    ierr += bHYPRE_StructMatrix_Initialize( A_b );
+    A_b = bHYPRE_StructMatrix_Create( mpi_comm, grid, stencil, ex );
+    ierr += bHYPRE_StructMatrix_Initialize( A_b, ex );
 
     /* SetBox values sets values for a block of the matrix;
        normally there are many SetBoxValues calls inside a loop.*/
     bHYPRE_StructMatrix_SetBoxValues(
                   A_b, box_lower, box_upper, dim,
-                  stencil_size, stencil_indices, values, volume );
-    ierr += bHYPRE_StructMatrix_Assemble( A_b );
+                  stencil_size, stencil_indices, values, volume, ex );
+    ierr += bHYPRE_StructMatrix_Assemble( A_b, ex );
 \end{verbatim}
 
 
@@ -619,21 +622,21 @@ For \code{object_type==HYPRE_PARCSR}:
     int box_lower[3], box_upper[3], index[3];
     int *entries;
 
-    A_b = bHYPRE_SStructParCSRMatrix_Create( mpi_comm, graph );
+    A_b = bHYPRE_SStructParCSRMatrix_Create( mpi_comm, graph, ex );
 
     /* No call of SetObjectType is needed, the information is in
        the name of this Initialize function: */
-    bHYPRE_SStructParCSRMatrix_Initialize( A_b );
+    bHYPRE_SStructParCSRMatrix_Initialize( A_b, ex );
 
     /* SetBoxValues and SetValues are normally called inside loops */
     bHYPRE_SStructParCSRMatrix_SetBoxValues
           ( A_b, part, box_lower, box_upper, dim, var,
-            nentries, entries, values, nvalues );
+            nentries, entries, values, nvalues, ex );
            }
     bHYPRE_SStructParCSRMatrix_SetValues
-          ( A_b, part, index, dim, var, nentries, entries, values );
+          ( A_b, part, index, dim, var, nentries, entries, values, ex );
 
-    bHYPRE_SStructParCSRMatrix_Assemble( A_b );
+    bHYPRE_SStructParCSRMatrix_Assemble( A_b, ex );
 \end{verbatim}
 
 
@@ -646,19 +649,19 @@ For \code{object_type==HYPRE_STRUCT} or \code{HYPRE_SSTRUCT}:
     int box_lower[3], box_upper[3], index[3];
     int *entries;
 
-    A_b = bHYPRE_SStructMatrix_Create( mpi_comm, graph );
+    A_b = bHYPRE_SStructMatrix_Create( mpi_comm, graph, ex );
 
-    bHYPRE_SStructMatrix_SetObjectType(A_b, object_type);
-    bHYPRE_SStructMatrix_Initialize( A_b );
+    bHYPRE_SStructMatrix_SetObjectType(A_b, object_type, ex);
+    bHYPRE_SStructMatrix_Initialize( A_b, ex );
 
     /* SetBoxValues and SetValues are normally called inside loops */
      bHYPRE_SStructMatrix_SetBoxValues
            ( A_b, part, boxlower, box_upper, dim, var,
-             nentries, entries, values, nvalues );
+             nentries, entries, values, nvalues, ex );
      bHYPRE_SStructMatrix_SetValues
-           ( A_b, part, index, dim, var, nentries, entries, values );
+           ( A_b, part, index, dim, var, nentries, entries, values, ex );
 
-     bHYPRE_SStructMatrix_Assemble( A_b );
+     bHYPRE_SStructMatrix_Assemble( A_b, ex );
 \end{verbatim}
 
 \subsubsection{C-only}
