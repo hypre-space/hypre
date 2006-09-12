@@ -34,6 +34,7 @@ can look at its documentation at
 \url{http://www.llnl.gov/CASC/components}.
 
 \section{Interfaces are Similar}
+\label{sec-Interfaces-Similar}
 
 In most respects, the older C-only interface and the Babel-based
 interface are very similar. The function names always differ a little,
@@ -53,9 +54,10 @@ the Babel interface in the C, C++, Fortran, and Python languages.
 
 
 \section{Interfaces are Different}
+\label{sec-Interfaces-Different}
 
 Function names usually differ in minor ways, as decribed in the
-following section ``Names and Conventions.''  But sometimes they
+following section \ref{sec-Names-Conventions}.  But sometimes they
 differ more; for example to apply a solver to solve linear equations,
 you say \code{Solve} in the C-only interface and \code{Apply} in the
 Babel-based interface.  For information on particular functions, see
@@ -87,26 +89,27 @@ interfaces.  In the C interface there is a different \code{Set}
 function for each parameter; the parameter name is part of the
 function name.  In the Babel-based interface there are just a few
 \code{Set*Parameter} interfaces.  The parameter is one of the
-arguments.  For details see the following section on parameters, or
-look in an example file.
+arguments.  For details see section
+\ref{sec-Parameters-ErrorFlags}, or look in an example file.
 
 MPI communicators are passed differently, in the native form in the
 C-only interface and as a language-neutral object in the Babel-based
-interface.  For details see the section on MPI communicators.
+interface.  For details see section \ref{sec-MPI}.
 
 In two rare cases, the Babel-based interface of \hypre{} provides
-output arrays in a special format.  See the section on arrays if you
-need to deal with it.
+output arrays in a special format.  See section \ref{sec-Arrays}
+if you need to deal with it.
 
 With the Babel-based interface in the C or Fortran languages, you will
 occasionally need to explicitly cast an object between different data
 types.  You do this with a special \code{cast} function.  Moreover,
 for every time you create or cast an object you need a corresponding
 call of a \code{Destroy} or \code{deleteRef} function. See the
-sections on memory management and casting for details.
+sections \ref{sec-Memory} and \ref{sec-Casting} for details.
 
 
 \section{Names and Conventions}
+\label{sec-Names-Conventions}
 
 In the C-only interface, most \hypre{} function names look like
 \code{HYPRE_ClassFunction} where \code{Class} is a class name and
@@ -123,7 +126,8 @@ This function naming pattern is slightly broken in the case of service
 functions provided by Babel rather than \hypre{}.  All of them contain
 a double underscore, \code{__}.  These functions are used for casting,
 certain arrays, and sometimes memory management.  For more information
-see the sections on object structure, arrays, and memory management.
+see sections \ref{sec-ObjectStructure}, \ref{sec-Arrays}, and
+\ref{sec-Memory}.
 
 Most functions are member functions of a class.  In
 non-object-oriented languages, the first argument of the function will
@@ -147,9 +151,10 @@ interface, but usually they are the same.
 
 Most \hypre{} objects need to be supplied with an MPI communicator.
 The Babel interface has a special class for the MPI communicator; for
-details see the section on MPI communicators.
+details see section \ref{sec-MPI}.
 
 \section{Parameters and Error Flags}
+\label{sec-Parameters-ErrorFlags}
 
 Most \hypre{} objects can be modified by setting parameters.  In the
 C-only interface, there is a separate function to set each parameter.
@@ -197,6 +202,7 @@ not how to handle them.
 \end{verbatim}
 
 \section{MPI communicator}
+\label{sec-MPI}
 
 In the C-only \hypre{} interface, and most normal MPI usage, one often
 needs an MPI communicator of type \code{MPI_Comm}.  What an
@@ -244,6 +250,7 @@ this function:
 \end{verbatim}
 
 \section{Memory Management}
+\label{sec-Memory}
 
 You will want to destroy whatever objects you create.  In C and
 Fortran, you must do this explicitly.  Through the Babel-based
@@ -287,6 +294,7 @@ objects.
 
 
 \section{Casting}
+\label{sec-Casting}
 
 If your code is written in C or Fortran, you will occasionally need to
 call a Babel \code{cast} function.  This section tells you why and
@@ -306,8 +314,8 @@ In C++ and Python, you do not normally need to call a \code{cast}
 function.
 
 Be careful to call a \code{deleteRef} or \code{Destroy} function to
-correspond to every \code{cast} function, as discussed in the section
-on memory management.
+correspond to every \code{cast} function, as discussed in section
+\ref{sec-Memory}.
 
 Here are examples of casting in C and Fortran.
 \begin{verbatim}
@@ -334,6 +342,7 @@ Here are examples of casting in C and Fortran.
 parameters to the solver, set up the vectors, and so forth).
 
 \section{The HYPRE Object Structure}
+\label{sec-ObjectStructure}
 
 Even though it is written in C, \hypre{} is object-oriented in its
 conceptual design.  The object structure of \hypre{} is often visible,
@@ -366,8 +375,8 @@ member function \code{SetValues}, in C as a function
 
 The inheritance structure matters in use because sometimes you must
 cast an object up and down its inheritance hierarchy to provide an
-object of the right data type in a function call.  See the section on
-casting.
+object of the right data type in a function call.  See section
+\ref{sec-Casting}.
 
 Figure~\ref{figObjectModel} describes in abbreviated form the most
 important ideas of the \hypre{} inheritance hierarchy.
@@ -397,6 +406,8 @@ The ideas of the hypre object model.}
 % conceptual interface (e.g. IJ) vs 'underlying storage type' (e.g. ParCSR)
 
 \section{Arrays}
+\label{sec-Arrays}
+
 Almost always, when you pass an array through the Babel-based
 interface, you do it in the natural way - you build and use the array
 type which is native to your language.  Babel calls this kind or array
@@ -445,8 +456,10 @@ on these arrays, read the Babel documentation at
 
 
 \section{Matrices and Vectors}
+\label{sec-Matrices-Vectors}
 
 \subsection{ParCSR Matrices}
+\label{subsec-ParCSRMatrices}
 
 \subsubsection{C-Babel}
 In C with the Babel-based interface, a ParCSR matrix is typically built as follows:
@@ -495,8 +508,8 @@ interface.  It is also notable that the MPI communicator is wrapped in
 a special object in the Babel interface, but passed directly in the
 C-only interface.  This is because the Babel interface is
 language-neutral, but MPI communicator types are generally
-language-dependent.  MPI communicators are discussed in another
-section of this chapter.
+language-dependent.  MPI communicators are discussed in section
+\ref{sec-MPI}.
 
 \subsubsection{C++-Babel}
 Here is how the same matrix would be built in C++ and Fortran.
@@ -572,8 +585,8 @@ the Babel interface:
 \end{verbatim}
 
 
-Other languages work the same way in the Babel interface; see the
-section on ParCSR matrices for syntax examples.
+Other languages work the same way in the Babel interface; see
+subsection \ref{subsec-ParCSRMatrices} for syntax examples.
 
 \subsubsection{C-only}
 
@@ -700,6 +713,7 @@ The C-only interface is very similar:
 %note that some have versions for different matrix storage types
 
 \section{Building HYPRE with the Babel Interface}
+\label{sec-Building-Babel}
 
 You can build \hypre{} almost the same way with and without the
 Babel-based interface.  Normally the only difference is that the
