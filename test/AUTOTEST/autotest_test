@@ -596,17 +596,20 @@ confbuildtest ()
 
 #
 # Make Section
-# if not testing public versions, build general files then build specified directory
+# if not testing public versions, build general files then build specified 
+# directory, if needed
    if [ "${MessageStr}" != "test_alpha" -a "${MessageStr}" != "test_beta"  -a \
         "${MessageStr}" != "test_general" ]
    then
       echo "Autotest starting make of $MessageStr"
-      $MAKE ${MakeOpt} 1>> ${Hdr}.${MessageStr}.all.log \
-                       2>> ${Hdr}.${MessageStr}.all.err
+      $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
+                2>> ${Hdr}.${MessageStr}.all.err
 
       if [ "${MakeDir}" != "" -a "${MakeDir}" != " " ]
       then
          cd $MakeDir
+         $MAKE ${MakeOpt} 1>> ${Hdr}.${MessageStr}.all.log \
+                          2>> ${Hdr}.${MessageStr}.all.err
       fi
    fi
 
