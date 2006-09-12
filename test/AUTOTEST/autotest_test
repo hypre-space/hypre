@@ -575,11 +575,15 @@ confbuildtest ()
 
 #
 # Configure Section
+#     if there are existing files, remove before beginning current case
    seconds; TIME=$SECS
    echo "Autotest starting configure of $MessageStr"
 
    cd $StdBuildDir
-   [ -f config.cache ] && rm config.cache
+   if [ -f config/Makefile.config ]
+   then
+      $MAKE distclean
+   fi
 
    if [ "$ConfigOpt" = " " ]
    then
@@ -592,20 +596,18 @@ confbuildtest ()
 
 #
 # Make Section
-# Remove all *.o and existing libHYPRE* files before building for current 
-# options unless testing public versions
+# if not testing public versions, build general files then build specified directory
    if [ "${MessageStr}" != "test_alpha" -a "${MessageStr}" != "test_beta"  -a \
         "${MessageStr}" != "test_general" ]
    then
       echo "Autotest starting make of $MessageStr"
+      $MAKE ${MakeOpt} 1>> ${Hdr}.${MessageStr}.all.log \
+                       2>> ${Hdr}.${MessageStr}.all.err
+
       if [ "${MakeDir}" != "" -a "${MakeDir}" != " " ]
       then
          cd $MakeDir
       fi
-      $MAKE clean
-      rm -rf $StdBuildDir/hypre/lib/*
-      $MAKE ${MakeOpt} 1>> ${Hdr}.${MessageStr}.all.log \
-                       2>> ${Hdr}.${MessageStr}.all.err
    fi
 
 #
