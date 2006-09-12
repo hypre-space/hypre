@@ -1168,10 +1168,8 @@ main( int   argc,
       ierr += bHYPRE_Hybrid_Setup( solver_Hybrid, b_V, x_V, &_ex );
 
       ierr += bHYPRE_Hybrid_GetFirstSolver( solver_Hybrid, &krylov_solver, &_ex );
-      bHYPRE_PreconditionedSolver_addRef( krylov_solver, &_ex );
       solver_PCG_1 = (bHYPRE_PCG) bHYPRE_PCG__cast( krylov_solver, &_ex );
       ierr += bHYPRE_PCG_SetIntParameter( solver_PCG_1, "MaxIter", 100, &_ex );
-      bHYPRE_PreconditionedSolver_deleteRef( krylov_solver, &_ex );
       bHYPRE_PCG_deleteRef( solver_PCG_1, &_ex );
 
       hypre_assert( ierr==0 );
