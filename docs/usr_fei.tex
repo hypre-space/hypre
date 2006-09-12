@@ -48,9 +48,12 @@ and the corresponding right hand side vector, and then calling linear
 solver to calculate the solution. The first step in this process is 
 thus to instantiate an {\tt FEI} object by
 \begin{tabbing}
-\hspace{0.5in} \= {\tt feiPtr = new FEI\_Implementation(mpiComm);}
+\hspace{0.5in} \= {\tt feiPtr = new FEI\_Implementation(solver,mpiComm,rank);}
 \end{tabbing}
-where {\tt mpiComm} is an MPI communicator (e.g. {\tt MPI\_COMM\_WORLD}).
+where {\tt solver} is a container pointing to the underlying linear solver 
+package, {\tt mpiComm} is an MPI communicator (e.g. {\tt MPI\_COMM\_WORLD}),
+and {\tt rank} is the processor number of the master processor (for 
+identifying which processor will produce the screen outputs). 
 Next, various finite element information need to be sent into the {\tt FEI}
 object.
 
