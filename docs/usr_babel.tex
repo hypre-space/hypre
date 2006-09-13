@@ -77,7 +77,7 @@ Python.  You should ignore it, but it has to be there.  In C you
 should declare it as follows.
 \begin{verbatim}
   #include "sidl_Exception.h"
-  sidl_BaseInterface_ex;
+  sidl_BaseInterface _ex;
 \end{verbatim}
 And in Fortran you should declare it as follows.
 \begin{verbatim}
@@ -142,7 +142,7 @@ expressed as:
 \end{verbatim}
 
 In the Babel interface, data types usually look like \code{Class} in
-C, \code{bHYPRE_Class} in C, and \code{integer*8} in Fortran.  Similar
+C++, \code{bHYPRE_Class} in C, and \code{integer*8} in Fortran.  Similar
 data types in the C-only interface would look like
 \code{HYPRE_Class}.  Here \code{Class} is a class name where the
 interface is defined in the SIDL file \code{Interfaces.idl}.
@@ -276,7 +276,7 @@ Here it is in Fortran:
 \end{verbatim}
 
 What is actually going on here is memory management by reference
-counting.  Babel references-counts all its objects.  Reference
+counting.  Babel reference-counts all its objects.  Reference
 counting means that the object contains an integer which counts the
 number of outside references to the object.  Babel will bump up the
 reference count by one when you call a \code{Create} or \code{cast}
@@ -303,7 +303,7 @@ how.
 Functions are generally written in as much generality as possible.
 For example, the PCG algorithm works the same for any kind of matrix
 and vector, as long as it can multiply a matrix and vector, compute an
-inner product, and so forth.  So two of its argument types are
+inner product, and so forth.  So two of its arguments are of type
 \code{bHYPRE_Vector}.  But when you create a vector you have to decide
 how it's going to be stored!  So you have to declare it as a more
 specific data type, e.g. \code{bHYPRE_StructVector}.  To apply the PCG
@@ -353,33 +353,85 @@ object structure or object-oriented programming.  This section is for
 you if you have some basic knowledge of object-oriented concepts and
 if you are curious about how they appear in \hypre{}.
 
-The object structure of the Babel-based interface is explicitly
-defined in the SIDL (Scientific Interface Definition Language) file
-\code{Interfaces.idl}.  Babel translates this object structure as
-appropriate for the language the user uses - from SIDL's interfaces
-and classes to C++ classes, or to mangled names in C and Fortran.
+In this section we will touch on some of the more notable features and
+peculiarities of the object system as seen through the Babel-based
+interface.  It is completely described elsewhere: the object structure
+is precisely defined in the a file \code{Interfaces.idl}, written in
+SIDL, which is short for ``Scientific Interface Definition Language''.
 For more information about the SIDL language, visit the Babel project
-website, \url{http://www.llnl.gov/CASC/components}.
+website, \url{http://www.llnl.gov/CASC/components}.  For the briefest
+possible description of the overall ideas of the \hypre{} object
+system, see Figure~\ref{figObjectModel}.
 
-Here is an example: In the SIDL file defining the Babel interface, the
-StructVector class inherits from the StructVectorView and Vector
-interfaces.  StructVectorView extends MatrixVectorView interface,
-which extends the ProblemDefinition interface.  The Babel StructVector
-class can appear as a C++ class also named \code{StructVector} (in the
-\code{bHYPRE} namespace), as a C struct named
-\code{bHYPRE_StructVector}, or as a Fortran
-\code{integer*8}.  Its member function SetValues can appear in C++ as a
-member function \code{SetValues}, in C as a function
+Babel translates this object structure as appropriate for the language
+the user uses - from SIDL's interfaces and classes to C++ classes, or
+to mangled names in C and Fortran.  For example the
+\code{StructVector} class defined in \code{Interfaces.idl} can appear
+as a C++ class also named \code{StructVector} (in the \code{bHYPRE}
+namespace), as a C struct named \code{bHYPRE_StructVector}, or as a
+Fortran \code{integer*8}.  Its member function SetValues can appear in
+C++ as a member function \code{SetValues}, in C as a function
 \code{bHYPRE_StructVector_SetValues}, or in Fortran as a subroutine
-\code{bHYPRE_StructVector_SetValues}.
+\code{bHYPRE_StructVector_SetValues_f}.
+
+In the Babel interface, which largely reflects the \hypre{} design, a
+solver and matrix are both a kind of operator, i.e. something which
+acts on a vector to compute another vector.  If a solver takes a
+preconditioner, it is called a preconditioned solver.  There is no
+class or interface for preconditioners --- it is possible, though not
+always wise, to use any solver as a preconditioner.
+
+In order for a solver to act as an operator, to map a vector to a
+vector, it must contain not only a solution method but also the
+equations to be solved.  So you supply the solver with a matrix while
+constructing the solver.
+
+All solvers have very similar interfaces, so most of their features
+are accessible through their common \code{Solver} interface. But each
+has its own peculiarities and each takes a different set of
+parameters.  Most solvers are specific to one or two matrix classes.
+An exception is the four Krylov solvers, which will run with any
+matrix.
+
+In contrast to the solvers, matrices have almost nothing in common
+other than being operators, i.e. a matrix can multiply a vector to
+compute another vector.  Once the storage scheme of the matrix is
+specified there is much to do - such as specifying stencils, index
+ranges, and grids.  There are four different classes of matrix for
+four different storage schemes - ParCSR, structured, and two kinds of
+semi-structured matrix.  ParCSR matrices are generally used for
+unstructured meshes but do not incorporate the mesh.  A structured
+matrix includes a structured grid.  The semistructured matrix classes
+share the same interface with minimal modifications, and both contain
+mesh information. But their implementations, e.g. matrix storage, are
+different.
+
+Conceptually, there can be multiple views, or ways of interfacing, to
+a matrix.  Or one type of view can be used for more than one matrix
+class.  At present, the Babel interface doesn't contain more than one
+view for any matrix class.  For vectors as well the Babel-based
+interface is capable of multiple views but no more than one per class
+has been implemented.
+
+For each matrix storage method there is a corresponding vector storage
+method.  When a matrix class contains a grid or not, so does the
+corresponding vector class.  So there are four vector classes just as
+there are four matrix classes.  All vector classes inherit from a
+common interface to accomodate the common vector operations such as
+inner products, sums, and copies.
+
+Here is an example of a full path through the inheritance tree: In the
+SIDL file defining the Babel interface, the StructVector class
+inherits from the StructVectorView and Vector interfaces.
+StructVectorView extends MatrixVectorView interface, which extends the
+ProblemDefinition interface.
+
 
 The inheritance structure matters in use because sometimes you must
 cast an object up and down its inheritance hierarchy to provide an
 object of the right data type in a function call.  See section
 \ref{sec-Casting}.
 
-Figure~\ref{figObjectModel} describes in abbreviated form the most
-important ideas of the \hypre{} inheritance hierarchy.
 
 
 \begin{figure}
@@ -454,263 +506,6 @@ on these arrays, read the Babel documentation at
       call sidl_double__array_deleteRef( row_data, ex )
 \end{verbatim}
 
-
-\section{Matrices and Vectors}
-\label{sec-Matrices-Vectors}
-
-\subsection{ParCSR Matrices}
-\label{subsec-ParCSRMatrices}
-
-\subsubsection{C-Babel}
-In C with the Babel-based interface, a ParCSR matrix is typically built as follows:
-
-\begin{verbatim}
-    bHYPRE_MPICommunicator mpi_comm;
-    bHYPRE_IJParCSRMatrix parcsr_A;
-    parcsr_A = bHYPRE_IJParCSRMatrix_Create(
-      mpi_comm, row_lower, row_upper, col_lower, col_upper, ex );
-
-    bHYPRE_IJParCSRMatrix_Initialize( parcsr_A, ex );
-
-    /* SetValues sets values for matrix rows; normally there
-       are many SetValues calls inside a loop ... */
-    bHYPRE_IJParCSRMatrix_SetValues( parcsr_A, n_rows, n_cols, rows, cols,
-                                     values, n_nonzeros, ex );
-
-    bHYPRE_IJParCSRMatrix_Assemble( parcsr_A, ex );
-\end{verbatim}
-
-\subsubsection{C-only}
-The same job in the C-only interface would be done as follows:
-
-\begin{verbatim}
-    MPI_COMM mpi_comm;
-    HYPRE_IJMatrix A;
-    HYPRE_IJMatrixCreate( mpi_comm, row_lower, row_upper, col_lower, col_upper, &A );
-
-    HYPRE_IJMatrixSetObjectType( A, HYPRE_PARCSR );
-
-    HYPRE_IJMatrixInitialize( A );
-
-    /* SetValues sets values for matrix rows; normally there
-       are many SetValues calls inside a loop ... */
-    HYPRE_IJMatrixSetValues( A, n_rows, n_cols, rows, cols, values );
-
-    HYPRE_IJMatrixAssemble(A);
-\end{verbatim}
-
-
-The most significant difference between the C-Babel and C-only
-interfaces is that the C-only interface includes a SetObjectType
-function call not found in the C-Babel interface.  This is because the
-same information is incorporated in function names in the Babel
-interface.  It is also notable that the MPI communicator is wrapped in
-a special object in the Babel interface, but passed directly in the
-C-only interface.  This is because the Babel interface is
-language-neutral, but MPI communicator types are generally
-language-dependent.  MPI communicators are discussed in section
-\ref{sec-MPI}.
-
-\subsubsection{C++-Babel}
-Here is how the same matrix would be built in C++ and Fortran.
-both with the same Babel-based interface as above.
-You can see how everything works the same.  Most of this chapter
-will not include non-C examples except in contexts where their differences
-from C are interesting.
-
-\begin{verbatim}
-    using namespace ::ucxx::bHYPRE;
-    MPICommunicator mpi_comm;
-    IJParCSRMatrix parcsr_A;
-    parcsr_A = IJParCSRMatrix::Create(
-       mpi_comm, row_lower, row_upper, col_lower, colupper );
-
-    parcsr_A.Initialize();
-
-    // SetValues sets values for matrix rows; normally there
-    //   are many SetValues calls inside a loop ...
-    parcsr_A.SetValues( n_rows, n_cols, rows, cols, values, n_nonzeros );
-
-    parcsr_A.Assemble();
-\end{verbatim}
-
-
-\subsubsection{Fortran-Babel}
-\begin{verbatim}
-          integer*8  bHYPRE_mpicomm
-          integer*8  parcsr_A
-          call bHYPRE_IJParCSRMatrix_Create_f(bHYPRE_mpicomm, row_lower,
-         1     row_upper, col_lower, col_upper, parcsr_A, ex )
-
-          call bHYPRE_IJParCSRMatrix_Initialize_f(parcsr_A,ierrtmp,ex )
-
-    c        SetValues sets values for matrix rows; normally there
-    c        are many SetValues calls inside a loop ...
-             call bHYPRE_IJParCSRMatrix_SetValues_f(
-         1        parcsr_A, n_rows, n_cols, rows, cols, values,
-         2        n_nonzeros, ierrtmp, ex )
-
-          call bHYPRE_IJParCSRMatrix_Assemble_f( parcsr_A, ierrtmp, ex )
-\end{verbatim}
-
-
-
-\subsection{Struct Matrices}
-
-Struct matrices are built almost the same way with
-the C-only and Babel+C interfaces.
-
-\subsubsection{C-Babel}
-
-In C, a Struct  matrix is typically built as follows with
-the Babel interface:
-
-\begin{verbatim}
-    bHYPRE_MPICommunicator mpi_comm;
-    bHYPRE_StructMatrix  A_b;
-    bHYPRE_StructGrid grid;
-    bHYPRE_StructStencil stencil;
-    int *box_lower, *box_upper, *stencil_indices;
-    double *values;
-
-    A_b = bHYPRE_StructMatrix_Create( mpi_comm, grid, stencil, ex );
-    ierr += bHYPRE_StructMatrix_Initialize( A_b, ex );
-
-    /* SetBox values sets values for a block of the matrix;
-       normally there are many SetBoxValues calls inside a loop.*/
-    bHYPRE_StructMatrix_SetBoxValues(
-                  A_b, box_lower, box_upper, dim,
-                  stencil_size, stencil_indices, values, volume, ex );
-    ierr += bHYPRE_StructMatrix_Assemble( A_b, ex );
-\end{verbatim}
-
-
-Other languages work the same way in the Babel interface; see
-subsection \ref{subsec-ParCSRMatrices} for syntax examples.
-
-\subsubsection{C-only}
-
-This job is done as follows with the C-only interface:
-
-\begin{verbatim}
-    MPICommunicator mpi_comm;
-    HYPRE_StructMatrix  A;
-    HYPRE_StructGrid    grid;
-    HYPRE_StructStencil stencil;
-    int *box_lower, *box_upper, *stencil_indices;
-    double *values;
-
-    HYPRE_StructMatrixCreate( mpi_comm, grid, stencil, &A);
-    HYPRE_StructMatrixInitialize(A);
-
-    /* SetBox values sets values for a block of the matrix;
-       normally there are many SetBoxValues calls inside a loop.*/
-    HYPRE_StructMatrixSetBoxValues( A, box_lower, box_upper,
-                                    stencil_size, stencil_indices, values);
-    HYPRE_StructMatrixAssemble(A);
-\end{verbatim}
-
-
-Both interfaces work the same way, with minor differences in argument
-lists and data types.
-
-\subsection{SStruct Matrices}
-
-SStruct matrices are built almost the same way with
-the C-only and C-Babel interfaces.
-
-\subsubsection{C-Babel}
-
-In C, a SStruct  matrix is typically built as follows with
-the Babel interface.  There are minor differences depending on the
-kind of SStruct matrix, \code{object_type} in the following.  Its possible
-values are \code{HYPRE_PARCSR}, \code{HYPRE_STRUCT}, \code{HYPRE_SSTRUCT}.
-
-For \code{object_type==HYPRE_PARCSR}:
-\begin{verbatim}
-    bHYPRE_MPICommunicator mpi_comm;
-    bHYPRE_SStructParCSRMatrix   A_b;
-    bHYPRE_SStructGraph   graph;
-    int object_type, dim, var, nentries, nvalues, part;
-    int box_lower[3], box_upper[3], index[3];
-    int *entries;
-
-    A_b = bHYPRE_SStructParCSRMatrix_Create( mpi_comm, graph, ex );
-
-    /* No call of SetObjectType is needed, the information is in
-       the name of this Initialize function: */
-    bHYPRE_SStructParCSRMatrix_Initialize( A_b, ex );
-
-    /* SetBoxValues and SetValues are normally called inside loops */
-    bHYPRE_SStructParCSRMatrix_SetBoxValues
-          ( A_b, part, box_lower, box_upper, dim, var,
-            nentries, entries, values, nvalues, ex );
-           }
-    bHYPRE_SStructParCSRMatrix_SetValues
-          ( A_b, part, index, dim, var, nentries, entries, values, ex );
-
-    bHYPRE_SStructParCSRMatrix_Assemble( A_b, ex );
-\end{verbatim}
-
-
-For \code{object_type==HYPRE_STRUCT} or \code{HYPRE_SSTRUCT}:
-\begin{verbatim}
-    bHYPRE_MPICommunicator mpi_comm;
-    bHYPRE_SStructMatrix  A_b;
-    bHYPRE_SStructGraph   graph;
-    int object_type, n_dim, var, nentries, nvalues;
-    int box_lower[3], box_upper[3], index[3];
-    int *entries;
-
-    A_b = bHYPRE_SStructMatrix_Create( mpi_comm, graph, ex );
-
-    bHYPRE_SStructMatrix_SetObjectType(A_b, object_type, ex);
-    bHYPRE_SStructMatrix_Initialize( A_b, ex );
-
-    /* SetBoxValues and SetValues are normally called inside loops */
-     bHYPRE_SStructMatrix_SetBoxValues
-           ( A_b, part, boxlower, box_upper, dim, var,
-             nentries, entries, values, nvalues, ex );
-     bHYPRE_SStructMatrix_SetValues
-           ( A_b, part, index, dim, var, nentries, entries, values, ex );
-
-     bHYPRE_SStructMatrix_Assemble( A_b, ex );
-\end{verbatim}
-
-\subsubsection{C-only}
-
-The C-only interface is very similar:
-\begin{verbatim}
-    MPICommunicator mpi_comm;
-    HYPRE_SStructMatrix   A;
-    HYPRE_SStructGraph    graph;
-    int object_type, var, nentries;
-    int box_lower[3], box_upper[3], index[3];
-    int *entries;
-
-    HYPRE_SStructMatrixCreate( mpi_comm, graph, &A );
-
-    /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
-    if ( object_type != HYPRE_SSTRUCT )
-        HYPRE_SStructMatrixSetObjectType(A, object_type);
-    HYPRE_SStructMatrixInitialize(A);
-
-    /* SetBoxValues and SetValues are normally called inside loops */
-    HYPRE_SStructMatrixSetBoxValues( A, part, box_lower, box_upper, var,
-                                     nentries, entries, values );
-    HYPRE_SStructMatrixSetValues
-         ( A, part, index, var, nentries, entries, values )
-
-    HYPRE_SStructMatrixAssemble(A);
-\end{verbatim}
-
-
-% >>>>>>>>>>>>>> Not done: vectors, stencils, graphs, grids, note that some
-% have versions for different matrix storage types
-
-% >>>>>>>>>>>>>> Not done: all solvers: PCG, GMRES, BiCGSTAB, CGNR, Euclid,
-% Hybrid, ParaSails, Pilut, Schwarz, Split, and DiagScale, Identity;
-%note that some have versions for different matrix storage types
 
 \section{Building HYPRE with the Babel Interface}
 \label{sec-Building-Babel}
