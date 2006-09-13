@@ -187,36 +187,42 @@ a value of zero means that all \hypre{} functions up to (and including) the
 current one have completed successfully.  This new error flags system is being
 implemented throughout the library, but currently there are still functions that
 do not support it.
-
-The error flag is a combination of one or a few error codes, which are
-defined in \code{utilities.h} and currently are:
-\begin{display} \begin{verbatim}
-#define HYPRE_ERROR_GENERIC      1<<0   /* generic error */
-#define HYPRE_ERROR_MEMORY       1<<1   /* unable to allocate memory */
-#define HYPRE_ERROR_ARG          1<<2   /* argument error */
-/* bits 4-8 are reserved for the index of the argument error */
-#define HYPRE_ERROR_CONV         1<<8   /* method did not converge as expected */
-\end{verbatim} \end{display}
-
-One can use \code{&} to determine exactly which errors have occurred:
+The error flag value is a combination of one or a few of the following
+error codes:
+\begin{enumerate}
+\item \code{HYPRE_ERROR_GENERIC} -- describes a generic error
+\item \code{HYPRE_ERROR_MEMORY} -- \hypre{} was unable to allocate memory
+\item \code{HYPRE_ERROR_ARG} -- error in one of the arguments of a \hypre{} function
+\item \code{HYPRE_ERROR_CONV} -- a \hypre{} solver did not converge as expected
+\end{enumerate}
+One can use the \code{HYPRE_CheckError} function to determine exactly
+which errors have occurred:
 \begin{display} \begin{verbatim}
 /* call some HYPRE functions */
 hypre_ierr = HYPRE_Function();
-
 /* check if the previously called hypre functions returned error(s) */
 if (hypre_ierr)
-{
    /* check if the error with code HYPRE_ERROR_CODE has occurred */
-   if (hypre_ierr & HYPRE_ERROR_CODE)
-}
+   if (HYPRE_CheckError(hypre_ierr,HYPRE_ERROR_CODE))
 \end{verbatim} \end{display}
-
-The global error flag can also be obtained directly by
-calling \code{HYPRE\_GetError()}. If \code{HYPRE\_ERROR\_ARG}
-has occurred the argument index can be obtained from \code{HYPRE\_GetErrorArg()}.
-To print a description of a given error flag, use
+The corresponding FORTRAN code is
 \begin{display} \begin{verbatim}
-HYPRE_DescribeError(int ierr, FILE *stream)
+C call some HYPRE functions
+      call HYPRE_Function(..., hypre_ierr);
+C check if the previously called hypre functions returned error(s)
+      if (hypre_ierr .ne. 0) then
+C check if the error with code HYPRE_ERROR_CODE has occurred
+         if (HYPRE_CheckError(hypre_ierr,HYPRE_ERROR_CODE) .ne. 0) then
+\end{verbatim} \end{display}
+The global error flag can also be obtained directly, between calls to
+other \hypre{} functions, by calling \code{HYPRE\_GetError()}.
+If an argument error (\code{HYPRE\_ERROR\_ARG}) has occurred, the
+argument index (counting from 1) can be obtained
+from \code{HYPRE\_GetErrorArg()}.
+To get a character string with a description of all errors in a
+given error flag, use
+\begin{display} \begin{verbatim}
+HYPRE_DescribeError(int hypre_ierr, char *descr);
 \end{verbatim} \end{display}
 Finally, if \hypre{} was configured with \code{--with-print-errors}, additional
 error information will be printed to the standard error during execution.
