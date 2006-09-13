@@ -39,7 +39,6 @@ void hypre_error_handler(char *filename, int line, int ierr)
    fprintf(stderr,
            "hypre error in file \"%s\", line %d, error code = %d ",
            filename, line, ierr);
-   HYPRE_DescribeError(ierr, stderr);
 #endif
 }
 
@@ -48,24 +47,27 @@ int HYPRE_GetError()
    return hypre_error_flag;
 }
 
-void HYPRE_DescribeError(int ierr, FILE *stream)
+int HYPRE_CheckError(int ierr, int hypre_error_code)
+{
+   return ierr & hypre_error_code;
+}
+
+void HYPRE_DescribeError(int ierr, char *msg)
 {
    if (ierr == 0)
-      fprintf(stream,"[No error] ");
+      sprintf(msg,"[No error] ");
 
    if (ierr & HYPRE_ERROR_GENERIC)
-      fprintf(stream,"[Generic error] ");
+      sprintf(msg,"[Generic error] ");
 
    if (ierr & HYPRE_ERROR_MEMORY)
-      fprintf(stream,"[Memory error] ");
+      sprintf(msg,"[Memory error] ");
 
    if (ierr & HYPRE_ERROR_ARG)
-      fprintf(stream,"[Error in argument %d] ", HYPRE_GetErrorArg());
+      sprintf(msg,"[Error in argument %d] ", HYPRE_GetErrorArg());
 
    if (ierr & HYPRE_ERROR_CONV)
-      fprintf(stream,"[Method did not converge] ");
-
-   fprintf(stream,"\n");
+      sprintf(msg,"[Method did not converge] ");
 }
 
 int HYPRE_GetErrorArg()

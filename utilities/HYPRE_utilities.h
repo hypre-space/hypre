@@ -71,14 +71,18 @@ typedef int MPI_Comm;
  * HYPRE error user functions
  *--------------------------------------------------------------------------*/
 
-#include <stdio.h>
-
 /* Return the current hypre error flag */
 int HYPRE_GetError();
-/* Print information about ierr in the given file stream */
-void HYPRE_DescribeError(int ierr, FILE *stream);
-/* Return the index of the argument error if HYPRE_ERROR_ARG was raised */
+
+/* Check if the given error flag contains the given error code */
+int HYPRE_CheckError(int hypre_ierr, int hypre_error_code);
+
+/* Return the index of the argument (counting from 1) where
+   argument error (HYPRE_ERROR_ARG) has occured */
 int HYPRE_GetErrorArg();
+
+/* Describe the given error flag in the given string */
+void HYPRE_DescribeError(int hypre_ierr, char *descr);
 
 #ifdef __cplusplus
 }
