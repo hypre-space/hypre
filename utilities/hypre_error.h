@@ -55,7 +55,7 @@ void hypre_error_handler(char *filename, int line, int ierr);
 #ifdef NDEBUG
 #define hypre_assert(EX)
 #else
-#define hypre_assert(EX) if (!(EX)) hypre_error(1)
+#define hypre_assert(EX) if (!(EX)) {fprintf(stderr,"hypre_assert failed: %s\n",__STRING(EX)); hypre_error(1);}
 #endif
 
 #endif
