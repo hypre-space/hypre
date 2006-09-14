@@ -374,12 +374,12 @@ C++ as a member function \code{SetValues}, in C as a function
 \code{bHYPRE_StructVector_SetValues}, or in Fortran as a subroutine
 \code{bHYPRE_StructVector_SetValues_f}.
 
-In the Babel interface, which largely reflects the \hypre{} design, a
-solver and matrix are both a kind of operator, i.e. something which
-acts on a vector to compute another vector.  If a solver takes a
-preconditioner, it is called a preconditioned solver.  There is no
-class or interface for preconditioners --- it is possible, though not
-always wise, to use any solver as a preconditioner.
+The Babel interface goes beyond the \hypre{} design in that a solver
+and matrix are both a kind of operator, i.e. something which acts on a
+vector to compute another vector.  If a solver takes a preconditioner,
+it is called a preconditioned solver.  There is no class or interface
+for preconditioners --- it is possible, though not always wise, to use
+any solver as a preconditioner.
 
 In order for a solver to act as an operator, to map a vector to a
 vector, it must contain not only a solution method but also the
