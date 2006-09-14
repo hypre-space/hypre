@@ -158,7 +158,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="alc"
         HYPRE_RUN_MACHINE="alc"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ne 1 -a 2 -l 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ne 1 -a 2 -cf -l 1"
         HYPRE_MESSAGE='SECONDARY[ALC]'
         ;;
      -mcr)
@@ -182,7 +182,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="thunder"
         HYPRE_RUN_MACHINE="thunder"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_ia64_elan4/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -l 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf -l 1"
         HYPRE_MESSAGE='SECONDARY[Thunder]'
         ;;
      -ubgl)
@@ -190,7 +190,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="ubgl"
         HYPRE_RUN_MACHINE="ubgl"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/sles_9_ppc64/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -l 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf -l 1"
         HYPRE_MESSAGE='SECONDARY[uBGL]'
         ;;
      -up)
@@ -198,7 +198,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="up"
         HYPRE_RUN_MACHINE="up"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/aix_5_64_fed/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -l 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf -l 1"
         HYPRE_MESSAGE='SECONDARY[uP]'
         ;;
      -vertex)
@@ -206,7 +206,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="vertex"
         HYPRE_RUN_MACHINE="vertex"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/chaos_3_x86_64_ib/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -l 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf -l 1"
         HYPRE_MESSAGE='SECONDARY[vertex]'
         ;;
      -insure)
@@ -222,7 +222,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nsde 1 -a 2 -l 2 -ABcf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nsde 1 -a 2 -ABcf -l 1"
         HYPRE_MESSAGE='PRIMARY[default]'
         COMPILERSELECT="default"
         ;;
