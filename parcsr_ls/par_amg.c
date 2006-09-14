@@ -115,7 +115,7 @@ hypre_BoomerAMGCreate()
    trunc_factor = 0.0;
    jacobi_trunc_threshold = 0.01;
    S_commpkg_switch = 1.0;
-   interp_type = 200;
+   interp_type = 0;
    coarsen_type = 6;
    measure_type = 0;
    setup_type = 1;
