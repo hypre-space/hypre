@@ -34,6 +34,10 @@
 
 Version 1.12.0b released, 2006/??/??.
 
+- Babel-based interface updated to Babel version 1.0.0, plus various improvements,
+  such as an interface to the hypre error handler.  Pre-built interfaces are included
+  for C, Fortran, and C++.  
+
 - Various modifications to BoomerAMG:
   - Eliminated the possibility to set relaxation on the finest grid
   - Added various new long-range interpolation algorithms: standard (with and without
