@@ -60,15 +60,13 @@
 int 
 HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   int ierr = 0;
-   
-   ierr = HYPRE_NewDistributedMatrixPilutSolver( comm, NULL, 
+   HYPRE_NewDistributedMatrixPilutSolver( comm, NULL, 
             (HYPRE_DistributedMatrixPilutSolver *) solver);
 
-   ierr = HYPRE_DistributedMatrixPilutSolverInitialize( 
+   HYPRE_DistributedMatrixPilutSolverInitialize( 
       (HYPRE_DistributedMatrixPilutSolver) solver );
 
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -78,17 +76,14 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 int 
 HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
 {
-   int ierr = 0;
-
-   ierr = HYPRE_DistributedMatrixDestroy( 
+   HYPRE_DistributedMatrixDestroy( 
       HYPRE_DistributedMatrixPilutSolverGetMatrix(
          (HYPRE_DistributedMatrixPilutSolver) solver ) );
-   if (ierr) return(ierr);
 
-   ierr = HYPRE_FreeDistributedMatrixPilutSolver(
+   HYPRE_FreeDistributedMatrixPilutSolver(
       (HYPRE_DistributedMatrixPilutSolver) solver );
 
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -101,21 +96,18 @@ HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
                    HYPRE_ParVector b,
                    HYPRE_ParVector x      )
 {
-   int ierr = 0;
    HYPRE_DistributedMatrix matrix;
    HYPRE_DistributedMatrixPilutSolver distributed_solver = 
       (HYPRE_DistributedMatrixPilutSolver) solver;
 
-   ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix(
+   HYPRE_ConvertParCSRMatrixToDistributedMatrix(
              A, &matrix );
-   if (ierr) return(ierr);
 
-   ierr = HYPRE_DistributedMatrixPilutSolverSetMatrix( distributed_solver, matrix );
-   if (ierr) return(ierr);
+   HYPRE_DistributedMatrixPilutSolverSetMatrix( distributed_solver, matrix );
 
-   ierr = HYPRE_DistributedMatrixPilutSolverSetup( distributed_solver );
+   HYPRE_DistributedMatrixPilutSolverSetup( distributed_solver );
 
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -128,17 +120,16 @@ HYPRE_ParCSRPilutSolve( HYPRE_Solver solver,
                    HYPRE_ParVector b,
                    HYPRE_ParVector x      )
 {
-   int ierr = 0;
    double *rhs, *soln;
 
    rhs = hypre_VectorData( hypre_ParVectorLocalVector( (hypre_ParVector *)b ) );
    soln = hypre_VectorData( hypre_ParVectorLocalVector( (hypre_ParVector *)x ) );
 
-   ierr = HYPRE_DistributedMatrixPilutSolverSolve(
+   HYPRE_DistributedMatrixPilutSolverSolve(
       (HYPRE_DistributedMatrixPilutSolver) solver,
       soln, rhs );
 
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -149,12 +140,11 @@ int
 HYPRE_ParCSRPilutSetMaxIter( HYPRE_Solver solver,
                         int          max_iter  )
 {
-   int ierr = 0;
 
-   ierr = HYPRE_DistributedMatrixPilutSolverSetMaxIts(
+   HYPRE_DistributedMatrixPilutSolverSetMaxIts(
       (HYPRE_DistributedMatrixPilutSolver) solver, max_iter );
 
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -165,13 +155,10 @@ int
 HYPRE_ParCSRPilutSetDropTolerance( HYPRE_Solver solver,
                     double       tol    )
 {
-   int ierr = 0;
-
-   ierr = HYPRE_DistributedMatrixPilutSolverSetDropTolerance(
+   HYPRE_DistributedMatrixPilutSolverSetDropTolerance(
       (HYPRE_DistributedMatrixPilutSolver) solver, tol );
 
-
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -182,12 +169,9 @@ int
 HYPRE_ParCSRPilutSetFactorRowSize( HYPRE_Solver solver,
                     int       size    )
 {
-   int ierr = 0;
-
-   ierr = HYPRE_DistributedMatrixPilutSolverSetFactorRowSize(
+   HYPRE_DistributedMatrixPilutSolverSetFactorRowSize(
       (HYPRE_DistributedMatrixPilutSolver) solver, size );
 
-
-   return( ierr );
+   return hypre_error_flag;
 }
 
