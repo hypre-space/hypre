@@ -58,12 +58,12 @@ Next, various finite element information need to be sent into the {\tt FEI}
 object.
 
 The first entity to be submitted to the {\tt FEI} is {\it field} information. 
-A {\it field} has an identifier called {\it fieldID} and a rank or
-{\it fieldSize} (number of degree of freedom). For example, for a simple
+A {\it field} has an identifier called {\tt fieldID} and a rank or
+{\tt fieldSize} (number of degrees of freedom). For example, for a simple
 3D incompressible Navier Stokes equation, the nodal variable is the velocity
 vector which has $3$ degrees of freedom; and the element variable (constant
 over the element) is the pressure (scalar). If these are the only variables,
-and if we assign {\it fieldID} $7$ and $8$ to them, respectively, then the
+and if we assign {\tt fieldID} $7$ and $8$ to them, respectively, then the
 finite element field information can be set up by
 \begin{tabbing}
 \hspace{0.5in} \= {\tt nFields = 2;} \\
@@ -169,7 +169,7 @@ the solve is successful. Finally, the solution can be retrieved by
 \hspace{0.5in} \= {\tt feiPtr$->$getBlockNodeSolution(elemBlkID, nNodes, nodeIDList, solnOffsets, solnValues);}
 \end{tabbing}
 where {\tt solnOffsets[i]} is the index pointing to the first location 
-where the variables at node $i$ is returned in {\tt solnValues}.
+where the variables at node $i$ are returned in {\tt solnValues}.
 
 \section{The LinearSystemCore Interface}
 \label{LSI_overview}
