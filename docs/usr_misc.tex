@@ -16,7 +16,7 @@ previous general and beta distributions as well as documentation.
 
 \section{Configure and Make}
 
-After unpacking the HYPRE tar file, the source code will be in the "src" 
+After unpacking the \hypre{} tar file, the source code will be in the "src" 
 sub-directory of a directory named hypre-VERSION, where VERSION is the current 
 version number (e.g., hypre-1.8.4, with a "b" appended for a beta release).
 
@@ -53,11 +53,11 @@ library.  If any errors occur while compiling, the user can edit the file
 \file{config/Makefile.config} directly then run \file{make} again; without having to 
 re-run configure.
 
-When building HYPRE without the install target, the libraries and include files 
+When building \hypre{} without the install target, the libraries and include files 
 will be copied into the default directories, \file{src/hypre/lib} and 
 \file{src/hypre/include}, respectively.
 
-When building HYPRE using the install target, the libraries and include files 
+When building \hypre{} using the install target, the libraries and include files 
 will be copied into the directories that the user specified in the options to 
 \file{configure}, e.g. \file{--prefix=/usr/apps}.  If none were specified the default 
 directories, \file{src/hypre/lib} and \file{src/hypre/include}, are used.
@@ -233,59 +233,59 @@ error information will be printed to the standard error during execution.
 \label{LSI_install}
 
 The ultimate objective is for application users to have immediate access
-to the latest FEI/\hypre{} library files on different computing platforms
-via public {\sf lib} directories.  While this feature is forthcoming, careful 
+to the latest {\tt FEI}/\hypre{} library files on different computing platforms
+via public {\tt lib} directories.  While this feature is forthcoming, careful 
 version control is needed for users to keep track of capabilities and bug fixes 
-for different installations.  Users who would like to set up the FEI/\hypre{}
+for different installations.  Users who would like to set up the {\tt FEI}/\hypre{}
 on their own should do the following :
 
 \begin{enumerate}
 
-\item obtain the \hypre{} and the Sandia FEI source codes (alternatively, use
-      the {\sf FEI} implementation in \hypre{}),
-\item compile Sandia's {\sf FEI} (fei-2.5.0) to create the
-      {\sf libfei\_base.a} file.
+\item obtain the \hypre{} and the Sandia {\tt FEI} source codes (alternatively, use
+      the {\tt FEI} implementation in \hypre{}),
+\item compile Sandia's {\tt FEI} (fei-2.5.0) to create the
+      {\tt libfei\_base.a} file.
 \item compile \hypre{} 
 \begin{enumerate}
 \item download \hypre{} from the web, ungzip and untar it
-\item go into the {\sf linear\_solvers} directory
-\item do a 'configure' with the {\sf --with-fei-inc-dir} option set to
-      the {\sf FEI} include directory plus other compile options
-\item compile with {\sf make install} to create the
-      {\sf libHYPRE\_LSI*} file in the {\sf linear\_solvers/hypre/lib}
+\item go into the {\tt linear\_solvers} directory
+\item do a 'configure' with the {\tt --with-fei-inc-dir} option set to
+      the {\tt FEI} include directory plus other compile options
+\item compile with {\tt make install} to create the
+      {\tt libHYPRE\_LSI*} file in the {\tt linear\_solvers/hypre/lib}
       directory.
 \end{enumerate}
-\item call the {\sf FEI} functions in your application code (example given
+\item call the {\tt FEI} functions in your application code (example given
       previously)
 \begin{enumerate}
-\item include {\sf cfei\-hypre.h} in your file 
-\item include {\sf FEI\_Implementation.h} in your file 
-\item make sure your application has an {\sf include} and an {\sf lib} path 
-      to the {\sf include} and {\sf lib} directories created above. 
+\item include {\tt cfei\-hypre.h} in your file 
+\item include {\tt FEI\_Implementation.h} in your file 
+\item make sure your application has an {\tt include} and an {\tt lib} path 
+      to the {\tt include} and {\tt lib} directories created above. 
 \end{enumerate}
 
 \end{enumerate}
 
 %\subsection{Linking with the library files}
 
-To link the {\sf FEI} and \hypre{} into the executable, the following has to be
+To link the {\tt FEI} and \hypre{} into the executable, the following has to be
 attached to the linking command :
 
 \begin{tabbing}
-\hspace{0.5in} \= {\sf -L\$$\{$LIBPATHS$\}$ -lfei\_base -lHYPRE\_LSI} 
+\hspace{0.5in} \= {\tt -L\$$\{$LIBPATHS$\}$ -lfei\_base -lHYPRE\_LSI} 
 \end{tabbing}
 along with all the other libraries (Note : the order in which the libraries are
-listed may be important), where {\sf LIBPATHS} are where 
-the \hypre{} and {\sf FEI} libraray files can be found.  
+listed may be important), where {\tt LIBPATHS} are where 
+the \hypre{} and {\tt FEI} library files can be found.  
 
 Since some of these library files make calls to LAPACK and BLAS functions, 
 the corresponding libraries need to be linked along with (placed after) these 
 library files.  
 %For example, on the DEC cluster, it suffices to link
-%with the {\sf dxml} library, (So {\sf -ldxml} is placed after the above link
-%sequence, with {\sf -lm} placed after {\sf -ldxml}.) while the {\it essl}
-%library can be used on the blue machine. If {\sf SuperLU} is also needed,
-%{\sf -lHYPRE\_superlu} should be placed immediately after {\sf HYPRE\_LSI}.
+%with the {\tt dxml} library, (So {\tt -ldxml} is placed after the above link
+%sequence, with {\tt -lm} placed after {\tt -ldxml}.) while the {\it essl}
+%library can be used on the blue machine. If {\tt SuperLU} is also needed,
+%{\tt -lHYPRE\_superlu} should be placed immediately after {\tt HYPRE\_LSI}.
 
 %\subsection{Some more caveats for application developers}
 
