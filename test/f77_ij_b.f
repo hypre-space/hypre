@@ -19,6 +19,7 @@ c-----------------------------------------------------------------------
       implicit none
 
       include 'mpif.h'
+      include '../babel/bHYPREClient-F/bHYPRE_ErrorCode.inc'
 
       integer MAXZONS, MAXBLKS, MAXDIM, MAXLEVELS
       integer HYPRE_PARCSR, NNX, NNY, NNZ, VECLEN
@@ -108,6 +109,7 @@ c     Babel-interface variables
       integer*8 mpi_comm
       integer*8  except
 c     ... except is for Babel exceptions, which we shall ignore
+      character msg*128
 
 
 c-----------------------------------------------------------------------
@@ -450,6 +452,13 @@ c-----------------------------------------------------------------------
          print *, 'Final Residual Norm = ', final_res_norm
          print *, 'Error Flag = ', ierr
       endif
+
+c     test error handler interface */
+      call bHYPRE_ErrorHandler_Describe_f( ierr, msg, except );
+      print *, msg
+      call bHYPRE_ErrorHandler_Check_f( ierr, HYPRE_ERROR_GENERIC,
+     1     i, except )
+      print *, 'check whether ierr is HYPRE_ERROR_GENERIC =', i
 
 c-----------------------------------------------------------------------
 c     Finalize things

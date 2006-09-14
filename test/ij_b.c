@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <assert.h>
 
 #include "utilities.h"
 #include "HYPRE.h"
@@ -162,6 +161,7 @@ main( int   argc,
 
    int		       time_index;
    MPI_Comm            mpi_comm = MPI_COMM_WORLD;
+   char * msg;
    int M, N;
    int first_local_row, last_local_row, local_num_rows;
    int first_local_col, last_local_col, local_num_cols;
@@ -184,6 +184,7 @@ main( int   argc,
 /*
   hypre_InitMemoryDebug(myid);
 */
+
    /*-----------------------------------------------------------
     * Set defaults and read user-provided parameters
     *-----------------------------------------------------------*/
@@ -1518,6 +1519,12 @@ main( int   argc,
 
    bHYPRE_IJParCSRVector_Print( bH_b, "driver.out.b", &_ex );
    bHYPRE_IJParCSRVector_Print( bH_x, "driver.out.x", &_ex );
+
+   /* test error handler interface */
+   bHYPRE_ErrorHandler_Describe(ierr,&msg,&_ex);
+   fprintf(stderr,"%s\n",msg);
+   i = bHYPRE_ErrorHandler_Check(ierr,HYPRE_ERROR_GENERIC, &_ex );
+   fprintf(stderr,"ierr check on HYPRE_ERROR_GENERIC is %i\n", i );
 
    /*-----------------------------------------------------------
     * Finalize things
