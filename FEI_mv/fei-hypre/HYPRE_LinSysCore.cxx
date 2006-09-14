@@ -492,6 +492,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       else if ( HYPreconID_ == HYMLI )
          HYPRE_LSI_MLIDestroy( HYPrecon_ );
 
+      else if ( HYPreconID_ == HYAMS )
+         HYPRE_AMSDestroy( HYPrecon_ );
+
       HYPrecon_ = NULL;
    }
    delete [] HYPreconName_;
@@ -2203,8 +2206,18 @@ This should ultimately be taken out even for newer ale3d implementation
          }
          delete [] eqnNumbers;
          delete [] newData;
-      }    
-   }    
+      }
+      else
+      {
+         if (nodeNumbers != NULL && numNodes != 0)
+         {
+            printf("putNodalFieldData WARNING : \n");
+            printf("    set nodeNumbers = NULL, set numNodes = 0.\n");
+         }
+         MLI_NodalCoord_ = new double[localEndRow_-localStartRow_+1];
+         for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = data[i];
+      }
+   }
 
    //-------------------------------------------------------------------
    // this is needed to set up the correct node equation map
@@ -3538,6 +3551,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
+   else if (!strcmp(name, "ams"))
+   {
+      strcpy(HYPreconName_, name);
+      HYPreconID_ = HYAMS;
+   }
    else if (!strcmp(name, "uzawa"))
    {
       strcpy(HYPreconName_, name);
@@ -3637,6 +3655,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 #else
            printf("HYPRE_LSC::selectPreconditioner-MLMaxwell unsupported.\n");
 #endif
+           break;
+      case HYAMS :
+           ierr = HYPRE_AMSCreate(&HYPrecon_);
            break;
       case HYUZAWA :
            HYPRE_LSI_UzawaCreate(comm_, &HYPrecon_);

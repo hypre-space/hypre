@@ -32,7 +32,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.6.2R1"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.7.0R1"
 
 // *************************************************************************
 // system libraries used
@@ -63,7 +63,7 @@ enum HYsolverID {HYPCG,HYLSICG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,
                  HYY12M,HYAMGE,HYHYBRID};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
-                 HYUZAWA,HYMLMAXWELL};
+                 HYUZAWA,HYMLMAXWELL,HYAMS};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255
@@ -455,6 +455,7 @@ class HYPRE_LinSysCore
    void   setupPreconSchwarz();
    void   setupPreconML();
    void   setupPreconMLMaxwell();
+   void   setupPreconAMS();
    void   setupPreconBlock();
    void   setupPreconEuclid();
    void   solveUsingBoomeramg(int&);
@@ -484,6 +485,8 @@ class HYPRE_LinSysCore
    void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
+   void   HYPRE_LSI_BuildNodalCoordinates(HYPRE_ParVector X, HYPRE_ParVector Y, 
+                                          HYPRE_ParVector Z);
 
    // ----------------------------------------------------------------------
    // private functions for selecting solver/preconditioner

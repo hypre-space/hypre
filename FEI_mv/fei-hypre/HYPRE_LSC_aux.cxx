@@ -313,6 +313,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - euclidNlevels <d>\n");
          printf("    - euclidThreshold <f>\n");
          printf("    - blockP help (to get blockP options) \n");
+         printf("    - amsNumPDEs <d>\n");
          printf("    - MLI help (to get MLI options) \n");
 #ifdef HAVE_ML
          printf("    - mlNumSweeps <d>\n");
@@ -1475,6 +1476,19 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //---------------------------------------------------------------
+      // mlpack preconditoner : no of PDEs (block size)
+      //---------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsNumPDEs") )
+      {
+         sscanf(params[i],"%s %d", param, &mlNumPDEs_);
+         if ( mlNumPDEs_ < 1 ) mlNumPDEs_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amsNumPDEs = %d\n",
+                   mlNumPDEs_);
+      }
+
+      //---------------------------------------------------------------
       // error 
       //---------------------------------------------------------------
 
@@ -1674,6 +1688,7 @@ void HYPRE_LinSysCore::setupPCGPrecon()
                                         HYPRE_DummyFunction, HYPrecon_);
            else
            {
+              setupPreconAMS();
               HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
                                         HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
@@ -1681,6 +1696,20 @@ void HYPRE_LinSysCore::setupPCGPrecon()
 #else
            printf("CG : MLI preconditioning not available.\n");
 #endif
+           break;
+
+      case HYAMS :
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("AMS preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_AMSSolve,
+                                        HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_AMSSolve,
+                                        HYPRE_AMSSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
            break;
 
       case HYUZAWA :
@@ -3397,11 +3426,44 @@ void HYPRE_LinSysCore::setupPreconMLMaxwell()
                                       (hypre_ParCSRMatrix *) maxwellGEN_,
                                       (hypre_ParCSRMatrix **) &maxwellANN_);
    }
-   HYPRE_LSI_MLMaxwellSetGMatrix(HYPrecon_,maxwellGEN_);
    HYPRE_LSI_MLMaxwellSetANNMatrix(HYPrecon_,maxwellANN_);
 #else
    return;
 #endif
+}
+
+//***************************************************************************
+// this function sets up AMS preconditioner
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::setupPreconAMS()
+{
+   int                maxit=100;    /* heuristics for now */
+   double             tol=1.0e-6;   /* heuristics for now */
+   int                cycle_type=1; /* V-cycle */
+   HYPRE_ParCSRMatrix A_csr;
+
+   /* Set AMS parameters */
+   HYPRE_AMSSetDimension(HYPrecon_, mlNumPDEs_);
+   HYPRE_AMSSetMaxIter(HYPrecon_, maxit);
+   HYPRE_AMSSetTol(HYPrecon_, tol);
+   HYPRE_AMSSetCycleType(HYPrecon_, cycle_type);
+   HYPRE_AMSSetPrintLevel(HYPrecon_, HYOutputLevel_);
+
+   if (maxwellGEN_ != NULL)
+      HYPRE_AMSSetDiscreteGradient(HYPrecon_, maxwellGEN_);
+   else
+   {
+      printf("HYPRE_LSC::setupPreconAMS ERROR - no G matrix.\n");
+      exit(1);
+   }
+   if (MLI_NodalCoord_ == NULL)
+   {
+      HYPRE_ParVector amsX, amsY, amsZ;
+      HYPRE_LSI_BuildNodalCoordinates(amsX,amsY,amsZ);
+      HYPRE_AMSSetCoordinateVectors(HYPrecon_,amsX,amsY,amsZ);
+   }
+   HYPRE_AMSSetBetaPoissonMatrix(HYPrecon_, NULL);
 }
 
 //***************************************************************************
@@ -5080,6 +5142,16 @@ void HYPRE_LinSysCore::FE_loadElemMatrix(int elemID, int nNodes,
    (void) matDim;
    (void) elemMat;
 #endif
+   return;
+}
+
+//***************************************************************************
+// build nodal coordinates
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::HYPRE_LSI_BuildNodalCoordinates(HYPRE_ParVector X,
+                       HYPRE_ParVector Y, HYPRE_ParVector Z)
+{
    return;
 }
 
