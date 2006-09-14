@@ -638,7 +638,7 @@ main( int   argc,
 	omega[i] = 1.;
    }
 
-   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 0 is
+   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 7 is
       implemented, i.e. Jacobi relaxation */
    if (solver_id == 5) 
    {
@@ -2032,7 +2032,6 @@ main( int   argc,
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
-      ioutdat = 2;
  
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter(pcg_solver, 1000);
@@ -3206,7 +3205,6 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
  
-      ioutdat = 2;
       HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_GMRESSetKDim(pcg_solver, k_dim);
       HYPRE_GMRESSetMaxIter(pcg_solver, 1000);
@@ -3481,7 +3479,6 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
  
-      ioutdat = 2;
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
       HYPRE_BiCGSTABSetTol(pcg_solver, tol);
@@ -3647,7 +3644,6 @@ main( int   argc,
       time_index = hypre_InitializeTiming("CGNR Setup");
       hypre_BeginTiming(time_index);
  
-      ioutdat = 2;
       HYPRE_ParCSRCGNRCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_CGNRSetMaxIter(pcg_solver, 1000);
       HYPRE_CGNRSetTol(pcg_solver, tol);
