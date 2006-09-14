@@ -119,6 +119,16 @@ namespace bHYPRE {
 
 
     /**
+     * The Destroy function doesn't necessarily destroy anything.
+     * It is just another name for deleteRef.  Thus it decrements the
+     * object's reference count.  The Babel memory management system will
+     * destroy the object if the reference count goes to zero.
+     */
+    void
+    Destroy() ;
+
+
+    /**
      * Prepare an object for setting coefficient values, whether for
      * the first time or subsequently.
      */

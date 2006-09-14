@@ -734,6 +734,42 @@ bHYPRE_IJParCSRVector_SetCommunicator__exec(
 }
 
 static void
+bHYPRE_IJParCSRVector_Destroy__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
+  /* stack space for arguments */
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  (self->d_epv->f_Destroy)(
+    self,
+    _ex);  SIDL_CHECK(*_ex);
+
+  /* pack return value */
+  /* pack out and inout argments */
+  /* clean-up dangling references */
+  return;
+
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
+}
+
+static void
 bHYPRE_IJParCSRVector_Initialize__exec(
         struct bHYPRE_IJParCSRVector__object* self,
         struct sidl_rmi_Call__object* inArgs,
@@ -1267,6 +1303,7 @@ ior_bHYPRE_IJParCSRVector__exec(
     { "Clear", bHYPRE_IJParCSRVector_Clear__exec },
     { "Clone", bHYPRE_IJParCSRVector_Clone__exec },
     { "Copy", bHYPRE_IJParCSRVector_Copy__exec },
+    { "Destroy", bHYPRE_IJParCSRVector_Destroy__exec },
     { "Dot", bHYPRE_IJParCSRVector_Dot__exec },
     { "GetLocalRange", bHYPRE_IJParCSRVector_GetLocalRange__exec },
     { "GetValues", bHYPRE_IJParCSRVector_GetValues__exec },
@@ -1383,6 +1420,7 @@ static void bHYPRE_IJParCSRVector__init_epv(void)
   epv->f_Print                    = NULL;
   epv->f_Read                     = NULL;
   epv->f_SetCommunicator          = NULL;
+  epv->f_Destroy                  = NULL;
   epv->f_Initialize               = NULL;
   epv->f_Assemble                 = NULL;
   epv->f_Clear                    = NULL;
@@ -1429,6 +1467,8 @@ static void bHYPRE_IJParCSRVector__init_epv(void)
   e0->f_SetCommunicator     = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e0->f_Destroy             = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e0->f_Initialize          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e0->f_Assemble            = (int32_t (*)(void*,
@@ -1463,6 +1503,8 @@ static void bHYPRE_IJParCSRVector__init_epv(void)
   e1->f_SetCommunicator     = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e1->f_Destroy             = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e1->f_Initialize          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e1->f_Assemble            = (int32_t (*)(void*,
@@ -1497,6 +1539,8 @@ static void bHYPRE_IJParCSRVector__init_epv(void)
   e2->f_SetCommunicator     = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e2->f_Destroy             = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e2->f_Initialize          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e2->f_Assemble            = (int32_t (*)(void*,

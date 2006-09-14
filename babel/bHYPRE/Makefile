@@ -65,6 +65,7 @@ FILES = ${IMPLSRCS} ${IORSRCS_NONNULL} ${SKELSRCS} ${STUBSRCS} \
  bHYPRE_Extensions.c
 
 OBJS = ${FILES:.c=.o}
+SHARED_OBJS = ${FILES:.c=.lo}
 
 ##################################################################
 # Targets
@@ -92,9 +93,13 @@ libbHYPRE.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libbHYPRE.so: ${OBJS}
+libbHYPRE.so: ${OBJS} ${SHARED_OBJS}
 	@echo  "Building $@ ... "
 	${LINK_CC} -o $@ -shared ${OBJS} -L${HYPRE_LIB_INSTALL} -lHYPRE -lsidl-1.0.0
 
 
 ${OBJS}: ${HEADERS}
+
+%.lo: %.c
+	$(LTCOMPILE) -c -o $@ $<
+

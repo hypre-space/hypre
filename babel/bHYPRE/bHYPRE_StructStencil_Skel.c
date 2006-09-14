@@ -75,6 +75,12 @@ extern struct sidl_RuntimeException__object*
   impl_bHYPRE_StructStencil_fcast_sidl_RuntimeException(void* bi,
   sidl_BaseInterface* _ex);
 extern
+void
+impl_bHYPRE_StructStencil_Destroy(
+  /* in */ bHYPRE_StructStencil self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_StructStencil_SetDimension(
   /* in */ bHYPRE_StructStencil self,
@@ -159,6 +165,7 @@ bHYPRE_StructStencil__set_epv(struct bHYPRE_StructStencil__epv *epv)
   epv->f__ctor = impl_bHYPRE_StructStencil__ctor;
   epv->f__ctor2 = impl_bHYPRE_StructStencil__ctor2;
   epv->f__dtor = impl_bHYPRE_StructStencil__dtor;
+  epv->f_Destroy = impl_bHYPRE_StructStencil_Destroy;
   epv->f_SetDimension = impl_bHYPRE_StructStencil_SetDimension;
   epv->f_SetSize = impl_bHYPRE_StructStencil_SetSize;
   epv->f_SetElement = skel_bHYPRE_StructStencil_SetElement;

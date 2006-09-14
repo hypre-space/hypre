@@ -169,6 +169,42 @@ bHYPRE_StructGrid_SetCommunicator__exec(
 }
 
 static void
+bHYPRE_StructGrid_Destroy__exec(
+        struct bHYPRE_StructGrid__object* self,
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
+  /* stack space for arguments */
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  (self->d_epv->f_Destroy)(
+    self,
+    _ex);  SIDL_CHECK(*_ex);
+
+  /* pack return value */
+  /* pack out and inout argments */
+  /* clean-up dangling references */
+  return;
+
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
+}
+
+static void
 bHYPRE_StructGrid_SetDimension__exec(
         struct bHYPRE_StructGrid__object* self,
         struct sidl_rmi_Call__object* inArgs,
@@ -732,6 +768,7 @@ ior_bHYPRE_StructGrid__exec(
     struct sidl_BaseInterface__object **_ex ) { 
   static const struct bHYPRE_StructGrid__method  s_methods[] = {
     { "Assemble", bHYPRE_StructGrid_Assemble__exec },
+    { "Destroy", bHYPRE_StructGrid_Destroy__exec },
     { "SetCommunicator", bHYPRE_StructGrid_SetCommunicator__exec },
     { "SetDimension", bHYPRE_StructGrid_SetDimension__exec },
     { "SetExtents", bHYPRE_StructGrid_SetExtents__exec },
@@ -805,6 +842,7 @@ static void bHYPRE_StructGrid__init_epv(void)
   epv->f__ctor2                   = NULL;
   epv->f__dtor                    = NULL;
   epv->f_SetCommunicator          = NULL;
+  epv->f_Destroy                  = NULL;
   epv->f_SetDimension             = NULL;
   epv->f_SetExtents               = NULL;
   epv->f_SetPeriodic              = NULL;

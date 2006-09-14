@@ -157,6 +157,12 @@ impl_bHYPRE_ParaSails_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_ParaSails_Destroy(
+  /* in */ bHYPRE_ParaSails self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_ParaSails_SetIntParameter(
   /* in */ bHYPRE_ParaSails self,
@@ -412,6 +418,7 @@ bHYPRE_ParaSails__set_epv(struct bHYPRE_ParaSails__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_ParaSails_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_ParaSails_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_ParaSails_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_ParaSails_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_ParaSails_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_ParaSails_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_ParaSails_SetStringParameter;

@@ -355,6 +355,28 @@ bHYPRE_IJParCSRVector_SetCommunicator(
 
 
 /**
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_IJParCSRVector_Destroy(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_Destroy)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  */

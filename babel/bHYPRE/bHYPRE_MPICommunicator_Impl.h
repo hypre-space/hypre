@@ -168,6 +168,12 @@ extern struct sidl_RuntimeException__object*
 extern struct sidl_RuntimeException__object* 
   impl_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi,
   sidl_BaseInterface* _ex);
+extern
+void
+impl_bHYPRE_MPICommunicator_Destroy(
+  /* in */ bHYPRE_MPICommunicator self,
+  /* out */ sidl_BaseInterface *_ex);
+
 extern struct bHYPRE_MPICommunicator__object* 
   impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url,
   sidl_bool ar, sidl_BaseInterface *_ex);

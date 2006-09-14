@@ -21,6 +21,12 @@
 #ifndef included_bHYPRE_CoefficientAccess_h
 #include "bHYPRE_CoefficientAccess.h"
 #endif
+#ifndef included_bHYPRE_ErrorCode_h
+#include "bHYPRE_ErrorCode.h"
+#endif
+#ifndef included_bHYPRE_ErrorHandler_h
+#include "bHYPRE_ErrorHandler.h"
+#endif
 #ifndef included_bHYPRE_Euclid_h
 #include "bHYPRE_Euclid.h"
 #endif

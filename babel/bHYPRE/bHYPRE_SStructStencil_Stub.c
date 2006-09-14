@@ -150,6 +150,28 @@ bHYPRE_SStructStencil_Create(
 }
 
 /*
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+
+SIDL_C_INLINE_DEFN
+void
+bHYPRE_SStructStencil_Destroy(
+  /* in */ bHYPRE_SStructStencil self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  (*self->d_epv->f_Destroy)(
+    self,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+/*
  * Set the number of spatial dimensions and stencil entries.
  * DEPRECATED, use Create:
  */
@@ -1112,6 +1134,48 @@ static void remote_bHYPRE_SStructStencil__exec(
   *_ex = NULL;
 }
 
+/* REMOTE METHOD STUB:Destroy */
+static void
+remote_bHYPRE_SStructStencil_Destroy(
+  /* in */ struct bHYPRE_SStructStencil__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructStencil__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Destroy", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructStencil.Destroy.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return;
+  }
+}
+
 /* REMOTE METHOD STUB:SetNumDimSize */
 static int32_t
 remote_bHYPRE_SStructStencil_SetNumDimSize(
@@ -1429,6 +1493,7 @@ static void bHYPRE_SStructStencil__init_remote_epv(void)
   epv->f__ctor              = NULL;
   epv->f__ctor2             = NULL;
   epv->f__dtor              = NULL;
+  epv->f_Destroy            = remote_bHYPRE_SStructStencil_Destroy;
   epv->f_SetNumDimSize      = remote_bHYPRE_SStructStencil_SetNumDimSize;
   epv->f_SetEntry           = remote_bHYPRE_SStructStencil_SetEntry;
   epv->f_addRef             = remote_bHYPRE_SStructStencil_addRef;

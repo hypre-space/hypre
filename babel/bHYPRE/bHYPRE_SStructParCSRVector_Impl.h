@@ -336,6 +336,12 @@ impl_bHYPRE_SStructParCSRVector_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_SStructParCSRVector_Destroy(
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_SStructParCSRVector_Initialize(
   /* in */ bHYPRE_SStructParCSRVector self,

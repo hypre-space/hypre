@@ -997,6 +997,48 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
   }
 
+  // REMOTE METHOD STUB:Destroy
+  static void
+  remote_bHYPRE__SStructVectorView_Destroy(
+    /* in */ struct bHYPRE__SStructVectorView__object* self ,
+    /* out */ struct sidl_BaseInterface__object* *_ex)
+  {
+    LANG_SPECIFIC_INIT();
+    *_ex = NULL;
+    {
+      // initialize a new invocation
+      sidl_BaseInterface _throwaway = NULL;
+      sidl_BaseException _be = NULL;
+      sidl_rmi_Response _rsvp = NULL;
+      struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+        bHYPRE__SStructVectorView__remote*)self->d_data)->d_ih;
+      sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( 
+        _conn, "Destroy", _ex ); SIDL_CHECK(*_ex);
+
+      // pack in and inout arguments
+
+      // send actual RMI request
+      _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+      _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+      if(_be != NULL) {
+        sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVectorView.Destroy.", &throwaway_exception);
+        *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+          &throwaway_exception);
+        goto EXIT;
+      }
+
+      // unpack out and inout arguments
+
+      // cleanup and return
+      EXIT:
+      if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+      if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+      return;
+    }
+  }
+
   // REMOTE METHOD STUB:Initialize
   static int32_t
   remote_bHYPRE__SStructVectorView_Initialize(
@@ -1328,6 +1370,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     epv->f_GetObject            = remote_bHYPRE__SStructVectorView_GetObject;
     epv->f_SetCommunicator      = 
       remote_bHYPRE__SStructVectorView_SetCommunicator;
+    epv->f_Destroy              = remote_bHYPRE__SStructVectorView_Destroy;
     epv->f_Initialize           = remote_bHYPRE__SStructVectorView_Initialize;
     epv->f_Assemble             = remote_bHYPRE__SStructVectorView_Assemble;
     epv->f_addRef               = remote_bHYPRE__SStructVectorView_addRef;
@@ -1354,6 +1397,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     e0->f_SetCommunicator = (int32_t (*)(void*,
       struct bHYPRE_MPICommunicator__object*,
       struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+    e0->f_Destroy         = (void (*)(void*,
+      struct sidl_BaseInterface__object **)) epv->f_Destroy;
     e0->f_Initialize      = (int32_t (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_Initialize;
     e0->f_Assemble        = (int32_t (*)(void*,
@@ -1388,6 +1433,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     e1->f_SetCommunicator = (int32_t (*)(void*,
       struct bHYPRE_MPICommunicator__object*,
       struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+    e1->f_Destroy         = (void (*)(void*,
+      struct sidl_BaseInterface__object **)) epv->f_Destroy;
     e1->f_Initialize      = (int32_t (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_Initialize;
     e1->f_Assemble        = (int32_t (*)(void*,
@@ -1425,6 +1472,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     e2->f_SetCommunicator = (int32_t (*)(void*,
       struct bHYPRE_MPICommunicator__object*,
       struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+    e2->f_Destroy         = (void (*)(void*,
+      struct sidl_BaseInterface__object **)) epv->f_Destroy;
     e2->f_Initialize      = (int32_t (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_Initialize;
     e2->f_Assemble        = (int32_t (*)(void*,
@@ -1486,6 +1535,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     e3->f_SetCommunicator = (int32_t (*)(void*,
       struct bHYPRE_MPICommunicator__object*,
       struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+    e3->f_Destroy         = (void (*)(void*,
+      struct sidl_BaseInterface__object **)) epv->f_Destroy;
     e3->f_Initialize      = (int32_t (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_Initialize;
     e3->f_Assemble        = (int32_t (*)(void*,

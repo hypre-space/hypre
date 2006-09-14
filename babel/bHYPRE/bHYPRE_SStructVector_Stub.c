@@ -697,6 +697,28 @@ bHYPRE_SStructVector_SetCommunicator(
 #endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+
+SIDL_C_INLINE_DEFN
+void
+bHYPRE_SStructVector_Destroy(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+#if SIDL_C_INLINE_REPEAT_DEFN
+{
+  (*self->d_epv->f_Destroy)(
+    self,
+    _ex);
+}
+#else /* ISO C 1999 inline semantics */
+;
+#endif /* SIDL_C_INLINE_REPEAT_DEFN */
+
+/*
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  */
@@ -2619,6 +2641,48 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVecto
   }
 }
 
+/* REMOTE METHOD STUB:Destroy */
+static void
+remote_bHYPRE_SStructVector_Destroy(
+  /* in */ struct bHYPRE_SStructVector__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructVector__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Destroy", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructVector.Destroy.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return;
+  }
+}
+
 /* REMOTE METHOD STUB:Initialize */
 static int32_t
 remote_bHYPRE_SStructVector_Initialize(
@@ -3079,6 +3143,7 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   epv->f_Print                = remote_bHYPRE_SStructVector_Print;
   epv->f_GetObject            = remote_bHYPRE_SStructVector_GetObject;
   epv->f_SetCommunicator      = remote_bHYPRE_SStructVector_SetCommunicator;
+  epv->f_Destroy              = remote_bHYPRE_SStructVector_Destroy;
   epv->f_Initialize           = remote_bHYPRE_SStructVector_Initialize;
   epv->f_Assemble             = remote_bHYPRE_SStructVector_Assemble;
   epv->f_Clear                = remote_bHYPRE_SStructVector_Clear;
@@ -3103,6 +3168,8 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   e0->f_SetCommunicator = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e0->f_Destroy         = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e0->f_Initialize      = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e0->f_Assemble        = (int32_t (*)(void*,
@@ -3134,6 +3201,8 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   e1->f_SetCommunicator = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e1->f_Destroy         = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e1->f_Initialize      = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e1->f_Assemble        = (int32_t (*)(void*,
@@ -3168,6 +3237,8 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   e2->f_SetCommunicator = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e2->f_Destroy         = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e2->f_Initialize      = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e2->f_Assemble        = (int32_t (*)(void*,
@@ -3225,6 +3296,8 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   e3->f_SetCommunicator = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e3->f_Destroy         = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e3->f_Initialize      = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e3->f_Assemble        = (int32_t (*)(void*,

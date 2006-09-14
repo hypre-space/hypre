@@ -26,6 +26,14 @@
 #include "bHYPRE_CoefficientAccess.hxx"
 #endif
 
+#ifndef included_bHYPRE_ErrorCode_hxx
+#include "bHYPRE_ErrorCode.hxx"
+#endif
+
+#ifndef included_bHYPRE_ErrorHandler_hxx
+#include "bHYPRE_ErrorHandler.hxx"
+#endif
+
 #ifndef included_bHYPRE_Euclid_hxx
 #include "bHYPRE_Euclid.hxx"
 #endif

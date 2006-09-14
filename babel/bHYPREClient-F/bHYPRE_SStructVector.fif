@@ -559,6 +559,23 @@ C        out sidl.BaseInterface exception
 
 
 C       
+C       Method:  Destroy[]
+C       The Destroy function doesn't necessarily destroy anything.
+C       It is just another name for deleteRef.  Thus it decrements the
+C       object's reference count.  The Babel memory management system will
+C       destroy the object if the reference count goes to zero.
+C       
+
+        subroutine bHYPRE_SStructVector_Destroy_f(self, exception)
+        implicit none
+C        in bHYPRE.SStructVector self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
 C       Method:  Initialize[]
 C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.

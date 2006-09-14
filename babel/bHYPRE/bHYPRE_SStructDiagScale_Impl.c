@@ -459,6 +459,34 @@ impl_bHYPRE_SStructDiagScale_SetCommunicator(
 }
 
 /*
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructDiagScale_Destroy"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_SStructDiagScale_Destroy(
+  /* in */ bHYPRE_SStructDiagScale self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.Destroy) */
+    /* Insert-Code-Here {bHYPRE.SStructDiagScale.Destroy} (Destroy method) */
+     bHYPRE_SStructDiagScale_deleteRef(self,_ex);
+     return;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.Destroy) */
+  }
+}
+
+/*
  * Set the int parameter associated with {\tt name}.
  */
 

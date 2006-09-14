@@ -261,6 +261,12 @@ impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_ParCSRDiagScale_Destroy(
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntParameter(
   /* in */ bHYPRE_ParCSRDiagScale self,

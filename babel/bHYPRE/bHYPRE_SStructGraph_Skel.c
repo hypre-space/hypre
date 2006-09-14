@@ -143,6 +143,12 @@ impl_bHYPRE_SStructGraph_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_SStructGraph_Destroy(
+  /* in */ bHYPRE_SStructGraph self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_SStructGraph_Initialize(
   /* in */ bHYPRE_SStructGraph self,
@@ -256,6 +262,7 @@ bHYPRE_SStructGraph__set_epv(struct bHYPRE_SStructGraph__epv *epv)
   epv->f_AddEntries = skel_bHYPRE_SStructGraph_AddEntries;
   epv->f_SetObjectType = impl_bHYPRE_SStructGraph_SetObjectType;
   epv->f_SetCommunicator = impl_bHYPRE_SStructGraph_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_SStructGraph_Destroy;
   epv->f_Initialize = impl_bHYPRE_SStructGraph_Initialize;
   epv->f_Assemble = impl_bHYPRE_SStructGraph_Assemble;
 

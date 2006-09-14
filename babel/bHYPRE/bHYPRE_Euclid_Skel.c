@@ -163,6 +163,12 @@ impl_bHYPRE_Euclid_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_Euclid_Destroy(
+  /* in */ bHYPRE_Euclid self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_Euclid_SetIntParameter(
   /* in */ bHYPRE_Euclid self,
@@ -417,6 +423,7 @@ bHYPRE_Euclid__set_epv(struct bHYPRE_Euclid__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_Euclid_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_Euclid_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_Euclid_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_Euclid_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_Euclid_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_Euclid_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_Euclid_SetStringParameter;

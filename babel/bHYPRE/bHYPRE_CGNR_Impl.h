@@ -293,6 +293,12 @@ impl_bHYPRE_CGNR_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_CGNR_Destroy(
+  /* in */ bHYPRE_CGNR self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_CGNR_SetIntParameter(
   /* in */ bHYPRE_CGNR self,

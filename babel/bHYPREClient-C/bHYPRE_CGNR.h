@@ -92,7 +92,7 @@ bHYPRE_CGNR
 bHYPRE_CGNR__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE\_CGNR\_\_data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE_CGNR__data) passed in rather than running the constructor.
  */
 bHYPRE_CGNR
 bHYPRE_CGNR__wrapObj(void * data, sidl_BaseInterface *_ex);
@@ -434,6 +434,28 @@ bHYPRE_CGNR_SetCommunicator(
   return (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_CGNR_Destroy(
+  /* in */ bHYPRE_CGNR self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_Destroy)(
+    self,
     _ex);
 }
 #else

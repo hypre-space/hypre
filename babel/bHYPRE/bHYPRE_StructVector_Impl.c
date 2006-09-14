@@ -431,6 +431,34 @@ impl_bHYPRE_StructVector_SetCommunicator(
 }
 
 /*
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Destroy"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_StructVector_Destroy(
+  /* in */ bHYPRE_StructVector self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Destroy) */
+    /* Insert-Code-Here {bHYPRE.StructVector.Destroy} (Destroy method) */
+     bHYPRE_StructVector_deleteRef(self,_ex);
+     return;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Destroy) */
+  }
+}
+
+/*
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  */

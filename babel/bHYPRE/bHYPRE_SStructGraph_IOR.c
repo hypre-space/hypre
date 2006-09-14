@@ -607,6 +607,42 @@ bHYPRE_SStructGraph_SetCommunicator__exec(
 }
 
 static void
+bHYPRE_SStructGraph_Destroy__exec(
+        struct bHYPRE_SStructGraph__object* self,
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
+  /* stack space for arguments */
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  (self->d_epv->f_Destroy)(
+    self,
+    _ex);  SIDL_CHECK(*_ex);
+
+  /* pack return value */
+  /* pack out and inout argments */
+  /* clean-up dangling references */
+  return;
+
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
+}
+
+static void
 bHYPRE_SStructGraph_Initialize__exec(
         struct bHYPRE_SStructGraph__object* self,
         struct sidl_rmi_Call__object* inArgs,
@@ -828,6 +864,7 @@ ior_bHYPRE_SStructGraph__exec(
   static const struct bHYPRE_SStructGraph__method  s_methods[] = {
     { "AddEntries", bHYPRE_SStructGraph_AddEntries__exec },
     { "Assemble", bHYPRE_SStructGraph_Assemble__exec },
+    { "Destroy", bHYPRE_SStructGraph_Destroy__exec },
     { "Initialize", bHYPRE_SStructGraph_Initialize__exec },
     { "SetCommGrid", bHYPRE_SStructGraph_SetCommGrid__exec },
     { "SetCommunicator", bHYPRE_SStructGraph_SetCommunicator__exec },
@@ -926,6 +963,7 @@ static void bHYPRE_SStructGraph__init_epv(void)
     bHYPRE_SStructGraph__object*,
     struct sidl_BaseInterface__object **)) s1->f_getClassInfo;
   epv->f_SetCommunicator          = NULL;
+  epv->f_Destroy                  = NULL;
   epv->f_Initialize               = NULL;
   epv->f_Assemble                 = NULL;
 
@@ -948,6 +986,8 @@ static void bHYPRE_SStructGraph__init_epv(void)
   e0->f_SetCommunicator     = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e0->f_Destroy             = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e0->f_Initialize          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e0->f_Assemble            = (int32_t (*)(void*,

@@ -268,6 +268,12 @@ impl_bHYPRE_Euclid_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_Euclid_Destroy(
+  /* in */ bHYPRE_Euclid self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_Euclid_SetIntParameter(
   /* in */ bHYPRE_Euclid self,

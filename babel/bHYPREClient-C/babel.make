@@ -1,5 +1,6 @@
 IORHDRS = bHYPRE_BiCGSTAB_IOR.h bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h      \
-  bHYPRE_CoefficientAccess_IOR.h bHYPRE_Euclid_IOR.h bHYPRE_GMRES_IOR.h       \
+  bHYPRE_CoefficientAccess_IOR.h bHYPRE_ErrorCode_IOR.h                       \
+  bHYPRE_ErrorHandler_IOR.h bHYPRE_Euclid_IOR.h bHYPRE_GMRES_IOR.h            \
   bHYPRE_HGMRES_IOR.h bHYPRE_HPCG_IOR.h bHYPRE_Hybrid_IOR.h                   \
   bHYPRE_IJMatrixView_IOR.h bHYPRE_IJParCSRMatrix_IOR.h                       \
   bHYPRE_IJParCSRVector_IOR.h bHYPRE_IJVectorView_IOR.h bHYPRE_IOR.h          \
@@ -20,8 +21,9 @@ IORHDRS = bHYPRE_BiCGSTAB_IOR.h bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h      \
   bHYPRE_StructStencil_IOR.h bHYPRE_StructVectorView_IOR.h                    \
   bHYPRE_StructVector_IOR.h bHYPRE_Vector_IOR.h
 STUBHDRS = bHYPRE.h bHYPRE_BiCGSTAB.h bHYPRE_BoomerAMG.h bHYPRE_CGNR.h        \
-  bHYPRE_CoefficientAccess.h bHYPRE_Euclid.h bHYPRE_GMRES.h bHYPRE_HGMRES.h   \
-  bHYPRE_HPCG.h bHYPRE_Hybrid.h bHYPRE_IJMatrixView.h bHYPRE_IJParCSRMatrix.h \
+  bHYPRE_CoefficientAccess.h bHYPRE_ErrorCode.h bHYPRE_ErrorHandler.h         \
+  bHYPRE_Euclid.h bHYPRE_GMRES.h bHYPRE_HGMRES.h bHYPRE_HPCG.h                \
+  bHYPRE_Hybrid.h bHYPRE_IJMatrixView.h bHYPRE_IJParCSRMatrix.h               \
   bHYPRE_IJParCSRVector.h bHYPRE_IJVectorView.h bHYPRE_IdentitySolver.h       \
   bHYPRE_MPICommunicator.h bHYPRE_MatrixVectorView.h bHYPRE_Operator.h        \
   bHYPRE_PCG.h bHYPRE_ParCSRDiagScale.h bHYPRE_ParaSails.h bHYPRE_Pilut.h     \
@@ -37,7 +39,8 @@ STUBHDRS = bHYPRE.h bHYPRE_BiCGSTAB.h bHYPRE_BoomerAMG.h bHYPRE_CGNR.h        \
   bHYPRE_StructStencil.h bHYPRE_StructVector.h bHYPRE_StructVectorView.h      \
   bHYPRE_Vector.h
 STUBSRCS = bHYPRE_BiCGSTAB_Stub.c bHYPRE_BoomerAMG_Stub.c bHYPRE_CGNR_Stub.c  \
-  bHYPRE_CoefficientAccess_Stub.c bHYPRE_Euclid_Stub.c bHYPRE_GMRES_Stub.c    \
+  bHYPRE_CoefficientAccess_Stub.c bHYPRE_ErrorCode_Stub.c                     \
+  bHYPRE_ErrorHandler_Stub.c bHYPRE_Euclid_Stub.c bHYPRE_GMRES_Stub.c         \
   bHYPRE_HGMRES_Stub.c bHYPRE_HPCG_Stub.c bHYPRE_Hybrid_Stub.c                \
   bHYPRE_IJMatrixView_Stub.c bHYPRE_IJParCSRMatrix_Stub.c                     \
   bHYPRE_IJParCSRVector_Stub.c bHYPRE_IJVectorView_Stub.c                     \

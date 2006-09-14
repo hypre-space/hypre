@@ -213,6 +213,34 @@ impl_bHYPRE_SStructStencil_Create(
 }
 
 /*
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructStencil_Destroy"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_SStructStencil_Destroy(
+  /* in */ bHYPRE_SStructStencil self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil.Destroy) */
+    /* Insert-Code-Here {bHYPRE.SStructStencil.Destroy} (Destroy method) */
+     bHYPRE_SStructStencil_deleteRef(self,_ex);
+     return;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil.Destroy) */
+  }
+}
+
+/*
  * Set the number of spatial dimensions and stencil entries.
  * DEPRECATED, use Create:
  */

@@ -260,6 +260,12 @@ impl_bHYPRE_ParaSails_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_ParaSails_Destroy(
+  /* in */ bHYPRE_ParaSails self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_ParaSails_SetIntParameter(
   /* in */ bHYPRE_ParaSails self,

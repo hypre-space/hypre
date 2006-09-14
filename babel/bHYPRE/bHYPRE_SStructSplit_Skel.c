@@ -155,6 +155,12 @@ impl_bHYPRE_SStructSplit_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_SStructSplit_Destroy(
+  /* in */ bHYPRE_SStructSplit self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_SStructSplit_SetIntParameter(
   /* in */ bHYPRE_SStructSplit self,
@@ -408,6 +414,7 @@ bHYPRE_SStructSplit__set_epv(struct bHYPRE_SStructSplit__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_SStructSplit_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_SStructSplit_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_SStructSplit_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_SStructSplit_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_SStructSplit_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_SStructSplit_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_SStructSplit_SetStringParameter;

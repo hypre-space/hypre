@@ -174,6 +174,12 @@ impl_bHYPRE_CGNR_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_CGNR_Destroy(
+  /* in */ bHYPRE_CGNR self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_CGNR_SetIntParameter(
   /* in */ bHYPRE_CGNR self,
@@ -428,6 +434,7 @@ bHYPRE_CGNR__set_epv(struct bHYPRE_CGNR__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_CGNR_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_CGNR_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_CGNR_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_CGNR_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_CGNR_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_CGNR_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_CGNR_SetStringParameter;

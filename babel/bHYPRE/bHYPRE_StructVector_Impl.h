@@ -256,6 +256,12 @@ impl_bHYPRE_StructVector_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_StructVector_Destroy(
+  /* in */ bHYPRE_StructVector self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_StructVector_Initialize(
   /* in */ bHYPRE_StructVector self,

@@ -849,6 +849,42 @@ bHYPRE_BiCGSTAB_SetCommunicator__exec(
 }
 
 static void
+bHYPRE_BiCGSTAB_Destroy__exec(
+        struct bHYPRE_BiCGSTAB__object* self,
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
+  /* stack space for arguments */
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  (self->d_epv->f_Destroy)(
+    self,
+    _ex);  SIDL_CHECK(*_ex);
+
+  /* pack return value */
+  /* pack out and inout argments */
+  /* clean-up dangling references */
+  return;
+
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
+}
+
+static void
 bHYPRE_BiCGSTAB_SetIntParameter__exec(
         struct bHYPRE_BiCGSTAB__object* self,
         struct sidl_rmi_Call__object* inArgs,
@@ -1620,6 +1656,7 @@ ior_bHYPRE_BiCGSTAB__exec(
     { "Apply", bHYPRE_BiCGSTAB_Apply__exec },
     { "ApplyAdjoint", bHYPRE_BiCGSTAB_ApplyAdjoint__exec },
     { "Clone", bHYPRE_BiCGSTAB_Clone__exec },
+    { "Destroy", bHYPRE_BiCGSTAB_Destroy__exec },
     { "GetDoubleValue", bHYPRE_BiCGSTAB_GetDoubleValue__exec },
     { "GetIntValue", bHYPRE_BiCGSTAB_GetIntValue__exec },
     { "GetNumIterations", bHYPRE_BiCGSTAB_GetNumIterations__exec },
@@ -1749,6 +1786,7 @@ static void bHYPRE_BiCGSTAB__init_epv(void)
   epv->f_GetNumIterations              = NULL;
   epv->f_GetRelResidualNorm            = NULL;
   epv->f_SetCommunicator               = NULL;
+  epv->f_Destroy                       = NULL;
   epv->f_SetIntParameter               = NULL;
   epv->f_SetDoubleParameter            = NULL;
   epv->f_SetStringParameter            = NULL;
@@ -1781,6 +1819,8 @@ static void bHYPRE_BiCGSTAB__init_epv(void)
   e0->f_SetCommunicator          = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e0->f_Destroy                  = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e0->f_SetIntParameter          = (int32_t (*)(void*,const char*,int32_t,
     struct sidl_BaseInterface__object **)) epv->f_SetIntParameter;
   e0->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,double,
@@ -1866,6 +1906,8 @@ static void bHYPRE_BiCGSTAB__init_epv(void)
   e1->f_SetCommunicator          = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e1->f_Destroy                  = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e1->f_SetIntParameter          = (int32_t (*)(void*,const char*,int32_t,
     struct sidl_BaseInterface__object **)) epv->f_SetIntParameter;
   e1->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,double,
@@ -1942,6 +1984,8 @@ static void bHYPRE_BiCGSTAB__init_epv(void)
   e2->f_SetCommunicator          = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e2->f_Destroy                  = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,int32_t,
     struct sidl_BaseInterface__object **)) epv->f_SetIntParameter;
   e2->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,double,

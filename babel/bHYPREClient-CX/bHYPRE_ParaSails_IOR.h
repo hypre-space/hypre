@@ -182,6 +182,9 @@ struct bHYPRE_ParaSails__epv {
     /* in */ struct bHYPRE_ParaSails__object* self,
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_Destroy)(
+    /* in */ struct bHYPRE_ParaSails__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetIntParameter)(
     /* in */ struct bHYPRE_ParaSails__object* self,
     /* in */ const char* name,

@@ -148,6 +148,12 @@ impl_bHYPRE_Pilut_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_Pilut_Destroy(
+  /* in */ bHYPRE_Pilut self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_Pilut_SetIntParameter(
   /* in */ bHYPRE_Pilut self,
@@ -394,6 +400,7 @@ bHYPRE_Pilut__set_epv(struct bHYPRE_Pilut__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_Pilut_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_Pilut_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_Pilut_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_Pilut_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_Pilut_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_Pilut_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_Pilut_SetStringParameter;

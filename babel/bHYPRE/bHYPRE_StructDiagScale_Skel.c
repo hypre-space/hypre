@@ -161,6 +161,12 @@ impl_bHYPRE_StructDiagScale_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_StructDiagScale_Destroy(
+  /* in */ bHYPRE_StructDiagScale self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_StructDiagScale_SetIntParameter(
   /* in */ bHYPRE_StructDiagScale self,
@@ -420,6 +426,7 @@ bHYPRE_StructDiagScale__set_epv(struct bHYPRE_StructDiagScale__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_StructDiagScale_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_StructDiagScale_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_StructDiagScale_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_StructDiagScale_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_StructDiagScale_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_StructDiagScale_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_StructDiagScale_SetStringParameter;

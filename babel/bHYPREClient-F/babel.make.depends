@@ -24,6 +24,13 @@ bHYPRE_CoefficientAccess_IOR.h:                                               \
 bHYPRE_CoefficientAccess_IOR.h: sidl_header.h
 bHYPRE_CoefficientAccess_IOR.h: sidl_BaseInterface_IOR.h
 
+bHYPRE_ErrorCode_IOR.h: sidlType.h
+
+bHYPRE_ErrorHandler_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_ErrorHandler_IOR.h: sidl_header.h
+bHYPRE_ErrorHandler_IOR.h: bHYPRE_ErrorCode_IOR.h
+bHYPRE_ErrorHandler_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_Euclid_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Euclid_IOR.h: sidl_header.h
 bHYPRE_Euclid_IOR.h: bHYPRE_Operator_IOR.h
@@ -91,6 +98,8 @@ bHYPRE_IOR.h: bHYPRE_BiCGSTAB_IOR.h
 bHYPRE_IOR.h: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_IOR.h: bHYPRE_CGNR_IOR.h
 bHYPRE_IOR.h: bHYPRE_CoefficientAccess_IOR.h
+bHYPRE_IOR.h: bHYPRE_ErrorCode_IOR.h
+bHYPRE_IOR.h: bHYPRE_ErrorHandler_IOR.h
 bHYPRE_IOR.h: bHYPRE_Euclid_IOR.h
 bHYPRE_IOR.h: bHYPRE_GMRES_IOR.h
 bHYPRE_IOR.h: bHYPRE_HGMRES_IOR.h
@@ -375,6 +384,8 @@ bHYPRE_CGNR.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CoefficientAccess.fif:                                                 \
   /home/painter/linear_solvers/babel/Interfaces.idl
 
+bHYPRE_ErrorHandler.fif: /home/painter/linear_solvers/babel/Interfaces.idl
+
 bHYPRE_Euclid.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
 bHYPRE_GMRES.fif: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -486,6 +497,9 @@ bHYPRE_CGNR_fStub.h: bHYPRE_CGNR_IOR.h
 bHYPRE_CoefficientAccess_fStub.h:                                             \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CoefficientAccess_fStub.h: bHYPRE_CoefficientAccess_IOR.h
+
+bHYPRE_ErrorHandler_fStub.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_ErrorHandler_fStub.h: bHYPRE_ErrorHandler_IOR.h
 
 bHYPRE_Euclid_fStub.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Euclid_fStub.h: bHYPRE_Euclid_IOR.h
@@ -882,6 +896,40 @@ bHYPRE_CoefficientAccess_fStub.c: sidl_rmi_Response.h
 bHYPRE_CoefficientAccess_fStub.c: sidl_rmi_ServerRegistry.h
 bHYPRE_CoefficientAccess_fStub.c: sidl_rmi_ConnectRegistry.h
 bHYPRE_CoefficientAccess_fStub.c: sidl_io_Serializable.h
+
+bHYPRE_ErrorCode_fStub.c: sidl_int_IOR.h
+bHYPRE_ErrorCode_fStub.c: sidlfortran.h
+
+bHYPRE_ErrorHandler_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_ErrorHandler_fStub.c: bHYPRE_ErrorHandler_fStub.h
+bHYPRE_ErrorHandler_fStub.c: sidlfortran.h
+bHYPRE_ErrorHandler_fStub.c: sidl_header.h
+bHYPRE_ErrorHandler_fStub.c: sidl_interface_IOR.h
+bHYPRE_ErrorHandler_fStub.c: sidl_Exception.h
+bHYPRE_ErrorHandler_fStub.c: babel_config.h
+bHYPRE_ErrorHandler_fStub.c: sidl_Loader.h
+bHYPRE_ErrorHandler_fStub.c: bHYPRE_ErrorHandler_IOR.h
+bHYPRE_ErrorHandler_fStub.c: bHYPRE_ErrorCode_IOR.h
+bHYPRE_ErrorHandler_fStub.c: sidl_BaseException_IOR.h
+bHYPRE_ErrorHandler_fStub.c: sidl_BaseInterface_IOR.h
+bHYPRE_ErrorHandler_fStub.c: sidl_ClassInfo_IOR.h
+bHYPRE_ErrorHandler_fStub.c: sidl_RuntimeException_IOR.h
+bHYPRE_ErrorHandler_fStub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_ErrorHandler_fStub.c: bHYPRE_ErrorHandler_fStub.h
+bHYPRE_ErrorHandler_fStub.c: sidl_BaseClass_fStub.h
+bHYPRE_ErrorHandler_fStub.c: sidl_BaseInterface_fStub.h
+bHYPRE_ErrorHandler_fStub.c: sidl_ClassInfo_fStub.h
+bHYPRE_ErrorHandler_fStub.c: sidl_RuntimeException_fStub.h
+bHYPRE_ErrorHandler_fStub.c: sidl_BaseClass.h
+bHYPRE_ErrorHandler_fStub.c: sidl_ClassInfo.h
+bHYPRE_ErrorHandler_fStub.c: sidl_rmi_ProtocolFactory.h
+bHYPRE_ErrorHandler_fStub.c: sidl_rmi_InstanceRegistry.h
+bHYPRE_ErrorHandler_fStub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_ErrorHandler_fStub.c: sidl_rmi_Invocation.h
+bHYPRE_ErrorHandler_fStub.c: sidl_rmi_Response.h
+bHYPRE_ErrorHandler_fStub.c: sidl_rmi_ServerRegistry.h
+bHYPRE_ErrorHandler_fStub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_ErrorHandler_fStub.c: sidl_io_Serializable.h
 
 bHYPRE_Euclid_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Euclid_fStub.c: bHYPRE_Euclid_fStub.h

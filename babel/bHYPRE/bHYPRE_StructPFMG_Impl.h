@@ -261,6 +261,12 @@ impl_bHYPRE_StructPFMG_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_StructPFMG_Destroy(
+  /* in */ bHYPRE_StructPFMG self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_StructPFMG_SetIntParameter(
   /* in */ bHYPRE_StructPFMG self,

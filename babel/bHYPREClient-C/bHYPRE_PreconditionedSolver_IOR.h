@@ -118,6 +118,9 @@ struct bHYPRE_PreconditionedSolver__epv {
     /* in */ void* self,
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_Destroy)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetIntParameter)(
     /* in */ void* self,
     /* in */ const char* name,
@@ -309,6 +312,9 @@ struct bHYPRE__PreconditionedSolver__epv {
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE__PreconditionedSolver__object* self,
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_Destroy)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetIntParameter)(
     /* in */ struct bHYPRE__PreconditionedSolver__object* self,

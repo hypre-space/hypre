@@ -174,6 +174,12 @@ impl_bHYPRE_StructGrid_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_StructGrid_Destroy(
+  /* in */ bHYPRE_StructGrid self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_StructGrid_SetDimension(
   /* in */ bHYPRE_StructGrid self,

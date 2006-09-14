@@ -84,6 +84,12 @@ extern struct sidl_RuntimeException__object*
 extern struct sidl_RuntimeException__object* 
   impl_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi,
   sidl_BaseInterface* _ex);
+extern
+void
+impl_bHYPRE_MPICommunicator_Destroy(
+  /* in */ bHYPRE_MPICommunicator self,
+  /* out */ sidl_BaseInterface *_ex);
+
 extern struct bHYPRE_MPICommunicator__object* 
   impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url,
   sidl_bool ar, sidl_BaseInterface *_ex);
@@ -124,6 +130,7 @@ bHYPRE_MPICommunicator__set_epv(struct bHYPRE_MPICommunicator__epv *epv)
   epv->f__ctor = impl_bHYPRE_MPICommunicator__ctor;
   epv->f__ctor2 = impl_bHYPRE_MPICommunicator__ctor2;
   epv->f__dtor = impl_bHYPRE_MPICommunicator__dtor;
+  epv->f_Destroy = impl_bHYPRE_MPICommunicator_Destroy;
 
 }
 #ifdef __cplusplus

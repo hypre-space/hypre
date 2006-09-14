@@ -80,7 +80,7 @@ bHYPRE_SStructDiagScale__createRemote(const char * url,
   sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE\_SStructDiagScale\_\_data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE_SStructDiagScale__data) passed in rather than running the constructor.
  */
 bHYPRE_SStructDiagScale
 bHYPRE_SStructDiagScale__wrapObj(void * data, sidl_BaseInterface *_ex);
@@ -359,6 +359,28 @@ bHYPRE_SStructDiagScale_SetCommunicator(
   return (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+/**
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_SStructDiagScale_Destroy(
+  /* in */ bHYPRE_SStructDiagScale self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_Destroy)(
+    self,
     _ex);
 }
 #else

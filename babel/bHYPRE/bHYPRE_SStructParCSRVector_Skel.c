@@ -230,6 +230,12 @@ impl_bHYPRE_SStructParCSRVector_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_SStructParCSRVector_Destroy(
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_SStructParCSRVector_Initialize(
   /* in */ bHYPRE_SStructParCSRVector self,
@@ -567,6 +573,7 @@ bHYPRE_SStructParCSRVector__set_epv(struct bHYPRE_SStructParCSRVector__epv *epv)
   epv->f_Print = impl_bHYPRE_SStructParCSRVector_Print;
   epv->f_GetObject = impl_bHYPRE_SStructParCSRVector_GetObject;
   epv->f_SetCommunicator = impl_bHYPRE_SStructParCSRVector_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_SStructParCSRVector_Destroy;
   epv->f_Initialize = impl_bHYPRE_SStructParCSRVector_Initialize;
   epv->f_Assemble = impl_bHYPRE_SStructParCSRVector_Assemble;
   epv->f_Clear = impl_bHYPRE_SStructParCSRVector_Clear;

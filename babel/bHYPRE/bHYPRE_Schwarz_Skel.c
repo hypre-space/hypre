@@ -154,6 +154,12 @@ impl_bHYPRE_Schwarz_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_Schwarz_Destroy(
+  /* in */ bHYPRE_Schwarz self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_Schwarz_SetIntParameter(
   /* in */ bHYPRE_Schwarz self,
@@ -407,6 +413,7 @@ bHYPRE_Schwarz__set_epv(struct bHYPRE_Schwarz__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_Schwarz_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_Schwarz_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_Schwarz_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_Schwarz_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_Schwarz_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_Schwarz_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_Schwarz_SetStringParameter;

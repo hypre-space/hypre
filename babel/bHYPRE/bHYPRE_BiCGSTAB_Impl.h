@@ -298,6 +298,12 @@ impl_bHYPRE_BiCGSTAB_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_BiCGSTAB_Destroy(
+  /* in */ bHYPRE_BiCGSTAB self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_BiCGSTAB_SetIntParameter(
   /* in */ bHYPRE_BiCGSTAB self,

@@ -179,6 +179,12 @@ impl_bHYPRE_BoomerAMG_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_BoomerAMG_Destroy(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_BoomerAMG_SetIntParameter(
   /* in */ bHYPRE_BoomerAMG self,
@@ -479,6 +485,7 @@ bHYPRE_BoomerAMG__set_epv(struct bHYPRE_BoomerAMG__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_BoomerAMG_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_BoomerAMG_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_BoomerAMG_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_BoomerAMG_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_BoomerAMG_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_BoomerAMG_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_BoomerAMG_SetStringParameter;

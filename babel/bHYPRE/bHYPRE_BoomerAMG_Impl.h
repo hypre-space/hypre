@@ -282,6 +282,12 @@ impl_bHYPRE_BoomerAMG_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_BoomerAMG_Destroy(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_BoomerAMG_SetIntParameter(
   /* in */ bHYPRE_BoomerAMG self,

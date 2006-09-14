@@ -157,6 +157,12 @@ extern struct sidl_RuntimeException__object*
   impl_bHYPRE_SStructStencil_fcast_sidl_RuntimeException(void* bi,
   sidl_BaseInterface* _ex);
 extern
+void
+impl_bHYPRE_SStructStencil_Destroy(
+  /* in */ bHYPRE_SStructStencil self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_SStructStencil_SetNumDimSize(
   /* in */ bHYPRE_SStructStencil self,

@@ -173,6 +173,12 @@ impl_bHYPRE_HPCG_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_HPCG_Destroy(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_HPCG_SetIntParameter(
   /* in */ bHYPRE_HPCG self,
@@ -427,6 +433,7 @@ bHYPRE_HPCG__set_epv(struct bHYPRE_HPCG__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_HPCG_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_HPCG_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_HPCG_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_HPCG_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_HPCG_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_HPCG_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_HPCG_SetStringParameter;

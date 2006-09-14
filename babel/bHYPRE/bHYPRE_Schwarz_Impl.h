@@ -258,6 +258,12 @@ impl_bHYPRE_Schwarz_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_Schwarz_Destroy(
+  /* in */ bHYPRE_Schwarz self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_Schwarz_SetIntParameter(
   /* in */ bHYPRE_Schwarz self,

@@ -273,6 +273,12 @@ impl_bHYPRE_Hybrid_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_Hybrid_Destroy(
+  /* in */ bHYPRE_Hybrid self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_Hybrid_SetIntParameter(
   /* in */ bHYPRE_Hybrid self,

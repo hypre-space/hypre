@@ -18,8 +18,8 @@
  * MPICommunicator class
  * - two general Create functions: use CreateC if called from C code,
  * CreateF if called from Fortran code.
- * - Create\_MPICommWorld will create a MPICommunicator to represent
- * MPI\_Comm\_World, and can be called from any language.
+ * - Create_MPICommWorld will create a MPICommunicator to represent
+ * MPI_Comm_World, and can be called from any language.
  */
 struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_MPICommunicator__array;
@@ -76,7 +76,7 @@ bHYPRE_MPICommunicator
 bHYPRE_MPICommunicator__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE\_MPICommunicator\_\_data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE_MPICommunicator__data) passed in rather than running the constructor.
  */
 bHYPRE_MPICommunicator
 bHYPRE_MPICommunicator__wrapObj(void * data, sidl_BaseInterface *_ex);
@@ -104,11 +104,33 @@ bHYPRE_MPICommunicator_CreateF(
   /* out */ sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create\_MPICommWorld[]
+ * Method:  Create_MPICommWorld[]
  */
 bHYPRE_MPICommunicator
 bHYPRE_MPICommunicator_Create_MPICommWorld(
   /* out */ sidl_BaseInterface *_ex);
+
+/**
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_MPICommunicator_Destroy(
+  /* in */ bHYPRE_MPICommunicator self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_Destroy)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
 
 SIDL_C_INLINE_DECL
 void

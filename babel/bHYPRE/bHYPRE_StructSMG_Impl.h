@@ -260,6 +260,12 @@ impl_bHYPRE_StructSMG_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_StructSMG_Destroy(
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_StructSMG_SetIntParameter(
   /* in */ bHYPRE_StructSMG self,

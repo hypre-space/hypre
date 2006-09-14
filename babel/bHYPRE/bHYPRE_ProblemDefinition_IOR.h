@@ -130,6 +130,9 @@ struct bHYPRE_ProblemDefinition__epv {
     /* in */ void* self,
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_Destroy)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_Initialize)(
     /* in */ void* self,
     /* out */ struct sidl_BaseInterface__object* *_ex);
@@ -225,6 +228,9 @@ struct bHYPRE__ProblemDefinition__epv {
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE__ProblemDefinition__object* self,
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_Destroy)(
+    /* in */ struct bHYPRE__ProblemDefinition__object* self,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_Initialize)(
     /* in */ struct bHYPRE__ProblemDefinition__object* self,

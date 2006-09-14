@@ -241,6 +241,12 @@ impl_bHYPRE_Pilut_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_Pilut_Destroy(
+  /* in */ bHYPRE_Pilut self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_Pilut_SetIntParameter(
   /* in */ bHYPRE_Pilut self,

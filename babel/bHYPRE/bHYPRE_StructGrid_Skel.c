@@ -88,6 +88,12 @@ impl_bHYPRE_StructGrid_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_StructGrid_Destroy(
+  /* in */ bHYPRE_StructGrid self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_StructGrid_SetDimension(
   /* in */ bHYPRE_StructGrid self,
@@ -237,6 +243,7 @@ bHYPRE_StructGrid__set_epv(struct bHYPRE_StructGrid__epv *epv)
   epv->f__ctor2 = impl_bHYPRE_StructGrid__ctor2;
   epv->f__dtor = impl_bHYPRE_StructGrid__dtor;
   epv->f_SetCommunicator = impl_bHYPRE_StructGrid_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_StructGrid_Destroy;
   epv->f_SetDimension = impl_bHYPRE_StructGrid_SetDimension;
   epv->f_SetExtents = skel_bHYPRE_StructGrid_SetExtents;
   epv->f_SetPeriodic = skel_bHYPRE_StructGrid_SetPeriodic;

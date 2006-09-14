@@ -175,6 +175,12 @@ impl_bHYPRE_GMRES_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_GMRES_Destroy(
+  /* in */ bHYPRE_GMRES self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_GMRES_SetIntParameter(
   /* in */ bHYPRE_GMRES self,
@@ -430,6 +436,7 @@ bHYPRE_GMRES__set_epv(struct bHYPRE_GMRES__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_GMRES_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_GMRES_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_GMRES_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_GMRES_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_GMRES_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_GMRES_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_GMRES_SetStringParameter;

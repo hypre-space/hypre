@@ -297,6 +297,12 @@ impl_bHYPRE_HPCG_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_HPCG_Destroy(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_HPCG_SetIntParameter(
   /* in */ bHYPRE_HPCG self,

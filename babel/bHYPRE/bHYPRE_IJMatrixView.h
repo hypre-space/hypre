@@ -318,6 +318,22 @@ bHYPRE_IJMatrixView_SetCommunicator(
 
 
 SIDL_C_INLINE_DECL
+void
+bHYPRE_IJMatrixView_Destroy(
+  /* in */ bHYPRE_IJMatrixView self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_Destroy)(
+    self->d_object,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
+SIDL_C_INLINE_DECL
 int32_t
 bHYPRE_IJMatrixView_Initialize(
   /* in */ bHYPRE_IJMatrixView self,

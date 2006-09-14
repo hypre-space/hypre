@@ -354,6 +354,48 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.S
     }
   }
 
+  // REMOTE METHOD STUB:Destroy
+  static void
+  remote_bHYPRE_StructGrid_Destroy(
+    /* in */ struct bHYPRE_StructGrid__object* self ,
+    /* out */ struct sidl_BaseInterface__object* *_ex)
+  {
+    LANG_SPECIFIC_INIT();
+    *_ex = NULL;
+    {
+      // initialize a new invocation
+      sidl_BaseInterface _throwaway = NULL;
+      sidl_BaseException _be = NULL;
+      sidl_rmi_Response _rsvp = NULL;
+      struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+        bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
+      sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( 
+        _conn, "Destroy", _ex ); SIDL_CHECK(*_ex);
+
+      // pack in and inout arguments
+
+      // send actual RMI request
+      _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+      _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+      if(_be != NULL) {
+        sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.Destroy.", &throwaway_exception);
+        *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+          &throwaway_exception);
+        goto EXIT;
+      }
+
+      // unpack out and inout arguments
+
+      // cleanup and return
+      EXIT:
+      if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+      if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+      return;
+    }
+  }
+
   // REMOTE METHOD STUB:SetDimension
   static int32_t
   remote_bHYPRE_StructGrid_SetDimension(
@@ -818,6 +860,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.g
     epv->f__ctor2               = NULL;
     epv->f__dtor                = NULL;
     epv->f_SetCommunicator      = remote_bHYPRE_StructGrid_SetCommunicator;
+    epv->f_Destroy              = remote_bHYPRE_StructGrid_Destroy;
     epv->f_SetDimension         = remote_bHYPRE_StructGrid_SetDimension;
     epv->f_SetExtents           = remote_bHYPRE_StructGrid_SetExtents;
     epv->f_SetPeriodic          = remote_bHYPRE_StructGrid_SetPeriodic;
@@ -1168,6 +1211,30 @@ bHYPRE::StructGrid::SetCommunicator( /* in */::bHYPRE::MPICommunicator mpi_comm
   }
   /*unpack results and cleanup*/
   return _result;
+}
+
+
+
+/**
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+void
+bHYPRE::StructGrid::Destroy(  )
+
+{
+
+  ior_t* const loc_self = _get_ior();
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_Destroy))(loc_self, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
 }
 
 

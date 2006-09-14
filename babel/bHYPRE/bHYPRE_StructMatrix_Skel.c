@@ -201,6 +201,12 @@ impl_bHYPRE_StructMatrix_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_StructMatrix_Destroy(
+  /* in */ bHYPRE_StructMatrix self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_StructMatrix_Initialize(
   /* in */ bHYPRE_StructMatrix self,
@@ -630,6 +636,7 @@ bHYPRE_StructMatrix__set_epv(struct bHYPRE_StructMatrix__epv *epv)
   epv->f_SetConstantEntries = skel_bHYPRE_StructMatrix_SetConstantEntries;
   epv->f_SetConstantValues = skel_bHYPRE_StructMatrix_SetConstantValues;
   epv->f_SetCommunicator = impl_bHYPRE_StructMatrix_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_StructMatrix_Destroy;
   epv->f_Initialize = impl_bHYPRE_StructMatrix_Initialize;
   epv->f_Assemble = impl_bHYPRE_StructMatrix_Assemble;
   epv->f_SetIntParameter = impl_bHYPRE_StructMatrix_SetIntParameter;

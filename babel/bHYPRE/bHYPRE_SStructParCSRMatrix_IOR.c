@@ -936,6 +936,42 @@ bHYPRE_SStructParCSRMatrix_SetCommunicator__exec(
 }
 
 static void
+bHYPRE_SStructParCSRMatrix_Destroy__exec(
+        struct bHYPRE_SStructParCSRMatrix__object* self,
+        struct sidl_rmi_Call__object* inArgs,
+        struct sidl_rmi_Return__object* outArgs,
+        struct sidl_BaseInterface__object ** _ex) {
+  /* stack space for arguments */
+  sidl_BaseInterface _ex3   = NULL;
+  sidl_BaseException _SIDLex = NULL;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  (self->d_epv->f_Destroy)(
+    self,
+    _ex);  SIDL_CHECK(*_ex);
+
+  /* pack return value */
+  /* pack out and inout argments */
+  /* clean-up dangling references */
+  return;
+
+  EXIT:
+  _SIDLex = sidl_BaseException__cast(*_ex,&_ex3); EXEC_CHECK(_ex3);
+  sidl_rmi_Return_throwException(outArgs, _SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseException_deleteRef(_SIDLex, &_ex3); EXEC_CHECK(_ex3);
+  sidl_BaseInterface_deleteRef(*_ex, &_ex3); EXEC_CHECK(_ex3);
+  *_ex = NULL;
+  return;
+  EXEC_ERR:
+  {
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseInterface_deleteRef(_ex3, &_throwaway);
+    return;
+  }
+}
+
+static void
 bHYPRE_SStructParCSRMatrix_Initialize__exec(
         struct bHYPRE_SStructParCSRMatrix__object* self,
         struct sidl_rmi_Call__object* inArgs,
@@ -1803,6 +1839,7 @@ ior_bHYPRE_SStructParCSRMatrix__exec(
     { "Apply", bHYPRE_SStructParCSRMatrix_Apply__exec },
     { "ApplyAdjoint", bHYPRE_SStructParCSRMatrix_ApplyAdjoint__exec },
     { "Assemble", bHYPRE_SStructParCSRMatrix_Assemble__exec },
+    { "Destroy", bHYPRE_SStructParCSRMatrix_Destroy__exec },
     { "GetDoubleValue", bHYPRE_SStructParCSRMatrix_GetDoubleValue__exec },
     { "GetIntValue", bHYPRE_SStructParCSRMatrix_GetIntValue__exec },
     { "GetObject", bHYPRE_SStructParCSRMatrix_GetObject__exec },
@@ -1950,6 +1987,7 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(void)
   epv->f_Print                         = NULL;
   epv->f_GetObject                     = NULL;
   epv->f_SetCommunicator               = NULL;
+  epv->f_Destroy                       = NULL;
   epv->f_Initialize                    = NULL;
   epv->f_Assemble                      = NULL;
   epv->f_SetIntParameter               = NULL;
@@ -1984,6 +2022,8 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(void)
   e0->f_SetCommunicator     = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e0->f_Destroy             = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e0->f_Initialize          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e0->f_Assemble            = (int32_t (*)(void*,
@@ -2018,6 +2058,8 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(void)
   e1->f_SetCommunicator          = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e1->f_Destroy                  = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e1->f_SetIntParameter          = (int32_t (*)(void*,const char*,int32_t,
     struct sidl_BaseInterface__object **)) epv->f_SetIntParameter;
   e1->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,double,
@@ -2079,6 +2121,8 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(void)
   e2->f_SetCommunicator     = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e2->f_Destroy             = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e2->f_Initialize          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e2->f_Assemble            = (int32_t (*)(void*,
@@ -2116,6 +2160,8 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(void)
   e3->f_SetCommunicator     = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e3->f_Destroy             = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e3->f_Initialize          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e3->f_Assemble            = (int32_t (*)(void*,
@@ -2180,6 +2226,8 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(void)
   e4->f_SetCommunicator     = (int32_t (*)(void*,
     struct bHYPRE_MPICommunicator__object*,
     struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+  e4->f_Destroy             = (void (*)(void*,
+    struct sidl_BaseInterface__object **)) epv->f_Destroy;
   e4->f_Initialize          = (int32_t (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_Initialize;
   e4->f_Assemble            = (int32_t (*)(void*,

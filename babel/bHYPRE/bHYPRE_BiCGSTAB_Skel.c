@@ -176,6 +176,12 @@ impl_bHYPRE_BiCGSTAB_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_BiCGSTAB_Destroy(
+  /* in */ bHYPRE_BiCGSTAB self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_BiCGSTAB_SetIntParameter(
   /* in */ bHYPRE_BiCGSTAB self,
@@ -432,6 +438,7 @@ bHYPRE_BiCGSTAB__set_epv(struct bHYPRE_BiCGSTAB__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_BiCGSTAB_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_BiCGSTAB_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_BiCGSTAB_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_BiCGSTAB_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_BiCGSTAB_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_BiCGSTAB_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_BiCGSTAB_SetStringParameter;

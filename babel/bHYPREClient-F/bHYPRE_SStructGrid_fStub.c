@@ -633,6 +633,39 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setcommunicator_f,BHYPRE_SSTRUCTGRID_SETC
 }
 
 /*
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructgrid_destroy_f,BHYPRE_SSTRUCTGRID_DESTROY_F,bHYPRE_SStructGrid_Destroy_f)
+(
+  int64_t *self,
+  int64_t *exception
+)
+{
+  struct bHYPRE_SStructGrid__epv *_epv = NULL;
+  struct bHYPRE_SStructGrid__object* _proxy_self = NULL;
+  struct sidl_BaseInterface__object* _proxy_exception = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructGrid__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  (*(_epv->f_Destroy))(
+    _proxy_self,
+    &_proxy_exception
+  );
+  if (_proxy_exception) {
+    *exception = (ptrdiff_t)_proxy_exception;
+  }
+  else {
+    *exception = (ptrdiff_t)NULL;
+  }
+}
+
+/*
  * Set the extents for a box on a structured part of the grid.
  */
 
@@ -2036,6 +2069,48 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructGrid.
   }
 }
 
+/* REMOTE METHOD STUB:Destroy */
+static void
+remote_bHYPRE_SStructGrid_Destroy(
+  /* in */ struct bHYPRE_SStructGrid__object* self ,
+  /* out */ struct sidl_BaseInterface__object* *_ex)
+{
+  LANG_SPECIFIC_INIT();
+  *_ex = NULL;
+  {
+    /* initialize a new invocation */
+    sidl_BaseInterface _throwaway = NULL;
+    sidl_BaseException _be = NULL;
+    sidl_rmi_Response _rsvp = NULL;
+    struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+      bHYPRE_SStructGrid__remote*)self->d_data)->d_ih;
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+      "Destroy", _ex ); SIDL_CHECK(*_ex);
+
+    /* pack in and inout arguments */
+
+    /* send actual RMI request */
+    _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+    _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+    if(_be != NULL) {
+      sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructGrid.Destroy.", &throwaway_exception);
+      *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+        &throwaway_exception);
+      goto EXIT;
+    }
+
+    /* unpack out and inout arguments */
+
+    /* cleanup and return */
+    EXIT:
+    if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+    if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+    return;
+  }
+}
+
 /* REMOTE METHOD STUB:SetExtents */
 static int32_t
 remote_bHYPRE_SStructGrid_SetExtents(
@@ -2685,6 +2760,7 @@ static void bHYPRE_SStructGrid__init_remote_epv(void)
   epv->f__dtor                    = NULL;
   epv->f_SetNumDimParts           = remote_bHYPRE_SStructGrid_SetNumDimParts;
   epv->f_SetCommunicator          = remote_bHYPRE_SStructGrid_SetCommunicator;
+  epv->f_Destroy                  = remote_bHYPRE_SStructGrid_Destroy;
   epv->f_SetExtents               = remote_bHYPRE_SStructGrid_SetExtents;
   epv->f_SetVariable              = remote_bHYPRE_SStructGrid_SetVariable;
   epv->f_AddVariable              = remote_bHYPRE_SStructGrid_AddVariable;

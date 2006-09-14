@@ -470,6 +470,34 @@ impl_bHYPRE_Schwarz_SetCommunicator(
 }
 
 /*
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Schwarz_Destroy"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_Schwarz_Destroy(
+  /* in */ bHYPRE_Schwarz self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Destroy) */
+    /* Insert-Code-Here {bHYPRE.Schwarz.Destroy} (Destroy method) */
+     bHYPRE_Schwarz_deleteRef(self,_ex);
+     return;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Destroy) */
+  }
+}
+
+/*
  * Set the int parameter associated with {\tt name}.
  */
 

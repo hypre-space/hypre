@@ -30,6 +30,12 @@
 #ifndef included_bHYPRE_CoefficientAccess_IOR_h
 #include "bHYPRE_CoefficientAccess_IOR.h"
 #endif
+#ifndef included_bHYPRE_ErrorCode_IOR_h
+#include "bHYPRE_ErrorCode_IOR.h"
+#endif
+#ifndef included_bHYPRE_ErrorHandler_IOR_h
+#include "bHYPRE_ErrorHandler_IOR.h"
+#endif
 #ifndef included_bHYPRE_Euclid_IOR_h
 #include "bHYPRE_Euclid_IOR.h"
 #endif

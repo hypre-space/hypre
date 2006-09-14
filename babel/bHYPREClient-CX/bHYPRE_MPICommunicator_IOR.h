@@ -167,6 +167,9 @@ struct bHYPRE_MPICommunicator__epv {
     /* out */ struct sidl_BaseInterface__object* *_ex);
   /* Methods introduced in sidl.BaseClass-v0.9.15 */
   /* Methods introduced in bHYPRE.MPICommunicator-v1.0.0 */
+  void (*f_Destroy)(
+    /* in */ struct bHYPRE_MPICommunicator__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
 };
 
 /*

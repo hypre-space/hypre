@@ -242,6 +242,12 @@ impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_IJParCSRMatrix_Destroy(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_IJParCSRMatrix_Initialize(
   /* in */ bHYPRE_IJParCSRMatrix self,
@@ -792,6 +798,7 @@ bHYPRE_IJParCSRMatrix__set_epv(struct bHYPRE_IJParCSRMatrix__epv *epv)
   epv->f_Print = impl_bHYPRE_IJParCSRMatrix_Print;
   epv->f_Read = impl_bHYPRE_IJParCSRMatrix_Read;
   epv->f_SetCommunicator = impl_bHYPRE_IJParCSRMatrix_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_IJParCSRMatrix_Destroy;
   epv->f_Initialize = impl_bHYPRE_IJParCSRMatrix_Initialize;
   epv->f_Assemble = impl_bHYPRE_IJParCSRMatrix_Assemble;
   epv->f_SetIntParameter = impl_bHYPRE_IJParCSRMatrix_SetIntParameter;

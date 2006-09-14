@@ -110,6 +110,28 @@ bHYPRE_MPICommunicator
 bHYPRE_MPICommunicator_Create_MPICommWorld(
   /* out */ sidl_BaseInterface *_ex);
 
+/**
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+SIDL_C_INLINE_DECL
+void
+bHYPRE_MPICommunicator_Destroy(
+  /* in */ bHYPRE_MPICommunicator self,
+  /* out */ sidl_BaseInterface *_ex)
+#ifdef SIDL_C_HAS_INLINE
+{
+  (*self->d_epv->f_Destroy)(
+    self,
+    _ex);
+}
+#else
+;
+#endif /* SIDL_C_HAS_INLINE */
+
+
 SIDL_C_INLINE_DECL
 void
 bHYPRE_MPICommunicator_addRef(

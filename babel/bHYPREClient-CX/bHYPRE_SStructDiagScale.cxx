@@ -931,6 +931,48 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructDiagS
     }
   }
 
+  // REMOTE METHOD STUB:Destroy
+  static void
+  remote_bHYPRE_SStructDiagScale_Destroy(
+    /* in */ struct bHYPRE_SStructDiagScale__object* self ,
+    /* out */ struct sidl_BaseInterface__object* *_ex)
+  {
+    LANG_SPECIFIC_INIT();
+    *_ex = NULL;
+    {
+      // initialize a new invocation
+      sidl_BaseInterface _throwaway = NULL;
+      sidl_BaseException _be = NULL;
+      sidl_rmi_Response _rsvp = NULL;
+      struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
+        bHYPRE_SStructDiagScale__remote*)self->d_data)->d_ih;
+      sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( 
+        _conn, "Destroy", _ex ); SIDL_CHECK(*_ex);
+
+      // pack in and inout arguments
+
+      // send actual RMI request
+      _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
+
+      _be = sidl_rmi_Response_getExceptionThrown(_rsvp, _ex);SIDL_CHECK(*_ex);
+      if(_be != NULL) {
+        sidl_BaseInterface throwaway_exception = NULL;
+sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructDiagScale.Destroy.", &throwaway_exception);
+        *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+          &throwaway_exception);
+        goto EXIT;
+      }
+
+      // unpack out and inout arguments
+
+      // cleanup and return
+      EXIT:
+      if(_inv) { sidl_rmi_Invocation_deleteRef(_inv, &_throwaway); }
+      if(_rsvp) { sidl_rmi_Response_deleteRef(_rsvp, &_throwaway); }
+      return;
+    }
+  }
+
   // REMOTE METHOD STUB:SetIntParameter
   static int32_t
   remote_bHYPRE_SStructDiagScale_SetIntParameter(
@@ -1666,6 +1708,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructDiagS
       remote_bHYPRE_SStructDiagScale_GetRelResidualNorm;
     epv->f_SetCommunicator               = 
       remote_bHYPRE_SStructDiagScale_SetCommunicator;
+    epv->f_Destroy                       = 
+      remote_bHYPRE_SStructDiagScale_Destroy;
     epv->f_SetIntParameter               = 
       remote_bHYPRE_SStructDiagScale_SetIntParameter;
     epv->f_SetDoubleParameter            = 
@@ -1707,6 +1751,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructDiagS
     e0->f_SetCommunicator          = (int32_t (*)(void*,
       struct bHYPRE_MPICommunicator__object*,
       struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+    e0->f_Destroy                  = (void (*)(void*,
+      struct sidl_BaseInterface__object **)) epv->f_Destroy;
     e0->f_SetIntParameter          = (int32_t (*)(void*,const char*,int32_t,
       struct sidl_BaseInterface__object **)) epv->f_SetIntParameter;
     e0->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,double,
@@ -1783,6 +1829,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.SStructDiagS
     e1->f_SetCommunicator          = (int32_t (*)(void*,
       struct bHYPRE_MPICommunicator__object*,
       struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
+    e1->f_Destroy                  = (void (*)(void*,
+      struct sidl_BaseInterface__object **)) epv->f_Destroy;
     e1->f_SetIntParameter          = (int32_t (*)(void*,const char*,int32_t,
       struct sidl_BaseInterface__object **)) epv->f_SetIntParameter;
     e1->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,double,
@@ -2370,6 +2418,30 @@ bHYPRE::SStructDiagScale::SetCommunicator( /* in */::bHYPRE::MPICommunicator
   }
   /*unpack results and cleanup*/
   return _result;
+}
+
+
+
+/**
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+void
+bHYPRE::SStructDiagScale::Destroy(  )
+
+{
+
+  ior_t* const loc_self = _get_ior();
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_Destroy))(loc_self, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
 }
 
 

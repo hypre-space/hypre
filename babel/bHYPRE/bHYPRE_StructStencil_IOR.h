@@ -162,6 +162,9 @@ struct bHYPRE_StructStencil__epv {
     /* out */ struct sidl_BaseInterface__object* *_ex);
   /* Methods introduced in sidl.BaseClass-v0.9.15 */
   /* Methods introduced in bHYPRE.StructStencil-v1.0.0 */
+  void (*f_Destroy)(
+    /* in */ struct bHYPRE_StructStencil__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetDimension)(
     /* in */ struct bHYPRE_StructStencil__object* self,
     /* in */ int32_t dim,

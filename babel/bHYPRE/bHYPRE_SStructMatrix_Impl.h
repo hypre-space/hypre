@@ -345,6 +345,12 @@ impl_bHYPRE_SStructMatrix_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_SStructMatrix_Destroy(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_SStructMatrix_Initialize(
   /* in */ bHYPRE_SStructMatrix self,

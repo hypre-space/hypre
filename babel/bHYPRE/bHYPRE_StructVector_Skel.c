@@ -153,6 +153,12 @@ impl_bHYPRE_StructVector_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_StructVector_Destroy(
+  /* in */ bHYPRE_StructVector self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_StructVector_Initialize(
   /* in */ bHYPRE_StructVector self,
@@ -362,6 +368,7 @@ bHYPRE_StructVector__set_epv(struct bHYPRE_StructVector__epv *epv)
   epv->f_SetValue = skel_bHYPRE_StructVector_SetValue;
   epv->f_SetBoxValues = skel_bHYPRE_StructVector_SetBoxValues;
   epv->f_SetCommunicator = impl_bHYPRE_StructVector_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_StructVector_Destroy;
   epv->f_Initialize = impl_bHYPRE_StructVector_Initialize;
   epv->f_Assemble = impl_bHYPRE_StructVector_Assemble;
   epv->f_Clear = impl_bHYPRE_StructVector_Clear;

@@ -161,6 +161,12 @@ impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex);
 
 extern
+void
+impl_bHYPRE_ParCSRDiagScale_Destroy(
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntParameter(
   /* in */ bHYPRE_ParCSRDiagScale self,
@@ -420,6 +426,7 @@ bHYPRE_ParCSRDiagScale__set_epv(struct bHYPRE_ParCSRDiagScale__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_ParCSRDiagScale_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm;
   epv->f_SetCommunicator = impl_bHYPRE_ParCSRDiagScale_SetCommunicator;
+  epv->f_Destroy = impl_bHYPRE_ParCSRDiagScale_Destroy;
   epv->f_SetIntParameter = impl_bHYPRE_ParCSRDiagScale_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_ParCSRDiagScale_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_ParCSRDiagScale_SetStringParameter;
