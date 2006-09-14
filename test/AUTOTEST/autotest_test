@@ -1,30 +1,12 @@
-#!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
-# Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
-# All rights reserved.
+#!/bin/sh 
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
 #
-# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-# disclaimer and the GNU Lesser General Public License.
-#
-# This program is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
 #
 # $Revision$
-#EHEADER**********************************************************************
-
+#EHEADER***********************************************************************
 
 #=============================================================================
 #    Initialize variables
@@ -41,8 +23,7 @@ initialize_variables ()
   EXAMPLES_TEST_CASES="TEST_examples/*.sh"
   TEST_DIRS="ams ij fac sstruct struct examples"
   STD_CONFIGOPTIONS="all++ all77 babel debug default docs insure no_mpi \
-                     openmp shared strict_checking test_alpha test_beta \
-                     test_general examples"
+                     openmp strict_checking test_alpha test_beta test_general examples"
   STD_MAKEOPTIONS="all configure"
   DEBUG_MODE="no"
   Build=1
@@ -81,7 +62,7 @@ initialize_variables ()
   StdTestDir=${HYPRE_REMOTE_DIR}/${SRC}/test
 
 #
-# Define architecture of current platform if not already defined
+# Define architecture of current platform
   if [ -z "$HYPRE_ARCH" ]
   then
      if [ -f "/bin/uname" ] 
@@ -186,13 +167,13 @@ usage ()
   printf "%s\n" "-c       C++; make all++."
   printf "%s\n" "-D       Turn on debug messages."
   printf "%s\n" "-d       Docs; make the documentation directory."
-  printf "%s\n" "-E       configure, build and run example codes."
+  printf "%s\n" "-E       configure, build and run example codes.\n"
   printf "%s\n" "-e opt   Debug; configure --enable-debug."
   printf "%s\n" "-f       F77; make all77."
   printf "%s\n" "-h       Help; display this help message."
   printf "%s\n" "-i opt   Insure++; perform configure --with-insure. Output"
   printf "                is appended to a file called insure.log.\n"
-  printf "%s\n" "-l opt   Shared libraries; configure --enable-shared."
+  printf "%s\n" "-l opt   Shared; configure --enable-shared."
   printf "%s\n" "-m       Mail; mail error summary to developers."
   printf "%s\n" "-n       NoMPI; configure --without-MPI."
   printf "%s\n" "-o opt   openMP; configure --with-openmp."
@@ -282,8 +263,10 @@ apply_error_filters ()
           'Compilation\ successful'\
           '^\ Guide\ \ \ '\
           ':\ 0\ errors\ in\ file'\
-          '1501-050:\ \(I\)'\
-          '1500-010:\ \(W\)'\
+          '1500-030:\ \(I\)\ INFORMATION:'\
+          '1500-010:\ \(W\)\ WARNING\ in'\
+          ':\ 1506-068\ \(W\)\ Operation\ between\ types'\
+          '^No\ begin\ line'\
           'autoconf\ has\ been\ disabled'\
           'automake\ has\ been\ disabled'\
           'autoheader\ has\ been\ disabled'\
@@ -312,7 +295,7 @@ apply_error_filters ()
           '\ remark:\ '
         do process_filter $ErrorFile "${ii}"
         done
-        ;;
+      ;;
       *bgl*)
         for ii in \
           'readonly\ variable'\
@@ -320,14 +303,14 @@ apply_error_filters ()
           'FE_MPI'
         do process_filter $ErrorFile "${ii}"
         done
-        ;;
+      ;;
       thun*)
         for ii in \
           'queued'\
           'allocated'
         do process_filter $ErrorFile "${ii}"
         done
-        ;;
+      ;;
       tux*)
         for ii in \
           'autoconf\ has\ been\ disabled'\
@@ -354,7 +337,7 @@ apply_error_filters ()
           'sed:\ Couldn.t\ close\ '
         do process_filter $ErrorFile "${ii}"
         done
-        ;;
+      ;;
     esac
   fi
 }
@@ -575,15 +558,11 @@ confbuildtest ()
 
 #
 # Configure Section
-#     if there are existing files, remove before beginning current case
    seconds; TIME=$SECS
    echo "Autotest starting configure of $MessageStr"
 
    cd $StdBuildDir
-   if [ -f config/Makefile.config ]
-   then
-      $MAKE distclean
-   fi
+   [ -f config.status ] && rm config.status
 
    if [ "$ConfigOpt" = " " ]
    then
@@ -596,21 +575,19 @@ confbuildtest ()
 
 #
 # Make Section
-# if not testing public versions, build general files then build specified 
-# directory, if needed
+# Remove all *.o files before building for current options unless testing
+# public versions
    if [ "${MessageStr}" != "test_alpha" -a "${MessageStr}" != "test_beta"  -a \
         "${MessageStr}" != "test_general" ]
    then
       echo "Autotest starting make of $MessageStr"
-      $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
-                2>> ${Hdr}.${MessageStr}.all.err
-
       if [ "${MakeDir}" != "" -a "${MakeDir}" != " " ]
       then
          cd $MakeDir
-         $MAKE ${MakeOpt} 1>> ${Hdr}.${MessageStr}.all.log \
-                          2>> ${Hdr}.${MessageStr}.all.err
       fi
+      $MAKE clean
+      $MAKE ${MakeOpt} 1>> ${Hdr}.${MessageStr}.all.log \
+                       2>> ${Hdr}.${MessageStr}.all.err
    fi
 
 #
