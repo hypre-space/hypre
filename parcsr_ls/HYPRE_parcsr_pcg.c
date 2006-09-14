@@ -56,8 +56,9 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
 
    *solver = ( (HYPRE_Solver) hypre_PCGCreate( pcg_functions ) );
+   if (!solver) hypre_error_in_arg(2);
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

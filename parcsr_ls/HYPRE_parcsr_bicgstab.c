@@ -50,8 +50,10 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
 
    *solver = ( (HYPRE_Solver) hypre_BiCGSTABCreate( bicgstab_functions) );
-
-   return 0;
+   if (!solver)
+      hypre_error_in_arg(2);
+    
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

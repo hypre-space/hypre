@@ -55,6 +55,11 @@ hypre_ParVectorCreate(  MPI_Comm comm,
    hypre_ParVector  *vector;
    int num_procs, my_id;
 
+   if (global_size < 0)
+   {
+      hypre_error_in_arg(2);
+      return NULL;
+   }
    vector = hypre_CTAlloc(hypre_ParVector, 1);
    MPI_Comm_rank(comm,&my_id);
 
@@ -119,8 +124,6 @@ hypre_ParMultiVectorCreate(  MPI_Comm comm,
 int 
 hypre_ParVectorDestroy( hypre_ParVector *vector )
 {
-   int  ierr=0;
-
    if (vector)
    {
       if ( hypre_ParVectorOwnsData(vector) )
@@ -140,7 +143,7 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
       hypre_TFree(vector);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -150,11 +153,14 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
 int 
 hypre_ParVectorInitialize( hypre_ParVector *vector )
 {
-   int  ierr = 0;
+   if (!vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_SeqVectorInitialize(hypre_ParVectorLocalVector(vector));
 
-   ierr = hypre_SeqVectorInitialize(hypre_ParVectorLocalVector(vector));
-
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -165,11 +171,15 @@ int
 hypre_ParVectorSetDataOwner( hypre_ParVector *vector,
                              int           owns_data   )
 {
-   int    ierr=0;
 
+   if (!vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    hypre_ParVectorOwnsData(vector) = owns_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -180,11 +190,15 @@ int
 hypre_ParVectorSetPartitioningOwner( hypre_ParVector *vector,
                              	     int owns_partitioning)
 {
-   int    ierr=0;
+   if (!vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    hypre_ParVectorOwnsPartitioning(vector) = owns_partitioning;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -274,8 +288,12 @@ hypre_ParVectorPrint( hypre_ParVector  *vector,
                       const char       *file_name )
 {
    char 	new_file_name[80];
+   if (!vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector); 
-   int  	ierr = 0;
    MPI_Comm 	comm = hypre_ParVectorComm(vector);
    int  	my_id, num_procs, i;
    int		*partitioning = hypre_ParVectorPartitioning(vector); 
@@ -285,7 +303,7 @@ hypre_ParVectorPrint( hypre_ParVector  *vector,
    MPI_Comm_rank(comm,&my_id); 
    MPI_Comm_size(comm,&num_procs); 
    sprintf(new_file_name,"%s.%d",file_name,my_id); 
-   ierr = hypre_SeqVectorPrint(local_vector,new_file_name);
+   hypre_SeqVectorPrint(local_vector,new_file_name);
    sprintf(new_file_name,"%s.INFO.%d",file_name,my_id); 
    fp = fopen(new_file_name, "w");
    fprintf(fp, "%d\n", global_size);
@@ -298,7 +316,7 @@ hypre_ParVectorPrint( hypre_ParVector  *vector,
 #endif
 
    fclose (fp);
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -834,7 +852,11 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
                         int              base_j,
                         const char      *filename )
 {
-   int ierr = 0;
+   if (!vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    MPI_Comm          comm         = hypre_ParVectorComm(vector);
    int               global_size  = hypre_ParVectorGlobalSize(vector);
    int              *partitioning = hypre_ParVectorPartitioning(vector);
@@ -845,7 +867,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 
    /* multivector code not written yet >>> */
    hypre_assert( hypre_ParVectorNumVectors(vector) == 1 );
-   if ( hypre_ParVectorNumVectors(vector) != 1 ) ++ierr;
+   if ( hypre_ParVectorNumVectors(vector) != 1 ) hypre_error_in_arg(1);
 
    MPI_Comm_rank(comm, &myid);
    MPI_Comm_size(comm, &num_procs);
@@ -855,7 +877,8 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    if ((file = fopen(new_filename, "w")) == NULL)
    {
       printf("Error: can't open output file %s\n", new_filename);
-      exit(1);
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
    }
 
    local_data = hypre_VectorData(hypre_ParVectorLocalVector(vector));
@@ -883,7 +906,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 
    fclose(file);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -896,7 +919,6 @@ hypre_ParVectorReadIJ( MPI_Comm             comm,
                        int                 *base_j_ptr,
                        hypre_ParVector    **vector_ptr)
 {
-   int ierr = 0;
    int               global_size;
    hypre_ParVector  *vector;
    hypre_Vector     *local_vector;
@@ -916,7 +938,8 @@ hypre_ParVectorReadIJ( MPI_Comm             comm,
    if ((file = fopen(new_filename, "r")) == NULL)
    {
       printf("Error: can't open output file %s\n", new_filename);
-      exit(1);
+      hypre_error(HYPRE_ERROR_GENERIC);
+      return hypre_error_flag;
    }
 
    fscanf(file, "%d", &global_size);
@@ -965,9 +988,9 @@ hypre_ParVectorReadIJ( MPI_Comm             comm,
 
    /* multivector code not written yet >>> */
    hypre_assert( hypre_ParVectorNumVectors(vector) == 1 );
-   if ( hypre_ParVectorNumVectors(vector) != 1 ) ++ierr;
+   if ( hypre_ParVectorNumVectors(vector) != 1 ) hypre_error(HYPRE_ERROR_GENERIC);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 
@@ -1035,7 +1058,7 @@ hypre_FillResponseParToVectorAll(void *p_recv_contact_buf,
    *response_message_size = 0; 
   
    
-   return(0);
+   return hypre_error_flag;
 
 }
 

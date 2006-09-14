@@ -39,8 +39,8 @@ int
 HYPRE_ParCSRHybridCreate( HYPRE_Solver *solver )
 {
    *solver = ( (HYPRE_Solver) hypre_AMGHybridCreate( ) );
-
-   return 0;
+   if (!solver) hypre_error_in_arg(1);
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

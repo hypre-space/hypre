@@ -40,7 +40,8 @@ int
 HYPRE_SchwarzCreate( HYPRE_Solver *solver)
 {
    *solver = (HYPRE_Solver) hypre_SchwarzCreate( ) ;
-   return 0;
+   if (!solver) hypre_error_in_arg(1);
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

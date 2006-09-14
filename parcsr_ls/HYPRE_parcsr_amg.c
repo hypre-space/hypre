@@ -40,7 +40,10 @@ int
 HYPRE_BoomerAMGCreate( HYPRE_Solver *solver)
 {
    *solver = (HYPRE_Solver) hypre_BoomerAMGCreate( ) ;
-   return 0;
+   if (!solver)
+      hypre_error_in_arg(1);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -523,7 +526,7 @@ HYPRE_BoomerAMGInitGridRelaxation( int     **num_grid_sweeps_ptr,
    for (i = 0; i < max_levels; i++)
       relax_weights[i] = 1.;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

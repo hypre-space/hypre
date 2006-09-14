@@ -44,7 +44,9 @@ HYPRE_ParVectorCreate( MPI_Comm comm,
 {
    *vector = (HYPRE_ParVector) hypre_ParVectorCreate(comm, global_size,
                                                     partitioning) ;
-   return 0;
+   if (!vector) hypre_error_in_arg(4);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -60,7 +62,10 @@ HYPRE_ParMultiVectorCreate( MPI_Comm comm,
 {
    *vector = (HYPRE_ParVector) hypre_ParMultiVectorCreate
       (comm, global_size, partitioning, number_vectors );
-   return 0;
+
+   if (!vector) hypre_error_in_arg(5);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -93,7 +98,8 @@ HYPRE_ParVectorRead( MPI_Comm         comm,
 		     HYPRE_ParVector *vector)
 {
    *vector = (HYPRE_ParVector) hypre_ParVectorRead( comm, file_name ) ;
-   return 0;
+   if (!vector) hypre_error_in_arg(3);
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -181,9 +187,21 @@ HYPRE_ParVectorAxpy( double        alpha,
 int
 HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, double *prod)
 {
+   if (!x) 
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!y) 
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    *prod = hypre_ParVectorInnerProd( (hypre_ParVector *) x, 
 			(hypre_ParVector *) y) ;
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -196,5 +214,6 @@ HYPRE_VectorToParVector( MPI_Comm comm, HYPRE_Vector b, int *partitioning,
 {
    *vector = (HYPRE_ParVector) hypre_VectorToParVector (comm, 
 		(hypre_Vector *) b, partitioning );
-   return 0;
+   if (!vector) hypre_error_in_arg(4);
+   return hypre_error_flag;
 }

@@ -52,7 +52,8 @@ HYPRE_ParCSRMatrixCreate( MPI_Comm  comm,
                                      row_starts, col_starts, num_cols_offd,
                                      num_nonzeros_diag, num_nonzeros_offd);
 
-   return 0;
+   if (!matrix) hypre_error_in_arg(9);
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -85,7 +86,8 @@ HYPRE_ParCSRMatrixRead( MPI_Comm            comm,
 			HYPRE_ParCSRMatrix *matrix)
 {
    *matrix = (HYPRE_ParCSRMatrix) hypre_ParCSRMatrixRead( comm, file_name );
-   return 0;
+   if (!matrix) hypre_error_in_arg(3);
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -98,7 +100,7 @@ HYPRE_ParCSRMatrixPrint( HYPRE_ParCSRMatrix  matrix,
 {
    hypre_ParCSRMatrixPrint( (hypre_ParCSRMatrix *) matrix,
                             file_name );
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -109,11 +111,10 @@ int
 HYPRE_ParCSRMatrixGetComm( HYPRE_ParCSRMatrix  matrix,
                          MPI_Comm *comm )
 {  
-   int ierr = 0;
-
+   if (!matrix) hypre_error_in_arg(1);
    *comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix);
 
-   return( ierr );
+   return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixGetDims
@@ -123,12 +124,12 @@ int
 HYPRE_ParCSRMatrixGetDims( HYPRE_ParCSRMatrix  matrix,
                          int *M, int *N )
 {  
-   int ierr = 0;
+   if (!matrix) hypre_error_in_arg(1);
 
    *M = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
    *N = hypre_ParCSRMatrixGlobalNumCols((hypre_ParCSRMatrix *) matrix);
 
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -139,9 +140,14 @@ int
 HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix  matrix,
                                 int **row_partitioning_ptr)
 {  
-   int ierr = 0;
    int *row_partitioning, *row_starts;
    int num_procs, i;
+
+   if (!matrix) 
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    MPI_Comm_size(hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix), 
 			&num_procs);
@@ -152,7 +158,7 @@ HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix  matrix,
 	row_partitioning[i] = row_starts[i];
 
    *row_partitioning_ptr = row_partitioning;
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -163,9 +169,14 @@ int
 HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix  matrix,
                                 int **col_partitioning_ptr)
 {  
-   int ierr = 0;
    int *col_partitioning, *col_starts;
    int num_procs, i;
+
+   if (!matrix) 
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    MPI_Comm_size(hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix), 
 			&num_procs);
@@ -176,7 +187,7 @@ HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix  matrix,
 	col_partitioning[i] = col_starts[i];
 
    *col_partitioning_ptr = col_partitioning;
-   return( ierr );
+   return hypre_error_flag;
 }
 
 
@@ -208,11 +219,16 @@ HYPRE_ParCSRMatrixGetLocalRange( HYPRE_ParCSRMatrix  matrix,
                          int               *col_start,
                          int               *col_end )
 {  
-   int ierr = 0;
+   if (!matrix) 
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
-   ierr = hypre_ParCSRMatrixGetLocalRange( (hypre_ParCSRMatrix *) matrix,
+
+   hypre_ParCSRMatrixGetLocalRange( (hypre_ParCSRMatrix *) matrix,
                             row_start, row_end, col_start, col_end );
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -226,11 +242,16 @@ HYPRE_ParCSRMatrixGetRow( HYPRE_ParCSRMatrix  matrix,
                          int               **col_ind,
                          double            **values )
 {  
-   int ierr=0;
+   if (!matrix) 
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    
-   ierr = hypre_ParCSRMatrixGetRow( (hypre_ParCSRMatrix *) matrix,
+   hypre_ParCSRMatrixGetRow( (hypre_ParCSRMatrix *) matrix,
                             row, size, col_ind, values );
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -244,11 +265,16 @@ HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix  matrix,
                          int               **col_ind,
                          double            **values )
 {  
-   int ierr = 0;
+   if (!matrix) 
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
-   ierr = hypre_ParCSRMatrixRestoreRow( (hypre_ParCSRMatrix *) matrix,
+
+   hypre_ParCSRMatrixRestoreRow( (hypre_ParCSRMatrix *) matrix,
                             row, size, col_ind, values );
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -265,7 +291,9 @@ HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm comm,
    *matrix = (HYPRE_ParCSRMatrix) hypre_CSRMatrixToParCSRMatrix( comm, 	
 		(hypre_CSRMatrix *) A_CSR, row_partitioning, 
 		col_partitioning) ;
-   return 0;
+   if (!matrix) 
+      hypre_error_in_arg(5);
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
