@@ -73,6 +73,14 @@ package bHYPRE version 1.0.0
       int SetCommunicator(in MPICommunicator mpi_comm);
 
       /**
+       * The Destroy function doesn't necessarily destroy anything.
+       * It is just another name for deleteRef.  Thus it decrements the
+       * object's reference count.  The Babel memory management system will
+       * destroy the object if the reference count goes to zero.
+       **/
+      void Destroy();
+
+      /**
        * Prepare an object for setting coefficient values, whether for
        * the first time or subsequently.
        **/
@@ -694,6 +702,14 @@ package bHYPRE version 1.0.0
       int SetCommunicator(in MPICommunicator mpi_comm);
 
       /**
+       * The Destroy function doesn't necessarily destroy anything.
+       * It is just another name for deleteRef.  Thus it decrements the
+       * object's reference count.  The Babel memory management system will
+       * destroy the object if the reference count goes to zero.
+       **/
+      void Destroy();
+
+      /**
        * Set the int parameter associated with {\tt name}.
        **/
       int SetIntParameter(in string name,
@@ -912,6 +928,14 @@ package bHYPRE version 1.0.0
       static MPICommunicator CreateC( in opaque mpi_comm );
       static MPICommunicator CreateF( in opaque mpi_comm );
       static MPICommunicator Create_MPICommWorld();
+
+      /**
+       * The Destroy function doesn't necessarily destroy anything.
+       * It is just another name for deleteRef.  Thus it decrements the
+       * object's reference count.  The Babel memory management system will
+       * destroy the object if the reference count goes to zero.
+       **/
+      void Destroy();
    }
 
    /**
@@ -1048,6 +1072,14 @@ package bHYPRE version 1.0.0
       int SetCommunicator(in MPICommunicator mpi_comm);
 
       /**
+       * The Destroy function doesn't necessarily destroy anything.
+       * It is just another name for deleteRef.  Thus it decrements the
+       * object's reference count.  The Babel memory management system will
+       * destroy the object if the reference count goes to zero.
+       **/
+      void Destroy();
+
+      /**
        * Set the extents for a box on a structured part of the grid.
        **/
       int SetExtents( in int part,
@@ -1148,6 +1180,14 @@ package bHYPRE version 1.0.0
    {
       static SStructStencil Create( in int ndim,
                                     in int size );
+      /**
+       * The Destroy function doesn't necessarily destroy anything.
+       * It is just another name for deleteRef.  Thus it decrements the
+       * object's reference count.  The Babel memory management system will
+       * destroy the object if the reference count goes to zero.
+       **/
+      void Destroy();
+
       /**
        * Set the number of spatial dimensions and stencil entries.
        * DEPRECATED, use Create:
@@ -1279,6 +1319,14 @@ package bHYPRE version 1.0.0
    {
       static StructStencil Create( in int ndim,
                                     in int size );
+      /**
+       * The Destroy function doesn't necessarily destroy anything.
+       * It is just another name for deleteRef.  Thus it decrements the
+       * object's reference count.  The Babel memory management system will
+       * destroy the object if the reference count goes to zero.
+       **/
+      void Destroy();
+
       int SetDimension(in int dim);
       int SetSize(in int size);
       int SetElement( in int index,
@@ -1300,6 +1348,14 @@ package bHYPRE version 1.0.0
        * DEPRECATED, use Create:
        **/
       int SetCommunicator(in MPICommunicator mpi_comm);
+
+      /**
+       * The Destroy function doesn't necessarily destroy anything.
+       * It is just another name for deleteRef.  Thus it decrements the
+       * object's reference count.  The Babel memory management system will
+       * destroy the object if the reference count goes to zero.
+       **/
+      void Destroy();
 
       /* DEPRECATED, use Create:*/
       int SetDimension(in int dim);
@@ -1755,6 +1811,37 @@ package bHYPRE version 1.0.0
                             in Operator A );
       int GetFirstSolver( out PreconditionedSolver FirstSolver );
       int GetSecondSolver( out PreconditionedSolver SecondSolver );
+   }
+
+   /**
+    *  The ErrorCode enumerated type is used with methods of the ErrorHandler class.
+    **/
+   enum ErrorCode
+   {
+      HYPRE_ERROR_GENERIC =   1,   /* generic error */
+      HYPRE_ERROR_MEMORY  =   2,   /* unable to allocate memory */
+      HYPRE_ERROR_ARG     =   4,   /* argument error */
+      /* bits 4-8 are reserved for the index of the argument error */
+      HYPRE_ERROR_CONV    = 256   /* method did not converge as expected */
+   };
+
+   /**
+    * ErrorHandler class is an interface to the hypre error handling system.
+    * Its methods help interpret the error flag ierr returned by hypre functions.
+    **/
+   class ErrorHandler
+   {
+      /**
+       * The Check method will return nonzero when the error flag ierr
+       * includes an error of type error_code; and zero otherwise.
+       **/
+      static int Check( in int ierr, in ErrorCode error_code );
+
+      /**
+       * The Describe method will return a string describing the errors
+       * included in the error flag ierr.
+       **/
+      static void Describe(in int ierr, out string message );
    }
 
 }
