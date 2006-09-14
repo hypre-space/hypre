@@ -2087,6 +2087,11 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
            printf("GMRES : Uzawa preconditioning not available.\n");
            exit(1);
            break;
+
+      case HYAMS :
+           printf("GMRES : AMS preconditioning not available.\n");
+           exit(1);
+           break;
    }
    return;
 }
@@ -2302,6 +2307,11 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
               HYPreconSetup_ = 1;
            }
            break;
+
+      case HYAMS :
+           printf("FGMRES: AMS preconditioning not available.\n");
+           exit(1);
+           break;
    }
    return;
 }
@@ -2496,8 +2506,14 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
            printf("BiCGSTAB : MLI preconditioning not available.\n");
 #endif
            break;
+
       case HYUZAWA :
            printf("BiCGSTAB : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("BiCGSTAB : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -2695,8 +2711,14 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            printf("BiCGSTABL : ML preconditioning not available.\n");
 #endif
            break;
+
       case HYUZAWA :
            printf("BiCGSTABL : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("BiCGSTABL : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -2890,8 +2912,14 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
            printf("TFQMR : MLI preconditioning not available.\n");
 #endif
            break;
+
       case HYUZAWA :
            printf("TFQMR : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("TFQMR : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -3085,8 +3113,14 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            printf("BiCGS : MLI preconditioning not available.\n");
 #endif
            break;
+
       case HYUZAWA :
            printf("BiCGS : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("BiCGS : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -3265,6 +3299,11 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
            printf("SymQMR : Uzawa preconditioning not available.\n");
            exit(1);
            break;
+
+      case HYAMS :
+           printf("SymQMR : AMS preconditioning not available.\n");
+           exit(1);
+           break;
    }
    return;
 }
@@ -3441,7 +3480,6 @@ void HYPRE_LinSysCore::setupPreconAMS()
    int                maxit=100;    /* heuristics for now */
    double             tol=1.0e-6;   /* heuristics for now */
    int                cycle_type=1; /* V-cycle */
-   HYPRE_ParCSRMatrix A_csr;
 
    /* Set AMS parameters */
    HYPRE_AMSSetDimension(HYPrecon_, mlNumPDEs_);
@@ -3463,7 +3501,8 @@ void HYPRE_LinSysCore::setupPreconAMS()
       HYPRE_LSI_BuildNodalCoordinates(amsX,amsY,amsZ);
       HYPRE_AMSSetCoordinateVectors(HYPrecon_,amsX,amsY,amsZ);
    }
-   HYPRE_AMSSetBetaPoissonMatrix(HYPrecon_, NULL);
+   // this is used to tell AMS that mass matrix has 0 coeff 
+   // HYPRE_AMSSetBetaPoissonMatrix(HYPrecon_, NULL);
 }
 
 //***************************************************************************
