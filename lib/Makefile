@@ -133,24 +133,24 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE.a:
+libHYPRE.a: ${FILES1} ${FILES2}
 	@echo  "Building libHYPRE ... "
 	cp -fp ${FILES1} .
 	cp -fp ${FILES2} .
 	${AR} $@ *.o
 	${RANLIB} $@
 
-libHYPRE.so:
+libHYPRE.so: ${FILES1} ${FILES2}
 	@echo  "Building libHYPRE ... "
 	cp -fp ${FILES1} .
 	cp -fp ${FILES2} .
 	${BUILD_CC_SHARED} -o $@ *.o
 
-libHYPRE_LSI.a:
+libHYPRE_LSI.a: ${FILES_LSI}
 	@echo  "Building libHYPRE_LSI ... "
 	${AR} $@ ${FILES_LSI}
 	${RANLIB} $@
 
-libHYPRE_LSI.so:
+libHYPRE_LSI.so: ${FILES_LSI}
 	@echo  "Building libHYPRE_LSI ... "
 	${BUILD_CC_SHARED} -o $@ ${FILES_LSI}
