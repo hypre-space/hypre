@@ -207,12 +207,15 @@ if (hypre_ierr)
 \end{verbatim} \end{display}
 The corresponding FORTRAN code is
 \begin{display} \begin{verbatim}
+C header file with hypre error codes
+      include 'HYPRE_error_f.h'
 C call some HYPRE functions
       call HYPRE_Function(..., hypre_ierr);
 C check if the previously called hypre functions returned error(s)
       if (hypre_ierr .ne. 0) then
 C check if the error with code HYPRE_ERROR_CODE has occurred
-         if (HYPRE_CheckError(hypre_ierr,HYPRE_ERROR_CODE) .ne. 0) then
+         HYPRE_CheckError(hypre_ierr,HYPRE_ERROR_CODE,check)
+         if (check .ne. 0) then
 \end{verbatim} \end{display}
 The global error flag can also be obtained directly, between calls to
 other \hypre{} functions, by calling \code{HYPRE\_GetError()}.
