@@ -75,7 +75,8 @@ FILES =\
  timing.c\
  umalloc_local.c\
  hypre_mpi_comm_f2c.c\
- hypre_error.c
+ hypre_error.c\
+ F90_HYPRE_error.c
 
 OBJS = ${FILES:.c=.o}
 
