@@ -78,7 +78,7 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
       return hypre_error_flag;
    }
 
-   if (iupper < 0)
+   if (iupper < -1)
    {
       hypre_error_in_arg(3);
       return hypre_error_flag;
@@ -90,7 +90,7 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
       return hypre_error_flag;
    }
 
-   if (jupper < 0)
+   if (jupper < -1)
    {
       hypre_error_in_arg(5);
       return hypre_error_flag;

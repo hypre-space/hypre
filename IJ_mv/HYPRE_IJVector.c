@@ -71,7 +71,7 @@ int HYPRE_IJVectorCreate( MPI_Comm comm,
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
-   if (jupper < 0)
+   if (jupper < -1)
    {
       hypre_error_in_arg(3);
       return hypre_error_flag;
