@@ -288,11 +288,6 @@ hypre_ParVectorPrint( hypre_ParVector  *vector,
                       const char       *file_name )
 {
    char 	new_file_name[80];
-   if (!vector)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector); 
    MPI_Comm 	comm = hypre_ParVectorComm(vector);
    int  	my_id, num_procs, i;
@@ -300,6 +295,11 @@ hypre_ParVectorPrint( hypre_ParVector  *vector,
    int		global_size = hypre_ParVectorGlobalSize(vector); 
    FILE		*fp;
 
+   if (!vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    MPI_Comm_rank(comm,&my_id); 
    MPI_Comm_size(comm,&num_procs); 
    sprintf(new_file_name,"%s.%d",file_name,my_id); 
@@ -852,11 +852,6 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
                         int              base_j,
                         const char      *filename )
 {
-   if (!vector)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    MPI_Comm          comm         = hypre_ParVectorComm(vector);
    int               global_size  = hypre_ParVectorGlobalSize(vector);
    int              *partitioning = hypre_ParVectorPartitioning(vector);
@@ -865,6 +860,11 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    char              new_filename[255];
    FILE             *file;
 
+   if (!vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    /* multivector code not written yet >>> */
    hypre_assert( hypre_ParVectorNumVectors(vector) == 1 );
    if ( hypre_ParVectorNumVectors(vector) != 1 ) hypre_error_in_arg(1);

@@ -1361,11 +1361,6 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 {
    hypre_AMGHybridData  *AMGhybrid_data    = AMGhybrid_vdata;
 
-   if (!AMGhybrid_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    double             tol            = (AMGhybrid_data -> tol);
    double             cf_tol         = (AMGhybrid_data -> cf_tol);
    int                dscg_max_its   = (AMGhybrid_data -> dscg_max_its);
@@ -1426,6 +1421,11 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    int		      sol_print_level; /* print_level for solver */
    int		      pre_print_level; /* print_level for preconditioner */
 
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    /*-----------------------------------------------------------------------
     * Setup diagonal scaled solver
     *-----------------------------------------------------------------------*/

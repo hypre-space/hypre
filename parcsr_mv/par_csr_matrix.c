@@ -224,11 +224,6 @@ hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
 int 
 hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix)
 {
-   if (!matrix)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    MPI_Comm comm = hypre_ParCSRMatrixComm(matrix);
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
    int *diag_i = hypre_CSRMatrixI(diag);
@@ -237,6 +232,12 @@ hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix)
    int local_num_rows = hypre_CSRMatrixNumRows(diag);
    int total_num_nonzeros;
    int local_num_nonzeros;
+
+   if (!matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    local_num_nonzeros = diag_i[local_num_rows] + offd_i[local_num_rows];
    MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, MPI_INT,
@@ -252,11 +253,6 @@ hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix)
 int 
 hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix)
 {
-   if (!matrix)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    MPI_Comm comm = hypre_ParCSRMatrixComm(matrix);
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
    int *diag_i = hypre_CSRMatrixI(diag);
@@ -266,6 +262,11 @@ hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix)
    double total_num_nonzeros;
    double local_num_nonzeros;
 
+   if (!matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    local_num_nonzeros = (double) diag_i[local_num_rows] 
 		+ (double) offd_i[local_num_rows];
    MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, MPI_DOUBLE,
@@ -478,11 +479,6 @@ int
 hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix, 
                          const char         *file_name )
 {
-   if (!matrix)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    MPI_Comm comm = hypre_ParCSRMatrixComm(matrix);
    int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(matrix);
    int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(matrix);
@@ -498,6 +494,11 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    int row_s, row_e, col_s, col_e;
 #endif
+   if (!matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    if (hypre_ParCSRMatrixOffd(matrix))
         num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(matrix));
 
@@ -543,11 +544,6 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
                            const int		       base_j,
                            const char         *filename )
 {
-   if (!matrix)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    MPI_Comm          comm = hypre_ParCSRMatrixComm(matrix);
    int               global_num_rows = hypre_ParCSRMatrixGlobalNumRows(matrix);
    int               global_num_cols = hypre_ParCSRMatrixGlobalNumCols(matrix);
@@ -574,6 +570,11 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    MPI_Comm_rank(comm, &myid);
    MPI_Comm_size(comm, &num_procs);
    
+   if (!matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    sprintf(new_filename,"%s.%05d", filename, myid);
 
    if ((file = fopen(new_filename, "w")) == NULL)
@@ -842,11 +843,6 @@ hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix,
                          int               *col_start,
                          int               *col_end )
 {  
-   if (!matrix)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
   *row_start = hypre_ParCSRMatrixFirstRowIndex(matrix);
@@ -856,6 +852,11 @@ hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix,
 #else
    int my_id;
 
+   if (!matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    MPI_Comm_rank( hypre_ParCSRMatrixComm(matrix), &my_id );
 
    *row_start = hypre_ParCSRMatrixRowStarts(matrix)[ my_id ];
@@ -893,16 +894,16 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
                          int               **col_ind,
                          double            **values )
 {  
-   if (!mat)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    int my_id;
    int row_start, row_end;
    hypre_CSRMatrix *Aa = (hypre_CSRMatrix *) hypre_ParCSRMatrixDiag(mat);
    hypre_CSRMatrix *Ba = (hypre_CSRMatrix *) hypre_ParCSRMatrixOffd(mat);
    
+   if (!mat)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    if (hypre_ParCSRMatrixGetrowactive(mat)) return(-1);
 
@@ -1946,6 +1947,15 @@ int
 hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, 
                         int copy_data )
 {
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   int *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
+   hypre_CSRMatrix *B_diag = hypre_ParCSRMatrixDiag(B);
+   hypre_CSRMatrix *B_offd = hypre_ParCSRMatrixOffd(B);
+   int *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);
+   int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+   int i;
+
    if (!A)
    {
       hypre_error_in_arg(1);
@@ -1956,15 +1966,6 @@ hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-   int *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
-   hypre_CSRMatrix *B_diag = hypre_ParCSRMatrixDiag(B);
-   hypre_CSRMatrix *B_offd = hypre_ParCSRMatrixOffd(B);
-   int *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);
-   int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
-   int i;
-
    hypre_CSRMatrixCopy(A_diag, B_diag, copy_data);
    hypre_CSRMatrixCopy(A_offd, B_offd, copy_data);
    if (num_cols_offd && col_map_offd_B == NULL)
