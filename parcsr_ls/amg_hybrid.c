@@ -1361,38 +1361,37 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 {
    hypre_AMGHybridData  *AMGhybrid_data    = AMGhybrid_vdata;
 
-   double             tol            = (AMGhybrid_data -> tol);
-   double             cf_tol         = (AMGhybrid_data -> cf_tol);
-   int                dscg_max_its   = (AMGhybrid_data -> dscg_max_its);
-   int                pcg_max_its    = (AMGhybrid_data -> pcg_max_its);
-   int                two_norm       = (AMGhybrid_data -> two_norm);
-   int                stop_crit      = (AMGhybrid_data -> stop_crit);
-   int                rel_change     = (AMGhybrid_data -> rel_change);
-   int                logging        = (AMGhybrid_data -> logging);
-   int                print_level    = (AMGhybrid_data -> print_level);
-   int                setup_type     = (AMGhybrid_data -> setup_type);
-   int                solver_type    = (AMGhybrid_data -> solver_type);
-   int                k_dim          = (AMGhybrid_data -> k_dim);
-  
+   double             tol;
+   double             cf_tol;
+   int                dscg_max_its;
+   int                pcg_max_its;
+   int                two_norm;
+   int                stop_crit;
+   int                rel_change;
+   int                logging;
+   int                print_level;
+   int                setup_type;
+   int                solver_type;
+   int                k_dim;
    /* BoomerAMG info */
-   double 	strong_threshold = (AMGhybrid_data -> strong_threshold);
-   double      	max_row_sum = (AMGhybrid_data -> max_row_sum);
-   double	trunc_factor = (AMGhybrid_data -> trunc_factor);
-   int		max_levels = (AMGhybrid_data -> max_levels);
-   int		measure_type = (AMGhybrid_data -> measure_type);
-   int		coarsen_type = (AMGhybrid_data -> coarsen_type);
-   int		interp_type = (AMGhybrid_data -> interp_type);
-   int		cycle_type = (AMGhybrid_data -> cycle_type);
-   int		num_paths = (AMGhybrid_data -> num_paths);
-   int		agg_num_levels = (AMGhybrid_data -> agg_num_levels);
-   int		num_functions = (AMGhybrid_data -> num_functions);
-   int		nodal = (AMGhybrid_data -> nodal);
-   int	       *num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
-   int	       *grid_relax_type = (AMGhybrid_data -> grid_relax_type);
-   int	      **grid_relax_points = (AMGhybrid_data -> grid_relax_points);
-   double      *relax_weight = (AMGhybrid_data -> relax_weight);
-   double      *omega = (AMGhybrid_data -> omega);
-   int         *dof_func = (AMGhybrid_data -> dof_func);
+   double 	strong_threshold;
+   double      	max_row_sum;
+   double	trunc_factor;
+   int		max_levels;
+   int		measure_type;
+   int		coarsen_type;
+   int		interp_type;
+   int		cycle_type;
+   int		num_paths;
+   int		agg_num_levels;
+   int		num_functions;
+   int		nodal;
+   int	       *num_grid_sweeps;
+   int	       *grid_relax_type;
+   int	      **grid_relax_points;
+   double      *relax_weight;
+   double      *omega;
+   int         *dof_func;
 
    int	       *boom_ngs;
    int	       *boom_grt;
@@ -1401,7 +1400,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    double      *boom_rlxw;
    double      *boom_omega;
 
-   int                pcg_default    = (AMGhybrid_data -> pcg_default);
+   int                pcg_default;
    int              (*pcg_precond_solve)();
    int              (*pcg_precond_setup)();
    void              *pcg_precond;
@@ -1430,6 +1429,59 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
     * Setup diagonal scaled solver
     *-----------------------------------------------------------------------*/
 
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   tol            = (AMGhybrid_data -> tol);
+   cf_tol         = (AMGhybrid_data -> cf_tol);
+   dscg_max_its   = (AMGhybrid_data -> dscg_max_its);
+   pcg_max_its    = (AMGhybrid_data -> pcg_max_its);
+   two_norm       = (AMGhybrid_data -> two_norm);
+   stop_crit      = (AMGhybrid_data -> stop_crit);
+   rel_change     = (AMGhybrid_data -> rel_change);
+   logging        = (AMGhybrid_data -> logging);
+   print_level    = (AMGhybrid_data -> print_level);
+   setup_type     = (AMGhybrid_data -> setup_type);
+   solver_type    = (AMGhybrid_data -> solver_type);
+   k_dim          = (AMGhybrid_data -> k_dim);
+   strong_threshold = (AMGhybrid_data -> strong_threshold);
+   max_row_sum = (AMGhybrid_data -> max_row_sum);
+   trunc_factor = (AMGhybrid_data -> trunc_factor);
+   max_levels = (AMGhybrid_data -> max_levels);
+   measure_type = (AMGhybrid_data -> measure_type);
+   coarsen_type = (AMGhybrid_data -> coarsen_type);
+   interp_type = (AMGhybrid_data -> interp_type);
+   cycle_type = (AMGhybrid_data -> cycle_type);
+   num_paths = (AMGhybrid_data -> num_paths);
+   agg_num_levels = (AMGhybrid_data -> agg_num_levels);
+   num_functions = (AMGhybrid_data -> num_functions);
+   nodal = (AMGhybrid_data -> nodal);
+   num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
+   grid_relax_type = (AMGhybrid_data -> grid_relax_type);
+   grid_relax_points = (AMGhybrid_data -> grid_relax_points);
+   relax_weight = (AMGhybrid_data -> relax_weight);
+   omega = (AMGhybrid_data -> omega);
+   dof_func = (AMGhybrid_data -> dof_func);
+   pcg_default    = (AMGhybrid_data -> pcg_default);
+   if (!b)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+   num_variables = hypre_VectorSize(hypre_ParVectorLocalVector(b));
+   if (!A)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   if (!x)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+  
 /*  print_level definitions: xy,  sol_print_level = y, pre_print_level = x */
    pre_print_level = print_level/10;
    sol_print_level = print_level - pre_print_level*10;
