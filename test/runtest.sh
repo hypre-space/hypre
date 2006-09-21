@@ -250,7 +250,7 @@ function PsubCmdStub
          ;;
       ubgl*) PsubCmd="psub -c ubgl -pool pbatch -b science -r $RunName -ln 32"
          ;;
-      up*) PsubCmd="psub -b a_casc -r $RunName -ln $NumProcs"
+      up*) PsubCmd="psub -b science -r $RunName -ln $NumProcs"
          ;;
       vert*) PsubCmd="psub -c vertex,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
