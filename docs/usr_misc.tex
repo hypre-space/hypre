@@ -190,12 +190,12 @@ do not support it.
 The error flag value is a combination of one or a few of the following
 error codes:
 \begin{enumerate}
-\item \code{HYPRE_ERROR_GENERIC} -- describes a generic error
-\item \code{HYPRE_ERROR_MEMORY} -- \hypre{} was unable to allocate memory
-\item \code{HYPRE_ERROR_ARG} -- error in one of the arguments of a \hypre{} function
-\item \code{HYPRE_ERROR_CONV} -- a \hypre{} solver did not converge as expected
+\item \code{HYPRE\_ERROR\_GENERIC} -- describes a generic error
+\item \code{HYPRE\_ERROR\_MEMORY} -- \hypre{} was unable to allocate memory
+\item \code{HYPRE\_ERROR\_ARG} -- error in one of the arguments of a \hypre{} function
+\item \code{HYPRE\_ERROR\_CONV} -- a \hypre{} solver did not converge as expected
 \end{enumerate}
-One can use the \code{HYPRE_CheckError} function to determine exactly
+One can use the \code{HYPRE\_CheckError} function to determine exactly
 which errors have occurred:
 \begin{display} \begin{verbatim}
 /* call some HYPRE functions */
@@ -261,7 +261,7 @@ on their own should do the following :
 \item call the {\tt FEI} functions in your application code (example given
       previously)
 \begin{enumerate}
-\item include {\tt cfei\-hypre.h} in your file 
+\item include {\tt cfei-hypre.h} in your file 
 \item include {\tt FEI\_Implementation.h} in your file 
 \item make sure your application has an {\tt include} and an {\tt lib} path 
       to the {\tt include} and {\tt lib} directories created above. 
@@ -511,9 +511,7 @@ The corresponding Fortran code for calling this routine is as follows:
 
 \section{Bug Reporting}
 
-An automated bug reporting mechanism has been set up for \hypre{} to be used for
-submitting bugs, desired features and documentation problems, as well as
-querying the status of previous reports.  Access
-\url{http://www-casc.llnl.gov/bugs} for full bug tracking details or to submit
-or query a bug report.  When using the site for the first time, click on ``Open
-a new Bugzilla account'' under the ``User login account management'' heading.
+An automated issue tracking tool, Roundup, is being used for \hypre{}. The primary
+access mechanism is by sending email to \kbd{hypre-support@llnl.gov}.  When a
+user submits an issue, their email address is captured and included on the list
+of those to get status reports for the issue.
