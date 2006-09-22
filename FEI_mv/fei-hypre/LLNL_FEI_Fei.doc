@@ -23,14 +23,14 @@
   * instantiation or object of the fei class.
   * @param comm - an MPI communicator
  **/
-LLNL_FEI_Fei(MPI_Comm comm);
+LLNL_FEI_Impl(MPI_Comm comm);
 
 /**
   * Finite element interface destructor: this function destroys
   * the object as well as its internal memory allocations.
   * @param - no parameter needed
  **/
-~LLNL_FEI_Fei();
+~LLNL_FEI_Impl();
 
 /**
   * The parameter function is the single most important function
