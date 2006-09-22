@@ -113,7 +113,9 @@ HEADERS =\
  HYPRE_parcsr_bicgstabl.h\
  HYPRE_parcsr_fgmres.h\
  HYPRE_parcsr_lsicg.h\
- HYPRE_parcsr_symqmr.h
+ HYPRE_parcsr_symqmr.h\
+ HYPRE_fei_mv.h\
+ fei_mv.h
 
 FILESC = \
  HYPRE_LSI_Dsuperlu.c\
@@ -155,7 +157,10 @@ FILESCXX = \
  HYPRE_SlideReduction.cxx\
  cfei_hypre.cxx\
  hypre_schur_reduce.cxx\
- hypre_slide_reduce.cxx
+ hypre_slide_reduce.cxx\
+ HYPRE_fei_mesh.cxx\
+ HYPRE_fei_matrix.cxx\
+ HYPRE_fei_vector.cxx
 
 OBJSC = ${FILESC:.c=.o}
 OBJSCXX = ${FILESCXX:.cxx=.o}
