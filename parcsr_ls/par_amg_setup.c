@@ -212,7 +212,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (grid_relax_type[0] >= 20) /* block relaxation choosen */
    {
 
-      if (!(interp_type > 9 && interp_type < 14) )
+      if (!(interp_type > 9 && interp_type < 12) )
       {
          hypre_ParAMGDataInterpType(amg_data) = 10;
          interp_type = 10;
@@ -231,7 +231,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       block_mode = 1;
    }
 
-   if (interp_type > 9 && interp_type < 14 ) /* block interp choosen */
+   if (interp_type > 9 && interp_type < 12 ) /* block interp choosen */
    {
       if (!(nodal)) 
       {
@@ -1326,6 +1326,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if (hypre_ParAMGDataInterpType(amg_data) == 7) /*FF interpolation */
       {
           hypre_BoomerAMGBuildFFInterp(A_array[level], CF_marker_array[level], 
+                 S, coarse_pnts_global, num_functions, dof_func_array[level], 
+		 debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
+	  hypre_TFree(col_offd_S_to_A);
+      }
+      else if (hypre_ParAMGDataInterpType(amg_data) == 12) /*FF1 interpolation */
+      {
+          hypre_BoomerAMGBuildFF1Interp(A_array[level], CF_marker_array[level], 
                  S, coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
 	  hypre_TFree(col_offd_S_to_A);
