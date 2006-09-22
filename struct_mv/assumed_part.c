@@ -1,21 +1,21 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
@@ -23,6 +23,7 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 /* This is code for the struct assumed partition 
    AHB 6/05 */
@@ -335,7 +336,6 @@ int hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array,
    hypre_APFindMyBoxesInRegions( region_array, my_box_array, &send_buf_count, 
                                  &send_buf_vol);
 
-   /* combine s.t. there is just one all reduce (number of regions will be small)*/
 
    /* copy ints to doubles so we can do one all_reduce */
    for (i=0; i< num_regions; i++)
@@ -1951,7 +1951,6 @@ int hypre_StructAssumedPartitionGetRegionsFromProc( hypre_StructAssumedPart *ass
    
    /* some thoughts: if x and y division are even (or if x is even and all the 
       extras
-      fit on the first z level - so extra < xy/2) then we could combine
       the two partitions into one partition (they would be side by side in x-dir). 
       I think it may be better to leave them seperate in the interest of 
       reducing the search space for neighbor calculations */  

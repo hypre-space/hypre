@@ -1,21 +1,21 @@
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+# Written by the HYPRE team. UCRL-CODE-222953.
 # All rights reserved.
 #
 # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
 # Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-# disclaimer and the GNU Lesser General Public License.
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# This program is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
 #
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
-# GNU General Public License for more details.
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, write to the Free Software Foundation,
@@ -23,6 +23,8 @@
 #
 # $Revision$
 #EHEADER**********************************************************************
+
+
 
 
 #=============================================================================
@@ -273,7 +275,6 @@ Version 1.7.8b released, 2002/09/25.
   not implemented before anyway).  The new interface allows much more
   flexibility in controlling which parts of the matrix are symmetric.
 
-- PCG: Option to combine relative and absolute tolerance in convergence test.
 
 Version 1.7.7b released, 2002/08/08.
 
@@ -393,7 +394,6 @@ New internal installation: V2000-05-31
 
 - OpenMP threading added to BoomerAMG.
 
-- Changed ParAMG names to BoomerAMG.  Use 'bin/V2000-05-31.hypre_convert'
   to convert code to use the new names.
 
 - Changed default coarsening type for BoomerAMG.  This version does

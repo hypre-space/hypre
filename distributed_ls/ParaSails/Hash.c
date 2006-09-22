@@ -1,21 +1,21 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
@@ -24,11 +24,11 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+
+
 /******************************************************************************
  *
- * Hash - Open addressing hash table with linear probing.  The keys are stored
  * in the table (also known as a closed table).  Conflicts are resolved with
- * linear probing, which may be faster in an environment with cache memory.
  *
  * We allow rehashing the data into a larger or smaller table, and thus
  * allow a data item (an integer, but a pointer would be more general)

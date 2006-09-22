@@ -1,21 +1,21 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
@@ -23,6 +23,8 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
+
 
 /* Will compute A*A^T, A a Boolean matrix or matrix of doubles.
    based on par_csr_matop.c and mli_pcsr_bool_matop.c */
@@ -54,7 +56,6 @@ void hypre_ParAat_RowSizes
 */
 {
    /* There are 3 CSRMatrix or CSRBooleanMatrix objects behind the arrays here:
-      A_diag, A_offd, and A_ext.  That's 9 possiable X*Y combinations.
       Any ext*Y belongs to another processor.  And diag*offd, offd*diag never
       have any entries because by definition diag and offd have different
       columns.  So we have to do 4:
@@ -500,7 +501,6 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
        *-----------------------------------------------------------------*/
          
       /* There are 3 CSRMatrix or CSRBooleanMatrix objects here:
-         A_diag, A_offd, and A_ext.  That's 9 possiable X*Y combinations.  But
          ext*ext, ext*diag, and ext*offd belong to another processor.
          diag*offd and offd*diag don't count - never share a column by definition.
          So we have to do 4 cases:

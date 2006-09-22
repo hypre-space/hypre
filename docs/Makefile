@@ -1,21 +1,21 @@
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+# Written by the HYPRE team. UCRL-CODE-222953.
 # All rights reserved.
 #
 # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
 # Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-# disclaimer and the GNU Lesser General Public License.
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# This program is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
 #
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
-# GNU General Public License for more details.
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, write to the Free Software Foundation,
@@ -23,6 +23,8 @@
 #
 # $Revision$
 #EHEADER**********************************************************************
+
+
 
 
 include ../config/Makefile.config
@@ -102,19 +104,8 @@ install: all
 		${HYPRE_INSTALL_DIR}/docs/V1.5.0b.IJ_transition_info
 
 clean:
-	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
-	@/bin/rm -f *.idx *.ilg *.ind *.brf *.out
-	@/bin/rm -f vref_manual.* vbref_manual.* version.tex
 
 distclean: clean
-	@/bin/rm -fr HYPRE_usr_manual
-	@/bin/rm -f  HYPRE_usr_manual.p*
-	@/bin/rm -fr HYPRE_dev_manual
-	@/bin/rm -f  HYPRE_dev_manual.p*
-	@/bin/rm -fr HYPRE_ref_manual
-	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.p*
-	@/bin/rm -fr bHYPRE_ref_manual
-	@/bin/rm -f  bHYPRE_ref_manual.tex bHYPRE_ref_manual.p*
 
 ##################################################################
 # Rules

@@ -1,21 +1,21 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
@@ -24,9 +24,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+
+
 /*--------------------------------------------------------------------------
  * hypre_LowerBinarySearch
- * performs a binary search for a value over a list of ordered non-negative
  * integers such that
  *      list[m-1] < value <= list[m].
  * The routine returns location m or -1.
@@ -77,7 +78,6 @@ int hypre_LowerBinarySearch(int *list, int value, int list_length)
 
 /*--------------------------------------------------------------------------
  * hypre_UpperBinarySearch
- * performs a binary search for a value over a list of ordered non-negative
  * integers such that
  *      list[m] <= value < list[m+1].
  * The routine returns location m or -1.

@@ -1,21 +1,21 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
@@ -23,6 +23,8 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
+
 
 /* ----------------------------------------------------------------------- */
 /*                                                                         */
@@ -440,7 +442,6 @@ hypre_ParCSRMatrixToParChordMatrix(
             diag and offd blocks...  */
          j_global = j_local + hypre_ParCSRMatrixColStarts(Ap)[my_q];
          j = j_global - first_index_rdof[my_q];
-         /* This j is local to the processor q - but for diag & offd combined */
          inchord_rdof[my_q][chord[0]] = j;
          inchord_data[my_q][chord[0]] = data;
          hypre_assert( chord[0] < num_inchords[my_q] );
@@ -603,7 +604,6 @@ hypre_ParCSRMatrixToParChordMatrix(
          hypre_assert( chord[q] < num_inchords[q] );
          inchord_idof[q][chord[q]] = row;
          j = j_global - first_index_rdof[q];
-         /* This j is local to the processor q - but for diag & offd combined */
          inchord_rdof[q][chord[q]] = j;
          inchord_data[q][chord[q]] = data;
          /* Note that although inchord_* is organized according to the

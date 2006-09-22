@@ -1,21 +1,21 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
@@ -23,6 +23,8 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
+
 
 /******************************************************************************
  *
@@ -60,7 +62,6 @@ hypre_SMGSetup( void               *smg_vdata,
                      
    int                   cdir;
 
-   hypre_Index           bindex;
    hypre_Index           bstride;
    hypre_Index           cindex;
    hypre_Index           findex;
@@ -329,7 +330,6 @@ hypre_SMGSetup( void               *smg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_SMGSetBIndex(base_index, base_stride, l, bindex);
       hypre_SMGSetBStride(base_index, base_stride, l, bstride);
       hypre_SMGSetCIndex(base_index, base_stride, l, cdir, cindex);
       hypre_SMGSetFIndex(base_index, base_stride, l, cdir, findex);
@@ -337,7 +337,6 @@ hypre_SMGSetup( void               *smg_vdata,
 
       /* set up relaxation */
       relax_data_l[l] = hypre_SMGRelaxCreate(comm);
-      hypre_SMGRelaxSetBase(relax_data_l[l], bindex, bstride);
       hypre_SMGRelaxSetMemoryUse(relax_data_l[l], (smg_data -> memory_use));
       hypre_SMGRelaxSetTol(relax_data_l[l], 0.0);
       hypre_SMGRelaxSetNumSpaces(relax_data_l[l], 2);
@@ -362,7 +361,6 @@ hypre_SMGSetup( void               *smg_vdata,
 
       /* set up the residual routine */
       residual_data_l[l] = hypre_SMGResidualCreate();
-      hypre_SMGResidualSetBase(residual_data_l[l], bindex, bstride);
       hypre_SMGResidualSetup(residual_data_l[l],
                              A_l[l], x_l[l], b_l[l], r_l[l]);
 
@@ -389,10 +387,8 @@ hypre_SMGSetup( void               *smg_vdata,
                           cindex, stride);
    }
 
-   hypre_SMGSetBIndex(base_index, base_stride, l, bindex);
    hypre_SMGSetBStride(base_index, base_stride, l, bstride);
    relax_data_l[l] = hypre_SMGRelaxCreate(comm);
-   hypre_SMGRelaxSetBase(relax_data_l[l], bindex, bstride);
    hypre_SMGRelaxSetTol(relax_data_l[l], 0.0);
    hypre_SMGRelaxSetMaxIter(relax_data_l[l], 1);
    hypre_SMGRelaxSetTempVec(relax_data_l[l], tb_l[l]);
@@ -404,7 +400,6 @@ hypre_SMGSetup( void               *smg_vdata,
    if( l == 0 )
    {
       residual_data_l[l] = hypre_SMGResidualCreate();
-      hypre_SMGResidualSetBase(residual_data_l[l], bindex, bstride);
       hypre_SMGResidualSetup(residual_data_l[l],
                              A_l[l], x_l[l], b_l[l], r_l[l]);
    }
