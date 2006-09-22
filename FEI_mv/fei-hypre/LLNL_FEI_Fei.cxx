@@ -5,15 +5,15 @@
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
  * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * HYPRE is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License (as published by the Free Software
  * Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
  * Public License for more details.
  *
@@ -23,8 +23,8 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-
+                                                                                
+                                                                                
 
 /**************************************************************************
   Module:  LLNL_FEI_Fei.cxx
@@ -2351,14 +2351,15 @@ void LLNL_FEI_Fei::assembleSolnVector()
 /**************************************************************************
  distribute solution vector to element solution vectors
  -------------------------------------------------------------------------*/
-void LLNL_FEI_Fei::disassembleSolnVector()
+void LLNL_FEI_Fei::disassembleSolnVector(double *solns)
 {
    int    iB, iE, iN, iD, **elemNodeLists, numElems, elemNumNodes;
    int    eqnIndex1, eqnIndex2, nLocal;
    double **solnVectors;
 
-   scatterDData( solnVector_ );
    nLocal = numLocalNodes_ * nodeDOF_;
+   for ( iD = 0; iD < nLocal; iD++ ) solnVector_[iD] = solns[iD];
+   scatterDData( solnVector_ );
    for ( iB = 0; iB < numBlocks_; iB++ )
    {
       elemNodeLists = elemBlocks_[iB]->getElemNodeLists();
