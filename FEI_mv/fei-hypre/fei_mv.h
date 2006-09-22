@@ -28,6 +28,8 @@
 
 #include "utilities.h"
 
+#include "LinearSystemCore.h"
+#include "LLNL_FEI_Impl.h"
 #include "HYPRE_fei_mv.h"
 
 #ifndef hypre_FE_MV_HEADER
@@ -41,7 +43,7 @@ extern "C" {
 
 /******************************************************************************
  *
- * Header info for the hypre_SStructGrid structures
+ * Header info for the hypre_FEMesh structures
  *
  *****************************************************************************/
 
@@ -52,21 +54,14 @@ extern "C" {
  * hypre_FEMesh:
  *--------------------------------------------------------------------------*/
 
-struct hypre_FEMesh_struct
+typedef struct hypre_FEMesh_struct
 {
-   MPI_Comm                   comm;
-   int                        ndim;
-   int                        nparts;
+   MPI_Comm comm_;
+   void     *linSys_;
+   void     *feiPtr_;
+   int      objectType_;
 
 } hypre_FEMesh;
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_SStructGrid
- *--------------------------------------------------------------------------*/
-
-#define hypre_FEMeshComm(grid)           ((grid) -> comm)
-#define hypre_FEMeshLocalSize(grid)      ((grid) -> local_size)
-#define hypre_FEMeshGlobalSize(grid)     ((grid) -> global_size)
 
 #endif
 
@@ -83,24 +78,14 @@ struct hypre_FEMesh_struct
  * hypre_FEMatrix:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_FEMatrix_struct
 {
-   MPI_Comm         comm;
-   hypre_FEMesh     *femesh;
+   MPI_Comm      comm_;
+   hypre_FEMesh *mesh_;
 
 } hypre_FEMatrix;
 
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_FEMatrix
- *--------------------------------------------------------------------------*/
-
-#define hypre_FEMatrixComm(mat)           ((mat) -> comm)
-#define hypre_FEMatrixNDim(mat)           ((mat) -> ndim)
-#define hypre_FEMatrixGraph(mat)          ((mat) -> graph)
-#define hypre_FEMatrixSplits(mat)         ((mat) -> splits)
-#define hypre_FEMatrixParCSRMatrix(mat)   ((mat) -> parcsrmatrix)
-#define hypre_FEMatrixGlobalSize(mat)     ((mat) -> global_size)
-#define hypre_FEMatrixObjectType(mat)     ((mat) -> object_type)
+#endif
 
 /******************************************************************************
  *
@@ -115,25 +100,22 @@ typedef struct
  * hypre_FEVector:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_FEVector_struct
 {
-   MPI_Comm       comm;
-   hypre_FEMesh  *mesh;
+   MPI_Comm      comm_;
+   hypre_FEMesh* mesh_;
 
 } hypre_FEVector;
 
+#endif
+
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_FEVector
+ * HYPRE_fei_mesh.cxx 
  *--------------------------------------------------------------------------*/
 
-#define hypre_FEVectorComm(vec)           ((vec) -> comm)
-#define hypre_FEVectorMesh(vec)           ((vec) -> mesh)
-#define hypre_FEVectorObjectType(vec)     ((vec) -> object_type)
-                                                                                                            
-/* HYPRE_fei_mv.cxx */
 int HYPRE_FEMeshCreate( MPI_Comm comm, HYPRE_FEMesh *mesh_ptr );
-int HYPRE_FEMeshDestroy( HYPRE_SStructGrid grid );
-int HYPRE_FEMeshAssemble( HYPRE_SStructGrid grid );
+int HYPRE_FEMeshDestroy( HYPRE_FEMesh mesh );
+int HYPRE_FEMeshSetFEObject( HYPRE_FEMesh mesh, void * , void *);
 int HYPRE_FEMeshInitFields( HYPRE_FEMesh mesh, int numFields,
                             int *fieldSizes, int *fieldIDs );
 int HYPRE_FEMeshInitElemBlock( HYPRE_FEMesh mesh, int blockID, 
@@ -142,7 +124,7 @@ int HYPRE_FEMeshInitElemBlock( HYPRE_FEMesh mesh, int blockID,
                                int numElemDOFFieldsPerElement,
                                int *elemDOFFieldIDs, int interleaveStrategy );
 int HYPRE_FEMeshInitElem( HYPRE_FEMesh mesh, int blockID, int elemID,
-                          *elemConn );
+                          int *elemConn );
 int HYPRE_FEMeshInitSharedNodes( HYPRE_FEMesh mesh, int nShared,
                                  int *sharedIDs, int *sharedLeng,
                                  int **sharedProcs );
@@ -150,25 +132,40 @@ int HYPRE_FEMeshInitComplete( HYPRE_FEMesh mesh );
 int HYPRE_FEMeshLoadNodeBCs( HYPRE_FEMesh mesh, int numNodes,
                              int *nodeIDs, int fieldID, double **alpha,
                              double **beta, double **gamma );
+int HYPRE_FEMeshSumInElem( HYPRE_FEMesh mesh, int blockID, int elemID, 
+                           int* elemConn, double** elemStiffness, 
+                           double *elemLoad, int elemFormat );
+int HYPRE_FEMeshSumInElemMatrix( HYPRE_FEMesh mesh, int blockID, int elemID, 
+                                 int* elemConn, double** elemStiffness, 
+                                 int elemFormat );
+int HYPRE_FEMeshSumInElemRHS( HYPRE_FEMesh mesh, int blockID, int elemID, 
+                              int* elemConn, double* elemLoad );
+int HYPRE_FEMeshLoadComplete( HYPRE_FEMesh mesh );
+int HYPRE_FEMeshSolve( HYPRE_FEMesh mesh );
+int HYPRE_FEMeshGetBlockNodeIDList( HYPRE_FEMesh mesh, int blockID, 
+                                    int numNodes, int *nodeIDList );
+int HYPRE_FEMeshGetBlockNodeSolution( HYPRE_FEMesh mesh, int blockID,
+                                      int numNodes, int *nodeIDList, 
+                                      int *solnOffsets, double *solnValues );
 
-/* HYPRE_fei_mv.cxx */
+/*--------------------------------------------------------------------------
+ * HYPRE_fei_matrix.cxx 
+ *--------------------------------------------------------------------------*/
 int HYPRE_FEMatrixCreate( MPI_Comm comm, HYPRE_FEMesh mesh, 
                           HYPRE_FEMatrix *matrix_ptr );
 int HYPRE_FEMatrixDestroy ( HYPRE_FEMatrix matrix );
 int HYPRE_FEMatrixInitialize ( HYPRE_FEMatrix matrix );
-int HYPRE_FEMatrixSetValues ( HYPRE_FEMatrix matrix , int blockID,
-          int elemID, int length, double **elemStiff, int elemFormat);
 int HYPRE_FEMatrixAssemble ( HYPRE_FEMatrix matrix );
 int HYPRE_FEMatrixSetObjectType ( HYPRE_FEMatrix vector, int type );
 int HYPRE_FEMatrixGetObject ( HYPRE_FEMatrix vector, void **object );
 
-/* HYPRE_fei_mv.cxx */
+/*--------------------------------------------------------------------------
+ * HYPRE_fei_vector.cxx 
+ *--------------------------------------------------------------------------*/
 int HYPRE_FEVectorCreate( MPI_Comm comm , HYPRE_FEMesh mesh, 
                           HYPRE_FEVector *vector_ptr );
 int HYPRE_FEVectorDestroy ( HYPRE_FEVector vector );
 int HYPRE_FEVectorInitialize ( HYPRE_FEVector vector );
-int HYPRE_FEVectorSetValues ( HYPRE_FEVector vector, int elemID, 
-                              int length , double *elemLoad );
 int HYPRE_FEVectorAssemble ( HYPRE_FEVector vector );
 int HYPRE_FEVectorSetObjectType ( HYPRE_FEVector vector, int type );
 int HYPRE_FEVectorGetObject ( HYPRE_FEVector vector, void **object );
