@@ -1,30 +1,28 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * disclaimer and the GNU Lesser General Public License.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  * $Revision$
- ***********************************************************************EHEADER*/
-
-
+ **********************************************************************EHEADER*/
 
 #ifndef HYPRE_FE_MV_HEADER
 #define HYPRE_FE_MV_HEADER
@@ -74,6 +72,12 @@ int HYPRE_FEMeshCreate(MPI_Comm comm, HYPRE_FEMesh *mesh);
 int HYPRE_FEMeshDestroy(HYPRE_FEMesh mesh);
 
 /**
+ * load an FE object
+ **/
+
+int HYPRE_FEMeshSetFEObject(HYPRE_FEMesh mesh, void *, void *);
+
+/**
  * initialize all fields in the finite element mesh
  **/
 
@@ -94,7 +98,7 @@ int HYPRE_FEMeshInitElemBlock(HYPRE_FEMesh mesh, int blockID, int nElements,
  **/
 
 int HYPRE_FEMeshInitElem(HYPRE_FEMesh mesh, int blockID, int elemID,
-                         *elemConn);
+                         int *elemConn);
 
 /**
  * initialize the shared nodes between processors
@@ -154,13 +158,6 @@ int HYPRE_FEMatrixDestroy(HYPRE_FEMatrix matrix);
 int HYPRE_FEMatrixInitialize(HYPRE_FEMatrix matrix);
    
 /**
- * sum the given element stiffness matrix into the global stiffness matrix 
- **/
-
-int HYPRE_FEMatrixSumInElemMatrix(HYPRE_FEMesh mesh, int blockID, 
-            int elemID, int length, double **elemStiff, int elemFormat);
-   
-/**
  * signal that loading has been completed
  **/
 
@@ -212,11 +209,6 @@ int HYPRE_FEVectorDestroy(HYPRE_FEVector vector);
  **/
 int HYPRE_FEVectorInitialize(HYPRE_FEVector vector);
 
-/**
- * Set vector coefficients element by element.
- **/
-int HYPRE_FEVectorSetValues(HYPRE_FEVector vector, int elemID,
-                            int length, double *elemLoad)l
 
 /**
  * Finalize the construction of the vector before using.
