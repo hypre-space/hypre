@@ -105,7 +105,7 @@ function MpirunString
          shift
          shift
          MY_ARGS="$*"
-         RunString="poe $EXECFILE -rmpool pdebug -procs $POE_NUM_PROCS"
+         RunString="poe $EXECFILE -rmpool pbatch -procs $POE_NUM_PROCS"
          RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          ;;
       tux*) BatchMode=0
@@ -250,7 +250,7 @@ function PsubCmdStub
          ;;
       ubgl*) PsubCmd="psub -c ubgl -pool pbatch -b science -r $RunName -ln 32"
          ;;
-      up*) PsubCmd="psub -c up -pool pbatch -b science -r $RunName -ln $NumProcs"
+      up*) PsubCmd="psub -c up -pool pbatch -b a_casc -r $RunName -ln $NumProcs"
          ;;
       vert*) PsubCmd="psub -c vertex,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
@@ -450,6 +450,7 @@ function StartCrunch
 }
 
 # main
+
 while [ "$*" ]
 do
    case $1 in
