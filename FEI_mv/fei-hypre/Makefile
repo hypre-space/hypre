@@ -24,7 +24,8 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
+# why do we create this variable, asked by Charles
+HYPRE_LIB_SUFFIX = .a
 
 include ../../config/Makefile.config
 
@@ -204,14 +205,10 @@ distclean: clean
 ##################################################################
 # Rules
 ##################################################################
-
-libHYPRE_FEI.a: ${OBJS}
-	@echo  "Building $@ ... "
-	${AR} $@ ${OBJS}
-	${RANLIB} $@
-
-libHYPRE_FEI.so: ${OBJS}
-	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ ${OBJS}
-
+libHYPRE_FEI${HYPRE_LIB_SUFFIX}: ${OBJS}
+        @echo  "Building $@ ... "
+        ${AR} $@ ${OBJS}
+        ${RANLIB} $@
+                                                                                
 ${OBJS}: ${HEADERS}
+
