@@ -206,9 +206,9 @@ distclean: clean
 # Rules
 ##################################################################
 libHYPRE_FEI${HYPRE_LIB_SUFFIX}: ${OBJS}
-        @echo  "Building $@ ... "
-        ${AR} $@ ${OBJS}
-        ${RANLIB} $@
+	@echo  "Building $@ ... "
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
                                                                                 
 ${OBJS}: ${HEADERS}
 
