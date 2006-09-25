@@ -816,7 +816,7 @@ void hypre_error_handler(char *filename, int line, int ierr);
 #ifdef NDEBUG
 #define hypre_assert(EX)
 #else
-#define hypre_assert(EX) if (!(EX)) {fprintf(stderr,"hypre_assert failed: %s %d\n",__FILE__, __LINE__); hypre_error(1);}
+#define hypre_assert(EX) if (!(EX)) {fprintf(stderr,"hypre_assert failed: %s\n",#EX); hypre_error(1);}
 #endif
 
 #endif
