@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh 
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -24,7 +24,6 @@
 #
 # $Revision$
 #EHEADER**********************************************************************
-
 
 #=============================================================================
 #    Initialize variables
@@ -83,7 +82,9 @@ initialize_variables ()
 # Define architecture of current platform
   if [ -z "$HYPRE_ARCH" ]
   then
+     if [ -f "/bin/uname" ] 
      then
+        HYPRE_OS="`/bin/uname -s`"
      fi
 
      case "$HYPRE_OS" in
@@ -111,7 +112,7 @@ initialize_variables ()
 #
 # Need the nopoe script for AIX platforms to force single task
   if [ "$HYPRE_ARCH" = "blue" ] ; then
-     CONFIGURE=". nopoe ./configure"
+     CONFIGURE="./nopoe ./configure"
   else
      CONFIGURE="./configure"
   fi
@@ -165,7 +166,7 @@ parse_arguments ()
 usage () 
 {
   printf "Usage: %s [-ABcDdEfGhmns] [-a opt] [-b opt] [-e opt]\n" $0
-  printf "             [-i opt] [-l opt] [-o opt] [-r host] [-v text]\n"
+  printf "          [-i opt] [-o opt] [-r host] [-v text]\n"
   printf "\n"
   printf "All options are sequentially executed in left-to-right order as\n"
   printf "entered on the command line.\n"
@@ -189,7 +190,6 @@ usage ()
   printf "%s\n" "-h       Help; display this help message."
   printf "%s\n" "-i opt   Insure++; perform configure --with-insure. Output"
   printf "                is appended to a file called insure.log.\n"
-  printf "%s\n" "-l opt   Shared; configure --enable-shared."
   printf "%s\n" "-m       Mail; mail error summary to developers."
   printf "%s\n" "-n       NoMPI; configure --without-MPI."
   printf "%s\n" "-o opt   openMP; configure --with-openmp."
@@ -219,7 +219,12 @@ mail_summary ()
 #
 # Define mail program to be used
    if [ "$HYPRE_ARCH" = "linux" ] ; then
+      [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
+      [ -x /usr/bin/mhmail ] && HYPRE_MAIL=/usr/bin/mhmail
    else
+      [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
+      [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
+      [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
    fi
 #
 #               mail summaries
@@ -266,7 +271,7 @@ apply_error_filters ()
   if [ -s "${ErrorFile}" ] ; then
     HOST=`hostname`
     case $HOST in
-      up*)
+      uv*)
         for ii in \
           '===\ End\ of\ Compilation'\
           'cpu\ clock'\
@@ -279,46 +284,35 @@ apply_error_filters ()
           ':\ 1506-068\ \(W\)\ Operation\ between\ types'\
           '^No\ begin\ line'\
           'autoconf\ has\ been\ disabled'\
-          'automake\ has\ been\ disabled'\
-          'autoheader\ has\ been\ disabled'\
-          'ltdl.c:'\
-          'sidl'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           'configure:\ WARNING:\ '
         do process_filter $ErrorFile "${ii}"
         done
         ;;
-      alc* | mcr* | peng*)
+      peng*)
         for ii in \
           '[A-Za-z0-9_]*\.[cCf]$'\
           '[A-Za-z0-9_]*\.cxx$'\
           '^[ \t]*$'\
           '^[0-9]*\ Lines\ Compiled$'\
-          'autoconf\ has\ been\ disabled'\
-          'automake\ has\ been\ disabled'\
-          'autoheader\ has\ been\ disabled'\
-          'ltdl.c:'\
-          'sidl'\
           'cpu\ clock'\
           'wall\ clock'\
-          'queued'\
-          'allocated'\
+          'external\ (subroutine|function)'\
+          'EXTERNAL\ (SUBROUTINE|FUNCTION)'\
+          'remark:\ LOOP\ WAS\ VECTORIZED'\
+          '^icc:\ Command\ line\ warning:\ overriding'\
           '\ remark:\ '
         do process_filter $ErrorFile "${ii}"
         done
       ;;
-      *bgl*)
+      gps*)
         for ii in \
-          'readonly\ variable'\
-          'BE_MPI'\
-          'FE_MPI'
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-      thun*)
-        for ii in \
-          'queued'\
-          'allocated'
+          '^No\ suffix\ list'\
+          '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
+          'WARNING:\ \ guidef77\ has\ implied\ '\
+          'cpu\ clock'\
+          'wall\ clock'\
+          '^cc:\ Info:\ '
         do process_filter $ErrorFile "${ii}"
         done
       ;;
@@ -346,6 +340,14 @@ apply_error_filters ()
           'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
           'PGC/x86\ Linux/x86\ 3.3-1:\ compilation\ completed\ with\ warnings'\
           'sed:\ Couldn.t\ close\ '
+        do process_filter $ErrorFile "${ii}"
+        done
+      ;;
+      vivid*)
+        for ii in \
+          'cpu\ clock'\
+          'wall\ clock'\
+          'xauth:\ \ error\ in\ locking\ authority\ file\ '
         do process_filter $ErrorFile "${ii}"
         done
       ;;
@@ -573,12 +575,18 @@ confbuildtest ()
    echo "Autotest starting configure of $MessageStr"
 
    cd $StdBuildDir
-   [ -f config.status ] && rm config.status
+   [ -f config.cache ] && rm config.cache
 
    if [ "$ConfigOpt" = " " ]
    then
       $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
                  2> ${Hdr}.${MessageStr}.configure.err
+   elif [ "$ConfigOpt" = "--with-babel" ]          ## need to disable Fortran90
+   then                                               ## ONLY when building Babel
+      ExtraConfigOpt="--disable-fortran90"
+      $CONFIGURE "$ConfigOpt" "$ExtraConfigOpt"  \
+                              1> ${Hdr}.${MessageStr}.configure.log \
+	                      2> ${Hdr}.${MessageStr}.configure.err
    else
       $CONFIGURE "$ConfigOpt" 1> ${Hdr}.${MessageStr}.configure.log \
                               2> ${Hdr}.${MessageStr}.configure.err
@@ -612,7 +620,7 @@ confbuildtest ()
 
       if [ "${HYPRE_RUN_MACHINE}" = "" -o "${HYPRE_RUN_MACHINE}" = " " ]
       then
-         HYPRE_RUN_MACHINE=`hostname|cut -c1-6`
+         HYPRE_RUN_MACHINE=$HOSTNAME
       fi
 #
 #               if examples/ex1 is executable then examples codes are being 
