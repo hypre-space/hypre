@@ -84,7 +84,7 @@ bHYPRE_SStructSplit
 bHYPRE_SStructSplit__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE_SStructSplit__data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE\_SStructSplit\_\_data) passed in rather than running the constructor.
  */
 bHYPRE_SStructSplit
 bHYPRE_SStructSplit__wrapObj(void * data, sidl_BaseInterface *_ex);

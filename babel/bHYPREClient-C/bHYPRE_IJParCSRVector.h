@@ -81,7 +81,7 @@ bHYPRE_IJParCSRVector
 bHYPRE_IJParCSRVector__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE_IJParCSRVector__data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE\_IJParCSRVector\_\_data) passed in rather than running the constructor.
  */
 bHYPRE_IJParCSRVector
 bHYPRE_IJParCSRVector__wrapObj(void * data, sidl_BaseInterface *_ex);

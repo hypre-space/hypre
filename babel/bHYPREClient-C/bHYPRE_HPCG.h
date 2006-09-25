@@ -104,7 +104,7 @@ bHYPRE_HPCG
 bHYPRE_HPCG__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE_HPCG__data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE\_HPCG\_\_data) passed in rather than running the constructor.
  */
 bHYPRE_HPCG
 bHYPRE_HPCG__wrapObj(void * data, sidl_BaseInterface *_ex);

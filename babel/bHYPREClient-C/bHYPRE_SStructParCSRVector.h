@@ -85,7 +85,7 @@ bHYPRE_SStructParCSRVector__createRemote(const char * url,
   sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE_SStructParCSRVector__data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE\_SStructParCSRVector\_\_data) passed in rather than running the constructor.
  */
 bHYPRE_SStructParCSRVector
 bHYPRE_SStructParCSRVector__wrapObj(void * data, sidl_BaseInterface *_ex);

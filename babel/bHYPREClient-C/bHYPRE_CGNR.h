@@ -92,7 +92,7 @@ bHYPRE_CGNR
 bHYPRE_CGNR__createRemote(const char * url, sidl_BaseInterface *_ex);
 
 /**
- * Wraps up the private data struct pointer (struct bHYPRE_CGNR__data) passed in rather than running the constructor.
+ * Wraps up the private data struct pointer (struct bHYPRE\_CGNR\_\_data) passed in rather than running the constructor.
  */
 bHYPRE_CGNR
 bHYPRE_CGNR__wrapObj(void * data, sidl_BaseInterface *_ex);
