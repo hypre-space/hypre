@@ -24,8 +24,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 HYPRE Installation Information
 =================================
 
@@ -43,6 +41,7 @@ The simplest way to build this package is:
 
   2. Type `make install' to compile the source code and install the resulting files 
 
+  3. You can remove the program binaries and object files from the source code 
      directory by typing `make clean'.  To remove the files that `configure' 
      created (so you can compile the package for a different kind of computer), 
      type `make distclean'.

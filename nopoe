@@ -1,3 +1,4 @@
+#!/usr/bin/ksh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -23,9 +24,6 @@
 #
 # $Revision$
 #EHEADER**********************************************************************
-
-
-
 
 # This script will be needed to build hypre with the Babel interface
 # in multiprocessing AIX systems. See the file babel-runtime/HYPRE_README.txt .
