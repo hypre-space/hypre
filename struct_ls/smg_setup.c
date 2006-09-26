@@ -23,9 +23,6 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 /******************************************************************************
  *
  *
@@ -62,6 +59,7 @@ hypre_SMGSetup( void               *smg_vdata,
                      
    int                   cdir;
 
+   hypre_Index           bindex;
    hypre_Index           bstride;
    hypre_Index           cindex;
    hypre_Index           findex;
@@ -330,6 +328,7 @@ hypre_SMGSetup( void               *smg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
+      hypre_SMGSetBIndex(base_index, base_stride, l, bindex);
       hypre_SMGSetBStride(base_index, base_stride, l, bstride);
       hypre_SMGSetCIndex(base_index, base_stride, l, cdir, cindex);
       hypre_SMGSetFIndex(base_index, base_stride, l, cdir, findex);
@@ -337,6 +336,7 @@ hypre_SMGSetup( void               *smg_vdata,
 
       /* set up relaxation */
       relax_data_l[l] = hypre_SMGRelaxCreate(comm);
+      hypre_SMGRelaxSetBase(relax_data_l[l], bindex, bstride);
       hypre_SMGRelaxSetMemoryUse(relax_data_l[l], (smg_data -> memory_use));
       hypre_SMGRelaxSetTol(relax_data_l[l], 0.0);
       hypre_SMGRelaxSetNumSpaces(relax_data_l[l], 2);
@@ -361,6 +361,7 @@ hypre_SMGSetup( void               *smg_vdata,
 
       /* set up the residual routine */
       residual_data_l[l] = hypre_SMGResidualCreate();
+      hypre_SMGResidualSetBase(residual_data_l[l], bindex, bstride);
       hypre_SMGResidualSetup(residual_data_l[l],
                              A_l[l], x_l[l], b_l[l], r_l[l]);
 
@@ -387,8 +388,10 @@ hypre_SMGSetup( void               *smg_vdata,
                           cindex, stride);
    }
 
+   hypre_SMGSetBIndex(base_index, base_stride, l, bindex);
    hypre_SMGSetBStride(base_index, base_stride, l, bstride);
    relax_data_l[l] = hypre_SMGRelaxCreate(comm);
+   hypre_SMGRelaxSetBase(relax_data_l[l], bindex, bstride);
    hypre_SMGRelaxSetTol(relax_data_l[l], 0.0);
    hypre_SMGRelaxSetMaxIter(relax_data_l[l], 1);
    hypre_SMGRelaxSetTempVec(relax_data_l[l], tb_l[l]);
@@ -400,6 +403,7 @@ hypre_SMGSetup( void               *smg_vdata,
    if( l == 0 )
    {
       residual_data_l[l] = hypre_SMGResidualCreate();
+      hypre_SMGResidualSetBase(residual_data_l[l], bindex, bstride);
       hypre_SMGResidualSetup(residual_data_l[l],
                              A_l[l], x_l[l], b_l[l], r_l[l]);
    }
