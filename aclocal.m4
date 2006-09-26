@@ -1,84 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
 # aclocal.m4 generated automatically by aclocal 1.6.3 -*- Autoconf -*-
 
 # Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
@@ -92,6 +11,31 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+dnl BHEADER**********************************************************************
+dnl Copyright (c) 2006   The Regents of the University of California.
+dnl Produced at the Lawrence Livermore National Laboratory.
+dnl Written by the HYPRE team. UCRL-CODE-222953.
+dnl All rights reserved.
+dnl
+dnl This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+dnl Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+dnl disclaimer, contact information and the GNU Lesser General Public License.
+dnl
+dnl HYPRE is free software; you can redistribute it and/or modify it under the
+dnl terms of the GNU General Public License (as published by the Free Software 
+dnl Foundation) version 2.1 dated February 1999.
+dnl
+dnl HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+dnl WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+dnl FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+dnl Public License for more details.
+dnl
+dnl You should have received a copy of the GNU Lesser General Public License
+dnl along with this program; if not, write to the Free Software Foundation,
+dnl Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+dnl
+dnl $Revision$
+dnl EHEADER**********************************************************************
 
 dnl **********************************************************************
 dnl * ACX_CHECK_MPI
@@ -644,6 +588,28 @@ then
 fi]) dnl
 
 dnl **********************************************************************
+dnl * HYPRE_SET_SHARED_FLAGS
+dnl *
+dnl * Set FLAGS for building shared libraries
+dnl **********************************************************************
+AC_DEFUN([HYPRE_SET_SHARED_FLAGS],
+[AC_PREREQ(2.57)dnl
+
+ case "${host}" in
+    *aix*)
+        CFLAGS="$CFLAGS -qmkshrobj"
+        CXXFLAGS="$CXXFLAGS -qmkshrobj"
+        FFLAGS="$CFLAGS -qmkshrobj"
+        ;;
+    *)
+        CFLAGS="$CFLAGS -fPIC"
+        CXXFLAGS="$CXXFLAGS -fPIC"
+        FFLAGS="$FFLAGS -fPIC"
+        ;;
+ esac
+])
+
+dnl **********************************************************************
 dnl * HYPRE_SET_ARCH
 dnl * Defines the architecture of the platform on which the code is to run.
 dnl * Cross-compiling is indicated by the host and build platforms being
@@ -768,6 +734,33 @@ dnl *    return architecture and host name values
    AC_SUBST(HOSTNAME)
 
 ])dnl
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 
 
 dnl @synopsis HYPRE_FIND_BLAS([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
@@ -897,6 +890,33 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   LDFLAGS="$hypre_save_LDFLGS"
 
 ])dnl HYPRE_FIND_BLAS
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 
 
 dnl @synopsis HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])

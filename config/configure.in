@@ -1,30 +1,28 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
+dnl BHEADER**********************************************************************
+dnl  Copyright (c) 2006   The Regents of the University of California.
+dnl  Produced at the Lawrence Livermore National Laboratory.
+dnl  Written by the HYPRE team. UCRL-CODE-222953.
+dnl  All rights reserved.
+dnl 
+dnl  This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+dnl  Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+dnl  disclaimer, contact information and the GNU Lesser General Public License.
+dnl 
+dnl  HYPRE is free software; you can redistribute it and/or modify it under the
+dnl  terms of the GNU General Public License (as published by the Free Software 
+dnl  Foundation) version 2.1 dated February 1999.
+dnl 
+dnl  HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+dnl  WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+dnl  FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+dnl  Public License for more details.
+dnl 
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with this program; if not, write to the Free Software Foundation,
+dnl  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+dnl 
+dnl  $Revision$
+dnl EHEADER**********************************************************************
 
 dnl *********************************************************************
 dnl * File Name: configure.in
@@ -66,28 +64,27 @@ AC_PREREQ(2.59)
 AC_REVISION($Id$)
 AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
-AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
- Produced at the Lawrence Livermore National Laboratory.
- Written by the HYPRE team, UCRL-CODE-222953.
- All rights reserved.
-
- This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- disclaimer and the GNU Lesser General Public License.
-
- This program is free software; you can redistribute it and/or modify it
- under the terms of the GNU General Public License (as published by the Free
- Software Foundation) version 2.1 dated February 1999.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with this program; if not, write to the Free Software Foundation,
- Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA])
-
+AC_COPYRIGHT([Copyright (c) 2006   The Regents of the University of California.
+  Produced at the Lawrence Livermore National Laboratory.
+  Written by the HYPRE team. UCRL-CODE-222953.
+  All rights reserved.
+ 
+  This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+  Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+  disclaimer, contact information and the GNU Lesser General Public License.
+ 
+  HYPRE is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License (as published by the Free Software 
+  Foundation) version 2.1 dated February 1999.
+ 
+  HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+  WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+  FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+  Public License for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([HYPRE.h])
 
@@ -761,7 +758,7 @@ then
       AC_CHECK_PROGS(CC, [mpguidec guidec icc xlc pgcc cc], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, [xlc pgcc gcc icc cc kcc], [""])
+      AC_CHECK_PROGS(CC, [gcc icc xlc pgcc cc kcc], [""])
    else
       AC_CHECK_PROGS(CC, [mpxlc mpcc mpicc mpiicc mpipgcc], [""])
    fi
@@ -779,7 +776,7 @@ then
       AC_CHECK_PROGS(CXX, [mpguidec++ guidec++ icc xlC pgCC CC], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CXX, [xlC icpc icc pgCC g++ gcc cxx KCC], [""])
+      AC_CHECK_PROGS(CXX, [g++ gcc icpc icc xlC cxx pgCC KCC], [""])
    else
       AC_CHECK_PROGS(CXX, [mpxlC mpCC mpicxx mpiCC mpiicc mpipgCC], [""])
    fi
@@ -797,7 +794,7 @@ then
       AC_CHECK_PROGS(F77, [mpguidef77 guidef77 ifort xlf pg77 f77], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(F77, [xlf ifort g77 pgf77 f77 kf77], [""])
+      AC_CHECK_PROGS(F77, [g77 ifort xlf pgf77 f77 kf77], [""])
    else
       AC_CHECK_PROGS(F77, [mpxlf mpf77 mpif77 mpiifort mpipgf77], [""])
    fi
@@ -1013,12 +1010,12 @@ if test "$casc_using_fei" = "yes"
 then
    HYPRE_FEI_SRC_DIR="HYPRE_TOP_SRC_DIR/FEI_mv"
    HYPRE_FEI_SUBDIRS="fei-hypre femli"
-   HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.*o"
-   HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.*o"
+   HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.o"
+   HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.o"
    if test "$casc_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.*o"
+      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.o"
    else
       HYPRE_FEI_SUPERLU_FILES=
    fi
@@ -1036,15 +1033,11 @@ else
    HYPRE_FEI_FEMLI_FILES=
 fi
 
-dnl *********************************************************************
-dnl * Find libm
-dnl *********************************************************************
-AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
 
 dnl *********************************************************************
-dnl * Find libstdc++
+dnl * Find libm.a
 dnl *********************************************************************
-AC_CHECK_LIB(stdc++, __gxx_personality_v0, LIBS="$LIBS -lstdc++")
+AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
 
 dnl *********************************************************************
 dnl * Set debug/optimization flags  
@@ -1057,58 +1050,14 @@ else
 fi
 
 dnl *********************************************************************
-dnl * Set installation directories
-dnl *********************************************************************
-HYPRE_INSTALLDIR="${prefix}"
-HYPRE_LIBINSTALL="${libdir}"
-HYPRE_INCINSTALL="${includedir}"
-
-dnl *********************************************************************
-dnl * Set large page option that is needed by all AIX platforms.
-dnl *********************************************************************
-hypre_platform=`uname`
-case $hypre_platform in
-   AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
-                       CFLAGS="${CFLAGS} -blpdata"
-                       CXXFLAGS="${CXXFLAGS} -blpdata"
-                       FFLAGS="${FFLAGS} -blpdata"
-   ;;
-esac
-
-dnl *********************************************************************
-dnl * Set default link commands and suffix values
-dnl *********************************************************************
-LINK_F77="${F77}"
-LINK_CC="${CC}"
-LINK_CXX="${CXX}"
-
-HYPRE_LIBSUFFIX=".a"
-
-dnl *********************************************************************
 dnl * Set flags if needed to enable shared libraries 
 dnl *********************************************************************
 if test "$casc_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-   case $hypre_platform in
-      AIX* | aix* | Aix*) FFLAGS="${FFLAGS} -qmkshrobj"
-                          CFLAGS="${CFLAGS} -qmkshrobj"
-                          CXXFLAGS="${CXXFLAGS} -qmkshrobj"
-                          BUILD_F77_SHARED="${F77} -G"
-                          BUILD_CC_SHARED="${CC} -G"
-                          BUILD_CXX_SHARED="${CXX} -G"
-                          LINK_F77="${F77} -brtl"
-                          LINK_CC="${CC} -brtl"
-                          LINK_CXX="${CXX} -brtl"
-                          ;;
-                       *) FFLAGS="${FFLAGS} -fPIC"
-                          CFLAGS="${CFLAGS} -fPIC"
-                          CXXFLAGS="${CXXFLAGS} -fPIC"
-                          BUILD_F77_SHARED="${F77} -shared"
-                          BUILD_CC_SHARED="${CC} -shared"
-                          BUILD_CXX_SHARED="${CXX} -shared"
-                          ;;
-   esac
+   HYPRE_SET_SHARED_FLAGS
+else
+   HYPRE_LIBSUFFIX=".a"
 fi
 
 dnl *********************************************************************
@@ -1121,9 +1070,11 @@ then
    then
       HYPRE_REVERSE_FLIBS
    fi
-   LINK_F77="insure ${casc_insure_flags}"
    LINK_CC="insure ${casc_insure_flags}"
    LINK_CXX="insure ${casc_insure_flags}"
+else
+   LINK_CC="${CC}"
+   LINK_CXX="${CXX}"
 fi
 
 dnl *********************************************************************
@@ -1137,9 +1088,28 @@ then
 fi
 
 dnl *********************************************************************
+dnl * Set installation directories
+dnl *********************************************************************
+HYPRE_INSTALLDIR="${prefix}"
+HYPRE_LIBINSTALL="${libdir}"
+HYPRE_INCINSTALL="${includedir}"
+
+dnl *********************************************************************
 dnl * Define machine architecture
 dnl *********************************************************************
 HYPRE_SET_ARCH
+
+dnl *********************************************************************
+dnl * Set large page option that is needed by all AIX platforms.
+dnl *********************************************************************
+hypre_platform=`uname`
+case $hypre_platform in
+   AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
+                       CFLAGS="${CFLAGS} -blpdata"
+                       CXXFLAGS="${CXXFLAGS} -blpdata"
+                       FFLAGS="${FFLAGS} -blpdata"
+   ;;
+esac
 
 
 dnl *********************************************************************
@@ -1257,13 +1227,8 @@ AC_SUBST(CXXFLAGS)
 AC_SUBST(F77FLAGS)
 AC_SUBST(LDFLAGS)
 
-AC_SUBST(LINK_F77)
 AC_SUBST(LINK_CC)
 AC_SUBST(LINK_CXX)
-
-AC_SUBST(BUILD_F77_SHARED)
-AC_SUBST(BUILD_CC_SHARED)
-AC_SUBST(BUILD_CXX_SHARED)
 
 dnl *********************************************************************
 dnl * Installation Directories

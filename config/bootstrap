@@ -25,10 +25,9 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 #set -x
+PATH=/usr/apps/autoconf/2.59/bin
+PATH=$PATH:/usr/bin:/bin
 ##if test -x config/configure.in ; then
 ##  echo "must be in the same directory as ./configure to run this script"
 ##  exit 1
