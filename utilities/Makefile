@@ -1,7 +1,7 @@
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+# Written by the HYPRE team, UCRL-CODE-222953.
 # All rights reserved.
 #
 # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).

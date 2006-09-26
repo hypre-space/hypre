@@ -68,7 +68,7 @@ AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
  Produced at the Lawrence Livermore National Laboratory.
- Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ Written by the HYPRE team, UCRL-CODE-222953.
  All rights reserved.
 
  This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
