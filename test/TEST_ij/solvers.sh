@@ -27,7 +27,7 @@
 
 
 #=============================================================================
-# Concatenate *.oout.* files then compare with baseline case
+# Concatenate *.out.* files then compare with baseline case
 #=============================================================================
 cat solvers.out.* > solvers.out
-diff solvers.out solvers.saved
+diff solvers.out solvers.saved >&2
