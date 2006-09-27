@@ -24,11 +24,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
-
 include ../config/Makefile.config
 
 BHYPRE_BABEL_DIRS =\

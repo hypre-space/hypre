@@ -24,9 +24,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 include ../config/Makefile.config
 
 HYPRE_DIST_LS_DIRS =\
