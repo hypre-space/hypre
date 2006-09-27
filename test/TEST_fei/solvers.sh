@@ -28,6 +28,8 @@
 
 
 #=============================================================================
-# No comparison done
+# Concatenate all *.out.* files then compare with baseline case
 #=============================================================================
 
+cat solvers.out.* > solvers.out
+diff solvers.out solvers.saved >&2

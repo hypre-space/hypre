@@ -1,0 +1,1167 @@
+Running with these driver parameters:
+  solver ID    = 0
+
+  Laplacian_27pt:
+    (nx, ny, nz) = (15, 15, 10)
+    (Px, Py, Pz) = (2, 2, 1)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has random components and unit 2-norm
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver:  AMG
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = Cleary-Luby-Jones-Plassman
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    2250    51772  0.010     8   27  23.0   0.000e+00   1.900e+01
+ 1     341    12673  0.109     9   65  37.2  -6.313e-14   4.814e+01
+ 2     102     7006  0.673    35  102  68.7   6.850e+00   4.763e+01
+ 3      36     1282  0.989    33   36  35.6   2.194e+01   4.817e+01
+ 4      13      169  1.000    13   13  13.0   2.914e+01   4.766e+01
+ 5       3        9  1.000     3    3   3.0   3.931e+01   4.584e+01
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  2250 x 341     1   8   6.218e-02 6.538e-01 2.692e-01 1.000e+00
+ 1   341 x 102     1  14   1.523e-02 2.850e-01 6.151e-02 1.000e+00
+ 2   102 x 36      1  14   2.848e-03 1.747e-01 1.501e-02 1.000e+00
+ 3    36 x 13      1   9   8.732e-03 1.841e-01 3.745e-02 1.000e+00
+ 4    13 x 3       1   3   1.896e-02 1.009e-01 3.069e-02 1.000e+00
+
+
+     Complexity:    grid = 1.220000
+                operator = 1.408310
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+BoomerAMG Setup:
+  wall clock time = 0.140000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+ Output flag (print_level): 3 
+
+
+AMG SOLUTION INFO:
+                                            relative
+               residual        factor       residual
+               --------        ------       --------
+    Initial    1.000000e+00                 1.000000e+00
+    Cycle  1   1.769685e-02    0.017697     1.769685e-02 
+    Cycle  2   6.135028e-04    0.034667     6.135028e-04 
+    Cycle  3   2.681675e-05    0.043711     2.681675e-05 
+    Cycle  4   1.176099e-06    0.043857     1.176099e-06 
+    Cycle  5   5.765353e-08    0.049021     5.765353e-08 
+    Cycle  6   2.755437e-09    0.047793     2.755437e-09 
+
+
+ Average Convergence Factor = 0.037443
+
+     Complexity:    grid = 1.220000
+                operator = 1.408310
+                   cycle = 2.816445
+
+
+
+=============================================
+Solve phase times:
+=============================================
+BoomerAMG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  solver ID    = 0
+
+  Laplacian_27pt:
+    (nx, ny, nz) = (15, 15, 10)
+    (Px, Py, Pz) = (2, 2, 1)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has random components and unit 2-norm
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver:  AMG
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = Ruge
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    2250    51772  0.010     8   27  23.0   0.000e+00   1.900e+01
+ 1     245     4693  0.078     8   27  19.2   0.000e+00   4.966e+01
+ 2     123     7429  0.491    24  102  60.4   7.849e-01   4.388e+01
+ 3      58     3256  0.968    45   58  56.1   1.533e+01   5.049e+01
+ 4      16      256  1.000    16   16  16.0   3.129e+01   5.697e+01
+ 5       5       25  1.000     5    5   5.0   3.821e+01   6.169e+01
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  2250 x 245     1   8   1.250e-01 6.538e-01 2.692e-01 1.000e+00
+ 1   245 x 123     1  20   1.485e-02 2.394e-01 1.822e-01 1.000e+00
+ 2   123 x 58      1  12   2.507e-02 4.226e-01 2.396e-01 1.000e+00
+ 3    58 x 16      1   8   7.276e-03 4.213e-01 4.620e-02 1.000e+00
+ 4    16 x 5       1   4   6.013e-03 8.403e-02 2.697e-02 1.000e+00
+
+
+     Complexity:    grid = 1.198667
+                operator = 1.302461
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+BoomerAMG Setup:
+  wall clock time = 0.110000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+ Output flag (print_level): 3 
+
+
+AMG SOLUTION INFO:
+                                            relative
+               residual        factor       residual
+               --------        ------       --------
+    Initial    1.000000e+00                 1.000000e+00
+    Cycle  1   2.159744e-02    0.021597     2.159744e-02 
+    Cycle  2   8.598017e-04    0.039810     8.598017e-04 
+    Cycle  3   5.281937e-05    0.061432     5.281937e-05 
+    Cycle  4   3.767188e-06    0.071322     3.767188e-06 
+    Cycle  5   2.764182e-07    0.073375     2.764182e-07 
+    Cycle  6   2.123139e-08    0.076809     2.123139e-08 
+    Cycle  7   1.699369e-09    0.080040     1.699369e-09 
+
+
+ Average Convergence Factor = 0.055871
+
+     Complexity:    grid = 1.198667
+                operator = 1.302461
+                   cycle = 2.604439
+
+
+
+=============================================
+Solve phase times:
+=============================================
+BoomerAMG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  solver ID    = 0
+
+  Laplacian_27pt:
+    (nx, ny, nz) = (15, 15, 10)
+    (Px, Py, Pz) = (2, 2, 1)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has random components and unit 2-norm
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver:  AMG
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 7
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = Ruge 3c 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined globally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    2250    51772  0.010     8   27  23.0   0.000e+00   1.900e+01
+ 1     252     5028  0.079     8   32  20.0  -1.688e-14   4.966e+01
+ 2     137     7361  0.392    23   94  53.7  -1.381e-15   4.556e+01
+ 3      83     5979  0.868    42   83  72.0   3.752e+00   4.818e+01
+ 4      45     1989  0.982    33   45  44.2   1.129e+01   5.171e+01
+ 5      18      324  1.000    18   18  18.0   2.333e+01   4.803e+01
+ 6       8       64  1.000     8    8   8.0   3.412e+01   4.176e+01
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  2250 x 252     1   8   8.654e-02 6.538e-01 2.692e-01 1.000e+00
+ 1   252 x 137     1  20   1.475e-02 2.748e-01 1.473e-01 1.000e+00
+ 2   137 x 83      1  15   2.301e-02 2.328e-01 1.335e-01 1.000e+00
+ 3    83 x 45      1   9   1.068e-02 2.736e-01 8.584e-02 1.000e+00
+ 4    45 x 18      1   8   1.022e-02 3.491e-01 1.648e-02 1.000e+00
+ 5    18 x 8       1   5   8.291e-03 1.287e-01 4.469e-02 1.000e+00
+
+
+     Complexity:    grid = 1.241333
+                operator = 1.400699
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+BoomerAMG Setup:
+  wall clock time = 0.100000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+ Output flag (print_level): 3 
+
+
+AMG SOLUTION INFO:
+                                            relative
+               residual        factor       residual
+               --------        ------       --------
+    Initial    1.000000e+00                 1.000000e+00
+    Cycle  1   2.146782e-02    0.021468     2.146782e-02 
+    Cycle  2   8.131082e-04    0.037876     8.131082e-04 
+    Cycle  3   4.684566e-05    0.057613     4.684566e-05 
+    Cycle  4   3.153950e-06    0.067326     3.153950e-06 
+    Cycle  5   2.187931e-07    0.069371     2.187931e-07 
+    Cycle  6   1.604790e-08    0.073347     1.604790e-08 
+    Cycle  7   1.244504e-09    0.077549     1.244504e-09 
+
+
+ Average Convergence Factor = 0.053439
+
+     Complexity:    grid = 1.241333
+                operator = 1.400699
+                   cycle = 2.800162
+
+
+
+=============================================
+Solve phase times:
+=============================================
+BoomerAMG Solve:
+  wall clock time = 0.070000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  solver ID    = 0
+
+  Laplacian_27pt:
+    (nx, ny, nz) = (15, 15, 10)
+    (Px, Py, Pz) = (2, 2, 1)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has random components and unit 2-norm
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver:  AMG
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    2250    51772  0.010     8   27  23.0   0.000e+00   1.900e+01
+ 1     260     6138  0.091     8   53  23.6  -3.689e-14   4.966e+01
+ 2     112     6838  0.545    15  107  61.1   3.797e+00   5.340e+01
+ 3      49     2325  0.968    39   49  47.4   1.556e+01   4.806e+01
+ 4      17      289  1.000    17   17  17.0   3.101e+01   4.621e+01
+ 5       4       16  1.000     4    4   4.0   3.497e+01   5.254e+01
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  2250 x 260     1   8   7.692e-02 6.538e-01 2.692e-01 1.000e+00
+ 1   260 x 112     1  18   1.485e-02 3.097e-01 1.667e-01 1.000e+00
+ 2   112 x 49      1  15   1.509e-02 3.407e-01 1.342e-01 1.000e+00
+ 3    49 x 17      1  11   7.979e-03 3.433e-01 8.728e-02 1.000e+00
+ 4    17 x 4       1   3   2.779e-02 1.833e-01 4.135e-02 1.000e+00
+
+
+     Complexity:    grid = 1.196444
+                operator = 1.301437
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+BoomerAMG Setup:
+  wall clock time = 0.150000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+ Output flag (print_level): 3 
+
+
+AMG SOLUTION INFO:
+                                            relative
+               residual        factor       residual
+               --------        ------       --------
+    Initial    1.000000e+00                 1.000000e+00
+    Cycle  1   2.040289e-02    0.020403     2.040289e-02 
+    Cycle  2   7.878798e-04    0.038616     7.878798e-04 
+    Cycle  3   4.237780e-05    0.053787     4.237780e-05 
+    Cycle  4   2.552211e-06    0.060225     2.552211e-06 
+    Cycle  5   1.568560e-07    0.061459     1.568560e-07 
+    Cycle  6   1.023232e-08    0.065234     1.023232e-08 
+    Cycle  7   7.133470e-10    0.069715     7.133470e-10 
+
+
+ Average Convergence Factor = 0.049355
+
+     Complexity:    grid = 1.196444
+                operator = 1.301437
+                   cycle = 2.602565
+
+
+
+=============================================
+Solve phase times:
+=============================================
+BoomerAMG Solve:
+  wall clock time = 0.060000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  solver ID    = 0
+
+  Laplacian_27pt:
+    (nx, ny, nz) = (15, 15, 10)
+    (Px, Py, Pz) = (2, 2, 1)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has random components and unit 2-norm
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver:  AMG
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 4
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = PMIS 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    2250    51772  0.010     8   27  23.0   0.000e+00   1.900e+01
+ 1     194     3602  0.096     5   32  18.6  -8.867e-14   5.942e+01
+ 2      31      469  0.488     6   28  15.1   3.088e+01   1.490e+02
+ 3       4       16  1.000     4    4   4.0   5.187e+01   4.630e+02
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  2250 x 194     1   7   1.282e-01 7.381e-01 2.692e-01 1.000e+00
+ 1   194 x 31      0   5   3.414e-02 1.000e+00 0.000e+00 1.000e+00
+ 2    31 x 4       0   2   4.393e-02 5.241e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.101778
+                operator = 1.078942
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+BoomerAMG Setup:
+  wall clock time = 0.110000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+ Output flag (print_level): 3 
+
+
+AMG SOLUTION INFO:
+                                            relative
+               residual        factor       residual
+               --------        ------       --------
+    Initial    1.000000e+00                 1.000000e+00
+    Cycle  1   3.213979e-02    0.032140     3.213979e-02 
+    Cycle  2   3.854363e-03    0.119925     3.854363e-03 
+    Cycle  3   7.474377e-04    0.193920     7.474377e-04 
+    Cycle  4   1.714420e-04    0.229373     1.714420e-04 
+    Cycle  5   4.194601e-05    0.244666     4.194601e-05 
+    Cycle  6   1.055319e-05    0.251590     1.055319e-05 
+    Cycle  7   2.694741e-06    0.255348     2.694741e-06 
+    Cycle  8   6.944955e-07    0.257723     6.944955e-07 
+    Cycle  9   1.801158e-07    0.259348     1.801158e-07 
+    Cycle 10   4.691831e-08    0.260490     4.691831e-08 
+    Cycle 11   1.225964e-08    0.261297     1.225964e-08 
+    Cycle 12   3.210420e-09    0.261869     3.210420e-09 
+
+
+ Average Convergence Factor = 0.195981
+
+     Complexity:    grid = 1.101778
+                operator = 1.078942
+                   cycle = 2.157576
+
+
+
+=============================================
+Solve phase times:
+=============================================
+BoomerAMG Solve:
+  wall clock time = 0.060000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  solver ID    = 0
+
+  Laplacian_27pt:
+    (nx, ny, nz) = (15, 15, 10)
+    (Px, Py, Pz) = (2, 2, 1)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has random components and unit 2-norm
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver:  AMG
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 4
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = HMIS 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    2250    51772  0.010     8   27  23.0   0.000e+00   1.900e+01
+ 1     237     4711  0.084     8   44  19.9  -5.665e-14   4.966e+01
+ 2      41      957  0.569    15   39  23.3   2.299e+01   8.880e+01
+ 3       7       49  1.000     7    7   7.0   3.676e+01   2.097e+02
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  2250 x 237     1   8   1.250e-01 7.381e-01 2.692e-01 1.000e+00
+ 1   237 x 41      0   8   2.228e-02 1.000e-00 0.000e+00 1.000e+00
+ 2    41 x 7       0   6   2.063e-02 3.401e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.126667
+                operator = 1.110426
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+BoomerAMG Setup:
+  wall clock time = 0.110000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         20 
+  Stopping Tolerance:               1.000000e-08 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+ Output flag (print_level): 3 
+
+
+AMG SOLUTION INFO:
+                                            relative
+               residual        factor       residual
+               --------        ------       --------
+    Initial    1.000000e+00                 1.000000e+00
+    Cycle  1   2.371586e-02    0.023716     2.371586e-02 
+    Cycle  2   1.741883e-03    0.073448     1.741883e-03 
+    Cycle  3   2.050882e-04    0.117739     2.050882e-04 
+    Cycle  4   2.754265e-05    0.134297     2.754265e-05 
+    Cycle  5   3.954165e-06    0.143565     3.954165e-06 
+    Cycle  6   5.925155e-07    0.149846     5.925155e-07 
+    Cycle  7   9.103442e-08    0.153641     9.103442e-08 
+    Cycle  8   1.418688e-08    0.155841     1.418688e-08 
+    Cycle  9   2.228893e-09    0.157109     2.228893e-09 
+
+
+ Average Convergence Factor = 0.109314
+
+     Complexity:    grid = 1.126667
+                operator = 1.110426
+                   cycle = 2.219907
+
+
+
+=============================================
+Solve phase times:
+=============================================
+BoomerAMG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  solver ID    = 1
+
+  Laplacian_27pt:
+    (nx, ny, nz) = (60, 60, 30)
+    (Px, Py, Pz) = (2, 2, 1)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.290000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.130000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has random components and unit 2-norm
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver: AMG-PCG
+HYPRE_ParCSRPCGGetPrecond got good precond
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0  108000  2788192  0.000     8   27  25.8   0.000e+00   1.900e+01
+ 1    1828    41252  0.012     7   36  22.6  -2.113e-12   3.452e+02
+ 2     158     5064  0.203    11   61  32.1   5.063e-03   8.391e+02
+ 3      59     2099  0.603    21   54  35.6   4.416e+01   9.413e+02
+ 4      22      438  0.905    12   22  19.9   2.166e+02   1.619e+03
+ 5       5       25  1.000     5    5   5.0   7.374e+02   2.026e+03
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0 108000 x 1828    1  10   1.354e-03 9.867e-01 2.119e-01 1.000e+00
+ 1  1828 x 158     1  12   1.348e-03 1.000e+00 2.427e-01 1.000e+00
+ 2   158 x 59      1   7   4.521e-02 6.215e-01 1.224e-01 1.000e+00
+ 3    59 x 22      1   6   1.507e-02 4.447e-01 6.706e-02 1.000e+00
+ 4    22 x 5       1   5   4.447e-02 4.075e-01 6.452e-02 1.000e+00
+
+
+     Complexity:    grid = 1.019185
+                operator = 1.017530
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      6    6     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 1.090000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.580000 seconds
+  cpu MFLOPS      = 0.000000
+
+<b,b>: 1.000000e-00
+
+
+Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
+-----    ------------   ---------  ------------ 
+    1    3.466214e-02    0.034662    3.466214e-02
+    2    8.292618e-03    0.239241    8.292618e-03
+    3    2.249580e-03    0.271275    2.249580e-03
+    4    5.612673e-04    0.249499    5.612673e-04
+    5    1.418999e-04    0.252820    1.418999e-04
+    6    2.914130e-05    0.205365    2.914130e-05
+    7    6.784483e-06    0.232813    6.784483e-06
+    8    1.588399e-06    0.234122    1.588399e-06
+    9    3.900294e-07    0.245549    3.900294e-07
+   10    9.447864e-08    0.242235    9.447864e-08
+   11    1.869869e-08    0.197914    1.869869e-08
+   12    3.768798e-09    0.201554    3.768798e-09
+
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 1.870000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.930000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 12
+Final Relative Residual Norm = 3.768798e-09
+
+Running with these driver parameters:
+  solver ID    = 1
+
+  Laplacian_27pt:
+    (nx, ny, nz) = (60, 60, 30)
+    (Px, Py, Pz) = (2, 2, 1)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.280000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.130000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has random components and unit 2-norm
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver: AMG-PCG
+HYPRE_ParCSRPCGGetPrecond got good precond
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = HMIS 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0  108000  2788192  0.000     8   27  25.8   0.000e+00   1.900e+01
+ 1    1406    31712  0.016     8   41  22.6  -3.522e-12   3.452e+02
+ 2     331    13069  0.119    15   73  39.5  -1.138e-12   4.663e+02
+ 3      61     1695  0.456    16   55  27.8   1.276e+02   6.588e+02
+ 4      17      209  0.723     7   17  12.3   2.861e+02   2.255e+03
+ 5       1        1  1.000     1    1   1.0   2.694e+03   2.694e+03
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0 108000 x 1406    1  10   4.630e-03 9.867e-01 2.204e-01 1.000e+00
+ 1  1406 x 331     1   7   1.222e-01 1.000e+00 4.112e-01 1.000e+00
+ 2   331 x 61      1   8   3.129e-02 1.000e-00 8.836e-02 1.000e+00
+ 3    61 x 17      1   4   3.577e-03 5.876e-01 1.732e-02 1.000e+00
+ 4    17 x 1       1   1   1.356e-02 1.275e-01 1.356e-02 1.000e+00
+
+
+     Complexity:    grid = 1.016815
+                operator = 1.016744
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      6    6     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.710000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.340000 seconds
+  cpu MFLOPS      = 0.000000
+
+<b,b>: 1.000000e-00
+
+
+Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
+-----    ------------   ---------  ------------ 
+    1    3.701436e-02    0.037014    3.701436e-02
+    2    8.868555e-03    0.239598    8.868555e-03
+    3    2.170227e-03    0.244710    2.170227e-03
+    4    5.120917e-04    0.235962    5.120917e-04
+    5    1.274683e-04    0.248917    1.274683e-04
+    6    2.687161e-05    0.210810    2.687161e-05
+    7    5.878335e-06    0.218756    5.878335e-06
+    8    1.485841e-06    0.252766    1.485841e-06
+    9    3.358607e-07    0.226041    3.358607e-07
+   10    7.469049e-08    0.222385    7.469049e-08
+   11    1.543628e-08    0.206670    1.543628e-08
+   12    3.296248e-09    0.213539    3.296248e-09
+
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 1.820000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.910000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 12
+Final Relative Residual Norm = 3.296248e-09
+

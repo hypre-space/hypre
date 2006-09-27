@@ -39,11 +39,11 @@ mpirun -np 3 ./new_ij -rhsrand -n 15 30 10 -w 1.1 -owl 1.0 0 \
  > smoother.out.0
 
 mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -rlx 6 -owl -10 0 \
- > coarsening.out.1
+ > smoother.out.1
 
 mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -rlx_up 4 \
- > coarsening.out.2
+ > smoother.out.2
 
 mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -CF 0 \
- > coarsening.out.3
+ > smoother.out.3
 

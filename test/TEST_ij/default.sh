@@ -44,3 +44,10 @@ head default.testdata.tmp0 > default.testdata.temp
 diff default.testdata default.testdata.temp >&2
 
 rm -f default.testdata default.testdata.tmp0 default.testdata.temp
+
+#=============================================================================
+#  Concatenate all *.out.* files then compare with baseline case
+#=============================================================================
+
+cat default.out.* > default.out
+diff default.out default.saved >&2

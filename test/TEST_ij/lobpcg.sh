@@ -28,6 +28,7 @@
 
 
 #=============================================================================
-# ij_es: no test
+# Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
+cat lobpcg.out.* > lobpcg.out
+diff lobpcg.out lobpcg.saved >&2

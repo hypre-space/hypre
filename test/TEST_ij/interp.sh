@@ -28,6 +28,7 @@
 
 
 #=============================================================================
-# IJ: no test
+# Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
+cat interp.out.* > interp.out
+diff interp.out interp.saved >&2

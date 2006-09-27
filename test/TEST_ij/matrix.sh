@@ -26,7 +26,6 @@
 #EHEADER**********************************************************************
 
 
-
 #=============================================================================
 # IJ: tests different ways of generating IJMatrix diffs it against 1 proc case
 #=============================================================================
@@ -43,3 +42,9 @@ head matrix.testdata.tmp0 > matrix.testdata.temp
 diff matrix.testdata matrix.testdata.temp >&2
 
 rm -f matrix.testdata matrix.testdata.tmp0 matrix.testdata.temp
+
+#=============================================================================
+#  Concatenate *.out.* files then compare with baseline case
+#=============================================================================
+cat matrix.out.* > matrix.out
+diff matrix.out matrix.saved >&2

@@ -28,6 +28,8 @@
 
 
 #=============================================================================
-# IJ: no test
+# Concatenate all *.out.* files then compare with baseline case
 #=============================================================================
 
+cat coarsening.out.* > coarsening.out
+diff coarsening.out coarsening.saved >&2

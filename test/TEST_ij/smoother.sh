@@ -26,8 +26,8 @@
 #EHEADER**********************************************************************
 
 
-
 #=============================================================================
-# IJ: no test
+# Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
+cat smoother.out.* > smoother.out
+diff smoother.out smoother.saved >&2
