@@ -25,14 +25,8 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
-# sstruct: no test
+# Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
-#rm -f solvers.out.0 solvers.out.1 solvers.out.2
-#rm -f solvers.out.3 solvers.out.4 solvers.out.5
-#rm -f solvers.out.6 solvers.out.7 solvers.out.8
-#rm -f solvers.out.9 solvers.out.10 solvers.out.11
-#rm -f solvers.out.12 solvers.out.13 solvers.out.14
+cat solvers.out.* > solvers.out
+diff solvers.out solvers.saved >&2

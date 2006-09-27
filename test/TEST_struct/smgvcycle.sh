@@ -25,9 +25,8 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
-# struct: no test
+# Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
+cat smgvcycle.out.* > smgvcycle.out
+diff smgvcycle.out smgvcycle.saved >&2

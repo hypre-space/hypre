@@ -25,9 +25,8 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
-# struct: no test
+# Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
+cat pfmgtest1d.out.* > pfmgtest1d.out
+diff pfmgtest1d.out pfmgtest1d.saved >&2

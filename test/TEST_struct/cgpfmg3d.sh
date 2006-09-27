@@ -25,8 +25,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
 # struct: Test CG+PFMG with skip parallel and blocking by diffing against
 # base 3d case
@@ -38,3 +36,9 @@ tail -3 cgpfmg3d.out.1 > cgpfmg3d.testdata.temp
 diff cgpfmg3d.testdata cgpfmg3d.testdata.temp >&2
 
 rm -f cgpfmg3d.testdata cgpfmg3d.testdata.temp
+
+#=============================================================================
+# Concatenate *.out.* files then compare with baseline case
+#=============================================================================
+cat cgpfmg3d.out.* > cgpfmg3d.out
+diff cgpfmg3d.out cgpfmg3d.saved >&2

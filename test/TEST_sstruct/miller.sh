@@ -25,9 +25,8 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
-# sstruct: no test
+#  Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
+cat miller.out.* > miller.out
+diff miller.out miller.saved >&2

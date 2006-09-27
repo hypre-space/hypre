@@ -25,8 +25,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
 # struct: Test 1d run as 2d and 3d by diffing against each other.
 #=============================================================================
@@ -37,3 +35,9 @@ tail -3 smgbase1d.out.1 > smgbase1d.testdata.temp
 diff smgbase1d.testdata smgbase1d.testdata.temp  >&2
 
 rm -f smgbase1d.testdata smgbase1d.testdata.temp
+
+#=============================================================================
+# Concatenate *.out.* files then compare with baseline case
+#=============================================================================
+cat smgbase1d.out.* > smgbase1d.out
+diff smgbase1d.out smgbase1d.saved >&2

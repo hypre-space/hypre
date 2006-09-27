@@ -25,9 +25,8 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
-# struct: no test
+# Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
+cat smgtest1d.out.* > smgtest1d.out
+diff smgtest1d.out smgtest1d.saved >&2

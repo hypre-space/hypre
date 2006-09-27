@@ -25,9 +25,8 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
-# struct: no test
+# Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
+cat hybrid.out.* > hybrid.out
+diff hybrid.out hybrid.saved >&2

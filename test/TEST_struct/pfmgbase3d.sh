@@ -25,8 +25,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
 # struct: Test PFMG parallel and blocking by diffing against base 3d case
 #=============================================================================
@@ -55,3 +53,9 @@ tail -3 pfmgbase3d.out.7 > pfmgbase3d.testdata.temp
 diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
 rm -f pfmgbase3d.testdata pfmgbase3d.testdata.temp
+
+#=============================================================================
+# Concatenate *.out.* files then compare with baseline case
+#=============================================================================
+cat pfmgbase3d.out.* > pfmgbase3d.out
+diff pfmgbase3d.out pfmgbase3d.saved >&2

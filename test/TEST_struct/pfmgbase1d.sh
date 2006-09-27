@@ -25,8 +25,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
 # struct: Test PFMG 1d run as 2d and 3d by diffing against each other.
 #=============================================================================
@@ -37,3 +35,9 @@ tail -3 pfmgbase1d.out.1 > pfmgbase1d.testdata.temp
 diff pfmgbase1d.testdata pfmgbase1d.testdata.temp  >&2
 
 rm -f pfmgbase1d.testdata pfmgbase1d.testdata.temp
+
+#=============================================================================
+# Concatenate *.out.* files then compare with baseline case
+#=============================================================================
+cat pfmgbase1d.out.* > pfmgbase1d.out
+diff pfmgbase1d.out pfmgbase1d.saved >&2

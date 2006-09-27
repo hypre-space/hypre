@@ -25,9 +25,8 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
-# struct: no test
+#  Concatenate *.out.* files then compare with baseline case
 #=============================================================================
-
+cat pfmgvcycle.out.* > pfmgvcycle.out
+diff pfmgvcycle.out pfmgvcycle.saved >&2

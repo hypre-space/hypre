@@ -25,8 +25,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
 # struct: Test PFMG 1d solve of the same problem in different orientations
 #=============================================================================
@@ -40,3 +38,9 @@ tail -3 pfmgorient.out.2 > pfmgorient.testdata.temp
 diff pfmgorient.testdata pfmgorient.testdata.temp  >&2
 
 rm -f pfmgorient.testdata pfmgorient.testdata.temp
+
+#=============================================================================
+# Concatenate *.out.* files then compare with baseline case
+#=============================================================================
+cat pfmgorient.out.* > pfmgorient.out
+diff pfmgorient.out pfmgorient.saved >&2

@@ -25,8 +25,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
 # struct: Test Periodic SMG base 3d case (periodic in x), test parallel and blocking,
 # and run a full periodic case. Note: driver sets up right hand size for
@@ -41,3 +39,9 @@ tail -3 psmgtest3d.out.1 > psmgtest3d.testdata.temp
 diff psmgtest3d.testdata psmgtest3d.testdata.temp >&2
 
 rm -f psmgtest3d.testdata psmgtest3d.testdata.temp
+
+#=============================================================================
+# Concatenate *.out.* files then compare with baseline case
+#=============================================================================
+cat psmgtest3d.out.* > psmgtest3d.out
+diff psmgtest3d.out psmgtest3d.saved >&2

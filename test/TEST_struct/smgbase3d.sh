@@ -25,8 +25,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base 3d case
 #=============================================================================
@@ -55,3 +53,9 @@ tail -3 smgbase3d.out.7 > smgbase3d.testdata.temp
 diff smgbase3d.testdata smgbase3d.testdata.temp >&2
 
 rm -f smgbase3d.testdata smgbase3d.testdata.temp
+
+#=============================================================================
+# Concatenate *.out.* files then compare with baseline case
+#=============================================================================
+cat smgbase3d.out.* > smgbase3d.out
+diff smgbase3d.out smgbase3d.saved >&2

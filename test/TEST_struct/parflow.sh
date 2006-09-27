@@ -25,8 +25,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base 3d case
 #=============================================================================
@@ -52,3 +50,9 @@ tail -3 parflow.out.5 > parflow.testdata.temp
 diff parflow.testdata parflow.testdata.temp >&2
 
 rm -f parflow.testdata parflow.testdata.temp
+
+#=============================================================================
+# Concatenate *.out.* files then compare with baseline case
+#=============================================================================
+cat parflow.out.* > parflow.out
+diff parflow.out parflow.saved >&2

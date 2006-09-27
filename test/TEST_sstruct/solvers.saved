@@ -1,0 +1,1896 @@
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.320000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.190000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.990000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.730000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 24
+Final Relative Residual Norm = 6.429522e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.180000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.180000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 5.916734e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.070000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.060000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 30
+Final Relative Residual Norm = 9.036190e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.290000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.200000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.960000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.790000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 24
+Final Relative Residual Norm = 6.429522e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.300000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.250000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.940000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.830000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.280000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.150000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 3.4627908268321410e+00
+Iteration 1 	bsize 1 	maxres 3.8866288257403112e+00
+Iteration 2 	bsize 1 	maxres 2.5465935946125668e+00
+Iteration 3 	bsize 1 	maxres 1.8114197103224852e+00
+Iteration 4 	bsize 1 	maxres 1.3578447542737884e+00
+Iteration 5 	bsize 1 	maxres 9.6986876151408608e-01
+Iteration 6 	bsize 1 	maxres 7.8821699171783477e-01
+Iteration 7 	bsize 1 	maxres 6.2308623815282438e-01
+Iteration 8 	bsize 1 	maxres 5.1769730766139221e-01
+Iteration 9 	bsize 1 	maxres 4.2801564049255497e-01
+Iteration 10 	bsize 1 	maxres 3.4437436647622716e-01
+Iteration 11 	bsize 1 	maxres 2.7107729631909505e-01
+Iteration 12 	bsize 1 	maxres 1.9751645336295692e-01
+Iteration 13 	bsize 1 	maxres 1.4741656398622355e-01
+Iteration 14 	bsize 1 	maxres 1.1175448838138127e-01
+Iteration 15 	bsize 1 	maxres 8.6607305564476836e-02
+Iteration 16 	bsize 1 	maxres 6.5092185212914877e-02
+Iteration 17 	bsize 1 	maxres 4.8998177577332477e-02
+Iteration 18 	bsize 1 	maxres 3.7516254630135096e-02
+Iteration 19 	bsize 1 	maxres 3.1009084925798958e-02
+Iteration 20 	bsize 1 	maxres 2.5456974793090073e-02
+Iteration 21 	bsize 1 	maxres 2.0795638949662843e-02
+Iteration 22 	bsize 1 	maxres 1.7267785677601382e-02
+Iteration 23 	bsize 1 	maxres 1.5419270928792797e-02
+Iteration 24 	bsize 1 	maxres 1.5228004605979993e-02
+Iteration 25 	bsize 1 	maxres 1.6597530070956303e-02
+Iteration 26 	bsize 1 	maxres 1.9742054012186042e-02
+Iteration 27 	bsize 1 	maxres 2.4791954416572812e-02
+Iteration 28 	bsize 1 	maxres 3.3486508294961567e-02
+Iteration 29 	bsize 1 	maxres 4.3763767006613809e-02
+Iteration 30 	bsize 1 	maxres 5.8950782561026913e-02
+Iteration 31 	bsize 1 	maxres 8.2375402688356344e-02
+Iteration 32 	bsize 1 	maxres 1.0465023798309595e-01
+Iteration 33 	bsize 1 	maxres 1.0069848436127816e-01
+Iteration 34 	bsize 1 	maxres 8.2180965121515612e-02
+Iteration 35 	bsize 1 	maxres 6.5562977029213612e-02
+Iteration 36 	bsize 1 	maxres 5.1438659473077207e-02
+Iteration 37 	bsize 1 	maxres 4.2415989720325800e-02
+Iteration 38 	bsize 1 	maxres 3.5744149132089960e-02
+Iteration 39 	bsize 1 	maxres 2.9835951316082944e-02
+Iteration 40 	bsize 1 	maxres 2.6501125563614610e-02
+Iteration 41 	bsize 1 	maxres 2.4699196959062187e-02
+Iteration 42 	bsize 1 	maxres 2.3849994451237269e-02
+Iteration 43 	bsize 1 	maxres 2.3360828842235580e-02
+Iteration 44 	bsize 1 	maxres 2.1769419420987909e-02
+Iteration 45 	bsize 1 	maxres 1.9396561793730928e-02
+Iteration 46 	bsize 1 	maxres 1.6603909232959378e-02
+Iteration 47 	bsize 1 	maxres 1.4021513489102605e-02
+Iteration 48 	bsize 1 	maxres 1.2898681657560404e-02
+Iteration 49 	bsize 1 	maxres 1.2720848645880453e-02
+Iteration 50 	bsize 1 	maxres 1.2618897270975177e-02
+Iteration 51 	bsize 1 	maxres 1.2631493927672755e-02
+Iteration 52 	bsize 1 	maxres 1.3000090668819837e-02
+Iteration 53 	bsize 1 	maxres 1.4707682594747716e-02
+Iteration 54 	bsize 1 	maxres 1.6720570891885680e-02
+Iteration 55 	bsize 1 	maxres 1.9593375793038499e-02
+Iteration 56 	bsize 1 	maxres 2.3436090144593257e-02
+Iteration 57 	bsize 1 	maxres 2.7441125191155335e-02
+Iteration 58 	bsize 1 	maxres 2.9355985802121665e-02
+Iteration 59 	bsize 1 	maxres 3.0074971262111838e-02
+Iteration 60 	bsize 1 	maxres 2.7946176646429292e-02
+Iteration 61 	bsize 1 	maxres 2.4599716257249382e-02
+Iteration 62 	bsize 1 	maxres 2.0947438573504638e-02
+Iteration 63 	bsize 1 	maxres 1.8429288713339879e-02
+Iteration 64 	bsize 1 	maxres 1.5304941429158553e-02
+Iteration 65 	bsize 1 	maxres 1.3110159312892968e-02
+Iteration 66 	bsize 1 	maxres 1.1385375859627182e-02
+Iteration 67 	bsize 1 	maxres 9.5505251748589474e-03
+Iteration 68 	bsize 1 	maxres 8.5674200702203721e-03
+Iteration 69 	bsize 1 	maxres 7.9184513602821131e-03
+Iteration 70 	bsize 1 	maxres 7.5276431208315753e-03
+Iteration 71 	bsize 1 	maxres 6.9901211422057066e-03
+Iteration 72 	bsize 1 	maxres 6.5549399296067779e-03
+Iteration 73 	bsize 1 	maxres 6.0349848071485747e-03
+Iteration 74 	bsize 1 	maxres 5.7494555919274017e-03
+Iteration 75 	bsize 1 	maxres 5.5075596967345880e-03
+Iteration 76 	bsize 1 	maxres 5.2038666115168629e-03
+Iteration 77 	bsize 1 	maxres 4.7261842349529239e-03
+Iteration 78 	bsize 1 	maxres 4.3503432542410419e-03
+Iteration 79 	bsize 1 	maxres 4.2253451071857968e-03
+Iteration 80 	bsize 1 	maxres 4.5940930774135205e-03
+Iteration 81 	bsize 1 	maxres 5.3362790091294222e-03
+Iteration 82 	bsize 1 	maxres 6.4040141260930123e-03
+Iteration 83 	bsize 1 	maxres 7.6068427933131018e-03
+Iteration 84 	bsize 1 	maxres 8.7072041581802082e-03
+Iteration 85 	bsize 1 	maxres 9.2402894271873398e-03
+Iteration 86 	bsize 1 	maxres 9.6826635755778590e-03
+Iteration 87 	bsize 1 	maxres 9.6979217670583144e-03
+Iteration 88 	bsize 1 	maxres 8.8631078913641217e-03
+Iteration 89 	bsize 1 	maxres 7.6978187190517196e-03
+Iteration 90 	bsize 1 	maxres 6.6146435779169234e-03
+Iteration 91 	bsize 1 	maxres 5.5334246383352374e-03
+Iteration 92 	bsize 1 	maxres 4.8692295733201423e-03
+Iteration 93 	bsize 1 	maxres 4.3989397492963517e-03
+Iteration 94 	bsize 1 	maxres 3.8372626512588586e-03
+Iteration 95 	bsize 1 	maxres 3.3949928516179249e-03
+Iteration 96 	bsize 1 	maxres 3.1099447747994437e-03
+Iteration 97 	bsize 1 	maxres 2.8532287225371570e-03
+Iteration 98 	bsize 1 	maxres 2.7536365391053154e-03
+Iteration 99 	bsize 1 	maxres 2.6764814117199026e-03
+Iteration 100 	bsize 1 	maxres 2.4075820241995531e-03
+
+Eigenvalue lambda 1.3488386079097914e+00
+Residual 2.4075820241995531e-03
+
+100 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 4.100000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 3.460000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.310000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.170000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.970000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.820000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.290000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.190000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 5
+
+No constraints
+
+
+Initial Max. Residual 3.6939063646890773e+00
+Iteration 1 	bsize 5 	maxres 3.8918417939488403e+00
+Iteration 2 	bsize 5 	maxres 2.4937359691342378e+00
+Iteration 3 	bsize 5 	maxres 1.7176945926151583e+00
+Iteration 4 	bsize 5 	maxres 1.4098149730649590e+00
+Iteration 5 	bsize 5 	maxres 1.1223753991681360e+00
+Iteration 6 	bsize 5 	maxres 9.9812975443856189e-01
+Iteration 7 	bsize 5 	maxres 8.4593859506988323e-01
+Iteration 8 	bsize 5 	maxres 6.7558506665458806e-01
+Iteration 9 	bsize 5 	maxres 6.3647481088267477e-01
+Iteration 10 	bsize 5 	maxres 5.2210608689938476e-01
+Iteration 11 	bsize 5 	maxres 5.4287825844390303e-01
+Iteration 12 	bsize 5 	maxres 4.6446356772555775e-01
+Iteration 13 	bsize 5 	maxres 4.3108821550068527e-01
+Iteration 14 	bsize 5 	maxres 3.4714492207738412e-01
+Iteration 15 	bsize 5 	maxres 2.5014576413356399e-01
+Iteration 16 	bsize 5 	maxres 2.1823077590014228e-01
+Iteration 17 	bsize 5 	maxres 2.0879194930593153e-01
+Iteration 18 	bsize 5 	maxres 1.9885245140947175e-01
+Iteration 19 	bsize 5 	maxres 1.9716278628430256e-01
+Iteration 20 	bsize 5 	maxres 1.9734613952859256e-01
+Iteration 21 	bsize 5 	maxres 2.1872885840653133e-01
+Iteration 22 	bsize 5 	maxres 2.2479004176285605e-01
+Iteration 23 	bsize 5 	maxres 2.5605295655389920e-01
+Iteration 24 	bsize 5 	maxres 3.0204279910850296e-01
+Iteration 25 	bsize 5 	maxres 3.6011302720823740e-01
+Iteration 26 	bsize 5 	maxres 4.1450838606547336e-01
+Iteration 27 	bsize 5 	maxres 4.0160048328199688e-01
+Iteration 28 	bsize 5 	maxres 3.4423818758080421e-01
+Iteration 29 	bsize 5 	maxres 2.5693241903575448e-01
+Iteration 30 	bsize 5 	maxres 1.9288246927858763e-01
+Iteration 31 	bsize 5 	maxres 1.4490286850928588e-01
+Iteration 32 	bsize 5 	maxres 1.0893578020610600e-01
+Iteration 33 	bsize 5 	maxres 8.1773088516799930e-02
+Iteration 34 	bsize 5 	maxres 6.0583364222531480e-02
+Iteration 35 	bsize 5 	maxres 4.5902902428832687e-02
+Iteration 36 	bsize 5 	maxres 3.4894294111791534e-02
+Iteration 37 	bsize 5 	maxres 2.6345624305096717e-02
+Iteration 38 	bsize 5 	maxres 1.9869899356530506e-02
+Iteration 39 	bsize 5 	maxres 1.5222732044680796e-02
+Iteration 40 	bsize 5 	maxres 1.2143083513118651e-02
+Iteration 41 	bsize 5 	maxres 1.0286360987662271e-02
+Iteration 42 	bsize 5 	maxres 9.1382002728996430e-03
+Iteration 43 	bsize 5 	maxres 7.6170836970591736e-03
+Iteration 44 	bsize 5 	maxres 6.1999997333540861e-03
+Iteration 45 	bsize 5 	maxres 5.3377233877081156e-03
+Iteration 46 	bsize 5 	maxres 4.7552181305908752e-03
+Iteration 47 	bsize 5 	maxres 4.2851543575509656e-03
+Iteration 48 	bsize 5 	maxres 3.5978760270306991e-03
+Iteration 49 	bsize 5 	maxres 2.9213037324937363e-03
+Iteration 50 	bsize 5 	maxres 2.4635518972129116e-03
+Iteration 51 	bsize 5 	maxres 2.1700176700513826e-03
+Iteration 52 	bsize 5 	maxres 1.8556191240537926e-03
+Iteration 53 	bsize 5 	maxres 1.6200190069413647e-03
+Iteration 54 	bsize 5 	maxres 1.5028483616757063e-03
+Iteration 55 	bsize 5 	maxres 1.4737773183539514e-03
+Iteration 56 	bsize 5 	maxres 1.4311403234569626e-03
+Iteration 57 	bsize 5 	maxres 1.3581234900061916e-03
+Iteration 58 	bsize 5 	maxres 1.2504762505199303e-03
+Iteration 59 	bsize 5 	maxres 1.2387012854195890e-03
+Iteration 60 	bsize 5 	maxres 1.3372370421232155e-03
+Iteration 61 	bsize 5 	maxres 1.4942986758228602e-03
+Iteration 62 	bsize 5 	maxres 1.5555586090075485e-03
+Iteration 63 	bsize 5 	maxres 1.5451752520179800e-03
+Iteration 64 	bsize 5 	maxres 1.6269418913422054e-03
+Iteration 65 	bsize 5 	maxres 1.7510331183281916e-03
+Iteration 66 	bsize 5 	maxres 1.7983581727010756e-03
+Iteration 67 	bsize 5 	maxres 1.6845566451254902e-03
+Iteration 68 	bsize 5 	maxres 1.5021595187794737e-03
+Iteration 69 	bsize 5 	maxres 1.3261126072662975e-03
+Iteration 70 	bsize 4 	maxres 1.1738053710161403e-03
+Iteration 71 	bsize 4 	maxres 1.0240705804855283e-03
+Iteration 72 	bsize 4 	maxres 8.8473692255952802e-04
+Iteration 73 	bsize 4 	maxres 7.5056432818127188e-04
+Iteration 74 	bsize 4 	maxres 6.2837060838954420e-04
+Iteration 75 	bsize 4 	maxres 5.5666799774655427e-04
+Iteration 76 	bsize 4 	maxres 5.2322486932364061e-04
+Iteration 77 	bsize 4 	maxres 4.4642237312566451e-04
+Iteration 78 	bsize 4 	maxres 3.6820743085794910e-04
+Iteration 79 	bsize 4 	maxres 3.1668652334991998e-04
+Iteration 80 	bsize 4 	maxres 2.8344188420636503e-04
+Iteration 81 	bsize 4 	maxres 2.3829429581734523e-04
+Iteration 82 	bsize 4 	maxres 1.9313432933629256e-04
+Iteration 83 	bsize 4 	maxres 1.6035434824914637e-04
+Iteration 84 	bsize 4 	maxres 1.3583137360794896e-04
+Iteration 85 	bsize 4 	maxres 1.1849663760275956e-04
+Iteration 86 	bsize 4 	maxres 1.0819683604399309e-04
+Iteration 87 	bsize 4 	maxres 9.8827879864851802e-05
+Iteration 88 	bsize 4 	maxres 7.9038554877915409e-05
+Iteration 89 	bsize 4 	maxres 6.4949800465571774e-05
+Iteration 90 	bsize 4 	maxres 5.4674318015347602e-05
+Iteration 91 	bsize 4 	maxres 5.0968475737874466e-05
+Iteration 92 	bsize 4 	maxres 5.0714046955393318e-05
+Iteration 93 	bsize 4 	maxres 5.0762613572843825e-05
+Iteration 94 	bsize 4 	maxres 5.6758235074123119e-05
+Iteration 95 	bsize 4 	maxres 6.1579801684389230e-05
+Iteration 96 	bsize 4 	maxres 6.7956128750098444e-05
+Iteration 97 	bsize 4 	maxres 5.9776902403476601e-05
+Iteration 98 	bsize 4 	maxres 5.4022754956039807e-05
+Iteration 99 	bsize 4 	maxres 6.1722327845491074e-05
+Iteration 100 	bsize 4 	maxres 6.7125924602667912e-05
+
+Eigenvalue lambda 1.3488083914439633e+00
+Eigenvalue lambda 1.3656084602557490e+00
+Eigenvalue lambda 1.4790858106478595e+00
+Eigenvalue lambda 1.4958982954381896e+00
+Eigenvalue lambda 1.6942005230866419e+00
+Residual 5.0101586755216978e-06
+Residual 9.7458842616992000e-07
+Residual 2.0655133857096798e-05
+Residual 1.8985498544404915e-05
+Residual 6.7125924602667912e-05
+
+100 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 23.090000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 18.320000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    9082   123642  0.001     5   15  13.6   1.000e+00   1.100e+01
+ 1    2186    74952  0.016     8   53  34.3   2.041e+00   1.446e+01
+ 2     665    59707  0.135    15  179  89.8   4.102e+00   2.021e+01
+ 3     259    31035  0.463    21  212  119.8   8.720e+00   1.729e+01
+ 4      59     2759  0.793    20   59  46.8   1.127e+01   1.667e+01
+ 5       3        9  1.000     3    3   3.0   1.445e+01   1.535e+01
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  9082 x 2186    1   8   6.667e-02 3.333e-01 2.667e-01 1.000e+00
+ 1  2186 x 665     0  16   1.226e-02 3.793e-01 0.000e+00 1.000e+00
+ 2   665 x 259     0  31   2.921e-03 2.643e-01 0.000e+00 1.000e+00
+ 3   259 x 59      0  12   2.931e-03 2.734e-01 0.000e+00 1.000e+00
+ 4    59 x 3       0   2   2.250e-02 1.755e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.349262
+                operator = 2.362498
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.170000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.120000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 2.292585e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.190000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.140000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 5.916734e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.180000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.130000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 3.4627908268321410e+00
+Iteration 1 	bsize 1 	maxres 3.9998246063052201e+00
+Iteration 2 	bsize 1 	maxres 2.7847730756818381e+00
+Iteration 3 	bsize 1 	maxres 1.9275384774816193e+00
+Iteration 4 	bsize 1 	maxres 1.3503065343369105e+00
+Iteration 5 	bsize 1 	maxres 1.0548498661130059e+00
+Iteration 6 	bsize 1 	maxres 8.1660942065876263e-01
+Iteration 7 	bsize 1 	maxres 6.4374521212594860e-01
+Iteration 8 	bsize 1 	maxres 5.3553515554181386e-01
+Iteration 9 	bsize 1 	maxres 4.4312617026270806e-01
+Iteration 10 	bsize 1 	maxres 3.7164905298688716e-01
+Iteration 11 	bsize 1 	maxres 2.9157287354161809e-01
+Iteration 12 	bsize 1 	maxres 2.1778374790651150e-01
+Iteration 13 	bsize 1 	maxres 1.6329954222006415e-01
+Iteration 14 	bsize 1 	maxres 1.2394685172837935e-01
+Iteration 15 	bsize 1 	maxres 9.6533523697917928e-02
+Iteration 16 	bsize 1 	maxres 7.3119029570001715e-02
+Iteration 17 	bsize 1 	maxres 5.4091678373539814e-02
+Iteration 18 	bsize 1 	maxres 4.2330144850527697e-02
+Iteration 19 	bsize 1 	maxres 3.3760006781883567e-02
+Iteration 20 	bsize 1 	maxres 2.7984664342993303e-02
+Iteration 21 	bsize 1 	maxres 2.2613428919673256e-02
+Iteration 22 	bsize 1 	maxres 1.8492917646500955e-02
+Iteration 23 	bsize 1 	maxres 1.5511289045725088e-02
+Iteration 24 	bsize 1 	maxres 1.4882176526452576e-02
+Iteration 25 	bsize 1 	maxres 1.4956115839339850e-02
+Iteration 26 	bsize 1 	maxres 1.6948476948017401e-02
+Iteration 27 	bsize 1 	maxres 2.0733821504624359e-02
+Iteration 28 	bsize 1 	maxres 2.6548194518106163e-02
+Iteration 29 	bsize 1 	maxres 3.3217493740804259e-02
+Iteration 30 	bsize 1 	maxres 4.3540007896763676e-02
+Iteration 31 	bsize 1 	maxres 5.8152595546525021e-02
+Iteration 32 	bsize 1 	maxres 7.8511461647579037e-02
+Iteration 33 	bsize 1 	maxres 1.0155118461602124e-01
+Iteration 34 	bsize 1 	maxres 9.6258373053392840e-02
+Iteration 35 	bsize 1 	maxres 7.7537085175703374e-02
+Iteration 36 	bsize 1 	maxres 6.3092281889753354e-02
+Iteration 37 	bsize 1 	maxres 5.2303775439758060e-02
+Iteration 38 	bsize 1 	maxres 4.4445516879316853e-02
+Iteration 39 	bsize 1 	maxres 3.7664994937610420e-02
+Iteration 40 	bsize 1 	maxres 3.3446183192505620e-02
+Iteration 41 	bsize 1 	maxres 3.0908448432373354e-02
+Iteration 42 	bsize 1 	maxres 2.9316583649088970e-02
+Iteration 43 	bsize 1 	maxres 2.7777614068557159e-02
+Iteration 44 	bsize 1 	maxres 2.6184797193229945e-02
+Iteration 45 	bsize 1 	maxres 2.2879811790118144e-02
+Iteration 46 	bsize 1 	maxres 1.8410834294492331e-02
+Iteration 47 	bsize 1 	maxres 1.5272679675736875e-02
+Iteration 48 	bsize 1 	maxres 1.3637879755326926e-02
+Iteration 49 	bsize 1 	maxres 1.2874060490181147e-02
+Iteration 50 	bsize 1 	maxres 1.2114121355325826e-02
+Iteration 51 	bsize 1 	maxres 1.2078543968489664e-02
+Iteration 52 	bsize 1 	maxres 1.2446272249610424e-02
+Iteration 53 	bsize 1 	maxres 1.3244952508721651e-02
+Iteration 54 	bsize 1 	maxres 1.5130605135161948e-02
+Iteration 55 	bsize 1 	maxres 1.7826766758097523e-02
+Iteration 56 	bsize 1 	maxres 2.0922763928559476e-02
+Iteration 57 	bsize 1 	maxres 2.4596722643526147e-02
+Iteration 58 	bsize 1 	maxres 2.7529219948578099e-02
+Iteration 59 	bsize 1 	maxres 2.8801242674021441e-02
+Iteration 60 	bsize 1 	maxres 2.9026639723553356e-02
+Iteration 61 	bsize 1 	maxres 2.7173174754888323e-02
+Iteration 62 	bsize 1 	maxres 2.4580848998262794e-02
+Iteration 63 	bsize 1 	maxres 2.2316314595788360e-02
+Iteration 64 	bsize 1 	maxres 1.9357939409267253e-02
+Iteration 65 	bsize 1 	maxres 1.7115850750291775e-02
+Iteration 66 	bsize 1 	maxres 1.5194944245233844e-02
+Iteration 67 	bsize 1 	maxres 1.3799517094996421e-02
+Iteration 68 	bsize 1 	maxres 1.2700084544044445e-02
+Iteration 69 	bsize 1 	maxres 1.1629432633806303e-02
+Iteration 70 	bsize 1 	maxres 1.0432927301569219e-02
+Iteration 71 	bsize 1 	maxres 9.2653905391224360e-03
+Iteration 72 	bsize 1 	maxres 7.9154921897214865e-03
+Iteration 73 	bsize 1 	maxres 6.7557692139795641e-03
+Iteration 74 	bsize 1 	maxres 6.2106893337690707e-03
+Iteration 75 	bsize 1 	maxres 5.7875720674941469e-03
+Iteration 76 	bsize 1 	maxres 5.2498686746528453e-03
+Iteration 77 	bsize 1 	maxres 4.9834481134706579e-03
+Iteration 78 	bsize 1 	maxres 4.4849891559847008e-03
+Iteration 79 	bsize 1 	maxres 4.3490103378588107e-03
+Iteration 80 	bsize 1 	maxres 4.5618093551797346e-03
+Iteration 81 	bsize 1 	maxres 5.0275778319307605e-03
+Iteration 82 	bsize 1 	maxres 5.9705317943031114e-03
+Iteration 83 	bsize 1 	maxres 7.0429886032904714e-03
+Iteration 84 	bsize 1 	maxres 7.8323784164602527e-03
+Iteration 85 	bsize 1 	maxres 8.5461103125223838e-03
+Iteration 86 	bsize 1 	maxres 9.3163667008500338e-03
+Iteration 87 	bsize 1 	maxres 9.4191394800538890e-03
+Iteration 88 	bsize 1 	maxres 9.1364642188938618e-03
+Iteration 89 	bsize 1 	maxres 8.2906458562034043e-03
+Iteration 90 	bsize 1 	maxres 7.5474037920206143e-03
+Iteration 91 	bsize 1 	maxres 6.9780172354349931e-03
+Iteration 92 	bsize 1 	maxres 6.7598986624250994e-03
+Iteration 93 	bsize 1 	maxres 6.7289561626340923e-03
+Iteration 94 	bsize 1 	maxres 6.3241832964087636e-03
+Iteration 95 	bsize 1 	maxres 5.6958047304773354e-03
+Iteration 96 	bsize 1 	maxres 5.0806764784800951e-03
+Iteration 97 	bsize 1 	maxres 4.6110009823362701e-03
+Iteration 98 	bsize 1 	maxres 4.3109413715201094e-03
+Iteration 99 	bsize 1 	maxres 3.7390078348650650e-03
+Iteration 100 	bsize 1 	maxres 3.2121912605971420e-03
+
+Eigenvalue lambda 1.3488407179245512e+00
+Residual 3.2121912605971420e-03
+
+100 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.950000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.660000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.180000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.120000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 5
+
+No constraints
+
+
+Initial Max. Residual 3.6939063646890773e+00
+Iteration 1 	bsize 5 	maxres 3.9894600039037420e+00
+Iteration 2 	bsize 5 	maxres 2.7816286739916931e+00
+Iteration 3 	bsize 5 	maxres 1.8370444723473021e+00
+Iteration 4 	bsize 5 	maxres 1.3614973219096034e+00
+Iteration 5 	bsize 5 	maxres 1.1698228693316866e+00
+Iteration 6 	bsize 5 	maxres 9.9994721248567153e-01
+Iteration 7 	bsize 5 	maxres 8.1044290131098340e-01
+Iteration 8 	bsize 5 	maxres 7.2415621966861676e-01
+Iteration 9 	bsize 5 	maxres 6.3447237855379579e-01
+Iteration 10 	bsize 5 	maxres 5.7243798780495980e-01
+Iteration 11 	bsize 5 	maxres 5.2899309586772714e-01
+Iteration 12 	bsize 5 	maxres 4.9744139862106557e-01
+Iteration 13 	bsize 5 	maxres 4.4177484509124726e-01
+Iteration 14 	bsize 5 	maxres 3.7990269675234034e-01
+Iteration 15 	bsize 5 	maxres 2.8668153380701505e-01
+Iteration 16 	bsize 5 	maxres 2.1521142539861235e-01
+Iteration 17 	bsize 5 	maxres 2.0340598603279972e-01
+Iteration 18 	bsize 5 	maxres 1.9759134023553845e-01
+Iteration 19 	bsize 5 	maxres 1.8796903922466401e-01
+Iteration 20 	bsize 5 	maxres 1.8446755357338041e-01
+Iteration 21 	bsize 5 	maxres 1.9299376581295816e-01
+Iteration 22 	bsize 5 	maxres 2.1130331847891712e-01
+Iteration 23 	bsize 5 	maxres 2.1075760064597715e-01
+Iteration 24 	bsize 5 	maxres 2.5986433710975609e-01
+Iteration 25 	bsize 5 	maxres 3.4271898859580280e-01
+Iteration 26 	bsize 5 	maxres 4.2429275229897728e-01
+Iteration 27 	bsize 5 	maxres 4.3612224287455220e-01
+Iteration 28 	bsize 5 	maxres 3.6444599612180212e-01
+Iteration 29 	bsize 5 	maxres 2.7622590057341467e-01
+Iteration 30 	bsize 5 	maxres 2.0043628826093385e-01
+Iteration 31 	bsize 5 	maxres 1.5120886073100606e-01
+Iteration 32 	bsize 5 	maxres 1.1276495120590842e-01
+Iteration 33 	bsize 5 	maxres 8.4344404592050504e-02
+Iteration 34 	bsize 5 	maxres 6.4205950042175067e-02
+Iteration 35 	bsize 5 	maxres 4.8589607690437513e-02
+Iteration 36 	bsize 5 	maxres 3.6589536789107778e-02
+Iteration 37 	bsize 5 	maxres 2.8162210313463904e-02
+Iteration 38 	bsize 5 	maxres 2.0643090061810820e-02
+Iteration 39 	bsize 5 	maxres 1.5774682698615435e-02
+Iteration 40 	bsize 5 	maxres 1.2234891078087118e-02
+Iteration 41 	bsize 5 	maxres 1.0556744897818287e-02
+Iteration 42 	bsize 5 	maxres 9.2855051267024553e-03
+Iteration 43 	bsize 5 	maxres 7.6300942706804082e-03
+Iteration 44 	bsize 5 	maxres 6.3718173875716641e-03
+Iteration 45 	bsize 5 	maxres 5.5261698938895553e-03
+Iteration 46 	bsize 5 	maxres 4.7936566345701433e-03
+Iteration 47 	bsize 5 	maxres 4.0418078703950222e-03
+Iteration 48 	bsize 5 	maxres 3.1779552093697512e-03
+Iteration 49 	bsize 5 	maxres 2.5103760327800681e-03
+Iteration 50 	bsize 5 	maxres 2.1219328117868834e-03
+Iteration 51 	bsize 5 	maxres 1.8017604743966508e-03
+Iteration 52 	bsize 5 	maxres 1.5179526255876480e-03
+Iteration 53 	bsize 5 	maxres 1.4497225340940067e-03
+Iteration 54 	bsize 5 	maxres 1.4652518684020821e-03
+Iteration 55 	bsize 5 	maxres 1.5112838360805418e-03
+Iteration 56 	bsize 5 	maxres 1.5585251559212328e-03
+Iteration 57 	bsize 5 	maxres 1.5289250764314078e-03
+Iteration 58 	bsize 5 	maxres 1.5136423542258435e-03
+Iteration 59 	bsize 4 	maxres 1.5348398293771864e-03
+Iteration 60 	bsize 4 	maxres 1.6341605102736295e-03
+Iteration 61 	bsize 4 	maxres 1.6841743801624864e-03
+Iteration 62 	bsize 3 	maxres 1.6210339281221950e-03
+Iteration 63 	bsize 3 	maxres 1.5895706282682616e-03
+Iteration 64 	bsize 3 	maxres 1.5922353353304273e-03
+Iteration 65 	bsize 3 	maxres 1.5740024506322140e-03
+Iteration 66 	bsize 3 	maxres 1.4821156783387419e-03
+Iteration 67 	bsize 3 	maxres 1.3726704340381675e-03
+Iteration 68 	bsize 3 	maxres 1.2412994304491806e-03
+Iteration 69 	bsize 3 	maxres 1.0847866802816840e-03
+Iteration 70 	bsize 3 	maxres 9.2862836180732480e-04
+Iteration 71 	bsize 3 	maxres 7.9868711244507904e-04
+Iteration 72 	bsize 3 	maxres 6.8285555394662187e-04
+Iteration 73 	bsize 3 	maxres 5.7540041962456513e-04
+Iteration 74 	bsize 3 	maxres 4.9240249120495775e-04
+Iteration 75 	bsize 3 	maxres 4.2397819963153102e-04
+Iteration 76 	bsize 3 	maxres 3.5646904107805317e-04
+Iteration 77 	bsize 3 	maxres 2.9926108322726719e-04
+Iteration 78 	bsize 3 	maxres 2.4004574347274407e-04
+Iteration 79 	bsize 3 	maxres 2.0799925258335733e-04
+Iteration 80 	bsize 3 	maxres 1.8013468712954134e-04
+Iteration 81 	bsize 2 	maxres 1.5347453385480378e-04
+Iteration 82 	bsize 2 	maxres 1.2959803992830451e-04
+Iteration 83 	bsize 2 	maxres 1.0821056048859576e-04
+Iteration 84 	bsize 2 	maxres 8.9277748917220210e-05
+Iteration 85 	bsize 1 	maxres 7.6836592435397839e-05
+Iteration 86 	bsize 1 	maxres 6.9261085132820051e-05
+Iteration 87 	bsize 1 	maxres 6.3266978689856262e-05
+Iteration 88 	bsize 1 	maxres 5.9191233741244861e-05
+Iteration 89 	bsize 1 	maxres 5.5358698363081225e-05
+Iteration 90 	bsize 1 	maxres 5.3372440611527735e-05
+Iteration 91 	bsize 1 	maxres 5.2455131171745990e-05
+Iteration 92 	bsize 1 	maxres 5.1027256065957139e-05
+Iteration 93 	bsize 1 	maxres 4.7195487197599902e-05
+Iteration 94 	bsize 1 	maxres 4.3890621861811463e-05
+Iteration 95 	bsize 1 	maxres 4.1854391785139781e-05
+Iteration 96 	bsize 1 	maxres 4.0630942959222420e-05
+Iteration 97 	bsize 1 	maxres 3.9895597015176204e-05
+Iteration 98 	bsize 1 	maxres 4.1008939742411822e-05
+Iteration 99 	bsize 1 	maxres 4.3135315655380977e-05
+Iteration 100 	bsize 1 	maxres 4.6788135409589865e-05
+
+Eigenvalue lambda 1.3488084825070570e+00
+Eigenvalue lambda 1.3656084774343251e+00
+Eigenvalue lambda 1.4790869964461177e+00
+Eigenvalue lambda 1.4958992587457691e+00
+Eigenvalue lambda 1.6942071735763926e+00
+Residual 8.1405087226442436e-07
+Residual 7.6354268772308728e-07
+Residual 9.7924856565331457e-07
+Residual 9.3922533586499517e-07
+Residual 4.6788135409589865e-05
+
+100 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 6.550000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 4.900000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.770000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.560000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 7
+Final Relative Residual Norm = 3.319145e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.120000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.110000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.060000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 31
+Final Relative Residual Norm = 7.336388e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+SysPFMG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+SysPFMG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 12
+Final Relative Residual Norm = 8.705979e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    4417    38917  0.002     4    9   8.8   0.000e+00   5.000e+00
+ 1    1116     9780  0.008     4   13   8.8  -2.776e-17   6.172e+00
+ 2     292     2570  0.030     4   14   8.8  -1.943e-15   7.195e+00
+ 3      78      728  0.120     4   16   9.3  -1.915e-15   7.396e+00
+ 4      22      184  0.380     4   12   8.4   4.694e-01   7.893e+00
+ 5       7       41  0.837     4    7   5.9   4.917e+00   8.216e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  4417 x 1116    1   4   1.667e-01 6.250e-01 3.750e-01 1.000e+00
+ 1  1116 x 292     1   5   7.354e-02 6.739e-01 3.690e-01 1.000e+00
+ 2   292 x 78      0   5   7.281e-02 6.073e-01 0.000e+00 1.000e+00
+ 3    78 x 22      1   5   5.701e-02 8.367e-01 1.051e-01 1.000e+00
+ 4    22 x 7       0   4   1.764e-02 4.661e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.342993
+                operator = 1.341830
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 6
+Final Relative Residual Norm = 2.641765e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 3.4627908268321410e+00
+Iteration 1 	bsize 1 	maxres 2.9808754626559137e+00
+Iteration 2 	bsize 1 	maxres 8.1638793819459188e-01
+Iteration 3 	bsize 1 	maxres 3.7698329179133899e-01
+Iteration 4 	bsize 1 	maxres 1.6686619630707530e-01
+Iteration 5 	bsize 1 	maxres 6.1150518396127333e-02
+Iteration 6 	bsize 1 	maxres 2.7170712281702598e-02
+Iteration 7 	bsize 1 	maxres 1.6622213799570615e-02
+Iteration 8 	bsize 1 	maxres 2.2428591011603643e-02
+Iteration 9 	bsize 1 	maxres 5.9001701268437109e-02
+Iteration 10 	bsize 1 	maxres 1.1041111673340563e-01
+Iteration 11 	bsize 1 	maxres 6.9684959077945419e-02
+Iteration 12 	bsize 1 	maxres 3.5409598387255985e-02
+Iteration 13 	bsize 1 	maxres 2.1868900718242473e-02
+Iteration 14 	bsize 1 	maxres 1.5799828281989153e-02
+Iteration 15 	bsize 1 	maxres 7.8120876934200468e-03
+Iteration 16 	bsize 1 	maxres 4.4443306900369319e-03
+Iteration 17 	bsize 1 	maxres 5.2166343242019894e-03
+Iteration 18 	bsize 1 	maxres 7.3560744528035210e-03
+Iteration 19 	bsize 1 	maxres 8.1536710510304346e-03
+Iteration 20 	bsize 1 	maxres 5.0041840396041039e-03
+Iteration 21 	bsize 1 	maxres 2.2626224637408159e-03
+Iteration 22 	bsize 1 	maxres 2.6283842359038309e-03
+Iteration 23 	bsize 1 	maxres 1.1449048540968904e-03
+Iteration 24 	bsize 1 	maxres 5.7410159727996847e-04
+Iteration 25 	bsize 1 	maxres 3.0420703346496189e-04
+Iteration 26 	bsize 1 	maxres 2.6262398296929024e-04
+Iteration 27 	bsize 1 	maxres 4.2577884623879445e-04
+Iteration 28 	bsize 1 	maxres 4.5114403593052321e-04
+Iteration 29 	bsize 1 	maxres 3.2473800654288628e-04
+Iteration 30 	bsize 1 	maxres 2.5070457294712782e-04
+Iteration 31 	bsize 1 	maxres 1.7976266863380713e-04
+Iteration 32 	bsize 1 	maxres 1.0436163093495344e-04
+Iteration 33 	bsize 1 	maxres 4.4701858466018227e-05
+Iteration 34 	bsize 1 	maxres 1.9720694908269278e-05
+Iteration 35 	bsize 1 	maxres 1.4490660438066579e-05
+Iteration 36 	bsize 1 	maxres 2.0158351334265679e-05
+Iteration 37 	bsize 1 	maxres 3.0535817359989212e-05
+Iteration 38 	bsize 1 	maxres 2.3282395051345117e-05
+Iteration 39 	bsize 1 	maxres 1.2922623168761952e-05
+Iteration 40 	bsize 1 	maxres 8.7272503406490722e-06
+Iteration 41 	bsize 1 	maxres 6.0544149645053514e-06
+Iteration 42 	bsize 1 	maxres 3.3598975065581387e-06
+Iteration 43 	bsize 1 	maxres 1.2771089014931134e-06
+Iteration 44 	bsize 1 	maxres 8.7067834378164495e-07
+
+Eigenvalue lambda 1.3488084824729083e+00
+Residual 8.7067834378164495e-07
+
+44 iterations
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 1.140000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.970000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 5
+
+No constraints
+
+
+Initial Max. Residual 3.6939063646890773e+00
+Iteration 1 	bsize 5 	maxres 3.0155716832970674e+00
+Iteration 2 	bsize 5 	maxres 1.1665659773595545e+00
+Iteration 3 	bsize 5 	maxres 7.1135152109606492e-01
+Iteration 4 	bsize 5 	maxres 4.5537588944368917e-01
+Iteration 5 	bsize 5 	maxres 2.5309914669942701e-01
+Iteration 6 	bsize 5 	maxres 2.3932262086721418e-01
+Iteration 7 	bsize 5 	maxres 1.8767898966909230e-01
+Iteration 8 	bsize 5 	maxres 5.3564380630542585e-01
+Iteration 9 	bsize 5 	maxres 2.6160908464630395e-01
+Iteration 10 	bsize 5 	maxres 9.9251672118295428e-02
+Iteration 11 	bsize 5 	maxres 3.4498357054414543e-02
+Iteration 12 	bsize 5 	maxres 1.2466019746312916e-02
+Iteration 13 	bsize 5 	maxres 6.2264378008943721e-03
+Iteration 14 	bsize 5 	maxres 4.6077081341961727e-03
+Iteration 15 	bsize 5 	maxres 3.3708919011090814e-03
+Iteration 16 	bsize 5 	maxres 1.7071848279137537e-03
+Iteration 17 	bsize 4 	maxres 1.0879974230465991e-03
+Iteration 18 	bsize 3 	maxres 8.9115485153917816e-04
+Iteration 19 	bsize 3 	maxres 4.7116346514171890e-04
+Iteration 20 	bsize 3 	maxres 2.9052264084047350e-04
+Iteration 21 	bsize 3 	maxres 2.1156987060991120e-04
+Iteration 22 	bsize 3 	maxres 2.0481453589685789e-04
+Iteration 23 	bsize 3 	maxres 1.7000473210796894e-04
+Iteration 24 	bsize 1 	maxres 1.2642270618656585e-04
+Iteration 25 	bsize 1 	maxres 1.2253418111654908e-04
+Iteration 26 	bsize 1 	maxres 1.1564820730789607e-04
+Iteration 27 	bsize 1 	maxres 9.3030865054715437e-05
+Iteration 28 	bsize 1 	maxres 6.5335771417910206e-05
+Iteration 29 	bsize 1 	maxres 5.8387017784731379e-05
+Iteration 30 	bsize 1 	maxres 4.9642399161880249e-05
+Iteration 31 	bsize 1 	maxres 3.2344691743876272e-05
+Iteration 32 	bsize 1 	maxres 2.6300585075523188e-05
+Iteration 33 	bsize 1 	maxres 2.2032955317280176e-05
+Iteration 34 	bsize 1 	maxres 1.5547137431496134e-05
+Iteration 35 	bsize 1 	maxres 1.0164327826956138e-05
+Iteration 36 	bsize 1 	maxres 8.8248892184882260e-06
+Iteration 37 	bsize 1 	maxres 9.1699019736093525e-06
+Iteration 38 	bsize 1 	maxres 9.3898434852005676e-06
+Iteration 39 	bsize 1 	maxres 7.3907590497314346e-06
+Iteration 40 	bsize 1 	maxres 5.2312967564856894e-06
+Iteration 41 	bsize 1 	maxres 3.9767049584144168e-06
+Iteration 42 	bsize 1 	maxres 3.1640047088737656e-06
+Iteration 43 	bsize 1 	maxres 2.9077585807449219e-06
+Iteration 44 	bsize 1 	maxres 2.5611174693962853e-06
+Iteration 45 	bsize 1 	maxres 1.6957707113926985e-06
+Iteration 46 	bsize 1 	maxres 1.1166446955974749e-06
+Iteration 47 	bsize 1 	maxres 9.5071168088435573e-07
+
+Eigenvalue lambda 1.3488084824683677e+00
+Eigenvalue lambda 1.3656084774331965e+00
+Eigenvalue lambda 1.4790869964116333e+00
+Eigenvalue lambda 1.4958992587166062e+00
+Eigenvalue lambda 1.6942071679879886e+00
+Residual 5.0817603527678883e-07
+Residual 5.7023106314784831e-07
+Residual 4.8777703357810848e-07
+Residual 9.5071168088435573e-07
+Residual 6.6737559710758012e-07
+
+47 iterations
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 4.180000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 3.380000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.060000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver ID not recognized - running inner PCG iterations without preconditioner
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 3.4627908268321410e+00
+Iteration 1 	bsize 1 	maxres 2.9808754626559137e+00
+Iteration 2 	bsize 1 	maxres 8.1638793819459188e-01
+Iteration 3 	bsize 1 	maxres 3.7698329179133855e-01
+Iteration 4 	bsize 1 	maxres 1.6686619630707483e-01
+Iteration 5 	bsize 1 	maxres 6.1150518396127951e-02
+Iteration 6 	bsize 1 	maxres 2.7170712281702716e-02
+Iteration 7 	bsize 1 	maxres 1.6622213799570729e-02
+Iteration 8 	bsize 1 	maxres 2.2428591011603456e-02
+Iteration 9 	bsize 1 	maxres 5.9001701268437456e-02
+Iteration 10 	bsize 1 	maxres 1.1041111673340392e-01
+Iteration 11 	bsize 1 	maxres 6.9684959077943157e-02
+Iteration 12 	bsize 1 	maxres 3.5409598387258955e-02
+Iteration 13 	bsize 1 	maxres 2.1868900718243923e-02
+Iteration 14 	bsize 1 	maxres 1.5799828281989670e-02
+Iteration 15 	bsize 1 	maxres 7.8120876934214874e-03
+Iteration 16 	bsize 1 	maxres 4.4443306900401169e-03
+Iteration 17 	bsize 1 	maxres 5.2166343242076602e-03
+Iteration 18 	bsize 1 	maxres 7.3560744528127636e-03
+Iteration 19 	bsize 1 	maxres 8.1536710510385565e-03
+Iteration 20 	bsize 1 	maxres 5.0041840396059505e-03
+Iteration 21 	bsize 1 	maxres 2.2626224637396237e-03
+Iteration 22 	bsize 1 	maxres 2.6283842359017132e-03
+Iteration 23 	bsize 1 	maxres 1.1449048540976585e-03
+Iteration 24 	bsize 1 	maxres 5.7410159728124447e-04
+Iteration 25 	bsize 1 	maxres 3.0420703346522682e-04
+Iteration 26 	bsize 1 	maxres 2.6262398296910203e-04
+Iteration 27 	bsize 1 	maxres 4.2577884624015421e-04
+Iteration 28 	bsize 1 	maxres 4.5114403593155537e-04
+Iteration 29 	bsize 1 	maxres 3.2473800654315705e-04
+Iteration 30 	bsize 1 	maxres 2.5070457294739681e-04
+Iteration 31 	bsize 1 	maxres 1.7976266863321548e-04
+Iteration 32 	bsize 1 	maxres 1.0436163093481438e-04
+Iteration 33 	bsize 1 	maxres 4.4701858465914875e-05
+Iteration 34 	bsize 1 	maxres 1.9720694908300774e-05
+Iteration 35 	bsize 1 	maxres 1.4490660438078355e-05
+Iteration 36 	bsize 1 	maxres 2.0158351333971507e-05
+Iteration 37 	bsize 1 	maxres 3.0535817361002250e-05
+Iteration 38 	bsize 1 	maxres 2.3282395051801251e-05
+Iteration 39 	bsize 1 	maxres 1.2922623168212060e-05
+Iteration 40 	bsize 1 	maxres 8.7272503401873782e-06
+Iteration 41 	bsize 1 	maxres 6.0544149645675981e-06
+Iteration 42 	bsize 1 	maxres 3.3598975061908105e-06
+Iteration 43 	bsize 1 	maxres 1.2771089015000332e-06
+Iteration 44 	bsize 1 	maxres 8.7067834432119499e-07
+
+Eigenvalue lambda 1.3488084824729085e+00
+Residual 8.7067834432119499e-07
+
+44 iterations
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 1.080000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.920000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver ID not recognized - running inner PCG iterations without preconditioner
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 5
+
+No constraints
+
+
+Initial Max. Residual 3.6939063646890773e+00
+Iteration 1 	bsize 5 	maxres 3.0155716832970683e+00
+Iteration 2 	bsize 5 	maxres 1.1665659773595591e+00
+Iteration 3 	bsize 5 	maxres 7.1135152109606659e-01
+Iteration 4 	bsize 5 	maxres 4.5537588944369606e-01
+Iteration 5 	bsize 5 	maxres 2.5309914669943506e-01
+Iteration 6 	bsize 5 	maxres 2.3932262086721134e-01
+Iteration 7 	bsize 5 	maxres 1.8767898966910695e-01
+Iteration 8 	bsize 5 	maxres 5.3564380630539798e-01
+Iteration 9 	bsize 5 	maxres 2.6160908464632210e-01
+Iteration 10 	bsize 5 	maxres 9.9251672118296552e-02
+Iteration 11 	bsize 5 	maxres 3.4498357054383186e-02
+Iteration 12 	bsize 5 	maxres 1.2466019746286826e-02
+Iteration 13 	bsize 5 	maxres 6.2264378007942855e-03
+Iteration 14 	bsize 5 	maxres 4.6077081339538509e-03
+Iteration 15 	bsize 5 	maxres 3.3708919007977411e-03
+Iteration 16 	bsize 5 	maxres 1.7071848277423372e-03
+Iteration 17 	bsize 4 	maxres 1.0879974228734041e-03
+Iteration 18 	bsize 3 	maxres 8.9115485123337243e-04
+Iteration 19 	bsize 3 	maxres 4.7116346466414665e-04
+Iteration 20 	bsize 3 	maxres 2.9052264084537517e-04
+Iteration 21 	bsize 3 	maxres 2.1156987085173902e-04
+Iteration 22 	bsize 3 	maxres 2.0481453578469511e-04
+Iteration 23 	bsize 3 	maxres 1.7000473188130480e-04
+Iteration 24 	bsize 1 	maxres 1.2642270612790406e-04
+Iteration 25 	bsize 1 	maxres 1.2253418123833780e-04
+Iteration 26 	bsize 1 	maxres 1.1564820763559910e-04
+Iteration 27 	bsize 1 	maxres 9.3030865284902468e-05
+Iteration 28 	bsize 1 	maxres 6.5335771413809984e-05
+Iteration 29 	bsize 1 	maxres 5.8387017823355444e-05
+Iteration 30 	bsize 1 	maxres 4.9642399214326781e-05
+Iteration 31 	bsize 1 	maxres 3.2344691714754256e-05
+Iteration 32 	bsize 1 	maxres 2.6300585024908534e-05
+Iteration 33 	bsize 1 	maxres 2.2032955331119668e-05
+Iteration 34 	bsize 1 	maxres 1.5547137429897888e-05
+Iteration 35 	bsize 1 	maxres 1.0164327835516780e-05
+Iteration 36 	bsize 1 	maxres 8.8248892122878009e-06
+Iteration 37 	bsize 1 	maxres 9.1699019753137911e-06
+Iteration 38 	bsize 1 	maxres 9.3898434964875629e-06
+Iteration 39 	bsize 1 	maxres 7.3907590689472596e-06
+Iteration 40 	bsize 1 	maxres 5.2312967557581169e-06
+Iteration 41 	bsize 1 	maxres 3.9767049553979749e-06
+Iteration 42 	bsize 1 	maxres 3.1640047080670006e-06
+Iteration 43 	bsize 1 	maxres 2.9077585780944359e-06
+Iteration 44 	bsize 1 	maxres 2.5611174668153835e-06
+Iteration 45 	bsize 1 	maxres 1.6957707089454745e-06
+Iteration 46 	bsize 1 	maxres 1.1166446939695718e-06
+Iteration 47 	bsize 1 	maxres 9.5071168239186686e-07
+
+Eigenvalue lambda 1.3488084824683706e+00
+Eigenvalue lambda 1.3656084774331962e+00
+Eigenvalue lambda 1.4790869964116300e+00
+Eigenvalue lambda 1.4958992587166129e+00
+Eigenvalue lambda 1.6942071679879878e+00
+Residual 5.0817603494529825e-07
+Residual 5.7023106241006800e-07
+Residual 4.8777703386078688e-07
+Residual 9.5071168239186686e-07
+Residual 6.6737559736438929e-07
+
+47 iterations
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 4.150000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 3.490000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.060000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.060000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    9082   123642  0.001     5   15  13.6   1.000e+00   1.100e+01
+ 1    2186    74952  0.016     8   53  34.3   2.041e+00   1.446e+01
+ 2     665    59707  0.135    15  179  89.8   4.102e+00   2.021e+01
+ 3     259    31035  0.463    21  212  119.8   8.720e+00   1.729e+01
+ 4      59     2759  0.793    20   59  46.8   1.127e+01   1.667e+01
+ 5       3        9  1.000     3    3   3.0   1.445e+01   1.535e+01
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  9082 x 2186    1   8   6.667e-02 3.333e-01 2.667e-01 1.000e+00
+ 1  2186 x 665     0  16   1.226e-02 3.793e-01 0.000e+00 1.000e+00
+ 2   665 x 259     0  31   2.921e-03 2.643e-01 0.000e+00 1.000e+00
+ 3   259 x 59      0  12   2.931e-03 2.734e-01 0.000e+00 1.000e+00
+ 4    59 x 3       0   2   2.250e-02 1.755e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.349262
+                operator = 2.362498
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.170000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.120000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.060000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.060000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 5
+Final Relative Residual Norm = 9.314221e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.100000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.100000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.300000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.210000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 1.320000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 1.070000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 28
+Final Relative Residual Norm = 7.409212e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.230000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.180000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 28
+Final Relative Residual Norm = 9.270399e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.070000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.070000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 30
+Final Relative Residual Norm = 9.036190e-07
+
