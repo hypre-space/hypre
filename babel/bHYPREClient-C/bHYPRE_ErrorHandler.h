@@ -89,7 +89,7 @@ bHYPRE_ErrorHandler__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
  * The Check method will return nonzero when the error flag ierr
- * includes an error of type error_code; and zero otherwise.
+ * includes an error of type error\_code; and zero otherwise.
  */
 int32_t
 bHYPRE_ErrorHandler_Check(
