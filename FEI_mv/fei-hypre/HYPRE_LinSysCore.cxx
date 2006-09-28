@@ -5,15 +5,15 @@
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
  * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * HYPRE is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License (as published by the Free Software
  * Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
  * Public License for more details.
  *
@@ -23,9 +23,6 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 //***************************************************************************
 // system includes
@@ -2752,9 +2749,10 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering copyInRHSVector.\n",mypid_);
-   if (strcmp("IJ_Vector", data.getTypeName()))
+   if (strcmp("IJ_Vector", data.getTypeName()) &&
+       strcmp("Sol_Vector", data.getTypeName()))
    {
-      printf("copyInRHSVector: data's type string not 'IJ_Vector'.\n");
+      printf("copyInRHSVector: data's type string not compatible.\n");
       exit(1);
    }
 
@@ -2766,12 +2764,16 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
    HYPRE_ParVector srcVec;
    HYPRE_ParVector destVec;
    HYPRE_IJVectorGetObject(inVec, (void **) &srcVec);
-   HYPRE_IJVectorGetObject(HYb_, (void **) &destVec);
+   if (!strcmp("Sol_Vector", data.getTypeName()))
+      HYPRE_IJVectorGetObject(HYb_, (void **) &destVec);
+   else
+      HYPRE_IJVectorGetObject(HYx_, (void **) &destVec);
  
-   HYPRE_ParVectorCopy( srcVec, destVec);
+   HYPRE_ParVectorCopy(srcVec, destVec);
  
    if ( scalar != 1.0 ) HYPRE_ParVectorScale( scalar, destVec);
-   HYPRE_IJVectorDestroy(inVec);
+   // do not destroy the incoming vector
+   //HYPRE_IJVectorDestroy(inVec);
 
    //-------------------------------------------------------------------
    // diagnostic message
