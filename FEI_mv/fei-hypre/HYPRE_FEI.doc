@@ -372,7 +372,7 @@ int HYPRE_FEMatrixGetObject( HYPRE_FEMatrix matrix, void **object );
 /*@}*/
 
 /**
- * @name HYPRE FEI Matrix functions
+ * @name HYPRE FEI Vector functions
  **/
 /*@{*/
                                                                                 
@@ -395,13 +395,21 @@ int HYPRE_FEVectorCreate( MPI_Comm comm , HYPRE_FEMesh mesh,
 int HYPRE_FEVectorDestroy( HYPRE_FEVector vector );
 
 /**
-  * This function gets the underlying HYPRE vector from the FE mesh
-  * @param vector - a pointer to the FE matrix
-  * @param object - a pointer to the HYPRE vector
+  * This function gets the underlying RHS vector from the FE mesh
+  * @param vector - a pointer to the FE vector
+  * @param object - upon return, points to the RHS vector
  **/
-
-int HYPRE_FEVectorGetObject( HYPRE_FEVector vector, void **object );
-
+                                                                                
+int HYPRE_FEVectorGetRHS( HYPRE_FEVector vector, void **object );
+                                                                                
+/**
+  * This function gives the solution vector to the FE mesh
+  * @param vector - a pointer to the FE vector
+  * @param object - points to the solution vector
+ **/
+                                                                                
+int HYPRE_FEVectorSetSol( HYPRE_FEVector vector, void *object );
+                                                                                
 /*@}*/
 
 /**

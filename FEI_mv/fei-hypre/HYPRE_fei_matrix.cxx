@@ -92,12 +92,20 @@ HYPRE_FEMatrixGetObject(HYPRE_FEMatrix matrix, void **object)
       else
       {
          lsc = (LinearSystemCore *) mesh->linSys_;
-         lsc->copyOutMatrix(1.0e0, dataObj); 
-         A = (HYPRE_IJMatrix) dataObj.getDataPtr();
-         HYPRE_IJMatrixGetObject(A, (void **) &ACSR);
-         (*object) = (void *) ACSR;
+         if (lsc != NULL)
+         {
+            lsc->copyOutMatrix(1.0e0, dataObj); 
+            A = (HYPRE_IJMatrix) dataObj.getDataPtr();
+            HYPRE_IJMatrixGetObject(A, (void **) &ACSR);
+            (*object) = (void *) ACSR;
+         }
+         else
+         {
+            (*object) = NULL;
+            ierr = 1;
+         }
       }
    }
-   return 0;
+   return ierr;
 }
 

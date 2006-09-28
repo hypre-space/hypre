@@ -24,8 +24,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 #include "utilities.h"
 
 #include "LinearSystemCore.h"
@@ -151,7 +149,7 @@ int HYPRE_FEMeshDestroy( HYPRE_FEMesh mesh );
   * @param mesh - a pointer to the finite element mesh 
   * @param externFEI - a pointer to the externally built finite element object 
   * @param linSys - a pointer to the HYPRE linear system solver object built
-  *                 using the HYPRE_base_create function.
+  *                 using the HYPRE\_base\_create function.
  **/
 
 int HYPRE_FEMeshSetFEObject(HYPRE_FEMesh mesh, void *externFEI, void *linSys);
@@ -311,6 +309,14 @@ int HYPRE_FEMeshLoadComplete( HYPRE_FEMesh mesh );
 int HYPRE_FEMeshSolve( HYPRE_FEMesh mesh );
 
 /**
+  * This function sends a solution vector to the FEI 
+  * @param mesh - a pointer to the finite element mesh
+  * @param sol - solution vector 
+ **/
+
+int HYPRE_FEMeshSetSolution( HYPRE_FEMesh mesh, void *sol );
+
+/**
   * This function returns the node identifiers given the element block.
   * @param mesh - a pointer to the finite element mesh
   * @param blockID - element block identifier
@@ -395,12 +401,20 @@ int HYPRE_FEVectorCreate( MPI_Comm comm , HYPRE_FEMesh mesh,
 int HYPRE_FEVectorDestroy( HYPRE_FEVector vector );
 
 /**
-  * This function gets the underlying HYPRE vector from the FE mesh
-  * @param vector - a pointer to the FE matrix
-  * @param object - a pointer to the HYPRE vector
+  * This function gets the underlying RHS vector from the FE mesh
+  * @param vector - a pointer to the FE vector
+  * @param object - upon return, points to the RHS vector
  **/
 
-int HYPRE_FEVectorGetObject( HYPRE_FEVector vector, void **object );
+int HYPRE_FEVectorGetRHS( HYPRE_FEVector vector, void **object );
+
+/**
+  * This function gives the solution vector to the FE mesh
+  * @param vector - a pointer to the FE vector
+  * @param object - points to the solution vector
+ **/
+
+int HYPRE_FEVectorSetSol( HYPRE_FEVector vector, void *object );
 
 /*@}*/
 /*@}*/

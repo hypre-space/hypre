@@ -34,6 +34,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef HAVE_FEI
+#include "FEI_Implementation.h"
+#endif
 #include "LLNL_FEI_Impl.h"
 #include "fei_mv.h"
 #include "Data.h"
@@ -70,11 +73,11 @@ HYPRE_FEVectorDestroy(HYPRE_FEVector vector)
 }
 
 /*****************************************************************************/
-/* HYPRE_FEVectorGetObject                                                   */
+/* HYPRE_FEVectorGetRHS                                                      */
 /*---------------------------------------------------------------------------*/
 
 extern "C" int
-HYPRE_FEVectorGetObject(HYPRE_FEVector vector, void **object)
+HYPRE_FEVectorGetRHS(HYPRE_FEVector vector, void **object)
 {
    int               ierr=0;
    HYPRE_FEMesh      mesh;
@@ -93,12 +96,79 @@ HYPRE_FEVectorGetObject(HYPRE_FEVector vector, void **object)
       else
       {
          lsc = (LinearSystemCore *) mesh->linSys_;
-         lsc->copyOutRHSVector(1.0e0, dataObj); 
-         X = (HYPRE_IJVector) dataObj.getDataPtr();
-         HYPRE_IJVectorGetObject(X, (void **) &XCSR);
-         (*object) = (void *) XCSR;
+         if (lsc != NULL)
+         {
+            lsc->copyOutRHSVector(1.0e0, dataObj); 
+            X = (HYPRE_IJVector) dataObj.getDataPtr();
+            HYPRE_IJVectorGetObject(X, (void **) &XCSR);
+            (*object) = (void *) XCSR;
+         }
+         else
+         {
+            (*object) = NULL;
+            ierr = 1;
+         }
       }
    }
-   return 0;
+   return ierr;
+}
+
+/*****************************************************************************/
+/* HYPRE_FEVectorSetSol                                                      */
+/*---------------------------------------------------------------------------*/
+
+extern "C" int
+HYPRE_FEVectorSetSol(HYPRE_FEVector vector, void *object)
+{
+   int                ierr=0;
+   HYPRE_FEMesh       mesh;
+   LinearSystemCore   *lsc;
+   Data               dataObj;
+   LLNL_FEI_Impl      *fei1;
+#ifdef HAVE_FEI
+   FEI_Implementation *fei2;
+#endif
+
+   if (vector == NULL)
+      ierr = 1;
+   else
+   {
+      mesh = vector->mesh_;
+      if (mesh == NULL)
+         ierr = 1;
+      else
+      {
+         lsc = (LinearSystemCore *) mesh->linSys_;
+         if (lsc != NULL)
+         {
+            dataObj.setTypeName("Sol_Vector");
+            dataObj.setDataPtr((void*) object);
+            lsc->copyInRHSVector(1.0e0, dataObj); 
+            if (mesh->feiPtr_ != NULL)
+            {
+#ifdef HAVE_FEI
+               if (mesh->objectType_ == 1)
+               {
+                  fei1 = (LLNL_FEI_Impl *) mesh->feiPtr_;
+                  ierr = fei1->solve(&ierr);
+               }
+               if (mesh->objectType_ == 2)
+               {
+                  fei2 = (FEI_Implementation *) mesh->feiPtr_;
+                  ierr = fei2->solve(&ierr);
+               }
+#else
+               fei1 = (LLNL_FEI_Impl *) mesh->feiPtr_;
+               ierr = fei1->solve(&ierr);
+#endif
+            }
+         }
+         else
+         {
+            ierr = 1;
+         }
+      }
+   }
+   return ierr;
 }
 
