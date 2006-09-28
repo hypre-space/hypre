@@ -3,6 +3,15 @@
 
 \section{Introduction}
 
+Many application codes use unstructured finite element meshes.
+This section describes an interface for finite element codes 
+to use the \hypre{} solvers.
+\vspace{-2.0in}
+\begin{figure}[htbp]
+\centerline{\includegraphics[height=4.0in]{square-hole.pdf}}
+\caption{Example of an unstructured mesh}
+\end{figure}
+
 User applications access the \hypre{} linear solvers via a pipeline of
 two interfaces - user to finite element interface (called {\tt FEI}),
 and the finite element to linear solver interface (called 
@@ -15,7 +24,8 @@ hand side vectors to the linear solver libraries via the
 {\tt LinearSystemCore} interface.
 The {\tt LinearSystemCore} interface also facilitates interfacing 
 multiple linear system solver packages (such as PetSC or Aztec)
-with little change in the user code.
+with little change in the user code. Users interact with an FEI
+solver primarily at the FEI level.
 
 The specification of the {\tt FEI} and its implementation was first
 developed at Sandia. A simplified implementation has been implemented
@@ -32,11 +42,11 @@ demonstrate how to use them.
 %A description of the {\tt MLI} is given in Section 5.4.
 %In Section 5.5, we describe the available options for using \hypre{}'s
 %rich solver capabilities. 
-Users who prefer to create their own finite
-element packages but would like to use the \hypre{} solvers can link their
-packages to \hypre{} via the {\tt LinearSystemCore}. A description
-of this interface is given in Section \ref{LSI_overview}. Some installation 
-and usage issues are discussed in Section \ref{LSI_install}.
+%Users who prefer to create their own finite
+%element packages but would like to use the \hypre{} solvers can link their
+%packages to \hypre{} via the {\tt LinearSystemCore}. A description
+%of this interface is given in Section \ref{LSI_overview}. Some installation 
+%and usage issues are discussed in Section \ref{LSI_install}.
 
 \section{A Brief Description of The Finite Element Interface}
 
@@ -45,25 +55,52 @@ storing element connectivities, element stiffness matrices, element
 loads, boundary conditions, nodal coordinates, etc. An implicit finite
 element problem can be solved by assembling the global stiffness matrix
 and the corresponding right hand side vector, and then calling linear
-solver to calculate the solution. The first step in this process is 
-thus to instantiate an {\tt FEI} object by
-\begin{tabbing}
-\hspace{0.5in} \= {\tt feiPtr = new FEI\_Implementation(solver,mpiComm,rank);}
-\end{tabbing}
-where {\tt solver} is a container pointing to the underlying linear solver 
-package, {\tt mpiComm} is an MPI communicator (e.g. {\tt MPI\_COMM\_WORLD}),
-and {\tt rank} is the processor number of the master processor (for 
-identifying which processor will produce the screen outputs). 
-Next, various finite element information need to be sent into the {\tt FEI}
-object.
+solver to calculate the solution. A complete description of Sandia's
+finite element interface can be obtained by contacting Alan William
+at Sandia (william@sandia.gov). In the following, we describe how
+to use the finite element interface via \hypre{} function calls.
 
-The first entity to be submitted to the {\tt FEI} is {\it field} information. 
-A {\it field} has an identifier called {\tt fieldID} and a rank or
-{\tt fieldSize} (number of degrees of freedom). For example, for a simple
+If the Sandia {\tt FEI} package is to be used, the first step in
+setting up the solver is to create an instance of \hypre{}'s
+{\tt LinearSystemCore} class by
+\begin{tabbing}
+\hspace{0.5in} \= {\tt solver = HYPRE\_base\_create(mpiComm);}
+\end{tabbing}
+where {\tt mpiComm} is an MPI communicator (e.g. {\tt MPI\_COMM\_WORLD}).
+
+This solver object is then used to create the external {\tt FEI} object by 
+\begin{tabbing}
+\hspace{0.5in} \= {\tt feiPtr = FEI\_Implementation(solver,mpiComm,rank);}
+\end{tabbing}
+where {\tt rank} is the processor number of the master processor (for 
+identifying which processor will produce the screen outputs). 
+
+To manipulate the external {\tt FEI} object within the \hypre{} context,
+we next create an instance of the \hypre{} finite element mesh class by
+\begin{tabbing}
+\hspace{0.5in} \= {\tt HYPRE\_FEMeshCreate(mpiComm, \&hypreMesh);}
+\end{tabbing}
+which returns a pointer in {\tt hypreMesh}.
+
+We will pass the external {\tt FEI} object into the \hypre{} mesh
+object by
+\begin{tabbing}
+\hspace{0.5in} \= {\tt HYPRE\_FEMeshSetFEObject(hypreMesh, feiPtr, solver);}
+\end{tabbing}
+Alternatively, if the internal simplified {\tt FEI} (to \hypre{}) is used,
+the {\tt HYPRE\_FEMeshSetFEObject} is to be called with both {\tt feiPtr}
+and {\tt solver} set to {\tt NULL} (that is, the first two steps above
+are skipped.)
+
+Next, various finite element information need to be sent into the 
+{\tt hypreMesh} object.
+The first entity to be submitted is {\it field} information. 
+A {\it field} has an identifier called {\it fieldID} and a rank or
+{\it fieldSize} (number of degree of freedom). For example, for a simple
 3D incompressible Navier Stokes equation, the nodal variable is the velocity
 vector which has $3$ degrees of freedom; and the element variable (constant
 over the element) is the pressure (scalar). If these are the only variables,
-and if we assign {\tt fieldID} $7$ and $8$ to them, respectively, then the
+and if we assign {\it fieldID} $7$ and $8$ to them, respectively, then the
 finite element field information can be set up by
 \begin{tabbing}
 \hspace{0.5in} \= {\tt nFields = 2;} \\
@@ -73,7 +110,7 @@ finite element field information can be set up by
                \> {\tt fieldSize = new int[nFields];} \\
                \> {\tt fieldSize[0] = $3$; /* velocity vector */} \\
                \> {\tt fieldSize[1] = $1$; /* pressure */ } \\
-               \> {\tt feiPtr$->$initFields(nFields, fieldSize, fieldID);}
+ \> {\tt HYPRE\_FEMeshInitFields(hypreMesh, nFields, fieldSize, fieldID);}
 \end{tabbing}
 
 Once the field information has been established, we are ready to initialize
@@ -92,8 +129,8 @@ consists of
                \> {\tt elemNFields = 1; /* element field - pressure */} \\
                \> {\tt elemFieldIDs = new[elemNFields];} \\
                \> {\tt elemFieldIDs[0] = fieldID[1]; /* pressure */ } \\
- \> {\tt feiPtr$->$initElemBlock(elemBlkID, nElems, elemNNodes, nodeNFields, nodeFieldIDs,}\\
- \> \hspace{1.0in} {\tt elemNFields, elemFieldIDs, 0);} 
+ \> {\tt HYPRE\_FEMeshInitElemBlock(hypreMesh,elemBlkID, nElems, elemNNodes,}\\
+ \> \hspace{1.0in} {\tt nodeNFields, nodeFieldIDs, elemNFields, elemFieldIDs, 0);} 
 \end{tabbing}
 The last argument is to specify how the dependent variables are arranged in
 the element matrices. A value of $0$ indicates that each variable is to be
@@ -110,12 +147,13 @@ of the global node list
 corresponding to the local nodes that are shared with the other processors.
 The syntax for setting up the shared nodes is
 \begin{tabbing}
-\hspace{0.5in} \= {\tt feiPtr$->$initSharedNodes(nShared, sharedIDs, sharedLengs, sharedProcs);}
+\hspace{0.5in} \= {\tt HYPRE\_FEMeshInitSharedNodes(hypreMesh, nShared, sharedIDs,}\\
+\> \hspace{1.0in} {\tt sharedLengs, sharedProcs);}
 \end{tabbing}
 This completes the initialization phase, and a completion signal is sent to
 the {\tt FEI} via
 \begin{tabbing}
-\hspace{0.5in} \= {\tt feiPtr$->$initComplete();}
+\hspace{0.5in} \= {\tt HYPRE\_FEMeshInitComplete(hypreMesh);}
 \end{tabbing}
 
 Next we begin the {\it load} phase. The first entity for loading is the
@@ -139,7 +177,7 @@ The calling sequence for loading element stiffness matrices is
 Again, to complete the loading phase, a completion signal is sent to 
 the {\tt FEI} via
 \begin{tabbing}
-\hspace{0.5in} \= {\tt feiPtr$->$loadComplete();}
+\hspace{0.5in} \= {\tt HYPRE\_FEMeshLoadComplete(hypreMesh);}
 \end{tabbing}
  
 Now the global stiffness matrix and the corresponding right hand side
@@ -156,80 +194,118 @@ of the solver parameters is given in Section 3. An example is given below
                \> {\tt strcpy(paramStrings[2], "maxiterations 100");} \\
                \> {\tt strcpy(paramStrings[3], "tolerance 1.0e-6");} \\
                \> {\tt strcpy(paramStrings[4], "outputLevel 1");} \\
-               \> {\tt feiPtr$->$parameters(nParams, paramStrings);} 
+ \> {\tt HYPRE\_FEMeshParameters(hypreMesh, nParams, paramStrings);} 
 \end{tabbing}
 
 To solve the linear system of equations, we call
 \begin{tabbing}
-\hspace{0.5in} \= {\tt feiPtr$->$solve(\&status);}
+\hspace{0.5in} \= {\tt HYPRE\_FEMeshSolve(hypreMesh);}
 \end{tabbing}
-where {\tt status} is returned from the {\tt FEI} indicating whether
-the solve is successful. Finally, the solution can be retrieved by
+Finally, the solution can be retrieved by the following two function calls
 \begin{tabbing}
-\hspace{0.5in} \= {\tt feiPtr$->$getBlockNodeSolution(elemBlkID, nNodes, nodeIDList, solnOffsets, solnValues);}
+\hspace{0.5in} \= {\tt HYPRE\_FEMeshGetBlockNodeIDList(hypreMesh, elemBlkID, nNodes, nodeIDList);}
+\end{tabbing}
+where {\tt nodeIDList} to be returned is a list of nodes in element 
+block {\tt elemBlkID}; and
+\begin{tabbing}
+\hspace{0.5in} \= {\tt HYPRE\_FEMeshGetBlockNodeSolution(hypreMesh, elemBlkID, nNodes, nodeIDList,}\\
+\> \hspace{1.0in} {\tt solnOffsets, solnValues);}
 \end{tabbing}
 where {\tt solnOffsets[i]} is the index pointing to the first location 
-where the variables at node $i$ are returned in {\tt solnValues}.
+where the variables at node $i$ is returned in {\tt solnValues}.
 
-\section{The LinearSystemCore Interface}
-\label{LSI_overview}
+\section{The Finite Element Interface Matrix and Vector Classes}
 
-As described before, users who prefer to create their own finite element
-interface package can also take advantage of the rich solver capabilities
-in \hypre{}. In this section we show how to access {\tt HYPRE\_LinSysCore}'s
-internal solver directly.  
-The matrix class in \hypre{} accessible via the {\tt LinearSystemCore} interface
-is the parallel compressed sparse row ({\tt ParCSR}) matrix.  The
-requirements about how the global matrix is partitioned among the
-processors are that each processor holds a contiguous block of rows and columns
-and the equation numbers in processors of lower rank are lower than those
-in processors of higher rank.  The {\tt FEI} is responsible for ensuring
-that these two requirements are followed. The matrix can be loaded in
-parallel - a row or a block of rows at a time.  The solution and right
-hand side vectors are constructed accordingly. The matrix rows corresponding
-to the shared nodes can be assigned to either processor, and is determined
-by the {\tt FEI} itself. Once the incoming matrix and vector data have
-been captured in the \hypre{} {\tt ParCSR} format, a whole of matrix and
-vector operators are available for use in the \hypre{} solvers.
-
-The following program segment describes the function calls to set up
-the internal matrix and solve the linear system.
-Users need first to 
-construct an array (say, {\tt eqnOffsets} describing the matrix row
-partitioning across all processors (so {\tt eqnOffsets[p]} and
-{\tt eqnOffset[p+1]} have the starting and ending row indices for processor
-p). Furthermore, suppose the local submatrix has been constructed as a
-compressed sparse row (CSR) matrix in the {\tt ia, ja, val} arrays. 
-
+This section describes two additional classes (other than {\tt HYPRE\_FEMesh})
+that users may need - {\tt HYPRE\_FEMatrix} and {\tt HYPRE\_FEVector}. 
+These classes are useful if the global finite element stiffness matrix is
+to be solved using solvers other than those available via the finite element
+interface (for example, via the IJ interface). The key task is to extract
+the matrix and vector internal to the {\tt FEI}. The matrix can be extracted
+by first instantiating an {\tt HYPRE\_FEMatrix} object
 \begin{tabbing}
-\hspace{0.5in} \= {\tt Program Segment} \\[1mm]
-\> {\tt startRow = eqnOffsets[mypid];} \\
-\> {\tt endRow = eqnOffsets[mypid+1] - 1;} \\
-\> {\tt nrows = endRow - startRow + 1} \\
-\> {\tt for ( i = startRow; i $<=$ endRow; i++ ) $\{$ } \\
-\> \hspace{0.3in} \= {\tt ncnt = ia[i+1] - ia[i];} \\
-\> \> {\tt rowLengths[i-startRow] = ncnt;} \\
-\> \> {\tt colIndices[i-startRow] = new int[ncnt];} \\
-\> \> {\tt k = 0;} \\
-\> \> {\tt for (j = ia[i]; j < ia[i+1]; j++) colIndices[i-startRow][k++] = ja[j];}\\
-\> \} \\
-\> {\tt HYPRE\_LinSysCore\_create(\&lsc, MPI\_COMM\_WORLD);} \\
-\> {\tt HYPRE\_setGlobalOffsets(lsc, nrows, NULL, eqnOffsets, NULL);} \\
-\> {\tt HYPRE\_setMatrixStructure(lsc, colIndices, rowLengths, NULL, NULL, NULL);} \\
-\> {\tt for ( i = startRow; i <= endRow; i++ ) $\{$ } \\
-\> \> {\tt ncnt = ia[i+1] - ia[i];} \\
-\> \> {\tt HYPRE\_sumIntoSystemMatrix(lsc, i, ncnt, \&val[ia[i]], \&ja[ia[i]]);}\\
-\> \> {\tt HYPRE\_sumIntoRHSVector(1, \&rhs[i], \&i);} \\
-\> \} \\
-\> {\tt HYPRE\_matrixLoadComplete();}\\
-\> {\tt strcpy(paramString, "solver gmres");} \\
-\> {\tt HYPRE\_parameters(1, \&paramString);} \\
-\> {\tt strcpy(paramString, "preconditioner boomeramg");} \\
-\> {\tt HYPRE\_parameters(1, \&paramString);} \\
-\> {\tt HYPRE\_launchSolver(\&status, \&iterations);}
+\hspace{0.5in} \= {\tt HYPRE\_FEMatrixCreate(mpiComm, hypreMesh, \&feMatrix);}
 \end{tabbing}
+where {\tt hypreMesh} is the object created before, and {\tt feMatrix} is 
+the pointer to the new object.
+The \hypre{} matrix in {\tt ParCSR} format can then be extracted by
+\begin{tabbing}
+\hspace{0.5in} \= {\tt HYPRE\_FEMatrixGetObject(feMatrix, \&parcsrMatrix);}
+\end{tabbing}
+Similarly, the right hand side vector can be extracted by
+\begin{tabbing}
+\hspace{0.5in} \= {\tt HYPRE\_FEVectorCreate(mpiComm, hypreMesh, \&feVector);}
+\end{tabbing}
+and
+\begin{tabbing}
+\hspace{0.5in} \= {\tt HYPRE\_FEVectorGetRHS(feMatrix, \&rhsVector);}
+\end{tabbing}
+When the solution of the linear system is obtained, it can be given
+to the {\tt FEI} by
+\begin{tabbing}
+\hspace{0.5in} \= {\tt HYPRE\_FEVectorSetSol(feMatrix, rhsVector);}
+\end{tabbing}
+Finally, the objects are destroyed by the corresponding destroy functions.
 
-A list of available functions is given in the reference manual.
+%\section{The LinearSystemCore Interface}
+%\label{LSI_overview}
+
+%As described before, users who prefer to create their own finite element
+%interface package can also take advantage of the rich solver capabilities
+%in \hypre{}. In this section we show how to access {\tt HYPRE\_LinSysCore}'s
+%internal solver directly.  
+%The matrix class in \hypre{} accessible via the {\tt LinearSystemCore} interface
+%is the parallel compressed sparse row ({\tt ParCSR}) matrix.  The
+%requirements about how the global matrix is partitioned among the
+%processors are that each processor holds a contiguous block of rows and columns
+%and the equation numbers in processors of lower rank are lower than those
+%in processors of higher rank.  The {\tt FEI} is responsible for ensuring
+%that these two requirements are followed. The matrix can be loaded in
+%parallel - a row or a block of rows at a time.  The solution and right
+%hand side vectors are constructed accordingly. The matrix rows corresponding
+%to the shared nodes can be assigned to either processor, and is determined
+%by the {\tt FEI} itself. Once the incoming matrix and vector data have
+%been captured in the \hypre{} {\tt ParCSR} format, a whole of matrix and
+%vector operators are available for use in the \hypre{} solvers.
+%
+%The following program segment describes the function calls to set up
+%the internal matrix and solve the linear system.
+%Users need first to 
+%construct an array (say, {\tt eqnOffsets} describing the matrix row
+%partitioning across all processors (so {\tt eqnOffsets[p]} and
+%{\tt eqnOffset[p+1]} have the starting and ending row indices for processor
+%p). Furthermore, suppose the local submatrix has been constructed as a
+%compressed sparse row (CSR) matrix in the {\tt ia, ja, val} arrays. 
+%
+%\begin{tabbing}
+%\hspace{0.5in} \= {\tt Program Segment} \\[1mm]
+%\> {\tt startRow = eqnOffsets[mypid];} \\
+%\> {\tt endRow = eqnOffsets[mypid+1] - 1;} \\
+%\> {\tt nrows = endRow - startRow + 1} \\
+%\> {\tt for ( i = startRow; i $<=$ endRow; i++ ) $\{$ } \\
+%\> \hspace{0.3in} \= {\tt ncnt = ia[i+1] - ia[i];} \\
+%\> \> {\tt rowLengths[i-startRow] = ncnt;} \\
+%\> \> {\tt colIndices[i-startRow] = new int[ncnt];} \\
+%\> \> {\tt k = 0;} \\
+%\> \> {\tt for (j = ia[i]; j < ia[i+1]; j++) colIndices[i-startRow][k++] = ja[j];}\\
+%\> \} \\
+%\> {\tt HYPRE\_LinSysCore\_create(\&lsc, MPI\_COMM\_WORLD);} \\
+%\> {\tt HYPRE\_setGlobalOffsets(lsc, nrows, NULL, eqnOffsets, NULL);} \\
+%\> {\tt HYPRE\_setMatrixStructure(lsc, colIndices, rowLengths, NULL, NULL, NULL);} \\
+%\> {\tt for ( i = startRow; i <= endRow; i++ ) $\{$ } \\
+%\> \> {\tt ncnt = ia[i+1] - ia[i];} \\
+%\> \> {\tt HYPRE\_sumIntoSystemMatrix(lsc, i, ncnt, \&val[ia[i]], \&ja[ia[i]]);}\\
+%\> \> {\tt HYPRE\_sumIntoRHSVector(1, \&rhs[i], \&i);} \\
+%\> \} \\
+%\> {\tt HYPRE\_matrixLoadComplete();}\\
+%\> {\tt strcpy(paramString, "solver gmres");} \\
+%\> {\tt HYPRE\_parameters(1, \&paramString);} \\
+%\> {\tt strcpy(paramString, "preconditioner boomeramg");} \\
+%\> {\tt HYPRE\_parameters(1, \&paramString);} \\
+%\> {\tt HYPRE\_launchSolver(\&status, \&iterations);}
+%\end{tabbing}
+
+%A list of available functions is given in the reference manual.
 %
 %\begin{tabbing}
 %{\tt HYPRE\_LinSysCore\_create(LinSysCore **lsc, MPI\_Comm comm)} \\[1mm]
