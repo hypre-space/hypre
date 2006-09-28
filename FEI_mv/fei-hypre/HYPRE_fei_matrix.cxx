@@ -1,7 +1,7 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
@@ -37,7 +37,6 @@
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
 #include "fei_mv.h"
-#include "HYPRE_fei_mv.h"
 #include "Data.h"
 
 /*****************************************************************************/
@@ -66,36 +65,6 @@ HYPRE_FEMatrixDestroy(HYPRE_FEMatrix matrix)
    {
       free(matrix);
    }
-   return 0;
-}
-
-/*****************************************************************************/
-/* HYPRE_FEMatrixInitialize                                                  */
-/*---------------------------------------------------------------------------*/
-
-extern "C" int
-HYPRE_FEMatrixInitialize(HYPRE_FEMatrix matrix)
-{
-   return 0;
-}
-
-/*****************************************************************************/
-/* HYPRE_FEMatrixAssemble                                                    */
-/*---------------------------------------------------------------------------*/
-
-extern "C" int
-HYPRE_FEMatrixAssemble(HYPRE_FEMatrix matrix)
-{
-   return 0;
-}
-
-/*****************************************************************************/
-/* HYPRE_FEMatrixSetObjectType                                               */
-/*---------------------------------------------------------------------------*/
-
-extern "C" int
-HYPRE_FEMatrixSetObjectType(HYPRE_FEMatrix matrix, int type)
-{
    return 0;
 }
 

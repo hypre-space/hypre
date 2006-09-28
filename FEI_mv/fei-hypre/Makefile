@@ -115,7 +115,6 @@ HEADERS =\
  HYPRE_parcsr_fgmres.h\
  HYPRE_parcsr_lsicg.h\
  HYPRE_parcsr_symqmr.h\
- HYPRE_fei_mv.h\
  fei_mv.h
 
 FILESC = \

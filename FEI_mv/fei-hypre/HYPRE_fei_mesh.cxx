@@ -1,7 +1,7 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
@@ -35,7 +35,6 @@
 #include <math.h>
 
 #include "LLNL_FEI_Impl.h"
-#include "HYPRE_fei_mv.h"
 #include "fei_mv.h"
 
 /*****************************************************************************/
@@ -133,6 +132,39 @@ HYPRE_FEMeshSetFEIObject(HYPRE_FEMesh mesh, void *feiObj, void *lscObj)
    return 0;
 }
 
+/*****************************************************************************/
+/* HYPRE_FEMeshParameters                                                    */
+/*---------------------------------------------------------------------------*/
+
+extern "C" int
+HYPRE_FEMeshParameters(HYPRE_FEMesh mesh, int numParams, char **paramStrings) 
+{
+   LLNL_FEI_Impl      *fei1;
+#ifdef HAVE_FEI
+   FEI_Implementation *fei2;
+#endif
+   int ierr=1;
+
+   if ((mesh != NULL) && (mesh->feiPtr_ != NULL))
+   {
+#ifdef HAVE_FEI
+      if (mesh->objectType_ == 1)
+      {
+         fei1 = (LLNL_FEI_Impl *) mesh->feiPtr_;
+         ierr = fei1->parameters(numParams, paramStrings);
+      }
+      if (mesh->objectType_ == 2)
+      {
+         fei2 = (FEI_Implementation *) mesh->feiPtr_;
+         ierr = fei2->parameters(numParams, paramStrings);
+      }
+#else
+      fei1 = (LLNL_FEI_Impl *) mesh->feiPtr_;
+      ierr = fei1->parameters(numParams, paramStrings);
+#endif
+   }
+   return ierr;
+}
 /*****************************************************************************/
 /* HYPRE_FEMeshInitFields                                                    */
 /*---------------------------------------------------------------------------*/

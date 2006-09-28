@@ -1,7 +1,7 @@
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
+ * Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
@@ -35,7 +35,6 @@
 #include <math.h>
 
 #include "LLNL_FEI_Impl.h"
-#include "HYPRE_fei_mv.h"
 #include "fei_mv.h"
 #include "Data.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
@@ -67,36 +66,6 @@ HYPRE_FEVectorDestroy(HYPRE_FEVector vector)
    {
       free(vector);
    }
-   return 0;
-}
-
-/*****************************************************************************/
-/* HYPRE_FEVectorInitialize                                                  */
-/*---------------------------------------------------------------------------*/
-
-extern "C" int
-HYPRE_FEVectorInitialize(HYPRE_FEVector vector)
-{
-   return 0;
-}
-
-/*****************************************************************************/
-/* HYPRE_FEVectorAssemble                                                    */
-/*---------------------------------------------------------------------------*/
-
-extern "C" int
-HYPRE_FEVectorAssemble(HYPRE_FEVector vector)
-{
-   return 0;
-}
-
-/*****************************************************************************/
-/* HYPRE_FEVectorSetObjectType                                               */
-/*---------------------------------------------------------------------------*/
-
-extern "C" int
-HYPRE_FEVectorSetObjectType(HYPRE_FEVector vector, int type)
-{
    return 0;
 }
 
