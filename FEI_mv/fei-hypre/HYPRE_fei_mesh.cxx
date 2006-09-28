@@ -34,6 +34,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef HAVE_FEI
+#include "FEI_Implementation.h"
+#endif
 #include "LLNL_FEI_Impl.h"
 #include "fei_mv.h"
 
