@@ -151,7 +151,7 @@ int HYPRE_FEMeshDestroy( HYPRE_FEMesh mesh );
   * @param mesh - a pointer to the finite element mesh 
   * @param externFEI - a pointer to the externally built finite element object 
   * @param linSys - a pointer to the HYPRE linear system solver object built
-  *                 using the HYPRE_base_create function.
+  *                 using the HYPRE\_base\_create function.
  **/
 
 int HYPRE_FEMeshSetFEObject(HYPRE_FEMesh mesh, void *externFEI, void *linSys);
