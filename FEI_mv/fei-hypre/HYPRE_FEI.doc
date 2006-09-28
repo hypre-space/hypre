@@ -422,11 +422,11 @@ int HYPRE_FEVectorGetObject( HYPRE_FEVector vector, void **object );
   *           specify its priority when multiple solvers are declared
   *           at random order.
   *\item[preconditioner xxx] where xxx is one of {\sf diagonal}, {\sf pilut},
-  *           {\sf euclid}, {\sf parasails}, {\sf boomeramg}, {\sf ddilut}, 
-  *           {\sf poly}, {\sf blockP}, {\sf Uzawa}, or {\sf mli}. The 
-  *           default is {\sf diagonal}.  Another option for 
+  *           {\sf euclid}, {\sf parasails}, {\sf boomeramg}, {\sf poly}, or 
+  *           {\sf mli}. The default is {\sf diagonal}.  Another option for 
   *           xxx is {\sf reuse} which allows the preconditioner to be reused 
-  *           (this is to be set after a preconditioner has been set up already).
+  *           (this should only be set after a preconditioner has been set 
+  *           up already).
   *           The preconditioner type can be followed by {\sf override} to
   *           specify its priority when multiple preconditioners are declared
   *           at random order.
@@ -455,18 +455,20 @@ Preconditioners and Solvers
   * Parameter options for the algebraic multigrid preconditioner BoomerAMG.
   * 
   *\begin{description}
+  *\item[amgMaxLevels xxx] where xxx is an integer specifying the maximum 
+  *           number of levels to be used for the grid hierarchy.
   *\item[amgCoarsenType xxx] where xxx specifies one of {\sf falgout} or
   *           {\sf ruge}, or {\sf default (CLJP)} coarsening for BOOMERAMG.
   *\item[amgMeasureType xxx] where xxx specifies one of {\sf local} or
-  *           or {\sf global}.  This parameter affects how coarsening is performed
-  *           in parallel.
-  *\item[amgNumSweeps xxx] where xxx is an integer specifying the number of
-  *           pre- and post-smoothing at each level of BOOMERAMG.
-  *           The default is two pre- and two post-smoothings.
+  *           or {\sf global}.  This parameter affects how coarsening is 
+  *           performed in parallel.
   *\item[amgRelaxType xxx] where xxx is one of {\sf jacobi} (Damped Jacobi),
   *           {\sf gs-slow} (sequential Gauss-Seidel), {\sf gs-fast}
   *           (Gauss-Seidel on interior nodes), or {\sf hybrid}.
   *           The default is {\sf hybrid}.
+  *\item[amgNumSweeps xxx] where xxx is an integer specifying the number of
+  *           pre- and post-smoothing at each level of BOOMERAMG.
+  *           The default is two pre- and two post-smoothings.
   *\item[amgRelaxWeight xxx] where xxx is a floating point number between 
   *           0 and 1 specifying the damping factor for BOOMERAMG's damped
   *           Jacobi and GS smoothers.  The default value is 1.0.
@@ -478,7 +480,10 @@ Preconditioners and Solvers
   *           strong coupling in BOOMERAMG's coasening.  The default 
   *           value is 0.25.
   *\item[amgSystemSize xxx] where xxx is the degree of freedom per node.
-  *\item[amgUseGSMG] - tells BOOMERAMG to use a different coarsening called GSMG.
+  *\item[amgMaxLevels xxx] where xxx is an integer specifying the maximum 
+  *           number of iterations to be used during the solve phase.
+  *\item[amgUseGSMG] - tells BOOMERAMG to use a different coarsening called 
+  *           GSMG.
   *\item[amgGSMGNumSamples] where xxx is the number of samples to generate
   *           to determine how to coarsen for GSMG.
   *\end{description}
@@ -534,15 +539,6 @@ MLI
   * are defined.
   * 
   *\begin{description}
-  *\item[ddilutFillin xxx] where xxx is a floating point number specifying 
-  *           the maximum number of nonzeros kept in the formation of local 
-  *           incomplete L and U (a value of $0.0$ means same sparsity as $A$,
-  *           and a value of $1.0$ means two times the number of nonzeros as
-  *           $A$.).  If this is not called, a value will be selected
-  *           based on the sparsity of the matrix.
-  *\item[ddilutDropTol xxx] where xxx is a floating point number specifying the 
-  *           threshold to drop small entries in L and U.  The default
-  *           value is 0.0.
   *\item[euclidNlevels xxx] where xxx is an non-negative integer specifying 
   *           the desired sparsity of the incomplete factors.  The
   *           default value is 0.
