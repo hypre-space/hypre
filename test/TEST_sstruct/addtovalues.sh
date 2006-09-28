@@ -47,9 +47,3 @@ tail -3 addtovalues.out.7 > addtovalues.testdata.temp
 diff addtovalues.testdata addtovalues.testdata.temp >&2
 
 rm -f addtovalues.testdata addtovalues.testdata.temp
-
-#=============================================================================
-#  Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat addtovalues.out.* > addtovalues.out
-diff addtovalues.out addtovalues.saved >&2

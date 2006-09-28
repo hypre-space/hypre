@@ -41,9 +41,3 @@ tail -3 neumann.out.3 > neumann.testdata.temp
 diff neumann.testdata neumann.testdata.temp >&2
 
 rm -f neumann.testdata neumann.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat neumann.out.* > neumann.out
-diff neumann.out neumann.saved >&2

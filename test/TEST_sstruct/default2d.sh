@@ -38,9 +38,3 @@ tail -3 default2d.out.2 > default2d.testdata.temp
 diff default2d.testdata default2d.testdata.temp >&2
 
 rm -f default2d.testdata default2d.testdata.temp
-
-#=============================================================================
-# Concatenate *.out* files then compare with baseline case
-#=============================================================================
-cat default2d.out.* > default2d.out
-diff default2d.out default2d.saved >&2

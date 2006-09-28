@@ -39,9 +39,3 @@ tail -3 cube.out.2 > cube.testdata.temp
 diff cube.testdata cube.testdata.temp >&2
 
 rm -f cube.testdata cube.testdata.temp
-
-#=============================================================================
-# Concatenate *.out* files then compare with baseline case
-#=============================================================================
-cat cube.out.* > cube.out
-diff cube.out cube.saved >&2

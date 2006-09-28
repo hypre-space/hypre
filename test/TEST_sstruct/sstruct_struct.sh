@@ -38,9 +38,3 @@ tail -3 sstruct_struct.out.200 > struct.testdata.temp
 diff struct.testdata struct.testdata.temp >&2
 
 rm -f struct.testdata struct.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat sstruct_struct.out.* > sstruct_struct.out
-diff sstruct_struct.out sstruct_struct.saved >&2

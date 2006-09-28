@@ -26,7 +26,5 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
-# Concatenate *.out.* files then compare with baseline case
+#  no tests
 #=============================================================================
-cat pfmgtest1d.out.* > pfmgtest1d.out
-diff pfmgtest1d.out pfmgtest1d.saved >&2

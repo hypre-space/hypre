@@ -68,9 +68,3 @@ tail -3 vdpfmgRedBlackGS.out.11 > vdpfmgRedBlackGS.testdata.temp
 diff vdpfmgRedBlackGS.testdata vdpfmgRedBlackGS.testdata.temp >&2
 
 rm -f vdpfmgRedBlackGS.testdata vdpfmgRedBlackGS.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat vdpfmgRedBlackGS.out.* > vdpfmgRedBlackGS.out
-diff vdpfmgRedBlackGS.out vdpfmgRedBlackGS.saved >&2

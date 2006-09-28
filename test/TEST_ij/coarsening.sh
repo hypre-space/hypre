@@ -28,8 +28,5 @@
 
 
 #=============================================================================
-# Concatenate all *.out.* files then compare with baseline case
+#  no tests
 #=============================================================================
-
-cat coarsening.out.* > coarsening.out
-diff coarsening.out coarsening.saved >&2

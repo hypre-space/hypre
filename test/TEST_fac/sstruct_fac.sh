@@ -29,10 +29,3 @@ diff fac.testdata fac.testdata.temp >&2
 
 
 rm -f fac.testdata fac.testdata.temp
-
-#=============================================================================
-#  Concatenate all *.out.* files then compare with baseline case
-#=============================================================================
-
-cat sstruct_fac.out.* > sstruct_fac.out
-diff sstruct_fac.out sstruct_fac.saved >&2

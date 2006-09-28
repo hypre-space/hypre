@@ -26,7 +26,5 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
-# Concatenate *.out.* files then compare with baseline case
+#  no test
 #=============================================================================
-cat smgvcycle.out.* > smgvcycle.out
-diff smgvcycle.out smgvcycle.saved >&2

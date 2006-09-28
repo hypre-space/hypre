@@ -42,9 +42,3 @@ tail -3 maxwell.out.2 > maxwell.testdata.temp
 diff maxwell.testdata maxwell.testdata.temp >&2
 
 rm -f maxwell.testdata maxwell.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare to baseline case
-#=============================================================================
-cat maxwell.out.* > maxwell.out
-diff maxwell.out maxwell.saved >&2

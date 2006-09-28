@@ -27,7 +27,5 @@
 
 
 #=============================================================================
-# Concatenate *.out.* files then compare with baseline case
+#  no tests
 #=============================================================================
-cat smoother.out.* > smoother.out
-diff smoother.out smoother.saved >&2

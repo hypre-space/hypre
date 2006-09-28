@@ -35,10 +35,3 @@ diff -I"time" solvers.out.0 solvers.out.1 >&2
 diff -I"time" solvers.out.2 solvers.out.3 >&2
 diff -I"time" solvers.out.4 solvers.out.5 >&2
 diff -I"time" solvers.out.6 solvers.out.7 >&2
-
-#=============================================================================
-# Concatenate all *.out.* files then compare with baseline case
-#=============================================================================
-
-cat solvers.out.* > solvers.out
-diff solvers.out solvers.saved >&2

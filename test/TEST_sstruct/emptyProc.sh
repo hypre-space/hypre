@@ -173,9 +173,3 @@ tail -3 emptyProc.out.138 > emptyProc.testdata.temp
 diff emptyProc.testdata emptyProc.testdata.temp >&2
 
 rm -f emptyProc.testdata emptyProc.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat emptyProc.out.* > emptyProc.out
-diff emptyProc.out emptyProc.saved >&2

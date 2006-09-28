@@ -26,8 +26,6 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
-# Concatenate *.out.* files then compare with baseline case
+#   no tests
 #=============================================================================
-cat hybridswitch.out.* > hybridswitch.out
-diff hybridswitch.out hybridswitch.saved >&2
 

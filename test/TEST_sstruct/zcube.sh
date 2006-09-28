@@ -36,9 +36,3 @@ tail -3 zcube.out.1 > zcube.testdata.temp
 diff zcube.testdata zcube.testdata.temp >&2
 
 rm -f zcube.testdata zcube.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat zcube.out.* > zcube.out
-diff zcube.out zcube.saved >&2

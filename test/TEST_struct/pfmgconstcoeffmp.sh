@@ -36,9 +36,3 @@ tail -3 pfmgconstcoeffmp.out.1 > pfmgconstcoeffmp.testdata.temp
 diff pfmgconstcoeffmp.testdata pfmgconstcoeffmp.testdata.temp  >&2
 
 rm -f pfmgconstcoeffmp.testdata pfmgconstcoeffmp.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat pfmgconstcoeffmp.out.* > pfmgconstcoeffmp.out
-diff pfmgconstcoeffmp.out pfmgconstcoeffmp.saved >&2

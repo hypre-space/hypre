@@ -74,9 +74,3 @@ tail -3 symm.out.35 > symm.testdata.temp
 diff symm.testdata symm.testdata.temp >&2
 
 rm -f symm.testdata symm.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat symm.out.* > symm.out
-diff symm.out symm.saved >&2

@@ -44,9 +44,3 @@ tail -3 periodic.out.31 > periodic.testdata.temp
 diff periodic.testdata periodic.testdata.temp >&2
 
 rm -f periodic.testdata periodic.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat periodic.out.* > periodic.out
-diff periodic.out periodic.saved >&2

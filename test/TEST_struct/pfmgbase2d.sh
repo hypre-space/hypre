@@ -47,9 +47,3 @@ tail -3 pfmgbase2d.out.5 > pfmgbase2d.testdata.temp
 diff pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
 
 rm -f pfmgbase2d.testdata pfmgbase2d.testdata.temp
-
-#=============================================================================
-# Concatenate *.out.* files then compare with baseline case
-#=============================================================================
-cat pfmgbase2d.out.* > pfmgbase2d.out
-diff pfmgbase2d.out pfmgbase2d.saved >&2
