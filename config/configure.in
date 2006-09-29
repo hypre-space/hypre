@@ -1,12 +1,12 @@
 dnl #BHEADER**********************************************************************
 dnl # Copyright (c) 2006   The Regents of the University of California.
 dnl # Produced at the Lawrence Livermore National Laboratory.
-dnl # Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+dnl # Written by the HYPRE team, UCRL-CODE-222953.
 dnl # All rights reserved.
 dnl #
 dnl # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
 dnl # Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-dnl # disclaimer and the GNU Lesser General Public License.
+dnl # disclaimer, contact information and the GNU Lesser General Public License.
 dnl #
 dnl # This program is free software; you can redistribute it and/or modify it
 dnl # under the terms of the GNU General Public License (as published by the Free
@@ -53,11 +53,11 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([HYPRE_NAME], [hypre])
-m4_define([HYPRE_VERSION], [1.12.0a])
-m4_define([HYPRE_DATE], [2006/07/26])
+m4_define([HYPRE_VERSION], [1.13.0b])
+m4_define([HYPRE_DATE], [2006/10/03])
 m4_define([HYPRE_TIME], [08:05:00])
 m4_define([HYPRE_DATETIME], [HYPRE_DATE HYPRE_TIME])
-m4_define([HYPRE_BUGS], [http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE])
+m4_define([HYPRE_BUGS], [hypre-support@llnl.gov])
 m4_define([HYPRE_TOP_SRC_DIR], [`pwd`])
 
 AC_PREREQ(2.59)
@@ -66,12 +66,12 @@ AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
  Produced at the Lawrence Livermore National Laboratory.
- Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+ Written by the HYPRE team, UCRL-CODE-222953.
  All rights reserved.
 
  This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- disclaimer and the GNU Lesser General Public License.
+ disclaimer, contact information and the GNU Lesser General Public License.
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License (as published by the Free

@@ -9,27 +9,27 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-# Copyright (c) 2006   The Regents of the University of California.
-#   Produced at the Lawrence Livermore National Laboratory.
-#   Written by the HYPRE team. UCRL-CODE-222953.
-#   All rights reserved.
+#  Copyright (c) 2006   The Regents of the University of California.
+#  Produced at the Lawrence Livermore National Laboratory.
+#  Written by the HYPRE team, UCRL-CODE-222953.
+#  All rights reserved.
 #
-#   This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-#   Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
-#   disclaimer, contact information and the GNU Lesser General Public License.
+#  This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+#  Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
+#  disclaimer, contact information and the GNU Lesser General Public License.
 #
-#   HYPRE is free software; you can redistribute it and/or modify it under the
-#   terms of the GNU General Public License (as published by the Free Software
-#   Foundation) version 2.1 dated February 1999.
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License (as published by the Free
+#  Software Foundation) version 2.1 dated February 1999.
 #
-#   HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
-#   WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
-#   FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
-#   Public License for more details.
+#  This program is distributed in the hope that it will be useful, but WITHOUT
+#  ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+#  FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+#  GNU General Public License for more details.
 #
-#   You should have received a copy of the GNU Lesser General Public License
-#   along with this program; if not, write to the Free Software Foundation,
-#   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#  You should have received a copy of the GNU Lesser General Public License
+#  along with this program; if not, write to the Free Software Foundation,
+#  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ## --------------------- ##
 ## M4sh Initialization.  ##
 ## --------------------- ##
@@ -336,7 +336,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK LN_S SET_MAKE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXXFLAGS ac_ct_CXX CXXCPP FFLAGS ac_ct_F77 FLIBS FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR EXAMPLEDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LINKDIR HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE HYPRE_FEI_SRC_DIR HYPRE_FEI_BASE_DIR HYPRE_FEI_SUBDIRS HYPRE_FEI_SUPERLU_FILES HYPRE_FEI_HYPRE_FILES HYPRE_FEI_FEMLI_FILES MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK LN_S SET_MAKE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXXFLAGS ac_ct_CXX CXXCPP FFLAGS ac_ct_F77 FLIBS FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR EXAMPLEDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_F77 LINK_CC LINK_CXX BUILD_F77_SHARED BUILD_CC_SHARED BUILD_CXX_SHARED HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LINKDIR HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE HYPRE_FEI_SRC_DIR HYPRE_FEI_BASE_DIR HYPRE_FEI_SUBDIRS HYPRE_FEI_SUPERLU_FILES HYPRE_FEI_HYPRE_FILES HYPRE_FEI_FEMLI_FILES MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1131,27 +1131,27 @@ Copyright (C) 2003 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
-Copyright (c) 2006   The Regents of the University of California.
-  Produced at the Lawrence Livermore National Laboratory.
-  Written by the HYPRE team. UCRL-CODE-222953.
-  All rights reserved.
+ Copyright (c) 2006   The Regents of the University of California.
+ Produced at the Lawrence Livermore National Laboratory.
+ Written by the HYPRE team, UCRL-CODE-222953.
+ All rights reserved.
 
-  This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-  Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
-  disclaimer, contact information and the GNU Lesser General Public License.
+ This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
+ disclaimer, contact information and the GNU Lesser General Public License.
 
-  HYPRE is free software; you can redistribute it and/or modify it under the
-  terms of the GNU General Public License (as published by the Free Software
-  Foundation) version 2.1 dated February 1999.
+ This program is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License (as published by the Free
+ Software Foundation) version 2.1 dated February 1999.
 
-  HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
-  WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
-  FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
-  Public License for more details.
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ GNU General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program; if not, write to the Free Software Foundation,
+ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 _ACEOF
   exit 0
 fi
@@ -1497,6 +1497,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
           ac_config_headers="$ac_config_headers HYPRE_config.h:config/HYPRE_config.h.in"
+
 
 
 ac_aux_dir=
@@ -2681,7 +2682,7 @@ test -n "$CC" || CC=""""
 
    elif test "$casc_using_mpi" = "no"
    then
-      for ac_prog in gcc icc xlc pgcc cc kcc
+      for ac_prog in xlc pgcc gcc icc cc kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2819,7 +2820,7 @@ test -n "$CXX" || CXX=""""
 
    elif test "$casc_using_mpi" = "no"
    then
-      for ac_prog in g++ gcc icpc icc xlC cxx pgCC KCC
+      for ac_prog in xlC icpc icc pgCC g++ gcc cxx KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2957,7 +2958,7 @@ test -n "$F77" || F77=""""
 
    elif test "$casc_using_mpi" = "no"
    then
-      for ac_prog in g77 ifort xlf pgf77 f77 kf77
+      for ac_prog in xlf ifort g77 pgf77 f77 kf77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5870,7 +5871,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5873:" \
+echo "$as_me:5874:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6066,7 +6067,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6069: \"$ac_link\") >&5
+(eval echo $as_me:6070: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6144,7 +6145,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6147: \"$ac_link\") >&5
+(eval echo $as_me:6148: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9260,12 +9261,12 @@ if test "$casc_using_fei" = "yes"
 then
    HYPRE_FEI_SRC_DIR="`pwd`/FEI_mv"
    HYPRE_FEI_SUBDIRS="fei-hypre femli"
-   HYPRE_FEI_HYPRE_FILES="`pwd`/FEI_mv/fei-hypre/*.o"
-   HYPRE_FEI_FEMLI_FILES="`pwd`/FEI_mv/femli/lib/*.o"
+   HYPRE_FEI_HYPRE_FILES="`pwd`/FEI_mv/fei-hypre/*.*o"
+   HYPRE_FEI_FEMLI_FILES="`pwd`/FEI_mv/femli/lib/*.*o"
    if test "$casc_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_SUPERLU_FILES="`pwd`/FEI_mv/SuperLU/*.o"
+      HYPRE_FEI_SUPERLU_FILES="`pwd`/FEI_mv/SuperLU/*.*o"
    else
       HYPRE_FEI_SUPERLU_FILES=
    fi
@@ -9282,7 +9283,6 @@ else
    HYPRE_FEI_HYPRE_FILES=
    HYPRE_FEI_FEMLI_FILES=
 fi
-
 
 echo "$as_me:$LINENO: checking for cabs in -lm" >&5
 echo $ECHO_N "checking for cabs in -lm... $ECHO_C" >&6
@@ -9358,6 +9358,83 @@ echo "$as_me:$LINENO: result: $ac_cv_lib_m_cabs" >&5
 echo "${ECHO_T}$ac_cv_lib_m_cabs" >&6
 if test $ac_cv_lib_m_cabs = yes; then
   LIBS="$LIBS -lm"
+fi
+
+
+echo "$as_me:$LINENO: checking for __gxx_personality_v0 in -lstdc++" >&5
+echo $ECHO_N "checking for __gxx_personality_v0 in -lstdc++... $ECHO_C" >&6
+if test "${ac_cv_lib_stdcpp___gxx_personality_v0+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lstdc++  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char __gxx_personality_v0 ();
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+__gxx_personality_v0 ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_stdcpp___gxx_personality_v0=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_stdcpp___gxx_personality_v0=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_stdcpp___gxx_personality_v0" >&5
+echo "${ECHO_T}$ac_cv_lib_stdcpp___gxx_personality_v0" >&6
+if test $ac_cv_lib_stdcpp___gxx_personality_v0 = yes; then
+  LIBS="$LIBS -lstdc++"
 fi
 
 
@@ -9750,25 +9827,47 @@ then
 fi
 fi
 
+HYPRE_INSTALLDIR="${prefix}"
+HYPRE_LIBINSTALL="${libdir}"
+HYPRE_INCINSTALL="${includedir}"
+
+hypre_platform=`uname`
+case $hypre_platform in
+   AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
+                       CFLAGS="${CFLAGS} -blpdata"
+                       CXXFLAGS="${CXXFLAGS} -blpdata"
+                       FFLAGS="${FFLAGS} -blpdata"
+   ;;
+esac
+
+LINK_F77="${F77}"
+LINK_CC="${CC}"
+LINK_CXX="${CXX}"
+
+HYPRE_LIBSUFFIX=".a"
+
 if test "$casc_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-
- case "${host}" in
-    *aix*)
-        CFLAGS="$CFLAGS -qmkshrobj"
-        CXXFLAGS="$CXXFLAGS -qmkshrobj"
-        FFLAGS="$CFLAGS -qmkshrobj"
-        ;;
-    *)
-        CFLAGS="$CFLAGS -fPIC"
-        CXXFLAGS="$CXXFLAGS -fPIC"
-        FFLAGS="$FFLAGS -fPIC"
-        ;;
- esac
-
-else
-   HYPRE_LIBSUFFIX=".a"
+   case $hypre_platform in
+      AIX* | aix* | Aix*) FFLAGS="${FFLAGS} -qmkshrobj"
+                          CFLAGS="${CFLAGS} -qmkshrobj"
+                          CXXFLAGS="${CXXFLAGS} -qmkshrobj"
+                          BUILD_F77_SHARED="${F77} -G"
+                          BUILD_CC_SHARED="${CC} -G"
+                          BUILD_CXX_SHARED="${CXX} -G"
+                          LINK_F77="${F77} -brtl"
+                          LINK_CC="${CC} -brtl"
+                          LINK_CXX="${CXX} -brtl"
+                          ;;
+                       *) FFLAGS="${FFLAGS} -fPIC"
+                          CFLAGS="${CFLAGS} -fPIC"
+                          CXXFLAGS="${CXXFLAGS} -fPIC"
+                          BUILD_F77_SHARED="${F77} -shared"
+                          BUILD_CC_SHARED="${CC} -shared"
+                          BUILD_CXX_SHARED="${CXX} -shared"
+                          ;;
+   esac
 fi
 
 if test "$casc_using_insure" = "yes"
@@ -9798,11 +9897,9 @@ then
 
 
    fi
+   LINK_F77="insure ${casc_insure_flags}"
    LINK_CC="insure ${casc_insure_flags}"
    LINK_CXX="insure ${casc_insure_flags}"
-else
-   LINK_CC="${CC}"
-   LINK_CXX="${CXX}"
 fi
 
 if test "$casc_using_purify" = "yes"
@@ -9811,10 +9908,6 @@ then
    CC="${HYPRE_PURIFY_PATH}/purify $CC ${casc_purify_flags}"
    CXX="${HYPRE_PURIFY_PATH}/purify $CXX ${casc_purify_flags}"
 fi
-
-HYPRE_INSTALLDIR="${prefix}"
-HYPRE_LIBINSTALL="${libdir}"
-HYPRE_INCINSTALL="${includedir}"
 
 
    if test $host_alias = $build_alias
@@ -9941,15 +10034,6 @@ _ACEOF
 
 
 
-
-hypre_platform=`uname`
-case $hypre_platform in
-   AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
-                       CFLAGS="${CFLAGS} -blpdata"
-                       CXXFLAGS="${CXXFLAGS} -blpdata"
-                       FFLAGS="${FFLAGS} -blpdata"
-   ;;
-esac
 
 
 
@@ -10123,6 +10207,11 @@ then
 else
    HYPRE_LINKDIR="`pwd`/hypre"
 fi
+
+
+
+
+
 
 
 
@@ -10854,8 +10943,12 @@ s,@EXAMPLEDIR@,$EXAMPLEDIR,;t t
 s,@HYPRE_ARCH@,$HYPRE_ARCH,;t t
 s,@HOSTNAME@,$HOSTNAME,;t t
 s,@F77FLAGS@,$F77FLAGS,;t t
+s,@LINK_F77@,$LINK_F77,;t t
 s,@LINK_CC@,$LINK_CC,;t t
 s,@LINK_CXX@,$LINK_CXX,;t t
+s,@BUILD_F77_SHARED@,$BUILD_F77_SHARED,;t t
+s,@BUILD_CC_SHARED@,$BUILD_CC_SHARED,;t t
+s,@BUILD_CXX_SHARED@,$BUILD_CXX_SHARED,;t t
 s,@HYPRE_INSTALLDIR@,$HYPRE_INSTALLDIR,;t t
 s,@HYPRE_LIBINSTALL@,$HYPRE_LIBINSTALL,;t t
 s,@HYPRE_INCINSTALL@,$HYPRE_INCINSTALL,;t t
