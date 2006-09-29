@@ -759,7 +759,7 @@ then
       AC_CHECK_PROGS(CC, [mpguidec guidec icc xlc pgcc cc], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, [xlc pgcc gcc icc cc kcc], [""])
+      AC_CHECK_PROGS(CC, [xlc gcc pgcc icc cc kcc], [""])
    else
       AC_CHECK_PROGS(CC, [mpxlc mpcc mpicc mpiicc mpipgcc], [""])
    fi
