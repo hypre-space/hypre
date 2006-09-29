@@ -51,6 +51,4 @@ announce)", "New Beta Release Announcements (hypre-beta-announce), or
 "Hypre Users (hypre-users)" use the `Mailing Lists' link on the HYPRE home page.
 
 We appreciate feedback from users of this package. Please submit
-comments, suggestions, and bug reports via:
-
-    http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE
+comments, suggestions, and issue reports to hypre-support@llnl.gov/
