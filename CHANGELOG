@@ -25,8 +25,6 @@
 #EHEADER**********************************************************************
 
 
-
-
 #=============================================================================
 #
 # This file chronicles user-level changes/additions to hypre, beginning
@@ -34,7 +32,7 @@
 #
 #=============================================================================
 
-Version 1.12.0b released, 2006/??/??.
+Version 1.13.0b released, 2006/10/03.
 
 - Babel-based interface updated to Babel version 1.0.0, plus various improvements,
   such as an interface to the hypre error handler.  Pre-built interfaces are included
@@ -55,7 +53,9 @@ Version 1.12.0b released, 2006/??/??.
   NOTE: the directory where the shared libraries reside MUST be defined in the
         LD_LIBRARY_PATH variable.
 
--incorporated GNU Lesser General Public License
+- incorporated GNU Lesser General Public License
+
+- Issure tracking now using ROundup, send email to hypre-support@llnl.gov
 
 ********************************************************************
 Version 1.12.0a released, 2006/07/26.
