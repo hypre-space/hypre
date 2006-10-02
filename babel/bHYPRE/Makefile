@@ -67,7 +67,7 @@ FILES = ${IMPLSRCS} ${IORSRCS_NONNULL} ${SKELSRCS} ${STUBSRCS} \
  bHYPRE_Extensions.c
 
 OBJS = ${FILES:.c=.o}
-SHARED_OBJS = ${FILES:.c=.lo}
+# SHARED_OBJS = ${FILES:.c=.lo}
 
 ##################################################################
 # Targets
@@ -95,13 +95,31 @@ libbHYPRE.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libbHYPRE.so: ${OBJS} ${SHARED_OBJS}
+libbHYPRE.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${LINK_CC} -o $@ -shared ${OBJS} -L${HYPRE_LIB_INSTALL} -lHYPRE -lsidl-1.0.0
-
+	${BUILD_CC_SHARED} -o $@ ${OBJS} -L${HYPRE_LIB_INSTALL} \
+	-lHYPRE_DistributedMatrixPilutSolver\
+	-lHYPRE_DistributedMatrixPilutSolver\
+	-lHYPRE_DistributedMatrix\
+	-lHYPRE_Euclid\
+	-lHYPRE_IJ_mv\
+	-lHYPRE_krylov\
+	-lHYPRE_MatrixMatrix\
+	-lHYPRE_multivector\
+	-lHYPRE_ParaSails\
+	-lHYPRE_parcsr_block_mv\
+	-lHYPRE_parcsr_ls\
+	-lHYPRE_parcsr_mv\
+	-lHYPRE_seq_mv\
+	-lHYPRE_sstruct_ls\
+	-lHYPRE_sstruct_mv\
+	-lHYPRE_struct_ls\
+	-lHYPRE_struct_mv\
+	-lHYPRE_superlu\
+	-lHYPRE_utilities\
+	-lsidl-1.0.0\
+	-lsidl
 
 ${OBJS}: ${HEADERS}
 
-%.lo: %.c
-	$(LTCOMPILE) -c -o $@ $<
 
