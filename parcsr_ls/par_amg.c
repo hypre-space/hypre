@@ -1929,7 +1929,7 @@ hypre_BoomerAMGSetPrintFileName( void       *data,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
-   if( strlen(print_file_name)<=256 );
+   if( strlen(print_file_name) > 256 );
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
