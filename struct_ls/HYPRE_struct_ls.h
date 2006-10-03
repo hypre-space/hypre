@@ -199,6 +199,12 @@ int HYPRE_StructPFMGSetMaxIter(HYPRE_StructSolver solver,
                                int                max_iter);
 
 /**
+ * (Optional) Set maximum number of levels.
+ **/
+int HYPRE_StructPFMGSetMaxLevels(HYPRE_StructSolver solver, 
+                                 int                max_levels);
+
+/**
  * (Optional) Additionally require that the relative difference in
  * successive iterates be small.
  **/
