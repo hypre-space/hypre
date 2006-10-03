@@ -861,7 +861,6 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
          recv_boxes = comm_boxes;
          recv_procs = comm_procs;
          recv_rboxnums = comm_boxnums;
-         hypre_TFree(comm_boxnums);
          break;
       }
    }
