@@ -3500,7 +3500,7 @@ void HYPRE_LinSysCore::setupPreconAMS()
    if (MLI_NodalCoord_ == NULL)
    {
       HYPRE_ParVector amsX, amsY, amsZ;
-      HYPRE_LSI_BuildNodalCoordinates(amsX,amsY,amsZ);
+      HYPRE_LSI_BuildNodalCoordinates(&amsX,&amsY,&amsZ);
       HYPRE_AMSSetCoordinateVectors(HYPrecon_,amsX,amsY,amsZ);
    }
    // this is used to tell AMS that mass matrix has 0 coeff 
@@ -5189,8 +5189,8 @@ void HYPRE_LinSysCore::FE_loadElemMatrix(int elemID, int nNodes,
 // build nodal coordinates
 //---------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::HYPRE_LSI_BuildNodalCoordinates(HYPRE_ParVector X,
-                       HYPRE_ParVector Y, HYPRE_ParVector Z)
+void HYPRE_LinSysCore::HYPRE_LSI_BuildNodalCoordinates(HYPRE_ParVector *X,
+                       HYPRE_ParVector *Y, HYPRE_ParVector *Z)
 {
    return;
 }
