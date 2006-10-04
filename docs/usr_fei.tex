@@ -182,7 +182,8 @@ the {\tt FEI} via
 Now the global stiffness matrix and the corresponding right hand side
 have been assembled. Before the linear system is solved, a number of 
 solver parameters have to be passed into the {\tt FEI}. A detailed description
-of the solver parameters is given in Section 3. An example is given below
+of the solver parameters is given in the reference manual. An example is 
+given below
 \begin{tabbing}
 \hspace{0.5in} \= {\tt nParams = 5;} \\
                \> {\tt paramStrings = new char*[nParams];} \\
@@ -219,7 +220,7 @@ This section describes two additional classes (other than {\tt HYPRE\_FEMesh})
 that users may need - {\tt HYPRE\_FEMatrix} and {\tt HYPRE\_FEVector}. 
 These classes are useful if the global finite element stiffness matrix is
 to be solved using solvers other than those available via the finite element
-interface (for example, via the IJ interface). The key task is to extract
+interface. The key task is to extract
 the matrix and vector internal to the {\tt FEI}. The matrix can be extracted
 by first instantiating an {\tt HYPRE\_FEMatrix} object
 \begin{tabbing}
