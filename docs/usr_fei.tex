@@ -230,7 +230,7 @@ where {\tt hypreMesh} is the object created before, and {\tt feMatrix} is
 the pointer to the new object.
 The \hypre{} matrix in {\tt ParCSR} format can then be extracted by
 \begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMatrixGetObject(feMatrix, \&parcsrMatrix);}
+\hspace{0.5in} \= {\tt HYPRE\_FEMatrixGetObject(feMatrix, (void **) \&parcsrMatrix);}
 \end{tabbing}
 Similarly, the right hand side vector can be extracted by
 \begin{tabbing}
@@ -238,12 +238,12 @@ Similarly, the right hand side vector can be extracted by
 \end{tabbing}
 and
 \begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEVectorGetRHS(feMatrix, \&rhsVector);}
+\hspace{0.5in} \= {\tt HYPRE\_FEVectorGetRHS(feMatrix, (void**) \&parVectorRHS);}
 \end{tabbing}
 When the solution of the linear system is obtained, it can be given
 to the {\tt FEI} by
 \begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEVectorSetSol(feMatrix, solVector);}
+\hspace{0.5in} \= {\tt HYPRE\_FEVectorSetSol(feMatrix, (void*) parVectorSol);}
 \end{tabbing}
 Finally, the objects are destroyed by the corresponding destroy functions.
 
