@@ -1,0 +1,3 @@
+BABEL_MAKEFILE_NAME = babel.make
+PYTHON_SETUP_NAME = setup.py
+PYSETUP_DIRS = bHYPREClient-P/

@@ -1,0 +1,24 @@
+# Python has its own build system, so this makefile just runs python.
+
+include ../../config/Makefile.config
+
+# TO DO: >>> This PYTHON should be derived from "--enable-python=pyMPI" in the
+# >>> hypre configure line.  That requires changes to the configure file. >>>
+PYTHON = pyMPI
+PYTHON_HYPRE_LIBRARY_DIR = ${HOME}/lib/pyMPI2.4/site-packages/bHYPRE
+HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl
+
+all:
+	${PYTHON} ./setup.py build \
+	--include-dirs=${HYPRE_INC_INSTALL} \
+	--library-dirs=${HYPRE_LIB_INSTALL} \
+	--extra-library='bHYPRE' --extra-library='HYPRE'
+	${PYTHON} ./setup.py install 
+	cp ${HYPRE_LIB_INSTALL}/libbHYPRE${HYPRE_LIB_SUFFIX} ${PYTHON_HYPRE_LIBRARY_DIR}
+
+install: all
+ 
+clean:
+	rm -rf build
+
+distclean: clean
