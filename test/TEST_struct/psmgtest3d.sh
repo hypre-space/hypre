@@ -31,11 +31,23 @@
 # full periodic case that satifies compatibility condition, it (the rhs)
 # is dependent on blocking and parallel partitioning. Thus results will
 # differ with number of blocks and processors.
+#
+#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 psmgtest3d.out.0 > psmgtest3d.testdata
-
 tail -3 psmgtest3d.out.1 > psmgtest3d.testdata.temp
 diff psmgtest3d.testdata psmgtest3d.testdata.temp >&2
 
-rm -f psmgtest3d.testdata psmgtest3d.testdata.temp
+cat psmgtest3d.testdata > psmgtest3d.tests
+cat psmgtest3d.testdata.temp >> psmgtest3d.tests
+
+#=============================================================================
+#   compare with the baseline case
+#=============================================================================
+diff psmgtest3d.saved psmgtest3d.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f psmgtest3d.testdata* psmgtest3d.tests

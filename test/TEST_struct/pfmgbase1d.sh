@@ -27,11 +27,23 @@
 
 #=============================================================================
 # struct: Test PFMG 1d run as 2d and 3d by diffing against each other.
+#
+#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 pfmgbase1d.out.0 > pfmgbase1d.testdata
-
 tail -3 pfmgbase1d.out.1 > pfmgbase1d.testdata.temp
 diff pfmgbase1d.testdata pfmgbase1d.testdata.temp  >&2
 
-rm -f pfmgbase1d.testdata pfmgbase1d.testdata.temp
+cat pfmgbase1d.testdata > pfmgbase1d.tests
+cat pfmgbase1d.testdata.temp >> pfmgbase1d.tests
+
+#=============================================================================
+#   compare with the baseline case
+#=============================================================================
+diff pfmgbase1d.saved pfmgbase1d.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f pfmgbase1d.testdata* pfmgbase1d.tests

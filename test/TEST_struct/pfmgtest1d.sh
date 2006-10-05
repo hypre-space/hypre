@@ -26,5 +26,26 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
-#  no tests
+#    for each test, save the results for comparison with the baseline case
 #=============================================================================
+
+tail -3 pfmgtest1d.out.0 > pfmgtest1d.testdata
+cat pfmgtest1d.testdata > pfmgtest1d.tests
+#=============================================================================
+
+tail -3 pfmgtest1d.out.1 > pfmgtest1d.testdata
+cat pfmgtest1d.testdata > pfmgtest1d.tests
+#=============================================================================
+
+tail -3 pfmgtest1d.out.2 > pfmgtest1d.testdata
+cat pfmgtest1d.testdata >> pfmgtest1d.tests
+
+#=============================================================================
+#    compare with the baseline case
+#=============================================================================
+diff pfmgtest1d.saved pfmgtest1d.tests >&2
+
+#=============================================================================
+#    remove temporary files
+#=============================================================================
+rm -f pfmgtest1d.testdata* pfmgtest1d.tests

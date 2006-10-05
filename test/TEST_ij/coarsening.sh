@@ -25,8 +25,55 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+#=============================================================================
+#  for each test save the results for comparison with baseline case
+#=============================================================================
+tail -18 coarsening.out.0 > coarsening.testdata
+head coarsening.testdata > coarsening.testdata.tmp0
 
+cat coarsening.testdata.tmp0 > coarsening.tests
+#=============================================================================
+tail -18 coarsening.out.1 > coarsening.testdata
+head coarsening.testdata > coarsening.testdata.tmp0
+
+cat coarsening.testdata.tmp0 >> coarsening.tests
+#=============================================================================
+tail -18 coarsening.out.2 > coarsening.testdata
+head coarsening.testdata > coarsening.testdata.tmp0
+
+cat coarsening.testdata.tmp0 >> coarsening.tests
+#=============================================================================
+tail -18 coarsening.out.3 > coarsening.testdata
+head coarsening.testdata > coarsening.testdata.tmp0
+
+cat coarsening.testdata.tmp0 >> coarsening.tests
+#=============================================================================
+tail -18 coarsening.out.4 > coarsening.testdata
+head coarsening.testdata > coarsening.testdata.tmp0
+
+cat coarsening.testdata.tmp0 >> coarsening.tests
+#=============================================================================
+tail -18 coarsening.out.5 > coarsening.testdata
+head coarsening.testdata > coarsening.testdata.tmp0
+
+cat coarsening.testdata.tmp0 >> coarsening.tests
+#=============================================================================
+tail -4 coarsening.out.6 > coarsening.testdata
+head coarsening.testdata > coarsening.testdata.tmp0
+
+cat coarsening.testdata.tmp0 >> coarsening.tests
+#=============================================================================
+tail -4 coarsening.out.7 > coarsening.testdata
+head coarsening.testdata > coarsening.testdata.tmp0
+
+cat coarsening.testdata.tmp0 >> coarsening.tests
 
 #=============================================================================
-#  no tests
+#   compare with baseline case
 #=============================================================================
+diff coarsening.saved coarsening.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f coarsening.testdata coarsening.testdata.tmp0 coarsening.tests

@@ -26,51 +26,83 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
+#   for each test, save the results for comparison with the baseline case
+#=============================================================================
+
+#=============================================================================
 # sstruct: Check SetSymmetric for HYPRE_SSTRUCT data type (2D)
 #=============================================================================
 
 tail -3 symm.out.20 > symm.testdata
-
 tail -3 symm.out.21 > symm.testdata.temp
 diff symm.testdata symm.testdata.temp >&2
+
+cat symm.testdata > symm.tests
+cat symm.testdata.temp >> symm.tests
+#=============================================================================
 
 tail -3 symm.out.22 > symm.testdata.temp
 diff symm.testdata symm.testdata.temp >&2
 
+cat symm.testdata.temp >> symm.tests
+#=============================================================================
+
 tail -3 symm.out.23 > symm.testdata.temp
 diff symm.testdata symm.testdata.temp >&2
+
+cat symm.testdata.temp >> symm.tests
 
 #=============================================================================
 # sstruct: Check SetSymmetric for HYPRE_PARCSR data type (2D)
 #=============================================================================
 
 tail -3 symm.out.24 > symm.testdata
-
 tail -3 symm.out.25 > symm.testdata.temp
 diff symm.testdata symm.testdata.temp >&2
+
+cat symm.testdata >> symm.tests
+cat symm.testdata.temp >> symm.tests
 
 #=============================================================================
 # sstruct: Check SetSymmetric for HYPRE_SSTRUCT data type (3D)
 #=============================================================================
 
 tail -3 symm.out.30 > symm.testdata
-
 tail -3 symm.out.31 > symm.testdata.temp
 diff symm.testdata symm.testdata.temp >&2
+
+cat symm.testdata >> symm.tests
+cat symm.testdata.temp >> symm.tests
+#=============================================================================
 
 tail -3 symm.out.32 > symm.testdata.temp
 diff symm.testdata symm.testdata.temp >&2
 
+cat symm.testdata.temp >> symm.tests
+#=============================================================================
+
 tail -3 symm.out.33 > symm.testdata.temp
 diff symm.testdata symm.testdata.temp >&2
+
+cat symm.testdata.temp >> symm.tests
 
 #=============================================================================
 # sstruct: Check SetSymmetric for HYPRE_PARCSR data type (3D)
 #=============================================================================
 
 tail -3 symm.out.34 > symm.testdata
-
 tail -3 symm.out.35 > symm.testdata.temp
 diff symm.testdata symm.testdata.temp >&2
 
-rm -f symm.testdata symm.testdata.temp
+cat symm.testdata >> symm.tests
+cat symm.testdata.temp >> symm.tests
+
+#=============================================================================
+#   compare with baseline case
+#=============================================================================
+diff symm.saved symm.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f symm.testdata* symm.tests

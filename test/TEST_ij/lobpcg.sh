@@ -25,8 +25,25 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+#=============================================================================
+#  for each test save the results for comparison with the baseline case
+#=============================================================================
+tail -14  lobpcg.out.vfromfile > lobpcg.testdata
+head lobpcg.testdata > lobpcg.testdata.tmp
 
+cat lobpcg.testdata.tmp > lobpcg.tests
+#=============================================================================
+tail -16 lobpcg.out.vout.1 > lobpcg.testdata
+head lobpcg.testdata > lobpcg.testdata.tmp
+
+cat lobpcg.testdata.tmp >> lobpcg.tests
 
 #=============================================================================
-# no tests
+#  compare with the baseline case
 #=============================================================================
+diff lobpcg.saved lobpcg.tests >&2
+
+#=============================================================================
+#  remove temporary files
+#=============================================================================
+rm -f lobpcg.testdat* lobpcg.tests

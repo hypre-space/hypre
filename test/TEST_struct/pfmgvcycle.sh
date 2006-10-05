@@ -26,5 +26,22 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
-#  no tests
+#    for each test, save the results for comparison with the baseline case
 #=============================================================================
+
+tail -3 pfmgvcycle.out.0 > pfmgvcycle.testdata
+cat pfmgvcycle.testdata > pfmgvcycle.tests
+#=============================================================================
+
+tail -3 pfmgvcycle.out.1 > pfmgvcycle.testdata
+cat pfmgvcycle.testdata > pfmgvcycle.tests
+
+#=============================================================================
+#    compare with the baseline case
+#=============================================================================
+diff pfmgvcycle.saved pfmgvcycle.tests >&2
+
+#=============================================================================
+#    remove temporary files
+#=============================================================================
+rm -f pfmgvcycle.testdata* pfmgvcycle.tests

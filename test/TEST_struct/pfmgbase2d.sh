@@ -27,23 +27,47 @@
 
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base "true" 2d case
+#
+#    for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 pfmgbase2d.out.0 > pfmgbase2d.testdata
-
 tail -3 pfmgbase2d.out.1 > pfmgbase2d.testdata.temp
 diff pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
+
+cat pfmgbase2d.testdata > pfmgbase2d.tests
+cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
+#=============================================================================
 
 tail -3 pfmgbase2d.out.2 > pfmgbase2d.testdata.temp
 diff pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
 
+cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
+#=============================================================================
+
 tail -3 pfmgbase2d.out.3 > pfmgbase2d.testdata.temp
 diff pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
+
+cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
+#=============================================================================
 
 tail -3 pfmgbase2d.out.4 > pfmgbase2d.testdata.temp
 diff pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
 
+cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
+#=============================================================================
+
 tail -3 pfmgbase2d.out.5 > pfmgbase2d.testdata.temp
 diff pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
 
-rm -f pfmgbase2d.testdata pfmgbase2d.testdata.temp
+cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
+
+#=============================================================================
+#   compare with the baseline case
+#=============================================================================
+diff pfmgbase2d.saved pfmgbase2d.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f pfmgbase2d.testdata* pfmgbase2d.tests

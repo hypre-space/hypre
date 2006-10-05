@@ -26,5 +26,28 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
-#   no test
+# struct: Test 1d run as 2d and 3d by diffing against each other.
+#
+#   for each test, save the results for comparison with the baseline case
 #=============================================================================
+
+tail -3 smgtest1d.out.0 > smgtest1d.testdata
+cat smgtest1d.testdata > smgtest1d.tests
+#=============================================================================
+
+tail -3 smgtest1d.out.1 > smgtest1d.testdata
+cat smgtest1d.testdata >> smgtest1d.tests
+#=============================================================================
+
+tail -3 smgtest1d.out.2 > smgtest1d.testdata
+cat smgtest1d.testdata >> smgtest1d.tests
+
+#=============================================================================
+#   compare with the baseline case
+#=============================================================================
+diff smgtest1d.saved smgtest1d.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f smgtest1d.testdata* smgtest1d.tests

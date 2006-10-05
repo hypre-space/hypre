@@ -26,21 +26,37 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
+#    for each test, save the results for comparison with the baseline case
+#=============================================================================
+
+#=============================================================================
 # Check SetNeighborBox for periodic problems (2D)
 #=============================================================================
 
 tail -3 periodic.out.20 > periodic.testdata
-
 tail -3 periodic.out.21 > periodic.testdata.temp
 diff periodic.testdata periodic.testdata.temp >&2
 
+cat periodic.testdata > periodic.tests
+cat periodic.testdata.temp >> periodic.tests
+
 #=============================================================================
-# Check SetNeighborBox for periodic problems (2D)
+# Check SetNeighborBox for periodic problems (3D)
 #=============================================================================
 
 tail -3 periodic.out.30 > periodic.testdata
-
 tail -3 periodic.out.31 > periodic.testdata.temp
 diff periodic.testdata periodic.testdata.temp >&2
 
-rm -f periodic.testdata periodic.testdata.temp
+cat periodic.testdata >> periodic.tests
+cat periodic.testdata.temp >> periodic.tests
+
+#=============================================================================
+#   compare with baseline case
+#=============================================================================
+diff periodic.saved periodic.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f periodic.testdata* periodic.tests

@@ -27,14 +27,30 @@
 
 #=============================================================================
 # sstruct: Test various blockings and distributions of default problem
+#
+#    for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 default2d.out.0 > default2d.testdata
+cat default2d.testdata > default2d.tests
+#=============================================================================
 
 tail -3 default2d.out.1 > default2d.testdata.temp
 diff default2d.testdata default2d.testdata.temp >&2
 
+cat default2d.testdata.temp >> default2d.tests
+#=============================================================================
 tail -3 default2d.out.2 > default2d.testdata.temp
 diff default2d.testdata default2d.testdata.temp >&2
 
-rm -f default2d.testdata default2d.testdata.temp
+cat default2d.testdata.temp >> default2d.tests
+
+#=============================================================================
+#    compare with the baseline case
+#=============================================================================
+diff default2d.saved default2d.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f default2d.testdata* default2d.tests

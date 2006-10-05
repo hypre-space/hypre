@@ -27,23 +27,47 @@
 
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base 3d case
+#
+#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 psmgbase3d.out.0 > psmgbase3d.testdata
-
 tail -3 psmgbase3d.out.1 > psmgbase3d.testdata.temp
 diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
+
+cat psmgbase3d.testdata > psmgbase3d.tests
+cat psmgbase3d.testdata.temp >> psmgbase3d.tests
+#=============================================================================
 
 tail -3 psmgbase3d.out.2 > psmgbase3d.testdata.temp
 diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
 
+cat psmgbase3d.testdata.temp >> psmgbase3d.tests
+#=============================================================================
+
 tail -3 psmgbase3d.out.3 > psmgbase3d.testdata.temp
 diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
+
+cat psmgbase3d.testdata.temp >> psmgbase3d.tests
+#=============================================================================
 
 tail -3 psmgbase3d.out.4 > psmgbase3d.testdata.temp
 diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
 
+cat psmgbase3d.testdata.temp >> psmgbase3d.tests
+#=============================================================================
+
 # tail -3 psmgbase3d.out.5 > psmgbase3d.testdata.temp
 # diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
+#
+# cat psmgbase3d.testdata.temp >> psmgbase3d.tests
 
-rm -f psmgbase3d.testdata psmgbase3d.testdata.temp
+#=============================================================================
+#    compare with the baseline case
+#=============================================================================
+diff psmgbase3d.saved psmgbase3d.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f psmgbase3d.testdata* psmgbase3d.tests

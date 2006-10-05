@@ -25,20 +25,36 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 #=============================================================================
 # IJ: tests different ways of generating IJMatrix diffs it against 1 proc case
+#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
-tail -21 matrix.out.0 > matrix.testdata.tmp0
+tail -18 matrix.out.0 > matrix.testdata.tmp0
 head matrix.testdata.tmp0 > matrix.testdata
 
-tail -21 matrix.out.1 > matrix.testdata.tmp0
+cat matrix.testdata > matrix.tests
+#=============================================================================
+
+tail -18 matrix.out.1 > matrix.testdata.tmp0
 head matrix.testdata.tmp0 > matrix.testdata.temp
 diff matrix.testdata matrix.testdata.temp >&2
 
-tail -21 matrix.out.2 > matrix.testdata.tmp0
+cat matrix.testdata.temp >> matrix.tests
+#=============================================================================
+
+tail -18 matrix.out.2 > matrix.testdata.tmp0
 head matrix.testdata.tmp0 > matrix.testdata.temp
 diff matrix.testdata matrix.testdata.temp >&2
 
-rm -f matrix.testdata matrix.testdata.tmp0 matrix.testdata.temp
+cat matrix.testdata.temp >> matrix.tests
+
+#=============================================================================
+#   compare with baseline case
+#=============================================================================
+diff matrix.saved matrix.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f matrix.testdata* matrix.tests

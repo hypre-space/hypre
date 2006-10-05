@@ -25,8 +25,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 #=============================================================================
 # The outputs below should differ only in timings.
 #=============================================================================
@@ -35,3 +33,56 @@ diff -I"time" solvers.out.0 solvers.out.1 >&2
 diff -I"time" solvers.out.2 solvers.out.3 >&2
 diff -I"time" solvers.out.4 solvers.out.5 >&2
 diff -I"time" solvers.out.6 solvers.out.7 >&2
+
+#=============================================================================
+#  for each test, save the results for comparison with the baseline case
+#=============================================================================
+tail -12 solvers.out.0 > solvers.testdata.tmp0
+head solvers.testdata.tmp0 > solvers.testdata
+
+cat solvers.testdata > solvers.tests
+#=============================================================================
+tail -12 solvers.out.1 > solvers.testdata.tmp0
+head solvers.testdata.tmp0 > solvers.testdata
+
+cat solvers.testdata >> solvers.tests
+#=============================================================================
+tail -12 solvers.out.2 > solvers.testdata.tmp0
+head solvers.testdata.tmp0 > solvers.testdata
+
+cat solvers.testdata >> solvers.tests
+#=============================================================================
+tail -12 solvers.out.3 > solvers.testdata.tmp0
+head solvers.testdata.tmp0 > solvers.testdata
+
+cat solvers.testdata >> solvers.tests
+#=============================================================================
+tail -4 solvers.out.4 > solvers.testdata.tmp0
+head solvers.testdata.tmp0 > solvers.testdata
+
+cat solvers.testdata >> solvers.tests
+#=============================================================================
+tail -4 solvers.out.5 > solvers.testdata.tmp0
+head solvers.testdata.tmp0 > solvers.testdata
+
+cat solvers.testdata >> solvers.tests
+#=============================================================================
+tail -4 solvers.out.6 > solvers.testdata.tmp0
+head solvers.testdata.tmp0 > solvers.testdata
+
+cat solvers.testdata >> solvers.tests
+#=============================================================================
+tail -4 solvers.out.7 > solvers.testdata.tmp0
+head solvers.testdata.tmp0 > solvers.testdata
+
+cat solvers.testdata >> solvers.tests
+
+#=============================================================================
+#  compare with the baseline case
+#=============================================================================
+diff solvers.saved solvers.tests >&2
+
+#=============================================================================
+#  remove temporary files
+#=============================================================================
+rm -f solvers.testdata solvers.testdata.tmp0 solvers.tests

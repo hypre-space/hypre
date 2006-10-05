@@ -27,29 +27,58 @@
 
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base 3d case
+#
+#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 smgbase3d.out.0 > smgbase3d.testdata
-
 tail -3 smgbase3d.out.1 > smgbase3d.testdata.temp
 diff smgbase3d.testdata smgbase3d.testdata.temp >&2
+
+cat smgbase3d.testdata > smgbase3d.tests
+cat smgbase3d.testdata.temp >> smgbase3d.tests
+#=============================================================================
 
 tail -3 smgbase3d.out.2 > smgbase3d.testdata.temp
 diff smgbase3d.testdata smgbase3d.testdata.temp >&2
 
+cat smgbase3d.testdata.temp >> smgbase3d.tests
+#=============================================================================
+
 tail -3 smgbase3d.out.3 > smgbase3d.testdata.temp
 diff smgbase3d.testdata smgbase3d.testdata.temp >&2
+
+cat smgbase3d.testdata.temp >> smgbase3d.tests
+#=============================================================================
 
 tail -3 smgbase3d.out.4 > smgbase3d.testdata.temp
 diff smgbase3d.testdata smgbase3d.testdata.temp >&2
 
+cat smgbase3d.testdata.temp >> smgbase3d.tests
+#=============================================================================
+
 # tail -3 smgbase3d.out.5 > smgbase3d.testdata.temp
 # diff smgbase3d.testdata smgbase3d.testdata.temp >&2
+#
+# cat smgbase3d.testdata.temp >> smgbase3d.tests
+#=============================================================================
 # 
 # tail -3 smgbase3d.out.6 > smgbase3d.testdata.temp
 # diff smgbase3d.testdata smgbase3d.testdata.temp >&2
+# cat smgbase3d.testdata.temp >> smgbase3d.tests
+#=============================================================================
 
 tail -3 smgbase3d.out.7 > smgbase3d.testdata.temp
 diff smgbase3d.testdata smgbase3d.testdata.temp >&2
 
-rm -f smgbase3d.testdata smgbase3d.testdata.temp
+cat smgbase3d.testdata.temp >> smgbase3d.tests
+
+#=============================================================================
+#   compare with the baseline case
+#=============================================================================
+diff smgbase3d.saved smgbase3d.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f smgbase3d.testdata* smgbase3d.tests

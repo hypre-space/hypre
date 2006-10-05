@@ -28,14 +28,31 @@
 #=============================================================================
 # sstruct: Test SetNeighborBox by comparing one-part problem
 #          against equivalent multi-part problems
+#
+#    for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 cube.out.0 > cube.testdata
+cat cube.testdata > cube.tests
+#=============================================================================
 
 tail -3 cube.out.1 > cube.testdata.temp
 diff cube.testdata cube.testdata.temp >&2
 
+cat cube.testdata.temp >> cube.tests
+#=============================================================================
+
 tail -3 cube.out.2 > cube.testdata.temp
 diff cube.testdata cube.testdata.temp >&2
 
-rm -f cube.testdata cube.testdata.temp
+cat cube.testdata.temp >> cube.tests
+
+#=============================================================================
+#    compare with the baseline case
+#=============================================================================
+diff cube.saved cube.tests >&2
+
+#=============================================================================
+#    remove temporary files
+#=============================================================================
+rm -f cube.testdata* cube.tests

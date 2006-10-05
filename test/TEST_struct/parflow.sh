@@ -26,27 +26,48 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
+#   for each test, save the results for comparison with the baseline case
+#=============================================================================
+
+#=============================================================================
 # struct: Test parallel and blocking by diffing against base 3d case
 #=============================================================================
 
 tail -3 parflow.out.0 > parflow.testdata
-
 tail -3 parflow.out.1 > parflow.testdata.temp
 diff parflow.testdata parflow.testdata.temp >&2
+
+cat parflow.testdata > parflow.tests
+cat parflow.testdata.temp >> parflow.tests
+#=============================================================================
 
 tail -3 parflow.out.2 > parflow.testdata.temp
 diff parflow.testdata parflow.testdata.temp >&2
 
+cat parflow.testdata.temp >> parflow.tests
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base 2d case
 #=============================================================================
 
 tail -3 parflow.out.3 > parflow.testdata
-
 tail -3 parflow.out.4 > parflow.testdata.temp
 diff parflow.testdata parflow.testdata.temp >&2
+
+cat parflow.testdata >> parflow.tests
+cat parflow.testdata.temp >> parflow.tests
+#=============================================================================
 
 tail -3 parflow.out.5 > parflow.testdata.temp
 diff parflow.testdata parflow.testdata.temp >&2
 
-rm -f parflow.testdata parflow.testdata.temp
+cat parflow.testdata.temp >> parflow.tests
+
+#=============================================================================
+#   compare with baseline case
+#=============================================================================
+diff parflow.saved parflow.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f parflow.testdata* parflow.tests

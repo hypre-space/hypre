@@ -27,29 +27,59 @@
 
 #=============================================================================
 # struct: Test PFMG parallel and blocking by diffing against base 3d case
+#
+#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 pfmgbase3d.out.0 > pfmgbase3d.testdata
-
 tail -3 pfmgbase3d.out.1 > pfmgbase3d.testdata.temp
 diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
+
+cat pfmgbase3d.testdata > pfmgbase3d.tests
+cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
+#=============================================================================
 
 tail -3 pfmgbase3d.out.2 > pfmgbase3d.testdata.temp
 diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
+cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
+#=============================================================================
+
 tail -3 pfmgbase3d.out.3 > pfmgbase3d.testdata.temp
 diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
+
+cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
+#=============================================================================
 
 tail -3 pfmgbase3d.out.4 > pfmgbase3d.testdata.temp
 diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
+cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
+#=============================================================================
+
 tail -3 pfmgbase3d.out.5 > pfmgbase3d.testdata.temp
 diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
+
+cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
+#=============================================================================
 
 tail -3 pfmgbase3d.out.6 > pfmgbase3d.testdata.temp
 diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
+cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
+#=============================================================================
+
 tail -3 pfmgbase3d.out.7 > pfmgbase3d.testdata.temp
 diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
-rm -f pfmgbase3d.testdata pfmgbase3d.testdata.temp
+cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
+
+#=============================================================================
+#     compare with baseline case
+#=============================================================================
+diff pfmgbase3d.saved pfmgbase3d.tests >&2
+
+#=============================================================================
+#     remove temporary files
+#=============================================================================
+rm -f pfmgbase3d.testdata* pfmgbase3d.tests

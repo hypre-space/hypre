@@ -27,17 +27,30 @@
 
 #=============================================================================
 # sstruct: Test various blockings and distributions of default problem
+#  for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 neumann.out.0 > neumann.testdata
-
 tail -3 neumann.out.2 > neumann.testdata.temp
 diff neumann.testdata neumann.testdata.temp >&2
 
+cat neumann.testdata > neumann.tests
+cat neumann.testdata.temp >> neumann.tests
+#=============================================================================
 
 tail -3 neumann.out.1 > neumann.testdata
-
 tail -3 neumann.out.3 > neumann.testdata.temp
 diff neumann.testdata neumann.testdata.temp >&2
 
-rm -f neumann.testdata neumann.testdata.temp
+cat neumann.testdata >> neumann.tests
+cat neumann.testdata.temp >> neumann.tests
+
+#=============================================================================
+#  compare with the baseline case
+#=============================================================================
+diff neumann.saved neumann.tests >&2
+
+#=============================================================================
+#  remove temporary files
+#=============================================================================
+rm -f neumann.testdata* neumann.tests

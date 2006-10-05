@@ -28,22 +28,47 @@
 # sstruct: Test addtovalue routine. Compares the solutions obtained using
 # different formations of the matrix- one with setvalues and the other with
 # addtovalues
+#
+#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 addtovalues.out.0 > addtovalues.testdata
 tail -3 addtovalues.out.1 > addtovalues.testdata.temp
 diff addtovalues.testdata addtovalues.testdata.temp >&2
 
+cat addtovalues.testdata > addtovalues.tests
+cat addtovalues.testdata.temp >> addtovalues.tests
+#=============================================================================
+
 tail -3 addtovalues.out.2 > addtovalues.testdata
 tail -3 addtovalues.out.3 > addtovalues.testdata.temp
 diff addtovalues.testdata addtovalues.testdata.temp >&2
+
+cat addtovalues.testdata >> addtovalues.tests
+cat addtovalues.testdata.temp >> addtovalues.tests
+#=============================================================================
 
 tail -3 addtovalues.out.4 > addtovalues.testdata
 tail -3 addtovalues.out.5 > addtovalues.testdata.temp
 diff addtovalues.testdata addtovalues.testdata.temp >&2
 
+cat addtovalues.testdata >> addtovalues.tests
+cat addtovalues.testdata.temp >> addtovalues.tests
+#=============================================================================
+
 tail -3 addtovalues.out.6 > addtovalues.testdata
 tail -3 addtovalues.out.7 > addtovalues.testdata.temp
 diff addtovalues.testdata addtovalues.testdata.temp >&2
 
-rm -f addtovalues.testdata addtovalues.testdata.temp
+cat addtovalues.testdata >> addtovalues.tests
+cat addtovalues.testdata.temp >> addtovalues.tests
+
+#=============================================================================
+#  compare with the baseline case
+#=============================================================================
+diff addtovalues.saved addtovalues.tests >&2
+
+#=============================================================================
+#  remove temporary files
+#=============================================================================
+rm -f addtovalues.testdata*  addtovalues.tests

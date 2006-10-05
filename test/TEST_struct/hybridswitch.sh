@@ -26,6 +26,45 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
-#   no tests
+#   for each test, save the results for comparison with the baseline case
+#=============================================================================
+tail -4 hybridswitch.out.0 > hybridswitch.testdata
+cat hybridswitch.testdata > hybridswitch.tests
 #=============================================================================
 
+tail -4 hybridswitch.out.1 > hybridswitch.testdata
+cat hybridswitch.testdata >> hybridswitch.tests
+#=============================================================================
+
+tail -4 hybridswitch.out.2 > hybridswitch.testdata
+cat hybridswitch.testdata >> hybridswitch.tests
+#=============================================================================
+
+tail -4 hybridswitch.out.3 > hybridswitch.testdata
+cat hybridswitch.testdata >> hybridswitch.tests
+#=============================================================================
+
+tail -4 hybridswitch.out.4 > hybridswitch.testdata
+cat hybridswitch.testdata >> hybridswitch.tests
+#=============================================================================
+
+tail -4 hybridswitch.out.5 > hybridswitch.testdata
+cat hybridswitch.testdata >> hybridswitch.tests
+#=============================================================================
+
+tail -4 hybridswitch.out.6 > hybridswitch.testdata
+cat hybridswitch.testdata >> hybridswitch.tests
+#=============================================================================
+
+tail -4 hybridswitch.out.7 > hybridswitch.testdata
+cat hybridswitch.testdata >> hybridswitch.tests
+
+#=============================================================================
+#   compare with the baseline case
+#=============================================================================
+diff hybridswitch.saved hybridswitch.tests >&2
+
+#=============================================================================
+#    remove temporary files
+#=============================================================================
+rm -f hybridswitch.testdata hybridswitch.tests

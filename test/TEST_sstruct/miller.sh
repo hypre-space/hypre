@@ -26,5 +26,45 @@
 #EHEADER**********************************************************************
 
 #=============================================================================
-#  no tests
+#   for each case save the results for comparison with the baseline case
 #=============================================================================
+
+tail -4 miller.out.0 > miller.testdata
+cat miller.testdata > miller.tests
+#=============================================================================
+tail -4 miller.out.1 > miller.testdata
+cat miller.testdata >> miller.tests
+#=============================================================================
+tail -4 miller.out.2 > miller.testdata
+cat miller.testdata >> miller.tests
+#=============================================================================
+tail -4 miller.out.3 > miller.testdata
+cat miller.testdata >> miller.tests
+#=============================================================================
+tail -4 miller.out.4 > miller.testdata
+cat miller.testdata >> miller.tests
+#=============================================================================
+tail -4 miller.out.5 > miller.testdata
+cat miller.testdata >> miller.tests
+#=============================================================================
+tail -4 miller.out.6 > miller.testdata
+cat miller.testdata >> miller.tests
+#=============================================================================
+tail -4 miller.out.7 > miller.testdata
+cat miller.testdata >> miller.tests
+#=============================================================================
+tail -4 miller.out.8 > miller.testdata
+cat miller.testdata >> miller.tests
+#=============================================================================
+tail -4 miller.out.9 > miller.testdata
+cat miller.testdata >> miller.tests
+
+#=============================================================================
+#   compare with baseline test case
+#=============================================================================
+diff miller.saved miller.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f miller.testdata miller.tests

@@ -28,11 +28,23 @@
 #=============================================================================
 # sstruct: Test SetNeighborBox by comparing one-part problem
 #          against equivalent multi-part problems
+#
+#    for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 zcube.out.0 > zcube.testdata
-
 tail -3 zcube.out.1 > zcube.testdata.temp
 diff zcube.testdata zcube.testdata.temp >&2
 
-rm -f zcube.testdata zcube.testdata.temp
+cat zcube.testdata > zcube.tests
+cat zcube.testdata.temp >> zcube.tests
+
+#=============================================================================
+#    compare with the baseline case
+#=============================================================================
+diff zcube.saved zcube.tests >&2
+
+#=============================================================================
+#    remove temporary files
+#=============================================================================
+rm -f zcube.testdata* zcube.tests

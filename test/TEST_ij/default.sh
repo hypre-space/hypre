@@ -30,17 +30,34 @@
 #=============================================================================
 # IJ: Run 2 and 3 proc parallel case, weighted Jacobi, BoomerAMG 
 #                    diffs it against 1 proc case
+#   for each case save the results for comparison with the baseline case
 #=============================================================================
 
-tail -21 default.out.0 > default.testdata.tmp0
+tail -18 default.out.0 > default.testdata.tmp0
 head default.testdata.tmp0 > default.testdata
 
-tail -21 default.out.1 > default.testdata.tmp0
+cat default.testdata > default.tests
+#=============================================================================
+
+tail -18 default.out.1 > default.testdata.tmp0
 head default.testdata.tmp0 > default.testdata.temp
 diff default.testdata default.testdata.temp >&2
 
-tail -21 default.out.2 > default.testdata.tmp0
+cat default.testdata.temp >> default.tests
+#=============================================================================
+
+tail -18 default.out.2 > default.testdata.tmp0
 head default.testdata.tmp0 > default.testdata.temp
 diff default.testdata default.testdata.temp >&2
 
-rm -f default.testdata default.testdata.tmp0 default.testdata.temp
+cat default.testdata.temp >> default.tests
+
+#=============================================================================
+#   compare with baseline test case
+#=============================================================================
+diff default.saved default.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f default.testdata* default.tests

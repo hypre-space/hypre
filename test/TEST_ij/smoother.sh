@@ -25,7 +25,35 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+#=============================================================================
+#  for each test save the results for comparison with the baseline case
+#=============================================================================
+tail -18 smoother.out.0 > smoother.testdata
+head smoother.testdata > smoother.testdata.tmp
+
+cat smoother.testdata.tmp > smoother.tests
+#=============================================================================
+tail -18 smoother.out.1 > smoother.testdata
+head smoother.testdata > smoother.testdata.tmp
+
+cat smoother.testdata.tmp >> smoother.tests
+#=============================================================================
+tail -18 smoother.out.2 > smoother.testdata
+head smoother.testdata > smoother.testdata.tmp
+
+cat smoother.testdata.tmp >> smoother.tests
+#=============================================================================
+tail -18 smoother.out.3 > smoother.testdata
+head smoother.testdata > smoother.testdata.tmp
+
+cat smoother.testdata.tmp >> smoother.tests
 
 #=============================================================================
-#  no tests
+#  compare with the baseline case
 #=============================================================================
+diff smoother.saved smoother.tests >&2
+
+#=============================================================================
+#  remove temporary files
+#=============================================================================
+rm -f smoother.testdata* smoother.tests

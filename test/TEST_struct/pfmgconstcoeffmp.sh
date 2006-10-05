@@ -28,11 +28,23 @@
 #=============================================================================
 # struct: Test PFMG constant coefficient runs on 1 and 2 processors
 # by diffing against each other.
+#
+#   for each test, save the results for comparison with baseline case
 #=============================================================================
 
 tail -3 pfmgconstcoeffmp.out.0 > pfmgconstcoeffmp.testdata
-
 tail -3 pfmgconstcoeffmp.out.1 > pfmgconstcoeffmp.testdata.temp
 diff pfmgconstcoeffmp.testdata pfmgconstcoeffmp.testdata.temp  >&2
 
-rm -f pfmgconstcoeffmp.testdata pfmgconstcoeffmp.testdata.temp
+cat pfmgconstcoeffmp.testdata > pfmgconstcoeffmp.tests
+cat pfmgconstcoeffmp.testdata.temp >> pfmgconstcoeffmp.tests
+
+#=============================================================================
+#    compare with baseline case 
+#=============================================================================
+diff pfmgconstcoeffmp.saved pfmgconstcoeffmp.tests >&2
+
+#=============================================================================
+#  remove temporary files
+#=============================================================================
+rm -f pfmgconstcoeffmp.testdata* pfmgconstcoeffmp.tests

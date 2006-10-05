@@ -27,11 +27,23 @@
 
 #=============================================================================
 # struct: Test 1d run as 2d and 3d by diffing against each other.
+#
+#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 smgbase1d.out.0 > smgbase1d.testdata
-
 tail -3 smgbase1d.out.1 > smgbase1d.testdata.temp
 diff smgbase1d.testdata smgbase1d.testdata.temp  >&2
 
-rm -f smgbase1d.testdata smgbase1d.testdata.temp
+cat smgbase1d.testdata > smgbase1d.tests
+cat smgbase1d.testdata.temp >> smgbase1d.tests
+
+#=============================================================================
+#   for each test, save the results for comparison with the baseline case
+#=============================================================================
+diff smgbase1d.saved smgbase1d.tests >&2
+
+#=============================================================================
+#   remove temporary files
+#=============================================================================
+rm -f smgbase1d.testdata* smgbase1d.tests

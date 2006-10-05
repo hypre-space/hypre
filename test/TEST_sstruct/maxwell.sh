@@ -27,18 +27,36 @@
 #=============================================================================
 # no test comparison for now. Just a holder file with fake tests. Hard to
 # develop tests because of the coarsening scheme.
+#    for each test, save results for comparison with baseline case
 #=============================================================================
 
 tail -3 maxwell.out.0 > maxwell.testdata
 tail -3 maxwell.out.0 > maxwell.testdata.temp
 diff maxwell.testdata maxwell.testdata.temp >&2
 
+cat maxwell.testdata > maxwell.tests
+cat maxwell.testdata.temp >> maxwell.tests
+#=============================================================================
 tail -3 maxwell.out.1 > maxwell.testdata
 tail -3 maxwell.out.1 > maxwell.testdata.temp
 diff maxwell.testdata maxwell.testdata.temp >&2
 
+cat maxwell.testdata >> maxwell.tests
+cat maxwell.testdata.temp >> maxwell.tests
+#=============================================================================
 tail -3 maxwell.out.2 > maxwell.testdata
 tail -3 maxwell.out.2 > maxwell.testdata.temp
 diff maxwell.testdata maxwell.testdata.temp >&2
 
-rm -f maxwell.testdata maxwell.testdata.temp
+cat maxwell.testdata >> maxwell.tests
+cat maxwell.testdata.temp >> maxwell.tests
+
+#=============================================================================
+#    compare with baseline case
+#=============================================================================
+diff maxwell.saved maxwell.tests >&2
+
+#=============================================================================
+#    remove temporary files
+#=============================================================================
+rm -f maxwell.testdata* maxwell.tests

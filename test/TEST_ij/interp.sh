@@ -25,8 +25,45 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+#=============================================================================
+#  for each test save the results for comparison with the baseline case
+#=============================================================================
+tail -18 interp.out.0 > interp.testdata
+head interp.testdata > interp.testdata.tmp
 
+cat interp.testdata.tmp > interp.tests
+#=============================================================================
+tail -18 interp.out.1 > interp.testdata
+head interp.testdata > interp.testdata.tmp
+
+cat interp.testdata.tmp >> interp.tests
+#=============================================================================
+tail -18 interp.out.2 > interp.testdata
+head interp.testdata > interp.testdata.tmp
+
+cat interp.testdata.tmp >> interp.tests
+#=============================================================================
+tail -18 interp.out.3 > interp.testdata
+head interp.testdata > interp.testdata.tmp
+
+cat interp.testdata.tmp >> interp.tests
+#=============================================================================
+tail -18 interp.out.4 > interp.testdata
+head interp.testdata > interp.testdata.tmp
+
+cat interp.testdata.tmp >> interp.tests
+#=============================================================================
+tail -18 interp.out.5 > interp.testdata
+head interp.testdata > interp.testdata.tmp
+
+cat interp.testdata.tmp >> interp.tests
 
 #=============================================================================
-# no tests
+#  compare with the baseline case
 #=============================================================================
+diff interp.saved interp.tests >&2
+
+#=============================================================================
+#  remove temporary files
+#=============================================================================
+rm -f interp.testdata* interp.tests

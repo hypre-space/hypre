@@ -27,14 +27,29 @@
 
 #=============================================================================
 # struct: Test PFMG 1d solve of the same problem in different orientations
+#
+#    for each test, save the results for comparison with the baseline case
 #=============================================================================
 
 tail -3 pfmgorient.out.0 > pfmgorient.testdata
-
 tail -3 pfmgorient.out.1 > pfmgorient.testdata.temp
 diff pfmgorient.testdata pfmgorient.testdata.temp  >&2
+
+cat pfmgorient.testdata > pfmgorient.tests
+cat pfmgorient.testdata.temp >> pfmgorient.tests
+#=============================================================================
 
 tail -3 pfmgorient.out.2 > pfmgorient.testdata.temp
 diff pfmgorient.testdata pfmgorient.testdata.temp  >&2
 
-rm -f pfmgorient.testdata pfmgorient.testdata.temp
+cat pfmgorient.testdata.temp >> pfmgorient.tests
+
+#=============================================================================
+#    compare with the baseline case
+#=============================================================================
+diff pfmgorient.saved pfmgorient.tests >&2
+
+#=============================================================================
+#    remove temporary files
+#=============================================================================
+rm -f pfmgorient.testdata* pfmgorient.tests
