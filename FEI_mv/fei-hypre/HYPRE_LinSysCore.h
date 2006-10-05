@@ -487,8 +487,8 @@ class HYPRE_LinSysCore
    void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
-   void   HYPRE_LSI_BuildNodalCoordinates(HYPRE_ParVector X, HYPRE_ParVector Y, 
-                                          HYPRE_ParVector Z);
+   void   HYPRE_LSI_BuildNodalCoordinates(HYPRE_ParVector *X, HYPRE_ParVector *Y, 
+                                          HYPRE_ParVector *Z);
 
    // ----------------------------------------------------------------------
    // private functions for selecting solver/preconditioner
