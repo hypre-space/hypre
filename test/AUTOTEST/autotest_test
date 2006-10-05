@@ -274,6 +274,7 @@ apply_error_filters ()
       uv*)
         for ii in \
           '===\ End\ of\ Compilation'\
+          'phase\ time'\
           'cpu\ clock'\
           'wall\ clock'\
           'Compilation\ successful'\
@@ -295,6 +296,7 @@ apply_error_filters ()
           '[A-Za-z0-9_]*\.cxx$'\
           '^[ \t]*$'\
           '^[0-9]*\ Lines\ Compiled$'\
+          'phase\ time'\
           'cpu\ clock'\
           'wall\ clock'\
           'external\ (subroutine|function)'\
@@ -310,6 +312,7 @@ apply_error_filters ()
           '^No\ suffix\ list'\
           '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
           'WARNING:\ \ guidef77\ has\ implied\ '\
+          'phase\ time'\
           'cpu\ clock'\
           'wall\ clock'\
           '^cc:\ Info:\ '
@@ -323,6 +326,7 @@ apply_error_filters ()
           'autoheader\ has\ been\ disabled'\
           'configure:\ WARNING:\ Configuration\ for'\
           'configure:\ WARNING:\ Skipping\ Java'\
+          'phase\ time'\
           'cpu\ clock'\
           'wall\ clock'\
           'Error:\ PDF\ version'\
@@ -345,6 +349,7 @@ apply_error_filters ()
       ;;
       vivid*)
         for ii in \
+          'phase\ time'\
           'cpu\ clock'\
           'wall\ clock'\
           'xauth:\ \ error\ in\ locking\ authority\ file\ '
