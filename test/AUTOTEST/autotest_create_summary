@@ -103,6 +103,8 @@ apply_error_filters ()
       up*)
         for ii in \
           '===\ End\ of\ Compilation'\
+          '[---]'\
+          '[0-9c0-9]'\
           'phase\ time'\
           'cpu\ clock'\
           'wall\ clock'\
@@ -127,6 +129,8 @@ apply_error_filters ()
           '[A-Za-z0-9_]*\.cxx$'\
           '^[ \t]*$'\
           '^[0-9]*\ Lines\ Compiled$'\
+          '[---]'\
+          '[0-9c0-9]'\
           'autoconf\ has\ been\ disabled'\
           'automake\ has\ been\ disabled'\
           'autoheader\ has\ been\ disabled'\
@@ -144,6 +148,8 @@ apply_error_filters ()
       *bgl*)
         for ii in \
           'readonly\ variable'\
+          '[---]'\
+          '[0-9c0-9]'\
           'BE_MPI'\
           'FE_MPI\ '
         do process_filter $ErrorFile "${ii}"
@@ -151,6 +157,8 @@ apply_error_filters ()
         ;;
       thun*)
         for ii in \
+          '[---]'\
+          '[0-9c0-9]'\
           'queued'\
           'allocated'
         do process_filter $ErrorFile "${ii}"
@@ -164,6 +172,8 @@ apply_error_filters ()
           'configure:\ WARNING:\ Configuration\ for'\
           'configure:\ WARNING:\ Skipping\ Java'\
           'phase\ time'\
+          '[---]'\
+          '[0-9c0-9]'\
           'cpu\ clock'\
           'wall\ clock'\
           'Error:\ PDF:\ version'\

@@ -112,7 +112,7 @@ initialize_variables ()
 #
 # Need the nopoe script for AIX platforms to force single task
   if [ "$HYPRE_ARCH" = "blue" ] ; then
-     CONFIGURE="./nopoe ./configure"
+     CONFIGURE="nopoe ./configure"
   else
      CONFIGURE="./configure"
   fi
@@ -275,6 +275,8 @@ apply_error_filters ()
         for ii in \
           '===\ End\ of\ Compilation'\
           'phase\ time'\
+          '[---]'\
+          '[0-9c0-9]'\
           'cpu\ clock'\
           'wall\ clock'\
           'Compilation\ successful'\
@@ -290,12 +292,14 @@ apply_error_filters ()
         do process_filter $ErrorFile "${ii}"
         done
         ;;
-      peng*)
+      peng* | alc* | mcr*)
         for ii in \
           '[A-Za-z0-9_]*\.[cCf]$'\
           '[A-Za-z0-9_]*\.cxx$'\
           '^[ \t]*$'\
           '^[0-9]*\ Lines\ Compiled$'\
+          '[---]'\
+          '[0-9c0-9]'\
           'phase\ time'\
           'cpu\ clock'\
           'wall\ clock'\
@@ -312,6 +316,8 @@ apply_error_filters ()
           '^No\ suffix\ list'\
           '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
           'WARNING:\ \ guidef77\ has\ implied\ '\
+          '[---]'\
+          '[0-9c0-9]'\
           'phase\ time'\
           'cpu\ clock'\
           'wall\ clock'\
@@ -326,6 +332,8 @@ apply_error_filters ()
           'autoheader\ has\ been\ disabled'\
           'configure:\ WARNING:\ Configuration\ for'\
           'configure:\ WARNING:\ Skipping\ Java'\
+          '[---]'\
+          '[0-9c0-9]'\
           'phase\ time'\
           'cpu\ clock'\
           'wall\ clock'\
@@ -344,15 +352,6 @@ apply_error_filters ()
           'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
           'PGC/x86\ Linux/x86\ 3.3-1:\ compilation\ completed\ with\ warnings'\
           'sed:\ Couldn.t\ close\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-      vivid*)
-        for ii in \
-          'phase\ time'\
-          'cpu\ clock'\
-          'wall\ clock'\
-          'xauth:\ \ error\ in\ locking\ authority\ file\ '
         do process_filter $ErrorFile "${ii}"
         done
       ;;
