@@ -203,7 +203,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    }
 
    level = 0;
-   cycle_param = 0;
+   cycle_param = 1;
 
    if (smooth_num_levels > 0)
    {
@@ -501,7 +501,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          
          --level;
          cycle_param = 2;
-         if (level == 0) cycle_param = 0;
       }
       else
       {
