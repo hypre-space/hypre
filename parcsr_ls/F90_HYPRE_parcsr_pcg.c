@@ -251,6 +251,19 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprintlevel, HYPRE_PARCSRPCGSETPRINTLEVEL)( lon
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetPrintLogging
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrpcgsetlogging, HYPRE_PARCSRPCGSETLOGGING)( long int *solver,
+                                            int      *level,
+                                            int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_ParCSRPCGSetLogging( (HYPRE_Solver) *solver,
+                                               (int)       *level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRPCGGetNumIterations
  *--------------------------------------------------------------------------*/
 
