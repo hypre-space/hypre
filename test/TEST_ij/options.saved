@@ -1,0 +1,190 @@
+
+Eigenvalue lambda 2.4304215831301565e-01
+Residual 2.7586159618885583e-09
+
+11 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.030000 seconds
+
+Eigenvalue lambda 1.0000000000000000e+00
+Residual 2.5798079123324934e-16
+
+0 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.000000 seconds
+
+Eigenvalue lambda 3.1439567681292357e-01
+Residual 4.9967817233712370e-09
+
+47 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.120000 seconds
+
+Eigenvalue lambda 1.1091267902277867e-01
+Eigenvalue lambda 2.1191776760936187e-01
+Residual 1.0520620731792497e-07
+Residual 1.2196596383607283e-03
+
+100 iterations
+=============================================
+Solve phase times:
+=============================================
+
+Eigenvalue lambda 2.1427338986926499e+00
+Eigenvalue lambda 2.3212231600306787e+00
+Residual 1.6856647419161050e+00
+Residual 1.5881065934760645e+00
+
+2 iterations
+=============================================
+Solve phase times:
+=============================================
+
+Eigenvalue lambda 2.4304215831301570e-01
+Residual 8.9640058757369301e-09
+
+13 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.040000 seconds
+
+Eigenvalue lambda 2.4304215831301570e-01
+Residual 8.9640058757369301e-09
+
+13 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.040000 seconds
+
+Eigenvalue lambda 2.4304215831301570e-01
+Residual 8.9640058757369301e-09
+
+13 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.030000 seconds
+
+Eigenvalue lambda 2.4304215831301570e-01
+Residual 8.9640058757369301e-09
+
+13 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.030000 seconds
+
+Eigenvalue lambda 2.4304215831301568e-01
+Residual 8.2542788048561575e-09
+
+13 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.110000 seconds
+
+Eigenvalue lambda 2.4304215831301579e-01
+Residual 9.7399503971924144e-10
+
+14 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.040000 seconds
+
+Eigenvalue lambda 2.4304215831301559e-01
+Residual 5.1423651464119167e-09
+
+14 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.040000 seconds
+
+Eigenvalue lambda 2.4304215831301570e-01
+Residual 8.9640058757369301e-09
+
+13 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.040000 seconds
+
+Eigenvalue lambda 2.4304215831301570e-01
+Residual 8.9640058757369301e-09
+
+13 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.040000 seconds
+
+Eigenvalue lambda 2.4304215831301329e-01
+Residual 9.0136702013449407e-09
+
+83 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.050000 seconds
+
+     Complexity:    grid = 2.024000
+                operator = 5.666563
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+
+Eigenvalue lambda 2.4304215831301570e-01
+Residual 8.9640058757369301e-09
+
+13 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.050000 seconds
+Eigenvalue lambda 2.4304215831301570e-01
+Residual 8.964006e-09
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+Eigenvalue lambda 2.4304215831301559e-01
+Eigenvalue lambda 4.7952103987964817e-01
+Residual 2.7049048550320548e-09
+Residual 3.6036423938611814e-09
+
+15 iterations
+=============================================
+Solve phase times:
+=============================================
