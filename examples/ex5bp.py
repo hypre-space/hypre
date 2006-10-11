@@ -1,9 +1,21 @@
-"""Example of using hypre through the Babel-Python interface
-   work in progress, but it works"""
+"""Example of using hypre through the Babel-Python interface"""
+
+# To build, do the following
+# 1. Install Python 2.4 or later.
+# 2. Install a version of Numeric Python as required by Babel.
+# 3. Install pyMPI.  Probably this could be made to work with other MPI extensions of Python
+#    with minor changes in this example; but I haven't tried anything else.
+# 4. configure --enable-shared --with-babel --enable-python=pyMPI
+# 5. make
+# 6. Make sure you have the following environment variables:
+#    SIDL_DLL_PATH={your top-level hypre directory}/babel/bHYPREClient-P/libbHYPRE.scl
+#    LD_LIBRARY_PATH={your top-level hypre directory}/hypre/lib
 
 import mpi,sys
 import bHYPRE
 import bHYPRE.MPICommunicator
+# It is important to import bHYPRE.MPICommunicator first.  The other classes
+# require it, so the build system assumes you will have loaded it first.
 import bHYPRE.IJParCSRMatrix
 import bHYPRE.IJParCSRVector
 import bHYPRE.BoomerAMG
