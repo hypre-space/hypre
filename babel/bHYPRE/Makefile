@@ -40,6 +40,12 @@ CDEFS =
  
 BABEL_RUNTIME_INCLUDES=\
   -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl
+BABEL_RUNTIME_SIDL_LIBS=\
+  -L$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl/.libs
+  -lsidl-1.0.0 -lsidl
+# ... note re the use of the .libs directory above.  Its contents will
+# get copied (by babel/Makefile) to hypre/lib, but the copy hasn't
+# happened yet, and we need to point to the sidl libraries now.
 
 C_COMPILE_FLAGS=\
  -I..\
@@ -117,8 +123,7 @@ libbHYPRE.so: ${OBJS}
 	-lHYPRE_struct_mv\
 	-lHYPRE_superlu\
 	-lHYPRE_utilities\
-	-lsidl-1.0.0\
-	-lsidl
+	${BABEL_RUNTIME_SIDL_LIBS)
 
 ${OBJS}: ${HEADERS}
 
