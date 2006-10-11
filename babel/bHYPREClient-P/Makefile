@@ -9,7 +9,7 @@ PYTHON_HYPRE_LIBRARY_DIR = ${HOME}/lib/pyMPI2.4/site-packages/bHYPRE
 HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl
 HYPRE_BABEL_RUNTIME_PYTHON_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/python
 
-all:
+all: libbHYPRE.scl
 	${PYTHON} ./setup.py build \
 	--include-dirs=${HYPRE_INC_INSTALL} \
 	--include-dirs=${HYPRE_BABEL_RUNTIME_SIDL_DIR} \
@@ -20,9 +20,12 @@ all:
 	${PYTHON} ./setup.py install 
 	cp ${HYPRE_LIB_INSTALL}/libbHYPRE${HYPRE_LIB_SUFFIX} ${PYTHON_HYPRE_LIBRARY_DIR}
 
+libbHYPRE.scl: 
+	sed -e 's,@@DIR@@,$(HYPRE_LIB_INSTALL),g' < $(srcdir)/libbHYPRE.scl.in > libbHYPRE.scl
+
 install: all
  
 clean:
-	rm -rf build
+	rm -rf build libbHYPRE.scl
 
 distclean: clean
