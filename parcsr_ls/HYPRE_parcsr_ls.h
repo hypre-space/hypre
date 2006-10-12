@@ -1221,6 +1221,18 @@ int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                int beta_relax_type,
                                double beta_strength_threshold);
 
+/**
+ * Returns the number of iterations taken.
+ **/
+int HYPRE_AMSGetNumIterations(HYPRE_Solver solver,
+                              int *num_iterations);
+
+/**
+ * Returns the norm of the final relative residual.
+ **/
+int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
+                                          double *rel_resid_norm);
+
 /*@}*/
 
 /*--------------------------------------------------------------------------

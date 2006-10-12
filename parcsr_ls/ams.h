@@ -94,6 +94,10 @@ typedef struct
    /* Temporary vectors */
    hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2;
 
+   /* Output log info */
+   int num_iterations;
+   double rel_resid_norm;
+
 } hypre_AMSData;
 
 /* Space dimension */

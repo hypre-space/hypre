@@ -195,9 +195,44 @@ int main (int argc, char *argv[])
    HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.b", &b);
    HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.G", &G);
 
+   /* Vectors Gx, Gy and Gz */
+   if (!coordinates)
+   {
+      CheckIfFileExists("aFEM.Gx.0");
+      CheckIfFileExists("aFEM.Gy.0");
+      CheckIfFileExists("aFEM.Gz.0");
+      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gx", &Gx);
+      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gy", &Gy);
+      if (dim == 3)
+         HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gz", &Gz);
+   }
+
+   /* Vectors x, y and z */
+   if (coordinates)
+   {
+      CheckIfFileExists("aFEM.x.0");
+      CheckIfFileExists("aFEM.y.0");
+      CheckIfFileExists("aFEM.z.0");
+      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.x", &x);
+      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.y", &y);
+      if (dim == 3)
+         HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.z", &z);
+   }
+
+   /* Poisson matrices */
+   if (h1_method)
+   {
+      CheckIfFileExists("aFEM.Aalpha.D.0");
+      HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Aalpha", &Aalpha);
+      CheckIfFileExists("aFEM.Abeta.D.0");
+      HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Abeta", &Abeta);
+   }
+
    if (!myid)
       printf("Problem size: %d\n\n",
              hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix*)A));
+
+   MPI_Barrier(MPI_COMM_WORLD);
 
    /* AMG */
    if (solver_id == 0)
@@ -278,38 +313,16 @@ int main (int argc, char *argv[])
 
       /* Vectors Gx, Gy and Gz */
       if (!coordinates)
-      {
-         CheckIfFileExists("aFEM.Gx.0");
-         CheckIfFileExists("aFEM.Gy.0");
-         CheckIfFileExists("aFEM.Gz.0");
-         HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gx", &Gx);
-         HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gy", &Gy);
-         if (dim == 3)
-            HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gz", &Gz);
          HYPRE_AMSSetEdgeConstantVectors(solver,Gx,Gy,Gz);
-      }
 
       /* Vectors x, y and z */
       if (coordinates)
-      {
-         CheckIfFileExists("aFEM.x.0");
-         CheckIfFileExists("aFEM.y.0");
-         CheckIfFileExists("aFEM.z.0");
-         HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.x", &x);
-         HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.y", &y);
-         if (dim == 3)
-            HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.z", &z);
          HYPRE_AMSSetCoordinateVectors(solver,x,y,z);
-      }
 
       /* Poisson matrices */
       if (h1_method)
       {
-         CheckIfFileExists("aFEM.Aalpha.D.0");
-         HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Aalpha", &Aalpha);
          HYPRE_AMSSetAlphaPoissonMatrix(solver, Aalpha);
-         CheckIfFileExists("aFEM.Abeta.D.0");
-         HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Abeta", &Abeta);
          HYPRE_AMSSetBetaPoissonMatrix(solver, Abeta);
       }
 
@@ -405,38 +418,16 @@ int main (int argc, char *argv[])
 
          /* Vectors Gx, Gy and Gz */
          if (!coordinates)
-         {
-            CheckIfFileExists("aFEM.Gx.0");
-            CheckIfFileExists("aFEM.Gy.0");
-            CheckIfFileExists("aFEM.Gz.0");
-            HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gx", &Gx);
-            HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gy", &Gy);
-            if (dim == 3)
-               HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gz", &Gz);
             HYPRE_AMSSetEdgeConstantVectors(precond,Gx,Gy,Gz);
-         }
 
          /* Vectors x, y and z */
          if (coordinates)
-         {
-            CheckIfFileExists("aFEM.x.0");
-            CheckIfFileExists("aFEM.y.0");
-            CheckIfFileExists("aFEM.z.0");
-            HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.x", &x);
-            HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.y", &y);
-            if (dim == 3)
-               HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.z", &z);
             HYPRE_AMSSetCoordinateVectors(precond,x,y,z);
-         }
 
          /* Poisson matrices */
          if (h1_method)
          {
-            CheckIfFileExists("aFEM.Aalpha.D.0");
-            HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Aalpha", &Aalpha);
             HYPRE_AMSSetAlphaPoissonMatrix(precond, Aalpha);
-            CheckIfFileExists("aFEM.Abeta.D.0");
-            HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Abeta", &Abeta);
             HYPRE_AMSSetBetaPoissonMatrix(precond, Abeta);
          }
 
@@ -509,6 +500,9 @@ int main (int argc, char *argv[])
       else if (solver_id == 3)
          HYPRE_AMSDestroy(precond);
    }
+
+   /* Save the solution */
+   /* HYPRE_ParVectorPrint(x0,"x.ams"); */
 
    /* Clean-up */
    HYPRE_ParCSRMatrixDestroy(A);

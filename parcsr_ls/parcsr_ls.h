@@ -131,6 +131,17 @@ int hypre_TwoLevelParCSRMulPrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type , i
 int hypre_TwoLevelParCSRAddPrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type , int A0_relax_times , double *A0_l1_norms , double A0_relax_weight , double A0_omega , hypre_ParCSRMatrix *A1 , HYPRE_Solver B1 , hypre_ParCSRMatrix *P1 , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *r1 , hypre_ParVector *g0 , hypre_ParVector *g1 );
 int hypre_ThreeLevelParCSRMulPrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type , int A0_relax_times , double *A0_l1_norms , double A0_relax_weight , double A0_omega , hypre_ParCSRMatrix *A1 , HYPRE_Solver B1 , hypre_ParCSRMatrix *P1 , hypre_ParCSRMatrix *A2 , HYPRE_Solver B2 , hypre_ParCSRMatrix *P2 , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *r1 , hypre_ParVector *r2 , hypre_ParVector *g0 , hypre_ParVector *g1 , hypre_ParVector *g2 , int cycle_type );
 int hypre_ThreeLevelParCSRAddPrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type , int A0_relax_times , double *A0_l1_norms , double A0_relax_weight , double A0_omega , hypre_ParCSRMatrix *A1 , HYPRE_Solver B1 , hypre_ParCSRMatrix *P1 , hypre_ParCSRMatrix *A2 , HYPRE_Solver B2 , hypre_ParCSRMatrix *P2 , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *r1 , hypre_ParVector *r2 , hypre_ParVector *g0 , hypre_ParVector *g1 , hypre_ParVector *g2 , int cycle_type );
+int hypre_AMSGetNumIterations ( void *solver , int *num_iterations );
+int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , double *rel_resid_norm );
+
+/* aux_interp.c */
+void insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , int *IN_marker , int *node_add , int num_cols_A_offd , int full_off_procNodes , int num_procs , int *OUT_marker );
+void hypre_ParCSRCommExtendA ( hypre_ParCSRMatrix *A , int newoff , int *found , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts , int **p_node_add );
+int ssort ( int *data , int n );
+int index_of_minimum ( int *data , int n );
+void swap_int ( int *data , int a , int b );
+void initialize_vecs ( int diag_n , int offd_n , int *diag_ftc , int *offd_ftc , int *diag_pm , int *offd_pm , int *tmp_CF );
+int new_offd_nodes ( int **found , int A_ext_rows , int *A_ext_i , int *A_ext_j , int num_cols_A_offd , int *col_map_offd , int col_1 , int col_n , int *Sop_i , int *Sop_j );
 
 /* block_tridiag.c */
 void *hypre_BlockTridiagCreate ( void );
@@ -170,6 +181,8 @@ int HYPRE_AMSSetPrintLevel ( HYPRE_Solver solver , int print_level );
 int HYPRE_AMSSetSmoothingOptions ( HYPRE_Solver solver , int relax_type , int relax_times , double relax_weight , double omega );
 int HYPRE_AMSSetAlphaAMGOptions ( HYPRE_Solver solver , int alpha_coarsen_type , int alpha_agg_levels , int alpha_relax_type , double alpha_strength_threshold );
 int HYPRE_AMSSetBetaAMGOptions ( HYPRE_Solver solver , int beta_coarsen_type , int beta_agg_levels , int beta_relax_type , double beta_strength_threshold );
+int HYPRE_AMSGetNumIterations ( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_AMSGetFinalRelativeResidualNorm ( HYPRE_Solver solver , double *rel_resid_norm );
 
 /* HYPRE_parcsr_amg.c */
 int HYPRE_BoomerAMGCreate ( HYPRE_Solver *solver );
@@ -646,26 +659,11 @@ int hypre_BoomerAMGIndepSetInit ( hypre_ParCSRMatrix *S , double *measure_array 
 int hypre_BoomerAMGIndepSet ( hypre_ParCSRMatrix *S , double *measure_array , int *graph_array , int graph_array_size , int *graph_array_offd , int graph_array_offd_size , int *IS_marker , int *IS_marker_offd );
 
 /* par_interp.c */
-int hypre_BoomerAMGBuildInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int P_max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-int hypre_BoomerAMGBuildInterpHE ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int P_max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-int hypre_BoomerAMGBuildDirInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int P_max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-int hypre_BoomerAMGInterpTruncation ( hypre_ParCSRMatrix *P , double trunc_factor , int P_max_elmts );
-void hypre_qsort2abs( int *v , double *w , int left , int right );
-
-/* par_lr_interp.c */
-int hypre_BoomerAMGBuildStdInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int sep_weight , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-int hypre_BoomerAMGBuildExtInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-int hypre_BoomerAMGBuildFFInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-int hypre_BoomerAMGBuildFF1Interp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
-
-/* aux_interp.c */
-void insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , int *IN_marker , int *node_add , int num_cols_A_offd , int full_off_procNodes , int num_procs , int *OUT_marker );
-void hypre_ParCSRCommExtendA ( hypre_ParCSRMatrix *A , int newoff , int *found , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts , int **p_node_add );
-int ssort ( int *data , int n );
-int index_of_minimum ( int *data , int n );
-void swap_int ( int *data , int a , int b );
-void initialize_vecs ( int diag_n , int offd_n , int *diag_ftc , int *offd_ftc , int *diag_pm , int *offd_pm , int *tmp_CF );
-int new_offd_nodes ( int **found , int A_ext_rows , int *A_ext_i , int *A_ext_j , int num_cols_A_offd , int *col_map_offd , int col_1 , int col_n , int *Sop_i , int *Sop_j );
+int hypre_BoomerAMGBuildInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+int hypre_BoomerAMGBuildInterpHE ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+int hypre_BoomerAMGBuildDirInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+int hypre_BoomerAMGInterpTruncation ( hypre_ParCSRMatrix *P , double trunc_factor , int max_elmts );
+void hypre_qsort2abs ( int *v , double *w , int left , int right );
 
 /* par_jacobi_interp.c */
 void hypre_BoomerAMGJacobiInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , hypre_ParCSRMatrix *S , int num_functions , int *dof_func , int *CF_marker , int level , double truncation_threshold , double truncation_threshold_minus );
@@ -686,6 +684,12 @@ HYPRE_ParCSRMatrix GenerateLaplacian ( MPI_Comm comm , int nx , int ny , int nz 
 int hypre_map ( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part );
 HYPRE_ParCSRMatrix GenerateSysLaplacian ( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , int num_fun , double *mtrx , double *value );
 HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef ( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , int num_fun , double *mtrx , double *value );
+
+/* par_lr_interp.c */
+int hypre_BoomerAMGBuildStdInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int sep_weight , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+int hypre_BoomerAMGBuildExtInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+int hypre_BoomerAMGBuildFFInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+int hypre_BoomerAMGBuildFF1Interp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 
 /* par_multi_interp.c */
 int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int P_max_elmts , int weight_option , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );

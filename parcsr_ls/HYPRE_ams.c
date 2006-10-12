@@ -241,3 +241,25 @@ int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                      beta_relax_type,
                                      beta_strength_threshold);
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSGetNumIterations
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSGetNumIterations(HYPRE_Solver solver,
+                              int *num_iterations)
+{
+   return hypre_AMSGetNumIterations((void *) solver,
+                                    num_iterations);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSGetFinalRelativeResidualNorm
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
+                                          double *rel_resid_norm)
+{
+   return hypre_AMSGetFinalRelativeResidualNorm((void *) solver,
+                                                rel_resid_norm);
+}

@@ -527,30 +527,43 @@ int hypre_AMSDestroy(void *solver)
    hypre_AMSData *ams_data = solver;
 
    if (ams_data -> owns_A_G)
-      hypre_ParCSRMatrixDestroy(ams_data -> A_G);
+      if (ams_data -> A_G)
+         hypre_ParCSRMatrixDestroy(ams_data -> A_G);
    if (!ams_data -> beta_is_zero)
-     HYPRE_BoomerAMGDestroy(ams_data -> B_G);
+      if (ams_data -> B_G)
+         HYPRE_BoomerAMGDestroy(ams_data -> B_G);
 
-   hypre_ParCSRMatrixDestroy(ams_data -> Pi);
+   if (ams_data -> Pi)
+      hypre_ParCSRMatrixDestroy(ams_data -> Pi);
    if (ams_data -> owns_A_Pi)
-      hypre_ParCSRMatrixDestroy(ams_data -> A_Pi);
-   HYPRE_BoomerAMGDestroy(ams_data -> B_Pi);
+      if (ams_data -> A_Pi)
+         hypre_ParCSRMatrixDestroy(ams_data -> A_Pi);
+   if (ams_data -> B_Pi)
+      HYPRE_BoomerAMGDestroy(ams_data -> B_Pi);
 
-   hypre_ParVectorDestroy(ams_data -> r0);
-   hypre_ParVectorDestroy(ams_data -> g0);
+   if (ams_data -> r0)
+      hypre_ParVectorDestroy(ams_data -> r0);
+   if (ams_data -> g0)
+      hypre_ParVectorDestroy(ams_data -> g0);
    if (!ams_data -> beta_is_zero)
    {
-      hypre_ParVectorDestroy(ams_data -> r1);
-      hypre_ParVectorDestroy(ams_data -> g1);
+      if (ams_data -> r1)
+         hypre_ParVectorDestroy(ams_data -> r1);
+      if (ams_data -> g1)
+         hypre_ParVectorDestroy(ams_data -> g1);
    }
-   hypre_ParVectorDestroy(ams_data -> r2);
-   hypre_ParVectorDestroy(ams_data -> g2);
+   if (ams_data -> r2)
+      hypre_ParVectorDestroy(ams_data -> r2);
+   if (ams_data -> g2)
+      hypre_ParVectorDestroy(ams_data -> g2);
 
-   hypre_TFree(ams_data -> A_l1_norms);
+   if (ams_data -> A_l1_norms)
+      hypre_TFree(ams_data -> A_l1_norms);
 
    /* G, x, y ,z, Gx, Gy and Gz are not destroyed */
 
-   hypre_TFree(ams_data);
+   if (ams_data)
+      hypre_TFree(ams_data);
 
    return hypre_error_flag;
 }
@@ -1062,6 +1075,9 @@ int hypre_AMSSetup(void *solver,
          if (!hypre_ParCSRMatrixCommPkg(ams_data -> G))
             hypre_MatvecCommPkgCreate(ams_data -> G);
 
+         if (!hypre_ParCSRMatrixCommPkg(ams_data -> A))
+            hypre_MatvecCommPkgCreate(ams_data -> A);
+
          hypre_BoomerAMGBuildCoarseOperator(ams_data -> G,
                                             ams_data -> A,
                                             ams_data -> G,
@@ -1069,7 +1085,7 @@ int hypre_AMSSetup(void *solver,
 
          /* Make sure that A_G has no zero rows (this can happen
             if beta is zero in part of the domain). */
-         hypre_ParCSRMatrixFixZeroRows(ams_data -> A_G);
+         /* hypre_ParCSRMatrixFixZeroRows(ams_data -> A_G); */
 
          ams_data -> owns_A_G = 1;
       }
@@ -1129,7 +1145,7 @@ int hypre_AMSSetup(void *solver,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AMSolve
+ * hypre_AMSSolve
  *
  * Solve the system A x = b.
  *--------------------------------------------------------------------------*/
@@ -1150,7 +1166,7 @@ int hypre_AMSSolve(void *solver,
                          hypre_ParVector*,hypre_ParVector*,int);
 
    int i, my_id;
-   double r0_norm, r_norm, b_norm, relative_resid, old_resid;
+   double r0_norm, r_norm, b_norm, relative_resid = 0, old_resid;
 
    if (ams_data -> print_level > 0)
       MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
@@ -1247,9 +1263,12 @@ int hypre_AMSSolve(void *solver,
       if (relative_resid < ams_data -> tol) break;
    }
 
-   if (my_id == 0 && ams_data -> print_level > 0)
+   if (my_id == 0 && ams_data -> print_level > 0 && ams_data -> maxit > 1)
       printf("\n\n Average Convergence Factor = %f\n\n",
              pow((r_norm/r0_norm),(1.0/(double) (i+1))));
+
+   ams_data -> num_iterations = i+1;
+   ams_data -> rel_resid_norm = relative_resid;
 
    return hypre_error_flag;
 }
@@ -1447,7 +1466,7 @@ int hypre_ThreeLevelParCSRMulPrec(/* fine space matrix */
       hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
       hypre_ParVectorAxpy(1.0, r0, y);
 
-      /* pre-smooth: y += S (x - Ay) */
+      /* post-smooth: y += S (x - Ay) */
       hypre_ParCSRRelax(A0, x,
                         A0_relax_type,
                         A0_relax_times,
@@ -1864,5 +1883,33 @@ int hypre_ThreeLevelParCSRAddPrec(/* fine space matrix */
    else
       hypre_error_in_arg(19);
 
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSGetNumIterations
+ *
+ * Get the number of AMS iterations.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSGetNumIterations(void *solver,
+                              int *num_iterations)
+{
+   hypre_AMSData *ams_data = solver;
+   *num_iterations = ams_data -> num_iterations;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSGetFinalRelativeResidualNorm
+ *
+ * Get the final relative residual norm in AMS.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSGetFinalRelativeResidualNorm(void *solver,
+                                          double *rel_resid_norm)
+{
+   hypre_AMSData *ams_data = solver;
+   *rel_resid_norm = ams_data -> rel_resid_norm;
    return hypre_error_flag;
 }
