@@ -178,6 +178,22 @@ AC_ARG_ENABLE(shared,
 [casc_using_shared=no]
 )
 
+AC_ARG_ENABLE(python,
+  AS_HELP_STRING([  --enable-python=PYTHON],
+                 [ Build interface to specified instance of Python (turns on shared libraries, requires Babel; default is NO).]),
+[case "${enableval}" in
+        yes) casc_using_python=yes
+             casc_python="python"
+             ;;
+    no | "") casc_using_python=no ;;
+          *) casc_using_python=yes
+             casc_python=${enableval}
+             casc_using_shared=yes
+             ;;
+ esac],
+[casc_using_python=no]
+)
+
 dnl *********************************************************************
 dnl * Determine if user provided C compiler or flags
 dnl *********************************************************************
@@ -1083,7 +1099,7 @@ LINK_CXX="${CXX}"
 HYPRE_LIBSUFFIX=".a"
 
 dnl *********************************************************************
-dnl * Set flags if needed to enable shared libraries 
+dnl * Set flags if needed to enable shared libraries and Python
 dnl *********************************************************************
 if test "$casc_using_shared" = "yes"
 then
@@ -1107,6 +1123,14 @@ then
                           BUILD_CXX_SHARED="${CXX} -shared"
                           ;;
    esac
+fi
+
+BUILD_PYTHON=0
+PYTHON=""
+if test "$casc_using_python" = "yes"
+then
+  BUILD_PYTHON=1
+  PYTHON="${casc_python}"
 fi
 
 dnl *********************************************************************
@@ -1262,6 +1286,9 @@ AC_SUBST(LINK_CXX)
 AC_SUBST(BUILD_F77_SHARED)
 AC_SUBST(BUILD_CC_SHARED)
 AC_SUBST(BUILD_CXX_SHARED)
+
+AC_SUBST(BUILD_PYTHON)
+AC_SUBST(PYTHON)
 
 dnl *********************************************************************
 dnl * Installation Directories
