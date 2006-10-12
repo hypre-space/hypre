@@ -26,9 +26,6 @@
 
 include ../config/Makefile.config
 
-# TO DO: get BUILD_PYTHON out of configure; default to 0
-#  Note that configure should set BUILD_PYTHON to 0 unless shared libraries are on.
-
 # Python support.
 # It is very important that you keep the Python modules up-to-date.
 # They contain copies of hypre binaries taken from the libraries
@@ -39,7 +36,6 @@ include ../config/Makefile.config
 # modules won't get automatically updated.  You need to cd to babel, and
 # type "make" there too.
 
-BUILD_PYTHON = 0
 # The build process for the Python interface can be time- and space-consuming,
 # so we don't want to do it unless requested.
 ifeq ($(BUILD_PYTHON),1)
@@ -70,7 +66,6 @@ all:
 	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_BUILD_DIR}/include
 	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/.libs/libs* ${HYPRE_BUILD_DIR}/lib
 	cp -fp hypre_babel_exception_handler.h ${HYPRE_BUILD_DIR}/include
-#	cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_BUILD_DIR}/include
 
 install:
 	@ \
@@ -84,7 +79,6 @@ install:
 	done
 	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_INC_INSTALL}
 	cp -fp hypre_babel_exception_handler.h ${HYPRE_INC_INSTALL}
-#	cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_INC_INSTALL}
 
 clean:
 	@ \
