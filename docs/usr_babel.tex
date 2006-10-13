@@ -49,7 +49,7 @@ the Babel interface in the C, C++, Fortran, and Python languages.
    bHYPRE_IJParCSRVector_Initialize( b, &_ex );
    b.Initialize();
    call bHYPRE_IJParCSRVector_Initialize_f( b, ierr, ex )
-   bHYPRE.IJParCSRVector.Initialize( b )
+   b.Initialize()
 \end{verbatim}
 
 
@@ -133,12 +133,13 @@ Most functions are member functions of a class.  In
 non-object-oriented languages, the first argument of the function will
 be the object which ``owns'' the function.  For example, to solve
 equations with a PCG solver you ``apply'' it to vectors using its
-member function \code{Apply}.  In C++, C, and Fortran this concept is
-expressed as:
+member function \code{Apply}.  In C++, C, Fortran, and Python this
+concept is expressed as:
 \begin{verbatim}
       pcg_solver.Apply( b, x );   (C++;in the ::ucxx::bHYPRE namespace)
       bHYPRE_PCG_Apply( PCG_solver, b, &x, ex );   (C)
       call bHYPRE_PCG_Apply_f( PCG_solver, b, x, ierr, ex )   (Fortran)
+      pcg_solver.Apply( b, x )  (Python)
 \end{verbatim}
 
 In the Babel interface, data types usually look like \code{Class} in
@@ -200,6 +201,13 @@ not how to handle them.
     ierr = amg_solver.SetIntParameter( "CoarsenType", 6);
     ierr = amg_solver.SetDoubleParameter( "Tolerance", 1e-7);
 \end{verbatim}
+
+\subsubsection{Python-Babel}
+\begin{verbatim}
+    ierr = solver.SetIntParameter( "CoarsenType", 6 )
+    ierr = solver.SetDoubleParameter( "Tolerance", 1e-7 )
+\end{verbatim}
+
 
 \section{MPI communicator}
 \label{sec-MPI}
@@ -543,3 +551,41 @@ When necessary, build \hypre{} as follows instead of the above:
 
 % I could write something about how building interfaces to other
 % languages, but that may be too advanced for a user manual.
+
+\subsection{Building HYPRE with Python using the Babel Interface}
+\label{sec-Building-Babel-Python}
+
+To build the hypre library so you can call it from Python code, the
+first step is to build a suitable Python!  Start with a recent version
+of Python with the Numeric Python extension; for details see the
+section on recommended external software in the Babel Users' Manual.
+
+We have only tested hypre's Python interface with pyMPI, a Python
+extension which supports MPI.  It is likely that you can make it work
+with other MPI extensions, or even no MPI at all.  If you try this,
+let us know how it works.
+
+You will need write access to your Python's site-packages directory.
+When you install pyMPI it creates another instance of Python, so this
+should not be a problem.
+
+You must configure and build hypre with shared libraries, because
+Python requires them.  And specify what Python you are building for;
+files will be written into its site-packages directory.
+For example:
+\begin{verbatim}
+  configure --with-babel --enable-shared --enable-python=pyMPI
+  make
+\end{verbatim}
+
+Finally, you need to set two environment variables.
+\code{LD_LIBRARY_PATH} must include the path to the hypre shared
+libraries, e.g. \code{linear_solvers/hypre/lib}.
+\code{SIDL_DLL_PATH} must include the path to an
+\code{.scl} file generated for the Python interface,
+e.g.\begin{verbatim}
+linear_solvers/babel/bHYPREClient-P/libbHYPRE.scl
+\end{verbatim}
+
+See the examples directory for an example of how to write a Python
+program which uses hypre.
