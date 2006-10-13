@@ -586,6 +586,8 @@ libraries, e.g. \code{linear_solvers/hypre/lib}.
 e.g.\begin{verbatim}
 linear_solvers/babel/bHYPREClient-P/libbHYPRE.scl
 \end{verbatim}
+If you are running multiple processes, these environment variables may
+need to be set in a dotfile so all processes will use the same values.
 
 See the examples directory for an example of how to write a Python
 program which uses hypre.
