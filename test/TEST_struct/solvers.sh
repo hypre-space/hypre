@@ -29,102 +29,102 @@
 #  for each test save the results for comparison with the baseline case
 #=============================================================================
 tail -4 solvers.out.0 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
+head -4 solvers.testdata > solvers.testdata.tmp
 
 cat solvers.testdata.tmp > solvers.tests
 #=============================================================================
 tail -4 solvers.out.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.10.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.10.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.10.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.11.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.11.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.11.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.17.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.17.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.17.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.18.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.18.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.18.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.19.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.19.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.19.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
+head -4 solvers.testdata > solvers.testdata.tmp
 
 cat solvers.testdata.tmp >> solvers.tests
 #=============================================================================
 tail -4 solvers.out.2 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
+head -4 solvers.testdata > solvers.testdata.tmp
 
 cat solvers.testdata.tmp >> solvers.tests
 #=============================================================================
 tail -4 solvers.out.3 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
+head -4 solvers.testdata > solvers.testdata.tmp
 
 cat solvers.testdata.tmp >> solvers.tests
 #=============================================================================
 tail -4 solvers.out.4 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
+head -4 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -4 solvers.out.10.lobpcg > solvers.testdata
+head -4 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.10.lobpcg.1 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.10.lobpcg.5 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -4 solvers.out.11.lobpcg > solvers.testdata
+head -4 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.11.lobpcg.1 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.11.lobpcg.5 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -4 solvers.out.17.lobpcg > solvers.testdata
+head -4 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.17.lobpcg.1 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.17.lobpcg.5 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -4 solvers.out.18.lobpcg > solvers.testdata
+head -4 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.18.lobpcg.1 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.18.lobpcg.5 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -4 solvers.out.19.lobpcg > solvers.testdata
+head -4 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.19.lobpcg.1 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
+
+cat solvers.testdata.tmp >> solvers.tests
+#=============================================================================
+tail -0 solvers.out.19.lobpcg.5 > solvers.testdata
+head -0 solvers.testdata > solvers.testdata.tmp
 
 cat solvers.testdata.tmp >> solvers.tests
 
