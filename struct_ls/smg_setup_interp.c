@@ -312,7 +312,11 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 
    hypre_StructStencilDestroy(compute_pkg_stencil);
 
+#if 0
    hypre_StructMatrixAssemble(PT);
+#else
+   hypre_StructInterpAssemble(A, PT, 0, cdir, cindex, stride);
+#endif
 
    return ierr;
 }

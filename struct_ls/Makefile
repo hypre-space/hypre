@@ -89,6 +89,7 @@ FILES =\
  point_relax.c\
  red_black_constantcoef_gs.c\
  red_black_gs.c\
+ semi.c\
  semi_interp.c\
  semi_restrict.c\
  semi_setup_rap.c\

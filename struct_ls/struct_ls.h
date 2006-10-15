@@ -429,6 +429,9 @@ int hypre_RedBlackGSSetZeroGuess ( void *relax_vdata , int zero_guess );
 int hypre_RedBlackGSSetStartRed ( void *relax_vdata );
 int hypre_RedBlackGSSetStartBlack ( void *relax_vdata );
 
+/* semi.c */
+int hypre_StructInterpAssemble ( hypre_StructMatrix *A , hypre_StructMatrix *P , int P_stored_as_transpose , int cdir , hypre_Index index , hypre_Index stride );
+
 /* semi_interp.c */
 void *hypre_SemiInterpCreate ( void );
 int hypre_SemiInterpSetup ( void *interp_vdata , hypre_StructMatrix *P , int P_stored_as_transpose , hypre_StructVector *xc , hypre_StructVector *e , hypre_Index cindex , hypre_Index findex , hypre_Index stride );
