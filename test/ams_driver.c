@@ -394,7 +394,7 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetRelaxType(precond, rlx_type);   /* Sym G.S./Jacobi hybrid */
          HYPRE_BoomerAMGSetNumSweeps(precond, 1);   /* Sweeeps on each level */
          HYPRE_BoomerAMGSetMaxLevels(precond, 20);  /* maximum number of levels */
-         HYPRE_BoomerAMGSetTol(precond, 1e-3);      /* conv. tolerance (if needed) */
+         HYPRE_BoomerAMGSetTol(precond, 0.0);      /* conv. tolerance (if needed) */
          HYPRE_BoomerAMGSetMaxIter(precond, 1);     /* do only one iteration! */
          HYPRE_BoomerAMGSetStrongThreshold(precond, theta);
 
@@ -523,5 +523,8 @@ int main (int argc, char *argv[])
 
    MPI_Finalize();
 
-   return (0);
+   if (HYPRE_GetError() && !myid)
+      fprintf(stderr,"hypre_error_flag = %d\n", HYPRE_GetError());
+
+   return 0;
 }
