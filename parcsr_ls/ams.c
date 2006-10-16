@@ -1260,15 +1260,22 @@ int hypre_AMSSolve(void *solver,
                    i+1, r_norm, r_norm / old_resid, relative_resid);
       }
 
-      if (relative_resid < ams_data -> tol) break;
+      if (relative_resid < ams_data -> tol)
+      {
+         i++;
+         break;
+      }
    }
 
    if (my_id == 0 && ams_data -> print_level > 0 && ams_data -> maxit > 1)
       printf("\n\n Average Convergence Factor = %f\n\n",
-             pow((r_norm/r0_norm),(1.0/(double) (i+1))));
+             pow((r_norm/r0_norm),(1.0/(double) i)));
 
-   ams_data -> num_iterations = i+1;
+   ams_data -> num_iterations = i;
    ams_data -> rel_resid_norm = relative_resid;
+
+   if (ams_data -> num_iterations == ams_data -> maxit && ams_data -> tol > 0.0)
+      hypre_error(HYPRE_ERROR_CONV);
 
    return hypre_error_flag;
 }
