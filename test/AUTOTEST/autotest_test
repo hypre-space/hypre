@@ -248,119 +248,6 @@ mail_summary ()
 
 
 #=============================================================================
-# Functions for filtering misleading error messages
-#    Removes specified messages from error files that do not reflect actual
-#    errors
-#=============================================================================
-process_filter ()
-{
-  ErrorFile=$1
-  shift
-  if (egrep "$@" $ErrorFile >/dev/null) ; then
-     mv $ErrorFile $ErrorFile.tmp
-     egrep -v "$@" $ErrorFile.tmp > $ErrorFile
-     echo "-- applied filter:$@" >> $ErrorFile.orig
-     cat $ErrorFile.tmp >> $ErrorFile.orig
-  fi
-}
-
-
-apply_error_filters ()
-{
-  ErrorFile=$1
-  if [ -s "${ErrorFile}" ] ; then
-    HOST=`hostname`
-    case $HOST in
-      uv*)
-        for ii in \
-          '===\ End\ of\ Compilation'\
-          'phase\ time'\
-          '[---]'\
-          '[0-9c0-9]'\
-          'cpu\ clock'\
-          'wall\ clock'\
-          'Compilation\ successful'\
-          '^\ Guide\ \ \ '\
-          ':\ 0\ errors\ in\ file'\
-          '1500-030:\ \(I\)\ INFORMATION:'\
-          '1500-010:\ \(W\)\ WARNING\ in'\
-          ':\ 1506-068\ \(W\)\ Operation\ between\ types'\
-          '^No\ begin\ line'\
-          'autoconf\ has\ been\ disabled'\
-          'babel_config.h.in:\ No\ such\ file\ or\ directory'\
-          'configure:\ WARNING:\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-        ;;
-      peng* | alc* | mcr*)
-        for ii in \
-          '[A-Za-z0-9_]*\.[cCf]$'\
-          '[A-Za-z0-9_]*\.cxx$'\
-          '^[ \t]*$'\
-          '^[0-9]*\ Lines\ Compiled$'\
-          '[---]'\
-          '[0-9c0-9]'\
-          'phase\ time'\
-          'cpu\ clock'\
-          'wall\ clock'\
-          'external\ (subroutine|function)'\
-          'EXTERNAL\ (SUBROUTINE|FUNCTION)'\
-          'remark:\ LOOP\ WAS\ VECTORIZED'\
-          '^icc:\ Command\ line\ warning:\ overriding'\
-          '\ remark:\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-      gps*)
-        for ii in \
-          '^No\ suffix\ list'\
-          '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
-          'WARNING:\ \ guidef77\ has\ implied\ '\
-          '[---]'\
-          '[0-9c0-9]'\
-          'phase\ time'\
-          'cpu\ clock'\
-          'wall\ clock'\
-          '^cc:\ Info:\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-      tux*)
-        for ii in \
-          'autoconf\ has\ been\ disabled'\
-          'automake\ has\ been\ disabled'\
-          'autoheader\ has\ been\ disabled'\
-          'configure:\ WARNING:\ Configuration\ for'\
-          'configure:\ WARNING:\ Skipping\ Java'\
-          '[---]'\
-          '[0-9c0-9]'\
-          'phase\ time'\
-          'cpu\ clock'\
-          'wall\ clock'\
-          'Error:\ PDF\ version'\
-          'babel_config.h.in:\ No\ such\ file\ or\ directory'\
-          '../../../babel/runtime'\
-          'ltdl.c:'\
-          'sidl'\
-          'Insure\ messages\ will\ be\ written\ to'\
-          'Timeout\ in\ waiting\ for\ processes\ to'\
-          'rsh\ program'\
-          'problem'\
-          'This\ is\ not\ a\ problem'\
-          'environment'\
-          'process\ termination'\
-          'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
-          'PGC/x86\ Linux/x86\ 3.3-1:\ compilation\ completed\ with\ warnings'\
-          'sed:\ Couldn.t\ close\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-    esac
-  fi
-}
-
-
-#=============================================================================
 # Function for creating error message summary file
 #=============================================================================
 create_summary_files () 
@@ -410,7 +297,6 @@ create_summary_files ()
         do
            if [ -r "${i}" ] ; then
               CTOTCNT=`expr $CTOTCNT + 1`
-              apply_error_filters ${i}
               if [ -s "${i}" ] ; then
                  errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${i}"\">"${EFILE}"</a><br>"
                  AutotestFailureCount=`expr $AutotestFailureCount + 1`
@@ -483,7 +369,6 @@ create_summary_files ()
         TestCaseFailedFlag=0
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
         for k in "${ErrFile}.[0-9]+"; do
-           apply_error_filters ${k}
            if [ -s "${k}" ] ; then
               if [ "$DEBUG_MODE" = "yes" ] ; then
                  printf "nonzero .err file = ${ErrFile}\n"
@@ -501,7 +386,6 @@ create_summary_files ()
 #
 #               check for non-zero error file without numerical suffix; which
 #               typically contains errors from insure runs
-        apply_error_filters ${ErrFile}
         if [ -s "${ErrFile}" ] ; then
            if [ "$DEBUG_MODE" = "yes" ] ; then
               printf "nonzero .err file = ${ErrFile}\n"
