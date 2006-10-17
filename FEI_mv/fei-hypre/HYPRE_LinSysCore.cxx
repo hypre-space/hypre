@@ -327,6 +327,9 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    MLI_Hybrid_MaxIter_  = 100;
    MLI_Hybrid_ConvRate_ = 0.95;
    MLI_Hybrid_NTrials_  = 5;
+   amsX_                = NULL;
+   amsY_                = NULL;
+   amsZ_                = NULL;
 
    //-------------------------------------------------------------------
    // parameters ML Maxwell solver
@@ -543,6 +546,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       HYPRE_ParCSRMatrixDestroy(maxwellANN_);
       maxwellANN_ = NULL;
    }
+   if (amsX_ != NULL) HYPRE_IJVectorDestroy(amsX_);
+   if (amsY_ != NULL) HYPRE_IJVectorDestroy(amsY_);
+   if (amsZ_ != NULL) HYPRE_IJVectorDestroy(amsZ_);
    // Users who copy this matrix in should be responsible for
    // destroying this
    //if (maxwellGEN_ != NULL)
@@ -4094,6 +4100,42 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                MLI_NodalCoord_, localEndRow_-localStartRow_+1);
    }
 #endif
+   if ( HYPreconID_ == HYAMS && MLI_EqnNumbers_ != NULL )
+   {
+      int *iArray = new int[MLI_NumNodes_];
+      for (i = 0; i < MLI_NumNodes_; i++) iArray[i] = i;
+      HYPRE_LSI_qsort1a(MLI_EqnNumbers_, iArray, 0, MLI_NumNodes_-1);
+      double *tempNodalCoord = MLI_NodalCoord_; 
+      int ncount = 1;
+      for (i = 1; i < MLI_NumNodes_; i++) 
+         if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) ncount++;
+      MLI_NodalCoord_ = new double[ncount*MLI_FieldSize_];
+      for (j = 0; j < MLI_FieldSize_; j++) 
+         MLI_NodalCoord_[j] = tempNodalCoord[iArray[0]*MLI_FieldSize_+j];
+      ncount = 1;
+      for (i = 1; i < MLI_NumNodes_; i++) 
+      {
+         if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) 
+         {
+            MLI_EqnNumbers_[ncount] = MLI_EqnNumbers_[i];
+            for (j = 0; j < MLI_FieldSize_; j++) 
+               MLI_NodalCoord_[ncount*MLI_FieldSize_+j] =
+                  tempNodalCoord[iArray[i]*MLI_FieldSize_+j];
+            ncount++;
+         }
+      }
+      MLI_NumNodes_ = ncount;
+      //assert((MLI_NumNodes_*MLI_FieldSize_)==(localEndRow_-localStartRow_+1));
+      delete [] tempNodalCoord;
+      delete [] iArray;
+      for (i = 0; i < MLI_NumNodes_; i++) 
+      {
+         if (MLI_NodalCoord_[i] == -99999.0) 
+            printf("%d : HYPRE launchSolver ERROR - coord %d not filled.\n",
+                   mypid_, i);
+      }
+      HYPRE_LSI_BuildNodalCoordinates();
+   }
 
    switch ( HYSolverID_ )
    {

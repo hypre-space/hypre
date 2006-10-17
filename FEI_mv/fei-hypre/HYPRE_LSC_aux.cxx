@@ -3482,6 +3482,7 @@ void HYPRE_LinSysCore::setupPreconAMS()
    int                maxit=100;    /* heuristics for now */
    double             tol=1.0e-6;   /* heuristics for now */
    int                cycle_type=1; /* V-cycle */
+   HYPRE_ParVector    parVecX, parVecY, parVecZ;
 
    /* Set AMS parameters */
    HYPRE_AMSSetDimension(HYPrecon_, mlNumPDEs_);
@@ -3497,11 +3498,12 @@ void HYPRE_LinSysCore::setupPreconAMS()
       printf("HYPRE_LSC::setupPreconAMS ERROR - no G matrix.\n");
       exit(1);
    }
-   if (MLI_NodalCoord_ == NULL)
+   if (amsX_ == NULL && amsY_ != NULL)
    {
-      HYPRE_ParVector amsX, amsY, amsZ;
-      HYPRE_LSI_BuildNodalCoordinates(&amsX,&amsY,&amsZ);
-      HYPRE_AMSSetCoordinateVectors(HYPrecon_,amsX,amsY,amsZ);
+      HYPRE_IJVectorGetObject(amsX_, (void **) &parVecX);
+      HYPRE_IJVectorGetObject(amsY_, (void **) &parVecY);
+      HYPRE_IJVectorGetObject(amsZ_, (void **) &parVecZ);
+      HYPRE_AMSSetCoordinateVectors(HYPrecon_,parVecX,parVecY,parVecZ);
    }
    // this is used to tell AMS that mass matrix has 0 coeff 
    // HYPRE_AMSSetBetaPoissonMatrix(HYPrecon_, NULL);
@@ -5189,9 +5191,306 @@ void HYPRE_LinSysCore::FE_loadElemMatrix(int elemID, int nNodes,
 // build nodal coordinates
 //---------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::HYPRE_LSI_BuildNodalCoordinates(HYPRE_ParVector *X,
-                       HYPRE_ParVector *Y, HYPRE_ParVector *Z)
+void HYPRE_LinSysCore::HYPRE_LSI_BuildNodalCoordinates()
 {
+   int    localNRows, *procNRows, *iTempArray, iP, iN, iS, *nodeProcMap;
+   int    *procList, nSends, *sendProcs, *sendLengs, **iSendBufs;
+   int    nRecvs, *recvLengs, *recvProcs, **iRecvBufs, iR, numNodes, eqnInd;
+   int    *flags, arrayLeng, coordLength, ierr, procIndex, iD;
+   double **dSendBufs, **dRecvBufs, *nCoords, *vecData;
+   MPI_Request *mpiRequests;
+   MPI_Status  mpiStatus;
+   HYPRE_ParVector parVec;
+
+   /* -------------------------------------------------------- */
+   /* construct procNRows array                                */
+   /* -------------------------------------------------------- */
+                                                                                
+   localNRows = localEndRow_ - localStartRow_ + 1;
+   procNRows = new int[numProcs_+1];
+   iTempArray = new int[numProcs_];
+   for (iP = 0; iP <= numProcs_; iP++) procNRows[iP] = 0;
+   procNRows[mypid_] = localNRows;
+   MPI_Allreduce(procNRows,iTempArray,numProcs_,MPI_INT,MPI_SUM,comm_);
+   procNRows[0] = 0;
+   for (iP = 1; iP <= numProcs_; iP++)
+      procNRows[iP] = procNRows[iP-1] + iTempArray[iP-1];
+
+   /* -------------------------------------------------------- */
+   /* construct node to processor map                          */
+   /* -------------------------------------------------------- */
+
+   nodeProcMap = new int[MLI_NumNodes_];
+   for (iN = 0; iN < MLI_NumNodes_; iN++)
+   {
+      nodeProcMap[iN] = -1;
+      if (MLI_EqnNumbers_[iN] < procNRows[mypid_] ||
+          MLI_EqnNumbers_[iN] >= procNRows[mypid_+1])
+      {
+         for (iP = 0; iP < numProcs_; iP++)
+            if (MLI_EqnNumbers_[iN] < procNRows[iP]) break;
+         nodeProcMap[iN] = iP - 1;
+      }
+   }
+
+   /* -------------------------------------------------------- */
+   /* construct send information                               */
+   /* -------------------------------------------------------- */
+                                                                                
+   procList = new int[numProcs_];
+   for (iP = 0; iP < numProcs_; iP++) procList[iP] = 0;
+   for (iN = 0; iN < numProcs_; iN++)
+      if (nodeProcMap[iN] >= 0) procList[nodeProcMap[iN]]++;
+   nSends = 0;
+   for (iP = 0; iP < numProcs_; iP++) if (procList[iP] > 0) nSends++;
+   if (nSends > 0)
+   {
+      sendProcs = new int[nSends];
+      sendLengs = new int[nSends];
+      iSendBufs = new int*[nSends];
+      dSendBufs = new double*[nSends];
+   }
+   nSends = 0;
+   for (iP = 0; iP < numProcs_; iP++)
+   {
+      if (procList[iP] > 0)
+      {
+         sendLengs[nSends] = procList[iP];
+         sendProcs[nSends++] = iP;
+      }
+   }
+                                                                                
+   /* -------------------------------------------------------- */
+   /* construct recv information                               */
+   /* -------------------------------------------------------- */
+                                                                                
+   for (iP = 0; iP < numProcs_; iP++) procList[iP] = 0;
+   for (iP = 0; iP < nSends; iP++) procList[sendProcs[iP]]++;
+   MPI_Allreduce(procList,iTempArray,numProcs_,MPI_INT,MPI_SUM,comm_);
+   nRecvs = iTempArray[mypid_];
+   if (nRecvs > 0)
+   {
+      recvLengs = new int[nRecvs];
+      recvProcs = new int[nRecvs];
+      iRecvBufs = new int*[nRecvs];
+      dRecvBufs = new double*[nRecvs];
+      mpiRequests = new MPI_Request[nRecvs];
+   }
+   for (iP = 0; iP < nRecvs; iP++)
+      MPI_Irecv(&(recvLengs[iP]), 1, MPI_INT, MPI_ANY_SOURCE, 29421,
+                comm_, &(mpiRequests[iP]));
+   for (iP = 0; iP < nSends; iP++)
+      MPI_Send(&(sendLengs[iP]), 1, MPI_INT, sendProcs[iP], 29421, comm_);
+   for (iP = 0; iP < nRecvs; iP++)
+   {
+      MPI_Wait(&(mpiRequests[iP]), &mpiStatus);
+      recvProcs[iP] = mpiStatus.MPI_SOURCE;
+   }
+                                                                                
+   /* -------------------------------------------------------- */
+   /* communicate equation numbers information                */
+   /* -------------------------------------------------------- */
+                                                                                
+   for (iP = 0; iP < nRecvs; iP++)
+   {
+      iRecvBufs[iP] = new int[recvLengs[iP]];
+      MPI_Irecv(iRecvBufs[iP], recvLengs[iP], MPI_INT, recvProcs[iP],
+                29422, comm_, &(mpiRequests[iP]));
+   }
+   for (iP = 0; iP < nSends; iP++)
+   {
+      iSendBufs[iP] = new int[sendLengs[iP]];
+      sendLengs[iP] = 0;
+   }
+   for (iN = 0; iN < MLI_NumNodes_; iN++)
+   {
+      if (nodeProcMap[iN] >= 0)
+      {
+         procIndex = nodeProcMap[iN];
+         for (iP = 0; iP < nSends; iP++)
+            if (procIndex == sendProcs[iP]) break;
+         iSendBufs[iP][sendLengs[iP]++] = MLI_EqnNumbers_[iN];
+      }
+   }
+   for (iP = 0; iP < nSends; iP++)
+   {
+      MPI_Send(iSendBufs[iP], sendLengs[iP], MPI_INT, sendProcs[iP],
+               29422, comm_);
+   }
+   for (iP = 0; iP < nRecvs; iP++) MPI_Wait(&(mpiRequests[iP]),&mpiStatus);
+                                                                                
+   /* -------------------------------------------------------- */
+   /* communicate coordinate information                       */
+   /* -------------------------------------------------------- */
+                                                                                
+   for (iP = 0; iP < nRecvs; iP++)
+   {
+      dRecvBufs[iP] = new double[recvLengs[iP]*MLI_FieldSize_];
+      MPI_Irecv(dRecvBufs[iP], recvLengs[iP]*MLI_FieldSize_, MPI_DOUBLE,
+                recvProcs[iP], 29425, comm_, &(mpiRequests[iP]));
+   }
+   for (iP = 0; iP < nSends; iP++)
+   {
+      dSendBufs[iP] = new double[sendLengs[iP]*MLI_FieldSize_];
+      sendLengs[iP] = 0;
+   }
+   for (iN = 0; iN < MLI_NumNodes_; iN++)
+   {
+      if (nodeProcMap[iN] >= 0)
+      {
+         procIndex = nodeProcMap[iN];
+         for (iP = 0; iP < nSends; iP++)
+            if (procIndex == sendProcs[iP]) break;
+         for (iD = 0; iD < MLI_FieldSize_; iD++)
+            dSendBufs[iP][sendLengs[iP]++] =
+                      MLI_NodalCoord_[iN*MLI_FieldSize_+iD];
+      }
+   }
+   for (iP = 0; iP < nSends; iP++)
+   {
+      sendLengs[iP] /= MLI_FieldSize_;
+      MPI_Send(dSendBufs[iP], sendLengs[iP]*MLI_FieldSize_, MPI_DOUBLE,
+               sendProcs[iP], 29425, comm_);
+   }
+   for (iP = 0; iP < nRecvs; iP++) MPI_Wait(&(mpiRequests[iP]),&mpiStatus);
+                                                                                
+   /* -------------------------------------------------------- */
+   /* check any duplicate coordinate information               */
+   /* -------------------------------------------------------- */
+                                                                                
+   arrayLeng = MLI_NumNodes_;
+   for (iP = 0; iP < nRecvs; iP++) arrayLeng += recvLengs[iP];
+   flags = new int[arrayLeng];
+   for (iN = 0; iN < arrayLeng; iN++) flags[iN] = 0;
+   for (iN = 0; iN < MLI_NumNodes_; iN++)
+   {
+      if (nodeProcMap[iN] < 0)
+      {
+         eqnInd = (MLI_EqnNumbers_[iN] - procNRows[mypid_]) / MLI_FieldSize_;
+         if (eqnInd >= arrayLeng)
+         {
+            printf("%d : LoadNodalCoordinates - ERROR(1).\n", mypid_);
+            exit(1);
+         }
+         flags[eqnInd] = 1;
+      }
+   }
+   for (iP = 0; iP < nRecvs; iP++)
+   {
+      for (iR = 0; iR < recvLengs[iP]; iR++)
+      {
+         eqnInd = (iRecvBufs[iP][iR] - procNRows[mypid_]) / MLI_FieldSize_;
+         if (eqnInd >= arrayLeng)
+         {
+            printf("%d : LoadNodalCoordinates - ERROR(2).\n", mypid_);
+            exit(1);
+         }
+         flags[eqnInd] = 1;
+      }
+   }
+   numNodes = 0;
+   for (iN = 0; iN < arrayLeng; iN++)
+   {
+      if ( flags[iN] == 0 ) break;
+      else                  numNodes++;
+   }
+   delete [] flags;
+                                                                                
+   /* -------------------------------------------------------- */
+   /* set up nodal coordinate information in correct order     */
+   /* -------------------------------------------------------- */
+                                                                                
+   coordLength = MLI_NumNodes_ * MLI_FieldSize_;
+   nCoords = new double[coordLength];
+                                                                                
+   arrayLeng = MLI_NumNodes_ * MLI_FieldSize_;
+   for (iN = 0; iN < MLI_NumNodes_; iN++)
+   {
+      if (nodeProcMap[iN] < 0)
+      {
+         eqnInd = (MLI_EqnNumbers_[iN] - procNRows[mypid_]) / MLI_FieldSize_;
+         if (eqnInd >= 0 && eqnInd < arrayLeng)
+            for (iD = 0; iD < MLI_FieldSize_; iD++)
+               nCoords[eqnInd*MLI_FieldSize_+iD] = 
+                      MLI_NodalCoord_[iN*MLI_FieldSize_+iD];
+      }
+   }
+   for (iP = 0; iP < nRecvs; iP++)
+   {
+      for (iR = 0; iR < recvLengs[iP]; iR++)
+      {
+         eqnInd = (iRecvBufs[iP][iR] - procNRows[mypid_]) / MLI_FieldSize_;
+         if (eqnInd >= 0 && eqnInd < arrayLeng)
+            for (iD = 0; iD < MLI_FieldSize_; iD++)
+               nCoords[eqnInd*MLI_FieldSize_+iD] =
+                     dRecvBufs[iP][iR*MLI_FieldSize_+iD];
+      }
+   }
+                                                                                
+   /* -------------------------------------------------------- */
+   /* create AMS vectors                                       */
+   /* -------------------------------------------------------- */
+
+   localNRows = localEndRow_ - localStartRow_ + 1;
+   ierr  = HYPRE_IJVectorCreate(comm_,(localStartRow_-1)/MLI_FieldSize_,
+                 localEndRow_/MLI_FieldSize_-1, &amsX_);
+   ierr += HYPRE_IJVectorSetObjectType(amsX_, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(amsX_);
+   ierr += HYPRE_IJVectorAssemble(amsX_);
+   assert(!ierr);
+   HYPRE_IJVectorGetObject(amsX_, (void **) &parVec);
+   vecData = (double *) hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) parVec));
+   for (iN = 0; iN < localNRows/MLI_FieldSize_; iN++)
+      vecData[iN] = nCoords[iN*MLI_FieldSize_];
+   ierr  = HYPRE_IJVectorCreate(comm_,(localStartRow_-1)/MLI_FieldSize_,
+                 localEndRow_/MLI_FieldSize_-1, &amsY_);
+   ierr += HYPRE_IJVectorSetObjectType(amsY_, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(amsY_);
+   ierr += HYPRE_IJVectorAssemble(amsY_);
+   assert(!ierr);
+   HYPRE_IJVectorGetObject(amsY_, (void **) &parVec);
+   vecData = (double *) hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) parVec));
+   for (iN = 0; iN < localNRows/MLI_FieldSize_; iN++)
+      vecData[iN] = nCoords[iN*MLI_FieldSize_+1];
+   ierr  = HYPRE_IJVectorCreate(comm_,(localStartRow_-1)/MLI_FieldSize_,
+                 localEndRow_/MLI_FieldSize_-1, &amsZ_);
+   ierr += HYPRE_IJVectorSetObjectType(amsZ_, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(amsZ_);
+   ierr += HYPRE_IJVectorAssemble(amsZ_);
+   assert(!ierr);
+   HYPRE_IJVectorGetObject(amsZ_, (void **) &parVec);
+   vecData = (double *) hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) parVec));
+   for (iN = 0; iN < localNRows/MLI_FieldSize_; iN++)
+      vecData[iN] = nCoords[iN*MLI_FieldSize_+2];
+
+   /* -------------------------------------------------------- */
+   /* clean up                                                 */
+   /* -------------------------------------------------------- */
+                                                                                
+   delete [] procList;
+   delete [] iTempArray;
+   delete [] nodeProcMap;
+   delete [] procNRows;
+   delete [] nCoords;
+   if (nSends > 0)
+   {
+      delete [] sendProcs;
+      delete [] sendLengs;
+      for (iS = 0; iS < nSends; iS++) delete [] iSendBufs[iS];
+      for (iS = 0; iS < nSends; iS++) delete [] dSendBufs[iS];
+      delete [] dSendBufs;
+      delete [] iSendBufs;
+   }
+   if (nRecvs > 0)
+   {
+      delete [] recvProcs;
+      delete [] recvLengs;
+      for (iR = 0; iR < nRecvs; iR++) delete [] iRecvBufs[iR];
+      for (iR = 0; iR < nRecvs; iR++) delete [] dRecvBufs[iR];
+      delete [] iRecvBufs;
+      delete [] dRecvBufs;
+      delete [] mpiRequests;
+   }
    return;
 }
 
