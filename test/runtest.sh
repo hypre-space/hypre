@@ -497,7 +497,7 @@ apply_error_filters ()
           '../../../babel/runtime'\
           'ltdl.c:'\
           'sidl'\
-          'Insure\ messages\ will\ be\ written\ to'\
+          'Insure'\
           'Timeout\ in\ waiting\ for\ processes\ to'\
           'rsh\ program'\
           'problem'\
@@ -518,6 +518,7 @@ apply_error_filters ()
 # apply filters to remove non-fatal messages from *.err file
 function error_filters
 {
+   curdir="`pwd`"
    for dir in $TestDirNames
    do
       cd $dir
@@ -529,6 +530,7 @@ function error_filters
             apply_error_filters ${errfile}
          fi
       done
+      cd $curdir
    done
 }
 
