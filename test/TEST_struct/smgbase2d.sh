@@ -33,33 +33,33 @@
 
 tail -3 smgbase2d.out.0 > smgbase2d.testdata
 tail -3 smgbase2d.out.1 > smgbase2d.testdata.temp
-diff smgbase2d.testdata smgbase2d.testdata.temp >&2
+diff -bI"time" smgbase2d.testdata smgbase2d.testdata.temp >&2
 
 cat smgbase2d.testdata > smgbase2d.tests
 cat smgbase2d.testdata.temp >> smgbase2d.tests
 #=============================================================================
 
 tail -3 smgbase2d.out.2 > smgbase2d.testdata.temp
-diff smgbase2d.testdata smgbase2d.testdata.temp >&2
+diff -bI"time" smgbase2d.testdata smgbase2d.testdata.temp >&2
 
 cat smgbase2d.testdata.temp >> smgbase2d.tests
 #=============================================================================
 
 tail -3 smgbase2d.out.3 > smgbase2d.testdata.temp
-diff smgbase2d.testdata smgbase2d.testdata.temp >&2
+diff -bI"time" smgbase2d.testdata smgbase2d.testdata.temp >&2
 
 cat smgbase2d.testdata.temp >> smgbase2d.tests
 #=============================================================================
 
 tail -3 smgbase2d.out.4 > smgbase2d.testdata.temp
-diff smgbase2d.testdata smgbase2d.testdata.temp >&2
+diff -bI"time" smgbase2d.testdata smgbase2d.testdata.temp >&2
 
 cat smgbase2d.testdata.temp >> smgbase2d.tests
 
 #=============================================================================
 #   compare with the baseline case
 #=============================================================================
-diff smgbase2d.saved smgbase2d.tests >&2
+diff -bI"time" smgbase2d.saved smgbase2d.tests >&2
 
 #=============================================================================
 #   remove temporary files

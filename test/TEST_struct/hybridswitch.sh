@@ -62,7 +62,7 @@ cat hybridswitch.testdata >> hybridswitch.tests
 #=============================================================================
 #   compare with the baseline case
 #=============================================================================
-diff hybridswitch.saved hybridswitch.tests >&2
+diff -bI"time" hybridswitch.saved hybridswitch.tests >&2
 
 #=============================================================================
 #    remove temporary files

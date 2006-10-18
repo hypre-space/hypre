@@ -34,7 +34,7 @@ tail -3 smgvcycle.out.0 > smgvcycle.tests
 #=============================================================================
 #   compare with the baseline case
 #=============================================================================
-diff smgvcycle.saved smgvcycle.tests >&2
+diff -bI"time" smgvcycle.saved smgvcycle.tests >&2
 
 #=============================================================================
 #   remove temporary files

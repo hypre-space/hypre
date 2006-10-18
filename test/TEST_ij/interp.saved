@@ -1,5 +1,5 @@
 
- Average Convergence Factor = 0.121972
+ Average Convergence Factor = 0.111473
 
      Complexity:    grid = 1.402667
                 operator = 3.553878
@@ -9,7 +9,7 @@
 
 =============================================
 
- Average Convergence Factor = 0.157957
+ Average Convergence Factor = 0.151019
 
      Complexity:    grid = 1.412000
                 operator = 3.607823
@@ -19,7 +19,7 @@
 
 =============================================
 
- Average Convergence Factor = 0.097692
+ Average Convergence Factor = 0.094689
 
      Complexity:    grid = 1.400000
                 operator = 3.479184
@@ -29,7 +29,7 @@
 
 =============================================
 
- Average Convergence Factor = 0.125676
+ Average Convergence Factor = 0.139473
 
      Complexity:    grid = 1.414667
                 operator = 2.556395
@@ -39,7 +39,7 @@
 
 =============================================
 
- Average Convergence Factor = 0.161679
+ Average Convergence Factor = 0.161875
 
      Complexity:    grid = 1.414667
                 operator = 2.556803
@@ -49,7 +49,7 @@
 
 =============================================
 
- Average Convergence Factor = 0.145084
+ Average Convergence Factor = 0.182255
 
      Complexity:    grid = 1.408444
                 operator = 2.536259

@@ -43,7 +43,7 @@ cat pfmgtest1d.testdata >> pfmgtest1d.tests
 #=============================================================================
 #    compare with the baseline case
 #=============================================================================
-diff pfmgtest1d.saved pfmgtest1d.tests >&2
+diff -bI"time" pfmgtest1d.saved pfmgtest1d.tests >&2
 
 #=============================================================================
 #    remove temporary files

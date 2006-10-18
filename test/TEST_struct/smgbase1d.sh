@@ -33,7 +33,7 @@
 
 tail -3 smgbase1d.out.0 > smgbase1d.testdata
 tail -3 smgbase1d.out.1 > smgbase1d.testdata.temp
-diff smgbase1d.testdata smgbase1d.testdata.temp  >&2
+diff -bI"time" smgbase1d.testdata smgbase1d.testdata.temp  >&2
 
 cat smgbase1d.testdata > smgbase1d.tests
 cat smgbase1d.testdata.temp >> smgbase1d.tests
@@ -41,7 +41,7 @@ cat smgbase1d.testdata.temp >> smgbase1d.tests
 #=============================================================================
 #   for each test, save the results for comparison with the baseline case
 #=============================================================================
-diff smgbase1d.saved smgbase1d.tests >&2
+diff -bI"time" smgbase1d.saved smgbase1d.tests >&2
 
 #=============================================================================
 #   remove temporary files

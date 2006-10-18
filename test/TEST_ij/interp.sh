@@ -61,7 +61,7 @@ cat interp.testdata.tmp >> interp.tests
 #=============================================================================
 #  compare with the baseline case
 #=============================================================================
-diff interp.saved interp.tests >&2
+diff -bI"time" interp.saved interp.tests >&2
 
 #=============================================================================
 #  remove temporary files

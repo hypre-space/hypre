@@ -34,7 +34,7 @@
 
 tail -3 pfmgconstcoeffmp.out.0 > pfmgconstcoeffmp.testdata
 tail -3 pfmgconstcoeffmp.out.1 > pfmgconstcoeffmp.testdata.temp
-diff pfmgconstcoeffmp.testdata pfmgconstcoeffmp.testdata.temp  >&2
+diff -bI"time" pfmgconstcoeffmp.testdata pfmgconstcoeffmp.testdata.temp  >&2
 
 cat pfmgconstcoeffmp.testdata > pfmgconstcoeffmp.tests
 cat pfmgconstcoeffmp.testdata.temp >> pfmgconstcoeffmp.tests
@@ -42,7 +42,7 @@ cat pfmgconstcoeffmp.testdata.temp >> pfmgconstcoeffmp.tests
 #=============================================================================
 #    compare with baseline case 
 #=============================================================================
-diff pfmgconstcoeffmp.saved pfmgconstcoeffmp.tests >&2
+diff -bI"time" pfmgconstcoeffmp.saved pfmgconstcoeffmp.tests >&2
 
 #=============================================================================
 #  remove temporary files

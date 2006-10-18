@@ -41,7 +41,7 @@ cat lobpcg.testdata.tmp >> lobpcg.tests
 #=============================================================================
 #  compare with the baseline case
 #=============================================================================
-diff lobpcg.saved lobpcg.tests >&2
+diff -bI"time" lobpcg.saved lobpcg.tests >&2
 
 #=============================================================================
 #  remove temporary files

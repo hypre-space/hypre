@@ -71,7 +71,7 @@ cat coarsening.testdata.tmp0 >> coarsening.tests
 #=============================================================================
 #   compare with baseline case
 #=============================================================================
-diff coarsening.saved coarsening.tests >&2
+diff -bI"time" coarsening.saved coarsening.tests >&2
 
 #=============================================================================
 #   remove temporary files

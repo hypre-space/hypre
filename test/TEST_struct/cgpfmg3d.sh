@@ -34,7 +34,7 @@
 
 tail -3 cgpfmg3d.out.0 > cgpfmg3d.testdata
 tail -3 cgpfmg3d.out.1 > cgpfmg3d.testdata.temp
-diff cgpfmg3d.testdata cgpfmg3d.testdata.temp >&2
+diff -bI"time" cgpfmg3d.testdata cgpfmg3d.testdata.temp >&2
 
 cat cgpfmg3d.testdata > cgpfmg3d.tests
 cat cgpfmg3d.testdata.temp >> cgpfmg3d.tests
@@ -42,7 +42,7 @@ cat cgpfmg3d.testdata.temp >> cgpfmg3d.tests
 #=============================================================================
 #    compare with the baseline case
 #=============================================================================
-diff cgpfmg3d.saved cgpfmg3d.tests >&2
+diff -bI"time" cgpfmg3d.saved cgpfmg3d.tests >&2
 
 #=============================================================================
 #   remove temporary files

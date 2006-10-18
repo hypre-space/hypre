@@ -56,7 +56,7 @@ cat amr2d.testdata >> amr2d.tests
 #=============================================================================
 #   compare with baseline test case
 #=============================================================================
-diff amr2d.saved amr2d.tests >&2
+diff -bI"time" amr2d.saved amr2d.tests >&2
 
 #=============================================================================
 #   remove temporary files

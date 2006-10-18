@@ -35,24 +35,24 @@ tail -3 default3d.out.0 > default3d.testdata
 cat default3d.testdata > default3d.tests
 #=============================================================================
 tail -3 default3d.out.1 > default3d.testdata.temp
-diff default3d.testdata default3d.testdata.temp >&2
+diff -bI"time" default3d.testdata default3d.testdata.temp >&2
 
 cat default3d.testdata.temp >> default3d.tests
 #=============================================================================
 tail -3 default3d.out.2 > default3d.testdata.temp
-diff default3d.testdata default3d.testdata.temp >&2
+diff -bI"time" default3d.testdata default3d.testdata.temp >&2
 
 cat default3d.testdata.temp >> default3d.tests
 #=============================================================================
 tail -3 default3d.out.3 > default3d.testdata.temp
-diff default3d.testdata default3d.testdata.temp >&2
+diff -bI"time" default3d.testdata default3d.testdata.temp >&2
 
 cat default3d.testdata.temp >> default3d.tests
 
 #=============================================================================
 #  compare with baseline case
 #=============================================================================
-diff default3d.saved default3d.tests >&2
+diff -bI"time" default3d.saved default3d.tests >&2
 
 #=============================================================================
 #    remove temporary files

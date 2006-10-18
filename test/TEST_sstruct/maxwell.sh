@@ -32,21 +32,21 @@
 
 tail -3 maxwell.out.0 > maxwell.testdata
 tail -3 maxwell.out.0 > maxwell.testdata.temp
-diff maxwell.testdata maxwell.testdata.temp >&2
+diff -bI"time" maxwell.testdata maxwell.testdata.temp >&2
 
 cat maxwell.testdata > maxwell.tests
 cat maxwell.testdata.temp >> maxwell.tests
 #=============================================================================
 tail -3 maxwell.out.1 > maxwell.testdata
 tail -3 maxwell.out.1 > maxwell.testdata.temp
-diff maxwell.testdata maxwell.testdata.temp >&2
+diff -bI"time" maxwell.testdata maxwell.testdata.temp >&2
 
 cat maxwell.testdata >> maxwell.tests
 cat maxwell.testdata.temp >> maxwell.tests
 #=============================================================================
 tail -3 maxwell.out.2 > maxwell.testdata
 tail -3 maxwell.out.2 > maxwell.testdata.temp
-diff maxwell.testdata maxwell.testdata.temp >&2
+diff -bI"time" maxwell.testdata maxwell.testdata.temp >&2
 
 cat maxwell.testdata >> maxwell.tests
 cat maxwell.testdata.temp >> maxwell.tests
@@ -54,7 +54,7 @@ cat maxwell.testdata.temp >> maxwell.tests
 #=============================================================================
 #    compare with baseline case
 #=============================================================================
-diff maxwell.saved maxwell.tests >&2
+diff -bI"time" maxwell.saved maxwell.tests >&2
 
 #=============================================================================
 #    remove temporary files

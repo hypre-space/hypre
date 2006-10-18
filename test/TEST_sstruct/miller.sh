@@ -62,7 +62,7 @@ cat miller.testdata >> miller.tests
 #=============================================================================
 #   compare with baseline test case
 #=============================================================================
-diff miller.saved miller.tests >&2
+diff -bI"time" miller.saved miller.tests >&2
 
 #=============================================================================
 #   remove temporary files

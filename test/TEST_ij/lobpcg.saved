@@ -1,6 +1,6 @@
 
-Eigenvalue lambda 2.4304215831301559e-01
-Residual 1.5630923118108756e-09
+Eigenvalue lambda 2.4304215831301570e-01
+Residual 1.5959805894641826e-09
 
 5 iterations
 =============================================
@@ -9,10 +9,10 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.020000 seconds
 
-Eigenvalue lambda 2.4304215844838320e-01
-Eigenvalue lambda 4.7952104553308983e-01
-Residual 1.7231449348689952e-05
-Residual 8.7046622695546039e-05
+Eigenvalue lambda 2.4304215845231433e-01
+Eigenvalue lambda 4.7952104548896435e-01
+Residual 1.7236662931927932e-05
+Residual 8.6281192439843692e-05
 
 8 iterations
 =============================================

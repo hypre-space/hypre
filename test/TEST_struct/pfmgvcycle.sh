@@ -39,7 +39,7 @@ cat pfmgvcycle.testdata > pfmgvcycle.tests
 #=============================================================================
 #    compare with the baseline case
 #=============================================================================
-diff pfmgvcycle.saved pfmgvcycle.tests >&2
+diff -bI"time" pfmgvcycle.saved pfmgvcycle.tests >&2
 
 #=============================================================================
 #    remove temporary files

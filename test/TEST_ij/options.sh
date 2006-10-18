@@ -126,7 +126,7 @@ cat options.testdata.tmp >> options.tests
 #=============================================================================
 #  compare with the baseline case
 #=============================================================================
-diff options.saved options.tests >&2
+diff -bI"time" options.saved options.tests >&2
 
 #=============================================================================
 #  remove temporary files

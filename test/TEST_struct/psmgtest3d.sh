@@ -37,7 +37,7 @@
 
 tail -3 psmgtest3d.out.0 > psmgtest3d.testdata
 tail -3 psmgtest3d.out.1 > psmgtest3d.testdata.temp
-diff psmgtest3d.testdata psmgtest3d.testdata.temp >&2
+diff -bI"time" psmgtest3d.testdata psmgtest3d.testdata.temp >&2
 
 cat psmgtest3d.testdata > psmgtest3d.tests
 cat psmgtest3d.testdata.temp >> psmgtest3d.tests
@@ -45,7 +45,7 @@ cat psmgtest3d.testdata.temp >> psmgtest3d.tests
 #=============================================================================
 #   compare with the baseline case
 #=============================================================================
-diff psmgtest3d.saved psmgtest3d.tests >&2
+diff -bI"time" psmgtest3d.saved psmgtest3d.tests >&2
 
 #=============================================================================
 #   remove temporary files

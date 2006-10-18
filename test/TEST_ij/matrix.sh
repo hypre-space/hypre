@@ -38,21 +38,21 @@ cat matrix.testdata > matrix.tests
 
 tail -18 matrix.out.1 > matrix.testdata.tmp0
 head matrix.testdata.tmp0 > matrix.testdata.temp
-diff matrix.testdata matrix.testdata.temp >&2
+diff -bI"time" matrix.testdata matrix.testdata.temp >&2
 
 cat matrix.testdata.temp >> matrix.tests
 #=============================================================================
 
 tail -18 matrix.out.2 > matrix.testdata.tmp0
 head matrix.testdata.tmp0 > matrix.testdata.temp
-diff matrix.testdata matrix.testdata.temp >&2
+diff -bI"time" matrix.testdata matrix.testdata.temp >&2
 
 cat matrix.testdata.temp >> matrix.tests
 
 #=============================================================================
 #   compare with baseline case
 #=============================================================================
-diff matrix.saved matrix.tests >&2
+diff -bI"time" matrix.saved matrix.tests >&2
 
 #=============================================================================
 #   remove temporary files

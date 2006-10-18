@@ -31,10 +31,24 @@
 
 tail -3 sstruct_struct.out.1 > struct.testdata
 tail -3 sstruct_struct.out.201 > struct.testdata.temp
-diff struct.testdata struct.testdata.temp >&2
+diff -bI"time" struct.testdata struct.testdata.temp >&2
+
+cat struct.testdata > sstruct_struct.tests
+cat struct.testdata.temp >> sstruct_struct.tests
 
 tail -3 sstruct_struct.out.0 > struct.testdata
 tail -3 sstruct_struct.out.200 > struct.testdata.temp
-diff struct.testdata struct.testdata.temp >&2
+diff -bI"time" struct.testdata struct.testdata.temp >&2
 
-rm -f struct.testdata struct.testdata.temp
+cat struct.testdata >> sstruct_struct.tests
+cat struct.testdata.temp >> sstruct_struct.tests
+
+#=============================================================================
+#   compare with baseline case
+#=============================================================================
+diff -bI"time" sstruct_struct.saved sstruct_struct.tests
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+rm -f struct.testdata struct.testdata.temp sstruct_struct.tests

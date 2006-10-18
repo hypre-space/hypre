@@ -51,7 +51,7 @@ cat smoother.testdata.tmp >> smoother.tests
 #=============================================================================
 #  compare with the baseline case
 #=============================================================================
-diff smoother.saved smoother.tests >&2
+diff -bI"time" smoother.saved smoother.tests >&2
 
 #=============================================================================
 #  remove temporary files

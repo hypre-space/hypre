@@ -41,21 +41,21 @@ cat default.testdata > default.tests
 
 tail -18 default.out.1 > default.testdata.tmp0
 head default.testdata.tmp0 > default.testdata.temp
-diff default.testdata default.testdata.temp >&2
+diff -bI"time" default.testdata default.testdata.temp >&2
 
 cat default.testdata.temp >> default.tests
 #=============================================================================
 
 tail -18 default.out.2 > default.testdata.tmp0
 head default.testdata.tmp0 > default.testdata.temp
-diff default.testdata default.testdata.temp >&2
+diff -bI"time" default.testdata default.testdata.temp >&2
 
 cat default.testdata.temp >> default.tests
 
 #=============================================================================
 #   compare with baseline test case
 #=============================================================================
-diff default.saved default.tests >&2
+diff -bI"time" default.saved default.tests >&2
 
 #=============================================================================
 #   remove temporary files

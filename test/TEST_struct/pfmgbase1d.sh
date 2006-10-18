@@ -33,7 +33,7 @@
 
 tail -3 pfmgbase1d.out.0 > pfmgbase1d.testdata
 tail -3 pfmgbase1d.out.1 > pfmgbase1d.testdata.temp
-diff pfmgbase1d.testdata pfmgbase1d.testdata.temp  >&2
+diff -bI"time" pfmgbase1d.testdata pfmgbase1d.testdata.temp  >&2
 
 cat pfmgbase1d.testdata > pfmgbase1d.tests
 cat pfmgbase1d.testdata.temp >> pfmgbase1d.tests
@@ -41,7 +41,7 @@ cat pfmgbase1d.testdata.temp >> pfmgbase1d.tests
 #=============================================================================
 #   compare with the baseline case
 #=============================================================================
-diff pfmgbase1d.saved pfmgbase1d.tests >&2
+diff -bI"time" pfmgbase1d.saved pfmgbase1d.tests >&2
 
 #=============================================================================
 #   remove temporary files

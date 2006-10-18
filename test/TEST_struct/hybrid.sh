@@ -51,7 +51,7 @@ cat hybrid.testdata >> hybrid.tests
 #=============================================================================
 #   compare with the baseline case
 #=============================================================================
-diff hybrid.saved hybrid.tests >&2
+diff -bI"time" hybrid.saved hybrid.tests >&2
 
 #=============================================================================
 #    remove temporary files

@@ -35,20 +35,20 @@
 
 tail -3 symm.out.20 > symm.testdata
 tail -3 symm.out.21 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+diff -bI"time" symm.testdata symm.testdata.temp >&2
 
 cat symm.testdata > symm.tests
 cat symm.testdata.temp >> symm.tests
 #=============================================================================
 
 tail -3 symm.out.22 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+diff -bI"time" symm.testdata symm.testdata.temp >&2
 
 cat symm.testdata.temp >> symm.tests
 #=============================================================================
 
 tail -3 symm.out.23 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+diff -bI"time" symm.testdata symm.testdata.temp >&2
 
 cat symm.testdata.temp >> symm.tests
 
@@ -58,7 +58,7 @@ cat symm.testdata.temp >> symm.tests
 
 tail -3 symm.out.24 > symm.testdata
 tail -3 symm.out.25 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+diff -bI"time" symm.testdata symm.testdata.temp >&2
 
 cat symm.testdata >> symm.tests
 cat symm.testdata.temp >> symm.tests
@@ -69,20 +69,20 @@ cat symm.testdata.temp >> symm.tests
 
 tail -3 symm.out.30 > symm.testdata
 tail -3 symm.out.31 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+diff -bI"time" symm.testdata symm.testdata.temp >&2
 
 cat symm.testdata >> symm.tests
 cat symm.testdata.temp >> symm.tests
 #=============================================================================
 
 tail -3 symm.out.32 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+diff -bI"time" symm.testdata symm.testdata.temp >&2
 
 cat symm.testdata.temp >> symm.tests
 #=============================================================================
 
 tail -3 symm.out.33 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+diff -bI"time" symm.testdata symm.testdata.temp >&2
 
 cat symm.testdata.temp >> symm.tests
 
@@ -92,7 +92,7 @@ cat symm.testdata.temp >> symm.tests
 
 tail -3 symm.out.34 > symm.testdata
 tail -3 symm.out.35 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+diff -bI"time" symm.testdata symm.testdata.temp >&2
 
 cat symm.testdata >> symm.tests
 cat symm.testdata.temp >> symm.tests
@@ -100,7 +100,7 @@ cat symm.testdata.temp >> symm.tests
 #=============================================================================
 #   compare with baseline case
 #=============================================================================
-diff symm.saved symm.tests >&2
+diff -bI"time" symm.saved symm.tests >&2
 
 #=============================================================================
 #   remove temporary files

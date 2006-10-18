@@ -1,6 +1,6 @@
 
 Iterations = 24
-Final Relative Residual Norm = 6.429522e-07
+Final Relative Residual Norm = 6.429486e-07
 
 
 Iterations = 25
@@ -12,31 +12,31 @@ Final Relative Residual Norm = 9.036190e-07
 
 
 Iterations = 24
-Final Relative Residual Norm = 6.429522e-07
+Final Relative Residual Norm = 6.429486e-07
 
 
-Eigenvalue lambda 1.3488386079097914e+00
-Residual 2.4075820241995531e-03
+Eigenvalue lambda 1.3488386081612995e+00
+Residual 2.4075897240075574e-03
 
 100 iterations
 =============================================
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 4.130000 seconds
+  wall clock time = 4.000000 seconds
 
-Eigenvalue lambda 1.3488083914439633e+00
-Eigenvalue lambda 1.3656084602557490e+00
-Eigenvalue lambda 1.4790858106478595e+00
-Eigenvalue lambda 1.4958982954381896e+00
-Eigenvalue lambda 1.6942005230866419e+00
-Residual 5.0101586755216978e-06
-Residual 9.7458842616992000e-07
-Residual 2.0655133857096798e-05
-Residual 1.8985498544404915e-05
+Eigenvalue lambda 1.3488085126721678e+00
+Eigenvalue lambda 1.3656084831158235e+00
+Eigenvalue lambda 1.4790873829032363e+00
+Eigenvalue lambda 1.4958995721058754e+00
+Eigenvalue lambda 1.6942092371926851e+00
+Residual 9.7282252947639580e-07
+Residual 9.4175151898832707e-07
+Residual 9.0185012527966692e-06
+Residual 8.3301468914003849e-06
 
 Iterations = 4
-Final Relative Residual Norm = 2.292585e-07
+Final Relative Residual Norm = 3.486783e-08
 
 
 Iterations = 25
@@ -51,7 +51,7 @@ Residual 3.2121912605971420e-03
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.870000 seconds
+  wall clock time = 0.880000 seconds
 
 Eigenvalue lambda 1.3488084825070570e+00
 Eigenvalue lambda 1.3656084774343251e+00
@@ -75,8 +75,8 @@ Iterations = 12
 Final Relative Residual Norm = 8.705979e-07
 
 
-Iterations = 6
-Final Relative Residual Norm = 2.641765e-07
+Iterations = 5
+Final Relative Residual Norm = 9.410367e-07
 
 
 Iterations = 25
@@ -91,7 +91,7 @@ Residual 8.7067834378164495e-07
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 1.110000 seconds
+  wall clock time = 1.140000 seconds
 
 Eigenvalue lambda 1.3488084824683677e+00
 Eigenvalue lambda 1.3656084774331965e+00
@@ -115,7 +115,7 @@ Residual 8.7067834432119499e-07
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 1.100000 seconds
+  wall clock time = 1.150000 seconds
 
 Eigenvalue lambda 1.3488084824683706e+00
 Eigenvalue lambda 1.3656084774331962e+00
@@ -135,8 +135,8 @@ Iterations = 25
 Final Relative Residual Norm = 9.124482e-07
 
 
-Iterations = 5
-Final Relative Residual Norm = 9.314221e-07
+Iterations = 4
+Final Relative Residual Norm = 5.423015e-08
 
 
 Iterations = 25
@@ -148,7 +148,7 @@ Final Relative Residual Norm = 9.124482e-07
 
 
 Iterations = 28
-Final Relative Residual Norm = 7.409212e-07
+Final Relative Residual Norm = 7.409218e-07
 
 
 Iterations = 28

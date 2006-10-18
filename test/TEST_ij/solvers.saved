@@ -1,6 +1,6 @@
 
-Iterations = 4
-Final Relative Residual Norm = 2.309403e-09
+Iterations = 5
+Final Relative Residual Norm = 3.172658e-10
 
 
 Iterations = 41
@@ -10,13 +10,13 @@ Final Relative Residual Norm = 6.698760e-09
 Iterations = 6
 PCG_Iterations = 4
 DSCG_Iterations = 2
-Final Relative Residual Norm = 1.157871e-09
+Final Relative Residual Norm = 5.456956e-09
 
 
 Iterations = 7
 PCG_Iterations = 4
 DSCG_Iterations = 3
-Final Relative Residual Norm = 5.953970e-09
+Final Relative Residual Norm = 5.193610e-09
 
 
 Iterations = 13
@@ -31,7 +31,7 @@ Residual 3.9466520400188824e-07
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.070000 seconds
+  wall clock time = 0.040000 seconds
 
 Eigenvalue lambda 2.4304215831301609e-01
 Eigenvalue lambda 4.7952103987967731e-01
@@ -44,31 +44,31 @@ Residual 3.7888096287984506e-07
 Residual 5.0796583098612780e-07
 
 Iterations = 4
-Final Relative Residual Norm = 2.794119e-08
+Final Relative Residual Norm = 7.318416e-08
 
 
-Eigenvalue lambda 2.4304215831309547e-01
-Residual 3.9120354552055945e-07
+Eigenvalue lambda 2.4304215831309614e-01
+Residual 3.8722779400883863e-07
 
 11 iterations
 =============================================
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.030000 seconds
+  wall clock time = 0.040000 seconds
 
-Eigenvalue lambda 2.4304215831301598e-01
-Eigenvalue lambda 4.7952103987968375e-01
-Eigenvalue lambda 4.7952103987969952e-01
-Eigenvalue lambda 4.7952103987980887e-01
-Eigenvalue lambda 7.1599992144647762e-01
-Residual 1.5004639691618506e-07
-Residual 4.5368241189343879e-07
-Residual 3.8625116607460105e-07
-Residual 5.6920457413928902e-07
+Eigenvalue lambda 2.4304215831301612e-01
+Eigenvalue lambda 4.7952103987968314e-01
+Eigenvalue lambda 4.7952103987969741e-01
+Eigenvalue lambda 4.7952103987980943e-01
+Eigenvalue lambda 7.1599992144651958e-01
+Residual 1.4798266472837362e-07
+Residual 4.5119313712772405e-07
+Residual 3.8578720866877290e-07
+Residual 5.5929733235155430e-07
 
 GMRES Iterations = 4
-Final GMRES Relative Residual Norm = 1.157871e-09
+Final GMRES Relative Residual Norm = 5.456956e-09
 
 
 Iterations = 20
@@ -115,7 +115,7 @@ Residual 4.0668699904548002e-07
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.020000 seconds
+  wall clock time = 0.030000 seconds
 
 Eigenvalue lambda 2.4304215831301595e-01
 Eigenvalue lambda 4.7952103987967737e-01
@@ -157,7 +157,7 @@ Residual 4.3579931812650314e-07
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.030000 seconds
+  wall clock time = 0.040000 seconds
 
 Eigenvalue lambda 2.4304215831301593e-01
 Eigenvalue lambda 4.7952103987967998e-01
@@ -172,7 +172,7 @@ Residual 5.4196005376032091e-07
 Iterations = 8
 PCG_Iterations = 4
 DSCG_Iterations = 4
-Final Relative Residual Norm = 1.099257e-09
+Final Relative Residual Norm = 2.132876e-09
 
 
  Average Convergence Factor = 0.060412
@@ -185,7 +185,7 @@ Final Relative Residual Norm = 1.099257e-09
 
 =============================================
 
- Average Convergence Factor = 0.037871
+ Average Convergence Factor = 0.040513
 
      Complexity:    grid = 1.677000
                 operator = 3.599627
@@ -195,7 +195,7 @@ Final Relative Residual Norm = 1.099257e-09
 
 =============================================
 
- Average Convergence Factor = 0.121384
+ Average Convergence Factor = 0.118013
 
      Complexity:    grid = 1.677000
                 operator = 3.616175

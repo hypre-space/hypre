@@ -35,7 +35,7 @@
 
 tail -3 periodic.out.20 > periodic.testdata
 tail -3 periodic.out.21 > periodic.testdata.temp
-diff periodic.testdata periodic.testdata.temp >&2
+diff -bI"time" periodic.testdata periodic.testdata.temp >&2
 
 cat periodic.testdata > periodic.tests
 cat periodic.testdata.temp >> periodic.tests
@@ -46,7 +46,7 @@ cat periodic.testdata.temp >> periodic.tests
 
 tail -3 periodic.out.30 > periodic.testdata
 tail -3 periodic.out.31 > periodic.testdata.temp
-diff periodic.testdata periodic.testdata.temp >&2
+diff -bI"time" periodic.testdata periodic.testdata.temp >&2
 
 cat periodic.testdata >> periodic.tests
 cat periodic.testdata.temp >> periodic.tests
@@ -54,7 +54,7 @@ cat periodic.testdata.temp >> periodic.tests
 #=============================================================================
 #   compare with baseline case
 #=============================================================================
-diff periodic.saved periodic.tests >&2
+diff -bI"time" periodic.saved periodic.tests >&2
 
 #=============================================================================
 #   remove temporary files

@@ -45,7 +45,7 @@ cat smgtest1d.testdata >> smgtest1d.tests
 #=============================================================================
 #   compare with the baseline case
 #=============================================================================
-diff smgtest1d.saved smgtest1d.tests >&2
+diff -bI"time" smgtest1d.saved smgtest1d.tests >&2
 
 #=============================================================================
 #   remove temporary files

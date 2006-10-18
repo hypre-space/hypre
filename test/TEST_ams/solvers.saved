@@ -1,56 +1,56 @@
 
- Average Convergence Factor = 0.408484
+ Average Convergence Factor = 0.411802
 
 =============================================
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 0.360000 seconds
+  wall clock time = 0.370000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.180000 seconds
+  cpu clock time  = 0.150000 seconds
 
- Average Convergence Factor = 0.408484
+ Average Convergence Factor = 0.411802
 
 =============================================
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 0.360000 seconds
+  wall clock time = 0.370000 seconds
   wall MFLOPS     = 0.000000
   cpu clock time  = 0.200000 seconds
 
- Average Convergence Factor = 0.720662
+ Average Convergence Factor = 0.721833
 
 =============================================
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 1.670000 seconds
+  wall clock time = 1.690000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.800000 seconds
+  cpu clock time  = 0.810000 seconds
 
- Average Convergence Factor = 0.720662
+ Average Convergence Factor = 0.721833
 
 =============================================
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 1.670000 seconds
+  wall clock time = 1.690000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.790000 seconds
+  cpu clock time  = 0.710000 seconds
 
 Iterations = 6
-Final Relative Residual Norm = 7.985171e-07
+Final Relative Residual Norm = 9.161075e-07
 
 
 Iterations = 6
-Final Relative Residual Norm = 7.985171e-07
+Final Relative Residual Norm = 9.161075e-07
 
 
 Iterations = 10
-Final Relative Residual Norm = 3.195512e-07
+Final Relative Residual Norm = 3.300177e-07
 
 
 Iterations = 10
-Final Relative Residual Norm = 3.195512e-07
+Final Relative Residual Norm = 3.300177e-07
 
