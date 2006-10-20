@@ -89,10 +89,10 @@ Iterations = 6
 Final Relative Residual Norm = 6.316774e-07
 
 Iterations = 25
-Final Relative Residual Norm = 9.090784e-07
+Final Relative Residual Norm = 9.090804e-07
 
 Iterations = 25
-Final Relative Residual Norm = 9.090784e-07
+Final Relative Residual Norm = 9.090804e-07
 
 Iterations = 3
 Final Relative Residual Norm = 1.572002e-07
@@ -100,11 +100,11 @@ Final Relative Residual Norm = 1.572002e-07
 Iterations = 3
 Final Relative Residual Norm = 1.572002e-07
 
-Iterations = 25
-Final Relative Residual Norm = 3.696518e-07
+Iterations = 27
+Final Relative Residual Norm = 5.917169e-07
 
-Iterations = 25
-Final Relative Residual Norm = 3.696518e-07
+Iterations = 27
+Final Relative Residual Norm = 5.917169e-07
 
 Iterations = 33
 Final Relative Residual Norm = 5.533708e-07
