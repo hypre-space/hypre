@@ -315,7 +315,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 #if 0
    hypre_StructMatrixAssemble(PT);
 #else
-   hypre_StructInterpAssemble(A, PT, 0, cdir, cindex, stride);
+   hypre_StructInterpAssemble(A, PT, 1, cdir, cindex, stride);
 #endif
 
    return ierr;
