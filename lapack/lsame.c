@@ -26,6 +26,8 @@
 
 
 
+#include "../blas/hypre_blas.h"
+#include "hypre_lapack.h"
 #include "f2c.h"
 
 logical lsame_(char *ca, char *cb)

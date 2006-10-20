@@ -44,6 +44,8 @@
 #include <math.h>
 #include "dsp_defs.h"
 #include "superlu_util.h"
+#include "../../blas/hypre_blas.h"
+#include "../../lapack/hypre_lapack.h"
 
 void
 dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,

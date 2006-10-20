@@ -26,8 +26,6 @@
 
 
 
-
-
 /*
  * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
@@ -39,6 +37,8 @@
  */
 #include <math.h>
 #include "fortran.h"
+#include "../../blas/hypre_blas.h"
+#include "../../lapack/hypre_lapack.h"
 /*#include "Cnames.h"*/
 
 int

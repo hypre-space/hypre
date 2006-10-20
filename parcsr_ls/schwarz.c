@@ -25,10 +25,9 @@
  ***********************************************************************EHEADER*/
 
 
-
-
 #include "headers.h"
 #include "Common.h"
+#include "../lapack/hypre_lapack.h"
 
 /* -------------------------------------------------------------------------
    dof_domain: for each dof defines neighborhood to build interpolation,
@@ -44,8 +43,8 @@
 #ifdef ESSL
 #include <essl.h>
 #else
-void hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
-void hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, double *, int *, int *);
+int hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
+int hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, double *, int *, int *);
 #endif
 
 /*--------------------------------------------------------------------------

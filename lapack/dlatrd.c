@@ -25,7 +25,7 @@
  ***********************************************************************EHEADER*/
 
 
-
+#include "../blas/hypre_blas.h"
 #include "hypre_lapack.h"
 #include "f2c.h"
 

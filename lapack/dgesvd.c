@@ -25,14 +25,14 @@
  ***********************************************************************EHEADER*/
 
 
-
+#include "../blas/hypre_blas.h"
 #include "hypre_lapack.h"
+#include "f2c.h"
+
 /*  -- translated by f2c (version 19990503).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
-
-#include "f2c.h"
 
 /* Table of constant values */
 

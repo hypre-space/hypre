@@ -44,7 +44,7 @@
 #include <essl.h>
 #else
 #include "fortran.h"
-void hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
+int hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
   int *, double *, int *, double *, int *, int *);
 #endif
 

@@ -36,27 +36,27 @@
  *   Change all names to hypre_ to avoid link conflicts
  * --------------------------------------------------------------------------*/
 
-#define dasum   hypre_dasum
-#define daxpy   hypre_daxpy
-#define dcopy   hypre_dcopy
-#define ddot    hypre_ddot
-#define dgemm   hypre_dgemm
-#define dgemv   hypre_dgemv
-#define dger    hypre_dger
-#define dnrm2   hypre_dnrm2
-#define drot    hypre_drot
-#define dscal   hypre_dscal
-#define dswap   hypre_dswap
-#define dsymm   hypre_dsymm
-#define dsymv   hypre_dsymv
-#define dsyr2   hypre_dsyr2
-#define dsyr2k  hypre_dsyr2k
-#define dsyrk   hypre_dsyrk
-#define dtrmm   hypre_dtrmm
-#define dtrmv   hypre_dtrmv
-#define dtrsm   hypre_dtrsm
-#define dtrsv   hypre_dtrsv
-#define idamax  hypre_idamax
+#define dasum_   hypre_dasum
+#define daxpy_   hypre_daxpy
+#define dcopy_   hypre_dcopy
+#define ddot_    hypre_ddot
+#define dgemm_   hypre_dgemm
+#define dgemv_   hypre_dgemv
+#define dger_    hypre_dger
+#define dnrm2_   hypre_dnrm2
+#define drot_    hypre_drot
+#define dscal_   hypre_dscal
+#define dswap_   hypre_dswap
+#define dsymm_   hypre_dsymm
+#define dsymv_   hypre_dsymv
+#define dsyr2_   hypre_dsyr2
+#define dsyr2k_  hypre_dsyr2k
+#define dsyrk_   hypre_dsyrk
+#define dtrmm_   hypre_dtrmm
+#define dtrmv_   hypre_dtrmv
+#define dtrsm_   hypre_dtrsm
+#define dtrsv_   hypre_dtrsv
+#define idamax_  hypre_idamax
 
 /* blas_utils.c */
 logical lsame_ ( char *ca , char *cb );

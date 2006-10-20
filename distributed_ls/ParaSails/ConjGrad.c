@@ -39,9 +39,9 @@
 #include "ParaSails.h"
 
 double ddot_(int *, double *, int *, double *, int *);
-void dcopy_(int *, double *, int *, double *, int *);
-void dscal_(int *, double *, double *, int *);
-void daxpy_(int *, double *, double *, int *, double *, int *);
+int dcopy_(int *, double *, int *, double *, int *);
+int dscal_(int *, double *, double *, int *);
+int daxpy_(int *, double *, double *, int *, double *, int *);
 
 static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 {

@@ -51,12 +51,14 @@
 */
 
 
-#ifndef HYPRE_USING_HYPRE_BLAS
-#define USE_VENDOR_BLAS
-#endif
-
 #include "dsp_defs.h"
 #include "superlu_util.h"
+
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#else
+#include "../../blas/hypre_blas.h"
+#endif
 
 /* 
  * Function prototypes 

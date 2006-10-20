@@ -58,10 +58,10 @@
 #ifdef ESSL
 #include <essl.h>
 #else
-void hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
-void hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, 
+int hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
+int hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, 
   double *, int *, int *);
-void hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, int *,
+int hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, int *,
   double *, int *, double *, int *, int *);
 #endif
 
