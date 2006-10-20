@@ -463,18 +463,12 @@ confbuildtest ()
    echo "Autotest starting configure of $MessageStr"
 
    cd $StdBuildDir
-   [ -f config.cache ] && rm config.cache
+   [ -f config.status ] && rm config.status
 
    if [ "$ConfigOpt" = " " ]
    then
       $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
                  2> ${Hdr}.${MessageStr}.configure.err
-   elif [ "$ConfigOpt" = "--with-babel" ]          ## need to disable Fortran90
-   then                                               ## ONLY when building Babel
-      ExtraConfigOpt="--disable-fortran90"
-      $CONFIGURE "$ConfigOpt" "$ExtraConfigOpt"  \
-                              1> ${Hdr}.${MessageStr}.configure.log \
-	                      2> ${Hdr}.${MessageStr}.configure.err
    else
       $CONFIGURE "$ConfigOpt" 1> ${Hdr}.${MessageStr}.configure.log \
                               2> ${Hdr}.${MessageStr}.configure.err

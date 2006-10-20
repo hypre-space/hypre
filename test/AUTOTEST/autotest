@@ -36,12 +36,6 @@ perform_test()
   echo ""
 
 #=============================================================================
-#   Set LD_LIBRARY_PATH in order to use shared libraries, if needed.
-#=============================================================================
-  LD_LIBRARY_PATH=${HYPRE_REMOTE_DIR}/linear_solvers/hypre/lib:$LD_LIBRARY_PATH
-  export LD_LIBRARY_PATH
-
-#=============================================================================
 #   Running tests on same machine as that executing this script
 #   Destroy old directory; copy newly checked out version; cd to
 #   HYPRE_REMOTE_DIR, create a temporary file indicating tests have started,
