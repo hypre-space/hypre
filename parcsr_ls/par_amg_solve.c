@@ -221,11 +221,10 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
           printf("\n\nERROR detected by Hypre ...  BEGIN\n");
           printf("ERROR -- hypre_BoomerAMGSolve: INFs and/or NaNs detected in input.\n");
           printf("User probably placed non-numerics in supplied A, x_0, or b.\n");
-          printf("Returning error flag += 101.  Program not terminated.\n");
           printf("ERROR detected by Hypre ...  END\n\n\n");
         }
-        Solve_err_flag += 101;
-        return Solve_err_flag;
+        hypre_error(HYPRE_ERROR_GENERIC);
+        return hypre_error_flag;
      }
 
      resid_nrm_init = resid_nrm;
@@ -258,13 +257,12 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
    
    while ((relative_resid >= tol || cycle_count < min_iter)
-          && cycle_count < max_iter
-          && Solve_err_flag == 0)
+          && cycle_count < max_iter)
    {
       hypre_ParAMGDataCycleOpCount(amg_data) = 0;   
       /* Op count only needed for one cycle */
 
-      Solve_err_flag = hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
+      hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
 
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
@@ -312,7 +310,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       }
    }
 
-   if (cycle_count == max_iter && tol >= 0.)
+   if (cycle_count == max_iter && tol > 0.)
    {
       Solve_err_flag = 1;
       hypre_error(HYPRE_ERROR_CONV);
@@ -363,6 +361,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_TFree(num_coeffs);
    hypre_TFree(num_variables);
 
-   return(Solve_err_flag);
+   return hypre_error_flag;
 }
 
