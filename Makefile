@@ -202,5 +202,5 @@ distclean:
 	rm -rf ./config.status
 
 tags:
-	etags `find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
-	-name "*.c??" -or -name "*.h??" -or -name "*.f"`
+	find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
+	-name "*.c??" -or -name "*.h??" -or -name "*.f" -print | etags -
