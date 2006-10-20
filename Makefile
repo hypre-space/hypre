@@ -203,4 +203,4 @@ distclean:
 
 tags:
 	find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
-	-name "*.c??" -or -name "*.h??" -or -name "*.f" -print | etags -
+	-name "*.c??" -or -name "*.h??" -or -name "*.f" | etags -
