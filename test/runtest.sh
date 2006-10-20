@@ -411,119 +411,6 @@ function PostProcess
    cd $SavePWD
 }
 
-#=============================================================================
-# Functions for filtering misleading error messages
-#    Removes specified messages from error files that do not reflect actual
-#    errors
-#=============================================================================
-function process_filter
-{
-  ErrorFile=$1
-  shift
-  if (egrep "$@" $ErrorFile >/dev/null) ; then
-     mv $ErrorFile $ErrorFile.tmp
-     egrep -v "$@" $ErrorFile.tmp > $ErrorFile
-     echo "-- applied filter:$@" >> $ErrorFile.orig
-     cat $ErrorFile.tmp >> $ErrorFile.orig
-  fi
-}
-
-
-function apply_error_filters
-{
-  ErrorFile=$1
-  if [ -s "${ErrorFile}" ] ; then
-    HOST=`hostname`
-    case $HOST in
-      up*)
-        for ii in \
-          '===\ End\ of\ Compilation'\
-          'Compilation\ successful'\
-          '^\ Guide\ \ \ '\
-          ':\ 0\ errors\ in\ file'\
-          'autoconf\ has\ been\ disabled'\
-          'automake\ has\ been\ disabled'\
-          'ltdl.c:'\
-          'sidl'\
-          '1501-050:\ \(I\)'\
-          '1500-010:\ \(W\)'\
-          'babel_config.h.in:\ No\ such\ file\ or\ directory'\
-          'configure:\ WARNING:\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-        ;;
-      alc* | mcr* | peng*)
-        for ii in \
-          '[A-Za-z0-9_]*\.[cCf]$'\
-          '[A-Za-z0-9_]*\.cxx$'\
-          '^[ \t]*$'\
-          '^[0-9]*\ Lines\ Compiled$'\
-          'autoconf\ has\ been\ disabled'\
-          'automake\ has\ been\ disabled'\
-          'ltdl.c:'\
-          'sidl'\
-          'queued'\
-          'allocated'\
-          '\ remark:\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-        ;;
-      *bgl*)
-        for ii in \
-          'readonly\ variable'\
-          'BE_MPI'\
-          'FE_MPI\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-        ;;
-      thun*)
-        for ii in \
-          'queued'\
-          'allocated'
-        do process_filter $ErrorFile "${ii}"
-        done
-        ;;
-      tux*)
-        for ii in \
-          'autoconf\ has\ been\ disabled'\
-          'automake\ has\ been\ disabled'\
-          'configure:\ WARNING:'\
-          'Error:\ PDF:'\
-          'babel_config.h.in:\ No\ such\ file\ or\ directory'\
-          '../../../babel/runtime'\
-          'ltdl.c:'\
-          'sidl'\
-          'Insure'\
-          'Timeout\ in\ waiting\ for\ processes\ to'\
-          'rsh\ program'\
-          'problem'\
-          'This\ is\ not\ a\ problem'\
-          'environment'\
-          'process\ termination'\
-          'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
-          'PGC/x86\ Linux/x86\ 3.3-1:\ compilation\ completed\ with\ warnings'\
-          'sed:\ Couldn.t\ close\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-        ;;
-    esac
-  fi
-}
-
-
-# apply filters to remove non-fatal messages from *.err file
-function error_filters
-{
-   errlist="`ls *.err`"
-   for errfile in ${errlist}
-   do
-      if [ -r ${errfile} ]
-      then
-         apply_error_filters ${errfile}
-      fi
-   done
-}
-
                
 # removes executable and hostname files from all TEST_* directories
 function CleanUp
@@ -623,19 +510,6 @@ do
          ;;
    esac
 done
-#
-#     apply error filters to TEST_* files
-for dir in $TestDirNames
-do
-   cd $dir
-   error_filters
-   cd $CurDir
-done
-#
-#     apply error filters to docs files
-cd $CurDir/../docs
-error_filters
-cd $CurDir
 #
 #     remove exectutable files from TEST_* directories
 CleanUp $TestDirNames $ExecFileNames
