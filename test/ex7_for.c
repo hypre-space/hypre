@@ -223,7 +223,6 @@ int main (int argc, char *argv[])
    int      two = 2;
    int      three = 3;
    int      five = 5;
-   int      thirty = 30;
    int      fifty = 50;
    int      twohundred = 200;
    int      fivehundred = 500;

@@ -2359,19 +2359,40 @@ c*--------------------------------------------------------------------------
 
 
 c*--------------------------------------------------------------------------
-c* HYPRE_ParCSRMatrixEliminateRowsCols
+c* HYPRE_SStructMaxwellEliminateRowsCols
 c*--------------------------------------------------------------------------
-      subroutine fhypre_parcsrmatrixeliminaterow (fparA, fnrows, frows)
+      subroutine fhypre_sstructmaxwelleliminater (fparA, fnrows, frows)
 
       integer ierr
       integer*8 fparA
       integer*8 frows
-      integer fnrows
+      integer*8 fnrows
 
-      call HYPRE_ParCSRMatrixEliminateRows(fparA, fnrows, frows, ierr)
+      call HYPRE_SStructMaxwellEliminateRo(fparA, fnrows, frows, 
+     1                                         ierr)
 
       if(ierr .ne. 0) then
-         print *, 'fhypre_parcsrmatrixeliminaterows = ', ierr
+         print *, 'fhypre_sstructmaxwelleliminaterows = ', ierr
+      endif
+
+      return
+      end
+
+
+c*--------------------------------------------------------------------------
+c* HYPRE_SStructMaxwellZeroVector
+c*--------------------------------------------------------------------------
+      subroutine fhypre_sstructmaxwellzerovector (fb, frows, fnrows)
+
+      integer ierr
+      integer*8 fb
+      integer*8 frows
+      integer*8 fnrows
+
+      call HYPRE_SStructMaxwellZeroVector(fb, frows, fnrows, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructmaxwellzerovector = ', ierr
       endif
 
       return

@@ -1878,9 +1878,9 @@ main( int   argc,
    HYPRE_SStructMaxwellPhysBdy(&grid, &one, &data.rfactor[0],
                                &bdryRanks[0][0], &bdryRanksCnt[0]);
 
-   HYPRE_ParCSRMatrixEliminateRows(&parA, &bdryRanksCnt[0], &bdryRanks[0]);
+   HYPRE_ParCSRMatrixEliminateRowsCols(&parA, &bdryRanksCnt[0], &bdryRanks[0]);
 
-   HYPRE_ParCSRMatrixEliminateRows(&parA, &bdryRanksCnt[0], &bdryRanks[0]);
+   HYPRE_ParCSRMatrixEliminateRowsCols(&parA, &bdryRanksCnt[0], &bdryRanks[0]);
 #else
    HYPRE_SStructMatrixGetObject(A, (void **) &parA);
    HYPRE_SStructMaxwellPhysBdy(&grid, 1, data.rfactor,
@@ -1893,7 +1893,7 @@ main( int   argc,
                                                                                                                                     
    {
       hypre_MaxwellOffProcRow **OffProcRows;
-      hypre_SStructSharedDOF_ParcsrMatRowsComm(grid,
+      hypre_SStructSharedDOF_ParcsrMatRowsComm(&grid,
                                                (hypre_ParCSRMatrix *) parA,
                                                &i,
                                                &OffProcRows);
@@ -2044,13 +2044,13 @@ main( int   argc,
       HYPRE_SStructMaxwellCreate(&long_temp_COMM, &solver);
       HYPRE_SStructMaxwellSetMaxIter(&solver, &twenty);
       HYPRE_SStructMaxwellSetTol(&solver, &ftol);
-      HYPRE_SStructMaxwellSetRelChang(&solver, &zero);
-      HYPRE_SStructMaxwellSetNumPreRe(&solver, &one);
-      HYPRE_SStructMaxwellSetNumPostR(&solver, &one);
+      HYPRE_SStructMaxwellSetRelChange(&solver, &zero);
+      HYPRE_SStructMaxwellSetNumPreRelax(&solver, &one);
+      HYPRE_SStructMaxwellSetNumPostRelax(&solver, &one);
       HYPRE_SStructMaxwellSetRfactors(&solver, &data.rfactor[0]);
       HYPRE_SStructMaxwellSetGrad(&solver, &T);
       /*HYPRE_SStructMaxwellSetConstantCoef(solver, 1);*/
-      HYPRE_SStructMaxwellSetPrintLev(&solver, &one);
+      HYPRE_SStructMaxwellSetPrintLevel(&solver, &one);
       HYPRE_SStructMaxwellSetLogging(&solver, &one);
       HYPRE_SStructMaxwellSetup(&solver, &A, &b, &x);
 #else
@@ -2088,8 +2088,8 @@ main( int   argc,
       hypre_ClearTiming();
 
 #ifdef HYPRE_FORTRAN
-      HYPRE_SStructMaxwellGetNumItera(&solver, &num_iterations);
-      HYPRE_SStructMaxwellGetFinalRel(&solver, &final_res_norm);
+      HYPRE_SStructMaxwellGetNumIterations(&solver, &num_iterations);
+      HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(&solver, &final_res_norm);
       HYPRE_SStructMaxwellDestroy(&solver);
 #else
       HYPRE_SStructMaxwellGetNumIterations(solver, &num_iterations);

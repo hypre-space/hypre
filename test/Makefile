@@ -25,7 +25,6 @@
 #EHEADER**********************************************************************
 
 
-
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -61,23 +60,7 @@ BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 
 LFLAGS =\
  -L${HYPRE_LINK_DIR}/lib\
- -lHYPRE_sstruct_ls\
- -lHYPRE_sstruct_mv\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
- -lHYPRE_parcsr_ls\
- -lHYPRE_parcsr_block_mv\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_multivector\
- -lHYPRE_utilities\
+ -lHYPRE\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
@@ -91,114 +74,6 @@ BABELLIBFLAGS =\
  -lbHYPRE\
  -lsidl -ldl -lxml2
 
-###########################################
-# Commpkg definitions
-###########################################
-COMMPKG_LFLAGS =\
- -L${HYPRE_LINK_DIR}/lib\
- -lHYPRE_parcsr_ls\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_utilities\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
-
-
-###########################################
-# Struct definitions
-###########################################
-STRUCT_LFLAGS =\
- -L${HYPRE_LINK_DIR}/lib\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_block_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_multivector \
- -lHYPRE_utilities\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
-
-###########################################
-# Sstruct definitions
-###########################################
-SSTRUCT_LFLAGS =\
- -L${HYPRE_LINK_DIR}/lib\
- -lHYPRE_sstruct_ls\
- -lHYPRE_sstruct_mv\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_block_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_multivector\
- -lHYPRE_utilities\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
-
-###########################################
-# IJ definitions
-###########################################
-IJ_LFLAGS =\
- -L${HYPRE_LINK_DIR}/lib\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_block_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_multivector\
- -lHYPRE_utilities\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
-
-###########################################
-# IJ_MV definitions
-###########################################
-IJ_MV_LFLAGS =\
- -L${HYPRE_LINK_DIR}/lib\
- -lHYPRE_parcsr_ls\
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
-###########################################
-# FEI definitions
-###########################################
-FEICXX_LFLAGS =\
- -L${HYPRE_LINK_DIR}/lib\
- -lHYPRE_LSI\
- -lHYPRE_superlu\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
 
 ##################################################################
 # Targets
@@ -295,7 +170,7 @@ distclean: clean
 
 struct: struct.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${STRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "
@@ -309,7 +184,7 @@ fparcsr_mv: fparcsr_mv.f
 	@echo  "Building" $@ "... "
 	${F77} -c $@  ${FFLAGS}
 
-fsstruct_ls: fsstruct_ls.f
+fsstruct_ls: fsstruct_ls.f 
 	@echo  "Building" $@ "... "
 	${F77} -c $@  ${FFLAGS}
 
@@ -327,15 +202,15 @@ fstruct_mv: fstruct_mv.f
 
 struct_for: fstruct_mv.o fstruct_ls.o struct_for.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
 ex1_for: fstruct_mv.o fstruct_ls.o ex1_for.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
 ex3_for: fstruct_mv.o fstruct_ls.o ex3_for.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
 ex5_for: fij_mv.o fparcsr_mv.o fparcsr_ls.o ex5_for.o
 	@echo  "Building" $@ "... "
@@ -355,55 +230,55 @@ for_maxwell: fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o for_maxwell.o
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 hypre_set_precond: hypre_set_precond.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 test_ij: hypre_set_precond.o test_ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ hypre_set_precond.o $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ hypre_set_precond.o $@.o ${LFLAGS}
 
 ij: ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 new_ij: new_ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 fei: fei.o
 	@echo  "Building" $@ "... "
-	${LINK_CXX} -o $@ $@.o ${FEICXX_LFLAGS}
+	${LINK_CXX} -o $@ $@.o ${LFLAGS}
 
 f77_struct: f77_struct.o
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 f77_ij: f77_ij.o
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${IJ_LFLAGS}
+	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 f77_ij_mv: f77_ij_mv.o
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${IJ_MV_LFLAGS}
+	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 driver_commpkg: driver_commpkg.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${COMMPKG_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "

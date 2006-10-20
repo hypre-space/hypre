@@ -416,7 +416,7 @@ function PostProcess
 #    Removes specified messages from error files that do not reflect actual
 #    errors
 #=============================================================================
-process_filter ()
+function process_filter
 {
   ErrorFile=$1
   shift
@@ -429,7 +429,7 @@ process_filter ()
 }
 
 
-apply_error_filters ()
+function apply_error_filters
 {
   ErrorFile=$1
   if [ -s "${ErrorFile}" ] ; then
@@ -443,7 +443,6 @@ apply_error_filters ()
           ':\ 0\ errors\ in\ file'\
           'autoconf\ has\ been\ disabled'\
           'automake\ has\ been\ disabled'\
-          'autoheader\ has\ been\ disabled'\
           'ltdl.c:'\
           'sidl'\
           '1501-050:\ \(I\)'\
@@ -461,7 +460,6 @@ apply_error_filters ()
           '^[0-9]*\ Lines\ Compiled$'\
           'autoconf\ has\ been\ disabled'\
           'automake\ has\ been\ disabled'\
-          'autoheader\ has\ been\ disabled'\
           'ltdl.c:'\
           'sidl'\
           'queued'\
@@ -489,10 +487,8 @@ apply_error_filters ()
         for ii in \
           'autoconf\ has\ been\ disabled'\
           'automake\ has\ been\ disabled'\
-          'autoheader\ has\ been\ disabled'\
-          'configure:\ WARNING:\ Configuration\ for'\
-          'configure:\ WARNING:\ Skipping\ Java'\
-          'Error:\ PDF:\ version'\
+          'configure:\ WARNING:'\
+          'Error:\ PDF:'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           '../../../babel/runtime'\
           'ltdl.c:'\
@@ -518,19 +514,13 @@ apply_error_filters ()
 # apply filters to remove non-fatal messages from *.err file
 function error_filters
 {
-   curdir="`pwd`"
-   for dir in $TestDirNames
+   errlist="`ls *.err`"
+   for errfile in ${errlist}
    do
-      cd $dir
-      errlist="`ls *.err`"
-      for errfile in ${errlist}
-      do
-         if [ -r ${errfile} ]
-         then
-            apply_error_filters ${errfile}
-         fi
-      done
-      cd $curdir
+      if [ -r ${errfile} ]
+      then
+         apply_error_filters ${errfile}
+      fi
    done
 }
 
@@ -633,5 +623,19 @@ do
          ;;
    esac
 done
+#
+#     apply error filters to TEST_* files
+for dir in $TestDirNames
+do
+   cd $dir
+   error_filters
+   cd $CurDir
+done
+#
+#     apply error filters to docs files
+cd $CurDir/../docs
 error_filters
+cd $CurDir
+#
+#     remove exectutable files from TEST_* directories
 CleanUp $TestDirNames $ExecFileNames
