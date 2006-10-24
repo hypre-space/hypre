@@ -176,7 +176,8 @@ main( int   argc,
    int iterations;
    int maxIterations = 100;
    int checkOrtho = 0;
-   int printLevel = 0;
+   int printLevel = 0; /* also c.f. poutdat */
+   int two_norm = 1;
    int pcgIterations = 0;
    int pcgMode = 1;
    double pcgTol = 1e-2;
@@ -2036,7 +2037,7 @@ main( int   argc,
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter(pcg_solver, 1000);
       HYPRE_PCGSetTol(pcg_solver, tol);
-      HYPRE_PCGSetTwoNorm(pcg_solver, 1);
+      HYPRE_PCGSetTwoNorm(pcg_solver, two_norm);
       HYPRE_PCGSetRelChange(pcg_solver, 0);
       HYPRE_PCGSetPrintLevel(pcg_solver, ioutdat);
  
@@ -2426,7 +2427,7 @@ main( int   argc,
        HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
        HYPRE_PCGSetMaxIter(pcg_solver, pcgIterations);
        HYPRE_PCGSetTol(pcg_solver, pcgTol);
-       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
+       HYPRE_PCGSetTwoNorm(pcg_solver, two_norm);
        HYPRE_PCGSetRelChange(pcg_solver, 0);
        HYPRE_PCGSetPrintLevel(pcg_solver, 0);
  
