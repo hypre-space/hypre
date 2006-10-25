@@ -1316,7 +1316,8 @@ typedef doublereal E_f;	/* real function with -R not specified */
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
+/*  Only use these definitions if HYPRE_USING_HYPRE_BLAS is defined   */
+#ifdef HYPRE_USING_HYPRE_BLAS
 
 /* hypre_blas.h  --  Contains BLAS prototypes needed by Hypre */
 
@@ -1419,6 +1420,7 @@ int dtrsv_ ( char *uplo , char *trans , char *diag , integer *n , doublereal *a 
 integer idamax_ ( integer *n , doublereal *dx , integer *incx );
 
 #endif
+#endif
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -1445,6 +1447,8 @@ integer idamax_ ( integer *n , doublereal *dx , integer *incx );
  * $Revision$
  ***********************************************************************EHEADER*/
 
+/*  Only use these definitions if HYPRE_USING_HYPRE_LAPACK is defined   */
+#ifdef HYPRE_USING_HYPRE_LAPACK
 
 
 /* hypre_lapack.h  --  Contains LAPACK prototypes needed by Hypre */
@@ -1765,6 +1769,7 @@ int dlasq5_ ( integer *i0 , integer *n0 , doublereal *z__ , integer *pp , double
 /* dlasq6.c */
 int dlasq6_ ( integer *i0 , integer *n0 , doublereal *z__ , integer *pp , doublereal *dmin__ , doublereal *dmin1 , doublereal *dmin2 , doublereal *dn , doublereal *dnm1 , doublereal *dnm2 );
 
+#endif
 #endif
 
 #ifdef __cplusplus
