@@ -61,6 +61,10 @@ hypre_mail_summary()
 
 #
 # Define mail program to be used
+   [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
+   [ -x /usr/bin/mhmail ] && HYPRE_MAIL=/usr/bin/mhmail
+   [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
+   [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
 #
 #               mail summaries
    SUBJECT="Autotest Error Summary `date '+%D'`"
