@@ -162,7 +162,7 @@ apply_error_filters ()
           'configure:\ WARNING:\ Skipping\ Java'\
           'cpu\ clock'\
           'wall\ clock'\
-          'Error:\ PDF:\ version'\
+          'Error:\ PDF'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           '../../../babel/runtime'\
           'ltdl.c:'\
