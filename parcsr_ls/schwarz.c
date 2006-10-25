@@ -27,7 +27,10 @@
 
 #include "headers.h"
 #include "Common.h"
+
+#ifdef HYPRE_USING_HYPRE_LAPACK
 #include "../lapack/hypre_lapack.h"
+#endif
 
 /* -------------------------------------------------------------------------
    dof_domain: for each dof defines neighborhood to build interpolation,
