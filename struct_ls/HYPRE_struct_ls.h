@@ -296,7 +296,7 @@ int HYPRE_StructPFMGSetLogging(HYPRE_StructSolver solver,
                                int                logging);
 
 /**
- * (Optional) Allow printing to the screen.
+ * (Optional) Set the amount of printing to do to the screen.
  **/
 int HYPRE_StructPFMGSetPrintLevel(HYPRE_StructSolver solver,
                                   int                print_level);
@@ -408,7 +408,7 @@ int HYPRE_StructSMGSetLogging(HYPRE_StructSolver solver,
                               int                logging);
 
 /**
- * (Optional) Allow printing to the screen.
+ * (Optional) Set the amount of printing to do to the screen.
  **/
 int HYPRE_StructSMGSetPrintLevel(HYPRE_StructSolver solver,
                                   int                print_level);
@@ -504,7 +504,7 @@ int HYPRE_StructPCGSetLogging(HYPRE_StructSolver solver,
 
 
 /**
- * (Optional) Allow printing to the screen.
+ * (Optional) Set the amount of printing to do to the screen.
  **/
 int HYPRE_StructPCGSetPrintLevel(HYPRE_StructSolver solver,
                               int                level);
@@ -621,7 +621,7 @@ HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver,
 
 
 /**
- * (Optional) Allow printing to the screen.
+ * (Optional) Set the amount of printing to do to the screen.
  **/
 int
 HYPRE_StructGMRESSetPrintLevel( HYPRE_StructSolver solver,
@@ -724,7 +724,7 @@ HYPRE_StructBiCGSTABSetLogging( HYPRE_StructSolver solver,
                                 int                logging );
 
 /**
- * (Optional) Allow printing to the screen.
+ * (Optional) Set the amount of printing to do to the screen.
  **/
 int
 HYPRE_StructBiCGSTABSetPrintLevel( HYPRE_StructSolver solver,
@@ -846,7 +846,7 @@ int HYPRE_StructHybridSetSolverType(HYPRE_StructSolver solver,
                                     int                solver_type);
 
 /**
- * (Optional) Set the Krylov subspace dimension when using GMRES.
+ * (Optional) Set the maximum size of the Krylov space when using GMRES.
  **/
 int HYPRE_StructHybridSetKDim(HYPRE_StructSolver solver,
                               int k_dim);
@@ -866,7 +866,7 @@ int HYPRE_StructHybridSetLogging(HYPRE_StructSolver solver,
                                  int                logging);
 
 /**
- * (Optional) Allow printing to the screen.
+ * (Optional) Set the amount of printing to do to the screen.
  **/
 int HYPRE_StructHybridSetPrintLevel(HYPRE_StructSolver solver,
                                     int               print_level);
