@@ -25,16 +25,14 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 INTERNAL_HEADER=sstruct_mv.h
 
 #===========================================================================
 # Include guards and other includes
 #===========================================================================
 
-cat > $INTERNAL_HEADER <<@
+cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
+cat >> $INTERNAL_HEADER <<@
 
 #include "utilities.h"
 
