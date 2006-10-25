@@ -78,9 +78,9 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 int 
 HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
 {
-   HYPRE_DistributedMatrixDestroy( 
-      HYPRE_DistributedMatrixPilutSolverGetMatrix(
-         (HYPRE_DistributedMatrixPilutSolver) solver ) );
+   HYPRE_DistributedMatrix mat = HYPRE_DistributedMatrixPilutSolverGetMatrix(
+      (HYPRE_DistributedMatrixPilutSolver) solver );
+   if ( mat ) HYPRE_DistributedMatrixDestroy( mat );
 
    HYPRE_FreeDistributedMatrixPilutSolver(
       (HYPRE_DistributedMatrixPilutSolver) solver );
