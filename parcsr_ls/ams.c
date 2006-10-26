@@ -1069,6 +1069,11 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_G, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_G, ams_data -> B_G_theta);
 
+      /* don't use exact solve on the coarsest level (matrix may be singular) */
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_G,
+                                       ams_data -> B_G_relax_type,
+                                       3);
+
       /* If not given, construct the coarse space matrix by RAP */
       if (!ams_data -> A_G)
       {
@@ -1106,6 +1111,11 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetTol(ams_data -> B_Pi, 0.0);
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Pi, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Pi, ams_data -> B_Pi_theta);
+
+      /* don't use exact solve on the coarsest level (matrix may be singular) */
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pi,
+                                       ams_data -> B_Pi_relax_type,
+                                       3);
 
       /* If not given, construct the coarse space matrix by RAP and
          notify BoomerAMG that this is a dim x dim block system. */
