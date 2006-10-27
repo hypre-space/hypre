@@ -25,10 +25,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-###  Internal LAPACK routines may be compiled in this sub-directory.
-###  Generally, the Makefile in the utilities sub-directory controls
 ###  the inclusion of these routines based on the configure options.
 ###
 
@@ -53,7 +49,6 @@ dlabrd.c\
 dlacpy.c\
 dlae2.c\
 dlaev2.c\
-dlamch.c\
 dlange.c\
 dlanst.c\
 dlansy.c\
@@ -114,7 +109,7 @@ OBJS = ${LAPACK_FILES:.c=.o}
 # Targets
 #################################################################
 
-all: ${OBJS}
+all: ${OBJS} dlamch.o
 	cp -fp *.*o ${HYPRE_SRC_TOP_DIR}/utilities
 	cp -fp *.h ${HYPRE_BUILD_DIR}/include
 
@@ -129,5 +124,8 @@ distclean: clean
 #################################################################
 # Rules
 #################################################################
+
+dlamch.o : dlamch.c ${LAPACK_HEADERS}
+	${CC} -c dlamch.c ${C_COMPILE_FLAGS}
 
 ${OBJS}: ${LAPACK_HEADERS}
