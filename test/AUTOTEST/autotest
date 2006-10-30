@@ -69,6 +69,7 @@ perform_test()
   else
     echo "deleting old AUTOTEST directory...."
     ssh ${HYPRE_COMPILE_MACHINE} "\
+    (/bin/sh -c \"\
         rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers;\"\
     )"
 
@@ -77,6 +78,7 @@ perform_test()
 
     echo "Begin running remote tests...."
     ssh -f ${HYPRE_COMPILE_MACHINE} "\
+    (/bin/sh -c \"\
       cd ${HYPRE_REMOTE_DIR};\
       echo "Autotest Started" > "autotest_start";\
       [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
