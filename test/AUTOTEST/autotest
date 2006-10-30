@@ -80,14 +80,14 @@ perform_test()
     ssh -f ${HYPRE_COMPILE_MACHINE} "\
     (/bin/sh -c \"\
       cd ${HYPRE_REMOTE_DIR};\
-      echo "Autotest Started" > "autotest_start";\
+      echo 'Autotest Started' > 'autotest_start';\
       [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
       rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/autotest.*;\
       rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/test/autotest.*;\
       linear_solvers/test/AUTOTEST/autotest_test \
             ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
-      echo "Autotest Done" > "autotest_done";\
+      echo 'Autotest Done' > 'autotest_done';\
       chmod -fR a+rX,ug+w,o-w linear_solvers;\
       chgrp -fR hypre linear_solvers\"\
     )" 
