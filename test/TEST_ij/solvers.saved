@@ -55,7 +55,7 @@ Residual   3.87227794008839e-07
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.040000 seconds
+  wall clock time = 0.030000 seconds
 
 Eigenvalue lambda   2.43042158313016e-01
 Eigenvalue lambda   4.79521039879683e-01
@@ -83,7 +83,7 @@ Residual   4.63315030187538e-07
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.040000 seconds
+  wall clock time = 0.030000 seconds
 
 Eigenvalue lambda   2.43042158313016e-01
 Eigenvalue lambda   4.79521039879675e-01
@@ -115,7 +115,7 @@ Residual   4.06686999045480e-07
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.030000 seconds
+  wall clock time = 0.020000 seconds
 
 Eigenvalue lambda   2.43042158313016e-01
 Eigenvalue lambda   4.79521039879677e-01

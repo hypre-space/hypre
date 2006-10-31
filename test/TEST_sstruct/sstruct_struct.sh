@@ -46,7 +46,7 @@ cat struct.testdata.temp >> sstruct_struct.tests
 #=============================================================================
 #   compare with baseline case
 #=============================================================================
-diff -bI"time" sstruct_struct.saved sstruct_struct.tests
+diff -bI"time" sstruct_struct.saved sstruct_struct.tests >&2
 
 #=============================================================================
 # remove temporary files

@@ -1,16 +1,16 @@
 
-Eigenvalue lambda 2.4304215831301565e-01
-Residual 5.0861013586933722e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   1.60768022951669e-09
 
 11 iterations
 =============================================
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.030000 seconds
+  wall clock time = 0.040000 seconds
 
-Eigenvalue lambda 1.0000000000000000e+00
-Residual 2.5798079123324934e-16
+Eigenvalue lambda   1.00000000000000e+00
+Residual   2.57980791233249e-16
 
 0 iterations
 =============================================
@@ -19,8 +19,8 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.000000 seconds
 
-Eigenvalue lambda 3.1439567681290598e-01
-Residual 9.7144852709480034e-09
+Eigenvalue lambda   3.14395676812906e-01
+Residual   9.71448527094800e-09
 
 47 iterations
 =============================================
@@ -29,28 +29,28 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.120000 seconds
 
-Eigenvalue lambda 1.1091267902277867e-01
-Eigenvalue lambda 2.1191776760936187e-01
-Residual 1.0520620731792497e-07
-Residual 1.2196596383607283e-03
+Eigenvalue lambda   1.10912679022779e-01
+Eigenvalue lambda   2.11917767609362e-01
+Residual   1.05206207317925e-07
+Residual   1.21965963836073e-03
 
 100 iterations
 =============================================
 Solve phase times:
 =============================================
 
-Eigenvalue lambda 2.1427338986926499e+00
-Eigenvalue lambda 2.3212231600306787e+00
-Residual 1.6856647419161050e+00
-Residual 1.5881065934760645e+00
+Eigenvalue lambda   2.14273389869265e+00
+Eigenvalue lambda   2.32122316003068e+00
+Residual   1.68566474191611e+00
+Residual   1.58810659347606e+00
 
 2 iterations
 =============================================
 Solve phase times:
 =============================================
 
-Eigenvalue lambda 2.4304215831301557e-01
-Residual 8.9463404245238443e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   8.94634042452384e-09
 
 13 iterations
 =============================================
@@ -59,8 +59,8 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.040000 seconds
 
-Eigenvalue lambda 2.4304215831301557e-01
-Residual 8.9463404245238443e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   8.94634042452384e-09
 
 13 iterations
 =============================================
@@ -69,8 +69,8 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.040000 seconds
 
-Eigenvalue lambda 2.4304215831301557e-01
-Residual 8.9463404245238443e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   8.94634042452384e-09
 
 13 iterations
 =============================================
@@ -79,8 +79,8 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.040000 seconds
 
-Eigenvalue lambda 2.4304215831301557e-01
-Residual 8.9463404245238443e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   8.94634042452384e-09
 
 13 iterations
 =============================================
@@ -89,8 +89,8 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.040000 seconds
 
-Eigenvalue lambda 2.4304215831301579e-01
-Residual 8.3931865782336879e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   8.39318657823369e-09
 
 13 iterations
 =============================================
@@ -99,18 +99,18 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.120000 seconds
 
-Eigenvalue lambda 2.4304215831301579e-01
-Residual 9.7399503971924144e-10
+Eigenvalue lambda   2.43042158313016e-01
+Residual   9.73995039719241e-10
 
 14 iterations
 =============================================
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.040000 seconds
+  wall clock time = 0.050000 seconds
 
-Eigenvalue lambda 2.4304215831301559e-01
-Residual 5.1423651464119167e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   5.14236514641192e-09
 
 14 iterations
 =============================================
@@ -119,8 +119,8 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.030000 seconds
 
-Eigenvalue lambda 2.4304215831301557e-01
-Residual 8.9463404245238443e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   8.94634042452384e-09
 
 13 iterations
 =============================================
@@ -129,8 +129,8 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.040000 seconds
 
-Eigenvalue lambda 2.4304215831301557e-01
-Residual 8.9463404245238443e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   8.94634042452384e-09
 
 13 iterations
 =============================================
@@ -139,10 +139,10 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.040000 seconds
 
-Eigenvalue lambda 2.4304215831299644e-01
-Residual 7.1402932191366776e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   9.01038372322300e-09
 
-67 iterations
+64 iterations
 =============================================
 Solve phase times:
 =============================================
@@ -159,8 +159,8 @@ BoomerAMG SOLVER PARAMETERS:
 
   Maximum number of cycles:         1 
 
-Eigenvalue lambda 2.4304215831301557e-01
-Residual 8.9463404245238443e-09
+Eigenvalue lambda   2.43042158313016e-01
+Residual   8.94634042452384e-09
 
 13 iterations
 =============================================
@@ -168,7 +168,7 @@ Solve phase times:
 =============================================
 LOBPCG Solve:
   wall clock time = 0.040000 seconds
-Eigenvalue lambda 2.4304215831301557e-01
+Eigenvalue lambda   2.43042158313016e-01
 Residual 8.946340e-09
 =============================================
 Solve phase times:
@@ -176,15 +176,15 @@ Solve phase times:
 LOBPCG Solve:
   wall clock time = 0.040000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.050000 seconds
+  cpu clock time  = 0.030000 seconds
   cpu MFLOPS      = 0.000000
 
-Eigenvalue lambda 2.4304215831301565e-01
-Eigenvalue lambda 4.7952103987964778e-01
-Residual 5.9846797893163619e-09
-Residual 2.5710059650392881e-09
+Eigenvalue lambda   2.43042158313016e-01
+Eigenvalue lambda   4.79521039879647e-01
+Residual   2.41596977361362e-09
+Residual   2.55863108441312e-09
 
-15 iterations
+16 iterations
 =============================================
 Solve phase times:
 =============================================
