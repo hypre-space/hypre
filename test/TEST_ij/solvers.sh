@@ -181,7 +181,6 @@ cat solvers.testdata.tmp >> solvers.tests
 #=============================================================================
 #  compare with the baseline case
 #=============================================================================
-cp solvers.tests solvers.saved
 diff -bI"time" solvers.saved solvers.tests >&2
 
 #=============================================================================
