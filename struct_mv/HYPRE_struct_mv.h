@@ -35,6 +35,13 @@
 extern "C" {
 #endif
 
+/* forward declarations */
+#ifndef HYPRE_StructVector_defined
+#define HYPRE_StructVector_defined
+struct hypre_StructVector_struct;
+typedef struct hypre_StructVector_struct *HYPRE_StructVector;
+#endif
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -297,6 +304,17 @@ int HYPRE_StructMatrixPrint(const char         *filename,
                             HYPRE_StructMatrix  matrix,
                             int                 all);
 
+/**
+ * Matvec operator.  This operation is  $y = \alpha A x + \beta y$ .
+ * Note that you can do a simple matrix-vector multiply by setting
+ * $\alpha=1$ and $\beta=0$.
+ **/
+int HYPRE_StructMatrixMatvec ( double alpha,
+                               HYPRE_StructMatrix A,
+                               HYPRE_StructVector x,
+                               double beta,
+                               HYPRE_StructVector y );
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -311,7 +329,9 @@ struct hypre_StructVector_struct;
 /**
  * The vector object.
  **/
+#ifndef HYPRE_StructVector_defined
 typedef struct hypre_StructVector_struct *HYPRE_StructVector;
+#endif
 
 /**
  * Create a vector object.
