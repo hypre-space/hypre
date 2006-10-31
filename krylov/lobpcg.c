@@ -635,14 +635,14 @@ es" argument */
       if ( verbosityLevel == 2 ) {
 	printf("\n");
 	for (i = 1; i <= sizeX; i++ ) 
-	  printf("Initial eigenvalues lambda %22.16e\n",
+	  printf("Initial eigenvalues lambda %22.14e\n",
 		 utilities_FortranMatrixValue( lambda, i, 1) );
 	for (i = 1; i <= sizeX; i++) 
 	  printf("Initial residuals %12.6e\n",
 		 utilities_FortranMatrixValue( residualNorms, i, 1) );
       }
       else if ( verbosityLevel == 1 )
-	printf("\nInitial Max. Residual %22.16e\n",
+	printf("\nInitial Max. Residual %22.14e\n",
 	       utilities_FortranMatrixMaxValue( residualNorms ) );
     }
   }
@@ -914,14 +914,14 @@ es" argument */
     if ( verbosityLevel == 2 ) {
       printf( "Iteration %d \tbsize %d\n", *iterationNumber, sizeR );
       for ( i = 1; i <= sizeX; i++ ) 
-	printf("Eigenvalue lambda %22.16e\n",
+	printf("Eigenvalue lambda %22.14e\n",
 	       utilities_FortranMatrixValue( lambda, i, 1) );
       for ( i = 1; i <= sizeX; i++ ) 
 	printf("Residual %12.6e\n",
 	       utilities_FortranMatrixValue( residualNorms, i, 1) );
     }
     else if ( verbosityLevel == 1 )
-      printf("Iteration %d \tbsize %d \tmaxres %22.16e\n",
+      printf("Iteration %d \tbsize %d \tmaxres %22.14e\n",
 	     *iterationNumber, sizeR, 
 	     utilities_FortranMatrixMaxValue( residualNorms ) );
 
@@ -942,10 +942,10 @@ es" argument */
   if ( verbosityLevel == 1 ) {
     printf("\n");
     for ( i = 1; i <= sizeX; i++ ) 
-      printf("Eigenvalue lambda %22.16e\n",
+      printf("Eigenvalue lambda %22.14e\n",
 	     utilities_FortranMatrixValue( lambda, i, 1) );
     for ( i = 1; i <= sizeX; i++ ) 
-      printf("Residual %22.16e\n",
+      printf("Residual %22.14e\n",
 	     utilities_FortranMatrixValue( residualNorms, i, 1) );
     printf("\n%d iterations\n", *iterationNumber );
   }

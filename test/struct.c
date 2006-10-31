@@ -1783,7 +1783,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 
@@ -1792,7 +1792,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 
@@ -1999,7 +1999,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 	   
@@ -2008,7 +2008,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 	   
