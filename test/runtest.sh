@@ -180,22 +180,23 @@ function CalcProcs
 }
 
 # determine if HOST machine can process batch queues
+#    set to run in debug pool unless batch MUST be used.
 function CheckBatch
 {
    case $HOST in
-      alc*) BATCH_MODE=1
+      alc*) BATCH_MODE=0
          ;;
-      mcr*) BATCH_MODE=1
+      mcr*) BATCH_MODE=0
          ;;
-      peng*) BATCH_MODE=1
+      peng*) BATCH_MODE=0
          ;;
-      thun*) BATCH_MODE=1
+      thun*) BATCH_MODE=0
          ;;
       *bgl*) BATCH_MODE=1
          ;;
-      up*) BATCH_MODE=1
+      up*) BATCH_MODE=0
          ;;
-      vert*) BATCH_MODE=1
+      vert*) BATCH_MODE=0
          ;;
       *) BATCH_MODE=0
          ;;
