@@ -290,7 +290,7 @@ hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
  *    MPI_Comm_rank(comm, &myid);
  *    if (myid==0)
  *       for (i=0; i<count; i++)
- *          printf("%22.16e\n",results[i])
+ *          printf("%22.14e\n",results[i])
  */
 
 /* ------------ */
