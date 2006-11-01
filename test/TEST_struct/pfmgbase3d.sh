@@ -33,53 +33,63 @@
 
 tail -3 pfmgbase3d.out.0 > pfmgbase3d.testdata
 tail -3 pfmgbase3d.out.1 > pfmgbase3d.testdata.temp
-diff -bI"time" pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
+diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
-cat pfmgbase3d.testdata > pfmgbase3d.tests
-cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
 #=============================================================================
 
 tail -3 pfmgbase3d.out.2 > pfmgbase3d.testdata.temp
-diff -bI"time" pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
+diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
-cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
 #=============================================================================
 
 tail -3 pfmgbase3d.out.3 > pfmgbase3d.testdata.temp
-diff -bI"time" pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
+diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
-cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
 #=============================================================================
 
 tail -3 pfmgbase3d.out.4 > pfmgbase3d.testdata.temp
-diff -bI"time" pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
+diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
-cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
 #=============================================================================
 
 tail -3 pfmgbase3d.out.5 > pfmgbase3d.testdata.temp
-diff -bI"time" pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
+diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
-cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
 #=============================================================================
 
 tail -3 pfmgbase3d.out.6 > pfmgbase3d.testdata.temp
-diff -bI"time" pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
+diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
-cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
 #=============================================================================
 
 tail -3 pfmgbase3d.out.7 > pfmgbase3d.testdata.temp
-diff -bI"time" pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
-
-cat pfmgbase3d.testdata.temp >> pfmgbase3d.tests
+diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
 #=============================================================================
 #     compare with baseline case
 #=============================================================================
-diff -bI"time" pfmgbase3d.saved pfmgbase3d.tests >&2
+
+FILES="\
+ pfmgbase3d.out.0\
+ pfmgbase3d.out.1\
+ pfmgbase3d.out.2\
+ pfmgbase3d.out.3\
+ pfmgbase3d.out.4\
+ pfmgbase3d.out.5\
+ pfmgbase3d.out.6\
+ pfmgbase3d.out.7\
+"
+
+for i in $FILES
+do
+  echo "----- $i -----"
+  tail -3 $i
+done > pfmgbase3d.out
+
+diff -bI"time" pfmgbase3d.saved pfmgbase3d.out >&2
 
 #=============================================================================
 #     remove temporary files
 #=============================================================================
-rm -f pfmgbase3d.testdata* pfmgbase3d.tests
+
+rm -f pfmgbase3d.testdata*
