@@ -100,7 +100,16 @@ int HYPRE_StructGridSetExtents(HYPRE_StructGrid  grid,
 int HYPRE_StructGridAssemble(HYPRE_StructGrid grid);
 
 /**
- * Set periodic.
+ * Set the periodicity for the grid.
+ *
+ * The argument {\tt periodic} is an {\tt ndim}-dimensional integer array that
+ * contains the periodicity for each dimension.  A zero value for a dimension
+ * means non-periodic, while a nonzero value means periodic and contains the
+ * actual period.  For example, periodicity in the first and third dimensions
+ * for a 10x11x12 grid is indicated by the array [10,0,12].
+ *
+ * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
+ * of the periodic dimensions.
  **/
 int HYPRE_StructGridSetPeriodic(HYPRE_StructGrid  grid,
                                 int              *periodic);
