@@ -82,11 +82,11 @@ FILES="\
 
 for i in $FILES
 do
-  echo "----- $i -----"
+  echo "# Output file: $i"
   tail -3 $i
 done > pfmgbase3d.out
 
-diff -bI"time" pfmgbase3d.saved pfmgbase3d.out >&2
+diff -U 3 -bI"time" pfmgbase3d.saved pfmgbase3d.out >&2
 
 #=============================================================================
 #     remove temporary files
