@@ -86,7 +86,7 @@ do
   tail -3 $i
 done > pfmgbase3d.out
 
-diff -U 3 -bI"time" pfmgbase3d.saved pfmgbase3d.out >&2
+diff -U3 -bI"time" pfmgbase3d.saved pfmgbase3d.out >&2
 
 #=============================================================================
 #     remove temporary files
