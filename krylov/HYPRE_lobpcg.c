@@ -43,12 +43,12 @@
 #else
 
 #include "fortran.h"
-void hypre_F90_NAME_BLAS(dsygv, DSYGV)
+int hypre_F90_NAME_BLAS(dsygv, DSYGV)
 ( int *itype, char *jobz, char *uplo, int *n,
   double *a, int *lda, double *b, int *ldb, double *w,
   double *work, int *lwork, /*@out@*/ int *info
 );
-void hypre_F90_NAME_BLAS( dpotrf, DPOTRF )
+int hypre_F90_NAME_BLAS( dpotrf, DPOTRF )
 ( char* uplo, int* n, double* aval, int* lda, int* ierr );
 
 #endif
