@@ -352,6 +352,8 @@ main( int   argc,
    {
       printf("Running with these driver parameters:\n");
       printf("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
+      printf("  (istart[0],istart[1],istart[2]) = (%d, %d, %d)\n", \
+                 istart[0],istart[1],istart[2]);
       printf("  (Px, Py, Pz)    = (%d, %d, %d)\n", P,  Q,  R);
       printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
       printf("  (px, py, pz)    = (%d, %d, %d)\n", px, py, pz);
@@ -365,7 +367,7 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
-    * Set up periodic flags and set istart = 0 for periodic dims
+    * Set up periodic flags
     *-----------------------------------------------------------*/
 
    time_index = hypre_InitializeTiming("Struct Interface");
@@ -374,11 +376,6 @@ main( int   argc,
    periodic[0] = px;
    periodic[1] = py;
    periodic[2] = pz;
-   for (i = 0; i < dim; i++)
-   {
-      if (periodic[i] != 0)
-         istart[i] = 0;
-   }
 
    /*-----------------------------------------------------------
     * Set up dxyz for PFMG solver  >>> NOT IMPLEMENTED <<<
@@ -760,6 +757,7 @@ main( int   argc,
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "RelChange", 0, &_ex );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPrerelax", n_pre, &_ex );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPostrelax", n_post, &_ex );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "PrintLevel", 1, &_ex );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 1, &_ex );
 
       b_V = bHYPRE_Vector__cast( b_SV, &_ex );
