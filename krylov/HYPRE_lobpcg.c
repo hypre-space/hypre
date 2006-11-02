@@ -33,9 +33,6 @@
  *
  *****************************************************************************/
 
-#include "HYPRE_lobpcg.h"
-#include "lobpcg.h"
-
 #include "utilities.h"
 
 #include "HYPRE_config.h"
@@ -46,15 +43,18 @@
 #else
 
 #include "fortran.h"
-int hypre_F90_NAME_BLAS(dsygv, DSYGV)
+void hypre_F90_NAME_BLAS(dsygv, DSYGV)
 ( int *itype, char *jobz, char *uplo, int *n,
   double *a, int *lda, double *b, int *ldb, double *w,
   double *work, int *lwork, /*@out@*/ int *info
 );
-int hypre_F90_NAME_BLAS( dpotrf, DPOTRF )
+void hypre_F90_NAME_BLAS( dpotrf, DPOTRF )
 ( char* uplo, int* n, double* aval, int* lda, int* ierr );
 
 #endif
+
+#include "HYPRE_lobpcg.h"
+#include "lobpcg.h"
 
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"
@@ -650,3 +650,4 @@ utilities_FortranMatrix* xy
                                   utilities_FortranMatrixWidth( xy ),
                                   utilities_FortranMatrixValues( xy ) );
 }
+
