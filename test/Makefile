@@ -67,7 +67,6 @@ LFLAGS =\
 
 BABELLIBFLAGS =\
  -L${HYPRE_LINK_DIR}/lib\
- -L${HYPRE_LINK_DIR}/../babel-runtime/sidl/.libs\
  -lbHYPRE\
  -lbHYPREClient-C\
  -lbHYPREClient-F\
