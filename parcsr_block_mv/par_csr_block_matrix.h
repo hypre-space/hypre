@@ -221,8 +221,6 @@ hypre_ParCSRBlockCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle);
 int
 hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A);
 
-int
-hypre_BlockNewCommPkgCreate(hypre_ParCSRBlockMatrix *A);
 
 int
 hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix);

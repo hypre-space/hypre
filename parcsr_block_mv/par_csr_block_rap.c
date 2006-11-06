@@ -1802,11 +1802,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
   }
   if (num_procs > 1)
   {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-     hypre_BlockNewCommPkgCreate(RAP); 
-#else
      hypre_BlockMatvecCommPkgCreate(RAP); 
-#endif
   }
 
   *RAP_ptr = RAP;

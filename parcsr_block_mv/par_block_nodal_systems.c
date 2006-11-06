@@ -115,11 +115,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_BlockNewCommPkgCreate(A);
-#else
       hypre_BlockMatvecCommPkgCreate(A);
-#endif
       comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
    }
 

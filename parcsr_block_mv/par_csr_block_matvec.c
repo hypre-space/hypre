@@ -92,12 +92,7 @@ hypre_ParCSRBlockMatrixMatvec(double alpha, hypre_ParCSRBlockMatrix *A,
 
       if (!comm_pkg)
       {
-
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_BlockNewCommPkgCreate(A); 
-#else
-        hypre_BlockMatvecCommPkgCreate(A);
-#endif
+         hypre_BlockMatvecCommPkgCreate(A);
          comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
       }
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -205,11 +200,7 @@ hypre_ParCSRBlockMatrixMatvecT( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_BlockNewCommPkgCreate(A);
-#else
       hypre_BlockMatvecCommPkgCreate(A);
-#endif
       comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
    }
 

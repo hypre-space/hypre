@@ -129,13 +129,20 @@ hypre_ParCSRBlockCommHandleCreate(int job, int bnnz, hypre_ParCSRCommPkg *comm_p
    return ( comm_handle );
 }
 
+
+
+
+/*--------------------------------------------------------------------
+hypre_ParCSRBlockCommHandleDestroy
+ *--------------------------------------------------------------------*/
+
 int
 hypre_ParCSRBlockCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle)
 {
    MPI_Status          *status0;
-   int			ierr = 0;
 
-   if ( comm_handle==NULL ) return ierr;
+   if ( comm_handle==NULL ) return hypre_error_flag;
+
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
       status0 = hypre_CTAlloc(MPI_Status,
@@ -148,110 +155,7 @@ hypre_ParCSRBlockCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle)
    hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle));
    hypre_TFree(comm_handle);
 
-   return ierr;
-}
-
-
-/* ----------------------------------------------------------------------
- * hypre_BlockNewCommPkgCreate
- * ---------------------------------------------------------------------*/
-
-int
-hypre_BlockNewCommPkgCreate(hypre_ParCSRBlockMatrix *A)
-{
- 
-   int        row_start=0, row_end=0, col_start = 0, col_end = 0;
-   int        num_recvs, *recv_procs, *recv_vec_starts;
-
-   int        num_sends, *send_procs, *send_map_starts;
-   int        *send_map_elements;
-
-   int        num_cols_off_d; 
-   int       *col_map_off_d; 
-
-   int        first_col_diag;
-   int        global_num_cols;
-
-   int        ierr = 0;
-
-   MPI_Comm   comm;
-
-   hypre_ParCSRCommPkg	 *comm_pkg;
-   hypre_IJAssumedPart   *apart;
-   
-   /*-----------------------------------------------------------
-    * get parcsr_A information 
-    *----------------------------------------------------------*/
-
-   row_start = hypre_ParCSRBlockMatrixFirstRowIndex(A);
-   row_end = hypre_ParCSRBlockMatrixLastRowIndex(A);
-   col_start =  hypre_ParCSRBlockMatrixFirstColDiag(A);
-   col_end =  hypre_ParCSRBlockMatrixLastColDiag(A);
-   
-   col_map_off_d =  hypre_ParCSRBlockMatrixColMapOffd(A);
-   num_cols_off_d = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixOffd(A));
-   
-   global_num_cols = hypre_ParCSRBlockMatrixGlobalNumCols(A); 
-   
-   comm = hypre_ParCSRBlockMatrixComm(A);
-
-   first_col_diag = hypre_ParCSRBlockMatrixFirstColDiag(A);
-
-   /* Create the assumed partition */
-   if  (hypre_ParCSRBlockMatrixAssumedPartition(A) == NULL)
-   {
-      hypre_ParCSRBlockMatrixCreateAssumedPartition(A);
-   }
-
-   apart = hypre_ParCSRBlockMatrixAssumedPartition(A);
-
-
-   /*-----------------------------------------------------------
-    * get commpkg info information 
-    *----------------------------------------------------------*/
-
-   hypre_NewCommPkgCreate_core( comm, col_map_off_d, first_col_diag, 
-                                col_start, col_end, 
-                                num_cols_off_d, global_num_cols,
-                                &num_recvs, &recv_procs, &recv_vec_starts,
-                                &num_sends, &send_procs, &send_map_starts, 
-                                &send_map_elements, apart);
-
-
-
-   if (!num_recvs)
-   {
-      hypre_TFree(recv_procs);
-      recv_procs = NULL;
-   }
-   if (!num_sends)
-   {
-      hypre_TFree(send_procs);
-      hypre_TFree(send_map_elements);
-      send_procs = NULL;
-      send_map_elements = NULL;
-   }
-
-  /*-----------------------------------------------------------
-   * setup commpkg
-   *----------------------------------------------------------*/
-
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
-
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elements;
-
-   hypre_ParCSRBlockMatrixCommPkg(A) = comm_pkg;
-
-   return ierr;
+   return hypre_error_flag;
 }
 
 
@@ -273,7 +177,6 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
 
    int global_num_cols;
    int myid;
-   int ierr = 0;
    int  row_start=0, row_end=0, col_start = 0, col_end = 0;
 
    MPI_Comm   comm;
@@ -296,7 +199,7 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
 
   /* get my assumed partitioning  - we want partitioning of the vector that the
       matrix multiplies - so we use the col start and end */
-   ierr = hypre_GetAssumedPartitionRowRange( myid, global_num_cols, &(apart->row_start), 
+   hypre_GetAssumedPartitionRowRange( myid, global_num_cols, &(apart->row_start), 
                                              &(apart->row_end));
 
   /*allocate some space for the partition of the assumed partition */
@@ -314,8 +217,8 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
     /* this partition will be saved in the matrix data structure until the matrix is destroyed */
     hypre_ParCSRBlockMatrixAssumedPartition(matrix) = apart;
    
-   return (ierr);
-
+    return hypre_error_flag;
+    
 }
 
 /*--------------------------------------------------------------------

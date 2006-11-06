@@ -182,11 +182,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_BlockNewCommPkgCreate(A); 
-#else
 	hypre_BlockMatvecCommPkgCreate(A);
-#endif
 	comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
    }
 
@@ -1570,11 +1566,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_BlockNewCommPkgCreate(A); 
-#else
 	hypre_BlockMatvecCommPkgCreate(A);
-#endif
 	comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
    }
 
