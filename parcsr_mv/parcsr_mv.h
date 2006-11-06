@@ -1,165 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
-
-
-
 
 #include <HYPRE_config.h>
 
@@ -174,6 +12,33 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 
 
 #ifndef HYPRE_PAR_CSR_COMMUNICATION_HEADER
@@ -277,6 +142,33 @@ typedef struct
 
 #endif /* hypre_PARCSR_ASSUMED_PART */
 
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
 
 #ifndef hypre_NEW_COMMPKG
 #define hypre_NEW_COMMPKG
@@ -297,6 +189,33 @@ typedef struct
 
 
 #endif /* hypre_NEW_COMMPKG */
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 
 
 
@@ -355,6 +274,33 @@ typedef struct
 
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
 
 
 /******************************************************************************
@@ -515,6 +461,33 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
 
 /******************************************************************************
  *
@@ -563,6 +536,33 @@ int * hypre_NumbersArray( hypre_NumbersNode * node );
 
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
 
 /******************************************************************************
  *
@@ -839,7 +839,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion ( hypre_ParCSRMatrix *A , hypre_ParC
 /* par_csr_matvec.c */
 int hypre_ParCSRMatrixMatvec ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
 int hypre_ParCSRMatrixMatvecT ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
-int hypre_ParCSRMatrixMatvec_FF( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y , int *CF_marker , int fpt );
+int hypre_ParCSRMatrixMatvec_FF ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y , int *CF_marker , int fpt );
 
 /* par_vector.c */
 hypre_ParVector *hypre_ParVectorCreate ( MPI_Comm comm , int global_size , int *partitioning );

@@ -1002,7 +1002,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
     *--------------------------------------------------------------------*/
    if (!hypre_ParCSRMatrixCommPkg(A))
    {
-              hypre_MatvecCommPkgCreate(A);
+      hypre_MatvecCommPkgCreate(A);
    }
     
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1065,6 +1065,11 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    hypre_CSRMatrix *AT_offd;
    hypre_CSRMatrix *AT_tmp;
    
+
+   int first_row_index_AT, first_col_diag_AT;
+   int local_num_rows_AT, local_num_cols_AT;
+   
+
    int *AT_tmp_i;
    int *AT_tmp_j;
    double *AT_tmp_data;
@@ -1106,8 +1111,8 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-	hypre_MatvecCommPkgCreate(A);
-	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
    if (num_procs > 1)
@@ -1287,6 +1292,13 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    {
       col_starts_AT = row_starts_AT;
    }
+
+   first_row_index_AT =  row_starts_AT[0];
+   first_col_diag_AT =  col_starts_AT[0];
+
+   local_num_rows_AT = row_starts_AT[1]-first_row_index_AT ;
+   local_num_cols_AT = col_starts_AT[1]-first_col_diag_AT;
+
 #else
    row_starts_AT = hypre_CTAlloc(int,num_procs+1);
    for (i=0; i < num_procs+1; i++)
@@ -1302,9 +1314,14 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    {
       col_starts_AT = row_starts_AT;
    }
+   first_row_index_AT =  row_starts_AT[my_id];
+   first_col_diag_AT =  col_starts_AT[my_id];
+
+   local_num_rows_AT = row_starts_AT[my_id+1]-first_row_index_AT ;
+   local_num_cols_AT = col_starts_AT[my_id+1]-first_col_diag_AT;
+
+
 #endif
-
-
 
 
    AT = hypre_CTAlloc(hypre_ParCSRMatrix,1);
@@ -1316,8 +1333,12 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixRowStarts(AT) = row_starts_AT;
    hypre_ParCSRMatrixColStarts(AT) = col_starts_AT;
    hypre_ParCSRMatrixColMapOffd(AT) = col_map_offd_AT;
-   hypre_ParCSRMatrixFirstRowIndex(AT) = row_starts_AT[my_id];
-   hypre_ParCSRMatrixFirstColDiag(AT) = col_starts_AT[my_id];
+ 
+   hypre_ParCSRMatrixFirstRowIndex(AT) = first_row_index_AT;
+   hypre_ParCSRMatrixFirstColDiag(AT) = first_col_diag_AT;
+
+   hypre_ParCSRMatrixLastRowIndex(AT) = first_row_index_AT + local_num_rows_AT - 1;
+   hypre_ParCSRMatrixLastColDiag(AT) = first_col_diag_AT + local_num_cols_AT - 1;
 
    hypre_ParCSRMatrixOwnsData(AT) = 1;
    hypre_ParCSRMatrixOwnsRowStarts(AT) = 1;
@@ -1456,7 +1477,9 @@ void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices,
    comm_pkg = hypre_ParCSRMatrixCommPkg(G_csr);
    if (nprocs == 1 && comm_pkg == NULL)
    {
+
       hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) G_csr);
+
       comm_pkg = hypre_ParCSRMatrixCommPkg(G_csr);
    }
 

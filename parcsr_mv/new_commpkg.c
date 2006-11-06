@@ -523,6 +523,12 @@ hypre_NewCommPkgCreate_core(
 
 }
 
+#if 0
+
+/* now this is incorporated into the std comm pkg routine - it is not deleted 
+   here in in case driver_commpkg.c is to be used for testing commpkg
+   setups */
+
 /*------------------------------------------------------------------
  * hypre_NewCommPkgCreate
  * this is an alternate way of constructing the comm package                                 
@@ -625,6 +631,9 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
       
    
 }
+
+
+#endif
 
 /*------------------------------------------------------------------
  *  hypre_NewCommPkgDestroy
