@@ -501,11 +501,8 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
       hypre_MatvecCommPkgCreate(A);
-#endif
+
         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
@@ -861,11 +858,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(S);
-#else
       hypre_MatvecCommPkgCreate(S);
-#endif
 	comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
    }
 
@@ -1425,11 +1418,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(S);
-#else
 	hypre_MatvecCommPkgCreate(S);
-#endif
 	comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
    }
 

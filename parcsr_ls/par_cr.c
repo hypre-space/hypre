@@ -478,11 +478,8 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(S);
-#else
         hypre_MatvecCommPkgCreate(S);
-#endif
+
         comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
    }
 
@@ -973,11 +970,7 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(S);
-#else
         hypre_MatvecCommPkgCreate(S);
-#endif
         comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
    }
 
@@ -1545,11 +1538,8 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(S);
-#else
         hypre_MatvecCommPkgCreate(S);
-#endif
+
         comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
    }
 

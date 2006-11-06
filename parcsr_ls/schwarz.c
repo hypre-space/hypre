@@ -3257,11 +3257,8 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
      else if (num_procs > 1)
      {
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_NewCommPkgCreate(A);
-#else
         hypre_MatvecCommPkgCreate(A);
-#endif
+
 	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);    
 	recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);    
      }

@@ -168,11 +168,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
 	hypre_MatvecCommPkgCreate(A);
-#endif
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -1145,11 +1141,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
 	hypre_MatvecCommPkgCreate(A);
-#endif
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -2044,11 +2036,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
 	hypre_MatvecCommPkgCreate(A);
-#endif
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
