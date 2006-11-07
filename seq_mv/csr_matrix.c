@@ -537,7 +537,12 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
          }
          if ( match==0 )
          {
-            C_j[mc] = jC[ B_j[mb] ];
+            if ( col_map_offd_A )
+               C_j[mc] = jC[ B_j[mb] ];
+            else
+               C_j[mc] = B_j[mb];
+            /* ... I don't know whether column indices are required to be in any
+               particular order.  If so, we'll need to sort. */
             ++mc;
          }
       }
