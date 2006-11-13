@@ -1,3 +1,4 @@
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -24,51 +25,63 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # sstruct: Test addtovalue routine. Compares the solutions obtained using
 # different formations of the matrix- one with setvalues and the other with
 # addtovalues
-#
-#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
-tail -3 addtovalues.out.0 > addtovalues.testdata
-tail -3 addtovalues.out.1 > addtovalues.testdata.temp
-diff -bI"time" addtovalues.testdata addtovalues.testdata.temp >&2
-
-cat addtovalues.testdata > addtovalues.tests
-cat addtovalues.testdata.temp >> addtovalues.tests
-#=============================================================================
-
-tail -3 addtovalues.out.2 > addtovalues.testdata
-tail -3 addtovalues.out.3 > addtovalues.testdata.temp
-diff -bI"time" addtovalues.testdata addtovalues.testdata.temp >&2
-
-cat addtovalues.testdata >> addtovalues.tests
-cat addtovalues.testdata.temp >> addtovalues.tests
-#=============================================================================
-
-tail -3 addtovalues.out.4 > addtovalues.testdata
-tail -3 addtovalues.out.5 > addtovalues.testdata.temp
-diff -bI"time" addtovalues.testdata addtovalues.testdata.temp >&2
-
-cat addtovalues.testdata >> addtovalues.tests
-cat addtovalues.testdata.temp >> addtovalues.tests
-#=============================================================================
-
-tail -3 addtovalues.out.6 > addtovalues.testdata
-tail -3 addtovalues.out.7 > addtovalues.testdata.temp
-diff -bI"time" addtovalues.testdata addtovalues.testdata.temp >&2
-
-cat addtovalues.testdata >> addtovalues.tests
-cat addtovalues.testdata.temp >> addtovalues.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#  compare with the baseline case
-#=============================================================================
-diff -bI"time" addtovalues.saved addtovalues.tests >&2
+
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#  remove temporary files
+
+tail -3 ${TNAME}.out.4 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.5 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
 #=============================================================================
-rm -f addtovalues.testdata*  addtovalues.tests
+
+tail -3 ${TNAME}.out.6 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.7 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

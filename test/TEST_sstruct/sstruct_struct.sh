@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/sh 
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -25,30 +25,45 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # sstruct: Tests the struct solvers called from the sstruct interface
 #=============================================================================
 
-tail -3 sstruct_struct.out.1 > struct.testdata
-tail -3 sstruct_struct.out.201 > struct.testdata.temp
-diff -bI"time" struct.testdata struct.testdata.temp >&2
-
-cat struct.testdata > sstruct_struct.tests
-cat struct.testdata.temp >> sstruct_struct.tests
-
-tail -3 sstruct_struct.out.0 > struct.testdata
-tail -3 sstruct_struct.out.200 > struct.testdata.temp
-diff -bI"time" struct.testdata struct.testdata.temp >&2
-
-cat struct.testdata >> sstruct_struct.tests
-cat struct.testdata.temp >> sstruct_struct.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.200 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#   compare with baseline case
+
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.201 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
 #=============================================================================
-diff -bI"time" sstruct_struct.saved sstruct_struct.tests >&2
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.200\
+ ${TNAME}.out.201\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
 # remove temporary files
 #=============================================================================
-rm -f struct.testdata struct.testdata.temp sstruct_struct.tests
+
+rm -f ${TNAME}.testdata*

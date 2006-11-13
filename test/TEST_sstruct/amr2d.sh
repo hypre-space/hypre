@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -25,40 +25,35 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#   for each case save the results for comparison with the baseline case
-#=============================================================================
-
-tail -4 amr2d.out.0 > amr2d.testdata
-cat amr2d.testdata > amr2d.tests
-#=============================================================================
-tail -4 amr2d.out.1 > amr2d.testdata
-cat amr2d.testdata >> amr2d.tests
-#=============================================================================
-tail -4 amr2d.out.2 > amr2d.testdata
-cat amr2d.testdata >> amr2d.tests
-#=============================================================================
-tail -4 amr2d.out.3 > amr2d.testdata
-cat amr2d.testdata >> amr2d.tests
-#=============================================================================
-tail -4 amr2d.out.4 > amr2d.testdata
-cat amr2d.testdata >> amr2d.tests
-#=============================================================================
-tail -4 amr2d.out.5 > amr2d.testdata
-cat amr2d.testdata >> amr2d.tests
-#=============================================================================
-tail -4 amr2d.out.6 > amr2d.testdata
-cat amr2d.testdata >> amr2d.tests
-#=============================================================================
-tail -4 amr2d.out.7 > amr2d.testdata
-cat amr2d.testdata >> amr2d.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#   compare with baseline test case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" amr2d.saved amr2d.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#   remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f amr2d.testdata amr2d.tests
+
+# rm -f ${TNAME}.testdata*

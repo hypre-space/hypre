@@ -8,23 +8,23 @@
 #####
 #####
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -r 1 1 1 -rhsone -solver 3 \
- > emptyProc.out.0
+ > emptyProc.out.00
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 10 \
- > emptyProc.out.1
+ > emptyProc.out.01
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 11 \
- > emptyProc.out.2
+ > emptyProc.out.02
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -r 1 1 1 -rhsone -solver 13 \
- > emptyProc.out.3
+ > emptyProc.out.03
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 18 \
- > emptyProc.out.4
+ > emptyProc.out.04
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 20 \
- > emptyProc.out.5
+ > emptyProc.out.05
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 22 \
- > emptyProc.out.6
+ > emptyProc.out.06
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 28 \
- > emptyProc.out.8
+ > emptyProc.out.08
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 30 \
- > emptyProc.out.9
+ > emptyProc.out.09
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 31 \
  > emptyProc.out.10
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 38 \

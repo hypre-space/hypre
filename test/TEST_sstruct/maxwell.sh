@@ -1,3 +1,4 @@
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -24,39 +25,49 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # no test comparison for now. Just a holder file with fake tests. Hard to
 # develop tests because of the coarsening scheme.
-#    for each test, save results for comparison with baseline case
 #=============================================================================
 
-tail -3 maxwell.out.0 > maxwell.testdata
-tail -3 maxwell.out.0 > maxwell.testdata.temp
-diff -bI"time" maxwell.testdata maxwell.testdata.temp >&2
-
-cat maxwell.testdata > maxwell.tests
-cat maxwell.testdata.temp >> maxwell.tests
-#=============================================================================
-tail -3 maxwell.out.1 > maxwell.testdata
-tail -3 maxwell.out.1 > maxwell.testdata.temp
-diff -bI"time" maxwell.testdata maxwell.testdata.temp >&2
-
-cat maxwell.testdata >> maxwell.tests
-cat maxwell.testdata.temp >> maxwell.tests
-#=============================================================================
-tail -3 maxwell.out.2 > maxwell.testdata
-tail -3 maxwell.out.2 > maxwell.testdata.temp
-diff -bI"time" maxwell.testdata maxwell.testdata.temp >&2
-
-cat maxwell.testdata >> maxwell.tests
-cat maxwell.testdata.temp >> maxwell.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#    compare with baseline case
-#=============================================================================
-diff -bI"time" maxwell.saved maxwell.tests >&2
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#    remove temporary files
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
 #=============================================================================
-rm -f maxwell.testdata* maxwell.tests
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -25,38 +25,47 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#    for each test, save the results for comparison with the baseline case
-#=============================================================================
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-# Check SetNeighborBox for periodic problems (2D)
+# Check SetNeighborBox for ${TNAME} problems (2D)
 #=============================================================================
 
-tail -3 periodic.out.20 > periodic.testdata
-tail -3 periodic.out.21 > periodic.testdata.temp
-diff -bI"time" periodic.testdata periodic.testdata.temp >&2
-
-cat periodic.testdata > periodic.tests
-cat periodic.testdata.temp >> periodic.tests
+tail -3 ${TNAME}.out.20 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.21 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-# Check SetNeighborBox for periodic problems (3D)
+# Check SetNeighborBox for ${TNAME} problems (3D)
 #=============================================================================
 
-tail -3 periodic.out.30 > periodic.testdata
-tail -3 periodic.out.31 > periodic.testdata.temp
-diff -bI"time" periodic.testdata periodic.testdata.temp >&2
-
-cat periodic.testdata >> periodic.tests
-cat periodic.testdata.temp >> periodic.tests
+tail -3 ${TNAME}.out.30 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.31 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#   compare with baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" periodic.saved periodic.tests >&2
+
+FILES="\
+ ${TNAME}.out.20\
+ ${TNAME}.out.21\
+ ${TNAME}.out.30\
+ ${TNAME}.out.31\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#   remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f periodic.testdata* periodic.tests
+
+rm -f ${TNAME}.testdata*

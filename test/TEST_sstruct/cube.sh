@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -25,34 +25,47 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # sstruct: Test SetNeighborBox by comparing one-part problem
 #          against equivalent multi-part problems
-#
-#    for each test, save the results for comparison with the baseline case
 #=============================================================================
 
-tail -3 cube.out.0 > cube.testdata
-cat cube.testdata > cube.tests
-#=============================================================================
-
-tail -3 cube.out.1 > cube.testdata.temp
-diff -bI"time" cube.testdata cube.testdata.temp >&2
-
-cat cube.testdata.temp >> cube.tests
-#=============================================================================
-
-tail -3 cube.out.2 > cube.testdata.temp
-diff -bI"time" cube.testdata cube.testdata.temp >&2
-
-cat cube.testdata.temp >> cube.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
 
 #=============================================================================
-#    compare with the baseline case
-#=============================================================================
-diff -bI"time" cube.saved cube.tests >&2
+
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#    remove temporary files
+
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
 #=============================================================================
-rm -f cube.testdata* cube.tests
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

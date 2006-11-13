@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -25,46 +25,37 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#   for each case save the results for comparison with the baseline case
-#=============================================================================
-
-tail -4 miller.out.0 > miller.testdata
-cat miller.testdata > miller.tests
-#=============================================================================
-tail -4 miller.out.1 > miller.testdata
-cat miller.testdata >> miller.tests
-#=============================================================================
-tail -4 miller.out.2 > miller.testdata
-cat miller.testdata >> miller.tests
-#=============================================================================
-tail -4 miller.out.3 > miller.testdata
-cat miller.testdata >> miller.tests
-#=============================================================================
-tail -4 miller.out.4 > miller.testdata
-cat miller.testdata >> miller.tests
-#=============================================================================
-tail -4 miller.out.5 > miller.testdata
-cat miller.testdata >> miller.tests
-#=============================================================================
-tail -4 miller.out.6 > miller.testdata
-cat miller.testdata >> miller.tests
-#=============================================================================
-tail -4 miller.out.7 > miller.testdata
-cat miller.testdata >> miller.tests
-#=============================================================================
-tail -4 miller.out.8 > miller.testdata
-cat miller.testdata >> miller.tests
-#=============================================================================
-tail -4 miller.out.9 > miller.testdata
-cat miller.testdata >> miller.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#   compare with baseline test case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" miller.saved miller.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+ ${TNAME}.out.8\
+ ${TNAME}.out.9\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#   remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f miller.testdata miller.tests
+
+# rm -f ${TNAME}.testdata*

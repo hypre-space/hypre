@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -25,32 +25,45 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # sstruct: Test various blockings and distributions of default problem
-#  for each test, save the results for comparison with the baseline case
 #=============================================================================
 
-tail -3 neumann.out.0 > neumann.testdata
-tail -3 neumann.out.2 > neumann.testdata.temp
-diff -bI"time" neumann.testdata neumann.testdata.temp >&2
-
-cat neumann.testdata > neumann.tests
-cat neumann.testdata.temp >> neumann.tests
-#=============================================================================
-
-tail -3 neumann.out.1 > neumann.testdata
-tail -3 neumann.out.3 > neumann.testdata.temp
-diff -bI"time" neumann.testdata neumann.testdata.temp >&2
-
-cat neumann.testdata >> neumann.tests
-cat neumann.testdata.temp >> neumann.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#  compare with the baseline case
-#=============================================================================
-diff -bI"time" neumann.saved neumann.tests >&2
+
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#  remove temporary files
+# compare with baseline case
 #=============================================================================
-rm -f neumann.testdata* neumann.tests
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*
