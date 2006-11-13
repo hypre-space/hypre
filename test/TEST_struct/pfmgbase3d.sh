@@ -86,7 +86,9 @@ do
   tail -3 $i
 done > pfmgbase3d.out
 
-diff -U3 -bI"time" pfmgbase3d.saved pfmgbase3d.out >&2
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" pfmgbase3d.saved pfmgbase3d.out >&2
+fi
 
 #=============================================================================
 #     remove temporary files

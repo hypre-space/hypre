@@ -38,14 +38,16 @@ HOST=`hostname|cut -c1-4`  #first 4 characters of host platform name
 function usage
 {
    printf "\n"
-   printf "$0 [-n|-norun] [-h|-help] [-t|-trace] {test_path}/{test_name}.sh\n"
+   printf "$0 [options] {test_path}/{test_name}.sh\n"
    printf "\n"
    printf " where: {test_path} is the directory path to the test script;\n"
    printf "        {test_name} is a user defined name for the test script\n"
    printf "\n"
-   printf "        -help          prints this usage information and exits\n"
-   printf "        -norun         turn off execute mode, echo what would be run\n"
-   printf "        -trace         echo each command\n"
+   printf " with options:\n"
+   printf "    -h|-help       prints this usage information and exits\n"
+   printf "    -n|-norun      turn off execute mode, echo what would be run\n"
+   printf "    -t|-trace      echo each command\n"
+   printf "    -D <var>       define <var> when running tests\n"
    printf "\n"
    printf " This is the hypre test driver script.  It is run stand-alone\n"
    printf " or by the autotest regression test script.  It is assumed that\n"
@@ -467,6 +469,12 @@ do
       -t|-trace)
          set -xv
          shift
+         ;;
+      -D)
+         shift
+         eval export `echo $1`=1
+         shift
+echo $HYPRE_NO_SAVED
          ;;
       *) InputString=$1
          if [ "$InputString" ] ; then
