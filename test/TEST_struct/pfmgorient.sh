@@ -25,31 +25,43 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # struct: Test PFMG 1d solve of the same problem in different orientations
-#
-#    for each test, save the results for comparison with the baseline case
 #=============================================================================
 
-tail -3 pfmgorient.out.0 > pfmgorient.testdata
-tail -3 pfmgorient.out.1 > pfmgorient.testdata.temp
-diff -bI"time" pfmgorient.testdata pfmgorient.testdata.temp  >&2
-
-cat pfmgorient.testdata > pfmgorient.tests
-cat pfmgorient.testdata.temp >> pfmgorient.tests
-#=============================================================================
-
-tail -3 pfmgorient.out.2 > pfmgorient.testdata.temp
-diff -bI"time" pfmgorient.testdata pfmgorient.testdata.temp  >&2
-
-cat pfmgorient.testdata.temp >> pfmgorient.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp  >&2
 
 #=============================================================================
-#    compare with the baseline case
-#=============================================================================
-diff -bI"time" pfmgorient.saved pfmgorient.tests >&2
+
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp  >&2
 
 #=============================================================================
-#    remove temporary files
+# compare with baseline case
 #=============================================================================
-rm -f pfmgorient.testdata* pfmgorient.tests
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

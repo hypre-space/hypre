@@ -25,18 +25,28 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#   for each test, save the results for comparison with the baseline case
-#=============================================================================
-
-tail -3 smgvcycle.out.0 > smgvcycle.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#   compare with the baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" smgvcycle.saved smgvcycle.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#   remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f smgvcycle.tests
+
+# rm -f ${TNAME}.testdata*

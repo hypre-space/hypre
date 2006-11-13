@@ -25,49 +25,59 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#   for each test, save the results for comparison with the baseline case
-#=============================================================================
+TNAME=`basename $0 .sh`
 
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base 3d case
 #=============================================================================
 
-tail -3 parflow.out.0 > parflow.testdata
-tail -3 parflow.out.1 > parflow.testdata.temp
-diff -bI"time" parflow.testdata parflow.testdata.temp >&2
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-cat parflow.testdata > parflow.tests
-cat parflow.testdata.temp >> parflow.tests
 #=============================================================================
 
-tail -3 parflow.out.2 > parflow.testdata.temp
-diff -bI"time" parflow.testdata parflow.testdata.temp >&2
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-cat parflow.testdata.temp >> parflow.tests
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base 2d case
 #=============================================================================
 
-tail -3 parflow.out.3 > parflow.testdata
-tail -3 parflow.out.4 > parflow.testdata.temp
-diff -bI"time" parflow.testdata parflow.testdata.temp >&2
-
-cat parflow.testdata >> parflow.tests
-cat parflow.testdata.temp >> parflow.tests
-#=============================================================================
-
-tail -3 parflow.out.5 > parflow.testdata.temp
-diff -bI"time" parflow.testdata parflow.testdata.temp >&2
-
-cat parflow.testdata.temp >> parflow.tests
+tail -3 ${TNAME}.out.3 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.4 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#   compare with baseline case
-#=============================================================================
-diff -bI"time" parflow.saved parflow.tests >&2
+
+tail -3 ${TNAME}.out.5 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#   remove temporary files
+# compare with baseline case
 #=============================================================================
-rm -f parflow.testdata* parflow.tests
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

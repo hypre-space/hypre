@@ -25,49 +25,61 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base "true" 2d case
-#
-#    for each test, save the results for comparison with the baseline case
 #=============================================================================
 
-tail -3 pfmgbase2d.out.0 > pfmgbase2d.testdata
-tail -3 pfmgbase2d.out.1 > pfmgbase2d.testdata.temp
-diff -bI"time" pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
-
-cat pfmgbase2d.testdata > pfmgbase2d.tests
-cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
-#=============================================================================
-
-tail -3 pfmgbase2d.out.2 > pfmgbase2d.testdata.temp
-diff -bI"time" pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
-
-cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
-#=============================================================================
-
-tail -3 pfmgbase2d.out.3 > pfmgbase2d.testdata.temp
-diff -bI"time" pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
-
-cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
-#=============================================================================
-
-tail -3 pfmgbase2d.out.4 > pfmgbase2d.testdata.temp
-diff -bI"time" pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
-
-cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
-#=============================================================================
-
-tail -3 pfmgbase2d.out.5 > pfmgbase2d.testdata.temp
-diff -bI"time" pfmgbase2d.testdata pfmgbase2d.testdata.temp >&2
-
-cat pfmgbase2d.testdata.temp >> pfmgbase2d.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#   compare with the baseline case
-#=============================================================================
-diff -bI"time" pfmgbase2d.saved pfmgbase2d.tests >&2
+
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#   remove temporary files
+
+tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
 #=============================================================================
-rm -f pfmgbase2d.testdata* pfmgbase2d.tests
+
+tail -3 ${TNAME}.out.4 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+
+tail -3 ${TNAME}.out.5 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

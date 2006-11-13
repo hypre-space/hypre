@@ -25,26 +25,38 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # struct: Test PFMG constant coefficient runs on 1 and 2 processors
 # by diffing against each other.
-#
-#   for each test, save the results for comparison with baseline case
 #=============================================================================
 
-tail -3 pfmgconstcoeffmp.out.0 > pfmgconstcoeffmp.testdata
-tail -3 pfmgconstcoeffmp.out.1 > pfmgconstcoeffmp.testdata.temp
-diff -bI"time" pfmgconstcoeffmp.testdata pfmgconstcoeffmp.testdata.temp  >&2
-
-cat pfmgconstcoeffmp.testdata > pfmgconstcoeffmp.tests
-cat pfmgconstcoeffmp.testdata.temp >> pfmgconstcoeffmp.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp  >&2
 
 #=============================================================================
-#    compare with baseline case 
+# compare with baseline case
 #=============================================================================
-diff -bI"time" pfmgconstcoeffmp.saved pfmgconstcoeffmp.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#  remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f pfmgconstcoeffmp.testdata* pfmgconstcoeffmp.tests
+
+rm -f ${TNAME}.testdata*

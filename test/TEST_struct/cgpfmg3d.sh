@@ -25,26 +25,39 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # struct: Test CG+PFMG with skip parallel and blocking by diffing against
 # base 3d case
-#
-#     for each test, save the results for comparison with the baseline case
 #=============================================================================
 
-tail -3 cgpfmg3d.out.0 > cgpfmg3d.testdata
-tail -3 cgpfmg3d.out.1 > cgpfmg3d.testdata.temp
-diff -bI"time" cgpfmg3d.testdata cgpfmg3d.testdata.temp >&2
-
-cat cgpfmg3d.testdata > cgpfmg3d.tests
-cat cgpfmg3d.testdata.temp >> cgpfmg3d.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#    compare with the baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" cgpfmg3d.saved cgpfmg3d.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#   remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f cgpfmg3d.testdata* cgpfmg3d.tests
+
+rm -f ${TNAME}.testdata*
+

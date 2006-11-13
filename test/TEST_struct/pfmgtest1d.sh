@@ -25,27 +25,30 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#    for each test, save the results for comparison with the baseline case
-#=============================================================================
-
-tail -3 pfmgtest1d.out.0 > pfmgtest1d.testdata
-cat pfmgtest1d.testdata > pfmgtest1d.tests
-#=============================================================================
-
-tail -3 pfmgtest1d.out.1 > pfmgtest1d.testdata
-cat pfmgtest1d.testdata > pfmgtest1d.tests
-#=============================================================================
-
-tail -3 pfmgtest1d.out.2 > pfmgtest1d.testdata
-cat pfmgtest1d.testdata >> pfmgtest1d.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#    compare with the baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" pfmgtest1d.saved pfmgtest1d.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#    remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f pfmgtest1d.testdata* pfmgtest1d.tests
+
+# rm -f ${TNAME}.testdata*

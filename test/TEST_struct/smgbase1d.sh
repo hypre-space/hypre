@@ -25,25 +25,37 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # struct: Test 1d run as 2d and 3d by diffing against each other.
-#
-#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
-tail -3 smgbase1d.out.0 > smgbase1d.testdata
-tail -3 smgbase1d.out.1 > smgbase1d.testdata.temp
-diff -bI"time" smgbase1d.testdata smgbase1d.testdata.temp  >&2
-
-cat smgbase1d.testdata > smgbase1d.tests
-cat smgbase1d.testdata.temp >> smgbase1d.tests
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp  >&2
 
 #=============================================================================
-#   for each test, save the results for comparison with the baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" smgbase1d.saved smgbase1d.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#   remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f smgbase1d.testdata* smgbase1d.tests
+
+rm -f ${TNAME}.testdata*

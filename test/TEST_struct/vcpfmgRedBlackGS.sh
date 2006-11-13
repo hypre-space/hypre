@@ -25,87 +25,95 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#   for each test, save the results for comparison with the baseline case
-#=============================================================================
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-# struct: Test parallel and blocking by diff -bI"time"ing against base "true" 2d case
+# struct: Test parallel and blocking by diffing against base "true" 2d case
 #=============================================================================
 
-tail -3 vcpfmgRedBlackGS.out.0 > vcpfmgRedBlackGS.testdata
-tail -3 vcpfmgRedBlackGS.out.1 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-cat vcpfmgRedBlackGS.testdata > vcpfmgRedBlackGS.tests
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
 #=============================================================================
 
-tail -3 vcpfmgRedBlackGS.out.2 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
 #=============================================================================
 
-tail -3 vcpfmgRedBlackGS.out.3 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
+tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
 #=============================================================================
 
-tail -3 vcpfmgRedBlackGS.out.4 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
+tail -3 ${TNAME}.out.4 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
 #=============================================================================
 
-tail -3 vcpfmgRedBlackGS.out.5 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
-
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
-#=============================================================================
+tail -3 ${TNAME}.out.5 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 # struct: symmetric GS
 #=============================================================================
 
-tail -3 vcpfmgRedBlackGS.out.6 > vcpfmgRedBlackGS.testdata
-tail -3 vcpfmgRedBlackGS.out.7 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
-
-cat vcpfmgRedBlackGS.testdata >> vcpfmgRedBlackGS.tests
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
-#=============================================================================
-
-tail -3 vcpfmgRedBlackGS.out.8 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
-
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
-#=============================================================================
-
-tail -3 vcpfmgRedBlackGS.out.9 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
-
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
-#=============================================================================
-
-tail -3 vcpfmgRedBlackGS.out.10 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
-
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
-#=============================================================================
-
-tail -3 vcpfmgRedBlackGS.out.11 > vcpfmgRedBlackGS.testdata.temp
-diff -bI"time" vcpfmgRedBlackGS.testdata vcpfmgRedBlackGS.testdata.temp >&2
-
-cat vcpfmgRedBlackGS.testdata.temp >> vcpfmgRedBlackGS.tests
+tail -3 ${TNAME}.out.6 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.7 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#    compare with the baseline case
-#=============================================================================
-diff -bI"time" vcpfmgRedBlackGS.saved vcpfmgRedBlackGS.tests >&2
+
+tail -3 ${TNAME}.out.8 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#    remove temporary files
+
+tail -3 ${TNAME}.out.9 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
 #=============================================================================
-rm -f vcpfmgRedBlackGS.testdata* vcpfmgRedBlackGS.tests
+
+tail -3 ${TNAME}.out.10 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+
+tail -3 ${TNAME}.out.11 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+ ${TNAME}.out.8\
+ ${TNAME}.out.9\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*
