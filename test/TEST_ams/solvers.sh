@@ -25,6 +25,8 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # The outputs below should differ only in timings.
 #=============================================================================
@@ -35,54 +37,40 @@ diff -bI"time" solvers.out.4 solvers.out.5 >&2
 diff -bI"time" solvers.out.6 solvers.out.7 >&2
 
 #=============================================================================
-#  for each test, save the results for comparison with the baseline case
+# compare with baseline case
 #=============================================================================
-tail -12 solvers.out.0 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata
 
-cat solvers.testdata > solvers.tests
-#=============================================================================
-tail -12 solvers.out.1 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+"
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -17 $i | head -8
+done > ${TNAME}.out
 
-cat solvers.testdata >> solvers.tests
-#=============================================================================
-tail -12 solvers.out.2 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata
+FILES="\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+"
 
-cat solvers.testdata >> solvers.tests
-#=============================================================================
-tail -12 solvers.out.3 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -4 $i
+done >> ${TNAME}.out
 
-cat solvers.testdata >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.4 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata
-
-cat solvers.testdata >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.5 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata
-
-cat solvers.testdata >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.6 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata
-
-cat solvers.testdata >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.7 > solvers.testdata.tmp0
-head solvers.testdata.tmp0 > solvers.testdata
-
-cat solvers.testdata >> solvers.tests
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#  compare with the baseline case
+# remove temporary files
 #=============================================================================
-diff -bI"time" solvers.saved solvers.tests >&2
 
-#=============================================================================
-#  remove temporary files
-#=============================================================================
-rm -f solvers.testdata solvers.testdata.tmp0 solvers.tests
+# rm -f ${TNAME}.testdata*
