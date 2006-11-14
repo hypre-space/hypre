@@ -25,165 +25,78 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#  for each test save the results for comparison with the baseline case
-#=============================================================================
-tail -4 solvers.out.0 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp > solvers.tests
-#=============================================================================
-tail -4 solvers.out.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -6 solvers.out.10 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -6 solvers.out.11 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.12.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.12.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.12.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.1.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.1.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.1.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.2 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.2.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.2.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.2.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.3 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.4 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.43.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.43.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.43.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.6 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.7 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -6 solvers.out.8 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -4 solvers.out.8.lobpcg > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -14 solvers.out.8.lobpcg.1 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -22 solvers.out.8.lobpcg.5 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -6 solvers.out.9 > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -18 solvers.out.sysh > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -18 solvers.out.sysn > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
-#=============================================================================
-tail -18 solvers.out.sysu > solvers.testdata
-head solvers.testdata > solvers.testdata.tmp
-
-cat solvers.testdata.tmp >> solvers.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#  compare with the baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" solvers.saved solvers.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+FILES="\
+ ${TNAME}.out.8\
+ ${TNAME}.out.9\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -5 $i
+done >> ${TNAME}.out
+
+FILES="\
+ ${TNAME}.out.1.lobpcg\
+ ${TNAME}.out.2.lobpcg\
+ ${TNAME}.out.8.lobpcg\
+ ${TNAME}.out.12.lobpcg\
+ ${TNAME}.out.43.lobpcg\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+  echo "# Output file: $i.1"
+  tail -13 $i.1 | head -3
+  echo "# Output file: $i.5"
+  tail -21 $i.5 | head -11
+done >> ${TNAME}.out
+
+FILES="\
+ ${TNAME}.out.sysh\
+ ${TNAME}.out.sysn\
+ ${TNAME}.out.sysu\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -17 $i | head -6
+done >> ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#  remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f solvers.testdata* solvers.tests
+
+# rm -f ${TNAME}.testdata*

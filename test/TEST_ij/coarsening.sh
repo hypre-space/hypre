@@ -25,55 +25,44 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#  for each test save the results for comparison with baseline case
-#=============================================================================
-tail -18 coarsening.out.0 > coarsening.testdata
-head coarsening.testdata > coarsening.testdata.tmp0
-
-cat coarsening.testdata.tmp0 > coarsening.tests
-#=============================================================================
-tail -18 coarsening.out.1 > coarsening.testdata
-head coarsening.testdata > coarsening.testdata.tmp0
-
-cat coarsening.testdata.tmp0 >> coarsening.tests
-#=============================================================================
-tail -18 coarsening.out.2 > coarsening.testdata
-head coarsening.testdata > coarsening.testdata.tmp0
-
-cat coarsening.testdata.tmp0 >> coarsening.tests
-#=============================================================================
-tail -18 coarsening.out.3 > coarsening.testdata
-head coarsening.testdata > coarsening.testdata.tmp0
-
-cat coarsening.testdata.tmp0 >> coarsening.tests
-#=============================================================================
-tail -18 coarsening.out.4 > coarsening.testdata
-head coarsening.testdata > coarsening.testdata.tmp0
-
-cat coarsening.testdata.tmp0 >> coarsening.tests
-#=============================================================================
-tail -18 coarsening.out.5 > coarsening.testdata
-head coarsening.testdata > coarsening.testdata.tmp0
-
-cat coarsening.testdata.tmp0 >> coarsening.tests
-#=============================================================================
-tail -4 coarsening.out.6 > coarsening.testdata
-head coarsening.testdata > coarsening.testdata.tmp0
-
-cat coarsening.testdata.tmp0 >> coarsening.tests
-#=============================================================================
-tail -4 coarsening.out.7 > coarsening.testdata
-head coarsening.testdata > coarsening.testdata.tmp0
-
-cat coarsening.testdata.tmp0 >> coarsening.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#   compare with baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" coarsening.saved coarsening.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -17 $i | head -6
+done > ${TNAME}.out
+
+FILES="\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done >> ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#   remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f coarsening.testdata coarsening.testdata.tmp0 coarsening.tests
+
+rm -f ${TNAME}.testdata* ${TNAME}.testdata.tmp0

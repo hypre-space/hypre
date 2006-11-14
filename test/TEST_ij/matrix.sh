@@ -25,36 +25,46 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
 # IJ: tests different ways of generating IJMatrix diffs it against 1 proc case
-#   for each test, save the results for comparison with the baseline case
 #=============================================================================
 
-tail -18 matrix.out.0 > matrix.testdata.tmp0
-head matrix.testdata.tmp0 > matrix.testdata
-
-cat matrix.testdata > matrix.tests
-#=============================================================================
-
-tail -18 matrix.out.1 > matrix.testdata.tmp0
-head matrix.testdata.tmp0 > matrix.testdata.temp
-diff -bI"time" matrix.testdata matrix.testdata.temp >&2
-
-cat matrix.testdata.temp >> matrix.tests
-#=============================================================================
-
-tail -18 matrix.out.2 > matrix.testdata.tmp0
-head matrix.testdata.tmp0 > matrix.testdata.temp
-diff -bI"time" matrix.testdata matrix.testdata.temp >&2
-
-cat matrix.testdata.temp >> matrix.tests
+tail -17 ${TNAME}.out.0 | head -6 > ${TNAME}.testdata
 
 #=============================================================================
-#   compare with baseline case
-#=============================================================================
-diff -bI"time" matrix.saved matrix.tests >&2
+
+tail -17 ${TNAME}.out.1 | head -6 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-#   remove temporary files
+
+tail -17 ${TNAME}.out.2 | head -6 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
 #=============================================================================
-rm -f matrix.testdata* matrix.tests
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -17 $i | head -6
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

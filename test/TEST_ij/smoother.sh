@@ -25,35 +25,31 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#  for each test save the results for comparison with the baseline case
-#=============================================================================
-tail -18 smoother.out.0 > smoother.testdata
-head smoother.testdata > smoother.testdata.tmp
-
-cat smoother.testdata.tmp > smoother.tests
-#=============================================================================
-tail -18 smoother.out.1 > smoother.testdata
-head smoother.testdata > smoother.testdata.tmp
-
-cat smoother.testdata.tmp >> smoother.tests
-#=============================================================================
-tail -18 smoother.out.2 > smoother.testdata
-head smoother.testdata > smoother.testdata.tmp
-
-cat smoother.testdata.tmp >> smoother.tests
-#=============================================================================
-tail -18 smoother.out.3 > smoother.testdata
-head smoother.testdata > smoother.testdata.tmp
-
-cat smoother.testdata.tmp >> smoother.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#  compare with the baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" smoother.saved smoother.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -17 $i | head -6
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#  remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f smoother.testdata* smoother.tests
+
+# rm -f ${TNAME}.testdata*

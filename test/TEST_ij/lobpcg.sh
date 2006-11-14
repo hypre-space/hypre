@@ -25,25 +25,29 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#  for each test save the results for comparison with the baseline case
-#=============================================================================
-tail -14  lobpcg.out.vfromfile > lobpcg.testdata
-head lobpcg.testdata > lobpcg.testdata.tmp
-
-cat lobpcg.testdata.tmp > lobpcg.tests
-#=============================================================================
-tail -16 lobpcg.out.vout.1 > lobpcg.testdata
-head lobpcg.testdata > lobpcg.testdata.tmp
-
-cat lobpcg.testdata.tmp >> lobpcg.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#  compare with the baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" lobpcg.saved lobpcg.tests >&2
+
+FILES="\
+ ${TNAME}.out.vfromfile\
+ ${TNAME}.out.vout.1\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -15 $i | head -5
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#  remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f lobpcg.testdat* lobpcg.tests
+
+rm -f ${TNAME}.testdata*

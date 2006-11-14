@@ -1,20 +1,12 @@
+# Output file: lobpcg.out.vfromfile
+Eigenvalue lambda   2.43042158313016e-01
 Eigenvalue lambda   4.79521039879648e-01
-Residual   1.32541409270940e-09
-Residual   8.11989595794778e-09
+Residual   1.32541409367116e-09
+Residual   8.11989616512324e-09
 
-7 iterations
-=============================================
-Solve phase times:
-=============================================
-LOBPCG Solve:
-  wall clock time = 0.040000 seconds
-
+# Output file: lobpcg.out.vout.1
 Eigenvalue lambda   2.43042158452314e-01
-Eigenvalue lambda   4.79521045488964e-01
-Residual   1.72366629319279e-05
-Residual   8.62811924398437e-05
+Eigenvalue lambda   4.79521045488978e-01
+Residual   1.72366629322504e-05
+Residual   8.62811924395547e-05
 
-8 iterations
-=============================================
-Solve phase times:
-=============================================

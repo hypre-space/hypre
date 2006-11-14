@@ -25,110 +25,61 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#  for each test save the results for comparison with the baseline case
-#=============================================================================
-tail -14 options.out.default > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp > options.tests
-#=============================================================================
-tail -15 options.out.gen.1 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -15 options.out.gen.2 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -16 options.out.itr.100 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -16 options.out.itr.2 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.no_orthchk > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -15 options.out.orthchk > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.pcgitr.0 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.pcgitr.1 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.pcgitr.2 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.pcgtol.01 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.pcgtol.05 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.seed > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.seed.repeat > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.solver.none > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -40 options.out.verb.0 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -14 options.out.verb.1 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -11 options.out.verb.2 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
-#=============================================================================
-tail -16 options.out.vrand.2 > options.testdata
-head options.testdata > options.testdata.tmp
-
-cat options.testdata.tmp >> options.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#  compare with the baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" options.saved options.tests >&2
+
+echo  "# ${TNAME}.out.default"               > ${TNAME}.out
+tail -13 ${TNAME}.out.default     | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.no_orthchk"           >> ${TNAME}.out
+tail -13 ${TNAME}.out.no_orthchk  | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.pcgitr.0"             >> ${TNAME}.out
+tail -13 ${TNAME}.out.pcgitr.0    | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.pcgitr.1"             >> ${TNAME}.out
+tail -13 ${TNAME}.out.pcgitr.1    | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.pcgitr.2"             >> ${TNAME}.out
+tail -13 ${TNAME}.out.pcgitr.2    | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.pcgtol.01"            >> ${TNAME}.out
+tail -13 ${TNAME}.out.pcgtol.01   | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.pcgtol.05"            >> ${TNAME}.out
+tail -13 ${TNAME}.out.pcgtol.05   | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.seed"                 >> ${TNAME}.out
+tail -13 ${TNAME}.out.seed        | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.seed.repeat"          >> ${TNAME}.out
+tail -13 ${TNAME}.out.seed.repeat | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.solver.none"          >> ${TNAME}.out
+tail -13 ${TNAME}.out.solver.none | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.verb.1"               >> ${TNAME}.out
+tail -13 ${TNAME}.out.verb.1      | head -3 >> ${TNAME}.out
+
+echo  "# ${TNAME}.out.gen.1"                >> ${TNAME}.out
+tail -14 ${TNAME}.out.gen.1       | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.gen.2"                >> ${TNAME}.out
+tail -14 ${TNAME}.out.gen.2       | head -3 >> ${TNAME}.out
+echo  "# ${TNAME}.out.orthchk"              >> ${TNAME}.out
+tail -14 ${TNAME}.out.orthchk     | head -3 >> ${TNAME}.out
+
+echo  "# ${TNAME}.out.itr.100"              >> ${TNAME}.out
+tail -15 ${TNAME}.out.itr.100     | head -5 >> ${TNAME}.out
+echo  "# ${TNAME}.out.itr.2"                >> ${TNAME}.out
+tail -15 ${TNAME}.out.itr.2       | head -5 >> ${TNAME}.out
+echo  "# ${TNAME}.out.vrand.2"              >> ${TNAME}.out
+tail -15 ${TNAME}.out.vrand.2     | head -5 >> ${TNAME}.out
+
+echo  "# ${TNAME}.out.verb.0"               >> ${TNAME}.out
+tail -39 ${TNAME}.out.verb.0      | head -3 >> ${TNAME}.out
+
+echo  "# ${TNAME}.out.verb.2"               >> ${TNAME}.out
+tail -11 ${TNAME}.out.verb.2      | head -3 >> ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#  remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f options.testdata* options.tests
+
+# rm -f ${TNAME}.testdata*

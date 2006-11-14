@@ -25,45 +25,33 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-#=============================================================================
-#  for each test save the results for comparison with the baseline case
-#=============================================================================
-tail -18 interp.out.0 > interp.testdata
-head interp.testdata > interp.testdata.tmp
-
-cat interp.testdata.tmp > interp.tests
-#=============================================================================
-tail -18 interp.out.1 > interp.testdata
-head interp.testdata > interp.testdata.tmp
-
-cat interp.testdata.tmp >> interp.tests
-#=============================================================================
-tail -18 interp.out.2 > interp.testdata
-head interp.testdata > interp.testdata.tmp
-
-cat interp.testdata.tmp >> interp.tests
-#=============================================================================
-tail -18 interp.out.3 > interp.testdata
-head interp.testdata > interp.testdata.tmp
-
-cat interp.testdata.tmp >> interp.tests
-#=============================================================================
-tail -18 interp.out.4 > interp.testdata
-head interp.testdata > interp.testdata.tmp
-
-cat interp.testdata.tmp >> interp.tests
-#=============================================================================
-tail -18 interp.out.5 > interp.testdata
-head interp.testdata > interp.testdata.tmp
-
-cat interp.testdata.tmp >> interp.tests
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-#  compare with the baseline case
+# compare with baseline case
 #=============================================================================
-diff -bI"time" interp.saved interp.tests >&2
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -17 $i | head -6
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
 
 #=============================================================================
-#  remove temporary files
+# remove temporary files
 #=============================================================================
-rm -f interp.testdata* interp.tests
+
+rm -f ${TNAME}.testdata*
