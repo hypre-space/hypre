@@ -106,6 +106,7 @@ int hypre_ThreeLevelParCSRMulPrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type ,
 int hypre_ThreeLevelParCSRAddPrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type , int A0_relax_times , double *A0_l1_norms , double A0_relax_weight , double A0_omega , hypre_ParCSRMatrix *A1 , HYPRE_Solver B1 , hypre_ParCSRMatrix *P1 , hypre_ParCSRMatrix *A2 , HYPRE_Solver B2 , hypre_ParCSRMatrix *P2 , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *r1 , hypre_ParVector *r2 , hypre_ParVector *g0 , hypre_ParVector *g1 , hypre_ParVector *g2 , int cycle_type );
 int hypre_AMSGetNumIterations ( void *solver , int *num_iterations );
 int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , double *rel_resid_norm );
+int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector *x_coord , int *edge_vertex , hypre_ParCSRMatrix **G_ptr );
 
 /* aux_interp.c */
 void insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , int *IN_marker , int *node_add , int num_cols_A_offd , int full_off_procNodes , int num_procs , int *OUT_marker );
@@ -156,6 +157,7 @@ int HYPRE_AMSSetAlphaAMGOptions ( HYPRE_Solver solver , int alpha_coarsen_type ,
 int HYPRE_AMSSetBetaAMGOptions ( HYPRE_Solver solver , int beta_coarsen_type , int beta_agg_levels , int beta_relax_type , double beta_strength_threshold );
 int HYPRE_AMSGetNumIterations ( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_AMSGetFinalRelativeResidualNorm ( HYPRE_Solver solver , double *rel_resid_norm );
+int HYPRE_AMSConstructDiscreteGradient ( HYPRE_ParCSRMatrix A , HYPRE_ParVector x_coord , int *edge_vertex , HYPRE_ParCSRMatrix *G );
 
 /* HYPRE_parcsr_amg.c */
 int HYPRE_BoomerAMGCreate ( HYPRE_Solver *solver );

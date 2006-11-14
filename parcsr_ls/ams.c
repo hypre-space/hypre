@@ -1930,3 +1930,96 @@ int hypre_AMSGetFinalRelativeResidualNorm(void *solver,
    *rel_resid_norm = ams_data -> rel_resid_norm;
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSConstructDiscreteGradient
+ *
+ * Construct and return the discrete gradient matrix G, based on:
+ * - a matrix on the egdes (e.g. the stiffness matrix A)
+ * - a vector on the vertices (e.g. the x coordinates)
+ * - the array edge_vertex, which lists the global indexes of the
+ *   vertices of the local edges.
+ *
+ * We assume that edge_vertex lists the edge vertices consecutively,
+ * and that the orientation of edge i depends only on the sign of
+ * edge_vertex[i+1] - edge_vertex[i].
+ *
+ * Warning: G steals the (row) partitionings of A and x_coord. This may
+ * break some code, but is necessery since the user is responsible for
+ * destroying the output matrix.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
+                                       hypre_ParVector *x_coord,
+                                       int *edge_vertex,
+                                       hypre_ParCSRMatrix **G_ptr)
+{
+   hypre_ParCSRMatrix *G;
+
+   int nedges, vxstart, vxend, nvert;
+
+   nedges = hypre_ParCSRMatrixNumRows(A);
+
+   vxstart = hypre_ParVectorFirstIndex(x_coord);
+   vxend = hypre_ParVectorLastIndex(x_coord);
+   nvert = vxend - vxstart + 1;
+
+   /* Construct the local part of G based on edge_vertex and the edge
+      and vertex partitionings from A and x_coord */
+   {
+      int i, *I = hypre_CTAlloc(int, nedges+1);
+      double *data = hypre_CTAlloc(double, 2*nedges);
+      hypre_CSRMatrix *local = hypre_CSRMatrixCreate (nedges,
+                                                      hypre_ParVectorGlobalSize(x_coord),
+                                                      2*nedges);
+
+      for (i = 0; i <= nedges; i++)
+         I[i] = 2*i;
+
+      /* Assume that the edge orientation is based on the vertex indexes */
+      for (i = 0; i < 2*nedges; i+=2)
+      {
+         if (edge_vertex[i] < edge_vertex[i+1])
+         {
+            data[i]   = -1.0;
+            data[i+1] =  1.0;
+         }
+         else
+         {
+            data[i]   =  1.0;
+            data[i+1] = -1.0;
+         }
+      }
+
+      hypre_CSRMatrixI(local) = I;
+      hypre_CSRMatrixJ(local) = edge_vertex;
+      hypre_CSRMatrixData(local) = data;
+
+      hypre_CSRMatrixRownnz(local) = NULL;
+      hypre_CSRMatrixOwnsData(local) = 1;
+      hypre_CSRMatrixNumRownnz(local) = nedges;
+
+      G = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
+                                   hypre_ParCSRMatrixGlobalNumRows(A),
+                                   hypre_ParVectorGlobalSize(x_coord),
+                                   hypre_ParCSRMatrixRowStarts(A),
+                                   hypre_ParVectorPartitioning(x_coord),
+                                   0, 0, 0);
+
+      hypre_ParCSRMatrixOwnsRowStarts(A) = 0;
+      hypre_ParVectorOwnsPartitioning(x_coord) = 0;
+      hypre_ParCSRMatrixOwnsRowStarts(G) = 1;
+      hypre_ParCSRMatrixOwnsColStarts(G) = 1;
+
+      GenerateDiagAndOffd(local, G,
+                          hypre_ParVectorFirstIndex(x_coord),
+                          hypre_ParVectorLastIndex(x_coord));
+
+      hypre_CSRMatrixJ(local) = NULL;
+      hypre_CSRMatrixDestroy(local);
+   }
+
+   *G_ptr = G;
+
+   return hypre_error_flag;
+}

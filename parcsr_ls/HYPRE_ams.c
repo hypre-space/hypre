@@ -263,3 +263,18 @@ int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
    return hypre_AMSGetFinalRelativeResidualNorm((void *) solver,
                                                 rel_resid_norm);
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSConstructDiscreteGradient
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
+                                       HYPRE_ParVector x_coord,
+				       int *edge_vertex,
+                                       HYPRE_ParCSRMatrix *G)
+{
+   return hypre_AMSConstructDiscreteGradient((hypre_ParCSRMatrix *) A,
+                                             (hypre_ParVector *) x_coord,
+                                             edge_vertex,
+                                             (hypre_ParCSRMatrix **) G);
+}
