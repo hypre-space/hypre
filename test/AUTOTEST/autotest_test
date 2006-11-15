@@ -634,16 +634,16 @@ confbuildtest ()
       then
          if [ "$DEBUG_MODE" = "yes" ]
          then
-            ./runtest.sh -trace $STD_TEST_CASES
+            ./runtest.sh -trace $HYPRE_RUNTEST_OPTS $STD_TEST_CASES
          else
-            ./runtest.sh $STD_TEST_CASES
+            ./runtest.sh $HYPRE_RUNTEST_OPTS $STD_TEST_CASES
          fi
       else
          ssh ${HYPRE_RUN_MACHINE} "\
          (\
           cd $StdTestDir;\
           [ -r ./AUTOTEST/env.${HYPRE_ARCH} ] && . ./AUTOTEST/env.${HYPRE_ARCH};\
-          ./runtest.sh $STD_TEST_CASES \
+          ./runtest.sh $HYPRE_RUNTEST_OPTS $STD_TEST_CASES \
          )"
       fi
    fi
