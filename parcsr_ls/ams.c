@@ -1942,7 +1942,7 @@ int hypre_AMSGetFinalRelativeResidualNorm(void *solver,
  *
  * We assume that edge_vertex lists the edge vertices consecutively,
  * and that the orientation of edge i depends only on the sign of
- * edge_vertex[i+1] - edge_vertex[i].
+ * edge_vertex[2*i+1] - edge_vertex[2*i].
  *
  * Warning: G steals the (row) partitionings of A and x_coord. This may
  * break some code, but is necessery since the user is responsible for
