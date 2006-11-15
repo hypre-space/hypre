@@ -25,14 +25,14 @@
  ***********************************************************************EHEADER*/
 
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #include "HYPRE_sstruct_mv.h"
 
 #ifndef hypre_SSTRUCT_MV_HEADER
 #define hypre_SSTRUCT_MV_HEADER
 
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"
 #include "IJ_mv.h"
 #include "HYPRE.h"
 

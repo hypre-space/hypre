@@ -50,7 +50,7 @@
 #include <math.h>
 
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
-#include "../../utilities/utilities.h"
+#include "../../utilities/_hypre_utilities.h"
 #include "../../seq_mv/vector.h"
 /* #include "../../parcsr_mv/par_vector.h" */
 #include "../../parcsr_mv/parcsr_mv.h"

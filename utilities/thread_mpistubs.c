@@ -30,7 +30,7 @@
  *
  *****************************************************************************/
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #ifdef HYPRE_USE_PTHREADS
 

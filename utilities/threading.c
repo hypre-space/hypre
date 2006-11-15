@@ -27,7 +27,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
 

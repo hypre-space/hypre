@@ -32,7 +32,7 @@
 
 #include "temp_multivector.h"
 #include "interpreter.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 static void
 mv_collectVectorPtr( int* mask, mv_TempMultiVector* x, void** px ) {

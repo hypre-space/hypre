@@ -35,7 +35,7 @@
 #include "HYPRE_FEI_includes.h"
 
 #include "HYPRE.h"
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "parcsr_mv/parcsr_mv.h"
 
 #include "HYPRE_LSI_schur.h"

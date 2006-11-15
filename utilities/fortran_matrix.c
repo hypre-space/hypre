@@ -30,7 +30,7 @@
 #include <stdio.h>
 
 #include "fortran_matrix.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 utilities_FortranMatrix*
 utilities_FortranMatrixCreate(void) {

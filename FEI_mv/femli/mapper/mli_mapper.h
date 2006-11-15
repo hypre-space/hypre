@@ -41,7 +41,7 @@
  *--------------------------------------------------------------------------*/
 
 #include <string.h>
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
  * MLI_Mapper data structure declaration

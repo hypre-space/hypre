@@ -32,7 +32,7 @@
  *****************************************************************************/
 
 #define HYPRE_TIMING_GLOBALS
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "timing.h"
 
 

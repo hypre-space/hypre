@@ -32,7 +32,7 @@
 #ifndef hypre_IJ_HEADER
 #define hypre_IJ_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "seq_mv.h"
 #include "parcsr_mv.h"
 #include "HYPRE_IJ_mv.h"

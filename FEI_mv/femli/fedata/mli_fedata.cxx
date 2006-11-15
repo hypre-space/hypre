@@ -42,7 +42,7 @@
 #define strcmp _stricmp
 #endif
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "fedata/mli_fedata.h"
 #include "util/mli_utils.h"
 

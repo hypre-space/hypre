@@ -32,10 +32,10 @@
 #ifndef hypre_SSTRUCT_LS_HEADER
 #define hypre_SSTRUCT_LS_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "krylov.h"
-#include "struct_ls.h"
-#include "sstruct_mv.h"
+#include "_hypre_struct_ls.h"
+#include "_hypre_sstruct_mv.h"
 #include "parcsr_ls.h"
 #include "multivector.h"
 

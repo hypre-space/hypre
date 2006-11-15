@@ -31,5 +31,4 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "sstruct_ls.h"
-#include "fac.h"
+#include "_hypre_sstruct_ls.h"

@@ -34,7 +34,7 @@
 #include <string.h>
 #include <assert.h>
 #include "HYPRE.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "parcsr_ls/parcsr_ls.h"
 #include "util/mli_utils.h"
 #include "matrix/mli_matrix.h"

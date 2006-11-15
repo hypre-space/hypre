@@ -46,7 +46,7 @@
 */
 
 #include <math.h>
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "krylov.h"
 #include "HYPRE_struct_ls.h"
 

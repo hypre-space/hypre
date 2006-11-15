@@ -28,7 +28,7 @@
 
 
 #include "headers.h"                                                                                                           
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "parcsr_mv.h"
 
 /*--------------------------------------------------------------------------

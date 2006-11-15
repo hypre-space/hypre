@@ -31,4 +31,4 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"

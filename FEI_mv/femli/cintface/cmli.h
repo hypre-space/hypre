@@ -36,7 +36,7 @@
 #ifndef __CINTFACEH__
 #define __CINTFACEH__
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -31,7 +31,7 @@
 
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

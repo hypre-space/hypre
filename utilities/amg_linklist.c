@@ -31,7 +31,7 @@
  *
  ****************************************************************************/
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #define LIST_HEAD -1
 #define LIST_TAIL -2

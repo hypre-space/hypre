@@ -33,6 +33,7 @@
  ******************************************************************************/
 
 #include "headers.h"
+#include "fac.h"
 
 #define MapCellRank(i, j , k, rank) \
 {\

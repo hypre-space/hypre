@@ -31,5 +31,5 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "struct_ls.h"
+#include "_hypre_struct_ls.h"
 

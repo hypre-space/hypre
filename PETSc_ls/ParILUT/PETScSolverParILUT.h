@@ -38,7 +38,7 @@
 #include <HYPRE_config.h>
 
 #include "general.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif

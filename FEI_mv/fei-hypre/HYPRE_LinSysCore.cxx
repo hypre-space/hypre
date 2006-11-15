@@ -28,7 +28,7 @@
 // system includes
 //---------------------------------------------------------------------------
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

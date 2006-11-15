@@ -36,7 +36,7 @@
 #ifndef __MLIMETHODAMGSAH__
 #define __MLIMETHODAMGSAH__
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "parcsr_mv/parcsr_mv.h"
 #include "base/mli.h"
 #include "matrix/mli_matrix.h"

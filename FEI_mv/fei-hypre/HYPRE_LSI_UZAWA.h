@@ -38,7 +38,7 @@
 // system libraries used
 // --------------------------------------------------------------------------
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "IJ_mv/IJ_mv.h"
 #include "parcsr_mv/parcsr_mv.h"
 #include "parcsr_ls/parcsr_ls.h"

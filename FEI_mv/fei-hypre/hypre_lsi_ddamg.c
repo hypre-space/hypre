@@ -40,7 +40,7 @@
 /* because it gives warning when compiling cfei.cc                         */
 /*-------------------------------------------------------------------------*/
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 
 #include "HYPRE.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"

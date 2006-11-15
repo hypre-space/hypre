@@ -63,7 +63,7 @@
  *--------------------------------------------------------------------------*/
 
 #include <string.h>
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 
 #include "matrix/mli_matrix.h"
 #include "vector/mli_vector.h"

@@ -35,7 +35,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "LLNL_FEI_LSCore.h"
 

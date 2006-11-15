@@ -43,7 +43,7 @@
  * include files 
  *--------------------------------------------------------------------------*/
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 
 #include "base/mli_defs.h"
 #include "solver/mli_solver.h"

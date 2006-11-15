@@ -26,7 +26,7 @@
 #EHEADER**********************************************************************
 
 
-INTERNAL_HEADER=struct_ls.h
+INTERNAL_HEADER=_hypre_struct_ls.h
 
 #===========================================================================
 # Include guards and other includes
@@ -35,14 +35,14 @@ INTERNAL_HEADER=struct_ls.h
 cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
 cat >> $INTERNAL_HEADER <<@
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #include "HYPRE_struct_ls.h"
 
 #ifndef hypre_STRUCT_LS_HEADER
 #define hypre_STRUCT_LS_HEADER
 
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"
 #include "krylov.h"
 
 #include "temp_multivector.h"

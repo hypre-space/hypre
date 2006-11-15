@@ -30,7 +30,7 @@
 #ifndef __MLIFEDATA_H__
 #define __MLIFEDATA_H__
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "fedata/mli_febase.h"
 
 /****************************************************************************/ 

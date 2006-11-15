@@ -33,7 +33,7 @@
 
 #include <stdio.h>
 #include "HYPRE.h"
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "matrix/mli_matrix.h"
 #include "matrix/mli_matrix_misc.h"
 #include "IJ_mv/IJ_mv.h"

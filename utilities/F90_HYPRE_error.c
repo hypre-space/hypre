@@ -24,7 +24,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "fortran.h"
 
 void

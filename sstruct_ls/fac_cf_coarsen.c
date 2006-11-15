@@ -27,6 +27,7 @@
 
 
 #include "headers.h" 
+#include "fac.h"
 
 #define MapStencilRank(stencil, rank) \
 {\

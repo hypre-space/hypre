@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
-#include "sstruct_mv.h"
+#include "_hypre_utilities.h"
+#include "_hypre_sstruct_mv.h"
  
 #include "bHYPRE_SStructMatrix.h"
 #include "bHYPRE_SStructVector.h"

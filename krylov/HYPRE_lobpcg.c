@@ -33,7 +33,7 @@
  *
  *****************************************************************************/
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #include "HYPRE_config.h"
 #ifdef HYPRE_USING_ESSL

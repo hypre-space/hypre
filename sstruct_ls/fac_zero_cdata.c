@@ -27,6 +27,7 @@
 
 
 #include "headers.h"
+#include "fac.h"
 
 /*--------------------------------------------------------------------------
  * hypre_FacZeroCData: Zeroes the data over the underlying coarse indices of

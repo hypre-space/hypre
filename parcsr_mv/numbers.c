@@ -31,7 +31,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #include "numbers.h"
 

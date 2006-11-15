@@ -3,7 +3,7 @@
 #include <mpi.h>
 #include <math.h>
 #include "HYPRE.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "parcsr_mv.h"
 #include "util/mli_utils.h"
 #include "base/mli_defs.h"

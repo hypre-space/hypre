@@ -33,7 +33,7 @@
  *
  *****************************************************************************/
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "matrix/mli_matrix.h"
 
 extern int  MLI_Matrix_ComputePtAP(MLI_Matrix *P,MLI_Matrix *A,MLI_Matrix **);

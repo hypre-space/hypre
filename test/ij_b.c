@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 

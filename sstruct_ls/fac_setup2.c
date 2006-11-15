@@ -27,6 +27,7 @@
 
 
 #include "headers.h"
+#include "fac.h"
 
 /*--------------------------------------------------------------------------
  * hypre_FacSetup2: Constructs the level composite structures.

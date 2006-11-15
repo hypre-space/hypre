@@ -32,7 +32,7 @@
 
 
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "../parcsr_mv/parcsr_mv.h"
                                                                                                                
 /* reference seems necessary to prevent a problem with the

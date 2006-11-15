@@ -32,7 +32,7 @@
 */
 
 #include <math.h>
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_ls.h"
 #include "krylov.h"
 

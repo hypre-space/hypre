@@ -34,7 +34,6 @@
 
 #include "headers.h"
 #include "fortran.h"
-#include "sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
  *  HYPRE_SStructVectorCreate

@@ -36,7 +36,7 @@
 #define hypre_DISTRIBUTED_MATRIX_HEADER
 
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 
 /*--------------------------------------------------------------------------

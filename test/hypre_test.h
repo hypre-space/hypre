@@ -9,7 +9,7 @@
 #include <math.h>
 
 #include "krylov.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_struct_ls.h"

@@ -6,7 +6,7 @@
 #ifndef hypre_PARCSR_LS_HEADER
 #define hypre_PARCSR_LS_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "krylov.h"
 #include "seq_mv.h"
 #include "parcsr_mv.h"

@@ -34,7 +34,7 @@
 #ifndef _LLNL_FEI_MATRIX_H_
 #define _LLNL_FEI_MATRIX_H_
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE.h"
 
 /**************************************************************************

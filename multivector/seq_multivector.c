@@ -33,7 +33,7 @@
  *****************************************************************************/
 
 #include "seq_multivector.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #include <stdlib.h>
 #include <string.h>

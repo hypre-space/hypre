@@ -29,7 +29,7 @@
 
 #include <string.h>
 #include <assert.h>
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "HYPRE.h"
 #include "mapper/mli_mapper.h"
 #include "util/mli_utils.h"

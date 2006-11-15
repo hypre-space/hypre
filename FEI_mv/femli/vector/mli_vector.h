@@ -43,7 +43,7 @@ class MLI_Matrix;
  * include files 
  *--------------------------------------------------------------------------*/
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "matrix/mli_matrix.h"
 #include "util/mli_utils.h"
 

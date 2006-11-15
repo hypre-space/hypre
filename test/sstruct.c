@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_ls.h"
 #include "krylov.h"
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 
 /* begin lobpcg */
 

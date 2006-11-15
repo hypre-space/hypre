@@ -34,7 +34,7 @@
 #ifndef __MLIONELEVELH__
 #define __MLIONELEVELH__
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "base/mli.h"
 
 class MLI;

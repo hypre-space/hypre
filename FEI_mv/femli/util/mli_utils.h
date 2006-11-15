@@ -37,7 +37,7 @@
 #define __MLIUTILS__
 
 #include <time.h>
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "parcsr_mv/parcsr_mv.h"
 #include "krylov/krylov.h"
 #include "parcsr_ls/parcsr_ls.h"

@@ -25,14 +25,14 @@
  ***********************************************************************EHEADER*/
 
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #include "HYPRE_struct_ls.h"
 
 #ifndef hypre_STRUCT_LS_HEADER
 #define hypre_STRUCT_LS_HEADER
 
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"
 #include "krylov.h"
 
 #include "temp_multivector.h"

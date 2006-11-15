@@ -32,7 +32,7 @@
 
 #include <stdio.h>
 #include "HYPRE_config.h"
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "matrix/mli_matrix.h"
 #include "vector/mli_vector.h"
 #include "solver/mli_solver.h"

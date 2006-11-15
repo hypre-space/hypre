@@ -32,7 +32,7 @@
  *
  *****************************************************************************/
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "HYPRE.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"

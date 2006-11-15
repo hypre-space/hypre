@@ -42,14 +42,14 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- headers.h\
  HYPRE_struct_int.h\
  HYPRE_struct_ls.h\
+ _hypre_struct_ls.h\
+ headers.h\
  pfmg.h\
  red_black_gs.h\
  smg.h\
- sparse_msg.h\
- struct_ls.h
+ sparse_msg.h
 
 FILES =\
  coarsen.c\
@@ -122,12 +122,12 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_struct_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/struct_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_struct_ls.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_struct_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/struct_ls.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_struct_ls.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

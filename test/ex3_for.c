@@ -36,7 +36,7 @@
 */
 
 #include <math.h>
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 
 #ifdef HYPRE_FORTRAN

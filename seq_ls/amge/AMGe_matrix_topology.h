@@ -35,7 +35,7 @@
 #ifndef hypre_LS_HEADER
 #define hypre_LS_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "seq_mv.h"
 
 */

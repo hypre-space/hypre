@@ -42,7 +42,7 @@
 #define hypre_CSR_BLOCK_MATRIX_HEADER
 
 #include "seq_mv.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
                                                                                                                
 #ifdef __cplusplus
 extern "C" {

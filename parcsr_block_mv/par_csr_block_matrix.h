@@ -39,7 +39,7 @@
 #ifndef hypre_PAR_CSR_BLOCK_MATRIX_HEADER
 #define hypre_PAR_CSR_BLOCK_MATRIX_HEADER
                                                                                                                
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "csr_block_matrix.h"
 #include "parcsr_mv.h"
                                                                                                                

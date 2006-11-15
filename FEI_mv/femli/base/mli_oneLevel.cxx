@@ -34,7 +34,7 @@
  *****************************************************************************/
 
 #include <string.h>
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "util/mli_utils.h"
 #include "base/mli_oneLevel.h"
 

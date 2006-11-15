@@ -27,6 +27,7 @@
 
 
 #include "headers.h"
+#include "fac.h"
 
 #define AbsStencilShape(stencil, abs_shape) \
 {\

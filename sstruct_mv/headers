@@ -25,7 +25,7 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-INTERNAL_HEADER=sstruct_mv.h
+INTERNAL_HEADER=_hypre_sstruct_mv.h
 
 #===========================================================================
 # Include guards and other includes
@@ -34,14 +34,14 @@ INTERNAL_HEADER=sstruct_mv.h
 cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
 cat >> $INTERNAL_HEADER <<@
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #include "HYPRE_sstruct_mv.h"
 
 #ifndef hypre_SSTRUCT_MV_HEADER
 #define hypre_SSTRUCT_MV_HEADER
 
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"
 #include "IJ_mv.h"
 #include "HYPRE.h"
 

@@ -30,7 +30,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "HYPRE.h"
 #include "parcsr_mv/parcsr_mv.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"

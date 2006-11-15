@@ -30,4 +30,4 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"

@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"
  
 #include "bHYPRE_StructMatrix.h"
 #include "bHYPRE_StructVector.h"

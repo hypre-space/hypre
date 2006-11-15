@@ -11,7 +11,7 @@
 #include <math.h>
 /*   #include <mpi.h>   */
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
 

@@ -36,7 +36,7 @@
 #include "par_multivector.h"
 #include "seq_multivector.h"
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 /* for temporary implementation of multivectorRead, multivectorPrint */
 #include "seq_mv.h"

@@ -2,16 +2,17 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 #include "krylov.h"
 
 #define HYPRE_MFLOPS 0
 #if HYPRE_MFLOPS
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"
 #endif
 
-#include "struct_mv.h"
+/* RDF: Why is this include here? */
+#include "_hypre_struct_mv.h"
 
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
@@ -2564,7 +2565,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
                  int                *period, 
                  double             value  )
 {
-#include  "struct_mv.h"
+/* #include  "_hypre_struct_mv.h" */
  int ierr = 0;
  hypre_BoxArray     *gridboxes;
  int                i,ib;

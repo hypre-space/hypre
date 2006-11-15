@@ -60,7 +60,7 @@
 
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
 
-#include "../../utilities/utilities.h"
+#include "../../utilities/_hypre_utilities.h"
 #include "../../distributed_matrix/HYPRE_distributed_matrix_types.h"
 #include "../../distributed_matrix/HYPRE_distributed_matrix_protos.h"
 

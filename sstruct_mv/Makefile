@@ -43,13 +43,13 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
+ HYPRE_sstruct_mv.h\
+ _hypre_sstruct_mv.h\
  box_map.h\
  headers.h\
- HYPRE_sstruct_mv.h\
  sstruct_graph.h\
  sstruct_grid.h\
  sstruct_matrix.h\
- sstruct_mv.h\
  sstruct_stencil.h\
  sstruct_vector.h
 
@@ -85,12 +85,12 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_sstruct_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/sstruct_mv.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_sstruct_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_sstruct_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/sstruct_mv.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_sstruct_mv.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

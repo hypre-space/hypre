@@ -27,6 +27,7 @@
 
 
 #include "headers.h" 
+#include "fac.h"
 
 /*--------------------------------------------------------------------------
  * hypre_AMR_RAP:  Forms the coarse operators for all amr levels.
