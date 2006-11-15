@@ -16,7 +16,7 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
 #include "parcsr_mv.h"
-#include "krylov.h"
+#include "HYPRE_krylov.h"
 
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParRhsFromFile (int argc , char *argv [], int arg_index , HYPRE_ParVector *b_ptr );

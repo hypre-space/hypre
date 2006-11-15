@@ -4,7 +4,7 @@
 
 #include "_hypre_utilities.h"
 #include "HYPRE_sstruct_ls.h"
-#include "krylov.h"
+#include "HYPRE_krylov.h"
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_sstruct_ls.h"
  

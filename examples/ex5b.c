@@ -21,7 +21,7 @@
 #include <math.h>
 #include <assert.h>
 #include "_hypre_utilities.h"
-#include "krylov.h"
+#include "HYPRE_krylov.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 

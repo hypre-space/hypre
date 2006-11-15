@@ -19,7 +19,7 @@
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "krylov.h"
+#include "HYPRE_krylov.h"
 
 #include "bHYPRE.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"

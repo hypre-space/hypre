@@ -32,8 +32,8 @@
  *
  *****************************************************************************/
 
-#ifndef HYPRE_KRYLOV_BiCGSTAB_HEADER
-#define HYPRE_KRYLOV_BiCGSTAB_HEADER
+#ifndef hypre_KRYLOV_BiCGSTAB_HEADER
+#define hypre_KRYLOV_BiCGSTAB_HEADER
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

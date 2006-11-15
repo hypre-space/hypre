@@ -4,7 +4,7 @@
 
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
-#include "krylov.h"
+#include "HYPRE_krylov.h"
 
 #define HYPRE_MFLOPS 0
 #if HYPRE_MFLOPS

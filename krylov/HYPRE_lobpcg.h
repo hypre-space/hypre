@@ -34,8 +34,8 @@
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"
 
-#ifndef HYPRE_LOBPCG_SOLVER
-#define HYPRE_LOBPCG_SOLVER
+#ifndef hypre_LOBPCG_SOLVER
+#define hypre_LOBPCG_SOLVER
 
 #ifdef __cplusplus
 extern "C" {

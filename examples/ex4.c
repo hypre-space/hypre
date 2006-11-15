@@ -47,7 +47,7 @@
 
 #include <math.h>
 #include "_hypre_utilities.h"
-#include "krylov.h"
+#include "HYPRE_krylov.h"
 #include "HYPRE_struct_ls.h"
 
 #ifdef M_PI

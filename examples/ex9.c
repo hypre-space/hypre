@@ -34,7 +34,7 @@
 #include <math.h>
 #include "_hypre_utilities.h"
 #include "HYPRE_sstruct_ls.h"
-#include "krylov.h"
+#include "HYPRE_krylov.h"
 
 int main (int argc, char *argv[])
 {
