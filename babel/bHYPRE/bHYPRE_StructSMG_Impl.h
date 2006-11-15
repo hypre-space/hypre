@@ -80,7 +80,7 @@
 #include "HYPRE.h"
 /* #include "HYPRE_parcsr_ls.h" will be needed if we use HYPRE_Solver */
 #include "HYPRE_struct_ls.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "bHYPRE_StructMatrix.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._includes) */
 

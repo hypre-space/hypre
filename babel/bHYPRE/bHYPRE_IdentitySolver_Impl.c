@@ -60,7 +60,7 @@
 
 
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 

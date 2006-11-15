@@ -59,8 +59,8 @@
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
 #include "HYPRE_sstruct_mv.h"
-#include "sstruct_mv.h"
-#include "utilities.h"
+#include "_hypre_sstruct_mv.h"
+#include "_hypre_utilities.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._includes) */
 

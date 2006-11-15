@@ -62,7 +62,7 @@
 /* Put additional include files here... */
 
 
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil._includes) */
 
 /*

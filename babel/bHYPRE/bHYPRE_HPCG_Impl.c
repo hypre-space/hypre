@@ -96,8 +96,8 @@
 #include "bHYPRE_StructDiagScale.h"
 #include "bHYPRE_SStructDiagScale.h"
 #include "bHYPRE_IdentitySolver_Impl.h"
-#include "struct_ls.h"
-#include "sstruct_ls.h"
+#include "_hypre_struct_ls.h"
+#include "_hypre_sstruct_ls.h"
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 

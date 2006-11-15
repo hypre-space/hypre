@@ -56,7 +56,7 @@
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"
 #include "bHYPRE_StructGrid_Impl.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._includes) */

@@ -58,7 +58,7 @@
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil._includes) */
 
 #define SIDL_IOR_MAJOR_VERSION 0

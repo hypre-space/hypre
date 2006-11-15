@@ -3,7 +3,7 @@
 
 #include "sidl_BaseInterface.h"
 #include "sidl_Exception.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 /*
    Exception Handler

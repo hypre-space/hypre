@@ -65,7 +65,7 @@
 #include "bHYPRE_SStructVector.h"
 #include "bHYPRE_SStructVector_Impl.h"
 #include "HYPRE_sstruct_ls.h"
-#include "sstruct_ls.h"
+#include "_hypre_sstruct_ls.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._includes) */
 

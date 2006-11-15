@@ -28,7 +28,7 @@
 /* DO-NOT-DELETE splicer.begin(bHYPRE.ErrorHandler._includes) */
 /* Insert-Code-Here {bHYPRE.ErrorHandler._includes} (includes and arbitrary code) */
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE_utilities.h"
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.ErrorHandler._includes) */

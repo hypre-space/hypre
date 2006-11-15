@@ -79,7 +79,7 @@
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */
 
 /*

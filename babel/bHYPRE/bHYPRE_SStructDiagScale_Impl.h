@@ -75,7 +75,7 @@
 
 
 #include "HYPRE.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "bHYPRE_SStructMatrix.h"
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._includes) */

@@ -76,7 +76,7 @@
 
 #include "HYPRE.h"
 #include "HYPRE_sstruct_ls.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "bHYPRE_SStructMatrix.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._includes) */
 

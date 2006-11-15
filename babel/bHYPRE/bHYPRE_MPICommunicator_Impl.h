@@ -62,7 +62,7 @@
 /* Insert-Code-Here {bHYPRE.MPICommunicator._includes} (include files) */
 
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._includes) */
 
 /*

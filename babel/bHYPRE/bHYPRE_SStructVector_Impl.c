@@ -61,11 +61,11 @@
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 #include "bHYPRE_SStructGrid_Impl.h"
 #include "bHYPRE_StructVector_Impl.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._includes) */
 
 #define SIDL_IOR_MAJOR_VERSION 0

@@ -61,7 +61,7 @@
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 #include "bHYPRE_SStructParCSRVector_Impl.h"
 #include "bHYPRE_SStructGraph_Impl.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"

@@ -85,7 +85,7 @@
 
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._includes) */
 
 /*

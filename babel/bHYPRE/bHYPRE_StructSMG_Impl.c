@@ -66,7 +66,7 @@
 #include "bHYPRE_StructMatrix_Impl.h"
 #include "bHYPRE_StructVector.h"
 #include "bHYPRE_StructVector_Impl.h"
-#include "struct_ls.h"
+#include "_hypre_struct_ls.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._includes) */
 

@@ -78,7 +78,7 @@
 
 
 #include "HYPRE.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "krylov.h"
 #include "HYPRE_parcsr_ls.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.HGMRES._includes) */
