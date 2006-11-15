@@ -2225,6 +2225,78 @@ This should ultimately be taken out even for newer ale3d implementation
    }
 
    //-------------------------------------------------------------------
+   // This part is for loading the nodal coordinate information.
+   // The node IDs in nodeNumbers are the one used in FEI (and thus
+   // corresponds to the ones in the system matrix using lookup)
+   //-------------------------------------------------------------------
+
+   else if ( fieldID == -4 )
+   {
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
+      {
+         for ( i = 0; i < numNodes; i++ )
+            for ( j = 0; j < fieldSize; j++ )
+               printf("putNodalFieldData : %4d %2d = %e\n",i,j,
+                      data[i*fieldSize+j]);
+      }    
+      if ( HYPreconID_ == HYAMS && lookup_ != NULL )
+      {
+         blockIDs       = (int *) lookup_->getElemBlockIDs();
+         blockID        = blockIDs[0];
+         nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
+         nodeFieldID    = nodeFieldIDs[0][0];
+         //checkFieldSize = lookup_->getFieldSize(nodeFieldID);
+         //assert( checkFieldSize == fieldSize );
+         eqnNumbers  = new int[numNodes];
+         newData     = new double[numNodes*fieldSize];
+         newNumNodes = 0;
+         for ( i = 0; i < numNodes*fieldSize; i++ ) newData[i] = -99999.9;
+         for ( i = 0; i < numNodes; i++ )
+         { 
+            index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
+
+/* ======
+This should ultimately be taken out even for newer ale3d implementation
+   =====*/
+            if ( index >= localStartRow_-1 && index < localEndRow_)
+            {
+               for ( j = 0; j < fieldSize; j++ ) 
+                  newData[newNumNodes*fieldSize+j] = data[i*fieldSize+j];
+               eqnNumbers[newNumNodes++] = index;
+            }
+         }
+         nRows = localEndRow_ - localStartRow_ + 1;
+         if ( MLI_NodalCoord_ == NULL )
+         {
+            MLI_EqnNumbers_ = new int[newNumNodes];
+            for (i = 0; i < newNumNodes; i++) 
+               MLI_EqnNumbers_[i] = localStartRow_ - 1 + i * fieldSize;
+            MLI_NodalCoord_ = new double[newNumNodes*fieldSize];
+            for (i = 0; i < newNumNodes*fieldSize; i++)
+               MLI_NodalCoord_[i] = -99999.0;
+            MLI_FieldSize_  = fieldSize;
+            MLI_NumNodes_   = newNumNodes;
+         }
+         for ( i = 0; i < newNumNodes; i++ )
+         {
+            index = eqnNumbers[i] - localStartRow_ + 1;
+            for ( j = 0; j < fieldSize; j++ ) 
+               MLI_NodalCoord_[index+j] = newData[i*fieldSize+j];
+         }
+         for ( i = 0; i < newNumNodes*fieldSize; i++ )
+         {
+           if ( MLI_NodalCoord_[i] == -99999.0)
+           {
+              printf("putNodalFieldData AMS WARNING : some nodal info ");
+              printf("not filled.\n");
+           }
+         }
+         delete [] eqnNumbers;
+         delete [] newData;
+      }
+   }
+
+   //-------------------------------------------------------------------
    // this is needed to set up the correct node equation map
    // (the FEI remaps the node IDs in the incoming nodeNumbers array.
    //  to revert to the original ALE3D node numbers, it is passed in
@@ -3760,13 +3832,14 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    int                i, j, numIterations=0, status, ierr, localNRows;
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
 #ifdef HAVE_MLI
-   int                *constrMap, *constrEqns;
+   int                *constrMap, *constrEqns, ncount, *iArray;
+   double             *tempNodalCoord; 
 #endif
    int                *numSweeps, *relaxType;
    int                *matSizes, *rowInd, retFlag, tempIter, nTrials;
    double             rnorm=0.0, ddata, *colVal, *relaxWt, *diagVals;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
-   double             rnorm0, rnorm1, convRate, rateThresh;
+   double             rnorm0, rnorm1, convRate, rateThresh; 
    char               fname[40], paramString[100];
    FILE               *fp;
    HYPRE_IJMatrix     TempA, IJI;
@@ -4063,11 +4136,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    }
    if ( HYPreconID_ == HYMLI && MLI_EqnNumbers_ != NULL )
    {
-      int *iArray = new int[MLI_NumNodes_];
+      iArray = new int[MLI_NumNodes_];
       for (i = 0; i < MLI_NumNodes_; i++) iArray[i] = i;
       HYPRE_LSI_qsort1a(MLI_EqnNumbers_, iArray, 0, MLI_NumNodes_-1);
-      double *tempNodalCoord = MLI_NodalCoord_; 
-      int ncount = 1;
+      tempNodalCoord = MLI_NodalCoord_; 
+      ncount = 1;
       for (i = 1; i < MLI_NumNodes_; i++) 
          if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) ncount++;
       MLI_NodalCoord_ = new double[ncount*MLI_FieldSize_];
@@ -4102,38 +4175,6 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #endif
    if ( HYPreconID_ == HYAMS && MLI_EqnNumbers_ != NULL )
    {
-      int *iArray = new int[MLI_NumNodes_];
-      for (i = 0; i < MLI_NumNodes_; i++) iArray[i] = i;
-      HYPRE_LSI_qsort1a(MLI_EqnNumbers_, iArray, 0, MLI_NumNodes_-1);
-      double *tempNodalCoord = MLI_NodalCoord_; 
-      int ncount = 1;
-      for (i = 1; i < MLI_NumNodes_; i++) 
-         if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) ncount++;
-      MLI_NodalCoord_ = new double[ncount*MLI_FieldSize_];
-      for (j = 0; j < MLI_FieldSize_; j++) 
-         MLI_NodalCoord_[j] = tempNodalCoord[iArray[0]*MLI_FieldSize_+j];
-      ncount = 1;
-      for (i = 1; i < MLI_NumNodes_; i++) 
-      {
-         if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) 
-         {
-            MLI_EqnNumbers_[ncount] = MLI_EqnNumbers_[i];
-            for (j = 0; j < MLI_FieldSize_; j++) 
-               MLI_NodalCoord_[ncount*MLI_FieldSize_+j] =
-                  tempNodalCoord[iArray[i]*MLI_FieldSize_+j];
-            ncount++;
-         }
-      }
-      MLI_NumNodes_ = ncount;
-      //assert((MLI_NumNodes_*MLI_FieldSize_)==(localEndRow_-localStartRow_+1));
-      delete [] tempNodalCoord;
-      delete [] iArray;
-      for (i = 0; i < MLI_NumNodes_; i++) 
-      {
-         if (MLI_NodalCoord_[i] == -99999.0) 
-            printf("%d : HYPRE launchSolver ERROR - coord %d not filled.\n",
-                   mypid_, i);
-      }
       HYPRE_LSI_BuildNodalCoordinates();
    }
 
