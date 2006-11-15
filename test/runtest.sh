@@ -474,7 +474,6 @@ do
          shift
          eval export `echo $1`=1
          shift
-echo $HYPRE_NO_SAVED
          ;;
       *) InputString=$1
          if [ "$InputString" ] ; then
