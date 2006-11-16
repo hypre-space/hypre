@@ -159,6 +159,62 @@ int hypre_BoxManEntryCopy( hypre_BoxManEntry *fromentry ,
 }
 
 /*--------------------------------------------------------------------------
+ hypre_BoxManSetAllGlobalKnown 
+ *--------------------------------------------------------------------------*/
+
+
+int hypre_BoxManSetAllGlobalKnown ( hypre_BoxManager *manager , int known )
+{
+   
+   hypre_BoxManAllGlobalKnown(manager) = known;
+
+   return hypre_error_flag;
+   
+}
+/*--------------------------------------------------------------------------
+ hypre_BoxManGetAllGlobalKnown 
+ *--------------------------------------------------------------------------*/
+
+
+int hypre_BoxManGetAllGlobalKnown ( hypre_BoxManager *manager , int *known )
+{
+   
+   *known = hypre_BoxManAllGlobalKnown(manager);
+
+   return hypre_error_flag;
+   
+}
+
+/*--------------------------------------------------------------------------
+ hypre_BoxManSetIsEntriesSort
+ *--------------------------------------------------------------------------*/
+
+
+int hypre_BoxManSetIsEntriesSort ( hypre_BoxManager *manager , int is_sort )
+{
+   
+   hypre_BoxManIsEntriesSort(manager) = is_sort;
+
+   return hypre_error_flag;
+   
+}
+/*--------------------------------------------------------------------------
+ hypre_BoxManGetIsEntriesSort
+ *--------------------------------------------------------------------------*/
+
+
+int hypre_BoxManGetIsEntriesSort ( hypre_BoxManager *manager , int *is_sort )
+{
+   
+  *is_sort  =  hypre_BoxManIsEntriesSort(manager);
+
+   return hypre_error_flag;
+   
+}
+
+
+
+/*--------------------------------------------------------------------------
   hypre_BoxManDeleteMultipleEntries
 
   Delete multiple entries from the manager.  The indices correcpond to the
@@ -274,7 +330,9 @@ int hypre_BoxManCreate ( int max_nentries , int info_size, int dim,
    hypre_BoxManIsGatherCalled(manager)  = 0;
    hypre_BoxManGatherRegions(manager)   = hypre_BoxArrayCreate(0); 
    hypre_BoxManAllGlobalKnown(manager)  = 0;
-   
+
+   hypre_BoxManIsEntriesSort(manager)   = 0;
+
    hypre_BoxManNumMyEntries(manager) = 0;
    hypre_BoxManMyIds(manager) = NULL;
    hypre_BoxManMyEntries(manager)  = NULL;
@@ -1599,6 +1657,14 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
 
 
    }/* end of if (gather entries) for both AP and non-AP */
+   else
+   {
+      /* no gather - so check to see if the entries have been sorted by the user -
+         if so we don't need to sort! */
+      if  (hypre_BoxManIsEntriesSort(manager))     
+         need_to_sort = 0;
+      
+   }
    
 
    /*we don't need special access to my entries anymore - because we will

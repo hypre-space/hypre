@@ -1321,6 +1321,12 @@ typedef struct
                                             acessed by a coarsening routine, 
                                             for example) */
    
+   int                 is_entries_sort;     /* Boolean to say that entries were 
+                                            added in sorted order (id, proc)
+                                            (this could be
+                                            acessed by a coarsening routine, 
+                                            for example) */
+
 
    int                 entry_info_size;  /* in bytes, the (max) size of the info 
                                             object for the entries */ 
@@ -1386,6 +1392,7 @@ typedef struct
 #define hypre_BoxManMaxNEntries(manager)        ((manager) -> max_nentries)
 
 #define hypre_BoxManIsGatherCalled(manager)     ((manager) -> is_gather_called)
+#define hypre_BoxManIsEntriesSort(manager)      ((manager) -> is_entries_sort)
 #define hypre_BoxManGatherRegions(manager)      ((manager) -> gather_regions)
 #define hypre_BoxManAllGlobalKnown(manager)     ((manager) -> all_global_known)
 #define hypre_BoxManEntryInfoSize(manager)      ((manager) -> entry_info_size)
@@ -2230,6 +2237,10 @@ int hypre_BoxManEntrySetInfo ( hypre_BoxManEntry *entry , void *info );
 int hypre_BoxManEntryGetInfo ( hypre_BoxManEntry *entry , void **info_ptr );
 int hypre_BoxManEntryGetExtents ( hypre_BoxManEntry *entry , hypre_Index imin , hypre_Index imax );
 int hypre_BoxManEntryCopy ( hypre_BoxManEntry *fromentry , hypre_BoxManEntry *toentry );
+int hypre_BoxManSetAllGlobalKnown ( hypre_BoxManager *manager , int known );
+int hypre_BoxManGetAllGlobalKnown ( hypre_BoxManager *manager , int *known );
+int hypre_BoxManSetIsEntriesSort ( hypre_BoxManager *manager , int is_sort );
+int hypre_BoxManGetIsEntriesSort ( hypre_BoxManager *manager , int *is_sort );
 int hypre_BoxManDeleteMultipleEntries ( hypre_BoxManager *manager , int *indices , int num );
 int hypre_BoxManCreate ( int max_nentries , int info_size , int dim , hypre_Box *bounding_box , MPI_Comm comm , hypre_BoxManager **manager_ptr );
 int hypre_BoxManIncSize ( hypre_BoxManager *manager , int inc_size );
@@ -2246,13 +2257,6 @@ int hypre_FillResponseBoxManAssemble1 ( void *p_recv_contact_buf , int contact_s
 int hypre_FillResponseBoxManAssemble2 ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
 void hypre_entryqsort2 ( int *v , hypre_BoxManEntry **ent , int left , int right );
 void hypre_entryswap2 ( int *v , hypre_BoxManEntry **ent , int i , int j );
-
-/* box_neighbors.c */
-int hypre_RankLinkCreate ( int rank , int prank , hypre_RankLink **rank_link_ptr );
-int hypre_RankLinkDestroy ( hypre_RankLink *rank_link );
-int hypre_BoxNeighborsCreate ( hypre_BoxArray *boxes , int *procs , int *ids , int first_local , int num_local , hypre_BoxNeighbors **neighbors_ptr );
-int hypre_BoxNeighborsAssemble ( hypre_BoxNeighbors *neighbors , hypre_Index periodic , int max_distance , int prune );
-int hypre_BoxNeighborsDestroy ( hypre_BoxNeighbors *neighbors );
 
 /* communication_info.c */
 int hypre_CommInfoCreate ( hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , int **send_procs , int **recv_procs , int **send_rboxnums , int **recv_rboxnums , hypre_BoxArrayArray *send_rboxes , hypre_CommInfo **comm_info_ptr );
@@ -2331,14 +2335,6 @@ int HYPRE_StructVectorSetConstantValues ( HYPRE_StructVector vector , double val
 int HYPRE_StructVectorGetMigrateCommPkg ( HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg );
 int HYPRE_StructVectorMigrate ( HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector );
 int HYPRE_CommPkgDestroy ( HYPRE_CommPkg comm_pkg );
-
-/* new_assemble.c */
-int hypre_StructGridAssembleWithAP ( hypre_StructGrid *grid );
-int hypre_FillResponseStructAssembleAP ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
-
-/* new_box_neighbors.c */
-int hypre_BoxNeighborsCreateWithAP ( hypre_BoxArray *boxes , int *procs , int *boxnums , int first_local , int num_local , hypre_Index *pshifts , hypre_BoxNeighbors **neighbors_ptr );
-int hypre_BoxNeighborsAssembleWithAP ( hypre_BoxNeighbors *neighbors , hypre_Index periodic , int max_distance , int prune );
 
 /* project.c */
 int hypre_ProjectBox ( hypre_Box *box , hypre_Index index , hypre_Index stride );

@@ -54,6 +54,12 @@ typedef struct
                                             acessed by a coarsening routine, 
                                             for example) */
    
+   int                 is_entries_sort;     /* Boolean to say that entries were 
+                                            added in sorted order (id, proc)
+                                            (this could be
+                                            acessed by a coarsening routine, 
+                                            for example) */
+
 
    int                 entry_info_size;  /* in bytes, the (max) size of the info 
                                             object for the entries */ 
@@ -119,6 +125,7 @@ typedef struct
 #define hypre_BoxManMaxNEntries(manager)        ((manager) -> max_nentries)
 
 #define hypre_BoxManIsGatherCalled(manager)     ((manager) -> is_gather_called)
+#define hypre_BoxManIsEntriesSort(manager)      ((manager) -> is_entries_sort)
 #define hypre_BoxManGatherRegions(manager)      ((manager) -> gather_regions)
 #define hypre_BoxManAllGlobalKnown(manager)     ((manager) -> all_global_known)
 #define hypre_BoxManEntryInfoSize(manager)      ((manager) -> entry_info_size)

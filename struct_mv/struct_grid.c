@@ -390,7 +390,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 
 
    /* if the box manager has been created then we don't need to do the
-    * following (because it was done through the coarsening routine */
+    * following (because it was done through the coarsening routine) */
    if (!is_boxman)
    {
     
