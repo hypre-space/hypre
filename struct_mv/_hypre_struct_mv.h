@@ -1213,6 +1213,286 @@ typedef struct hypre_BoxNeighbors_struct
 
 /******************************************************************************
  *
+ * Header info for the struct assumed partition
+ *
+ *****************************************************************************/
+
+#ifndef hypre_ASSUMED_PART_HEADER
+#define hypre_ASSUMED_PART_HEADER
+
+
+/* to prevent overflow */
+
+#define hypre_doubleBoxVolume(box) \
+   ((double) hypre_BoxSizeX(box) * (double) hypre_BoxSizeY(box) * (double) hypre_BoxSizeZ(box))
+
+
+typedef struct 
+{
+   /* the entries will be the same for all procs */  
+   hypre_BoxArray      *regions;
+   int                 num_regions;      
+   int                 *proc_partitions;
+   hypre_Index         *divisions;
+   /* these entries are specific to each proc */
+   hypre_BoxArray      *my_partition;
+   hypre_BoxArray      *my_partition_boxes;
+   int                 *my_partition_proc_ids;
+   int                 *my_partition_boxnums;
+   int                 my_partition_ids_size;   
+   int                 my_partition_ids_alloc;
+   int                 my_partition_num_distinct_procs;
+    
+} hypre_StructAssumedPart;
+
+
+/*Accessor macros */
+
+#define hypre_StructAssumedPartRegions(apart) ((apart)->regions) 
+#define hypre_StructAssumedPartNumRegions(apart) ((apart)->num_regions) 
+#define hypre_StructAssumedPartDivisions(apart) ((apart)->divisions) 
+#define hypre_StructAssumedPartDivision(apart, i) ((apart)->divisions[i]) 
+#define hypre_StructAssumedPartProcPartitions(apart) ((apart)->proc_partitions) 
+#define hypre_StructAssumedPartProcPartition(apart, i) ((apart)->proc_partitions[i]) 
+#define hypre_StructAssumedPartMyPartition(apart) ((apart)->my_partition)
+#define hypre_StructAssumedPartMyPartitionBoxes(apart) ((apart)->my_partition_boxes)
+#define hypre_StructAssumedPartMyPartitionProcIds(apart) ((apart)->my_partition_proc_ids)
+#define hypre_StructAssumedPartMyPartitionIdsSize(apart) ((apart)->my_partition_ids_size)
+#define hypre_StructAssumedPartMyPartitionIdsAlloc(apart) ((apart)->my_partition_ids_alloc)
+#define hypre_StructAssumedPartMyPartitionNumDistinctProcs(apart) ((apart)->my_partition_num_distinct_procs)
+#define hypre_StructAssumedPartMyPartitionBoxnums(apart) ((apart)->my_partition_boxnums)
+
+
+
+#endif
+#ifndef hypre_BOX_MANAGER_HEADER
+#define hypre_BOX_MANAGER_HEADER
+
+
+/*---------------------------------------------------------------------------
+ *
+ * Box Manager: organizes arbitrary information in a spatial way
+ *
+ *----------------------------------------------------------------------------*/
+
+
+typedef struct hypre_BoxManEntry_struct
+{
+   hypre_Index  imin; /*extents of box */
+   hypre_Index  imax;
+
+   int proc; /*this is a two-part unique id: (proc, id) */
+   int id;
+   int num_ghost[6];
+
+   void *info; 
+
+   struct hypre_BoxManEntry_struct  *next;
+
+} hypre_BoxManEntry;
+
+
+/*-----------------------------------------------------------------------------*/
+
+typedef struct
+{
+
+   MPI_Comm            comm;
+
+   int                 max_nentries;  /* storage in entries allocated to this 
+                                         amount */
+
+    
+   int                 is_gather_called; /* boolean to indicate  whether GatherEntries
+                                            function has been called  (prior to 
+                                            assemble) - may not want this (can tell
+                                            by the size of gather_regions array) */
+   
+   hypre_BoxArray     *gather_regions;  /*this is where we collect boxes input 
+                                          by calls to BoxManGatherEntries - to be 
+                                          gathered in the assemble.  These are then 
+                                          deleted after the assemble */
+   
+
+   int                 all_global_known; /* Boolean to say that every
+                                            processor already has all
+                                            of the global data for
+                                            this manager (this could be
+                                            acessed by a coarsening routine, 
+                                            for example) */
+   
+
+   int                 entry_info_size;  /* in bytes, the (max) size of the info 
+                                            object for the entries */ 
+
+   int                 is_assembled;        /* flag to indicate if the box manager has been 
+                                            assembled (use to control whether or not
+                                            functions can be used prior to assemble)*/
+   
+
+   /* storing the entries */
+   int                 nentries;     /* number of entries stored */
+   hypre_BoxManEntry  *entries;      /* These are the actual box manager entries - these
+                                      are sorted by (proc, id) at the end of the assemble)*/  
+
+   int                *procs_sort;    /* the sorted procs corresponding to entries */
+   int                *ids_sort;      /* sorted ids corresponding to the entries */
+ 
+   int                num_procs_sort; /* number of distinct procs in *entries */
+   int                *procs_sort_offsets;  /* offsets for procs into the 
+                                             *entry_sort array */
+   int                first_local;      /* position of local infomation in entries*/  
+   int                local_proc_offset;  /*position of local information in offsets */
+
+   /* here is the table  that organizes the entries spatially (by index)*/
+   hypre_BoxManEntry **index_table; /* this points into 'entries' array  
+                                            and corresponds to the index arays*/
+
+   int                *indexes[3]; /* here we have the x,y,z indexes (ordered) 
+                                      for the imin and imax
+                                      of each box in the entries array*/
+   int                 size[3];    /* how many indexes we have in each direction 
+                                      - x,y,z */ 
+
+   int                 last_index[3]; /* the last index used in the indexes map */
+
+   int                 num_my_entries; /* number of entries with proc_id = myid */
+   int                 *my_ids;        /* an array of ids corresponding to my entries */ 
+   hypre_BoxManEntry   **my_entries;   /* points into *entries that are mine & corresponds to
+                                          my_ids array.  This is destroyed in the assemble */
+   
+   hypre_StructAssumedPart *assumed_partition; /* the assumed partition object  - for now this is only
+                                                  used during the assemble (where it is created)*/
+   int                 dim;           /* problem dimension (known in the grid) */
+
+   hypre_Box           *bounding_box;  /* bounding box - from associated grid */
+   
+
+   /* ghost stuff - leave for now */
+
+   int                num_ghost[6]; 
+
+
+
+} hypre_BoxManager;
+
+
+/*--------------------------------------------------------------------------
+ * Accessor macros:  hypre_BoxMan
+ *--------------------------------------------------------------------------*/
+
+#define hypre_BoxManComm(manager)               ((manager) -> comm)
+
+#define hypre_BoxManMaxNEntries(manager)        ((manager) -> max_nentries)
+
+#define hypre_BoxManIsGatherCalled(manager)     ((manager) -> is_gather_called)
+#define hypre_BoxManGatherRegions(manager)      ((manager) -> gather_regions)
+#define hypre_BoxManAllGlobalKnown(manager)     ((manager) -> all_global_known)
+#define hypre_BoxManEntryInfoSize(manager)      ((manager) -> entry_info_size)
+#define hypre_BoxManNEntries(manager)           ((manager) -> nentries)
+#define hypre_BoxManEntries(manager)            ((manager) -> entries)
+#define hypre_BoxManIsAssembled(manager)        ((manager) -> is_assembled) 
+
+#define hypre_BoxManProcsSort(manager)          ((manager) -> procs_sort)
+#define hypre_BoxManIdsSort(manager)            ((manager) -> ids_sort)
+#define hypre_BoxManNumProcsSort(manager)       ((manager) -> num_procs_sort)
+#define hypre_BoxManProcsSortOffsets(manager)   ((manager) -> procs_sort_offsets)
+#define hypre_BoxManLocalProcOffset(manager)    ((manager) -> local_proc_offset)
+
+#define hypre_BoxManFirstLocal(manager)         ((manager) -> first_local)
+
+#define hypre_BoxManIndexTable(manager)         ((manager) -> index_table)
+#define hypre_BoxManIndexes(manager)            ((manager) -> indexes)
+#define hypre_BoxManSize(manager)               ((manager) -> size)
+#define hypre_BoxManLastIndex(manager)          ((manager) -> last_index)
+
+#define hypre_BoxManNumMyEntries(manager)       ((manager) -> num_my_entries)
+#define hypre_BoxManMyIds(manager)              ((manager) -> my_ids)
+#define hypre_BoxManMyEntries(manager)          ((manager) -> my_entries)
+#define hypre_BoxManAssumedPartition(manager)   ((manager) -> assumed_partition)
+#define hypre_BoxManDim(manager)                ((manager) -> dim)
+#define hypre_BoxManBoundingBox(manager)        ((manager) -> bounding_box)
+
+#define hypre_BoxManNumGhost(manager)           ((manager) -> num_ghost)
+
+#define hypre_BoxManIndexesD(manager, d)    hypre_BoxManIndexes(manager)[d]
+#define hypre_BoxManSizeD(manager, d)       hypre_BoxManSize(manager)[d]
+#define hypre_BoxManLastIndexD(manager, d)  hypre_BoxManLastIndex(manager)[d]
+#define hypre_BoxManIndexTableEntry(manager, i, j, k) \
+hypre_BoxManIndexTable(manager)[((k*hypre_BoxManSizeD(manager, 1) + j)*\
+                           hypre_BoxManSizeD(manager, 0) + i)]
+
+
+
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_BoxManEntry
+ *--------------------------------------------------------------------------*/
+
+#define hypre_BoxManEntryIMin(entry)     ((entry) -> imin)
+#define hypre_BoxManEntryIMax(entry)     ((entry) -> imax)
+#define hypre_BoxManEntryProc(entry)     ((entry) -> proc)
+#define hypre_BoxManEntryId(entry)       ((entry) -> id)
+#define hypre_BoxManEntryInfo(entry)     ((entry) -> info)
+#define hypre_BoxManEntryNumGhost(entry) ((entry) -> num_ghost)
+#define hypre_BoxManEntryNext(entry)     ((entry) -> next)
+
+
+
+
+/*--------------------------------------------------------------------------
+ * Info objects 
+ *--------------------------------------------------------------------------*/
+
+
+
+typedef struct
+{
+   int  type;
+   int  proc;
+   int  offset;
+   int  box;
+   int  ghoffset;
+
+} hypre_BoxManInfoDefault;
+
+#define hypre_BoxManInfoDType(info)            ((info) -> type)
+#define hypre_BoxManInfoDProc(info)            ((info) -> proc)
+#define hypre_BoxManInfoDOffset(info)          ((info) -> offset)
+#define hypre_BoxManInfoDBox(info)             ((info) -> box)
+#define hypre_BoxManInfoDGhoffset(info)        ((info) -> ghoffset)
+
+
+#endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
+/******************************************************************************
+ *
  * Header info for the hypre_StructGrid structures
  *
  *****************************************************************************/
@@ -1232,8 +1512,6 @@ typedef struct hypre_StructGrid_struct
                       
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
    int                 *ids;          /* Unique IDs for boxes */
-                      
-   hypre_BoxNeighbors  *neighbors;    /* Neighbors of boxes */
    int                  max_distance; /* Neighborhood size */
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
@@ -1242,14 +1520,19 @@ typedef struct hypre_StructGrid_struct
    int                  global_size;  /* Total number of grid points */
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
+   int                  num_periods;  /* number of box set periods */
+   
+   hypre_Index         *pshifts;      /* shifts of periodicity */
+
 
    int                  ref_count;
 
- /* GEC0902 additions for ghost expansion of boxes */
 
    int                 ghlocal_size;   /* Number of vars in box including ghosts */
    int                 num_ghost[6];   /* ghost layer size for each box  */  
 
+   hypre_BoxManager   *box_man;
+   
 
 } hypre_StructGrid;
 
@@ -1261,15 +1544,18 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridDim(grid)           ((grid) -> dim)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
 #define hypre_StructGridIDs(grid)           ((grid) -> ids)
-#define hypre_StructGridNeighbors(grid)     ((grid) -> neighbors)
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 #define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
 #define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
 #define hypre_StructGridPeriodic(grid)      ((grid) -> periodic)
+#define hypre_StructGridNumPeriods(grid)    ((grid) -> num_periods)
+#define hypre_StructGridPShifts(grid)       ((grid) -> pshifts)
+#define hypre_StructGridPShift(grid, i)     ((grid) -> pshifts[i])
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
 #define hypre_StructGridGhlocalSize(grid)   ((grid) -> ghlocal_size)
 #define hypre_StructGridNumGhost(grid)      ((grid) -> num_ghost)
+#define hypre_StructGridBoxMan(grid)        ((grid) -> box_man) 
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
@@ -1879,286 +2165,6 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
  hypre_BoxIndexRank(hypre_StructVectorBox(vector, b), index))
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-/******************************************************************************
- *
- * Header info for the struct assumed partition
- *
- *****************************************************************************/
-
-#ifndef hypre_ASSUMED_PART_HEADER
-#define hypre_ASSUMED_PART_HEADER
-
-
-/* to prevent overflow */
-
-#define hypre_doubleBoxVolume(box) \
-   ((double) hypre_BoxSizeX(box) * (double) hypre_BoxSizeY(box) * (double) hypre_BoxSizeZ(box))
-
-
-typedef struct 
-{
-   /* the entries will be the same for all procs */  
-   hypre_BoxArray      *regions;
-   int                 num_regions;      
-   int                 *proc_partitions;
-   hypre_Index         *divisions;
-   /* these entries are specific to each proc */
-   hypre_BoxArray      *my_partition;
-   hypre_BoxArray      *my_partition_boxes;
-   int                 *my_partition_proc_ids;
-   int                 *my_partition_boxnums;
-   int                 my_partition_ids_size;   
-   int                 my_partition_ids_alloc;
-   int                 my_partition_num_distinct_procs;
-    
-} hypre_StructAssumedPart;
-
-
-/*Accessor macros */
-
-#define hypre_StructAssumedPartRegions(apart) ((apart)->regions) 
-#define hypre_StructAssumedPartNumRegions(apart) ((apart)->num_regions) 
-#define hypre_StructAssumedPartDivisions(apart) ((apart)->divisions) 
-#define hypre_StructAssumedPartDivision(apart, i) ((apart)->divisions[i]) 
-#define hypre_StructAssumedPartProcPartitions(apart) ((apart)->proc_partitions) 
-#define hypre_StructAssumedPartProcPartition(apart, i) ((apart)->proc_partitions[i]) 
-#define hypre_StructAssumedPartMyPartition(apart) ((apart)->my_partition)
-#define hypre_StructAssumedPartMyPartitionBoxes(apart) ((apart)->my_partition_boxes)
-#define hypre_StructAssumedPartMyPartitionProcIds(apart) ((apart)->my_partition_proc_ids)
-#define hypre_StructAssumedPartMyPartitionIdsSize(apart) ((apart)->my_partition_ids_size)
-#define hypre_StructAssumedPartMyPartitionIdsAlloc(apart) ((apart)->my_partition_ids_alloc)
-#define hypre_StructAssumedPartMyPartitionNumDistinctProcs(apart) ((apart)->my_partition_num_distinct_procs)
-#define hypre_StructAssumedPartMyPartitionBoxnums(apart) ((apart)->my_partition_boxnums)
-
-
-
-#endif
-#ifndef hypre_BOX_MANAGER_HEADER
-#define hypre_BOX_MANAGER_HEADER
-
-
-/*---------------------------------------------------------------------------
- *
- * Box Manager: organizes arbitrary information in a spatial way
- *
- *----------------------------------------------------------------------------*/
-
-
-typedef struct hypre_BoxManEntry_struct
-{
-   hypre_Index  imin; /*extents of box */
-   hypre_Index  imax;
-
-   int proc; /*this is a two-part unique id: (proc, id) */
-   int id;
-   int num_ghost[6];
-
-   void *info; 
-
-   struct hypre_BoxManEntry_struct  *next;
-
-} hypre_BoxManEntry;
-
-
-/*-----------------------------------------------------------------------------*/
-
-typedef struct
-{
-
-   MPI_Comm            comm;
-
-   int                 max_nentries;  /* storage in entries allocated to this 
-                                         amount */
-
-    
-   int                 is_gather_called; /* boolean to indicate  whether GatherEntries
-                                            function has been called  (prior to 
-                                            assemble) - may not want this (can tell
-                                            by the size of gather_regions array) */
-   
-   hypre_BoxArray     *gather_regions;  /*this is where we collect boxes input 
-                                          by calls to BoxManGatherEntries - to be 
-                                          gathered in the assemble.  These are then 
-                                          deleted after the assemble */
-   
-
-   int                 all_global_known; /* Boolean to say that every
-                                            processor already has all
-                                            of the global data for
-                                            this manager (this could be
-                                            acessed by a coarsening routine, 
-                                            for example) */
-   
-
-   int                 entry_info_size;  /* in bytes, the (max) size of the info 
-                                            object for the entries */ 
-
-   /* storing the entries */
-   int                 nentries;     /* number of entries stored */
-   hypre_BoxManEntry  *entries;      /* These are the actual box manager entries */  
-
- 
-
-   /* for accessing an entry via (proc, id) */
-
-   hypre_BoxManEntry  **sort_table;   /* points into *entries and is sorted 
-                                               by each entry's unique two-part id: 
-                                               (proc, id) */
-   
-   int                *procs_sort;    /* the sorted procs corresponding to entries*/
-   int                *ids_sort;      /* sorted ids corresponding to the entries */
- 
-   int                num_procs_sort; /* number of distinct procs in *entries */
-   int                *procs_sort_offsets;  /* offsets for procs into the 
-                                             *entry_sort array */
-   int                first_local;      /* position of local infomation */  
-   int                local_proc_offset;  /*position of local information in offsets */
-
-   /* here is the table  that organizes the entires spatially (by index)*/
-   hypre_BoxManEntry **index_table; /* this points into 'entries' array  
-                                            and corresponds to the index arays*/
-
-   int                *indexes[3]; /* here we have the x,y,z indexes (ordered) 
-                                      for the imin and imax
-                                      of each box in the entries array*/
-   int                 size[3];    /* how many indexes we have in each direction 
-                                      - x,y,z */ 
-
-   int                 last_index[3]; /* the last index used in the indexes map */
-
-   /* extra stuff needed for AP implementation */
-
-   int                 num_my_entries; /* number of entries with proc_id = myid */
-   int                 *my_ids;        /* an array of ids corresponding to my entries */ 
-   hypre_BoxManEntry   **my_entries;   /* points into *entries that are mine & corresponds to
-                                          my_ids array.  This is destroyed in the assemble */
-   
-   hypre_StructAssumedPart *assumed_partition; /* the assumed partition object  - for now this is only
-                                           us ed during the assemble (where it is created)*/
-   int                   dim;           /* problem dimension (known in the grid) */
-
-   /* ghost stuff - leave for now */
-
-   int                num_ghost[6]; 
-
-
-
-} hypre_BoxManager;
-
-
-/*--------------------------------------------------------------------------
- * Accessor macros:  hypre_BoxMan
- *--------------------------------------------------------------------------*/
-
-#define hypre_BoxManComm(manager)               ((manager) -> comm)
-
-#define hypre_BoxManMaxNEntries(manager)        ((manager) -> max_nentries)
-
-#define hypre_BoxManIsGatherCalled(manager)     ((manager) -> is_gather_called)
-#define hypre_BoxManGatherRegions(manager)      ((manager) -> gather_regions)
-#define hypre_BoxManAllGlobalKnown(manager)     ((manager) -> all_global_known)
-#define hypre_BoxManEntryInfoSize(manager)      ((manager) -> entry_info_size)
-#define hypre_BoxManNEntries(manager)           ((manager) -> nentries)
-#define hypre_BoxManEntries(manager)            ((manager) -> entries)
-
-#define hypre_BoxManSortTable(manager)          ((manager) -> sort_table)
-#define hypre_BoxManProcsSort(manager)          ((manager) -> procs_sort)
-#define hypre_BoxManIdsSort(manager)            ((manager) -> ids_sort)
-#define hypre_BoxManNumProcsSort(manager)       ((manager) -> num_procs_sort)
-#define hypre_BoxManProcsSortOffsets(manager)   ((manager) -> procs_sort_offsets)
-#define hypre_BoxManLocalProcOffset(manager)    ((manager) -> local_proc_offset)
-
-#define hypre_BoxManFirstLocal(manager)         ((manager) -> first_local)
-
-#define hypre_BoxManIndexTable(manager)         ((manager) -> index_table)
-#define hypre_BoxManIndexes(manager)            ((manager) -> indexes)
-#define hypre_BoxManSize(manager)               ((manager) -> size)
-#define hypre_BoxManLastIndex(manager)          ((manager) -> last_index)
-
-#define hypre_BoxManNumMyEntries(manager)       ((manager) -> num_my_entries)
-#define hypre_BoxManMyIds(manager)              ((manager) -> my_ids)
-#define hypre_BoxManMyEntries(manager)          ((manager) -> my_entries)
-#define hypre_BoxManAssumedPartition(manager)   ((manager) -> assumed_partition)
-#define hypre_BoxManDim(manager)                ((manager) -> dim)
-
-#define hypre_BoxManNumGhost(manager)           ((manager) -> num_ghost)
-
-#define hypre_BoxManIndexesD(manager, d)    hypre_BoxManIndexes(manager)[d]
-#define hypre_BoxManSizeD(manager, d)       hypre_BoxManSize(manager)[d]
-#define hypre_BoxManLastIndexD(manager, d)  hypre_BoxManLastIndex(manager)[d]
-#define hypre_BoxManIndexTableEntry(manager, i, j, k) \
-hypre_BoxManIndexTable(manager)[((k*hypre_BoxManSizeD(manager, 1) + j)*\
-                           hypre_BoxManSizeD(manager, 0) + i)]
-
-
-
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_BoxManEntry
- *--------------------------------------------------------------------------*/
-
-#define hypre_BoxManEntryIMin(entry)     ((entry) -> imin)
-#define hypre_BoxManEntryIMax(entry)     ((entry) -> imax)
-#define hypre_BoxManEntryProc(entry)     ((entry) -> proc)
-#define hypre_BoxManEntryId(entry)       ((entry) -> id)
-#define hypre_BoxManEntryInfo(entry)     ((entry) -> info)
-#define hypre_BoxManEntryNumGhost(entry) ((entry) -> num_ghost)
-#define hypre_BoxManEntryNext(entry)     ((entry) -> next)
-
-
-
-
-/*--------------------------------------------------------------------------
- * Info objects 
- *--------------------------------------------------------------------------*/
-
-
-
-typedef struct
-{
-   int  type;
-   int  proc;
-   int  offset;
-   int  box;
-   int  ghoffset;
-
-} hypre_BoxManInfoDefault;
-
-#define hypre_BoxManInfoDType(info)            ((info) -> type)
-#define hypre_BoxManInfoDProc(info)            ((info) -> proc)
-#define hypre_BoxManInfoDOffset(info)          ((info) -> offset)
-#define hypre_BoxManInfoDBox(info)             ((info) -> box)
-#define hypre_BoxManInfoDGhoffset(info)        ((info) -> ghoffset)
-
-
-#endif
 
 /* assumed_part.c */
 int hypre_APSubdivideRegion ( hypre_Box *region , int dim , int level , hypre_BoxArray *box_array , int *num_new_boxes );
@@ -2225,18 +2231,19 @@ int hypre_BoxManEntryGetInfo ( hypre_BoxManEntry *entry , void **info_ptr );
 int hypre_BoxManEntryGetExtents ( hypre_BoxManEntry *entry , hypre_Index imin , hypre_Index imax );
 int hypre_BoxManEntryCopy ( hypre_BoxManEntry *fromentry , hypre_BoxManEntry *toentry );
 int hypre_BoxManDeleteMultipleEntries ( hypre_BoxManager *manager , int *indices , int num );
-int hypre_BoxManCreate ( int max_nentries , int info_size , int dim , MPI_Comm comm , hypre_BoxManager **manager_ptr );
+int hypre_BoxManCreate ( int max_nentries , int info_size , int dim , hypre_Box *bounding_box , MPI_Comm comm , hypre_BoxManager **manager_ptr );
 int hypre_BoxManIncSize ( hypre_BoxManager *manager , int inc_size );
 int hypre_BoxManDestroy ( hypre_BoxManager *manager );
 int hypre_BoxManAddEntry ( hypre_BoxManager *manager , hypre_Index imin , hypre_Index imax , int proc_id , int box_id , void *info );
 int hypre_BoxManGetEntry ( hypre_BoxManager *manager , int proc , int id , hypre_BoxManEntry **entry_ptr );
 int hypre_BoxManGetAllEntries ( hypre_BoxManager *manager , int *num_entries , hypre_BoxManEntry ***entries_ptr );
+int hypre_BoxManGetAllEntriesBoxes ( hypre_BoxManager *manager , hypre_BoxArray *boxes );
 int hypre_BoxManGatherEntries ( hypre_BoxManager *manager , hypre_Index imin , hypre_Index imax );
 int hypre_BoxManAssemble ( hypre_BoxManager *manager );
 int hypre_BoxManIntersect ( hypre_BoxManager *manager , hypre_Index ilower , hypre_Index iupper , hypre_BoxManEntry ***entries_ptr , int *nentries_ptr );
 int hypre_BoxManSetNumGhost ( hypre_BoxManager *manager , int *num_ghost );
-int hypre_FillResponseBoxMapAssemble1 ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
-int hypre_FillResponseBoxMapAssemble2 ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
+int hypre_FillResponseBoxManAssemble1 ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
+int hypre_FillResponseBoxManAssemble2 ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
 void hypre_entryqsort2 ( int *v , hypre_BoxManEntry **ent , int left , int right );
 void hypre_entryswap2 ( int *v , hypre_BoxManEntry **ent , int i , int j );
 
@@ -2328,7 +2335,6 @@ int HYPRE_CommPkgDestroy ( HYPRE_CommPkg comm_pkg );
 /* new_assemble.c */
 int hypre_StructGridAssembleWithAP ( hypre_StructGrid *grid );
 int hypre_FillResponseStructAssembleAP ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
-int hypre_StructGridSetIDs ( hypre_StructGrid *grid , int *ids );
 
 /* new_box_neighbors.c */
 int hypre_BoxNeighborsCreateWithAP ( hypre_BoxArray *boxes , int *procs , int *boxnums , int first_local , int num_local , hypre_Index *pshifts , hypre_BoxNeighbors **neighbors_ptr );
@@ -2359,11 +2365,13 @@ int hypre_StructPartialCopy ( hypre_StructVector *x , hypre_StructVector *y , hy
 int hypre_StructGridCreate ( MPI_Comm comm , int dim , hypre_StructGrid **grid_ptr );
 int hypre_StructGridRef ( hypre_StructGrid *grid , hypre_StructGrid **grid_ref );
 int hypre_StructGridDestroy ( hypre_StructGrid *grid );
-int hypre_StructGridSetHoodInfo ( hypre_StructGrid *grid , int max_distance );
 int hypre_StructGridSetPeriodic ( hypre_StructGrid *grid , hypre_Index periodic );
 int hypre_StructGridSetExtents ( hypre_StructGrid *grid , hypre_Index ilower , hypre_Index iupper );
 int hypre_StructGridSetBoxes ( hypre_StructGrid *grid , hypre_BoxArray *boxes );
-int hypre_StructGridSetHood ( hypre_StructGrid *grid , hypre_BoxArray *hood_boxes , int *hood_procs , int *hood_ids , int first_local , int num_local , hypre_Box *bounding_box );
+int hypre_StructGridSetBoundingBox ( hypre_StructGrid *grid , hypre_Box *new_bb );
+int hypre_StructGridSetIDs ( hypre_StructGrid *grid , int *ids );
+int hypre_StructGridSetBoxManager ( hypre_StructGrid *grid , hypre_BoxManager *boxman );
+int hypre_StructGridSetMaxDistance ( hypre_StructGrid *grid , int dist );
 int hypre_StructGridAssemble ( hypre_StructGrid *grid );
 int hypre_GatherAllBoxes ( MPI_Comm comm , hypre_BoxArray *boxes , hypre_BoxArray **all_boxes_ptr , int **all_procs_ptr , int *first_local_ptr );
 int hypre_ComputeBoxnums ( hypre_BoxArray *boxes , int *procs , int **boxnums_ptr );

@@ -61,7 +61,6 @@ FILES =\
  box_boundary.c\
  box.c\
  box_manager.c\
- box_neighbors.c\
  communication_info.c\
  computation.c\
  F90_HYPRE_struct_grid.c\
@@ -73,8 +72,6 @@ FILES =\
  HYPRE_struct_matrix.c\
  HYPRE_struct_stencil.c\
  HYPRE_struct_vector.c\
- new_assemble.c\
- new_box_neighbors.c\
  project.c\
  struct_axpy.c\
  struct_communication.c\

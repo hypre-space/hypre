@@ -112,11 +112,9 @@ HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
 int
 HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
 {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-   return ( hypre_StructGridAssembleWithAP(grid) );
-#else
-   return ( hypre_StructGridAssemble(grid) );
-#endif
+
+ return ( hypre_StructGridAssemble(grid) );
+
 }
 
 /*---------------------------------------------------------------------------

@@ -46,8 +46,6 @@ typedef struct hypre_StructGrid_struct
                       
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
    int                 *ids;          /* Unique IDs for boxes */
-                      
-   hypre_BoxNeighbors  *neighbors;    /* Neighbors of boxes */
    int                  max_distance; /* Neighborhood size */
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
@@ -56,14 +54,19 @@ typedef struct hypre_StructGrid_struct
    int                  global_size;  /* Total number of grid points */
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
+   int                  num_periods;  /* number of box set periods */
+   
+   hypre_Index         *pshifts;      /* shifts of periodicity */
+
 
    int                  ref_count;
 
- /* GEC0902 additions for ghost expansion of boxes */
 
    int                 ghlocal_size;   /* Number of vars in box including ghosts */
    int                 num_ghost[6];   /* ghost layer size for each box  */  
 
+   hypre_BoxManager   *box_man;
+   
 
 } hypre_StructGrid;
 
@@ -75,15 +78,18 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridDim(grid)           ((grid) -> dim)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
 #define hypre_StructGridIDs(grid)           ((grid) -> ids)
-#define hypre_StructGridNeighbors(grid)     ((grid) -> neighbors)
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 #define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
 #define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
 #define hypre_StructGridPeriodic(grid)      ((grid) -> periodic)
+#define hypre_StructGridNumPeriods(grid)    ((grid) -> num_periods)
+#define hypre_StructGridPShifts(grid)       ((grid) -> pshifts)
+#define hypre_StructGridPShift(grid, i)     ((grid) -> pshifts[i])
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
 #define hypre_StructGridGhlocalSize(grid)   ((grid) -> ghlocal_size)
 #define hypre_StructGridNumGhost(grid)      ((grid) -> num_ghost)
+#define hypre_StructGridBoxMan(grid)        ((grid) -> box_man) 
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))

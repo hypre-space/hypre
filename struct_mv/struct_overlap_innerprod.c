@@ -34,6 +34,11 @@
 
 #include "headers.h"
 
+/* this is all commented out now as it is currently not used - if used
+   in the future, it needs to use the box manager instead of the neighbors 
+   structure */
+
+#if 0
 
 /*--------------------------------------------------------------------------
  * hypre_StructOverlapInnerProd
@@ -305,3 +310,6 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
 
    return final_innerprod_result;
 }
+
+
+#endif
