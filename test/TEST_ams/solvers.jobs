@@ -39,3 +39,8 @@ mpirun -np 4 ./ams_driver -solver 3 > solvers.out.4
 mpirun -np 4 ./ams_driver -solver 3 -coord > solvers.out.5
 mpirun -np 4 ./ams_driver -solver 3 -h1 > solvers.out.6
 mpirun -np 4 ./ams_driver -solver 3 -h1 -coord > solvers.out.7
+
+mpirun -np 4 ./ams_driver -solver 5 -tol 1e-4 > solvers.out.8
+mpirun -np 4 ./ams_driver -solver 5 -tol 1e-4 -coord > solvers.out.9
+mpirun -np 4 ./ams_driver -solver 5 -tol 1e-4 -h1 > solvers.out.10
+mpirun -np 4 ./ams_driver -solver 5 -tol 1e-4 -h1 -coord > solvers.out.11

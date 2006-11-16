@@ -35,6 +35,8 @@ diff -bI"time" solvers.out.0 solvers.out.1 >&2
 diff -bI"time" solvers.out.2 solvers.out.3 >&2
 diff -bI"time" solvers.out.4 solvers.out.5 >&2
 diff -bI"time" solvers.out.6 solvers.out.7 >&2
+diff -bI"time" solvers.out.8 solvers.out.9 >&2
+diff -bI"time" solvers.out.10 solvers.out.11 >&2
 
 #=============================================================================
 # compare with baseline case
@@ -58,11 +60,23 @@ FILES="\
  ${TNAME}.out.6\
  ${TNAME}.out.7\
 "
-
 for i in $FILES
 do
   echo "# Output file: $i"
   tail -4 $i
+done >> ${TNAME}.out
+
+FILES="\
+ ${TNAME}.out.8\
+ ${TNAME}.out.9\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -22 $i | head -13
 done >> ${TNAME}.out
 
 if [ -z $HYPRE_NO_SAVED ]; then
