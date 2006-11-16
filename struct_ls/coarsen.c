@@ -138,7 +138,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_Box        *new_box;
    hypre_Box        *bounding_box;
 
-   int               i, myid, count;
+   int               i, j, myid, count;
    int               info_size, max_nentries;
    int               num_entries;
    int              *fids, *cids;
@@ -186,7 +186,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    
    /*** prune? ***/
    /* zero volume boxes are needed when forming
-    P and P^T  (ignore input variable prune)*/ 
+    P and P^T  */ 
    if (prune)
    {
       count = 0;    
@@ -235,15 +235,15 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    else
       new_dist = 0;
    
-   known = hypre_BoxManAllGlobalKnown(fboxman);
-   
+   hypre_BoxManGetAllGlobalKnown (fboxman, &known );
+
    if ( new_dist >= 2 || known)  /* large enough */
    {
       /*** update new max distance value */  
       if (known)
-         hypre_StructGridMaxDistance(cgrid) = max_distance;
+         hypre_StructGridSetMaxDistance(cgrid, max_distance);
       else
-         hypre_StructGridMaxDistance(cgrid) = new_dist;
+         hypre_StructGridSetMaxDistance(cgrid, new_dist);
 
       /*** update the new bounding box ***/
       bounding_box = hypre_BoxDuplicate(hypre_StructGridBoundingBox(fgrid));
@@ -260,22 +260,12 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       hypre_BoxDestroy(bounding_box);
 
       /*** update all global known ***/
-      hypre_BoxManAllGlobalKnown(cboxman) = known;
+      hypre_BoxManSetAllGlobalKnown(cboxman, known );
+      
 
-      /*** add my coarse grid boxes to the coarse grid box manager
-           (have already been pruned if necessary)  - re-number the entry 
-           ids to be sequential (this is the box number, really)*/
-      hypre_ForBoxI(i, my_boxes)
-      {
-         box = hypre_BoxArrayBox(my_boxes, i);
-         hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(box),
-                               hypre_BoxIMax(box), myid, i,
-                               entry_info );
-      }
-
-      /*** now get the off-proc entries from the fgrid box manager,
-           coarsen, and add to the coarse grid box manager */
-
+      /*** now get the entries from the fgrid box manager, coarsen,
+           and add to the coarse grid box manager (note: my boxes have
+           already been coarsened)*/
 
       hypre_BoxManGetAllEntries( fboxman , &num_entries, &entries); 
 
@@ -285,13 +275,14 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
       /* entries are sorted by (proc, id) pairs  - may not
         have entries for all processors, but for each processor
-        represented, we do have all its boxes. */
+        represented, we do have all its boxes. We will keep them sorted
+        in the new box manager - to avoid re-sorting*/
       for (i = 0; i < num_entries; i++)
       {
          entry = entries[i];
          proc = hypre_BoxManEntryProc(entry);
  
-         if  (proc != myid)/* already added my boxes */ 
+         if  (proc != myid)/* not my boxes */ 
          {
             hypre_BoxManEntryGetExtents(entry, ilower, iupper);
             hypre_BoxSetExtents(new_box, ilower, iupper);
@@ -299,7 +290,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
             id =  hypre_BoxManEntryId(entry);
             /* if there is pruning we need to adjust the ids 
                if any boxes drop out  (we want these ids 
-               sequential - no gaps) - and zero boxes are */
+               sequential - no gaps) - and zero boxes are 
+               not kept in the box manager*/
             if (prune)
             {  
                if (proc != last_proc) 
@@ -324,8 +316,28 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
                                   hypre_BoxIMax(new_box), proc, id,
                                      entry_info);
             }
+         } 
+         else /* my boxes*/
+            /*add my coarse grid boxes to the coarse grid box manager
+           (have already been pruned if necessary)  - re-number the entry 
+           ids to be sequential (this is the box number, really)*/
+         {
+            if (proc != last_proc) /* just do this once (the first myid ) */
+            {
+               hypre_ForBoxI(j, my_boxes)
+               {
+                  box = hypre_BoxArrayBox(my_boxes, j);
+                  hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(box),
+                                        hypre_BoxIMax(box), myid, j,
+                                        entry_info );
+               }
+               last_proc = proc;
+            }
          }
-      }
+      } /* loop through entries */
+
+      /* these entries are sorted */
+      hypre_BoxManSetIsEntriesSort(cboxman, 1 );
 
       hypre_BoxDestroy(new_box);
       
