@@ -32,9 +32,10 @@ int main (int argc, char *argv[])
    int amg_coarsen_type, amg_rlx_type, amg_agg_levels;
    int h1_method, singular_problem, coordinates;
    double tol, theta;
+   int blockSize;
    HYPRE_Solver solver, precond;
 
-   HYPRE_ParCSRMatrix A, G, Aalpha=0, Abeta=0;
+   HYPRE_ParCSRMatrix A, G, Aalpha=0, Abeta=0, M=0;
    HYPRE_ParVector x0, b;
    HYPRE_ParVector Gx=0, Gy=0, Gz=0;
    HYPRE_ParVector x=0, y=0, z=0;
@@ -59,6 +60,7 @@ int main (int argc, char *argv[])
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 0; amg_rlx_type = 3;  */ /* PMIS-0 */
    /* cycle_type = 7; amg_coarsen_type = 6; amg_agg_levels = 0; amg_rlx_type = 6;  */ /* Falgout-0 */
    theta = 0.25;
+   blockSize = 5;
 
    /* Parse command line */
    {
@@ -137,6 +139,11 @@ int main (int argc, char *argv[])
             arg_index++;
             theta = atof(argv[arg_index++]);
          }
+         else if ( strcmp(argv[arg_index], "-bsize") == 0 )
+         {
+            arg_index++;
+            blockSize = atoi(argv[arg_index++]);
+         }
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
             print_usage = 1;
@@ -160,6 +167,7 @@ int main (int argc, char *argv[])
          printf("                           2 - AMS                             \n");
          printf("                           3 - AMS-PCG (default)               \n");
          printf("                           4 - DS-PCG                          \n");
+         printf("                           5 - AME                             \n");
          printf("    -maxit <num>         : maximum number of iterations (100)  \n");
          printf("    -tol <num>           : convergence tolerance (1e-6)        \n");
          printf("\n");
@@ -175,6 +183,9 @@ int main (int argc, char *argv[])
          printf("    -coord               : use coordinate vectors              \n");
          printf("    -h1                  : use block-diag Poisson solves       \n");
          printf("    -sing                : curl-curl only (singular) problem   \n");
+         printf("\n");
+         printf("  AME eigensolver options:                                     \n");
+         printf("    -bsize<num>          : number of eigenvalues to compute    \n");
          printf("\n");
       }
 
@@ -501,6 +512,91 @@ int main (int argc, char *argv[])
          HYPRE_AMSDestroy(precond);
    }
 
+   if (solver_id == 5)
+   {
+      CheckIfFileExists("aFEM.M.D.0");
+      HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.M", &M);
+
+      time_index = hypre_InitializeTiming("AME Setup");
+      hypre_BeginTiming(time_index);
+
+      /* Create AMS preconditioner and specify any parameters */
+      HYPRE_AMSCreate(&precond);
+      HYPRE_AMSSetDimension(precond, dim);
+      HYPRE_AMSSetMaxIter(precond, 1);
+      HYPRE_AMSSetTol(precond, 0.0);
+      HYPRE_AMSSetCycleType(precond, cycle_type);
+      HYPRE_AMSSetPrintLevel(precond, 0);
+      HYPRE_AMSSetDiscreteGradient(precond, G);
+
+      /* Vectors Gx, Gy and Gz */
+      if (!coordinates)
+         HYPRE_AMSSetEdgeConstantVectors(precond,Gx,Gy,Gz);
+
+      /* Vectors x, y and z */
+      if (coordinates)
+         HYPRE_AMSSetCoordinateVectors(precond,x,y,z);
+
+      /* Poisson matrices */
+      if (h1_method)
+      {
+         HYPRE_AMSSetAlphaPoissonMatrix(precond, Aalpha);
+         HYPRE_AMSSetBetaPoissonMatrix(precond, Abeta);
+      }
+
+      if (singular_problem)
+         HYPRE_AMSSetBetaPoissonMatrix(precond, NULL);
+
+      /* Set up the AMS preconditioner */
+      HYPRE_AMSSetup(precond, A, b, x0);
+
+      /* Smoothing and AMG options */
+      HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, 1.0, 1.0);
+      HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta);
+      HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta);
+
+      /* Create AME object */
+      HYPRE_AMECreate(&solver);
+
+      /* Set main parameters */
+      HYPRE_AMESetAMSSolver(solver, precond);
+      HYPRE_AMESetMassMatrix(solver, M);
+      HYPRE_AMESetBlockSize(solver, blockSize);
+
+      /* Set additional parameters */
+      HYPRE_AMESetMaxIter(solver, maxit); /* max iterations */
+      HYPRE_AMESetTol(solver, tol); /* conv. tolerance */
+      if (myid == 0)
+         HYPRE_AMESetPrintLevel(solver, 1); /* print solve info */
+      else
+         HYPRE_AMESetPrintLevel(solver, 0);
+
+      /* Setup */
+      HYPRE_AMESetup(solver);
+
+      /* Finalize setup timing */
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("AME Solve");
+      hypre_BeginTiming(time_index);
+
+      /* Solve */
+      HYPRE_AMESolve(solver);
+
+      /* Finalize solve timing */
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      /* Destroy solver and preconditioner */
+      HYPRE_AMEDestroy(solver);
+      HYPRE_AMSDestroy(precond);
+   }
+
    /* Save the solution */
    /* HYPRE_ParVectorPrint(x0,"x.ams"); */
 
@@ -509,6 +605,8 @@ int main (int argc, char *argv[])
    HYPRE_ParVectorDestroy(x0);
    HYPRE_ParVectorDestroy(b);
    HYPRE_ParCSRMatrixDestroy(G);
+
+   if (M) HYPRE_ParCSRMatrixDestroy(M);
 
    if (Gx) HYPRE_ParVectorDestroy(Gx);
    if (Gy) HYPRE_ParVectorDestroy(Gy);
