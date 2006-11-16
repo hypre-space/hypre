@@ -42,14 +42,11 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_PARCSR_LS_HEADER
 #define hypre_PARCSR_LS_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "krylov.h"
 #include "seq_mv.h"
 #include "parcsr_mv.h"
-#include "temp_multivector.h"
- /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
-#include "HYPRE_MatvecFunctions.h"
- /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
+#include "HYPRE_lobpcg.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -10,10 +10,7 @@
 #include "krylov.h"
 #include "seq_mv.h"
 #include "parcsr_mv.h"
-#include "temp_multivector.h"
- /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
-#include "HYPRE_MatvecFunctions.h"
- /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
+#include "HYPRE_lobpcg.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +18,27 @@ extern "C" {
 
 typedef struct { int prev; int next; } Link;
 
+
+/* ame.c */
+void *hypre_AMECreate ( void );
+int hypre_AMEDestroy ( void *esolver );
+int hypre_AMESetAMSSolver ( void *esolver , void *ams_solver );
+int hypre_AMESetMassMatrix ( void *esolver , hypre_ParCSRMatrix *M );
+int hypre_AMESetBlockSize ( void *esolver , int block_size );
+int hypre_AMESetMaxIter ( void *esolver , int maxit );
+int hypre_AMESetTol ( void *esolver , double tol );
+int hypre_AMESetPrintLevel ( void *esolver , int print_level );
+int hypre_AMESetup ( void *esolver );
+int hypre_AMEDiscrDivFreeComponent ( void *esolver , hypre_ParVector *b );
+void hypre_AMEOperatorA ( void *data , void *x , void *y );
+void hypre_AMEMultiOperatorA ( void *data , void *x , void *y );
+void hypre_AMEOperatorM ( void *data , void *x , void *y );
+void hypre_AMEMultiOperatorM ( void *data , void *x , void *y );
+void hypre_AMEOperatorB ( void *data , void *x , void *y );
+void hypre_AMEMultiOperatorB ( void *data , void *x , void *y );
+int hypre_AMESolve ( void *esolver );
+int hypre_AMEGetEigenvectors ( void *esolver , HYPRE_ParVector **eigenvectors_ptr );
+int hypre_AMEGetEigenvalues ( void *esolver , double **eigenvalues_ptr );
 
 /* amg_hybrid.c */
 void *hypre_AMGHybridCreate ( void );
@@ -136,6 +154,20 @@ int BuildParFromOneFile ( int argc , char *argv [], int arg_index , HYPRE_ParCSR
 int BuildRhsParFromOneFile ( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr );
 int BuildParLaplacian9pt ( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt ( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+
+/* HYPRE_ame.c */
+int HYPRE_AMECreate ( HYPRE_Solver *esolver );
+int HYPRE_AMEDestroy ( HYPRE_Solver esolver );
+int HYPRE_AMESetup ( HYPRE_Solver esolver );
+int HYPRE_AMESolve ( HYPRE_Solver esolver );
+int HYPRE_AMESetAMSSolver ( HYPRE_Solver esolver , HYPRE_Solver ams_solver );
+int HYPRE_AMESetMassMatrix ( HYPRE_Solver esolver , HYPRE_ParCSRMatrix M );
+int HYPRE_AMESetBlockSize ( HYPRE_Solver esolver , int block_size );
+int HYPRE_AMESetMaxIter ( HYPRE_Solver esolver , int maxit );
+int HYPRE_AMESetTol ( HYPRE_Solver esolver , double tol );
+int HYPRE_AMESetPrintLevel ( HYPRE_Solver esolver , int print_level );
+int HYPRE_AMEGetEigenvalues ( HYPRE_Solver esolver , double **eigenvalues );
+int HYPRE_AMEGetEigenvectors ( HYPRE_Solver esolver , HYPRE_ParVector **eigenvectors );
 
 /* HYPRE_ams.c */
 int HYPRE_AMSCreate ( HYPRE_Solver *solver );
