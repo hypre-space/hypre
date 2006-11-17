@@ -241,7 +241,7 @@ hypre_StructGridSetMaxDistance( hypre_StructGrid *grid,
  *
  *   Notes:
  *   1. No longer need a different assemble for the assumed partition case
-     2. if this is called from StructCoarsen, then the Box Manager *may*
+     2. if this is called from StructCoarsen, then the Box Manager has
         already been created, and ids have been set
  *
  *--------------------------------------------------------------------------*/
@@ -522,6 +522,52 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 
       
    } /* end of if (!is_boxman) */
+   else if (max_distance == 0) /* boxman was created (by coarsen), but we need
+                                  to collect additional neighbor info */
+   {
+
+      /* pick a new max distance and set in grid*/  
+      max_distance = 8;
+      hypre_StructGridMaxDistance(grid) = max_distance;
+
+      grow_box = hypre_BoxCreate();
+      result_box = hypre_BoxCreate();
+      periodic_box = hypre_BoxCreate();
+
+      /* now loop through each local box */
+      hypre_ForBoxI(i, local_boxes)
+      {
+         box = hypre_BoxArrayBox(local_boxes, i);
+       
+         /* now expand box by max_distance or larger and gather entries */
+         hypre_CopyBox(box ,grow_box);     
+         hypre_BoxExpandConstant(grow_box, max_distance);
+         hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box), 
+                                   hypre_BoxIMax(grow_box));
+
+         /* now repeat for any periodic boxes - by shifting the grow_box*/
+         for (k=1; k < num_periods; k++) /* k=0 is original box */
+         {
+            hypre_CopyBox(grow_box, periodic_box);
+            pshift = pshifts[k];
+            hypre_BoxShiftPos(periodic_box, pshift);
+
+            /* see if the shifted box intersects the domain */  
+            hypre_IntersectBoxes(periodic_box, bounding_box, result_box);  
+            /* if so, call gather entries */
+            if (hypre_BoxVolume(result_box) > 0)
+            {
+               hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(periodic_box), 
+                                         hypre_BoxIMax(periodic_box));
+            }
+         }
+      }/* end of for each local box */
+      
+      hypre_BoxDestroy(periodic_box);
+      hypre_BoxDestroy(grow_box);
+      hypre_BoxDestroy(result_box);
+
+   }
    
    /***************Assemble the box manager *****************/
    

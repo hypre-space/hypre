@@ -765,9 +765,10 @@ int hypre_BoxManGetAllEntries( hypre_BoxManager *manager , int *num_entries,
   Notes: Should have already created the box array;
 
 
-  TO DO: Might want to just sotr the array of boxes seperate from the entries 
-         array so we don't have to create the everytime this function is called.
-         (may be called quite a bit in some sstruct apps)
+  TO DO: (?) Might want to just store the array of boxes seperate from the
+  entries array so we don't have to create the array everytime this
+  function is called.  (may be called quite a bit in some sstruct
+  apps)
 
 *--------------------------------------------------------------------------*/
 
@@ -1321,6 +1322,65 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                }
             }
             
+          
+            
+            /* TO DO: check to see if we have any entries from a processor before
+               contacting(if we have one entry from a processor, then we have
+               all of the entries) */
+               
+            
+            /* we will do we only do this if we have sorted - otherwise we
+               can't easily seach the proc list - this will be most common usage 
+               anyways*/             
+
+            if (hypre_BoxManIsEntriesSort(manager) && nentries)
+            {
+               
+               int new_count = 0;
+               int proc_spot = 0;
+               int known_id, contact_id;
+
+               for (i=0; i< proc_count; i++)
+               {
+                  
+                  contact_id = contact_proc_ids[i];
+
+                  while (proc_spot < nentries) 
+                  {
+                     known_id = procs_sort[proc_spot];
+                     if (contact_id > known_id)
+                     {
+                        proc_spot++;
+                     }
+                     else if (contact_id == known_id)
+                     {
+                        /* known already - remove from contact list -
+                         so go to next i and spot*/
+                        proc_spot++;
+                        break;
+                     }
+                     else /* contact_id < known_id */
+                     {
+                        /* this contact_id is not known already - 
+                           keep in list*/
+                        contact_proc_ids[new_count] = contact_id;
+                        new_count++;
+                        break;
+                        
+                     }
+                  }
+                  if (proc_spot == nentries) /* keep the rest */
+                  {
+                     contact_proc_ids[new_count] = contact_id;
+                     new_count++;
+                  }
+               }
+
+               proc_count = new_count;
+               
+            }
+
+            
             send_buf_starts = hypre_CTAlloc(int, proc_count + 1);
             for (i=0; i< proc_count+1; i++)
             {
@@ -1328,14 +1388,8 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             }
             send_buf = NULL;
             
-            
-            /* TO DO"  (?) check to see if we have any entries from a processor before
-               contacting???
-               
-               currently: don't check if we have an entry before getting more info -
-               we just eliminate duplicates later */ 
-            
-            
+
+
             
             /* exchange #2 - now we contact processors (send nothing) and
                that processor needs to send us all of their local entry
