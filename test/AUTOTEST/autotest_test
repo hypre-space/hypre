@@ -91,7 +91,7 @@ initialize_variables ()
 	OSF1)
 	    HYPRE_ARCH="dec";;
 	AIX)
-	    HYPRE_ARCH="blue";;
+	    HYPRE_ARCH="aix";;
 	"TFLOPS O/S")
 	    HYPRE_ARCH="red";;
 	Linux)
@@ -111,7 +111,7 @@ initialize_variables ()
 
 #
 # Need the nopoe script for AIX platforms to force single task
-  if [ "$HYPRE_ARCH" = "blue" ] ; then
+  if [ "$HYPRE_ARCH" = "aix" ] ; then
      CONFIGURE="nopoe ./configure"
   else
      CONFIGURE="./configure"

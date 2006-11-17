@@ -213,7 +213,7 @@ hypre_set_machine_options()
         HYPRE_MESSAGE='SECONDARY[uBGL]'
         ;;
      -up)
-        HYPRE_ARCH="blue"
+        HYPRE_ARCH="aix"
         HYPRE_COMPILE_MACHINE="up"
         HYPRE_RUN_MACHINE="up"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/aix_5_64_fed/AUTOTEST"
