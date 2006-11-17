@@ -310,7 +310,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    mlStrongThreshold_  = 0.08; // one suggested by Vanek/Brezina/Mandel
    mlCoarseSolver_     = 0;    // default coarse solver = SuperLU
    mlCoarsenScheme_    = 1;    // default coarsening scheme = uncoupled
-   mlNumPDEs_          = 1;    // default block size 
+   mlNumPDEs_          = 3;    // default block size 
 
    truncThresh_        = 0.0;
    rhsIDs_             = new int[1];
@@ -2239,7 +2239,7 @@ This should ultimately be taken out even for newer ale3d implementation
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
                       data[i*fieldSize+j]);
       }    
-      if ( HYPreconID_ == HYAMS && lookup_ != NULL )
+      if ( lookup_ != NULL )
       {
          blockIDs       = (int *) lookup_->getElemBlockIDs();
          blockID        = blockIDs[0];
