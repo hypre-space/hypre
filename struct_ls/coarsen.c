@@ -220,10 +220,14 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
 
    /***check the max_distance value of the fine grid to determine
-       whether we can populate the new coarse grid manager with the
-       same entries, or we will need to re-gather information in the
-       assemble.  Note: if all global info is already known for a 
-       grid, we also can just populate the box manager*/
+       whether we will need to re-gather information in the
+       assemble. If we need to re-gather, then the max_distance will
+       be set to 0.  Either way, we will create and populate the box
+       manager with the information from the fine grid.
+
+       Note: if all global info is already known for a 
+       grid, the we do not need to re-gathe regardless of the 
+       max_distance value. ****/
 
    coarsen_factor = hypre_IndexD(stride,0);   
    for (i = 1; i < dim; i++)
@@ -237,124 +241,120 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    
    hypre_BoxManGetAllGlobalKnown (fboxman, &known );
 
-   if ( new_dist >= 2 || known)  /* large enough */
+   if ( new_dist >= 2 || known)  /* large enough  - don't need to re-gather*/
    {
       /*** update new max distance value */  
       if (known)
          hypre_StructGridSetMaxDistance(cgrid, max_distance);
       else
          hypre_StructGridSetMaxDistance(cgrid, new_dist);
+   }
+   else  /* not large enough - set max_distance to 0 - neighbor info
+            will be collected during the assemble*/
+   {
+      hypre_StructGridSetMaxDistance(cgrid, 0);
+   }
 
-      /*** update the new bounding box ***/
-      bounding_box = hypre_BoxDuplicate(hypre_StructGridBoundingBox(fgrid));
-      hypre_StructCoarsenBox(bounding_box, index, stride);
 
-      hypre_StructGridSetBoundingBox(cgrid, bounding_box);
+   /*** update the new bounding box ***/
+   bounding_box = hypre_BoxDuplicate(hypre_StructGridBoundingBox(fgrid));
+   hypre_StructCoarsenBox(bounding_box, index, stride);
+   
+   hypre_StructGridSetBoundingBox(cgrid, bounding_box);
+   
+   /*** create a box manager for the coarse grid */ 
+   info_size = hypre_BoxManEntryInfoSize(fboxman);
+   max_nentries =  hypre_BoxManMaxNEntries(fboxman);
+   hypre_BoxManCreate(max_nentries, info_size, dim, bounding_box, 
+                      comm, &cboxman);
+   
+   hypre_BoxDestroy(bounding_box);
+   
+   /*** update all global known ***/
+   hypre_BoxManSetAllGlobalKnown(cboxman, known );
+   
+   
+   /*** now get the entries from the fgrid box manager, coarsen,
+        and add to the coarse grid box manager (note: my boxes have
+        already been coarsened)*/
+   
+   hypre_BoxManGetAllEntries( fboxman , &num_entries, &entries); 
 
-      /*** create a box manager for the coarse grid */ 
-      info_size = hypre_BoxManEntryInfoSize(fboxman);
-      max_nentries =  hypre_BoxManMaxNEntries(fboxman);
-      hypre_BoxManCreate(max_nentries, info_size, dim, bounding_box, 
-                         comm, &cboxman);
+   new_box = hypre_BoxCreate();
+   num = 0;
+   last_proc = -1;
 
-      hypre_BoxDestroy(bounding_box);
-
-      /*** update all global known ***/
-      hypre_BoxManSetAllGlobalKnown(cboxman, known );
+   /* entries are sorted by (proc, id) pairs  - may not
+      have entries for all processors, but for each processor
+      represented, we do have all its boxes. We will keep them sorted
+      in the new box manager - to avoid re-sorting*/
+   for (i = 0; i < num_entries; i++)
+   {
+      entry = entries[i];
+      proc = hypre_BoxManEntryProc(entry);
       
-
-      /*** now get the entries from the fgrid box manager, coarsen,
-           and add to the coarse grid box manager (note: my boxes have
-           already been coarsened)*/
-
-      hypre_BoxManGetAllEntries( fboxman , &num_entries, &entries); 
-
-      new_box = hypre_BoxCreate();
-      num = 0;
-      last_proc = -1;
-
-      /* entries are sorted by (proc, id) pairs  - may not
-        have entries for all processors, but for each processor
-        represented, we do have all its boxes. We will keep them sorted
-        in the new box manager - to avoid re-sorting*/
-      for (i = 0; i < num_entries; i++)
+      if  (proc != myid)/* not my boxes */ 
       {
-         entry = entries[i];
-         proc = hypre_BoxManEntryProc(entry);
- 
-         if  (proc != myid)/* not my boxes */ 
-         {
-            hypre_BoxManEntryGetExtents(entry, ilower, iupper);
-            hypre_BoxSetExtents(new_box, ilower, iupper);
-            hypre_StructCoarsenBox(new_box, index, stride);
-            id =  hypre_BoxManEntryId(entry);
-            /* if there is pruning we need to adjust the ids 
-               if any boxes drop out  (we want these ids 
-               sequential - no gaps) - and zero boxes are 
-               not kept in the box manager*/
-            if (prune)
-            {  
-               if (proc != last_proc) 
-               {
-                  num = 0;
-                  last_proc = proc;
-               }
-               if (hypre_BoxVolume(new_box))
-               {
-
-                  hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(new_box) ,
-                                        hypre_BoxIMax(new_box), proc, num,
-                                        entry_info);
-                  num++;
-               }
-            }
-            else /* no pruning - just use id (note that size zero boxes
-                  will not be saved in the box manager - so we will
-                  have gaps in the box numbers*/
+         hypre_BoxManEntryGetExtents(entry, ilower, iupper);
+         hypre_BoxSetExtents(new_box, ilower, iupper);
+         hypre_StructCoarsenBox(new_box, index, stride);
+         id =  hypre_BoxManEntryId(entry);
+         /* if there is pruning we need to adjust the ids 
+            if any boxes drop out  (we want these ids 
+            sequential - no gaps) - and zero boxes are 
+            not kept in the box manager*/
+         if (prune)
+         {  
+            if (proc != last_proc) 
             {
-               hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(new_box) ,
-                                  hypre_BoxIMax(new_box), proc, id,
-                                     entry_info);
-            }
-         } 
-         else /* my boxes*/
-            /*add my coarse grid boxes to the coarse grid box manager
-           (have already been pruned if necessary)  - re-number the entry 
-           ids to be sequential (this is the box number, really)*/
-         {
-            if (proc != last_proc) /* just do this once (the first myid ) */
-            {
-               hypre_ForBoxI(j, my_boxes)
-               {
-                  box = hypre_BoxArrayBox(my_boxes, j);
-                  hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(box),
-                                        hypre_BoxIMax(box), myid, j,
-                                        entry_info );
-               }
+               num = 0;
                last_proc = proc;
             }
+            if (hypre_BoxVolume(new_box))
+            {
+               
+               hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(new_box) ,
+                                     hypre_BoxIMax(new_box), proc, num,
+                                     entry_info);
+               num++;
+            }
          }
-      } /* loop through entries */
-
-      /* these entries are sorted */
-      hypre_BoxManSetIsEntriesSort(cboxman, 1 );
-
-      hypre_BoxDestroy(new_box);
-      
-      /* assign new box manager */
-      hypre_StructGridSetBoxManager(cgrid, cboxman);
-      
-   }
-   else  /* not large enough - select a new max_distance for this
-            coarse grid - neighbor info will be collected during the
-            assemble*/
-   {
-
-      /** ???? not sure what value is best to use for new_dist */
-      new_dist = 8;
-      hypre_StructGridSetMaxDistance(cgrid, new_dist);
-   }
+         else /* no pruning - just use id (note that size zero boxes
+                 will not be saved in the box manager - so we will
+                 have gaps in the box numbers*/
+         {
+            hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(new_box) ,
+                                  hypre_BoxIMax(new_box), proc, id,
+                                  entry_info);
+         }
+      } 
+      else /* my boxes*/
+         /*add my coarse grid boxes to the coarse grid box manager
+           (have already been pruned if necessary)  - re-number the entry 
+           ids to be sequential (this is the box number, really)*/
+      {
+         if (proc != last_proc) /* just do this once (the first myid ) */
+         {
+            hypre_ForBoxI(j, my_boxes)
+            {
+               box = hypre_BoxArrayBox(my_boxes, j);
+               hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(box),
+                                     hypre_BoxIMax(box), myid, j,
+                                     entry_info );
+            }
+            last_proc = proc;
+         }
+      }
+   } /* loop through entries */
    
+   /* these entries are sorted */
+   hypre_BoxManSetIsEntriesSort(cboxman, 1 );
+   
+   hypre_BoxDestroy(new_box);
+      
+   /* assign new box manager */
+   hypre_StructGridSetBoxManager(cgrid, cboxman);
+      
 
    /*** finally....assemble the new coarse grid***/
    hypre_StructGridAssemble(cgrid);
