@@ -836,12 +836,14 @@ main( int   argc,
       printf("       3=direct interpolation with separation of weights  \n");
       printf("       4=multipass interpolation  \n");
       printf("       5=multipass interpolation with separation of weights  \n");
-      printf("       6=extended interpolation  \n");
-      printf("       7=F-F interpolation  \n");
+      printf("       6=extended classical modified interpolation  \n");
+      printf("       7=extended (only if no common C neighbor) interpolation  \n");
       printf("       8=standard interpolation  \n");
       printf("       9=standard interpolation with separation of weights  \n");
       printf("      10=classical block interpolation for nodal systems AMG\n");
       printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
+      printf("      12=FF interpolation  \n");
+      printf("      13=FF1 interpolation  \n");
       printf("\n");
       printf("  -rlx  <val>            : relaxation type\n");
       printf("       0=Weighted Jacobi  \n");
