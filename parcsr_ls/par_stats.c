@@ -87,6 +87,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    int      coarsen_type;
    int      interp_type;
    int      measure_type;
+   int      agg_num_levels;
    double   global_nonzeros;
 
    double  *send_buff;
@@ -168,6 +169,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
    smooth_type = hypre_ParAMGDataSmoothType(amg_data);
    smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
+   agg_num_levels = hypre_ParAMGDataAggNumLevels(amg_data);
 
 
    A_block_array = hypre_ParAMGDataABlockArray(amg_data);
@@ -257,9 +259,14 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
 	printf(" Coarsening Type = CLJP, fixed random \n");
       }
-      if (coarsen_type > 0) 
+      /*if (coarsen_type > 0) 
       {
 	printf(" Hybrid Coarsening (switch to CLJP when coarsening slows)\n");
+      }*/
+
+      if (agg_num_levels > 0)
+      {
+	printf("\n No. of levels of aggressive coarsening: %d\n\n", agg_num_levels);
       }
       
 
