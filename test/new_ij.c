@@ -511,7 +511,7 @@ main( int   argc,
          arg_index++;
          agg_num_levels = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-np") == 0 )
+      else if ( strcmp(argv[arg_index], "-npaths") == 0 )
       {
          arg_index++;
          num_paths = atoi(argv[arg_index++]);
