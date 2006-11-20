@@ -484,11 +484,11 @@ void * hypre_AMSCreate()
    ams_data -> A_relax_weight = 1.0;   /* damping parameter */
    ams_data -> A_omega = 1.0;          /* SSOR coefficient */
    ams_data -> B_G_coarsen_type = 10;  /* HMIS coarsening */
-   ams_data -> B_G_agg_levels = 1;     /* Levels of aggresive coarsening */
+   ams_data -> B_G_agg_levels = 1;     /* Levels of aggressive coarsening */
    ams_data -> B_G_relax_type = 3;     /* hybrid G-S/Jacobi */
    ams_data -> B_G_theta = 0.25;       /* strength threshold */
    ams_data -> B_Pi_coarsen_type = 10; /* HMIS coarsening */
-   ams_data -> B_Pi_agg_levels = 1;    /* Levels of aggresive coarsening */
+   ams_data -> B_Pi_agg_levels = 1;    /* Levels of aggressive coarsening */
    ams_data -> B_Pi_relax_type = 3;    /* hybrid G-S/Jacobi */
    ams_data -> B_Pi_theta = 0.25;      /* strength threshold */
    ams_data -> beta_is_zero = 0;       /* the problem has a mass term */
