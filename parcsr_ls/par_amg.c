@@ -794,7 +794,7 @@ hypre_BoomerAMGSetInterpType( void     *data,
       return hypre_error_flag;
    } 
 
-   if (interp_type < 0 || interp_type > 12)
+   if (interp_type < 0 || interp_type > 13)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;

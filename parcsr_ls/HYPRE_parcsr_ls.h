@@ -478,8 +478,29 @@ int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
                                   double       S_commpkg_switch);
 
 /*
- * (Optional) Specifies the use of LS interpolation - least-squares
- * fitting of smooth vectors.
+ * (Optional) Defines which parallel interpolation operator is used.
+ * There are the following options for interp\_type: 
+* 
+* \begin{tabular}{|c|l|} \hline
+ * 0 &	classical modified interpolation \\
+ * 1 &	LS interpolation (for use with GSMG) \\
+ * 2 &	classical modified interpolation for hyperbolic PDEs \\
+ * 3 &	direct interpolation (with separation of weights) \\
+ * 4 &	multipass interpolation \\
+ * 5 &	multipass interpolation (with separation of weights) \\
+ * 6 &  extended classical modified interpolation \\
+ * 7 &  extended (if no common C neighbor) classical modified interpolation \\
+ * 8 &	standard interpolation \\
+ * 9 &	standard interpolation (with separation of weights) \\
+ * 10 &	classical block interpolation (for use with nodal systems version only) \\
+ * 11 &	classical block interpolation (for use with nodal systems version only) \\
+ *   &	with diagonalized diagonal blocks \\
+ * 12 &	FF interpolation \\
+ * 13 &	FF1 interpolation \\
+ * \hline
+ * \end{tabular}
+ * 
+ * The default is 0. 
  **/
 int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
                                  int          interp_type);

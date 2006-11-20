@@ -521,87 +521,66 @@ void initialize_vecs(int diag_n, int offd_n, int *diag_ftc, int *offd_ftc,
 
 /* Find nodes that are offd and are not contained in original offd
  * (neighbors of neighbors) */
-int new_offd_nodes(int **found, int A_ext_rows, int *A_ext_i, int *A_ext_j, 
-		   int num_cols_A_offd, int *col_map_offd, int col_1, 
+int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j, 
+		   int num_cols_S_offd, int *col_map_offd, int col_1, 
 		   int col_n, int *Sop_i, int *Sop_j)
 {
-  int i, i1, ii, j, ifound, kk, k1;
+  int i, i1, j, ifound, kk, k1;
   int got_loc, loc_col;
 
-  int min, max;
+  int min;
 
   int size_offP;
 
-  int *tmp_found, *intDummy;
+  int *tmp_found;
   int newoff = 0;
   int full_off_procNodes = 0;
 
-  if(num_cols_A_offd)
-  {
-    size_offP = num_cols_A_offd;
-    min = col_map_offd[0];
-    max = col_map_offd[num_cols_A_offd-1];
-  }
-  else
-  {
-    size_offP = 10;
-    min = 0; max = 0;
-  }
+  size_offP = A_ext_i[num_cols_A_offd];
   tmp_found = hypre_CTAlloc(int, size_offP);
 
   /* Find nodes that will be added to the off diag list */ 
-  for (i = 0; i < A_ext_rows; i++)
+  for (i = 0; i < num_cols_A_offd; i++)
   {
     for (j = A_ext_i[i]; j < A_ext_i[i+1]; j++)
     {
       i1 = A_ext_j[j];
       if(i1 < col_1 || i1 >= col_n)
       {
-	if(i1 < min || i1 > max)
-	{
-	  if(newoff >= size_offP)
-	  {
-	    size_offP += 10;
-	    intDummy = hypre_TReAlloc(tmp_found, int, size_offP);
-	    tmp_found = intDummy;
-	  }
-	  if(i1 < min) min = i1;
-	  if(i1 > max) max = i1;
-	  tmp_found[newoff]=i1;
-	  newoff++;
-	}
-	else
-	{
 	  ifound = hypre_BinarySearch(col_map_offd,i1,num_cols_A_offd);
 	  if(ifound == -1)
 	  {
-	    ifound = 0;
-	    for(ii = 0; ii < newoff; ii++)
-	      if(i1 == tmp_found[ii])
-		ifound = 1; 
-	    if(!ifound)
-	    {
-	      if(newoff >= size_offP)
-	      {
-		size_offP = newoff + 10;
-		intDummy = hypre_TReAlloc(tmp_found, int, size_offP);
-		tmp_found = intDummy;
-	      }
 	      tmp_found[newoff]=i1;
 	      newoff++;
-	    }
 	  }
-	}
+	  else
+	  {
+	      A_ext_j[j] = -ifound-1;
+	  }
       }
     }
   }
   /* Put found in monotone increasing order */
-  qsort0(tmp_found,0,newoff-1);
+  if (newoff > 0)
+  {
+     qsort0(tmp_found,0,newoff-1);
+     ifound = tmp_found[0];
+     min = 1;
+     for (i=1; i < newoff; i++)
+     {
+       if (tmp_found[i] > ifound)
+       {
+          ifound = tmp_found[i];
+          tmp_found[min++] = ifound;
+       }
+     }
+     newoff = min;
+  }
 
   full_off_procNodes = newoff + num_cols_A_offd;
   /* Set column indices for Sop and A_ext such that offd nodes are
    * negatively indexed */
-  for(i = 0; i < num_cols_A_offd; i++)
+  for(i = 0; i < num_cols_S_offd; i++)
    {
      for(kk = Sop_i[i]; kk < Sop_i[i+1]; kk++)
      {
@@ -633,33 +612,16 @@ int new_offd_nodes(int **found, int A_ext_rows, int *A_ext_i, int *A_ext_j,
 	 Sop_j[kk] = -loc_col - 1;
        }
      }
+   }
+  for(i = 0; i < num_cols_A_offd; i++)
+   {
      for (kk = A_ext_i[i]; kk < A_ext_i[i+1]; kk++)
      {
        k1 = A_ext_j[kk];
-       if(k1 < col_1 || k1 >= col_n)
+       if(k1 > -1 && (k1 < col_1 || k1 >= col_n))
        {
-	 if(newoff < num_cols_A_offd)
-	 {  
-	   got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
-	   if(got_loc > -1)
-	     loc_col = got_loc + num_cols_A_offd;
-	   else
-	     loc_col = hypre_BinarySearch(col_map_offd,k1,
-					  num_cols_A_offd);
-	 }
-	 else
-	 {
-	   loc_col = hypre_BinarySearch(col_map_offd,k1,
-					num_cols_A_offd);
-	   if(loc_col == -1)
-	     loc_col = hypre_BinarySearch(tmp_found,k1,newoff) +
-	       num_cols_A_offd;
-	 }
-	 if(loc_col < 0)
-	 {
-	   printf("Could not find node: STOP\n");
-	   return(-1);
-	 }
+	 got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
+	 loc_col = got_loc + num_cols_A_offd;
 	 A_ext_j[kk] = -loc_col - 1;
        }
      }
