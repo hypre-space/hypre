@@ -478,7 +478,18 @@ hypre_NewCommPkgCreate_core(
    /*-----------------------------------------------------------
     *  Return output info for setting up the comm package
     *-----------------------------------------------------------*/
-   
+  
+   if (!num_recvs)
+   {
+      hypre_TFree(recv_procs);
+      recv_procs = NULL;
+   }
+   if (!num_sends)
+   {
+      hypre_TFree(send_proc_obj.id);
+      send_proc_obj.id = NULL;
+   }
+
 
    *p_num_recvs = num_recvs;
    *p_recv_procs = recv_procs;
@@ -497,6 +508,12 @@ hypre_NewCommPkgCreate_core(
          send_proc_obj.elements[i] -= first_col_diag;
       }
    }
+   else
+   {
+      hypre_TFree(send_proc_obj.elements);
+      send_proc_obj.elements = NULL;
+   }
+   
    *p_send_map_elements =  send_proc_obj.elements;
 
 
@@ -518,6 +535,7 @@ hypre_NewCommPkgCreate_core(
    /* don't free send_proc_obj.id,send_proc_obj.vec_starts,send_proc_obj.elements;
       recv_procs, recv_vec_starts.  These are aliased to the comm package and
       will be destroyed there */
+
 
    return hypre_error_flag;
 
