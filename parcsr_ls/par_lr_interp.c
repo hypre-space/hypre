@@ -49,8 +49,6 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Communication Variables */
   MPI_Comm 	           comm = hypre_ParCSRMatrixComm(A);   
   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-  hypre_ParCSRCommPkg     *new_comm_pkg;
-
   int              my_id, num_procs;
 
   /* Variables to store input variables */
@@ -96,7 +94,7 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int              P_offd_size;
   int             *P_marker; 
   int             *P_marker_offd;
-  int             *P_node_add;  
+  
   int             *CF_marker_offd, *tmp_CF_marker_offd;
   int             *dof_func_offd = NULL;
 
@@ -149,11 +147,8 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   double           wall_2 = 0;
   double           wall_3 = 0;
   
-  /* Expanded communication for neighbor of neighbors */
-  int new_num_recvs, *new_recv_procs, *new_recv_vec_starts;
-  int new_num_sends, *new_send_procs, *new_send_map_starts;
-  int *new_send_map_elmts;
-  
+
+  hypre_ParCSRCommPkg	*extend_comm_pkg = NULL;
 
   if (debug_flag== 4) wall_time = time_getWallclockSeconds();
 
@@ -172,11 +167,7 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-     hypre_NewCommPkgCreate(A);
-#else
      hypre_MatvecCommPkgCreate(A);
-#endif
      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
    
@@ -212,35 +203,25 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
-     new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-     hypre_ParCSRCommExtendA(A, newoff, found, &new_num_recvs, 
-			     &new_recv_procs, &new_recv_vec_starts, 
-			     &new_num_sends, &new_send_procs, 
-			     &new_send_map_starts, &new_send_map_elmts, 
-			     &P_node_add);
+
+     /* AHB - create a new comm package just for extended info -
+        this will work better with the assumed partition*/
+     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
+                                   &extend_comm_pkg);
      
-     hypre_ParCSRCommPkgComm(new_comm_pkg) = comm;
-     hypre_ParCSRCommPkgNumRecvs(new_comm_pkg) = new_num_recvs;
-     hypre_ParCSRCommPkgRecvProcs(new_comm_pkg) = new_recv_procs;
-     hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg) = new_recv_vec_starts;
-     hypre_ParCSRCommPkgNumSends(new_comm_pkg) = new_num_sends;
-     hypre_ParCSRCommPkgSendProcs(new_comm_pkg) = new_send_procs;
-     hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg) = new_send_map_starts;
-     hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg) = new_send_map_elmts;
-   
-     /* Insert nodes that are added from neighbors of neighbors connections */
      CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
      if (num_functions > 1 && full_off_procNodes > 0)
-       dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
-    
-     insert_new_nodes(new_comm_pkg, CF_marker, P_node_add, num_cols_A_offd, 
-		      full_off_procNodes, num_procs, CF_marker_offd);
+        dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
+                          full_off_procNodes, CF_marker_offd);
+     
      if(num_functions > 1)
-       insert_new_nodes(new_comm_pkg, dof_func, P_node_add, num_cols_A_offd, 
-	 full_off_procNodes, num_procs, dof_func_offd);
+        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
+                             full_off_procNodes, dof_func_offd);
    }
-   else
-       new_comm_pkg = comm_pkg;
+
 
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
@@ -428,9 +409,11 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    {
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] += my_first_cpt;
-     insert_new_nodes(new_comm_pkg, fine_to_coarse, P_node_add, 
-		      num_cols_A_offd, full_off_procNodes, num_procs, 
+
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, fine_to_coarse, 
+		      full_off_procNodes, 
 		      fine_to_coarse_offd);
+
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] -= my_first_cpt;
    }
@@ -1085,25 +1068,17 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      hypre_TFree(P_marker_offd);
      hypre_TFree(CF_marker_offd);
      hypre_TFree(tmp_CF_marker_offd);
-     hypre_TFree(P_node_add);
+
      if(num_functions > 1)
        hypre_TFree(dof_func_offd);
      hypre_TFree(found);
 
-     if (hypre_ParCSRCommPkgSendProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg));
-     hypre_TFree(new_comm_pkg);
+     hypre_MatvecCommPkgDestroy(extend_comm_pkg);
+
    }
    
-   return(0);  
+ 
+   return hypre_error_flag;  
 }
 
 /*---------------------------------------------------------------------------
@@ -1121,7 +1096,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Communication Variables */
   MPI_Comm 	           comm = hypre_ParCSRMatrixComm(A);   
   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-  hypre_ParCSRCommPkg     *new_comm_pkg;
+
 
   int              my_id, num_procs;
 
@@ -1168,7 +1143,6 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int              P_offd_size;
   int             *P_marker; 
   int             *P_marker_offd;
-  int             *P_node_add;  
   int             *CF_marker_offd, *tmp_CF_marker_offd;
   int             *dof_func_offd = NULL;
 
@@ -1212,11 +1186,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   double           one  = 1.0;
   double           wall_time;
   
-  /* Expanded communication for neighbor of neighbors */
-  int new_num_recvs, *new_recv_procs, *new_recv_vec_starts;
-  int new_num_sends, *new_send_procs, *new_send_map_starts;
-  int *new_send_map_elmts;
-  
+
+  hypre_ParCSRCommPkg	*extend_comm_pkg = NULL;
+
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
                                                                                                
    P_diag_size = jj_counter;
@@ -1235,11 +1207,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-     hypre_NewCommPkgCreate(A);
-#else
      hypre_MatvecCommPkgCreate(A);
-#endif
      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -1275,35 +1243,25 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
-     new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-     hypre_ParCSRCommExtendA(A, newoff, found, &new_num_recvs, 
-			     &new_recv_procs, &new_recv_vec_starts, 
-			     &new_num_sends, &new_send_procs, 
-			     &new_send_map_starts, &new_send_map_elmts, 
-			     &P_node_add);
-     
-     hypre_ParCSRCommPkgComm(new_comm_pkg) = comm;
-     hypre_ParCSRCommPkgNumRecvs(new_comm_pkg) = new_num_recvs;
-     hypre_ParCSRCommPkgRecvProcs(new_comm_pkg) = new_recv_procs;
-     hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg) = new_recv_vec_starts;
-     hypre_ParCSRCommPkgNumSends(new_comm_pkg) = new_num_sends;
-     hypre_ParCSRCommPkgSendProcs(new_comm_pkg) = new_send_procs;
-     hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg) = new_send_map_starts;
-     hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg) = new_send_map_elmts;
-   
-     /* Insert nodes that are added from neighbors of neighbors connections */
-     CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
-     if (num_functions > 1 && full_off_procNodes > 0)
-       dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
     
-     insert_new_nodes(new_comm_pkg, CF_marker, P_node_add, num_cols_A_offd, 
-		      full_off_procNodes, num_procs, CF_marker_offd);
+     /* AHB - create a new comm package just for extended info -
+        this will work better with the assumed partition*/
+     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
+                                   &extend_comm_pkg);
+     
+     CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
+     if (num_functions > 1 && full_off_procNodes > 0)
+        dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
+                          full_off_procNodes, CF_marker_offd);
+     
      if(num_functions > 1)
-       insert_new_nodes(new_comm_pkg, dof_func, P_node_add, num_cols_A_offd, 
-	 full_off_procNodes, num_procs, dof_func_offd);
+        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
+                             full_off_procNodes, dof_func_offd);
    }
-   else
-     new_comm_pkg = comm_pkg;
+  
 
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
@@ -1492,9 +1450,11 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    {
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] += my_first_cpt;
-     insert_new_nodes(new_comm_pkg, fine_to_coarse, P_node_add, 
-		      num_cols_A_offd, full_off_procNodes, num_procs, 
+    
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, fine_to_coarse, 
+		      full_off_procNodes, 
 		      fine_to_coarse_offd);
+
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] -= my_first_cpt;
    }
@@ -1939,22 +1899,14 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      if(num_functions > 1)
        hypre_TFree(dof_func_offd);
      hypre_TFree(found);
-     hypre_TFree(P_node_add);
 
-     if (hypre_ParCSRCommPkgSendProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg));
-     hypre_TFree(new_comm_pkg);
+
+     hypre_MatvecCommPkgDestroy(extend_comm_pkg);
+   
+
    }
    
-   return(0);  
+   return hypre_error_flag;  
 }
 
 /*---------------------------------------------------------------------------
@@ -1972,7 +1924,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Communication Variables */
   MPI_Comm 	           comm = hypre_ParCSRMatrixComm(A);   
   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-  hypre_ParCSRCommPkg     *new_comm_pkg;
+
 
   int              my_id, num_procs;
 
@@ -2019,7 +1971,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int              P_offd_size;
   int             *P_marker; 
   int             *P_marker_offd;
-  int             *P_node_add;  
+
   int             *CF_marker_offd, *tmp_CF_marker_offd;
   int             *dof_func_offd = NULL;
   /*int             **ext_p, **ext_p_offd;*/
@@ -2067,12 +2019,9 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Definitions */
   double           zero = 0.0;
   double           one  = 1.0;
-  
-  /* Expanded communication for neighbor of neighbors */
-  int new_num_recvs, *new_recv_procs, *new_recv_vec_starts;
-  int new_num_sends, *new_send_procs, *new_send_map_starts;
-  int *new_send_map_elmts;
-  
+
+  hypre_ParCSRCommPkg	*extend_comm_pkg = NULL;
+
   /* BEGIN */
   MPI_Comm_size(comm, &num_procs);   
   MPI_Comm_rank(comm,&my_id);
@@ -2088,11 +2037,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-     hypre_NewCommPkgCreate(A);
-#else
      hypre_MatvecCommPkgCreate(A);
-#endif
      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -2128,35 +2073,27 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
-     new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-     hypre_ParCSRCommExtendA(A, newoff, found, &new_num_recvs, 
-			     &new_recv_procs, &new_recv_vec_starts, 
-			     &new_num_sends, &new_send_procs, 
-			     &new_send_map_starts, &new_send_map_elmts, 
-			     &P_node_add);
+
+     /* AHB - create a new comm package just for extended info -
+        this will work better with the assumed partition*/
+     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
+                                   &extend_comm_pkg);
      
-     hypre_ParCSRCommPkgComm(new_comm_pkg) = comm;
-     hypre_ParCSRCommPkgNumRecvs(new_comm_pkg) = new_num_recvs;
-     hypre_ParCSRCommPkgRecvProcs(new_comm_pkg) = new_recv_procs;
-     hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg) = new_recv_vec_starts;
-     hypre_ParCSRCommPkgNumSends(new_comm_pkg) = new_num_sends;
-     hypre_ParCSRCommPkgSendProcs(new_comm_pkg) = new_send_procs;
-     hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg) = new_send_map_starts;
-     hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg) = new_send_map_elmts;
-     
-     /* Insert nodes that are added from neighbors of neighbors connections */
      CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
      if (num_functions > 1 && full_off_procNodes > 0)
-       dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
-    
-     insert_new_nodes(new_comm_pkg, CF_marker, P_node_add, num_cols_A_offd, 
-		      full_off_procNodes, num_procs, CF_marker_offd);
+        dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
+                          full_off_procNodes, CF_marker_offd);
+     
      if(num_functions > 1)
-       insert_new_nodes(new_comm_pkg, dof_func, P_node_add, num_cols_A_offd, 
-	 full_off_procNodes, num_procs, dof_func_offd);
+        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
+                             full_off_procNodes, dof_func_offd);
+   
+
    }
-   else
-     new_comm_pkg = comm_pkg;
+
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
     *-----------------------------------------------------------------------*/
@@ -2466,9 +2403,11 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    {
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] += my_first_cpt;
-     insert_new_nodes(new_comm_pkg, fine_to_coarse, P_node_add, 
-		      num_cols_A_offd, full_off_procNodes, num_procs, 
+
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, fine_to_coarse, 
+		      full_off_procNodes, 
 		      fine_to_coarse_offd);
+
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] -= my_first_cpt;
    }
@@ -3012,7 +2951,6 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    
    if (num_procs > 1) 
    {
-     hypre_TFree(P_node_add);
      /*hypre_TFree(clist_offd);*/
      hypre_CSRMatrixDestroy(Sop);
      hypre_CSRMatrixDestroy(A_ext);
@@ -3024,20 +2962,10 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        hypre_TFree(dof_func_offd);
      hypre_TFree(found);
      
-     if (hypre_ParCSRCommPkgSendProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg));
-     hypre_TFree(new_comm_pkg);
+     hypre_MatvecCommPkgDestroy(extend_comm_pkg);
    }
    
-   return(0);  
+   return hypre_error_flag;  
 }
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildFFInterp
@@ -3054,7 +2982,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Communication Variables */
   MPI_Comm 	           comm = hypre_ParCSRMatrixComm(A);   
   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-  hypre_ParCSRCommPkg     *new_comm_pkg;
+
 
   int              my_id, num_procs;
 
@@ -3101,7 +3029,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int              P_offd_size;
   int             *P_marker; 
   int             *P_marker_offd;
-  int             *P_node_add;  
+
   int             *CF_marker_offd, *tmp_CF_marker_offd;
   int             *dof_func_offd = NULL;
   /*int             **ext_p, **ext_p_offd;*/
@@ -3151,10 +3079,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   double           zero = 0.0;
   double           one  = 1.0;
   
-  /* Expanded communication for neighbor of neighbors */
-  int new_num_recvs, *new_recv_procs, *new_recv_vec_starts;
-  int new_num_sends, *new_send_procs, *new_send_map_starts;
-  int *new_send_map_elmts;
+  hypre_ParCSRCommPkg	*extend_comm_pkg = NULL;
   
   /* BEGIN */
   MPI_Comm_size(comm, &num_procs);   
@@ -3171,11 +3096,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-     hypre_NewCommPkgCreate(A);
-#else
      hypre_MatvecCommPkgCreate(A);
-#endif
      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -3211,35 +3132,27 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
-     new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-     hypre_ParCSRCommExtendA(A, newoff, found, &new_num_recvs, 
-			     &new_recv_procs, &new_recv_vec_starts, 
-			     &new_num_sends, &new_send_procs, 
-			     &new_send_map_starts, &new_send_map_elmts, 
-			     &P_node_add);
-     
-     hypre_ParCSRCommPkgComm(new_comm_pkg) = comm;
-     hypre_ParCSRCommPkgNumRecvs(new_comm_pkg) = new_num_recvs;
-     hypre_ParCSRCommPkgRecvProcs(new_comm_pkg) = new_recv_procs;
-     hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg) = new_recv_vec_starts;
-     hypre_ParCSRCommPkgNumSends(new_comm_pkg) = new_num_sends;
-     hypre_ParCSRCommPkgSendProcs(new_comm_pkg) = new_send_procs;
-     hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg) = new_send_map_starts;
-     hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg) = new_send_map_elmts;
-     
-     /* Insert nodes that are added from neighbors of neighbors connections */
-     CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
-     if (num_functions > 1 && full_off_procNodes > 0)
-       dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
     
-     insert_new_nodes(new_comm_pkg, CF_marker, P_node_add, num_cols_A_offd, 
-		      full_off_procNodes, num_procs, CF_marker_offd);
+     /* AHB - create a new comm package just for extended info -
+        this will work better with the assumed partition*/
+     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
+                                   &extend_comm_pkg);
+     
+     CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
+     if (num_functions > 1 && full_off_procNodes > 0)
+        dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
+                          full_off_procNodes, CF_marker_offd);
+     
      if(num_functions > 1)
-       insert_new_nodes(new_comm_pkg, dof_func, P_node_add, num_cols_A_offd, 
-	 full_off_procNodes, num_procs, dof_func_offd);
+        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
+                             full_off_procNodes, dof_func_offd);
+
+
    }
-   else
-     new_comm_pkg = comm_pkg;
+   
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
     *-----------------------------------------------------------------------*/
@@ -3549,9 +3462,11 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    {
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] += my_first_cpt;
-     insert_new_nodes(new_comm_pkg, fine_to_coarse, P_node_add, 
-		      num_cols_A_offd, full_off_procNodes, num_procs, 
-		      fine_to_coarse_offd);
+    
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, fine_to_coarse, 
+                          full_off_procNodes, 
+                          fine_to_coarse_offd);
+
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] -= my_first_cpt;
    }
@@ -4091,7 +4006,6 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    
    if (num_procs > 1) 
    {
-     hypre_TFree(P_node_add);
      /*hypre_TFree(clist_offd);*/
      hypre_CSRMatrixDestroy(Sop);
      hypre_CSRMatrixDestroy(A_ext);
@@ -4102,21 +4016,12 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      if(num_functions > 1)
        hypre_TFree(dof_func_offd);
      hypre_TFree(found);
-     
-     if (hypre_ParCSRCommPkgSendProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg));
-     hypre_TFree(new_comm_pkg);
+
+     hypre_MatvecCommPkgDestroy(extend_comm_pkg);
+ 
    }
    
-   return(0);  
+   return hypre_error_flag;  
 }
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildFF1Interp
@@ -4133,7 +4038,6 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Communication Variables */
   MPI_Comm 	           comm = hypre_ParCSRMatrixComm(A);   
   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-  hypre_ParCSRCommPkg     *new_comm_pkg;
 
   int              my_id, num_procs;
 
@@ -4180,7 +4084,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
   int              P_offd_size;
   int             *P_marker; 
   int             *P_marker_offd;
-  int             *P_node_add;  
+
   int             *CF_marker_offd, *tmp_CF_marker_offd;
   int             *dof_func_offd = NULL;
   /*int             **ext_p, **ext_p_offd;*/
@@ -4230,11 +4134,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
   double           zero = 0.0;
   double           one  = 1.0;
   
-  /* Expanded communication for neighbor of neighbors */
-  int new_num_recvs, *new_recv_procs, *new_recv_vec_starts;
-  int new_num_sends, *new_send_procs, *new_send_map_starts;
-  int *new_send_map_elmts;
-  
+  hypre_ParCSRCommPkg	*extend_comm_pkg = NULL;
   /* BEGIN */
   MPI_Comm_size(comm, &num_procs);   
   MPI_Comm_rank(comm,&my_id);
@@ -4250,11 +4150,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-     hypre_NewCommPkgCreate(A);
-#else
      hypre_MatvecCommPkgCreate(A);
-#endif
      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -4290,35 +4186,25 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
-     new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-     hypre_ParCSRCommExtendA(A, newoff, found, &new_num_recvs, 
-			     &new_recv_procs, &new_recv_vec_starts, 
-			     &new_num_sends, &new_send_procs, 
-			     &new_send_map_starts, &new_send_map_elmts, 
-			     &P_node_add);
+
+     /* AHB - create a new comm package just for extended info -
+        this will work better with the assumed partition*/
+     hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
+                                   &extend_comm_pkg);
      
-     hypre_ParCSRCommPkgComm(new_comm_pkg) = comm;
-     hypre_ParCSRCommPkgNumRecvs(new_comm_pkg) = new_num_recvs;
-     hypre_ParCSRCommPkgRecvProcs(new_comm_pkg) = new_recv_procs;
-     hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg) = new_recv_vec_starts;
-     hypre_ParCSRCommPkgNumSends(new_comm_pkg) = new_num_sends;
-     hypre_ParCSRCommPkgSendProcs(new_comm_pkg) = new_send_procs;
-     hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg) = new_send_map_starts;
-     hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg) = new_send_map_elmts;
-     
-     /* Insert nodes that are added from neighbors of neighbors connections */
      CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
      if (num_functions > 1 && full_off_procNodes > 0)
-       dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
-    
-     insert_new_nodes(new_comm_pkg, CF_marker, P_node_add, num_cols_A_offd, 
-		      full_off_procNodes, num_procs, CF_marker_offd);
+        dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
+     
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, CF_marker, 
+                          full_off_procNodes, CF_marker_offd);
+     
      if(num_functions > 1)
-       insert_new_nodes(new_comm_pkg, dof_func, P_node_add, num_cols_A_offd, 
-	 full_off_procNodes, num_procs, dof_func_offd);
+        alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func, 
+                             full_off_procNodes, dof_func_offd);
    }
-   else
-     new_comm_pkg = comm_pkg;
+
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
     *-----------------------------------------------------------------------*/
@@ -4629,9 +4515,11 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
    {
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] += my_first_cpt;
-     insert_new_nodes(new_comm_pkg, fine_to_coarse, P_node_add, 
-		      num_cols_A_offd, full_off_procNodes, num_procs, 
-		      fine_to_coarse_offd);
+
+     alt_insert_new_nodes(comm_pkg, extend_comm_pkg, fine_to_coarse, 
+                          full_off_procNodes, 
+                          fine_to_coarse_offd);
+
      for (i = 0; i < n_fine; i++)
        fine_to_coarse[i] -= my_first_cpt;
    }
@@ -5175,7 +5063,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
    
    if (num_procs > 1) 
    {
-     hypre_TFree(P_node_add);
+
      /*hypre_TFree(clist_offd);*/
      hypre_CSRMatrixDestroy(Sop);
      hypre_CSRMatrixDestroy(A_ext);
@@ -5187,18 +5075,9 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
        hypre_TFree(dof_func_offd);
      hypre_TFree(found);
      
-     if (hypre_ParCSRCommPkgSendProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvProcs(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvProcs(new_comm_pkg));
-     if (hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg))
-       hypre_TFree(hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg));
-     hypre_TFree(new_comm_pkg);
+     hypre_MatvecCommPkgDestroy(extend_comm_pkg);
+
    }
    
-   return(0);  
+   return hypre_error_flag;  
 }

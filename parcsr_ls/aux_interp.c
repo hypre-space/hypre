@@ -12,7 +12,7 @@
  * terms of the GNU General Public License (as published by the Free Software
  * Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * HYPRE is distributed in the hope that it will  useful, but WITHOUT ANY 
  * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
  * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
  * Public License for more details.
@@ -32,6 +32,10 @@
  * Auxilary routines for the long range interpolation methods.
  *  Implemented: "standard", "extended", "multipass", "FF"
  *--------------------------------------------------------------------------*/
+#if 0
+
+/* AHB - this has been replaced by the function after this one - we should
+   delete this */
 
 /* Inserts nodes to position expected for CF_marker_offd and P_marker_offd.
  * This is different than the send/recv vecs
@@ -113,8 +117,195 @@ void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, int *IN_marker,
   } 
   return;
 } 
+#endif
+/* AHB 11/06: Modification of the above original - takes two
+   communication packages and inserts nodes to position expected for
+   OUT_marker
+  
+   offd nodes from comm_pkg take up first chunk of CF_marker_offd, offd 
+   nodes from extend_comm_pkg take up the second chunk 0f CF_marker_offd. */
+
+
+
+int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, 
+                          hypre_ParCSRCommPkg *extend_comm_pkg,
+                          int *IN_marker, 
+                          int full_off_procNodes,
+                          int *OUT_marker)
+{   
+  hypre_ParCSRCommHandle  *comm_handle;
+
+  int i, j, start, index, shift;
+
+  int num_sends, num_recvs;
+  
+  int *recv_vec_starts;
+
+  int e_num_sends;
+
+  int *int_buf_data;
+  int *e_out_marker;
+  
+
+  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+  num_recvs =  hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+  recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+
+  e_num_sends = hypre_ParCSRCommPkgNumSends(extend_comm_pkg);
+
+
+  index = hypre_max(hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                    hypre_ParCSRCommPkgSendMapStart(extend_comm_pkg, e_num_sends));
+
+  int_buf_data = hypre_CTAlloc(int, index);
+
+  /* orig commpkg data*/
+  index = 0;
+  
+  for (i = 0; i < num_sends; i++)
+  {
+    start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+    for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); 
+	 j++)
+      int_buf_data[index++] 
+	= IN_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+  }
+   
+  comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+					      OUT_marker);
+   
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  comm_handle = NULL;
+  
+  /* now do the extend commpkg */
+
+  /* first we need to shift our position in the OUT_marker */
+  shift = recv_vec_starts[num_recvs];
+  e_out_marker = OUT_marker + shift;
+  
+  index = 0;
+
+  for (i = 0; i < e_num_sends; i++)
+  {
+    start = hypre_ParCSRCommPkgSendMapStart(extend_comm_pkg, i);
+    for (j = start; j < hypre_ParCSRCommPkgSendMapStart(extend_comm_pkg, i+1); 
+	 j++)
+       int_buf_data[index++] 
+	= IN_marker[hypre_ParCSRCommPkgSendMapElmt(extend_comm_pkg,j)];
+  }
+   
+  comm_handle = hypre_ParCSRCommHandleCreate( 11, extend_comm_pkg, int_buf_data, 
+					      e_out_marker);
+   
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  comm_handle = NULL;
+  
+  hypre_TFree(int_buf_data);
+    
+  return hypre_error_flag;
+} 
+
+
+
+/* AHB 11/06 : alternate to the extend function below - creates a
+ * second comm pkg based on found - this makes it easier to use the
+ * global partition*/
+int
+hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, int newoff, int *found, 
+                              hypre_ParCSRCommPkg **extend_comm_pkg)
+
+{
+   
+
+   int			num_sends;
+   int			*send_procs;
+   int			*send_map_starts;
+   int			*send_map_elmts;
+ 
+   int			num_recvs;
+   int			*recv_procs;
+   int			*recv_vec_starts;
+
+   hypre_ParCSRCommPkg	*new_comm_pkg;
+
+   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
+
+   int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+  /* use found instead of col_map_offd in A, and newoff instead 
+      of num_cols_offd*/
+
+#if HYPRE_NO_GLOBAL_PARTITION
+
+   int        row_start=0, row_end=0, col_start = 0, col_end = 0;
+   int        global_num_cols;
+   hypre_IJAssumedPart   *apart;
+   
+   hypre_ParCSRMatrixGetLocalRange( A,
+                                    &row_start, &row_end ,
+                                    &col_start, &col_end );
+   
+
+   global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A); 
+
+   /* Create the assumed partition */
+   if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
+   {
+      hypre_ParCSRMatrixCreateAssumedPartition(A);
+   }
+
+   apart = hypre_ParCSRMatrixAssumedPartition(A);
+   
+   hypre_NewCommPkgCreate_core( comm, found, first_col_diag, 
+                                col_start, col_end, 
+                                newoff, global_num_cols,
+                                &num_recvs, &recv_procs, &recv_vec_starts,
+                                &num_sends, &send_procs, &send_map_starts, 
+                                &send_map_elmts, apart);
+
+#else   
+   int  *col_starts = hypre_ParCSRMatrixColStarts(A);
+   int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
+   
+   hypre_MatvecCommPkgCreate_core
+      (
+         comm, found, first_col_diag, col_starts,
+         num_cols_diag, newoff,
+         first_col_diag, found,
+         1,
+         &num_recvs, &recv_procs, &recv_vec_starts,
+         &num_sends, &send_procs, &send_map_starts,
+         &send_map_elmts
+         );
+
+#endif
+
+   new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+
+   hypre_ParCSRCommPkgComm(new_comm_pkg) = comm;
+
+   hypre_ParCSRCommPkgNumRecvs(new_comm_pkg) = num_recvs;
+   hypre_ParCSRCommPkgRecvProcs(new_comm_pkg) = recv_procs;
+   hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg) = recv_vec_starts;
+   hypre_ParCSRCommPkgNumSends(new_comm_pkg) = num_sends;
+   hypre_ParCSRCommPkgSendProcs(new_comm_pkg) = send_procs;
+   hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg) = send_map_starts;
+   hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg) = send_map_elmts;
+
+
+
+   *extend_comm_pkg = new_comm_pkg;
+   
+
+   return hypre_error_flag;
+   
+}
+
+#if 0
+/* this has been replaced by the function above - we should delete
+ * this one*/
 
 /* Add new communication patterns for new offd nodes */
+
 void
 hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
 			int *p_num_recvs, int **p_recv_procs,
@@ -432,6 +623,8 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
 
    return;
 }
+
+#endif
 
 /* sort for non-ordered arrays */
 int ssort(int *data, int n)
