@@ -1020,18 +1020,17 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
          int *proc_array;
          int *ap_proc_ids;
          int  count;
+         int threshold;
         
          int  max_response_size;
          int  non_info_size, entry_size_bytes;
-         int *neighbor_proc_ids = NULL, *neighbor_boxnums = NULL;
+         int *neighbor_proc_ids = NULL;
          int *response_buf_starts;
          int *response_buf;
          int  response_size, tmp_int;
 
          int *send_buf = NULL;
          int *send_buf_starts = NULL;
-         int *order_index = NULL;
-         int *delete_array = NULL;
          int  d, proc, id, last_id;
          int *tmp_int_ptr;
          int *contact_proc_ids = NULL;
@@ -1215,17 +1214,24 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
 
             /* we do not want a sinlge processor to do a ton of point
                to point communications (relative to the number of
-               total processors -  how much is too much? 
+               total processors -  how much is too much?
                2^32 ~  128,000 */
-  
-            if ( max_proc_count >  hypre_max(8, 2*ologp))
+            threshold = hypre_max(8, 2*ologp);
+            
+            if ( max_proc_count >  threshold)
             {
                /* too many! */
                if (myid == 0)
-                  printf("check 1: max_proc_count = %d\n", max_proc_count);
+                  printf("TOO BIG: check 1: max_proc_count = %d\n", max_proc_count);
 
                /* change coarse midstream!- now we will just gather everything! */
                non_ap_gather = 1;
+
+               /*clean up from above */ 
+               hypre_TFree(ap_proc_ids);
+               
+
+
             }
             
             if (!non_ap_gather)
@@ -1390,131 +1396,146 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                   
                }
 
-            
-               send_buf_starts = hypre_CTAlloc(int, proc_count + 1);
-               for (i=0; i< proc_count+1; i++)
-               {
-                  send_buf_starts[i] = 0;  
-               }
-               send_buf = NULL;
                
-               
-               /* TO DO?   should we check again to make sure we
+               /* ??? should we check again to make sure we
                   do not have too many contacts? */
-               
-               
 
-               /* TO DO */
-                        
-
-
-
-               /* exchange #2 - now we contact processors (send nothing) and
-                  that processor needs to send us all of their local entry
-                  information*/ 
-               
-               entry_response_buf = NULL; /*this and the next are allocated
-                                           * in exchange data */
-               response_buf_starts = NULL;
-               
-               response_obj2.fill_response = hypre_FillResponseBoxManAssemble2;
-               response_obj2.data1 = manager; /* needed to fill responses*/ 
-               response_obj2.data2 = NULL;   
-               
-               
-               /*how big is an entry? extents: 6 ints, proc: 1 int, id: 1
-                * int , num_ghost: 6 ints, info: info_size is in bytes*/
-               /* note: for now, we do not need to send num_ghost - this
-                  is just copied in addentry anyhow */
-               non_info_size = 8;
-               entry_size_bytes = non_info_size*sizeof(int) 
-                  + hypre_BoxManEntryInfoSize(manager);
-               
-               /* use same max_response_size as previous exchange */
-               
-               hypre_DataExchangeList(proc_count, contact_proc_ids, 
-                                      send_buf, send_buf_starts, sizeof(int),
-                                      entry_size_bytes, &response_obj2, 
-                                      max_response_size, 4, 
-                                      comm,  &entry_response_buf, 
-                                      &response_buf_starts);
-               
-            
-               /* now we can add entries that are in response_buf
-                  - we check for duplicates later  */
-               
-               /*how many entries do we have?*/
-               response_size = response_buf_starts[proc_count];  
-            
-               /* do we need more storage ?*/
-               if (nentries + response_size >  hypre_BoxManMaxNEntries(manager))
+               /* check (again) how many point to point
+               communications?  here the threshold is higher - we have
+               less left to do.... */
+               MPI_Allreduce(&proc_count, &max_proc_count, 1, MPI_INT, MPI_MAX, comm);   
+               threshold *=2;
+               if ( max_proc_count >  threshold)
                {
-                  int inc_size;
+                  /* too many! */
+                  if (myid == 0)
+                     printf("TOO BIG: check 2: max_proc_count = %d\n", max_proc_count);
                   
-                  inc_size = (response_size + nentries 
-                              - hypre_BoxManMaxNEntries(manager));
-                  hypre_BoxManIncSize ( manager, inc_size);
-                  
-                  entries =  hypre_BoxManEntries(manager);
-                  procs_sort = hypre_BoxManProcsSort(manager);
-                  ids_sort = hypre_BoxManIdsSort(manager);
+                  /* change coarse midstream!- now we will just gather everything! */
+                  non_ap_gather = 1;
+
+                  /* clean up before aborting */ 
+                  hypre_TFree(contact_proc_ids);
+                  hypre_TFree(neighbor_proc_ids);
                }
-               
-               index_ptr = entry_response_buf; /* point into response buf */
-               for (i = 0; i < response_size; i++)
+
+               if (!non_ap_gather)
                {
-                  size = sizeof(int);
-                  /* imin */
-                  for (d = 0; d < 3; d++)
+                  
+
+                  send_buf_starts = hypre_CTAlloc(int, proc_count + 1);
+                  for (i=0; i< proc_count+1; i++)
                   {
-                     memcpy( &tmp_int, index_ptr, size);
-                     index_ptr =  (void *) ((char *) index_ptr + size);
-                     hypre_IndexD(imin, d) = tmp_int;
+                     send_buf_starts[i] = 0;  
+                  }
+                  send_buf = NULL;
+                  
+                  
+                  /* exchange #2 - now we contact processors (send nothing) and
+                     that processor needs to send us all of their local entry
+                     information*/ 
+                  
+                  entry_response_buf = NULL; /*this and the next are allocated
+                                              * in exchange data */
+                  response_buf_starts = NULL;
+                  
+                  response_obj2.fill_response = hypre_FillResponseBoxManAssemble2;
+                  response_obj2.data1 = manager; /* needed to fill responses*/ 
+                  response_obj2.data2 = NULL;   
+                  
+                  
+                  /*how big is an entry? extents: 6 ints, proc: 1 int, id: 1
+                   * int , num_ghost: 6 ints, info: info_size is in bytes*/
+                  /* note: for now, we do not need to send num_ghost - this
+                     is just copied in addentry anyhow */
+                  non_info_size = 8;
+                  entry_size_bytes = non_info_size*sizeof(int) 
+                     + hypre_BoxManEntryInfoSize(manager);
+                  
+                  /* use same max_response_size as previous exchange */
+                  
+                  hypre_DataExchangeList(proc_count, contact_proc_ids, 
+                                         send_buf, send_buf_starts, sizeof(int),
+                                         entry_size_bytes, &response_obj2, 
+                                         max_response_size, 4, 
+                                         comm,  &entry_response_buf, 
+                                         &response_buf_starts);
+                  
+                  
+                  /* now we can add entries that are in response_buf
+                     - we check for duplicates later  */
+                  
+                  /*how many entries do we have?*/
+                  response_size = response_buf_starts[proc_count];  
+                  
+                  /* do we need more storage ?*/
+                  if (nentries + response_size >  hypre_BoxManMaxNEntries(manager))
+                  {
+                     int inc_size;
+                     
+                     inc_size = (response_size + nentries 
+                                 - hypre_BoxManMaxNEntries(manager));
+                     hypre_BoxManIncSize ( manager, inc_size);
+                     
+                     entries =  hypre_BoxManEntries(manager);
+                     procs_sort = hypre_BoxManProcsSort(manager);
+                     ids_sort = hypre_BoxManIdsSort(manager);
                   }
                   
-                  /*imax */
-                  for (d = 0; d < 3; d++)
+                  index_ptr = entry_response_buf; /* point into response buf */
+                  for (i = 0; i < response_size; i++)
                   {
-                     memcpy( &tmp_int, index_ptr, size);
+                     size = sizeof(int);
+                     /* imin */
+                     for (d = 0; d < 3; d++)
+                     {
+                        memcpy( &tmp_int, index_ptr, size);
+                        index_ptr =  (void *) ((char *) index_ptr + size);
+                        hypre_IndexD(imin, d) = tmp_int;
+                     }
+                     
+                     /*imax */
+                     for (d = 0; d < 3; d++)
+                     {
+                        memcpy( &tmp_int, index_ptr, size);
+                        index_ptr =  (void *) ((char *) index_ptr + size);
+                        hypre_IndexD(imax, d) = tmp_int;
+                     }
+                     
+                     /* proc */  
+                     tmp_int_ptr = (int *) index_ptr;
+                     proc = *tmp_int_ptr;
                      index_ptr =  (void *) ((char *) index_ptr + size);
-                     hypre_IndexD(imax, d) = tmp_int;
+                     
+                     /* id */
+                     tmp_int_ptr = (int *) index_ptr;
+                     id = *tmp_int_ptr;
+                     index_ptr =  (void *) ((char *) index_ptr + size);
+                     
+                     /* info */
+                     /* index_ptr is at info */            
+                     
+                     hypre_BoxManAddEntry( manager , imin , 
+                                           imax , proc, id, 
+                                           index_ptr );
+                     
+                     /* start of next entry */  
+                     index_ptr = (void *) ((char *) index_ptr 
+                                           + hypre_BoxManEntryInfoSize(manager));
                   }
                   
-                  /* proc */  
-                  tmp_int_ptr = (int *) index_ptr;
-                  proc = *tmp_int_ptr;
-                  index_ptr =  (void *) ((char *) index_ptr + size);
-                  
-                  /* id */
-                  tmp_int_ptr = (int *) index_ptr;
-                  id = *tmp_int_ptr;
-                  index_ptr =  (void *) ((char *) index_ptr + size);
-                  
-                  /* info */
-                  /* index_ptr is at info */            
-                  
-                  hypre_BoxManAddEntry( manager , imin , 
-                                        imax , proc, id, 
-                                        index_ptr );
-                  
-                  /* start of next entry */  
-                  index_ptr = (void *) ((char *) index_ptr 
-                                        + hypre_BoxManEntryInfoSize(manager));
-               }
+                  /* clean up from this section of code*/
+                  hypre_TFree(entry_response_buf);
+                  hypre_TFree(response_buf_starts);
+                  hypre_TFree(send_buf_starts);
+                  hypre_TFree(contact_proc_ids);
+                  hypre_TFree(neighbor_proc_ids);
                
-               /* clean up from this section of code*/
-               hypre_TFree(entry_response_buf);
-               hypre_TFree(response_buf_starts);
-               hypre_TFree(send_buf_starts);
-               hypre_TFree(contact_proc_ids);
-               hypre_TFree(neighbor_boxnums);
-               hypre_TFree(neighbor_proc_ids);
-               hypre_TFree(order_index);
-               hypre_TFree(delete_array);
-               
-            } /* end of if global boxes */
-         } /* end of nested non_ap_gather */
-         
+             
+               } /* end of nested non_ap_gather - exchange 2*/
+            } /* end of nested non_ap_gather -exchange 1*/
+
+           } /* end of if global boxes */
          
       } /********** end of gathering for the AP case *****************/
       
