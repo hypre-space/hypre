@@ -59,7 +59,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridDim(grid)         = dim;
    hypre_StructGridBoxes(grid)       = hypre_BoxArrayCreate(0);
    hypre_StructGridIDs(grid)         = NULL;
-   hypre_StructGridMaxDistance(grid) = 8;
+   hypre_StructGridMaxDistance(grid) = 16;
    hypre_StructGridBoundingBox(grid) = NULL;
    hypre_StructGridLocalSize(grid)   = 0;
    hypre_StructGridGlobalSize(grid)  = 0;
@@ -527,7 +527,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    {
 
       /* pick a new max distance and set in grid*/  
-      max_distance = 8;
+      max_distance = 16;
       hypre_StructGridMaxDistance(grid) = max_distance;
 
       grow_box = hypre_BoxCreate();
