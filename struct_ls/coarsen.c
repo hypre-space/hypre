@@ -150,7 +150,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    hypre_BoxManager   *fboxman, *cboxman;
 
-   hypre_BoxManEntry **entries = NULL;
+   hypre_BoxManEntry *entries;
    hypre_BoxManEntry  *entry;
      
    void               *entry_info = NULL;
@@ -169,20 +169,19 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /*** create new coarse grid ***/
    hypre_StructGridCreate(comm, dim, &cgrid);
 
-   /*** coarsen my boxes ****/
+
+
+   /*** coarsen my boxes 
+        and create the coarse grid ids (same as fgrid)  ****/
    my_boxes = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(fgrid));
+   cids = hypre_TAlloc(int,  hypre_BoxArraySize(my_boxes));
    for (i = 0; i < hypre_BoxArraySize(my_boxes); i++)
    {
       box = hypre_BoxArrayBox(my_boxes, i);
       hypre_StructCoarsenBox(box, index, stride);
-   }
-
-   /*** create the coarse grid ids (same as fgrid) ***/
-   cids = hypre_TAlloc(int,  hypre_BoxArraySize(my_boxes));
-   hypre_ForBoxI(i, my_boxes)
-   {
       cids[i] = fids[i];
    }
+
    
    /*** prune? ***/
    /* zero volume boxes are needed when forming
@@ -290,7 +289,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       in the new box manager - to avoid re-sorting*/
    for (i = 0; i < num_entries; i++)
    {
-      entry = entries[i];
+      entry = &entries[i];
       proc = hypre_BoxManEntryProc(entry);
       
       if  (proc != myid)/* not my boxes */ 
@@ -359,9 +358,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /*** finally....assemble the new coarse grid***/
    hypre_StructGridAssemble(cgrid);
 
-   /* clean up */
-   hypre_TFree(entries);
-   
 
    /* return the coarse grid */   
    *cgrid_ptr = cgrid;
