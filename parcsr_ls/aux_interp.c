@@ -727,7 +727,7 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
   int size_offP;
 
   int *tmp_found;
-  int *CF_marker_offd;
+  int *CF_marker_offd = NULL;
   int *int_buf_data;
   int newoff = 0;
   int full_off_procNodes = 0;
@@ -849,7 +849,13 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
    }
   }
 
+
+  hypre_TFree(CF_marker_offd);
+  
+
   *found = tmp_found;
  
+
+
   return newoff;
 }
