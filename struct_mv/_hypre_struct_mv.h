@@ -2247,7 +2247,7 @@ int hypre_BoxManIncSize ( hypre_BoxManager *manager , int inc_size );
 int hypre_BoxManDestroy ( hypre_BoxManager *manager );
 int hypre_BoxManAddEntry ( hypre_BoxManager *manager , hypre_Index imin , hypre_Index imax , int proc_id , int box_id , void *info );
 int hypre_BoxManGetEntry ( hypre_BoxManager *manager , int proc , int id , hypre_BoxManEntry **entry_ptr );
-int hypre_BoxManGetAllEntries ( hypre_BoxManager *manager , int *num_entries , hypre_BoxManEntry ***entries_ptr );
+int hypre_BoxManGetAllEntries ( hypre_BoxManager *manager , int *num_entries , hypre_BoxManEntry **entries );
 int hypre_BoxManGetAllEntriesBoxes ( hypre_BoxManager *manager , hypre_BoxArray *boxes );
 int hypre_BoxManGatherEntries ( hypre_BoxManager *manager , hypre_Index imin , hypre_Index imax );
 int hypre_BoxManAssemble ( hypre_BoxManager *manager );

@@ -717,41 +717,31 @@ int hypre_BoxManGetEntry( hypre_BoxManager *manager , int proc, int id,
   Return a list of all of the entries in the box manager (and the
   number of entries). These are sorted by (proc, id) pairs.
 
+  11/06 - changed to return the pointer to the boxman entries rather
+  than a copy of the array (so calling code should not free this array!)
+
 *--------------------------------------------------------------------------*/
 
 
 int hypre_BoxManGetAllEntries( hypre_BoxManager *manager , int *num_entries, 
-                               hypre_BoxManEntry ***entries_ptr)
+                               hypre_BoxManEntry **entries)
 
 {
-   
+  
+ 
 
-   hypre_BoxManEntry **entries;
-   int                i, nentries;
-   
-   hypre_BoxManEntry  *boxman_entries  = hypre_BoxManEntries(manager);
-
-
-  /* can only use after assembling */
+   /* can only use after assembling */
    if (!hypre_BoxManIsAssembled(manager))
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
 
-
-   nentries = hypre_BoxManNEntries(manager);
-   entries = hypre_CTAlloc(hypre_BoxManEntry *, nentries);
-   for (i= 0; i< nentries; i++)
-   {
-      entries[i]= &boxman_entries[i];
-   }
-
-
+  
+ 
    /* return */
-   *entries_ptr = entries;
-   *num_entries = nentries;
-
+   *num_entries = hypre_BoxManNEntries(manager);
+   *entries =  hypre_BoxManEntries(manager);
 
    return hypre_error_flag;
    
