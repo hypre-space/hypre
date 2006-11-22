@@ -716,9 +716,10 @@ void initialize_vecs(int diag_n, int offd_n, int *diag_ftc, int *offd_ftc,
  * (neighbors of neighbors) */
 int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j, 
 		   int num_cols_S_offd, int *col_map_offd, int col_1, 
-		   int col_n, int *Sop_i, int *Sop_j)
+		   int col_n, int *Sop_i, int *Sop_j,
+		   int *CF_marker, hypre_ParCSRCommPkg *comm_pkg)
 {
-  int i, i1, j, ifound, kk, k1;
+  int i, i1, ii, j, ifound, kk, k1;
   int got_loc, loc_col;
 
   int min;
@@ -726,8 +727,27 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
   int size_offP;
 
   int *tmp_found;
+  int *CF_marker_offd;
+  int *int_buf_data;
   int newoff = 0;
   int full_off_procNodes = 0;
+  hypre_ParCSRCommHandle *comm_handle;
+                                                                                                                                         
+  CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+  int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                hypre_ParCSRCommPkgNumSends(comm_pkg)));
+  ii = 0;
+  for (i=0; i < hypre_ParCSRCommPkgNumSends(comm_pkg); i++)
+  {
+      for (j=hypre_ParCSRCommPkgSendMapStart(comm_pkg,i);
+                j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+        int_buf_data[ii++]
+          = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+  }
+  comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg,int_buf_data,
+        CF_marker_offd);
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  hypre_TFree(int_buf_data);
 
   size_offP = A_ext_i[num_cols_A_offd];
   tmp_found = hypre_CTAlloc(int, size_offP);
@@ -735,6 +755,8 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
   /* Find nodes that will be added to the off diag list */ 
   for (i = 0; i < num_cols_A_offd; i++)
   {
+   if (CF_marker_offd[i] < 0)
+   {
     for (j = A_ext_i[i]; j < A_ext_i[i+1]; j++)
     {
       i1 = A_ext_j[j];
@@ -752,6 +774,7 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
 	  }
       }
     }
+   }
   }
   /* Put found in monotone increasing order */
   if (newoff > 0)
@@ -774,6 +797,8 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
   /* Set column indices for Sop and A_ext such that offd nodes are
    * negatively indexed */
   for(i = 0; i < num_cols_S_offd; i++)
+  {
+   if (CF_marker_offd[i] < 0)
    {
      for(kk = Sop_i[i]; kk < Sop_i[i+1]; kk++)
      {
@@ -806,7 +831,10 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
        }
      }
    }
+  }
   for(i = 0; i < num_cols_A_offd; i++)
+  {
+   if (CF_marker_offd[i] < 0)
    {
      for (kk = A_ext_i[i]; kk < A_ext_i[i+1]; kk++)
      {
@@ -819,6 +847,7 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
        }
      }
    }
+  }
 
   *found = tmp_found;
  

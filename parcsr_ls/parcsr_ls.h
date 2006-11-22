@@ -135,7 +135,7 @@ int ssort ( int *data , int n );
 int index_of_minimum ( int *data , int n );
 void swap_int ( int *data , int a , int b );
 void initialize_vecs ( int diag_n , int offd_n , int *diag_ftc , int *offd_ftc , int *diag_pm , int *offd_pm , int *tmp_CF );
-int new_offd_nodes ( int **found , int num_cols_A_offd , int *A_ext_i , int *A_ext_j , int num_cols_S_offd , int *col_map_offd , int col_1 , int col_n , int *Sop_i , int *Sop_j );
+int new_offd_nodes ( int **found , int num_cols_A_offd , int *A_ext_i , int *A_ext_j , int num_cols_S_offd , int *col_map_offd , int col_1 , int col_n , int *Sop_i , int *Sop_j , int *CF_marker , hypre_ParCSRCommPkg *comm_pkg );
 
 /* block_tridiag.c */
 void *hypre_BlockTridiagCreate ( void );
