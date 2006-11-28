@@ -567,6 +567,10 @@ void hypre_AMEMultiOperatorB(void *data, void* x, void* y)
 
 #include "fortran.h"
 
+int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, int *, double *, int *, int *);
+int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(int *, char *, char *, int *, double *, int *,
+                                       double *, int *, double *, double *, int *, int *);
+
 int hypre_AMESolve(void *esolver)
 {
    hypre_AMEData *ame_data = esolver;
