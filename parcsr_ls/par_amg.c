@@ -255,6 +255,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataDofPointArray(amg_data) = NULL;
    hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
    hypre_ParAMGDataSmoother(amg_data) = NULL;
+   hypre_ParAMGDataL1Norms(amg_data) = NULL;
   
    hypre_ParAMGDataABlockArray(amg_data) = NULL;
    hypre_ParAMGDataPBlockArray(amg_data) = NULL;
@@ -331,6 +332,14 @@ hypre_BoomerAMGDestroy( void *data )
         if (hypre_ParAMGDataPBlockArray(amg_data)[i-1])
            hypre_ParCSRBlockMatrixDestroy(hypre_ParAMGDataPBlockArray(amg_data)[i-1]);
 
+   }
+
+   if (hypre_ParAMGDataL1Norms(amg_data))
+   {
+      for (i=0; i < num_levels; i++)
+         if (hypre_ParAMGDataL1Norms(amg_data)[i])
+           hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i]);
+      hypre_TFree(hypre_ParAMGDataL1Norms(amg_data));
    }
 
    /* get rid of a fine level block matrix */

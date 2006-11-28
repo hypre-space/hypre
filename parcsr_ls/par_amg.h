@@ -97,6 +97,7 @@ typedef struct
    int                **dof_point_array;
    int                **point_dof_map_array;
    int                  num_levels;
+   double             **l1_norms;
 
 
    /* Block data */
@@ -178,6 +179,7 @@ typedef struct
 #define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
+#define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
 
 /* solve params */
 

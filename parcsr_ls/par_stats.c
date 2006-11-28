@@ -866,7 +866,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
               grid_relax_type[1],
               grid_relax_type[2],grid_relax_type[3]);
       printf( "   Point types, partial sweeps (1=C, -1=F):\n");
-      if (grid_relax_points)
+      if (grid_relax_points && grid_relax_type[1] != 8)
       {
          printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
@@ -881,7 +881,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
               printf("  %2d", grid_relax_points[3][j]);
          printf( "\n\n");
       }
-      else if (relax_order == 1)
+      else if (relax_order == 1 && grid_relax_type[1] != 8)
       {
          printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)

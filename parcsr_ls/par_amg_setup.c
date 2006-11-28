@@ -104,6 +104,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *A_H;
    hypre_ParCSRMatrix  *AN;
    double              *SmoothVecs = NULL;
+   double             **l1_norms = NULL;
 
    int       old_num_levels, num_levels;
    int       level;
@@ -199,7 +200,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    P_block_array = hypre_ParAMGDataPBlockArray(amg_data);
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
-
 
 
    /* Verify that settings are correct for solving systmes */
@@ -1635,8 +1635,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
     * Setup F and U arrays
     *-----------------------------------------------------------------------*/
 
+   if (grid_relax_type[1] == 8)
+   {
+      l1_norms = hypre_CTAlloc(double *, num_levels);
+      hypre_ParAMGDataL1Norms(amg_data) = l1_norms;
+   }
+
    for (j = 0; j < num_levels; j++)
    {
+      if (grid_relax_type[1] == 8 && j < num_levels-1)
+      {
+	 hypre_ParCSRComputeL1Norms(A_array[j], 2, &l1_norms[j]);
+      }
+      else if (grid_relax_type[3] == 8 && j == num_levels-1)
+      {
+	 hypre_ParCSRComputeL1Norms(A_array[j], 2, &l1_norms[j]);
+      }
       if ((smooth_type == 9 || smooth_type == 19) && smooth_num_levels > j)
       {
          HYPRE_EuclidCreate(comm, &smoother[j]);
