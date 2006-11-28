@@ -87,7 +87,7 @@
 #else
 
 #ifdef HYPRE_USING_HYPRE_BLAS
-#define hypre_F90_NAME_BLAS(name,NAME)  name##_
+#define hypre_F90_NAME_BLAS(name,NAME)  hypre_##name
 #else
 #if defined(F77_FUNC)
 /* F77_FUNC macro assumes NO underscores exist in name */
@@ -99,7 +99,7 @@
 #endif
 
 #ifdef HYPRE_USING_HYPRE_LAPACK
-#define hypre_F90_NAME_LAPACK(name,NAME)  name##_
+#define hypre_F90_NAME_LAPACK(name,NAME)  hypre_##name
 #else
 #if defined(F77_FUNC)
 /* F77_FUNC macro assumes NO underscores exist in name */

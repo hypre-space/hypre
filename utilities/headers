@@ -76,10 +76,6 @@ cat exchange_data.h            >> $INTERNAL_HEADER
 		          
 cat hypre_error.h              >> $INTERNAL_HEADER
 		          
-cat ../blas/hypre_blas.h       >> $INTERNAL_HEADER
-		          
-cat ../lapack/hypre_lapack.h   >> $INTERNAL_HEADER
-		          
 #===========================================================================
 # Include guards
 #===========================================================================
