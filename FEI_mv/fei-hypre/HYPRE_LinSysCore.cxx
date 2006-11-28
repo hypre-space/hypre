@@ -2225,13 +2225,14 @@ This should ultimately be taken out even for newer ale3d implementation
    }
 
    //-------------------------------------------------------------------
-   // This part is for loading the nodal coordinate information.
-   // The node IDs in nodeNumbers are the one used in FEI (and thus
-   // corresponds to the ones in the system matrix using lookup)
+   // This part is for loading the nodal coordinate information for
+   // use with the AMS preconditioner.
    //-------------------------------------------------------------------
 
    else if ( fieldID == -4 )
    {
+      if (numNodes <= 0 || fieldSize <= 0) return 1;
+
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       {
          for ( i = 0; i < numNodes; i++ )
@@ -2239,61 +2240,16 @@ This should ultimately be taken out even for newer ale3d implementation
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
                       data[i*fieldSize+j]);
       }    
-      if ( lookup_ != NULL )
-      {
-         blockIDs       = (int *) lookup_->getElemBlockIDs();
-         blockID        = blockIDs[0];
-         nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
-         nodeFieldID    = nodeFieldIDs[0][0];
-         //checkFieldSize = lookup_->getFieldSize(nodeFieldID);
-         //assert( checkFieldSize == fieldSize );
-         eqnNumbers  = new int[numNodes];
-         newData     = new double[numNodes*fieldSize];
-         newNumNodes = 0;
-         for ( i = 0; i < numNodes*fieldSize; i++ ) newData[i] = -99999.9;
-         for ( i = 0; i < numNodes; i++ )
-         { 
-            index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
-
-/* ======
-This should ultimately be taken out even for newer ale3d implementation
-   =====*/
-            if ( index >= localStartRow_-1 && index < localEndRow_)
-            {
-               for ( j = 0; j < fieldSize; j++ ) 
-                  newData[newNumNodes*fieldSize+j] = data[i*fieldSize+j];
-               eqnNumbers[newNumNodes++] = index;
-            }
-         }
-         nRows = localEndRow_ - localStartRow_ + 1;
-         if ( MLI_NodalCoord_ == NULL )
-         {
-            MLI_EqnNumbers_ = new int[newNumNodes];
-            for (i = 0; i < newNumNodes; i++) 
-               MLI_EqnNumbers_[i] = localStartRow_ - 1 + i * fieldSize;
-            MLI_NodalCoord_ = new double[newNumNodes*fieldSize];
-            for (i = 0; i < newNumNodes*fieldSize; i++)
-               MLI_NodalCoord_[i] = -99999.0;
-            MLI_FieldSize_  = fieldSize;
-            MLI_NumNodes_   = newNumNodes;
-         }
-         for ( i = 0; i < newNumNodes; i++ )
-         {
-            index = eqnNumbers[i] - localStartRow_ + 1;
-            for ( j = 0; j < fieldSize; j++ ) 
-               MLI_NodalCoord_[index+j] = newData[i*fieldSize+j];
-         }
-         for ( i = 0; i < newNumNodes*fieldSize; i++ )
-         {
-           if ( MLI_NodalCoord_[i] == -99999.0)
-           {
-              printf("putNodalFieldData AMS WARNING : some nodal info ");
-              printf("not filled.\n");
-           }
-         }
-         delete [] eqnNumbers;
-         delete [] newData;
-      }
+      if ( MLI_EqnNumbers_ != NULL ) delete [] MLI_EqnNumbers_;
+      if ( MLI_NodalCoord_ != NULL ) delete [] MLI_NodalCoord_;
+      MLI_FieldSize_  = fieldSize;
+      MLI_NumNodes_   = numNodes;
+      MLI_EqnNumbers_ = new int[numNodes+1];
+      MLI_NodalCoord_ = new double[fieldSize*numNodes+1];
+      for (i = 0; i < numNodes; i++) MLI_EqnNumbers_[i] = nodeNumbers[i];
+      MLI_EqnNumbers_[numNodes] = -1;
+      for (i = 0; i < numNodes*fieldSize; i++) MLI_NodalCoord_[i] = data[i];
+      MLI_NodalCoord_[numNodes*fieldSize] = -99999.0;
    }
 
    //-------------------------------------------------------------------
@@ -2762,8 +2718,29 @@ int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
 #ifndef NOFEI
 int HYPRE_LinSysCore::copyOutMatrix(double scalar, Data& data) 
 {
+   char *name;
+
    (void) scalar;
-   data.setDataPtr( HYA_ );
+
+   name = data.getTypeName();
+
+   if (!strcmp(name, "A"))
+   {
+      data.setDataPtr((void *) HYA_);
+   }
+   else if (!strcmp(name, "NodeNumbers"))
+   {
+      data.setDataPtr((void *) MLI_EqnNumbers_);
+   }
+   else if (!strcmp(name, "NodalCoord"))
+   {
+      data.setDataPtr((void *) MLI_NodalCoord_);
+   }
+   else
+   {
+      printf("HYPRE_LSC::copyOutMatrix ERROR - invalid command.\n");
+      exit(1);
+   }
    return (0);
 }
 #endif
@@ -4173,10 +4150,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                MLI_NodalCoord_, localEndRow_-localStartRow_+1);
    }
 #endif
+#if 0
+   // replaced by better scheme, to be deleted later
    if ( HYPreconID_ == HYAMS && MLI_EqnNumbers_ != NULL )
    {
       HYPRE_LSI_BuildNodalCoordinates();
    }
+#endif
 
    switch ( HYSolverID_ )
    {

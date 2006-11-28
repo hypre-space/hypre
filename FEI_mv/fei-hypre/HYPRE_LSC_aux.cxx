@@ -5189,6 +5189,8 @@ void HYPRE_LinSysCore::FE_loadElemMatrix(int elemID, int nNodes,
 
 //***************************************************************************
 // build nodal coordinates
+// (to be used by AMS preconditioner, but it has been replaced with better
+//  scheme. So when time is ripe, this function should be deleted.)
 //---------------------------------------------------------------------------
 
 void HYPRE_LinSysCore::HYPRE_LSI_BuildNodalCoordinates()
