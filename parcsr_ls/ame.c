@@ -584,8 +584,8 @@ int hypre_AMESolve(void *esolver)
    blap_fn.dsygv  = dsygv;
    blap_fn.dpotrf = dpotrf;
 #else
-   blap_fn.dsygv  = hypre_F90_NAME_BLAS(dsygv,DSYGV);
-   blap_fn.dpotrf = hypre_F90_NAME_BLAS(dpotrf,DPOTRF);
+   blap_fn.dsygv  = hypre_F90_NAME_LAPACK(dsygv,DSYGV);
+   blap_fn.dpotrf = hypre_F90_NAME_LAPACK(dpotrf,DPOTRF);
 #endif
    lobpcg_tol.relative = ame_data -> tol;
    lobpcg_tol.absolute = ame_data -> tol;
