@@ -56,8 +56,6 @@
 
 #ifndef HYPRE_USING_HYPRE_BLAS
 #define USE_VENDOR_BLAS
-#else
-#include "../../blas/hypre_blas.h"
 #endif
 
 /* 

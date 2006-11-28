@@ -39,8 +39,6 @@
  */
 #include "dsp_defs.h"
 #include "superlu_util.h"
-#include "../../blas/hypre_blas.h"
-#include "../../lapack/hypre_lapack.h"
 
 void
 dgssvx(char *fact, char *trans, char *refact,

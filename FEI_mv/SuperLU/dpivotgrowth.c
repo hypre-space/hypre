@@ -41,8 +41,6 @@
 #include "dsp_defs.h"
 #include "fortran.h"
 #include "superlu_util.h"
-#include "../../blas/hypre_blas.h"
-#include "../../lapack/hypre_lapack.h"
 
 double
 dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c, 

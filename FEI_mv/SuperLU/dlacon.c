@@ -37,8 +37,6 @@
  */
 #include <math.h>
 #include "fortran.h"
-#include "../../blas/hypre_blas.h"
-#include "../../lapack/hypre_lapack.h"
 /*#include "Cnames.h"*/
 
 int
