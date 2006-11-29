@@ -54,6 +54,7 @@ perform_test()
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT}
      rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/autotest.*
      rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/test/autotest.*
+     export HYPRE_RUNTEST_OPTS
      linear_solvers/test/AUTOTEST/autotest_test \
          ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE}
      echo "Autotest Done" > "autotest_done"
@@ -85,6 +86,7 @@ perform_test()
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
       rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/autotest.*;\
       rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/test/autotest.*;\
+      export HYPRE_RUNTEST_OPTS=${HYPRE_RUNTEST_OPTS};\
       linear_solvers/test/AUTOTEST/autotest_test \
             ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
       echo 'Autotest Done' > 'autotest_done';\
@@ -291,8 +293,6 @@ hypre_set_machine_options()
         COMPILERSELECT="default"
         ;;
   esac
-
-  export HYPRE_RUNTEST_OPTS
 }
 
 #==============================================================================
