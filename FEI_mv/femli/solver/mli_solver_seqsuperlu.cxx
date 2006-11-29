@@ -41,7 +41,7 @@
 #include "mli_solver_seqsuperlu.h"
 #include "HYPRE.h"
 #include "parcsr_mv/_hypre_parcsr_mv.h"
-#include "IJ_mv/IJ_mv.h"
+#include "IJ_mv/_hypre_IJ_mv.h"
 
 /* ****************************************************************************
  * constructor 
