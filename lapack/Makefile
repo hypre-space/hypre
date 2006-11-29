@@ -111,7 +111,6 @@ OBJS = ${LAPACK_FILES:.c=.o}
 
 all: ${OBJS} dlamch.o
 	cp -fp *.*o ${HYPRE_SRC_TOP_DIR}/utilities
-	cp -fp *.h ${HYPRE_BUILD_DIR}/include
 
 install: all
 	cp -fp *.h ${HYPRE_INC_INSTALL}/include
