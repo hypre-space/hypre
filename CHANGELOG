@@ -26,60 +26,85 @@
 
 
 #=============================================================================
-#
-# This file chronicles user-level changes/additions to hypre, beginning
-# with the most recent release.
-#
+# This file chronicles user-level changes to hypre, beginning with the most
+# recent release.
 #=============================================================================
+
+Version 1.14.0b released, 2006/12/??.
+
+- Added python support to Babel interface.
+
+- Changed the name of several internal header files to use the '_hypre_' prefix.
+  This should not affect most users, since these are internal headers.
+
+- Added AME, a new Maxwell eigensolver based on AMS and LOBPCG.
+
+- Changes to Struct code to hopefully improve efficiency of MG solver setup.
+
+- Efficiency improvements for new long-range interpolation algorithms in
+  BoomerAMG, including:
+    * extended interpolation is now like modified, i.e no absolute values
+    * added an extended interpolation which only extends when there are no
+      common coarse neighbors
+    * changed standard interpolation to only extend at strong F neighbors
+      (instead of all neighbors) for better efficiency
+
+#====================================
 
 Version 1.13.0b released, 2006/10/03.
 
-- Babel-based interface updated to Babel version 1.0.0, plus various improvements,
-  such as an interface to the hypre error handler.  Pre-built interfaces are included
-  for C, Fortran, and C++.  
+- Babel-based interface updated to Babel version 1.0.0, plus various
+  improvements, such as an interface to the hypre error handler.  Pre-built
+  interfaces are included for C, Fortran, and C++.
 
 - Various modifications to BoomerAMG:
-  - Eliminated the possibility to set relaxation on the finest grid
-  - Added various new long-range interpolation algorithms: standard (with and without
-    weight separation), extended and F-F interpolation. These routines will improve
-    convergence for low complexity coarsening algorithms PMIS and HMIS.
-  - Added the possibility to set a maximal number of weights per row <n> when truncating
-    the interpolation operator. When this option is used, only the absolutely largest
-    <n> weights per row are kept. 
+  * Eliminated the possibility to set relaxation on the finest grid
+  * Added various new long-range interpolation algorithms: standard (with and
+    without weight separation), extended, and F-F interpolation.  These routines
+    will improve convergence for the low complexity coarsening algorithms PMIS
+    and HMIS.
+  * Added the possibility to set a maximal number of weights per row <n> when
+    truncating the interpolation operator.  When this option is used, only the
+    absolutely largest <n> weights per row are kept.
 
-- Modifications to the fac user interface to permit easier set up of the problem.
+- Modifications to the fac user interface to permit easier problem set up.
 
-- shared libraries can be built by using the --enable-shared option when configuring.
-  NOTE: the directory where the shared libraries reside MUST be defined in the
-        LD_LIBRARY_PATH variable.
+- Shared libraries can be built by using the --enable-shared option when
+  configuring.  NOTE: the directory where the shared libraries reside MUST be
+  defined in the LD_LIBRARY_PATH variable.
 
-- incorporated GNU Lesser General Public License
+- Incorporated the GNU Lesser General Public License.
 
-- Issure tracking now using ROundup, send email to hypre-support@llnl.gov
+- Now using Roundup for issue tracking; send email to hypre-support@llnl.gov
 
-********************************************************************
+#====================================
+
 Version 1.12.0a released, 2006/07/26.
 
-- First release of AMS -- a new solver for (semi)definite Maxwell problems.
+- First release of AMS, a new solver for (semi)definite Maxwell problems.
 
 - First release of Maxwell, a semi-structured Maxwell solver.
 
 - Modifications to the fac user interface to permit easier set up of the problem.
-********************************************************************
   
+#====================================
+
 Version 1.11.1b released, 2006/05/30.
 
-- Corrected FEI build to allow user to specify a system FEI and build internal 
+- Corrected FEI build to allow user to specify a system FEI and build internal
   HYPRE routines.
-********************************************************************
+
+#====================================
 
 Version 1.11.0b released, 2006/04/24.
 
-- Added configure option --without-FEI to disable build of internal FEI routines.
+- Added configure option --without-FEI to disable build of internal FEI
+  routines.
 
 - Added a new system for handling error codes in hypre.
 
-- Added configure option --print-errors to enable printing of HYPRE error messages.
+- Added configure option --print-errors to enable printing of HYPRE error
+  messages.
 
 - Modified configure to only depend on having a C compiler available.
 
@@ -87,43 +112,41 @@ Version 1.11.0b released, 2006/04/24.
 
 - Updated all F90_HYPRE_* files to be consistent with HYPRE_* files.
 
-- Updated ex5.c to include (1) an option to print the system matrix and rhs and 
-  (2) a description of how to read in a matrix and rhs in IJ format for testing 
-  purposes.
+- Updated ex5.c to include:
+    * an option to print the system matrix and rhs
+    * a description of how to read in a matrix and rhs in IJ format.
 
-- Corrected error that ocurred when more than one Euclid solver object is used
+- Corrected error that occured when more than one Euclid solver object is used
   at the same time
 
-- Added Maxwell capabilities via Sandia's ML solvers; see details in 
+- Added Maxwell capabilities via Sandia's ML solvers; see details in
   FEI_mv/fei-hypre/CHANGELOG.
 
 - Replaced PILUT with Euclid in test code sstruct.c.
 
-********************************************************************
+#====================================
 
 Version 1.10.0b released, 2005/12/19.
 
 - configure updates
-   -- always runs --without-blas --without-lapack unless the user specifies otherwise
-   -- cross-compiling enabled
-   -- added --with-no-global-partition option
+    * always runs --without-blas --without-lapack unless otherwise specified
+    * cross-compiling enabled
+    * added --with-no-global-partition option
 
 - makefile updates
-   -- changed eigensolvers subdirectory to multivector
+    * changed eigensolvers subdirectory to multivector
 
 - Added a set of simple example codes covering the Struct, SStruct and IJ
-  interfaces. See README.html in the examples subdirectory for more details.
+  interfaces.  See README.html in the examples subdirectory for more details.
 
-- The --with-no-global-partition option was added to reduce storage
-  and improve run times on very large numbers of processors (such as
-  BlueGene/L). Currently only the IJ interface solvers have been
-  optimized.  For small or modest numbers of processors ( typically <
-  1000-5000 depending on the machine), this option is not needed 
-  (and will likely be slower).
+- The --with-no-global-partition option was added to reduce storage and improve
+  run times on very large numbers of processors (such as BlueGene/L).  Currently
+  only the IJ interface solvers have been optimized.  For small or modest
+  numbers of processors (typically < 1000-5000 depending on the machine), this
+  option is not needed (and will likely be slower).
   
-- Added aggressive coarsening, which can be applied to all available 
-  coarsening schemes (via HYPRE_BoomerAMGSetNumAggLevels and 
-  HYPRE_BoomerAMGSetNumPaths) 
+- Added aggressive coarsening, which can be applied to all available coarsening
+  schemes (via HYPRE_BoomerAMGSetNumAggLevels and HYPRE_BoomerAMGSetNumPaths)
 
 - Added multipass interpolation and direct interpolation.
 
@@ -131,7 +154,7 @@ Version 1.10.0b released, 2005/12/19.
 
 - expanded coverage of Babel-based interface
 
-********************************************************************
+#====================================
 
 Version 1.9.0b released, 2005/02/10.
 
@@ -141,6 +164,7 @@ Version 1.9.0b released, 2005/02/10.
 
 - Added FAC to semi-struct
 
+#====================================
 
 Version 1.9.0a released, 2005/01/18.
 
@@ -177,7 +201,7 @@ Version 1.9.0a released, 2005/01/18.
 - Reverted back to the first approach for setting periodic conditions.  The
   periodic flag now contains the periodicity value, and is not just a boolean.
 
-************************
+#====================================
 
 Version 1.8.3a released, 2004/01/21.
 
@@ -212,26 +236,36 @@ Version 1.8.3a released, 2004/01/21.
 - Fixed the PFMG and SMG solvers to work in the case of pure Neumann
   boundary conditions.
 
+#====================================
+
 Version 1.8.2b released, 2003/10/22.
 
 - Performance improvements for Struct solvers when there are many
   boxes per processor in the grid.  For 125 boxes or more in 3D,
   the speedup in the setup phases of PFMG and SMG can be significant
   (we have seen as much as a factor of 30).
+
 - New non-Galerkin option in PFMG can improve convergence and memory
   usage.  This option maintains either a 5-pt stencil in 2D or a 7-pt
   stencil in 3D on all grid levels.
+
 - New non-symmetric red/black smoother in PFMG can improve
   convergence on some problems.
+
 - New optimizations in the smoothers in PFMG lead to as much as 30%
   faster times.
+
 - Added a new interpolation option to AMG that is useful for solving
   hyperbolic equations.  It treats fine weak connections like fine
   strong connections.
 
+#====================================
+
 Version 1.8.1b released, 2003/05/21.
 
 - Minor bug fixes and performance improvements.
+
+#====================================
 
 Version 1.8.0b released, 2003/04/08.
 
@@ -239,29 +273,41 @@ Version 1.8.0b released, 2003/04/08.
   provides language interoperability.  HYPRE will eventually migrate
   to using Babel exclusively.  See 'docs/babel_transition_info.txt' for
   information on how to use the new interface.
+
 - PFMG: bug fix for red/black relaxation.
+
 - Eigenvalue solver LOBPCG has been added.  See 'docs/lobpcg_info.txt'
   for documentation.
+
+#====================================
 
 Version 1.7.11a released, 2003/03/14.
 
 - BiCGSTAB has been added to struct and sstruct interface
+
 - added automatic determination of relaxation parameters for use with symmetric
   smoothers in BoomerAMG
+
+#====================================
 
 Version 1.7.10b released, 2002/12/02.
 
 - New Hybrid solvers available for ParCSR and Struct.
+
 - IJ: Modified the 'GetValues' part of the matrix interface to make
   it possible to get matrix values without knowing the nonzero
   structure.  In particular, added a new option to IJMatrixGetValues,
   and added new routines IJMatrixGetRowCounts, IJMatrixGetLocalRange,
   and IJVectorGetLocalRange.
+
 - SStruct: Fixed a bug when connecting a part to itself with SetNeighborBox.
+
 - FEI: Added a few more smoothers and amg methods in mli, fixed a few memory 
   leaks uncovered by running ale3d, added new aggregation coarsening for 
   handling multiple materials.  For more details, see 
   FEI_mv/fei-hypre/CHANGELOG.
+
+#====================================
 
 Version 1.7.9b released, 2002/10/18.
 
@@ -269,31 +315,41 @@ Version 1.7.9b released, 2002/10/18.
   iUventries so that its only executed when there are at least 2 
   such entries.
 
+#====================================
+
 Version 1.7.8b released, 2002/09/25.
 
 - SStruct: Changed the MatrixSetSymmetric interface (this was actually
   not implemented before anyway).  The new interface allows much more
   flexibility in controlling which parts of the matrix are symmetric.
 
+#====================================
 
 Version 1.7.7b released, 2002/08/08.
 
 - limited release SStruct optimizations testing
 - the krylov library has been renamed to HYPRE_krylov
 
+#====================================
+
 Version 1.7.6b released, 2002/03/27.
 
 - SStruct: Changed SetNeighborBox function to allow the case where the
   NeighborBox does not even intersect the grid.  This functionality
   is convenient in some application situations.
+
 - SStruct: Made additional changes to the SetNeighborBox function to
   allow NeighborBox information to be redundantly declared by users.
   This functionality is also convenient in some application situations.
+
 - SStruct: Optimized the implementation of MatrixSetBoxValues.
+
+#====================================
 
 Version 1.7.5b released, 2002/01/16.
 
 - SStruct: Modified SetNeighborBox boxes to reach off of the global grid.
+
 - krylov solvers (PCG, GMRES, BiCGSTAB and CGNR ) are the first
   solvers to use the new definitions for logging, which are 
   logging = 0: no printout,  no storing of norms or rel. res. norms 
@@ -303,16 +359,22 @@ Version 1.7.5b released, 2002/01/16.
                and printed out to standard output during each iteration 
                step. 
 
+#====================================
+
 Version 1.7.0b released, 2001/11/12.
 
 - Bug fixes: SStruct interface under threads was producing incorrect
   results. That is now fixed.
+
+#====================================
 
 Version 1.6.0 released, 2001/07/27.
 
 - The Euclid PILU preconditioning library has been added to the release.
   See Section 7.7.5 of the user manual and Section 6.6.4 of the reference
   manual for details.
+
+#====================================
 
 Version 1.5.0b released, 2001/07/18.
 
@@ -323,6 +385,8 @@ Version 1.5.0b released, 2001/07/18.
 
 - Added SetRelChange option to GMRES solver.
 
+#====================================
+
 Version 1.4.0b released, 2001/01/10.
 
 - Changed SStruct interface: The SStructGraphAddEntries routine now
@@ -331,6 +395,8 @@ Version 1.4.0b released, 2001/01/10.
 
 - Both PCG and GMRES are available now when using the Struct or SStruct
   matrix classes (only one or the other was previously available).
+
+#====================================
 
 - First working multiprocessor version of SStruct interface.
 
@@ -341,7 +407,11 @@ Version 1.4.0b released, 2001/01/10.
   may be called instead of HYPRE_ParCSRPCGSetPrecond or
   HYPRE_StructPCGSetPrecond.
 
+#====================================
+
 Version 1.3.1b released, 2000/10/12.
+
+#====================================
 
 Version 1.3.0b released, 2000/10/11.
 
@@ -353,7 +423,11 @@ Version 1.3.0b released, 2000/10/11.
   all capitals (e.g., Cray fortran compilers).  To use, specify the
   '--with-CFLAGS=-DHYPRE_CRAY' option on the 'configure' line.
 
+#====================================
+
 Version 1.2.0 released, 2000/09/22.
+
+#====================================
 
 Version 1.1.0 released, 2000/09/07.
 
@@ -378,6 +452,8 @@ Version 1.1.0 released, 2000/09/07.
 - The main header files have been restructured to be more readable.
   They will soon include full documentation for their interfaces.
 
+#====================================
+
 New internal installation: V1.0.0, 2000/07/06
 
 - Now installing both optimized and debugging versions of the library.
@@ -390,6 +466,8 @@ New internal installation: V1.0.0, 2000/07/06
 - Using a new version numbering scheme.  The C macro HYPRE_Version()
   may be used to retrieve version information.
 
+#====================================
+
 New internal installation: V2000-05-31
 
 - OpenMP threading added to BoomerAMG.
@@ -401,6 +479,8 @@ New internal installation: V2000-05-31
   an initial independent set for the CLJP coarsening algorithm.
 
 - Various BoomerAMG optimizations.
+
+#====================================
 
 New internal installation: V2000-03-30
 
@@ -424,5 +504,7 @@ New internal installation: V2000-03-30
 
 - Fortran interface wrappers have been made for ParCSRMatrixMatvec and
   ParCSRMatrixMatvecT calls
+
+#====================================
 
 New internal installation: V2000-01-14
