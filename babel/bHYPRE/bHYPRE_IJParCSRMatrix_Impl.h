@@ -86,7 +86,7 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
 #include "_hypre_utilities.h"
-#include "parcsr_ls.h"
+#include "_hypre_parcsr_ls.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._includes) */
 
 /*

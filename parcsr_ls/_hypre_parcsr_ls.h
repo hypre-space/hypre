@@ -9,7 +9,7 @@
 #include "_hypre_utilities.h"
 #include "krylov.h"
 #include "seq_mv.h"
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 #include "HYPRE_lobpcg.h"
 
 #ifdef __cplusplus

@@ -27,7 +27,7 @@
 
 
 
-#include "IJ_mv.h"
+#include "_hypre_IJ_mv.h"
 #include "headers.h"
 
 #include "nd1_amge_interpolation.h"

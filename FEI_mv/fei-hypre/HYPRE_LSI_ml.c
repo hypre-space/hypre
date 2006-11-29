@@ -67,7 +67,7 @@
 #include "../../matrix_matrix/HYPRE_matrix_matrix_protos.h"
 
 #include "../../seq_mv/vector.h"
-#include "../../parcsr_mv/parcsr_mv.h" 
+#include "../../parcsr_mv/_hypre_parcsr_mv.h" 
 /* #include "../../parcsr_mv/par_vector.h" */
 
 extern void qsort0(int *, int, int);

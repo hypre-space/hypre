@@ -37,7 +37,7 @@
 #include "headers.h"
 
 #include "HYPRE.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "seq_mv/seq_mv.h"
 #include <assert.h>
 

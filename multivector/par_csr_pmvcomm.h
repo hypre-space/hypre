@@ -29,7 +29,7 @@
 #ifndef HYPRE_PAR_CSR_PMVCOMM_HEADER
 #define HYPRE_PAR_CSR_PMVCOMM_HEADER
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -35,7 +35,7 @@
 #include "HYPRE.h"
 #include "vector/mli_vector.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "util/mli_utils.h"
 
 /******************************************************************************

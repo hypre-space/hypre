@@ -29,7 +29,7 @@
 
 #include <string.h>
 #include "solver/mli_solver_gs.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 
 /******************************************************************************
  * Gauss-Seidel relaxation scheme

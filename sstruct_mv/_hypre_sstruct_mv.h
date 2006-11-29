@@ -33,7 +33,7 @@
 #define hypre_SSTRUCT_MV_HEADER
 
 #include "_hypre_struct_mv.h"
-#include "IJ_mv.h"
+#include "_hypre_IJ_mv.h"
 #include "HYPRE.h"
 
 #ifdef __cplusplus

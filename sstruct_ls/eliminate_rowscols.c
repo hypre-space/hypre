@@ -26,7 +26,7 @@
 
 
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 #include "eliminate_rowscols.h"
 
 int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,

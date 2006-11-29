@@ -31,5 +31,5 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "IJ_mv.h"
+#include "_hypre_IJ_mv.h"
 #include "HYPRE_IJ_mv.h"

@@ -32,7 +32,7 @@
 #include <math.h>
 
 #include "solver/mli_solver_mls.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 
 #define hmin(x,y) (((x) < (y)) ? (x) : (y))
 

@@ -54,7 +54,7 @@
 #include "HYPRE_parcsr_fgmres.h"
 #include "HYPRE_parcsr_lsicg.h"
 #include "HYPRE_LinSysCore.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "HYPRE_LSI_schwarz.h"
 #include "HYPRE_LSI_ddilut.h"
 #include "HYPRE_LSI_ddict.h"

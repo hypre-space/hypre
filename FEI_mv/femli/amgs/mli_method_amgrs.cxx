@@ -40,7 +40,7 @@
 #include <string.h>
 #include <assert.h>
 #include "HYPRE.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
 #include "util/mli_utils.h"
 #include "matrix/mli_matrix.h"
 #include "matrix/mli_matrix_misc.h"

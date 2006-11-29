@@ -34,8 +34,8 @@
 
 #include "utilities/_hypre_utilities.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
 #include "seq_mv/seq_mv.h"
 
 #ifdef HAVE_SUPERLU

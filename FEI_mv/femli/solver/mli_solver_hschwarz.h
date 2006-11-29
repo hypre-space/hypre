@@ -31,8 +31,8 @@
 #define __MLI_SOLVER_HSCHWARZ_H__
 
 #include <stdio.h>
-#include "parcsr_ls/parcsr_ls.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "matrix/mli_matrix.h"
 #include "vector/mli_vector.h"
 #include "solver/mli_solver.h"

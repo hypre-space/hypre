@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "solver/mli_solver_mli.h"
 #include "amgs/mli_method_amgsa.h"
 

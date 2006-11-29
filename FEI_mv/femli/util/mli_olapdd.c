@@ -27,7 +27,7 @@
 
 
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 extern int MLI_Smoother_Apply_Schwarz(void *smoother_obj,hypre_ParCSRMatrix *A,
                                         hypre_ParVector *f,hypre_ParVector *u);

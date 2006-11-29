@@ -36,7 +36,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "HYPRE.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "fedata/mli_fedata.h"
 #include "matrix/mli_matrix.h"
 

@@ -36,7 +36,7 @@
 #include "krylov.h"
 #include "_hypre_struct_ls.h"
 #include "_hypre_sstruct_mv.h"
-#include "parcsr_ls.h"
+#include "_hypre_parcsr_ls.h"
 #include "multivector.h"
 
 #ifdef __cplusplus

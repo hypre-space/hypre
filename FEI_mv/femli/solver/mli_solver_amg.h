@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include "HYPRE_config.h"
 #include "utilities/_hypre_utilities.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
 #include "matrix/mli_matrix.h"
 #include "vector/mli_vector.h"
 #include "solver/mli_solver.h"

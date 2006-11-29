@@ -15,7 +15,7 @@
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
 #include "hypre_test.h"

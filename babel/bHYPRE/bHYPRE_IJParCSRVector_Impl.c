@@ -60,7 +60,7 @@
 
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 #include "bHYPRE_IJVectorView.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */

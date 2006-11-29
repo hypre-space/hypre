@@ -40,7 +40,7 @@
 #include <assert.h>
 #include "mli_solver_seqsuperlu.h"
 #include "HYPRE.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "IJ_mv/IJ_mv.h"
 
 /* ****************************************************************************

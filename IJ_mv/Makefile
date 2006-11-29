@@ -46,8 +46,8 @@ HEADERS =\
  aux_par_vector.h\
  headers.h\
  HYPRE_IJ_mv.h\
+ _hypre_IJ_mv.h\
  IJ_matrix.h\
- IJ_mv.h\
  IJ_vector.h
 
 EXTRA_FILES =\
@@ -75,12 +75,12 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/IJ_mv.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_IJ_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/IJ_mv.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_IJ_mv.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

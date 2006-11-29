@@ -34,7 +34,7 @@
 
 #include "par_csr_multimatvec.h"
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 #include "seq_multivector.h"
 #include "par_multivector.h"

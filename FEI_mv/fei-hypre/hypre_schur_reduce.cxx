@@ -42,11 +42,11 @@
 #define habs(x) ((x > 0) ? x : -(x))
 
 //---------------------------------------------------------------------------
-// parcsr_mv.h is put here instead of in HYPRE_LinSysCore.h 
+// _hypre_parcsr_mv.h is put here instead of in HYPRE_LinSysCore.h 
 // because it gives warning when compiling cfei.cc
 //---------------------------------------------------------------------------
 
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 
 //---------------------------------------------------------------------------
 // These are external functions needed internally here

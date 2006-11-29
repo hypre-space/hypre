@@ -38,9 +38,9 @@
 
 #include <time.h>
 #include "utilities/_hypre_utilities.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "krylov/krylov.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
 typedef struct MLI_Function_Struct MLI_Function;
 #include "cintface/cmli.h"
 

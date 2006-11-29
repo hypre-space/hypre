@@ -30,7 +30,7 @@
 #include <HYPRE_config.h>
 #include "_hypre_utilities.h"
 #include "par_csr_block_matrix.h"
-#include "../parcsr_mv/parcsr_mv.h"
+#include "../parcsr_mv/_hypre_parcsr_mv.h"
 
 
 /*--------------------------------------------------------------------------

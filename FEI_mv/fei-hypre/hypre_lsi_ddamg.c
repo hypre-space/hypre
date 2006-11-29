@@ -45,7 +45,7 @@
 #include "HYPRE.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
 int  HYPRE_DummySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,

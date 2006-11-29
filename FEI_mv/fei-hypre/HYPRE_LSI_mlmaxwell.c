@@ -53,7 +53,7 @@
 #include "../../utilities/_hypre_utilities.h"
 #include "../../seq_mv/vector.h"
 /* #include "../../parcsr_mv/par_vector.h" */
-#include "../../parcsr_mv/parcsr_mv.h"
+#include "../../parcsr_mv/_hypre_parcsr_mv.h"
 #include "HYPRE_MLMatrix.h"
 #include "HYPRE_MLMaxwell.h"
 

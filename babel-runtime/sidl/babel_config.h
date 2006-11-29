@@ -687,14 +687,14 @@
 /* If defined, Java support was disabled at configure time */
 #ifndef JAVA_DISABLED
 #ifndef JAVA_DISABLED
-/* #undef JAVA_DISABLED */
+#define JAVA_DISABLED 1
 #endif
 #endif
 
 /* Fully qualified string name of the Java Virtual Machine shared library */
 #ifndef JVM_SHARED_LIBRARY
 #ifndef JVM_SHARED_LIBRARY
-#define JVM_SHARED_LIBRARY "/usr/apps/java/j2sdk1.4.2_05/jre/lib/i386/server/libjvm.so"
+/* #undef JVM_SHARED_LIBRARY */
 #endif
 #endif
 
@@ -810,7 +810,7 @@
 /* If defined, Python support was disabled at configure time */
 #ifndef PYTHON_DISABLED
 #ifndef PYTHON_DISABLED
-/* #undef PYTHON_DISABLED */
+#define PYTHON_DISABLED 1
 #endif
 #endif
 
@@ -838,7 +838,7 @@
 /* A string indicating the Python version number */
 #ifndef PYTHON_VERSION
 #ifndef PYTHON_VERSION
-#define PYTHON_VERSION "2.4"
+#define PYTHON_VERSION "2.2"
 #endif
 #endif
 

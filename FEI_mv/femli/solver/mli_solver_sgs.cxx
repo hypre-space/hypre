@@ -29,7 +29,7 @@
 
 #include <math.h>
 #include <string.h>
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "solver/mli_solver_sgs.h"
 
 /******************************************************************************

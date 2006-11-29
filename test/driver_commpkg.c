@@ -12,10 +12,10 @@
 /*   #include <mpi.h>   */
 
 #include "_hypre_utilities.h"
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
 
-/* #include "parcsr_ls.h"
+/* #include "_hypre_parcsr_ls.h"
  #include "HYPRE.h" 
  #include "HYPRE_parcsr_mv.h" 
  #include "HYPRE_krylov.h"  */

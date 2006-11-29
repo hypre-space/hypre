@@ -55,7 +55,7 @@
 #include "../seq_mv/vector.h"
 /* AB 8/06 - replace header file */
 /* #include "../parcsr_mv/par_vector.h" */
-#include "../parcsr_mv/parcsr_mv.h"
+#include "../parcsr_mv/_hypre_parcsr_mv.h"
 
 /* If code is more mysterious, then it must be good */
 typedef struct

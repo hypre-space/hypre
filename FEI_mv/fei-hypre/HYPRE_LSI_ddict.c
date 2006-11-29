@@ -40,7 +40,7 @@
 #include "HYPRE.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 #include "HYPRE_MHMatrix.h"
 

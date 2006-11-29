@@ -687,14 +687,14 @@
 /* If defined, Java support was disabled at configure time */
 #ifndef JAVA_DISABLED
 #ifndef JAVA_DISABLED
-/* #undef JAVA_DISABLED */
+#define JAVA_DISABLED 1
 #endif
 #endif
 
 /* Fully qualified string name of the Java Virtual Machine shared library */
 #ifndef JVM_SHARED_LIBRARY
 #ifndef JVM_SHARED_LIBRARY
-#define JVM_SHARED_LIBRARY "/usr/apps/java/j2sdk1.4.2_05/jre/lib/i386/server/libjvm.so"
+/* #undef JVM_SHARED_LIBRARY */
 #endif
 #endif
 
@@ -810,35 +810,35 @@
 /* If defined, Python support was disabled at configure time */
 #ifndef PYTHON_DISABLED
 #ifndef PYTHON_DISABLED
-/* #undef PYTHON_DISABLED */
+#define PYTHON_DISABLED 1
 #endif
 #endif
 
 /* If defined, server-side Python support was disabled at configure time */
 #ifndef PYTHON_SERVER_DISABLED
 #ifndef PYTHON_SERVER_DISABLED
-/* #undef PYTHON_SERVER_DISABLED */
+#define PYTHON_SERVER_DISABLED 1
 #endif
 #endif
 
 /* Fully qualified string name of the Python shared library */
 #ifndef PYTHON_SHARED_LIBRARY
 #ifndef PYTHON_SHARED_LIBRARY
-#define PYTHON_SHARED_LIBRARY "/home/painter/lib/libpython2.4.so"
+/* #undef PYTHON_SHARED_LIBRARY */
 #endif
 #endif
 
 /* Directory of the Python shared library */
 #ifndef PYTHON_SHARED_LIBRARY_DIR
 #ifndef PYTHON_SHARED_LIBRARY_DIR
-#define PYTHON_SHARED_LIBRARY_DIR "/home/painter/lib"
+/* #undef PYTHON_SHARED_LIBRARY_DIR */
 #endif
 #endif
 
 /* A string indicating the Python version number */
 #ifndef PYTHON_VERSION
 #ifndef PYTHON_VERSION
-#define PYTHON_VERSION "2.4"
+#define PYTHON_VERSION "2.2"
 #endif
 #endif
 

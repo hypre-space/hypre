@@ -42,7 +42,7 @@
 
 #include "utilities/_hypre_utilities.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "HYPRE_LSI_blkprec.h"
 
 #ifdef __cplusplus

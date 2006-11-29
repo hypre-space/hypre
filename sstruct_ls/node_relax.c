@@ -32,7 +32,7 @@
  *****************************************************************************/
 
 #include "headers.h"
-#include "parcsr_ls.h"
+#include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_NodeRelaxData data structure

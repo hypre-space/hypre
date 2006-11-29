@@ -40,8 +40,9 @@
 
 #include "utilities/_hypre_utilities.h"
 #include "IJ_mv/IJ_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
+
 
 // *************************************************************************
 // Solver-Preconditioner parameter data structure

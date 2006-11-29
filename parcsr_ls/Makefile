@@ -59,8 +59,8 @@ HEADERS =\
  headers.h\
  HYPRE_parcsr_int.h\
  HYPRE_parcsr_ls.h\
+ _hypre_parcsr_ls.h\
  par_amg.h\
- parcsr_ls.h\
  schwarz.h\
  block_tridiag.h
 
@@ -138,12 +138,12 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/parcsr_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
  
 install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/parcsr_ls.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
  
 clean:

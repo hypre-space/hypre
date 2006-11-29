@@ -38,7 +38,7 @@
 
 #include "utilities/_hypre_utilities.h"
 #include "HYPRE.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
 /*---------------------------------------------------------------------------

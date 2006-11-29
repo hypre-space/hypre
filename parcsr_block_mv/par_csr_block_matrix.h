@@ -41,7 +41,7 @@
                                                                                                                
 #include "_hypre_utilities.h"
 #include "csr_block_matrix.h"
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
                                                                                                                
 #ifdef __cplusplus
 extern "C" {

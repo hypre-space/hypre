@@ -34,7 +34,7 @@
 #ifndef PAR_CSR_MATMULTIVEC_HEADER
 #define PAR_CSR_MATMULTIVEC_HEADER
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 #include "par_multivector.h"
 
 #ifdef __cplusplus

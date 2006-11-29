@@ -30,8 +30,8 @@
 #ifndef hypre_BLOCKTRIDIAG_HEADER
 #define hypre_BLOCKTRIDIAG_HEADER
 
-#include "parcsr_mv/parcsr_mv.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_BlockTridiag

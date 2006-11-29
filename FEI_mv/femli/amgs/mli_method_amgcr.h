@@ -37,7 +37,7 @@
 #define __MLIMETHODAMGCRH__
 
 #include "utilities/_hypre_utilities.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "base/mli.h"
 #include "matrix/mli_matrix.h"
 #include "amgs/mli_method.h"
