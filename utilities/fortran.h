@@ -34,6 +34,8 @@
 #ifndef HYPRE_FORT_HEADER
 #define HYPRE_FORT_HEADER
 
+#include "HYPRE_config.h"
+
 #ifdef WIN32
 #include "mkl.h"
 #endif
