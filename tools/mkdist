@@ -50,7 +50,7 @@ help ()
   printf "  The number syntax within the repository is VM-mm-rr so that is\n"
   printf "  the format input to this script.\n"
   printf "  \n"
-  printf "  Alpha releases are denoted as \"VM-nn-rr-a\" and \"VM-nn-rr-b\" for\n"
+  printf "  Alpha releases are denoted as \"VM-nn-rra\" and \"VM-nn-rrb\" for\n"
   printf "  beta releases.\n"
   printf "  \n"
   printf "  If VersionId can be mapped to a valid rtag branch from the source\n"
