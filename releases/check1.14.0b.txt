@@ -40,37 +40,38 @@ the responsible project member before the release is made available to users.
  8. Update config/configure.in with release number and date, then run
     config/bootstrap and commit changes to the repository
 
-    --->> 
+    --->> rdf 11/30/2006
 
  9. Tag repository with release number
 
-    --->> 
+    --->> rdf 11/30/2006
 
 10. Checkout tagged version
 
-    --->> 
+    --->> skipped
 
 11. Manually run the autotest script with the following options on the checked
     out version: -tux149 -insure -gpsmp -pengra
 
-    --->> 
+    --->> skipped (relying on runs prior to tagging)
 
 12. If the test runs properly, proceed.  Otherwise, untag the repository, make
     necessary corrections, and return to step 8.
 
-    --->> 
+    --->> rdf 11/30/2006
 
 13. Create release tar file by running the mkdist script './mkdist [VersionID]'
     (this can be run from within any directory, just be sure to use the latest
     version of the 'mkdist' script)
 
-    --->> 
+    --->> rdf 11/30/2006
 
-14. On the CASC cluster, copy tar file to /usr/casc/hypre/i686-pc-linux-gnu
+14. On the CASC cluster, copy tar file to /usr/casc/hypre
 
-    --->> 
+    --->> rdf 11/30/2006
 
-15. Inform project team and other appropriate users of availability
+15. Put release on download page, and inform project team and other appropriate
+    users of availability
 
     --->> 
 
