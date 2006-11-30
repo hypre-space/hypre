@@ -1215,14 +1215,14 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             /* we do not want a sinlge processor to do a ton of point
                to point communications (relative to the number of
                total processors -  how much is too much?
-               2^32 ~  128,000 */
-            threshold = hypre_max(8, 2*ologp);
+               17 ~  log(128,000) */
+            threshold = 8*ologp;
             
             if ( max_proc_count >  threshold)
             {
                /* too many! */
-               if (myid == 0)
-                  printf("TOO BIG: check 1: max_proc_count = %d\n", max_proc_count);
+               /* if (myid == 0)
+                  printf("TOO BIG: check 1: max_proc_count = %d\n", max_proc_count);*/
 
                /* change coarse midstream!- now we will just gather everything! */
                non_ap_gather = 1;
@@ -1397,9 +1397,10 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                }
 
                
-               /* ??? should we check again to make sure we
-                  do not have too many contacts? */
-
+               /* should we check again to make sure we
+                  do not have too many contacts?  - for now, no - doesn't seem like 
+                  this one fails if the first passes */
+#if 0
                /* check (again) how many point to point
                communications?  here the threshold is higher - we have
                less left to do.... */
@@ -1408,8 +1409,8 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                if ( max_proc_count >  threshold)
                {
                   /* too many! */
-                  if (myid == 0)
-                     printf("TOO BIG: check 2: max_proc_count = %d\n", max_proc_count);
+                  /* if (myid == 0)
+                     printf("TOO BIG: check 2: max_proc_count = %d\n", max_proc_count);*/
                   
                   /* change coarse midstream!- now we will just gather everything! */
                   non_ap_gather = 1;
@@ -1418,7 +1419,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                   hypre_TFree(contact_proc_ids);
                   hypre_TFree(neighbor_proc_ids);
                }
-
+#endif
                if (!non_ap_gather)
                {
                   
@@ -1730,7 +1731,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
          }
          
          hypre_BoxManAllGlobalKnown(manager) = 1;
-      
+         
          hypre_TFree(send_buf);
          hypre_TFree(recv_buf);
          hypre_TFree(recv_counts);
@@ -1739,7 +1740,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
          /* now the entries and procs_sort and ids_sort are already
             sorted */
          need_to_sort = 0;
-
+         hypre_BoxManIsEntriesSort(manager) = 1;
    
       } /********* end of non-AP gather *****************/
 
