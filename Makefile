@@ -200,6 +200,7 @@ distclean:
 	rm -rf ./autom4te.cache
 	rm -rf ./config.log
 	rm -rf ./config.status
+	rm -rf ./HYPRE_config.h
 
 tags:
 	find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
