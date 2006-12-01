@@ -189,8 +189,5 @@ int
 HYPRE_StructJacobiGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                                 double             *norm   )
 {
-#if 0
    return( hypre_JacobiGetFinalRelativeResidualNorm( (void *) solver, norm ) );
-#endif
-   return 0;
 }

@@ -50,7 +50,8 @@ typedef struct
 {
    MPI_Comm                comm;
                        
-   double                  tol;                /* not yet used */
+   double                  tol;       /* tolerance, set =0 for no convergence testing */
+   double                  rresnorm;  /* relative residual norm, computed only if tol>0.0 */
    int                     max_iter;
    int                     rel_change;         /* not yet used */
    int                     zero_guess;
@@ -96,7 +97,8 @@ hypre_PointRelaxCreate( MPI_Comm  comm )
    (relax_data -> time_index) = hypre_InitializeTiming("PointRelax");
 
    /* set defaults */
-   (relax_data -> tol)              = 1.0e-06;
+   (relax_data -> tol)              = 0.0;  /* tol=0 means no convergence testing */
+   (relax_data -> rresnorm)         = 0.0;
    (relax_data -> max_iter)         = 1000;
    (relax_data -> rel_change)       = 0;
    (relax_data -> zero_guess)       = 0;
@@ -355,6 +357,8 @@ hypre_PointRelax( void               *relax_vdata,
    hypre_StructVector    *t                = (relax_data -> t);
    int                    diag_rank        = (relax_data -> diag_rank);
    hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
+   double                 tol              = (relax_data -> tol);
+   double                 tol2             = tol*tol;
 
    hypre_ComputePkg      *compute_pkg;
    hypre_CommHandle      *comm_handle;
@@ -390,6 +394,7 @@ hypre_PointRelax( void               *relax_vdata,
    int                    pointset;
 
    int                    ierr = 0;
+   double                 bsumsq, rsumsq, ss;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
@@ -421,6 +426,9 @@ hypre_PointRelax( void               *relax_vdata,
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
+   if ( tol>0.0 )
+      bsumsq = hypre_StructInnerProd( b, b );
+
    /*----------------------------------------------------------
     * Do zero_guess iteration
     *----------------------------------------------------------*/
@@ -430,6 +438,7 @@ hypre_PointRelax( void               *relax_vdata,
 
    if (zero_guess)
    {
+      if ( p==0 ) rsumsq = 0.0;
       if (num_pointsets > 1)
       {
          hypre_StructVectorSetConstantValues(x, 0.0);
@@ -513,6 +522,12 @@ hypre_PointRelax( void               *relax_vdata,
             }
       }
       
+      if ( tol>0.0 )
+      {
+         ierr += hypre_sumsqdiff_pointset( relax_data, pointset, x, b, A, &ss );
+         rsumsq += ss;
+      }
+
       if (weight != 1.0)
       {
          hypre_StructScale(weight, x);
@@ -520,6 +535,15 @@ hypre_PointRelax( void               *relax_vdata,
       
       p    = (p + 1) % num_pointsets;
       iter = iter + (p == 0);
+
+      if ( tol>0.0 && p==0 )
+         /* ... p==0 here means we've finished going through all the pointsets,
+            i.e. this iteration is complete.
+         tol>0.0 means to do a convergence test, using tol.
+         The test is simply ||r||/||b||<tol, where r=residual, b=r.h.s., unweighted L2 norm */
+      {
+         if ( rsumsq/bsumsq<tol2 ) max_iter = iter; /* converged; reset max_iter to prevent more iterations */
+      }
    }
 
    /*----------------------------------------------------------
@@ -528,6 +552,7 @@ hypre_PointRelax( void               *relax_vdata,
 
    while (iter < max_iter)
    {
+      if ( p==0 ) rsumsq = 0.0;
       pointset = pointset_ranks[p];
       compute_pkg = compute_pkgs[pointset];
       stride = pointset_strides[pointset];
@@ -620,22 +645,39 @@ hypre_PointRelax( void               *relax_vdata,
             }
       }
 
+
+      if ( tol>0.0 )
+      {
+         ierr += hypre_sumsqdiff_pointset( relax_data, pointset, t, x, A, &ss );
+         rsumsq += ss;
+      }
+
       if (weight != 1.0)
       {
          /*        hypre_StructScale((1.0 - weight), x);
                    hypre_StructAxpy(weight, t, x);*/
-         hypre_relax_wtx( relax_data, pointset, t, x );
+         hypre_relax_wtx( relax_data, pointset, t, x ); /* x=w*t+(1-w)*x on pointset */
       }
       else
       {
-         hypre_relax_copy( relax_data, pointset, t, x );
+         hypre_relax_copy( relax_data, pointset, t, x ); /* x=t on pointset */
             /* hypre_StructCopy(t, x);*/
       }
 
       p    = (p + 1) % num_pointsets;
       iter = iter + (p == 0);
+
+      if ( tol>0.0 && p==0 )
+         /* ... p==0 here means we've finished going through all the pointsets,
+            i.e. this iteration is complete.
+         tol>0.0 means to do a convergence test, using tol.
+         The test is simply ||r||/||b||<tol, where r=residual, b=r.h.s., unweighted L2 norm */
+      {
+         if ( rsumsq/bsumsq<tol2 ) break;
+      }
    }
-   
+
+   if ( tol>0.0 ) (relax_data -> rresnorm) = sqrt( rsumsq/bsumsq );
    (relax_data -> num_iterations) = iter;
 
    /*-----------------------------------------------------------------------
@@ -1647,6 +1689,19 @@ hypre_PointRelaxSetTempVec( void               *relax_vdata,
 }
 
 
+
+/*--------------------------------------------------------------------------
+ * hypre_PointRelaxGetFinalRelativeResidualNorm
+ *--------------------------------------------------------------------------*/
+
+int hypre_PointRelaxGetFinalRelativeResidualNorm( void * relax_vdata, double * norm )
+{
+   hypre_PointRelaxData *relax_data = relax_vdata;
+
+   *norm = relax_data -> rresnorm;
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_relax_wtx
  * Special vector operation for use in hypre_PointRelax -
@@ -1815,6 +1870,129 @@ int hypre_relax_copy( void *relax_vdata, int pointset,
                   hypre_BoxLoop2End(xi, ti);
                }
          }
+   }
+
+   return ierr;
+}
+/*--------------------------------------------------------------------------
+ * hypre_sumsqdiff_pointset
+ * Computes the sum of squares of the residual but only on the specified pointset.
+ * The residual is computed from the old x iterate, x, the new x iterate, t,
+ * and the diagonal of the matrix A as follows.  We assume t was computed by
+ * a Jacobi iteration on the pointset.
+ * Let A=D+O, D diagonal.  Then, t was computed by Dt=b-Ox, r is
+ * r = b-Ax = b-Ox-Dx = D(t-x)
+ *--------------------------------------------------------------------------*/
+
+int hypre_sumsqdiff_pointset( void *relax_vdata, int pointset,
+                              hypre_StructVector *t, hypre_StructVector *x,
+                              hypre_StructMatrix *A, double *sumsq )
+{
+   hypre_PointRelaxData  *relax_data = relax_vdata;
+   hypre_Index           *pointset_strides = (relax_data -> pointset_strides);
+   int                    diag_rank        = (relax_data -> diag_rank);
+   hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
+   hypre_ComputePkg      *compute_pkg;
+
+   hypre_IndexRef         stride;
+   hypre_IndexRef         start;
+   hypre_Index            loop_size;
+
+   int constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
+   double                *Ap;
+   double *xp, *tp;
+   double xmta;
+   int compute_i, i, j, loopi, loopj, loopk;
+   int Ai, xi, ti;
+   int ierr = 0;
+   double Api;
+
+   hypre_BoxArrayArray   *compute_box_aa;
+   hypre_BoxArray        *compute_box_a;
+   hypre_Box             *compute_box;
+   hypre_Box             *x_data_box;
+   hypre_Box             *t_data_box;
+   hypre_Box             *A_data_box;
+
+   *sumsq = 0.0;
+   compute_pkg = compute_pkgs[pointset];
+   stride = pointset_strides[pointset];
+
+   for (compute_i = 0; compute_i < 2; compute_i++)
+   {
+      switch(compute_i)
+      {
+      case 0:
+      {
+         compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
+      }
+      break;
+
+      case 1:
+      {
+         compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
+      }
+      break;
+      }
+
+      hypre_ForBoxArrayI(i, compute_box_aa)
+      {
+         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+
+         x_data_box =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+         t_data_box =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(t), i);
+         A_data_box =
+            hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+
+         xp = hypre_StructVectorBoxData(x, i);
+         tp = hypre_StructVectorBoxData(t, i);
+         Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+
+         compute_box = hypre_BoxArrayBox(compute_box_a, j);
+         start  = hypre_BoxIMin(compute_box);
+         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+         if ( constant_coefficient==1 ) /* constant diagonal */
+         {
+            hypre_ForBoxI(j, compute_box_a)
+            {
+               Ai = hypre_CCBoxIndexRank( A_data_box, start );
+               Api = Ap[Ai];
+
+               hypre_BoxLoop2Begin(loop_size,
+                                   x_data_box, start, stride, xi,
+                                   t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
+#include "hypre_box_smp_forloop.h"
+               hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
+               {
+                  xmta = (xp[xi] - tp[ti])*Api;
+                  *sumsq += xmta*xmta;
+               }
+               hypre_BoxLoop2End(xi, ti);
+            }
+         }
+         else  /* variable diagonal, constant_coefficient==0 or 2 */
+         {
+            hypre_ForBoxI(j, compute_box_a)
+            {
+               hypre_BoxLoop3Begin(loop_size,
+                                   A_data_box, start, stride, Ai,
+                                   x_data_box, start, stride, xi,
+                                   t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
+#include "hypre_box_smp_forloop.h"
+               hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
+               {
+                  xmta = (xp[xi] - tp[ti])*Ap[Ai];
+                  *sumsq += xmta*xmta;
+               }
+               hypre_BoxLoop3End(Ai, xi, ti);
+            }
+         }
+      }
    }
 
    return ierr;
