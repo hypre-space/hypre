@@ -1,14 +1,16 @@
 
-HYPRE Beta Release Checklist
+** NOTE: This file still needs some work
 
-Beta releases tend to occur somewhat frequently.  They may include new
-technology, but they are reasonably stable.
+HYPRE General Release Checklist
+
+General releases occur infrequently.  They are stable, well-documented and can
+be downloaded from the HYPRE web site.
 
 The following steps must be completed, initialed & dated on the --->> line by
 the responsible project member before the release is made available to users.
 
 
- 1. Decision made for release number: X.X.Xb
+ 1. Decision made for release number: X.X.X
 
     --->> 
 
@@ -21,11 +23,24 @@ the responsible project member before the release is made available to users.
 
     --->> 
 
+ *. Update user, reference, and developer manuals with information regarding
+    contents of this release
+
+    --->> 
+
+ *. Initial documentation review meeting
+
+    --->> 
+
  4. Update CHANGELOG file with information regarding contents of this release
 
     --->> 
 
- 5. Verify that user, reference, and developer manuals are updated
+ *. Create beta release
+
+    --->> 
+
+ *. Final documentation review meeting
 
     --->> 
 
