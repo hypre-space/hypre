@@ -2789,6 +2789,10 @@ int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
    {
       maxwellGEN_ = (HYPRE_ParCSRMatrix) data.getDataPtr();
    }
+   else if (!strcmp(name, "AMSData"))
+   {
+      auxAMSData_ = (HYPRE_AMSData *) data.getDataPtr();
+   }
    else
    {
       printf("%4d : HYPRE_LSC::copyInMatrix ERROR - invalid data.\n",mypid_);

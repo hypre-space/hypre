@@ -711,6 +711,7 @@ class HYPRE_LinSysCore
    double          MLI_Hybrid_ConvRate_;
    int             MLI_Hybrid_NTrials_;
    HYPRE_AMSData   AMSData_;
+   HYPRE_AMSData   *auxAMSData_;
 
    // ----------------------------------------------------------------------
    // ML Maxwell variables
