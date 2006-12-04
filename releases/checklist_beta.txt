@@ -46,36 +46,32 @@ the responsible project member before the release is made available to users.
 
     --->> 
 
-10. Checkout tagged version
-
-    --->> 
-
-11. Manually run the autotest script with the following options on the checked
+10. Manually run the autotest script with the following options on the checked
     out version: -tux149 -insure -gpsmp -pengra
 
     --->> 
 
-12. If the test runs properly, proceed.  Otherwise, untag the repository, make
+11. If the test runs properly, proceed.  Otherwise, untag the repository, make
     necessary corrections, and return to step 8.
 
     --->> 
 
-13. Create release tar file by running the mkdist script './mkdist [VersionID]'
+12. Create release tar file by running the mkdist script './mkdist [VersionID]'
     (this can be run from within any directory, just be sure to use the latest
     version of the 'mkdist' script)
 
     --->> 
 
-14. On the CASC cluster, copy tar file to /usr/casc/hypre
+13. On the CASC cluster, copy tar file to /usr/casc/hypre
 
     --->> 
 
-15. Put release on download page, and inform project team and other appropriate
+14. Put release on download page, and inform project team and other appropriate
     users of availability
 
     --->> 
 
-16. FINAL CERTIFICATION: Verify that all steps have been signed off and commit
+15. FINAL CERTIFICATION: Verify that all steps have been signed off and commit
     this file to the repository
 
     --->> 

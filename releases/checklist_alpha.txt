@@ -37,21 +37,17 @@ the responsible project member before the release is made available to users.
 
     --->> 
 
- 9. Checkout tagged version
-
-    --->> 
-
-10. Create release tar file by running the mkdist script './mkdist [VersionID]'
+ 9. Create release tar file by running the mkdist script './mkdist [VersionID]'
     (this can be run from within any directory, just be sure to use the latest
     version of the 'mkdist' script)
 
     --->> 
 
-11. On the CASC cluster, copy tar file to /usr/casc/hypre
+10. On the CASC cluster, copy tar file to /usr/casc/hypre
 
     --->> 
 
-12. FINAL CERTIFICATION: Verify that all steps have been signed off and commit
+11. FINAL CERTIFICATION: Verify that all steps have been signed off and commit
     this file to the repository
 
     --->> 

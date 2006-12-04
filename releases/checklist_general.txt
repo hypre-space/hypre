@@ -61,10 +61,6 @@ the responsible project member before the release is made available to users.
 
     --->> 
 
-10. Checkout tagged version
-
-    --->> 
-
 11. Manually run the autotest script with the following options on the checked
     out version: -tux149 -insure -gpsmp -pengra
 
