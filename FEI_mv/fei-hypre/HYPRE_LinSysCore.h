@@ -97,7 +97,7 @@ typedef struct
    int    numLocalNodes_;
    int    numNodes_;
    double *NodalCoord_;
-} HYPRE_AMSData;
+} HYPRE_FEI_AMSData;
 
 // *************************************************************************
 // class definition
@@ -710,8 +710,7 @@ class HYPRE_LinSysCore
    int             MLI_Hybrid_MaxIter_;
    double          MLI_Hybrid_ConvRate_;
    int             MLI_Hybrid_NTrials_;
-   HYPRE_AMSData   AMSData_;
-   HYPRE_AMSData   *auxAMSData_;
+   HYPRE_FEI_AMSData AMSData_;
 
    // ----------------------------------------------------------------------
    // ML Maxwell variables

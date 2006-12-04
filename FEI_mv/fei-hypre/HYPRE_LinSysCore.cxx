@@ -2776,7 +2776,9 @@ int HYPRE_LinSysCore::getMatrixPtr(Data& data)
 #ifndef NOFEI
 int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data) 
 {
+   int  i;
    char *name;
+   HYPRE_FEI_AMSData *auxAMSData;
 
    (void) scalar;
 
@@ -2791,7 +2793,22 @@ int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
    }
    else if (!strcmp(name, "AMSData"))
    {
-      auxAMSData_ = (HYPRE_AMSData *) data.getDataPtr();
+      auxAMSData = (HYPRE_FEI_AMSData *) data.getDataPtr();
+      if (AMSData_.NodeNumbers_ != NULL) delete [] AMSData_.NodeNumbers_;
+      if (AMSData_.NodalCoord_  != NULL) delete [] AMSData_.NodalCoord_;
+      AMSData_.NodeNumbers_ = NULL;
+      AMSData_.NodalCoord_  = NULL;
+      AMSData_.numNodes_ = auxAMSData->numNodes_;
+      AMSData_.numLocalNodes_ = auxAMSData->numLocalNodes_;
+      if (AMSData_.numNodes_ > 0)
+      {
+         AMSData_.NodeNumbers_ = new int[AMSData_.numNodes_];
+         AMSData_.NodalCoord_  = new double[AMSData_.numNodes_*mlNumPDEs_];
+         for (i = 0; i < AMSData_.numNodes_; i++)
+            AMSData_.NodeNumbers_[i] = auxAMSData->NodeNumbers_[i];
+         for (i = 0; i < AMSData_.numNodes_*mlNumPDEs_; i++)
+            AMSData_.NodalCoord_[i] = auxAMSData->NodalCoord_[i];
+      }
    }
    else
    {
