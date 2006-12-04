@@ -327,9 +327,14 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    MLI_Hybrid_MaxIter_  = 100;
    MLI_Hybrid_ConvRate_ = 0.95;
    MLI_Hybrid_NTrials_  = 5;
-   amsX_                = NULL;
-   amsY_                = NULL;
-   amsZ_                = NULL;
+   AMSData_.numNodes_      = 0;
+   AMSData_.numLocalNodes_ = 0;
+   AMSData_.EdgeNodeList_  = NULL;
+   AMSData_.NodeNumbers_   = NULL;
+   AMSData_.NodalCoord_    = NULL;
+   amsX_ = NULL;
+   amsY_ = NULL;
+   amsZ_ = NULL;
 
    //-------------------------------------------------------------------
    // parameters ML Maxwell solver
@@ -556,6 +561,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    //   HYPRE_ParCSRMatrixDestroy(maxwellGEN_);
    //   maxwellGEN_ = NULL;
    //}
+   if (AMSData_.EdgeNodeList_ != NULL) delete [] AMSData_.EdgeNodeList_;
+   if (AMSData_.NodeNumbers_  != NULL) delete [] AMSData_.NodeNumbers_;
+   if (AMSData_.NodalCoord_   != NULL) delete [] AMSData_.NodalCoord_;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -2131,10 +2139,10 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
                        int* nodeNumbers, int numNodes, const double* data)
 {
-   int    i, j, **nodeFieldIDs, nodeFieldID, *procNRows, nRows;
-   int    blockID, *blockIDs, *eqnNumbers, *iTempArray;
+   int    i, j, **nodeFieldIDs, nodeFieldID, *procNRows, nRows, errCnt;
+   int    blockID, *blockIDs, *eqnNumbers, *iArray, newNumEdges;
    //int   checkFieldSize;
-   int    *aleNodeNumbers, index, newNumNodes;
+   int    *aleNodeNumbers, index, newNumNodes, numEdges;
    double *newData;
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
@@ -2225,31 +2233,111 @@ This should ultimately be taken out even for newer ale3d implementation
    }
 
    //-------------------------------------------------------------------
-   // This part is for loading the nodal coordinate information for
-   // use with the AMS preconditioner.
+   // This part is for loading the edge to (hypre-compatible) node list 
+   // for AMS (the node list is ordered with the edge equation numbers
+   // and the node numbers are true node equation numbers passed in by
+   // the application which obtains the true node eqn numbers via the
+   // nodal FEI) ===> EdgeNodeList  
    //-------------------------------------------------------------------
 
-   else if ( fieldID == -4 )
+   if (fieldID == -4)
    {
-      if (numNodes <= 0 || fieldSize <= 0) return 1;
-
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5)
       {
-         for ( i = 0; i < numNodes; i++ )
-            for ( j = 0; j < fieldSize; j++ )
+         for (i = 0; i < numNodes; i++)
+            for (j = 0; j < fieldSize; j++)
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
                       data[i*fieldSize+j]);
       }    
-      if ( MLI_EqnNumbers_ != NULL ) delete [] MLI_EqnNumbers_;
-      if ( MLI_NodalCoord_ != NULL ) delete [] MLI_NodalCoord_;
-      MLI_FieldSize_  = fieldSize;
-      MLI_NumNodes_   = numNodes;
-      MLI_EqnNumbers_ = new int[numNodes+1];
-      MLI_NodalCoord_ = new double[fieldSize*numNodes+1];
-      for (i = 0; i < numNodes; i++) MLI_EqnNumbers_[i] = nodeNumbers[i];
-      MLI_EqnNumbers_[numNodes] = -1;
-      for (i = 0; i < numNodes*fieldSize; i++) MLI_NodalCoord_[i] = data[i];
-      MLI_NodalCoord_[numNodes*fieldSize] = -99999.0;
+      if (HYPreconID_ == HYAMS && lookup_ != NULL && fieldSize == 2 &&
+           numNodes > 0)
+      {
+         blockIDs       = (int *) lookup_->getElemBlockIDs();
+         blockID        = blockIDs[0];
+         nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
+         nodeFieldID    = nodeFieldIDs[0][0];
+         numEdges    = numNodes;
+         eqnNumbers  = new int[numEdges];
+         iArray      = new int[numEdges*fieldSize];
+         newNumEdges = 0;
+         for (i = 0; i < numEdges; i++)
+         { 
+            index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
+            if (index >= localStartRow_-1 && index < localEndRow_)
+            {
+               for (j = 0; j < fieldSize; j++) 
+                  iArray[newNumEdges*fieldSize+j] = (int) data[i*fieldSize+j];
+               eqnNumbers[newNumEdges++] = index;
+            }
+         }
+         nRows = localEndRow_ - localStartRow_ + 1;
+         if (AMSData_.EdgeNodeList_ != NULL) delete [] AMSData_.EdgeNodeList_;
+         AMSData_.EdgeNodeList_ = NULL;
+         if (newNumEdges > 0)
+         {
+            AMSData_.numEdges_ = nRows;
+            AMSData_.EdgeNodeList_ = new int[nRows*fieldSize];
+            for (i = 0; i < nRows*fieldSize; i++)
+               AMSData_.EdgeNodeList_[i] = -99999;
+            for (i = 0; i < newNumNodes; i++)
+            {
+               index = eqnNumbers[i] - localStartRow_ + 1;
+               for (j = 0; j < fieldSize; j++ ) 
+                  AMSData_.EdgeNodeList_[index+j] = iArray[i*fieldSize+j];
+            }
+            errCnt = 0;
+            for (i = 0; i < nRows*fieldSize; i++)
+               if (AMSData_.EdgeNodeList_[i] == -99999) errCnt++;
+            if (errCnt > 0)
+               printf("putNodalFieldData ERROR:incomplete AMS edge vertex list\n");
+         }
+         delete [] eqnNumbers;
+         delete [] iArray;
+      }
+   }
+
+   //-------------------------------------------------------------------
+   // This part is for converting node numbers to equations as well as
+   // for loading the nodal coordinate information
+   // (stored in NodeNumbers, NodalCoord, numNodes, numLocalNodes)
+   //-------------------------------------------------------------------
+
+   if (fieldID == -5)
+   {
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5)
+      {
+         for (i = 0; i < numNodes; i++)
+            for (j = 0; j < fieldSize; j++)
+               printf("putNodalFieldData : %4d %2d = %e\n",i,j,
+                      data[i*fieldSize+j]);
+      }    
+      if (lookup_ != NULL && fieldSize == 1)
+      {
+         blockIDs       = (int *) lookup_->getElemBlockIDs();
+         blockID        = blockIDs[0];
+         nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
+         nodeFieldID    = nodeFieldIDs[0][0];
+         if (AMSData_.NodeNumbers_ != NULL) delete [] AMSData_.NodeNumbers_;
+         if (AMSData_.NodalCoord_  != NULL) delete [] AMSData_.NodalCoord_;
+         AMSData_.NodeNumbers_ = NULL;
+         AMSData_.NodalCoord_  = NULL;
+         AMSData_.numNodes_ = 0;
+         AMSData_.numLocalNodes_ = localEndRow_ - localStartRow_ + 1;
+         if (numNodes > 0)
+         {
+            AMSData_.numNodes_ = numNodes;
+            AMSData_.numLocalNodes_ = localEndRow_ - localStartRow_ + 1;
+            AMSData_.NodeNumbers_ = new int[numNodes];
+            AMSData_.NodalCoord_  = new double[fieldSize*numNodes];
+            for (i = 0; i < numNodes; i++)
+            {
+               index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
+               AMSData_.NodeNumbers_[i] = index;
+               for (j = 0; j < fieldSize; j++)
+                  AMSData_.NodalCoord_[i*fieldSize+j] = data[i*fieldSize+j];
+            }
+         }
+      }
    }
 
    //-------------------------------------------------------------------
@@ -2279,12 +2367,11 @@ This should ultimately be taken out even for newer ale3d implementation
          procNRows = new int[numProcs_];
          for ( i = 0; i < numProcs_; i++ ) procNRows[i] = 0;
          procNRows[mypid_] = localEndRow_;
-         iTempArray = procNRows;
+         iArray = procNRows;
          procNRows  = new int[numProcs_+1];
          for ( i = 0; i <= numProcs_; i++ ) procNRows[i] = 0;
-         MPI_Allreduce(iTempArray,&(procNRows[1]),numProcs_,MPI_INT,MPI_SUM,
-                       comm_);
-         delete [] iTempArray;
+         MPI_Allreduce(iArray,&(procNRows[1]),numProcs_,MPI_INT,MPI_SUM,comm_);
+         delete [] iArray;
          HYPRE_LSI_MLICreateNodeEqnMap(HYPrecon_, numNodes, aleNodeNumbers,
                                        eqnNumbers, procNRows);
          delete [] procNRows;
@@ -2305,7 +2392,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
                        int* nodeNumbers, int numNodes, const double* data)
 {
    int    i, **nodeFieldIDs, nodeFieldID, numFields, *procNRows;
-   int    blockID, *blockIDs, *eqnNumbers, *iTempArray, checkFieldSize;
+   int    blockID, *blockIDs, *eqnNumbers, *iArray, checkFieldSize;
    int    *aleNodeNumbers;
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -2378,12 +2465,12 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          procNRows = new int[numProcs_];
          for ( i = 0; i < numProcs_; i++ ) procNRows[i] = 0;
          procNRows[mypid_] = localEndRow_;
-         iTempArray = procNRows;
+         iArray = procNRows;
          procNRows  = new int[numProcs_+1];
          for ( i = 0; i <= numProcs_; i++ ) procNRows[i] = 0;
-         MPI_Allreduce(iTempArray,&(procNRows[1]),numProcs_,MPI_INT,MPI_SUM,
+         MPI_Allreduce(iArray,&(procNRows[1]),numProcs_,MPI_INT,MPI_SUM,
                        comm_);
-         delete [] iTempArray;
+         delete [] iArray;
          HYPRE_LSI_MLICreateNodeEqnMap(HYPrecon_, numNodes, aleNodeNumbers,
                                        eqnNumbers, procNRows);
          delete [] procNRows;
@@ -2728,13 +2815,9 @@ int HYPRE_LinSysCore::copyOutMatrix(double scalar, Data& data)
    {
       data.setDataPtr((void *) HYA_);
    }
-   else if (!strcmp(name, "NodeNumbers"))
+   else if (!strcmp(name, "AMSData"))
    {
-      data.setDataPtr((void *) MLI_EqnNumbers_);
-   }
-   else if (!strcmp(name, "NodalCoord"))
-   {
-      data.setDataPtr((void *) MLI_NodalCoord_);
+      data.setDataPtr((void *) &AMSData_);
    }
    else
    {

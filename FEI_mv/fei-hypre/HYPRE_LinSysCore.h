@@ -86,6 +86,20 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
 #define HYFEI_IMPOSENOBC           4194304
 
 // *************************************************************************
+// substructure definition
+// -------------------------------------------------------------------------
+
+typedef struct 
+{
+   int    *EdgeNodeList_;
+   int    *NodeNumbers_;
+   int    numEdges_;
+   int    numLocalNodes_;
+   int    numNodes_;
+   double *NodalCoord_;
+} HYPRE_AMSData;
+
+// *************************************************************************
 // class definition
 // -------------------------------------------------------------------------
 
@@ -696,6 +710,7 @@ class HYPRE_LinSysCore
    int             MLI_Hybrid_MaxIter_;
    double          MLI_Hybrid_ConvRate_;
    int             MLI_Hybrid_NTrials_;
+   HYPRE_AMSData   AMSData_;
 
    // ----------------------------------------------------------------------
    // ML Maxwell variables
