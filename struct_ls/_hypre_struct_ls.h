@@ -49,7 +49,6 @@ extern "C" {
 int hypre_StructMapFineToCoarse ( hypre_Index findex , hypre_Index index , hypre_Index stride , hypre_Index cindex );
 int hypre_StructMapCoarseToFine ( hypre_Index cindex , hypre_Index index , hypre_Index stride , hypre_Index findex );
 int hypre_StructCoarsen ( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , int prune , hypre_StructGrid **cgrid_ptr );
-int hypre_StructCoarsen ( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , int prune , hypre_StructGrid **cgrid_ptr );
 int hypre_Merge ( int **arrays , int *sizes , int size , int **mergei_ptr , int **mergej_ptr );
 
 /* cyclic_reduction.c */
@@ -269,6 +268,7 @@ int hypre_JacobiSetZeroGuess ( void *jacobi_vdata , int zero_guess );
 int hypre_JacobiGetZeroGuess ( void *jacobi_vdata , int *zero_guess );
 int hypre_JacobiGetNumIterations ( void *jacobi_vdata , int *num_iterations );
 int hypre_JacobiSetTempVec ( void *jacobi_vdata , hypre_StructVector *t );
+int hypre_JacobiGetFinalRelativeResidualNorm ( void *jacobi_vdata , double *norm );
 
 /* pcg_struct.c */
 char *hypre_StructKrylovCAlloc ( int count , int elt_size );
@@ -412,8 +412,10 @@ int hypre_PointRelaxSetNumPointsets ( void *relax_vdata , int num_pointsets );
 int hypre_PointRelaxSetPointset ( void *relax_vdata , int pointset , int pointset_size , hypre_Index pointset_stride , hypre_Index *pointset_indices );
 int hypre_PointRelaxSetPointsetRank ( void *relax_vdata , int pointset , int pointset_rank );
 int hypre_PointRelaxSetTempVec ( void *relax_vdata , hypre_StructVector *t );
+int hypre_PointRelaxGetFinalRelativeResidualNorm ( void *relax_vdata , double *norm );
 int hypre_relax_wtx ( void *relax_vdata , int pointset , hypre_StructVector *t , hypre_StructVector *x );
 int hypre_relax_copy ( void *relax_vdata , int pointset , hypre_StructVector *t , hypre_StructVector *x );
+int hypre_sumsqdiff_pointset ( void *relax_vdata , int pointset , hypre_StructVector *t , hypre_StructVector *x , hypre_StructMatrix *A , double *sumsq );
 
 /* red_black_constantcoef_gs.c */
 int hypre_RedBlackConstantCoefGS ( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
