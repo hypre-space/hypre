@@ -69,7 +69,7 @@ UTILFILES = \
  ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.*o\
  ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error.*o
 
-FILES1 = \
+FILES_HYPRE = \
 $(SUPERLUFILES)\
 $(FEIHYPREFILES)\
 $(FEMLIFILES)\
@@ -79,9 +79,7 @@ $(PARASAILSFILES)\
 $(PILUTFILES)\
 $(DISTMATRIXFILES)\
 $(KRYLOVFILES)\
-$(MATMATFILES)
-
-FILES2 = \
+$(MATMATFILES)\
 $(MULTIVECFILES)\
 $(PARCSRLSFILES)\
 $(PARCSRMVFILES)\
@@ -134,24 +132,58 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE.a: ${FILES1} ${FILES2}
+libHYPRE.a: ${FILES_HYPRE}
 	@echo  "Building libHYPRE ... "
-	cp -fp ${FILES1} .
-	cp -fp ${FILES2} .
-	${AR} $@ *.o
+	${AR} $@ $(SUPERLUFILES)
+	${AR} $@ $(FEIHYPREFILES)
+	${AR} $@ $(FEMLIFILES)
+	${AR} $@ $(IJMVFILES)
+	${AR} $@ $(EUCLIDFILES)
+	${AR} $@ $(PARASAILSFILES)
+	${AR} $@ $(PILUTFILES)
+	${AR} $@ $(DISTMATRIXFILES)
+	${AR} $@ $(KRYLOVFILES)
+	${AR} $@ $(MATMATFILES)
+	${AR} $@ $(MULTIVECFILES)
+	${AR} $@ $(PARCSRLSFILES)
+	${AR} $@ $(PARCSRMVFILES)
+	${AR} $@ $(PARCSRBLOCKMVFILES)
+	${AR} $@ $(SEQMVFILES)
+	${AR} $@ $(SSTRUCTLSFILES)
+	${AR} $@ $(SSTRUCTMVFILES)
+	${AR} $@ $(STRUCTLSFILES)
+	${AR} $@ $(STRUCTMVFILES)
+	${AR} $@ $(UTILITIESFILES)
 	${RANLIB} $@
 
-libHYPRE.so: ${FILES1} ${FILES2}
+libHYPRE.so: ${FILES_HYPRE}
 	@echo  "Building libHYPRE ... "
-	cp -fp ${FILES1} .
-	cp -fp ${FILES2} .
-	${BUILD_CC_SHARED} -o $@ *.o
+	${BUILD_CC_SHARED} -o $@ ${FILES_HYPRE}
 
 libHYPRE_LSI.a: ${FILES_LSI}
 	@echo  "Building libHYPRE_LSI ... "
-	${AR} $@ ${FILES_LSI}
+	${AR} $@ $(FEIHYPREFILES)
+	${AR} $@ $(FEMLIFILES)
+	${AR} $@ $(IJMVFILES)
+	${AR} $@ $(EUCLIDFILES)
+	${AR} $@ $(PARASAILSFILES)
+	${AR} $@ $(PILUTFILES)
+	${AR} $@ $(DISTMATRIXFILES)
+	${AR} $@ $(KRYLOVFILES)
+	${AR} $@ $(MATMATFILES)
+	${AR} $@ $(MULTIVECFILES)
+	${AR} $@ $(PARCSRLSFILES)
+	${AR} $@ $(PARCSRMVFILES)
+	${AR} $@ $(PARCSRBLOCKMVFILES)
+	${AR} $@ $(SEQMVFILES)
+	${AR} $@ $(SSTRUCTLSFILES)
+	${AR} $@ $(SSTRUCTMVFILES)
+	${AR} $@ $(STRUCTLSFILES)
+	${AR} $@ $(STRUCTMVFILES)
+	${AR} $@ $(UTILFILES)
 	${RANLIB} $@
 
 libHYPRE_LSI.so: ${FILES_LSI}
 	@echo  "Building libHYPRE_LSI ... "
 	${BUILD_CC_SHARED} -o $@ ${FILES_LSI}
+
