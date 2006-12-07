@@ -311,5 +311,11 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
    return final_innerprod_result;
 }
 
+#else
+
+double
+hypre_StructOverlapInnerProd( hypre_StructVector *x,
+                              hypre_StructVector *y )
+{}
 
 #endif
