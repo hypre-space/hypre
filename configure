@@ -9283,12 +9283,12 @@ if test "$casc_using_fei" = "yes"
 then
    HYPRE_FEI_SRC_DIR="`pwd`/FEI_mv"
    HYPRE_FEI_SUBDIRS="fei-hypre femli"
-   HYPRE_FEI_HYPRE_FILES="`pwd`/FEI_mv/fei-hypre/*.*o"
-   HYPRE_FEI_FEMLI_FILES="`pwd`/FEI_mv/femli/lib/*.*o"
+   HYPRE_FEI_HYPRE_FILES="`pwd`/FEI_mv/fei-hypre/*.o"
+   HYPRE_FEI_FEMLI_FILES="`pwd`/FEI_mv/femli/lib/*.o"
    if test "$casc_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_SUPERLU_FILES="`pwd`/FEI_mv/SuperLU/*.*o"
+      HYPRE_FEI_SUPERLU_FILES="`pwd`/FEI_mv/SuperLU/*.o"
    else
       HYPRE_FEI_SUPERLU_FILES=
    fi

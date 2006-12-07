@@ -52,22 +52,22 @@ STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
 UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
 
 UTILFILES = \
- ${HYPRE_SRC_TOP_DIR}/utilities/amg_linklist.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/exchange_data.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/fortran_matrix.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_memory.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_qsort.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/memory_dmalloc.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/mpistubs.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/qsplit.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/random.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/thread_mpistubs.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/threading.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/timer.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/timing.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error.*o
+ ${HYPRE_SRC_TOP_DIR}/utilities/amg_linklist.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/exchange_data.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/fortran_matrix.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_memory.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_qsort.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/memory_dmalloc.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/mpistubs.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/qsplit.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/random.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/thread_mpistubs.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/threading.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/timer.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/timing.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error.o
 
 FILES_HYPRE = \
 $(SUPERLUFILES)\
