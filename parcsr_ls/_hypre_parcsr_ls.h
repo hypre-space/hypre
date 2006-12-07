@@ -125,6 +125,8 @@ int hypre_ThreeLevelParCSRAddPrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type ,
 int hypre_AMSGetNumIterations ( void *solver , int *num_iterations );
 int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , double *rel_resid_norm );
 int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector *x_coord , int *edge_vertex , hypre_ParCSRMatrix **G_ptr );
+int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , int num_vert , int num_local_vert , int *vert_number , double *vert_coord , int num_edges , int *edge_vertex );
+int hypre_AMSFEIDestroy ( void *solver );
 
 /* aux_interp.c */
 void insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , int *IN_marker , int *node_add , int num_cols_A_offd , int full_off_procNodes , int num_procs , int *OUT_marker );
@@ -192,6 +194,8 @@ int HYPRE_AMSSetBetaAMGOptions ( HYPRE_Solver solver , int beta_coarsen_type , i
 int HYPRE_AMSGetNumIterations ( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_AMSGetFinalRelativeResidualNorm ( HYPRE_Solver solver , double *rel_resid_norm );
 int HYPRE_AMSConstructDiscreteGradient ( HYPRE_ParCSRMatrix A , HYPRE_ParVector x_coord , int *edge_vertex , HYPRE_ParCSRMatrix *G );
+int HYPRE_AMSFEISetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x , int *EdgeNodeList_ , int *NodeNumbers_ , int numEdges_ , int numLocalNodes_ , int numNodes_ , double *NodalCoord_ );
+int HYPRE_AMSFEIDestroy ( HYPRE_Solver solver );
 
 /* HYPRE_parcsr_amg.c */
 int HYPRE_BoomerAMGCreate ( HYPRE_Solver *solver );

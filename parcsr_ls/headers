@@ -27,7 +27,7 @@
 
 
 
-INTERNAL_HEADER=parcsr_ls.h
+INTERNAL_HEADER=_hypre_parcsr_ls.h
 
 #===========================================================================
 # Include guards and other includes
@@ -45,7 +45,7 @@ cat > $INTERNAL_HEADER <<@
 #include "_hypre_utilities.h"
 #include "krylov.h"
 #include "seq_mv.h"
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 #include "HYPRE_lobpcg.h"
 
 #ifdef __cplusplus

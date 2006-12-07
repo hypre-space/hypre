@@ -565,12 +565,6 @@ void hypre_AMEMultiOperatorB(void *data, void* x, void* y)
  * version of LOBPCG (i.e. we iterate in the discr. div. free space).
  *--------------------------------------------------------------------------*/
 
-#include "fortran.h"
-
-int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, int *, double *, int *, int *);
-int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(int *, char *, char *, int *, double *, int *,
-                                       double *, int *, double *, double *, int *, int *);
-
 int hypre_AMESolve(void *esolver)
 {
    hypre_AMEData *ame_data = esolver;

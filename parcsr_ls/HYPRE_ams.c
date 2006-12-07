@@ -278,3 +278,39 @@ int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
                                              edge_vertex,
                                              (hypre_ParCSRMatrix **) G);
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSFEISetup
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSFEISetup(HYPRE_Solver solver,
+                      HYPRE_ParCSRMatrix A,
+                      HYPRE_ParVector b,
+                      HYPRE_ParVector x,
+                      int    *EdgeNodeList_,
+                      int    *NodeNumbers_,
+                      int    numEdges_,
+                      int    numLocalNodes_,
+                      int    numNodes_,
+                      double *NodalCoord_)
+{
+   return hypre_AMSFEISetup((void *) solver,
+                            (hypre_ParCSRMatrix *) A,
+                            (hypre_ParVector *) b,
+                            (hypre_ParVector *) x,
+                            numNodes_,
+                            numLocalNodes_,
+                            NodeNumbers_,
+                            NodalCoord_,
+                            numEdges_,
+                            EdgeNodeList_);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSFEIDestroy
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSFEIDestroy(HYPRE_Solver solver)
+{
+   return hypre_AMSFEIDestroy((void *) solver);
+}

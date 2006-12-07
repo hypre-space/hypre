@@ -500,7 +500,11 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
          HYPRE_LSI_MLIDestroy( HYPrecon_ );
 
       else if ( HYPreconID_ == HYAMS )
+      {
+ 	 // Destroy G and coordinate vectors
+         HYPRE_AMSFEIDestroy( HYPrecon_ );
          HYPRE_AMSDestroy( HYPrecon_ );
+      }
 
       HYPrecon_ = NULL;
    }
