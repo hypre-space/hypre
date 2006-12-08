@@ -49,8 +49,7 @@ help ()
 hypre_mail_summary()
 {
 
-  HYPRE_ALL_EMAIL="hill66@llnl.gov\
-                   rfalgout@llnl.gov\
+  HYPRE_ALL_EMAIL="rfalgout@llnl.gov\
                    abaker@llnl.gov\
                    painter1@llnl.gov\
                    lee123@llnl.gov\
