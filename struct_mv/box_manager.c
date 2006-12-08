@@ -804,6 +804,52 @@ int hypre_BoxManGetAllEntriesBoxes( hypre_BoxManager *manager,
 }
 
 /*--------------------------------------------------------------------------
+ *  Get the boxes and the proc ids. The input procs array should be NULL.
+ *--------------------------------------------------------------------------*/
+int hypre_BoxManGetAllEntriesBoxesProc( hypre_BoxManager *manager,
+                                        hypre_BoxArray *boxes,
+                                        int            *procs)
+                                                                                                                                                
+{
+                                                                                                                                                
+                                                                                                                                                
+   hypre_BoxManEntry entry;
+                                                                                                                                                
+   int                i, nentries;
+   hypre_Index       ilower, iupper;
+                                                                                                                                                
+   hypre_BoxManEntry  *boxman_entries  = hypre_BoxManEntries(manager);
+                                                                                                                                                
+                                                                                                                                                
+  /* can only use after assembling */
+   if (!hypre_BoxManIsAssembled(manager))
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+                                                                                                                                                
+                                                                                                                                                
+   /* set array size  */
+   nentries = hypre_BoxManNEntries(manager);
+                                                                                                                                                
+   hypre_BoxArraySetSize(boxes, nentries);
+   procs= hypre_TAlloc(int, nentries);
+                                                                                                                                                
+   for (i= 0; i< nentries; i++)
+   {
+      entry = boxman_entries[i];
+      hypre_BoxManEntryGetExtents(&entry, ilower, iupper);
+      hypre_BoxSetExtents(hypre_BoxArrayBox(boxes,i), ilower, iupper);
+      procs[i]= hypre_BoxManEntryProc(&entry);
+   }
+                                                                                                                                                
+   /* return */
+                                                                                                                                                
+   return hypre_error_flag;
+                                                                                                                                                
+}
+
+/*--------------------------------------------------------------------------
  hypre_BoxManGatherEntries:
 
  All global entries that lie within the boxes supplied to this
