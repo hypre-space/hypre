@@ -377,6 +377,7 @@ hypre_PointRelax( void               *relax_vdata,
    double                *bp;
    double                *xp;
    double                *tp;
+   void                  *matvec_data = NULL;
 
    int                    Ai;
    int                    bi;
@@ -435,6 +436,11 @@ hypre_PointRelax( void               *relax_vdata,
 
    p    = 0;
    iter = 0;
+   if ( tol>0.0 && num_pointsets>1 )
+   {
+      matvec_data = hypre_StructMatvecCreate();
+      hypre_StructMatvecSetup( matvec_data, A, x );
+   }
 
    if (zero_guess)
    {
@@ -522,8 +528,8 @@ hypre_PointRelax( void               *relax_vdata,
             }
       }
       
-      if ( tol>0.0 )
-      {
+      if ( tol>0.0 && num_pointsets==1 )
+      {  /* accumulate residual sum-squares for convergence test */
          ierr += hypre_sumsqdiff_pointset( relax_data, pointset, x, b, A, &ss );
          rsumsq += ss;
       }
@@ -542,6 +548,13 @@ hypre_PointRelax( void               *relax_vdata,
          tol>0.0 means to do a convergence test, using tol.
          The test is simply ||r||/||b||<tol, where r=residual, b=r.h.s., unweighted L2 norm */
       {
+         if ( num_pointsets>1 )
+         {  /* do residual sum-squares the expensive way */
+            hypre_StructCopy( b, t ); /* t = b */
+            hypre_StructMatvecCompute( matvec_data,
+                                       -1.0, A, x, 1.0, t );  /* t = - A x + t = - A x + b */
+            rsumsq = hypre_StructInnerProd( t, t ); /* <t,t> */
+         }
          if ( rsumsq/bsumsq<tol2 ) max_iter = iter; /* converged; reset max_iter to prevent more iterations */
       }
    }
@@ -646,8 +659,8 @@ hypre_PointRelax( void               *relax_vdata,
       }
 
 
-      if ( tol>0.0 )
-      {
+      if ( tol>0.0 && num_pointsets==1 )
+      {  /* accumulate residual sum-squares for convergence test */
          ierr += hypre_sumsqdiff_pointset( relax_data, pointset, t, x, A, &ss );
          rsumsq += ss;
       }
@@ -673,8 +686,20 @@ hypre_PointRelax( void               *relax_vdata,
          tol>0.0 means to do a convergence test, using tol.
          The test is simply ||r||/||b||<tol, where r=residual, b=r.h.s., unweighted L2 norm */
       {
+         if ( num_pointsets>1 )
+         {  /* do residual sum-squares the expensive way */
+            hypre_StructCopy( b, t ); /* t = b */
+            hypre_StructMatvecCompute( matvec_data,
+                                       -1.0, A, x, 1.0, t );  /* t = - A x + t = - A x + b */
+            rsumsq = hypre_StructInnerProd( t, t ); /* <t,t> */
+         }
          if ( rsumsq/bsumsq<tol2 ) break;
       }
+   }
+
+   if ( tol>0.0 && num_pointsets>1 )
+   {
+      hypre_StructMatvecDestroy( matvec_data );
    }
 
    if ( tol>0.0 ) (relax_data -> rresnorm) = sqrt( rsumsq/bsumsq );
@@ -1876,7 +1901,17 @@ int hypre_relax_copy( void *relax_vdata, int pointset,
 }
 /*--------------------------------------------------------------------------
  * hypre_sumsqdiff_pointset
- * Computes the sum of squares of the residual but only on the specified pointset.
+ * Computes the sum of squares of the residual for a Jacobi iteration.
+ *   This is a cheap computation, but the residual sum-of-squares actually belongs
+ * to the previous iteration.  But note that a straightforward computation of
+ * a current value would cost as much as doing another iteration.
+ *   Note also that PointRelax is doing a real Jacobi iteration only in the
+ * case where there is a single pointset.  This is because if there are two or
+ * more pointsets, the iteration for the second pointset uses updated values
+ * from the first one.  This function will not compute a true correct residual
+ * sum-of-squares in the multiple-pointset case, although what it computes may
+ * be useful in early stages of convergence testing.
+ *
  * The residual is computed from the old x iterate, x, the new x iterate, t,
  * and the diagonal of the matrix A as follows.  We assume t was computed by
  * a Jacobi iteration on the pointset.
@@ -1950,14 +1985,14 @@ int hypre_sumsqdiff_pointset( void *relax_vdata, int pointset,
          tp = hypre_StructVectorBoxData(t, i);
          Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
 
-         compute_box = hypre_BoxArrayBox(compute_box_a, j);
-         start  = hypre_BoxIMin(compute_box);
-         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
          if ( constant_coefficient==1 ) /* constant diagonal */
          {
             hypre_ForBoxI(j, compute_box_a)
             {
+               compute_box = hypre_BoxArrayBox(compute_box_a, j);
+               start  = hypre_BoxIMin(compute_box);
+               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
                Ai = hypre_CCBoxIndexRank( A_data_box, start );
                Api = Ap[Ai];
 
@@ -1978,6 +2013,9 @@ int hypre_sumsqdiff_pointset( void *relax_vdata, int pointset,
          {
             hypre_ForBoxI(j, compute_box_a)
             {
+               compute_box = hypre_BoxArrayBox(compute_box_a, j);
+               start  = hypre_BoxIMin(compute_box);
+               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                hypre_BoxLoop3Begin(loop_size,
                                    A_data_box, start, stride, Ai,
                                    x_data_box, start, stride, xi,
