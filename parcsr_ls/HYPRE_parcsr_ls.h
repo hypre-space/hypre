@@ -477,7 +477,7 @@ int HYPRE_BoomerAMGSetPMaxElmts(HYPRE_Solver solver,
 int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
                                   double       S_commpkg_switch);
 
-/*
+/**
  * (Optional) Defines which parallel interpolation operator is used.
  * There are the following options for interp\_type: 
 * 
@@ -505,13 +505,13 @@ int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
 int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
                                  int          interp_type);
 
-/*
+/**
  * (Optional)
  **/
 int HYPRE_BoomerAMGSetMinIter(HYPRE_Solver solver,
                               int          min_iter);
 
-/*
+/**
  * (Optional) This routine will be eliminated in the future.
  **/
 int HYPRE_BoomerAMGInitGridRelaxation(int    **num_grid_sweeps_ptr,
