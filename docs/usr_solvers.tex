@@ -258,8 +258,8 @@ unstructured components can be set using stencils and the HYPRE$\_$SStructGraphA
 The matrix coefficients can be filled after setting these non-zero patterns. Between each pair of
 successive AMR levels, the coarse matrix underlying the refinement patch must be the identity and the corresponding
 rows of the rhs must be zero. These can performed using routines HYPRE$\_$SStructFACZeroCFSten (to zero off
-the stencil values reaching from a coarse boxes into the refinement boxes), HYPRE$\_$SStructFACZeroFCSten
-(to zero off the stencil values reaching from the refinement boxes into the coarse boxes),
+the stencil values reaching from coarse boxes into refinement boxes), HYPRE$\_$SStructFACZeroFCSten
+(to zero off the stencil values reaching from refinement boxes into coarse boxes),
 HYPRE$\_$SStructFACZeroAMRMatrixData (to set the identity at coarse grid points underlying a refinement patch),
 and HYPRE$\_$SStructFACZeroAMRVectorData (to zero off a vector at coarse grid points underlying a refinement patch).
 These routines can simplify the user's matrix setup. For example, consider two successive AMR levels with the
@@ -307,7 +307,7 @@ interpolation operator can be used. This is formed by calling HYPRE$\_$SStructMa
 with the flag$>0$ before setting up the solver, otherwise the default edge interpolation is an
 operator-collapsing/element-agglomeration scheme. This is suitable for variable coefficients.
 Also, before setting up the solver, the user must pass the gradient operator, whether user or 
-HYPRE$\_$MaxwellGrad generated, with the routine HYPRE$\_$SStructMaxwellSetGrad. After all these
+HYPRE$\_$MaxwellGrad generated, with HYPRE$\_$SStructMaxwellSetGrad. After these
 preliminary calls, the Maxwell solver can be setup by calling HYPRE$\_$SStructMaxwellSetup.
 
 There are two solver cycling schemes that can be used to solve the linear system. To describe these, one
