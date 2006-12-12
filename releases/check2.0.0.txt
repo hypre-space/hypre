@@ -10,27 +10,27 @@ The following steps must be completed, initialed & dated on the --->> line by
 the responsible project member before the release is made available to users.
 
 
- 1. Decision made for release number: X.X.X
+ 1. Decision made for release number: 2.0.0
 
-    --->> 
+    --->> rdf 12/07/2006
 
  2. Copy this file to 'check{release number}.txt' and commit to the repository
 
-    --->> 
+    --->> rdf 12/07/2006
 
  3. Project personnel advised of release decision and tentative date with
     a request to not disrupt the repository until the release is complete
 
-    --->> 
+    --->> rdf 12/07/2006
 
  4. Update user, reference, and developer manuals with information regarding
     contents of this release
 
-    --->> 
+    --->> rdf 12/07/2006
 
  5. Initial documentation review meeting
 
-    --->> 
+    --->> rdf 12/12/2006
 
  6. Update CHANGELOG file with information regarding contents of this release
 
@@ -51,7 +51,7 @@ the responsible project member before the release is made available to users.
 10. Update config/configure.in with release number and date, then run
     config/bootstrap and commit changes to the repository
 
-    --->> 
+    --->> rdf 12/11/2006
 
 11. Tag repository with release number
 
