@@ -74,25 +74,25 @@ This solver object is then used to create the external {\tt FEI} object by
 where {\tt rank} is the processor number of the master processor (for 
 identifying which processor will produce the screen outputs). 
 
-To manipulate the external {\tt FEI} object within the \hypre{} context,
-we next create an instance of the \hypre{} finite element mesh class by
-\begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMeshCreate(mpiComm, \&hypreMesh);}
-\end{tabbing}
-which returns a pointer in {\tt hypreMesh}.
+%To manipulate the external {\tt FEI} object within the \hypre{} context,
+%we next create an instance of the \hypre{} finite element mesh class by
+%\begin{tabbing}
+%\hspace{0.5in} \= {\tt HYPRE\_FEMeshCreate(mpiComm, \&hypreMesh);}
+%\end{tabbing}
+%which returns a pointer in {\tt hypreMesh}.
 
-We will pass the external {\tt FEI} object into the \hypre{} mesh
-object by
-\begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMeshSetFEObject(hypreMesh, feiPtr, solver);}
-\end{tabbing}
-Alternatively, if the internal simplified {\tt FEI} (to \hypre{}) is used,
-the {\tt HYPRE\_FEMeshSetFEObject} is to be called with both {\tt feiPtr}
-and {\tt solver} set to {\tt NULL} (that is, the first two steps above
-are skipped.)
+%We will pass the external {\tt FEI} object into the \hypre{} mesh
+%object by
+%\begin{tabbing}
+%\hspace{0.5in} \= {\tt HYPRE\_FEMeshSetFEObject(hypreMesh, feiPtr, solver);}
+%\end{tabbing}
+%Alternatively, if the internal simplified {\tt FEI} (to \hypre{}) is used,
+%the {\tt HYPRE\_FEMeshSetFEObject} is to be called with both {\tt feiPtr}
+%and {\tt solver} set to {\tt NULL} (that is, the first two steps above
+%are skipped.)
 
 Next, various finite element information need to be sent into the 
-{\tt hypreMesh} object.
+{\tt feiPtr} object.
 The first entity to be submitted is {\it field} information. 
 A {\it field} has an identifier called {\it fieldID} and a rank or
 {\it fieldSize} (number of degree of freedom). For example, for a simple
@@ -109,7 +109,7 @@ finite element field information can be set up by
                \> {\tt fieldSize = new int[nFields];} \\
                \> {\tt fieldSize[0] = $3$; /* velocity vector */} \\
                \> {\tt fieldSize[1] = $1$; /* pressure */ } \\
- \> {\tt HYPRE\_FEMeshInitFields(hypreMesh, nFields, fieldSize, fieldID);}
+ \> {\tt feiPtr$->$initFields(nFields, fieldSize, fieldID);}
 \end{tabbing}
 
 Once the field information has been established, we are ready to initialize
@@ -128,7 +128,7 @@ consists of
                \> {\tt elemNFields = 1; /* element field - pressure */} \\
                \> {\tt elemFieldIDs = new[elemNFields];} \\
                \> {\tt elemFieldIDs[0] = fieldID[1]; /* pressure */ } \\
- \> {\tt HYPRE\_FEMeshInitElemBlock(hypreMesh,elemBlkID, nElems, elemNNodes,}\\
+ \> {\tt feiPtr$->$initElemBlock(elemBlkID, nElems, elemNNodes,}\\
  \> \hspace{1.0in} {\tt nodeNFields, nodeFieldIDs, elemNFields, elemFieldIDs, 0);} 
 \end{tabbing}
 The last argument is to specify how the dependent variables are arranged in
@@ -146,13 +146,13 @@ of the global node list
 corresponding to the local nodes that are shared with the other processors.
 The syntax for setting up the shared nodes is
 \begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMeshInitSharedNodes(hypreMesh, nShared, sharedIDs,}\\
+\hspace{0.5in} \= {\tt feiPtr->initSharedNodes(hypreMesh, nShared, sharedIDs,}\\
 \> \hspace{1.0in} {\tt sharedLengs, sharedProcs);}
 \end{tabbing}
 This completes the initialization phase, and a completion signal is sent to
 the {\tt FEI} via
 \begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMeshInitComplete(hypreMesh);}
+\hspace{0.5in} \= {\tt feiPtr$->$initComplete();}
 \end{tabbing}
 
 Next we begin the {\it load} phase. The first entity for loading is the
@@ -176,7 +176,7 @@ The calling sequence for loading element stiffness matrices is
 Again, to complete the loading phase, a completion signal is sent to 
 the {\tt FEI} via
 \begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMeshLoadComplete(hypreMesh);}
+\hspace{0.5in} \= {\tt feiPtr$->$loadComplete();}
 \end{tabbing}
  
 Now the global stiffness matrix and the corresponding right hand side
@@ -194,58 +194,25 @@ given below
                \> {\tt strcpy(paramStrings[2], "maxiterations 100");} \\
                \> {\tt strcpy(paramStrings[3], "tolerance 1.0e-6");} \\
                \> {\tt strcpy(paramStrings[4], "outputLevel 1");} \\
- \> {\tt HYPRE\_FEMeshParameters(hypreMesh, nParams, paramStrings);} 
+ \> {\tt feiPtr$->$parameters(nParams, paramStrings);} 
 \end{tabbing}
 
 To solve the linear system of equations, we call
 \begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMeshSolve(hypreMesh);}
+\hspace{0.5in} \= {\tt feiPtr$-$solve(&status);}
 \end{tabbing}
 Finally, the solution can be retrieved by the following two function calls
 \begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMeshGetBlockNodeIDList(hypreMesh, elemBlkID, nNodes, nodeIDList);}
+\hspace{0.5in} \= {\tt feiPtr$->$getBlockNodeIDList(elemBlkID, nNodes, nodeIDList);}
 \end{tabbing}
 where {\tt nodeIDList} to be returned is a list of nodes in element 
 block {\tt elemBlkID}; and
 \begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMeshGetBlockNodeSolution(hypreMesh, elemBlkID, nNodes, nodeIDList,}\\
+\hspace{0.5in} \= {\tt feiPtr$->$getBlockNodeSolution(elemBlkID, nNodes, nodeIDList,}\\
 \> \hspace{1.0in} {\tt solnOffsets, solnValues);}
 \end{tabbing}
 where {\tt solnOffsets[i]} is the index pointing to the first location 
 where the variables at node $i$ is returned in {\tt solnValues}.
-
-\section{The Finite Element Interface Matrix and Vector Classes}
-
-This section describes two additional classes (other than {\tt HYPRE\_FEMesh})
-that users may need - {\tt HYPRE\_FEMatrix} and {\tt HYPRE\_FEVector}. 
-These classes are useful if the global finite element stiffness matrix is
-to be solved using solvers other than those available via the finite element
-interface. The key task is to extract
-the matrix and vector internal to the {\tt FEI}. The matrix can be extracted
-by first instantiating an {\tt HYPRE\_FEMatrix} object
-\begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMatrixCreate(mpiComm, hypreMesh, \&feMatrix);}
-\end{tabbing}
-where {\tt hypreMesh} is the object created before, and {\tt feMatrix} is 
-the pointer to the new object.
-The \hypre{} matrix in {\tt ParCSR} format can then be extracted by
-\begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEMatrixGetObject(feMatrix, (void **) \&parcsrMatrix);}
-\end{tabbing}
-Similarly, the right hand side vector can be extracted by
-\begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEVectorCreate(mpiComm, hypreMesh, \&feVector);}
-\end{tabbing}
-and
-\begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEVectorGetRHS(feMatrix, (void**) \&parVectorRHS);}
-\end{tabbing}
-When the solution of the linear system is obtained, it can be given
-to the {\tt FEI} by
-\begin{tabbing}
-\hspace{0.5in} \= {\tt HYPRE\_FEVectorSetSol(feMatrix, (void*) parVectorSol);}
-\end{tabbing}
-Finally, the objects are destroyed by the corresponding destroy functions.
 
 %\section{The LinearSystemCore Interface}
 %\label{LSI_overview}
