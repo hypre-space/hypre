@@ -109,56 +109,41 @@ actual release number, which may or may not have an 'a' or 'b' appended; dependi
 on the type of release being created.
 
 \begin{enumerate}
-\item Go to a local directory
-\begin{verbatim}
-      Example: cd /home/hill66
-\end{verbatim}
 \item Retrieve the latest version of \hypre{} from the CVS repository
-      results in a new directory named linear\_solvers which contains the source code
 \begin{verbatim}
-      Example: cvs checkout linear_solvers
+      cvs checkout linear_solvers
 \end{verbatim}
-\item Move to the linear\_solvers directory
+\item In the \file{config/configure.in} file, change the release version number
+and date, i.e., change
 \begin{verbatim}
-      Example: cd linear_solvers
+      m4_define(HYPRE_VERSION, 1.9.0b)
+      m4_define(HYPRE_DATE, 2005/02/24)
 \end{verbatim}
-\item Move to the config directory
+\item From the root directory, run the \file{config/bootstrap} script to create
+a new \file{configure} script
 \begin{verbatim}
-      Example: cd config
-\end{verbatim}
-\item Change the HYPRE\_version number, date and time in the \file{configure.in} file
-\begin{verbatim}
-      Example: vi configure.in
-               change numeric values following HYPRE_* in:
-                  m4_define(HYPRE_VERSION, 1.9.0b)
-                  m4_define(HYPRE_DATE, 2005/02/24)
-                  m4_define(HYPRE_TIME, 14:26:53)
-\end{verbatim}
-\item Move to the linear\_solvers directory
-\begin{verbatim}
-      Example: cd linear_solvers
-\end{verbatim}
-\item Run the \file{bootstrap} script to create a new \file{configure} script
-\begin{verbatim}
-      Example:./config/bootstrap
+      ./config/bootstrap
 \end{verbatim}
 \item Commit new \file{configure} and \file{configure.in} files to repository
 \begin{verbatim}
-      Example: cvs commit 
+      cvs commit 
 \end{verbatim}
-\item Tag the repository with this release number
+\item Tag the repository with this release number (for general releases, add the
+\kbd{-b} option after \kbd{rtag} to create a new branch)
 \begin{verbatim}
-      Example: cvs rtag VM-mm-rr linear_solvers
+      cvs rtag VM-mm-rr linear_solvers
 \end{verbatim}
-\item Create the distribution tar file by running the \file{mkdist} script,
-      located in the tools directory. Output is a new directory named \file{hypre-M.mm.rr}
-      and a compressed tar file named \file{hypre-M.mm.rr.tar.gz}
+\item Create the distribution tar file by running the \file{tools/mkdist}
+script.  Output is a new directory named \file{hypre-M.mm.rr} and a compressed
+tar file named \file{hypre-M.mm.rr.tar.gz}.  This may be run from within any
+directory, as long as the latest version of the script is being used (the
+following is being run from the root directory).
 \begin{verbatim}
-      Example: ./tools/mkdist VM-mm-rr
+      ./tools/mkdist VM-mm-rr
 \end{verbatim}
 \item Copy the tar file to /usr/casc/hypre on the local system
 \begin{verbatim}
-      Example: cp hypre-M.mm.rr.tar.gz /usr/casc/hypre
+      cp hypre-M.mm.rr.tar.gz /usr/casc/hypre
 \end{verbatim}
 \end{enumerate}
 

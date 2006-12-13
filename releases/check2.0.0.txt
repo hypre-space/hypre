@@ -53,7 +53,7 @@ the responsible project member before the release is made available to users.
 
     --->> rdf 12/11/2006
 
-11. Tag repository with release number
+11. Tag repository with release number (use 'rtag -b' to create a branch)
 
     --->> 
 
