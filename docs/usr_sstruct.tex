@@ -390,18 +390,20 @@ $(6,6)$.  We approximate the flux as follows
   \approx \frac{h}{2} \frac{u(0,0)-u(-3h/4,0)}{3h/4} \\
 & \approx & \frac{2}{3} (u_{6,6}-u_{2,3}) \nonumber .
 \end{eqnarray} 
-The first approximation uses the midpoint rule for the edge integral, the
-second uses a finite difference formula for the derivative, and the third the
-piecewise constant interpolation to the solution in the coarse cell.  This
-means that the equation for the variable at cell $(6,6)$ involves not only the
-stencil couplings to $(6,7)$ and $(7,6)$ on part~1 but also non-stencil
-couplings to $(2,3)$ and $(3,2)$ on part~0.  These non-stencil couplings are
-described by \code{GraphAddEntries()} calls.  The syntax for this call is
-simply the part and index for both the variable whose equation is being defined
-and the variable to which it couples.  After these calls, the non-zero pattern
-of the matrix (and the graph) is complete.  Note that the ``west'' and
-``south'' stencil couplings simply ``drop off'' the part, and are effectively
-zeroed out.
+The first approximation uses the midpoint rule for the edge integral, the second
+uses a finite difference formula for the derivative, and the third the piecewise
+constant interpolation to the solution in the coarse cell.  This means that the
+equation for the variable at cell $(6,6)$ involves not only the stencil
+couplings to $(6,7)$ and $(7,6)$ on part~1 but also non-stencil couplings to
+$(2,3)$ and $(3,2)$ on part~0.  These non-stencil couplings are described by
+\code{GraphAddEntries()} calls.  The syntax for this call is simply the part and
+index for both the variable whose equation is being defined and the variable to
+which it couples.  After these calls, the non-zero pattern of the matrix (and
+the graph) is complete.  Note that the ``west'' and ``south'' stencil couplings
+simply ``drop off'' the part, and are effectively zeroed out (currently, this is
+only supported for the \code{HYPRE_PARCSR} object type, and these values must be
+manually zeroed out for other object types; see \code{MatrixSetObjectType()} in
+the reference manual).
 
 \begin{figure}
 \centering

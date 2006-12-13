@@ -415,13 +415,13 @@ interpolation, multipass interpolation is always used on levels with aggressive 
 
 Various interpolation techniques can be set using \code{HYPRE_BoomerAMGSetInterpType}:
 \begin{itemize}
-\item the ``classical" interpolation as defined in \cite{Ruge_Stueben_1987} (default),
+\item the ``classical'' interpolation as defined in \cite{Ruge_Stueben_1987} (default),
 \item direct interpolation \cite{Stueben_1999},
 \item standard interpolation \cite{Stueben_1999},
 \item multipass interpolation \cite{Stueben_1999},
-\item an extended ``classical" interpolation, which is a long range interpolation and is recommended to be used with PMIS and HMIS coarsening for harder problems,
+\item an extended ``classical'' interpolation, which is a long range interpolation and is recommended to be used with PMIS and HMIS coarsening for harder problems,
 \item Jacobi interpolation \cite{Stueben_1999},
-\item the ``classical" interpolation modified for hyperbolic PDEs.
+\item the ``classical'' interpolation modified for hyperbolic PDEs.
 \end{itemize}
 Jacobi interpolation is only use to improve certain interpolation operators and can be 
 used with \code{HYPRE_BoomerAMGSetPostInterpType}.

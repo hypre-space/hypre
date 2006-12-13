@@ -579,11 +579,11 @@ For example:
 
 Finally, you need to set two environment variables.
 \code{LD_LIBRARY_PATH} must include the path to the hypre shared
-libraries, e.g. \code{linear_solvers/hypre/lib}.
+libraries, e.g. \code{src/hypre/lib}.
 \code{SIDL_DLL_PATH} must include the path to an
 \code{.scl} file generated for the Python interface,
 e.g.\begin{verbatim}
-linear_solvers/babel/bHYPREClient-P/libbHYPRE.scl
+src/babel/bHYPREClient-P/libbHYPRE.scl
 \end{verbatim}
 If you are running multiple processes, these environment variables may
 need to be set in a dotfile so all processes will use the same values.

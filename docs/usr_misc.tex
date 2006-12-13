@@ -8,69 +8,72 @@
 \section{Getting the Source Code}
 
 The \hypre{} distribution tar file is available from the Software link of the
-\hypre{} web page, \url{http://www.llnl.gov/CASC/hypre/}.  The \hypre{}
-Software distribution page allows access to the tar files of the latest and
-previous general and beta distributions as well as documentation.
+\hypre{} web page, \url{http://www.llnl.gov/CASC/hypre/}.  The \hypre{} Software
+distribution page allows access to the tar files of the latest and previous
+general and beta distributions as well as documentation.
 
 %-----------------------------
 
-\section{Configure and Make}
+\section{Building the Library}
 
-After unpacking the \hypre{} tar file, the source code will be in the ``src" 
-sub-directory of a directory named hypre-VERSION, where VERSION is the current 
-version number (e.g., hypre-1.8.4, with a ``b" appended for a beta release).
+After unpacking the \hypre{} tar file, the source code will be in the ``src''
+sub-directory of a directory named hypre-VERSION, where VERSION is the current
+version number (e.g., hypre-1.8.4, with a ``b'' appended for a beta release).
 
-Move to the ``src" sub-directory to build \hypre{} for the host platform.  The 
-simplest method is to configure, compile and install the libraries in \file{./hypre/lib}
-and \file{./hypre/include} directories, which is accomplished by:
+Move to the ``src'' sub-directory to build \hypre{} for the host platform.  The
+simplest method is to configure, compile and install the libraries in
+\file{./hypre/lib} and \file{./hypre/include} directories, which is accomplished
+by:
 \begin{verbatim}
    ./configure
    make
 \end{verbatim}
 
-NOTE: when executing on an IBM platform \file{configure} must be executed under 
-the nopoe script (\file{./nopoe ./configure <option> ...<option>}) to force a single 
-task to be run on the log-in node.
+NOTE: when executing on an IBM platform \file{configure} must be executed under
+the nopoe script (\file{./nopoe ./configure <option> ...<option>}) to force a
+single task to be run on the log-in node.
 
-There are many options to \file{configure} and \file{make} to customize such 
+There are many options to \file{configure} and \file{make} to customize such
 things as installation directories, compilers used, compile and load flags, etc.
 
-Executing \file{configure} results in the creation of platform specific files 
+Executing \file{configure} results in the creation of platform specific files
 that are used when building the library. The information may include such things
-as the system type being used for building and executing, compilers being used, 
-libraries being searched, option flags being set, etc.  When all of the searching
-is done two files are left in the \file{src} directory; \file{config.status} 
-contains information to recreate the current configuration and \file{config.log}
-contains compiler messages which may help in debugging \file{configure} errors. 
+as the system type being used for building and executing, compilers being used,
+libraries being searched, option flags being set, etc.  When all of the
+searching is done two files are left in the \file{src} directory;
+\file{config.status} contains information to recreate the current configuration
+and \file{config.log} contains compiler messages which may help in debugging
+\file{configure} errors.
 
-Upon successful completion of \file{configure} the file \file{config/Makefile.config} 
-is created from its template \file{config/Makefile.config.in} and \hypre{} is 
-ready to be built.
+Upon successful completion of \file{configure} the file
+\file{config/Makefile.config} is created from its template
+\file{config/Makefile.config.in} and \hypre{} is ready to be built.
 
-Executing \file{make}, with or without targets being specified, in the \file{src}
-directory initiates compiling of all of the source code and building of the \hypre{} 
-library.  If any errors occur while compiling, the user can edit the file 
-\file{config/Makefile.config} directly then run \file{make} again; without having to 
-re-run configure.
+Executing \file{make}, with or without targets being specified, in the
+\file{src} directory initiates compiling of all of the source code and building
+of the \hypre{} library.  If any errors occur while compiling, the user can edit
+the file \file{config/Makefile.config} directly then run \file{make} again;
+without having to re-run configure.
 
-When building \hypre{} without the install target, the libraries and include files 
-will be copied into the default directories, \file{src/hypre/lib} and 
+When building \hypre{} without the install target, the libraries and include
+files will be copied into the default directories, \file{src/hypre/lib} and
 \file{src/hypre/include}, respectively.
 
-When building \hypre{} using the install target, the libraries and include files 
-will be copied into the directories that the user specified in the options to 
-\file{configure}, e.g. \file{--prefix=/usr/apps}.  If none were specified the default 
-directories, \file{src/hypre/lib} and \file{src/hypre/include}, are used.
+When building \hypre{} using the install target, the libraries and include files
+will be copied into the directories that the user specified in the options to
+\file{configure}, e.g. \file{--prefix=/usr/apps}.  If none were specified the
+default directories, \file{src/hypre/lib} and \file{src/hypre/include}, are
+used.
 
 %-----------------------------
 
 \subsection{Configure Options}\label{config_options}
 
-There are many options to \file{configure} to allow the user to override and 
-refine the defaults for any system. The best way to find out what options are 
-available is to display the help package, by executing \file{./configure --help}, which 
-also includes the usage information.  The user can mix and match the configure options 
-and variable settings to meet their needs.
+There are many options to \file{configure} to allow the user to override and
+refine the defaults for any system. The best way to find out what options are
+available is to display the help package, by executing \file{./configure
+--help}, which also includes the usage information.  The user can mix and match
+the configure options and variable settings to meet their needs.
 
 Some of the commonly used options include:
 
@@ -92,32 +95,28 @@ Some of the commonly used options include:
 
 \end{verbatim}
 
-The user can mix and match the configure options and variable settings to meet their 
-needs.  It should be noted that \hypre{} can be configured with external BLAS and/or
-LAPACK libraries, which can be combined with any other option.  This is done as follows:
+The user can mix and match the configure options and variable settings to meet
+their needs.  It should be noted that \hypre{} can be configured with external
+BLAS and LAPACK libraries, which can be combined with any other option.  This is
+done as follows (currently, both libraries must be configured as external
+together):
 
 \begin{verbatim}
-   Specifying BLAS only:
-      ./configure  --with-blas-lib="blas-lib-name" --with-blas-lib-dirs="path-to-blas-lib"
-
-   Specifying LAPACK only:
-      ./configure  --with-lapack-lib="lapack-lib-name" --with-lapack-lib-dirs="path-to-lapack-lib"
-
-   Specifying both BLAS and LAPACK:
       ./configure  --with-blas-lib="blas-lib-name" --with-blas-lib-dirs="path-to-blas-lib" \
                    --with-lapack-lib="lapack-lib-name" --with-lapack-lib-dirs="path-to-lapack-lib"
 \end{verbatim}
 
-The output from \file{configure} is several pages long.  It reports the system type 
-being used for building and executing, compilers being used, libraries being searched,
-option flags being set, etc.  
+The output from \file{configure} is several pages long.  It reports the system
+type being used for building and executing, compilers being used, libraries
+being searched, option flags being set, etc.
 
 %-----------------------------
 
 \subsection{Make Targets}
 
-The make step in building \hypre{} is where the compiling, loading and creation 
-of libraries occurs.  Make has several options that are called targets.  These include:
+The make step in building \hypre{} is where the compiling, loading and creation
+of libraries occurs.  Make has several options that are called targets.  These
+include:
 \begin{verbatim}
    help         prints the details of each target
 
@@ -147,56 +146,57 @@ of libraries occurs.  Make has several options that are called targets.  These i
                    simulate how application codes will link to HYPRE
 \end{verbatim}
 
-
-%==========================================================================
+%-----------------------------------------------------------------------------
 
 \section{Testing the Library} 
 
 The \kbd{examples} subdirectory contains several codes that can be used to test
-the newly created \hypre{} library.  To create the executable versions, move into
-the \kbd{examples} subdirectory, enter \kbd{make} then execute the codes as described
-in the initial comments section of each source code.
+the newly created \hypre{} library.  To create the executable versions, move
+into the \kbd{examples} subdirectory, enter \kbd{make} then execute the codes as
+described in the initial comments section of each source code.
 
 %-----------------------------
 
 \section{Linking to the Library}
 
-An application code linking with \hypre{} must be compiled with \kbd{-I\$PREFIX/include} 
-and linked with \kbd{-L\$PREFIX/lib -lHYPRE}, where \kbd{\$PREFIX} is the directory 
-where \hypre{} is installed, default is \kbd{hypre}, or as defined by the configure 
-option \kbd{--prefix=PREFIX}. As noted above, if \hypre{} was built as a shared library 
-the user MUST have its location defined in the environment variable \kbd{LD\_LIBRARY\_PATH}.
+An application code linking with \hypre{} must be compiled with
+\kbd{-I\$PREFIX/include} and linked with \kbd{-L\$PREFIX/lib -lHYPRE}, where
+\kbd{\$PREFIX} is the directory where \hypre{} is installed, default is
+\kbd{hypre}, or as defined by the configure option \kbd{--prefix=PREFIX}. As
+noted above, if \hypre{} was built as a shared library the user MUST have its
+location defined in the environment variable \kbd{LD\_LIBRARY\_PATH}.
 
-We strongly recommend that users link with \kbd{libHYPRE.a} rather than specifying each 
-of the separate \hypre{} libraries, i.e.  \kbd{libHYPRE\_krylov.a}, \kbd{libHYPRE\_parcsr\_mv.a},
-etc.  By using \kbd{libHYPRE.a} the user is guaranteed to have all capabilities without
-having to change their link flags.
+We strongly recommend that users link with \kbd{libHYPRE.a} rather than
+specifying each of the separate \hypre{} libraries, i.e.
+\kbd{libHYPRE\_krylov.a}, \kbd{libHYPRE\_parcsr\_mv.a}, etc.  By using
+\kbd{libHYPRE.a} the user is guaranteed to have all capabilities without having
+to change their link flags.
 
-As an example of linking with \hypre{}, a user may refer to the \kbd{Makefile} in the 
-\file{examples} subdirectory.  It is designed to build codes similar to user applications
-that link with and call \hypre{}.  All include and linking flags are defined in the 
-\file{Makefile.config} file by \file{configure}.
+As an example of linking with \hypre{}, a user may refer to the \kbd{Makefile}
+in the \file{examples} subdirectory.  It is designed to build codes similar to
+user applications that link with and call \hypre{}.  All include and linking
+flags are defined in the \file{Makefile.config} file by \file{configure}.
 
 %-----------------------------------------------------------------------------
 
 \section{Error flags}
+
 Every \hypre{} function returns an integer, which is used to indicate errors
-during execution.  Note that the error flag returned by a given function reflects
-the errors from {\em all} previous calls to \hypre{} functions.  In particular, 
-a value of zero means that all \hypre{} functions up to (and including) the 
-current one have completed successfully.  This new error flags system is being
-implemented throughout the library, but currently there are still functions that
-do not support it.
-The error flag value is a combination of one or a few of the following
-error codes:
+during execution.  Note that the error flag returned by a given function
+reflects the errors from {\em all} previous calls to \hypre{} functions.  In
+particular, a value of zero means that all \hypre{} functions up to (and
+including) the current one have completed successfully.  This new error flags
+system is being implemented throughout the library, but currently there are
+still functions that do not support it.  The error flag value is a combination
+of one or a few of the following error codes:
 \begin{enumerate}
 \item \code{HYPRE\_ERROR\_GENERIC} -- describes a generic error
 \item \code{HYPRE\_ERROR\_MEMORY} -- \hypre{} was unable to allocate memory
 \item \code{HYPRE\_ERROR\_ARG} -- error in one of the arguments of a \hypre{} function
 \item \code{HYPRE\_ERROR\_CONV} -- a \hypre{} solver did not converge as expected
 \end{enumerate}
-One can use the \code{HYPRE\_CheckError} function to determine exactly
-which errors have occurred:
+One can use the \code{HYPRE\_CheckError} function to determine exactly which
+errors have occurred:
 \begin{display} \begin{verbatim}
 /* call some HYPRE functions */
 hypre_ierr = HYPRE_Function();
@@ -217,18 +217,30 @@ C check if the error with code HYPRE_ERROR_CODE has occurred
          HYPRE_CheckError(hypre_ierr,HYPRE_ERROR_CODE,check)
          if (check .ne. 0) then
 \end{verbatim} \end{display}
-The global error flag can also be obtained directly, between calls to
-other \hypre{} functions, by calling \code{HYPRE\_GetError()}.
-If an argument error (\code{HYPRE\_ERROR\_ARG}) has occurred, the
-argument index (counting from 1) can be obtained
-from \code{HYPRE\_GetErrorArg()}.
-To get a character string with a description of all errors in a
-given error flag, use
+The global error flag can also be obtained directly, between calls to other
+\hypre{} functions, by calling \code{HYPRE\_GetError()}.  If an argument error
+(\code{HYPRE\_ERROR\_ARG}) has occurred, the argument index (counting from 1)
+can be obtained from \code{HYPRE\_GetErrorArg()}.  To get a character string
+with a description of all errors in a given error flag, use
 \begin{display} \begin{verbatim}
 HYPRE_DescribeError(int hypre_ierr, char *descr);
 \end{verbatim} \end{display}
 Finally, if \hypre{} was configured with \code{--with-print-errors}, additional
 error information will be printed to the standard error during execution.
+
+%-----------------------------------------------------------------------------
+
+\section{Bug Reporting and General Support}
+
+Simply send and email to \kbd{hypre-support@llnl.gov} to report bugs, request
+features, or ask general usage questions.  An {\em issue number} will be
+assigned to your email so that we can track progress (we are using an issue
+tracking tool called Roundup to do this).
+
+Users should include as much relevant information as possible in their issue
+emails, including at a minimum, the \hypre{} version number being used.  For
+compile and runtime problems, please also include the machine type, operating
+system, MPI implementation, compiler, and any error messages produced.
 
 %-----------------------------------------------------------------------------
 
@@ -309,19 +321,32 @@ files be stripped of the BLAS functions.
 %Comments about \hypre{}'s finite element interface can be directed
 %to Charles Tong (925-422-3411, chtong@llnl.gov).
 
-\section{Calling HYPRE from Fortran}
+%-----------------------------------------------------------------------------
 
-A Fortran interface is provided in \hypre{} to enable such applications to call its C
-routines.  Typically, the Fortran subroutine name is the same as the C name, unless 
-it is longer than 31 characters.  In these situations, the name is condensed to 31
-characters, usually by simple truncation.  For now, users should look at the Fortran 
-test drivers (*.f codes) in the \code{test} directory for the correct condensed 
-names.  In the future, this aspect of the interface conversion will be made 
-consistent and straightforward.
+\section{Calling HYPRE from Other Languages}
 
-The Fortran subroutine argument list is always the same as the corresponding C routine, 
-except that the error return code \code{ierr} is always last.  Conversion from C parameter
-types to Fortran argument type is summarized in Table \ref{table-fortran-interface-types}.
+The \hypre{} library can be called from a variety of languages.  This is
+currently provided through two basic mechanisms:
+\begin{itemize}
+\item The Babel interfaces described in Chapter~\ref{ch-babel} utilize the Babel
+tool to provide the most extensive language support (note that the \hypre{}
+library is moving towards using the Babel tool as its primary means of getting
+language interoperability).
+\item A Fortran interface is manually supported to mirror the ``native'' C
+interface used throughout most of this manual.  We describe this interface next.
+\end{itemize}
+
+Typically, the Fortran subroutine name is the same as the C name, unless it is
+longer than 31 characters.  In these situations, the name is condensed to 31
+characters, usually by simple truncation.  For now, users should look at the
+Fortran test drivers (*.f codes) in the \code{test} directory for the correct
+condensed names.  In the future, this aspect of the interface conversion will be
+made consistent and straightforward.
+
+The Fortran subroutine argument list is always the same as the corresponding C
+routine, except that the error return code \code{ierr} is always last.
+Conversion from C parameter types to Fortran argument type is summarized in
+Table \ref{table-fortran-interface-types}.
 
 \begin{table}
 \center
@@ -344,11 +369,11 @@ Conversion from C parameters to Fortran arguments
 \label{table-fortran-interface-types}
 \end{table}
 
-
-Array arguments in \hypre{} are always of type \code{(int *)} or \code{(double *)}, 
-and the corresponding Fortran types are simply \code{integer} or \code{double precision} 
-arrays.  Note that the Fortran arrays may be indexed in any manner.  For example, an integer
-array of length \code{N} may be declared in fortran as either of the following:
+Array arguments in \hypre{} are always of type \code{(int *)} or \code{(double
+*)}, and the corresponding Fortran types are simply \code{integer} or
+\code{double precision} arrays.  Note that the Fortran arrays may be indexed in
+any manner.  For example, an integer array of length \code{N} may be declared in
+fortran as either of the following:
 \begin{display}
 \begin{verbatim}
       integer  array(N)
@@ -356,11 +381,11 @@ array of length \code{N} may be declared in fortran as either of the following:
 \end{verbatim}
 \end{display}
 
-\hypre{} objects can usually be declared as in the table because \code{integer*8} 
-usually corresponds to the length of a pointer.  However, there may be some machines
-where this is not the case (although we are not aware of any at this time).  On such
-machines, the Fortran type for a \hypre{} object should be an \code{integer} of
-the appropriate length.
+\hypre{} objects can usually be declared as in the table because
+\code{integer*8} usually corresponds to the length of a pointer.  However, there
+may be some machines where this is not the case (although we are not aware of
+any at this time).  On such machines, the Fortran type for a \hypre{} object
+should be an \code{integer} of the appropriate length.
 
 This simple example illustrates the above information: 
 
@@ -387,136 +412,3 @@ The corresponding Fortran code for calling this routine is as follows:
      &                             values, ierr)
 \end{verbatim}
 \end{display}
-
-%Fortran 77 subroutine arguments always pass copies of the argument
-%addresses upon execution of the subroutine call.  This is referred to
-%as call-by-address or call-by-reference.  In the called subroutine,
-%the memory space at the argument address can be altered, but the
-%calling address cannot be altered.
-%
-%C function parameters, whether pointers (addresses) or not, are
-%directly copied upon entry to the function. This is referred to as
-%call-by-value.  Altering the copied C parameter in the called function
-%has no effect on the parameter in the calling function.  A pointer
-%parameter in C can achieve the same effect as call-by-reference, and
-%by this mechanism the languages can interoperate in a straightforward
-%manner.
-%
-%Portability across typical platforms is currently achieved with the
-%specific Fortran-calling-C mapping:
-%
-%\vspace{0.2in}
-%
-%\begin{tabular}{lcl}
-%
-%\underline{calling Fortran argument type} & &
-%\underline{called C function parameter type} \\
-%                              &                   &   \\
-%\hspace{0.1in} (addr of) \code{integer*8}        & $\longrightarrow$ &
-%\hspace{0.5in} \code{long int*} \\
-%\hspace{0.1in} (addr of) \code{integer}          & $\longrightarrow$ &
-%\hspace{0.5in} \code{int*} \\
-%\hspace{0.1in} (addr of) \code{character}        & $\longrightarrow$ &
-%\hspace{0.5in} \code{char*} \\
-%\hspace{0.1in} (addr of) \code{double precision} & $\longrightarrow$ &
-%\hspace{0.5in} \code{double*} \\
-%
-%\end{tabular}
-%
-%\vspace{0.2in}
-%
-%In particular, C-type
-%\code{long int*} points to a space that can hold an address, a space
-%which happens to be the size of that allocated by a Fortran
-%\code{integer*8} declaration.
-%In other words, C can hold an address in a \code{long int} and
-%assign that address to a Fortran \code{integer*8} memory space
-%(using \code{long int*} call-by-value).
-%
-%Addresses in \code{integer*8} variables might not have originated
-%in a Fortran call, and if they address inhomogeneously typed collections
-%of data (e.g. C structures), Fortran might not have enough information to
-%dereference them.  But Fortran can still pass around such addresses, and in
-%particular hand them back and forth between various C functions.  The
-%\hypre{} Fortran interface makes extensive use of this technique,
-%as with the \code{addr} variable in the following general example:
-%
-%\vspace{0.1in}
-%
-%\noindent Generalized example:
-%
-%\vspace{0.1in}
-%
-%  Fortran calling:
-%\begin{verbatim}
-%      integer*8        addr
-%      integer          intg, ierr
-%      character        charact
-%      double precision double_precis
-%
-%      call subroutine_name(addr, intg, charact, double_precis, ierr)
-%\end{verbatim}
-%
-%The interface is designed so that the label \code{subroutine_name} is
-%exactly the label of the \hypre{} C-function\footnote{For C function
-%names under 32 characters in length, the Fortran name is the same as
-%the C name.  For C function names over 31 characters, the Fortran name
-%is condensed to less than 32 characters (see reference manual for
-%Fortran name in such a case).}.  \hypre{} interlanguage C-wrappers
-%currently account for interlanguage linking issues involving appended
-%underscores.  The C-wrappers also accomodate Fortran subroutine name
-%length limitations.  Fortran variable
-%\code{ierr} allows error handling through the interface.
-%
-%\vspace{0.1in}
-%
-%\noindent Specific example:
-%
-%\vspace{0.1in}
-%
-%  Fortran calling:
-%\begin{verbatim}
-%      integer*8        IJmatrix, 
-%      integer          num_nonzero_coefs, row_index
-%      integer          col_indices(MAX_NUM_COLS), ierr
-%      double precision coefs(MAX_NUM_COLS)
-%             .
-%             .
-%             .
-%
-%      call HYPRE_IJMatrixInsertRow(IJmatrix, num_nonzero_coefs, row_index,
-%                                   col_indices, coefs, ierr)
-%\end{verbatim}
-%
-%\vspace{0.1in}
-%
-%  C called:
-%\begin{verbatim}
-%      int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix IJmatrix, int n,
-%                                   int row, const int *cols,
-%                                   const double *values)     
-%
-%      { int ierr = 0;
-%              .
-%              .
-%              .
-%
-%        return(ierr); }
-%\end{verbatim}
-%
-%\noindent Since the C function name has less than 32 characters, Fortran
-%uses the same name in the subroutine call.
-
-%-----------------------------------------------------------------------------
-
-\section{Bug Reporting and General Support}
-
-Simply send and email to \kbd{hypre-support@llnl.gov} to report bugs, request
-features, or ask general usage questions.  An {\em issue number} will be
-assigned to your email so that we can track progress (we are using an issue
-tracking tool called Roundup to do this).
-
-Users should include as much relevant information as possible in their issue
-emails, including at a minimum, the \hypre{} version number being used.  For
-compile and runtime problems, please also include the machine type, operating
-system, MPI implementation, compiler, and any error messages produced.

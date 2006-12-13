@@ -4,22 +4,19 @@
 \chapter{Introduction}
 \label{ch-Introduction}
 
-
 This manual describes \hypre{}, a software library of high performance
-preconditioners and solvers for the solution of large, sparse linear
-systems of equations on massively parallel computers.  The \hypre{}
-library was created with the primary goal of providing users with
-advanced parallel preconditioners.  The library features parallel
-multigrid solvers for both structured and unstructured grid problems.
-For ease of use, these solvers are accessed from the application code
-via \hypre{}'s conceptual interfaces, which allow a variety of natural
-problem descriptions.
+preconditioners and solvers for the solution of large, sparse linear systems of
+equations on massively parallel computers.  The \hypre{} library was created
+with the primary goal of providing users with advanced parallel preconditioners.
+The library features parallel multigrid solvers for both structured and
+unstructured grid problems.  For ease of use, these solvers are accessed from
+the application code via \hypre{}'s conceptual linear system interfaces
+(abbreviated to {\em conceptual interfaces} throughout much of this manual),
+which allow a variety of natural problem descriptions.
 
 This introductory chapter provides an overview of the various features in
 \hypre{}, discusses further sources of information on \hypre{}, and
 offers suggestions on how to get started.
-
-
 
 %-----------------------------------------------------------------------------
 
@@ -97,36 +94,34 @@ For more information on Babel, see
 
 \section{Getting More Information}
 
-This user's manual consists of chapters describing each conceptual
-interface, a chapter detailing the various linear solver options
-available, and detailed installation information.  In addition to this
-manual, a number of other information sources for
-\hypre{} are available.
-
+This user's manual consists of chapters describing each conceptual interface, a
+chapter detailing the various linear solver options available, and detailed
+installation information.  In addition to this manual, a number of other
+information sources for \hypre{} are available.
 
 \begin{itemize}
 
 \item
-{\bf Reference Manual:} The reference manual comprehensively lists all
-of the interface and solver functions available in \hypre{}.  The
-reference manual is ideal for determining the various options
-available for a particular solver or for viewing the functions
-provided to describe a problem for a particular interface. 
+{\bf Reference Manual:} The reference manual comprehensively lists all of the
+interface and solver functions available in \hypre{}.  The reference manual is
+ideal for determining the various options available for a particular solver or
+for viewing the functions provided to describe a problem for a particular
+interface.
 
-\item{\bf Example Problems:} A suite of example problems is provided
-with the \hypre{} installation.  These examples reside in the \file{examples}
+\item{\bf Example Problems:} A suite of example problems is provided with the
+\hypre{} installation.  These examples reside in the \file{examples}
 subdirectory and demonstrate various features of the \hypre{} library.
-Associated documentation may be accessed by viewing the \file{README.html}
-file in that same directory.
+Associated documentation may be accessed by viewing the \file{README.html} file
+in that same directory.
 
 \item
 {\bf Papers, Presentations, etc.:} Articles and presentations related to the
-\hypre{} software library or the solvers available
-in the library are available from the \hypre{} web page at
-\url{http://www.llnl.gov/CASC/linear_solvers/}.
+\hypre{} software library and the solvers available in the library are available
+from the \hypre{} web page at \url{http://www.llnl.gov/CASC/hypre/}.
 
-\item{\bf Mailing Lists:} There are three \hypre{} mailing lists that can be subscribed to through the
-\hypre{} web page at \url{http://www.llnl.gov/CASC/linear_solvers}:
+\item{\bf Mailing Lists:} There are two \hypre{} mailing lists that can be
+subscribed to through the \hypre{} web page at
+\url{http://www.llnl.gov/CASC/hypre/}:
 
 \begin{enumerate}
 \item {\sl hypre-announce} (\kbd{hypre-announce@lists.llnl.gov}): The
@@ -136,10 +131,6 @@ It cannot be posted to by users.
 \item {\sl hypre-beta-announce} (\kbd{hypre-beta-announce@lists.llnl.gov}): The
 development team uses this list to announce new beta releases of \hypre{}.  It
 cannot be posted to by users.
-
-\item {\sl hypre-users} (\kbd{hypre-users@lists.llnl.gov}): This list is for
-\hypre{} users to communicate with the development team and each other.  It can
-be posted to by any member of the list.
 \end{enumerate}
 
 
@@ -150,8 +141,6 @@ be posted to by any member of the list.
 
 \section{How to get started}
 
-
-
 \subsection{Installing \hypre{}}
 
 As previously noted, on most systems \hypre{} can be built by simply typing
@@ -159,7 +148,6 @@ As previously noted, on most systems \hypre{} can be built by simply typing
 more detailed instructions read the \file{INSTALL} file provided with the
 \hypre{} distribution or refer to the last chapter in this manual. Note the
 following requirements:
-
 
 \begin{itemize}
 
