@@ -244,66 +244,35 @@ system, MPI implementation, compiler, and any error messages produced.
 
 %-----------------------------------------------------------------------------
 
-\section{HYPRE LinearSystemCore Installation}
+\section{Using HYPRE in External FEI Implementation}
 \label{LSI_install}
-
-The ultimate objective is for application users to have immediate access
-to the latest {\tt FEI}/\hypre{} library files on different computing platforms
-via public {\tt lib} directories.  While this feature is forthcoming, careful 
-version control is needed for users to keep track of capabilities and bug fixes 
-for different installations.  Users who would like to set up the {\tt FEI}/\hypre{}
-on their own should do the following :
-
+To set up \hypre{} for use in external, e.g. Sandia's, {\tt FEI} implementation
+one needs to follow the following steps:
 \begin{enumerate}
-
-\item obtain the \hypre{} and the Sandia {\tt FEI} source codes (alternatively, use
-      the {\tt FEI} implementation in \hypre{}),
+\item obtain the \hypre{} and Sandia's {\tt FEI} source codes,
 \item compile Sandia's {\tt FEI} (fei-2.5.0) to create the
-      {\tt libfei\_base.a} file.
-\item compile \hypre{} 
+      {\tt fei\_base} library.
+\item compile \hypre{}
 \begin{enumerate}
-\item download \hypre{} from the web, ungzip and untar it
-\item go into the {\tt linear\_solvers} directory
+\item unpack the archive and go into the \code{src} directory
 \item do a 'configure' with the {\tt --with-fei-inc-dir} option set to
       the {\tt FEI} include directory plus other compile options
 \item compile with {\tt make install} to create the
-      {\tt libHYPRE\_LSI*} file in the {\tt linear\_solvers/hypre/lib}
-      directory.
+      {\tt HYPRE\_LSI} library in {\tt hypre/lib}.
 \end{enumerate}
-\item call the {\tt FEI} functions in your application code (example given
-      previously)
+\item call the {\tt FEI} functions in your application code (as shown in
+      Chapters \ref{ch-FEI} and \ref{ch-Solvers})
 \begin{enumerate}
-\item include {\tt cfei-hypre.h} in your file 
-\item include {\tt FEI\_Implementation.h} in your file 
-\item make sure your application has an {\tt include} and an {\tt lib} path 
-      to the {\tt include} and {\tt lib} directories created above. 
+\item include {\tt cfei-hypre.h} in your file
+\item include {\tt FEI\_Implementation.h} in your file
 \end{enumerate}
-
+\item Modify your \code{Makefile}
+\begin{enumerate}
+\item include \hypre{}'s {\tt include} and {\tt lib} directories in the search paths.
+\item Link with \code{-lfei_base -lHYPRE_LSI}.
+Note that the order in which the libraries are listed may be important.
 \end{enumerate}
-
-%\subsection{Linking with the library files}
-
-To link the {\tt FEI} and \hypre{} into the executable, the following has to be
-attached to the linking command :
-
-\begin{tabbing}
-\hspace{0.5in} \= {\tt -L\$$\{$LIBPATHS$\}$ -lfei\_base -lHYPRE\_LSI} 
-\end{tabbing}
-along with all the other libraries (Note : the order in which the libraries are
-listed may be important), where {\tt LIBPATHS} are where 
-the \hypre{} and {\tt FEI} library files can be found.  
-
-Since some of these library files make calls to LAPACK and BLAS functions, 
-the corresponding libraries need to be linked along with (placed after) these 
-library files.  
-%For example, on the DEC cluster, it suffices to link
-%with the {\tt dxml} library, (So {\tt -ldxml} is placed after the above link
-%sequence, with {\tt -lm} placed after {\tt -ldxml}.) while the {\it essl}
-%library can be used on the blue machine. If {\tt SuperLU} is also needed,
-%{\tt -lHYPRE\_superlu} should be placed immediately after {\tt HYPRE\_LSI}.
-
-%\subsection{Some more caveats for application developers}
-
+\end{enumerate}
 Building an application executable often requires linking with many different
 software packages, and many software packages use some LAPACK and/or BLAS
 functions.  In order to alleviate the problem of multiply defined functions
@@ -315,8 +284,6 @@ built with this in mind.  However, some other software library files needed
 may have the BLAS functions defined in them.  To avoid the problem of
 multiply defined functions, it is recommended that the offending library
 files be stripped of the BLAS functions.
-
-%\subsection{Comments about the FEI/\hypre{} Interface and Contacts}
 
 %Comments about \hypre{}'s finite element interface can be directed
 %to Charles Tong (925-422-3411, chtong@llnl.gov).
