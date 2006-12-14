@@ -18,7 +18,10 @@
 extern "C" {
 #endif
 
-/*
+/* Opaque forward declaration of array struct */
+struct bHYPRE_SStructVariable__array;
+
+/**
  * Symbol "bHYPRE.SStructVariable" (version 1.0.0)
  * 
  * The SStructVariable enumerated type.
@@ -66,9 +69,6 @@ extern "C" {
  * processes because they may be associated with multiple cells.
  */
 
-
-/* Opaque forward declaration of array struct */
-struct bHYPRE_SStructVariable__array;
 
 enum bHYPRE_SStructVariable__enum {
   bHYPRE_SStructVariable_UNDEFINED = -1,
