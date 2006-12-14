@@ -6,12 +6,12 @@ After the {\tt FEI} has been used to assemble the global linear system
 (as described in Chapter \ref{ch-FEI}), a number of \hypre{} solvers
 can be called to perform the solution.
 This is straightforward, if \hypre's {\tt FEI} has been used.
-If external {\tt FEI} is employed, the user needs to link with \hypre's
+If an external {\tt FEI} is employed, the user needs to link with \hypre's
 implementation of the \code{LinearSystemCore} class, as described
 in Section \ref{LSI_install}.
 
 Solver parameters are specified as an array of strings, and a complete
-list of the available options can be found in Section 8.2 of the reference
+list of the available options can be found in the FEI section of the reference
 manual.
 They are passed to the {\tt FEI} as in the following example:
 \begin{display}
@@ -53,7 +53,7 @@ where the variables at node $i$ is returned in \code{solnValues}.
 While most of the solvers from the previous sections are available through
 the FEI interface, there are number of additional solvers and preconditioners
 that are accessible only through the FEI.
-These solvers are briefly described in this section (see also Sections 8.2.4--8.2.7 in the reference manual).
+These solvers are briefly described in this section (see also the reference manual).
 
 %On the other side of the {\sf LinearSystemCore} interface is the linear
 %solver package. Any linear solver package can be used as long as there

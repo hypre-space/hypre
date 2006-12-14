@@ -21,7 +21,7 @@ A complete description of Sandia's {\tt FEI} implementation can be obtained
 by contacting Alan Williams at Sandia (william@sandia.gov).
 A simplified version of the {\tt FEI} has been implemented
 at LLNL and is included in \hypre{}.
-More details about this implementation can be found int the header
+More details about this implementation can be found in the header
 files of the \code{FEI_mv/fei-base} and \code{FEI_mv/fei-hypre} directories.
 
 %% The purpose of the {\tt FEI} is to allow users to submit the global
@@ -188,7 +188,7 @@ feiPtr -> initComplete();
 
 Next, we begin the {\it load} phase. The first entity for loading is the
 nodal boundary conditions. Here we need to specify the number of boundary
-equations and the boundary values given by {\tt alpha, beta}, and {\tt gamma}.  Depending whether the boundary conditions are Dirichlet, Neumann, or mixed,
+equations and the boundary values given by {\tt alpha, beta}, and {\tt gamma}.  Depending on whether the boundary conditions are Dirichlet, Neumann, or mixed,
 the three values should be passed into the {\tt FEI} accordingly. 
 \begin{display}
 \begin{verbatim}
