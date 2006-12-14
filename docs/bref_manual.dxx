@@ -1,5 +1,5 @@
 /**
-@name {\it hypre} Reference Manual
+@name {\it hypre} Reference Manual: \linebreak Babel-based Interface in C
 
 HYPRECopyright
 
@@ -417,7 +417,7 @@ HYPRECopyright
  * @name Semi-Structured Variable
  **/
 //@{
-//@Include: ../babel/bHYPREClient-C/bHYPRE_SStructVariable.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_SStructVariable_IOR.h
 //@}
 
 //@}
