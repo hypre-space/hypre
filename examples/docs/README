@@ -28,6 +28,14 @@
   create/update the README.html in the examples directory.
 
 
+  NOTE: To clarify, the docs directory is NOT distributed 
+	to users.  To test what is in the distribution, do "make" 
+	in the docs directory. This updates the examples/README_files
+	directory (which IS distributed) and the file README.html 
+	which is created in the *examples* directory (from docs/index.htm 
+	- which is why the links in index.htm do not - and should not -
+	work in the docs directory)
+	
 3. Maintaining, updating and testing.
 
 - Changes in hypre interface should be reflected in the examples.
