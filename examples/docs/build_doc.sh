@@ -22,6 +22,10 @@ foreach target (`ls ../*.cxx`)
     $currentdir/code2html.perl -l c++ -n -o html $target $target.html
     mv $target.html .
 end
+foreach target (`ls ../*.py`)
+    $currentdir/code2html.perl -l python -n -o html $target $target.html
+    mv $target.html .
+end
 cd $currentdir
 
 # Copy the example files
