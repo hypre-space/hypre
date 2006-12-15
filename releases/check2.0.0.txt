@@ -34,19 +34,19 @@ the responsible project member before the release is made available to users.
 
  6. Update CHANGELOG file with information regarding contents of this release
 
-    --->> 
+    --->> tk 12/15/2006
 
  7. Final documentation review meeting
 
-    --->> 
+    --->> tk 12/15/2006 (we had several meetings over the last month)
 
  8. Verify that all agreed-upon changes have been committed
 
-    --->> 
+    --->> tk 12/15/2006
 
  9. Project Lead review and/or concurrence to release
 
-    --->> 
+    --->> rdf 12/15/2006
 
 10. Update config/configure.in with release number and date, then run
     config/bootstrap and commit changes to the repository
@@ -55,27 +55,27 @@ the responsible project member before the release is made available to users.
 
 11. Tag repository with release number (use 'rtag -b' to create a branch)
 
-    --->> 
+    --->> tk 12/15/2006
 
 12. Manually run the autotest script with the following options on the checked
     out version: -tux149 -insure -gpsmp -pengra
 
-    --->> 
+    --->> tk 12/15/2006 (relying on the autotest from the previous few days)
 
 13. If the test runs properly, proceed.  Otherwise, untag the repository, make
     necessary corrections, and return to step 10.
 
-    --->> 
+    --->> n/a
 
 14. Create release tar file by running the mkdist script './mkdist [VersionID]'
     (this can be run from within any directory, just be sure to use the latest
     version of the 'mkdist' script)
 
-    --->> 
+    --->> tk 12/15/2006
 
 15. On the CASC cluster, copy tar file to /usr/casc/hypre
 
-    --->> 
+    --->> tk 12/15/2006
 
 16. Put release on download page, and inform project team and other appropriate
     users of availability
