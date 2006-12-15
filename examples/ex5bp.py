@@ -6,6 +6,7 @@
 # 3. Install pyMPI.  Probably this could be made to work with other MPI extensions of Python
 #    with minor changes in this example; but I haven't tried anything else.
 # 4. configure --enable-shared --with-babel --enable-python=pyMPI
+#    If you have trouble with missing stdc++ functions, also use  --without-fei
 # 5. make
 # 6. Make sure you have the following environment variables:
 #    SIDL_DLL_PATH={your top-level hypre directory}/babel/bHYPREClient-P/libbHYPRE.scl
