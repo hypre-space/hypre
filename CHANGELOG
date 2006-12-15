@@ -30,6 +30,12 @@
 # recent release.
 #=============================================================================
 
+Version 2.0.0 released, 2006/12/15.
+
+- Minor documentation updates.
+
+#====================================
+
 Version 1.14.0b released, 2006/11/30.
 
 - Added python support to Babel interface.
