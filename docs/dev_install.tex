@@ -1,15 +1,17 @@
 %==========================================================================
-\chapter{Creating and Installing a HYPRE Distribution}
-\label{Creating and Installing a HYPRE Distribution}
+\chapter{Creating and HYPRE Release}
+\label{Creating and HYPRE Release}
 
-Making a HYPRE release available to the user community involves creating a
-distribution tar file, copying it to supported CASC and Livermore Computing
-(LC) platforms and installing the libraries on those platforms.  As LC adds 
-new machines, the latest HYPRE releases will be installed on those machines.
+Making a \hypre{} release available to the user community involves creating a
+distribution tar file, putting it on the \hypre{} download page, and sending an
+announcement to the appropriate email list.  Formerly, we also supported the
+installation of the library on the Livermore Computing (LC) platforms.  In case
+we go back to providing support sometime in the future, the documentation for
+installing the library remains below.
 
 General and beta releases are installed on all supported LC platforms. While
-alpha releases are installed {\bf only} on the CASC cluster.  Each release is 
-configured and built with different options which results in the creation of 
+alpha releases are installed {\bf only} on the CASC cluster.  Each release is
+configured and built with different options which results in the creation of
 subdirectories as defined below:
 \begin{itemize}
 \item optimized -- stored in lib and include
@@ -26,39 +28,29 @@ subdirectories as defined below:
 \section{Scripts}
 \label{Scripts}
 
-There are three, currently Korn shell, scripts \file{mkdist}, \file{mkdistlinks}
-and \file{mklibs} that ease the task of building and installing \hypre{} on most 
-platforms.  These scripts reside in the \file{tools} subdirectory of the \hypre{} 
-repository or in the root directory on specific platforms.
+There are three Korn shell scripts \file{mkdist}, \file{mkdistlinks} and
+\file{mklibs} that ease the task of building and installing \hypre{} on most
+platforms.  These scripts reside in the \file{tools} subdirectory of the
+\hypre{} repository or in the root directory on specific platforms.
 
 %==========================================================================
 \subsection{mkdist}
 \label{mkdist}
 
-The distribution tar file is created with the \file{mkdist} script.
-
-\begin{verbatim}
-Usage: ./mkdist [-help] | [-display] | VersionID
-       where:
-             -help       displays help message only
-             -display    reports the CVS rtag history
-             VersionID   release number
-                         syntax: M.mm.rr  -- general release
-                                 M.mm.rrb -- beta release
-                                 M.mm.rra -- alpha release
-\end{verbatim}
-
-\file{mkdist} extracts the requested version from the repository, reorganizes 
-the file structure, builds the documentation and creates the distribution tar 
-file named \file{hypre-M.nn.rr.tar.gz}.
+The distribution tar file is created with the \file{mkdist} script.  The
+\file{mkdist} script extracts the requested version from the repository,
+reorganizes the file structure, builds the documentation and creates the
+distribution tar file named \file{hypre-M.nn.rr.tar.gz}.  Use the command
+\kbd{mkdist -help} to get usage information.
 
 %==========================================================================
 \subsection{mkdistlinks}
 \label{mkdistlinks}
 
-\file{mkdistlinks} creates symbolic links from the \hypre{} distribution tar file
-to subdirectories that are defined within this script.  The directory list only
-needs to be updated when new classes of platforms are added.
+The \file{mkdistlinks} script creates symbolic links from the \hypre{}
+distribution tar file to subdirectories that are defined within this script.
+The directory list only needs to be updated when new classes of platforms are
+added.
 
 \begin{verbatim}
 Usage: ./mkdistlinks hypre-M.mm.rr.tar.gz
@@ -70,26 +62,14 @@ Usage: ./mkdistlinks hypre-M.mm.rr.tar.gz
 \subsection{mklibs}
 \label{mklibs}
 
-\file{mklibs} generates the various versions of the library (optimized, debug, serial,
-threaded) and stores them in the appropriate subdirectories. Optionally, it will 
-symbolically link to the \file{/usr/apps/hypre} directory.
-
-\begin{verbatim}
-Usage: ./mklibs [-help] | [-n] <-g | -b | -a> hypre-M.mm.rr.tar.gz [install]
-       where:
-             -help       displays help message only
-             -n          do not extract files from hypre-M.mm.rr.tar.gz
-             <-g|-b|-a>  release type -- MUST choose one
-                         -g for general release
-                         -b for beta release
-                         -a for alpha release
-             hypre-M.mm.rr.tar.gz  distribution tar file created by mkdist
-             install     create symbolic links
-\end{verbatim}
-
-\file{mklibs} untars the distribution, resulting in a new directory named 
-\file{hypre-M.mm.rr} which contains the \file{docs} and \file{src} subdirectories 
-as well as the CHANGELOG and other relevant files.
+The \file{mklibs} script generates the various versions of the library
+(optimized, debug, serial, threaded) and stores them in the appropriate
+subdirectories. Optionally, it will symbolically link to the
+\file{/usr/apps/hypre} directory.  The \file{mklibs} script untars the
+distribution, resulting in a new directory named \file{hypre-M.mm.rr} which
+contains the \file{docs} and \file{src} subdirectories as well as the
+\file{CHANGELOG} and other relevant files.  Use the command \kbd{mklibs -help}
+to get usage information.
 
 There are two specialized versions of \file{mklibs}:
 \begin{itemize}
@@ -101,18 +81,24 @@ There are two specialized versions of \file{mklibs}:
 \section{Creating a Distribution Tar File}
 \label{Creating a Distribution Tar File}
 
-The distribution tar file is created on a local CASC platform.  The following 
-steps detail the actions to be taken as well as provide an example command as 
-appropriate.  Prior to executing these steps the release number will be assigned 
-by the project team. In the examples below, M-mm-rr is a place-holder for the 
-actual release number, which may or may not have an 'a' or 'b' appended; depending 
-on the type of release being created.
+The distribution tar file is created on a local CASC platform.  The following
+steps detail the actions to be taken and provide examples where appropriate.
+Prior to executing these steps, the release number will be assigned by the
+project team.  In the examples below, M-mm-rr is a place-holder for the actual
+release number, which may or may not have an 'a' or 'b' appended, depending on
+the type of release being created.
 
 \begin{enumerate}
+\item Ensure that the \code{CVSROOT} environment variable is set to point to the
+location of the CASC repository \code{/home/casc/repository} (you will save
+yourself more trouble than you think by doing this first).
 \item Retrieve the latest version of \hypre{} from the CVS repository
 \begin{verbatim}
       cvs checkout linear_solvers
 \end{verbatim}
+\item In the \file{releases} directory, copy the appropriate \file{checklist_*}
+file to a new file (follow the naming convention already started) and follow the
+steps listed within.  Several of the steps are replicated here.
 \item In the \file{config/configure.in} file, change the release version number
 and date, i.e., change
 \begin{verbatim}
