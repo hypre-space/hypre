@@ -4,7 +4,7 @@
 0 5 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
 0 1 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -mcr -tux -insure | tee autotest.cron.Tue.log
 0 5 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -alc -tuxintel -tux -insure | tee autotest.cron.Wed.log
+0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -yana -tuxintel -tux -insure | tee autotest.cron.Wed.log
 0 5 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
 0 1 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -pengra -tuxgcc -tux -insure | tee autotest.cron.Thu.log
 0 5 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary

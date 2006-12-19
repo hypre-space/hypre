@@ -126,6 +126,7 @@ help () {
   printf "%s\n" "     -ubgl      LC - SLES."
   printf "%s\n" "     -up        LC - AIX."
   printf "%s\n" "     -vertex    LC - Opteron."
+  printf "%s\n" "     -yana      LC - AMD Opteron."
   printf "%s\n" "     -tux       CASC - Linux."
   printf "%s\n" "     -insure    CASC - Linux, executing insure++."
   printf "%s\n" "     -tuxgcc    CASC - gcc compilers"
@@ -231,6 +232,15 @@ hypre_set_machine_options()
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
         HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[vertex]'
+        ;;
+     -yana)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="yana"
+        HYPRE_RUN_MACHINE="yana"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_64_ib/AUTOTEST"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
+        HYPRE_MESSAGE='SECONDARY[yana]'
         ;;
      -tuxpgi)
         HYPRE_ARCH="linux"
