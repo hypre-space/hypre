@@ -225,7 +225,7 @@ get_hypre_test_name()
          hypre_test_name="SECONDARY[Thunder]"
          ;;
       *chaos_3_x86_64_ib/AUTOTEST)
-         hypre_test_name="SECONDARY[vertex]"
+         hypre_test_name="SECONDARY[yana/vertex]"
          ;;
       *sles_9_ppc64/AUTOTEST)
          hypre_test_name="SECONDARY[ubgl]"
