@@ -93,7 +93,6 @@ HEADERS =\
  FEI_HYPRE_Impl.h\
  FEI_HYPRE_include.h\
  HYPRE_Builder.h\
- HYPRE_FEI_mv.h\
  HYPRE_LSI_Dsuperlu.h\
  HYPRE_LSI_UZAWA.h\
  HYPRE_LSI_Uzawa_c.h\
