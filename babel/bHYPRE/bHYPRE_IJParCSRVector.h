@@ -93,7 +93,7 @@ bHYPRE_IJParCSRVector
 bHYPRE_IJParCSRVector__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create an IJParCSR Vector. 
  */
 bHYPRE_IJParCSRVector
 bHYPRE_IJParCSRVector_Create(

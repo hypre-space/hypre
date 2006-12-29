@@ -159,7 +159,7 @@ impl_bHYPRE_ErrorHandler__dtor(
 
 /*
  * The Check method will return nonzero when the error flag ierr
- * includes an error of type error_code; and zero otherwise.
+ * includes an error of type error\_code; and zero otherwise.
  */
 
 #undef __FUNC__
@@ -186,7 +186,6 @@ impl_bHYPRE_ErrorHandler_Check(
 }
 
 /*
- * The Describe method will return a string describing the errors
  * included in the error flag ierr.
  */
 

@@ -1,30 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
 /*
  * File:          bHYPRE_StructVector_Impl.c
  * Symbol:        bHYPRE.StructVector-v1.0.0
@@ -183,7 +156,7 @@ impl_bHYPRE_StructVector__dtor(
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct Vector. 
  */
 
 #undef __FUNC__
@@ -229,7 +202,7 @@ impl_bHYPRE_StructVector_Create(
 }
 
 /*
- * Method:  SetGrid[]
+ *  Set the grid on which vectors are defined. 
  */
 
 #undef __FUNC__
@@ -282,7 +255,9 @@ impl_bHYPRE_StructVector_SetGrid(
 }
 
 /*
- * Method:  SetNumGhost[]
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
  */
 
 #undef __FUNC__
@@ -318,7 +293,9 @@ impl_bHYPRE_StructVector_SetNumGhost(
 }
 
 /*
- * Method:  SetValue[]
+ *  Set the value of a single vector coefficient, given by "grid_index".
+ * "grid_index" is an array of size "dim", where dim is the number
+ * of dimensions. 
  */
 
 #undef __FUNC__
@@ -355,7 +332,11 @@ impl_bHYPRE_StructVector_SetValue(
 }
 
 /*
- * Method:  SetBoxValues[]
+ *  Set the values of all vector coefficient for grid points in a box.
+ * The box is defined by its lower and upper corners in the grid.
+ * "ilower" and "iupper" are arrays of size "dim", where dim is the
+ * number of dimensions.  The "values" array has size "nvalues", which
+ * is the number of grid points in the box. 
  */
 
 #undef __FUNC__

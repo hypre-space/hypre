@@ -18,8 +18,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * Schwarz requires an IJParCSR matrix
  */
 struct bHYPRE_Schwarz__object;
@@ -101,7 +99,7 @@ bHYPRE_Schwarz
 bHYPRE_Schwarz__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a Schwarz solver. 
  */
 bHYPRE_Schwarz
 bHYPRE_Schwarz_Create(

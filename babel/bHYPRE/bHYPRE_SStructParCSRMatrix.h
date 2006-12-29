@@ -97,7 +97,7 @@ bHYPRE_SStructParCSRMatrix
 bHYPRE_SStructParCSRMatrix__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct ParCSR Matrix. 
  */
 bHYPRE_SStructParCSRMatrix
 bHYPRE_SStructParCSRMatrix_Create(

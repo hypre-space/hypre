@@ -18,8 +18,6 @@
  * Objects of this type can be cast to Solver objects
  * using the {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * The StructSMG solver requires a Struct matrix.
  */
 struct bHYPRE_StructSMG__object;
@@ -101,7 +99,7 @@ bHYPRE_StructSMG
 bHYPRE_StructSMG__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct SMG solver. 
  */
 bHYPRE_StructSMG
 bHYPRE_StructSMG_Create(
