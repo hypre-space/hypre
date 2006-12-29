@@ -2835,7 +2835,9 @@ RETURNS\n\
    (bHYPRE.SStructParCSRVector _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a SStruct ParCSR Vector. "
    },
   { "_connect", (PyCFunction)pStub_SStructParCSRVector__connect,
   (METH_VARARGS | METH_KEYWORDS),

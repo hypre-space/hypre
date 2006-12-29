@@ -16,8 +16,6 @@
  * Symbol "bHYPRE.SStructSplit" (version 1.0.0)
  * 
  * 
- * Documentation goes here.
- * 
  * The SStructSplit solver requires a SStruct matrix.
  */
 

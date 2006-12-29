@@ -18,7 +18,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
  * Although the usual Solver SetParameter functions are available,
  * a Euclid-stype parameter-setting function is also available, SetParameters.
  */

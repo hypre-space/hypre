@@ -809,7 +809,7 @@ bHYPRE::ErrorHandler::throwException0(
 
 /**
  * The Check method will return nonzero when the error flag ierr
- * includes an error of type error_code; and zero otherwise.
+ * includes an error of type error\_code; and zero otherwise.
  */
 int32_t
 bHYPRE::ErrorHandler::Check( /* in */int32_t ierr,
@@ -832,7 +832,6 @@ bHYPRE::ErrorHandler::Check( /* in */int32_t ierr,
 
 
 /**
- * The Describe method will return a string describing the errors
  * included in the error flag ierr.
  */
 void

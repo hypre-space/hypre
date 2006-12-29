@@ -16,9 +16,7 @@ C       Symbol "bHYPRE.Hybrid" (version 1.0.0)
 C       
 C       Hybrid solver
 C       first tries to solve with the specified Krylov solver, preconditioned by
-C       diagonal scaling (this combination is the "first solver")
 C       If that fails to converge, it will try again with the user-specified
-C       preconditioner (this combination is the "second solver").
 C       
 C       Specify the preconditioner  by calling SecondSolver's SetPreconditioner
 C       method.  If no preconditioner is specified (equivalently, if the
@@ -95,6 +93,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create[]
+C        This function is the preferred way to create a Hybrid solver. 
 C       
 
         subroutine bHYPRE_Hybrid_Create_f(mpi_comm, SecondSolver, A,

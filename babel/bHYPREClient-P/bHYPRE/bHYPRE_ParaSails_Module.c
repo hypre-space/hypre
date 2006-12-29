@@ -26,8 +26,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * ParaSails requires an IJParCSR matrix
  */
 #include <Python.h>
@@ -2698,7 +2696,9 @@ RETURNS\n\
    (bHYPRE.ParaSails _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a ParaSails solver. "
    },
   { "_connect", (PyCFunction)pStub_ParaSails__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2817,8 +2817,6 @@ static PyTypeObject _bHYPRE_ParaSailsType = {
 \
 Objects of this type can be cast to Solver objects using the\n\
 {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 ParaSails requires an IJParCSR matrix", /* tp_doc */
   0,      /* tp_traverse */
@@ -3053,8 +3051,6 @@ initParaSails(void) {
 \
 Objects of this type can be cast to Solver objects using the\n\
 {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 ParaSails requires an IJParCSR matrix"
   );

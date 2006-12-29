@@ -3429,7 +3429,9 @@ RETURNS\n\
    (bHYPRE.IJParCSRMatrix _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create an IJParCSR Matrix. "
    },
   { "GenerateLaplacian", (PyCFunction)pStub_IJParCSRMatrix_GenerateLaplacian,
   (METH_VARARGS | METH_KEYWORDS),

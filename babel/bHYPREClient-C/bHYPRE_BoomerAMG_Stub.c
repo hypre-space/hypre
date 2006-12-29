@@ -132,7 +132,7 @@ bHYPRE_BoomerAMG__connect(const char* url, sidl_BaseInterface *_ex)
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a BoomerAMG solver. 
  */
 
 bHYPRE_BoomerAMG

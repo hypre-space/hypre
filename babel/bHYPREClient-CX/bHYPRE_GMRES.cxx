@@ -2444,8 +2444,9 @@ bHYPRE::GMRES::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a GMRES solver. 
  */
 ::bHYPRE::GMRES
 bHYPRE::GMRES::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

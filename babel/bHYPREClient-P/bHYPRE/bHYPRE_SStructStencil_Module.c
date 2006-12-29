@@ -1673,7 +1673,9 @@ RETURNS\n\
    (bHYPRE.SStructStencil _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a SStruct Stencil. "
    },
   { "_connect", (PyCFunction)pStub_SStructStencil__connect,
   (METH_VARARGS | METH_KEYWORDS),

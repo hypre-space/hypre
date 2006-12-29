@@ -18,8 +18,6 @@
  * Objects of this type can be cast to Solver objects
  * using the {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * The StructPFMG solver requires a Struct matrix.
  */
 

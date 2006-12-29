@@ -547,7 +547,7 @@ SIDLFortran77Symbol(bhypre_sstructmatrix__set_hooks_static_f,BHYPRE_SSTRUCTMATRI
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct Matrix. 
  */
 
 void

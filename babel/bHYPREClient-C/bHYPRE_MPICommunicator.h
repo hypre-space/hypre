@@ -88,7 +88,7 @@ bHYPRE_MPICommunicator
 bHYPRE_MPICommunicator__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  CreateC[]
+ *  Create an MPICommunicator object from C code. 
  */
 bHYPRE_MPICommunicator
 bHYPRE_MPICommunicator_CreateC(
@@ -96,7 +96,7 @@ bHYPRE_MPICommunicator_CreateC(
   /* out */ sidl_BaseInterface *_ex);
 
 /**
- * Method:  CreateF[]
+ *  Create an MPICommunicator object from Fortran code. 
  */
 bHYPRE_MPICommunicator
 bHYPRE_MPICommunicator_CreateF(
@@ -104,7 +104,7 @@ bHYPRE_MPICommunicator_CreateF(
   /* out */ sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create\_MPICommWorld[]
+ *  Create an MPICommunicator object which represents MPI\_Comm\_World. 
  */
 bHYPRE_MPICommunicator
 bHYPRE_MPICommunicator_Create_MPICommWorld(

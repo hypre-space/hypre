@@ -12,12 +12,9 @@
 /*
  * Symbol "bHYPRE.BiCGSTAB" (version 1.0.0)
  * 
- * Objects of this type can be cast to PreconditionedSolver objects
- * using the {\tt \_\_cast} methods.
- * 
- * RDF: Documentation goes here.
- * 
- * BiCGSTAB solver calls Babel-interface functions
+ * BiCGSTAB solver.
+ * This calls Babel-interface matrix and vector functions, so it will work
+ * with any consistent matrix, vector, and preconditioner classes.
  */
 
 #ifndef included_bHYPRE_BiCGSTAB_fStub_h
@@ -540,7 +537,7 @@ SIDLFortran77Symbol(bhypre_bicgstab__set_hooks_static_f,BHYPRE_BICGSTAB__SET_HOO
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a BiCGSTAB solver. 
  */
 
 void

@@ -18,7 +18,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
  * Although the usual Solver SetParameter functions are available,
  * a Euclid-stype parameter-setting function is also available, SetParameters.
  */
@@ -101,7 +100,7 @@ bHYPRE_Euclid
 bHYPRE_Euclid__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a Euclid solver. 
  */
 bHYPRE_Euclid
 bHYPRE_Euclid_Create(

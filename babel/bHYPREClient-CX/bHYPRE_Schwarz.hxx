@@ -90,8 +90,6 @@ namespace bHYPRE {
    * Objects of this type can be cast to Solver objects using the
    * {\tt \_\_cast} methods.
    * 
-   * RDF: Documentation goes here.
-   * 
    * Schwarz requires an IJParCSR matrix
    */
   class Schwarz: public virtual ::bHYPRE::Solver,
@@ -117,8 +115,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a Schwarz solver. 
      */
     static ::bHYPRE::Schwarz
     Create (

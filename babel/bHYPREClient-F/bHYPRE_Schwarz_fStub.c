@@ -15,8 +15,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * Schwarz requires an IJParCSR matrix
  */
 
@@ -538,7 +536,7 @@ SIDLFortran77Symbol(bhypre_schwarz__set_hooks_static_f,BHYPRE_SCHWARZ__SET_HOOKS
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Schwarz solver. 
  */
 
 void

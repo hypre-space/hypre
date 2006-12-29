@@ -85,7 +85,7 @@ C        out sidl.BaseInterface exception
 C       
 C       Method:  Check[]
 C       The Check method will return nonzero when the error flag ierr
-C       includes an error of type error_code; and zero otherwise.
+C       includes an error of type error\_code; and zero otherwise.
 C       
 
         subroutine bHYPRE_ErrorHandler_Check_f(ierr, error_code, retval,
@@ -104,7 +104,6 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Describe[]
-C       The Describe method will return a string describing the errors
 C       included in the error flag ierr.
 C       
 

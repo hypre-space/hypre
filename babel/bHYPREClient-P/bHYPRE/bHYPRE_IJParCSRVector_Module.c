@@ -2514,7 +2514,9 @@ RETURNS\n\
    (bHYPRE.IJParCSRVector _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create an IJParCSR Vector. "
    },
   { "_connect", (PyCFunction)pStub_IJParCSRVector__connect,
   (METH_VARARGS | METH_KEYWORDS),

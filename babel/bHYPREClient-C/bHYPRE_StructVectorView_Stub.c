@@ -58,7 +58,7 @@ bHYPRE_StructVectorView__connect(const char* url, sidl_BaseInterface *_ex)
 }
 
 /*
- * Method:  SetGrid[]
+ *  Set the grid on which vectors are defined. 
  */
 
 SIDL_C_INLINE_DEFN
@@ -79,7 +79,9 @@ bHYPRE_StructVectorView_SetGrid(
 #endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
- * Method:  SetNumGhost[]
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
  */
 
 SIDL_C_INLINE_DEFN
@@ -107,7 +109,9 @@ bHYPRE_StructVectorView_SetNumGhost(
 #endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
- * Method:  SetValue[]
+ *  Set the value of a single vector coefficient, given by "grid_index".
+ * "grid_index" is an array of size "dim", where dim is the number
+ * of dimensions. 
  */
 
 SIDL_C_INLINE_DEFN
@@ -137,7 +141,11 @@ bHYPRE_StructVectorView_SetValue(
 #endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
- * Method:  SetBoxValues[]
+ *  Set the values of all vector coefficient for grid points in a box.
+ * The box is defined by its lower and upper corners in the grid.
+ * "ilower" and "iupper" are arrays of size "dim", where dim is the
+ * number of dimensions.  The "values" array has size "nvalues", which
+ * is the number of grid points in the box. 
  */
 
 int32_t

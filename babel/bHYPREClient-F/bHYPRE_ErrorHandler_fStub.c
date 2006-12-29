@@ -520,7 +520,7 @@ SIDLFortran77Symbol(bhypre_errorhandler__set_hooks_static_f,BHYPRE_ERRORHANDLER_
 
 /*
  * The Check method will return nonzero when the error flag ierr
- * includes an error of type error_code; and zero otherwise.
+ * includes an error of type error\_code; and zero otherwise.
  */
 
 void
@@ -553,7 +553,6 @@ SIDLFortran77Symbol(bhypre_errorhandler_check_f,BHYPRE_ERRORHANDLER_CHECK_F,bHYP
 }
 
 /*
- * The Describe method will return a string describing the errors
  * included in the error flag ierr.
  */
 

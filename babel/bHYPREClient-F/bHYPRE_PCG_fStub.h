@@ -14,6 +14,10 @@
 
 /**
  * Symbol "bHYPRE.PCG" (version 1.0.0)
+ * 
+ * PCG solver.
+ * This calls Babel-interface matrix and vector functions, so it will work
+ * with any consistent matrix, vector, and preconditioner classes.
  */
 
 #ifndef included_bHYPRE_PCG_IOR_h

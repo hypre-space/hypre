@@ -15,8 +15,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * Pilut has not been implemented yet.
  */
 
@@ -533,7 +531,7 @@ SIDLFortran77Symbol(bhypre_pilut__set_hooks_static_f,BHYPRE_PILUT__SET_HOOKS_STA
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Pilut solver. 
  */
 
 void

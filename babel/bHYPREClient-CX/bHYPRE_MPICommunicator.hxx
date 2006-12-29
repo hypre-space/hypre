@@ -92,8 +92,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  Create an MPICommunicator object from C code. 
      */
     static ::bHYPRE::MPICommunicator
     CreateC (
@@ -102,8 +103,9 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined static method
+     *  Create an MPICommunicator object from Fortran code. 
      */
     static ::bHYPRE::MPICommunicator
     CreateF (
@@ -112,8 +114,9 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined static method
+     *  Create an MPICommunicator object which represents MPI_Comm_World. 
      */
     static ::bHYPRE::MPICommunicator
     Create_MPICommWorld() ;

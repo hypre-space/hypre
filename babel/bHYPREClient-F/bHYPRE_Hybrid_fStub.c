@@ -14,9 +14,7 @@
  * 
  * Hybrid solver
  * first tries to solve with the specified Krylov solver, preconditioned by
- * diagonal scaling (this combination is the "first solver")
  * If that fails to converge, it will try again with the user-specified
- * preconditioner (this combination is the "second solver").
  * 
  * Specify the preconditioner  by calling SecondSolver's SetPreconditioner
  * method.  If no preconditioner is specified (equivalently, if the
@@ -545,7 +543,7 @@ SIDLFortran77Symbol(bhypre_hybrid__set_hooks_static_f,BHYPRE_HYBRID__SET_HOOKS_S
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Hybrid solver. 
  */
 
 void

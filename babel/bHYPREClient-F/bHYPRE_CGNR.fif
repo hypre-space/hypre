@@ -14,12 +14,9 @@ C
 C       
 C       Symbol "bHYPRE.CGNR" (version 1.0.0)
 C       
-C       Objects of this type can be cast to PreconditionedSolver objects
-C       using the {\tt \_\_cast} methods.
-C       
-C       RDF: Documentation goes here.
-C       
-C       CGNR solver calls Babel-interface functions
+C       CGNR solver.
+C       This calls Babel-interface matrix and vector functions, so it will work
+C       with any consistent matrix, vector, and preconditioner classes.
 C       
 
 
@@ -87,6 +84,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create[]
+C        This function is the preferred way to create a CGNR solver. 
 C       
 
         subroutine bHYPRE_CGNR_Create_f(mpi_comm, A, retval, exception)

@@ -84,6 +84,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create[]
+C        This function is the preferred way to create a SStruct Stencil. 
 C       
 
         subroutine bHYPRE_SStructStencil_Create_f(ndim, size, retval,

@@ -15,8 +15,6 @@
  * Objects of this type can be cast to Solver objects
  * using the {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * The StructPFMG solver requires a Struct matrix.
  */
 
@@ -539,7 +537,7 @@ SIDLFortran77Symbol(bhypre_structpfmg__set_hooks_static_f,BHYPRE_STRUCTPFMG__SET
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct PFMG solver. 
  */
 
 void

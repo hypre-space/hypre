@@ -531,7 +531,7 @@ SIDLFortran77Symbol(bhypre_sstructdiagscale__set_hooks_static_f,BHYPRE_SSTRUCTDI
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct DiagScale solver. 
  */
 
 void

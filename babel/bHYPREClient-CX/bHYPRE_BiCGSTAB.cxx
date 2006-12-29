@@ -2450,8 +2450,9 @@ bHYPRE::BiCGSTAB::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a BiCGSTAB solver. 
  */
 ::bHYPRE::BiCGSTAB
 bHYPRE::BiCGSTAB::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

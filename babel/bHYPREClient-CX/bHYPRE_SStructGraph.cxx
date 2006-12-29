@@ -1322,8 +1322,9 @@ bHYPRE::SStructGraph::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a SStruct Graph. 
  */
 ::bHYPRE::SStructGraph
 bHYPRE::SStructGraph::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

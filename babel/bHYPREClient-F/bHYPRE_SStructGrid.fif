@@ -83,8 +83,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create[]
-C       Set the number of dimensions {\tt ndim} and the number of
-C       structured parts {\tt nparts}.
+C        This function is the preferred way to create a SStruct Grid. 
 C       
 
         subroutine bHYPRE_SStructGrid_Create_f(mpi_comm, ndim, nparts,
@@ -370,6 +369,7 @@ C        in rarray<int> num_ghost(dim2)
 
 C       
 C       Method:  Assemble[]
+C        final construction of the object before its use 
 C       
 
         subroutine bHYPRE_SStructGrid_Assemble_f(self, retval,

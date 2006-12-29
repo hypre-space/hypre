@@ -88,6 +88,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create[]
+C        This function is the preferred way to create a SStruct ParCSR Matrix. 
 C       
 
         subroutine bHYPRE_SStructParCSRMatrix_Create_f(mpi_comm, graph,

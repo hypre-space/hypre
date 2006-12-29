@@ -56,8 +56,6 @@
  * \item[NumSweeps] ({\tt Int}) - number of sweeps for fine grid, up and
  * down cycle.
  * 
- * \item[Cycle0NumSweeps] ({\tt Int}) - number of sweeps for fine grid
- * 
  * \item[Cycle1NumSweeps] ({\tt Int}) - number of sweeps for down cycle
  * 
  * \item[Cycle2NumSweeps] ({\tt Int}) - number of sweeps for up cycle
@@ -70,8 +68,6 @@
  * 
  * \item[RelaxType] ({\tt Int}) - type of smoother for fine grid, up and
  * down cycle.
- * 
- * \item[Cycle0RelaxType] ({\tt Int}) - type of smoother for fine grid
  * 
  * \item[Cycle1RelaxType] ({\tt Int}) - type of smoother for down cycle
  * 
@@ -104,7 +100,7 @@
  * complex smoothers.
  * 
  * \item[PrintFileName] ({\tt String}) - name of file printed to in
- * association with {\tt SetPrintLevel}.  (not yet implemented).
+ * association with {\tt SetPrintLevel}.
  * 
  * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
  * (when using the systems version).
@@ -121,7 +117,51 @@
  * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
  * for additive Schwarz.
  * 
+ * \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
+ * is used as a solver; ignored if this is used as a preconditioner
+ * 
  * \item[DebugFlag] ({\tt Int}) -
+ * 
+ * \item[InterpType] ({\tt Int}) - Defines which parallel interpolation
+ * operator is used. There are the following options for interp\_type: 
+ * 
+ * \begin{tabular}{|c|l|} \hline
+ * 0 &	classical modified interpolation \\
+ * 1 &	LS interpolation (for use with GSMG) \\
+ * 2 &	classical modified interpolation for hyperbolic PDEs \\
+ * 3 &	direct interpolation (with separation of weights) \\
+ * 4 &	multipass interpolation \\
+ * 5 &	multipass interpolation (with separation of weights) \\
+ * 6 &  extended classical modified interpolation \\
+ * 7 &  extended (if no common C neighbor) classical modified interpolation \\
+ * 8 &	standard interpolation \\
+ * 9 &	standard interpolation (with separation of weights) \\
+ * 10 &	classical block interpolation (for use with nodal systems version only) \\
+ * 11 &	classical block interpolation (for use with nodal systems version only) \\
+ * &	with diagonalized diagonal blocks \\
+ * 12 &	FF interpolation \\
+ * 13 &	FF1 interpolation \\
+ * \hline
+ * \end{tabular}
+ * 
+ * The default is 0. 
+ * 
+ * \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
+ * in GSMG or LS interpolation.
+ * 
+ * \item[MaxIterations] ({\tt Int}) - maximum number of iterations
+ * 
+ * \item[Logging] ({\tt Int}) - Set the {\it logging level}, specifying the
+ * degree of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
+ * \item[PrintLevel] ({\tt Int}) - Set the {\it print level}, specifying the
+ * degree of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
  * 
  * \end{description}
  * 
@@ -3074,7 +3114,9 @@ RETURNS\n\
    (bHYPRE.BoomerAMG _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a BoomerAMG solver. "
    },
   { "_connect", (PyCFunction)pStub_BoomerAMG__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -3250,8 +3292,6 @@ Use NumSweeps or Cycle?NumSweeps instead.\n\
 \\item[NumSweeps] ({\\tt Int}) - number of sweeps for fine grid, up and\n\
 down cycle.\n\
 \n\
-\\item[Cycle0NumSweeps] ({\\tt Int}) - number of sweeps for fine grid\n\
-\n\
 \\item[Cycle1NumSweeps] ({\\tt Int}) - number of sweeps for down cycle\n\
 \n\
 \\item[Cycle2NumSweeps] ({\\tt Int}) - number of sweeps for up cycle\n\
@@ -3264,8 +3304,6 @@ Use RelaxType or Cycle?RelaxType instead.\n\
 \n\
 \\item[RelaxType] ({\\tt Int}) - type of smoother for fine grid, up and\n\
 down cycle.\n\
-\n\
-\\item[Cycle0RelaxType] ({\\tt Int}) - type of smoother for fine grid\n\
 \n\
 \\item[Cycle1RelaxType] ({\\tt Int}) - type of smoother for down cycle\n\
 \n\
@@ -3298,7 +3336,7 @@ complex smoothers.\n\
 complex smoothers.\n\
 \n\
 \\item[PrintFileName] ({\\tt String}) - name of file printed to in\n\
-association with {\\tt SetPrintLevel}.  (not yet implemented).\n\
+association with {\\tt SetPrintLevel}.\n\
 \n\
 \\item[NumFunctions] ({\\tt Int}) - size of the system of PDEs\n\
 (when using the systems version).\n\
@@ -3315,7 +3353,51 @@ function to each variable (when using the systems version).\n\
 \\item[SchwarzRlxWeight] ({\\tt Double}) - the smoothing parameter\n\
 for additive Schwarz.\n\
 \n\
+\\item[Tolerance] ({\\tt Double}) - convergence tolerance, if this\n\
+is used as a solver; ignored if this is used as a preconditioner\n\
+\n\
 \\item[DebugFlag] ({\\tt Int}) -\n\
+\n\
+\\item[InterpType] ({\\tt Int}) - Defines which parallel interpolation\n\
+operator is used. There are the following options for interp\\_type: \n\
+\n\
+\\begin{tabular}{|c|l|} \\hline\n\
+0 &\tclassical modified interpolation \\\\\n\
+1 &\tLS interpolation (for use with GSMG) \\\\\n\
+2 &\tclassical modified interpolation for hyperbolic PDEs \\\\\n\
+3 &\tdirect interpolation (with separation of weights) \\\\\n\
+4 &\tmultipass interpolation \\\\\n\
+5 &\tmultipass interpolation (with separation of weights) \\\\\n\
+6 &  extended classical modified interpolation \\\\\n\
+7 &  extended (if no common C neighbor) classical modified interpolation \\\\\n\
+8 &\tstandard interpolation \\\\\n\
+9 &\tstandard interpolation (with separation of weights) \\\\\n\
+10 &\tclassical block interpolation (for use with nodal systems version only) \\\\\n\
+11 &\tclassical block interpolation (for use with nodal systems version only) \\\\\n\
+&\twith diagonalized diagonal blocks \\\\\n\
+12 &\tFF interpolation \\\\\n\
+13 &\tFF1 interpolation \\\\\n\
+\\hline\n\
+\\end{tabular}\n\
+\n\
+The default is 0. \n\
+\n\
+\\item[NumSamples] ({\\tt Int}) - Defines the number of sample vectors used\n\
+in GSMG or LS interpolation.\n\
+\n\
+\\item[MaxIterations] ({\\tt Int}) - maximum number of iterations\n\
+\n\
+\\item[Logging] ({\\tt Int}) - Set the {\\it logging level}, specifying the\n\
+degree of additional informational data to be accumulated.  Does\n\
+nothing by default (level = 0).  Other levels (if any) are\n\
+implementation-specific.  Must be called before {\\tt Setup}\n\
+and {\\tt Apply}.\n\
+\n\
+\\item[PrintLevel] ({\\tt Int}) - Set the {\\it print level}, specifying the\n\
+degree of informational data to be printed either to the screen or\n\
+to a file.  Does nothing by default (level=0).  Other levels\n\
+(if any) are implementation-specific.  Must be called before\n\
+{\\tt Setup} and {\\tt Apply}.\n\
 \n\
 \\end{description}\n\
 \n\
@@ -3593,8 +3675,6 @@ Use NumSweeps or Cycle?NumSweeps instead.\n\
 \\item[NumSweeps] ({\\tt Int}) - number of sweeps for fine grid, up and\n\
 down cycle.\n\
 \n\
-\\item[Cycle0NumSweeps] ({\\tt Int}) - number of sweeps for fine grid\n\
-\n\
 \\item[Cycle1NumSweeps] ({\\tt Int}) - number of sweeps for down cycle\n\
 \n\
 \\item[Cycle2NumSweeps] ({\\tt Int}) - number of sweeps for up cycle\n\
@@ -3607,8 +3687,6 @@ Use RelaxType or Cycle?RelaxType instead.\n\
 \n\
 \\item[RelaxType] ({\\tt Int}) - type of smoother for fine grid, up and\n\
 down cycle.\n\
-\n\
-\\item[Cycle0RelaxType] ({\\tt Int}) - type of smoother for fine grid\n\
 \n\
 \\item[Cycle1RelaxType] ({\\tt Int}) - type of smoother for down cycle\n\
 \n\
@@ -3641,7 +3719,7 @@ complex smoothers.\n\
 complex smoothers.\n\
 \n\
 \\item[PrintFileName] ({\\tt String}) - name of file printed to in\n\
-association with {\\tt SetPrintLevel}.  (not yet implemented).\n\
+association with {\\tt SetPrintLevel}.\n\
 \n\
 \\item[NumFunctions] ({\\tt Int}) - size of the system of PDEs\n\
 (when using the systems version).\n\
@@ -3658,7 +3736,51 @@ function to each variable (when using the systems version).\n\
 \\item[SchwarzRlxWeight] ({\\tt Double}) - the smoothing parameter\n\
 for additive Schwarz.\n\
 \n\
+\\item[Tolerance] ({\\tt Double}) - convergence tolerance, if this\n\
+is used as a solver; ignored if this is used as a preconditioner\n\
+\n\
 \\item[DebugFlag] ({\\tt Int}) -\n\
+\n\
+\\item[InterpType] ({\\tt Int}) - Defines which parallel interpolation\n\
+operator is used. There are the following options for interp\\_type: \n\
+\n\
+\\begin{tabular}{|c|l|} \\hline\n\
+0 &\tclassical modified interpolation \\\\\n\
+1 &\tLS interpolation (for use with GSMG) \\\\\n\
+2 &\tclassical modified interpolation for hyperbolic PDEs \\\\\n\
+3 &\tdirect interpolation (with separation of weights) \\\\\n\
+4 &\tmultipass interpolation \\\\\n\
+5 &\tmultipass interpolation (with separation of weights) \\\\\n\
+6 &  extended classical modified interpolation \\\\\n\
+7 &  extended (if no common C neighbor) classical modified interpolation \\\\\n\
+8 &\tstandard interpolation \\\\\n\
+9 &\tstandard interpolation (with separation of weights) \\\\\n\
+10 &\tclassical block interpolation (for use with nodal systems version only) \\\\\n\
+11 &\tclassical block interpolation (for use with nodal systems version only) \\\\\n\
+&\twith diagonalized diagonal blocks \\\\\n\
+12 &\tFF interpolation \\\\\n\
+13 &\tFF1 interpolation \\\\\n\
+\\hline\n\
+\\end{tabular}\n\
+\n\
+The default is 0. \n\
+\n\
+\\item[NumSamples] ({\\tt Int}) - Defines the number of sample vectors used\n\
+in GSMG or LS interpolation.\n\
+\n\
+\\item[MaxIterations] ({\\tt Int}) - maximum number of iterations\n\
+\n\
+\\item[Logging] ({\\tt Int}) - Set the {\\it logging level}, specifying the\n\
+degree of additional informational data to be accumulated.  Does\n\
+nothing by default (level = 0).  Other levels (if any) are\n\
+implementation-specific.  Must be called before {\\tt Setup}\n\
+and {\\tt Apply}.\n\
+\n\
+\\item[PrintLevel] ({\\tt Int}) - Set the {\\it print level}, specifying the\n\
+degree of informational data to be printed either to the screen or\n\
+to a file.  Does nothing by default (level=0).  Other levels\n\
+(if any) are implementation-specific.  Must be called before\n\
+{\\tt Setup} and {\\tt Apply}.\n\
 \n\
 \\end{description}\n\
 \n\

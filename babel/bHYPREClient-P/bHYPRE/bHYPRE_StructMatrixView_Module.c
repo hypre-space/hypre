@@ -2450,7 +2450,18 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set matrix values throughout a box in the grid, specified by its lower\n\
+and upper corners.  You can supply these values for one or more positions\n\
+in the stencil.  Thus the total number of matrix values you supply,\n\
+\"nvalues\", is num_stencil_indices x box_size, where box_size is the\n\
+number of grid points in the box.  The values array should be organized\n\
+so all values for a given box point are together (i.e., the stencil\n\
+index is the most rapidly varying).\n\
+\"ilower\" and \"iupper\" are arrays of size \"dim\", \"stencil_indices\" is an\n\
+array of size \"num_stencil_indices\", and \"values\" is an array of size\n\
+\"nvalues\". "
    },
   { "SetConstantEntries",                                                     \
     (PyCFunction)pStub_StructMatrixView_SetConstantEntries,
@@ -2461,7 +2472,12 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ State which stencil entries are constant over the grid.\n\
+Supported options are: (i) none (the default),\n\
+(ii) all (stencil_constant_points should include all stencil points)\n\
+(iii) all entries but the diagonal. "
    },
   { "SetConstantValues",                                                      \
     (PyCFunction)pStub_StructMatrixView_SetConstantValues,
@@ -2473,7 +2489,12 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Provide values for matrix coefficients which are constant throughout\n\
+the grid, one value for each stencil point.\n\
+\"stencil_indices\" and \"values\" is each an array of length\n\
+\"num_stencil_indices\" "
    },
   { "SetGrid", (PyCFunction)pStub_StructMatrixView_SetGrid,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2483,7 +2504,10 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the grid on which vectors are defined.  This and the stencil\n\
+determine the matrix structure. "
    },
   { "SetNumGhost", (PyCFunction)pStub_StructMatrixView_SetNumGhost,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2493,7 +2517,11 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the number of ghost zones, separately on the lower and upper sides\n\
+for each dimension.\n\
+\"num_ghost\" is an array of size \"dim2\", twice the number of dimensions"
    },
   { "SetStencil", (PyCFunction)pStub_StructMatrixView_SetStencil,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2503,7 +2531,9 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the stencil. This and the grid determine the matrix structure. "
    },
   { "SetSymmetric", (PyCFunction)pStub_StructMatrixView_SetSymmetric,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2513,7 +2543,10 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Call SetSymmetric with symmetric=1 to turn on symmetric matrix storage if\n\
+available. "
    },
   { "SetValues", (PyCFunction)pStub_StructMatrixView_SetValues,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2525,7 +2558,12 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set matrix values at grid point, given by \"index\".\n\
+You can supply values for one or more positions in the stencil.\n\
+\"index\" is an array of size \"dim\"; and \"stencil_indices\" and \"values\"\n\
+are arrays of size \"num_stencil_indices\"."
    },
   { "_exec", (PyCFunction)pStub_StructMatrixView__exec,
   (METH_VARARGS | METH_KEYWORDS),

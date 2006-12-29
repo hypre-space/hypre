@@ -85,8 +85,6 @@ namespace bHYPRE {
    * Objects of this type can be cast to Solver objects using the
    * {\tt \_\_cast} methods.
    * 
-   * RDF: Documentation goes here.
-   * 
    * Pilut has not been implemented yet.
    */
   class Pilut: public virtual ::bHYPRE::Solver,
@@ -112,8 +110,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a Pilut solver. 
      */
     static ::bHYPRE::Pilut
     Create (

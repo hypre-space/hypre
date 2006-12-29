@@ -1002,8 +1002,11 @@ bHYPRE::StructStencil::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a Struct Stencil.
+ * You provide the number of spatial dimensions and the number of
+ * stencil entries.  
  */
 ::bHYPRE::StructStencil
 bHYPRE::StructStencil::Create( /* in */int32_t ndim, /* in */int32_t size )
@@ -1047,8 +1050,9 @@ bHYPRE::StructStencil::Destroy(  )
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the number of dimensions.  DEPRECATED, use StructStencilCreate 
  */
 int32_t
 bHYPRE::StructStencil::SetDimension( /* in */int32_t dim )
@@ -1069,8 +1073,10 @@ bHYPRE::StructStencil::SetDimension( /* in */int32_t dim )
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the number of stencil entries.
+ * DEPRECATED, use StructStencilCreate 
  */
 int32_t
 bHYPRE::StructStencil::SetSize( /* in */int32_t size )
@@ -1091,8 +1097,11 @@ bHYPRE::StructStencil::SetSize( /* in */int32_t size )
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set a stencil element.  Specify the stencil index, and an array of
+ * offsets.  "offset" is an array of length "dim", the number of spatial
+ * dimensions. 
  */
 int32_t
 bHYPRE::StructStencil::SetElement( /* in */int32_t index,
@@ -1120,8 +1129,11 @@ bHYPRE::StructStencil::SetElement( /* in */int32_t index,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set a stencil element.  Specify the stencil index, and an array of
+ * offsets.  "offset" is an array of length "dim", the number of spatial
+ * dimensions. 
  */
 int32_t
 bHYPRE::StructStencil::SetElement( /* in */int32_t index,

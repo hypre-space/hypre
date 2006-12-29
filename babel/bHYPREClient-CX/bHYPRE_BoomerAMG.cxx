@@ -2295,8 +2295,9 @@ bHYPRE::BoomerAMG::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a BoomerAMG solver. 
  */
 ::bHYPRE::BoomerAMG
 bHYPRE::BoomerAMG::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

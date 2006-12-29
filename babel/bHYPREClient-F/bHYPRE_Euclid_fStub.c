@@ -15,7 +15,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
  * Although the usual Solver SetParameter functions are available,
  * a Euclid-stype parameter-setting function is also available, SetParameters.
  */
@@ -537,7 +536,7 @@ SIDLFortran77Symbol(bhypre_euclid__set_hooks_static_f,BHYPRE_EUCLID__SET_HOOKS_S
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Euclid solver. 
  */
 
 void

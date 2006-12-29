@@ -1306,8 +1306,9 @@ bHYPRE::StructVectorView::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined non-static method.
+ *  Set the grid on which vectors are defined. 
  */
 int32_t
 bHYPRE::StructVectorView::SetGrid( /* in */::bHYPRE::StructGrid grid )
@@ -1332,8 +1333,11 @@ bHYPRE::StructVectorView::SetGrid( /* in */::bHYPRE::StructGrid grid )
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
  */
 int32_t
 bHYPRE::StructVectorView::SetNumGhost( /* in rarray[dim2] */int32_t* num_ghost,
@@ -1364,8 +1368,11 @@ bHYPRE::StructVectorView::SetNumGhost( /* in rarray[dim2] */int32_t* num_ghost,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
  */
 int32_t
 bHYPRE::StructVectorView::SetNumGhost( /* in rarray[dim2] 
@@ -1390,8 +1397,11 @@ bHYPRE::StructVectorView::SetNumGhost( /* in rarray[dim2]
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the value of a single vector coefficient, given by "grid_index".
+ * "grid_index" is an array of size "dim", where dim is the number
+ * of dimensions. 
  */
 int32_t
 bHYPRE::StructVectorView::SetValue( /* in rarray[dim] */int32_t* grid_index,
@@ -1422,8 +1432,11 @@ bHYPRE::StructVectorView::SetValue( /* in rarray[dim] */int32_t* grid_index,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the value of a single vector coefficient, given by "grid_index".
+ * "grid_index" is an array of size "dim", where dim is the number
+ * of dimensions. 
  */
 int32_t
 bHYPRE::StructVectorView::SetValue( /* in rarray[dim] */::sidl::array<int32_t> 
@@ -1448,8 +1461,13 @@ bHYPRE::StructVectorView::SetValue( /* in rarray[dim] */::sidl::array<int32_t>
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the values of all vector coefficient for grid points in a box.
+ * The box is defined by its lower and upper corners in the grid.
+ * "ilower" and "iupper" are arrays of size "dim", where dim is the
+ * number of dimensions.  The "values" array has size "nvalues", which
+ * is the number of grid points in the box. 
  */
 int32_t
 bHYPRE::StructVectorView::SetBoxValues( /* in rarray[dim] */int32_t* ilower,
@@ -1494,8 +1512,13 @@ bHYPRE::StructVectorView::SetBoxValues( /* in rarray[dim] */int32_t* ilower,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the values of all vector coefficient for grid points in a box.
+ * The box is defined by its lower and upper corners in the grid.
+ * "ilower" and "iupper" are arrays of size "dim", where dim is the
+ * number of dimensions.  The "values" array has size "nvalues", which
+ * is the number of grid points in the box. 
  */
 int32_t
 bHYPRE::StructVectorView::SetBoxValues( /* in rarray[dim] 

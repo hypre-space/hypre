@@ -35,6 +35,10 @@ extern "C" {
 
 /*
  * Symbol "bHYPRE.PCG" (version 1.0.0)
+ * 
+ * PCG solver.
+ * This calls Babel-interface matrix and vector functions, so it will work
+ * with any consistent matrix, vector, and preconditioner classes.
  */
 
 struct bHYPRE_PCG__array;

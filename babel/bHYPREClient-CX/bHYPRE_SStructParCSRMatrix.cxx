@@ -2683,8 +2683,9 @@ bHYPRE::SStructParCSRMatrix::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a SStruct ParCSR Matrix. 
  */
 ::bHYPRE::SStructParCSRMatrix
 bHYPRE::SStructParCSRMatrix::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

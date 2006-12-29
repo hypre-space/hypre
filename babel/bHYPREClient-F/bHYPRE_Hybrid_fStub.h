@@ -17,9 +17,7 @@
  * 
  * Hybrid solver
  * first tries to solve with the specified Krylov solver, preconditioned by
- * diagonal scaling (this combination is the "first solver")
  * If that fails to converge, it will try again with the user-specified
- * preconditioner (this combination is the "second solver").
  * 
  * Specify the preconditioner  by calling SecondSolver's SetPreconditioner
  * method.  If no preconditioner is specified (equivalently, if the

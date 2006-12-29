@@ -22,6 +22,10 @@
 
 /**
  * Symbol "bHYPRE.PCG" (version 1.0.0)
+ * 
+ * PCG solver.
+ * This calls Babel-interface matrix and vector functions, so it will work
+ * with any consistent matrix, vector, and preconditioner classes.
  */
 #include <Python.h>
 #include <stdlib.h>
@@ -2951,7 +2955,9 @@ RETURNS\n\
    (bHYPRE.PCG _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a PCG solver. "
    },
   { "_connect", (PyCFunction)pStub_PCG__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -3067,8 +3073,10 @@ static PyTypeObject _bHYPRE_PCGType = {
   0,      /* tp_as_buffer */
   Py_TPFLAGS_DEFAULT, /* tp_flags */
   "\
-SIDL wrapper for the bHYPRE.PCG type.\
-", /* tp_doc */
+\
+PCG solver.\n\
+This calls Babel-interface matrix and vector functions, so it will work\n\
+with any consistent matrix, vector, and preconditioner classes.", /* tp_doc */
   0,      /* tp_traverse */
   0,       /* tp_clear */
   0,       /* tp_richcompare */
@@ -3294,7 +3302,12 @@ initPCG(void) {
   struct sidl_BaseInterface__object *throwaway_exception;
   sidl_DLL dll = NULL;
   struct bHYPRE_PCG__external*(*_extFunc)(void) = NULL;
-  module = Py_InitModule("PCG", _PCGModuleMethods);
+  module = Py_InitModule3("PCG", _PCGModuleMethods, "\
+\
+PCG solver.\n\
+This calls Babel-interface matrix and vector functions, so it will work\n\
+with any consistent matrix, vector, and preconditioner classes."
+  );
   dict = PyModule_GetDict(module);
   ExternalAPI[bHYPRE_PCG__wrap_NUM] = (void*)bHYPRE_PCG__wrap;
   ExternalAPI[bHYPRE_PCG__convert_NUM] = (void*)bHYPRE_PCG__convert;

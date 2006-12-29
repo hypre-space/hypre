@@ -536,7 +536,7 @@ SIDLFortran77Symbol(bhypre_identitysolver__set_hooks_static_f,BHYPRE_IDENTITYSOL
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create an Identity (null) solver. 
  */
 
 void

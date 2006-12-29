@@ -2171,8 +2171,9 @@ bHYPRE::ParaSails::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a ParaSails solver. 
  */
 ::bHYPRE::ParaSails
 bHYPRE::ParaSails::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

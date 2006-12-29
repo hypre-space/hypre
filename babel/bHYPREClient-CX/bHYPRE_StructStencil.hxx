@@ -91,8 +91,11 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a Struct Stencil.
+     * You provide the number of spatial dimensions and the number of
+     * stencil entries.  
      */
     static ::bHYPRE::StructStencil
     Create (
@@ -112,8 +115,9 @@ namespace bHYPRE {
     void
     Destroy() ;
 
+
     /**
-     * user defined non-static method
+     *  Set the number of dimensions.  DEPRECATED, use StructStencilCreate 
      */
     int32_t
     SetDimension (
@@ -122,8 +126,10 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the number of stencil entries.
+     * DEPRECATED, use StructStencilCreate 
      */
     int32_t
     SetSize (
@@ -132,8 +138,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set a stencil element.  Specify the stencil index, and an array of
+     * offsets.  "offset" is an array of length "dim", the number of spatial
+     * dimensions. 
      */
     int32_t
     SetElement (
@@ -144,8 +153,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set a stencil element.  Specify the stencil index, and an array of
+     * offsets.  "offset" is an array of length "dim", the number of spatial
+     * dimensions. 
      */
     int32_t
     SetElement (

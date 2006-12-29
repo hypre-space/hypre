@@ -90,7 +90,7 @@ namespace bHYPRE {
 
     /**
      * The Check method will return nonzero when the error flag ierr
-     * includes an error of type error_code; and zero otherwise.
+     * includes an error of type error\_code; and zero otherwise.
      */
     static int32_t
     Check (
@@ -102,7 +102,6 @@ namespace bHYPRE {
 
 
     /**
-     * The Describe method will return a string describing the errors
      * included in the error flag ierr.
      */
     static void

@@ -544,7 +544,7 @@ SIDLFortran77Symbol(bhypre_sstructvector__set_hooks_static_f,BHYPRE_SSTRUCTVECTO
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct Vector. 
  */
 
 void

@@ -56,6 +56,8 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  SetGrid[]
+C        Set the grid on which vectors are defined.  This and the stencil
+C       determine the matrix structure. 
 C       
 
         subroutine bHYPRE_StructMatrixView_SetGrid_f(self, grid, retval,
@@ -74,6 +76,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  SetStencil[]
+C        Set the stencil. This and the grid determine the matrix structure. 
 C       
 
         subroutine bHYPRE_StructMatrixView_SetStencil_f(self, stencil,
@@ -92,6 +95,10 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  SetValues[]
+C        Set matrix values at grid point, given by "index".
+C       You can supply values for one or more positions in the stencil.
+C       "index" is an array of size "dim"; and "stencil_indices" and "values"
+C       are arrays of size "num_stencil_indices".
 C       
 
         subroutine bHYPRE_StructMatrixView_SetValues_f(self, index, dim,
@@ -119,6 +126,16 @@ C        in rarray<double> values(num_stencil_indices)
 
 C       
 C       Method:  SetBoxValues[]
+C        Set matrix values throughout a box in the grid, specified by its lower
+C       and upper corners.  You can supply these values for one or more positions
+C       in the stencil.  Thus the total number of matrix values you supply,
+C       "nvalues", is num_stencil_indices x box_size, where box_size is the
+C       number of grid points in the box.  The values array should be organized
+C       so all values for a given box point are together (i.e., the stencil
+C       index is the most rapidly varying).
+C       "ilower" and "iupper" are arrays of size "dim", "stencil_indices" is an
+C       array of size "num_stencil_indices", and "values" is an array of size
+C       "nvalues". 
 C       
 
         subroutine bHYPRE_StructMatrixView_SetBoxValues_f(self, ilower,
@@ -150,6 +167,9 @@ C        in rarray<double> values(nvalues)
 
 C       
 C       Method:  SetNumGhost[]
+C        Set the number of ghost zones, separately on the lower and upper sides
+C       for each dimension.
+C       "num_ghost" is an array of size "dim2", twice the number of dimensions
 C       
 
         subroutine bHYPRE_StructMatrixView_SetNumGhost_f(self,
@@ -170,6 +190,8 @@ C        in rarray<int> num_ghost(dim2)
 
 C       
 C       Method:  SetSymmetric[]
+C        Call SetSymmetric with symmetric=1 to turn on symmetric matrix storage if
+C       available. 
 C       
 
         subroutine bHYPRE_StructMatrixView_SetSymmetric_f(self,
@@ -188,6 +210,10 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  SetConstantEntries[]
+C        State which stencil entries are constant over the grid.
+C       Supported options are: (i) none (the default),
+C       (ii) all (stencil_constant_points should include all stencil points)
+C       (iii) all entries but the diagonal. 
 C       
 
         subroutine bHYPRE_StructMatrixView_SetConstantEntries_f(self,
@@ -210,6 +236,10 @@ C        in rarray<int> stencil_constant_points(num_stencil_constant_points)
 
 C       
 C       Method:  SetConstantValues[]
+C        Provide values for matrix coefficients which are constant throughout
+C       the grid, one value for each stencil point.
+C       "stencil_indices" and "values" is each an array of length
+C       "num_stencil_indices" 
 C       
 
         subroutine bHYPRE_StructMatrixView_SetConstantValues_f(self,

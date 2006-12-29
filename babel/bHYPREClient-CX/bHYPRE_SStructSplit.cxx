@@ -2175,8 +2175,9 @@ bHYPRE::SStructSplit::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a SStruct Split solver. 
  */
 ::bHYPRE::SStructSplit
 bHYPRE::SStructSplit::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

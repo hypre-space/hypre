@@ -132,7 +132,7 @@ bHYPRE_StructPFMG__connect(const char* url, sidl_BaseInterface *_ex)
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct PFMG solver. 
  */
 
 bHYPRE_StructPFMG

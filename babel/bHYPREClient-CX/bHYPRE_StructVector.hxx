@@ -108,8 +108,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a Struct Vector. 
      */
     static ::bHYPRE::StructVector
     Create (
@@ -119,8 +120,9 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the grid on which vectors are defined. 
      */
     int32_t
     SetGrid (
@@ -129,8 +131,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the number of ghost zones, separately on the lower and upper sides
+     * for each dimension.
+     * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
      */
     int32_t
     SetNumGhost (
@@ -140,8 +145,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the number of ghost zones, separately on the lower and upper sides
+     * for each dimension.
+     * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
      */
     int32_t
     SetNumGhost (
@@ -150,8 +158,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the value of a single vector coefficient, given by "grid_index".
+     * "grid_index" is an array of size "dim", where dim is the number
+     * of dimensions. 
      */
     int32_t
     SetValue (
@@ -162,8 +173,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the value of a single vector coefficient, given by "grid_index".
+     * "grid_index" is an array of size "dim", where dim is the number
+     * of dimensions. 
      */
     int32_t
     SetValue (
@@ -173,8 +187,13 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the values of all vector coefficient for grid points in a box.
+     * The box is defined by its lower and upper corners in the grid.
+     * "ilower" and "iupper" are arrays of size "dim", where dim is the
+     * number of dimensions.  The "values" array has size "nvalues", which
+     * is the number of grid points in the box. 
      */
     int32_t
     SetBoxValues (
@@ -187,8 +206,13 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the values of all vector coefficient for grid points in a box.
+     * The box is defined by its lower and upper corners in the grid.
+     * "ilower" and "iupper" are arrays of size "dim", where dim is the
+     * number of dimensions.  The "values" array has size "nvalues", which
+     * is the number of grid points in the box. 
      */
     int32_t
     SetBoxValues (

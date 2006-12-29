@@ -22,6 +22,20 @@
 
 /**
  * Symbol "bHYPRE.HGMRES" (version 1.0.0)
+ * 
+ * Objects of this type can be cast to PreconditionedSolver objects
+ * using the {\tt \_\_cast} methods.
+ * 
+ * The regular GMRES solver calls Babel-interface matrix and vector functions.
+ * The HGMRES solver calls HYPRE interface functions.
+ * The regular solver will work with any consistent matrix, vector, and
+ * preconditioner classes.  The HGMRES solver will work with the more common ones.
+ * 
+ * The HGMRES solver checks whether the matrix, vectors, and preconditioner
+ * are of known types, and will not work with any other types.
+ * Presently, the recognized data types are:
+ * matrix, vector: IJParCSRMatrix, IJParCSRVector
+ * preconditioner: BoomerAMG, ParCSRDiagScale
  */
 #include <Python.h>
 #include <stdlib.h>
@@ -2953,7 +2967,9 @@ RETURNS\n\
    (bHYPRE.HGMRES _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a HGMRES solver. "
    },
   { "_connect", (PyCFunction)pStub_HGMRES__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -3069,8 +3085,20 @@ static PyTypeObject _bHYPRE_HGMRESType = {
   0,      /* tp_as_buffer */
   Py_TPFLAGS_DEFAULT, /* tp_flags */
   "\
-SIDL wrapper for the bHYPRE.HGMRES type.\
-", /* tp_doc */
+\
+Objects of this type can be cast to PreconditionedSolver objects\n\
+using the {\\tt \\_\\_cast} methods.\n\
+\n\
+The regular GMRES solver calls Babel-interface matrix and vector functions.\n\
+The HGMRES solver calls HYPRE interface functions.\n\
+The regular solver will work with any consistent matrix, vector, and\n\
+preconditioner classes.  The HGMRES solver will work with the more common ones.\n\
+\n\
+The HGMRES solver checks whether the matrix, vectors, and preconditioner\n\
+are of known types, and will not work with any other types.\n\
+Presently, the recognized data types are:\n\
+matrix, vector: IJParCSRMatrix, IJParCSRVector\n\
+preconditioner: BoomerAMG, ParCSRDiagScale", /* tp_doc */
   0,      /* tp_traverse */
   0,       /* tp_clear */
   0,       /* tp_richcompare */
@@ -3297,7 +3325,22 @@ initHGMRES(void) {
   struct sidl_BaseInterface__object *throwaway_exception;
   sidl_DLL dll = NULL;
   struct bHYPRE_HGMRES__external*(*_extFunc)(void) = NULL;
-  module = Py_InitModule("HGMRES", _HGMRESModuleMethods);
+  module = Py_InitModule3("HGMRES", _HGMRESModuleMethods, "\
+\
+Objects of this type can be cast to PreconditionedSolver objects\n\
+using the {\\tt \\_\\_cast} methods.\n\
+\n\
+The regular GMRES solver calls Babel-interface matrix and vector functions.\n\
+The HGMRES solver calls HYPRE interface functions.\n\
+The regular solver will work with any consistent matrix, vector, and\n\
+preconditioner classes.  The HGMRES solver will work with the more common ones.\n\
+\n\
+The HGMRES solver checks whether the matrix, vectors, and preconditioner\n\
+are of known types, and will not work with any other types.\n\
+Presently, the recognized data types are:\n\
+matrix, vector: IJParCSRMatrix, IJParCSRVector\n\
+preconditioner: BoomerAMG, ParCSRDiagScale"
+  );
   dict = PyModule_GetDict(module);
   ExternalAPI[bHYPRE_HGMRES__wrap_NUM] = (void*)bHYPRE_HGMRES__wrap;
   ExternalAPI[bHYPRE_HGMRES__convert_NUM] = (void*)bHYPRE_HGMRES__convert;

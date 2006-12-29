@@ -26,7 +26,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
  * Although the usual Solver SetParameter functions are available,
  * a Euclid-stype parameter-setting function is also available, SetParameters.
  */
@@ -2812,7 +2811,9 @@ RETURNS\n\
    (bHYPRE.Euclid _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a Euclid solver. "
    },
   { "_connect", (PyCFunction)pStub_Euclid__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2944,7 +2945,6 @@ static PyTypeObject _bHYPRE_EuclidType = {
 Objects of this type can be cast to Solver objects using the\n\
 {\\tt \\_\\_cast} methods.\n\
 \n\
-RDF: Documentation goes here.\n\
 Although the usual Solver SetParameter functions are available,\n\
 a Euclid-stype parameter-setting function is also available, SetParameters.", /* tp_doc */
   0,      /* tp_traverse */
@@ -3178,7 +3178,6 @@ initEuclid(void) {
 Objects of this type can be cast to Solver objects using the\n\
 {\\tt \\_\\_cast} methods.\n\
 \n\
-RDF: Documentation goes here.\n\
 Although the usual Solver SetParameter functions are available,\n\
 a Euclid-stype parameter-setting function is also available, SetParameters."
   );

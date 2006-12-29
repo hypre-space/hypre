@@ -520,7 +520,9 @@ SIDLFortran77Symbol(bhypre_structstencil__set_hooks_static_f,BHYPRE_STRUCTSTENCI
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct Stencil.
+ * You provide the number of spatial dimensions and the number of
+ * stencil entries.  
  */
 
 void
@@ -584,7 +586,7 @@ SIDLFortran77Symbol(bhypre_structstencil_destroy_f,BHYPRE_STRUCTSTENCIL_DESTROY_
 }
 
 /*
- * Method:  SetDimension[]
+ *  Set the number of dimensions.  DEPRECATED, use StructStencilCreate 
  */
 
 void
@@ -618,7 +620,8 @@ SIDLFortran77Symbol(bhypre_structstencil_setdimension_f,BHYPRE_STRUCTSTENCIL_SET
 }
 
 /*
- * Method:  SetSize[]
+ *  Set the number of stencil entries.
+ * DEPRECATED, use StructStencilCreate 
  */
 
 void
@@ -652,7 +655,9 @@ SIDLFortran77Symbol(bhypre_structstencil_setsize_f,BHYPRE_STRUCTSTENCIL_SETSIZE_
 }
 
 /*
- * Method:  SetElement[]
+ *  Set a stencil element.  Specify the stencil index, and an array of
+ * offsets.  "offset" is an array of length "dim", the number of spatial
+ * dimensions. 
  */
 
 void

@@ -92,7 +92,7 @@ bHYPRE_SStructDiagScale
 bHYPRE_SStructDiagScale__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct DiagScale solver. 
  */
 bHYPRE_SStructDiagScale
 bHYPRE_SStructDiagScale_Create(
