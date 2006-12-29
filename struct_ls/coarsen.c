@@ -37,6 +37,9 @@ FILE      *file;
 static int debug_count = 0;
 #endif
 
+
+
+
 /*--------------------------------------------------------------------------
  * hypre_StructMapFineToCoarse
  *
@@ -142,12 +145,14 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    int               info_size, max_nentries;
    int               num_entries;
    int              *fids, *cids;
-   int               new_dist, max_distance;
+   hypre_Index       new_dist;
+   hypre_IndexRef    max_distance;
    int               proc, id;
    int               coarsen_factor, known;
    int               num, last_proc;
-   
-
+#if 0
+   hypre_StructAssumedPart *fap = NULL, *cap = NULL;
+#endif
    hypre_BoxManager   *fboxman, *cboxman;
 
    hypre_BoxManEntry *entries;
@@ -155,7 +160,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
      
    void               *entry_info = NULL;
  
-  
+
+
    /***get relevant information from the fine grid */
    fids = hypre_StructGridIDs(fgrid);
    fboxman = hypre_StructGridBoxMan(fgrid);
@@ -221,37 +227,34 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /***check the max_distance value of the fine grid to determine
        whether we will need to re-gather information in the
        assemble. If we need to re-gather, then the max_distance will
-       be set to 0.  Either way, we will create and populate the box
+       be set to (0,0,0).  Either way, we will create and populate the box
        manager with the information from the fine grid.
 
        Note: if all global info is already known for a 
-       grid, the we do not need to re-gathe regardless of the 
-       max_distance value. ****/
+       grid, the we do not need to re-gather regardless of the 
+       max_distance values. ****/
 
-   coarsen_factor = hypre_IndexD(stride,0);   
-   for (i = 1; i < dim; i++)
+
+   for (i = 0; i < dim; i++)
    {
-      coarsen_factor = hypre_max(hypre_IndexD(stride,i), coarsen_factor);
+      coarsen_factor = hypre_IndexD(stride,i); 
+      hypre_IndexD(new_dist, i) = hypre_IndexD(max_distance,i)/coarsen_factor;
    }
-   if (coarsen_factor) 
-      new_dist = max_distance/coarsen_factor;
-   else
-      new_dist = 0;
    
    hypre_BoxManGetAllGlobalKnown (fboxman, &known );
 
-   if ( new_dist >= 2 || known)  /* large enough  - don't need to re-gather*/
+
+   if ( hypre_IndexGTESize(new_dist, 2) || known)  /* large enough  - don't need to re-gather*/
    {
       /*** update new max distance value */  
-      if (known)
-         hypre_StructGridSetMaxDistance(cgrid, max_distance);
-      else
+      if (!known) /* only need to change if global info is not known*/
          hypre_StructGridSetMaxDistance(cgrid, new_dist);
    }
    else  /* not large enough - set max_distance to 0 - neighbor info
             will be collected during the assemble*/
    {
-      hypre_StructGridSetMaxDistance(cgrid, 0);
+      hypre_ClearIndex(new_dist);
+      hypre_StructGridSetMaxDistance(cgrid, new_dist);
    }
 
 
@@ -350,7 +353,22 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_BoxManSetIsEntriesSort(cboxman, 1 );
    
    hypre_BoxDestroy(new_box);
-      
+
+#if 0   
+   /* if there is an assumed partition in the fg, 
+      then coarsen those boxes as well and add to cg */
+    hypre_BoxManGetAssumedPartition ( fboxman, &fap);
+    
+    if (fap)
+    {
+       /* coarsen fap to get cap */ 
+
+       /* set cap */  
+       hypre_BoxManSetAssumedPartition (cboxman, cap);
+    }
+#endif
+
+   
    /* assign new box manager */
    hypre_StructGridSetBoxManager(cgrid, cboxman);
       
@@ -362,6 +380,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* return the coarse grid */   
    *cgrid_ptr = cgrid;
 
+  
    return hypre_error_flag;
 }
 
