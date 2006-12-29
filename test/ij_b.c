@@ -646,16 +646,12 @@ main( int   argc,
                                               "driver.out.log", &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "MaxIter", 1, &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "CycleType", clp->cycle_type, &_ex );
-         bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle0NumSweeps",
-                                           (clp->num_grid_sweeps)[0], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle1NumSweeps",
                                            (clp->num_grid_sweeps)[1], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle2NumSweeps",
                                            (clp->num_grid_sweeps)[2], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle3NumSweeps",
                                            (clp->num_grid_sweeps)[3], &_ex );
-         bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle0RelaxType",
-                                           (clp->grid_relax_type)[0], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle1RelaxType",
                                            (clp->grid_relax_type)[1], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle2RelaxType",
@@ -1067,16 +1063,12 @@ main( int   argc,
                                               "driver.out.log", &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "MaxIter", 1, &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "CycleType", clp->cycle_type, &_ex );
-         bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle0NumSweeps",
-                                           (clp->num_grid_sweeps)[0], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle1NumSweeps",
                                            (clp->num_grid_sweeps)[1], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle2NumSweeps",
                                            (clp->num_grid_sweeps)[2], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle3NumSweeps",
                                            (clp->num_grid_sweeps)[3], &_ex );
-         bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle0RelaxType",
-                                           (clp->grid_relax_type)[0], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle1RelaxType",
                                            (clp->grid_relax_type)[1], &_ex );
          bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle2RelaxType",
@@ -3515,16 +3507,12 @@ int Test_AMG( CommandLineParameters *clp, bHYPRE_IJParCSRMatrix bH_parcsr_A,
    bHYPRE_BoomerAMG_SetDoubleParameter( bH_AMG, "TruncFactor",
                                         clp->trunc_factor, &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "CycleType", clp->cycle_type, &_ex );
-   bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle0NumSweeps",
-                                     (clp->num_grid_sweeps)[0], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle1NumSweeps",
                                      (clp->num_grid_sweeps)[1], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle2NumSweeps",
                                      (clp->num_grid_sweeps)[2], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle3NumSweeps",
                                      (clp->num_grid_sweeps)[3], &_ex );
-   bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle0RelaxType",
-                                     (clp->grid_relax_type)[0], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle1RelaxType",
                                      (clp->grid_relax_type)[1], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle2RelaxType",
@@ -3630,16 +3618,12 @@ int PrecondAMG( CommandLineParameters *clp, int myid,
                                         "driver.out.log", &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "MaxIter", 1, &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "CycleType", clp->cycle_type, &_ex );
-   bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle0NumSweeps",
-                                     (clp->num_grid_sweeps)[0], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle1NumSweeps",
                                      (clp->num_grid_sweeps)[1], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle2NumSweeps",
                                      (clp->num_grid_sweeps)[2], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle3NumSweeps",
                                      (clp->num_grid_sweeps)[3], &_ex );
-   bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle0RelaxType",
-                                     (clp->grid_relax_type)[0], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle1RelaxType",
                                      (clp->grid_relax_type)[1], &_ex );
    bHYPRE_BoomerAMG_SetIntParameter( bH_AMG, "Cycle2RelaxType",
