@@ -54,6 +54,7 @@ misc. notes/considerations/open questions:
 #include "headers.h"
 
 
+
 /*--------------------------------------------------------------------------
  hypre_BoxManEntrySetInfo 
  *--------------------------------------------------------------------------*/
@@ -212,6 +213,35 @@ int hypre_BoxManGetIsEntriesSort ( hypre_BoxManager *manager , int *is_sort )
    
 }
 
+/*--------------------------------------------------------------------------
+  hypre_BoxManGetAssumedPartition
+ *--------------------------------------------------------------------------*/
+
+
+int hypre_BoxManGetAssumedPartition ( hypre_BoxManager *manager,  
+                                      hypre_StructAssumedPart **assumed_partition )
+{
+   
+   *assumed_partition = hypre_BoxManAssumedPartition(manager);
+   
+
+   return hypre_error_flag;
+   
+}
+/*--------------------------------------------------------------------------
+  hypre_BoxManSetAssumedPartition
+ *--------------------------------------------------------------------------*/
+
+
+int hypre_BoxManSetAssumedPartition ( hypre_BoxManager *manager,  
+                                      hypre_StructAssumedPart *assumed_partition )
+{
+   
+   hypre_BoxManAssumedPartition(manager) = assumed_partition;
+
+   return hypre_error_flag;
+   
+}
 
 
 /*--------------------------------------------------------------------------
@@ -1109,78 +1139,84 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
 
          hypre_IndexRef  min_ref, max_ref;
          
-         /* 1.  Need to create an assumed partition */   
+         /* 1.  Create an assumed partition? (may have been added in the coarsen routine) */   
 
-         /* create an array of local boxes.  get the global box size/volume
-            (as a double). */
-
-         local_boxes = hypre_BoxArrayCreate(num_my_entries);
-         local_boxnums = hypre_CTAlloc(int, num_my_entries);
-
-         local_volume = 0.0;
-         
-         for (i=0; i< num_my_entries; i++)
+         if (hypre_BoxManAssumedPartition(manager) == NULL)
          {
-            /* get entry */           
-            entry_ptr = my_entries[i];
-
-            /* copy box info to local_boxes */
-            min_ref = hypre_BoxManEntryIMin(entry_ptr);
-            max_ref =  hypre_BoxManEntryIMax(entry_ptr);
-            box = hypre_BoxArrayBox(local_boxes, i);
-            hypre_BoxSetExtents( box, min_ref, max_ref );
-
-            /* keep box num also */
-            local_boxnums[i] =   hypre_BoxManEntryId(entry_ptr);
-
-            /* calculate volume */ 
-            local_volume += (double) hypre_BoxVolume(box);
-  
             
-         }/* end of local boxes */
+            /* create an array of local boxes.  get the global box size/volume
+               (as a double). */
+
+            local_boxes = hypre_BoxArrayCreate(num_my_entries);
+            local_boxnums = hypre_CTAlloc(int, num_my_entries);
+            
+            local_volume = 0.0;
+         
+            for (i=0; i< num_my_entries; i++)
+            {
+               /* get entry */           
+               entry_ptr = my_entries[i];
+               
+               /* copy box info to local_boxes */
+               min_ref = hypre_BoxManEntryIMin(entry_ptr);
+               max_ref =  hypre_BoxManEntryIMax(entry_ptr);
+               box = hypre_BoxArrayBox(local_boxes, i);
+               hypre_BoxSetExtents( box, min_ref, max_ref );
+               
+               /* keep box num also */
+               local_boxnums[i] =   hypre_BoxManEntryId(entry_ptr);
+               
+               /* calculate volume */ 
+               local_volume += (double) hypre_BoxVolume(box);
+               
+               
+            }/* end of local boxes */
      
-         /* get the number of global entries and the global volume */
+            /* get the number of global entries and the global volume */
 
-         sendbuf2[0] = local_volume;
-         sendbuf2[1] = (double) num_my_entries;
+            sendbuf2[0] = local_volume;
+            sendbuf2[1] = (double) num_my_entries;
+            
+            MPI_Allreduce(&sendbuf2, &recvbuf2, 2, MPI_DOUBLE, MPI_SUM, comm);   
+            
+            global_volume = recvbuf2[0];
+            global_num_boxes = (int) recvbuf2[1];
+            
+            /* estimates for the assumed partition */ 
+            d = nprocs/2;
+            ologp = 0;
+            while ( d > 0)
+            {
+               d = d/2; /* note - d is an int - so this is floored */
+               ologp++;
+            }
+            
+            max_regions =  hypre_min(pow(2, ologp+1), 10*ologp);
+            max_refinements = ologp;
+            gamma = .6; /* percentage a region must be full to 
+                           avoid refinement */  
+            
+            
+            hypre_StructAssumedPartitionCreate(dim, 
+                                               hypre_BoxManBoundingBox(manager), 
+                                               global_volume, 
+                                               global_num_boxes,
+                                               local_boxes, local_boxnums,
+                                               max_regions, max_refinements, 
+                                               gamma,
+                                               comm, 
+                                               &ap);
          
-         MPI_Allreduce(&sendbuf2, &recvbuf2, 2, MPI_DOUBLE, MPI_SUM, comm);   
-          
-         global_volume = recvbuf2[0];
-         global_num_boxes = (int) recvbuf2[1];
+            
+            hypre_BoxManAssumedPartition(manager) = ap;
 
-         /* estimates for the assumed partition */ 
-         d = nprocs/2;
-         ologp = 0;
-         while ( d > 0)
-         {
-            d = d/2; /* note - d is an int - so this is floored */
-            ologp++;
+            hypre_BoxArrayDestroy(local_boxes);
+            hypre_TFree(local_boxnums);
          }
-         
-         max_regions =  hypre_min(pow(2, ologp+1), 10*ologp);
-         max_refinements = ologp;
-         gamma = .6; /* percentage a region must be full to 
-                   avoid refinement */  
-    
-
-         hypre_StructAssumedPartitionCreate(dim, 
-                                            hypre_BoxManBoundingBox(manager), 
-                                            global_volume, 
-                                            global_num_boxes,
-                                            local_boxes, local_boxnums,
-                                            max_regions, max_refinements, 
-                                            gamma,
-                                            comm, 
-                                            &ap);
-         
-
-
-
-         hypre_BoxManAssumedPartition(manager) = ap;
-
-         hypre_BoxArrayDestroy(local_boxes);
-         hypre_TFree(local_boxnums);
+         else
+         {
+            ap = hypre_BoxManAssumedPartition(manager);
+         }
          
 
          /* 2.  Now go thru gather regions and find out which processor's 
@@ -1258,17 +1294,20 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             MPI_Allreduce(&proc_count, &max_proc_count, 1, MPI_INT, MPI_MAX, comm);   
 
 
-            /* we do not want a sinlge processor to do a ton of point
+            /* we do not want a single processor to do a ton of point
                to point communications (relative to the number of
                total processors -  how much is too much?
                17 ~  log(128,000) */
-            threshold = 8*ologp;
-            
-            if ( max_proc_count >  threshold)
+
+            /* TO DO: need a better way to figure the threshold */ 
+
+            threshold = hypre_min(8*ologp, nprocs);          
+
+            if ( max_proc_count >=  threshold)
             {
                /* too many! */
-               /* if (myid == 0)
-                  printf("TOO BIG: check 1: max_proc_count = %d\n", max_proc_count);*/
+               /*if (myid == 0)
+                 printf("TOO BIG: check 1: max_proc_count = %d\n", max_proc_count);*/
 
                /* change coarse midstream!- now we will just gather everything! */
                non_ap_gather = 1;
@@ -1455,8 +1494,6 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                if ( max_proc_count >  threshold)
                {
                   /* too many! */
-                  /* if (myid == 0)
-                     printf("TOO BIG: check 2: max_proc_count = %d\n", max_proc_count);*/
                   
                   /* change coarse midstream!- now we will just gather everything! */
                   non_ap_gather = 1;
@@ -1648,7 +1685,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
           sorted above by increasing id */
          send_buf = hypre_MAlloc(send_count_bytes);
          recv_buf = hypre_MAlloc(recv_buf_size_bytes);
-         
+
          index_ptr = send_buf; /* step through send_buf with this pointer */
          /* loop over my entries */  
          for (i=0; i < send_count; i++)
@@ -1694,7 +1731,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             size = hypre_BoxManEntryInfoSize(manager);
             memcpy(index_ptr, hypre_BoxManEntryInfo(entry), size);
             index_ptr =  (void *) ((char *) index_ptr + size);
-            
+       
          } /* end of loop over my entries */
 
          /* now send_buf is ready to go! */  
@@ -1787,6 +1824,8 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             sorted */
          need_to_sort = 0;
          hypre_BoxManIsEntriesSort(manager) = 1;
+
+         
    
       } /********* end of non-AP gather *****************/
 
@@ -1847,6 +1886,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
       
       if (need_to_sort)
       {
+
          order_index = hypre_CTAlloc(int, nentries);
          delete_array =  hypre_CTAlloc(int, nentries);
          index = 0;
@@ -2025,14 +2065,15 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    {
     /* for the assumed partition case, we can check to see if all the global
-      information is known - this could prevent future comm costs */
+      information is known (is a gather has been done) 
+      - this could prevent future comm costs */
 
       int all_known = 0;
       int global_all_known;
       
       nentries = hypre_BoxManNEntries(manager);
    
-      if (!hypre_BoxManAllGlobalKnown(manager))
+      if (!hypre_BoxManAllGlobalKnown(manager) && global_is_gather)
       {
          /*if every processor has its nentries = global_num_boxes, then all is known */  
             if (global_num_boxes == nentries) all_known = 1;
@@ -2240,7 +2281,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
 
       /* done with the index_table! */ 
       hypre_TFree( hypre_BoxManIndexTable(manager)); /* in case this is a 
-                                                        re-assemble */
+                                                        re-assemble - shouldn't be though */
       hypre_BoxManIndexTable(manager) = index_table;
 
       for (d = 0; d < 3; d++)
@@ -2465,6 +2506,7 @@ int hypre_BoxManIntersect ( hypre_BoxManager *manager , hypre_Index ilower ,
     * eliminate duplicates. */
    else
    {
+   
       unsort      = hypre_CTAlloc(int, cnt);
       proc_ids    = hypre_CTAlloc(int, cnt);
       ids         = hypre_CTAlloc(int, cnt);

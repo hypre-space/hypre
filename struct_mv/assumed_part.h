@@ -76,6 +76,6 @@ typedef struct
 #define hypre_StructAssumedPartMyPartitionNumDistinctProcs(apart) ((apart)->my_partition_num_distinct_procs)
 #define hypre_StructAssumedPartMyPartitionBoxnums(apart) ((apart)->my_partition_boxnums)
 
-
-
+#define hypre_StructAssumedPartMyPartitionProcId(apart, i) ((apart)->my_partition_proc_ids[i])
+#define hypre_StructAssumedPartMyPartitionBoxnum(apart, i) ((apart)->my_partition_boxnums[i])
 #endif

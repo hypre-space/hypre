@@ -41,6 +41,8 @@ FILE      *file;
 int        my_rank;
 #endif
 
+static int time_index = 0;
+
 /*--------------------------------------------------------------------------
  * hypre_StructGridCreate
  *--------------------------------------------------------------------------*/
@@ -59,7 +61,9 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridDim(grid)         = dim;
    hypre_StructGridBoxes(grid)       = hypre_BoxArrayCreate(0);
    hypre_StructGridIDs(grid)         = NULL;
-   hypre_StructGridMaxDistance(grid) = 8;
+
+   hypre_SetIndex(hypre_StructGridMaxDistance(grid),8, 8, 8);
+
    hypre_StructGridBoundingBox(grid) = NULL;
    hypre_StructGridLocalSize(grid)   = 0;
    hypre_StructGridGlobalSize(grid)  = 0;
@@ -224,10 +228,10 @@ hypre_StructGridSetBoxManager( hypre_StructGrid *grid,
 
 int 
 hypre_StructGridSetMaxDistance( hypre_StructGrid *grid,
-                                int dist )
+                                hypre_Index dist )
 {
 
-   hypre_StructGridMaxDistance(grid) = dist;
+   hypre_CopyIndex(dist, hypre_StructGridMaxDistance(grid));
 
    return hypre_error_flag;
 }
@@ -285,13 +289,19 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    MPI_Comm             comm         = hypre_StructGridComm(grid);
    int                  dim          = hypre_StructGridDim(grid);
    hypre_BoxArray      *local_boxes  = hypre_StructGridBoxes(grid);
-   int                  max_distance = hypre_StructGridMaxDistance(grid);
+   hypre_IndexRef       max_distance = hypre_StructGridMaxDistance(grid);
    hypre_Box           *bounding_box = hypre_StructGridBoundingBox(grid);
    hypre_IndexRef       periodic     = hypre_StructGridPeriodic(grid);
    hypre_BoxManager    *boxman       = hypre_StructGridBoxMan(grid); 
    int                  *numghost    = hypre_StructGridNumGhost(grid);
 
-  
+   
+   if (!time_index)
+      time_index = hypre_InitializeTiming("StructGridAssemble");
+
+   hypre_BeginTiming(time_index);
+
+
    /* other initializations */
    num_local_boxes = hypre_BoxArraySize(local_boxes);
 
@@ -494,7 +504,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
        
          /* now expand box by max_distance or larger and gather entries */
          hypre_CopyBox(box ,grow_box);     
-         hypre_BoxExpandConstant(grow_box, max_distance);
+         hypre_BoxExpandConstantDim(grow_box, max_distance);
          hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box), 
                                    hypre_BoxIMax(grow_box));
 
@@ -522,13 +532,14 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 
       
    } /* end of if (!is_boxman) */
-   else if (max_distance == 0) /* boxman was created (by coarsen), but we need
+   else if ( hypre_IndexZero(max_distance) ) /* boxman was created (by coarsen), but we need
                                   to collect additional neighbor info */
    {
 
       /* pick a new max distance and set in grid*/  
-      max_distance = 8;
-      hypre_StructGridMaxDistance(grid) = max_distance;
+      hypre_SetIndex(hypre_StructGridMaxDistance(grid), 2, 2, 2);
+      max_distance =  hypre_StructGridMaxDistance(grid);
+      
 
       grow_box = hypre_BoxCreate();
       result_box = hypre_BoxCreate();
@@ -541,7 +552,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
        
          /* now expand box by max_distance or larger and gather entries */
          hypre_CopyBox(box ,grow_box);     
-         hypre_BoxExpandConstant(grow_box, max_distance);
+         hypre_BoxExpandConstantDim(grow_box, max_distance);
          hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box), 
                                    hypre_BoxIMax(grow_box));
 
@@ -575,6 +586,9 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    
    hypre_StructGridBoxMan(grid) = boxman;
    
+
+   hypre_EndTiming(time_index);
+
    return hypre_error_flag;
 }
 

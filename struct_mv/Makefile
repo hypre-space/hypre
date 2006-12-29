@@ -43,7 +43,6 @@ HEADERS =\
  assumed_part.h\
  box.h\
  box_manager.h\
- box_neighbors.h\
  box_pthreads.h\
  computation.h\
  headers.h\

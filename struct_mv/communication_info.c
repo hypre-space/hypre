@@ -540,7 +540,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
         different intersections  (TO DO: put more thought into if are
         there ever any exceptions to this?  - the intersection routine
         already eliminates duplicates - so what i mean is eliminating
-        duplicates from multiple intersection calls)  */  
+        duplicates from multiple intersection calls in periodic case)  */  
+
 
     
       /*------------------------------------------------

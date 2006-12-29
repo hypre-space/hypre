@@ -46,7 +46,7 @@ typedef struct hypre_StructGrid_struct
                       
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
    int                 *ids;          /* Unique IDs for boxes */
-   int                  max_distance; /* Neighborhood size */
+   hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
 

@@ -562,6 +562,30 @@ hypre_BoxExpandConstant( hypre_Box   *box,
   return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BoxExpandDim - grow a box in each direction (the same pos as negative)
+ * so expand is size 3
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoxExpandConstantDim( hypre_Box   *box,
+                         int         *expand)
+{ 
+  int   ierr = 0;
+  int  *imin = hypre_BoxIMin(box);
+  int  *imax = hypre_BoxIMax(box);
+  int  d; 
+
+  for (d = 0; d < 3; d++)
+  {
+    imin[d] -= expand[d];
+    imax[d] += expand[d];
+  }
   
+  return ierr;
+}
+
+  
+
 
 

@@ -108,6 +108,14 @@ typedef struct hypre_BoxArrayArray_struct
 
 #define hypre_ClearIndex(index)  hypre_SetIndex(index, 0, 0, 0)
 
+#define hypre_IndexZero(index)\
+   (hypre_IndexX(index) == 0 &&  hypre_IndexY(index) == 0 \
+    && hypre_IndexZ(index) == 0)
+
+#define hypre_IndexGTESize(index, size) \
+(hypre_IndexX(index) >= size &&  hypre_IndexY(index) >= size \
+    && hypre_IndexZ(index) >= size)
+
 #define hypre_CopyIndex(index1, index2) \
 ( hypre_IndexX(index2) = hypre_IndexX(index1),\
   hypre_IndexY(index2) = hypre_IndexY(index1),\
