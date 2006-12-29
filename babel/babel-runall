@@ -29,3 +29,7 @@ babel --output-directory=bHYPREClient-P --comment-local-only --include-reference
 # temporary fix to bad doc comments...
 cd bHYPREClient-C
 for i in *.h;do emacs -batch $i -l $HOME/linear_solvers/babel/docfix.el -f save-buffer; done                                                                                                        
+# This doc comment fix should be done by hand in bHYPREClient-C :
+# In bHYPRE_SStructVariable_IOR.h, first change /* to /** .
+# Then move the bHYPRE_SStructVariable__array definition to above the doc
+# comment, so the comment will instead be associated with the enum.
