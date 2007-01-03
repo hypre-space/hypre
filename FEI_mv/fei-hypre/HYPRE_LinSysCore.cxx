@@ -2315,7 +2315,7 @@ This should ultimately be taken out even for newer ale3d implementation
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
                       data[i*fieldSize+j]);
       }    
-      if (lookup_ != NULL && fieldSize == 1)
+      if (lookup_ != NULL && fieldSize == 3)
       {
          blockIDs       = (int *) lookup_->getElemBlockIDs();
          blockID        = blockIDs[0];
