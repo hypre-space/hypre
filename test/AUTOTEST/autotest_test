@@ -319,6 +319,8 @@ apply_error_filters ()
         ;;
       thun*)
         for ii in \
+          'Assembler\ messages'\
+          'Warning'\
           'queued'\
           'allocated'
         do process_filter $ErrorFile "${ii}"
