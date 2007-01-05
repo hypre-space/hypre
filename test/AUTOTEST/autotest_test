@@ -272,6 +272,7 @@ apply_error_filters ()
     case $HOST in
       up*)
         for ii in \
+          'INFORMATION:'\
           '===\ End\ of\ Compilation'\
           'cpu\ clock'\
           'wall\ clock'\
