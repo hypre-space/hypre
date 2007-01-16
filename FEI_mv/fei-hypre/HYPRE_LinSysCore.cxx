@@ -2253,7 +2253,7 @@ This should ultimately be taken out even for newer ale3d implementation
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
                       data[i*fieldSize+j]);
       }    
-      if (HYPreconID_ == HYAMS && lookup_ != NULL && fieldSize == 2 &&
+      if (lookup_ != NULL && fieldSize == 2 &&
            numNodes > 0)
       {
          blockIDs       = (int *) lookup_->getElemBlockIDs();
@@ -2283,11 +2283,11 @@ This should ultimately be taken out even for newer ale3d implementation
             AMSData_.EdgeNodeList_ = new int[nRows*fieldSize];
             for (i = 0; i < nRows*fieldSize; i++)
                AMSData_.EdgeNodeList_[i] = -99999;
-            for (i = 0; i < newNumNodes; i++)
+            for (i = 0; i < newNumEdges; i++)
             {
                index = eqnNumbers[i] - localStartRow_ + 1;
                for (j = 0; j < fieldSize; j++ ) 
-                  AMSData_.EdgeNodeList_[index+j] = iArray[i*fieldSize+j];
+                  AMSData_.EdgeNodeList_[index*fieldSize+j] = iArray[i*fieldSize+j];
             }
             errCnt = 0;
             for (i = 0; i < nRows*fieldSize; i++)
@@ -2326,7 +2326,6 @@ This should ultimately be taken out even for newer ale3d implementation
          AMSData_.NodeNumbers_ = NULL;
          AMSData_.NodalCoord_  = NULL;
          AMSData_.numNodes_ = 0;
-         AMSData_.numLocalNodes_ = localEndRow_ - localStartRow_ + 1;
          if (numNodes > 0)
          {
             AMSData_.numNodes_ = numNodes;

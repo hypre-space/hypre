@@ -1690,6 +1690,7 @@ void HYPRE_LinSysCore::setupPCGPrecon()
                                         HYPRE_DummyFunction, HYPrecon_);
            else
            {
+              setupPreconAMS();
               HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
                                         HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
@@ -3479,9 +3480,10 @@ void HYPRE_LinSysCore::setupPreconMLMaxwell()
 
 void HYPRE_LinSysCore::setupPreconAMS()
 {
-   int                maxit=100;    /* heuristics for now */
-   double             tol=1.0e-6;   /* heuristics for now */
+   int                maxit=1;    /* heuristics for now */
+   double             tol=0.0;   /* heuristics for now */
    int                cycle_type=1; /* V-cycle */
+   HYPRE_ParVector    parVecX, parVecY, parVecZ;
 
    /* Set AMS parameters */
    HYPRE_AMSSetDimension(HYPrecon_, mlNumPDEs_);
@@ -3489,6 +3491,9 @@ void HYPRE_LinSysCore::setupPreconAMS()
    HYPRE_AMSSetTol(HYPrecon_, tol);
    HYPRE_AMSSetCycleType(HYPrecon_, cycle_type);
    HYPRE_AMSSetPrintLevel(HYPrecon_, HYOutputLevel_);
+
+   HYPRE_AMSSetAlphaAMGOptions(HYPrecon_, 10, 0, 6, 0.25);
+   HYPRE_AMSSetBetaAMGOptions(HYPrecon_, 10, 0, 6, 0.25);
 
 #if 0
    if (maxwellGEN_ != NULL)
@@ -3500,7 +3505,6 @@ void HYPRE_LinSysCore::setupPreconAMS()
    }
    if (amsX_ == NULL && amsY_ != NULL)
    {
-      HYPRE_ParVector parVecX, parVecY, parVecZ;
       HYPRE_IJVectorGetObject(amsX_, (void **) &parVecX);
       HYPRE_IJVectorGetObject(amsY_, (void **) &parVecY);
       HYPRE_IJVectorGetObject(amsZ_, (void **) &parVecZ);
