@@ -2032,12 +2032,13 @@ int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
  *    A              - the edge element stiffness matrix
  *    num_vert       - number of vertices (nodes) in the processor
  *    num_local_vert - number of vertices owned by the processor
- *    vert_numbers   - global indexes of the vertices in the processor
- *    vert_coords    - coordinates of the vertices in the processor
+ *    vert_number    - global indexes of the vertices in the processor
+ *    vert_coord     - coordinates of the vertices in the processor
  *    num_edges      - number of edges owned by the processor
- *    edge_vertex    - the vertices of the edges owned by the processor,
- *                     vertices are in global numbering, and edge orientation
- *                     is always from the first to the second vertex.
+ *    edge_vertex    - the vertices of the edges owned by the processor.
+ *                     Vertices are in local numbering (the same as in
+ *                     vert_number), and edge orientation is always from
+ *                     the first to the second vertex.
  *
  * Here we distinguish between vertices that belong to elements in the
  * current processor, and the subset of these vertices that is owned by
@@ -2120,6 +2121,10 @@ int hypre_AMSFEISetup(void *solver,
          z_data[j] = vert_coord[3*i+2];
       }
    }
+
+   /* Change vertex numbers from local to global */
+   for (i = 0; i < 2*num_edges; i++)
+     edge_vertex[i] = vert_number[edge_vertex[i]];
 
    /* Construct the local part of G based on edge_vertex */
    {
