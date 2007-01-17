@@ -3483,7 +3483,9 @@ void HYPRE_LinSysCore::setupPreconAMS()
    int                maxit=1;    /* heuristics for now */
    double             tol=0.0;   /* heuristics for now */
    int                cycle_type=1; /* V-cycle */
+#if 0
    HYPRE_ParVector    parVecX, parVecY, parVecZ;
+#endif
 
    /* Set AMS parameters */
    HYPRE_AMSSetDimension(HYPrecon_, mlNumPDEs_);
