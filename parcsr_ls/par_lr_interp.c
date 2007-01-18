@@ -1190,7 +1190,6 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
                                                                                                
-   P_diag_size = jj_counter;
   /* BEGIN */
   MPI_Comm_size(comm, &num_procs);   
   MPI_Comm_rank(comm,&my_id);
