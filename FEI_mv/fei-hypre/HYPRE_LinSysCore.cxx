@@ -2223,6 +2223,12 @@ This should ultimately be taken out even for newer ale3d implementation
          }
          delete [] eqnNumbers;
          delete [] newData;
+         errCnt = 0;
+         for (i = 0; i < nRows; i++)
+            if (MLI_NodalCoord_[i] == -99999.0) errCnt++;
+         if (errCnt > 0)
+            printf("putNodalFieldData ERROR:incomplete nodal coordinates (%d %d).\n",
+                   errCnt, nRows);
       }
       else
       {
