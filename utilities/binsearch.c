@@ -90,7 +90,8 @@ int hypre_BinarySearch2(int *list, int value, int low, int high, int *spot)
          return m;
       }
    }
-   /* not found (high = low-1) - so insert at low - unless high < 0*/
+   /* not found (high = low-1) - so insert at low */
       *spot = low;
+
    return -1;
 }
