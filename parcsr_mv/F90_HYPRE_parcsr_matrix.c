@@ -285,6 +285,24 @@ hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix, HYPRE_CSRMATRIXTOPARCSRMATRIX)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix_withnewpartitioning, HYPRE_CSRMATRIXTOPARCSRMATRIX_WITHNEWPARTITIONING)
+                                          (int      *comm,
+                                           long int *A_CSR,
+                                           long int *matrix,
+                                           int      *ierr   )
+{
+
+   *ierr = (int) ( HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning(
+                      (MPI_Comm)  *comm,
+                      (HYPRE_CSRMatrix) *A_CSR,
+                      (HYPRE_ParCSRMatrix *) matrix ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
 
