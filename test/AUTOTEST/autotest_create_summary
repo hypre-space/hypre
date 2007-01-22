@@ -43,32 +43,33 @@ help ()
 
 #==============================================================================
 #    Mail error summary file 
-#       Define mail recipients and mail program to be used
-#       Send messages
+#       Define mail recipients and send messages
+#       Uses 'sendmail' to set 'Content-Type' to 'text/html'
 #==============================================================================
 hypre_mail_summary()
 {
+   HYPRE_ALL_EMAIL="\
+      rfalgout@llnl.gov,\
+      abaker@llnl.gov,\
+      painter1@llnl.gov,\
+      lee123@llnl.gov,\
+      tzanio@llnl.gov,\
+      umyang@llnl.gov,\
+      chtong@llnl.gov,\
+      panayot@llnl.gov"
 
-  HYPRE_ALL_EMAIL="rfalgout@llnl.gov\
-                   abaker@llnl.gov\
-                   painter1@llnl.gov\
-                   lee123@llnl.gov\
-                   kolev1@llnl.gov\
-                   yang11@llnl.gov\
-                   chtong@llnl.gov\
-                   vhenson@llnl.gov"
-
-#
-# Define mail program to be used
-   [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
-   [ -x /usr/bin/mhmail ] && HYPRE_MAIL=/usr/bin/mhmail
-   [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
-   [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
-#
-#               mail summaries
    SUBJECT="Autotest Error Summary `date '+%D'`"
 
-   ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_ALL_EMAIL < $HYPRE_TEST_SUMMARY_FILE
+   (
+      echo From: "Robert D. Falgout <rfalgout@llnl.gov>"
+      echo To: ${HYPRE_ALL_EMAIL}
+      echo Subject: ${SUBJECT}
+      echo Content-Type: text/html
+      echo MIME-Version: 1.0
+
+      cat $HYPRE_TEST_SUMMARY_FILE
+
+   ) | /usr/sbin/sendmail -t
 
    echo "Autotest mail sent"
 }
