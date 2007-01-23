@@ -1152,7 +1152,7 @@ hypre_BoomerAMGSetCycleNumSweeps( void     *data,
       return hypre_error_flag;
    } 
 
-   if (num_sweeps < 1)
+   if (num_sweeps < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
