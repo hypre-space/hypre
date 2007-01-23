@@ -28,7 +28,7 @@
 
 
 
-INTERNAL_HEADER=parcsr_mv.h
+INTERNAL_HEADER=_hypre_parcsr_mv.h
 
 #===========================================================================
 # Include guards and other includes
