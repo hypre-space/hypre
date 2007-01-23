@@ -353,7 +353,7 @@ do
          printf "%-29s: " $hypre_test_name >> $HYPRE_TEST_SUMMARY_FILE
          printf "  `date '+%D'`" >> $HYPRE_TEST_SUMMARY_FILE
          printf "    PASSED" >> $HYPRE_TEST_SUMMARY_FILE
-         printf "  <a href=\"%s\">%s</a><br>\n" ${resultsfile} ${archfile} >> $HYPRE_TEST_SUMMARY_FILE
+         printf "  <a href=\"file:%s\">%s</a><br>\n" ${resultsfile} ${archfile} >> $HYPRE_TEST_SUMMARY_FILE
       elif [ "${TOTERR}" = "-999" ]
       then
          printf "%-29s: " $hypre_test_name >> $HYPRE_TEST_SUMMARY_FILE
@@ -363,7 +363,7 @@ do
          printf "%-29s: " $hypre_test_name >> $HYPRE_TEST_SUMMARY_FILE
          printf "  `date '+%D'`" >> $HYPRE_TEST_SUMMARY_FILE
          printf "%5d Errors" ${TOTERR} >> $HYPRE_TEST_SUMMARY_FILE
-         printf "  <a href=\"%s\">%s</a><br>\n" ${resultsfile} ${archfile} >> $HYPRE_TEST_SUMMARY_FILE
+         printf "  <a href=\"file:%s\">%s</a><br>\n" ${resultsfile} ${archfile} >> $HYPRE_TEST_SUMMARY_FILE
       fi
    else
       printf "%-29s: " $hypre_test_name >> $HYPRE_TEST_SUMMARY_FILE
