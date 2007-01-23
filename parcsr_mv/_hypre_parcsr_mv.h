@@ -6,7 +6,7 @@
 #ifndef hypre_PARCSR_MV_HEADER
 #define hypre_PARCSR_MV_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "seq_mv.h"
 
 #ifdef __cplusplus
