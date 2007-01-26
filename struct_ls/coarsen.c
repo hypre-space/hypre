@@ -24,7 +24,11 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#define TIME_DEBUG 0 /*remember to compile --with-timing */
 
+#if TIME_DEBUG
+static int s_coarsen_num = 0;
+#endif
 
 
 #include "headers.h"
@@ -160,7 +164,15 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
      
    void               *entry_info = NULL;
  
+#if TIME_DEBUG  
+   int tindex;
+   char new_title[80];
+   sprintf(new_title,"Coarsen.%d",s_coarsen_num);
+   tindex = hypre_InitializeTiming(new_title);
+   s_coarsen_num++;
 
+   hypre_BeginTiming(tindex);
+#endif
 
    /***get relevant information from the fine grid */
    fids = hypre_StructGridIDs(fgrid);
@@ -380,7 +392,10 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* return the coarse grid */   
    *cgrid_ptr = cgrid;
 
-  
+#if TIME_DEBUG
+   hypre_EndTiming(tindex);
+#endif
+
    return hypre_error_flag;
 }
 
