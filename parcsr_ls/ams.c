@@ -451,7 +451,7 @@ int hypre_ParCSRMatrixSetDiagRows(hypre_ParCSRMatrix *A, double d)
    {
       j = A_diag_I[i];
       if ((A_diag_I[i+1] == j+1) && (A_diag_J[j] == i) &&
-          num_cols_offd && (A_offd_I[i+1] == A_offd_I[i]))
+          (!num_cols_offd || (A_offd_I[i+1] == A_offd_I[i])))
       {
          A_diag_data[j] = d;
       }
