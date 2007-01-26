@@ -1120,6 +1120,11 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
          
          int  *local_boxnums;
 
+         int statbuf[3];
+         int send_statbuf[3];
+         
+
+
          int dim = hypre_BoxManDim(manager);
 
          void *entry_response_buf;
@@ -1296,7 +1301,19 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             
             
             /* check how many point to point communications? (what is the max?) */
-            MPI_Allreduce(&proc_count, &max_proc_count, 1, MPI_INT, MPI_MAX, comm);   
+            /* also get the max distinct AP procs and the max # of entries) */
+            send_statbuf[0] = proc_count;
+            send_statbuf[1] = hypre_StructAssumedPartMyPartitionNumDistinctProcs(ap);
+            send_statbuf[2] = num_my_entries;
+
+
+
+            MPI_Allreduce(send_statbuf, statbuf, 3, MPI_INT, MPI_MAX, comm);   
+
+            max_proc_count = statbuf[0];
+            
+            /* if(myid == 0 ) printf("max: contacts = %d, num of procs in AP= %d, 
+               num my entries = %d\n", max_proc_count, statbuf[1], statbuf[2]); */
 
 
             /* we do not want a single processor to do a ton of point
@@ -1304,13 +1321,12 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                total processors -  how much is too much?
                17 ~  log(128,000) */
 
-            /* TO DO: need a better way to figure the threshold */ 
-
+            /* TO DO: need a better way to figure the threshold? */ 
             threshold = hypre_min(12*ologp, nprocs);          
 
             if ( max_proc_count >=  threshold)
             {
-               /* too many! */
+                  /* too many! */
                /*if (myid == 0)
                  printf("TOO BIG: check 1: max_proc_count = %d\n", max_proc_count);*/
 
@@ -1349,7 +1365,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                
                
                /* exchange #1 - we send nothing, and the contacted proc
-                * returns all of the (proc, box ids) in its AP region*/
+                * returns all of the procs with boxes in its AP region*/
                
                /* build response object*/
                response_obj.fill_response = hypre_FillResponseBoxManAssemble1;
@@ -1372,7 +1388,9 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                size =  sizeof(int);
                
                /* this parameter needs to be the same on all processors */ 
-               max_response_size = (global_num_boxes/nprocs)*2;
+               /* max_response_size = (global_num_boxes/nprocs)*2;*/
+               /* modification - should reduce data passed */
+               max_response_size = statbuf[1]; /*max num of distinct procs */
                
                hypre_DataExchangeList(proc_count, ap_proc_ids, 
                                       send_buf, send_buf_starts, 
@@ -1535,8 +1553,10 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                   entry_size_bytes = non_info_size*sizeof(int) 
                      + hypre_BoxManEntryInfoSize(manager);
                   
-                  /* use same max_response_size as previous exchange */
-                  
+                  /* modification -  use an true max_response_size 
+                     (should be faster and less communication*/
+                  max_response_size = statbuf[2]; /* max of num_my_entries */
+ 
                   hypre_DataExchangeList(proc_count, contact_proc_ids, 
                                          send_buf, send_buf_starts, sizeof(int),
                                          entry_size_bytes, &response_obj2, 
@@ -2638,6 +2658,8 @@ hypre_BoxManSetNumGhost( hypre_BoxManager *manager, int  *num_ghost )
     contact message is null.  need to return the (proc) id of each box
     in our assumed partition.
 
+    1/07 - just returning distinct proc ids.
+
  *****************************************************************************/
 
 int
@@ -2649,7 +2671,7 @@ hypre_FillResponseBoxManAssemble1(void *p_recv_contact_buf,
    
 
    int    myid, i, index;
-   int    size, num_objects;
+   int    size, num_boxes, num_objects;
    int   *proc_ids;
    int   *send_response_buf = (int *) *p_send_response_buf;
     
@@ -2667,9 +2689,14 @@ hypre_FillResponseBoxManAssemble1(void *p_recv_contact_buf,
    /*we need to send back the list of all the processor ids
      for the boxes */
 
+   /* NOTE: in the AP, boxes with the same proc id are adjacent
+    (but proc ids not in any sorted order) */
+
    /*how many boxes do we have in the AP?*/
-   num_objects = hypre_StructAssumedPartMyPartitionIdsSize(ap);
-  
+   num_boxes = hypre_StructAssumedPartMyPartitionIdsSize(ap);
+   /*how many procs do we have in the AP?*/
+   num_objects = hypre_StructAssumedPartMyPartitionNumDistinctProcs(ap);
+   
    /* num_objects is then how much we need to send*/
      
    /*check storage in send_buf for adding the information */
@@ -2684,12 +2711,17 @@ hypre_FillResponseBoxManAssemble1(void *p_recv_contact_buf,
       *p_send_response_buf = send_response_buf;  
    }
 
-   /* populate send_response_buf */
+   /* populate send_response_buf with distinct proc ids*/
    index = 0;
-   for (i = 0; i< num_objects; i++)
+
+   if (num_objects > 0) 
+      send_response_buf[index++] = proc_ids[0];
+
+   for (i = 1; i < num_boxes && index < num_objects; i++)
    {
       /* processor id */
-      send_response_buf[index++] = proc_ids[i];
+      if (proc_ids[i] != proc_ids[i-1])
+         send_response_buf[index++] = proc_ids[i];
    }
 
    /* return variables */
