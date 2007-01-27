@@ -1192,14 +1192,17 @@ int HYPRE_AMSSetTol(HYPRE_Solver solver, double tol);
  * \begin{tabular}{|c|l|}
  * \hline
  *   1 & 3-level multiplicative solver (01210) \\
- *   3 & 3-level multiplicative solver (02120) \\
- *   5 & 3-level multiplicative solver (0102010) \\
- *   7 & 3-level multiplicative solver (0201020) \\
- * \hline
  *   2 & 3-level additive solver (0+1+2) \\
+ *   3 & 3-level multiplicative solver (02120) \\
  *   4 & 3-level additive solver (010+2) \\
+ *   5 & 3-level multiplicative solver (0102010) \\
  *   6 & 3-level additive solver (1+020) \\
- *   8 & 3-level additive solver (010+020) \\
+ *   7 & 3-level multiplicative solver (0201020) \\
+ *   8 & 3-level additive solver (0(1+2)0) \\
+ *  11 & 5-level multiplicative solver (013454310) \\
+ *  12 & 5-level additive solver (0+1+3+4+5) \\
+ *  13 & 5-level multiplicative solver (034515430) \\
+ *  14 & 5-level additive solver (01(3+4+5)10) \\
  * \hline
  * \end{tabular}
  *
