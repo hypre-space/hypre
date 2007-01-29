@@ -1358,8 +1358,8 @@ impl_bHYPRE_PCG_Apply(
       }
       else  /* !two_norm */
       {
-         printf("Iters       ||r||_C      ||r||_C/||b||_C\n");
-         printf("-----    ------------    ------------ \n");
+         printf("Iters       ||r||_C     conv.rate  ||r||_C/||b||_C\n");
+         printf("-----    ------------    ---------  ------------ \n");
       }
    }
 
