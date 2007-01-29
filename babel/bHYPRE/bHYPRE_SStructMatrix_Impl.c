@@ -1201,7 +1201,7 @@ impl_bHYPRE_SStructMatrix_Apply(
 
    bHYPREP_x = (bHYPRE_SStructVector) bHYPRE_Vector__cast2( *x, "bHYPRE.SStructVector", _ex );
    SIDL_CHECK(*_ex);
-   hypre_assert( bHYPREP_b!=NULL );
+   hypre_assert( bHYPREP_x!=NULL );
 
    data_x = bHYPRE_SStructVector__get_data( bHYPREP_x );
    Hx = data_x -> vec;
