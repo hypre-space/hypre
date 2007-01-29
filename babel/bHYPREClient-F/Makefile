@@ -78,6 +78,7 @@ OBJS = ${FILES:.c=.o}
 
 all: libbHYPREClient-F.a
 	cp -fp $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
+	cp -fp $(srcdir)/*.inc ${HYPRE_BUILD_DIR}/include/.
 	cp -fp libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
  
 install: all
