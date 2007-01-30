@@ -692,6 +692,24 @@ class HYPRE_LinSysCore
    HYPRE_IJVector  amsX_;
    HYPRE_IJVector  amsY_;
    HYPRE_IJVector  amsZ_;
+   HYPRE_ParCSRMatrix  amsBetaPoisson_;
+   int             amsNumPDEs_;
+   int             amsMaxIter_;
+   double          amsTol_;
+   int             amsCycleType_;
+   int             amsRelaxType_;
+   int             amsRelaxTimes_;
+   double          amsRelaxWt_;
+   double          amsRelaxOmega_;
+   int             amsPrintLevel_;
+   int             amsAlphaCoarsenType_;
+   int             amsAlphaAggLevels_;
+   int             amsAlphaRelaxType_;
+   double          amsAlphaStrengthThresh_;
+   int             amsBetaCoarsenType_;
+   int             amsBetaAggLevels_;
+   int             amsBetaRelaxType_;
+   double          amsBetaStrengthThresh_;
 
    // ----------------------------------------------------------------------
    // FEI and MLI variables

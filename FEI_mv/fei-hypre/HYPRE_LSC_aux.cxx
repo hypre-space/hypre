@@ -992,6 +992,15 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
             printf("       HYPRE_LSC::parameters amgStrongThreshold = %e\n",
                     amgStrongThreshold_);
       }
+      else if ( !strcmp(param1, "amgStrengthThreshold") )
+      {
+         sscanf(params[i],"%s %lg", param, &amgStrongThreshold_);
+         if ( amgStrongThreshold_ < 0.0 || amgStrongThreshold_ > 1.0 )
+            amgStrongThreshold_ = 0.25;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgStrengthThreshold = %e\n",
+                    amgStrongThreshold_);
+      }
 
       //---------------------------------------------------------------
       // amg preconditoner : choose system size
@@ -1478,16 +1487,249 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //---------------------------------------------------------------
-      // mlpack preconditoner : no of PDEs (block size)
+      // ams preconditoner : no of PDEs (block size)
       //---------------------------------------------------------------
 
       else if ( !strcmp(param1, "amsNumPDEs") )
       {
-         sscanf(params[i],"%s %d", param, &mlNumPDEs_);
-         if ( mlNumPDEs_ < 1 ) mlNumPDEs_ = 1;
+         sscanf(params[i],"%s %d", param, &amsNumPDEs_);
+         if ( amsNumPDEs_ < 1 ) amsNumPDEs_ = 1;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amsNumPDEs = %d\n",
-                   mlNumPDEs_);
+                   amsNumPDEs_);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : which smoother to use
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsRelaxType") )
+      {
+         sscanf(params[i],"%s %s", param, param2);
+         if      (!strcmp(param2, "jacobi"))    amsRelaxType_ = 0;
+         else if (!strcmp(param2, "gsSlow"))    amsRelaxType_ = 1;
+         else if (!strcmp(param2, "gsFast"))    amsRelaxType_ = 4;
+         else if (!strcmp(param2, "hybrid"))    amsRelaxType_ = 3;
+         else if (!strcmp(param2, "hybridsym")) amsRelaxType_ = 6;
+         else                                   amsRelaxType_ = 4;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amsRelaxType = %s\n",
+                   param2);
+      }
+
+      //----------------------------------------------------------------
+      // ams preconditoner : no of relaxation sweeps per level
+      //----------------------------------------------------------------
+
+      else if (!strcmp(param1, "amsRelaxTimes"))
+      {
+         sscanf(params[i],"%s %d", param, &amsRelaxTimes_);
+         if (amsRelaxTimes_ < 1) amsRelaxTimes_ = 1;
+         if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgRelaxTimes = %d\n",
+                   amsRelaxTimes_);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : damping factor for Jacobi smoother
+      //---------------------------------------------------------------
+
+      else if (!strcmp(param1, "amsRelaxWeight"))
+      {
+         sscanf(params[i],"%s %lg", param, &amsRelaxWt_);
+         if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+            printf("       HYPRE_LSC::parameters amgRelaxWeight = %e\n",
+                   amsRelaxWt_);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : omega
+      //---------------------------------------------------------------
+
+      else if (!strcmp(param1, "amsRelaxOmega"))
+      {
+         sscanf(params[i],"%s %lg", param, &amsRelaxOmega_);
+         if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+            printf("       HYPRE_LSC::parameters amgRelaxWeight = %e\n",
+                   amsRelaxOmega_);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : cycle type
+      //---------------------------------------------------------------
+
+      else if (!strcmp(param1, "amsCycleType"))
+      {
+         sscanf(params[i],"%s %c", param, param2);
+         if (param2[0] == 'V') amsCycleType_ = 1;
+         if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+            printf("       HYPRE_LSC::parameters amgCycleType = %s\n",
+                   param2);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : max iterations
+      //---------------------------------------------------------------
+
+      else if (!strcmp(param1, "amsMaxIterations"))
+      {
+         sscanf(params[i],"%s %d", param, &amsMaxIter_);
+         if (amsMaxIter_ < 1) amsMaxIter_ = 1;
+         if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+            printf("       HYPRE_LSC::parameters amsMaxIterations = %d\n",
+                   amsMaxIter_);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : tolerance
+      //---------------------------------------------------------------
+
+      else if (!strcmp(param1, "amsTolerance"))
+      {
+         sscanf(params[i],"%s %lg", param, &amsTol_);
+         if (amsTol_ < 0.0) amsTol_ = 0.0;
+         if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+            printf("       HYPRE_LSC::parameters amsTolerance = %e\n",
+                   amsTol_);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : print level 
+      //---------------------------------------------------------------
+
+      else if (!strcmp(param1, "amsPrintLevel"))
+      {
+         sscanf(params[i],"%s %d", param, &amsPrintLevel_);
+         if (amsPrintLevel_ < 0) amsPrintLevel_ = 0;
+         if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+            printf("       HYPRE_LSC::parameters amsPrintLevel = %d\n",
+                   amsPrintLevel_);
+      }
+
+      //----------------------------------------------------------------
+      // amg preconditoner : alpha coarsening type
+      //----------------------------------------------------------------
+                                                                                
+      else if ( !strcmp(param1, "amsAlphaCoarsenType") )
+      {
+         sscanf(params[i],"%s %s", param, param2);
+         if      (!strcmp(param2, "cljp"))    amsAlphaCoarsenType_ = 0;
+         else if (!strcmp(param2, "ruge"))    amsAlphaCoarsenType_ = 1;
+         else if (!strcmp(param2, "ruge3c"))  amsAlphaCoarsenType_ = 4;
+         else if (!strcmp(param2, "falgout")) amsAlphaCoarsenType_ = 6;
+         else if (!strcmp(param2, "pmis"))    amsAlphaCoarsenType_ = 8;
+         else if (!strcmp(param2, "hmis"))    amsAlphaCoarsenType_ = 10;
+         else                                 amsAlphaCoarsenType_ = 0;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amsAlphaCoarsenType = %s\n",
+                   param2);
+      }
+                                                                                
+      //----------------------------------------------------------------
+      // amg preconditoner : coarsening type
+      //----------------------------------------------------------------
+                                                                                
+      else if ( !strcmp(param1, "amsBetaCoarsenType") )
+      {
+         sscanf(params[i],"%s %s", param, param2);
+         if      (!strcmp(param2, "cljp"))    amsBetaCoarsenType_ = 0;
+         else if (!strcmp(param2, "ruge"))    amsBetaCoarsenType_ = 1;
+         else if (!strcmp(param2, "ruge3c"))  amsBetaCoarsenType_ = 4;
+         else if (!strcmp(param2, "falgout")) amsBetaCoarsenType_ = 6;
+         else if (!strcmp(param2, "pmis"))    amsBetaCoarsenType_ = 8;
+         else if (!strcmp(param2, "hmis"))    amsBetaCoarsenType_ = 10;
+         else                                 amsBetaCoarsenType_ = 0;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amsBetaCoarsenType = %s\n",
+                   param2);
+      }
+                                                                                
+      //---------------------------------------------------------------
+      // ams preconditoner : agg level
+      //---------------------------------------------------------------
+
+      else if (!strcmp(param1, "amsAlphaAggLevels"))
+      {
+         sscanf(params[i],"%s %d", param, &amsAlphaAggLevels_);
+         if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+            printf("       HYPRE_LSC::parameters amsAlphaAggLevels = %d\n",
+                   amsAlphaAggLevels_);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : agg level
+      //---------------------------------------------------------------
+
+      else if (!strcmp(param1, "amsBetaAggLevels"))
+      {
+         sscanf(params[i],"%s %d", param, &amsBetaAggLevels_);
+         if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+            printf("       HYPRE_LSC::parameters amsBetaAggLevels = %d\n",
+                   amsAlphaAggLevels_);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : which smoother to use
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsAlphaRelaxType") )
+      {
+         sscanf(params[i],"%s %s", param, param2);
+         if      (!strcmp(param2, "jacobi"))    amsAlphaRelaxType_ = 0;
+         else if (!strcmp(param2, "gsSlow"))    amsAlphaRelaxType_ = 1;
+         else if (!strcmp(param2, "gsFast"))    amsAlphaRelaxType_ = 4;
+         else if (!strcmp(param2, "hybrid"))    amsAlphaRelaxType_ = 3;
+         else if (!strcmp(param2, "hybridsym")) amsAlphaRelaxType_ = 6;
+         else                                   amsAlphaRelaxType_ = 4;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amsAlphaRelaxType = %s\n",
+                   param2);
+      }
+
+      //---------------------------------------------------------------
+      // ams preconditoner : which smoother to use
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsBetaRelaxType") )
+      {
+         sscanf(params[i],"%s %s", param, param2);
+         if      (!strcmp(param2, "jacobi"))    amsBetaRelaxType_ = 0;
+         else if (!strcmp(param2, "gsSlow"))    amsBetaRelaxType_ = 1;
+         else if (!strcmp(param2, "gsFast"))    amsBetaRelaxType_ = 4;
+         else if (!strcmp(param2, "hybrid"))    amsBetaRelaxType_ = 3;
+         else if (!strcmp(param2, "hybridsym")) amsBetaRelaxType_ = 6;
+         else                                   amsBetaRelaxType_ = 4;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amsBetaRelaxType = %s\n",
+                   param2);
+      }
+
+      //---------------------------------------------------------------
+      // amg preconditoner : threshold to determine strong coupling
+      //---------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsAlphaStrengthThreshold") )
+      {
+         sscanf(params[i],"%s %lg", param, &amsAlphaStrengthThresh_);
+         if (amsAlphaStrengthThresh_<0.0 || amsAlphaStrengthThresh_>1.0)
+            amsAlphaStrengthThresh_ = 0.25;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amsAlphaStrengthThresh = %e\n",
+                    amsAlphaStrengthThresh_);
+      }
+
+      //---------------------------------------------------------------
+      // amg preconditoner : threshold to determine strong coupling
+      //---------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsBetaStrengthThreshold") )
+      {
+         sscanf(params[i],"%s %lg", param, &amsBetaStrengthThresh_);
+         if (amsBetaStrengthThresh_<0.0 || amsBetaStrengthThresh_>1.0)
+            amsBetaStrengthThresh_ = 0.25;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amsBetaStrengthThresh = %e\n",
+                    amsBetaStrengthThresh_);
       }
 
       //---------------------------------------------------------------
@@ -3480,22 +3722,26 @@ void HYPRE_LinSysCore::setupPreconMLMaxwell()
 
 void HYPRE_LinSysCore::setupPreconAMS()
 {
-   int                maxit=1;    /* heuristics for now */
-   double             tol=0.0;   /* heuristics for now */
-   int                cycle_type=1; /* V-cycle */
 #if 0
    HYPRE_ParVector    parVecX, parVecY, parVecZ;
 #endif
 
    /* Set AMS parameters */
-   HYPRE_AMSSetDimension(HYPrecon_, mlNumPDEs_);
-   HYPRE_AMSSetMaxIter(HYPrecon_, maxit);
-   HYPRE_AMSSetTol(HYPrecon_, tol);
-   HYPRE_AMSSetCycleType(HYPrecon_, cycle_type);
-   HYPRE_AMSSetPrintLevel(HYPrecon_, HYOutputLevel_);
+   HYPRE_AMSSetDimension(HYPrecon_, amsNumPDEs_);
+   HYPRE_AMSSetMaxIter(HYPrecon_, amsMaxIter_);
+   HYPRE_AMSSetTol(HYPrecon_, amsTol_);
+   HYPRE_AMSSetCycleType(HYPrecon_, amsCycleType_);
+   HYPRE_AMSSetPrintLevel(HYPrecon_, amsPrintLevel_);
+   HYPRE_AMSSetSmoothingOptions(HYPrecon_, amsRelaxType_, amsRelaxTimes_,
+                                amsRelaxWt_, amsRelaxOmega_);
 
-   HYPRE_AMSSetAlphaAMGOptions(HYPrecon_, 10, 0, 6, 0.25);
-   HYPRE_AMSSetBetaAMGOptions(HYPrecon_, 10, 0, 6, 0.25);
+   if (amsBetaPoisson_ != NULL)
+      HYPRE_AMSSetBetaPoissonMatrix(HYPrecon_, amsBetaPoisson_);
+
+   HYPRE_AMSSetAlphaAMGOptions(HYPrecon_, amsAlphaCoarsenType_, 
+            amsAlphaAggLevels_, amsAlphaRelaxType_, amsAlphaStrengthThresh_);
+   HYPRE_AMSSetBetaAMGOptions(HYPrecon_, amsBetaCoarsenType_,
+            amsBetaAggLevels_, amsBetaRelaxType_, amsBetaStrengthThresh_);
 
 #if 0
    if (maxwellGEN_ != NULL)
@@ -3537,8 +3783,6 @@ void HYPRE_LinSysCore::setupPreconAMS()
 			AMSData_.NodalCoord_);
    }
 
-   // this is used to tell AMS that mass matrix has 0 coeff 
-   // HYPRE_AMSSetBetaPoissonMatrix(HYPrecon_, NULL);
 }
 
 //***************************************************************************

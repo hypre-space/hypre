@@ -335,6 +335,26 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsX_ = NULL;
    amsY_ = NULL;
    amsZ_ = NULL;
+   amsNumPDEs_ = 3;
+   amsMaxIter_ = 1;
+   amsTol_     = 0.0;
+   amsCycleType_ = 1;
+   amsRelaxType_ = 2;
+   amsRelaxTimes_ = 2;
+   amsRelaxWt_    = 1.0;
+   amsRelaxOmega_ = 1.0;
+   amsBetaPoisson_ = NULL;
+   amsPrintLevel_ = 0;
+   amsPrintLevel_ = 0;
+   amsAlphaCoarsenType_ = 10;
+   amsAlphaAggLevels_ = 1;
+   amsAlphaRelaxType_ = 3;
+   amsAlphaStrengthThresh_ = 0.25;
+   amsBetaCoarsenType_ = 10;
+   amsBetaAggLevels_ = 1;
+   amsBetaRelaxType_ = 3;
+   amsBetaStrengthThresh_ = 0.25;
+
 
    //-------------------------------------------------------------------
    // parameters ML Maxwell solver
@@ -2799,6 +2819,10 @@ int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
    else if (!strcmp(name, "GEN"))
    {
       maxwellGEN_ = (HYPRE_ParCSRMatrix) data.getDataPtr();
+   }
+   else if (!strcmp(name, "AMSBMATRIX"))
+   {
+      amsBetaPoisson_ = (HYPRE_ParCSRMatrix) data.getDataPtr();
    }
    else if (!strcmp(name, "AMSData"))
    {
