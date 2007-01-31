@@ -173,7 +173,7 @@ int main (int argc, char *argv[])
          printf("\n");
          printf("  AMS solver options:                                          \n");
          printf("    -dim <num>           : space dimension                     \n");
-         printf("    -type <num>          : 3-level cycle type (0-8)            \n");
+         printf("    -type <num>          : 3-level cycle type (0-8, 11-14)     \n");
          printf("    -theta <num>         : BoomerAMG threshold (0.25)          \n");
          printf("    -ctype <num>         : BoomerAMG coarsening type           \n");
          printf("    -agg <num>           : Levels of BoomerAMG agg. coarsening \n");

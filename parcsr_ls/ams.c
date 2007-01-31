@@ -1054,7 +1054,6 @@ int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-
 /*--------------------------------------------------------------------------
  * hypre_AMSComputePixyz
  *
@@ -1633,40 +1632,25 @@ int hypre_AMSSolve(void *solver,
 {
    hypre_AMSData *ams_data = solver;
 
-   hypre_ParCSRMatrix *Ai[5] = { ams_data -> A_G,
-                                 ams_data -> A_Pi,
-                                 ams_data -> A_Pix,
-                                 ams_data -> A_Piy,
-                                 ams_data -> A_Piz };
-
-   HYPRE_Solver Bi[5] =        { ams_data -> B_G,
-                                 ams_data -> B_Pi,
-                                 ams_data -> B_Pix,
-                                 ams_data -> B_Piy,
-                                 ams_data -> B_Piz };
-
-   hypre_ParCSRMatrix *Pi[5] = { ams_data -> G,
-                                 ams_data -> Pi,
-                                 ams_data -> Pix,
-                                 ams_data -> Piy,
-                                 ams_data -> Piz };
-
-   hypre_ParVector *ri[5] =    { ams_data -> r1,
-                                 ams_data -> r2,
-                                 ams_data -> r1,
-                                 ams_data -> r1,
-                                 ams_data -> r1 };
-
-   hypre_ParVector *gi[5] =    { ams_data -> g1,
-                                 ams_data -> g2,
-                                 ams_data -> g1,
-                                 ams_data -> g1,
-                                 ams_data -> g1 };
-
-   char cycle[30];
-
    int i, my_id;
    double r0_norm, r_norm, b_norm, relative_resid = 0, old_resid;
+
+   char cycle[30];
+   hypre_ParCSRMatrix *Ai[5], *Pi[5];
+   HYPRE_Solver Bi[5];
+   hypre_ParVector *ri[5], *gi[5];
+
+   Ai[0] = ams_data -> A_G;   Bi[0] = ams_data -> B_G;   Pi[0] = ams_data -> G;
+   Ai[1] = ams_data -> A_Pi;  Bi[1] = ams_data -> B_Pi;  Pi[1] = ams_data -> Pi;
+   Ai[2] = ams_data -> A_Pix; Bi[2] = ams_data -> B_Pix; Pi[2] = ams_data -> Pix;
+   Ai[3] = ams_data -> A_Piy; Bi[3] = ams_data -> B_Piy; Pi[3] = ams_data -> Piy;
+   Ai[4] = ams_data -> A_Piz; Bi[4] = ams_data -> B_Piz; Pi[4] = ams_data -> Piz;
+
+   ri[0] = ams_data -> r1;    gi[0] = ams_data -> g1;
+   ri[1] = ams_data -> r2;    gi[1] = ams_data -> g2;
+   ri[2] = ams_data -> r1;    gi[2] = ams_data -> g1;
+   ri[3] = ams_data -> r1;    gi[3] = ams_data -> g1;
+   ri[4] = ams_data -> r1;    gi[4] = ams_data -> g1;
 
    if (ams_data -> print_level > 0)
       MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
@@ -1692,10 +1676,14 @@ int hypre_AMSSolve(void *solver,
             sprintf(cycle,"%s","(0+2)");
             break;
          case 11:
+         case 13:
             sprintf(cycle,"%s","0345430");
             break;
          case 12:
             sprintf(cycle,"%s","(0+3+4+5)");
+            break;
+         case 14:
+            sprintf(cycle,"%s","0(+3+4+5)0");
             break;
       }
    }
@@ -1818,7 +1806,6 @@ int hypre_AMSSolve(void *solver,
 
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRSubspacePrec
