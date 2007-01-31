@@ -340,11 +340,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsTol_     = 0.0;
    amsCycleType_ = 1;
    amsRelaxType_ = 2;
-   amsRelaxTimes_ = 2;
+   amsRelaxTimes_ = 1;
    amsRelaxWt_    = 1.0;
    amsRelaxOmega_ = 1.0;
    amsBetaPoisson_ = NULL;
-   amsPrintLevel_ = 0;
    amsPrintLevel_ = 0;
    amsAlphaCoarsenType_ = 10;
    amsAlphaAggLevels_ = 1;
