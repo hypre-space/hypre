@@ -1,0 +1,3 @@
+#define sidl_Scope__array_isColumnOrder_m ary_isColumnOrder3uyc_5v1bpms_m
+#define sidl_scope__array_iscolumnorder_m ary_iscolumnorder3uyc_5v1bpms_m
+#define SIDL_SCOPE__ARRAY_ISCOLUMNORDER_M ARY_ISCOLUMNORDER3UYC_5V1BPMS_M
