@@ -4,6 +4,7 @@
 CC        = mpicc
 F77       = mpif77
 CXX       = mpiCC
+F90       = mpif90
 HYPRE_DIR = ../hypre
 
 ########################################################################
@@ -22,6 +23,9 @@ CXXINCLUDES = $(CINCLUDES) -I..
 CXXDEFS   = $(CDEFS)
 IFLAGS_BXX = -I../babel-runtime/sidl
 CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS) $(IFLAGS_BXX)
+IF90FLAGS = -I../babel/bHYPREClient-F90
+F90FLAGS = $(FFLAGS) $(IF90FLAGS)
+
 
 LINKOPTS  = $(COPTS)
 LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lg2c -lm
@@ -34,11 +38,13 @@ LFLAGS_B =\
  -lbHYPREClient-F\
  -lbHYPRE\
  -lsidl -ldl -lxml2
+LFLAGS90 =
 
 ########################################################################
 # Rules for compiling the source files
 ########################################################################
-.SUFFIXES: .c .f .cxx
+.SUFFIXES: .c .f .cxx .f90
+
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 .f.o:
@@ -46,11 +52,24 @@ LFLAGS_B =\
 .cxx.o:
 	$(CXX) $(CXXFLAGS) -c $<
 
+# This Fortran 90 build code is adapted from the sample in the Babel Users' Guide,
+# which explains the separate preprocessing steps as a workaround to the 31-
+# character name limit in Fortran 90.
+.f90.o:
+	$(CC) -E -traditional -P -o $*.tmp -x c $(IF90FLAGS) $<
+	sed -e 's/^#pragma.*$$//' < $*.tmp > $*-pp.f90
+	$(F90) -c -o $@ $(F90FLAGS) $*-pp.f90
+	rm -f $*.tmp
+# ... we can't delete the $*-pp.f90 files because they are the source code which
+# debuggers need to look at
+
 ########################################################################
 # List of all programs to be compiled
 ########################################################################
 ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9 ex10
 BABELPROGS = ex5b ex5b77 ex5bxx ex6b ex6b77
+# ... ex5bp and ex5b90 are not in BABELPROGS because they require a
+# software environment which many people haven't set up.
 
 all: $(ALLPROGS)
 
@@ -97,6 +116,12 @@ ex5b: ex5b.o
 ########################################################################
 ex5b77: ex5b77.o
 	$(F77) -o $@ $^ $(LFLAGS_B) $(LFLAGS)
+
+########################################################################
+# Example 5 Babel Fortran 90
+########################################################################
+ex5b90: ex5b90.o
+	$(F90) -o $@ $^ $(LFLAGS_B) $(LFLAGS) $(LFLAGS90)
 
 ########################################################################
 # Example 5 Babel C++
@@ -156,3 +181,4 @@ veryclean distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)
 	rm -f $(BABELPROGS) $(BABELPROGS:=*~)
 	rm -rf *.html README_files
+	rm -rf $(BABELPROGS:=*-pp.f90)
