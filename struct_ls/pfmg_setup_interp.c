@@ -270,6 +270,7 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    int                    stencil_size = hypre_StructStencilSize(stencil);
+   int                    warning_cnt= 0;
 
    hypre_BoxLoop2Begin(loop_size,
                        A_dbox, start, stride, Ai,
@@ -308,8 +309,17 @@ hypre_PFMGSetupInterpOp_CC0
                mrk1++;
          }
 
-         Pp0[Pi] /= center;
-         Pp1[Pi] /= center;  
+         if (!center)
+         {
+            warning_cnt++;
+            Pp0[Pi] = 0.0;
+            Pp1[Pi] = 0.0;  
+         }
+         else
+         {
+            Pp0[Pi] /= center;
+            Pp1[Pi] /= center;  
+         }
 
          /*----------------------------------------------
           * Set interpolation weight to zero, if stencil
@@ -323,6 +333,9 @@ hypre_PFMGSetupInterpOp_CC0
             Pp1[Pi] = 0.0;
       }
    hypre_BoxLoop2End(Ai, Pi);
+  
+   if (warning_cnt)
+      printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
 
    return hypre_error_flag;
 }
@@ -356,6 +369,7 @@ hypre_PFMGSetupInterpOp_CC1
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    int                    stencil_size = hypre_StructStencilSize(stencil);
+   int                    warning_cnt= 0;
 
    Ai = hypre_CCBoxIndexRank(A_dbox,start );
    Pi = hypre_CCBoxIndexRank(P_dbox,startc);
@@ -389,8 +403,17 @@ hypre_PFMGSetupInterpOp_CC1
       if (si == si1 && Ap[Ai] == 0.0)
          mrk1++;
    }
-   Pp0[Pi] /= center;
-   Pp1[Pi] /= center;  
+   if (!center)
+   {
+        warning_cnt++;
+        Pp0[Pi] = 0.0;
+        Pp1[Pi] = 0.0;  
+   }
+   else
+   {
+        Pp0[Pi] /= center;
+        Pp1[Pi] /= center;  
+   }
 
    /*----------------------------------------------
     * Set interpolation weight to zero, if stencil
@@ -407,6 +430,9 @@ hypre_PFMGSetupInterpOp_CC1
       Pp0[Pi] = 0.0;
    if (mrk1 != 0)
       Pp1[Pi] = 0.0;
+
+   if (warning_cnt)
+      printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
 
    return hypre_error_flag;
 }
@@ -445,6 +471,7 @@ hypre_PFMGSetupInterpOp_CC2
    int                    stencil_size = hypre_StructStencilSize(stencil);
    hypre_Index            diag_index;
    int                    diag_rank;
+   int                    warning_cnt= 0;
 
    hypre_SetIndex(diag_index, 0, 0, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
@@ -538,8 +565,17 @@ hypre_PFMGSetupInterpOp_CC2
             if (si == si1 && Ap[Ai] == 0.0)
                mrk1++;
 
-            Pp0[Pi] /= center;
-            Pp1[Pi] /= center;  
+             if (!center)
+             {
+                warning_cnt++;
+                Pp0[Pi] = 0.0;
+                Pp1[Pi] = 0.0;  
+             }
+             else
+             {
+                Pp0[Pi] /= center;
+                Pp1[Pi] /= center;  
+             }
 
             /*----------------------------------------------
              * Set interpolation weight to zero, if stencil
@@ -555,6 +591,9 @@ hypre_PFMGSetupInterpOp_CC2
          }
       hypre_BoxLoop2End(Ai, Pi);
    }
+
+   if (warning_cnt)
+      printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
 
    return hypre_error_flag;
 }
