@@ -434,13 +434,19 @@ hypre_MPI_Allreduce( void              *sendbuf,
                      hypre_MPI_Op       op,
                      hypre_MPI_Comm     comm )
 { 
+   int i;
+   
    switch (datatype)
    {
       case hypre_MPI_INT:
       {
          int *crecvbuf = (int *)recvbuf;
          int *csendbuf = (int *)sendbuf;
-         crecvbuf[0] = csendbuf[0];
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
+         
       } 
       break;
 
@@ -448,7 +454,10 @@ hypre_MPI_Allreduce( void              *sendbuf,
       {
          double *crecvbuf = (double *)recvbuf;
          double *csendbuf = (double *)sendbuf;
-         crecvbuf[0] = csendbuf[0];
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
       } 
       break;
 
@@ -456,13 +465,16 @@ hypre_MPI_Allreduce( void              *sendbuf,
       {
          char *crecvbuf = (char *)recvbuf;
          char *csendbuf = (char *)sendbuf;
-         crecvbuf[0] = csendbuf[0];
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
       } 
       break;
 
       case hypre_MPI_BYTE:
       {
-         memcpy(recvbuf, sendbuf, 1);
+         memcpy(recvbuf, sendbuf, count);
       } 
       break;
    }
