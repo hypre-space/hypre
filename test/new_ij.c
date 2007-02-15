@@ -72,6 +72,7 @@ main( int   argc,
    int                 pcg_max_its; 
    int                 dscg_max_its; 
    int                 nodal = 0;
+   int                 nodal_diag = 0;
    double              cf_tol = 0.9;
    double              norm;
    double              final_res_norm;
@@ -147,7 +148,8 @@ main( int   argc,
    double   outer_wt_level;
    double   tol = 1.e-8, pc_tol = 0.;
    double   max_row_sum = 1.;
-
+   int      amg_max_iter = 20;
+   
    /* parameters for ParaSAILS */
    double   sai_threshold = 0.1;
    double   sai_filter = 0.1;
@@ -531,6 +533,12 @@ main( int   argc,
          arg_index++;
          smooth_num_sweeps = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-amg_max_its") == 0 )
+      {
+         arg_index++;
+         amg_max_iter = atoi(argv[arg_index++]);
+      }
+
       else if ( strcmp(argv[arg_index], "-dt") == 0 )
       {
          arg_index++;
@@ -737,6 +745,12 @@ main( int   argc,
          arg_index++;
          nodal  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-nodal_diag") == 0 )
+      {
+         arg_index++;
+         nodal_diag  = atoi(argv[arg_index++]);
+      }
+
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
          arg_index++;
@@ -820,7 +834,7 @@ main( int   argc,
       printf("  -cljp                 : CLJP coarsening \n");
       printf("  -cljp1                : CLJP coarsening, fixed random \n");
       printf("  -pmis                 : PMIS coarsening \n");
-       printf("  -pmis1                : PMIS coarsening, fixed random \n");
+      printf("  -pmis1                : PMIS coarsening, fixed random \n");
       printf("  -hmis                 : HMIS coarsening \n");
       printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
       printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
@@ -840,10 +854,24 @@ main( int   argc,
       printf("       7=extended (only if no common C neighbor) interpolation  \n");
       printf("       8=standard interpolation  \n");
       printf("       9=standard interpolation with separation of weights  \n");
-      printf("      10=classical block interpolation for nodal systems AMG\n");
-      printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
       printf("      12=FF interpolation  \n");
       printf("      13=FF1 interpolation  \n");
+ 
+      printf("      16=use modified unknown interpolation for a system (w/unknown or hybrid approach) \n");
+      printf("      17=use non-systems interp = 6 for a system (w/unknown or hybrid approach) \n");
+      printf("      18=use non-systems interp = 8 for a system (w/unknown or hybrid approach) \n");
+      printf("      19=use non-systems interp = 0 for a system (w/unknown or hybrid approach) \n");
+      
+
+      printf("      10=classical block interpolation for nodal systems AMG\n");
+      printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
+      printf("      20=same as 10, but don't add weak connect. to diag \n");
+      printf("      21=same as 11, but don't add weak connect. to diag \n");
+      printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
+      printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
+        
+
+     
       printf("\n");
       printf("  -rlx  <val>            : relaxation type\n");
       printf("       0=Weighted Jacobi  \n");
@@ -863,8 +891,13 @@ main( int   argc,
       printf("       1 = Frobenius norm  \n");
       printf("       2 = Sum of Abs.value of elements  \n");
       printf("       3 = Largest magnitude element (includes its sign)  \n");
-      printf("       4 = Inf. norm \n");
-      printf("       5 = One norm  \n");
+      printf("       4 = Inf. norm (block only) \n");
+      printf("       5 = One norm  (block only) \n");
+      printf("       6 = Sum of all elements in block (block only) \n");
+      printf("  -nodal_diag <val>        :how to treat diag elements\n");
+      printf("       0 = no special treatment \n");
+      printf("       1 = make diag = neg.sum of the off_diag  \n");
+      printf("       2 = make diag = neg. of diag \n");
       printf("  -ns <val>              : Use <val> sweeps on each level\n");
       printf("                           (default C/F down, F/C up, F/C fine\n");
       printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
@@ -880,17 +913,7 @@ main( int   argc,
       printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
       printf("  -nf <val>              : set number of functions for systems AMG\n");
       printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
-      printf("  -interptype <val>      : set to 1 to get LS interpolation (for GSMG only)\n");
-      printf("                         : set to 2 to get interpolation for hyperbolic equations\n");
-      printf("                         : set to 3 to get direct interpolation (with weight separation)\n");
-      printf("                         : set to 4 to get multipass interpolation\n");
-      printf("                         : set to 5 to get multipass interpolation with weight separation\n");
-      printf("                         : set to 6 to get extended interpolation\n");
-      printf("                         : set to 7 to get FF interpolation\n");
-      printf("                         : set to 8 to get standard interpolation\n");
-      printf("                         : set to 9 to get standard interpolation with weight separation\n");
-      printf("                         : set to 10 for nodal standard interpolation (for systems only) \n");
-      printf("                         : set to 11 for diagonal nodal standard interpolation (for systems only) \n");
+    
       printf("  -postinterptype <val>  : invokes <val> no. of Jacobi interpolation steps after main interpolation\n");
       printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
       printf("                         : 1  PCG  (default)\n");
@@ -1622,6 +1645,9 @@ main( int   argc,
       if (!(build_rhs_type ==1 || build_rhs_type ==7)) HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
 
+      /* HYPRE_ParCSRMatrixPrint( parcsr_A,
+         "new_mat.A" );*/
+      
    }
 
    /*-----------------------------------------------------------
@@ -1786,9 +1812,12 @@ main( int   argc,
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
+      HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
+
+      HYPRE_BoomerAMGSetMaxIter(amg_solver, amg_max_iter);
 
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
 
@@ -1877,6 +1906,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
+       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       if (num_functions > 1)
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
  
@@ -1997,6 +2027,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2110,6 +2141,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2277,6 +2309,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2380,6 +2413,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2553,6 +2587,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2731,6 +2766,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2988,8 +3024,13 @@ BuildParLaplacian( int                  argc,
    double             *values;
    double             *mtrx;
 
+   double              ep = .1;
+   
    int                 system_vcoef = 0;
-
+   int                 sys_opt = 0;
+   int                 vcoef_opt = 0;
+   
+   
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -3045,10 +3086,26 @@ BuildParLaplacian( int                  argc,
          arg_index++;
          num_fun = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-sys_vcoef") == 0 )
+      else if ( strcmp(argv[arg_index], "-sysL_opt") == 0 )
       {
          arg_index++;
+         sys_opt = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sys_vcoef") == 0 )
+      {
+         /* have to use -sysL for this to */
+         arg_index++;
          system_vcoef = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-sys_vcoef_opt") == 0 )
+      {
+         arg_index++;
+         vcoef_opt = atoi(argv[arg_index++]); 
+      }
+      else if ( strcmp(argv[arg_index], "-ep") == 0 )
+      {
+         arg_index++;
+         ep = atof(argv[arg_index++]); 
       }
       else
       {
@@ -3120,45 +3177,143 @@ BuildParLaplacian( int                  argc,
 
       if (num_fun == 2)
       {
-         mtrx[0] = 2;
-         mtrx[1] = 1;
-         mtrx[2] = 1;
-         mtrx[3] = 2;
+         if (sys_opt ==1) /* identity  */
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 0.0; 
+            mtrx[2] = 0.0;
+            mtrx[3] = 1.0; 
+         }
+         else if (sys_opt ==2)
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 0.0; 
+            mtrx[2] = 0.0;
+            mtrx[3] = 20.0; 
+         }
+         else if (sys_opt ==3) /* similar to barry's talk - ex1 */
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 2.0; 
+            mtrx[2] = 2.0;
+            mtrx[3] = 1.0; 
+         }
+         else if (sys_opt ==4) /* can use with vcoef to get barry's ex*/
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 1.0; 
+            mtrx[2] = 1.0;
+            mtrx[3] = 1.0; 
+         }
+         else if (sys_opt ==5) /* barry's talk - ex1 */
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 1.1; 
+            mtrx[2] = 1.1;
+            mtrx[3] = 1.0; 
+         }
+         else if (sys_opt ==6) /*  */
+         {
+            mtrx[0] = 1.1;
+            mtrx[1] = 1.0; 
+            mtrx[2] = 1.0;
+            mtrx[3] = 1.1; 
+         }
 
-#if 0         
-         mtrx[0] = .01;
-         mtrx[1] = 200; 
-         mtrx[2] = 200;
-         mtrx[3] = .01; 
-#endif
-
-
+         else /* == 0 */
+         {
+            mtrx[0] = 2;
+            mtrx[1] = 1;
+            mtrx[2] = 1;
+            mtrx[3] = 2;
+         }
       }
       else if (num_fun == 3)
+      {
+         if (sys_opt ==1)
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 0.0;
+            mtrx[2] = 0.0;
+            mtrx[3] = 0.0;
+            mtrx[4] = 1.0;
+            mtrx[5] = 0.0;
+            mtrx[6] = 0.0;
+            mtrx[7] = 0.0;
+            mtrx[8] = 1.0;
+         }
+         else if (sys_opt ==2)
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 0.0;
+            mtrx[2] = 0.0;
+            mtrx[3] = 0.0;
+            mtrx[4] = 20.0;
+            mtrx[5] = 0.0;
+            mtrx[6] = 0.0;
+            mtrx[7] = 0.0;
+            mtrx[8] =.01;
+         }
+         else if (sys_opt ==3)
+         {
+            mtrx[0] = 1.01;
+            mtrx[1] = 1;
+            mtrx[2] = 0.0;
+            mtrx[3] = 1;
+            mtrx[4] = 2;
+            mtrx[5] = 1;
+            mtrx[6] = 0.0;
+            mtrx[7] = 1;
+            mtrx[8] = 1.01;  
+         }
+         else if (sys_opt ==4) /* barry ex4 */
+         {
+            mtrx[0] = 3;
+            mtrx[1] = 1;
+            mtrx[2] = 0.0;
+            mtrx[3] = 1;
+            mtrx[4] = 4;
+            mtrx[5] = 2;
+            mtrx[6] = 0.0;
+            mtrx[7] = 2;
+            mtrx[8] = .25;  
+         }
+         else /* == 0 */
+         {
+            mtrx[0] = 2.0;
+            mtrx[1] = 1.0;
+            mtrx[2] = 0.0;
+            mtrx[3] = 1.0;
+            mtrx[4] = 2.0;
+            mtrx[5] = 1.0;
+            mtrx[6] = 0.0;
+            mtrx[7] = 1.0;
+            mtrx[8] = 2.0;
+         }
+
+      } 
+      else if (num_fun == 4)
       {
          mtrx[0] = 1.01;
          mtrx[1] = 1;
          mtrx[2] = 0.0;
-         mtrx[3] = 1;
-         mtrx[4] = 2;
-         mtrx[5] = 1;
-         mtrx[6] = 0.0;
-         mtrx[7] = 1;
-         mtrx[8] = 1.01;
-
-#if 0
-         mtrx[0] = 3.0;
-         mtrx[1] = 1;
-         mtrx[2] = 0.0;
-         mtrx[3] = 1;
-         mtrx[4] = 4;
+         mtrx[3] = 0.0;
+         mtrx[4] = 1;
          mtrx[5] = 2;
-         mtrx[6] = 0.0;
-         mtrx[7] = 2;
-         mtrx[8] = .25;
-#endif
-
+         mtrx[6] = 1;
+         mtrx[7] = 0.0;
+         mtrx[8] = 0.0;
+         mtrx[9] = 1;
+         mtrx[10] = 1.01;
+         mtrx[11] = 0.0;
+         mtrx[12] = 2;
+         mtrx[13] = 1;
+         mtrx[14] = 0.0;
+         mtrx[15] = 1;
       } 
+
+
+
 
       if (!system_vcoef)
       {
@@ -3176,18 +3331,83 @@ BuildParLaplacian( int                  argc,
 
          if (num_fun == 2)
          {
+            if (vcoef_opt == 1)
+            {
+               /* Barry's talk * - must also have sys_opt = 4, all fail */
+               mtrx[0] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, .10, 1.0, 0, mtrx_values);
+               
+               mtrx[1]  = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, .1, 1.0, 1.0, 1, mtrx_values);
+               
+               mtrx[2] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, .01, 1.0, 1.0, 2, mtrx_values);
+               
+               mtrx[3] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, .02, 1.0, 3, mtrx_values);
+               
+            }
+            else if (vcoef_opt == 2)
+            {
+               /* Barry's talk * - ex2 - if have sys-opt = 4*/
+               mtrx[0] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, .010, 1.0, 0, mtrx_values);
+               
+               mtrx[1]  = 200.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 1, mtrx_values);
 
-            mtrx[0] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 0, mtrx_values);
-            
-            mtrx[1] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 2.0, 1.0, 1, mtrx_values);
-            
-            mtrx[2] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, 1.0, 0.0, 2, mtrx_values);
-            
-            mtrx[3] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 3.0, 1.0, 3, mtrx_values);
+               mtrx[2] = 200.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 2, mtrx_values);
+               
+               mtrx[3] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, .02, 1.0, 3, mtrx_values);
+               
+            }
+            else if (vcoef_opt == 3) /* use with default sys_opt  - ulrike ex 3*/
+            {
+               
+               /* mtrx[0] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 0, mtrx_values);
+               
+               /* mtrx[1] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 1, mtrx_values);
+               
+               /* mtrx[2] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 2, mtrx_values);
+               
+               /* mtrx[3] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 3, mtrx_values);
+            }
+            else if (vcoef_opt == 4) /* use with default sys_opt  - ulrike ex 4*/
+            {
+               double ep2 = ep;
+               
+               /* mtrx[0] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 0, mtrx_values);
+               
+               /* mtrx[1] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep*1.0, 1.0, 1, mtrx_values);
+               
+               /* mtrx[2] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 2, mtrx_values);
+               
+               /* mtrx[3] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep2*1.0, 1.0, 3, mtrx_values);
+            }
+            else  /* = 0 */
+            {
+               /* mtrx[0] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 0, mtrx_values);
+               
+               /* mtrx[1] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 2.0, 1.0, 1, mtrx_values);
+               
+               /* mtrx[2] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, 1.0, 0.0, 2, mtrx_values);
+               
+               /* mtrx[3] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 3.0, 1.0, 3, mtrx_values);
+            }
 
          }
          else if (num_fun == 3)
