@@ -605,7 +605,13 @@ int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
  **/
 int HYPRE_BoomerAMGSetNodal(HYPRE_Solver solver,
                                 int          nodal);
-
+/**
+ * (Optional) Sets whether to give spoecial treatment to diagonal elements in 
+ * the nodal systems version.
+ * The default is 0.
+ **/
+int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
+                                int          nodal_diag);
 /**
  * (Optional) Sets the mapping that assigns the function to each variable, 
  * if using the systems version. If no assignment is made and the number of

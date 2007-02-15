@@ -34,6 +34,9 @@
  *
  * Routine for getting matrix statistics from setup
  *
+ *
+ * AHB - using block norm 6 (sum of all elements) instead of 1 (frobenius)
+ *
  *****************************************************************************/
 
 
@@ -338,7 +341,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
       if (block_mode)
       {
-         printf( "\nBlock Operator Matrix Information:\n\n");
+         printf( "\nBlock Operator Matrix Information:\n");
+           printf( "(Row sums and weights use sum of all elements in the block -keeping signs)\n\n");
       }
       else 
       {
@@ -397,13 +401,13 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             min_entries = (A_diag_i[1]-A_diag_i[0])+(A_offd_i[1]-A_offd_i[0]);
             for (j = A_diag_i[0]; j < A_diag_i[1]; j++)
             {
-               hypre_CSRBlockMatrixBlockNorm(1, &A_diag_data[j*bnnz], &tmp_norm, block_size);
+               hypre_CSRBlockMatrixBlockNorm(6, &A_diag_data[j*bnnz], &tmp_norm, block_size);
                min_rowsum += tmp_norm;
             }
             
             for (j = A_offd_i[0]; j < A_offd_i[1]; j++)
             {
-               hypre_CSRBlockMatrixBlockNorm(1, &A_offd_data[j*bnnz], &tmp_norm, block_size);
+               hypre_CSRBlockMatrixBlockNorm(6, &A_offd_data[j*bnnz], &tmp_norm, block_size);
                min_rowsum += tmp_norm;
             }
             
@@ -418,12 +422,12 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                rowsum = 0.0;
                for (i = A_diag_i[j]; i < A_diag_i[j+1]; i++)
                {
-                  hypre_CSRBlockMatrixBlockNorm(1, &A_diag_data[i*bnnz], &tmp_norm, block_size);
+                  hypre_CSRBlockMatrixBlockNorm(6, &A_diag_data[i*bnnz], &tmp_norm, block_size);
                   rowsum += tmp_norm;
                }
                for (i = A_offd_i[j]; i < A_offd_i[j+1]; i++)
                {
-                  hypre_CSRBlockMatrixBlockNorm(1, &A_offd_data[i*bnnz], &tmp_norm, block_size);
+                  hypre_CSRBlockMatrixBlockNorm(6, &A_offd_data[i*bnnz], &tmp_norm, block_size);
                   rowsum += tmp_norm;
                }
                min_rowsum = hypre_min(rowsum, min_rowsum);
@@ -565,7 +569,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       }
       else 
       {
-         printf( "\n\nInterpolation Matrix Information:\n\n");
+         printf( "\n\nInterpolation Matrix Information:\n");
+         printf( "(Row sums and weights use sum of all elements in the block - keeping signs)\n\n");
       }
       
       printf("                 entries/row    min     max");
@@ -611,14 +616,14 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          {
             if (hypre_CSRBlockMatrixNumCols(P_block_diag)) 
             {
-               hypre_CSRBlockMatrixBlockNorm(1, &P_diag_data[0], &tmp_norm, block_size);
+               hypre_CSRBlockMatrixBlockNorm(6, &P_diag_data[0], &tmp_norm, block_size);
                min_weight = tmp_norm;
             }
             
 
             for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
             {
-               hypre_CSRBlockMatrixBlockNorm(1, &P_diag_data[j*bnnz], &tmp_norm, block_size);
+               hypre_CSRBlockMatrixBlockNorm(6, &P_diag_data[j*bnnz], &tmp_norm, block_size);
                min_weight = hypre_min(min_weight, tmp_norm);
 
                if (tmp_norm != 1.0)
@@ -630,7 +635,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             }
             for (j = P_offd_i[0]; j < P_offd_i[1]; j++)
             {        
-               hypre_CSRBlockMatrixBlockNorm(1, &P_offd_data[j*bnnz], &tmp_norm, block_size);
+               hypre_CSRBlockMatrixBlockNorm(6, &P_offd_data[j*bnnz], &tmp_norm, block_size);
                min_weight = hypre_min(min_weight, tmp_norm); 
  
               if (tmp_norm != 1.0)
@@ -653,7 +658,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                rowsum = 0.0;
                for (i = P_diag_i[j]; i < P_diag_i[j+1]; i++)
                {
-                  hypre_CSRBlockMatrixBlockNorm(1, &P_diag_data[i*bnnz], &tmp_norm, block_size);
+                  hypre_CSRBlockMatrixBlockNorm(6, &P_diag_data[i*bnnz], &tmp_norm, block_size);
                   min_weight = hypre_min(min_weight, tmp_norm);
 
                   if (tmp_norm != 1.0)
@@ -664,7 +669,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                
                for (i = P_offd_i[j]; i < P_offd_i[j+1]; i++)
                {
-                  hypre_CSRBlockMatrixBlockNorm(1, &P_offd_data[i*bnnz], &tmp_norm, block_size);
+                  hypre_CSRBlockMatrixBlockNorm(6, &P_offd_data[i*bnnz], &tmp_norm, block_size);
                   min_weight = hypre_min(min_weight, tmp_norm);
 
                   if (tmp_norm != 1.0) 

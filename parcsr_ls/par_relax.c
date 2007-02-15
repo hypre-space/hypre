@@ -2337,6 +2337,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             }
 
             relax_error = gselim(A_mat,b_vec,n_global);
+            /* use version with pivoting */
+            /* relax_error = gselim_piv(A_mat,b_vec,n_global);*/
 
             for (i = 0; i < n; i++)
             {

@@ -57,10 +57,11 @@
 
 int
 hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
-                       int                    num_functions,
-                       int                   *dof_func,
-                       int                    option,
-                       hypre_ParCSRMatrix   **AN_ptr)
+                            int                    num_functions,
+                            int                   *dof_func,
+                            int                    option,
+                            int                    diag_option,     
+                            hypre_ParCSRMatrix   **AN_ptr)
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
@@ -131,6 +132,9 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    int		      *map_to_node;
    int		      *map_to_map;
    int		      *counter;
+
+   double sum;
+   
 
    MPI_Comm_size(comm,&num_procs);
 
@@ -227,48 +231,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    switch (mode)
    {
-      case 7:  /* frobenius norm with signs*/
-      {
-         for (i=0; i < num_nodes; i++)
-         {
-            for (j=0; j < num_functions; j++)
-            {
-	       for (k=A_diag_i[row]; k < A_diag_i[row+1]; k++)
-	       {
-	          k_map = map_to_node[A_diag_j[k]];
-	          if (counter[k_map] < start_index)
-	          {
-	             counter[k_map] = index;
-	             AN_diag_j[index] = k_map;
-	             AN_diag_data[index] = A_diag_data[k]*A_diag_data[k];
-	             index++;
-	          }
-	          else
-	          {
-	             AN_diag_data[counter[k_map]] += 
-				A_diag_data[k]*A_diag_data[k];
-	          }
-	       }
-	       row++;
-            }
-            start_index = index;
-         }
-         for (i=0; i < AN_num_nonzeros_diag; i++)
-            AN_diag_data[i] = sqrt(AN_diag_data[i]);
-
-         /* temp for testing - make all diagonal entries negative */
-         /* the diagonal is the first element listed in each row -
-            this is the same as serial code */
-
-         for (i=0; i < num_nodes; i++)
-         {
-            index = AN_diag_i[i];
-            AN_diag_data[index] = - AN_diag_data[index];
-         }
-
-      }
-      break;
-      
       case 1:  /* frobenius norm */
       {
          for (i=0; i < num_nodes; i++)
@@ -297,18 +259,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          for (i=0; i < AN_num_nonzeros_diag; i++)
             AN_diag_data[i] = sqrt(AN_diag_data[i]);
-
-#if 0
-         /* temp for testing - make all diagonal entries negative */
-         /* the diagonal is the first element listed in each row -
-            this is the same as serial code */
-
-         for (i=0; i < num_nodes; i++)
-         {
-            index = AN_diag_i[i];
-            AN_diag_data[index] = - AN_diag_data[index];
-         }
-#endif         
 
       }
       break;
@@ -374,6 +324,40 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       }
       break;
    }
+
+   if (diag_option ==1 )
+   {
+      /* make the diag entry the negative of the sum of off-diag entries (DO MORE BELOW) */
+      for (i=0; i < num_nodes; i++)
+      {
+         index = AN_diag_i[i]; 
+         sum = 0.0;
+         for (k = AN_diag_i[i]+1; k < AN_diag_i[i+1]; k++)
+         {
+            sum += AN_diag_data[k];
+            
+         }
+         AN_diag_data[index] = -sum;
+      }
+      
+   }
+   else if (diag_option == 2)
+   {
+      
+      /*  make all diagonal entries negative */
+      /* the diagonal is the first element listed in each row - */
+      
+      for (i=0; i < num_nodes; i++)
+      {
+         index = AN_diag_i[i];
+         AN_diag_data[index] = - AN_diag_data[index];
+      }
+   }
+
+
+
+
+
 
    num_nonzeros_offd = A_offd_i[num_variables];
    AN_offd_i = hypre_CTAlloc(int, num_nodes+1);
@@ -612,7 +596,26 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       }
       hypre_TFree(map_to_map);
    }
-   
+
+   if (diag_option ==1 )
+   {
+      /* make the diag entry the negative of the sum of off-diag entries (here we are adding the 
+         off_diag contribution)*/
+      /* the diagonal is the first element listed in each row of AN_diag_data - */
+      for (i=0; i < num_nodes; i++)
+      {
+         sum = 0.0;
+         for (k = AN_offd_i[i]; k < AN_offd_i[i+1]; k++)
+         {
+            sum += AN_offd_data[k];
+            
+         }
+         index = AN_diag_i[i];/* location of diag entry in data */ 
+         AN_diag_data[index] -= sum; /* subtract from current value */
+      }
+      
+   }
+
     
    AN = hypre_ParCSRMatrixCreate(comm, global_num_nodes, global_num_nodes,
 		row_starts_AN, row_starts_AN, num_cols_offd_AN,

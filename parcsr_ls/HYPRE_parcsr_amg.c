@@ -1019,7 +1019,16 @@ HYPRE_BoomerAMGSetNodal( HYPRE_Solver  solver,
 {
    return( hypre_BoomerAMGSetNodal( (void *) solver, nodal ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNodalDiag
+ *--------------------------------------------------------------------------*/
 
+int
+HYPRE_BoomerAMGSetNodalDiag( HYPRE_Solver  solver,
+                         int          nodal  )
+{
+   return( hypre_BoomerAMGSetNodalDiag( (void *) solver, nodal ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetDofFunc
  *--------------------------------------------------------------------------*/

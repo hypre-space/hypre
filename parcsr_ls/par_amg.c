@@ -60,7 +60,7 @@ hypre_BoomerAMGCreate()
    int      setup_type;
    int      P_max_elmts;
    int 	    num_functions;
-   int 	    nodal;
+   int 	    nodal, nodal_diag;
    int 	    num_paths;
    int 	    agg_num_levels;
    int      post_interp_type;
@@ -124,6 +124,7 @@ hypre_BoomerAMGCreate()
    P_max_elmts = 0;
    num_functions = 1;
    nodal = 0;
+   nodal_diag = 0;
    num_paths = 1;
    agg_num_levels = 0;
    post_interp_type = 0;
@@ -193,6 +194,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetPMaxElmts(amg_data, P_max_elmts);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
    hypre_BoomerAMGSetNodal(amg_data, nodal);
+   hypre_BoomerAMGSetNodal(amg_data, nodal_diag);
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
    hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
    hypre_BoomerAMGSetPostInterpType(amg_data, post_interp_type);
@@ -803,7 +805,9 @@ hypre_BoomerAMGSetInterpType( void     *data,
       return hypre_error_flag;
    } 
 
-   if (interp_type < 0 || interp_type > 13)
+
+   if (interp_type < 0 || interp_type > 25)
+
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
@@ -2122,7 +2126,26 @@ hypre_BoomerAMGSetNodal( void     *data,
 
    return hypre_error_flag;
 }
+/*--------------------------------------------------------------------------
+ * Indicate how to treat diag for primary matrix with  nodal systems function
+ *--------------------------------------------------------------------------*/
 
+int
+hypre_BoomerAMGSetNodalDiag( void     *data,
+                          int    nodal )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataNodalDiag(amg_data) = nodal;
+
+   return hypre_error_flag;
+}
 /*--------------------------------------------------------------------------
  * Indicate the degree of aggressive coarsening
  *--------------------------------------------------------------------------*/
