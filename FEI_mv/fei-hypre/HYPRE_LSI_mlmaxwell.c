@@ -209,11 +209,6 @@ int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
     rowptr  = Amat->rowptr;
     colInd  = Amat->colnum;
     colVal  = Amat->values;
-#else
-    printf("ML_MatVec : MLMaxwell not activated.\n");
-    return -1;
-#endif
-
     length = nRows;
     for (i = 0; i < Amat->recvProcCnt; i++) length += Amat->recvLeng[i];
     dbuf = (double *) malloc(length * sizeof(double));
@@ -233,6 +228,11 @@ int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
     }
     if (dbuf != NULL) free(dbuf);
     return 1;
+
+#else
+    printf("ML_MatVec : MLMaxwell not activated.\n");
+    return -1;
+#endif
 }
 
 /****************************************************************************/
