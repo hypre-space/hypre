@@ -196,12 +196,12 @@ int ML_MatVec(ML_Operator *obj, int leng1, double p[], int leng2, double ap[])
 int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
 #endif
 {
+#ifdef HAVE_MLMAXWELL
     int               i, j, length, nRows, ibeg, iend, k, *rowptr, *colInd;
     double            *dbuf, sum, *colVal;
     HYPRE_ML_Matrix   *Amat;
     MLMaxwell_Context *context;
 
-#ifdef HAVE_MLMAXWELL
     ML_Operator *ml_op = (ML_Operator *) obj;
     context = (MLMaxwell_Context *) ML_Get_MyGetrowData(ml_op);
     Amat    = (HYPRE_ML_Matrix*) context->Amat;
