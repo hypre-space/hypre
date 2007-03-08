@@ -1105,24 +1105,22 @@ if test "$casc_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
    case $hypre_platform in
-      AIX* | aix* | Aix*) FFLAGS="${FFLAGS} -qmkshrobj"
-                          CFLAGS="${CFLAGS} -qmkshrobj"
-                          CXXFLAGS="${CXXFLAGS} -qmkshrobj"
-                          BUILD_F77_SHARED="${F77} -G"
-                          BUILD_CC_SHARED="${CC} -G"
-                          BUILD_CXX_SHARED="${CXX} -G"
+      AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
+                          SHARED_BUILD_FLAG="-G"
                           LINK_F77="${F77} -brtl"
                           LINK_CC="${CC} -brtl"
                           LINK_CXX="${CXX} -brtl"
                           ;;
-                       *) FFLAGS="${FFLAGS} -fPIC"
-                          CFLAGS="${CFLAGS} -fPIC"
-                          CXXFLAGS="${CXXFLAGS} -fPIC"
-                          BUILD_F77_SHARED="${F77} -shared"
-                          BUILD_CC_SHARED="${CC} -shared"
-                          BUILD_CXX_SHARED="${CXX} -shared"
+                       *) SHARED_COMPILE_FLAG="-fPIC"
+                          SHARED_BUILD_FLAG="-shared"
                           ;;
    esac
+   FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
+   CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
+   CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
+   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
+   BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
+   BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
 fi
 
 BUILD_PYTHON=0
@@ -1286,6 +1284,9 @@ AC_SUBST(LINK_CXX)
 AC_SUBST(BUILD_F77_SHARED)
 AC_SUBST(BUILD_CC_SHARED)
 AC_SUBST(BUILD_CXX_SHARED)
+
+AC_SUBST(SHARED_COMPILE_FLAG)
+AC_SUBST(SHARED_BUILD_FLAG)
 
 AC_SUBST(BUILD_PYTHON)
 AC_SUBST(PYTHON)
