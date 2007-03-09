@@ -47,14 +47,14 @@ mpirun -np 8 ./struct -n 4 4 4 -b 2 2 2 -P 2 2 2  -c 2.0 3.0 40 -solver 1 \
 # struct: Run base 2d case
 #=============================================================================
 
-mpirun -np 1 ./struct -d 2 -n 80 80 1 -solver 1  \
+mpirun -np 1 ./struct -d 2 -n 80 80 1 -solver 1  -w 0.80\
  > parflow.out.3
 
 #=============================================================================
 # struct: Run parallel and blocking 
 #=============================================================================
 
-mpirun -np 8 ./struct -d 2 -n 10 80 1 -P 8 1 1 -solver 1  \
+mpirun -np 8 ./struct -d 2 -n 10 80 1 -P 8 1 1 -solver 1 -w 0.80 \
  > parflow.out.4
-mpirun -np 4 ./struct -d 2 -n 10 10 1 -b 4 4 1 -P 2 2 1 -solver 1  \
+mpirun -np 4 ./struct -d 2 -n 10 10 1 -b 4 4 1 -P 2 2 1 -solver 1 -w 0.80 \
  > parflow.out.5
