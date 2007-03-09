@@ -153,6 +153,17 @@ HYPRE_SStructSysPFMGSetRelaxType( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructSysPFMGSetSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+                                                                                                                                                               
+int
+HYPRE_SStructSysPFMGSetJacobiWeight(HYPRE_SStructSolver solver,
+                                    double              weight)
+{
+   return( hypre_SysPFMGSetJacobiWeight( (void *) solver, weight) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SStructSysPFMGSetNumPreRelax
  *--------------------------------------------------------------------------*/
 

@@ -79,6 +79,9 @@ typedef struct
    int                    max_cycles;
    int                    zero_guess;
    int                    relax_type;
+   double                 jacobi_weight;  /* weighted jacobi weight */
+   int                    usr_jacobi_weight; /* indicator flag for user weight */
+
    int                    num_pre_smooth;
    int                    num_post_smooth;
 

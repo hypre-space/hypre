@@ -178,6 +178,20 @@ hypre_F90_IFACE(hypre_sstructsyspfmgsetrelaxtyp, HYPRE_SSTRUCTSYSPFMGSETRELAXTYP
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructSysPFMGSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+                                                                                                                                                               
+void
+hypre_F90_IFACE(hypre_sstructsyspfmgsetjacobiweigh, HYPRE_SSTRUCTSYSPFMGSETJACOBIWEIGH)
+                                                         (long int *solver,
+                                                          double   *weight,
+                                                          int      *ierr)
+{
+   *ierr = (int) (HYPRE_SStructSysPFMGSetJacobiWeight( (HYPRE_SStructSolver) *solver,
+                                                       (double)              *weight ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SStructSysPFMGSetNumPreRelax
  *--------------------------------------------------------------------------*/
 

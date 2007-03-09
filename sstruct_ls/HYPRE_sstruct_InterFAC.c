@@ -249,6 +249,17 @@ HYPRE_SStructFACSetRelaxType( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructFACSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructFACSetJacobiWeight( HYPRE_SStructSolver solver,
+                                 double              weight)
+{
+   return( hypre_FACSetJacobiWeight( (void *) solver, weight) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SStructFACSetNumPreRelax
  *--------------------------------------------------------------------------*/
 int

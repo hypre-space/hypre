@@ -73,6 +73,8 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_SStructPVector *x;
 
    int                   relax_type = (sys_pfmg_data -> relax_type);
+   int                   usr_jacobi_weight= (sys_pfmg_data -> usr_jacobi_weight);
+   double                jacobi_weight    = (sys_pfmg_data -> jacobi_weight);
    int                   skip_relax = (sys_pfmg_data -> skip_relax);
    double               *dxyz       = (sys_pfmg_data -> dxyz);
                      
@@ -389,6 +391,10 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    relax_data_l[0] = hypre_SysPFMGRelaxCreate(comm);
    hypre_SysPFMGRelaxSetTol(relax_data_l[0], 0.0);
    hypre_SysPFMGRelaxSetType(relax_data_l[0], relax_type);
+   if (usr_jacobi_weight)
+   {
+      hypre_SysPFMGRelaxSetJacobiWeight(relax_data_l[0], jacobi_weight);
+   }
    hypre_SysPFMGRelaxSetTempVec(relax_data_l[0], tx_l[0]);
    hypre_SysPFMGRelaxSetup(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
    if (num_levels > 1)
@@ -399,6 +405,10 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
          relax_data_l[l] = hypre_SysPFMGRelaxCreate(comm);
          hypre_SysPFMGRelaxSetTol(relax_data_l[l], 0.0);
          hypre_SysPFMGRelaxSetType(relax_data_l[l], relax_type);
+         if (usr_jacobi_weight)
+         {
+            hypre_SysPFMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+         }
          hypre_SysPFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
          hypre_SysPFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
@@ -407,6 +417,10 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       hypre_SysPFMGRelaxSetTol(relax_data_l[l], 0.0);
       hypre_SysPFMGRelaxSetMaxIter(relax_data_l[l], 1);
       hypre_SysPFMGRelaxSetType(relax_data_l[l], 0);
+      if (usr_jacobi_weight)
+      {
+         hypre_SysPFMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+      }
       hypre_SysPFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
       hypre_SysPFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
    }

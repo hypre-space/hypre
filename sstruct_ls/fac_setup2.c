@@ -107,8 +107,10 @@ hypre_FacSetup2( void                 *fac_vdata,
    HYPRE_SStructSolver     crse_solver;
    HYPRE_SStructSolver     crse_precond;
    
-   int                     max_level      =  hypre_FACDataMaxLevels(fac_data);
-   int                     relax_type     =  fac_data -> relax_type;
+   int                     max_level        =  hypre_FACDataMaxLevels(fac_data);
+   int                     relax_type       =  fac_data -> relax_type;
+   int                     usr_jacobi_weight=  fac_data -> usr_jacobi_weight;
+   double                  jacobi_weight    =  fac_data -> jacobi_weight;
    int                    *levels;
    int                    *part_to_level;
 
@@ -895,6 +897,10 @@ hypre_FacSetup2( void                 *fac_vdata,
        relax_data_level[level]=  hypre_SysPFMGRelaxCreate(comm);
        hypre_SysPFMGRelaxSetTol(relax_data_level[level], 0.0);
        hypre_SysPFMGRelaxSetType(relax_data_level[level], relax_type);
+       if (usr_jacobi_weight)
+       {
+          hypre_SysPFMGRelaxSetJacobiWeight(relax_data_level[level], jacobi_weight);
+       }
        hypre_SysPFMGRelaxSetTempVec(relax_data_level[level], tx_level[level]);
        hypre_SysPFMGRelaxSetup(relax_data_level[level], 
                                hypre_SStructMatrixPMatrix(A_level[level], part_fine),
@@ -923,6 +929,10 @@ hypre_FacSetup2( void                 *fac_vdata,
        HYPRE_SStructSysPFMGSetZeroGuess(crse_precond);
        /* weighted Jacobi = 1; red-black GS = 2 */
        HYPRE_SStructSysPFMGSetRelaxType(crse_precond, 3);
+       if (usr_jacobi_weight)
+       {
+          HYPRE_SStructFACSetJacobiWeight(crse_precond, jacobi_weight);
+       }
        HYPRE_SStructSysPFMGSetNumPreRelax(crse_precond, 1);
        HYPRE_SStructSysPFMGSetNumPostRelax(crse_precond, 1);
        HYPRE_PCGSetPrecond((HYPRE_Solver) crse_solver,
@@ -946,6 +956,10 @@ hypre_FacSetup2( void                 *fac_vdata,
        HYPRE_SStructSysPFMGSetZeroGuess(crse_solver);
        /* weighted Jacobi = 1; red-black GS = 2 */
        HYPRE_SStructSysPFMGSetRelaxType(crse_solver, relax_type);
+       if (usr_jacobi_weight)
+       {
+          HYPRE_SStructFACSetJacobiWeight(crse_precond, jacobi_weight);
+       }
        HYPRE_SStructSysPFMGSetNumPreRelax(crse_solver, 1);
        HYPRE_SStructSysPFMGSetNumPostRelax(crse_solver, 1);
        HYPRE_SStructSysPFMGSetup(crse_solver, A_level[0], b_level[0], x_level[0]);
