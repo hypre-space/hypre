@@ -246,8 +246,14 @@ int HYPRE_StructPFMGSetNonZeroGuess(HYPRE_StructSolver solver);
 int HYPRE_StructPFMGSetRelaxType(HYPRE_StructSolver solver,
                                  int                relax_type);
 
+/*
+ * (Optional) Set Jacobi weight (this is purposely not documented)
+ */
 int HYPRE_StructPFMGSetJacobiWeight(HYPRE_StructSolver solver,
                                     double             weight);
+int HYPRE_StructPFMGGetJacobiWeight(HYPRE_StructSolver solver,
+                                    double            *weight);
+
 
 /**
  * (Optional) Set type of coarse-grid operator to use.

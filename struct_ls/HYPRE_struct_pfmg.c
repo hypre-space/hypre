@@ -189,7 +189,9 @@ HYPRE_StructPFMGSetNonZeroGuess( HYPRE_StructSolver solver )
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetRelaxType, HYPRE_StructPFMGGetRelaxType,
- * HYPRE_StructPFMGSetJacobiWeight
+ * HYPRE_StructPFMGSetJacobiWeight, HYPRE_StructPFMGGetJacobiWeight
+ * GetJacobiWeight will not return the actual weight
+ * if SetJacobiWeight has not been called.
  *--------------------------------------------------------------------------*/
 
 int
@@ -212,6 +214,13 @@ HYPRE_StructPFMGSetJacobiWeight(HYPRE_StructSolver solver,
 {
    return( hypre_PFMGSetJacobiWeight( (void *) solver, weight) );
 }
+int
+HYPRE_StructPFMGGetJacobiWeight(HYPRE_StructSolver solver,
+                                double            *weight)
+{
+   return( hypre_PFMGGetJacobiWeight( (void *) solver, weight) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetRAPType, HYPRE_StructPFMGGetRAPType
  *--------------------------------------------------------------------------*/

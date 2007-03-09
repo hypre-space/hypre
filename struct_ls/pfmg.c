@@ -317,7 +317,7 @@ hypre_PFMGGetRelaxType( void *pfmg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetJacobiWeight
+ * hypre_PFMGSetJacobiWeight, hypre_PFMGGetJacobiWeight
  *--------------------------------------------------------------------------*/
 int
 hypre_PFMGSetJacobiWeight( void  *pfmg_vdata,
@@ -328,6 +328,17 @@ hypre_PFMGSetJacobiWeight( void  *pfmg_vdata,
    (pfmg_data -> jacobi_weight)    = weight;
    (pfmg_data -> usr_jacobi_weight)= 1;
                                                                                                                                       
+   return hypre_error_flag;
+}
+
+int
+hypre_PFMGGetJacobiWeight( void  *pfmg_vdata,
+                           double *weight )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+
+   *weight = (pfmg_data -> jacobi_weight);
+
    return hypre_error_flag;
 }
 
