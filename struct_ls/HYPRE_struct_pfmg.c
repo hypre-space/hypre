@@ -188,7 +188,8 @@ HYPRE_StructPFMGSetNonZeroGuess( HYPRE_StructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetRelaxType, HYPRE_StructPFMGGetRelaxType
+ * HYPRE_StructPFMGSetRelaxType, HYPRE_StructPFMGGetRelaxType,
+ * HYPRE_StructPFMGSetJacobiWeight
  *--------------------------------------------------------------------------*/
 
 int
@@ -205,6 +206,12 @@ HYPRE_StructPFMGGetRelaxType( HYPRE_StructSolver solver,
    return( hypre_PFMGGetRelaxType( (void *) solver, relax_type) );
 }
 
+int
+HYPRE_StructPFMGSetJacobiWeight(HYPRE_StructSolver solver,
+                                double             weight)
+{
+   return( hypre_PFMGSetJacobiWeight( (void *) solver, weight) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetRAPType, HYPRE_StructPFMGGetRAPType
  *--------------------------------------------------------------------------*/

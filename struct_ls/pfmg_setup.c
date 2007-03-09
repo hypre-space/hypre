@@ -69,9 +69,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    MPI_Comm              comm = (pfmg_data -> comm);
                      
-   int                   relax_type = (pfmg_data -> relax_type);
-   int                   skip_relax = (pfmg_data -> skip_relax);
-   double               *dxyz       = (pfmg_data -> dxyz);
+   int                   relax_type =       (pfmg_data -> relax_type);
+   int                   usr_jacobi_weight= (pfmg_data -> usr_jacobi_weight);
+   double                jacobi_weight    = (pfmg_data -> jacobi_weight);
+   int                   skip_relax =       (pfmg_data -> skip_relax);
+   double               *dxyz       =       (pfmg_data -> dxyz);
    int                   rap_type;
                      
    int                   max_iter;
@@ -419,6 +421,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    relax_data_l[0] = hypre_PFMGRelaxCreate(comm);
    hypre_PFMGRelaxSetTol(relax_data_l[0], 0.0);
    hypre_PFMGRelaxSetType(relax_data_l[0], relax_type);
+   if (usr_jacobi_weight)
+   {
+      hypre_PFMGRelaxSetJacobiWeight(relax_data_l[0], jacobi_weight);
+   }
    hypre_PFMGRelaxSetTempVec(relax_data_l[0], tx_l[0]);
    hypre_PFMGRelaxSetup(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
    if (num_levels > 1)
@@ -431,6 +437,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
             relax_data_l[l] = hypre_PFMGRelaxCreate(comm);
             hypre_PFMGRelaxSetTol(relax_data_l[l], 0.0);
             hypre_PFMGRelaxSetType(relax_data_l[l], relax_type);
+            if (usr_jacobi_weight)
+            {
+               hypre_PFMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+            }
             hypre_PFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
             hypre_PFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
          }
@@ -442,6 +452,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_PFMGRelaxSetTol(relax_data_l[l], 0.0);
          hypre_PFMGRelaxSetMaxIter(relax_data_l[l], 1);
          hypre_PFMGRelaxSetType(relax_data_l[l], 0);
+         if (usr_jacobi_weight)
+         {
+            hypre_PFMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+         }
          hypre_PFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
          hypre_PFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }

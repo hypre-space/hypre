@@ -184,6 +184,19 @@ hypre_F90_IFACE(hypre_structsparsemsgsetrelaxty, HYPRE_STRUCTSPARSEMSGSETRELAXTY
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructSparseMSGSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+void
+hypre_F90_IFACE(hypre_structsparsemsgsetjacobiweigh, HYPRE_STRUCTSPARSEMSGSETJACOBIWEIGH)
+                                                  (long int *solver,
+                                                   double   *weight,
+                                                   int      *ierr)
+{
+   *ierr = (int) (HYPRE_StructSparseMSGSetJacobiWeight( (HYPRE_StructSolver) *solver,
+                                                        (double)             *weight ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructSparseMSGSetNumPreRelax
  *--------------------------------------------------------------------------*/
 

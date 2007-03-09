@@ -49,22 +49,24 @@ hypre_SparseMSGCreate( MPI_Comm  comm )
    (smsg_data -> time_index) = hypre_InitializeTiming("SparseMSG");
 
    /* set defaults */
-   (smsg_data -> tol)            = 1.0e-06;
-   (smsg_data -> max_iter)       = 200;
-   (smsg_data -> rel_change)     = 0;
-   (smsg_data -> zero_guess)     = 0;
-   (smsg_data -> jump)           = 0;
-   (smsg_data -> relax_type)     = 1;       /* weighted Jacobi */
-   (smsg_data -> num_pre_relax)  = 1;
-   (smsg_data -> num_post_relax) = 1;
-   (smsg_data -> num_fine_relax) = 1;
-   (smsg_data -> logging)        = 0;
-   (smsg_data -> print_level)    = 0;
+   (smsg_data -> tol)              = 1.0e-06;
+   (smsg_data -> max_iter)         = 200;
+   (smsg_data -> rel_change)       = 0;
+   (smsg_data -> zero_guess)       = 0;
+   (smsg_data -> jump)             = 0;
+   (smsg_data -> relax_type)       = 1;       /* weighted Jacobi */
+   (smsg_data -> jacobi_weight)    = 0.0;
+   (smsg_data -> usr_jacobi_weight)= 0;     /* no user Jacobi weight */
+   (smsg_data -> num_pre_relax)    = 1;
+   (smsg_data -> num_post_relax)   = 1;
+   (smsg_data -> num_fine_relax)   = 1;
+   (smsg_data -> logging)          = 0;
+   (smsg_data -> print_level)      = 0;
 
    /* initialize */
-   (smsg_data -> num_grids[0])    = 1;
-   (smsg_data -> num_grids[1])    = 1;
-   (smsg_data -> num_grids[2])    = 1;
+   (smsg_data -> num_grids[0])     = 1;
+   (smsg_data -> num_grids[1])     = 1;
+   (smsg_data -> num_grids[2])     = 1;
 
    return (void *) smsg_data;
 }
@@ -262,6 +264,21 @@ hypre_SparseMSGSetRelaxType( void *smsg_vdata,
    (smsg_data -> relax_type) = relax_type;
  
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SparseMSGSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+int
+hypre_SparseMSGSetJacobiWeight( void  *smsg_vdata,
+                                double weight )
+{
+   hypre_SparseMSGData *smsg_data = smsg_vdata;
+
+   (smsg_data -> jacobi_weight)    = weight;
+   (smsg_data -> usr_jacobi_weight)= 1;
+                                                                                                                                      
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

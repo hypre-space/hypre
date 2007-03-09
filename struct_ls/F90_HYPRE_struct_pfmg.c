@@ -243,6 +243,19 @@ hypre_F90_IFACE(hypre_structpfmggetrelaxtype, HYPRE_STRUCTPFMGGETRELAXTYPE)( lon
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+void
+hypre_F90_IFACE(hypre_structpfmgsetjacobiweigh, HYPRE_STRUCTPFMGSETJACOBIWEIGH)
+                                                  (long int *solver,
+                                                   double   *weight,
+                                                   int      *ierr)
+{
+   *ierr = (int) (HYPRE_StructPFMGSetJacobiWeight( (HYPRE_StructSolver) *solver,
+                                                   (double)             *weight ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetRAPType, HYPRE_StructPFMGSetRapType
  *--------------------------------------------------------------------------*/
 

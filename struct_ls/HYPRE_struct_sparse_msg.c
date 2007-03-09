@@ -164,6 +164,17 @@ HYPRE_StructSparseMSGSetRelaxType( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructSparseMSGSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_StructSparseMSGSetJacobiWeight(HYPRE_StructSolver solver,
+                                     double             weight)
+{
+   return( hypre_SparseMSGSetJacobiWeight( (void *) solver, weight) );
+}
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructSparseMSGSetNumPreRelax
  *--------------------------------------------------------------------------*/
 

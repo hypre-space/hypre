@@ -72,6 +72,8 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    int                   max_iter;
    int                   jump       = (smsg_data -> jump);
    int                   relax_type = (smsg_data -> relax_type);
+   int                   usr_jacobi_weight= (smsg_data -> usr_jacobi_weight);
+   double                jacobi_weight    = (smsg_data -> jacobi_weight);
    int                  *num_grids  = (smsg_data -> num_grids);
    int                   num_all_grids;
    int                   num_levels;
@@ -725,6 +727,10 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    relax_a[0] = hypre_PFMGRelaxCreate(comm);
    hypre_PFMGRelaxSetTol(relax_a[0], 0.0);
    hypre_PFMGRelaxSetType(relax_a[0], relax_type);
+   if (usr_jacobi_weight)
+   {
+      hypre_PFMGRelaxSetJacobiWeight(relax_a[0], jacobi_weight);
+   }
    hypre_PFMGRelaxSetTempVec(relax_a[0], t_a[0]);
    hypre_PFMGRelaxSetup(relax_a[0], A_a[0], b_a[0], x_a[0]);
    /* set up the fine grid residual routine */
@@ -748,6 +754,10 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                   relax_a[fi] = hypre_PFMGRelaxCreate(comm);
                   hypre_PFMGRelaxSetTol(relax_a[fi], 0.0);
                   hypre_PFMGRelaxSetType(relax_a[fi], relax_type);
+                  if (usr_jacobi_weight)
+                  {
+                     hypre_PFMGRelaxSetJacobiWeight(relax_a[fi], jacobi_weight);
+                  }
                   hypre_PFMGRelaxSetTempVec(relax_a[fi], t_a[fi]);
                   hypre_PFMGRelaxSetup(relax_a[fi], A_a[fi], b_a[fi], x_a[fi]);
 
@@ -764,6 +774,10 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       hypre_PFMGRelaxSetTol(relax_a[fi], 0.0);
       hypre_PFMGRelaxSetMaxIter(relax_a[fi], 1);
       hypre_PFMGRelaxSetType(relax_a[fi], 0);
+      if (usr_jacobi_weight)
+      {
+         hypre_PFMGRelaxSetJacobiWeight(relax_a[fi], jacobi_weight);
+      }
       hypre_PFMGRelaxSetTempVec(relax_a[fi], t_a[fi]);
       hypre_PFMGRelaxSetup(relax_a[fi], A_a[fi], b_a[fi], x_a[fi]);
    }

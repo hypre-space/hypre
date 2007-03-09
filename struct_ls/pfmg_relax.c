@@ -42,6 +42,8 @@ typedef struct
    void                   *relax_data;
    void                   *rb_relax_data;
    int                     relax_type;
+   int                     usr_jacobi_weight;
+   double                  jacobi_weight;
 
 } hypre_PFMGRelaxData;
 
@@ -132,9 +134,12 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
                       hypre_StructVector *b,
                       hypre_StructVector *x                )
 {
-   hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
-   int                  relax_type = (pfmg_relax_data -> relax_type);
-   int                  ierr = 0;
+   hypre_PFMGRelaxData *pfmg_relax_data  = pfmg_relax_vdata;
+   int                  relax_type       = (pfmg_relax_data -> relax_type);
+   int                  usr_jacobi_weight= (pfmg_relax_data -> usr_jacobi_weight); 
+   double               jacobi_weight    = (pfmg_relax_data -> jacobi_weight); 
+   int                  ndim             = hypre_StructGridDim(hypre_StructVectorGrid(x));
+   int                  ierr;
 
    switch(relax_type)
    {
@@ -148,6 +153,35 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
          ierr = hypre_RedBlackGSSetup((pfmg_relax_data -> rb_relax_data),
                                       A, b, x);
          break;
+   }
+
+   if (relax_type==1)
+   {
+      if (usr_jacobi_weight)
+      {
+         hypre_PointRelaxSetWeight(pfmg_relax_data -> relax_data, jacobi_weight);
+      }
+   
+      else  /* weights dimensionally dependent */
+      {
+         switch(ndim)
+         {
+            case 1: /* Weighted Jacobi (weight = 2/3)- already set */
+            {
+                break;
+            }
+            case 2: /* Weighted Jacobi (weight = 0.80) */
+            {
+                hypre_PointRelaxSetWeight(pfmg_relax_data -> relax_data, 0.80);
+                break;
+            }
+            case 3: /* Weighted Jacobi (weight = 6/7) */
+            {
+                hypre_PointRelaxSetWeight(pfmg_relax_data -> relax_data, 0.857142857);
+                break;
+            }
+         }
+      }
    }
 
    return ierr;
@@ -171,7 +205,7 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
    switch(relax_type)
    {
       case 1: /* Weighted Jacobi (weight = 2/3) */
-      hypre_PointRelaxSetWeight(relax_data, 0.666666);
+      hypre_PointRelaxSetWeight(relax_data, 0.66666666);
 
       case 0: /* Jacobi */
       {
@@ -195,9 +229,23 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PFMGRelaxSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+int
+hypre_PFMGRelaxSetJacobiWeight(void  *pfmg_relax_vdata,
+                               double weight) 
+{
+   hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
+
+  (pfmg_relax_data -> jacobi_weight)    = weight;
+  (pfmg_relax_data -> usr_jacobi_weight)= 1;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PFMGRelaxSetPreRelax
  *--------------------------------------------------------------------------*/
-
 int
 hypre_PFMGRelaxSetPreRelax( void  *pfmg_relax_vdata )
 {
