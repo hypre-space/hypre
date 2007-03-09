@@ -50,6 +50,9 @@ typedef struct
    int                   jump;
 
    int                   relax_type;     /* type of relaxation to use */
+   double                jacobi_weight;  /* weighted jacobi weight */
+   int                   usr_jacobi_weight; /* indicator flag for user weight */
+
    int                   num_pre_relax;  /* number of pre relaxation sweeps */
    int                   num_post_relax; /* number of post relaxation sweeps */
    int                   num_fine_relax; /* number of fine relaxation sweeps */

@@ -246,6 +246,9 @@ int HYPRE_StructPFMGSetNonZeroGuess(HYPRE_StructSolver solver);
 int HYPRE_StructPFMGSetRelaxType(HYPRE_StructSolver solver,
                                  int                relax_type);
 
+int HYPRE_StructPFMGSetJacobiWeight(HYPRE_StructSolver solver,
+                                    double             weight);
+
 /**
  * (Optional) Set type of coarse-grid operator to use.
  *
@@ -937,6 +940,9 @@ int HYPRE_StructSparseMSGSetNonZeroGuess(HYPRE_StructSolver solver);
 
 int HYPRE_StructSparseMSGSetRelaxType(HYPRE_StructSolver solver,
                                       int                relax_type);
+
+int HYPRE_StructSparseMSGSetJacobiWeight(HYPRE_StructSolver solver,
+                                         double             weight);
 
 int HYPRE_StructSparseMSGSetNumPreRelax(HYPRE_StructSolver solver,
                                         int                num_pre_relax);
