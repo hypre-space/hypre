@@ -436,11 +436,8 @@ hypre_PointRelax( void               *relax_vdata,
 
    p    = 0;
    iter = 0;
-   if ( tol>0.0 && num_pointsets>1 )
-   {
-      matvec_data = hypre_StructMatvecCreate();
-      hypre_StructMatvecSetup( matvec_data, A, x );
-   }
+   matvec_data = hypre_StructMatvecCreate();
+   hypre_StructMatvecSetup( matvec_data, A, x );
 
    if (zero_guess)
    {
@@ -528,12 +525,6 @@ hypre_PointRelax( void               *relax_vdata,
             }
       }
       
-      if ( tol>0.0 && num_pointsets==1 )
-      {  /* accumulate residual sum-squares for convergence test */
-         ierr += hypre_sumsqdiff_pointset( relax_data, pointset, x, b, A, &ss );
-         rsumsq += ss;
-      }
-
       if (weight != 1.0)
       {
          hypre_StructScale(weight, x);
@@ -548,13 +539,10 @@ hypre_PointRelax( void               *relax_vdata,
          tol>0.0 means to do a convergence test, using tol.
          The test is simply ||r||/||b||<tol, where r=residual, b=r.h.s., unweighted L2 norm */
       {
-         if ( num_pointsets>1 )
-         {  /* do residual sum-squares the expensive way */
-            hypre_StructCopy( b, t ); /* t = b */
-            hypre_StructMatvecCompute( matvec_data,
-                                       -1.0, A, x, 1.0, t );  /* t = - A x + t = - A x + b */
-            rsumsq = hypre_StructInnerProd( t, t ); /* <t,t> */
-         }
+         hypre_StructCopy( b, t ); /* t = b */
+         hypre_StructMatvecCompute( matvec_data,
+                                    -1.0, A, x, 1.0, t );  /* t = - A x + t = - A x + b */
+         rsumsq = hypre_StructInnerProd( t, t ); /* <t,t> */
          if ( rsumsq/bsumsq<tol2 ) max_iter = iter; /* converged; reset max_iter to prevent more iterations */
       }
    }
@@ -659,12 +647,6 @@ hypre_PointRelax( void               *relax_vdata,
       }
 
 
-      if ( tol>0.0 && num_pointsets==1 )
-      {  /* accumulate residual sum-squares for convergence test */
-         ierr += hypre_sumsqdiff_pointset( relax_data, pointset, t, x, A, &ss );
-         rsumsq += ss;
-      }
-
       if (weight != 1.0)
       {
          /*        hypre_StructScale((1.0 - weight), x);
@@ -686,13 +668,10 @@ hypre_PointRelax( void               *relax_vdata,
          tol>0.0 means to do a convergence test, using tol.
          The test is simply ||r||/||b||<tol, where r=residual, b=r.h.s., unweighted L2 norm */
       {
-         if ( num_pointsets>1 )
-         {  /* do residual sum-squares the expensive way */
-            hypre_StructCopy( b, t ); /* t = b */
-            hypre_StructMatvecCompute( matvec_data,
-                                       -1.0, A, x, 1.0, t );  /* t = - A x + t = - A x + b */
-            rsumsq = hypre_StructInnerProd( t, t ); /* <t,t> */
-         }
+         hypre_StructCopy( b, t ); /* t = b */
+         hypre_StructMatvecCompute( matvec_data,
+                                    -1.0, A, x, 1.0, t );  /* t = - A x + t = - A x + b */
+         rsumsq = hypre_StructInnerProd( t, t ); /* <t,t> */
          if ( rsumsq/bsumsq<tol2 ) break;
       }
    }
@@ -1895,142 +1874,6 @@ int hypre_relax_copy( void *relax_vdata, int pointset,
                   hypre_BoxLoop2End(xi, ti);
                }
          }
-   }
-
-   return ierr;
-}
-/*--------------------------------------------------------------------------
- * hypre_sumsqdiff_pointset
- * Computes the sum of squares of the residual for a Jacobi iteration.
- *   This is a cheap computation, but the residual sum-of-squares actually belongs
- * to the previous iteration.  But note that a straightforward computation of
- * a current value would cost as much as doing another iteration.
- *   Note also that PointRelax is doing a real Jacobi iteration only in the
- * case where there is a single pointset.  This is because if there are two or
- * more pointsets, the iteration for the second pointset uses updated values
- * from the first one.  This function will not compute a true correct residual
- * sum-of-squares in the multiple-pointset case, although what it computes may
- * be useful in early stages of convergence testing.
- *
- * The residual is computed from the old x iterate, x, the new x iterate, t,
- * and the diagonal of the matrix A as follows.  We assume t was computed by
- * a Jacobi iteration on the pointset.
- * Let A=D+O, D diagonal.  Then, t was computed by Dt=b-Ox, r is
- * r = b-Ax = b-Ox-Dx = D(t-x)
- *--------------------------------------------------------------------------*/
-
-int hypre_sumsqdiff_pointset( void *relax_vdata, int pointset,
-                              hypre_StructVector *t, hypre_StructVector *x,
-                              hypre_StructMatrix *A, double *sumsq )
-{
-   hypre_PointRelaxData  *relax_data = relax_vdata;
-   hypre_Index           *pointset_strides = (relax_data -> pointset_strides);
-   int                    diag_rank        = (relax_data -> diag_rank);
-   hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
-   hypre_ComputePkg      *compute_pkg;
-
-   hypre_IndexRef         stride;
-   hypre_IndexRef         start;
-   hypre_Index            loop_size;
-
-   int constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   double                *Ap;
-   double *xp, *tp;
-   double xmta;
-   int compute_i, i, j, loopi, loopj, loopk;
-   int Ai, xi, ti;
-   int ierr = 0;
-   double Api;
-
-   hypre_BoxArrayArray   *compute_box_aa;
-   hypre_BoxArray        *compute_box_a;
-   hypre_Box             *compute_box;
-   hypre_Box             *x_data_box;
-   hypre_Box             *t_data_box;
-   hypre_Box             *A_data_box;
-
-   *sumsq = 0.0;
-   compute_pkg = compute_pkgs[pointset];
-   stride = pointset_strides[pointset];
-
-   for (compute_i = 0; compute_i < 2; compute_i++)
-   {
-      switch(compute_i)
-      {
-      case 0:
-      {
-         compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
-      }
-      break;
-
-      case 1:
-      {
-         compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
-      }
-      break;
-      }
-
-      hypre_ForBoxArrayI(i, compute_box_aa)
-      {
-         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
-
-         x_data_box =
-            hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         t_data_box =
-            hypre_BoxArrayBox(hypre_StructVectorDataSpace(t), i);
-         A_data_box =
-            hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-
-         xp = hypre_StructVectorBoxData(x, i);
-         tp = hypre_StructVectorBoxData(t, i);
-         Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
-
-         if ( constant_coefficient==1 ) /* constant diagonal */
-         {
-            hypre_ForBoxI(j, compute_box_a)
-            {
-               compute_box = hypre_BoxArrayBox(compute_box_a, j);
-               start  = hypre_BoxIMin(compute_box);
-               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-               Ai = hypre_CCBoxIndexRank( A_data_box, start );
-               Api = Ap[Ai];
-
-               hypre_BoxLoop2Begin(loop_size,
-                                   x_data_box, start, stride, xi,
-                                   t_data_box, start, stride, ti);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
-#include "hypre_box_smp_forloop.h"
-               hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
-               {
-                  xmta = (xp[xi] - tp[ti])*Api;
-                  *sumsq += xmta*xmta;
-               }
-               hypre_BoxLoop2End(xi, ti);
-            }
-         }
-         else  /* variable diagonal, constant_coefficient==0 or 2 */
-         {
-            hypre_ForBoxI(j, compute_box_a)
-            {
-               compute_box = hypre_BoxArrayBox(compute_box_a, j);
-               start  = hypre_BoxIMin(compute_box);
-               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-               hypre_BoxLoop3Begin(loop_size,
-                                   A_data_box, start, stride, Ai,
-                                   x_data_box, start, stride, xi,
-                                   t_data_box, start, stride, ti);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ti
-#include "hypre_box_smp_forloop.h"
-               hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
-               {
-                  xmta = (xp[xi] - tp[ti])*Ap[Ai];
-                  *sumsq += xmta*xmta;
-               }
-               hypre_BoxLoop3End(Ai, xi, ti);
-            }
-         }
-      }
    }
 
    return ierr;
