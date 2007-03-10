@@ -60,6 +60,8 @@ hypre_PFMGRelaxCreate( MPI_Comm  comm )
    (pfmg_relax_data -> relax_data) = hypre_PointRelaxCreate(comm);
    (pfmg_relax_data -> rb_relax_data) = hypre_RedBlackGSCreate(comm);
    (pfmg_relax_data -> relax_type) = 0;        /* Weighted Jacobi */
+   (pfmg_relax_data -> usr_jacobi_weight) = 0;
+   (pfmg_relax_data -> jacobi_weight) = 0.0;
 
    return (void *) pfmg_relax_data;
 }
@@ -190,7 +192,8 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
 /*--------------------------------------------------------------------------
  * hypre_PFMGRelaxSetType
  *--------------------------------------------------------------------------*/
-
+/* All the weight-related code in this function should be migrated to
+ * hypre_PFMGRelaxSetup */
 int
 hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
                         int    relax_type       )
@@ -198,6 +201,8 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
    void                *relax_data = (pfmg_relax_data -> relax_data);
    int                  ierr = 0;
+   double               weight = (pfmg_relax_data->jacobi_weight);
+   int                  usr_jacobi_weight = (pfmg_relax_data -> usr_jacobi_weight);
 
    (pfmg_relax_data -> relax_type) = relax_type;
 
@@ -205,7 +210,14 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
    switch(relax_type)
    {
       case 1: /* Weighted Jacobi (weight = 2/3) */
-      hypre_PointRelaxSetWeight(relax_data, 0.66666666);
+      {
+         if ( !usr_jacobi_weight )
+         {
+            weight = 0.6666667;
+            (pfmg_relax_data->jacobi_weight) = weight;
+         }
+         hypre_PointRelaxSetWeight(relax_data, weight);
+      }
 
       case 0: /* Jacobi */
       {
@@ -231,6 +243,9 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
 /*--------------------------------------------------------------------------
  * hypre_PFMGRelaxSetJacobiWeight
  *--------------------------------------------------------------------------*/
+/* Presently this should be called before hypre_PFMGRelaxSetType.
+ * If we move all the weight-related code in hypre_PFMGRelaxSetType
+ * to hypre_PFMGRelaxSetup, then this restriction will go away */
 int
 hypre_PFMGRelaxSetJacobiWeight(void  *pfmg_relax_vdata,
                                double weight) 
