@@ -436,8 +436,11 @@ hypre_PointRelax( void               *relax_vdata,
 
    p    = 0;
    iter = 0;
-   matvec_data = hypre_StructMatvecCreate();
-   hypre_StructMatvecSetup( matvec_data, A, x );
+   if ( tol>0.0)
+   {
+      matvec_data = hypre_StructMatvecCreate();
+      hypre_StructMatvecSetup( matvec_data, A, x );
+   }
 
    if (zero_guess)
    {
@@ -676,7 +679,10 @@ hypre_PointRelax( void               *relax_vdata,
       }
    }
 
-   hypre_StructMatvecDestroy( matvec_data );
+   if ( tol>0.0 )
+   {
+      hypre_StructMatvecDestroy( matvec_data );
+   }
 
    if ( tol>0.0 ) (relax_data -> rresnorm) = sqrt( rsumsq/bsumsq );
    (relax_data -> num_iterations) = iter;
