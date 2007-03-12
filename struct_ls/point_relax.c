@@ -395,7 +395,7 @@ hypre_PointRelax( void               *relax_vdata,
    int                    pointset;
 
    int                    ierr = 0;
-   double                 bsumsq, rsumsq, ss;
+   double                 bsumsq, rsumsq;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
@@ -676,10 +676,7 @@ hypre_PointRelax( void               *relax_vdata,
       }
    }
 
-   if ( tol>0.0 && num_pointsets>1 )
-   {
-      hypre_StructMatvecDestroy( matvec_data );
-   }
+   hypre_StructMatvecDestroy( matvec_data );
 
    if ( tol>0.0 ) (relax_data -> rresnorm) = sqrt( rsumsq/bsumsq );
    (relax_data -> num_iterations) = iter;
