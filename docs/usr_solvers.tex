@@ -687,6 +687,9 @@ Note the following regarding these functions:
 the diagonal entries of the input matrix corresponding to eliminated
 degrees of freedom (due to essential boundary conditions)
 are penalized.
+\item It is assumed that thei essential boundary conditions of
+${\mathbf A}$, \code{Abeta} and \code{Aalpha} are on the same
+part of the boundary.
 \item \code{HYPRE_AMSSetAlphaPoissonMatrix} forces the
 AMS method to use a simpler, but weaker (in terms of convergence) method.
 With this option, the multiplicative AMS cycle
