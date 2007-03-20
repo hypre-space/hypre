@@ -566,11 +566,12 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       if (block_mode)
       {
          printf( "\n\nBlock Interpolation Matrix Information:\n\n");
+         printf( "(Row sums and weights use sum of all elements in the block - keeping signs)\n\n");
       }
       else 
       {
          printf( "\n\nInterpolation Matrix Information:\n");
-         printf( "(Row sums and weights use sum of all elements in the block - keeping signs)\n\n");
+        
       }
       
       printf("                 entries/row    min     max");
