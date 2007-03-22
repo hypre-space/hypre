@@ -134,10 +134,7 @@ distclean: clean
 
 libHYPRE.a: ${FILES_HYPRE}
 	@echo  "Building libHYPRE ... "
-	${AR} $@ $(SUPERLUFILES)
-	${AR} $@ $(FEIHYPREFILES)
-	${AR} $@ $(FEMLIFILES)
-	${AR} $@ $(IJMVFILES)
+	${AR} $@ $(SUPERLUFILES) $(FEIHYPREFILES) $(FEMLIFILES) $(IJMVFILES)
 	${AR} $@ $(EUCLIDFILES)
 	${AR} $@ $(PARASAILSFILES)
 	${AR} $@ $(PILUTFILES)
@@ -162,9 +159,7 @@ libHYPRE.so: ${FILES_HYPRE}
 
 libHYPRE_LSI.a: ${FILES_LSI}
 	@echo  "Building libHYPRE_LSI ... "
-	${AR} $@ $(FEIHYPREFILES)
-	${AR} $@ $(FEMLIFILES)
-	${AR} $@ $(IJMVFILES)
+	${AR} $@ $(FEIHYPREFILES) $(FEMLIFILES) $(IJMVFILES)
 	${AR} $@ $(EUCLIDFILES)
 	${AR} $@ $(PARASAILSFILES)
 	${AR} $@ $(PILUTFILES)
