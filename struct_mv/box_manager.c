@@ -1102,7 +1102,6 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
          int *proc_array;
          int *ap_proc_ids;
          int  count;
-         int threshold;
         
          int  max_response_size;
          int  non_info_size, entry_size_bytes;
