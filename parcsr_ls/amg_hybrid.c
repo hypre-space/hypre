@@ -70,6 +70,7 @@ typedef struct
    double		strong_threshold;
    double		max_row_sum;
    double		trunc_factor;
+   int                  pmax;
    int                  setup_type;
    int			max_levels;
    int			measure_type;
@@ -130,6 +131,7 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> strong_threshold)  = 0.25;
    (AMGhybrid_data -> max_row_sum)  = 0.9;
    (AMGhybrid_data -> trunc_factor)  = 0.0;
+   (AMGhybrid_data -> pmax)  = 0;
    (AMGhybrid_data -> max_levels)  = 25;
    (AMGhybrid_data -> measure_type)  = 0;
    (AMGhybrid_data -> coarsen_type)  = 6;
@@ -573,6 +575,36 @@ hypre_AMGHybridSetTruncFactor( void *AMGhybrid_vdata,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_AMGHybridSetPMaxElmts( void   *AMGhybrid_vdata,
+                             int    P_max_elmts )
+{
+
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (P_max_elmts < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+    (AMGhybrid_data -> pmax) = P_max_elmts;
+
+   return hypre_error_flag;
+}
+
+
+
 
 /*--------------------------------------------------------------------------
  * hypre_AMGHybridSetMaxLevels
@@ -1379,6 +1411,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    double 	strong_threshold;
    double      	max_row_sum;
    double	trunc_factor;
+   int          pmax;
    int		max_levels;
    int		measure_type;
    int		coarsen_type;
@@ -1451,6 +1484,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    strong_threshold = (AMGhybrid_data -> strong_threshold);
    max_row_sum = (AMGhybrid_data -> max_row_sum);
    trunc_factor = (AMGhybrid_data -> trunc_factor);
+   pmax = (AMGhybrid_data -> pmax);
    max_levels = (AMGhybrid_data -> max_levels);
    measure_type = (AMGhybrid_data -> measure_type);
    coarsen_type = (AMGhybrid_data -> coarsen_type);
@@ -1700,6 +1734,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          hypre_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          hypre_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         hypre_BoomerAMGSetPMaxElmts(pcg_precond, pmax);
          hypre_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          hypre_BoomerAMGSetPrintLevel(pcg_precond, pre_print_level);
          hypre_BoomerAMGSetMaxLevels(pcg_precond,  max_levels);

@@ -269,6 +269,19 @@ HYPRE_ParCSRHybridSetTruncFactor( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetPMaxElmts( HYPRE_Solver solver,
+                              int              p_max    )
+{
+   return( hypre_AMGHybridSetPMaxElmts( (void *) solver, p_max ) );
+}
+
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetMaxLevels
  *--------------------------------------------------------------------------*/
 

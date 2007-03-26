@@ -1435,6 +1435,19 @@ HYPRE_ParCSRHybridSetMaxRowSum( HYPRE_Solver solver,
 int
 HYPRE_ParCSRHybridSetTruncFactor( HYPRE_Solver solver,
                               double              trunc_factor    );
+
+
+/**
+ * (Optional) Defines the maximal number of elements per row for the interpolation.
+ * The default is 0.
+ **/
+int HYPRE_ParCSRHybridSetPMaxElmts(HYPRE_Solver solver,
+                                 int       P_max_elmts);
+
+
+
+
+
                                                                                                               
 /**
  * (Optional) Defines the maximal number of levels used for AMG.
