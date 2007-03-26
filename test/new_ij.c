@@ -1673,6 +1673,7 @@ main( int   argc,
       HYPRE_ParCSRHybridSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_ParCSRHybridSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParCSRHybridSetTruncFactor(amg_solver, trunc_factor);
+      HYPRE_ParCSRHybridSetPMaxElmts(amg_solver, P_max_elmts);
       HYPRE_ParCSRHybridSetMaxLevels(amg_solver, max_levels);
       HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_ParCSRHybridSetNumSweeps(amg_solver, num_sweeps);
