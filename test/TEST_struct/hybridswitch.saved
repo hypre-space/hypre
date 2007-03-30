@@ -4,7 +4,7 @@ Final Relative Residual Norm = 8.777304e-07
 
 # Output file: hybridswitch.out.1
 Iterations = 11
-Final Relative Residual Norm = 4.250818e-07
+Final Relative Residual Norm = 4.303572e-07
 
 # Output file: hybridswitch.out.2
 Iterations = 6
@@ -16,7 +16,7 @@ Final Relative Residual Norm = 7.591871e-07
 
 # Output file: hybridswitch.out.4
 Iterations = 8
-Final Relative Residual Norm = 7.198390e-07
+Final Relative Residual Norm = 7.771813e-07
 
 # Output file: hybridswitch.out.5
 Iterations = 36
