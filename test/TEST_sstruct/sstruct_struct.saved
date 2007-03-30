@@ -4,7 +4,7 @@ Final Relative Residual Norm = 2.753739e-07
 
 # Output file: sstruct_struct.out.1
 Iterations = 16
-Final Relative Residual Norm = 6.553848e-07
+Final Relative Residual Norm = 6.891627e-07
 
 # Output file: sstruct_struct.out.200
 Iterations = 5
@@ -12,5 +12,5 @@ Final Relative Residual Norm = 2.753739e-07
 
 # Output file: sstruct_struct.out.201
 Iterations = 16
-Final Relative Residual Norm = 6.553848e-07
+Final Relative Residual Norm = 6.891627e-07
 
