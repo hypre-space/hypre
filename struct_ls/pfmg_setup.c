@@ -560,6 +560,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    double                 cxyz[3];
    double                 tcxyz[3];
    double                 cxyz_max;
+   double                 locals[3];
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
@@ -795,9 +796,27 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                      }
                   }
 
-                  cx += tcxyz[0]/2.0;
-                  cy += tcxyz[1]/2.0;
-                  cz += tcxyz[2]/2.0;
+                  locals[0]= tcxyz[0]/2.0;
+                  locals[1]= tcxyz[1]/2.0;
+                  locals[2]= tcxyz[2]/2.0;
+
+                  cxyz_max = 0.0;
+                  for (d = 0; d < 3; d++)
+                  {
+                     cxyz_max = hypre_max(cxyz_max, locals[d]);
+                  }
+                  if (cxyz_max == 0.0)
+                  {
+                     cxyz_max = 1.0;
+                  }
+
+                  for (d = 0; d < 3; d++)
+                  {
+                     locals[d]/= cxyz_max;
+                  }
+                  cx += locals[0];
+                  cy += locals[1];
+                  cz += locals[2];
                }
             hypre_BoxLoop1End(Ai);
          }
