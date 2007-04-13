@@ -282,6 +282,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    double     weight;
    double     r_norm_0;
    double     relative_error;
+   int        reset_relativeerror;
 
    (gmres_data -> converged) = 0;
    /*-----------------------------------------------------------------------
@@ -417,6 +418,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (rel_change)
    {
       relative_error= epsilon + 1.;
+      reset_relativeerror= 0;
    }
 
    while (iter < max_iter)
@@ -509,18 +511,29 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		for (j = 1; j < i; j++)
 		{
 			t = hh[j-1][i-1];
-			hh[j-1][i-1] = c[j-1]*t + s[j-1]*hh[j][i-1];		
-			hh[j][i-1] = -s[j-1]*t + c[j-1]*hh[j][i-1];
+                        hh[j-1][i-1] = s[j-1]*hh[j][i-1] + c[j-1]*t;
+                        hh[j][i-1] = -s[j-1]*t + c[j-1]*hh[j][i-1];
 		}
-		gamma = sqrt(hh[i-1][i-1]*hh[i-1][i-1] + hh[i][i-1]*hh[i][i-1]);
+                t= hh[i][i-1]*hh[i][i-1];
+                t+= hh[i-1][i-1]*hh[i-1][i-1];
+                gamma = sqrt(t);
 		if (gamma == 0.0) gamma = epsmac;
-		c[i-1] = hh[i-1][i-1]/gamma;
-		s[i-1] = hh[i][i-1]/gamma;
-		rs[i] = -s[i-1]*rs[i-1];
+                c[i-1] = hh[i-1][i-1]/gamma;
+                s[i-1] = hh[i][i-1]/gamma;
+                rs[i] = -hh[i][i-1]*rs[i-1];
+                rs[i]/=  gamma;
 		rs[i-1] = c[i-1]*rs[i-1];
 		/* determine residual norm */
-		hh[i-1][i-1] = c[i-1]*hh[i-1][i-1] + s[i-1]*hh[i][i-1];
+                hh[i-1][i-1] = s[i-1]*hh[i][i-1] + c[i-1]*hh[i-1][i-1];
 		r_norm = fabs(rs[i]);
+
+                /* can reset the relative_error now since we've gone through 
+                   one correction */
+                if (!reset_relativeerror)
+                {
+                    relative_error-=  1.0;
+                    reset_relativeerror= 1;
+                }
 		if ( print_level>0 )
 		{
 		   norms[iter] = r_norm;
@@ -562,23 +575,26 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	rs[i-1] = rs[i-1]/hh[i-1][i-1];
 	for (k = i-2; k >= 0; k--)
 	{
-		t = rs[k];
-		for (j = k+1; j < i; j++)
-		{
-			t -= hh[k][j]*rs[j];
-		}
-		rs[k] = t/hh[k][k];
+                t = 0.0;
+                for (j = k+1; j < i; j++)
+                {
+                        t -= hh[k][j]*rs[j];
+                }
+                t+= rs[k];
+                rs[k] = t/hh[k][k];
 	}
 	
-	(*(gmres_functions->CopyVector))(p[0],w);
-	(*(gmres_functions->ScaleVector))(rs[0],w);
-	for (j = 1; j < i; j++)
-		(*(gmres_functions->Axpy))(rs[j], p[j], w);
+
+        (*(gmres_functions->CopyVector))(p[i-1],w);
+        (*(gmres_functions->ScaleVector))(rs[i-1],w);
+        for (j = i-2; j >=0; j--)
+                (*(gmres_functions->Axpy))(rs[j], p[j], w);
 
 	(*(gmres_functions->ClearVector))(r);
 	precond(precond_data, A, w, r);
 
 	(*(gmres_functions->Axpy))(1.0,r,x);
+
 
 /* check for convergence, evaluate actual residual */
 	if (r_norm/den_norm <= epsilon && iter >= min_iter) 
@@ -587,6 +603,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
                 {
                    x_norm = sqrt( (*(gmres_functions->InnerProd))(x,x) );
                    if ( x_norm<=guard_zero_residual ) break; /* don't divide by 0 */
+
+                  /* for relative change take x_(i-1) to be 
+                         x + M^{-1}[sum{j=0..i-2} rs_j p_j ].
+                     Form [sum{j=0..i-2} rs_j p_j ] by subtracting rs_{i-1} p_{i-1} */
+                   (*(gmres_functions->Axpy))(-rs[i-1], p[i-1], w);
+	           (*(gmres_functions->ClearVector))(r);
+	           precond(precond_data, A, w, r);
+          
 		   r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
                    relative_error= r_norm/x_norm;
                 }
@@ -635,9 +659,15 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		rs[j] = c[j-1]*rs[j];
 	}
 
-	if (i) (*(gmres_functions->Axpy))(rs[0]-1.0,p[0],p[0]);
-	for (j=1; j < i+1; j++)
-		(*(gmres_functions->Axpy))(rs[j],p[j],p[0]);	
+        if (i) (*(gmres_functions->Axpy))(rs[i]-1.0,p[i],p[i]);
+        for (j=i-1 ; j > 0; j--)
+                (*(gmres_functions->Axpy))(rs[j],p[j],p[i]);
+                                                                                                                    
+        if (i)
+        {
+            (*(gmres_functions->Axpy))(rs[0]-1.0,p[0],p[0]);
+            (*(gmres_functions->Axpy))(1.0,p[i],p[0]);
+        }
    }
 
    if ( print_level>1 && my_id == 0 )
