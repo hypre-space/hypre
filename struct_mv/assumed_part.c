@@ -2269,16 +2269,17 @@ int hypre_StructAssumedPartitionGetProcsFromBox( hypre_StructAssumedPart *assume
 }
 
 #if 0
-/******************************************************************************
- *  UNFINISHED  
- *  Create a new assumed partition by coarsen the boxes from another
- *  assumed partition.
+{
+/*
+   UNFINISHED  
+   Create a new assumed partition by coarsen the boxes from another
+   assumed partition.
 
    unfinished because of a problem: can't figure out what the new id
    is since the zero boxes drop out - and we don't have all of the
    boxes from a particular processor in the AP */
  
- *****************************************************************************/
+*/ 
 
 
 int hypre_StructCoarsenAP(hypre_StructAssumedPart *ap,  hypre_Index index, hypre_Index stride,
