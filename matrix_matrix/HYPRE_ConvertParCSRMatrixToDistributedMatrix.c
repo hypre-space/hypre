@@ -78,20 +78,20 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
 
    ierr = HYPRE_DistributedMatrixSetLocalStorageType( *DistributedMatrix,
                                                      HYPRE_PARCSR );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr); */
 
    ierr = HYPRE_DistributedMatrixInitialize( *DistributedMatrix );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr); */
 
    ierr = HYPRE_DistributedMatrixSetLocalStorage( *DistributedMatrix, parcsr_matrix );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr);*/
    
 
    ierr = HYPRE_ParCSRMatrixGetDims( parcsr_matrix, &M, &N); if(ierr) return(ierr);
    ierr = HYPRE_DistributedMatrixSetDims( *DistributedMatrix, M, N);
 
    ierr = HYPRE_DistributedMatrixAssemble( *DistributedMatrix );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr); */
 
 #ifdef HYPRE_TIMING
    hypre_EndTiming( timer );

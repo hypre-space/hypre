@@ -80,17 +80,17 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
    ierr = PetscObjectGetComm( (PetscObject) PETSc_matrix, &MPI_Comm); CHKERRA(ierr);
 
    ierr = HYPRE_DistributedMatrixCreate( MPI_Comm, DistributedMatrix );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr); */
 
    ierr = HYPRE_DistributedMatrixSetLocalStorageType( *DistributedMatrix,
                                                      HYPRE_PETSC );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr);*/
 
    ierr = HYPRE_DistributedMatrixInitialize( *DistributedMatrix );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr);*/
 
    ierr = HYPRE_DistributedMatrixSetLocalStorage( *DistributedMatrix, PETSc_matrix );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr); */
    /* Note that this is kind of cheating, since the Mat structure contains more
       than local information... the alternative is to extract the global info
       from the Mat and put it into DistributedMatrixAuxiliaryStorage. However,
@@ -101,7 +101,7 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
    ierr = HYPRE_DistributedMatrixSetDims( *DistributedMatrix, M, N);
 
    ierr = HYPRE_DistributedMatrixAssemble( *DistributedMatrix );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr);*/
 
 #ifdef HYPRE_TIMING
    hypre_EndTiming( timer );
