@@ -114,11 +114,11 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 }
 #endif
 
-  if(ierr) return(ierr);
+/* if(ierr) return(ierr);*/
 
   /* Exchange structural unions with other processors */
   ierr = ExchangeStructuralUnions( ddist, &structural_union, globals );
-  if(ierr) return(ierr);
+  /* if(ierr) return(ierr); */
 
   /* Select the rows to be factored */
 #ifdef HYPRE_TIMING
@@ -171,7 +171,7 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
     /* Initialize work space  */
     ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
-    if (ierr) return(ierr);
+    /* if (ierr) return(ierr); */
 
     for (lastjr=1, lastlr=0, j=0, diag_present=0; j<row_size; j++) {
       if (iperm[ col_ind[j] - firstrow ] < iperm[i]) 
@@ -269,7 +269,7 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
     /* Initialize work space */
     ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
-    if (ierr) return(ierr);
+    /* if (ierr) return(ierr); */
 
     for (lastjr=1, lastlr=0, j=0, diag_present=0; j<row_size; j++) {
       if (col_ind[j] >= firstrow  &&
@@ -390,7 +390,7 @@ int hypre_SelectInterior( int local_num_rows,
     {
       ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
-      if (ierr) return(ierr);
+      /* if (ierr) return(ierr); */
 
       for (j=0, break_loop=0; ( j<row_size )&& (break_loop == 0); j++) 
       {
@@ -439,7 +439,7 @@ int FindStructuralUnion( HYPRE_DistributedMatrix matrix,
     /* Get row structure; no values needed */
     ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
                &col_ind, NULL );
-    if (ierr) return(ierr);
+    /* if (ierr) return(ierr); */
 
     /* Loop through nonzeros in this row */
     for ( j=0; j<row_size; j++)
@@ -453,7 +453,7 @@ int FindStructuralUnion( HYPRE_DistributedMatrix matrix,
     /* Restore row structure */
     ierr = HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &row_size,
                &col_ind, NULL );
-    if (ierr) return(ierr);
+    /* if (ierr) return(ierr); */
 
   }
 
@@ -585,7 +585,7 @@ void hypre_SecondDrop(int maxnz, double tol, int row,
   /* Now, I want to keep maxnz elements of L. Go and extract them */
 
   ierr = hypre_DoubleQuickSplit( w, jw, last, maxnz ); 
-  if (ierr) return;
+  /* if (ierr) return; */
   for ( j= hypre_max(0,last-maxnz); j< last; j++ ) 
   {
      ldu->lcolind[ldu->lerowptr[lrow]] = jw[ j ];
@@ -613,7 +613,7 @@ void hypre_SecondDrop(int maxnz, double tol, int row,
 
   /* Now, I want to keep maxnz elements of U. Go and extract them */
   ierr = hypre_DoubleQuickSplit( w+first, jw+first, lastjr-first, maxnz ); 
-  if (ierr) return;
+  /* if (ierr) return; */
   for ( j=hypre_max(first, lastjr-maxnz); j< lastjr; j++ ) 
   {
      ldu->ucolind[ldu->uerowptr[lrow]] = jw[ j ];
@@ -739,7 +739,7 @@ void hypre_SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
 
   /* Keep large maxnz elements of L */
   ierr = hypre_DoubleQuickSplit( w+1, jw+1, last-1, maxnz ); 
-  if (ierr) return;
+  /* if (ierr) return; */
   for ( j= hypre_max(1,last-maxnz); j< last; j++ ) 
   {
      ldu->lcolind[ldu->lerowptr[lrow]] = jw[ j ];
