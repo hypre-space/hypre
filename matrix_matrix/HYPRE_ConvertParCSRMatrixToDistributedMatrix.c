@@ -87,7 +87,7 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
    /* if(ierr) return(ierr);*/
    
 
-   ierr = HYPRE_ParCSRMatrixGetDims( parcsr_matrix, &M, &N); if(ierr) return(ierr);
+   ierr = HYPRE_ParCSRMatrixGetDims( parcsr_matrix, &M, &N); /* if(ierr) return(ierr); */
    ierr = HYPRE_DistributedMatrixSetDims( *DistributedMatrix, M, N);
 
    ierr = HYPRE_DistributedMatrixAssemble( *DistributedMatrix );
