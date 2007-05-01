@@ -117,6 +117,7 @@ typedef struct
    void  *A;
    void  *r;
    void  *w;
+   void  *w_2;
    void  **p;
 
    void    *matvec_data;
