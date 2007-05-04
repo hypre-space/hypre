@@ -1235,23 +1235,27 @@ int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
 
 /**
  * (Optional) Sets AMG parameters for $B_\Pi$.
- * The defaults are $10$, $1$, $3$, $0.25$. See the user's manual for more details.
+ * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
  **/
 int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
                                 int alpha_coarsen_type,
                                 int alpha_agg_levels,
                                 int alpha_relax_type,
-                                double alpha_strength_threshold);
+                                double alpha_strength_threshold,
+                                int alpha_interp_type,
+                                int alpha_Pmax);
 
 /**
  * (Optional) Sets AMG parameters for $B_G$.
- * The defaults are $10$, $1$, $3$, $0.25$. See the user's manual for more details.
+ * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
  **/
 int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                int beta_coarsen_type,
                                int beta_agg_levels,
                                int beta_relax_type,
-                               double beta_strength_threshold);
+                               double beta_strength_threshold,
+                               int beta_interp_type,
+                               int beta_Pmax);
 
 /**
  * Returns the number of iterations taken.

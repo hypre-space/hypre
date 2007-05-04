@@ -487,10 +487,14 @@ void * hypre_AMSCreate()
    ams_data -> B_G_agg_levels = 1;     /* Levels of aggressive coarsening */
    ams_data -> B_G_relax_type = 3;     /* hybrid G-S/Jacobi */
    ams_data -> B_G_theta = 0.25;       /* strength threshold */
+   ams_data -> B_G_interp_type = 0;    /* interpolation type */
+   ams_data -> B_G_Pmax = 0;           /* max nonzero elements in interp. rows */
    ams_data -> B_Pi_coarsen_type = 10; /* HMIS coarsening */
    ams_data -> B_Pi_agg_levels = 1;    /* Levels of aggressive coarsening */
    ams_data -> B_Pi_relax_type = 3;    /* hybrid G-S/Jacobi */
    ams_data -> B_Pi_theta = 0.25;      /* strength threshold */
+   ams_data -> B_Pi_interp_type = 0;   /* interpolation type */
+   ams_data -> B_Pi_Pmax = 0;          /* max nonzero elements in interp. rows */
    ams_data -> beta_is_zero = 0;       /* the problem has a mass term */
 
    /* The rest of the fields are initialized using the Set functions */
@@ -836,40 +840,48 @@ int hypre_AMSSetSmoothingOptions(void *solver,
 /*--------------------------------------------------------------------------
  * hypre_AMSSetAlphaAMGOptions
  *
- * Set AMG parameters for B_Pi. Default values: 10, 1, 3, 0.25.
+ * Set AMG parameters for B_Pi. Default values: 10, 1, 3, 0.25, 0, 0.
  *--------------------------------------------------------------------------*/
 
 int hypre_AMSSetAlphaAMGOptions(void *solver,
                                 int B_Pi_coarsen_type,
                                 int B_Pi_agg_levels,
                                 int B_Pi_relax_type,
-                                double B_Pi_theta)
+                                double B_Pi_theta,
+                                int B_Pi_interp_type,
+                                int B_Pi_Pmax)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> B_Pi_coarsen_type = B_Pi_coarsen_type;
    ams_data -> B_Pi_agg_levels = B_Pi_agg_levels;
    ams_data -> B_Pi_relax_type = B_Pi_relax_type;
    ams_data -> B_Pi_theta = B_Pi_theta;
+   ams_data -> B_Pi_interp_type = B_Pi_interp_type;
+   ams_data -> B_Pi_Pmax = B_Pi_Pmax;
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_AMSSetBetaAMGOptions
  *
- * Set AMG parameters for B_G. Default values: 10, 1, 3, 0.25.
+ * Set AMG parameters for B_G. Default values: 10, 1, 3, 0.25, 0, 0.
  *--------------------------------------------------------------------------*/
 
 int hypre_AMSSetBetaAMGOptions(void *solver,
                                int B_G_coarsen_type,
                                int B_G_agg_levels,
                                int B_G_relax_type,
-                               double B_G_theta)
+                               double B_G_theta,
+                               int B_G_interp_type,
+                               int B_G_Pmax)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> B_G_coarsen_type = B_G_coarsen_type;
    ams_data -> B_G_agg_levels = B_G_agg_levels;
    ams_data -> B_G_relax_type = B_G_relax_type;
    ams_data -> B_G_theta = B_G_theta;
+   ams_data -> B_G_interp_type = B_G_interp_type;
+   ams_data -> B_G_Pmax = B_G_Pmax;
    return hypre_error_flag;
 }
 
@@ -1451,6 +1463,8 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetTol(ams_data -> B_G, 0.0);
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_G, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_G, ams_data -> B_G_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_G, ams_data -> B_G_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_G, ams_data -> B_G_Pmax);
 
       /* don't use exact solve on the coarsest level (matrix may be singular) */
       HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_G,
@@ -1495,6 +1509,8 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetTol(ams_data -> B_Pix, 0.0);
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Pix, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Pix, ams_data -> B_Pi_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_Pix, ams_data -> B_Pi_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Pix, ams_data -> B_Pi_Pmax);
 
       HYPRE_BoomerAMGCreate(&ams_data -> B_Piy);
       HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_Piy, ams_data -> B_Pi_coarsen_type);
@@ -1505,6 +1521,8 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetTol(ams_data -> B_Piy, 0.0);
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Piy, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Piy, ams_data -> B_Pi_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_Piy, ams_data -> B_Pi_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Piy, ams_data -> B_Pi_Pmax);
 
       HYPRE_BoomerAMGCreate(&ams_data -> B_Piz);
       HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_Piz, ams_data -> B_Pi_coarsen_type);
@@ -1515,6 +1533,8 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetTol(ams_data -> B_Piz, 0.0);
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Piz, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Piz, ams_data -> B_Pi_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_Piz, ams_data -> B_Pi_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Piz, ams_data -> B_Pi_Pmax);
 
       /* Construct the coarse space matrices by RAP */
       if (!hypre_ParCSRMatrixCommPkg(ams_data -> Pix))
@@ -1568,6 +1588,8 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetTol(ams_data -> B_Pi, 0.0);
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Pi, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Pi, ams_data -> B_Pi_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_Pi, ams_data -> B_Pi_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Pi, ams_data -> B_Pi_Pmax);
 
       /* don't use exact solve on the coarsest level (matrix may be singular) */
       HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pi,
@@ -1972,13 +1994,9 @@ int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
 {
    hypre_ParCSRMatrix *G;
 
-   int nedges, vxstart, vxend, nvert;
+   int nedges;
 
    nedges = hypre_ParCSRMatrixNumRows(A);
-
-   vxstart = hypre_ParVectorFirstIndex(x_coord);
-   vxend = hypre_ParVectorLastIndex(x_coord);
-   nvert = vxend - vxstart + 1;
 
    /* Construct the local part of G based on edge_vertex and the edge
       and vertex partitionings from A and x_coord */

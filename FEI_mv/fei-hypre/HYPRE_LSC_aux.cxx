@@ -305,6 +305,9 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - amgSchwarzDomainType <d>\n");
          printf("    - amgUseGSMG\n");
          printf("    - amgGSMGNumSamples\n");
+         printf("    - amgAggLevels <d>\n");
+         printf("    - amgInterpType <d>\n");
+         printf("    - amgPmax <d>\n");
          printf("    - parasailsThreshold <f>\n");
          printf("    - parasailsNlevels <d>\n");
          printf("    - parasailsFilter <f>\n");
@@ -1129,6 +1132,42 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
             printf("       HYPRE_LSC::parameters amgUseGSMG.\n");
       }
 
+      //----------------------------------------------------------------
+      // amg preconditoner : levels of aggresive coarsening
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amgAggLevels") )
+      {
+ 	 sscanf(params[i],"%s %d", param, &amgAggLevels_);
+	 if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+	   printf("       HYPRE_LSC::parameters %s = %d\n",
+		  param1, amgAggLevels_);
+      }
+
+      //----------------------------------------------------------------
+      // amg preconditoner : interpolation type
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amgInterpType") )
+      {
+ 	 sscanf(params[i],"%s %d", param, &amgInterpType_);
+	 if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+	   printf("       HYPRE_LSC::parameters %s = %d\n",
+		  param1, amgInterpType_);
+      }
+
+      //----------------------------------------------------------------
+      // amg preconditoner : interpolation truncation
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amgPmax") )
+      {
+ 	 sscanf(params[i],"%s %d", param, &amgPmax_);
+	 if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+	   printf("       HYPRE_LSC::parameters %s = %d\n",
+		  param1, amgPmax_);
+      }
+
       //---------------------------------------------------------------
       // parasails preconditoner : gsmg number of samples
       //---------------------------------------------------------------
@@ -1507,11 +1546,12 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       {
          sscanf(params[i],"%s %s", param, param2);
          if      (!strcmp(param2, "jacobi"))    amsRelaxType_ = 0;
-         else if (!strcmp(param2, "gsSlow"))    amsRelaxType_ = 1;
+         else if (!strcmp(param2, "scjacobi"))  amsRelaxType_ = 1;
+         else if (!strcmp(param2, "scgs"))      amsRelaxType_ = 2;
          else if (!strcmp(param2, "gsFast"))    amsRelaxType_ = 4;
          else if (!strcmp(param2, "hybrid"))    amsRelaxType_ = 3;
          else if (!strcmp(param2, "hybridsym")) amsRelaxType_ = 6;
-         else                                   amsRelaxType_ = 4;
+         else                                   amsRelaxType_ = 2;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amsRelaxType = %s\n",
                    param2);
@@ -1560,8 +1600,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
 
       else if (!strcmp(param1, "amsCycleType"))
       {
-         sscanf(params[i],"%s %c", param, param2);
-         if (param2[0] == 'V') amsCycleType_ = 1;
+         sscanf(params[i],"%s %d", param, &amsCycleType_);
+         if (amsCycleType_ < 1) amsCycleType_ = 1;
          if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
             printf("       HYPRE_LSC::parameters amgCycleType = %s\n",
                    param2);
@@ -1628,7 +1668,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       //----------------------------------------------------------------
       // amg preconditoner : coarsening type
       //----------------------------------------------------------------
-                                                                                
+
       else if ( !strcmp(param1, "amsBetaCoarsenType") )
       {
          sscanf(params[i],"%s %s", param, param2);
@@ -1643,9 +1683,9 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
             printf("       HYPRE_LSC::parameters amsBetaCoarsenType = %s\n",
                    param2);
       }
-                                                                                
+
       //---------------------------------------------------------------
-      // ams preconditoner : agg level
+      // ams preconditoner : levels of aggresive coarseinig
       //---------------------------------------------------------------
 
       else if (!strcmp(param1, "amsAlphaAggLevels"))
@@ -1656,8 +1696,32 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    amsAlphaAggLevels_);
       }
 
+      //----------------------------------------------------------------
+      // ams preconditoner : interpolation type
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsAlphaInterpType") )
+      {
+ 	 sscanf(params[i],"%s %d", param, &amsAlphaInterpType_);
+	 if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+	   printf("       HYPRE_LSC::parameters amsAlphaInterpType = %d\n",
+		  amsAlphaInterpType_);
+      }
+
+      //----------------------------------------------------------------
+      // ams preconditoner : interpolation truncation
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsAlphaPmax") )
+      {
+ 	 sscanf(params[i],"%s %d", param, &amsAlphaPmax_);
+	 if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+	   printf("       HYPRE_LSC::parameters amsAlphaPmax = %d\n",
+		  amsAlphaPmax_);
+      }
+
       //---------------------------------------------------------------
-      // ams preconditoner : agg level
+      // ams preconditoner : levels of aggresive coarseinig
       //---------------------------------------------------------------
 
       else if (!strcmp(param1, "amsBetaAggLevels"))
@@ -1666,6 +1730,30 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
             printf("       HYPRE_LSC::parameters amsBetaAggLevels = %d\n",
                    amsAlphaAggLevels_);
+      }
+
+      //----------------------------------------------------------------
+      // ams preconditoner : interpolation type
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsBetaInterpType") )
+      {
+ 	 sscanf(params[i],"%s %d", param, &amsBetaInterpType_);
+	 if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+	   printf("       HYPRE_LSC::parameters amsBetaInterpType = %d\n",
+		  amsBetaInterpType_);
+      }
+
+      //----------------------------------------------------------------
+      // ams preconditoner : interpolation truncation
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsBetaPmax") )
+      {
+ 	 sscanf(params[i],"%s %d", param, &amsBetaPmax_);
+	 if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+	   printf("       HYPRE_LSC::parameters amsBetaPmax = %d\n",
+		  amsBetaPmax_);
       }
 
       //---------------------------------------------------------------
@@ -3594,7 +3682,8 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
    HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
    HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
    HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,amgStrongThreshold_);
-   HYPRE_BoomerAMGSetTol(HYPrecon_, -1.0e0);
+   HYPRE_BoomerAMGSetTol(HYPrecon_, 0.0e0);
+   HYPRE_BoomerAMGSetMaxIter(HYPrecon_, 1);
    num_sweeps = hypre_CTAlloc(int,4);
    for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
 
@@ -3653,6 +3742,10 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
       HYPRE_BoomerAMGSetGSMG(HYPrecon_, 4);
       HYPRE_BoomerAMGSetNumSamples(HYPrecon_,amgGSMGNSamples_);
    }
+
+   HYPRE_BoomerAMGSetAggNumLevels(HYPrecon_, amgAggLevels_);
+   HYPRE_BoomerAMGSetInterpType(HYPrecon_, amgInterpType_);
+   HYPRE_BoomerAMGSetPMaxElmts(HYPrecon_, amgPmax_);
 }
 
 //***************************************************************************
@@ -3739,9 +3832,11 @@ void HYPRE_LinSysCore::setupPreconAMS()
       HYPRE_AMSSetBetaPoissonMatrix(HYPrecon_, amsBetaPoisson_);
 
    HYPRE_AMSSetAlphaAMGOptions(HYPrecon_, amsAlphaCoarsenType_, 
-            amsAlphaAggLevels_, amsAlphaRelaxType_, amsAlphaStrengthThresh_);
+            amsAlphaAggLevels_, amsAlphaRelaxType_, amsAlphaStrengthThresh_,
+            amsAlphaInterpType_, amsAlphaPmax_);
    HYPRE_AMSSetBetaAMGOptions(HYPrecon_, amsBetaCoarsenType_,
-            amsBetaAggLevels_, amsBetaRelaxType_, amsBetaStrengthThresh_);
+            amsBetaAggLevels_, amsBetaRelaxType_, amsBetaStrengthThresh_,
+            amsBetaInterpType_, amsBetaPmax_);
 
 #if 0
    if (maxwellGEN_ != NULL)

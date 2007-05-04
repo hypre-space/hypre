@@ -265,6 +265,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    for (int i = 0; i < 25; i++) amgRelaxWeight_[i] = 1.0; 
    for (int j = 0; j < 25; j++) amgRelaxOmega_[j] = 1.0; 
 
+   amgAggLevels_       = 0;
+   amgInterpType_      = 0;
+   amgPmax_            = 0;
+
    pilutFillin_        = 0;    // how many nonzeros to keep in L and U
    pilutDropTol_       = 0.0;
    pilutMaxNnzPerRow_  = 0;    // register the max NNZ/row in matrix A
@@ -347,13 +351,16 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsPrintLevel_ = 0;
    amsAlphaCoarsenType_ = 10;
    amsAlphaAggLevels_ = 1;
-   amsAlphaRelaxType_ = 3;
+   amsAlphaRelaxType_ = 6;
    amsAlphaStrengthThresh_ = 0.25;
+   amsAlphaInterpType_ = 0;
+   amsAlphaPmax_ = 0;
    amsBetaCoarsenType_ = 10;
    amsBetaAggLevels_ = 1;
-   amsBetaRelaxType_ = 3;
+   amsBetaRelaxType_ = 6;
    amsBetaStrengthThresh_ = 0.25;
-
+   amsBetaInterpType_ = 0;
+   amsBetaPmax_ = 0;
 
    //-------------------------------------------------------------------
    // parameters ML Maxwell solver

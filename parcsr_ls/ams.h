@@ -91,12 +91,16 @@ typedef struct
    int B_G_agg_levels;
    int B_G_relax_type;
    double B_G_theta;
+   int B_G_interp_type;
+   int B_G_Pmax;
 
    /* AMG options for B_Pi */
    int B_Pi_coarsen_type;
    int B_Pi_agg_levels;
    int B_Pi_relax_type;
    double B_Pi_theta;
+   int B_Pi_interp_type;
+   int B_Pi_Pmax;
 
    /* Temporary vectors */
    hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2;

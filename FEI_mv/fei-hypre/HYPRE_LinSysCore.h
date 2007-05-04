@@ -656,6 +656,9 @@ class HYPRE_LinSysCore
    int             amgSchwarzDomainType_;
    int             amgUseGSMG_;
    int             amgGSMGNSamples_;
+   int             amgAggLevels_;
+   int             amgInterpType_;
+   int             amgPmax_;
    int             pilutFillin_;
    double          pilutDropTol_;
    int             pilutMaxNnzPerRow_;
@@ -706,10 +709,14 @@ class HYPRE_LinSysCore
    int             amsAlphaAggLevels_;
    int             amsAlphaRelaxType_;
    double          amsAlphaStrengthThresh_;
+   int             amsAlphaInterpType_;
+   int             amsAlphaPmax_;
    int             amsBetaCoarsenType_;
    int             amsBetaAggLevels_;
    int             amsBetaRelaxType_;
    double          amsBetaStrengthThresh_;
+   int             amsBetaInterpType_;
+   int             amsBetaPmax_;
 
    // ----------------------------------------------------------------------
    // FEI and MLI variables
