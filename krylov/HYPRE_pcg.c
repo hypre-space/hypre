@@ -220,6 +220,24 @@ HYPRE_PCGGetRelChange( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PCGSetRecomputeResidual, HYPRE_PCGGetRecomputeResidual
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetRecomputeResidual( HYPRE_Solver solver,
+                       int                recompute_residual )
+{
+   return( hypre_PCGSetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+int
+HYPRE_PCGGetRecomputeResidual( HYPRE_Solver solver,
+                       int              * recompute_residual )
+{
+   return( hypre_PCGGetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PCGSetPrecond
  *--------------------------------------------------------------------------*/
 

@@ -709,7 +709,7 @@ typedef struct
  where the norm is an energy norm wrt preconditioner, |r|=sqrt(<Cr,r>).
  - two_norm!=0 means: the norm is the L2 norm, |r|=sqrt(<r,r>)
  - rel_change!=0 means: if pass the other stopping criteria, also check the
- relative change in the solution x.
+ relative change in the solution x.  Pass iff this relative change is small.
  - stop_crit!=0 means: pure absolute error tolerance rather than a pure relative
  error tolerance on the residual.  Never applies if rel_change!=0 or atolf!=0.
  - atolf = absolute error tolerance factor to be used _together_ with the
@@ -717,6 +717,10 @@ typedef struct
  - tol = relative error tolerance, as above
  - cf_tol = convergence factor tolerance; if >0 used for special test
  for slow convergence
+ - recompute_residual means: when the iteration seems to be converged, recompute the
+ residual from scratch (r=b-Ax) and use this new residual to repeat the convergence test.
+ This can be expensive, use this only if you have seen a problem with the regular
+ residual computation.
 */
 
 typedef struct
@@ -727,6 +731,7 @@ typedef struct
    int      max_iter;
    int      two_norm;
    int      rel_change;
+   int      recompute_residual;
    int      stop_crit;
    int      converged;
 
@@ -951,6 +956,8 @@ int HYPRE_PCGSetTwoNorm ( HYPRE_Solver solver , int two_norm );
 int HYPRE_PCGGetTwoNorm ( HYPRE_Solver solver , int *two_norm );
 int HYPRE_PCGSetRelChange ( HYPRE_Solver solver , int rel_change );
 int HYPRE_PCGGetRelChange ( HYPRE_Solver solver , int *rel_change );
+int HYPRE_PCGSetRecomputeResidual ( HYPRE_Solver solver , int recompute_residual );
+int HYPRE_PCGGetRecomputeResidual ( HYPRE_Solver solver , int *recompute_residual );
 int HYPRE_PCGSetPrecond ( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_PCGGetPrecond ( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_PCGSetLogging ( HYPRE_Solver solver , int level );
@@ -981,6 +988,8 @@ int hypre_PCGSetTwoNorm ( void *pcg_vdata , int two_norm );
 int hypre_PCGGetTwoNorm ( void *pcg_vdata , int *two_norm );
 int hypre_PCGSetRelChange ( void *pcg_vdata , int rel_change );
 int hypre_PCGGetRelChange ( void *pcg_vdata , int *rel_change );
+int hypre_PCGSetRecomputeResidual ( void *pcg_vdata , int recompute_residual );
+int hypre_PCGGetRecomputeResidual ( void *pcg_vdata , int *recompute_residual );
 int hypre_PCGSetStopCrit ( void *pcg_vdata , int stop_crit );
 int hypre_PCGGetStopCrit ( void *pcg_vdata , int *stop_crit );
 int hypre_PCGGetPrecond ( void *pcg_vdata , HYPRE_Solver *precond_data_ptr );
