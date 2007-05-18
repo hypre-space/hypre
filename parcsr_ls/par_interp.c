@@ -2730,51 +2730,53 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    }
    if (max_elmts > 0)
    {
-    int P_mxnum, cnt1;
+    int P_mxnum, cnt1, rowlength;
     int *P_aux_j;
     double *P_aux_data;
 
-    P_mxnum = 2*(P_diag_i[1]+P_offd_i[1]);
-    P_aux_j = hypre_CTAlloc(int, P_mxnum);
-    P_aux_data = hypre_CTAlloc(double, P_mxnum);
-    cnt_diag = 0;
-    cnt_offd = 0;
-
-    for (i = 0; i < n_fine; i++)
+    rowlength = P_diag_i[1]+P_offd_i[1];
+    P_mxnum = rowlength;
+    for (i=1; i<n_fine; i++)
     {
-     row_sum = 0;
-     num_elmts = P_diag_i[i+1]-P_diag_i[i]+P_offd_i[i+1]-P_offd_i[i];
-     if (max_elmts < num_elmts)
+	rowlength = P_diag_i[i+1]-P_diag_i[i]+P_offd_i[i+1]-P_offd_i[i];
+	if (rowlength > P_mxnum) P_mxnum = rowlength;
+    }
+    if (P_mxnum > max_elmts)
+    {
+     P_aux_j = hypre_CTAlloc(int, P_mxnum);
+     P_aux_data = hypre_CTAlloc(double, P_mxnum);
+     cnt_diag = 0;
+     cnt_offd = 0;
+
+     for (i = 0; i < n_fine; i++)
      {
-       if (num_elmts > P_mxnum)
-       {
-	   P_mxnum = num_elmts;
-	   P_aux_j = hypre_TReAlloc(P_aux_j,int,P_mxnum);
-	   P_aux_data = hypre_TReAlloc(P_aux_data,double,P_mxnum);
-       } 
-       cnt = 0;
-       for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
-       {
+      row_sum = 0;
+      num_elmts = P_diag_i[i+1]-P_diag_i[i]+P_offd_i[i+1]-P_offd_i[i];
+      if (max_elmts < num_elmts)
+      {
+        cnt = 0;
+        for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
+        {
 	  P_aux_j[cnt] = P_diag_j[j];
 	  P_aux_data[cnt++] = P_diag_data[j];
 	  row_sum += P_diag_data[j];
-       }
-       num_lost += cnt;
-       cnt1 = cnt;
-       for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
-       {
+        }
+        num_lost += cnt;
+        cnt1 = cnt;
+        for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
+        {
 	  P_aux_j[cnt] = P_offd_j[j]+num_cols;
 	  P_aux_data[cnt++] = P_offd_data[j];
 	  row_sum += P_offd_data[j];
-       }
-       num_lost_offd += cnt-cnt1;
-       /* sort data */
-       hypre_qsort2abs(P_aux_j,P_aux_data,0,cnt-1);
-       scale = 0;
-       P_diag_i[i] = cnt_diag;
-       P_offd_i[i] = cnt_offd;
-       for (j = 0; j < max_elmts; j++)
-       {
+        }
+        num_lost_offd += cnt-cnt1;
+        /* sort data */
+        hypre_qsort2abs(P_aux_j,P_aux_data,0,cnt-1);
+        scale = 0;
+        P_diag_i[i] = cnt_diag;
+        P_offd_i[i] = cnt_offd;
+        for (j = 0; j < max_elmts; j++)
+        {
 	  scale += P_aux_data[j];
           if (P_aux_j[j] < num_cols)
 	  {
@@ -2786,13 +2788,13 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
 	     P_offd_j[cnt_offd] = P_aux_j[j]-num_cols;
 	     P_offd_data[cnt_offd++] = P_aux_data[j];
 	  }
-       }
-       num_lost -= cnt_diag-P_diag_i[i];
-       num_lost_offd -= cnt_offd-P_offd_i[i];
-      /* normalize row of P */
+        }
+        num_lost -= cnt_diag-P_diag_i[i];
+        num_lost_offd -= cnt_offd-P_offd_i[i];
+       /* normalize row of P */
 
-       if (scale != 0.)
-       {
+        if (scale != 0.)
+        {
 	  if (scale != row_sum)
 	  {
    	     scale = row_sum/scale;
@@ -2801,10 +2803,10 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    	     for (j = P_offd_i[i]; j < cnt_offd; j++)
       	        P_offd_data[j] *= scale;
 	  }
-       }
-     }
-     else
-     {
+        }
+      }
+      else
+      {
         if (P_diag_i[i] != cnt_diag)
         {
 	   start_j = P_diag_i[i];
@@ -2835,6 +2837,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
     P_offd_i[n_fine] = cnt_offd;
     hypre_TFree(P_aux_j);
     hypre_TFree(P_aux_data);
+   }
    }
    if (num_lost)
    {
