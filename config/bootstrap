@@ -39,6 +39,6 @@ ln -s config/configure.in .
 
 rm -rf aclocal.m4 configure autom4te.cache config/acinclude.m4
 
-aclocal -I config
+aclocal -I config -I babel-runtime/m4
 autoconf --include=config
 rm configure.in

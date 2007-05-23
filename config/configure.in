@@ -87,6 +87,7 @@ AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA])
 
 AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_MACRO_DIR([babel-runtime/m4])
 AC_CONFIG_SRCDIR([HYPRE.h])
 
 dnl *********************************************************************
@@ -851,7 +852,7 @@ fi
 if test "$casc_using_fortran" = "yes"
 then
    AC_PROG_F77
-   AC_F77_LIBRARY_LDFLAGS
+   LLNL_F77_LIBRARY_LDFLAGS
    AC_F77_WRAPPERS
    AC_CHECK_PROGS(FPP, fpp cpp "$CC -E" "cc -E" "gcc -E")
    test -z "$FPP" && AC_MSG_ERROR([no acceptable fpp found in \$PATH])
