@@ -313,7 +313,7 @@ hypre_NewCommPkgCreate_core(
       upper_bound = response_buf[i*2+1];
       count = 0;
       /* loop through off_d entries - counting how many are in the range */
-      while (col_map_off_d[j] <= upper_bound && j < num_cols_off_d)     
+      while (j < num_cols_off_d && col_map_off_d[j] <= upper_bound)
       {
          j++;
          count++;       
