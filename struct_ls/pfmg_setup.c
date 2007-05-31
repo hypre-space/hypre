@@ -95,7 +95,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    double               *data;
    int                   data_size = 0;
    double               *relax_weights;
-   double                alpha;
+   double               *mean, *deviation;
+   double                alpha, beta;
 
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
@@ -121,6 +122,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    double                min_dxyz;
    int                   cdir;
    int                   d, l;
+   int                   dxyz_flag;
                        
    int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    int                   x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
@@ -153,7 +155,23 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    /* compute dxyz */
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
-      hypre_PFMGComputeDxyz(A, dxyz);
+     
+      mean= hypre_CTAlloc(double, 3);
+      deviation= hypre_CTAlloc(double, 3);
+      hypre_PFMGComputeDxyz(A, dxyz, mean, deviation);
+        
+      dxyz_flag= 0;
+      for (d= 0; d< dim; d++)
+      {
+         deviation[d]-= mean[d]*mean[d];
+         if (deviation[d]/(mean[d]*mean[d]) > .1)  /* square of coeff. of variation */
+         {
+            dxyz_flag= 1;
+            break;
+         }
+      }
+      hypre_TFree(mean);
+      hypre_TFree(deviation);
    }
 
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
@@ -180,26 +198,43 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          }
          alpha+= 1.0/(dxyz[d]*dxyz[d]);
       }
-     
+      relax_weights[l]= 2.0/3.0;
+                                                                                                                               
+      beta= 0.0;
       if (cdir != -1)
       {
-         for (d = 0; d < dim; d++)
+         if (dxyz_flag)
          {
-            if (d != cdir)
-            {
-               relax_weights[l]+= 1.0/(dxyz[d]*dxyz[d]);
-            }
+            relax_weights[l]= 2.0/3.0;
          }
-         alpha= relax_weights[l]/alpha;
 
-         /* determine level Jacobi weights */
-         if (dim > 1)
-         {
-            relax_weights[l]= 2.0/(3.0 - alpha);
-         }
          else
          {
-            relax_weights[l]= 2.0/3.0; /* always 2/3 for 1-d */
+            for (d = 0; d < dim; d++)
+            {
+               if (d != cdir)
+               {
+                  beta+= 1.0/(dxyz[d]*dxyz[d]);
+               }
+            }
+            if (beta == alpha)
+            {
+               alpha= 0.0;
+            }
+            else
+            {
+               alpha= beta/alpha;
+            }
+
+            /* determine level Jacobi weights */
+            if (dim > 1)
+            {
+               relax_weights[l]= 2.0/(3.0 - alpha);
+            }
+            else
+            {
+               relax_weights[l]= 2.0/3.0; /* always 2/3 for 1-d */
+            }
          }
       }
 
@@ -493,7 +528,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          }
          else
          {
-            hypre_PFMGRelaxSetJacobiWeight(relax_data_l[l], relax_weights[l]);
+            hypre_PFMGRelaxSetJacobiWeight(relax_data_l[l], 1.0);
          }
          hypre_PFMGRelaxSetType(relax_data_l[l], 0);
          hypre_PFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
@@ -547,7 +582,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
 int
 hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
-                       double             *dxyz )
+                       double             *dxyz,
+                       double             *mean,
+                       double             *deviation)
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -558,10 +595,12 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                         
    double                *Ap;
    double                 cxyz[3];
+   double                 sqcxyz[3];
    double                 tcxyz[3];
    double                 cxyz_max;
-   double                 locals[3];
-                        
+
+   int                    tot_size; 
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    int                    stencil_size;
@@ -581,6 +620,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    int                    ierr = 0;
    double                 cx, cy, cz;
+   double                 sqcx, sqcy, sqcz;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -600,6 +640,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    cxyz[1] = 0.0;
    cxyz[2] = 0.0;
 
+   sqcxyz[0] = 0.0;
+   sqcxyz[1] = 0.0;
+   sqcxyz[2] = 0.0;
+
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
    if ( constant_coefficient==2 )
    {
@@ -608,9 +652,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    }
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+
+   tot_size= hypre_StructGridGlobalSize(hypre_StructMatrixGrid(A));
+
    hypre_ForBoxI(i, compute_boxes)
       {
          compute_box = hypre_BoxArrayBox(compute_boxes, i);
+
 
          A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
 
@@ -621,6 +669,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          cx = cxyz[0];
          cy = cxyz[1];
          cz = cxyz[2];
+
+         sqcx = sqcxyz[0];
+         sqcy = sqcxyz[1];
+         sqcz = sqcxyz[2];
 
          if ( constant_coefficient==1 )
             /* all coefficients constant */
@@ -660,6 +712,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             cx += tcxyz[0];
             cy += tcxyz[1];
             cz += tcxyz[2];
+
+            sqcx += (tcxyz[0]*tcxyz[0]);
+            sqcy += (tcxyz[1]*tcxyz[1]);
+            sqcz += (tcxyz[2]*tcxyz[2]);
          }
          else if ( constant_coefficient==2 )
             /* variable diagonal, other coefficients constant */
@@ -746,6 +802,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                      cx += tcxyz[0];
                      cy += tcxyz[1];
                      cz += tcxyz[2];
+
+                     sqcx += (tcxyz[0]*tcxyz[0]);
+                     sqcy += (tcxyz[1]*tcxyz[1]);
+                     sqcz += (tcxyz[2]*tcxyz[2]);
                   }
                hypre_BoxLoop1End(Ai);
             }
@@ -754,11 +814,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             cy += tcxyz[1];
             cz += tcxyz[2];
 
+            sqcx += (tcxyz[0]*tcxyz[0]);
+            sqcy += (tcxyz[1]*tcxyz[1]);
+            sqcz += (tcxyz[2]*tcxyz[2]);
          }
          else
             /* constant_coefficient==0, all coefficients vary with space */
          {
-
             hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai
 #define HYPRE_SMP_REDUCTION_OP +
@@ -796,34 +858,25 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                      }
                   }
 
-                  locals[0]= tcxyz[0]/2.0;
-                  locals[1]= tcxyz[1]/2.0;
-                  locals[2]= tcxyz[2]/2.0;
+                  cx += tcxyz[0];
+                  cy += tcxyz[1];
+                  cz += tcxyz[2];
 
-                  cxyz_max = 0.0;
-                  for (d = 0; d < 3; d++)
-                  {
-                     cxyz_max = hypre_max(cxyz_max, locals[d]);
-                  }
-                  if (cxyz_max == 0.0)
-                  {
-                     cxyz_max = 1.0;
-                  }
-
-                  for (d = 0; d < 3; d++)
-                  {
-                     locals[d]/= cxyz_max;
-                  }
-                  cx += locals[0];
-                  cy += locals[1];
-                  cz += locals[2];
+                  sqcx += (tcxyz[0]*tcxyz[0]);
+                  sqcy += (tcxyz[1]*tcxyz[1]);
+                  sqcz += (tcxyz[2]*tcxyz[2]);
                }
             hypre_BoxLoop1End(Ai);
+
          }
 
          cxyz[0] = cx;
          cxyz[1] = cy;
          cxyz[2] = cz;
+
+         sqcxyz[0] = sqcx;
+         sqcxyz[1] = sqcy;
+         sqcxyz[2] = sqcz;
       }
 
    /*----------------------------------------------------------
@@ -836,6 +889,18 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    MPI_Allreduce(tcxyz, cxyz, 3, MPI_DOUBLE, MPI_SUM,
                  hypre_StructMatrixComm(A));
 
+   tcxyz[0] = sqcxyz[0];
+   tcxyz[1] = sqcxyz[1];
+   tcxyz[2] = sqcxyz[2];
+   MPI_Allreduce(tcxyz, sqcxyz, 3, MPI_DOUBLE, MPI_SUM,
+                 hypre_StructMatrixComm(A));
+
+   for (d= 0; d< 3; d++)
+   {
+      mean[d]= cxyz[d]/tot_size;
+      deviation[d]= sqcxyz[d]/tot_size;
+   }
+     
    cxyz_max = 0.0;
    for (d = 0; d < 3; d++)
    {

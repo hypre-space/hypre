@@ -371,7 +371,7 @@ int hypre_PFMGRelaxSetTempVec ( void *pfmg_relax_vdata , hypre_StructVector *t )
 
 /* pfmg_setup.c */
 int hypre_PFMGSetup ( void *pfmg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A , double *dxyz );
+int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A , double *dxyz , double *mean , double *deviation );
 int hypre_ZeroDiagonal ( hypre_StructMatrix *A );
 
 /* pfmg_setup_interp.c */
