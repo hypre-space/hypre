@@ -118,7 +118,9 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_Box            *cbox;
 
    double               *relax_weights;
-   double                alpha;
+   double               *mean, *deviation;
+   double                alpha, beta;
+   int                   dxyz_flag;
 
    double                min_dxyz;
    int                   cdir;
@@ -175,14 +177,36 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    /* compute dxyz */
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
+      mean= hypre_CTAlloc(double, 3);
+      deviation= hypre_CTAlloc(double, 3);
+      dxyz_flag= 0;
+
       for ( i = 0; i < nvars; i++)
       {
-         hypre_PFMGComputeDxyz(hypre_SStructPMatrixSMatrix(A,i,i), sys_dxyz[i]);
+         hypre_PFMGComputeDxyz(hypre_SStructPMatrixSMatrix(A,i,i), sys_dxyz[i],
+                               mean, deviation);
+
+         /* signal flag if any of the flag has a large (square) coeff. of variation */
+         if (!dxyz_flag)
+         {
+            for (d= 0; d< dim; d++)
+            {
+               deviation[d]-= mean[d]*mean[d];
+               if (deviation[d]/(mean[d]*mean[d]) > .1)  /* square of coeff. of variation */
+               {
+                  dxyz_flag= 1;
+                  break;
+               }
+            }
+         }
+
          for ( d = 0; d < 3; d++)
          {
             dxyz[d] += sys_dxyz[i][d];
          } 
       }
+      hypre_TFree(mean);
+      hypre_TFree(deviation);
    }
 
    grid_l = hypre_TAlloc(hypre_SStructPGrid *, max_levels);
@@ -209,26 +233,42 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
          }
          alpha+= 1.0/(dxyz[d]*dxyz[d]);
       }
+      relax_weights[l]= 2.0/3.0;
 
+      beta= 0.0;
       if (cdir != -1)
       {
-         for (d = 0; d < dim; d++)
+         if (dxyz_flag)
          {
-            if (d != cdir)
-            {
-               relax_weights[l]+= 1.0/(dxyz[d]*dxyz[d]);
-            }
-         }
-         alpha= relax_weights[l]/alpha;
-                                                                                                                         
-         /* determine level Jacobi weights */
-         if (dim > 1)
-         {
-            relax_weights[l]= 2.0/(3.0 - alpha);
+            relax_weights[l]= 2.0/3.0;
          }
          else
          {
-            relax_weights[l]= 2.0/3.0; /* always 2/3 for 1-d */
+            for (d = 0; d < dim; d++)
+            {
+               if (d != cdir)
+               {
+                  beta+= 1.0/(dxyz[d]*dxyz[d]);
+               }
+            }
+            if (beta == alpha)
+            {
+               alpha= 0.0;
+            }
+            else
+            {
+               alpha= beta/alpha;
+            }
+
+            /* determine level Jacobi weights */
+            if (dim > 1)
+            {
+               relax_weights[l]= 2.0/(3.0 - alpha);
+            }
+            else
+            {
+               relax_weights[l]= 2.0/3.0; /* always 2/3 for 1-d */
+            }
          }
       }
 
