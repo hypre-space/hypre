@@ -376,7 +376,7 @@ int main (int argc, char *argv[])
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6, &_ex ); /* Falgout coarsening */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 6, &_ex );   /* Sym G-S/Jacobi hybrid relaxation */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "NumSweeps", 1, &_ex );   /* Sweeeps on each level */
-      bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-3, &_ex);      /* conv. tolerance */
+      bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 0, &_ex);      /* conv. tolerance */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "MaxIter", 1, &_ex ); /* do only one iteration! */
 
       /* Set the PCG preconditioner */
