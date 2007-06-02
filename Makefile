@@ -152,12 +152,25 @@ help:
 	@echo "     builds the test drivers; linking to the temporary installation"
 	@echo "        directories to simulate how application codes will link to HYPRE"
 	@echo "     "
+	@echo "check:"
+	@echo "     runs a small driver test to verify a working library"
+	@echo "     use CHECKRUN=<mpirun routine> if needed"
+	@echo "     "
 	@echo "************************************************************"
 
 test: all
 	@ \
 	echo "Making test drivers ..."; \
 	(cd test; $(MAKE) clean; $(MAKE) all)
+
+check: 
+	@ \
+	echo "Checking the library ..."; \
+	(cd test; $(MAKE) all); \
+	(cd test; $(CHECKRUN) ij 2> ij.err); \
+	(cd test; $(CHECKRUN) struct 2> struct.err); \
+	(cd test; cp -f TEST_sstruct/sstruct.in.default .; $(CHECKRUN) sstruct 2> sstruct.err); \
+	(cd test; ls -l ij.err struct.err sstruct.err)
 
 install: all
 	@echo "Installing hypre ..."
