@@ -40,6 +40,8 @@ HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, int nx, int ny, int
                                          int num_fun, double *mtrx, double *value);
 int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx, double vcy, double vcz, int mtx_entry, double *values);
 
+int BuildParCoordinates (int argc , char *argv [], int arg_index , int *coorddim_ptr , float **coord_ptr );
+                                                                                
 
 #define SECOND_TIME 0
  
@@ -149,6 +151,13 @@ main( int   argc,
    double   tol = 1.e-8, pc_tol = 0.;
    double   max_row_sum = 1.;
    int      amg_max_iter = 20;
+   /* for CGC BM Aug 25, 2006 */
+   int      cgcits = 1;
+   /* for coordinate plotting BM Oct 24, 2006 */
+   int      plot_grids = 0;
+   int      coord_dim  = 3;
+   float    *coordinates = NULL;
+   char    plot_file_name[256];
    
    /* parameters for ParaSAILS */
    double   sai_threshold = 0.1;
@@ -201,6 +210,7 @@ main( int   argc,
    ioutdat = 3;
    poutdat = 1;
 
+   sprintf (plot_file_name,"AMGgrids.CF.dat");
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
@@ -383,6 +393,18 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 7;
       }    
+      else if ( strcmp(argv[arg_index], "-cgc") == 0 )
+      {
+        arg_index++;
+        coarsen_type      = 21;
+        cgcits            = 200;
+      }
+      else if ( strcmp(argv[arg_index], "-cgce") == 0 )
+      {
+        arg_index++;
+        coarsen_type      = 22;
+        cgcits            = 200;
+      }
       else if ( strcmp(argv[arg_index], "-pmis") == 0 )
       {
          arg_index++;
@@ -554,6 +576,22 @@ main( int   argc,
       {
          arg_index++;
       }
+   }
+   /* begin CGC BM Aug 25, 2006 */
+   if (coarsen_type == 21 || coarsen_type == 22) {
+     arg_index = 0;
+     while ( (arg_index < argc) && (!print_usage) )
+       {
+         if ( strcmp(argv[arg_index], "-cgcits") == 0 )
+           {
+             arg_index++;
+             cgcits = atoi(argv[arg_index++]);
+           }
+         else
+           {
+             arg_index++;
+           }
+       }
    }
 
    if (solver_id == 8 || solver_id == 18)
@@ -756,6 +794,17 @@ main( int   argc,
          arg_index++;
          print_system = 1;
       }
+      /* BM Oct 23, 2006 */
+      else if ( strcmp(argv[arg_index], "-plot_grids") == 0 )
+      {
+         arg_index++;
+         plot_grids = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-plot_file_name") == 0 )
+      {
+         arg_index++;
+	 sprintf (plot_file_name,"%s",argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -833,6 +882,8 @@ main( int   argc,
       printf("\n");
       printf("  -cljp                 : CLJP coarsening \n");
       printf("  -cljp1                : CLJP coarsening, fixed random \n");
+      printf("  -cgc                  : CGC coarsening \n");
+      printf("  -cgce                 : CGC-E coarsening \n");
       printf("  -pmis                 : PMIS coarsening \n");
       printf("  -pmis1                : PMIS coarsening, fixed random \n");
       printf("  -hmis                 : HMIS coarsening \n");
@@ -915,6 +966,8 @@ main( int   argc,
       printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
     
       printf("  -postinterptype <val>  : invokes <val> no. of Jacobi interpolation steps after main interpolation\n");
+      printf("\n");
+      printf("  -cgcitr <val>          : set maximal number of coarsening iterations for CGC\n");
       printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
       printf("                         : 1  PCG  (default)\n");
       printf("                         : 2  GMRES\n");
@@ -942,7 +995,8 @@ main( int   argc,
       printf("\n");
       printf("  -print                 : print out the system\n");
       printf("\n");
-
+      printf("  -plot_grids            : print out information for plotting the grids\n");
+      printf("  -plot_file_name <val>  : file name for plotting output\n");
       exit(1);
    }
 
@@ -1011,6 +1065,18 @@ main( int   argc,
       printf("You have asked for an unsupported problem with\n");
       printf("build_matrix_type = %d.\n", build_matrix_type);
       return(-1);
+   }
+   /* BM Oct 23, 2006 */
+   if (plot_grids)
+   {
+     if (build_matrix_type > 1 &&  build_matrix_type < 8)
+         BuildParCoordinates (argc, argv, build_matrix_arg_index, 
+		&coord_dim, &coordinates);
+     else
+     {
+       printf("Sorry, coordinates are not yet available for build_matrix_type = %d.\n", build_matrix_type);
+       return(-1);
+     }
    }
 
    time_index = hypre_InitializeTiming("Spatial operator");
@@ -1766,6 +1832,8 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
+      /* BM Aug 25, 2006 */
+      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
       HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
@@ -1820,6 +1888,14 @@ main( int   argc,
 
       HYPRE_BoomerAMGSetMaxIter(amg_solver, amg_max_iter);
 
+      /* BM Oct 23, 2006 */
+      if (plot_grids) {
+        HYPRE_BoomerAMGSetPlotGrids (amg_solver, 1);
+        HYPRE_BoomerAMGSetPlotFileName (amg_solver, plot_file_name);
+        HYPRE_BoomerAMGSetCoordDim (amg_solver, coord_dim);
+        HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
+      }
+
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
 
       hypre_EndTiming(time_index);
@@ -1863,6 +1939,8 @@ main( int   argc,
  
       HYPRE_BoomerAMGCreate(&amg_solver);
       HYPRE_BoomerAMGSetGSMG(amg_solver, 4); /* specify GSMG */
+      /* BM Aug 25, 2006 */
+      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
       HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
@@ -1986,6 +2064,8 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2096,6 +2176,8 @@ main( int   argc,
          if (myid == 0) printf("Solver: GSMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2268,6 +2350,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2368,6 +2451,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: GSMG-GMRES\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2546,6 +2630,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2728,6 +2813,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-CGNR\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -4408,5 +4494,93 @@ int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx,
 
    return 0;
    
+}
+                                                                                
+/*----------------------------------------------------------------------
+ * Build coordinates for 1D/2D/3D
+ *----------------------------------------------------------------------*/
+                                                                                
+int
+BuildParCoordinates( int                  argc,
+                     char                *argv[],
+                     int                  arg_index,
+                     int                 *coorddim_ptr,
+                     float               **coord_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+                                                                                
+   int                 num_procs, myid;
+   int                 p, q, r;
+                                                                                
+   int                 coorddim;
+   float               *coordinates;
+                                                                                
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+                                                                                
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+                                                                                
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+                                                                                
+   nx = 10;
+   ny = 10;
+   nz = 10;
+                                                                                
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+                                                                                
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+                                                                                
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
+                                                                                
+   /*-----------------------------------------------------------
+    * Generate the coordinates
+    *-----------------------------------------------------------*/
+                                                                                
+   coorddim = 3;
+   if (nx<2) coorddim--;
+   if (ny<2) coorddim--;
+   if (nz<2) coorddim--;
+                                                                                
+   if (coorddim>0)
+     coordinates = GenerateCoordinates (MPI_COMM_WORLD,
+                                        nx, ny, nz, P, Q, R, p, q, r, coorddim);   else coordinates=NULL;
+                                                                                
+   *coorddim_ptr = coorddim;
+   *coord_ptr = coordinates;
+   return (0);
 }
 
