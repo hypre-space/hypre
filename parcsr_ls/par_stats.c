@@ -262,6 +262,14 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
 	printf(" Coarsening Type = CLJP, fixed random \n");
       }
+      else if (abs(coarsen_type) == 21) /* BM Aug 29, 2006 */
+      {
+        printf(" Coarsening Type = CGC \n");
+      }
+      else if (abs(coarsen_type) == 22) /* BM Aug 29, 2006 */
+      {
+        printf(" Coarsening Type = CGC-E \n");
+      }
       /*if (coarsen_type > 0) 
       {
 	printf(" Hybrid Coarsening (switch to CLJP when coarsening slows)\n");

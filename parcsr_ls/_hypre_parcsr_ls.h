@@ -1,3 +1,28 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 #include <HYPRE_config.h>
 
@@ -293,6 +318,11 @@ int HYPRE_BoomerAMGSetISType ( HYPRE_Solver solver , int IS_type );
 int HYPRE_BoomerAMGSetCRUseCG ( HYPRE_Solver solver , int CR_use_CG );
 int HYPRE_BoomerAMGSetGSMG ( HYPRE_Solver solver , int gsmg );
 int HYPRE_BoomerAMGSetNumSamples ( HYPRE_Solver solver , int gsmg );
+int HYPRE_BoomerAMGSetCGCIts (HYPRE_Solver solver, int its );
+int HYPRE_BoomerAMGSetPlotGrids (HYPRE_Solver solver, int plotgrids );
+int HYPRE_BoomerAMGSetPlotFileName (HYPRE_Solver solver, const char *plotfilename );
+int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver, int coorddim );
+int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver solver, float *coordinates );
 
 /* HYPRE_parcsr_bicgstab.c */
 int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -587,6 +617,11 @@ int hypre_BoomerAMGSetNumCRRelaxSteps ( void *data , int num_CR_relax_steps );
 int hypre_BoomerAMGSetCRRate ( void *data , double CR_rate );
 int hypre_BoomerAMGSetISType ( void *data , int IS_type );
 int hypre_BoomerAMGSetCRUseCG ( void *data , int CR_use_CG );
+int hypre_BoomerAMGSetCGCIts ( void *data , int its );
+int hypre_BoomerAMGSetPlotGrids ( void *data , int plotgrids );
+int hypre_BoomerAMGSetPlotFileName ( void *data , const char *plotfilename );
+int hypre_BoomerAMGSetCoordDim ( void *data , int coorddim );
+int hypre_BoomerAMGSetCoordinates ( void *data , float *coordinates );
 int hypre_BoomerAMGSetNumPoints ( void *data , int num_points );
 int hypre_BoomerAMGSetDofFunc ( void *data , int *dof_func );
 int hypre_BoomerAMGSetPointDofMap ( void *data , int *point_dof_map );
@@ -633,8 +668,20 @@ int hypre_BoomerAMGCoarsenFalgout ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *
 int hypre_BoomerAMGCoarsenHMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int measure_type , int debug_flag , int **CF_marker_ptr );
 int hypre_BoomerAMGCoarsenPMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int CF_init , int debug_flag , int **CF_marker_ptr );
 
+/* par_cgc_coarsen.c */
+int hypre_BoomerAMGCoarsenCGCb ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int measure_type , int coarsen_type , int cgc_its, int debug_flag , int **CF_marker_ptr );
+/* BM Aug 25, 2006 - Sep 7, 2006 */
+int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,int numberofgrids,int coarsen_type,int *CF_marker);
+int AmgCGCPrepare (hypre_ParCSRMatrix *S,int nlocal,int *CF_marker,int **CF_marker_offd,int coarsen_type,int **vrange);
+int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,int *vertexrange,int *CF_marker,int *CF_marker_offd,int coarsen_type,HYPRE_IJMatrix *ijG);
+int AmgCGCChoose (hypre_CSRMatrix *G,int *vertexrange,int mpisize,int **coarse);
+int AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,int *CF_marker,int *CF_marker_offd);
+
 /* par_coarse_parms.c */
 int hypre_BoomerAMGCoarseParms ( MPI_Comm comm , int local_num_variables , int num_functions , int *dof_func , int *CF_marker , int **coarse_dof_func_ptr , int **coarse_pnts_global_ptr );
+
+/* par_coordinates.c */
+float* GenerateCoordinates( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , int coorddim );
 
 /* par_cr.c */
 int hypre_BoomerAMGCoarsenCR1 ( hypre_ParCSRMatrix *A , int **CF_marker_ptr , int *coarse_size_ptr , int num_CR_relax_steps , int IS_type , int CRaddCpoints );

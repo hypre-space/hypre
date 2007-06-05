@@ -100,7 +100,9 @@ FILES =\
  par_amg_solveT.c\
  par_cg_relax_wt.c\
  par_coarsen.c\
+ par_cgc_coarsen.c\
  par_coarse_parms.c\
+ par_coordinates.c\
  par_cr.c\
  par_cycle.c\
  par_difconv.c\

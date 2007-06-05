@@ -67,6 +67,7 @@ hypre_BoomerAMGCreate()
    int 	    num_CR_relax_steps;
    int 	    IS_type;
    int 	    CR_use_CG;
+   int 	    cgc_its;
 
    /* solve params */
    int      min_iter;
@@ -106,6 +107,8 @@ hypre_BoomerAMGCreate()
    char     log_file_name[256];
    int      debug_flag;
 
+   char     plot_file_name[251];
+
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
     *-----------------------------------------------------------------------*/
@@ -132,6 +135,7 @@ hypre_BoomerAMGCreate()
    CR_rate = 0.7;
    IS_type = 1;
    CR_use_CG = 0;
+   cgc_its = 1;
 
    variant = 0;
    overlap = 1;
@@ -202,6 +206,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
    hypre_BoomerAMGSetISType(amg_data, IS_type);
    hypre_BoomerAMGSetCRUseCG(amg_data, CR_use_CG);
+   hypre_BoomerAMGSetCGCIts(amg_data, cgc_its);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
@@ -265,6 +270,14 @@ hypre_BoomerAMGCreate()
 
    /* this can not be set by the user currently */
    hypre_ParAMGDataBlockMode(amg_data) = block_mode;
+
+   /* BM Oct 22, 2006 */
+   hypre_ParAMGDataPlotGrids(amg_data) = 0;
+   hypre_BoomerAMGSetPlotFileName (amg_data, plot_file_name);
+                                                                                                       
+   /* BM Oct 17, 2006 */
+   hypre_ParAMGDataCoordDim(amg_data) = 0;
+   hypre_ParAMGDataCoordinates(amg_data) = NULL;
 
    return (void *) amg_data;
 }
@@ -2061,6 +2074,78 @@ hypre_BoomerAMGSetNumSamples( void *data,
    amg_data->num_samples = par;
 
    return hypre_error_flag;
+}
+
+/* BM Aug 25, 2006 */
+
+int
+hypre_BoomerAMGSetCGCIts( void *data,
+                          int  its)
+{
+  int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataCGCIts(amg_data) = its;
+  return (ierr);
+}
+
+/* BM Oct 22, 2006 */
+int
+hypre_BoomerAMGSetPlotGrids( void *data,
+                          int plotgrids)
+{
+  int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataPlotGrids(amg_data) = plotgrids;
+  return (ierr);
+}
+
+int
+hypre_BoomerAMGSetPlotFileName( void       *data,
+                              const char *plot_file_name )
+{
+   hypre_ParAMGData  *amg_data = data;
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if( strlen(plot_file_name)>251 )
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   if (strlen(plot_file_name)==0 )
+     sprintf(hypre_ParAMGDataPlotFileName(amg_data), "%s", "AMGgrids.CF.dat");
+   else
+     sprintf(hypre_ParAMGDataPlotFileName(amg_data), "%s", plot_file_name);
+
+   return hypre_error_flag;
+}
+
+/* BM Oct 17, 2006 */
+int
+hypre_BoomerAMGSetCoordDim( void *data,
+                          int coorddim)
+{
+  int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataCoordDim(amg_data) = coorddim;
+  return (ierr);
+}
+
+int
+hypre_BoomerAMGSetCoordinates( void *data,
+                             float *coordinates)
+{
+  int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataCoordinates(amg_data) = coordinates;
+  return (ierr);
 }
 
 /*--------------------------------------------------------------------------

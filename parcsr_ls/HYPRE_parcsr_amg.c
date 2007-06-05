@@ -1132,3 +1132,62 @@ HYPRE_BoomerAMGSetNumSamples( HYPRE_Solver  solver,
 {
    return( hypre_BoomerAMGSetNumSamples( (void *) solver, gsmg ) );
 }
+/* BM Aug 25, 2006 */
+                                                                                                       
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCGCIts
+ *--------------------------------------------------------------------------*/
+                                                                                                       
+int
+HYPRE_BoomerAMGSetCGCIts (HYPRE_Solver solver,
+                          int its)
+{
+  return (hypre_BoomerAMGSetCGCIts ( (void *) solver, its ) );
+}
+                                                                                                       
+/* BM Oct 23, 2006 */
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetPlotGrids
+ *--------------------------------------------------------------------------*/
+                                                                                                       
+int
+HYPRE_BoomerAMGSetPlotGrids (HYPRE_Solver solver,
+                             int plotgrids)
+{
+  return (hypre_BoomerAMGSetPlotGrids ( (void *) solver, plotgrids ) );
+}
+                                                                                                       
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetPlotFileName
+ *--------------------------------------------------------------------------*/
+                                                                                                       
+int
+HYPRE_BoomerAMGSetPlotFileName (HYPRE_Solver solver,
+                                const char *plotfilename)
+{
+  return (hypre_BoomerAMGSetPlotFileName ( (void *) solver, plotfilename ) );
+}
+                                                                                                       
+/* BM Oct 17, 2006 */
+                                                                                                       
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCoordDim
+ *--------------------------------------------------------------------------*/
+                                                                                                       
+int
+HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
+                            int coorddim)
+{
+  return (hypre_BoomerAMGSetCoordDim ( (void *) solver, coorddim ) );
+}
+                                                                                                       
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCoordinates
+ *--------------------------------------------------------------------------*/
+                                                                                                       
+int
+HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver solver,
+                               float *coordinates)
+{
+  return (hypre_BoomerAMGSetCoordinates ( (void *) solver, coordinates ) );
+}

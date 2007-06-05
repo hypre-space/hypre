@@ -208,6 +208,8 @@ int HYPRE_BoomerAMGSetMaxRowSum(HYPRE_Solver solver,
  * 10 &	HMIS-coarsening (uses one pass Ruge-Stueben on each processor independently, followed \\
  * & by PMIS using the interior C-points generated as its first independent set) \\
  * 11 &	one-pass Ruge-Stueben coarsening on each processor, no boundary treatment (not recommended!) \\
+ * 21 &	CGC coarsening \\
+ * 22 &	CGC-E coarsening \\
  * \hline
  * \end{tabular}
  * 
@@ -752,6 +754,36 @@ int HYPRE_BoomerAMGSetGSMG(HYPRE_Solver solver,
  **/
 int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
                                 int    num_samples);
+/**
+ * (optional) Defines the number of pathes for CGC-coarsening.
+ **/
+int HYPRE_BoomerAMGSetCGCIts (HYPRE_Solver solver,
+                            int its);
+
+/*
+ * HYPRE_BoomerAMGSetPlotGrids
+ **/
+int HYPRE_BoomerAMGSetPlotGrids (HYPRE_Solver solver,
+                               int plotgrids);
+
+/*
+ * HYPRE_BoomerAMGSetPlotFilename
+ **/
+int HYPRE_BoomerAMGSetPlotFileName (HYPRE_Solver solver,
+                                  const char *plotfilename);
+
+/*
+ * HYPRE_BoomerAMGSetCoordDim
+ **/
+int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
+                              int coorddim);
+
+/*
+ * HYPRE_BoomerAMGSetCoordinates
+ **/
+int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver solver,
+                                 float *coordinates);
+
 
 /*@}*/
 
@@ -2248,6 +2280,20 @@ GenerateVarDifConv( MPI_Comm comm,
                  int      r,
                  double eps,
                  HYPRE_ParVector *rhs_ptr);
+
+float*
+GenerateCoordinates( MPI_Comm comm,
+                     int      nx,
+                     int      ny,
+                     int      nz,
+                     int      P,
+                     int      Q,
+                     int      R,
+                     int      p,
+                     int      q,
+                     int      r,
+                     int      coorddim);
+
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
