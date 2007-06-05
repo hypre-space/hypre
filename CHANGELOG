@@ -30,6 +30,8 @@
 # recent release.
 #=============================================================================
 
+Added Bram Metsch's CGC and CGC-E coarsening algorithm.
+
 Version 2.0.0 released, 2006/12/15.
 
 - Minor documentation updates.
