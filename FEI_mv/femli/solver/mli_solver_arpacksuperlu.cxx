@@ -92,7 +92,6 @@ MLI_Solver_ARPACKSuperLU::~MLI_Solver_ARPACKSuperLU()
    if ( sendMap_   != NULL ) delete [] sendMap_;
    if ( ANodeEqnList_ != NULL ) delete [] ANodeEqnList_;
    if ( SNodeEqnList_ != NULL ) delete [] SNodeEqnList_;
-   return;
 }
 
 /* ****************************************************************************
