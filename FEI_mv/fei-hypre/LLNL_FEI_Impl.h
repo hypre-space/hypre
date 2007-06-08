@@ -51,7 +51,7 @@ class LLNL_FEI_Impl
    LLNL_FEI_Fei    *feiPtr_;
    LLNL_FEI_Solver *solverPtr_;
    LLNL_FEI_Matrix *matPtr_;
-   int             solverLibID_;
+   int             FLAG_SolverLib_;
 
 public:
 

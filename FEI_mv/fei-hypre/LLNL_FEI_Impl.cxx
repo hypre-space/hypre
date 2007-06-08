@@ -58,7 +58,7 @@ LLNL_FEI_Impl::LLNL_FEI_Impl( MPI_Comm comm )
    solverPtr_   = NULL;
    lscPtr_      = NULL;
    matPtr_      = NULL;
-   solverLibID_ = 0;
+   FLAG_SolverLib_ = 0;
 }
 
 /**************************************************************************
@@ -87,11 +87,11 @@ int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
       {
          printf("LLNL_FEI_Impl::make sure you call externalSolver before ");
          printf("loading the matrix.\n");
-         if ( (solverLibID_ & SOLVERLOCK) == 0 )
+         if ( (FLAG_SolverLib_ & SOLVERLOCK) == 0 )
          {
             sscanf(paramString[i], "%s %s", param1, param2);
-            if ( !strcmp( param2, "HYPRE" ) ) solverLibID_ = 1;
-            else                              solverLibID_ = 0;
+            if ( !strcmp( param2, "HYPRE" ) ) FLAG_SolverLib_ = 1;
+            else                              FLAG_SolverLib_ = 0;
          }
       }
       else if ( !strcmp( param1, "transferSolution" ) )
@@ -99,8 +99,8 @@ int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
          transferSolution();
       }
    }
-   solverLibID_ |= SOLVERLOCK;
-   if ( (solverLibID_ - SOLVERLOCK) > 0 ) 
+   FLAG_SolverLib_ |= SOLVERLOCK;
+   if ( (FLAG_SolverLib_ - SOLVERLOCK) > 0 ) 
    {
       if ( lscPtr_ != NULL ) delete lscPtr_;
       if ( solverPtr_ != NULL ) 
@@ -138,7 +138,7 @@ int LLNL_FEI_Impl::solve(int *status)
 {
    double *rhsVector, *solnVector;
 
-   if ((solverLibID_ & SOLVERLOCK) != 0) solverLibID_ -= SOLVERLOCK; 
+   if ((FLAG_SolverLib_ & SOLVERLOCK) != 0) FLAG_SolverLib_ -= SOLVERLOCK; 
    feiPtr_->getRHSVector(&rhsVector);
    feiPtr_->getSolnVector(&solnVector);
    feiPtr_->getMatrix(&matPtr_);
@@ -207,8 +207,8 @@ int LLNL_FEI_Impl::solve(int *status)
       lscPtr_->putInitialGuess((const int *) indices, 
                                (const double *) solnVector, localNRows);
       lscPtr_->matrixLoadComplete();
-      if ((*status) != -9999)
-         lscPtr_->solve(status,&iter);
+      // Charles : this status check not in application code?
+      if ((*status) != -9999) lscPtr_->solve(status,&iter);
       lscPtr_->getSolution(solnVector, localNRows);
       if (localNRows > 0) delete [] indices;
    }

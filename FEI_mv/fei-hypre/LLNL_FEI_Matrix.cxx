@@ -835,6 +835,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    for ( iD = 0; iD < localNRows_; iD++ ) newOffdNNZ += offdRowLengs[iD];
 
    /* -----------------------------------------------------------------
+    * combine the matrices
     * -----------------------------------------------------------------*/
 
    TdiagIA = new int[localNRows_+1];

@@ -442,10 +442,10 @@ LLNL_FEI_Fei::LLNL_FEI_Fei( MPI_Comm comm )
 LLNL_FEI_Fei::~LLNL_FEI_Fei()
 {
    int    iB;
-   double zero=0.0;
+   double internCode=1.0e35;
 
    if ( outputLevel_ > 2 ) printf("%4d : LLNL_FEI_Fei destructor\n", mypid_);
-   resetSystem(zero);
+   resetSystem(internCode);
    if ( matPtr_ != NULL ) delete matPtr_;
    for ( iB = 0; iB < numBlocks_; iB++ )
       if ( elemBlocks_[iB] != NULL ) delete elemBlocks_[iB];
@@ -557,6 +557,7 @@ int LLNL_FEI_Fei::initElemBlock(int elemBlockID, int numElements,
       for ( int iB2 = 0; iB2 < numBlocks_-1; iB2++ )
          elemBlocks_[iB2] = tempBlocks[iB2];
       elemBlocks_[numBlocks_-1] = new LLNL_FEI_Elem_Block(elemBlockID);
+      delete [] tempBlocks;
    }
    elemBlocks_[numBlocks_-1]->initialize(numElements, numNodesPerElement,
                                          nodeDOF_); 
@@ -654,8 +655,8 @@ int LLNL_FEI_Fei::resetSystem(double s)
 int LLNL_FEI_Fei::resetMatrix(double s)
 {
    int iB, iD;
+   double internCode=1.0e35;
 
-   (void) s;
    if ( outputLevel_ > 2 )
       printf("%4d : LLNL_FEI_Fei::resetMatrix begins...\n", mypid_);
    for ( iB = 0; iB < numBlocks_; iB++ ) elemBlocks_[iB]->reset();
@@ -688,27 +689,42 @@ int LLNL_FEI_Fei::resetMatrix(double s)
       delete [] BCNodeGamma_;
    }
    if ( BCNodeIDs_ != NULL ) delete [] BCNodeIDs_; 
-   if ( CRNodeLists_ != NULL ) 
+   if ( s == internCode )
    {
-      for ( iD = 0; iD < numCRMult_; iD++ ) 
-         if ( CRNodeLists_[iD] != NULL ) delete [] CRNodeLists_[iD];
-      delete [] CRNodeLists_;
+      if ( CRNodeLists_ != NULL )
+      {
+         for ( iD = 0; iD < numCRMult_; iD++ )
+            if ( CRNodeLists_[iD] != NULL ) delete [] CRNodeLists_[iD];
+         delete [] CRNodeLists_;
+      }
+      if ( CRWeightLists_ != NULL )
+      {
+         for ( iD = 0; iD < numCRMult_; iD++ )
+            if ( CRWeightLists_[iD] != NULL ) delete [] CRWeightLists_[iD];
+         delete [] CRWeightLists_;
+      }
+      if ( CRValues_         != NULL ) delete [] CRValues_;
+      numCRMult_           = 0;
+      CRListLen_           = 0;
+      CRNodeLists_         = NULL;
+      CRWeightLists_       = NULL;
+      CRValues_            = NULL;
    }
-   if ( CRWeightLists_ != NULL ) 
+   if ( s == internCode )
    {
-      for ( iD = 0; iD < numCRMult_; iD++ ) 
-         if ( CRWeightLists_[iD] != NULL ) delete [] CRWeightLists_[iD];
-      delete [] CRWeightLists_;
+      if ( sharedNodeIDs_    != NULL ) delete [] sharedNodeIDs_;
+      if ( sharedNodeNProcs_ != NULL ) delete [] sharedNodeNProcs_;
+      if ( sharedNodeProcs_  != NULL )
+      {
+         for ( iD = 0; iD < numSharedNodes_; iD++ )
+            if ( sharedNodeProcs_[iD] != NULL ) delete [] sharedNodeProcs_[iD];
+         delete [] sharedNodeProcs_;
+      }
+      numSharedNodes_      = 0;
+      sharedNodeIDs_       = NULL;
+      sharedNodeNProcs_    = NULL;
+      sharedNodeProcs_     = NULL;
    }
-   if ( CRValues_         != NULL ) delete [] CRValues_;
-   if ( sharedNodeIDs_    != NULL ) delete [] sharedNodeIDs_;
-   if ( sharedNodeNProcs_ != NULL ) delete [] sharedNodeNProcs_;
-   if ( sharedNodeProcs_  != NULL ) 
-   {
-      for ( iD = 0; iD < numSharedNodes_; iD++ ) 
-         if ( sharedNodeProcs_[iD] != NULL ) delete [] sharedNodeProcs_[iD];
-      delete [] sharedNodeProcs_;
-   } 
    nSends_              = 0;
    nRecvs_              = 0;
    nodeGlobalIDs_       = NULL;
@@ -727,15 +743,6 @@ int LLNL_FEI_Fei::resetMatrix(double s)
    BCNodeBeta_          = NULL;
    BCNodeGamma_         = NULL;
    numBCNodes_          = 0;
-   numCRMult_           = 0;
-   CRListLen_           = 0;
-   CRNodeLists_         = NULL;
-   CRWeightLists_       = NULL;
-   CRValues_            = NULL;
-   numSharedNodes_      = 0;
-   sharedNodeIDs_       = NULL;
-   sharedNodeNProcs_    = NULL;
-   sharedNodeProcs_     = NULL;
    TimerLoad_           = 0.0;
    TimerLoadStart_      = 0.0;
    TimerSolve_          = 0.0;
@@ -1035,9 +1042,6 @@ int LLNL_FEI_Fei::loadComplete()
       printf("%4d : LLNL_FEI_Fei::loadComplete - numCRMult   = %d\n",
              mypid_, numCRMult_);
    }
-if (mypid_ == 0)
-printf("%4d : LLNL_FEI_Fei::loadComplete - numExtNodes = %d\n",
-mypid_, localNNodes-numLocalNodes_);
 
    /* -----------------------------------------------------------------
     * construct global node list, starting with nodes that belong
@@ -1545,13 +1549,14 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
    int    iB, iD, iE, iN, offset, iD2, iD3, iN2, *elemNodeList=NULL, diagNNZ; 
    int    offdNNZ, *offdCounts=NULL, rowIndBase, rowInd, colIndBase, colInd;
    int    iP, nprocs, iCount, index, iBegin, *TdiagIA=NULL, *TdiagJA=NULL;
-   int    *ToffdIA=NULL, *ToffdJA=NULL, elemNExt, elemNLocal, nodeID;
+   int    *ToffdIA=NULL, *ToffdJA=NULL, elemNExt, elemNLocal, nodeID, length;
    int    diagOffset, offdOffset, nLocal, rowInd2, *globalEqnOffsets; 
    int    *diagIA, *diagJA, *offdIA, *offdJA, *extEqnList, *crOffsets;
-   int    nRecvs, *recvLengs, *recvProcs, *recvProcIndices;
-   int    nSends, *sendLengs, *sendProcs, *sendProcIndices, *flags;
+   int    nRecvs, *recvLengs, *recvProcs, *recvProcIndices, *flags;
+   int    nSends, *sendLengs, *sendProcs, *sendProcIndices, BCcnt, *iArray;
    double **elemMats=NULL, *elemMat=NULL, *TdiagAA=NULL, *ToffdAA=NULL;
-   double alpha, beta, gamma, dtemp, *diagAA, *offdAA, *diagonal; 
+   double alpha, beta, gamma, dtemp, *diagAA, *offdAA, *diagonal, *dvec; 
+   double **tArray;
 
    if ( outputLevel_ > 2 )
       printf("%4d : LLNL_FEI_Fei::buildGlobalMatrixVector begins..\n",mypid_);
@@ -1930,6 +1935,207 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
    }
 
    /* -----------------------------------------------------------------
+    * obtain off-processor boundary conditions
+    * -----------------------------------------------------------------*/
+
+   length = (numLocalNodes_ + numExtNodes_) * nodeDOF_ * 3;
+
+   /* part 1: if BC is declared on off-processors, get them in */ 
+   if (length > 0 )
+   {
+      dvec = new double[length];
+      for (iD = 0; iD < length; iD++) dvec[iD] = 0.0;
+      for ( iN = 0; iN < numBCNodes_; iN++ )
+      {
+         nodeID = BCNodeIDs_[iN];
+         index  = -1;
+         if (numExtNodes_ > 0)
+            index = hypre_BinarySearch(&nodeGlobalIDs_[numLocalNodes_],nodeID,
+                                       numExtNodes_);
+         if (index >= 0) 
+            dvec[(numLocalNodes_+index)*nodeDOF_] = 1.0;
+      }
+      gatherAddDData( dvec );
+      BCcnt = 0;
+      for (iD = 0; iD < numLocalNodes_; iD++)
+         if  (dvec[iD*nodeDOF_] == 1.0) BCcnt++;
+      if (BCcnt > 0)
+      {
+         iArray = BCNodeIDs_;
+         BCNodeIDs_ = new int[numBCNodes_+BCcnt];
+         for (iN = 0; iN < numBCNodes_; iN++) BCNodeIDs_[iN] = iArray[iN];
+         delete [] iArray;
+         offset = numBCNodes_;
+         for (iD = 0; iD < numLocalNodes_; iD++)
+            if  (dvec[iD*nodeDOF_] == 1.0) 
+               BCNodeIDs_[offset++] = iD;
+         tArray = BCNodeAlpha_;
+         BCNodeAlpha_ = new double*[numBCNodes_+BCcnt];
+         for (iN = 0; iN < numBCNodes_; iN++) BCNodeAlpha_[iN] = tArray[iN];
+         for (iN = 0; iN < BCcnt; iN++) 
+         {
+            BCNodeAlpha_[numBCNodes_+iN] = new double[nodeDOF_];
+            for (iD = 0; iD < nodeDOF_; iD++)
+               BCNodeAlpha_[numBCNodes_+iN][iD] = 0.0;
+         }
+         delete [] tArray;
+         tArray = BCNodeBeta_;
+         BCNodeBeta_ = new double*[numBCNodes_+BCcnt];
+         for (iN = 0; iN < numBCNodes_; iN++) BCNodeBeta_[iN] = tArray[iN];
+         for (iN = 0; iN < BCcnt; iN++) 
+         {
+            BCNodeBeta_[numBCNodes_+iN] = new double[nodeDOF_];
+            for (iD = 0; iD < nodeDOF_; iD++)
+               BCNodeBeta_[numBCNodes_+iN][iD] = 0.0;
+         }
+         delete [] tArray;
+         tArray = BCNodeGamma_;
+         BCNodeGamma_ = new double*[numBCNodes_+BCcnt];
+         for (iN = 0; iN < numBCNodes_; iN++) BCNodeGamma_[iN] = tArray[iN];
+         for (iN = 0; iN < BCcnt; iN++) 
+         {
+            BCNodeGamma_[numBCNodes_+iN] = new double[nodeDOF_];
+            for (iD = 0; iD < nodeDOF_; iD++)
+               BCNodeGamma_[numBCNodes_+iN][iD] = 0.0;
+         }
+         delete [] tArray;
+      }
+      for (iD = 0; iD < length; iD++) dvec[iD] = 0.0;
+      for ( iN = 0; iN < numBCNodes_; iN++ )
+      {
+         nodeID = BCNodeIDs_[iN];
+         index  = -1;
+         if (numExtNodes_ > 0)
+            index = hypre_BinarySearch(&nodeGlobalIDs_[numLocalNodes_],nodeID,
+                                       numExtNodes_);
+         if (index >= 0)
+         {
+            for (iD = index*nodeDOF_*3; iD < index*nodeDOF_*3+nodeDOF_; iD++)
+               dvec[numLocalNodes_*nodeDOF_*3+iD] =
+                  BCNodeAlpha_[iN][iD%nodeDOF_]; 
+            for (iD = index*nodeDOF_*3+nodeDOF_; 
+                 iD < index*nodeDOF_*3+nodeDOF_*2; iD++)
+               dvec[numLocalNodes_*nodeDOF_*3+iD] =
+                  BCNodeBeta_[iN][iD%nodeDOF_]; 
+            for (iD = index*nodeDOF_*3+nodeDOF_*2; 
+                 iD < (index+1)*nodeDOF_*3; iD++)
+               dvec[numLocalNodes_*nodeDOF_*3+iD] =
+                  BCNodeGamma_[iN][iD%nodeDOF_]; 
+         }
+      }
+      iD = nodeDOF_;
+      nodeDOF_ *= 3;
+      gatherAddDData( dvec );
+      nodeDOF_ = iD;
+      for (iN = numBCNodes_; iN < numBCNodes_+BCcnt; iN++) 
+      {
+         nodeID = BCNodeIDs_[iN];
+         for (iD = 0; iD < nodeDOF_; iD++) 
+            BCNodeAlpha_[iN][iD] = dvec[nodeID*nodeDOF_*3+iD]; 
+         for (iD = 0; iD < nodeDOF_; iD++) 
+            BCNodeBeta_[iN][iD] = dvec[nodeID*nodeDOF_*3+nodeDOF_+iD]; 
+         for (iD = 0; iD < nodeDOF_; iD++) 
+            BCNodeGamma_[iN][iD] = dvec[nodeID*nodeDOF_*3+nodeDOF_*2+iD]; 
+         BCNodeIDs_[iN] = nodeGlobalIDs_[nodeID];
+      }
+      numBCNodes_ += BCcnt;
+      delete [] dvec;
+   }
+
+   /* part 1: if BC is declared on-processors, get them out */ 
+   if (length > 0 )
+   {
+      dvec = new double[length];
+      for (iD = 0; iD < length; iD++) dvec[iD] = 0.0;
+      for ( iN = 0; iN < numBCNodes_; iN++ )
+      {
+         nodeID = BCNodeIDs_[iN];
+         index = hypre_BinarySearch(nodeGlobalIDs_,nodeID,numLocalNodes_);
+         if (index >= 0) 
+            dvec[index*nodeDOF_] = 1.0;
+      }
+      scatterDData( dvec );
+      BCcnt = 0;
+      for (iD = numLocalNodes_; iD < numLocalNodes_+numExtNodes_; iD++)
+         if  (dvec[iD*nodeDOF_] != 0.0) BCcnt++;
+      if (BCcnt > 0)
+      {
+         iArray = BCNodeIDs_;
+         BCNodeIDs_ = new int[numBCNodes_+BCcnt];
+         for (iN = 0; iN < numBCNodes_; iN++) BCNodeIDs_[iN] = iArray[iN];
+         delete [] iArray;
+         offset = numBCNodes_;
+         for (iD = numLocalNodes_; iD < numLocalNodes_+numExtNodes_; iD++)
+            if  (dvec[iD*nodeDOF_] == 1.0) 
+               BCNodeIDs_[offset++] = iD;
+         tArray = BCNodeAlpha_;
+         BCNodeAlpha_ = new double*[numBCNodes_+BCcnt];
+         for (iN = 0; iN < numBCNodes_; iN++) BCNodeAlpha_[iN] = tArray[iN];
+         for (iN = 0; iN < BCcnt; iN++) 
+         {
+            BCNodeAlpha_[numBCNodes_+iN] = new double[nodeDOF_];
+            for (iD = 0; iD < nodeDOF_; iD++)
+               BCNodeAlpha_[numBCNodes_+iN][iD] = 0.0;
+         }
+         delete [] tArray;
+         tArray = BCNodeBeta_;
+         BCNodeBeta_ = new double*[numBCNodes_+BCcnt];
+         for (iN = 0; iN < numBCNodes_; iN++) BCNodeBeta_[iN] = tArray[iN];
+         for (iN = 0; iN < BCcnt; iN++) 
+         {
+            BCNodeBeta_[numBCNodes_+iN] = new double[nodeDOF_];
+            for (iD = 0; iD < nodeDOF_; iD++)
+               BCNodeBeta_[numBCNodes_+iN][iD] = 0.0;
+         }
+         delete [] tArray;
+         tArray = BCNodeGamma_;
+         BCNodeGamma_ = new double*[numBCNodes_+BCcnt];
+         for (iN = 0; iN < numBCNodes_; iN++) BCNodeGamma_[iN] = tArray[iN];
+         for (iN = 0; iN < BCcnt; iN++) 
+         {
+            BCNodeGamma_[numBCNodes_+iN] = new double[nodeDOF_];
+            for (iD = 0; iD < nodeDOF_; iD++)
+               BCNodeGamma_[numBCNodes_+iN][iD] = 0.0;
+         }
+         delete [] tArray;
+      }
+      for (iD = 0; iD < length; iD++) dvec[iD] = 0.0;
+      for ( iN = 0; iN < numBCNodes_; iN++ )
+      {
+         nodeID = BCNodeIDs_[iN];
+         index = hypre_BinarySearch(nodeGlobalIDs_,nodeID,numLocalNodes_);
+         if (index >= 0) 
+         {
+            for (iD = index*nodeDOF_*3; iD < index*nodeDOF_*3+nodeDOF_; iD++)
+               dvec[iD] = BCNodeAlpha_[iN][iD%nodeDOF_]; 
+            for (iD = index*nodeDOF_*3+nodeDOF_; 
+                 iD < index*nodeDOF_*3+nodeDOF_*2; iD++)
+               dvec[iD] = BCNodeBeta_[iN][iD%nodeDOF_]; 
+            for (iD = index*nodeDOF_*3+nodeDOF_*2; 
+                 iD < (index+1)*nodeDOF_*3; iD++)
+               dvec[iD] = BCNodeGamma_[iN][iD%nodeDOF_]; 
+         }
+      }
+      iD = nodeDOF_;
+      nodeDOF_ *= 3;
+      scatterDData( dvec );
+      nodeDOF_ = iD;
+      for (iN = numBCNodes_; iN < numBCNodes_+BCcnt; iN++) 
+      {
+         nodeID = BCNodeIDs_[iN];
+         for (iD = 0; iD < nodeDOF_; iD++) 
+            BCNodeAlpha_[iN][iD] = dvec[nodeID*nodeDOF_*3+iD]; 
+         for (iD = 0; iD < nodeDOF_; iD++) 
+            BCNodeBeta_[iN][iD] = dvec[nodeID*nodeDOF_*3+nodeDOF_+iD]; 
+         for (iD = 0; iD < nodeDOF_; iD++) 
+            BCNodeGamma_[iN][iD] = dvec[nodeID*nodeDOF_*3+nodeDOF_*2+iD]; 
+         BCNodeIDs_[iN] = nodeGlobalIDs_[nodeID];
+      }
+      numBCNodes_ += BCcnt;
+      delete [] dvec;
+   }
+
+   /* -----------------------------------------------------------------
     * impose boundary conditions
     * -----------------------------------------------------------------*/
 
@@ -1937,10 +2143,10 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
    flags = NULL;
    if (numLocalNodes_+numExtNodes_ > 0)
       flags = new int[(numLocalNodes_+numExtNodes_)*nodeDOF_];
-   for (iD = 0; iD < (numLocalNodes_+numExtNodes_)*nodeDOF_; iD++)
+   for (iD = 0; iD < (numLocalNodes_+numExtNodes_)*nodeDOF_; iD++) 
       flags[iD] = 0;
 
-   for (iN = 0; iN < numBCNodes_; iN++)
+   for ( iN = 0; iN < numBCNodes_; iN++ )
    {
       nodeID = BCNodeIDs_[iN];
       index  = -1;
@@ -1977,7 +2183,7 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
                   }
                   TdiagJA[TdiagIA[iD]] = iD;
                   TdiagAA[TdiagIA[iD]] = 1.0;
-                  for (iD2=TdiagIA[iD]+1;iD2<TdiagIA[iD]+diagCounts[iD];iD2++)
+                  for (iD2=TdiagIA[iD]+1; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
                   {
                      TdiagJA[iD2] = -1;
                      TdiagAA[iD2] = 0.0;
@@ -2012,7 +2218,7 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
                else if (beta != 0.0)
                {
                   flags[iD] = 1;
-                  for (iD2=TdiagIA[iD];iD2<TdiagIA[iD]+diagCounts[iD];iD2++)
+                  for (iD2=TdiagIA[iD]; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
                   {
                      rowInd = TdiagJA[iD2];
                      if (rowInd == iD)
@@ -2030,89 +2236,84 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
       {
          if (numExtNodes_ <= 0)
          {
-            if (outputLevel_ > 2)
-               printf("WARNING : BC node ID not local %d (%d).\n",nodeID,
-                      mypid_);
-            index = -1;
+            printf("%4d : LLNL_FEI_Fei::buildGlobalMatrixVector ERROR(2).\n",
+                   mypid_);
+            exit(1);
          }
-         else
+         index = hypre_BinarySearch(&nodeGlobalIDs_[numLocalNodes_],nodeID,
+                                    numExtNodes_);
+         if (index < 0)
          {
-            index = hypre_BinarySearch(&nodeGlobalIDs_[numLocalNodes_],nodeID,
-                                       numExtNodes_);
-            if (index < 0 && outputLevel_ > 2)
-               printf("WARNING : BC node ID not local %d (%d).\n",nodeID,
-                      mypid_);
+            printf("ERROR : BC node ID not local.\n");
+            exit(1);
          }
-         if (index >= 0)
+         index += numLocalNodes_;
+         for (iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++)
          {
-            index += numLocalNodes_;
-            for (iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++)
+            if (flags[iD] == 0)
             {
-               if (flags[iD] == 0)
+               alpha  = BCNodeAlpha_[iN][iD%nodeDOF_]; 
+               beta   = BCNodeBeta_[iN][iD%nodeDOF_]; 
+               gamma  = BCNodeGamma_[iN][iD%nodeDOF_]; 
+               if (beta == 0.0 && alpha != 0.0)
                {
-                  alpha  = BCNodeAlpha_[iN][iD%nodeDOF_]; 
-                  beta   = BCNodeBeta_[iN][iD%nodeDOF_]; 
-                  gamma  = BCNodeGamma_[iN][iD%nodeDOF_]; 
-                  if (beta == 0.0 && alpha != 0.0)
+                  flags[iD] = 1;
+                  rowInd = iD + numCRMult_;
+                  if (numExtNodes_ > 0)
                   {
-                     flags[iD] = 1;
-                     rowInd = iD + numCRMult_;
-                     if (numExtNodes_ > 0)
-                     {
-                        for (iD2=TdiagIA[rowInd]; 
-                             iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
-                        {
-                           rowInd2 = TdiagJA[iD2];
-                           if (rowInd2 >= 0)
-                           {
-                              for (iD3 = ToffdIA[rowInd2];
-                                   iD3<ToffdIA[rowInd2]+offdCounts[rowInd2];iD3++)
-                              {
-                                 if (ToffdJA[iD3] == rowInd && ToffdAA[iD3]!=0.0)
-                                 {
-                                   rhsVector_[rowInd2]-=(gamma/alpha*ToffdAA[iD3]);
-                                   ToffdAA[iD3] = 0.0;
-                                   break;
-                                 }
-                              }
-                           }
-                        }
-                        for (iD2=ToffdIA[rowInd]; 
-                             iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
-                        {
-                           rowInd2 = ToffdJA[iD2];
-                           if (rowInd2 != rowInd && rowInd2 >= 0)
-                           {
-                              for (iD3 = ToffdIA[rowInd2];
-                                   iD3<ToffdIA[rowInd2]+offdCounts[rowInd2];iD3++)
-                              {
-                                 if (ToffdJA[iD3] == rowInd && ToffdAA[iD3]!=0.0)
-                                 {
-                                   rhsVector_[rowInd2]-=(gamma/alpha*ToffdAA[iD3]);
-                                   ToffdAA[iD3] = 0.0;
-                                   break;
-                                 }
-                              }
-                           }
-                        }
-                     }
                      for (iD2=TdiagIA[rowInd]; 
-                          iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
+                          iD2<TdiagIA[rowInd]+diagCounts[rowInd];iD2++)
                      {
-                        TdiagJA[iD2] = -1;
-                        TdiagAA[iD2] = 0.0;
-                     }
-                     if (ToffdIA != NULL)
-                     {
-                        for (iD2=ToffdIA[rowInd]; 
-                             iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
+                        rowInd2 = TdiagJA[iD2];
+                        if (rowInd2 >= 0)
                         {
-                           ToffdJA[iD2] = -1;
-                           ToffdAA[iD2] = 0.0;
+                           for (iD3 = ToffdIA[rowInd2];
+                                iD3<ToffdIA[rowInd2]+offdCounts[rowInd2];iD3++)
+                           {
+                              if (ToffdJA[iD3] == rowInd && ToffdAA[iD3] != 0.0)
+                              {
+                                 rhsVector_[rowInd2]-=(gamma/alpha*ToffdAA[iD3]);
+                                 ToffdAA[iD3] = 0.0;
+                                 break;
+                              }
+                           }
                         }
                      }
-                     rhsVector_[rowInd] = 0.0;
+                     for (iD2=ToffdIA[rowInd]; 
+                          iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
+                     {
+                        rowInd2 = ToffdJA[iD2];
+                        if (rowInd2 != rowInd && rowInd2 >= 0)
+                        {
+                           for (iD3 = ToffdIA[rowInd2];
+                                iD3<ToffdIA[rowInd2]+offdCounts[rowInd2]; iD3++)
+                           {
+                              if (ToffdJA[iD3] == rowInd && ToffdAA[iD3] != 0.0)
+                              {
+                                 rhsVector_[rowInd2]-=(gamma/alpha*ToffdAA[iD3]);
+                                 ToffdAA[iD3] = 0.0;
+                                 break;
+                              }
+                           }
+                        }
+                     }
                   }
+                  for (iD2=TdiagIA[rowInd]; 
+                       iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
+                  {
+                     TdiagJA[iD2] = -1;
+                     TdiagAA[iD2] = 0.0;
+                  }
+                  if ( ToffdIA != NULL )
+                  {
+                     for (iD2=ToffdIA[rowInd]; 
+                          iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
+                     {
+                        ToffdJA[iD2] = -1;
+                        ToffdAA[iD2] = 0.0;
+                     }
+                  }
+                  rhsVector_[rowInd] = 0.0;
                }
             }
          }
@@ -2828,8 +3029,8 @@ void LLNL_FEI_Fei::findSharedNodeProcs(int *nodeIDs, int *nodeIDAux,
                             int totalNNodes, int CRNNodes,
                             int **sharedNodePInfo_out) 
 {
-   int *sharedNodePInfo, iN, minProc, iP, NNodes;
-   int nprocs, index, pindex, *sharedNodePInds, iN2;
+   int *sharedNodePInfo, iN, minProc, NNodes;
+   int nprocs, index, *sharedNodePInds, iN2;
 
    MPI_Comm_size( mpiComm_, &nprocs);
    
@@ -2847,12 +3048,18 @@ void LLNL_FEI_Fei::findSharedNodeProcs(int *nodeIDs, int *nodeIDAux,
 
       index = hypre_BinarySearch(nodeIDs,sharedNodeIDs_[iN],totalNNodes);
       sharedNodePInds[iN] = -1;
+#if 0
+      /* Charles: 3/5/07 : sorted already, no need to do it again */
       minProc = nprocs;
-      for ( iP = 0; iP < sharedNodeNProcs_[iN]; iP++ )
+      for (int iP = 0; iP < sharedNodeNProcs_[iN]; iP++ )
       {
-         pindex = sharedNodeProcs_[iN][iP];
-         if ( pindex < minProc ) minProc = pindex;
+         int pindex = sharedNodeProcs_[iN][iP];
+         if ( pindex < minProc )
+            minProc = pindex;
       }
+#else
+      minProc = sharedNodeProcs_[iN][0];
+#endif
       /* pind = -ve if my processor doesn't own nor need the shared node
        * pind = 0:nprocs-1 if my processor owns or needs the shared node
          pind >= nprocs if my processor needs but does not own it */
@@ -3005,7 +3212,7 @@ void LLNL_FEI_Fei::findSharedNodeOwners( int *sharedNodePInfo )
             sindex = hypre_BinarySearch(commProcs,pindex,nComm);
             index = rbuffer[sindex][commLengs[sindex]++];
             if ( index < 0 ) 
-               sharedNodeProcs_[iN][iP] = - sharedNodeProcs_[iN][iP];
+               sharedNodeProcs_[iN][iP] = - sharedNodeProcs_[iN][iP] - 1;
             else if ( index >= nprocs ) 
                sharedNodeProcs_[iN][iP] += nprocs; 
          } 

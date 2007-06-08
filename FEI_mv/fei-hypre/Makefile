@@ -79,6 +79,8 @@ CXX_COMPILE_FLAGS = \
 
 HEADERS =\
  cfei-hypre.h\
+ cfei_hypre.h\
+ hypre_cfei.h\
  HYPRE_LinSysCore.h\
  HYPRE_FEI_includes.h \
  $(BASE_DIR)/base/Data.h  \
@@ -155,6 +157,7 @@ FILESCXX = \
  HYPRE_LinSysCore.cxx\
  HYPRE_SlideReduction.cxx\
  cfei_hypre.cxx\
+ hypre_cfei.cxx\
  hypre_schur_reduce.cxx\
  hypre_slide_reduce.cxx\
  HYPRE_fei_mesh.cxx\
@@ -172,6 +175,7 @@ OBJS = ${OBJSC} ${OBJSCXX}
 all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include
@@ -184,6 +188,7 @@ all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)

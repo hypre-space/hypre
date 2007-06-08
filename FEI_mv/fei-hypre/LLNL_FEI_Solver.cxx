@@ -88,7 +88,10 @@ LLNL_FEI_Solver::LLNL_FEI_Solver( MPI_Comm comm )
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Solver::parameters(int numParams, char **paramString)
 {
-   int  i, olevel, nprocs;
+   int  i, olevel;
+#if HAVE_SUPERLU
+   int  nprocs;
+#endif
    char param[256], param1[256];
 
    for ( i = 0; i < numParams; i++ )
