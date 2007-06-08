@@ -2213,13 +2213,10 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          newData     = new double[numNodes*fieldSize];
          newNumNodes = 0;
          for ( i = 0; i < numNodes*fieldSize; i++ ) newData[i] = -99999.9;
+#ifdef FEI_250
          for ( i = 0; i < numNodes; i++ )
          { 
             index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
-
-/* ======
-This should ultimately be taken out even for newer ale3d implementation
-   =====*/
             if ( index >= localStartRow_-1 && index < localEndRow_)
             {
                if ( newData[newNumNodes*fieldSize] == -99999.9 )
@@ -2247,14 +2244,48 @@ This should ultimately be taken out even for newer ale3d implementation
             for ( j = 0; j < fieldSize; j++ ) 
                MLI_NodalCoord_[index+j] = newData[i*fieldSize+j];
          }
+#else
+         for ( i = 0; i < numNodes; i++ )
+         { 
+            index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
+            if ( index >= 0 )
+            {
+               for ( j = 0; j < fieldSize; j++ ) 
+                  newData[newNumNodes*fieldSize+j] = data[i*fieldSize+j];
+               eqnNumbers[newNumNodes++] = index;
+            }
+         }
+         if ( MLI_NodalCoord_ == NULL )
+         {
+            MLI_EqnNumbers_ = new int[newNumNodes];
+            for (i=0; i<newNumNodes; i++) 
+               MLI_EqnNumbers_[i] = eqnNumbers[i];
+            MLI_NodalCoord_ = new double[newNumNodes*fieldSize];
+            for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = -99999.0;
+            MLI_FieldSize_  = fieldSize;
+            MLI_NumNodes_   = newNumNodes;
+         }
+         for ( i = 0; i < newNumNodes; i++ )
+         {
+            index = i * fieldSize;
+            for ( j = 0; j < fieldSize; j++ ) 
+               MLI_NodalCoord_[index+j] = newData[i*fieldSize+j];
+         }
+#endif
          delete [] eqnNumbers;
          delete [] newData;
          errCnt = 0;
          for (i = 0; i < nRows; i++)
             if (MLI_NodalCoord_[i] == -99999.0) errCnt++;
          if (errCnt > 0)
-            printf("putNodalFieldData ERROR:incomplete nodal coordinates (%d %d).\n",
-                   errCnt, nRows);
+         {
+            printf("%d : putNodalFieldData ERROR:incomplete nodal coordinates (%d %d).\n",
+                   mypid_, errCnt, nRows);
+            for (i = 0; i < nRows; i++)
+               if (MLI_NodalCoord_[i] == -99999.0)
+                  printf("%d : putNodalFieldData ERROR on equation %d\n",
+                         mypid_, i);
+         }
       }
       else
       {

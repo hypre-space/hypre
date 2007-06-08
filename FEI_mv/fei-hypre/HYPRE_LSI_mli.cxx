@@ -1592,6 +1592,8 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
                nCoords[eqnInd*nDim+iD] = dRecvBufs[iP][iR*nDim+iD];
       }
    }
+   for ( iN = 0; iN < numNodes*nodeDOF; iN++ )  
+      if (nCoords[iN] == -99999.0) printf("%d : LSI_mli error %d\n",mypid,iN);
 
    /* -------------------------------------------------------- */
    /* clean up                                                 */
