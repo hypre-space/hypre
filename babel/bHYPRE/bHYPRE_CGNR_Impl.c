@@ -34,7 +34,7 @@
 #include "bHYPRE_IdentitySolver_Impl.h"
 #include "bHYPRE_MatrixVectorView.h"
 #include <math.h>
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.CGNR._includes) */
 

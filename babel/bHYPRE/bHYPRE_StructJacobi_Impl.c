@@ -31,7 +31,7 @@
 /* Insert-Code-Here {bHYPRE.StructJacobi._includes} (includes and arbitrary code) */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 #include "bHYPRE_StructMatrix.h"
 #include "bHYPRE_StructMatrix_Impl.h"

@@ -69,7 +69,7 @@
 #include "bHYPRE_IdentitySolver_Impl.h"
 #include "_hypre_struct_ls.h"
 #include "_hypre_sstruct_ls.h"
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 
 #include "bHYPRE_MPICommunicator.h"

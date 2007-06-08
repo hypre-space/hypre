@@ -29,7 +29,7 @@
 /* Insert-Code-Here {bHYPRE.SStructSplit._includes} (includes and arbitrary code) */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 #include "bHYPRE_SStructMatrix.h"
 #include "bHYPRE_SStructMatrix_Impl.h"

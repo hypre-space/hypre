@@ -53,7 +53,7 @@
 #include "bHYPRE_PCG_Impl.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 #include "bHYPRE_IdentitySolver.h"
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
 

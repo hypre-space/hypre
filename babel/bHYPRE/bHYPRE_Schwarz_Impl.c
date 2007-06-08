@@ -31,7 +31,7 @@
 /* Insert-Code-Here {bHYPRE.Schwarz._includes} (includes and arbitrary code) */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"

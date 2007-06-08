@@ -45,7 +45,7 @@
 
 #include "bHYPRE_MPICommunicator_Impl.h"
 #include <math.h>
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 #include "bHYPRE_StructSMG.h"
 #include "bHYPRE_StructDiagScale.h"

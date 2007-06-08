@@ -31,7 +31,7 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 #include "bHYPRE_SStructVector_Impl.h"
 #include "bHYPRE_SStructMatrix_Impl.h"
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._includes) */

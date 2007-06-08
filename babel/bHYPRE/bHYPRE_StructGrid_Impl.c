@@ -28,7 +28,7 @@
 /* Put additional includes or other arbitrary code here... */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
 #include "HYPRE_struct_mv.h"

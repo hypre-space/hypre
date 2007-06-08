@@ -180,7 +180,7 @@
 /* Put additional includes or other arbitrary code here... */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
@@ -1568,7 +1568,7 @@ impl_bHYPRE_BoomerAMG_Apply(
 
    bHYPREP_b = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2(b, "bHYPRE.IJParCSRVector", _ex );
    SIDL_CHECK(*_ex);
-   if ( bHYPREP_b==NULL ) hypre_assert( "Unrecognized vector type."==(char *)x );
+   if ( bHYPREP_b==NULL ) hypre_assert( "Unrecognized vector type."==(char *)b );
 
    datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
    ij_b = datab -> ij_b;

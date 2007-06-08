@@ -31,7 +31,7 @@
 /* Put additional includes or other arbitrary code here... */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
 #include "_hypre_sstruct_mv.h"
