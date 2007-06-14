@@ -2261,7 +2261,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
             for (i=0; i<newNumNodes; i++) 
                MLI_EqnNumbers_[i] = eqnNumbers[i];
             MLI_NodalCoord_ = new double[newNumNodes*fieldSize];
-            for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = -99999.0;
+            for (i=0; i<newNumNodes; i++) MLI_NodalCoord_[i] = -99999.0;
             MLI_FieldSize_  = fieldSize;
             MLI_NumNodes_   = newNumNodes;
          }
