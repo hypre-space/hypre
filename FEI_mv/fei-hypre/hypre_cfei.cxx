@@ -279,6 +279,7 @@ int HYPRE_FEI_sumInElemMatrix(HYPRE_FEI_Impl *fei, int elemBlock, int elemID,
    LLNL_FEI_Impl *lfei;
    if (fei == NULL) return 1;
    if (fei->fei_ == NULL) return 1;
+   lfei = (LLNL_FEI_Impl *) fei->fei_;
    lfei->sumInElemMatrix(elemBlock,elemID,elemConn,elemStiff,elemFormat);
    return(0);
 }
