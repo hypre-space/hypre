@@ -2244,6 +2244,18 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
             for ( j = 0; j < fieldSize; j++ ) 
                MLI_NodalCoord_[index+j] = newData[i*fieldSize+j];
          }
+         errCnt = 0;
+         for (i = 0; i < nRows; i++)
+            if (MLI_NodalCoord_[i] == -99999.0) errCnt++;
+         if (errCnt > 0)
+         {
+            printf("%d : putNodalFieldData ERROR:incomplete nodal coordinates (%d %d).\n",
+                   mypid_, errCnt, nRows);
+            for (i = 0; i < nRows; i++)
+               if (MLI_NodalCoord_[i] == -99999.0)
+                  printf("%d : putNodalFieldData ERROR on equation %d\n",
+                         mypid_, i);
+         }
 #else
          for ( i = 0; i < numNodes; i++ )
          { 
@@ -2274,18 +2286,6 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
 #endif
          delete [] eqnNumbers;
          delete [] newData;
-         errCnt = 0;
-         for (i = 0; i < nRows; i++)
-            if (MLI_NodalCoord_[i] == -99999.0) errCnt++;
-         if (errCnt > 0)
-         {
-            printf("%d : putNodalFieldData ERROR:incomplete nodal coordinates (%d %d).\n",
-                   mypid_, errCnt, nRows);
-            for (i = 0; i < nRows; i++)
-               if (MLI_NodalCoord_[i] == -99999.0)
-                  printf("%d : putNodalFieldData ERROR on equation %d\n",
-                         mypid_, i);
-         }
       }
       else
       {
