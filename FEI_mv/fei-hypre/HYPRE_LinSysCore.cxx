@@ -2294,6 +2294,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
             printf("putNodalFieldData WARNING : \n");
             printf("    set nodeNumbers = NULL, set numNodes = 0.\n");
          }
+         nRows = localEndRow_ - localStartRow_ + 1;
          MLI_NodalCoord_ = new double[localEndRow_-localStartRow_+1];
          for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = data[i];
       }
