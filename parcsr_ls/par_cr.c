@@ -2296,6 +2296,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
          if (num_functions == 1)
          /*if(CRaddCpoints == 0)*/
          {
+            local_max = 0.0;
             for(i=0;i<num_variables;i++)
                if(fabs(e1[i]) > local_max)
                   local_max = fabs(e1[i]);
@@ -2303,6 +2304,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
          else
          {
             jj = 0;
+            local_max = 0.0;
             for(i=0;i<num_nodes;i++)
             {
                /*CF_marker[jj] = CFN_marker[i];*/
