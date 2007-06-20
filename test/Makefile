@@ -286,16 +286,26 @@ ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
-cxx_ij cxx_sstruct cxx_struct: cxx_ij.o cxx_sstruct.o cxx_struct.o
+cxx_ij: cxx_ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CXX} -o $@ $@.o ${LFLAGS}
+cxx_ij.o: cxx_ij.cxx
+cxx_ij.cxx: ij.c
+	cp -fp ij.c cxx_ij.cxx
 
-cxx_ij.o cxx_sstruct.o cxx_struct.o: cxx_ij.cxx cxx_sstruct.cxx cxx_struct.cxx
+cxx_sstruct: cxx_sstruct.o
+	@echo  "Building" $@ "... "
+	${LINK_CXX} -o $@ $@.o ${LFLAGS}
+cxx_sstruct.o: cxx_sstruct.cxx
+cxx_sstruct.cxx: sstruct.c
+	cp -fp sstruct.c cxx_sstruct.cxx
 
-cxx_ij.cxx cxx_sstruct.cxx cxx_struct.cxx: ij.c sstruct.c struct.c
-	cp -f ij.c cxx_ij.cxx
-	cp -f sstruct.c cxx_sstruct.cxx
-	cp -f struct.c cxx_struct.cxx
+cxx_struct: cxx_struct.o
+	@echo  "Building" $@ "... "
+	${LINK_CXX} -o $@ $@.o ${LFLAGS}
+cxx_struct.o: cxx_struct.cxx
+cxx_struct.cxx: struct.c
+	cp -fp struct.c cxx_struct.cxx
 
 ##################################################################
 # Babel version of above
