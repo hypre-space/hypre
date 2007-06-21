@@ -30,7 +30,19 @@
 # recent release.
 #=============================================================================
 
-Added Bram Metsch's CGC and CGC-E coarsening algorithm.
+Version 2.1.0a released, 2007/06/XX.
+
+- Added Bram Metsch's CGC and CGC-E coarsening algorithms.
+
+- Added several new solver types to AMS and improved the AMS/FEI integration.
+
+- Better handling of the relative change test in GMRES.
+
+- Improved weights for Struct and SStruct weighted Jacobi.
+
+- Added a 'make check' target that does a simple code verification test.
+
+#====================================
 
 Version 2.0.0 released, 2006/12/15.
 
