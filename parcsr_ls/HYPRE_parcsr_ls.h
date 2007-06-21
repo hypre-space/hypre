@@ -208,8 +208,8 @@ int HYPRE_BoomerAMGSetMaxRowSum(HYPRE_Solver solver,
  * 10 &	HMIS-coarsening (uses one pass Ruge-Stueben on each processor independently, followed \\
  * & by PMIS using the interior C-points generated as its first independent set) \\
  * 11 &	one-pass Ruge-Stueben coarsening on each processor, no boundary treatment (not recommended!) \\
- * 21 &	CGC coarsening \\
- * 22 &	CGC-E coarsening \\
+ * 21 &	CGC coarsening by M. Griebel, B. Metsch and A. Schweitzer \\
+ * 22 &	CGC-E coarsening by M. Griebel, B. Metsch and A.Schweitzer \\
  * \hline
  * \end{tabular}
  * 
