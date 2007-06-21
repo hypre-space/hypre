@@ -32,7 +32,9 @@
 
 Version 2.1.0a released, 2007/06/XX.
 
-- Added Bram Metsch's CGC and CGC-E coarsening algorithms.
+- Added the CGC and CGC-E coarsening algorithms, which have been developed 
+  and implemented by Michael Griebel, Bram Metsch and Alex Schweitzer of 
+  the University of Bonn.
 
 - Added several new solver types to AMS and improved the AMS/FEI integration.
 
