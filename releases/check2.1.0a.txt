@@ -31,23 +31,23 @@ the responsible project member before the release is made available to users.
  7. Update config/configure.in with release number and date, then run
     config/bootstrap and commit changes to the repository
 
-    --->> 
+    --->> tk 06/25/07
 
  8. Tag repository with release number
 
-    --->> 
+    --->> tk 06/25/07
 
  9. Create release tar file by running the mkdist script './mkdist [VersionID]'
     (this can be run from within any directory, just be sure to use the latest
     version of the 'mkdist' script)
 
-    --->> 
+    --->> tk 06/25/07
 
 10. On the CASC cluster, copy tar file to /usr/casc/hypre
 
-    --->> 
+    --->> tk 06/25/07
 
 11. FINAL CERTIFICATION: Verify that all steps have been signed off and commit
     this file to the repository
 
-    --->> 
+    --->> tk 06/25/07
