@@ -53,8 +53,8 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([HYPRE_NAME], [hypre])
-m4_define([HYPRE_VERSION], [2.0.0])
-m4_define([HYPRE_DATE], [2006/12/15])
+m4_define([HYPRE_VERSION], [2.1.0a])
+m4_define([HYPRE_DATE], [2007/06/25])
 m4_define([HYPRE_TIME], [00:00:00])
 m4_define([HYPRE_DATETIME], [HYPRE_DATE])
 m4_define([HYPRE_BUGS], [hypre-support@llnl.gov])
