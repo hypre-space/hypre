@@ -10,5 +10,6 @@ all:
 clean:
 	rm -f *.html
 
-veryclean distclean: clean
+distclean: clean
 	rm -f *~
+	rm -rf ../*.html ../README_files

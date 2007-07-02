@@ -177,8 +177,7 @@ ex10: ex10.o
 clean:
 	rm -f $(ALLPROGS:=.o)
 	rm -f $(BABELPROGS:=.o)
-veryclean distclean: clean
+distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)
 	rm -f $(BABELPROGS) $(BABELPROGS:=*~)
-	rm -rf *.html README_files
 	rm -rf $(BABELPROGS:=*-pp.f90)
