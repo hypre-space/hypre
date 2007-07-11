@@ -351,6 +351,7 @@ apply_error_filters ()
           'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
           'PGC/x86\ Linux/x86\ 3.3-1:\ compilation\ completed\ with\ warnings'\
           'sed:\ Couldn.t\ close\ '
+          'Warning:\ No\ xauth\ data'
         do process_filter $ErrorFile "${ii}"
         done
         ;;
