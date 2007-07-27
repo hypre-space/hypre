@@ -2730,10 +2730,11 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    }
    if (max_elmts > 0)
    {
-    int P_mxnum, cnt1, rowlength=0;
+    int P_mxnum, cnt1, rowlength;
     int *P_aux_j;
     double *P_aux_data;
 
+    rowlength = 0;
     if (n_fine) 
        rowlength = P_diag_i[1]+P_offd_i[1];
     P_mxnum = rowlength;
