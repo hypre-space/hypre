@@ -90,7 +90,7 @@ HYPRE_DIRS =\
 HYPRE_EXTRA_DIRS =\
  ${HYPRE_DOCS_DIRS}\
  ${HYPRE_TEST_DIRS}\
- seq_ls 
+ seq_ls/pamg 
 
 #################################################################
 # Targets
