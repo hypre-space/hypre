@@ -265,10 +265,6 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    for (int i = 0; i < 25; i++) amgRelaxWeight_[i] = 1.0; 
    for (int j = 0; j < 25; j++) amgRelaxOmega_[j] = 1.0; 
 
-   amgAggLevels_       = 0;
-   amgInterpType_      = 0;
-   amgPmax_            = 0;
-
    pilutFillin_        = 0;    // how many nonzeros to keep in L and U
    pilutDropTol_       = 0.0;
    pilutMaxNnzPerRow_  = 0;    // register the max NNZ/row in matrix A
@@ -351,16 +347,13 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsPrintLevel_ = 0;
    amsAlphaCoarsenType_ = 10;
    amsAlphaAggLevels_ = 1;
-   amsAlphaRelaxType_ = 6;
+   amsAlphaRelaxType_ = 3;
    amsAlphaStrengthThresh_ = 0.25;
-   amsAlphaInterpType_ = 0;
-   amsAlphaPmax_ = 0;
    amsBetaCoarsenType_ = 10;
    amsBetaAggLevels_ = 1;
-   amsBetaRelaxType_ = 6;
+   amsBetaRelaxType_ = 3;
    amsBetaStrengthThresh_ = 0.25;
-   amsBetaInterpType_ = 0;
-   amsBetaPmax_ = 0;
+
 
    //-------------------------------------------------------------------
    // parameters ML Maxwell solver
@@ -1069,8 +1062,17 @@ int HYPRE_LinSysCore::setMatrixStructure(int** ptColIndices, int* ptRowLengths,
    //-------------------------------------------------------------------
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   {
       printf("%4d : HYPRE_LSC::entering setMatrixStructure.\n",mypid_);
-
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 6 )
+      {
+         int nRows = localEndRow_ - localStartRow_ + 1;
+         for (i = 0; i < nRows; i++)
+            for (j = 0; j < ptRowLengths[i]; j++) 
+               printf("  %4d : row, col = %d %d\n",mypid_,
+                      localStartRow_+i, ptColIndices[i][j]+1);
+      }
+   }
    (void) blkColIndices;
    (void) blkRowLengths;
    (void) ptRowsPerBlkRow;
@@ -1447,8 +1449,8 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
       printf("%4d : row number = %d.\n", mypid_, row);
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 6 )
          for ( i = 0; i < numValues; i++ )
-            printf("  %4d : col = %d, data = %e\n", mypid_, scatterIndices[i], 
-                    values[i]);
+            printf("  %4d : row,col = %d %d, data = %e\n", mypid_, 
+                   row+1, scatterIndices[i]+1, values[i]);
    }
 
    //-------------------------------------------------------------------
@@ -1534,7 +1536,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
             localRow = ptRows[i] - localStartRow_ + 1;
             for ( j = 0; j < numPtCols; j++ )
                printf("  %4d : row,col,val = %8d %8d %e\n",mypid_,
-                      localRow, ptCols[j], values[i][j]); 
+                      ptRows[i]+1, ptCols[j]+1, values[i][j]); 
          }
       }
    }
@@ -1610,8 +1612,8 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
          if ( index >= rowLeng )
          {
             printf("%4d : sumIntoSystemMatrix ERROR - loading column",mypid_);
-            printf("      that has not been declared before - %d.\n",
-                   colIndex);
+            printf(" that has not been declared before - %d (row=%d).\n",
+                   colIndex, ptRows[i]+1);
             for ( k = 0; k < rowLeng; k++ ) 
                printf("       available column index = %d\n", indptr[k]);
             exit(1);
@@ -2213,10 +2215,13 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          newData     = new double[numNodes*fieldSize];
          newNumNodes = 0;
          for ( i = 0; i < numNodes*fieldSize; i++ ) newData[i] = -99999.9;
-#ifdef FEI_250
          for ( i = 0; i < numNodes; i++ )
          { 
             index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
+
+/* ======
+This should ultimately be taken out even for newer ale3d implementation
+   =====*/
             if ( index >= localStartRow_-1 && index < localEndRow_)
             {
                if ( newData[newNumNodes*fieldSize] == -99999.9 )
@@ -2244,48 +2249,14 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
             for ( j = 0; j < fieldSize; j++ ) 
                MLI_NodalCoord_[index+j] = newData[i*fieldSize+j];
          }
+         delete [] eqnNumbers;
+         delete [] newData;
          errCnt = 0;
          for (i = 0; i < nRows; i++)
             if (MLI_NodalCoord_[i] == -99999.0) errCnt++;
          if (errCnt > 0)
-         {
-            printf("%d : putNodalFieldData ERROR:incomplete nodal coordinates (%d %d).\n",
-                   mypid_, errCnt, nRows);
-            for (i = 0; i < nRows; i++)
-               if (MLI_NodalCoord_[i] == -99999.0)
-                  printf("%d : putNodalFieldData ERROR on equation %d\n",
-                         mypid_, i);
-         }
-#else
-         for ( i = 0; i < numNodes; i++ )
-         { 
-            index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
-            if ( index >= 0 )
-            {
-               for ( j = 0; j < fieldSize; j++ ) 
-                  newData[newNumNodes*fieldSize+j] = data[i*fieldSize+j];
-               eqnNumbers[newNumNodes++] = index;
-            }
-         }
-         if ( MLI_NodalCoord_ == NULL )
-         {
-            MLI_EqnNumbers_ = new int[newNumNodes];
-            for (i=0; i<newNumNodes; i++) 
-               MLI_EqnNumbers_[i] = eqnNumbers[i];
-            MLI_NodalCoord_ = new double[newNumNodes*fieldSize];
-            for (i=0; i<newNumNodes; i++) MLI_NodalCoord_[i] = -99999.0;
-            MLI_FieldSize_  = fieldSize;
-            MLI_NumNodes_   = newNumNodes;
-         }
-         for ( i = 0; i < newNumNodes; i++ )
-         {
-            index = i * fieldSize;
-            for ( j = 0; j < fieldSize; j++ ) 
-               MLI_NodalCoord_[index+j] = newData[i*fieldSize+j];
-         }
-#endif
-         delete [] eqnNumbers;
-         delete [] newData;
+            printf("putNodalFieldData ERROR:incomplete nodal coordinates (%d %d).\n",
+                   errCnt, nRows);
       }
       else
       {
@@ -2294,7 +2265,6 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
             printf("putNodalFieldData WARNING : \n");
             printf("    set nodeNumbers = NULL, set numNodes = 0.\n");
          }
-         nRows = localEndRow_ - localStartRow_ + 1;
          MLI_NodalCoord_ = new double[localEndRow_-localStartRow_+1];
          for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = data[i];
       }
