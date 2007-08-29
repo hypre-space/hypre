@@ -64,6 +64,8 @@
 #include "HYPRE_MLMaxwell.h"
 #include "HYPRE_SlideReduction.h"
 
+#define HAVE_SYSPDE
+
 //***************************************************************************
 // timers 
 //---------------------------------------------------------------------------
@@ -353,7 +355,13 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsBetaAggLevels_ = 1;
    amsBetaRelaxType_ = 3;
    amsBetaStrengthThresh_ = 0.25;
-
+   sysPDEMethod_ = -1;
+   sysPDEFormat_ = -1;
+   sysPDETol_ = 0.0;
+   sysPDEMaxIter_ = -1;
+   sysPDENumPre_ = -1;
+   sysPDENumPost_ = -1;
+   sysPDENVars_ = 3;
 
    //-------------------------------------------------------------------
    // parameters ML Maxwell solver
@@ -524,6 +532,10 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
          HYPRE_AMSFEIDestroy( HYPrecon_ );
          HYPRE_AMSDestroy( HYPrecon_ );
       }
+#ifdef HAVE_SYSPDE
+      else if ( HYPreconID_ == HYSYSPDE )
+         HYPRE_ParCSRSysPDEDestroy( HYPrecon_ );
+#endif
 
       HYPrecon_ = NULL;
    }
@@ -3649,6 +3661,10 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 #endif
       else if (HYPreconID_ == HYUZAWA)   
          HYPRE_LSI_UzawaDestroy(HYPrecon_);
+#ifdef HAVE_SYSPDE
+      else if (HYPreconID_ == HYSYSPDE)
+         HYPRE_ParCSRSysPDEDestroy(HYPrecon_);
+#endif
    }
 
    //-------------------------------------------------------------------
@@ -3765,6 +3781,13 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       strcpy(HYPreconName_, name);
       HYPreconID_ = HYUZAWA;
    }
+#ifdef HAVE_SYSPDE
+   else if (!strcmp(name, "syspde"))
+   {
+      strcpy(HYPreconName_, name);
+      HYPreconID_ = HYSYSPDE;
+   }
+#endif
    else
    {
       if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
@@ -3865,6 +3888,13 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            break;
       case HYUZAWA :
            HYPRE_LSI_UzawaCreate(comm_, &HYPrecon_);
+           break;
+      case HYSYSPDE :
+#ifdef HAVE_SYSPDE
+           ierr = HYPRE_ParCSRSysPDECreate(comm_, sysPDENVars_, &HYPrecon_);
+#else
+           printf("HYPRE_LSC::selectPreconditioner-SYSPDE unsupported.\n");
+#endif
            break;
    }
 
