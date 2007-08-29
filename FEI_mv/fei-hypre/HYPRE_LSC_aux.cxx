@@ -49,6 +49,7 @@
 #define strcmp _stricmp
 #endif
 
+//#define HAVE_SYSPDE 
 #define HAVE_MLI 
 
 //---------------------------------------------------------------------------
@@ -320,6 +321,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - blockP help (to get blockP options) \n");
          printf("    - amsNumPDEs <d>\n");
          printf("    - MLI help (to get MLI options) \n");
+         printf("    - syspdeNVars <d> \n");
 #ifdef HAVE_ML
          printf("    - mlNumSweeps <d>\n");
          printf("    - mlRelaxType <jacobi,sgs,vbsgs>\n");
@@ -1821,6 +1823,20 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //---------------------------------------------------------------
+      // syspde preconditoner : nvars
+      //---------------------------------------------------------------
+
+      else if ( !strcmp(param1, "syspdeNVars") )
+      {
+         sscanf(params[i],"%s %d", param, &sysPDENVars_);
+         if (sysPDENVars_<0 || sysPDENVars_>10)
+            sysPDENVars_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters syspdeNVars = %d\n",
+                   sysPDENVars_);
+      }
+
+      //---------------------------------------------------------------
       // error 
       //---------------------------------------------------------------
 
@@ -2048,6 +2064,25 @@ void HYPRE_LinSysCore::setupPCGPrecon()
       case HYUZAWA :
            printf("CG : Uzawa preconditioning not available.\n");
            exit(1);
+           break;
+
+      case HYSYSPDE :
+#ifdef HAVE_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+                                        HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+                                        HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("CG : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -2424,6 +2459,25 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
       case HYAMS :
            printf("GMRES : AMS preconditioning not available.\n");
            exit(1);
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+                                          HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("GMRES : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -4013,6 +4067,32 @@ void HYPRE_LinSysCore::setupPreconBlock()
    newLookup->object = (void *) lookup_;
    HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
    free( newLookup );
+}
+
+//***************************************************************************
+// this function sets up system pde preconditioner
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::setupPreconSysPDE()
+{
+#ifdef HAVE_SYSPDE
+   if (sysPDEMethod_ >= 0)
+      HYPRE_ParCSRSysPDESetMethod(HYPrecon_, sysPDEMethod_);
+   if (sysPDEFormat_ >= 0)
+      HYPRE_ParCSRFormat(HYPrecon_, sysPDEFormat_);
+   if (sysPDETol_ > 0.0)
+      HYPRE_ParCSRSysPDESetTol(HYPrecon_, sysPDETol_);
+   if (sysPDEMaxIter_ > 0)
+      HYPRE_ParCSRSysPDESetMaxIter(HYPrecon_, sysPDEMaxIter_);
+   if (sysPDENumPre_ > 0)
+      HYPRE_ParCSRSysPDESetNPre(HYPrecon_, sysPDENumPre_);
+   if (sysPDENumPost_ > 0)
+      HYPRE_ParCSRSysPDESetNPost(HYPrecon_, sysPDENumPost_);
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+      HYPRE_ParCSRSysPDESetLogging(HYPrecon_, 1);
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+      HYPRE_ParCSRSysPDESetPrintLevel(HYPrecon_,  1);
+#endif
 }
 
 //***************************************************************************

@@ -64,7 +64,7 @@
 #include "HYPRE_MLMaxwell.h"
 #include "HYPRE_SlideReduction.h"
 
-#define HAVE_SYSPDE
+//#define HAVE_SYSPDE
 
 //***************************************************************************
 // timers 
