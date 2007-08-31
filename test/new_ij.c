@@ -125,6 +125,8 @@ main( int   argc,
    double   jacobi_trunc_threshold;
    double   S_commpkg_switch = 1.0;
    double   CR_rate = 0.7;
+   double   CR_strong_th = 0.0;
+   int      CR_use_CG = 0;
    int      P_max_elmts = 0;
    int      cycle_type;
    int      coarsen_type = 6;
@@ -425,6 +427,11 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 99;
       }    
+      else if ( strcmp(argv[arg_index], "-crcg") == 0 )
+      {
+         arg_index++;
+         CR_use_CG = atoi(argv[arg_index++]);
+      }    
       else if ( strcmp(argv[arg_index], "-hmis") == 0 )
       {
          arg_index++;
@@ -484,6 +491,11 @@ main( int   argc,
       {
          arg_index++;
          CR_rate = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-crst") == 0 )
+      {
+         arg_index++;
+         CR_strong_th = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
@@ -1853,6 +1865,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetISType(amg_solver, IS_type);
       HYPRE_BoomerAMGSetNumCRRelaxSteps(amg_solver, num_CR_relax_steps);
       HYPRE_BoomerAMGSetCRRate(amg_solver, CR_rate);
+      HYPRE_BoomerAMGSetCRStrongTh(amg_solver, CR_strong_th);
+      HYPRE_BoomerAMGSetCRUseCG(amg_solver, CR_use_CG);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
       if (relax_down > -1)
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
@@ -2085,6 +2099,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
@@ -2197,6 +2213,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
@@ -2370,6 +2388,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
@@ -2471,6 +2491,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
@@ -2650,6 +2672,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
