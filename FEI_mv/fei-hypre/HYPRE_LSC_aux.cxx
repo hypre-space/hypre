@@ -927,7 +927,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       {
          sscanf(params[i],"%s %d", param, &nsweeps);
          if ( nsweeps < 1 ) nsweeps = 1;
-         for ( k = 0; k < 3; k++ ) amgNumSweeps_[k] = nsweeps;
+         for ( k = 0; k < 4; k++ ) amgNumSweeps_[k] = nsweeps;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amgNumSweeps = %d\n",
                    nsweeps);
