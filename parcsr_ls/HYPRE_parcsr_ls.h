@@ -2649,6 +2649,19 @@ int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
                              double  CR_rate);
 
 /*
+ * (Optional) Defines strong threshold for CR
+ * The default is 0.0.
+ **/
+int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
+                             double  CR_strong_th);
+
+/*
+ * (Optional) Defines whether to use CG 
+ **/
+int HYPRE_BoomerAMGSetCRUseCG(HYPRE_Solver solver,
+                             int  CR_use_CG);
+
+/*
  * (Optional) Defines the Type of independent set algorithm used for CR
  **/
 int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,

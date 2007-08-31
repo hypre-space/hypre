@@ -1090,6 +1090,17 @@ HYPRE_BoomerAMGSetCRRate( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCRStrongTh
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetCRStrongTh( HYPRE_Solver  solver,
+                          double        CR_strong_th  )
+{
+   return( hypre_BoomerAMGSetCRStrongTh( (void *) solver, CR_strong_th ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetISType
  *--------------------------------------------------------------------------*/
 

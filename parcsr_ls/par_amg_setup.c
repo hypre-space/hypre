@@ -75,6 +75,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    double              *omega;
    double               schwarz_relax_wt = 1;
    double               strong_threshold;
+   double               CR_strong_th;
    double               max_row_sum;
    double               trunc_factor, jacobi_trunc_threshold;
    double               S_commpkg_switch;
@@ -100,6 +101,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *S;
    hypre_ParCSRMatrix  *S2;
    hypre_ParCSRMatrix  *SN;
+   hypre_ParCSRMatrix  *SCR;
    hypre_ParCSRMatrix  *P;
    hypre_ParCSRMatrix  *PN;
    hypre_ParCSRMatrix  *A_H;
@@ -471,6 +473,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    level = 0;
   
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
+   CR_strong_th = hypre_ParAMGDataCRStrongTh(amg_data);
    max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
    trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
    P_max_elmts = hypre_ParAMGDataPMaxElmts(amg_data);
@@ -1070,6 +1073,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          else if (coarsen_type == 99) /* CR */
          {
             if (nodal == 0) 
+            {
                /*if (level < smooth_num_levels)
                {
                   hypre_BoomerAMGCreateNodalA(A_array[level],num_functions,
@@ -1092,11 +1096,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_TFree(CFN_marker);
                }
                else*/
+                  hypre_BoomerAMGCreateS(A_array[level],
+                        CR_strong_th, 1,
+                        num_functions, dof_func_array[level],&SCR);
                   hypre_BoomerAMGCoarsenCR(A_array[level], &CF_marker,
                         &coarse_size,
                         num_CR_relax_steps, IS_type, 1, grid_relax_type[0],
 			relax_weight[level], omega[level], CR_rate, 
-			NULL,NULL,CR_use_CG,S);
+			NULL,NULL,CR_use_CG,SCR);
+                  hypre_ParCSRMatrixDestroy(SCR);
+             }
              else if (nodal > 0) 
              {
                 printf("Warning! Currently not implemented!\n");

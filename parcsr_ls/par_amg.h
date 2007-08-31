@@ -50,6 +50,7 @@ typedef struct
    double   jacobi_trunc_threshold;
    double   S_commpkg_switch;
    double   CR_rate;
+   double   CR_strong_th;
    int      measure_type;
    int      setup_type;
    int      coarsen_type;
@@ -187,6 +188,7 @@ typedef struct
 #define hypre_ParAMGDataPostInterpType(amg_data) ((amg_data)->post_interp_type)
 #define hypre_ParAMGDataNumCRRelaxSteps(amg_data) ((amg_data)->num_CR_relax_steps)
 #define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
+#define hypre_ParAMGDataCRStrongTh(amg_data) ((amg_data)->CR_strong_th)
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)

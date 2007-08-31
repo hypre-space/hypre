@@ -305,6 +305,115 @@ int IndepSetGreedy(int *A_i, int *A_j, int n, int *cf)
    return 0;
 }
 
+int IndepSetGreedyS(int *A_i, int *A_j, int n, int *cf) 
+{
+   Link *list;
+   int  *head, *head_mem, *ma;
+   int  *tail, *tail_mem;
+                                                                                                       
+   int i, ji, jj, jl, index, istack, stack_size;
+
+   ma = hypre_CTAlloc(int, n);
+                                                                                                       
+   /* Initialize the graph and measure array
+    *
+    * ma: cands >= 1
+    *     cpts  = -1
+    *     else  =  0
+    * Note: only cands are put into graph */
+                                                                                                       
+   istack = 0;
+   for (i = 0; i < n; i++){
+      if (cf[i] == cand){
+         ma[i] = 1;
+         for (ji = A_i[i]; ji < A_i[i+1]; ji++){
+            jj = A_j[ji];
+            if (cf[jj] != cpt){
+               ma[i]++;
+            }
+         }
+         if (ma[i] > istack){
+            istack = (int) ma[i];
+         }
+      }
+      else if (cf[i] == cpt){
+         ma[i] = -1;
+      } else {
+         ma[i] = 0;
+      }
+   }
+   stack_size = 2*istack;
+                                                                                                       
+   /* initialize graph */
+   head_mem = hypre_CTAlloc(int, stack_size); head = head_mem + stack_size;
+   tail_mem = hypre_CTAlloc(int, stack_size); tail = tail_mem + stack_size;
+   list = hypre_CTAlloc(Link, n);
+                                                                                                       
+   for (i = -1; i >= -stack_size; i--){
+      head[i] = i;
+      tail[i] = i;
+   }
+   for (i = 0; i < n; i++){
+      if (ma[i] > 0){
+         GraphAdd(list, head, tail, i, (int) ma[i]);
+      }
+   }
+                                                                                                       
+  /* Loop until all points are either F or C */
+   while (istack > 0){
+     /* i w/ max measure at head of stacks */
+      i = head[-istack];
+                                                                                                       
+     /* make i C point */
+      cf[i] = cpt;
+      ma[i] = -1;
+                                                                                                       
+     /* remove i from graph */
+      GraphRemove(list, head, tail, i);
+                                                                                                       
+     /* update nbs and nbs-of-nbs */
+      for (ji = A_i[i]; ji < A_i[i+1]; ji++){
+         jj = A_j[ji];
+        /* if not "decided" C or F */
+         if (ma[jj] > -1){
+           /* if a candidate, remove jj from graph */
+            if (ma[jj] > 0){
+               GraphRemove(list, head, tail, jj);
+            }
+                                                                                                       
+           /* make jj an F point and mark "decided" */
+            cf[jj] = fpt;
+            ma[jj] = -1;
+                                                                                                       
+            for (jl = A_i[jj]; jl < A_i[jj+1]; jl++){
+               index = A_j[jl];
+              /* if a candidate, increase ma */
+               if (ma[index] > 0){
+                  ma[index]++;
+                                                                                                       
+                 /* move index in graph */
+                  GraphRemove(list, head, tail, index);
+                  GraphAdd(list, head, tail, index,
+                           (int) ma[index]);
+                  if (ma[index] > istack){
+                     istack = (int) ma[index];
+                  }
+               }
+            }
+         }
+      }
+     /* reset istack to point to biggest non-empty stack */
+      for ( ; istack > 0; istack--){
+        /* if non-negative, break */
+         if (head[-istack] > -1){
+            break;
+         }
+      }
+   }
+   free(ma); free(list); free(head_mem); free(tail_mem);
+   return 0;
+}
+
 /* f point jac cr */
 int fptjaccr(int *cf, int *A_i, int *A_j, double *A_data,
        int n, double *e0, double omega, double *e1)
@@ -844,6 +953,462 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
    return (ierr);
 }
 
+/**************************************************************
+ *
+ *      Ruge Coarsening routine
+ *
+ **************************************************************/
+int
+hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
+                        int                    measure_type,
+                        int                    debug_flag,
+                        int                   *CF_marker)
+{
+   MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
+   hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
+   hypre_CSRMatrix *S_diag        = hypre_ParCSRMatrixDiag(S);
+   hypre_CSRMatrix *S_offd        = hypre_ParCSRMatrixOffd(S);
+   int             *S_i           = hypre_CSRMatrixI(S_diag);
+   int             *S_j           = hypre_CSRMatrixJ(S_diag);
+   int             *S_offd_i      = hypre_CSRMatrixI(S_offd);
+   int             *S_offd_j;
+   int              num_variables = hypre_CSRMatrixNumRows(S_diag);
+   int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
+                  
+   hypre_ParCSRCommHandle *comm_handle;
+   hypre_CSRMatrix *ST;
+   int             *ST_i;
+   int             *ST_j;
+                 
+   int             *measure_array;
+   int             *CF_marker_offd;
+   int             *int_buf_data;
+
+   int              i, j, k, jS;
+   int		    index;
+   int		    num_procs, my_id;
+   int		    num_sends = 0;
+   int		    start, jrow;
+
+   hypre_LinkList   LoL_head;
+   hypre_LinkList   LoL_tail;
+
+   int             *lists, *where;
+   int              measure, new_meas;
+   int              num_left = 0;
+   int              nabor, nabor_two;
+
+   int              ierr = 0;
+   int              f_pnt = F_PT;
+   double	    wall_time;
+
+   /*-------------------------------------------------------
+    * Initialize the C/F marker, LoL_head, LoL_tail  arrays
+    *-------------------------------------------------------*/
+
+   LoL_head = NULL;
+   LoL_tail = NULL;
+   lists = hypre_CTAlloc(int, num_variables);
+   where = hypre_CTAlloc(int, num_variables);
+
+#if 0 /* debugging */
+   char  filename[256];
+   FILE *fp;
+   int   iter = 0;
+#endif
+
+   /*--------------------------------------------------------------
+    * Compute a CSR strength matrix, S.
+    *
+    * For now, the "strength" of dependence/influence is defined in
+    * the following way: i depends on j if
+    *     aij > hypre_max (k != i) aik,    aii < 0
+    * or
+    *     aij < hypre_min (k != i) aik,    aii >= 0
+    * Then S_ij = 1, else S_ij = 0.
+    *
+    * NOTE: the entries are negative initially, corresponding
+    * to "unaccounted-for" dependence.
+    *----------------------------------------------------------------*/
+
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
+
+   MPI_Comm_size(comm,&num_procs);
+   MPI_Comm_rank(comm,&my_id);
+
+   if (!comm_pkg)
+   {
+        comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
+   }
+
+   if (!comm_pkg)
+   {
+        hypre_MatvecCommPkgCreate(S);
+
+        comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
+   }
+
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+
+   if (num_cols_offd) S_offd_j = hypre_CSRMatrixJ(S_offd);
+
+   jS = S_i[num_variables];
+
+   ST = hypre_CSRMatrixCreate(num_variables, num_variables, jS);
+   ST_i = hypre_CTAlloc(int,num_variables+1);
+   ST_j = hypre_CTAlloc(int,jS);
+   hypre_CSRMatrixI(ST) = ST_i;
+   hypre_CSRMatrixJ(ST) = ST_j;
+
+   /*----------------------------------------------------------
+    * generate transpose of S, ST
+    *----------------------------------------------------------*/
+
+   for (i=0; i <= num_variables; i++)
+      ST_i[i] = 0;
+ 
+   for (i=0; i < jS; i++)
+   {
+	 ST_i[S_j[i]+1]++;
+   }
+   for (i=0; i < num_variables; i++)
+   {
+      ST_i[i+1] += ST_i[i];
+   }
+   for (i=0; i < num_variables; i++)
+   {
+      for (j=S_i[i]; j < S_i[i+1]; j++)
+      {
+	 index = S_j[j];
+ 	 ST_j[ST_i[index]] = i;
+       	 ST_i[index]++;
+      }
+   }      
+   for (i = num_variables; i > 0; i--)
+   {
+      ST_i[i] = ST_i[i-1];
+   }
+   ST_i[0] = 0;
+
+   /*----------------------------------------------------------
+    * Compute the measures
+    *
+    * The measures are given by the row sums of ST.
+    * Hence, measure_array[i] is the number of influences
+    * of variable i.
+    * correct actual measures through adding influences from
+    * neighbor processors
+    *----------------------------------------------------------*/
+
+   if (measure_type == 0)
+   {
+      measure_array = hypre_CTAlloc(int, num_variables);
+      for (i=0; i < num_variables; i++)
+         measure_array[i] = 0;
+      for (i=0; i < num_variables; i++)
+      {
+         if (CF_marker[i] < 1)
+         {
+            for (j = S_i[i]+1; j < S_i[i+1]; j++)
+            {
+               if (CF_marker[S_j[j]] < 1)
+                  measure_array[S_j[j]]++;
+            }
+         }
+      }
+ 
+   }
+   else
+   {
+
+      /* now the off-diagonal part of CF_marker */
+      if (num_cols_offd)
+         CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      else
+         CF_marker_offd = NULL;
+ 
+      for (i=0; i < num_cols_offd; i++)
+         CF_marker_offd[i] = 0;
+   
+      /*------------------------------------------------
+       * Communicate the CF_marker values to the external nodes
+       *------------------------------------------------*/
+      int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                num_sends));
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         {
+            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+            int_buf_data[index++] = CF_marker[jrow];
+         }
+      }
+    
+      if (num_procs > 1)
+      {
+         comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
+                                                  CF_marker_offd);
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+      }
+
+      measure_array = hypre_CTAlloc(int, num_variables+num_cols_offd);
+      for (i=0; i < num_variables+num_cols_offd; i++)
+         measure_array[i] = 0;
+ 
+      for (i=0; i < num_variables; i++)
+      {
+         if (CF_marker[i] < 1)
+         {
+            for (j = S_i[i]+1; j < S_i[i+1]; j++)
+            {
+               if (CF_marker[S_j[j]] < 1)
+                  measure_array[S_j[j]]++;
+            }
+            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            {
+               if (CF_marker_offd[S_offd_j[j]] < 1)
+                  measure_array[num_variables + S_offd_j[j]]++;
+            }
+         }
+      }
+      hypre_TFree(CF_marker_offd);
+      /* now send those locally calculated values for the external nodes to the neighboring processors */
+      if (num_procs > 1)
+         comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg,
+                        &measure_array[num_variables], int_buf_data);
+ 
+      /* finish the communication */
+      if (num_procs > 1)
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+       
+      /* now add the externally calculated part of the local nodes to the local nodes */
+      index = 0;
+      for (i=0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            measure_array[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
+                        += int_buf_data[index++];
+      }
+      hypre_TFree(int_buf_data);
+   }
+
+
+   if (measure_type == 2 && num_procs > 1)
+   {
+      for (i = 0; i < num_variables; i++)
+      {
+         if (CF_marker[i] == 0)
+         {
+            if ((S_offd_i[i+1]-S_offd_i[i]) == 0)
+            {
+	       num_left++;
+            }
+            else 
+            {
+	       measure_array[i] = 0;
+	       CF_marker[i] = 2;
+            }
+         }
+         else if (CF_marker[i] < 0)
+	    measure_array[i] = 0;
+         else
+	    measure_array[i] = -1;
+      }
+   }
+   else
+   {
+      for (i = 0; i < num_variables; i++)
+      {
+         if (CF_marker[i] == 0)
+         {
+	    num_left++;
+         }
+         else if (CF_marker[i] < 0)
+	    measure_array[i] = 0;
+         else
+	    measure_array[i] = -1;
+      }
+   }
+
+   /*---------------------------------------------------
+    * Loop until all points are either fine or coarse.
+    *---------------------------------------------------*/
+
+   if (debug_flag == 3) wall_time = time_getWallclockSeconds();
+
+   /* first coarsening phase */
+
+  /*************************************************************
+   *
+   *   Initialize the lists
+   *
+   *************************************************************/
+
+   for (j = 0; j < num_variables; j++) 
+   {    
+      measure = measure_array[j];
+      if (CF_marker[j] == 0)
+      {
+         if (measure > 0)
+         {
+            enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
+         }
+         else
+         {
+            if (measure < 0) printf("negative measure!\n");
+            CF_marker[j] = f_pnt;
+            for (k = S_i[j]+1; k < S_i[j+1]; k++)
+            {
+               nabor = S_j[k];
+               if (CF_marker[nabor] != SF_PT && CF_marker[nabor] < 1)
+               {
+                  if (nabor < j)
+                  {
+                     new_meas = measure_array[nabor];
+	             if (new_meas > 0)
+                        remove_point(&LoL_head, &LoL_tail, new_meas, 
+                               nabor, lists, where);
+
+                     new_meas = ++(measure_array[nabor]);
+                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                                 nabor, lists, where);
+                  }
+	          else
+                  {
+                     new_meas = ++(measure_array[nabor]);
+                  }
+               }
+            }
+            --num_left;
+         }
+      }
+   }
+
+   /****************************************************************
+    *
+    *  Main loop of Ruge-Stueben first coloring pass.
+    *
+    *  WHILE there are still points to classify DO:
+    *        1) find first point, i,  on list with max_measure
+    *           make i a C-point, remove it from the lists
+    *        2) For each point, j,  in S_i^T,
+    *           a) Set j to be an F-point
+    *           b) For each point, k, in S_j
+    *                  move k to the list in LoL with measure one
+    *                  greater than it occupies (creating new LoL
+    *                  entry if necessary)
+    *        3) For each point, j,  in S_i,
+    *                  move j to the list in LoL with measure one
+    *                  smaller than it occupies (creating new LoL
+    *                  entry if necessary)
+    *
+    ****************************************************************/
+
+   while (num_left > 0)
+   {
+      index = LoL_head -> head;
+
+      CF_marker[index] = C_PT;
+      measure = measure_array[index];
+      measure_array[index] = 0;
+      --num_left;
+      
+      remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
+  
+      for (j = ST_i[index]+1; j < ST_i[index+1]; j++)
+      {
+         nabor = ST_j[j];
+         if (CF_marker[nabor] == UNDECIDED)
+         {
+            CF_marker[nabor] = F_PT;
+            measure = measure_array[nabor];
+
+            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+            --num_left;
+
+            for (k = S_i[nabor]+1; k < S_i[nabor+1]; k++)
+            {
+               nabor_two = S_j[k];
+               if (CF_marker[nabor_two] == UNDECIDED)
+               {
+                  measure = measure_array[nabor_two];
+                  remove_point(&LoL_head, &LoL_tail, measure, 
+                               nabor_two, lists, where);
+
+                  new_meas = ++(measure_array[nabor_two]);
+                 
+                  enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                                 nabor_two, lists, where);
+               }
+            }
+         }
+      }
+      for (j = S_i[index]+1; j < S_i[index+1]; j++)
+      {
+         nabor = S_j[j];
+         if (CF_marker[nabor] == UNDECIDED)
+         {
+            measure = measure_array[nabor];
+
+            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+
+            measure_array[nabor] = --measure;
+	
+	    if (measure > 0)
+               enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
+				lists, where);
+	    else
+	    {
+               CF_marker[nabor] = F_PT;
+               --num_left;
+
+               for (k = S_i[nabor]+1; k < S_i[nabor+1]; k++)
+               {
+                  nabor_two = S_j[k];
+                  if (CF_marker[nabor_two] == UNDECIDED)
+                  {
+                     new_meas = measure_array[nabor_two];
+                     remove_point(&LoL_head, &LoL_tail, new_meas, 
+                               nabor_two, lists, where);
+
+                     new_meas = ++(measure_array[nabor_two]);
+                 
+                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                                 nabor_two, lists, where);
+                  }
+               }
+	    }
+         }
+      }
+   }
+
+   hypre_TFree(measure_array);
+   hypre_CSRMatrixDestroy(ST);
+
+   if (debug_flag == 3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d    Coarsen 1st pass = %f\n",
+                     my_id, wall_time); 
+   }
+
+   if (measure_type == 2)
+   {
+      for (i=0; i < num_variables; i++)
+         if (CF_marker[i] == 2) CF_marker[i] = 0;
+   }
+
+   hypre_TFree(lists);
+   hypre_TFree(where);
+   hypre_TFree(LoL_head);
+   hypre_TFree(LoL_tail);
+
+   return (ierr);
+}
+
 
 int
 hypre_BoomerAMGIndepHMIS( hypre_ParCSRMatrix    *S,
@@ -865,6 +1430,31 @@ hypre_BoomerAMGIndepHMIS( hypre_ParCSRMatrix    *S,
 
    if (num_procs > 1)
       ierr += hypre_BoomerAMGIndepPMIS (S, 0, debug_flag,
+                                CF_marker);
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGIndepHMISa( hypre_ParCSRMatrix    *S,
+                          int                    measure_type,
+                          int                    debug_flag,
+                          int                   *CF_marker)
+{
+   int              ierr = 0;
+   int		    num_procs;
+   MPI_Comm comm = hypre_ParCSRMatrixComm(S);
+
+   MPI_Comm_size(comm,&num_procs);
+   /*-------------------------------------------------------
+    * Perform Ruge coarsening followed by CLJP coarsening
+    *-------------------------------------------------------*/
+
+   ierr += hypre_BoomerAMGIndepRSa (S, 2, debug_flag,
+                                CF_marker);
+
+   if (num_procs > 1)
+      ierr += hypre_BoomerAMGIndepPMISa (S, 0, debug_flag,
                                 CF_marker);
 
    return (ierr);
@@ -2028,10 +2618,13 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
    int              global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    int             *row_starts = hypre_ParCSRMatrixRowStarts(A);
    int             *A_i           = hypre_CSRMatrixI(A_diag);
    int             *A_j           = hypre_CSRMatrixJ(A_diag);
+   int             *S_i           = hypre_CSRMatrixI(S_diag);
+   int             *S_j           = hypre_CSRMatrixJ(S_diag);
    /*double          *A_data        = hypre_CSRMatrixData(A_diag);*/
    /*double          *Vtemp_data        = hypre_CSRMatrixData(A_diag);*/
    double          *Vtemp_data;
@@ -2251,7 +2844,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                   e0[i] = e1[i];
                }
             }
-                                                                                                              
+
+            hypre_ParVectorSetConstantValues(Rtemp,0);
             rho1 = hypre_ParVectorInnerProd(e1_vec,e1_vec);
             rho0 = rho1;
             i=0;
@@ -2336,19 +2930,21 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                }
             }
    	    if (IS_type == 1)
-	        hypre_BoomerAMGIndepHMIS(A,0,0,CF_marker);
+	        hypre_BoomerAMGIndepHMIS(S,0,0,CF_marker);
+   	    else if (IS_type == 7)
+	        hypre_BoomerAMGIndepHMISa(A,0,0,CF_marker);
    	    else if (IS_type == 2)
 	        hypre_BoomerAMGIndepPMISa(A,0,0,CF_marker);
             else if (IS_type == 5)
                 hypre_BoomerAMGIndepPMIS(S,0,0,CF_marker);
    	    else if (IS_type == 3)
-	    {
                IndepSetGreedy(A_i,A_j,num_variables,CF_marker);
-	    }
+   	    else if (IS_type == 6)
+               IndepSetGreedyS(S_i,S_j,num_variables,CF_marker);
             else if (IS_type == 4)
                hypre_BoomerAMGIndepRS(S,1,0,CF_marker);
    	    else 
-	       hypre_BoomerAMGIndepRS(A,1,0,CF_marker);
+	       hypre_BoomerAMGIndepRSa(A,1,0,CF_marker);
          }
          else
          {

@@ -54,6 +54,7 @@ hypre_BoomerAMGCreate()
    double   jacobi_trunc_threshold;
    double   S_commpkg_switch;
    double   CR_rate;
+   double   CR_strong_th;
    int      interp_type;
    int      coarsen_type;
    int      measure_type;
@@ -133,6 +134,7 @@ hypre_BoomerAMGCreate()
    post_interp_type = 0;
    num_CR_relax_steps = 2;
    CR_rate = 0.7;
+   CR_strong_th = 0;
    IS_type = 1;
    CR_use_CG = 0;
    cgc_its = 1;
@@ -204,6 +206,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetPostInterpType(amg_data, post_interp_type);
    hypre_BoomerAMGSetNumCRRelaxSteps(amg_data, num_CR_relax_steps);
    hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
+   hypre_BoomerAMGSetCRStrongTh(amg_data, CR_strong_th);
    hypre_BoomerAMGSetISType(amg_data, IS_type);
    hypre_BoomerAMGSetCRUseCG(amg_data, CR_use_CG);
    hypre_BoomerAMGSetCGCIts(amg_data, cgc_its);
@@ -2326,6 +2329,27 @@ hypre_BoomerAMGSetCRRate( void     *data,
       return hypre_error_flag;
    } 
    hypre_ParAMGDataCRRate(amg_data) = CR_rate;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the desired convergence rate for Compatible relaxation
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetCRStrongTh( void     *data,
+                          double    CR_strong_th )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataCRStrongTh(amg_data) = CR_strong_th;
 
    return hypre_error_flag;
 }
