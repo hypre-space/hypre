@@ -158,6 +158,9 @@ HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
 mv $HYPRE_DIR/src/linear_solvers/* $HYPRE_DIR/src
 rmdir $HYPRE_DIR/src/linear_solvers
 
+# remove certain directories that should not appear in the release
+rm -fr $HYPRE_DIR/src/test/AUTOTEST
+
 # create the hypre-${VersionId}.tar file
 echo "creating $HYPRE_DIR.tar file ..."
 tar cf $HYPRE_DIR.tar \
