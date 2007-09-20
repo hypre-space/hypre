@@ -70,6 +70,7 @@ DEV_FILES =\
  dev_reference.tex\
  dev_repository.tex\
  dev_requirements.tex\
+ dev_babel.tex\
  dev_manual.tex
 
 ##################################################################
