@@ -169,7 +169,7 @@ vref_manual.tex: vref_manual.dxx
 
 vref_manual.dxx: ref_manual.dxx
 	@ \
-	sed -e '/HYPRECopyright/r copyright' -e 's/HYPRECopyright//g' -e 's/HYPREVersion/$(HYPRE_RELEASE_VERSION)/g' ref_manual.dxx > vref_manual.dxx
+	sed -e '/HYPRECopyright/r copyright.txt' -e 's/HYPRECopyright//g' -e 's/HYPREVersion/$(HYPRE_RELEASE_VERSION)/g' ref_manual.dxx > vref_manual.dxx
 
 ##########
 
@@ -188,7 +188,7 @@ vbref_manual.tex: vbref_manual.dxx
 
 vbref_manual.dxx: bref_manual.dxx
 	@ \
-	sed -e '/HYPRECopyright/r copyright' -e 's/HYPRECopyright//g' -e 's/HYPREVersion/$(HYPRE_RELEASE_VERSION)/g' bref_manual.dxx > vbref_manual.dxx
+	sed -e '/HYPRECopyright/r copyright.txt' -e 's/HYPRECopyright//g' -e 's/HYPREVersion/$(HYPRE_RELEASE_VERSION)/g' bref_manual.dxx > vbref_manual.dxx
 
 ##########
 
