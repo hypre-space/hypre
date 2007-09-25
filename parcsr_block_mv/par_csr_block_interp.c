@@ -53,6 +53,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
                                  int                  *dof_func,
                                  int                   debug_flag,
                                  double                trunc_factor,
+                                 int		       max_elmts,
                                  int                   add_weak_to_diag,        
                                  int 		      *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr)
@@ -1113,9 +1114,9 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
 
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
-   if (trunc_factor != 0.0)
+   if (trunc_factor != 0.0  || max_elmts > 0)
    {
-      hypre_BoomerAMGBlockInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGBlockInterpTruncation(P, trunc_factor, max_elmts);
       P_diag_data = hypre_CSRBlockMatrixData(P_diag);
       P_diag_i = hypre_CSRBlockMatrixI(P_diag);
       P_diag_j = hypre_CSRBlockMatrixJ(P_diag);
@@ -1203,12 +1204,13 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
 }            
     
 
-/* 2/12 This function needs to be fixed - doesn't make sense to scale by blocks - 
-   also need to do by number of elements instead probably */
+/* 8/07 - not sure that it is appropriate to scale by the blocks - for
+ now it is commented out - may want to change this or do something
+ different  */
 
 int
 hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
-				 double trunc_factor)        
+                                      double trunc_factor, int max_elmts)        
 {
    hypre_CSRBlockMatrix *P_diag = hypre_ParCSRBlockMatrixDiag(P);
    int *P_diag_i = hypre_CSRBlockMatrixI(P_diag);
@@ -1228,6 +1230,7 @@ hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
    int  bnnz = block_size*block_size;
 
    int n_fine = hypre_CSRBlockMatrixNumRows(P_diag);
+   int num_cols = hypre_CSRBlockMatrixNumCols(P_diag);
    int i, j, start_j, k;
    int ierr = 0;
    int next_open = 0;
@@ -1242,7 +1245,9 @@ hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
    double *row_sum;
    double *scale;
    double *out_block;
-   
+   int cnt, cnt_diag, cnt_offd;
+   int num_elmts;
+ 
 
    /* for now we will use the frobenius norm to 
       determine whether to keep a block or not  - so norm_type = 1*/
@@ -1250,130 +1255,323 @@ hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
    scale = hypre_CTAlloc(double, bnnz);
    out_block = hypre_CTAlloc(double, bnnz);
 
-   /* go through each row */
-   for (i = 0; i < n_fine; i++)
+   if (trunc_factor > 0)
    {
-      max_coef = 0.0;
-
-      /* diag */
-      for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
+      /* go through each row */
+      for (i = 0; i < n_fine; i++)
       {
-         hypre_CSRBlockMatrixBlockNorm(1, &P_diag_data[j*bnnz] , &tmp, block_size);
-         max_coef = (max_coef < tmp) ?  tmp : max_coef;
-      }
-      
-      /* off_diag */ 
-      for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
-      {
-         hypre_CSRBlockMatrixBlockNorm(1, &P_offd_data[j*bnnz], &tmp, block_size);
-         max_coef = (max_coef < tmp) ?  tmp : max_coef;
-      }
-      
-      max_coef *= trunc_factor;
-
-      start_j = P_diag_i[i];
-      P_diag_i[i] -= num_lost;
-    
-      /* set scale and row sum to zero */
-      hypre_CSRBlockMatrixBlockSetScalar(scale, 0.0, block_size);
-      hypre_CSRBlockMatrixBlockSetScalar(row_sum, 0.0, block_size);
-
-      for (j = start_j; j < P_diag_i[i+1]; j++)
-      {
-         /* row_sum += P_diag_data[now_checking];*/
-         hypre_CSRBlockMatrixBlockAddAccumulate(&P_diag_data[now_checking*bnnz], row_sum, block_size);
-
-         hypre_CSRBlockMatrixBlockNorm(1, &P_diag_data[now_checking*bnnz] , &tmp, block_size);
-
-         if ( tmp < max_coef)
+         max_coef = 0.0;
+         
+         /* diag */
+         for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
          {
-            num_lost++;
-            now_checking++;
-         }
-         else
-         {
-	    /* scale += P_diag_data[now_checking]; */
-            hypre_CSRBlockMatrixBlockAddAccumulate(&P_diag_data[now_checking*bnnz], scale, block_size);
-
-            /* P_diag_data[next_open] = P_diag_data[now_checking]; */
-            hypre_CSRBlockMatrixBlockCopyData( &P_diag_data[now_checking*bnnz], &P_diag_data[next_open*bnnz], 
-                                               1.0, block_size);
-            
-            P_diag_j[next_open] = P_diag_j[now_checking];
-            now_checking++;
-            next_open++;
-         }
-      }
-
-      start_j = P_offd_i[i];
-      P_offd_i[i] -= num_lost_offd;
-
-      for (j = start_j; j < P_offd_i[i+1]; j++)
-      {
-	 /* row_sum += P_offd_data[now_checking_offd]; */
-         hypre_CSRBlockMatrixBlockAddAccumulate(&P_offd_data[now_checking_offd*bnnz], row_sum, block_size);
-
-         hypre_CSRBlockMatrixBlockNorm(1, &P_offd_data[now_checking_offd*bnnz] , &tmp, block_size);
-
-         if ( tmp < max_coef)
-         {
-            num_lost_offd++;
-            now_checking_offd++;
-         }
-         else
-         {
-	    /* scale += P_offd_data[now_checking_offd]; */
-            hypre_CSRBlockMatrixBlockAddAccumulate(&P_offd_data[now_checking_offd*bnnz], scale, block_size);
-
-            /* P_offd_data[next_open_offd] = P_offd_data[now_checking_offd];*/
-            hypre_CSRBlockMatrixBlockCopyData( &P_offd_data[now_checking_offd*bnnz], &P_offd_data[next_open_offd*bnnz], 
-                                               1.0, block_size);
-            
-
-            P_offd_j[next_open_offd] = P_offd_j[now_checking_offd];
-            now_checking_offd++;
-            next_open_offd++;
-         }
-      }
-      /* normalize row of P */
-
-      /* out_block = row_sum/scale; */
-      if (hypre_CSRBlockMatrixBlockInvMult(scale, row_sum, out_block, block_size) == 0)
-      {
-         	 
-         for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
-         {
-            /* P_diag_data[j] *= out_block; */
-
-            /* put mult result in row_sum */ 
-           hypre_CSRBlockMatrixBlockMultAdd(out_block, &P_diag_data[j*bnnz], 0.0,
-                                            row_sum, block_size);
-           /* add to P_diag_data */
-           hypre_CSRBlockMatrixBlockAddAccumulate(row_sum, &P_diag_data[j*bnnz], block_size);
+            hypre_CSRBlockMatrixBlockNorm(1, &P_diag_data[j*bnnz] , &tmp, block_size);
+            max_coef = (max_coef < tmp) ?  tmp : max_coef;
          }
          
-         for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
+         /* off_diag */ 
+         for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
          {
-            
-            /* P_offd_data[j] *= out_block; */
-
-            /* put mult result in row_sum */ 
-            hypre_CSRBlockMatrixBlockMultAdd(out_block, &P_offd_data[j*bnnz], 0.0,
-                                             row_sum, block_size);
-           /* add to to P_offd_data */
-           hypre_CSRBlockMatrixBlockAddAccumulate(row_sum, &P_offd_data[j*bnnz], block_size);
-
+            hypre_CSRBlockMatrixBlockNorm(1, &P_offd_data[j*bnnz], &tmp, block_size);
+            max_coef = (max_coef < tmp) ?  tmp : max_coef;
          }
          
+         max_coef *= trunc_factor;
+         
+         start_j = P_diag_i[i];
+         P_diag_i[i] -= num_lost;
+         
+         /* set scale and row sum to zero */
+         hypre_CSRBlockMatrixBlockSetScalar(scale, 0.0, block_size);
+         hypre_CSRBlockMatrixBlockSetScalar(row_sum, 0.0, block_size);
+         
+         for (j = start_j; j < P_diag_i[i+1]; j++)
+         {
+            /* row_sum += P_diag_data[now_checking];*/
+            hypre_CSRBlockMatrixBlockAddAccumulate(&P_diag_data[now_checking*bnnz], row_sum, block_size);
+            
+            hypre_CSRBlockMatrixBlockNorm(1, &P_diag_data[now_checking*bnnz] , &tmp, block_size);
+            
+            if ( tmp < max_coef)
+            {
+               num_lost++;
+               now_checking++;
+            }
+            else
+            {
+               /* scale += P_diag_data[now_checking]; */
+               hypre_CSRBlockMatrixBlockAddAccumulate(&P_diag_data[now_checking*bnnz], scale, block_size);
+               
+               /* P_diag_data[next_open] = P_diag_data[now_checking]; */
+               hypre_CSRBlockMatrixBlockCopyData( &P_diag_data[now_checking*bnnz], &P_diag_data[next_open*bnnz], 
+                                                  1.0, block_size);
+               
+               P_diag_j[next_open] = P_diag_j[now_checking];
+               now_checking++;
+               next_open++;
+            }
+         }
+         
+         start_j = P_offd_i[i];
+         P_offd_i[i] -= num_lost_offd;
+         
+         for (j = start_j; j < P_offd_i[i+1]; j++)
+         {
+            /* row_sum += P_offd_data[now_checking_offd]; */
+            hypre_CSRBlockMatrixBlockAddAccumulate(&P_offd_data[now_checking_offd*bnnz], row_sum, block_size);
+            
+            hypre_CSRBlockMatrixBlockNorm(1, &P_offd_data[now_checking_offd*bnnz] , &tmp, block_size);
+            
+            if ( tmp < max_coef)
+            {
+               num_lost_offd++;
+               now_checking_offd++;
+            }
+            else
+            {
+               /* scale += P_offd_data[now_checking_offd]; */
+               hypre_CSRBlockMatrixBlockAddAccumulate(&P_offd_data[now_checking_offd*bnnz], scale, block_size);
+               
+               /* P_offd_data[next_open_offd] = P_offd_data[now_checking_offd];*/
+               hypre_CSRBlockMatrixBlockCopyData( &P_offd_data[now_checking_offd*bnnz], &P_offd_data[next_open_offd*bnnz], 
+                                                  1.0, block_size);
+               
+               
+               P_offd_j[next_open_offd] = P_offd_j[now_checking_offd];
+               now_checking_offd++;
+               next_open_offd++;
+            }
+         }
+         /* normalize row of P */
+#if 0         
+         /* out_block = row_sum/scale; */
+         if (hypre_CSRBlockMatrixBlockInvMult(scale, row_sum, out_block, block_size) == 0)
+         {
+            
+            for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
+            {
+               /* P_diag_data[j] *= out_block; */
+               
+               /* put mult result in row_sum */ 
+               hypre_CSRBlockMatrixBlockMultAdd(out_block, &P_diag_data[j*bnnz], 0.0,
+                                                row_sum, block_size);
+               /* add to P_diag_data */
+               hypre_CSRBlockMatrixBlockAddAccumulate(row_sum, &P_diag_data[j*bnnz], block_size);
+            }
+            
+            for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
+            {
+               
+               /* P_offd_data[j] *= out_block; */
+               
+               /* put mult result in row_sum */ 
+               hypre_CSRBlockMatrixBlockMultAdd(out_block, &P_offd_data[j*bnnz], 0.0,
+                                                row_sum, block_size);
+               /* add to to P_offd_data */
+               hypre_CSRBlockMatrixBlockAddAccumulate(row_sum, &P_offd_data[j*bnnz], block_size);
+               
+            }
+            
+         }
+#endif
+      }
+
+      P_diag_i[n_fine] -= num_lost;
+      P_offd_i[n_fine] -= num_lost_offd;
+   }
+   if (max_elmts > 0)
+   {
+      int P_mxnum, cnt1, rowlength;
+      int *P_aux_j;
+      double *P_aux_data;
+      double *norm_array;
+      
+
+      rowlength = 0;
+      if (n_fine) 
+         rowlength = P_diag_i[1]+P_offd_i[1];
+      P_mxnum = rowlength;
+      for (i=1; i<n_fine; i++)
+      {
+         rowlength = P_diag_i[i+1]-P_diag_i[i]+P_offd_i[i+1]-P_offd_i[i];
+         if (rowlength > P_mxnum) P_mxnum = rowlength;
+      }
+      if (P_mxnum > max_elmts)
+      {
+         P_aux_j = hypre_CTAlloc(int, P_mxnum);
+         P_aux_data = hypre_CTAlloc(double, P_mxnum*bnnz);
+         cnt_diag = 0;
+         cnt_offd = 0;
+         
+         for (i = 0; i < n_fine; i++)
+         {
+            hypre_CSRBlockMatrixBlockSetScalar(row_sum, 0.0, block_size);
+            /*row_sum = 0; */
+
+            num_elmts = P_diag_i[i+1]-P_diag_i[i]+P_offd_i[i+1]-P_offd_i[i];
+            if (max_elmts < num_elmts)
+            {
+               cnt = 0;
+               for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
+               {
+                  P_aux_j[cnt] = P_diag_j[j];
+                  /*P_aux_data[cnt++] = P_diag_data[j];*/
+                  hypre_CSRBlockMatrixBlockCopyData(&P_diag_data[j*bnnz],
+                                                    &P_aux_data[cnt*bnnz], 
+                                                    1.0, block_size);
+                  cnt++;
+                  /*row_sum += P_diag_data[j];*/
+                  hypre_CSRBlockMatrixBlockAddAccumulate(&P_diag_data[j*bnnz], row_sum, block_size);
+                  
+                    
+               }
+               num_lost += cnt;
+               cnt1 = cnt;
+               for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
+               {
+                  P_aux_j[cnt] = P_offd_j[j]+num_cols;
+                  /*P_aux_data[cnt++] = P_offd_data[j];*/
+                  hypre_CSRBlockMatrixBlockCopyData(&P_offd_data[j*bnnz],
+                                                    &P_aux_data[cnt*bnnz], 
+                                                    1.0, block_size);
+                  cnt++;
+                  
+                  /*row_sum += P_offd_data[j];*/
+                  hypre_CSRBlockMatrixBlockAddAccumulate(&P_offd_data[j*bnnz], row_sum, block_size);
+                  
+
+               }
+               num_lost_offd += cnt-cnt1;
+               /* sort data */
+               norm_array = hypre_CTAlloc(double, cnt);
+               for (j=0; j< cnt; j++)
+               {
+                  hypre_CSRBlockMatrixBlockNorm(1, &P_aux_data[j*bnnz] , &norm_array[j], block_size);
+               }
+               
+               hypre_block_qsort(P_aux_j, norm_array, P_aux_data,block_size, 0,cnt-1);
+               
+               hypre_TFree(norm_array);
+               
+               /* scale = 0; */
+               hypre_CSRBlockMatrixBlockSetScalar(scale, 0.0, block_size);
+               P_diag_i[i] = cnt_diag;
+               P_offd_i[i] = cnt_offd;
+               for (j = 0; j < max_elmts; j++)
+               {
+                  /* scale += P_aux_data[j];*/
+                  hypre_CSRBlockMatrixBlockAddAccumulate(&P_aux_data[j*bnnz], 
+                                                         scale, block_size);
+                  
+
+                  if (P_aux_j[j] < num_cols)
+                  {
+                     P_diag_j[cnt_diag] = P_aux_j[j];
+                     /*P_diag_data[cnt_diag++] = P_aux_data[j];*/
+                     hypre_CSRBlockMatrixBlockCopyData(&P_aux_data[j*bnnz], 
+                                                       &P_diag_data[cnt_diag*bnnz],
+                                                       1.0, block_size);
+                     
+                     cnt_diag++;
+                     
+                     
+                  }
+                  else
+                  {
+                     P_offd_j[cnt_offd] = P_aux_j[j]-num_cols;
+                     /*P_offd_data[cnt_offd++] = P_aux_data[j];*/
+                     hypre_CSRBlockMatrixBlockCopyData(&P_aux_data[j*bnnz], 
+                                                       &P_offd_data[cnt_offd*bnnz],
+                                                       1.0, block_size);
+                     cnt_offd++;
+                     
+                  }
+               }
+               num_lost -= cnt_diag-P_diag_i[i];
+               num_lost_offd -= cnt_offd-P_offd_i[i];
+               /* normalize row of P */
+               /* out_block = row_sum/scale; */
+               /*if (scale != 0.)*/
+#if 0               
+               if (hypre_CSRBlockMatrixBlockInvMult(scale, row_sum, out_block, block_size) == 0)
+               {
+           
+                  for (j = P_diag_i[i]; j < cnt_diag; j++)
+                  {
+                     
+                     /* P_diag_data[j] *= out_block; */
+                     
+                     /* put mult result in row_sum */ 
+                     hypre_CSRBlockMatrixBlockMultAdd(out_block, &P_diag_data[j*bnnz], 0.0,
+                                                      row_sum, block_size);
+                     /* add to P_diag_data */
+                     hypre_CSRBlockMatrixBlockAddAccumulate(row_sum, &P_diag_data[j*bnnz], block_size);
+                  }
+                  
+                  for (j = P_offd_i[i]; j < cnt_offd; j++)
+                  {
+                     
+                     /* P_offd_data[j] *= out_block; */
+                     
+                     /* put mult result in row_sum */ 
+                     hypre_CSRBlockMatrixBlockMultAdd(out_block, &P_offd_data[j*bnnz], 0.0,
+                                                      row_sum, block_size);
+                     /* add to to P_offd_data */
+                     hypre_CSRBlockMatrixBlockAddAccumulate(row_sum, &P_offd_data[j*bnnz], block_size);
+                  }
+                  
+
+               }
+#endif
+            }
+            else
+            {
+               if (P_diag_i[i] != cnt_diag)
+               {
+                  start_j = P_diag_i[i];
+                  P_diag_i[i] = cnt_diag;
+                  for (j = start_j; j < P_diag_i[i+1]; j++)
+                  {
+                     P_diag_j[cnt_diag] = P_diag_j[j];
+                     /*P_diag_data[cnt_diag++] = P_diag_data[j];*/
+                     hypre_CSRBlockMatrixBlockCopyData(&P_diag_data[j*bnnz], 
+                                                       &P_diag_data[cnt_diag*bnnz],
+                                                       1.0, block_size);
+                     cnt_diag++;
+                     
+
+                  }
+               }
+               else
+                  cnt_diag += P_diag_i[i+1]-P_diag_i[i];
+               if (P_offd_i[i] != cnt_offd)
+               {
+                  start_j = P_offd_i[i];
+                  P_offd_i[i] = cnt_offd;
+                  for (j = start_j; j < P_offd_i[i+1]; j++)
+                  {
+                     P_offd_j[cnt_offd] = P_offd_j[j];
+                     /*P_offd_data[cnt_offd++] = P_offd_data[j];*/
+
+                     hypre_CSRBlockMatrixBlockCopyData(&P_offd_data[j*bnnz], 
+                                                       &P_offd_data[cnt_offd*bnnz],
+                                                       1.0, block_size);
+                     cnt_offd++;
+                  }
+               }
+               else
+                  cnt_offd += P_offd_i[i+1]-P_offd_i[i];
+            }
+         }
+         P_diag_i[n_fine] = cnt_diag;
+         P_offd_i[n_fine] = cnt_offd;
+         hypre_TFree(P_aux_j);
+         hypre_TFree(P_aux_data);
       }
    }
 
-   hypre_TFree(row_sum);
-   hypre_TFree(scale);
-   hypre_TFree(out_block);
 
-   P_diag_i[n_fine] -= num_lost;
-   P_offd_i[n_fine] -= num_lost_offd;
+
 
    if (num_lost)
    {
@@ -1415,8 +1613,62 @@ hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
       hypre_CSRMatrixData(P_offd) = P_offd_data_new;
       hypre_CSRMatrixNumNonzeros(P_offd) = P_offd_size;
    }
+   
+   hypre_TFree(row_sum);
+   hypre_TFree(scale);
+   hypre_TFree(out_block);
+
    return ierr;
 }
+
+/*-----------------------------------------------*/
+/* compare on w, move v and blk_array */
+
+void hypre_block_qsort( int *v,
+                        double *w, double *blk_array, int block_size,
+                        int  left,
+                        int  right )
+{
+   int i, last;
+
+   if (left >= right)
+      return;
+
+   swap2( v, w, left, (left+right)/2);
+   swap_blk(blk_array, block_size, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+      if (fabs(w[i]) > fabs(w[left]))
+      {
+         swap2(v, w, ++last, i);
+         swap_blk(blk_array, block_size, last, i);
+      }
+   swap2(v, w, left, last);
+   swap_blk(blk_array, block_size, left, last);
+   hypre_block_qsort(v, w, blk_array, block_size, left, last-1);
+   hypre_block_qsort(v, w, blk_array, block_size, last+1, right);
+}
+void swap_blk( double *v, int block_size,
+               int  i,
+               int  j )
+{
+   int bnnz = block_size*block_size;
+   double *temp;
+
+   temp = hypre_CTAlloc(double, bnnz);
+
+   /*temp = v[i];*/
+   hypre_CSRBlockMatrixBlockCopyData(&v[i*bnnz],temp, 1.0, block_size);
+   /*v[i] = v[j];*/
+   hypre_CSRBlockMatrixBlockCopyData(&v[j*bnnz],&v[i*bnnz], 1.0, block_size);
+   /* v[j] = temp; */
+   hypre_CSRBlockMatrixBlockCopyData(temp,&v[j*bnnz], 1.0, block_size);
+
+   hypre_TFree(temp);
+
+}
+
+
 
 
 /*---------------------------------------------------------------------------
@@ -1436,16 +1688,17 @@ hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
 
 int
 hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
-                         int                  *CF_marker,
-                         hypre_ParCSRMatrix   *S,
-                         int                  *num_cpts_global,
-                         int                   num_functions,
-                         int                  *dof_func,
-                         int                   debug_flag,
-                         double                trunc_factor,
-                         int                   add_weak_to_diag,
-                         int 		      *col_offd_S_to_A,
-                         hypre_ParCSRBlockMatrix  **P_ptr)
+                                     int                  *CF_marker,
+                                     hypre_ParCSRMatrix   *S,
+                                     int                  *num_cpts_global,
+                                     int                   num_functions,
+                                     int                  *dof_func,
+                                     int                   debug_flag,
+                                     double                trunc_factor,
+                                     int		       max_elmts,
+                                     int                   add_weak_to_diag,
+                                     int 		      *col_offd_S_to_A,
+                                     hypre_ParCSRBlockMatrix  **P_ptr)
 {
 
    MPI_Comm 	      comm = hypre_ParCSRBlockMatrixComm(A);   
@@ -1549,6 +1802,8 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
    double           *distribute_block;
    
    int               *P_row_starts, *A_col_starts;
+
+   double           *sign;
    
 
    MPI_Comm_size(comm, &num_procs);   
@@ -1825,6 +2080,8 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
    /* we need a block identity and a block of zeros*/
    identity_block = hypre_CTAlloc(double, bnnz);
    zero_block =  hypre_CTAlloc(double, bnnz);
+
+   
  
    for(i = 0; i < block_size; i++) 
    {
@@ -1836,6 +2093,9 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
    diagonal_block =  hypre_CTAlloc(double, bnnz);
    sum_block =  hypre_CTAlloc(double, bnnz);
    distribute_block =  hypre_CTAlloc(double, bnnz);
+
+
+   sign =  hypre_CTAlloc(double, block_size);
 
    /*-----------------------------------------------------------------------
     *  Send and receive fine_to_coarse info.
@@ -2122,6 +2382,9 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                 * of the connections to c-points that strongly influence i.
                 *-----------------------------------------------------------*/
 
+               hypre_CSRBlockMatrixComputeSign(&A_diag_data[A_diag_i[i1]*bnnz], sign, block_size);
+               
+
                /* Diagonal block part of row i1 */
                for (jj1 = A_diag_i[i1]; jj1 < A_diag_i[i1+1]; jj1++)
                {
@@ -2130,8 +2393,11 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                   {
                      /* add diag data to sum */ 
                      /* sum += A_diag_data[jj1]; */
-                     hypre_CSRBlockMatrixBlockAddAccumulateDiag(&A_diag_data[jj1*bnnz], 
-                                                            sum_block, block_size);
+                     /* hypre_CSRBlockMatrixBlockAddAccumulateDiag(&A_diag_data[jj1*bnnz], 
+                                                            sum_block, block_size);*/
+
+                     hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(&A_diag_data[jj1*bnnz], 
+                                                                         sum_block, block_size, sign);
                   }
                }
 
@@ -2145,8 +2411,11 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                      {
                         /* add off diag data to sum */ 
                         /*sum += A_offd_data[jj1];*/
-                        hypre_CSRBlockMatrixBlockAddAccumulateDiag(&A_offd_data[jj1*bnnz], 
-                                                               sum_block, block_size);
+                        /* hypre_CSRBlockMatrixBlockAddAccumulateDiag(&A_offd_data[jj1*bnnz], 
+                           sum_block, block_size);*/
+                        hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(&A_offd_data[jj1*bnnz], 
+                                                                            sum_block, block_size, sign);
+                        
 
                      }
                   }
@@ -2178,9 +2447,14 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                         /* multiply - result in sum_block */ 
                         hypre_CSRBlockMatrixBlockCopyData(zero_block,  
                                                           sum_block, 1.0, block_size);
-                        hypre_CSRBlockMatrixBlockMultAddDiag(distribute_block, 
+
+
+                        /* hypre_CSRBlockMatrixBlockMultAddDiag(distribute_block, 
                                                              &A_diag_data[jj1*bnnz], 0.0, 
-                                                             sum_block, block_size);
+                                                             sum_block, block_size);*/
+                        hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(distribute_block, 
+                                                             &A_diag_data[jj1*bnnz], 0.0, 
+                                                                      sum_block, block_size, sign);
                         
 
                         /* add result to p_diag_data */
@@ -2206,15 +2480,22 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
 
                            hypre_CSRBlockMatrixBlockCopyData(zero_block,  
                                                     sum_block, 1.0, block_size);
-                           hypre_CSRBlockMatrixBlockMultAddDiag(distribute_block, 
+                           /* hypre_CSRBlockMatrixBlockMultAddDiag(distribute_block, 
                                                             &A_offd_data[jj1*bnnz], 0.0, 
-                                                            sum_block, block_size);
+                                                            sum_block, block_size); */
                            
-                           
+                           hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(distribute_block, 
+                                                            &A_offd_data[jj1*bnnz], 0.0, 
+                                                                         sum_block, block_size, sign);
+
+
+
                            /* add result to p_offd_data */
                            hypre_CSRBlockMatrixBlockAddAccumulateDiag(sum_block, 
                                                                   &P_offd_data[P_marker_offd[i2]*bnnz], 
-                                                                  block_size);
+                                                                  block_size); 
+
+
                         }
                      }
                   }
@@ -2291,6 +2572,9 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                   /* find row number */
                   c_num = A_offd_j[jj];
                   
+                  hypre_CSRBlockMatrixComputeSign(&A_ext_data[A_ext_i[c_num]*bnnz], sign, block_size); 
+                  
+
                   for (jj1 = A_ext_i[c_num]; jj1 < A_ext_i[c_num+1]; jj1++)
                   {
                      i2 = A_ext_j[jj1];
@@ -2301,8 +2585,13 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                         if (P_marker[i2] >= jj_begin_row)
                         {
                            /* sum += A_ext_data[jj1]; */
-                           hypre_CSRBlockMatrixBlockAddAccumulateDiag(&A_ext_data[jj1*bnnz], 
-                                         sum_block, block_size);
+                           /*  hypre_CSRBlockMatrixBlockAddAccumulateDiag(&A_ext_data[jj1*bnnz], 
+                                         sum_block, block_size);*/
+                           hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(&A_ext_data[jj1*bnnz], 
+                                                                      sum_block, block_size, sign);
+
+
+
                         }
                      }
                      else                       
@@ -2311,8 +2600,10 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                         if (P_marker_offd[-i2-1] >= jj_begin_row_offd)
                         {
                            /* sum += A_ext_data[jj1]; */
-                           hypre_CSRBlockMatrixBlockAddAccumulateDiag(&A_ext_data[jj1*bnnz], 
-                                                                  sum_block, block_size);
+                           /* hypre_CSRBlockMatrixBlockAddAccumulateDiag(&A_ext_data[jj1*bnnz], 
+                              sum_block, block_size);*/
+                           hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(&A_ext_data[jj1*bnnz], 
+                                                                      sum_block, block_size, sign);
                            
                         }
                      }
@@ -2348,15 +2639,18 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                               /* multiply - result in sum_block */ 
                               hypre_CSRBlockMatrixBlockCopyData(zero_block, sum_block, 1.0, block_size);
 
-                              hypre_CSRBlockMatrixBlockMultAdd(distribute_block, 
+                              /* hypre_CSRBlockMatrixBlockMultAddDiag(distribute_block, 
                                                                &A_ext_data[jj1*bnnz], 0.0, 
-                                                               sum_block, block_size);
+                                                               sum_block, block_size); */
                               
-
+                              hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(distribute_block, 
+                                                               &A_ext_data[jj1*bnnz], 0.0, 
+                                                               sum_block, block_size, sign);
                               /* add result to p_diag_data */
                               hypre_CSRBlockMatrixBlockAddAccumulateDiag(sum_block, 
                                                                      &P_diag_data[P_marker[i2]*bnnz], 
                                                                      block_size);
+
 
                            }
                         }
@@ -2372,15 +2666,22 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                               /* multiply - result in sum_block */ 
                               hypre_CSRBlockMatrixBlockCopyData(zero_block, sum_block, 1.0, block_size);
 
-                              hypre_CSRBlockMatrixBlockMultAddDiag(distribute_block, 
+                              /* hypre_CSRBlockMatrixBlockMultAddDiag(distribute_block, 
                                                                &A_ext_data[jj1*bnnz], 0.0, 
-                                                               sum_block, block_size);
+                                                               sum_block, block_size);*/
                            
-                           
+                              hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(distribute_block, 
+                                                               &A_ext_data[jj1*bnnz], 0.0, 
+                                                                   sum_block, block_size, sign);
+
+
                               /* add result to p_offd_data */
                               hypre_CSRBlockMatrixBlockAddAccumulateDiag(sum_block, 
                                                                          &P_offd_data[P_marker_offd[-i2-1]*bnnz], 
                                                                          block_size);
+                              
+
+                              
                            }
                            
 
@@ -2509,9 +2810,9 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
 
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
-   if (trunc_factor != 0.0)
+   if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGBlockInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGBlockInterpTruncation(P, trunc_factor, max_elmts);
       P_diag_data = hypre_CSRBlockMatrixData(P_diag);
       P_diag_i = hypre_CSRBlockMatrixI(P_diag);
       P_diag_j = hypre_CSRBlockMatrixJ(P_diag);
@@ -2577,6 +2878,8 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
 
    *P_ptr = P;
 
+   hypre_TFree(sign);
+   
 
    hypre_TFree(zero_block);
    hypre_TFree(identity_block);
@@ -2616,15 +2919,16 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
 
 int
 hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
-                         int                  *CF_marker,
-                         hypre_ParCSRMatrix   *S,
-                         int                  *num_cpts_global,
-                         int                   num_functions,
-                         int                  *dof_func,
-                         int                   debug_flag,
-                         double                trunc_factor,
-                         int 		      *col_offd_S_to_A,
-                         hypre_ParCSRBlockMatrix  **P_ptr)
+                                   int                  *CF_marker,
+                                   hypre_ParCSRMatrix   *S,
+                                   int                  *num_cpts_global,
+                                   int                   num_functions,
+                                   int                  *dof_func,
+                                   int                   debug_flag,
+                                   double                trunc_factor,
+                                   int		       max_elmts,
+                                   int 		      *col_offd_S_to_A,
+                                   hypre_ParCSRBlockMatrix  **P_ptr)
 {
 
    MPI_Comm 	      comm = hypre_ParCSRBlockMatrixComm(A);   
@@ -3644,9 +3948,9 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
 
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
-   if (trunc_factor != 0.0)
+   if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGBlockInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGBlockInterpTruncation(P, trunc_factor, max_elmts);
       P_diag_data = hypre_CSRBlockMatrixData(P_diag);
       P_diag_i = hypre_CSRBlockMatrixI(P_diag);
       P_diag_j = hypre_CSRBlockMatrixJ(P_diag);
@@ -3742,21 +4046,22 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
    whose diag entries are the row sumes (like suggested in Tanya Clees thesis
    for direct interp)
 
-   -again there is no differentiation for wesk/string f-connections
+   -again there is no differentiation for weak/strong f-connections
 
  *--------------------------------------------------------------------------*/
 
 int
 hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
-                         int                  *CF_marker,
-                         hypre_ParCSRMatrix   *S,
-                         int                  *num_cpts_global,
-                         int                   num_functions,
-                         int                  *dof_func,
-                         int                   debug_flag,
-                         double                trunc_factor,
-                         int 		      *col_offd_S_to_A,
-                         hypre_ParCSRBlockMatrix  **P_ptr)
+                                    int                  *CF_marker,
+                                    hypre_ParCSRMatrix   *S,
+                                    int                  *num_cpts_global,
+                                    int                   num_functions,
+                                    int                  *dof_func,
+                                    int                   debug_flag,
+                                    double                trunc_factor,
+                                    int		       max_elmts,
+                                    int 		      *col_offd_S_to_A,
+                                    hypre_ParCSRBlockMatrix  **P_ptr)
 {
 
    MPI_Comm 	      comm = hypre_ParCSRBlockMatrixComm(A);   
@@ -4776,9 +5081,9 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
 
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
-   if (trunc_factor != 0.0)
+   if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGBlockInterpTruncation(P, trunc_factor);
+      hypre_BoomerAMGBlockInterpTruncation(P, trunc_factor, max_elmts);
       P_diag_data = hypre_CSRBlockMatrixData(P_diag);
       P_diag_i = hypre_CSRBlockMatrixI(P_diag);
       P_diag_j = hypre_CSRBlockMatrixJ(P_diag);
@@ -4863,12 +5168,823 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
 
    return(0);  
 
-}            
+}          
     
-#if 0  /* not done yet */
+
+
 
 /*---------------------------------------------------------------------------
- * hypre_BoomerAMGBuildStdInterp
+ * hypre_BoomerAMGBuildBlockDirInterp
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
+                         int                  *CF_marker,
+                         hypre_ParCSRMatrix   *S,
+                         int                  *num_cpts_global,
+                         int                   num_functions,
+                         int                  *dof_func,
+                         int                   debug_flag,
+                         double                trunc_factor,
+                         int		       max_elmts,
+                         int 		      *col_offd_S_to_A,
+                         hypre_ParCSRBlockMatrix  **P_ptr)
+{
+
+   MPI_Comm 	      comm = hypre_ParCSRBlockMatrixComm(A);   
+   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
+   hypre_ParCSRCommHandle  *comm_handle;
+
+   hypre_CSRBlockMatrix *A_diag = hypre_ParCSRBlockMatrixDiag(A);
+   double          *A_diag_data = hypre_CSRBlockMatrixData(A_diag);
+   int             *A_diag_i = hypre_CSRBlockMatrixI(A_diag);
+   int             *A_diag_j = hypre_CSRBlockMatrixJ(A_diag);
+
+   int                  block_size = hypre_CSRBlockMatrixBlockSize(A_diag);
+   int                  bnnz = block_size*block_size;
+
+
+   hypre_CSRBlockMatrix *A_offd = hypre_ParCSRBlockMatrixOffd(A);   
+   double          *A_offd_data = hypre_CSRBlockMatrixData(A_offd);
+   int             *A_offd_i = hypre_CSRBlockMatrixI(A_offd);
+   int             *A_offd_j = hypre_CSRBlockMatrixJ(A_offd);
+   int              num_cols_A_offd = hypre_CSRBlockMatrixNumCols(A_offd);
+
+   hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
+   int             *S_diag_i = hypre_CSRMatrixI(S_diag);
+   int             *S_diag_j = hypre_CSRMatrixJ(S_diag);
+
+   hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);   
+   int             *S_offd_i = hypre_CSRMatrixI(S_offd);
+   int             *S_offd_j = hypre_CSRMatrixJ(S_offd);
+
+   hypre_ParCSRBlockMatrix *P;
+   int		      *col_map_offd_P;
+
+   int             *CF_marker_offd;
+   int             *dof_func_offd = NULL;
+
+   hypre_CSRBlockMatrix    *P_diag;
+   hypre_CSRBlockMatrix    *P_offd;   
+
+   double          *P_diag_data;
+   int             *P_diag_i;
+   int             *P_diag_j;
+   double          *P_offd_data;
+   int             *P_offd_i;
+   int             *P_offd_j;
+
+   int              P_diag_size, P_offd_size;
+   
+   int             *P_marker, *P_marker_offd;
+
+   int              jj_counter,jj_counter_offd;
+   int             *jj_count, *jj_count_offd;
+   int              jj_begin_row,jj_begin_row_offd;
+   int              jj_end_row,jj_end_row_offd;
+   
+   int              start_indexing = 0; /* start indexing for P_data at 0 */
+
+   int              n_fine = hypre_CSRBlockMatrixNumRows(A_diag);
+
+   int             *fine_to_coarse;
+   int             *fine_to_coarse_offd;
+   int             *coarse_counter;
+   int              coarse_shift;
+   int              total_global_cpts;
+   int              num_cols_P_offd,my_first_cpt;
+
+   int              i,i1;
+   int              j,jl,jj;
+   int              start;
+   
+   int              my_id;
+   int              num_procs;
+   int              num_threads;
+   int              num_sends;
+   int              index;
+   int              ns, ne, size, rest;
+   int             *int_buf_data;
+
+   double           wall_time;  /* for debugging instrumentation  */
+
+   double           *identity_block;
+   double           *zero_block;
+   double           *diagonal_block;
+   double           *sum_block_p;
+   double           *sum_block_n;
+   double           *r_block;
+   
+   int               *P_row_starts, *A_col_starts;
+   
+
+   MPI_Comm_size(comm, &num_procs);   
+   MPI_Comm_rank(comm,&my_id);
+   num_threads = hypre_NumThreads();
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   my_first_cpt = num_cpts_global[0];
+   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
+   MPI_Bcast(&total_global_cpts, 1, MPI_INT, num_procs-1, comm);
+#else
+   my_first_cpt = num_cpts_global[my_id];
+   total_global_cpts = num_cpts_global[num_procs];
+#endif
+
+   /*-------------------------------------------------------------------
+    * Get the CF_marker data for the off-processor columns
+    *-------------------------------------------------------------------*/
+
+   if (debug_flag==4) wall_time = time_getWallclockSeconds();
+
+   CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+  
+
+   if (!comm_pkg)
+   {
+	hypre_BlockMatvecCommPkgCreate(A);
+	comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
+   }
+
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+						num_sends));
+
+   index = 0;
+   for (i = 0; i < num_sends; i++)
+   {
+	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+		int_buf_data[index++] 
+		 = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+   }
+	
+   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+	CF_marker_offd);
+
+   hypre_ParCSRCommHandleDestroy(comm_handle);   
+ 
+   if (debug_flag==4)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d     Interp: Comm 1 CF_marker =    %f\n",
+                    my_id, wall_time);
+      fflush(NULL);
+   }
+
+   /*-----------------------------------------------------------------------
+    *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
+    *-----------------------------------------------------------------------*/
+
+   /*-----------------------------------------------------------------------
+    *  Intialize counters and allocate mapping vector.
+    *-----------------------------------------------------------------------*/
+
+   coarse_counter = hypre_CTAlloc(int, num_threads);
+   jj_count = hypre_CTAlloc(int, num_threads);
+   jj_count_offd = hypre_CTAlloc(int, num_threads);
+
+   fine_to_coarse = hypre_CTAlloc(int, n_fine);
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+   for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
+
+   jj_counter = start_indexing;
+   jj_counter_offd = start_indexing;
+      
+   /*-----------------------------------------------------------------------
+    *  Loop over fine grid.
+    *-----------------------------------------------------------------------*/
+
+/* RDF: this looks a little tricky, but doable */
+#define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
+#include "../utilities/hypre_smp_forloop.h"
+   for (j = 0; j < num_threads; j++)
+   {
+     size = n_fine/num_threads;
+     rest = n_fine - size*num_threads;
+     if (j < rest)
+     {
+        ns = j*size+j;
+        ne = (j+1)*size+j+1;
+     }
+     else
+     {
+        ns = j*size+rest;
+        ne = (j+1)*size+rest;
+     }
+
+
+     /* loop over the fine grid points */   
+     for (i = ns; i < ne; i++)
+     {
+      
+      /*--------------------------------------------------------------------
+       *  If i is a C-point, interpolation is the identity. Also set up
+       *  mapping vector (fine_to_coarse is the mapping vector).
+       *--------------------------------------------------------------------*/
+
+      if (CF_marker[i] >= 0)
+      {
+         jj_count[j]++;
+         fine_to_coarse[i] = coarse_counter[j];
+         coarse_counter[j]++;
+      }
+      
+      /*--------------------------------------------------------------------
+       *  If i is an F-point, interpolation is from the C-points that
+       *  strongly influence i.
+       *--------------------------------------------------------------------*/
+
+      else
+      {
+         for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
+         {
+            i1 = S_diag_j[jj];           
+            if (CF_marker[i1] > 0)
+            {
+               jj_count[j]++;
+            }
+         }
+
+         if (num_procs > 1)
+         {
+	   if (col_offd_S_to_A)
+           {
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+            {
+               i1 = col_offd_S_to_A[S_offd_j[jj]];           
+               if (CF_marker_offd[i1] > 0)
+               {
+                  jj_count_offd[j]++;
+               }
+            }
+           }
+           else
+           {
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+            {
+               i1 = S_offd_j[jj];           
+               if (CF_marker_offd[i1] > 0)
+               {
+                  jj_count_offd[j]++;
+               }
+            }
+           }
+         }
+      }
+    }
+   }
+
+   /*-----------------------------------------------------------------------
+    *  Allocate  arrays.
+    *-----------------------------------------------------------------------*/
+
+   for (i=0; i < num_threads-1; i++)
+   {
+      coarse_counter[i+1] += coarse_counter[i];
+      jj_count[i+1] += jj_count[i];
+      jj_count_offd[i+1] += jj_count_offd[i];
+   }
+   i = num_threads-1;
+   jj_counter = jj_count[i];
+   jj_counter_offd = jj_count_offd[i];
+
+   P_diag_size = jj_counter;
+
+   P_diag_i    = hypre_CTAlloc(int, n_fine+1);
+   P_diag_j    = hypre_CTAlloc(int, P_diag_size);
+   /* we need to include the size of the blocks in the data size */
+   P_diag_data = hypre_CTAlloc(double, P_diag_size*bnnz);
+
+   P_diag_i[n_fine] = jj_counter; 
+
+
+   P_offd_size = jj_counter_offd;
+
+   P_offd_i    = hypre_CTAlloc(int, n_fine+1);
+   P_offd_j    = hypre_CTAlloc(int, P_offd_size);
+   /* we need to include the size of the blocks in the data size */
+   P_offd_data = hypre_CTAlloc(double, P_offd_size*bnnz);
+
+   /*-----------------------------------------------------------------------
+    *  Intialize some stuff.
+    *-----------------------------------------------------------------------*/
+
+   jj_counter = start_indexing;
+   jj_counter_offd = start_indexing;
+
+   if (debug_flag==4)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d     Interp: Internal work 1 =     %f\n",
+                    my_id, wall_time);
+      fflush(NULL);
+   }
+
+  /* we need a block identity and a block of zeros*/
+   identity_block = hypre_CTAlloc(double, bnnz);
+   zero_block =  hypre_CTAlloc(double, bnnz);
+ 
+   for(i = 0; i < block_size; i++) 
+   {
+      identity_block[i*block_size + i] = 1.0;
+   }
+   /* we also need a block to keep track of the diagonal values and a sum */
+   diagonal_block =  hypre_CTAlloc(double, bnnz);
+   sum_block_p =  hypre_CTAlloc(double, bnnz);
+   sum_block_n =  hypre_CTAlloc(double, bnnz);
+   r_block =  hypre_CTAlloc(double, bnnz);
+
+   /*-----------------------------------------------------------------------
+    *  Send and receive fine_to_coarse info.
+    *-----------------------------------------------------------------------*/ 
+
+   if (debug_flag==4) wall_time = time_getWallclockSeconds();
+
+   fine_to_coarse_offd = hypre_CTAlloc(int, num_cols_A_offd); 
+
+#define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
+#include "../utilities/hypre_smp_forloop.h"
+   for (j = 0; j < num_threads; j++)
+   {
+     coarse_shift = 0;
+     if (j > 0) coarse_shift = coarse_counter[j-1];
+     size = n_fine/num_threads;
+     rest = n_fine - size*num_threads;
+     if (j < rest)
+     {
+        ns = j*size+j;
+        ne = (j+1)*size+j+1;
+     }
+     else
+     {
+        ns = j*size+rest;
+        ne = (j+1)*size+rest;
+     }
+     for (i = ns; i < ne; i++)
+	fine_to_coarse[i] += my_first_cpt+coarse_shift;
+   }
+   index = 0;
+   for (i = 0; i < num_sends; i++)
+   {
+	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+		int_buf_data[index++] 
+		 = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+   }
+	
+   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+	fine_to_coarse_offd);  
+
+   hypre_ParCSRCommHandleDestroy(comm_handle);   
+
+   if (debug_flag==4)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d     Interp: Comm 4 FineToCoarse = %f\n",
+                    my_id, wall_time);
+      fflush(NULL);
+   }
+
+   if (debug_flag==4) wall_time = time_getWallclockSeconds();
+
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+   for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
+
+   /*-----------------------------------------------------------------------
+    *  Loop over fine grid points.
+    *-----------------------------------------------------------------------*/
+    
+#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,diagonal,P_marker,P_marker_offd,jj_counter,jj_counter_offd,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
+#include "../utilities/hypre_smp_forloop.h"
+   for (jl = 0; jl < num_threads; jl++)
+   {
+     size = n_fine/num_threads;
+     rest = n_fine - size*num_threads;
+     if (jl < rest)
+     {
+        ns = jl*size+jl;
+        ne = (jl+1)*size+jl+1;
+     }
+     else
+     {
+        ns = jl*size+rest;
+        ne = (jl+1)*size+rest;
+     }
+     jj_counter = 0;
+     if (jl > 0) jj_counter = jj_count[jl-1];
+     jj_counter_offd = 0;
+     if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
+
+     P_marker = hypre_CTAlloc(int, n_fine);
+     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+
+     for (i = 0; i < n_fine; i++)
+     {      
+        P_marker[i] = -1;
+     }
+     for (i = 0; i < num_cols_A_offd; i++)
+     {      
+        P_marker_offd[i] = -1;
+     }
+ 
+     for (i = ns; i < ne; i++)
+     {
+             
+      /*--------------------------------------------------------------------
+       *  If i is a c-point, interpolation is the identity.
+       *--------------------------------------------------------------------*/
+      
+      if (CF_marker[i] >= 0)
+      {
+         P_diag_i[i] = jj_counter;
+         P_diag_j[jj_counter]    = fine_to_coarse[i];
+         /* P_diag_data[jj_counter] = one; */
+         hypre_CSRBlockMatrixBlockCopyData(identity_block,  
+                                           &P_diag_data[jj_counter*bnnz], 
+                                           1.0, block_size);
+         jj_counter++;
+      }
+      
+      /*--------------------------------------------------------------------
+       *  If i is an F-point, build interpolation.
+       *--------------------------------------------------------------------*/
+
+      else
+      {         
+         /* Diagonal part of P */
+         P_diag_i[i] = jj_counter;
+         jj_begin_row = jj_counter;
+
+         for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
+         {
+            i1 = S_diag_j[jj];   
+
+            /*--------------------------------------------------------------
+             * If neighbor i1 is a C-point, set column number in P_diag_j
+             * and initialize interpolation weight to zero.
+             *--------------------------------------------------------------*/
+
+            if (CF_marker[i1] >= 0)
+            {
+               P_marker[i1] = jj_counter;
+               P_diag_j[jj_counter]    = fine_to_coarse[i1];
+               /* P_diag_data[jj_counter] = zero; */
+               hypre_CSRBlockMatrixBlockCopyData(zero_block,  
+                                                 &P_diag_data[jj_counter*bnnz], 
+                                                 1.0, block_size);
+               jj_counter++;
+            }
+
+         }
+         jj_end_row = jj_counter;
+
+         /* Off-Diagonal part of P */
+         P_offd_i[i] = jj_counter_offd;
+         jj_begin_row_offd = jj_counter_offd;
+
+
+         if (num_procs > 1)
+         {
+           if (col_offd_S_to_A)
+           {
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+            {
+               i1 = col_offd_S_to_A[S_offd_j[jj]];   
+               
+               /*-----------------------------------------------------------
+                * If neighbor i1 is a C-point, set column number in P_offd_j
+                * and initialize interpolation weight to zero.
+                *-----------------------------------------------------------*/
+               
+               if (CF_marker_offd[i1] >= 0)
+               {
+                  P_marker_offd[i1] = jj_counter_offd;
+                  P_offd_j[jj_counter_offd]  = i1;
+                  /*P_offd_data[jj_counter_offd] = zero;*/
+                  hypre_CSRBlockMatrixBlockCopyData(zero_block,  
+                                                    &P_offd_data[jj_counter_offd*bnnz], 
+                                                    1.0, block_size);
+                  jj_counter_offd++;
+               }
+            }
+           }
+           else
+           {
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+            {
+               i1 = S_offd_j[jj];   
+
+               /*-----------------------------------------------------------
+                * If neighbor i1 is a C-point, set column number in P_offd_j
+                * and initialize interpolation weight to zero.
+                *-----------------------------------------------------------*/
+
+               if (CF_marker_offd[i1] >= 0)
+               {
+                  P_marker_offd[i1] = jj_counter_offd;
+                  P_offd_j[jj_counter_offd]  = i1;
+                  /* P_offd_data[jj_counter_offd] = zero; */
+                  hypre_CSRBlockMatrixBlockCopyData(zero_block,  
+                                                    &P_offd_data[jj_counter_offd*bnnz], 
+                                                    1.0, block_size);
+                  jj_counter_offd++;
+               }
+
+            }
+           }
+         }
+      
+         jj_end_row_offd = jj_counter_offd;
+         /* get the diagonal block */
+         /* diagonal = A_diag_data[A_diag_i[i]];*/
+         hypre_CSRBlockMatrixBlockCopyData(&A_diag_data[A_diag_i[i]*bnnz], diagonal_block, 
+                                           1.0, block_size);
+         
+     
+         /* Loop over ith row of A.  First, the diagonal part of A */
+	 /*sum_N_pos = 0;
+	 sum_N_neg = 0;
+	 sum_P_pos = 0;
+	 sum_P_neg = 0;*/
+         hypre_CSRBlockMatrixBlockCopyData(zero_block, sum_block_p, 1.0, 
+                                           block_size);
+         hypre_CSRBlockMatrixBlockCopyData(zero_block, sum_block_n, 1.0, 
+                                           block_size);
+
+
+         for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+         {
+            i1 = A_diag_j[jj];
+
+            /*if (A_diag_data[jj] > 0)
+              sum_N_pos += A_diag_data[jj];
+              else
+              sum_N_neg += A_diag_data[jj];*/
+
+            hypre_CSRBlockMatrixBlockAddAccumulate(&A_diag_data[jj*bnnz], 
+                                                      sum_block_n, block_size);
+
+            /*--------------------------------------------------------------
+             * Case 1: neighbor i1 is a C-point and strongly influences i,
+             * accumulate a_{i,i1} into the interpolation weight.
+             *--------------------------------------------------------------*/
+
+            if (P_marker[i1] >= jj_begin_row)
+            {
+
+
+               /* P_diag_data[P_marker[i1]] += A_diag_data[jj];*/
+               hypre_CSRBlockMatrixBlockAddAccumulate(&A_diag_data[jj*bnnz], 
+                                                      &P_diag_data[P_marker[i1]*bnnz], 
+                                                      block_size);
+
+
+	       /*if (A_diag_data[jj] > 0)
+		  sum_P_pos += A_diag_data[jj];
+	       else
+                  sum_P_neg += A_diag_data[jj];*/
+               hypre_CSRBlockMatrixBlockAddAccumulate(&A_diag_data[jj*bnnz], 
+                                                      sum_block_p, block_size);
+
+            }
+
+         }    
+       
+          /*----------------------------------------------------------------
+           * Still looping over ith row of A. Next, loop over the 
+           * off-diagonal part of A 
+           *---------------------------------------------------------------*/
+
+         if (num_procs > 1)
+         {
+            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            {
+               i1 = A_offd_j[jj];
+
+               /*if (A_offd_data[jj] > 0)
+                 sum_N_pos += A_offd_data[jj];
+                 else
+                 sum_N_neg += A_offd_data[jj];*/
+               hypre_CSRBlockMatrixBlockAddAccumulate(&A_offd_data[jj*bnnz], 
+                                                      sum_block_n, block_size);
+                  
+
+            /*--------------------------------------------------------------
+             * Case 1: neighbor i1 is a C-point and strongly influences i,
+             * accumulate a_{i,i1} into the interpolation weight.
+             *--------------------------------------------------------------*/
+
+               if (P_marker_offd[i1] >= jj_begin_row_offd)
+               {
+
+                  /* P_offd_data[P_marker_offd[i1]] += A_offd_data[jj];*/
+                  hypre_CSRBlockMatrixBlockAddAccumulate( &A_offd_data[jj*bnnz],
+                                                          &P_offd_data[P_marker_offd[i1]*bnnz],
+                                                          block_size);
+
+	          /*if (A_offd_data[jj] > 0)
+		     sum_P_pos += A_offd_data[jj];
+	          else
+                     sum_P_neg += A_offd_data[jj];*/
+                  hypre_CSRBlockMatrixBlockAddAccumulate(&A_offd_data[jj*bnnz], 
+                                                         sum_block_p, block_size);
+                  
+               }
+
+            }
+         }   
+
+        
+         /*if (sum_P_neg) alfa = sum_N_neg/sum_P_neg/diagonal;
+           if (sum_P_pos) beta = sum_N_pos/sum_P_pos/diagonal;*/
+
+         /*r_block = sum_block_n*sum_block_p^-1*/
+         hypre_CSRBlockMatrixBlockMultInv(sum_block_p, sum_block_n, 
+                                          r_block, block_size);
+                    
+         /* sum_block_n= diagonal^-1*r_block */ 
+         hypre_CSRBlockMatrixBlockInvMult(diagonal_block, r_block, 
+                                          sum_block_n, block_size);
+         
+
+
+        /*-----------------------------------------------------------------
+          * Set interpolation weight by dividing by the diagonal.
+          *-----------------------------------------------------------------*/
+
+         for (jj = jj_begin_row; jj < jj_end_row; jj++)
+         {
+            /*if (P_diag_data[jj]> 0)
+               P_diag_data[jj] *= -beta;
+            else
+            P_diag_data[jj] *= -alfa;*/
+
+            hypre_CSRBlockMatrixBlockCopyData( &P_diag_data[jj*bnnz], 
+                                               r_block, -1.0, block_size);
+            
+
+            hypre_CSRBlockMatrixBlockMultAdd(sum_block_n, r_block, 0.0, 
+                                             &P_diag_data[jj*bnnz], block_size);
+
+         }
+
+         for (jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
+         {
+            /*if (P_offd_data[jj]> 0)
+               P_offd_data[jj] *= -beta;
+            else
+            P_offd_data[jj] *= -alfa;*/
+
+            hypre_CSRBlockMatrixBlockCopyData( &P_offd_data[jj*bnnz], 
+                                               r_block, -1.0, block_size);
+            
+            hypre_CSRBlockMatrixBlockMultAdd(sum_block_n, r_block, 0.0, 
+                                             &P_offd_data[jj*bnnz], block_size);
+
+         }
+           
+      }
+
+      P_offd_i[i+1] = jj_counter_offd;
+     }
+     hypre_TFree(P_marker);
+     hypre_TFree(P_marker_offd);
+   }
+
+   /* copy row starts since A will be destroyed */
+   A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
+   
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   P_row_starts = hypre_CTAlloc(int, 2); /* don't free this */
+   for (i = 0; i < 2; i++)
+   {
+      P_row_starts[i] =  A_col_starts[i];
+   }
+#else
+   P_row_starts = hypre_CTAlloc(int, num_procs + 1); /* don't free this */
+   for (i = 0; i < num_procs + 1; i++)
+   {
+      P_row_starts[i] =  A_col_starts[i];
+   }
+#endif
+
+
+   /* Now create P - as a block matrix */                                                                         
+   P = hypre_ParCSRBlockMatrixCreate(comm,block_size,
+                                     hypre_ParCSRBlockMatrixGlobalNumRows(A),
+                                     total_global_cpts,
+                                     P_row_starts,
+                                     num_cpts_global,
+                                     0,
+                                     P_diag_i[n_fine],
+                                     P_offd_i[n_fine]);
+                                                                                
+                                                                                
+   P_diag = hypre_ParCSRBlockMatrixDiag(P);
+   hypre_CSRBlockMatrixData(P_diag) = P_diag_data;
+   hypre_CSRBlockMatrixI(P_diag) = P_diag_i;
+   hypre_CSRBlockMatrixJ(P_diag) = P_diag_j;
+  
+   P_offd = hypre_ParCSRBlockMatrixOffd(P);
+   hypre_CSRBlockMatrixData(P_offd) = P_offd_data;
+   hypre_CSRBlockMatrixI(P_offd) = P_offd_i;
+   hypre_CSRBlockMatrixJ(P_offd) = P_offd_j;
+
+   /* Compress P, removing coefficients smaller than trunc_factor * Max */
+
+   if (trunc_factor != 0.0 || max_elmts > 0)
+   {
+      hypre_BoomerAMGBlockInterpTruncation(P, trunc_factor, max_elmts);
+      P_diag_data = hypre_CSRBlockMatrixData(P_diag);
+      P_diag_i = hypre_CSRBlockMatrixI(P_diag);
+      P_diag_j = hypre_CSRBlockMatrixJ(P_diag);
+      P_offd_data = hypre_CSRBlockMatrixData(P_offd);
+      P_offd_i = hypre_CSRBlockMatrixI(P_offd);
+      P_offd_j = hypre_CSRBlockMatrixJ(P_offd);
+      P_diag_size = P_diag_i[n_fine];
+      P_offd_size = P_offd_i[n_fine];
+   }
+
+   num_cols_P_offd = 0;
+   if (P_offd_size)
+   {
+      P_marker = hypre_CTAlloc(int, num_cols_A_offd);
+
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+      for (i=0; i < num_cols_A_offd; i++)
+         P_marker[i] = 0;
+                                                                                
+      num_cols_P_offd = 0;
+      for (i=0; i < P_offd_size; i++)
+      {
+         index = P_offd_j[i];
+         if (!P_marker[index])
+         {
+            num_cols_P_offd++;
+            P_marker[index] = 1;
+         }
+      }
+                                                                                
+      col_map_offd_P = hypre_CTAlloc(int,num_cols_P_offd);
+                                                                                
+      index = 0;
+      for (i=0; i < num_cols_P_offd; i++)
+      {
+         while (P_marker[index]==0) index++;
+         col_map_offd_P[i] = index++;
+      }
+
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+      for (i=0; i < P_offd_size; i++)
+	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
+					 P_offd_j[i],
+					 num_cols_P_offd);
+      hypre_TFree(P_marker); 
+   }
+
+   for (i=0; i < n_fine; i++)
+      if (CF_marker[i] == -3) CF_marker[i] = -1;
+
+   if (num_cols_P_offd)
+   { 
+   	hypre_ParCSRBlockMatrixColMapOffd(P) = col_map_offd_P;
+        hypre_CSRBlockMatrixNumCols(P_offd) = num_cols_P_offd;
+   } 
+
+   hypre_GetCommPkgBlockRTFromCommPkgBlockA(P,A,fine_to_coarse_offd); 
+
+   *P_ptr = P;
+
+   hypre_TFree(zero_block);
+   hypre_TFree(identity_block);
+   hypre_TFree(diagonal_block);
+   hypre_TFree(sum_block_n);
+   hypre_TFree(sum_block_p);
+   hypre_TFree(r_block);
+
+
+   hypre_TFree(CF_marker_offd);
+   hypre_TFree(dof_func_offd);
+   hypre_TFree(int_buf_data);
+   hypre_TFree(fine_to_coarse);
+   hypre_TFree(fine_to_coarse_offd);
+   hypre_TFree(coarse_counter);
+   hypre_TFree(jj_count);
+   hypre_TFree(jj_count_offd);
+
+   return(0);  
+
+}            
+
+#if 0  /* not finished yet! */
+
+/*---------------------------------------------------------------------------
+ * hypre_BoomerAMGBuildBlockStdInterp
  *  Comment: The interpolatory weighting can be changed with the sep_weight
  *           variable. This can enable not separating negative and positive
  *           off diagonals in the weight formula.

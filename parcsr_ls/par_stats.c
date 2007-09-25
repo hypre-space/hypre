@@ -346,6 +346,13 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 	printf(" Interpolation = block classical interpolation with diagonal blocks\n");
 	printf("                 for nodal systems AMG\n");
       }
+      else if (interp_type == 24) 
+      {
+	printf(" Interpolation = block direct interpolation \n");
+	printf("                 for nodal systems AMG\n");
+      }
+
+
 
       if (block_mode)
       {

@@ -157,9 +157,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    double    wall_time;   /* for debugging instrumentation */
 
-   /* AHB - use reg interpolation with unknown or hybrid approach if 1 -
-      implement better later - for now in interptype is negative */
-
    
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
@@ -607,7 +604,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (block_mode)
                {
                   hypre_BoomerAMGBlockCreateNodalA( A_block_array[level], abs(nodal), nodal_diag, &AN);
-                
                }
                else
                {
@@ -626,11 +622,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else /* all entries are positive */
 		  hypre_BoomerAMGCreateSabs(AN, strong_threshold, max_row_sum,
                                    1, NULL,&SN);
-#if 0
-/* TEMP - to compare with serial */
-               hypre_BoomerAMGCreateS(AN, strong_threshold, max_row_sum,
-                                      1, NULL,&SN);
-#endif
             
 
                col_offd_S_to_A = NULL;
@@ -1552,9 +1543,46 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                     coarse_pnts_global, 1,
                                                     NULL,
                                                     debug_flag,
-                                                    trunc_factor,1,
+                                                    trunc_factor, P_max_elmts,1,
                                                     col_offd_S_to_A,
                                                     &P_block_array[level]);
+
+#if 0
+               /* for debugging */          
+               {
+                  hypre_ParCSRMatrix *temp_P;
+                  char new_file[80];
+                  hypre_ParVector     *y_new, *x_new;
+
+                  sprintf(new_file,"%s.level.%d","parcsr.P.out" ,level);
+                  temp_P =  hypre_ParCSRBlockMatrixConvertToParCSRMatrix(
+                     P_block_array[level]);
+                  hypre_ParCSRMatrixPrint(temp_P, new_file); 
+                
+                  x_new = hypre_ParVectorCreate(MPI_COMM_WORLD, hypre_ParCSRMatrixGlobalNumCols(temp_P), hypre_ParCSRMatrixColStarts(temp_P) );
+                  hypre_ParVectorSetPartitioningOwner(x_new, 0);
+                  hypre_ParVectorInitialize(x_new);
+                  hypre_ParVectorSetRandomValues(x_new, 1);   
+
+                  y_new = hypre_ParVectorCreate(MPI_COMM_WORLD, hypre_ParCSRMatrixGlobalNumRows(temp_P), hypre_ParCSRMatrixRowStarts(temp_P));
+                  hypre_ParVectorSetPartitioningOwner(y_new, 0);
+                  hypre_ParVectorInitialize(y_new);
+                  hypre_ParVectorSetConstantValues(y_new, 0.0);
+
+                  /*y = 1.0*A*x+1.0*y */
+                  hypre_ParCSRMatrixMatvec (1.0, temp_P, x_new, 1.0, y_new);
+                  sprintf(new_file,"%s.level.%d","Px.out" ,level);
+                  hypre_ParVectorPrint(y_new, new_file); 
+
+                  hypre_ParCSRMatrixDestroy(temp_P);
+                  hypre_ParVectorDestroy(x_new);
+                  hypre_ParVectorDestroy(y_new);
+
+               }
+#endif
+
+
+
             }
             else if (interp_type == 22)
             {
@@ -1563,7 +1591,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                     coarse_pnts_global, 1,
                                                     NULL,
                                                     debug_flag,
-                                                    trunc_factor,
+                                                  trunc_factor, P_max_elmts,
                                                     col_offd_S_to_A,
                                                     &P_block_array[level]);
             }
@@ -1574,7 +1602,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                     coarse_pnts_global, 1,
                                                     NULL,
                                                     debug_flag,
-                                                    trunc_factor,
+                                                  trunc_factor, P_max_elmts,
                                                     col_offd_S_to_A,
                                                     &P_block_array[level]);
             }
@@ -1585,7 +1613,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                coarse_pnts_global, 1,
                                                NULL,
                                                debug_flag,
-                                                trunc_factor,0,
+                                                trunc_factor, P_max_elmts, 0,
                                                col_offd_S_to_A,
                                                 &P_block_array[level]);
                
@@ -1597,11 +1625,21 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                     coarse_pnts_global, 1,
                                                     NULL,
                                                     debug_flag,
-                                                    trunc_factor,0,
+                                                    trunc_factor, P_max_elmts, 0,
                                                     col_offd_S_to_A,
                                                     &P_block_array[level]);
             }
-
+            else if (interp_type == 24)
+            {
+               hypre_BoomerAMGBuildBlockDirInterp( A_block_array[level], CFN_marker, 
+                                                    SN,
+                                                    coarse_pnts_global, 1,
+                                                    NULL,
+                                                    debug_flag,
+                                                    trunc_factor, P_max_elmts,
+                                                    col_offd_S_to_A,
+                                                    &P_block_array[level]);
+            }
 
 
             else /* interp_type ==10 */
@@ -1612,7 +1650,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                coarse_pnts_global, 1,
                                                NULL,
                                                debug_flag,
-                                                trunc_factor,1,
+                                                trunc_factor, P_max_elmts, 1,
                                                col_offd_S_to_A,
                                                &P_block_array[level]);
 
@@ -1716,6 +1754,36 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                              S, coarse_pnts_global, num_functions, 
                                              dof_func_array[level], 
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
+
+
+#if 0
+               /* for debugging */          
+               {
+                  hypre_ParVector     *y_new, *x_new;
+                  char new_file[80];
+                  sprintf(new_file,"%s.level.%d","unk.parcsr.P.out" ,level);
+                  hypre_ParCSRMatrixPrint(P, new_file); 
+                  x_new = hypre_ParVectorCreate(MPI_COMM_WORLD, hypre_ParCSRMatrixGlobalNumCols(P), hypre_ParCSRMatrixColStarts(P) );
+                  hypre_ParVectorSetPartitioningOwner(x_new, 0);
+                  hypre_ParVectorInitialize(x_new);
+                  hypre_ParVectorSetRandomValues(x_new, 1);   
+
+                  y_new = hypre_ParVectorCreate(MPI_COMM_WORLD, hypre_ParCSRMatrixGlobalNumRows(P), hypre_ParCSRMatrixRowStarts(P));
+                  hypre_ParVectorSetPartitioningOwner(y_new, 0);
+                  hypre_ParVectorInitialize(y_new);
+                  hypre_ParVectorSetConstantValues(y_new, 0.0);
+
+                  /*y = 1.0*A*x+1.0*y */
+                  hypre_ParCSRMatrixMatvec (1.0, P, x_new, 1.0, y_new);
+                  sprintf(new_file,"%s.level.%d","unk.Px.out" ,level);
+                  hypre_ParVectorPrint(y_new, new_file); 
+
+                  hypre_ParVectorDestroy(x_new);
+                  hypre_ParVectorDestroy(y_new);
+
+               }
+#endif
+
                }
                
                hypre_TFree(col_offd_S_to_A);
@@ -2032,12 +2100,31 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 {
    char  filename[256];
 
-   for (level = 0; level < num_levels; level++)
+   if (block_mode)
    {
-      sprintf(filename, "BoomerAMG.out.A.%02d.ij", level);
-      hypre_ParCSRMatrixPrintIJ(A_array[level], 0, 0, filename);
+      hypre_ParCSRMatrix *temp_A;
+
+      for (level = 0; level < num_levels; level++)
+      {
+         sprintf(filename, "BoomerAMG.out.A_blk.%02d.ij", level);
+         temp_A =  hypre_ParCSRBlockMatrixConvertToParCSRMatrix(
+            A_block_array[level]);
+         hypre_ParCSRMatrixPrintIJ(temp_A, 0, 0, filename);
+         hypre_ParCSRMatrixDestroy(temp_A);
+      }
+      
+   }
+   else
+   {
+      
+      for (level = 0; level < num_levels; level++)
+      {
+         sprintf(filename, "BoomerAMG.out.A.%02d.ij", level);
+         hypre_ParCSRMatrixPrintIJ(A_array[level], 0, 0, filename);
+      }
    }
 }
+
 #endif
 
    return(Setup_err_flag);

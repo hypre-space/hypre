@@ -155,7 +155,11 @@ int hypre_CSRBlockMatrixBlockNorm(int norm_type, double* data, double* out, int 
    
 int hypre_CSRBlockMatrixBlockSetScalar(double* o, double beta, int block_size);
    
-
+int hypre_CSRBlockMatrixComputeSign(double *i1, double *o, int block_size);
+int hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(double* i1, double* o, int block_size, double *sign);
+int hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(double* i1, double* i2, double beta, 
+                                              double* o, int block_size, double *sign);
+   
 
 
 

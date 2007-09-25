@@ -374,6 +374,54 @@ hypre_CSRBlockMatrixBlockAddAccumulateDiag(double* i1, double* o, int block_size
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign
+ *only add elements of sign*i1 that are negative (sign is size block_size)
+
+ * (diag(o) = diag(i1) + diag(o)) 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(double* i1, double* o, int block_size, double *sign)
+{
+   int i;
+   double tmp;
+
+   for (i = 0; i < block_size; i++)
+   {
+      
+      tmp = i1[i*block_size+i]*sign[i];
+      if (tmp < 0) 
+         o[i*block_size+i] += i1[i*block_size+i];
+   }
+   
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ *  hypre_CSRBlockMatrixComputeSign
+
+ * o = sign(diag(i1)) 
+ *--------------------------------------------------------------------------*/
+
+int hypre_CSRBlockMatrixComputeSign(double *i1, double *o, int block_size)
+{
+
+   int i;
+   
+
+    for (i = 0; i < block_size; i++)
+   {
+      if (i1[i*block_size+i] < 0)
+         o[i] = -1;
+      else
+         o[i] = 1;
+   }
+
+   return 0;
+   
+}
+
+
+/*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockSetScalar
  * (each entry in block o is set to beta ) 
  *--------------------------------------------------------------------------*/
@@ -451,7 +499,7 @@ hypre_CSRBlockMatrixBlockTranspose(double* i1, double* o, int block_size)
  * hypre_CSRBlockMatrixBlockNorm
  * (out = norm(data) ) 
  *
- *  (note these are not all actually "norms")
+ *  (note: these are not all actually "norms")
  *  
  *
  *--------------------------------------------------------------------------*/
@@ -561,6 +609,7 @@ hypre_CSRBlockMatrixBlockNorm(int norm_type, double* data, double* out, int bloc
    
 }
 
+
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockMultAdd
  * (o = i1 * i2 + beta * o) 
@@ -664,6 +713,53 @@ hypre_CSRBlockMatrixBlockMultAddDiag(double* i1, double* i2, double beta,
    }
    return 0;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockMultAddDiagCheckSign
+ * 
+ *  only mult elements if sign*diag(i2) is negative
+ *(diag(o) = diag(i1) * diag(i2) + beta * diag(o)) 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(double* i1, double* i2, double beta, 
+                                              double* o, int block_size, double *sign)
+{
+   int    i;
+   double tmp;
+   
+
+   if (beta == 0.0)
+   {
+      for (i = 0; i < block_size; i++)
+      {
+         tmp = i2[i*block_size+i]*sign[i];
+         if (tmp < 0)
+            o[i*block_size + i] = i1[i*block_size + i] * i2[i*block_size + i];
+      }
+   }
+   else if (beta == 1.0)
+   {
+      for(i = 0; i < block_size; i++)
+      {
+         tmp = i2[i*block_size+i]*sign[i];
+         if (tmp < 0)
+            o[i*block_size + i] = o[i*block_size + i] + i1[i*block_size + i] * i2[i*block_size + i];
+      }
+   }
+   else
+   {
+      for(i = 0; i < block_size; i++)
+      {
+         tmp = i2[i*block_size+i]*sign[i];
+         if (tmp < 0)
+            o[i*block_size + i] = beta* o[i*block_size + i] + i1[i*block_size + i] * i2[i*block_size + i];
+      }
+   }
+   return 0;
+}
+
+
+
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockMultAddDiag2 (scales cols of il by diag of i2)
  * ((o) = (i1) * diag(i2) + beta * (o)) 

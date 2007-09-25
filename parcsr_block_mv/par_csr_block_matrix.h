@@ -160,6 +160,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
                                  int                  *dof_func,
                                  int                   debug_flag,
                                  double                trunc_factor,
+                                 int		       max_elmts,
                                  int                   add_weak_to_diag,    
                                  int 		      *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr);
@@ -175,6 +176,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
                                  int                  *dof_func,
                                  int                   debug_flag,
                                  double                trunc_factor,
+                                   int		       max_elmts,
                                  int 		      *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr);
    
@@ -187,6 +189,7 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
                                  int                  *dof_func,
                                  int                   debug_flag,
                                  double                trunc_factor,
+                                    int		       max_elmts,
                                  int 		      *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr);
 int
@@ -198,14 +201,28 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                                      int                  *dof_func,
                                      int                   debug_flag,
                                      double                trunc_factor,
+                                     int		       max_elmts,
                                      int                   add_weak_to_diag,    
                                      int 		      *col_offd_S_to_A,
                                      hypre_ParCSRBlockMatrix  **P_ptr);
 
 int hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
-                                      double trunc_factor);
+                                          double trunc_factor, int max_elements);
    
 
+int
+hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
+                                    int                  *CF_marker,
+                                    hypre_ParCSRMatrix   *S,
+                                    int                  *num_cpts_global,
+                                    int                   num_functions,
+                                    int                  *dof_func,
+                                    int                   debug_flag,
+                                    double                trunc_factor,
+                                    int		       max_elmts,
+                                    int 		      *col_offd_S_to_A,
+                                    hypre_ParCSRBlockMatrix  **P_ptr);
+   
 
 int  hypre_BoomerAMGBlockRelaxIF( hypre_ParCSRBlockMatrix *A,
                              hypre_ParVector    *f,
@@ -298,6 +315,21 @@ hypre_ParCSRBlockMatrixMatvecT( double                  alpha,
                                 hypre_ParVector         *x,
                                 double                   beta,
                                 hypre_ParVector          *y);
+   
+
+
+
+
+
+void hypre_block_qsort( int *v,
+                        double *w, double *blk_array, int block_size,
+                        int  left,
+                        int  right );
+   
+
+void swap_blk( double *v, int block_size,
+               int  i,
+               int  j );
    
 
 #ifdef __cplusplus

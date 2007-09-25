@@ -932,7 +932,8 @@ main( int   argc,
       printf("      21=same as 11, but don't add weak connect. to diag \n");
       printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
       printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
-        
+      printf("      24=direct block interpolation for nodal systems AMG\n");
+
 
      
       printf("\n");
@@ -3504,6 +3505,24 @@ BuildParLaplacian( int                  argc,
                
                /* mtrx[3] */
                SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep2*1.0, 1.0, 3, mtrx_values);
+            }
+            else if (vcoef_opt == 5) /* use with default sys_opt  - */
+            {
+               double  alp, beta;
+               alp = .001;
+               beta = 10;
+               
+               /* mtrx[0] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, alp*1.0, 1.0, 1.0, 0, mtrx_values);
+               
+               /* mtrx[1] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, beta*1.0, 1.0, 1, mtrx_values);
+               
+               /* mtrx[2] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, alp*1.0, 1.0, 1.0, 2, mtrx_values);
+               
+               /* mtrx[3] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, beta*1.0, 1.0, 3, mtrx_values);
             }
             else  /* = 0 */
             {
