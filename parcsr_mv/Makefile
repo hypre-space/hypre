@@ -69,7 +69,8 @@ FILES =\
  par_csr_matrix.c\
  par_csr_matop_marked.c\
  par_csr_matvec.c\
- par_vector.c
+ par_vector.c\
+ par_make_system.c
 
 EXTRA_FILES =\
  parchord_to_parcsr.c\

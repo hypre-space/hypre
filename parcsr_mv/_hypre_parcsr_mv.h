@@ -659,6 +659,18 @@ typedef struct
 
 
 #endif
+#ifndef hypre_PAR_MAKE_SYSTEM
+#define  hypre_PAR_MAKE_SYSTEM
+
+typedef struct
+{
+   hypre_ParCSRMatrix * A;
+   hypre_ParVector * x;
+   hypre_ParVector * b;
+
+} HYPRE_ParCSR_System_Problem;
+
+#endif /* hypre_PAR_MAKE_SYSTEM */
 
 /* communicationT.c */
 void RowsWithColumn_original ( int *rowmin , int *rowmax , int column , hypre_ParCSRMatrix *A );
@@ -666,11 +678,7 @@ void RowsWithColumn ( int *rowmin , int *rowmax , int column , int num_rows_diag
 void hypre_MatTCommPkgCreate_core ( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_rows_diag , int num_cols_diag , int num_cols_offd , int *row_starts , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
 int hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A );
 
-/* driver_aat2.c */
-
 /* driver_aat.c */
-
-/* driver_ab.c */
 
 /* driver_boolaat.c */
 
@@ -845,6 +853,10 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion ( hypre_ParCSRMatrix *A , hypre_ParC
 int hypre_ParCSRMatrixMatvec ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
 int hypre_ParCSRMatrixMatvecT ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
 int hypre_ParCSRMatrixMatvec_FF ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y , int *CF_marker , int fpt );
+
+/* par_make_system.c */
+HYPRE_ParCSR_System_Problem *HYPRE_Generate2DSystem ( HYPRE_ParCSRMatrix H_L1 , HYPRE_ParCSRMatrix H_L2 , HYPRE_ParVector H_b1 , HYPRE_ParVector H_b2 , HYPRE_ParVector H_x1 , HYPRE_ParVector H_x2 , double *M_vals );
+int HYPRE_Destroy2DSystem ( HYPRE_ParCSR_System_Problem *sys_prob );
 
 /* par_vector.c */
 hypre_ParVector *hypre_ParVectorCreate ( MPI_Comm comm , int global_size , int *partitioning );
