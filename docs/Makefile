@@ -149,6 +149,8 @@ HYPRE_usr_manual.pdf: version.tex ${USR_FILES}
 
 HYPRE_dev_manual.pdf: version.tex ${DEV_FILES}
 	${PDFLATEX} dev_manual
+	bibtex dev_manual
+	${PDFLATEX} dev_manual
 	${PDFLATEX} dev_manual
 	mv dev_manual.pdf HYPRE_dev_manual.pdf
 
