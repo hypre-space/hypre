@@ -984,6 +984,7 @@ int HYPRE_SStructStencilSetEntry ( HYPRE_SStructStencil stencil , int entry , in
 /* HYPRE_sstruct_vector.c */
 int HYPRE_SStructVectorCreate ( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructVector *vector_ptr );
 int HYPRE_SStructVectorDestroy ( HYPRE_SStructVector vector );
+int HYPRE_SStructVectorSetNumGhost ( HYPRE_SStructVector vector , int *num_ghost );
 int HYPRE_SStructVectorInitialize ( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorSetValues ( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
 int HYPRE_SStructVectorSetBoxValues ( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );

@@ -141,6 +141,37 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
    return ierr;
 }
 
+int
+HYPRE_SStructVectorSetNumGhost( HYPRE_SStructVector vector,
+                                int                *num_ghost )
+{
+   int ierr = 0;
+   int                   vector_type= hypre_SStructVectorObjectType(vector);
+   int                   nparts     = hypre_SStructVectorNParts(vector);
+
+   hypre_SStructPVector *pvector;
+   int part, nvars, var;
+
+   if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
+   {
+      for (part= 0; part< nparts; part++)
+      {
+         pvector= hypre_SStructVectorPVector(vector, part); 
+         nvars = hypre_SStructPVectorNVars(pvector);
+
+         for (var = 0; var< nvars; var++)
+         {
+            hypre_StructVectorSetNumGhost(hypre_SStructPVectorSVector(pvector, var),
+                                          num_ghost);
+         }
+      }
+   }
+
+   return ierr;
+}
+
+
+
 /*---------------------------------------------------------
  * GEC1002 changes to initialize the vector with a data chunk
  * that includes all the part,var pieces instead of just svector-var

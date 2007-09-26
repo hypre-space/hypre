@@ -609,6 +609,11 @@ int HYPRE_SStructVectorCreate(MPI_Comm              comm,
 int HYPRE_SStructVectorDestroy(HYPRE_SStructVector vector);
 
 /**
+ * Sets ghostlayer size.
+ **/
+int HYPRE_SStructVectorSetNumGhost(HYPRE_SStructVector vector,
+                                   int                *num_ghost);
+/**
  * Prepare a vector object for setting coefficient values.
  **/
 int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
