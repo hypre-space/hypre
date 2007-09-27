@@ -2,7 +2,7 @@ C
 C       File:          sidl_rmi_InstanceRegistry_Impl.f
 C       Symbol:        sidl.rmi.InstanceRegistry-v0.9.15
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.rmi.InstanceRegistry
@@ -80,7 +80,7 @@ C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine sidl_rmi_InstanceRegistry__cast_f(ref, retval,
+        subroutine sidl_rmi_InstanceRegistry__cast_f(ref, retval, 
      &     exception)
         implicit none
 C        in opaque ref
@@ -97,7 +97,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_rmi_InstanceRegistry__cast2_f(self, name,
+        subroutine sidl_rmi_InstanceRegistry__cast2_f(self, name, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -145,7 +145,7 @@ C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
 
-        subroutine sidl_rmi_InstanceRegistry_deleteRef_f(self,
+        subroutine sidl_rmi_InstanceRegistry_deleteRef_f(self, 
      &     exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -161,7 +161,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_rmi_InstanceRegistry_isSame_f(self, iobj,
+        subroutine sidl_rmi_InstanceRegistry_isSame_f(self, iobj, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -183,7 +183,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_rmi_InstanceRegistry_isType_f(self, name,
+        subroutine sidl_rmi_InstanceRegistry_isType_f(self, name, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -202,7 +202,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_rmi_InstanceRegistry_getClassInfo_f(self,
+        subroutine sidl_rmi_InstanceRegistry_getClassInfo_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -223,9 +223,8 @@ C       the registry will return an objectID string guaranteed to be
 C       unique for the lifetime of the process
 C       
 
-        subroutine 
-     &     sidl_rmi_InstanceRegistry_registerInstance_f(instance,
-     &     retval, exception)
+        subroutine sidl_rmi_InstanceRegistry_registerInstance_f(
+     &     instance, retval, exception)
         implicit none
 C        in sidl.BaseClass instance
         integer*8 instance
@@ -246,8 +245,7 @@ C       the supplied name, a false is returned, if the object was
 C       successfully registered, true is returned.
 C       
 
-        subroutine 
-     &     sidl_rmi_InstanceRegistry_registerInstanceByString_f(
+        subroutine sidl_rmi_InstanceRegistry_registerInstanceByString_f(
      &     instance, instanceID, retval, exception)
         implicit none
 C        in sidl.BaseClass instance
@@ -268,9 +266,8 @@ C       returns a handle to the class based on the unique objectID
 C       string, (null if the handle isn't in the table)
 C       
 
-        subroutine 
-     &     sidl_rmi_InstanceRegistry_getInstanceByString_f(instanceID,
-     &     retval, exception)
+        subroutine sidl_rmi_InstanceRegistry_getInstanceByString_f(
+     &     instanceID, retval, exception)
         implicit none
 C        in string instanceID
         character*(*) instanceID
@@ -288,9 +285,8 @@ C       takes a class and returns the objectID string associated
 C       with it.  (null if the handle isn't in the table)
 C       
 
-        subroutine 
-     &     sidl_rmi_InstanceRegistry_getInstanceByClass_f(instance,
-     &     retval, exception)
+        subroutine sidl_rmi_InstanceRegistry_getInstanceByClass_f(
+     &     instance, retval, exception)
         implicit none
 C        in sidl.BaseClass instance
         integer*8 instance
@@ -309,8 +305,7 @@ C       string..  returns a pointer to the object, which must be
 C       destroyed.
 C       
 
-        subroutine 
-     &     sidl_rmi_InstanceRegistry_removeInstanceByString_f(
+        subroutine sidl_rmi_InstanceRegistry_removeInstanceByString_f(
      &     instanceID, retval, exception)
         implicit none
 C        in string instanceID
@@ -329,9 +324,8 @@ C       removes an instance from the table based on its BaseClass
 C       pointer.  returns the objectID string, which much be freed.
 C       
 
-        subroutine 
-     &     sidl_rmi_InstanceRegistry_removeInstanceByClass_f(instance,
-     &     retval, exception)
+        subroutine sidl_rmi_InstanceRegistry_removeInstanceByClass_f(
+     &     instance, retval, exception)
         implicit none
 C        in sidl.BaseClass instance
         integer*8 instance
@@ -347,7 +341,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_rmi_InstanceRegistry__exec_f(self, methodName,
+        subroutine sidl_rmi_InstanceRegistry__exec_f(self, methodName, 
      &     inArgs, outArgs, exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -368,7 +362,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine sidl_rmi_InstanceRegistry__getURL_f(self, retval,
+        subroutine sidl_rmi_InstanceRegistry__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -385,7 +379,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_rmi_InstanceRegistry__isRemote_f(self, retval,
+        subroutine sidl_rmi_InstanceRegistry__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -402,7 +396,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_rmi_InstanceRegistry__isLocal_f(self, retval,
+        subroutine sidl_rmi_InstanceRegistry__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -419,7 +413,7 @@ C       Method:  _set_hooks[]
 C       Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine sidl_rmi_InstanceRegistry__set_hooks_f(self, on,
+        subroutine sidl_rmi_InstanceRegistry__set_hooks_f(self, on, 
      &     exception)
         implicit none
 C        in sidl.rmi.InstanceRegistry self
@@ -436,7 +430,7 @@ C       Method:  _set_hooks_static[]
 C       Static Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine sidl_rmi_InstanceRegistry__set_hooks_static_f(on,
+        subroutine sidl_rmi_InstanceRegistry__set_hooks_static_f(on, 
      &     exception)
         implicit none
 C        in bool on

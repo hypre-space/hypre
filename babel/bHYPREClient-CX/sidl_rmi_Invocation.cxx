@@ -2,7 +2,7 @@
 // File:          sidl_rmi_Invocation.cxx
 // Symbol:        sidl.rmi.Invocation-v0.9.15
 // Symbol Type:   interface
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Release:       $Name$
 // Revision:      @(#) $Id$
 // Description:   Client-side glue code for sidl.rmi.Invocation
@@ -142,8 +142,8 @@ static struct sidl_recursive_mutex_t sidl_rmi__Invocation__mutex= SIDL_RECURSIVE
 #endif
 
   // Static variables to hold version of IOR
-  static const int32_t s_IOR_MAJOR_VERSION = 0;
-  static const int32_t s_IOR_MINOR_VERSION = 10;
+  static const int32_t s_IOR_MAJOR_VERSION = 1;
+  static const int32_t s_IOR_MINOR_VERSION = 0;
 
   // Static variables for managing EPV initialization.
   static int s_remote_initialized = 0;
@@ -194,15 +194,15 @@ static struct sidl_recursive_mutex_t sidl_rmi__Invocation__mutex= SIDL_RECURSIVE
       cmp1 = strcmp(name, "sidl.rmi._Invocation");
       if (!cmp1) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidl_rmi__Invocation__object*)self);
         return cast;
       }
     }
     if ((*self->d_epv->f_isType)(self,name, _ex)) {
-      void* (*func)(struct sidl_rmi_InstanceHandle__object*,
-        struct sidl_BaseInterface__object**) = 
-        (void* (*)(struct sidl_rmi_InstanceHandle__object*,
-          struct sidl_BaseInterface__object**)) 
+      void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct 
+        sidl_BaseInterface__object**) = 
+        (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct 
+          sidl_BaseInterface__object**)) 
         sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
       cast =  (*func)(((struct 
         sidl_rmi__Invocation__remote*)self->d_data)->d_ih, _ex);
@@ -245,7 +245,7 @@ static struct sidl_recursive_mutex_t sidl_rmi__Invocation__mutex= SIDL_RECURSIVE
     struct sidl_rmi_InstanceHandle__object *_conn = ((struct 
       sidl_rmi__Invocation__remote*)self->d_data)->d_ih;
     sidl_rmi_Response _rsvp = NULL;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "addRef", _ex ); SIDL_CHECK(*_ex);
     // send actual RMI request
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
@@ -389,14 +389,14 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       if(iobj){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj, 
           _ex);SIDL_CHECK(*_ex);
-        sidl_rmi_Invocation_packString( _inv, "iobj", _url,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(
+          *_ex);
         free((void*)_url);
       } else {
-        sidl_rmi_Invocation_packString( _inv, "iobj", NULL,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(
+          *_ex);
       }
 
       // send actual RMI request
@@ -412,8 +412,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
       }
 
       // extract return value
-      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -461,8 +461,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
       }
 
       // extract return value
-      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -509,10 +509,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
       }
 
       // extract return value
-      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
         _ex);SIDL_CHECK(*_ex);
-      _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,
-        _ex);SIDL_CHECK(*_ex);
+      _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -730,8 +730,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packOpaque( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packOpaque( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -777,8 +777,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packFloat( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packFloat( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -824,8 +824,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packDouble( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -871,8 +871,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packFcomplex( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packFcomplex( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -918,8 +918,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packDcomplex( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packDcomplex( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -965,8 +965,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1013,14 +1013,14 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
       if(value){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)value,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)value, 
           _ex);SIDL_CHECK(*_ex);
-        sidl_rmi_Invocation_packString( _inv, "value", _url,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "value", _url, _ex);SIDL_CHECK(
+          *_ex);
         free((void*)_url);
       } else {
-        sidl_rmi_Invocation_packString( _inv, "value", NULL,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "value", NULL, _ex);SIDL_CHECK(
+          *_ex);
       }
 
       // send actual RMI request
@@ -1070,12 +1070,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBoolArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packBoolArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1125,12 +1125,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packCharArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packCharArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1180,12 +1180,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packIntArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packIntArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1235,12 +1235,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packLongArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packLongArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1290,12 +1290,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packOpaqueArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packOpaqueArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1345,12 +1345,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packFloatArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packFloatArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1400,12 +1400,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packDoubleArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packDoubleArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1455,12 +1455,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packFcomplexArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packFcomplexArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1510,12 +1510,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packDcomplexArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packDcomplexArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1565,12 +1565,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packStringArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packStringArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1618,9 +1618,9 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packGenericArray( _inv, "value", value,0,
+      sidl_rmi_Invocation_packGenericArray( _inv, "value", value,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1671,12 +1671,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packSerializableArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packSerializableArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1736,10 +1736,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
       }
 
       // extract return value
-      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
         _ex);SIDL_CHECK(*_ex);
-      _retval = sidl_rmi_Response__connectI(_retval_str, FALSE,
-        _ex);SIDL_CHECK(*_ex);
+      _retval = sidl_rmi_Response__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1786,10 +1786,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
       }
 
       // extract return value
-      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
         _ex);SIDL_CHECK(*_ex);
-      _retval = sidl_rmi_Ticket__connectI(_retval_str, FALSE,
-        _ex);SIDL_CHECK(*_ex);
+      _retval = sidl_rmi_Ticket__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1913,218 +1913,214 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
     epv->f_invokeOneWay               = 
       remote_sidl_rmi__Invocation_invokeOneWay;
 
-    e0->f__cast        = (void* (*)(void*,const char*,
-      sidl_BaseInterface*)) epv->f__cast;
+    e0->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+      epv->f__cast;
     e0->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
     e0->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
     e0->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-    e0->f__isRemote    = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e0->f__set_hooks   = (void (*)(void*,int32_t,
-      sidl_BaseInterface*)) epv->f__set_hooks;
-    e0->f__exec        = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e0->f_addRef       = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e0->f_deleteRef    = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e0->f_isSame       = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e0->f_isType       = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
-    e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    e0->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e0->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+      epv->f__set_hooks;
+    e0->f__exec        = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e0->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+      epv->f_addRef;
+    e0->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+      epv->f_deleteRef;
+    e0->f_isSame       = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e0->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
+    e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
     e1->f__cast                 = (void* (*)(void*,const char*,
       sidl_BaseInterface*)) epv->f__cast;
-    e1->f__delete               = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__delete;
-    e1->f__getURL               = (char* (*)(void*,
-      sidl_BaseInterface*)) epv->f__getURL;
-    e1->f__raddRef              = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__raddRef;
-    e1->f__isRemote             = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e1->f__set_hooks            = (void (*)(void*,int32_t,
+    e1->f__delete               = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__delete;
+    e1->f__getURL               = (char* (*)(void*,sidl_BaseInterface*)) 
+      epv->f__getURL;
+    e1->f__raddRef              = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__raddRef;
+    e1->f__isRemote             = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e1->f__set_hooks            = (void (*)(void*,int32_t, 
       sidl_BaseInterface*)) epv->f__set_hooks;
-    e1->f__exec                 = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e1->f_addRef                = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e1->f_deleteRef             = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e1->f_isSame                = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e1->f_isType                = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
+    e1->f__exec                 = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e1->f_addRef                = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_addRef;
+    e1->f_deleteRef             = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_deleteRef;
+    e1->f_isSame                = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e1->f_isType                = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
     e1->f_getClassInfo          = (struct sidl_ClassInfo__object* (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
-    e1->f_packBool              = (void (*)(void*,const char*,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packBool;
-    e1->f_packChar              = (void (*)(void*,const char*,char,
-      struct sidl_BaseInterface__object **)) epv->f_packChar;
-    e1->f_packInt               = (void (*)(void*,const char*,int32_t,
-      struct sidl_BaseInterface__object **)) epv->f_packInt;
-    e1->f_packLong              = (void (*)(void*,const char*,int64_t,
-      struct sidl_BaseInterface__object **)) epv->f_packLong;
-    e1->f_packOpaque            = (void (*)(void*,const char*,void*,
-      struct sidl_BaseInterface__object **)) epv->f_packOpaque;
-    e1->f_packFloat             = (void (*)(void*,const char*,float,
-      struct sidl_BaseInterface__object **)) epv->f_packFloat;
-    e1->f_packDouble            = (void (*)(void*,const char*,double,
-      struct sidl_BaseInterface__object **)) epv->f_packDouble;
-    e1->f_packFcomplex          = (void (*)(void*,const char*,
-      struct sidl_fcomplex,
-      struct sidl_BaseInterface__object **)) epv->f_packFcomplex;
-    e1->f_packDcomplex          = (void (*)(void*,const char*,
-      struct sidl_dcomplex,
-      struct sidl_BaseInterface__object **)) epv->f_packDcomplex;
+    e1->f_packBool              = (void (*)(void*,const char*,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packBool;
+    e1->f_packChar              = (void (*)(void*,const char*,char,struct 
+      sidl_BaseInterface__object **)) epv->f_packChar;
+    e1->f_packInt               = (void (*)(void*,const char*,int32_t,struct 
+      sidl_BaseInterface__object **)) epv->f_packInt;
+    e1->f_packLong              = (void (*)(void*,const char*,int64_t,struct 
+      sidl_BaseInterface__object **)) epv->f_packLong;
+    e1->f_packOpaque            = (void (*)(void*,const char*,void*,struct 
+      sidl_BaseInterface__object **)) epv->f_packOpaque;
+    e1->f_packFloat             = (void (*)(void*,const char*,float,struct 
+      sidl_BaseInterface__object **)) epv->f_packFloat;
+    e1->f_packDouble            = (void (*)(void*,const char*,double,struct 
+      sidl_BaseInterface__object **)) epv->f_packDouble;
+    e1->f_packFcomplex          = (void (*)(void*,const char*,struct 
+      sidl_fcomplex,struct sidl_BaseInterface__object **)) epv->f_packFcomplex;
+    e1->f_packDcomplex          = (void (*)(void*,const char*,struct 
+      sidl_dcomplex,struct sidl_BaseInterface__object **)) epv->f_packDcomplex;
     e1->f_packString            = (void (*)(void*,const char*,const char*,
       struct sidl_BaseInterface__object **)) epv->f_packString;
-    e1->f_packSerializable      = (void (*)(void*,const char*,
-      struct sidl_io_Serializable__object*,
-      struct sidl_BaseInterface__object **)) epv->f_packSerializable;
-    e1->f_packBoolArray         = (void (*)(void*,const char*,
-      struct sidl_bool__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packBoolArray;
-    e1->f_packCharArray         = (void (*)(void*,const char*,
-      struct sidl_char__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packCharArray;
-    e1->f_packIntArray          = (void (*)(void*,const char*,
-      struct sidl_int__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packIntArray;
-    e1->f_packLongArray         = (void (*)(void*,const char*,
-      struct sidl_long__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packLongArray;
-    e1->f_packOpaqueArray       = (void (*)(void*,const char*,
-      struct sidl_opaque__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packOpaqueArray;
-    e1->f_packFloatArray        = (void (*)(void*,const char*,
-      struct sidl_float__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packFloatArray;
-    e1->f_packDoubleArray       = (void (*)(void*,const char*,
-      struct sidl_double__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packDoubleArray;
-    e1->f_packFcomplexArray     = (void (*)(void*,const char*,
-      struct sidl_fcomplex__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packFcomplexArray;
-    e1->f_packDcomplexArray     = (void (*)(void*,const char*,
-      struct sidl_dcomplex__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packDcomplexArray;
-    e1->f_packStringArray       = (void (*)(void*,const char*,
-      struct sidl_string__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packStringArray;
-    e1->f_packGenericArray      = (void (*)(void*,const char*,
-      struct sidl__array*,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packGenericArray;
-    e1->f_packSerializableArray = (void (*)(void*,const char*,
-      struct sidl_io_Serializable__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packSerializableArray;
+    e1->f_packSerializable      = (void (*)(void*,const char*,struct 
+      sidl_io_Serializable__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_packSerializable;
+    e1->f_packBoolArray         = (void (*)(void*,const char*,struct 
+      sidl_bool__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packBoolArray;
+    e1->f_packCharArray         = (void (*)(void*,const char*,struct 
+      sidl_char__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packCharArray;
+    e1->f_packIntArray          = (void (*)(void*,const char*,struct 
+      sidl_int__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packIntArray;
+    e1->f_packLongArray         = (void (*)(void*,const char*,struct 
+      sidl_long__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packLongArray;
+    e1->f_packOpaqueArray       = (void (*)(void*,const char*,struct 
+      sidl_opaque__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packOpaqueArray;
+    e1->f_packFloatArray        = (void (*)(void*,const char*,struct 
+      sidl_float__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packFloatArray;
+    e1->f_packDoubleArray       = (void (*)(void*,const char*,struct 
+      sidl_double__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packDoubleArray;
+    e1->f_packFcomplexArray     = (void (*)(void*,const char*,struct 
+      sidl_fcomplex__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packFcomplexArray;
+    e1->f_packDcomplexArray     = (void (*)(void*,const char*,struct 
+      sidl_dcomplex__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packDcomplexArray;
+    e1->f_packStringArray       = (void (*)(void*,const char*,struct 
+      sidl_string__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packStringArray;
+    e1->f_packGenericArray      = (void (*)(void*,const char*,struct 
+      sidl__array*,sidl_bool,struct sidl_BaseInterface__object **)) 
+      epv->f_packGenericArray;
+    e1->f_packSerializableArray = (void (*)(void*,const char*,struct 
+      sidl_io_Serializable__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packSerializableArray;
 
     e2->f__cast                 = (void* (*)(void*,const char*,
       sidl_BaseInterface*)) epv->f__cast;
-    e2->f__delete               = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__delete;
-    e2->f__getURL               = (char* (*)(void*,
-      sidl_BaseInterface*)) epv->f__getURL;
-    e2->f__raddRef              = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__raddRef;
-    e2->f__isRemote             = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e2->f__set_hooks            = (void (*)(void*,int32_t,
+    e2->f__delete               = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__delete;
+    e2->f__getURL               = (char* (*)(void*,sidl_BaseInterface*)) 
+      epv->f__getURL;
+    e2->f__raddRef              = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__raddRef;
+    e2->f__isRemote             = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e2->f__set_hooks            = (void (*)(void*,int32_t, 
       sidl_BaseInterface*)) epv->f__set_hooks;
-    e2->f__exec                 = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e2->f_addRef                = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e2->f_deleteRef             = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e2->f_isSame                = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e2->f_isType                = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
+    e2->f__exec                 = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e2->f_addRef                = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_addRef;
+    e2->f_deleteRef             = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_deleteRef;
+    e2->f_isSame                = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e2->f_isType                = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
     e2->f_getClassInfo          = (struct sidl_ClassInfo__object* (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
-    e2->f_packBool              = (void (*)(void*,const char*,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packBool;
-    e2->f_packChar              = (void (*)(void*,const char*,char,
-      struct sidl_BaseInterface__object **)) epv->f_packChar;
-    e2->f_packInt               = (void (*)(void*,const char*,int32_t,
-      struct sidl_BaseInterface__object **)) epv->f_packInt;
-    e2->f_packLong              = (void (*)(void*,const char*,int64_t,
-      struct sidl_BaseInterface__object **)) epv->f_packLong;
-    e2->f_packOpaque            = (void (*)(void*,const char*,void*,
-      struct sidl_BaseInterface__object **)) epv->f_packOpaque;
-    e2->f_packFloat             = (void (*)(void*,const char*,float,
-      struct sidl_BaseInterface__object **)) epv->f_packFloat;
-    e2->f_packDouble            = (void (*)(void*,const char*,double,
-      struct sidl_BaseInterface__object **)) epv->f_packDouble;
-    e2->f_packFcomplex          = (void (*)(void*,const char*,
-      struct sidl_fcomplex,
-      struct sidl_BaseInterface__object **)) epv->f_packFcomplex;
-    e2->f_packDcomplex          = (void (*)(void*,const char*,
-      struct sidl_dcomplex,
-      struct sidl_BaseInterface__object **)) epv->f_packDcomplex;
+    e2->f_packBool              = (void (*)(void*,const char*,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packBool;
+    e2->f_packChar              = (void (*)(void*,const char*,char,struct 
+      sidl_BaseInterface__object **)) epv->f_packChar;
+    e2->f_packInt               = (void (*)(void*,const char*,int32_t,struct 
+      sidl_BaseInterface__object **)) epv->f_packInt;
+    e2->f_packLong              = (void (*)(void*,const char*,int64_t,struct 
+      sidl_BaseInterface__object **)) epv->f_packLong;
+    e2->f_packOpaque            = (void (*)(void*,const char*,void*,struct 
+      sidl_BaseInterface__object **)) epv->f_packOpaque;
+    e2->f_packFloat             = (void (*)(void*,const char*,float,struct 
+      sidl_BaseInterface__object **)) epv->f_packFloat;
+    e2->f_packDouble            = (void (*)(void*,const char*,double,struct 
+      sidl_BaseInterface__object **)) epv->f_packDouble;
+    e2->f_packFcomplex          = (void (*)(void*,const char*,struct 
+      sidl_fcomplex,struct sidl_BaseInterface__object **)) epv->f_packFcomplex;
+    e2->f_packDcomplex          = (void (*)(void*,const char*,struct 
+      sidl_dcomplex,struct sidl_BaseInterface__object **)) epv->f_packDcomplex;
     e2->f_packString            = (void (*)(void*,const char*,const char*,
       struct sidl_BaseInterface__object **)) epv->f_packString;
-    e2->f_packSerializable      = (void (*)(void*,const char*,
-      struct sidl_io_Serializable__object*,
-      struct sidl_BaseInterface__object **)) epv->f_packSerializable;
-    e2->f_packBoolArray         = (void (*)(void*,const char*,
-      struct sidl_bool__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packBoolArray;
-    e2->f_packCharArray         = (void (*)(void*,const char*,
-      struct sidl_char__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packCharArray;
-    e2->f_packIntArray          = (void (*)(void*,const char*,
-      struct sidl_int__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packIntArray;
-    e2->f_packLongArray         = (void (*)(void*,const char*,
-      struct sidl_long__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packLongArray;
-    e2->f_packOpaqueArray       = (void (*)(void*,const char*,
-      struct sidl_opaque__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packOpaqueArray;
-    e2->f_packFloatArray        = (void (*)(void*,const char*,
-      struct sidl_float__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packFloatArray;
-    e2->f_packDoubleArray       = (void (*)(void*,const char*,
-      struct sidl_double__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packDoubleArray;
-    e2->f_packFcomplexArray     = (void (*)(void*,const char*,
-      struct sidl_fcomplex__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packFcomplexArray;
-    e2->f_packDcomplexArray     = (void (*)(void*,const char*,
-      struct sidl_dcomplex__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packDcomplexArray;
-    e2->f_packStringArray       = (void (*)(void*,const char*,
-      struct sidl_string__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packStringArray;
-    e2->f_packGenericArray      = (void (*)(void*,const char*,
-      struct sidl__array*,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packGenericArray;
-    e2->f_packSerializableArray = (void (*)(void*,const char*,
-      struct sidl_io_Serializable__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packSerializableArray;
+    e2->f_packSerializable      = (void (*)(void*,const char*,struct 
+      sidl_io_Serializable__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_packSerializable;
+    e2->f_packBoolArray         = (void (*)(void*,const char*,struct 
+      sidl_bool__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packBoolArray;
+    e2->f_packCharArray         = (void (*)(void*,const char*,struct 
+      sidl_char__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packCharArray;
+    e2->f_packIntArray          = (void (*)(void*,const char*,struct 
+      sidl_int__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packIntArray;
+    e2->f_packLongArray         = (void (*)(void*,const char*,struct 
+      sidl_long__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packLongArray;
+    e2->f_packOpaqueArray       = (void (*)(void*,const char*,struct 
+      sidl_opaque__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packOpaqueArray;
+    e2->f_packFloatArray        = (void (*)(void*,const char*,struct 
+      sidl_float__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packFloatArray;
+    e2->f_packDoubleArray       = (void (*)(void*,const char*,struct 
+      sidl_double__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packDoubleArray;
+    e2->f_packFcomplexArray     = (void (*)(void*,const char*,struct 
+      sidl_fcomplex__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packFcomplexArray;
+    e2->f_packDcomplexArray     = (void (*)(void*,const char*,struct 
+      sidl_dcomplex__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packDcomplexArray;
+    e2->f_packStringArray       = (void (*)(void*,const char*,struct 
+      sidl_string__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packStringArray;
+    e2->f_packGenericArray      = (void (*)(void*,const char*,struct 
+      sidl__array*,sidl_bool,struct sidl_BaseInterface__object **)) 
+      epv->f_packGenericArray;
+    e2->f_packSerializableArray = (void (*)(void*,const char*,struct 
+      sidl_io_Serializable__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packSerializableArray;
     e2->f_invokeMethod          = (struct sidl_rmi_Response__object* (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_invokeMethod;
     e2->f_invokeNonblocking     = (struct sidl_rmi_Ticket__object* (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_invokeNonblocking;
-    e2->f_invokeOneWay          = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_invokeOneWay;
+    e2->f_invokeOneWay          = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_invokeOneWay;
 
     s_remote_initialized = 1;
   }
 
   // Create an instance that connects to an existing remote object.
   static struct sidl_rmi_Invocation__object*
-  sidl_rmi_Invocation__remoteConnect(const char *url, sidl_bool ar,
+  sidl_rmi_Invocation__remoteConnect(const char *url, sidl_bool ar, 
     sidl_BaseInterface *_ex)
   {
     struct sidl_rmi__Invocation__object* self;
@@ -2136,8 +2132,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
     char* objectID = NULL;
     objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
     if(objectID) {
-      sidl_BaseInterface bi = 
-        (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
+      sidl_BaseInterface bi = (
+        sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
         objectID, _ex);
       if(ar) {
         sidl_BaseInterface_addRef(bi, _ex);
@@ -2183,7 +2179,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
   // Create an instance that uses an already existing 
   // InstanceHandel to connect to an existing remote object.
   static struct sidl_rmi_Invocation__object*
-  sidl_rmi_Invocation__IHConnect(sidl_rmi_InstanceHandle instance,
+  sidl_rmi_Invocation__IHConnect(sidl_rmi_InstanceHandle instance, 
     sidl_BaseInterface *_ex)
   {
     struct sidl_rmi__Invocation__object* self;
@@ -2238,8 +2234,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
 
     *_ex = NULL;
     if(!connect_loaded) {
-      sidl_rmi_ConnectRegistry_registerConnect("sidl.rmi.Invocation",
-        (void*)sidl_rmi_Invocation__IHConnect, _ex);
+      sidl_rmi_ConnectRegistry_registerConnect("sidl.rmi.Invocation", (
+        void*)sidl_rmi_Invocation__IHConnect, _ex);
       connect_loaded = 1;
     }
     if (obj != NULL) {
@@ -2259,8 +2255,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi._Invocatio
   // RMI connector function for the class.
   // 
   struct sidl_rmi_Invocation__object*
-  sidl_rmi_Invocation__connectI(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex)
+  sidl_rmi_Invocation__connectI(const char* url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex)
   {
     return sidl_rmi_Invocation__remoteConnect(url, ar, _ex);
   }
@@ -2281,11 +2277,11 @@ sidl::rmi::Invocation::throwException0(
   void * _p = 0;
   struct sidl_BaseInterface__object *throwaway_exception;
 
-  if ( (_p=(*(_exception->d_epv->f__cast))(_exception->d_object,
+  if ( (_p=(*(_exception->d_epv->f__cast))(_exception->d_object, 
     "sidl.RuntimeException", &throwaway_exception)) != 0 ) {
     struct sidl_RuntimeException__object * _realtype = reinterpret_cast< struct 
       sidl_RuntimeException__object*>(_p);
-    (*_exception->d_epv->f_deleteRef)(_exception->d_object,
+    (*_exception->d_epv->f_deleteRef)(_exception->d_object, 
       &throwaway_exception);
     // Note: alternate constructor does not increment refcount.
     ::sidl::RuntimeException _resolved_exception = ::sidl::RuntimeException( 
@@ -2318,20 +2314,18 @@ sidl::rmi::Invocation::invokeMethod(  )
 
 {
   ::sidl::rmi::Response _result;
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::rmi::Invocation::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_rmi_Invocation__object*) 
+    ::sidl::rmi::Invocation::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = ::sidl::rmi::Response( 
-    (*(loc_self->d_epv->f_invokeMethod))(loc_self->d_object, &_exception ),
-    false);
+  _result = ::sidl::rmi::Response( (*(loc_self->d_epv->f_invokeMethod))(
+    loc_self->d_object, &_exception ), false);
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
   return _result;
 }
 
@@ -2346,20 +2340,18 @@ sidl::rmi::Invocation::invokeNonblocking(  )
 
 {
   ::sidl::rmi::Ticket _result;
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::rmi::Invocation::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_rmi_Invocation__object*) 
+    ::sidl::rmi::Invocation::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = ::sidl::rmi::Ticket( 
-    (*(loc_self->d_epv->f_invokeNonblocking))(loc_self->d_object, &_exception ),
-    false);
+  _result = ::sidl::rmi::Ticket( (*(loc_self->d_epv->f_invokeNonblocking))(
+    loc_self->d_object, &_exception ), false);
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
   return _result;
 }
 
@@ -2376,18 +2368,17 @@ sidl::rmi::Invocation::invokeOneWay(  )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::rmi::Invocation::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_rmi_Invocation__object*) 
+    ::sidl::rmi::Invocation::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
   (*(loc_self->d_epv->f_invokeOneWay))(loc_self->d_object, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2399,22 +2390,27 @@ sidl::rmi::Invocation::invokeOneWay(  )
 //  Babel's C++ bindings)
 // 
 
-// remote connector 2
+// remote connector
 ::sidl::rmi::Invocation
 sidl::rmi::Invocation::_connect(const std::string& url, const bool ar ) {
   ior_t* ior_self;
-  sidl_BaseInterface__object* _ex = 0;
-  ior_self = sidl_rmi_Invocation__remoteConnect( url.c_str(), ar?TRUE:FALSE,
-    &_ex );
-  if (_ex != 0 ) {
-    ; //TODO: handle exception
+  struct sidl_BaseInterface__object *_exception;
+  ior_self = sidl_rmi_Invocation__remoteConnect( url.c_str(), ar?TRUE:FALSE, 
+    &_exception );
+  if (_exception != 0 ) {
+    throwException0(_exception);
   }
   return ::sidl::rmi::Invocation( ior_self, false );
 }
 
 // copy constructor
 sidl::rmi::Invocation::Invocation ( const ::sidl::rmi::Invocation& original ) {
-  d_self = ::sidl::rmi::Invocation::_cast(original._get_ior());
+  d_self = (struct sidl_rmi_Invocation__object*) 
+    original.::sidl::rmi::Invocation::_get_ior();
+  sidl_rmi_Invocation_IORCache = (ior_t*) d_self;
+  if(d_self) {
+    addRef();
+  }
   d_weak_reference = false;
 }
 
@@ -2425,8 +2421,12 @@ sidl::rmi::Invocation::operator=( const ::sidl::rmi::Invocation& rhs ) {
     if ( d_self != 0 ) {
       deleteRef();
     }
-    d_self = ::sidl::rmi::Invocation::_cast(rhs._get_ior());
-    // note _cast incremements the reference count
+    d_self = (struct sidl_rmi_Invocation__object*) 
+      rhs.::sidl::rmi::Invocation::_get_ior();
+    sidl_rmi_Invocation_IORCache = (ior_t*) d_self;
+    if(d_self) {
+      addRef();
+    }
     d_weak_reference = false;
   }
   return *this;
@@ -2434,14 +2434,17 @@ sidl::rmi::Invocation::operator=( const ::sidl::rmi::Invocation& rhs ) {
 
 // conversion from ior to C++ class
 sidl::rmi::Invocation::Invocation ( ::sidl::rmi::Invocation::ior_t* ior ) 
-   : StubBase(reinterpret_cast< void*>(ior)) { }
+   : StubBase(reinterpret_cast< void*>(ior)) { 
+  sidl_rmi_Invocation_IORCache = (ior_t*) d_self;
+}
 
 // Alternate constructor: does not call addRef()
 // (sets d_weak_reference=isWeak)
 // For internal use by Impls (fixes bug#275)
-sidl::rmi::Invocation::Invocation ( ::sidl::rmi::Invocation::ior_t* ior,
-  bool isWeak ) : 
+sidl::rmi::Invocation::Invocation ( ::sidl::rmi::Invocation::ior_t* ior, bool 
+  isWeak ) : 
 StubBase(reinterpret_cast< void*>(ior), isWeak){ 
+  sidl_rmi_Invocation_IORCache = (ior_t*) d_self;
 }
 
 // exec has special argument passing to avoid #include circularities
@@ -2468,24 +2471,23 @@ sidl::rmi::Invocation::_getURL(  )
 
 {
   ::std::string _result;
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::rmi::Invocation::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_rmi_Invocation__object*) 
+    ::sidl::rmi::Invocation::_get_ior();
   char * _local_result;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _local_result = (*(loc_self->d_epv->f__getURL))(loc_self->d_object,
+  _local_result = (*(loc_self->d_epv->f__getURL))(loc_self->d_object, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   if (_local_result) {
     _result = _local_result;
     ::sidl_String_free( _local_result );
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
   return _result;
 }
 
@@ -2500,20 +2502,19 @@ sidl::rmi::Invocation::_set_hooks( /* in */bool on )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::rmi::Invocation::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_rmi_Invocation__object*) 
+    ::sidl::rmi::Invocation::_get_ior();
   sidl_bool _local_on = on;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f__set_hooks))(loc_self->d_object, /* in */ _local_on,
+  (*(loc_self->d_epv->f__set_hooks))(loc_self->d_object, /* in */ _local_on, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 // protected method that implements casting
@@ -2524,8 +2525,8 @@ struct sidl_rmi_Invocation__object* sidl::rmi::Invocation::_cast(const void*
 
   if(!connect_loaded) {
     struct sidl_BaseInterface__object *throwaway_exception;
-    sidl_rmi_ConnectRegistry_registerConnect("sidl.rmi.Invocation",
-      (void*)sidl_rmi_Invocation__IHConnect, &throwaway_exception);
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.rmi.Invocation", (
+      void*)sidl_rmi_Invocation__IHConnect, &throwaway_exception);
     connect_loaded = 1;
   }
   if ( src != 0 ) {
@@ -2534,7 +2535,7 @@ struct sidl_rmi_Invocation__object* sidl::rmi::Invocation::_cast(const void*
     struct sidl_BaseInterface__object *throwaway_exception;
     struct sidl_BaseInterface__object * base = reinterpret_cast< struct 
       sidl_BaseInterface__object *>(tmp);
-    cast = reinterpret_cast< ior_t*>((*base->d_epv->f__cast)(base->d_object,
+    cast = reinterpret_cast< ior_t*>((*base->d_epv->f__cast)(base->d_object, 
       "sidl.rmi.Invocation", &throwaway_exception));
   }
   return cast;

@@ -2,7 +2,7 @@
  * File:          sidl_io_IOException_fStub.h
  * Symbol:        sidl.io.IOException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side documentation text for sidl.io.IOException
@@ -67,8 +67,8 @@ sidl_io_IOException__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_io_IOException__object*
-sidl_io_IOException__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_io_IOException__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

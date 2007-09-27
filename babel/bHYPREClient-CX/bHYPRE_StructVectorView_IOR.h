@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructVectorView_IOR.h
  * Symbol:        bHYPRE.StructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.StructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost

@@ -2,7 +2,7 @@ C
 C       File:          sidl_rmi_Invocation_Impl.f
 C       Symbol:        sidl.rmi.Invocation-v0.9.15
 C       Symbol Type:   interface
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.rmi.Invocation
@@ -67,7 +67,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_rmi_Invocation__cast2_f(self, name, retval,
+        subroutine sidl_rmi_Invocation__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -130,7 +130,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_rmi_Invocation_isSame_f(self, iobj, retval,
+        subroutine sidl_rmi_Invocation_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -152,7 +152,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_rmi_Invocation_isType_f(self, name, retval,
+        subroutine sidl_rmi_Invocation_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -171,7 +171,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_rmi_Invocation_getClassInfo_f(self, retval,
+        subroutine sidl_rmi_Invocation_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -187,7 +187,7 @@ C
 C       Method:  packBool[]
 C       
 
-        subroutine sidl_rmi_Invocation_packBool_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packBool_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -205,7 +205,7 @@ C
 C       Method:  packChar[]
 C       
 
-        subroutine sidl_rmi_Invocation_packChar_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packChar_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -223,7 +223,7 @@ C
 C       Method:  packInt[]
 C       
 
-        subroutine sidl_rmi_Invocation_packInt_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packInt_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -241,7 +241,7 @@ C
 C       Method:  packLong[]
 C       
 
-        subroutine sidl_rmi_Invocation_packLong_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packLong_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -259,7 +259,7 @@ C
 C       Method:  packOpaque[]
 C       
 
-        subroutine sidl_rmi_Invocation_packOpaque_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packOpaque_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -277,7 +277,7 @@ C
 C       Method:  packFloat[]
 C       
 
-        subroutine sidl_rmi_Invocation_packFloat_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packFloat_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -295,7 +295,7 @@ C
 C       Method:  packDouble[]
 C       
 
-        subroutine sidl_rmi_Invocation_packDouble_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packDouble_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -313,7 +313,7 @@ C
 C       Method:  packFcomplex[]
 C       
 
-        subroutine sidl_rmi_Invocation_packFcomplex_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packFcomplex_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -331,7 +331,7 @@ C
 C       Method:  packDcomplex[]
 C       
 
-        subroutine sidl_rmi_Invocation_packDcomplex_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packDcomplex_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -349,7 +349,7 @@ C
 C       Method:  packString[]
 C       
 
-        subroutine sidl_rmi_Invocation_packString_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packString_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -367,7 +367,7 @@ C
 C       Method:  packSerializable[]
 C       
 
-        subroutine sidl_rmi_Invocation_packSerializable_f(self, key,
+        subroutine sidl_rmi_Invocation_packSerializable_f(self, key, 
      &     value, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -442,7 +442,7 @@ C
 C       Method:  packIntArray[]
 C       
 
-        subroutine sidl_rmi_Invocation_packIntArray_f(self, key, value,
+        subroutine sidl_rmi_Invocation_packIntArray_f(self, key, value, 
      &     ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -490,7 +490,7 @@ C
 C       Method:  packOpaqueArray[]
 C       
 
-        subroutine sidl_rmi_Invocation_packOpaqueArray_f(self, key,
+        subroutine sidl_rmi_Invocation_packOpaqueArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -514,7 +514,7 @@ C
 C       Method:  packFloatArray[]
 C       
 
-        subroutine sidl_rmi_Invocation_packFloatArray_f(self, key,
+        subroutine sidl_rmi_Invocation_packFloatArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -538,7 +538,7 @@ C
 C       Method:  packDoubleArray[]
 C       
 
-        subroutine sidl_rmi_Invocation_packDoubleArray_f(self, key,
+        subroutine sidl_rmi_Invocation_packDoubleArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -562,7 +562,7 @@ C
 C       Method:  packFcomplexArray[]
 C       
 
-        subroutine sidl_rmi_Invocation_packFcomplexArray_f(self, key,
+        subroutine sidl_rmi_Invocation_packFcomplexArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -586,7 +586,7 @@ C
 C       Method:  packDcomplexArray[]
 C       
 
-        subroutine sidl_rmi_Invocation_packDcomplexArray_f(self, key,
+        subroutine sidl_rmi_Invocation_packDcomplexArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -610,7 +610,7 @@ C
 C       Method:  packStringArray[]
 C       
 
-        subroutine sidl_rmi_Invocation_packStringArray_f(self, key,
+        subroutine sidl_rmi_Invocation_packStringArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -634,7 +634,7 @@ C
 C       Method:  packGenericArray[]
 C       
 
-        subroutine sidl_rmi_Invocation_packGenericArray_f(self, key,
+        subroutine sidl_rmi_Invocation_packGenericArray_f(self, key, 
      &     value, reuse_array, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -654,7 +654,7 @@ C
 C       Method:  packSerializableArray[]
 C       
 
-        subroutine sidl_rmi_Invocation_packSerializableArray_f(self,
+        subroutine sidl_rmi_Invocation_packSerializableArray_f(self, 
      &     key, value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -682,7 +682,7 @@ C       may be called, and it must the the last method called
 C       in the object's lifetime.
 C       
 
-        subroutine sidl_rmi_Invocation_invokeMethod_f(self, retval,
+        subroutine sidl_rmi_Invocation_invokeMethod_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -755,7 +755,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine sidl_rmi_Invocation__getURL_f(self, retval,
+        subroutine sidl_rmi_Invocation__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -772,7 +772,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_rmi_Invocation__isRemote_f(self, retval,
+        subroutine sidl_rmi_Invocation__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self
@@ -789,7 +789,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_rmi_Invocation__isLocal_f(self, retval,
+        subroutine sidl_rmi_Invocation__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.Invocation self

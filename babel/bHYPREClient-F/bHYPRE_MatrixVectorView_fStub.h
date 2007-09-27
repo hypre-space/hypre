@@ -2,7 +2,7 @@
  * File:          bHYPRE_MatrixVectorView_fStub.h
  * Symbol:        bHYPRE.MatrixVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.MatrixVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -45,8 +45,8 @@ bHYPRE_MatrixVectorView__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_MatrixVectorView__object*
-bHYPRE_MatrixVectorView__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_MatrixVectorView__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

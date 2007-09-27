@@ -2,7 +2,7 @@
 // File:          bHYPRE_StructDiagScale.hxx
 // Symbol:        bHYPRE.StructDiagScale-v1.0.0
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Description:   Client-side glue code for bHYPRE.StructDiagScale
 // 
 // WARNING: Automatically generated; changes will be lost
@@ -92,8 +92,8 @@ namespace bHYPRE {
    * Objects of this type can be cast to Solver objects using the
    * {\tt \_\_cast} methods.
    */
-  class StructDiagScale: public virtual ::bHYPRE::Solver,
-    public virtual ::sidl::BaseClass {
+  class StructDiagScale: public virtual ::bHYPRE::Solver, public virtual 
+    ::sidl::BaseClass {
 
     //////////////////////////////////////////////////
     // 
@@ -424,7 +424,8 @@ namespace bHYPRE {
     typedef struct bHYPRE_StructDiagScale__sepv sepv_t;
 
     // default constructor
-    StructDiagScale() { }
+    StructDiagScale() { 
+    }
 
     // static constructor
     static ::bHYPRE::StructDiagScale _create();
@@ -439,7 +440,7 @@ namespace bHYPRE {
     }
 
     // RMI connect 2
-    static ::bHYPRE::StructDiagScale _connect( /*in*/ const std::string& url,
+    static ::bHYPRE::StructDiagScale _connect( /*in*/ const std::string& url, 
       /*in*/ const bool ar  );
 
     // default destructor
@@ -466,13 +467,13 @@ namespace bHYPRE {
     // For internal use by Impls (fixes bug#275)
     StructDiagScale ( StructDiagScale::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -556,9 +557,9 @@ namespace bHYPRE {
 extern "C" {
 
 
-  #pragma weak bHYPRE_StructDiagScale__connectI
+#pragma weak bHYPRE_StructDiagScale__connectI
 
-  #pragma weak bHYPRE_StructDiagScale__rmicast
+#pragma weak bHYPRE_StructDiagScale__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -571,8 +572,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct bHYPRE_StructDiagScale__object*
-  bHYPRE_StructDiagScale__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  bHYPRE_StructDiagScale__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

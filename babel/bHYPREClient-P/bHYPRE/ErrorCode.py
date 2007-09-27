@@ -2,7 +2,7 @@
 # File:          ErrorCode.py
 # Symbol:        bHYPRE.ErrorCode-v1.0.0
 # Symbol Type:   enumeration
-# Babel Version: 1.0.0
+# Babel Version: 1.0.4
 # Description:   define enumeration constants
 # 
 # WARNING: Automatically generated; changes will be lost

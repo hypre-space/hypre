@@ -2,7 +2,7 @@
 // File:          sidl_rmi_ServerInfo.hxx
 // Symbol:        sidl.rmi.ServerInfo-v0.9.15
 // Symbol Type:   interface
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Release:       $Name$
 // Revision:      @(#) $Id$
 // Description:   Client-side glue code for sidl.rmi.ServerInfo
@@ -171,7 +171,9 @@ namespace sidl {
       typedef struct sidl_rmi_ServerInfo__sepv sepv_t;
 
       // default constructor
-      ServerInfo() { }
+      ServerInfo() { 
+        sidl_rmi_ServerInfo_IORCache = NULL;
+      }
 
       // RMI connect
       static inline ::sidl::rmi::ServerInfo _connect( /*in*/ const std::string& 
@@ -180,7 +182,7 @@ namespace sidl {
       }
 
       // RMI connect 2
-      static ::sidl::rmi::ServerInfo _connect( /*in*/ const std::string& url,
+      static ::sidl::rmi::ServerInfo _connect( /*in*/ const std::string& url, 
         /*in*/ const bool ar  );
 
       // default destructor
@@ -200,13 +202,22 @@ namespace sidl {
       // For internal use by Impls (fixes bug#275)
       ServerInfo ( ServerInfo::ior_t* ior, bool isWeak );
 
-      ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+      inline ior_t* _get_ior() const throw() {
+        if(!sidl_rmi_ServerInfo_IORCache) { 
+          sidl_rmi_ServerInfo_IORCache = ::sidl::rmi::ServerInfo::_cast((
+            void*)d_self);
+          if (sidl_rmi_ServerInfo_IORCache) {
+            struct sidl_BaseInterface__object *throwaway_exception;
+            (sidl_rmi_ServerInfo_IORCache->d_epv->f_deleteRef)(
+              sidl_rmi_ServerInfo_IORCache->d_object, &throwaway_exception);  
+          }  
+        }
+        return sidl_rmi_ServerInfo_IORCache;
+      }
 
-      const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-        ior_t*>(d_self); }
-
-      void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-        void*>(ptr); }
+      void _set_ior( ior_t* ptr ) throw () { 
+        d_self = reinterpret_cast< void*>(ptr);
+      }
 
       bool _is_nil() const throw () { return (d_self==0); }
 
@@ -263,6 +274,14 @@ namespace sidl {
     public:
       static const ext_t * _get_ext() throw ( ::sidl::NullIORException );
 
+
+      //////////////////////////////////////////////////
+      // 
+      // Locally Cached IOR pointer
+      // 
+
+    protected:
+      mutable ior_t* sidl_rmi_ServerInfo_IORCache;
     }; // end class ServerInfo
   } // end namespace rmi
 } // end namespace sidl
@@ -270,9 +289,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_rmi_ServerInfo__connectI
+#pragma weak sidl_rmi_ServerInfo__connectI
 
-  #pragma weak sidl_rmi_ServerInfo__rmicast
+#pragma weak sidl_rmi_ServerInfo__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -285,8 +304,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_rmi_ServerInfo__object*
-  sidl_rmi_ServerInfo__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_rmi_ServerInfo__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

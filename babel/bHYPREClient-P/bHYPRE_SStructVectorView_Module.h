@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructVectorView_Module.h
  * Symbol:        bHYPRE.SStructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   expose a constructor for the Python wrapper
  * 
  * WARNING: Automatically generated; only changes within splicers preserved

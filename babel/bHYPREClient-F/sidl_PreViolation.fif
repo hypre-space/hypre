@@ -2,7 +2,7 @@ C
 C       File:          sidl_PreViolation_Impl.f
 C       Symbol:        sidl.PreViolation-v0.9.15
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.PreViolation
@@ -79,7 +79,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_PreViolation__cast2_f(self, name, retval,
+        subroutine sidl_PreViolation__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.PreViolation self
@@ -142,7 +142,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_PreViolation_isSame_f(self, iobj, retval,
+        subroutine sidl_PreViolation_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in sidl.PreViolation self
@@ -164,7 +164,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_PreViolation_isType_f(self, name, retval,
+        subroutine sidl_PreViolation_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.PreViolation self
@@ -183,7 +183,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_PreViolation_getClassInfo_f(self, retval,
+        subroutine sidl_PreViolation_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.PreViolation self
@@ -249,7 +249,7 @@ C       Method:  add[Line]
 C       Adds a stringified entry/line to the stack trace.
 C       
 
-        subroutine sidl_PreViolation_addLine_f(self, traceline,
+        subroutine sidl_PreViolation_addLine_f(self, traceline, 
      &     exception)
         implicit none
 C        in sidl.PreViolation self
@@ -267,7 +267,7 @@ C       Formats and adds an entry to the stack trace based on the
 C       file name, line number, and method name.
 C       
 
-        subroutine sidl_PreViolation_add_f(self, filename, lineno,
+        subroutine sidl_PreViolation_add_f(self, filename, lineno, 
      &     methodname, exception)
         implicit none
 C        in sidl.PreViolation self
@@ -318,7 +318,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_PreViolation__exec_f(self, methodName, inArgs,
+        subroutine sidl_PreViolation__exec_f(self, methodName, inArgs, 
      &     outArgs, exception)
         implicit none
 C        in sidl.PreViolation self
@@ -355,7 +355,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_PreViolation__isRemote_f(self, retval,
+        subroutine sidl_PreViolation__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.PreViolation self

@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_BiCGSTAB_Impl.f
 C       Symbol:        bHYPRE.BiCGSTAB-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.BiCGSTAB
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -69,7 +69,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_BiCGSTAB__cast2_f(self, name, retval,
+        subroutine bHYPRE_BiCGSTAB__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -88,7 +88,7 @@ C       Method:  Create[]
 C        This function is the preferred way to create a BiCGSTAB solver. 
 C       
 
-        subroutine bHYPRE_BiCGSTAB_Create_f(mpi_comm, A, retval,
+        subroutine bHYPRE_BiCGSTAB_Create_f(mpi_comm, A, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.MPICommunicator mpi_comm
@@ -151,7 +151,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_isSame_f(self, iobj, retval,
+        subroutine bHYPRE_BiCGSTAB_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -173,7 +173,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_isType_f(self, name, retval,
+        subroutine bHYPRE_BiCGSTAB_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -192,7 +192,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_getClassInfo_f(self, retval,
+        subroutine bHYPRE_BiCGSTAB_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -209,7 +209,7 @@ C       Method:  SetPreconditioner[]
 C       Set the preconditioner.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetPreconditioner_f(self, s, retval,
+        subroutine bHYPRE_BiCGSTAB_SetPreconditioner_f(self, s, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -227,7 +227,7 @@ C
 C       Method:  GetPreconditioner[]
 C       
 
-        subroutine bHYPRE_BiCGSTAB_GetPreconditioner_f(self, s, retval,
+        subroutine bHYPRE_BiCGSTAB_GetPreconditioner_f(self, s, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -264,7 +264,7 @@ C       Set the operator for the linear system being solved.
 C       DEPRECATED.  use Create
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetOperator_f(self, A, retval,
+        subroutine bHYPRE_BiCGSTAB_SetOperator_f(self, A, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -284,7 +284,7 @@ C       (Optional) Set the convergence tolerance.
 C       DEPRECATED.  use SetDoubleParameter
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetTolerance_f(self, tolerance,
+        subroutine bHYPRE_BiCGSTAB_SetTolerance_f(self, tolerance, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -304,7 +304,7 @@ C       (Optional) Set maximum number of iterations.
 C       DEPRECATED   use SetIntParameter
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetMaxIterations_f(self,
+        subroutine bHYPRE_BiCGSTAB_SetMaxIterations_f(self, 
      &     max_iterations, retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -328,7 +328,7 @@ C       and {\tt Apply}.
 C       DEPRECATED   use SetIntParameter
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetLogging_f(self, level, retval,
+        subroutine bHYPRE_BiCGSTAB_SetLogging_f(self, level, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -352,7 +352,7 @@ C       {\tt Setup} and {\tt Apply}.
 C       DEPRECATED   use SetIntParameter
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetPrintLevel_f(self, level, retval,
+        subroutine bHYPRE_BiCGSTAB_SetPrintLevel_f(self, level, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -371,7 +371,7 @@ C       Method:  GetNumIterations[]
 C       (Optional) Return the number of iterations taken.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_GetNumIterations_f(self,
+        subroutine bHYPRE_BiCGSTAB_GetNumIterations_f(self, 
      &     num_iterations, retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -390,7 +390,7 @@ C       Method:  GetRelResidualNorm[]
 C       (Optional) Return the norm of the relative residual.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_GetRelResidualNorm_f(self, norm,
+        subroutine bHYPRE_BiCGSTAB_GetRelResidualNorm_f(self, norm, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -410,7 +410,7 @@ C       Set the MPI Communicator.
 C       DEPRECATED, use Create:
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetCommunicator_f(self, mpi_comm,
+        subroutine bHYPRE_BiCGSTAB_SetCommunicator_f(self, mpi_comm, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -446,7 +446,7 @@ C       Method:  SetIntParameter[]
 C       Set the int parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetIntParameter_f(self, name, value,
+        subroutine bHYPRE_BiCGSTAB_SetIntParameter_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -467,7 +467,7 @@ C       Method:  SetDoubleParameter[]
 C       Set the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetDoubleParameter_f(self, name,
+        subroutine bHYPRE_BiCGSTAB_SetDoubleParameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -488,7 +488,7 @@ C       Method:  SetStringParameter[]
 C       Set the string parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetStringParameter_f(self, name,
+        subroutine bHYPRE_BiCGSTAB_SetStringParameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -509,7 +509,7 @@ C       Method:  SetIntArray1Parameter[]
 C       Set the int 1-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetIntArray1Parameter_f(self, name,
+        subroutine bHYPRE_BiCGSTAB_SetIntArray1Parameter_f(self, name, 
      &     value, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -532,7 +532,7 @@ C       Method:  SetIntArray2Parameter[]
 C       Set the int 2-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetIntArray2Parameter_f(self, name,
+        subroutine bHYPRE_BiCGSTAB_SetIntArray2Parameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -553,7 +553,7 @@ C       Method:  SetDoubleArray1Parameter[]
 C       Set the double 1-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetDoubleArray1Parameter_f(self,
+        subroutine bHYPRE_BiCGSTAB_SetDoubleArray1Parameter_f(self, 
      &     name, value, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -576,7 +576,7 @@ C       Method:  SetDoubleArray2Parameter[]
 C       Set the double 2-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_SetDoubleArray2Parameter_f(self,
+        subroutine bHYPRE_BiCGSTAB_SetDoubleArray2Parameter_f(self, 
      &     name, value, retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -597,7 +597,7 @@ C       Method:  GetIntValue[]
 C       Set the int parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_GetIntValue_f(self, name, value,
+        subroutine bHYPRE_BiCGSTAB_GetIntValue_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -618,7 +618,7 @@ C       Method:  GetDoubleValue[]
 C       Get the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_GetDoubleValue_f(self, name, value,
+        subroutine bHYPRE_BiCGSTAB_GetDoubleValue_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -640,7 +640,7 @@ C       (Optional) Do any preprocessing that may be necessary in
 C       order to execute {\tt Apply}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_Setup_f(self, b, x, retval,
+        subroutine bHYPRE_BiCGSTAB_Setup_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -661,7 +661,7 @@ C       Method:  Apply[]
 C       Apply the operator to {\tt b}, returning {\tt x}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_Apply_f(self, b, x, retval,
+        subroutine bHYPRE_BiCGSTAB_Apply_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -682,7 +682,7 @@ C       Method:  ApplyAdjoint[]
 C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
 C       
 
-        subroutine bHYPRE_BiCGSTAB_ApplyAdjoint_f(self, b, x, retval,
+        subroutine bHYPRE_BiCGSTAB_ApplyAdjoint_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self
@@ -703,7 +703,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine bHYPRE_BiCGSTAB__exec_f(self, methodName, inArgs,
+        subroutine bHYPRE_BiCGSTAB__exec_f(self, methodName, inArgs, 
      &     outArgs, exception)
         implicit none
 C        in bHYPRE.BiCGSTAB self

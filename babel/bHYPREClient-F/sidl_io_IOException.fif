@@ -2,7 +2,7 @@ C
 C       File:          sidl_io_IOException_Impl.f
 C       Symbol:        sidl.io.IOException-v0.9.15
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.io.IOException
@@ -78,7 +78,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_io_IOException__cast2_f(self, name, retval,
+        subroutine sidl_io_IOException__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -141,7 +141,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_io_IOException_isSame_f(self, iobj, retval,
+        subroutine sidl_io_IOException_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -163,7 +163,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_io_IOException_isType_f(self, name, retval,
+        subroutine sidl_io_IOException_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -182,7 +182,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_io_IOException_getClassInfo_f(self, retval,
+        subroutine sidl_io_IOException_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -199,7 +199,7 @@ C       Method:  getNote[]
 C       Return the message associated with the exception.
 C       
 
-        subroutine sidl_io_IOException_getNote_f(self, retval,
+        subroutine sidl_io_IOException_getNote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -216,7 +216,7 @@ C       Method:  setNote[]
 C       Set the message associated with the exception.
 C       
 
-        subroutine sidl_io_IOException_setNote_f(self, message,
+        subroutine sidl_io_IOException_setNote_f(self, message, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -234,7 +234,7 @@ C       Returns formatted string containing the concatenation of all
 C       tracelines.
 C       
 
-        subroutine sidl_io_IOException_getTrace_f(self, retval,
+        subroutine sidl_io_IOException_getTrace_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -251,7 +251,7 @@ C       Method:  add[Line]
 C       Adds a stringified entry/line to the stack trace.
 C       
 
-        subroutine sidl_io_IOException_addLine_f(self, traceline,
+        subroutine sidl_io_IOException_addLine_f(self, traceline, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -269,7 +269,7 @@ C       Formats and adds an entry to the stack trace based on the
 C       file name, line number, and method name.
 C       
 
-        subroutine sidl_io_IOException_add_f(self, filename, lineno,
+        subroutine sidl_io_IOException_add_f(self, filename, lineno, 
      &     methodname, exception)
         implicit none
 C        in sidl.io.IOException self
@@ -341,7 +341,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine sidl_io_IOException__getURL_f(self, retval,
+        subroutine sidl_io_IOException__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -358,7 +358,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_io_IOException__isRemote_f(self, retval,
+        subroutine sidl_io_IOException__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self
@@ -375,7 +375,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_io_IOException__isLocal_f(self, retval,
+        subroutine sidl_io_IOException__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.io.IOException self

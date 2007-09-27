@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_PCG_Impl.f
 C       Symbol:        bHYPRE.PCG-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.PCG
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -204,7 +204,7 @@ C       Method:  SetPreconditioner[]
 C       Set the preconditioner.
 C       
 
-        subroutine bHYPRE_PCG_SetPreconditioner_f(self, s, retval,
+        subroutine bHYPRE_PCG_SetPreconditioner_f(self, s, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -222,7 +222,7 @@ C
 C       Method:  GetPreconditioner[]
 C       
 
-        subroutine bHYPRE_PCG_GetPreconditioner_f(self, s, retval,
+        subroutine bHYPRE_PCG_GetPreconditioner_f(self, s, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -278,7 +278,7 @@ C       (Optional) Set the convergence tolerance.
 C       DEPRECATED.  use SetDoubleParameter
 C       
 
-        subroutine bHYPRE_PCG_SetTolerance_f(self, tolerance, retval,
+        subroutine bHYPRE_PCG_SetTolerance_f(self, tolerance, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -298,7 +298,7 @@ C       (Optional) Set maximum number of iterations.
 C       DEPRECATED   use SetIntParameter
 C       
 
-        subroutine bHYPRE_PCG_SetMaxIterations_f(self, max_iterations,
+        subroutine bHYPRE_PCG_SetMaxIterations_f(self, max_iterations, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -322,7 +322,7 @@ C       and {\tt Apply}.
 C       DEPRECATED   use SetIntParameter
 C       
 
-        subroutine bHYPRE_PCG_SetLogging_f(self, level, retval,
+        subroutine bHYPRE_PCG_SetLogging_f(self, level, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -346,7 +346,7 @@ C       {\tt Setup} and {\tt Apply}.
 C       DEPRECATED   use SetIntParameter
 C       
 
-        subroutine bHYPRE_PCG_SetPrintLevel_f(self, level, retval,
+        subroutine bHYPRE_PCG_SetPrintLevel_f(self, level, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -365,7 +365,7 @@ C       Method:  GetNumIterations[]
 C       (Optional) Return the number of iterations taken.
 C       
 
-        subroutine bHYPRE_PCG_GetNumIterations_f(self, num_iterations,
+        subroutine bHYPRE_PCG_GetNumIterations_f(self, num_iterations, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -384,7 +384,7 @@ C       Method:  GetRelResidualNorm[]
 C       (Optional) Return the norm of the relative residual.
 C       
 
-        subroutine bHYPRE_PCG_GetRelResidualNorm_f(self, norm, retval,
+        subroutine bHYPRE_PCG_GetRelResidualNorm_f(self, norm, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -404,7 +404,7 @@ C       Set the MPI Communicator.
 C       DEPRECATED, use Create:
 C       
 
-        subroutine bHYPRE_PCG_SetCommunicator_f(self, mpi_comm, retval,
+        subroutine bHYPRE_PCG_SetCommunicator_f(self, mpi_comm, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -440,7 +440,7 @@ C       Method:  SetIntParameter[]
 C       Set the int parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_PCG_SetIntParameter_f(self, name, value,
+        subroutine bHYPRE_PCG_SetIntParameter_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -461,7 +461,7 @@ C       Method:  SetDoubleParameter[]
 C       Set the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_PCG_SetDoubleParameter_f(self, name, value,
+        subroutine bHYPRE_PCG_SetDoubleParameter_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -482,7 +482,7 @@ C       Method:  SetStringParameter[]
 C       Set the string parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_PCG_SetStringParameter_f(self, name, value,
+        subroutine bHYPRE_PCG_SetStringParameter_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -547,7 +547,7 @@ C       Method:  SetDoubleArray1Parameter[]
 C       Set the double 1-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_PCG_SetDoubleArray1Parameter_f(self, name,
+        subroutine bHYPRE_PCG_SetDoubleArray1Parameter_f(self, name, 
      &     value, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -570,7 +570,7 @@ C       Method:  SetDoubleArray2Parameter[]
 C       Set the double 2-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_PCG_SetDoubleArray2Parameter_f(self, name,
+        subroutine bHYPRE_PCG_SetDoubleArray2Parameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -591,7 +591,7 @@ C       Method:  GetIntValue[]
 C       Set the int parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_PCG_GetIntValue_f(self, name, value, retval,
+        subroutine bHYPRE_PCG_GetIntValue_f(self, name, value, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -612,7 +612,7 @@ C       Method:  GetDoubleValue[]
 C       Get the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_PCG_GetDoubleValue_f(self, name, value,
+        subroutine bHYPRE_PCG_GetDoubleValue_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.PCG self
@@ -674,7 +674,7 @@ C       Method:  ApplyAdjoint[]
 C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
 C       
 
-        subroutine bHYPRE_PCG_ApplyAdjoint_f(self, b, x, retval,
+        subroutine bHYPRE_PCG_ApplyAdjoint_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.PCG self

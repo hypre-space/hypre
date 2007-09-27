@@ -2,7 +2,7 @@
 // File:          bHYPRE_PCG.hxx
 // Symbol:        bHYPRE.PCG-v1.0.0
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Description:   Client-side glue code for bHYPRE.PCG
 // 
 // WARNING: Automatically generated; changes will be lost
@@ -96,8 +96,8 @@ namespace bHYPRE {
    * This calls Babel-interface matrix and vector functions, so it will work
    * with any consistent matrix, vector, and preconditioner classes.
    */
-  class PCG: public virtual ::bHYPRE::PreconditionedSolver,
-    public virtual ::sidl::BaseClass {
+  class PCG: public virtual ::bHYPRE::PreconditionedSolver, public virtual 
+    ::sidl::BaseClass {
 
     //////////////////////////////////////////////////
     // 
@@ -459,7 +459,8 @@ namespace bHYPRE {
     typedef struct bHYPRE_PCG__sepv sepv_t;
 
     // default constructor
-    PCG() { }
+    PCG() { 
+    }
 
     // static constructor
     static ::bHYPRE::PCG _create();
@@ -473,8 +474,8 @@ namespace bHYPRE {
     }
 
     // RMI connect 2
-    static ::bHYPRE::PCG _connect( /*in*/ const std::string& url,
-      /*in*/ const bool ar  );
+    static ::bHYPRE::PCG _connect( /*in*/ const std::string& url, /*in*/ const 
+      bool ar  );
 
     // default destructor
     virtual ~PCG () { }
@@ -500,13 +501,13 @@ namespace bHYPRE {
     // For internal use by Impls (fixes bug#275)
     PCG ( PCG::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -589,9 +590,9 @@ namespace bHYPRE {
 extern "C" {
 
 
-  #pragma weak bHYPRE_PCG__connectI
+#pragma weak bHYPRE_PCG__connectI
 
-  #pragma weak bHYPRE_PCG__rmicast
+#pragma weak bHYPRE_PCG__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -604,8 +605,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct bHYPRE_PCG__object*
-  bHYPRE_PCG__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  bHYPRE_PCG__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

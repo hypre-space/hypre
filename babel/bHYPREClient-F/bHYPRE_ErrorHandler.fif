@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_ErrorHandler_Impl.f
 C       Symbol:        bHYPRE.ErrorHandler-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.ErrorHandler
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -68,7 +68,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_ErrorHandler__cast2_f(self, name, retval,
+        subroutine bHYPRE_ErrorHandler__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.ErrorHandler self
@@ -107,7 +107,7 @@ C       Method:  Describe[]
 C       included in the error flag ierr.
 C       
 
-        subroutine bHYPRE_ErrorHandler_Describe_f(ierr, message,
+        subroutine bHYPRE_ErrorHandler_Describe_f(ierr, message, 
      &     exception)
         implicit none
 C        in int ierr
@@ -168,7 +168,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_ErrorHandler_isSame_f(self, iobj, retval,
+        subroutine bHYPRE_ErrorHandler_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.ErrorHandler self
@@ -190,7 +190,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_ErrorHandler_isType_f(self, name, retval,
+        subroutine bHYPRE_ErrorHandler_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.ErrorHandler self
@@ -209,7 +209,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_ErrorHandler_getClassInfo_f(self, retval,
+        subroutine bHYPRE_ErrorHandler_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.ErrorHandler self
@@ -247,7 +247,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine bHYPRE_ErrorHandler__getURL_f(self, retval,
+        subroutine bHYPRE_ErrorHandler__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.ErrorHandler self
@@ -264,7 +264,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine bHYPRE_ErrorHandler__isRemote_f(self, retval,
+        subroutine bHYPRE_ErrorHandler__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.ErrorHandler self
@@ -281,7 +281,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine bHYPRE_ErrorHandler__isLocal_f(self, retval,
+        subroutine bHYPRE_ErrorHandler__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.ErrorHandler self
@@ -314,7 +314,7 @@ C       Method:  _set_hooks_static[]
 C       Static Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine bHYPRE_ErrorHandler__set_hooks_static_f(on,
+        subroutine bHYPRE_ErrorHandler__set_hooks_static_f(on, 
      &     exception)
         implicit none
 C        in bool on

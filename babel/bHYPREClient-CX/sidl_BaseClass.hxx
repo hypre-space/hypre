@@ -2,7 +2,7 @@
 // File:          sidl_BaseClass.hxx
 // Symbol:        sidl.BaseClass-v0.9.15
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Release:       $Name$
 // Revision:      @(#) $Id$
 // Description:   Client-side glue code for sidl.BaseClass
@@ -195,7 +195,8 @@ namespace sidl {
     typedef struct sidl_BaseClass__sepv sepv_t;
 
     // default constructor
-    BaseClass() { }
+    BaseClass() { 
+    }
 
     // static constructor
     static ::sidl::BaseClass _create();
@@ -209,8 +210,8 @@ namespace sidl {
     }
 
     // RMI connect 2
-    static ::sidl::BaseClass _connect( /*in*/ const std::string& url,
-      /*in*/ const bool ar  );
+    static ::sidl::BaseClass _connect( /*in*/ const std::string& url, /*in*/ 
+      const bool ar  );
 
     // default destructor
     virtual ~BaseClass () { }
@@ -229,13 +230,13 @@ namespace sidl {
     // For internal use by Impls (fixes bug#275)
     BaseClass ( BaseClass::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -297,9 +298,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_BaseClass__connectI
+#pragma weak sidl_BaseClass__connectI
 
-  #pragma weak sidl_BaseClass__rmicast
+#pragma weak sidl_BaseClass__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -312,8 +313,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_BaseClass__object*
-  sidl_BaseClass__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_BaseClass__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

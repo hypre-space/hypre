@@ -2,7 +2,7 @@ C
 C       File:          sidl_rmi_TicketBook_Impl.f
 C       Symbol:        sidl.rmi.TicketBook-v0.9.15
 C       Symbol Type:   interface
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.rmi.TicketBook
@@ -67,7 +67,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_rmi_TicketBook__cast2_f(self, name, retval,
+        subroutine sidl_rmi_TicketBook__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -130,7 +130,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_rmi_TicketBook_isSame_f(self, iobj, retval,
+        subroutine sidl_rmi_TicketBook_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -152,7 +152,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_rmi_TicketBook_isType_f(self, name, retval,
+        subroutine sidl_rmi_TicketBook_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -171,7 +171,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_rmi_TicketBook_getClassInfo_f(self, retval,
+        subroutine sidl_rmi_TicketBook_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -220,7 +220,7 @@ C       Method:  createEmptyTicketBook[]
 C        creates an empty container specialized for Tickets 
 C       
 
-        subroutine sidl_rmi_TicketBook_createEmptyTicketBook_f(self,
+        subroutine sidl_rmi_TicketBook_createEmptyTicketBook_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -239,7 +239,7 @@ C       (NOTE: needed for implementors of communication
 C       libraries, not expected for general use).
 C       
 
-        subroutine sidl_rmi_TicketBook_getResponse_f(self, retval,
+        subroutine sidl_rmi_TicketBook_getResponse_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -256,7 +256,7 @@ C       Method:  insertWithID[]
 C        insert a ticket with a user-specified ID 
 C       
 
-        subroutine sidl_rmi_TicketBook_insertWithID_f(self, t, id,
+        subroutine sidl_rmi_TicketBook_insertWithID_f(self, t, id, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -275,7 +275,7 @@ C       Method:  insert[]
 C        insert a ticket and issue a unique ID 
 C       
 
-        subroutine sidl_rmi_TicketBook_insert_f(self, t, retval,
+        subroutine sidl_rmi_TicketBook_insert_f(self, t, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -295,7 +295,7 @@ C        remove a ready ticket from the TicketBook
 C       returns 0 (and null) on an empty TicketBook
 C       
 
-        subroutine sidl_rmi_TicketBook_removeReady_f(self, t, retval,
+        subroutine sidl_rmi_TicketBook_removeReady_f(self, t, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -314,7 +314,7 @@ C       Method:  isEmpty[]
 C       immediate, returns the number of Tickets in the book.
 C       
 
-        subroutine sidl_rmi_TicketBook_isEmpty_f(self, retval,
+        subroutine sidl_rmi_TicketBook_isEmpty_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -352,7 +352,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine sidl_rmi_TicketBook__getURL_f(self, retval,
+        subroutine sidl_rmi_TicketBook__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -369,7 +369,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_rmi_TicketBook__isRemote_f(self, retval,
+        subroutine sidl_rmi_TicketBook__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self
@@ -386,7 +386,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_rmi_TicketBook__isLocal_f(self, retval,
+        subroutine sidl_rmi_TicketBook__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.TicketBook self

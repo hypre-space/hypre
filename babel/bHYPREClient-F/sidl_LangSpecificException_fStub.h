@@ -2,7 +2,7 @@
  * File:          sidl_LangSpecificException_fStub.h
  * Symbol:        sidl.LangSpecificException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side documentation text for sidl.LangSpecificException
@@ -70,8 +70,8 @@ sidl_LangSpecificException__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_LangSpecificException__object*
-sidl_LangSpecificException__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_LangSpecificException__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

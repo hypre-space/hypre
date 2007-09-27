@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructMatrix_fStub.h
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -47,8 +47,8 @@ bHYPRE_StructMatrix__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_StructMatrix__object*
-bHYPRE_StructMatrix__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_StructMatrix__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

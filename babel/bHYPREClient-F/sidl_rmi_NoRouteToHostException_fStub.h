@@ -2,7 +2,7 @@
  * File:          sidl_rmi_NoRouteToHostException_fStub.h
  * Symbol:        sidl.rmi.NoRouteToHostException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side documentation text for sidl.rmi.NoRouteToHostException
@@ -69,7 +69,7 @@ sidl_rmi_NoRouteToHostException__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_rmi_NoRouteToHostException__object*
-sidl_rmi_NoRouteToHostException__connectI(const char * url, sidl_bool ar,
+sidl_rmi_NoRouteToHostException__connectI(const char * url, sidl_bool ar, 
   struct sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus

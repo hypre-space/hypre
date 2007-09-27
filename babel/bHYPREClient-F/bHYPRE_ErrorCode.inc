@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_ErrorCode.inc
 C       Symbol:        bHYPRE.ErrorCode-v1.0.0
 C       Symbol Type:   enumeration
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side glue code for bHYPRE.ErrorCode
 C       
 C       WARNING: Automatically generated; changes will be lost

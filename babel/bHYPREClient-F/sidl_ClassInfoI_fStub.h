@@ -2,7 +2,7 @@
  * File:          sidl_ClassInfoI_fStub.h
  * Symbol:        sidl.ClassInfoI-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side documentation text for sidl.ClassInfoI
@@ -70,8 +70,8 @@ sidl_ClassInfoI__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_ClassInfoI__object*
-sidl_ClassInfoI__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_ClassInfoI__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

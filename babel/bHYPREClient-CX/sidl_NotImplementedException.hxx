@@ -2,7 +2,7 @@
 // File:          sidl_NotImplementedException.hxx
 // Symbol:        sidl.NotImplementedException-v0.9.15
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Release:       $Name$
 // Revision:      @(#) $Id$
 // Description:   Client-side glue code for sidl.NotImplementedException
@@ -84,7 +84,7 @@ namespace sidl {
    * implmentation has not been written for yet.  The throw code is
    * placed into the _Impl files automatically when they are generated.
    */
-  class NotImplementedException: public virtual ::sidl::RuntimeException,
+  class NotImplementedException: public virtual ::sidl::RuntimeException, 
     public virtual ::sidl::SIDLException {
 
     //////////////////////////////////////////////////
@@ -121,7 +121,8 @@ namespace sidl {
     typedef struct sidl_NotImplementedException__sepv sepv_t;
 
     // default constructor
-    NotImplementedException() { }
+    NotImplementedException() { 
+    }
 
     // static constructor
     static ::sidl::NotImplementedException _create();
@@ -155,16 +156,16 @@ namespace sidl {
     // Alternate constructor: does not call addRef()
     // (sets d_weak_reference=isWeak)
     // For internal use by Impls (fixes bug#275)
-    NotImplementedException ( NotImplementedException::ior_t* ior,
-      bool isWeak );
+    NotImplementedException ( NotImplementedException::ior_t* ior, bool isWeak 
+      );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -227,9 +228,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_NotImplementedException__connectI
+#pragma weak sidl_NotImplementedException__connectI
 
-  #pragma weak sidl_NotImplementedException__rmicast
+#pragma weak sidl_NotImplementedException__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -242,8 +243,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_NotImplementedException__object*
-  sidl_NotImplementedException__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_NotImplementedException__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

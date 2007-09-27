@@ -2,7 +2,7 @@
 // File:          sidl_rmi_Call.hxx
 // Symbol:        sidl.rmi.Call-v0.9.15
 // Symbol Type:   interface
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Release:       $Name$
 // Revision:      @(#) $Id$
 // Description:   Client-side glue code for sidl.rmi.Call
@@ -120,7 +120,9 @@ namespace sidl {
       typedef struct sidl_rmi_Call__sepv sepv_t;
 
       // default constructor
-      Call() { }
+      Call() { 
+        sidl_rmi_Call_IORCache = NULL;
+      }
 
       // RMI connect
       static inline ::sidl::rmi::Call _connect( /*in*/ const std::string& url ) 
@@ -129,8 +131,8 @@ namespace sidl {
       }
 
       // RMI connect 2
-      static ::sidl::rmi::Call _connect( /*in*/ const std::string& url,
-        /*in*/ const bool ar  );
+      static ::sidl::rmi::Call _connect( /*in*/ const std::string& url, /*in*/ 
+        const bool ar  );
 
       // default destructor
       virtual ~Call () { }
@@ -149,13 +151,21 @@ namespace sidl {
       // For internal use by Impls (fixes bug#275)
       Call ( Call::ior_t* ior, bool isWeak );
 
-      ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+      inline ior_t* _get_ior() const throw() {
+        if(!sidl_rmi_Call_IORCache) { 
+          sidl_rmi_Call_IORCache = ::sidl::rmi::Call::_cast((void*)d_self);
+          if (sidl_rmi_Call_IORCache) {
+            struct sidl_BaseInterface__object *throwaway_exception;
+            (sidl_rmi_Call_IORCache->d_epv->f_deleteRef)(
+              sidl_rmi_Call_IORCache->d_object, &throwaway_exception);  
+          }  
+        }
+        return sidl_rmi_Call_IORCache;
+      }
 
-      const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-        ior_t*>(d_self); }
-
-      void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-        void*>(ptr); }
+      void _set_ior( ior_t* ptr ) throw () { 
+        d_self = reinterpret_cast< void*>(ptr);
+      }
 
       bool _is_nil() const throw () { return (d_self==0); }
 
@@ -211,6 +221,14 @@ namespace sidl {
     public:
       static const ext_t * _get_ext() throw ( ::sidl::NullIORException );
 
+
+      //////////////////////////////////////////////////
+      // 
+      // Locally Cached IOR pointer
+      // 
+
+    protected:
+      mutable ior_t* sidl_rmi_Call_IORCache;
     }; // end class Call
   } // end namespace rmi
 } // end namespace sidl
@@ -218,9 +236,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_rmi_Call__connectI
+#pragma weak sidl_rmi_Call__connectI
 
-  #pragma weak sidl_rmi_Call__rmicast
+#pragma weak sidl_rmi_Call__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -233,8 +251,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_rmi_Call__object*
-  sidl_rmi_Call__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_rmi_Call__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

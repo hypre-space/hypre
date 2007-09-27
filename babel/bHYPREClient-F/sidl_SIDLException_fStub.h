@@ -2,7 +2,7 @@
  * File:          sidl_SIDLException_fStub.h
  * Symbol:        sidl.SIDLException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side documentation text for sidl.SIDLException
@@ -69,8 +69,8 @@ sidl_SIDLException__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_SIDLException__object*
-sidl_SIDLException__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_SIDLException__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

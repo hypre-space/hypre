@@ -2,7 +2,7 @@
  * File:          bHYPRE_BoomerAMG_fStub.h
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -194,8 +194,8 @@ bHYPRE_BoomerAMG__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_BoomerAMG__object*
-bHYPRE_BoomerAMG__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_BoomerAMG__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

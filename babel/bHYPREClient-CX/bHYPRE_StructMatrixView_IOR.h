@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructMatrixView_IOR.h
  * Symbol:        bHYPRE.StructMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.StructMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost

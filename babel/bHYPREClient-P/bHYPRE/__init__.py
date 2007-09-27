@@ -2,7 +2,7 @@
 # File:          __init__.py
 # Symbol:        bHYPRE-v1.0.0
 # Symbol Type:   package
-# Babel Version: 1.0.0
+# Babel Version: 1.0.4
 # Description:   package initialization code
 # 
 # WARNING: Automatically generated; changes will be lost

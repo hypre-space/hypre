@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructVectorView_Module.c
  * Symbol:        bHYPRE.SStructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   implement a C extension type for a sidl extendable
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -143,12 +143,12 @@ bHYPRE_SStructVectorView__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_SStructVectorView__object*
-bHYPRE_SStructVectorView__connectI(const char * url, sidl_bool ar,            \
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_SStructVectorView__connectI(const char * url, sidl_bool ar, struct     \
+  sidl_BaseInterface__object **_ex);
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -222,16 +222,16 @@ static void* remote_bHYPRE__SStructVectorView__cast(
       cmp2 = strcmp(name, "bHYPRE._SStructVectorView");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct bHYPRE__SStructVectorView__object*)self);
         return cast;
       }
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,                    \
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,                     \
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct             \
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct              \
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct                                                  \
       bHYPRE__SStructVectorView__remote*)self->d_data)->d_ih, _ex);
@@ -381,12 +381,12 @@ remote_bHYPRE__SStructVectorView_SetGrid(
     if(grid){
       char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)grid,       \
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "grid", _url,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "grid", _url, _ex);SIDL_CHECK(    \
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "grid", NULL,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "grid", NULL, _ex);SIDL_CHECK(    \
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -402,8 +402,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -443,8 +443,8 @@ remote_bHYPRE__SStructVectorView_SetValues(
     sidl_rmi_Invocation_packIntArray( _inv, "index", index,                   \
       sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
     sidl_rmi_Invocation_packInt( _inv, "var", var, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packDouble( _inv, "value", value,                     \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex);SIDL_CHECK(    \
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -459,8 +459,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -519,8 +519,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -560,8 +560,8 @@ remote_bHYPRE__SStructVectorView_AddToValues(
     sidl_rmi_Invocation_packIntArray( _inv, "index", index,                   \
       sidl_column_major_order,1,0, _ex);SIDL_CHECK(*_ex);
     sidl_rmi_Invocation_packInt( _inv, "var", var, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packDouble( _inv, "value", value,                     \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex);SIDL_CHECK(    \
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -576,8 +576,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -636,8 +636,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -683,8 +683,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -738,12 +738,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackDouble( _rsvp, "value", value,                    \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackDouble( _rsvp, "value", value, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -800,8 +800,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
     sidl_rmi_Response_unpackDoubleArray( _rsvp, "values", values,             \
@@ -849,8 +849,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -901,8 +901,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -950,8 +950,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
     sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex);SIDL_CHECK(*_ex);
@@ -989,12 +989,12 @@ remote_bHYPRE__SStructVectorView_SetCommunicator(
     if(mpi_comm){
       char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)mpi_comm,   \
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "mpi_comm", _url,                 \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "mpi_comm", _url, _ex);SIDL_CHECK(\
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "mpi_comm", NULL,                 \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "mpi_comm", NULL, _ex);SIDL_CHECK(\
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -1010,8 +1010,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1099,8 +1099,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1146,8 +1146,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1222,12 +1222,12 @@ remote_bHYPRE__SStructVectorView_isSame(
     if(iobj){
       char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,       \
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "iobj", _url,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(    \
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "iobj", NULL,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(    \
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -1243,8 +1243,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1292,8 +1292,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1342,8 +1342,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE._SStructVect
     /* extract return value */
     sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,                    \
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1405,203 +1405,203 @@ static void bHYPRE__SStructVectorView__init_remote_epv(void)
   epv->f_isType               = remote_bHYPRE__SStructVectorView_isType;
   epv->f_getClassInfo         = remote_bHYPRE__SStructVectorView_getClassInfo;
 
-  e0->f__cast           = (void* (*)(void*,const char*,                       \
-    sidl_BaseInterface*)) epv->f__cast;
-  e0->f__delete         = (void (*)(void*,                                    \
-    sidl_BaseInterface*)) epv->f__delete;
-  e0->f__getURL         = (char* (*)(void*,                                   \
-    sidl_BaseInterface*)) epv->f__getURL;
-  e0->f__raddRef        = (void (*)(void*,                                    \
-    sidl_BaseInterface*)) epv->f__raddRef;
-  e0->f__isRemote       = (sidl_bool (*)(void*,                               \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e0->f__set_hooks      = (void (*)(void*,int32_t,                            \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e0->f__exec           = (void (*)(void*,const char*,                        \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_SetCommunicator = (int32_t (*)(void*,                                 \
-    struct bHYPRE_MPICommunicator__object*,                                   \
-    struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
-  e0->f_Destroy         = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_Destroy;
-  e0->f_Initialize      = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_Initialize;
-  e0->f_Assemble        = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_Assemble;
-  e0->f_addRef          = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef       = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame          = (sidl_bool (*)(void*,                               \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType          = (sidl_bool (*)(void*,const char*,                   \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e0->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,          \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e0->f__cast           = (void* (*)(void*,const char*,sidl_BaseInterface*))  \
+    epv->f__cast;
+  e0->f__delete         = (void (*)(void*,sidl_BaseInterface*))               \
+    epv->f__delete;
+  e0->f__getURL         = (char* (*)(void*,sidl_BaseInterface*))              \
+    epv->f__getURL;
+  e0->f__raddRef        = (void (*)(void*,sidl_BaseInterface*))               \
+    epv->f__raddRef;
+  e0->f__isRemote       = (sidl_bool (*)(void*,sidl_BaseInterface*))          \
+    epv->f__isRemote;
+  e0->f__set_hooks      = (void (*)(void*,int32_t, sidl_BaseInterface*))      \
+    epv->f__set_hooks;
+  e0->f__exec           = (void (*)(void*,const char*,struct                  \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_SetCommunicator = (int32_t (*)(void*,struct                           \
+    bHYPRE_MPICommunicator__object*,struct sidl_BaseInterface__object **))    \
+    epv->f_SetCommunicator;
+  e0->f_Destroy         = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_Destroy;
+  e0->f_Initialize      = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_Initialize;
+  e0->f_Assemble        = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_Assemble;
+  e0->f_addRef          = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_addRef;
+  e0->f_deleteRef       = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_deleteRef;
+  e0->f_isSame          = (sidl_bool (*)(void*,struct                         \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e0->f_isType          = (sidl_bool (*)(void*,const char*,struct             \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e0->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,struct    \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e1->f__cast           = (void* (*)(void*,const char*,                       \
-    sidl_BaseInterface*)) epv->f__cast;
-  e1->f__delete         = (void (*)(void*,                                    \
-    sidl_BaseInterface*)) epv->f__delete;
-  e1->f__getURL         = (char* (*)(void*,                                   \
-    sidl_BaseInterface*)) epv->f__getURL;
-  e1->f__raddRef        = (void (*)(void*,                                    \
-    sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote       = (sidl_bool (*)(void*,                               \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks      = (void (*)(void*,int32_t,                            \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec           = (void (*)(void*,const char*,                        \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_SetCommunicator = (int32_t (*)(void*,                                 \
-    struct bHYPRE_MPICommunicator__object*,                                   \
-    struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
-  e1->f_Destroy         = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_Destroy;
-  e1->f_Initialize      = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_Initialize;
-  e1->f_Assemble        = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_Assemble;
-  e1->f_addRef          = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef       = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame          = (sidl_bool (*)(void*,                               \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType          = (sidl_bool (*)(void*,const char*,                   \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,          \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f__cast           = (void* (*)(void*,const char*,sidl_BaseInterface*))  \
+    epv->f__cast;
+  e1->f__delete         = (void (*)(void*,sidl_BaseInterface*))               \
+    epv->f__delete;
+  e1->f__getURL         = (char* (*)(void*,sidl_BaseInterface*))              \
+    epv->f__getURL;
+  e1->f__raddRef        = (void (*)(void*,sidl_BaseInterface*))               \
+    epv->f__raddRef;
+  e1->f__isRemote       = (sidl_bool (*)(void*,sidl_BaseInterface*))          \
+    epv->f__isRemote;
+  e1->f__set_hooks      = (void (*)(void*,int32_t, sidl_BaseInterface*))      \
+    epv->f__set_hooks;
+  e1->f__exec           = (void (*)(void*,const char*,struct                  \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_SetCommunicator = (int32_t (*)(void*,struct                           \
+    bHYPRE_MPICommunicator__object*,struct sidl_BaseInterface__object **))    \
+    epv->f_SetCommunicator;
+  e1->f_Destroy         = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_Destroy;
+  e1->f_Initialize      = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_Initialize;
+  e1->f_Assemble        = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_Assemble;
+  e1->f_addRef          = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_addRef;
+  e1->f_deleteRef       = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_deleteRef;
+  e1->f_isSame          = (sidl_bool (*)(void*,struct                         \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e1->f_isType          = (sidl_bool (*)(void*,const char*,struct             \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,struct    \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e2->f__cast           = (void* (*)(void*,const char*,                       \
-    sidl_BaseInterface*)) epv->f__cast;
-  e2->f__delete         = (void (*)(void*,                                    \
-    sidl_BaseInterface*)) epv->f__delete;
-  e2->f__getURL         = (char* (*)(void*,                                   \
-    sidl_BaseInterface*)) epv->f__getURL;
-  e2->f__raddRef        = (void (*)(void*,                                    \
-    sidl_BaseInterface*)) epv->f__raddRef;
-  e2->f__isRemote       = (sidl_bool (*)(void*,                               \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e2->f__set_hooks      = (void (*)(void*,int32_t,                            \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e2->f__exec           = (void (*)(void*,const char*,                        \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e2->f_GetObject       = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object**,                                      \
-    struct sidl_BaseInterface__object **)) epv->f_GetObject;
-  e2->f_SetCommunicator = (int32_t (*)(void*,                                 \
-    struct bHYPRE_MPICommunicator__object*,                                   \
-    struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
-  e2->f_Destroy         = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_Destroy;
-  e2->f_Initialize      = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_Initialize;
-  e2->f_Assemble        = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_Assemble;
-  e2->f_addRef          = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e2->f_deleteRef       = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e2->f_isSame          = (sidl_bool (*)(void*,                               \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e2->f_isType          = (sidl_bool (*)(void*,const char*,                   \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e2->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,          \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e2->f__cast           = (void* (*)(void*,const char*,sidl_BaseInterface*))  \
+    epv->f__cast;
+  e2->f__delete         = (void (*)(void*,sidl_BaseInterface*))               \
+    epv->f__delete;
+  e2->f__getURL         = (char* (*)(void*,sidl_BaseInterface*))              \
+    epv->f__getURL;
+  e2->f__raddRef        = (void (*)(void*,sidl_BaseInterface*))               \
+    epv->f__raddRef;
+  e2->f__isRemote       = (sidl_bool (*)(void*,sidl_BaseInterface*))          \
+    epv->f__isRemote;
+  e2->f__set_hooks      = (void (*)(void*,int32_t, sidl_BaseInterface*))      \
+    epv->f__set_hooks;
+  e2->f__exec           = (void (*)(void*,const char*,struct                  \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e2->f_GetObject       = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object**,struct sidl_BaseInterface__object **))       \
+    epv->f_GetObject;
+  e2->f_SetCommunicator = (int32_t (*)(void*,struct                           \
+    bHYPRE_MPICommunicator__object*,struct sidl_BaseInterface__object **))    \
+    epv->f_SetCommunicator;
+  e2->f_Destroy         = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_Destroy;
+  e2->f_Initialize      = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_Initialize;
+  e2->f_Assemble        = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_Assemble;
+  e2->f_addRef          = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_addRef;
+  e2->f_deleteRef       = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_deleteRef;
+  e2->f_isSame          = (sidl_bool (*)(void*,struct                         \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e2->f_isType          = (sidl_bool (*)(void*,const char*,struct             \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e2->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,struct    \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e3->f__cast           = (void* (*)(void*,const char*,                       \
-    sidl_BaseInterface*)) epv->f__cast;
-  e3->f__delete         = (void (*)(void*,                                    \
-    sidl_BaseInterface*)) epv->f__delete;
-  e3->f__getURL         = (char* (*)(void*,                                   \
-    sidl_BaseInterface*)) epv->f__getURL;
-  e3->f__raddRef        = (void (*)(void*,                                    \
-    sidl_BaseInterface*)) epv->f__raddRef;
-  e3->f__isRemote       = (sidl_bool (*)(void*,                               \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e3->f__set_hooks      = (void (*)(void*,int32_t,                            \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e3->f__exec           = (void (*)(void*,const char*,                        \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e3->f_SetGrid         = (int32_t (*)(void*,                                 \
-    struct bHYPRE_SStructGrid__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_SetGrid;
+  e3->f__cast           = (void* (*)(void*,const char*,sidl_BaseInterface*))  \
+    epv->f__cast;
+  e3->f__delete         = (void (*)(void*,sidl_BaseInterface*))               \
+    epv->f__delete;
+  e3->f__getURL         = (char* (*)(void*,sidl_BaseInterface*))              \
+    epv->f__getURL;
+  e3->f__raddRef        = (void (*)(void*,sidl_BaseInterface*))               \
+    epv->f__raddRef;
+  e3->f__isRemote       = (sidl_bool (*)(void*,sidl_BaseInterface*))          \
+    epv->f__isRemote;
+  e3->f__set_hooks      = (void (*)(void*,int32_t, sidl_BaseInterface*))      \
+    epv->f__set_hooks;
+  e3->f__exec           = (void (*)(void*,const char*,struct                  \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e3->f_SetGrid         = (int32_t (*)(void*,struct                           \
+    bHYPRE_SStructGrid__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_SetGrid;
   e3->f_SetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*, \
     int32_t,double,struct sidl_BaseInterface__object **)) epv->f_SetValues;
   e3->f_SetBoxValues    = (int32_t (*)(void*,int32_t,struct sidl_int__array*, \
-    struct sidl_int__array*,int32_t,struct sidl_double__array*,               \
-    struct sidl_BaseInterface__object **)) epv->f_SetBoxValues;
+    struct sidl_int__array*,int32_t,struct sidl_double__array*,struct         \
+    sidl_BaseInterface__object **)) epv->f_SetBoxValues;
   e3->f_AddToValues     = (int32_t (*)(void*,int32_t,struct sidl_int__array*, \
     int32_t,double,struct sidl_BaseInterface__object **)) epv->f_AddToValues;
   e3->f_AddToBoxValues  = (int32_t (*)(void*,int32_t,struct sidl_int__array*, \
-    struct sidl_int__array*,int32_t,struct sidl_double__array*,               \
-    struct sidl_BaseInterface__object **)) epv->f_AddToBoxValues;
-  e3->f_Gather          = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_Gather;
+    struct sidl_int__array*,int32_t,struct sidl_double__array*,struct         \
+    sidl_BaseInterface__object **)) epv->f_AddToBoxValues;
+  e3->f_Gather          = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_Gather;
   e3->f_GetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*, \
     int32_t,double*,struct sidl_BaseInterface__object **)) epv->f_GetValues;
   e3->f_GetBoxValues    = (int32_t (*)(void*,int32_t,struct sidl_int__array*, \
-    struct sidl_int__array*,int32_t,struct sidl_double__array**,              \
-    struct sidl_BaseInterface__object **)) epv->f_GetBoxValues;
-  e3->f_SetComplex      = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_SetComplex;
-  e3->f_Print           = (int32_t (*)(void*,const char*,int32_t,             \
-    struct sidl_BaseInterface__object **)) epv->f_Print;
-  e3->f_GetObject       = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object**,                                      \
-    struct sidl_BaseInterface__object **)) epv->f_GetObject;
-  e3->f_SetCommunicator = (int32_t (*)(void*,                                 \
-    struct bHYPRE_MPICommunicator__object*,                                   \
-    struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
-  e3->f_Destroy         = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_Destroy;
-  e3->f_Initialize      = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_Initialize;
-  e3->f_Assemble        = (int32_t (*)(void*,                                 \
-    struct sidl_BaseInterface__object **)) epv->f_Assemble;
-  e3->f_addRef          = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e3->f_deleteRef       = (void (*)(void*,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e3->f_isSame          = (sidl_bool (*)(void*,                               \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e3->f_isType          = (sidl_bool (*)(void*,const char*,                   \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e3->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,          \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    struct sidl_int__array*,int32_t,struct sidl_double__array**,struct        \
+    sidl_BaseInterface__object **)) epv->f_GetBoxValues;
+  e3->f_SetComplex      = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_SetComplex;
+  e3->f_Print           = (int32_t (*)(void*,const char*,int32_t,struct       \
+    sidl_BaseInterface__object **)) epv->f_Print;
+  e3->f_GetObject       = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object**,struct sidl_BaseInterface__object **))       \
+    epv->f_GetObject;
+  e3->f_SetCommunicator = (int32_t (*)(void*,struct                           \
+    bHYPRE_MPICommunicator__object*,struct sidl_BaseInterface__object **))    \
+    epv->f_SetCommunicator;
+  e3->f_Destroy         = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_Destroy;
+  e3->f_Initialize      = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_Initialize;
+  e3->f_Assemble        = (int32_t (*)(void*,struct                           \
+    sidl_BaseInterface__object **)) epv->f_Assemble;
+  e3->f_addRef          = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_addRef;
+  e3->f_deleteRef       = (void (*)(void*,struct sidl_BaseInterface__object   \
+    **)) epv->f_deleteRef;
+  e3->f_isSame          = (sidl_bool (*)(void*,struct                         \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e3->f_isType          = (sidl_bool (*)(void*,const char*,struct             \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e3->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*,struct    \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e4->f__cast        = (void* (*)(void*,const char*,                          \
-    sidl_BaseInterface*)) epv->f__cast;
+  e4->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*))     \
+    epv->f__cast;
   e4->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e4->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e4->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e4->f__isRemote    = (sidl_bool (*)(void*,                                  \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e4->f__set_hooks   = (void (*)(void*,int32_t,                               \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e4->f__exec        = (void (*)(void*,const char*,                           \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e4->f_addRef       = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e4->f_deleteRef    = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e4->f_isSame       = (sidl_bool (*)(void*,                                  \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e4->f_isType       = (sidl_bool (*)(void*,const char*,                      \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e4->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,             \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e4->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*))             \
+    epv->f__isRemote;
+  e4->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*))         \
+    epv->f__set_hooks;
+  e4->f__exec        = (void (*)(void*,const char*,struct                     \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e4->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_addRef;
+  e4->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_deleteRef;
+  e4->f_isSame       = (sidl_bool (*)(void*,struct                            \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e4->f_isType       = (sidl_bool (*)(void*,const char*,struct                \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e4->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct       \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   s_remote_initialized = 1;
 }
@@ -1620,8 +1620,8 @@ bHYPRE_SStructVectorView__remoteConnect(const char *url, sidl_bool ar,        \
   char* objectID = NULL;
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi =                                                   \
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(      \
+    sidl_BaseInterface bi = (                                                 \
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(       \
       objectID, _ex);
     if(ar) {
       sidl_BaseInterface_addRef(bi, _ex);
@@ -1743,8 +1743,8 @@ bHYPRE_SStructVectorView__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.SStructVectorView",      \
-      (void*)bHYPRE_SStructVectorView__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.SStructVectorView", (    \
+      void*)bHYPRE_SStructVectorView__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
@@ -1765,8 +1765,8 @@ bHYPRE_SStructVectorView__rmicast(
  */
 
 struct bHYPRE_SStructVectorView__object*
-bHYPRE_SStructVectorView__connectI(const char* url, sidl_bool ar,             \
-  struct sidl_BaseInterface__object **_ex)
+bHYPRE_SStructVectorView__connectI(const char* url, sidl_bool ar, struct      \
+  sidl_BaseInterface__object **_ex)
 {
   return bHYPRE_SStructVectorView__remoteConnect(url, ar, _ex);
 }
@@ -1796,14 +1796,14 @@ pStub_SStructVectorView__connect(PyObject *_ignored, PyObject *_args,         \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -1865,14 +1865,14 @@ pStub_SStructVectorView_AddToBoxValues(PyObject *_self, PyObject *_args,      \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1942,14 +1942,14 @@ pStub_SStructVectorView_AddToValues(PyObject *_self, PyObject *_args,         \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1973,8 +1973,8 @@ pStub_SStructVectorView_AddToValues(PyObject *_self, PyObject *_args,         \
 }
 
 static PyObject *
-pStub_SStructVectorView_Gather(PyObject *_self, PyObject *_args,              \
-  PyObject *_kwdict) {
+pStub_SStructVectorView_Gather(PyObject *_self, PyObject *_args, PyObject     \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2001,14 +2001,14 @@ pStub_SStructVectorView_Gather(PyObject *_self, PyObject *_args,              \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2078,14 +2078,14 @@ pStub_SStructVectorView_GetBoxValues(PyObject *_self, PyObject *_args,        \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2093,10 +2093,10 @@ pStub_SStructVectorView_GetBoxValues(PyObject *_self, PyObject *_args,        \
           "lO&",
           _proxy__return,
           (void *)sidl_python_clone_array, values);
+        sidl_python_deleteRef_array((struct sidl__array *)values);
       }
       sidl_python_deleteRef_array((struct sidl__array *)ilower);
       sidl_python_deleteRef_array((struct sidl__array *)iupper);
-      sidl_python_deleteRef_array((struct sidl__array *)values);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -2112,8 +2112,8 @@ pStub_SStructVectorView_GetBoxValues(PyObject *_self, PyObject *_args,        \
 }
 
 static PyObject *
-pStub_SStructVectorView_GetValues(PyObject *_self, PyObject *_args,           \
-  PyObject *_kwdict) {
+pStub_SStructVectorView_GetValues(PyObject *_self, PyObject *_args, PyObject  \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2154,14 +2154,14 @@ pStub_SStructVectorView_GetValues(PyObject *_self, PyObject *_args,           \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2186,8 +2186,8 @@ pStub_SStructVectorView_GetValues(PyObject *_self, PyObject *_args,           \
 }
 
 static PyObject *
-pStub_SStructVectorView_Print(PyObject *_self, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_SStructVectorView_Print(PyObject *_self, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2222,14 +2222,14 @@ pStub_SStructVectorView_Print(PyObject *_self, PyObject *_args,               \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2299,14 +2299,14 @@ pStub_SStructVectorView_SetBoxValues(PyObject *_self, PyObject *_args,        \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2332,8 +2332,8 @@ pStub_SStructVectorView_SetBoxValues(PyObject *_self, PyObject *_args,        \
 }
 
 static PyObject *
-pStub_SStructVectorView_SetComplex(PyObject *_self, PyObject *_args,          \
-  PyObject *_kwdict) {
+pStub_SStructVectorView_SetComplex(PyObject *_self, PyObject *_args, PyObject \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2360,14 +2360,14 @@ pStub_SStructVectorView_SetComplex(PyObject *_self, PyObject *_args,          \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2390,8 +2390,8 @@ pStub_SStructVectorView_SetComplex(PyObject *_self, PyObject *_args,          \
 }
 
 static PyObject *
-pStub_SStructVectorView_SetGrid(PyObject *_self, PyObject *_args,             \
-  PyObject *_kwdict) {
+pStub_SStructVectorView_SetGrid(PyObject *_self, PyObject *_args, PyObject    \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2422,14 +2422,14 @@ pStub_SStructVectorView_SetGrid(PyObject *_self, PyObject *_args,             \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2453,8 +2453,8 @@ pStub_SStructVectorView_SetGrid(PyObject *_self, PyObject *_args,             \
 }
 
 static PyObject *
-pStub_SStructVectorView_SetValues(PyObject *_self, PyObject *_args,           \
-  PyObject *_kwdict) {
+pStub_SStructVectorView_SetValues(PyObject *_self, PyObject *_args, PyObject  \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2497,14 +2497,14 @@ pStub_SStructVectorView_SetValues(PyObject *_self, PyObject *_args,           \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2528,8 +2528,8 @@ pStub_SStructVectorView_SetValues(PyObject *_self, PyObject *_args,           \
 }
 
 static PyObject *
-pStub_SStructVectorView__exec(PyObject *_self, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_SStructVectorView__exec(PyObject *_self, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2564,14 +2564,14 @@ pStub_SStructVectorView__exec(PyObject *_self, PyObject *_args,               \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2595,8 +2595,8 @@ pStub_SStructVectorView__exec(PyObject *_self, PyObject *_args,               \
 }
 
 static PyObject *
-pStub_SStructVectorView__getURL(PyObject *_self, PyObject *_args,             \
-  PyObject *_kwdict) {
+pStub_SStructVectorView__getURL(PyObject *_self, PyObject *_args, PyObject    \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2621,22 +2621,22 @@ pStub_SStructVectorView__getURL(PyObject *_self, PyObject *_args,             \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "z",
           _return);
+        free((void *)_return);
       }
-      free((void *)_return);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -2652,8 +2652,8 @@ pStub_SStructVectorView__getURL(PyObject *_self, PyObject *_args,             \
 }
 
 static PyObject *
-pStub_SStructVectorView__isLocal(PyObject *_self, PyObject *_args,            \
-  PyObject *_kwdict) {
+pStub_SStructVectorView__isLocal(PyObject *_self, PyObject *_args, PyObject   \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2680,14 +2680,14 @@ pStub_SStructVectorView__isLocal(PyObject *_self, PyObject *_args,            \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2710,8 +2710,8 @@ pStub_SStructVectorView__isLocal(PyObject *_self, PyObject *_args,            \
 }
 
 static PyObject *
-pStub_SStructVectorView__isRemote(PyObject *_self, PyObject *_args,           \
-  PyObject *_kwdict) {
+pStub_SStructVectorView__isRemote(PyObject *_self, PyObject *_args, PyObject  \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2738,14 +2738,14 @@ pStub_SStructVectorView__isRemote(PyObject *_self, PyObject *_args,           \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2768,8 +2768,8 @@ pStub_SStructVectorView__isRemote(PyObject *_self, PyObject *_args,           \
 }
 
 static PyObject *
-pStub_SStructVectorView__set_hooks(PyObject *_self, PyObject *_args,          \
-  PyObject *_kwdict) {
+pStub_SStructVectorView__set_hooks(PyObject *_self, PyObject *_args, PyObject \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_SStructVectorView__object *_self_ior =
     ((struct bHYPRE_SStructVectorView__object *)
@@ -2798,14 +2798,14 @@ pStub_SStructVectorView__set_hooks(PyObject *_self, PyObject *_args,          \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2827,12 +2827,12 @@ pStub_SStructVectorView__set_hooks(PyObject *_self, PyObject *_args,          \
 }
 
 static int
-bHYPRE_SStructVectorView_createCast(PyObject *self, PyObject *args,           \
-  PyObject *kwds) {
+bHYPRE_SStructVectorView_createCast(PyObject *self, PyObject *args, PyObject  \
+  *kwds) {
   struct bHYPRE_SStructVectorView__object *optarg = NULL;
   static char *_kwlist[] = { "sobj", NULL };
-  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "O&", _kwlist,          \
-    (void *)bHYPRE_SStructVectorView__convert, &optarg);
+  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "O&", _kwlist, (void    \
+    *)bHYPRE_SStructVectorView__convert, &optarg);
   if (_okay) {
     return sidl_Object_Init(
       (SPObject *)self,
@@ -3160,9 +3160,8 @@ bHYPRE_SStructVectorView__wrap_RETURN
 bHYPRE_SStructVectorView__wrap bHYPRE_SStructVectorView__wrap_PROTO {
   PyObject *result;
   if (sidlobj) {
-    result =                                                                  \
-      _bHYPRE_SStructVectorViewType.tp_new(&_bHYPRE_SStructVectorViewType,    \
-      NULL, NULL);
+    result = _bHYPRE_SStructVectorViewType.tp_new(                            \
+      &_bHYPRE_SStructVectorViewType, NULL, NULL);
     if (result) {
       if (sidl_Object_Init(
         (SPObject *)result,
@@ -3185,9 +3184,8 @@ bHYPRE_SStructVectorView__weakRef_RETURN
 bHYPRE_SStructVectorView__weakRef bHYPRE_SStructVectorView__weakRef_PROTO {
   PyObject *result;
   if (sidlobj) {
-    result =                                                                  \
-      _bHYPRE_SStructVectorViewType.tp_new(&_bHYPRE_SStructVectorViewType,    \
-      NULL, NULL);
+    result = _bHYPRE_SStructVectorViewType.tp_new(                            \
+      &_bHYPRE_SStructVectorViewType, NULL, NULL);
     if (result) {
       if (sidl_Object_Init(
         (SPObject *)result,
@@ -3218,9 +3216,8 @@ bHYPRE_SStructVectorView__newRef_RETURN
 bHYPRE_SStructVectorView__newRef bHYPRE_SStructVectorView__newRef_PROTO {
   PyObject *result;
   if (sidlobj) {
-    result =                                                                  \
-      _bHYPRE_SStructVectorViewType.tp_new(&_bHYPRE_SStructVectorViewType,    \
-      NULL, NULL);
+    result = _bHYPRE_SStructVectorViewType.tp_new(                            \
+      &_bHYPRE_SStructVectorViewType, NULL, NULL);
     if (result) {
       if (sidl_Object_Init(
         (SPObject *)result,
@@ -3372,28 +3369,28 @@ initSStructVectorView(void) {
   module = Py_InitModule("SStructVectorView",                                 \
     _SStructVectorViewModuleMethods);
   dict = PyModule_GetDict(module);
-  ExternalAPI[bHYPRE_SStructVectorView__wrap_NUM] =                           \
-    (void*)bHYPRE_SStructVectorView__wrap;
-  ExternalAPI[bHYPRE_SStructVectorView__convert_NUM] =                        \
-    (void*)bHYPRE_SStructVectorView__convert;
-  ExternalAPI[bHYPRE_SStructVectorView__convert_python_array_NUM] =           \
-    (void*)bHYPRE_SStructVectorView__convert_python_array;
-  ExternalAPI[bHYPRE_SStructVectorView__convert_sidl_array_NUM] =             \
-    (void*)bHYPRE_SStructVectorView__convert_sidl_array;
-  ExternalAPI[bHYPRE_SStructVectorView__weakRef_NUM] =                        \
-    (void*)bHYPRE_SStructVectorView__weakRef;
-  ExternalAPI[bHYPRE_SStructVectorView_deref_NUM] =                           \
-    (void*)bHYPRE_SStructVectorView_deref;
-  ExternalAPI[bHYPRE_SStructVectorView__newRef_NUM] =                         \
-    (void*)bHYPRE_SStructVectorView__newRef;
-  ExternalAPI[bHYPRE_SStructVectorView__addRef_NUM] =                         \
-    (void*)bHYPRE_SStructVectorView__addRef;
-  ExternalAPI[bHYPRE_SStructVectorView_PyType_NUM] =                          \
-    (void*)bHYPRE_SStructVectorView_PyType;
-  ExternalAPI[bHYPRE_SStructVectorView__connectI_NUM] =                       \
-    (void*)bHYPRE_SStructVectorView__connectI;
-  ExternalAPI[bHYPRE_SStructVectorView__rmicast_NUM] =                        \
-    (void*)bHYPRE_SStructVectorView__rmicast;
+  ExternalAPI[bHYPRE_SStructVectorView__wrap_NUM] = (                         \
+    void*)bHYPRE_SStructVectorView__wrap;
+  ExternalAPI[bHYPRE_SStructVectorView__convert_NUM] = (                      \
+    void*)bHYPRE_SStructVectorView__convert;
+  ExternalAPI[bHYPRE_SStructVectorView__convert_python_array_NUM] = (         \
+    void*)bHYPRE_SStructVectorView__convert_python_array;
+  ExternalAPI[bHYPRE_SStructVectorView__convert_sidl_array_NUM] = (           \
+    void*)bHYPRE_SStructVectorView__convert_sidl_array;
+  ExternalAPI[bHYPRE_SStructVectorView__weakRef_NUM] = (                      \
+    void*)bHYPRE_SStructVectorView__weakRef;
+  ExternalAPI[bHYPRE_SStructVectorView_deref_NUM] = (                         \
+    void*)bHYPRE_SStructVectorView_deref;
+  ExternalAPI[bHYPRE_SStructVectorView__newRef_NUM] = (                       \
+    void*)bHYPRE_SStructVectorView__newRef;
+  ExternalAPI[bHYPRE_SStructVectorView__addRef_NUM] = (                       \
+    void*)bHYPRE_SStructVectorView__addRef;
+  ExternalAPI[bHYPRE_SStructVectorView_PyType_NUM] = (                        \
+    void*)bHYPRE_SStructVectorView_PyType;
+  ExternalAPI[bHYPRE_SStructVectorView__connectI_NUM] = (                     \
+    void*)bHYPRE_SStructVectorView__connectI;
+  ExternalAPI[bHYPRE_SStructVectorView__rmicast_NUM] = (                      \
+    void*)bHYPRE_SStructVectorView__rmicast;
   import_SIDLObjA();
   if (PyErr_Occurred()) {
     Py_FatalError("Error importing sidlObjA module.");
@@ -3413,17 +3410,17 @@ initSStructVectorView(void) {
   _bHYPRE_SStructVectorViewType.tp_base =                                     \
     bHYPRE_SStructMatrixVectorView_PyType();
   _bHYPRE_SStructVectorViewType.tp_bases = PyTuple_New(1);
-  PyTuple_SetItem(_bHYPRE_SStructVectorViewType.tp_bases,0,                   \
-    (PyObject *)bHYPRE_SStructMatrixVectorView_PyType());
+  PyTuple_SetItem(_bHYPRE_SStructVectorViewType.tp_bases,0, (PyObject         \
+    *)bHYPRE_SStructMatrixVectorView_PyType());
   if (PyType_Ready(&_bHYPRE_SStructVectorViewType) < 0) {
     PyErr_Print();
     fprintf(stderr, "PyType_Ready on bHYPRE.SStructVectorView failed.\n");
     return;
   }
   Py_INCREF(&_bHYPRE_SStructVectorViewType);
-  PyDict_SetItemString(dict, "SStructVectorView",                             \
-    (PyObject *)&_bHYPRE_SStructVectorViewType);
+  PyDict_SetItemString(dict, "SStructVectorView", (PyObject                   \
+    *)&_bHYPRE_SStructVectorViewType);
 
-  sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.SStructVectorView",        \
-    (void*)bHYPRE_SStructVectorView__IHConnect, &throwaway_exception);
+  sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.SStructVectorView", (      \
+    void*)bHYPRE_SStructVectorView__IHConnect, &throwaway_exception);
 }

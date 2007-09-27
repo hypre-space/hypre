@@ -2,7 +2,7 @@ C
 C       File:          sidl_BaseInterface_Impl.f
 C       Symbol:        sidl.BaseInterface-v0.9.15
 C       Symbol Type:   interface
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.BaseInterface
@@ -68,7 +68,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_BaseInterface__cast2_f(self, name, retval,
+        subroutine sidl_BaseInterface__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseInterface self
@@ -131,7 +131,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_BaseInterface_isSame_f(self, iobj, retval,
+        subroutine sidl_BaseInterface_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseInterface self
@@ -153,7 +153,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_BaseInterface_isType_f(self, name, retval,
+        subroutine sidl_BaseInterface_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseInterface self
@@ -172,7 +172,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_BaseInterface_getClassInfo_f(self, retval,
+        subroutine sidl_BaseInterface_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseInterface self
@@ -189,7 +189,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_BaseInterface__exec_f(self, methodName, inArgs,
+        subroutine sidl_BaseInterface__exec_f(self, methodName, inArgs, 
      &     outArgs, exception)
         implicit none
 C        in sidl.BaseInterface self
@@ -226,7 +226,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_BaseInterface__isRemote_f(self, retval,
+        subroutine sidl_BaseInterface__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseInterface self
@@ -243,7 +243,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_BaseInterface__isLocal_f(self, retval,
+        subroutine sidl_BaseInterface__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseInterface self

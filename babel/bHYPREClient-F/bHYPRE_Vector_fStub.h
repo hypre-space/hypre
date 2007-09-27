@@ -2,7 +2,7 @@
  * File:          bHYPRE_Vector_fStub.h
  * Symbol:        bHYPRE.Vector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -40,8 +40,8 @@ bHYPRE_Vector__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_Vector__object*
-bHYPRE_Vector__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_Vector__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

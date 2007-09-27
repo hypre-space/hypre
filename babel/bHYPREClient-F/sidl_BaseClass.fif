@@ -2,7 +2,7 @@ C
 C       File:          sidl_BaseClass_Impl.f
 C       Symbol:        sidl.BaseClass-v0.9.15
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.BaseClass
@@ -79,7 +79,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_BaseClass__cast2_f(self, name, retval,
+        subroutine sidl_BaseClass__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseClass self
@@ -142,7 +142,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_BaseClass_isSame_f(self, iobj, retval,
+        subroutine sidl_BaseClass_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseClass self
@@ -164,7 +164,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_BaseClass_isType_f(self, name, retval,
+        subroutine sidl_BaseClass_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseClass self
@@ -183,7 +183,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_BaseClass_getClassInfo_f(self, retval,
+        subroutine sidl_BaseClass_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.BaseClass self
@@ -200,7 +200,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_BaseClass__exec_f(self, methodName, inArgs,
+        subroutine sidl_BaseClass__exec_f(self, methodName, inArgs, 
      &     outArgs, exception)
         implicit none
 C        in sidl.BaseClass self

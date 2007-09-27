@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructStencil_Module.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   implement a C extension type for a sidl extendable
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -140,12 +140,12 @@ bHYPRE_StructStencil__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_StructStencil__object*
-bHYPRE_StructStencil__connectI(const char * url, sidl_bool ar,                \
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_StructStencil__connectI(const char * url, sidl_bool ar, struct         \
+  sidl_BaseInterface__object **_ex);
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -170,14 +170,14 @@ static void* remote_bHYPRE_StructStencil__cast(
   cmp0 = strcmp(name, "sidl.BaseClass");
   if (!cmp0) {
     (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-    cast = self;
+    cast = ((struct sidl_BaseClass__object*)self);
     return cast;
   }
   else if (cmp0 < 0) {
     cmp1 = strcmp(name, "bHYPRE.StructStencil");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct bHYPRE_StructStencil__object*)self);
       return cast;
     }
   }
@@ -190,10 +190,10 @@ static void* remote_bHYPRE_StructStencil__cast(
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,                    \
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,                     \
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct             \
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct              \
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct                                                  \
       bHYPRE_StructStencil__remote*)self->d_data)->d_ih, _ex);
@@ -397,8 +397,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructStenci
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -446,8 +446,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructStenci
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -498,8 +498,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructStenci
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -574,12 +574,12 @@ remote_bHYPRE_StructStencil_isSame(
     if(iobj){
       char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,       \
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "iobj", _url,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(    \
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "iobj", NULL,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(    \
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -595,8 +595,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructStenci
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -644,8 +644,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructStenci
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -694,8 +694,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructStenci
     /* extract return value */
     sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,                    \
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -748,44 +748,44 @@ static void bHYPRE_StructStencil__init_remote_epv(void)
   e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,      \
     sidl_BaseInterface*)) epv->f__set_hooks;
   e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,  \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,              \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,              \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct      \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,struct        \
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,struct        \
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,struct   \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,const    \
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct             \
-    sidl_BaseClass__object*,                                                  \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **))            \
+    epv->f_getClassInfo;
 
-  e1->f__cast        = (void* (*)(void*,const char*,                          \
-    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*))     \
+    epv->f__cast;
   e1->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e1->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e1->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote    = (sidl_bool (*)(void*,                                  \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks   = (void (*)(void*,int32_t,                               \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec        = (void (*)(void*,const char*,                           \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef       = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef    = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame       = (sidl_bool (*)(void*,                                  \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType       = (sidl_bool (*)(void*,const char*,                      \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,             \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*))             \
+    epv->f__isRemote;
+  e1->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*))         \
+    epv->f__set_hooks;
+  e1->f__exec        = (void (*)(void*,const char*,struct                     \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_deleteRef;
+  e1->f_isSame       = (sidl_bool (*)(void*,struct                            \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*,struct                \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct       \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   s_remote_initialized = 1;
 }
@@ -808,13 +808,13 @@ bHYPRE_StructStencil__remoteConnect(const char *url, sidl_bool ar,            \
   if(url == NULL) {return NULL;}
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi =                                                   \
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(      \
+    sidl_BaseInterface bi = (                                                 \
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(       \
       objectID, _ex); SIDL_CHECK(*_ex);
     return bHYPRE_StructStencil__rmicast(bi,_ex);SIDL_CHECK(*_ex);
   }
-  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,                \
-    _ex ); SIDL_CHECK(*_ex);
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex );         \
+    SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct bHYPRE_StructStencil__object*) malloc(
@@ -908,9 +908,8 @@ bHYPRE_StructStencil__remoteCreate(const char *url, sidl_BaseInterface *_ex)
   struct sidl_BaseClass__object* s1;
 
   struct bHYPRE_StructStencil__remote* r_obj;
-  sidl_rmi_InstanceHandle instance =                                          \
-    sidl_rmi_ProtocolFactory_createInstance(url, "bHYPRE.StructStencil",      \
-    _ex ); SIDL_CHECK(*_ex);
+  sidl_rmi_InstanceHandle instance = sidl_rmi_ProtocolFactory_createInstance( \
+    url, "bHYPRE.StructStencil", _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct bHYPRE_StructStencil__object*) malloc(
@@ -961,8 +960,8 @@ bHYPRE_StructStencil__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.StructStencil",          \
-      (void*)bHYPRE_StructStencil__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.StructStencil", (        \
+      void*)bHYPRE_StructStencil__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
@@ -983,15 +982,15 @@ bHYPRE_StructStencil__rmicast(
  */
 
 struct bHYPRE_StructStencil__object*
-bHYPRE_StructStencil__connectI(const char* url, sidl_bool ar,                 \
-  struct sidl_BaseInterface__object **_ex)
+bHYPRE_StructStencil__connectI(const char* url, sidl_bool ar, struct          \
+  sidl_BaseInterface__object **_ex)
 {
   return bHYPRE_StructStencil__remoteConnect(url, ar, _ex);
 }
 
 static PyObject *
-pStub_StructStencil__connect(PyObject *_ignored, PyObject *_args,             \
-  PyObject *_kwdict) {
+pStub_StructStencil__connect(PyObject *_ignored, PyObject *_args, PyObject    \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object* self = NULL;
   char* url = NULL;
@@ -1014,14 +1013,14 @@ pStub_StructStencil__connect(PyObject *_ignored, PyObject *_args,             \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -1040,8 +1039,8 @@ static struct bHYPRE_StructStencil__sepv *_sepv = NULL;
 static const struct bHYPRE_StructStencil__external *_implEPV = NULL;
 
 static PyObject *
-pStub_StructStencil_Create(PyObject *_ignored, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_StructStencil_Create(PyObject *_ignored, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   int32_t ndim = (int32_t) 0;
   int32_t size = (int32_t) 0;
@@ -1071,14 +1070,14 @@ pStub_StructStencil_Create(PyObject *_ignored, PyObject *_args,               \
       sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
         PyErr_SetObject(sidl_RuntimeException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -1091,8 +1090,8 @@ pStub_StructStencil_Create(PyObject *_ignored, PyObject *_args,               \
 }
 
 static PyObject *
-pStub_StructStencil_Destroy(PyObject *_self, PyObject *_args,                 \
-  PyObject *_kwdict) {
+pStub_StructStencil_Destroy(PyObject *_self, PyObject *_args, PyObject        \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object *_self_ior =
     ((struct bHYPRE_StructStencil__object *)
@@ -1115,14 +1114,14 @@ pStub_StructStencil_Destroy(PyObject *_self, PyObject *_args,                 \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1143,8 +1142,8 @@ pStub_StructStencil_Destroy(PyObject *_self, PyObject *_args,                 \
 }
 
 static PyObject *
-pStub_StructStencil_SetDimension(PyObject *_self, PyObject *_args,            \
-  PyObject *_kwdict) {
+pStub_StructStencil_SetDimension(PyObject *_self, PyObject *_args, PyObject   \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object *_self_ior =
     ((struct bHYPRE_StructStencil__object *)
@@ -1176,14 +1175,14 @@ pStub_StructStencil_SetDimension(PyObject *_self, PyObject *_args,            \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1205,8 +1204,8 @@ pStub_StructStencil_SetDimension(PyObject *_self, PyObject *_args,            \
 }
 
 static PyObject *
-pStub_StructStencil_SetElement(PyObject *_self, PyObject *_args,              \
-  PyObject *_kwdict) {
+pStub_StructStencil_SetElement(PyObject *_self, PyObject *_args, PyObject     \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object *_self_ior =
     ((struct bHYPRE_StructStencil__object *)
@@ -1241,14 +1240,14 @@ pStub_StructStencil_SetElement(PyObject *_self, PyObject *_args,              \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1271,8 +1270,8 @@ pStub_StructStencil_SetElement(PyObject *_self, PyObject *_args,              \
 }
 
 static PyObject *
-pStub_StructStencil_SetSize(PyObject *_self, PyObject *_args,                 \
-  PyObject *_kwdict) {
+pStub_StructStencil_SetSize(PyObject *_self, PyObject *_args, PyObject        \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object *_self_ior =
     ((struct bHYPRE_StructStencil__object *)
@@ -1304,14 +1303,14 @@ pStub_StructStencil_SetSize(PyObject *_self, PyObject *_args,                 \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1333,8 +1332,8 @@ pStub_StructStencil_SetSize(PyObject *_self, PyObject *_args,                 \
 }
 
 static PyObject *
-pStub_StructStencil__exec(PyObject *_self, PyObject *_args,                   \
-  PyObject *_kwdict) {
+pStub_StructStencil__exec(PyObject *_self, PyObject *_args, PyObject          \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object *_self_ior =
     ((struct bHYPRE_StructStencil__object *)
@@ -1369,14 +1368,14 @@ pStub_StructStencil__exec(PyObject *_self, PyObject *_args,                   \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1399,8 +1398,8 @@ pStub_StructStencil__exec(PyObject *_self, PyObject *_args,                   \
 }
 
 static PyObject *
-pStub_StructStencil__getURL(PyObject *_self, PyObject *_args,                 \
-  PyObject *_kwdict) {
+pStub_StructStencil__getURL(PyObject *_self, PyObject *_args, PyObject        \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object *_self_ior =
     ((struct bHYPRE_StructStencil__object *)
@@ -1424,22 +1423,22 @@ pStub_StructStencil__getURL(PyObject *_self, PyObject *_args,                 \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "z",
           _return);
+        free((void *)_return);
       }
-      free((void *)_return);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -1454,8 +1453,8 @@ pStub_StructStencil__getURL(PyObject *_self, PyObject *_args,                 \
 }
 
 static PyObject *
-pStub_StructStencil__isLocal(PyObject *_self, PyObject *_args,                \
-  PyObject *_kwdict) {
+pStub_StructStencil__isLocal(PyObject *_self, PyObject *_args, PyObject       \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object *_self_ior =
     ((struct bHYPRE_StructStencil__object *)
@@ -1481,14 +1480,14 @@ pStub_StructStencil__isLocal(PyObject *_self, PyObject *_args,                \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1510,8 +1509,8 @@ pStub_StructStencil__isLocal(PyObject *_self, PyObject *_args,                \
 }
 
 static PyObject *
-pStub_StructStencil__isRemote(PyObject *_self, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_StructStencil__isRemote(PyObject *_self, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object *_self_ior =
     ((struct bHYPRE_StructStencil__object *)
@@ -1537,14 +1536,14 @@ pStub_StructStencil__isRemote(PyObject *_self, PyObject *_args,               \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1566,8 +1565,8 @@ pStub_StructStencil__isRemote(PyObject *_self, PyObject *_args,               \
 }
 
 static PyObject *
-pStub_StructStencil__set_hooks(PyObject *_self, PyObject *_args,              \
-  PyObject *_kwdict) {
+pStub_StructStencil__set_hooks(PyObject *_self, PyObject *_args, PyObject     \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_StructStencil__object *_self_ior =
     ((struct bHYPRE_StructStencil__object *)
@@ -1595,14 +1594,14 @@ pStub_StructStencil__set_hooks(PyObject *_self, PyObject *_args,              \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1648,14 +1647,14 @@ pStub_StructStencil__set_hooks_static(PyObject *_ignored, PyObject *_args,    \
       sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
         PyErr_SetObject(sidl_RuntimeException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -1670,14 +1669,14 @@ pStub_StructStencil__set_hooks_static(PyObject *_ignored, PyObject *_args,    \
 }
 
 static int
-bHYPRE_StructStencil_createCast(PyObject *self, PyObject *args,               \
-  PyObject *kwds) {
+bHYPRE_StructStencil_createCast(PyObject *self, PyObject *args, PyObject      \
+  *kwds) {
   struct bHYPRE_StructStencil__object *optarg = NULL;
   char* url = NULL;
   PyObject * implObj = NULL;
   static char *_kwlist[] = {"sobj",  "url", "impl", NULL };
-  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&zO", _kwlist,       \
-    (void *)bHYPRE_StructStencil__convert, &optarg, &url, &implObj);
+  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&zO", _kwlist, (void \
+    *)bHYPRE_StructStencil__convert, &optarg, &url, &implObj);
   if (_okay) {
     if (!optarg && !url && !implObj) {
       struct sidl_BaseInterface__object *_exception;
@@ -1690,14 +1689,14 @@ bHYPRE_StructStencil_createCast(PyObject *self, PyObject *args,               \
           sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
             struct sidl_BaseInterface__object *throwaway_exception;
             PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-            PyObject *_args = PyTuple_New(1);
-            PyTuple_SetItem(_args, 0, _obj);
-            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyObject *_eargs = PyTuple_New(1);
+            PyTuple_SetItem(_eargs, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
             PyErr_SetObject(sidl_RuntimeException__type, _obj);
             Py_XDECREF(_obj);
             (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
               &throwaway_exception);
-            Py_XDECREF(_args);
+            Py_XDECREF(_eargs);
           }
           return -1;
         }
@@ -1715,14 +1714,14 @@ bHYPRE_StructStencil_createCast(PyObject *self, PyObject *args,               \
           sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
             struct sidl_BaseInterface__object *throwaway_exception;
             PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-            PyObject *_args = PyTuple_New(1);
-            PyTuple_SetItem(_args, 0, _obj);
-            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyObject *_eargs = PyTuple_New(1);
+            PyTuple_SetItem(_eargs, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
             PyErr_SetObject(sidl_RuntimeException__type, _obj);
             Py_XDECREF(_obj);
             (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
               &throwaway_exception);
-            Py_XDECREF(_args);
+            Py_XDECREF(_eargs);
           }
           return -1;
         }
@@ -1738,14 +1737,14 @@ bHYPRE_StructStencil_createCast(PyObject *self, PyObject *args,               \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
       return -1;
     }
@@ -2193,28 +2192,28 @@ thus the decision has been made to make this a class rather than\n\
 an interface."
   );
   dict = PyModule_GetDict(module);
-  ExternalAPI[bHYPRE_StructStencil__wrap_NUM] =                               \
-    (void*)bHYPRE_StructStencil__wrap;
-  ExternalAPI[bHYPRE_StructStencil__convert_NUM] =                            \
-    (void*)bHYPRE_StructStencil__convert;
-  ExternalAPI[bHYPRE_StructStencil__convert_python_array_NUM] =               \
-    (void*)bHYPRE_StructStencil__convert_python_array;
-  ExternalAPI[bHYPRE_StructStencil__convert_sidl_array_NUM] =                 \
-    (void*)bHYPRE_StructStencil__convert_sidl_array;
-  ExternalAPI[bHYPRE_StructStencil__weakRef_NUM] =                            \
-    (void*)bHYPRE_StructStencil__weakRef;
-  ExternalAPI[bHYPRE_StructStencil_deref_NUM] =                               \
-    (void*)bHYPRE_StructStencil_deref;
-  ExternalAPI[bHYPRE_StructStencil__newRef_NUM] =                             \
-    (void*)bHYPRE_StructStencil__newRef;
-  ExternalAPI[bHYPRE_StructStencil__addRef_NUM] =                             \
-    (void*)bHYPRE_StructStencil__addRef;
-  ExternalAPI[bHYPRE_StructStencil_PyType_NUM] =                              \
-    (void*)bHYPRE_StructStencil_PyType;
-  ExternalAPI[bHYPRE_StructStencil__connectI_NUM] =                           \
-    (void*)bHYPRE_StructStencil__connectI;
-  ExternalAPI[bHYPRE_StructStencil__rmicast_NUM] =                            \
-    (void*)bHYPRE_StructStencil__rmicast;
+  ExternalAPI[bHYPRE_StructStencil__wrap_NUM] = (                             \
+    void*)bHYPRE_StructStencil__wrap;
+  ExternalAPI[bHYPRE_StructStencil__convert_NUM] = (                          \
+    void*)bHYPRE_StructStencil__convert;
+  ExternalAPI[bHYPRE_StructStencil__convert_python_array_NUM] = (             \
+    void*)bHYPRE_StructStencil__convert_python_array;
+  ExternalAPI[bHYPRE_StructStencil__convert_sidl_array_NUM] = (               \
+    void*)bHYPRE_StructStencil__convert_sidl_array;
+  ExternalAPI[bHYPRE_StructStencil__weakRef_NUM] = (                          \
+    void*)bHYPRE_StructStencil__weakRef;
+  ExternalAPI[bHYPRE_StructStencil_deref_NUM] = (                             \
+    void*)bHYPRE_StructStencil_deref;
+  ExternalAPI[bHYPRE_StructStencil__newRef_NUM] = (                           \
+    void*)bHYPRE_StructStencil__newRef;
+  ExternalAPI[bHYPRE_StructStencil__addRef_NUM] = (                           \
+    void*)bHYPRE_StructStencil__addRef;
+  ExternalAPI[bHYPRE_StructStencil_PyType_NUM] = (                            \
+    void*)bHYPRE_StructStencil_PyType;
+  ExternalAPI[bHYPRE_StructStencil__connectI_NUM] = (                         \
+    void*)bHYPRE_StructStencil__connectI;
+  ExternalAPI[bHYPRE_StructStencil__rmicast_NUM] = (                          \
+    void*)bHYPRE_StructStencil__rmicast;
   import_SIDLObjA();
   if (PyErr_Occurred()) {
     Py_FatalError("Error importing sidlObjA module.");
@@ -2233,16 +2232,16 @@ an interface."
   sidl_BaseClass__import();
   _bHYPRE_StructStencilType.tp_base = sidl_BaseClass_PyType();
   _bHYPRE_StructStencilType.tp_bases = PyTuple_New(1);
-  PyTuple_SetItem(_bHYPRE_StructStencilType.tp_bases,0,                       \
-    (PyObject *)sidl_BaseClass_PyType());
+  PyTuple_SetItem(_bHYPRE_StructStencilType.tp_bases,0, (PyObject             \
+    *)sidl_BaseClass_PyType());
   if (PyType_Ready(&_bHYPRE_StructStencilType) < 0) {
     PyErr_Print();
     fprintf(stderr, "PyType_Ready on bHYPRE.StructStencil failed.\n");
     return;
   }
   Py_INCREF(&_bHYPRE_StructStencilType);
-  PyDict_SetItemString(dict, "StructStencil",                                 \
-    (PyObject *)&_bHYPRE_StructStencilType);
+  PyDict_SetItemString(dict, "StructStencil", (PyObject                       \
+    *)&_bHYPRE_StructStencilType);
   /* Load the implementation after initializing the module. */
   /* Try search global namespace first */
   dll = sidl_DLL__create(&throwaway_exception);
@@ -2281,6 +2280,6 @@ an interface."
       bHYPRE.StructStencil");
   }
 
-  sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.StructStencil",            \
-    (void*)bHYPRE_StructStencil__IHConnect, &throwaway_exception);
+  sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.StructStencil", (          \
+    void*)bHYPRE_StructStencil__IHConnect, &throwaway_exception);
 }

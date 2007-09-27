@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_SStructGraph_Impl.f
 C       Symbol:        bHYPRE.SStructGraph-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.SStructGraph
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -67,7 +67,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_SStructGraph__cast2_f(self, name, retval,
+        subroutine bHYPRE_SStructGraph__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -86,7 +86,7 @@ C       Method:  Create[]
 C        This function is the preferred way to create a SStruct Graph. 
 C       
 
-        subroutine bHYPRE_SStructGraph_Create_f(mpi_comm, grid, retval,
+        subroutine bHYPRE_SStructGraph_Create_f(mpi_comm, grid, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.MPICommunicator mpi_comm
@@ -106,7 +106,7 @@ C       Set the grid and communicator.
 C       DEPRECATED, use Create:
 C       
 
-        subroutine bHYPRE_SStructGraph_SetCommGrid_f(self, mpi_comm,
+        subroutine bHYPRE_SStructGraph_SetCommGrid_f(self, mpi_comm, 
      &     grid, retval, exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -128,7 +128,7 @@ C       Set the stencil for a variable on a structured part of the
 C       grid.
 C       
 
-        subroutine bHYPRE_SStructGraph_SetStencil_f(self, part, var,
+        subroutine bHYPRE_SStructGraph_SetStencil_f(self, part, var, 
      &     stencil, retval, exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -157,7 +157,7 @@ C       processes that own the associated variables.  This means that
 C       some data will be multiply defined.
 C       
 
-        subroutine bHYPRE_SStructGraph_AddEntries_f(self, part, index,
+        subroutine bHYPRE_SStructGraph_AddEntries_f(self, part, index, 
      &     dim, var, to_part, to_index, to_var, retval, exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -187,7 +187,7 @@ C
 C       Method:  SetObjectType[]
 C       
 
-        subroutine bHYPRE_SStructGraph_SetObjectType_f(self, type,
+        subroutine bHYPRE_SStructGraph_SetObjectType_f(self, type, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -250,7 +250,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_SStructGraph_isSame_f(self, iobj, retval,
+        subroutine bHYPRE_SStructGraph_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -272,7 +272,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_SStructGraph_isType_f(self, name, retval,
+        subroutine bHYPRE_SStructGraph_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -291,7 +291,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_SStructGraph_getClassInfo_f(self, retval,
+        subroutine bHYPRE_SStructGraph_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -345,7 +345,7 @@ C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
 
-        subroutine bHYPRE_SStructGraph_Initialize_f(self, retval,
+        subroutine bHYPRE_SStructGraph_Initialize_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -366,7 +366,7 @@ C       Initialize preceding Assemble. Values can only be set in
 C       between a call to Initialize and Assemble.
 C       
 
-        subroutine bHYPRE_SStructGraph_Assemble_f(self, retval,
+        subroutine bHYPRE_SStructGraph_Assemble_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -404,7 +404,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine bHYPRE_SStructGraph__getURL_f(self, retval,
+        subroutine bHYPRE_SStructGraph__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -421,7 +421,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine bHYPRE_SStructGraph__isRemote_f(self, retval,
+        subroutine bHYPRE_SStructGraph__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -438,7 +438,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine bHYPRE_SStructGraph__isLocal_f(self, retval,
+        subroutine bHYPRE_SStructGraph__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructGraph self
@@ -471,7 +471,7 @@ C       Method:  _set_hooks_static[]
 C       Static Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine bHYPRE_SStructGraph__set_hooks_static_f(on,
+        subroutine bHYPRE_SStructGraph__set_hooks_static_f(on, 
      &     exception)
         implicit none
 C        in bool on

@@ -2,7 +2,7 @@
  * File:          sidl_NotImplementedException_fStub.h
  * Symbol:        sidl.NotImplementedException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side documentation text for sidl.NotImplementedException
@@ -70,8 +70,8 @@ sidl_NotImplementedException__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_NotImplementedException__object*
-sidl_NotImplementedException__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_NotImplementedException__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

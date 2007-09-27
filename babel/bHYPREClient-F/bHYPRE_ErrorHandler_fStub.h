@@ -2,7 +2,7 @@
  * File:          bHYPRE_ErrorHandler_fStub.h
  * Symbol:        bHYPRE.ErrorHandler-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.ErrorHandler
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -43,8 +43,8 @@ bHYPRE_ErrorHandler__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_ErrorHandler__object*
-bHYPRE_ErrorHandler__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_ErrorHandler__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

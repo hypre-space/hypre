@@ -2,7 +2,7 @@
 // File:          bHYPRE_StructGrid.hxx
 // Symbol:        bHYPRE.StructGrid-v1.0.0
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Description:   Client-side glue code for bHYPRE.StructGrid
 // 
 // WARNING: Automatically generated; changes will be lost
@@ -255,7 +255,8 @@ namespace bHYPRE {
     typedef struct bHYPRE_StructGrid__sepv sepv_t;
 
     // default constructor
-    StructGrid() { }
+    StructGrid() { 
+    }
 
     // static constructor
     static ::bHYPRE::StructGrid _create();
@@ -270,8 +271,8 @@ namespace bHYPRE {
     }
 
     // RMI connect 2
-    static ::bHYPRE::StructGrid _connect( /*in*/ const std::string& url,
-      /*in*/ const bool ar  );
+    static ::bHYPRE::StructGrid _connect( /*in*/ const std::string& url, /*in*/ 
+      const bool ar  );
 
     // default destructor
     virtual ~StructGrid () { }
@@ -297,13 +298,13 @@ namespace bHYPRE {
     // For internal use by Impls (fixes bug#275)
     StructGrid ( StructGrid::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -387,9 +388,9 @@ namespace bHYPRE {
 extern "C" {
 
 
-  #pragma weak bHYPRE_StructGrid__connectI
+#pragma weak bHYPRE_StructGrid__connectI
 
-  #pragma weak bHYPRE_StructGrid__rmicast
+#pragma weak bHYPRE_StructGrid__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -402,8 +403,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct bHYPRE_StructGrid__object*
-  bHYPRE_StructGrid__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  bHYPRE_StructGrid__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructVector_fStub.h
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -40,8 +40,8 @@ bHYPRE_StructVector__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_StructVector__object*
-bHYPRE_StructVector__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_StructVector__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

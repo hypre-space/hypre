@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ConnectRegistry_fStub.h
  * Symbol:        sidl.rmi.ConnectRegistry-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side documentation text for sidl.rmi.ConnectRegistry
@@ -74,8 +74,8 @@ sidl_rmi_ConnectRegistry__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_rmi_ConnectRegistry__object*
-sidl_rmi_ConnectRegistry__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_rmi_ConnectRegistry__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

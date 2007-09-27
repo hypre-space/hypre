@@ -2,7 +2,7 @@ C
 C       File:          sidl_rmi_ServerRegistry_Impl.f
 C       Symbol:        sidl.rmi.ServerRegistry-v0.9.15
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.rmi.ServerRegistry
@@ -76,7 +76,7 @@ C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine sidl_rmi_ServerRegistry__cast_f(ref, retval,
+        subroutine sidl_rmi_ServerRegistry__cast_f(ref, retval, 
      &     exception)
         implicit none
 C        in opaque ref
@@ -93,7 +93,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_rmi_ServerRegistry__cast2_f(self, name, retval,
+        subroutine sidl_rmi_ServerRegistry__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ServerRegistry self
@@ -156,7 +156,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_rmi_ServerRegistry_isSame_f(self, iobj, retval,
+        subroutine sidl_rmi_ServerRegistry_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ServerRegistry self
@@ -178,7 +178,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_rmi_ServerRegistry_isType_f(self, name, retval,
+        subroutine sidl_rmi_ServerRegistry_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ServerRegistry self
@@ -197,7 +197,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_rmi_ServerRegistry_getClassInfo_f(self, retval,
+        subroutine sidl_rmi_ServerRegistry_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ServerRegistry self
@@ -213,7 +213,7 @@ C
 C       Method:  registerServer[]
 C       
 
-        subroutine sidl_rmi_ServerRegistry_registerServer_f(si,
+        subroutine sidl_rmi_ServerRegistry_registerServer_f(si, 
      &     exception)
         implicit none
 C        in sidl.rmi.ServerInfo si
@@ -248,7 +248,7 @@ C       url points to a local or remote object.  Returns the objectID
 C       if is local, Null otherwise.
 C       
 
-        subroutine sidl_rmi_ServerRegistry_isLocalObject_f(url, retval,
+        subroutine sidl_rmi_ServerRegistry_isLocalObject_f(url, retval, 
      &     exception)
         implicit none
 C        in string url
@@ -269,7 +269,7 @@ C       Server.  This gets the array of all those exceptions.  THIS
 C       IS SOMETHING OF A TEST! THIS MAY CHANGE!
 C       
 
-        subroutine sidl_rmi_ServerRegistry_getExceptions_f(retval,
+        subroutine sidl_rmi_ServerRegistry_getExceptions_f(retval, 
      &     exception)
         implicit none
 C        out array<sidl.io.Serializable> retval
@@ -284,7 +284,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_rmi_ServerRegistry__exec_f(self, methodName,
+        subroutine sidl_rmi_ServerRegistry__exec_f(self, methodName, 
      &     inArgs, outArgs, exception)
         implicit none
 C        in sidl.rmi.ServerRegistry self
@@ -305,7 +305,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine sidl_rmi_ServerRegistry__getURL_f(self, retval,
+        subroutine sidl_rmi_ServerRegistry__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ServerRegistry self
@@ -322,7 +322,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_rmi_ServerRegistry__isRemote_f(self, retval,
+        subroutine sidl_rmi_ServerRegistry__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ServerRegistry self
@@ -339,7 +339,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_rmi_ServerRegistry__isLocal_f(self, retval,
+        subroutine sidl_rmi_ServerRegistry__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ServerRegistry self
@@ -356,7 +356,7 @@ C       Method:  _set_hooks[]
 C       Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine sidl_rmi_ServerRegistry__set_hooks_f(self, on,
+        subroutine sidl_rmi_ServerRegistry__set_hooks_f(self, on, 
      &     exception)
         implicit none
 C        in sidl.rmi.ServerRegistry self
@@ -373,7 +373,7 @@ C       Method:  _set_hooks_static[]
 C       Static Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine sidl_rmi_ServerRegistry__set_hooks_static_f(on,
+        subroutine sidl_rmi_ServerRegistry__set_hooks_static_f(on, 
      &     exception)
         implicit none
 C        in bool on

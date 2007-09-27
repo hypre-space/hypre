@@ -2,7 +2,7 @@ C
 C       File:          sidl_io_Serializer_Impl.f
 C       Symbol:        sidl.io.Serializer-v0.9.15
 C       Symbol Type:   interface
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.io.Serializer
@@ -66,7 +66,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_io_Serializer__cast2_f(self, name, retval,
+        subroutine sidl_io_Serializer__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -129,7 +129,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_io_Serializer_isSame_f(self, iobj, retval,
+        subroutine sidl_io_Serializer_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -151,7 +151,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_io_Serializer_isType_f(self, name, retval,
+        subroutine sidl_io_Serializer_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -170,7 +170,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_io_Serializer_getClassInfo_f(self, retval,
+        subroutine sidl_io_Serializer_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -186,7 +186,7 @@ C
 C       Method:  packBool[]
 C       
 
-        subroutine sidl_io_Serializer_packBool_f(self, key, value,
+        subroutine sidl_io_Serializer_packBool_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -204,7 +204,7 @@ C
 C       Method:  packChar[]
 C       
 
-        subroutine sidl_io_Serializer_packChar_f(self, key, value,
+        subroutine sidl_io_Serializer_packChar_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -222,7 +222,7 @@ C
 C       Method:  packInt[]
 C       
 
-        subroutine sidl_io_Serializer_packInt_f(self, key, value,
+        subroutine sidl_io_Serializer_packInt_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -240,7 +240,7 @@ C
 C       Method:  packLong[]
 C       
 
-        subroutine sidl_io_Serializer_packLong_f(self, key, value,
+        subroutine sidl_io_Serializer_packLong_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -258,7 +258,7 @@ C
 C       Method:  packOpaque[]
 C       
 
-        subroutine sidl_io_Serializer_packOpaque_f(self, key, value,
+        subroutine sidl_io_Serializer_packOpaque_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -276,7 +276,7 @@ C
 C       Method:  packFloat[]
 C       
 
-        subroutine sidl_io_Serializer_packFloat_f(self, key, value,
+        subroutine sidl_io_Serializer_packFloat_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -294,7 +294,7 @@ C
 C       Method:  packDouble[]
 C       
 
-        subroutine sidl_io_Serializer_packDouble_f(self, key, value,
+        subroutine sidl_io_Serializer_packDouble_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -312,7 +312,7 @@ C
 C       Method:  packFcomplex[]
 C       
 
-        subroutine sidl_io_Serializer_packFcomplex_f(self, key, value,
+        subroutine sidl_io_Serializer_packFcomplex_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -330,7 +330,7 @@ C
 C       Method:  packDcomplex[]
 C       
 
-        subroutine sidl_io_Serializer_packDcomplex_f(self, key, value,
+        subroutine sidl_io_Serializer_packDcomplex_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -348,7 +348,7 @@ C
 C       Method:  packString[]
 C       
 
-        subroutine sidl_io_Serializer_packString_f(self, key, value,
+        subroutine sidl_io_Serializer_packString_f(self, key, value, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -366,7 +366,7 @@ C
 C       Method:  packSerializable[]
 C       
 
-        subroutine sidl_io_Serializer_packSerializable_f(self, key,
+        subroutine sidl_io_Serializer_packSerializable_f(self, key, 
      &     value, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -393,7 +393,7 @@ C       remote unserializer should try to reuse the array that is
 C       passed into it or not.
 C       
 
-        subroutine sidl_io_Serializer_packBoolArray_f(self, key, value,
+        subroutine sidl_io_Serializer_packBoolArray_f(self, key, value, 
      &     ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -417,7 +417,7 @@ C
 C       Method:  packCharArray[]
 C       
 
-        subroutine sidl_io_Serializer_packCharArray_f(self, key, value,
+        subroutine sidl_io_Serializer_packCharArray_f(self, key, value, 
      &     ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -441,7 +441,7 @@ C
 C       Method:  packIntArray[]
 C       
 
-        subroutine sidl_io_Serializer_packIntArray_f(self, key, value,
+        subroutine sidl_io_Serializer_packIntArray_f(self, key, value, 
      &     ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -465,7 +465,7 @@ C
 C       Method:  packLongArray[]
 C       
 
-        subroutine sidl_io_Serializer_packLongArray_f(self, key, value,
+        subroutine sidl_io_Serializer_packLongArray_f(self, key, value, 
      &     ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -489,7 +489,7 @@ C
 C       Method:  packOpaqueArray[]
 C       
 
-        subroutine sidl_io_Serializer_packOpaqueArray_f(self, key,
+        subroutine sidl_io_Serializer_packOpaqueArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -537,7 +537,7 @@ C
 C       Method:  packDoubleArray[]
 C       
 
-        subroutine sidl_io_Serializer_packDoubleArray_f(self, key,
+        subroutine sidl_io_Serializer_packDoubleArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -561,7 +561,7 @@ C
 C       Method:  packFcomplexArray[]
 C       
 
-        subroutine sidl_io_Serializer_packFcomplexArray_f(self, key,
+        subroutine sidl_io_Serializer_packFcomplexArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -585,7 +585,7 @@ C
 C       Method:  packDcomplexArray[]
 C       
 
-        subroutine sidl_io_Serializer_packDcomplexArray_f(self, key,
+        subroutine sidl_io_Serializer_packDcomplexArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -609,7 +609,7 @@ C
 C       Method:  packStringArray[]
 C       
 
-        subroutine sidl_io_Serializer_packStringArray_f(self, key,
+        subroutine sidl_io_Serializer_packStringArray_f(self, key, 
      &     value, ordering, dimen, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -633,7 +633,7 @@ C
 C       Method:  packGenericArray[]
 C       
 
-        subroutine sidl_io_Serializer_packGenericArray_f(self, key,
+        subroutine sidl_io_Serializer_packGenericArray_f(self, key, 
      &     value, reuse_array, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -678,7 +678,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_io_Serializer__exec_f(self, methodName, inArgs,
+        subroutine sidl_io_Serializer__exec_f(self, methodName, inArgs, 
      &     outArgs, exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -715,7 +715,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_io_Serializer__isRemote_f(self, retval,
+        subroutine sidl_io_Serializer__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self
@@ -732,7 +732,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_io_Serializer__isLocal_f(self, retval,
+        subroutine sidl_io_Serializer__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.io.Serializer self

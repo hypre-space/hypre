@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_IJVectorView_Impl.f
 C       Symbol:        bHYPRE.IJVectorView-v1.0.0
 C       Symbol Type:   interface
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.IJVectorView
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -39,7 +39,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_IJVectorView__cast2_f(self, name, retval,
+        subroutine bHYPRE_IJVectorView__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -67,7 +67,7 @@ C
 C       Collective.
 C       
 
-        subroutine bHYPRE_IJVectorView_SetLocalRange_f(self, jlower,
+        subroutine bHYPRE_IJVectorView_SetLocalRange_f(self, jlower, 
      &     jupper, retval, exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -94,7 +94,7 @@ C
 C       Not collective.
 C       
 
-        subroutine bHYPRE_IJVectorView_SetValues_f(self, nvalues,
+        subroutine bHYPRE_IJVectorView_SetValues_f(self, nvalues, 
      &     indices, values, retval, exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -120,7 +120,7 @@ C
 C       Not collective.
 C       
 
-        subroutine bHYPRE_IJVectorView_AddToValues_f(self, nvalues,
+        subroutine bHYPRE_IJVectorView_AddToValues_f(self, nvalues, 
      &     indices, values, retval, exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -144,7 +144,7 @@ C       Returns range of the part of the vector owned by this
 C       processor.
 C       
 
-        subroutine bHYPRE_IJVectorView_GetLocalRange_f(self, jlower,
+        subroutine bHYPRE_IJVectorView_GetLocalRange_f(self, jlower, 
      &     jupper, retval, exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -168,7 +168,7 @@ C
 C       Not collective.
 C       
 
-        subroutine bHYPRE_IJVectorView_GetValues_f(self, nvalues,
+        subroutine bHYPRE_IJVectorView_GetValues_f(self, nvalues, 
      &     indices, values, retval, exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -192,7 +192,7 @@ C       Print the vector to file.  This is mainly for debugging
 C       purposes.
 C       
 
-        subroutine bHYPRE_IJVectorView_Print_f(self, filename, retval,
+        subroutine bHYPRE_IJVectorView_Print_f(self, filename, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -212,7 +212,7 @@ C       Read the vector from file.  This is mainly for debugging
 C       purposes.
 C       
 
-        subroutine bHYPRE_IJVectorView_Read_f(self, filename, comm,
+        subroutine bHYPRE_IJVectorView_Read_f(self, filename, comm, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -270,7 +270,7 @@ C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
 
-        subroutine bHYPRE_IJVectorView_Initialize_f(self, retval,
+        subroutine bHYPRE_IJVectorView_Initialize_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -291,7 +291,7 @@ C       Initialize preceding Assemble. Values can only be set in
 C       between a call to Initialize and Assemble.
 C       
 
-        subroutine bHYPRE_IJVectorView_Assemble_f(self, retval,
+        subroutine bHYPRE_IJVectorView_Assemble_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -352,7 +352,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_IJVectorView_isSame_f(self, iobj, retval,
+        subroutine bHYPRE_IJVectorView_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -374,7 +374,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_IJVectorView_isType_f(self, name, retval,
+        subroutine bHYPRE_IJVectorView_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -393,7 +393,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_IJVectorView_getClassInfo_f(self, retval,
+        subroutine bHYPRE_IJVectorView_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -431,7 +431,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine bHYPRE_IJVectorView__getURL_f(self, retval,
+        subroutine bHYPRE_IJVectorView__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -448,7 +448,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine bHYPRE_IJVectorView__isRemote_f(self, retval,
+        subroutine bHYPRE_IJVectorView__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self
@@ -465,7 +465,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine bHYPRE_IJVectorView__isLocal_f(self, retval,
+        subroutine bHYPRE_IJVectorView__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.IJVectorView self

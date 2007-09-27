@@ -2,7 +2,7 @@
  * File:          sidl_io_Serializable_fStub.h
  * Symbol:        sidl.io.Serializable-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side documentation text for sidl.io.Serializable
@@ -69,8 +69,8 @@ sidl_io_Serializable__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_io_Serializable__object*
-sidl_io_Serializable__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_io_Serializable__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

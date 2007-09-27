@@ -2,7 +2,7 @@
 // File:          sidl_rmi_NoRouteToHostException.hxx
 // Symbol:        sidl.rmi.NoRouteToHostException-v0.9.15
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Release:       $Name$
 // Revision:      @(#) $Id$
 // Description:   Client-side glue code for sidl.rmi.NoRouteToHostException
@@ -119,7 +119,8 @@ namespace sidl {
       typedef struct sidl_rmi_NoRouteToHostException__sepv sepv_t;
 
       // default constructor
-      NoRouteToHostException() { }
+      NoRouteToHostException() { 
+      }
 
       // static constructor
       static ::sidl::rmi::NoRouteToHostException _create();
@@ -153,16 +154,16 @@ namespace sidl {
       // Alternate constructor: does not call addRef()
       // (sets d_weak_reference=isWeak)
       // For internal use by Impls (fixes bug#275)
-      NoRouteToHostException ( NoRouteToHostException::ior_t* ior,
-        bool isWeak );
+      NoRouteToHostException ( NoRouteToHostException::ior_t* ior, bool isWeak 
+        );
 
-      ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+      inline ior_t* _get_ior() const throw() {
+        return reinterpret_cast< ior_t*>(d_self);
+      }
 
-      const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-        ior_t*>(d_self); }
-
-      void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-        void*>(ptr); }
+      void _set_ior( ior_t* ptr ) throw () { 
+        d_self = reinterpret_cast< void*>(ptr);
+      }
 
       bool _is_nil() const throw () { return (d_self==0); }
 
@@ -227,9 +228,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_rmi_NoRouteToHostException__connectI
+#pragma weak sidl_rmi_NoRouteToHostException__connectI
 
-  #pragma weak sidl_rmi_NoRouteToHostException__rmicast
+#pragma weak sidl_rmi_NoRouteToHostException__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -242,7 +243,7 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_rmi_NoRouteToHostException__object*
-  sidl_rmi_NoRouteToHostException__connectI(const char * url, sidl_bool ar,
+  sidl_rmi_NoRouteToHostException__connectI(const char * url, sidl_bool ar, 
     struct sidl_BaseInterface__object **_ex);
 
 

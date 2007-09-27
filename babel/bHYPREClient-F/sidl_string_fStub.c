@@ -252,7 +252,7 @@ SIDLFortran77Symbol(sidl_string__array_get1_f,
      *i1);
   sidl_copy_c_str(
     SIDL_F77_STR(result),
-    SIDL_F77_STR_LEN(result),
+    (size_t)SIDL_F77_STR_LEN(result),
     tmp);
   free((void *)tmp);
 }
@@ -269,7 +269,7 @@ SIDLFortran77Symbol(sidl_string__array_set1_f,
    SIDL_F77_STR_FAR_LEN_DECL(value))
 {
   char *tmp = sidl_copy_fortran_str(SIDL_F77_STR(value),
-                                    SIDL_F77_STR_LEN(value));
+                                    (ptrdiff_t)SIDL_F77_STR_LEN(value));
   sidl_string__array_set1((struct sidl_string__array *)(ptrdiff_t)
                            *array,
    *i1,
@@ -294,7 +294,7 @@ SIDLFortran77Symbol(sidl_string__array_get2_f,
      *i2);
   sidl_copy_c_str(
     SIDL_F77_STR(result),
-    SIDL_F77_STR_LEN(result),
+    (size_t)SIDL_F77_STR_LEN(result),
     tmp);
   free((void *)tmp);
 }
@@ -312,7 +312,7 @@ SIDLFortran77Symbol(sidl_string__array_set2_f,
    SIDL_F77_STR_FAR_LEN_DECL(value))
 {
   char *tmp = sidl_copy_fortran_str(SIDL_F77_STR(value),
-                                    SIDL_F77_STR_LEN(value));
+                                    (ptrdiff_t)SIDL_F77_STR_LEN(value));
   sidl_string__array_set2((struct sidl_string__array *)(ptrdiff_t)
                            *array,
    *i1,
@@ -340,7 +340,7 @@ SIDLFortran77Symbol(sidl_string__array_get3_f,
      *i3);
   sidl_copy_c_str(
     SIDL_F77_STR(result),
-    SIDL_F77_STR_LEN(result),
+    (size_t)SIDL_F77_STR_LEN(result),
     tmp);
   free((void *)tmp);
 }
@@ -359,7 +359,7 @@ SIDLFortran77Symbol(sidl_string__array_set3_f,
    SIDL_F77_STR_FAR_LEN_DECL(value))
 {
   char *tmp = sidl_copy_fortran_str(SIDL_F77_STR(value),
-                                    SIDL_F77_STR_LEN(value));
+                                    (ptrdiff_t)SIDL_F77_STR_LEN(value));
   sidl_string__array_set3((struct sidl_string__array *)(ptrdiff_t)
                            *array,
    *i1,
@@ -390,7 +390,7 @@ SIDLFortran77Symbol(sidl_string__array_get4_f,
      *i4);
   sidl_copy_c_str(
     SIDL_F77_STR(result),
-    SIDL_F77_STR_LEN(result),
+    (size_t)SIDL_F77_STR_LEN(result),
     tmp);
   free((void *)tmp);
 }
@@ -410,7 +410,7 @@ SIDLFortran77Symbol(sidl_string__array_set4_f,
    SIDL_F77_STR_FAR_LEN_DECL(value))
 {
   char *tmp = sidl_copy_fortran_str(SIDL_F77_STR(value),
-                                    SIDL_F77_STR_LEN(value));
+                                    (ptrdiff_t)SIDL_F77_STR_LEN(value));
   sidl_string__array_set4((struct sidl_string__array *)(ptrdiff_t)
                            *array,
    *i1,
@@ -444,7 +444,7 @@ SIDLFortran77Symbol(sidl_string__array_get5_f,
      *i5);
   sidl_copy_c_str(
     SIDL_F77_STR(result),
-    SIDL_F77_STR_LEN(result),
+    (size_t)SIDL_F77_STR_LEN(result),
     tmp);
   free((void *)tmp);
 }
@@ -465,7 +465,7 @@ SIDLFortran77Symbol(sidl_string__array_set5_f,
    SIDL_F77_STR_FAR_LEN_DECL(value))
 {
   char *tmp = sidl_copy_fortran_str(SIDL_F77_STR(value),
-                                    SIDL_F77_STR_LEN(value));
+                                    (ptrdiff_t)SIDL_F77_STR_LEN(value));
   sidl_string__array_set5((struct sidl_string__array *)(ptrdiff_t)
                            *array,
    *i1,
@@ -502,7 +502,7 @@ SIDLFortran77Symbol(sidl_string__array_get6_f,
      *i6);
   sidl_copy_c_str(
     SIDL_F77_STR(result),
-    SIDL_F77_STR_LEN(result),
+    (size_t)SIDL_F77_STR_LEN(result),
     tmp);
   free((void *)tmp);
 }
@@ -524,7 +524,7 @@ SIDLFortran77Symbol(sidl_string__array_set6_f,
    SIDL_F77_STR_FAR_LEN_DECL(value))
 {
   char *tmp = sidl_copy_fortran_str(SIDL_F77_STR(value),
-                                    SIDL_F77_STR_LEN(value));
+                                    (ptrdiff_t)SIDL_F77_STR_LEN(value));
   sidl_string__array_set6((struct sidl_string__array *)(ptrdiff_t)
                            *array,
    *i1,
@@ -564,7 +564,7 @@ SIDLFortran77Symbol(sidl_string__array_get7_f,
      *i7);
   sidl_copy_c_str(
     SIDL_F77_STR(result),
-    SIDL_F77_STR_LEN(result),
+    (size_t)SIDL_F77_STR_LEN(result),
     tmp);
   free((void *)tmp);
 }
@@ -587,7 +587,7 @@ SIDLFortran77Symbol(sidl_string__array_set7_f,
    SIDL_F77_STR_FAR_LEN_DECL(value))
 {
   char *tmp = sidl_copy_fortran_str(SIDL_F77_STR(value),
-                                    SIDL_F77_STR_LEN(value));
+                                    (ptrdiff_t)SIDL_F77_STR_LEN(value));
   sidl_string__array_set7((struct sidl_string__array *)(ptrdiff_t)
                            *array,
    *i1,
@@ -614,7 +614,7 @@ SIDLFortran77Symbol(sidl_string__array_get_f,
                             *array, indices);
   sidl_copy_c_str(
     SIDL_F77_STR(value),
-    SIDL_F77_STR_LEN(value),
+    (size_t)SIDL_F77_STR_LEN(value),
     tmp);
   free((void *)tmp);
 }
@@ -629,7 +629,7 @@ SIDLFortran77Symbol(sidl_string__array_set_f,
    SIDL_F77_STR_FAR_LEN_DECL(value))
 {
   char *tmp = sidl_copy_fortran_str(SIDL_F77_STR(value),
-                                    SIDL_F77_STR_LEN(value));
+                                    (ptrdiff_t)SIDL_F77_STR_LEN(value));
   sidl_string__array_set((struct sidl_string__array *)(ptrdiff_t)
                      *array, indices, tmp);
   free(tmp);

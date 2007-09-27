@@ -2,7 +2,7 @@
 // File:          sidl_rmi_Response.hxx
 // Symbol:        sidl.rmi.Response-v0.9.15
 // Symbol Type:   interface
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Release:       $Name$
 // Revision:      @(#) $Id$
 // Description:   Client-side glue code for sidl.rmi.Response
@@ -143,7 +143,9 @@ namespace sidl {
       typedef struct sidl_rmi_Response__sepv sepv_t;
 
       // default constructor
-      Response() { }
+      Response() { 
+        sidl_rmi_Response_IORCache = NULL;
+      }
 
       // RMI connect
       static inline ::sidl::rmi::Response _connect( /*in*/ const std::string& 
@@ -152,7 +154,7 @@ namespace sidl {
       }
 
       // RMI connect 2
-      static ::sidl::rmi::Response _connect( /*in*/ const std::string& url,
+      static ::sidl::rmi::Response _connect( /*in*/ const std::string& url, 
         /*in*/ const bool ar  );
 
       // default destructor
@@ -172,13 +174,22 @@ namespace sidl {
       // For internal use by Impls (fixes bug#275)
       Response ( Response::ior_t* ior, bool isWeak );
 
-      ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+      inline ior_t* _get_ior() const throw() {
+        if(!sidl_rmi_Response_IORCache) { 
+          sidl_rmi_Response_IORCache = ::sidl::rmi::Response::_cast((
+            void*)d_self);
+          if (sidl_rmi_Response_IORCache) {
+            struct sidl_BaseInterface__object *throwaway_exception;
+            (sidl_rmi_Response_IORCache->d_epv->f_deleteRef)(
+              sidl_rmi_Response_IORCache->d_object, &throwaway_exception);  
+          }  
+        }
+        return sidl_rmi_Response_IORCache;
+      }
 
-      const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-        ior_t*>(d_self); }
-
-      void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-        void*>(ptr); }
+      void _set_ior( ior_t* ptr ) throw () { 
+        d_self = reinterpret_cast< void*>(ptr);
+      }
 
       bool _is_nil() const throw () { return (d_self==0); }
 
@@ -235,6 +246,14 @@ namespace sidl {
     public:
       static const ext_t * _get_ext() throw ( ::sidl::NullIORException );
 
+
+      //////////////////////////////////////////////////
+      // 
+      // Locally Cached IOR pointer
+      // 
+
+    protected:
+      mutable ior_t* sidl_rmi_Response_IORCache;
     }; // end class Response
   } // end namespace rmi
 } // end namespace sidl
@@ -242,9 +261,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_rmi_Response__connectI
+#pragma weak sidl_rmi_Response__connectI
 
-  #pragma weak sidl_rmi_Response__rmicast
+#pragma weak sidl_rmi_Response__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -257,8 +276,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_rmi_Response__object*
-  sidl_rmi_Response__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_rmi_Response__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

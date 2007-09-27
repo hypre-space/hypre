@@ -2,7 +2,7 @@
 // File:          sidl_CastException.hxx
 // Symbol:        sidl.CastException-v0.9.15
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Release:       $Name$
 // Revision:      @(#) $Id$
 // Description:   Client-side glue code for sidl.CastException
@@ -83,8 +83,8 @@ namespace sidl {
    * be communicated up the call stack.  (Note: babel _cast does NOT
    * throw this exception)
    */
-  class CastException: public virtual ::sidl::RuntimeException,
-    public virtual ::sidl::SIDLException {
+  class CastException: public virtual ::sidl::RuntimeException, public virtual 
+    ::sidl::SIDLException {
 
     //////////////////////////////////////////////////
     // 
@@ -120,7 +120,8 @@ namespace sidl {
     typedef struct sidl_CastException__sepv sepv_t;
 
     // default constructor
-    CastException() { }
+    CastException() { 
+    }
 
     // static constructor
     static ::sidl::CastException _create();
@@ -135,7 +136,7 @@ namespace sidl {
     }
 
     // RMI connect 2
-    static ::sidl::CastException _connect( /*in*/ const std::string& url,
+    static ::sidl::CastException _connect( /*in*/ const std::string& url, 
       /*in*/ const bool ar  );
 
     // default destructor
@@ -155,13 +156,13 @@ namespace sidl {
     // For internal use by Impls (fixes bug#275)
     CastException ( CastException::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -224,9 +225,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_CastException__connectI
+#pragma weak sidl_CastException__connectI
 
-  #pragma weak sidl_CastException__rmicast
+#pragma weak sidl_CastException__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -239,8 +240,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_CastException__object*
-  sidl_CastException__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_CastException__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

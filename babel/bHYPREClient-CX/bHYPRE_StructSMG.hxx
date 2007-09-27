@@ -2,7 +2,7 @@
 // File:          bHYPRE_StructSMG.hxx
 // Symbol:        bHYPRE.StructSMG-v1.0.0
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Description:   Client-side glue code for bHYPRE.StructSMG
 // 
 // WARNING: Automatically generated; changes will be lost
@@ -92,8 +92,8 @@ namespace bHYPRE {
    * 
    * The StructSMG solver requires a Struct matrix.
    */
-  class StructSMG: public virtual ::bHYPRE::Solver,
-    public virtual ::sidl::BaseClass {
+  class StructSMG: public virtual ::bHYPRE::Solver, public virtual 
+    ::sidl::BaseClass {
 
     //////////////////////////////////////////////////
     // 
@@ -424,7 +424,8 @@ namespace bHYPRE {
     typedef struct bHYPRE_StructSMG__sepv sepv_t;
 
     // default constructor
-    StructSMG() { }
+    StructSMG() { 
+    }
 
     // static constructor
     static ::bHYPRE::StructSMG _create();
@@ -439,8 +440,8 @@ namespace bHYPRE {
     }
 
     // RMI connect 2
-    static ::bHYPRE::StructSMG _connect( /*in*/ const std::string& url,
-      /*in*/ const bool ar  );
+    static ::bHYPRE::StructSMG _connect( /*in*/ const std::string& url, /*in*/ 
+      const bool ar  );
 
     // default destructor
     virtual ~StructSMG () { }
@@ -466,13 +467,13 @@ namespace bHYPRE {
     // For internal use by Impls (fixes bug#275)
     StructSMG ( StructSMG::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -556,9 +557,9 @@ namespace bHYPRE {
 extern "C" {
 
 
-  #pragma weak bHYPRE_StructSMG__connectI
+#pragma weak bHYPRE_StructSMG__connectI
 
-  #pragma weak bHYPRE_StructSMG__rmicast
+#pragma weak bHYPRE_StructSMG__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -571,8 +572,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct bHYPRE_StructSMG__object*
-  bHYPRE_StructSMG__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  bHYPRE_StructSMG__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

@@ -2,7 +2,7 @@
  * File:          bHYPRE_CoefficientAccess.h
  * Symbol:        bHYPRE.CoefficientAccess-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -81,13 +81,15 @@ bHYPRE_CoefficientAccess_GetRow(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetRow)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetRow)(
     self->d_object,
     row,
     size,
     col_ind,
     values,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -134,10 +136,12 @@ bHYPRE_CoefficientAccess_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self->d_object,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -152,10 +156,12 @@ bHYPRE_CoefficientAccess_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self->d_object,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -169,9 +175,11 @@ bHYPRE_CoefficientAccess_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -229,9 +237,11 @@ bHYPRE_CoefficientAccess__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -265,9 +275,11 @@ bHYPRE_CoefficientAccess__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -524,8 +536,8 @@ bHYPRE_CoefficientAccess__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_CoefficientAccess__object*
-bHYPRE_CoefficientAccess__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_CoefficientAccess__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

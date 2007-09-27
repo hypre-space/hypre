@@ -2,7 +2,7 @@ C
 C       File:          sidl_Finder_Impl.f
 C       Symbol:        sidl.Finder-v0.9.15
 C       Symbol Type:   interface
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.Finder
@@ -209,7 +209,7 @@ C       @return a non-NULL object means the search was successful.
 C       The DLL has already been added.
 C       
 
-        subroutine sidl_Finder_findLibrary_f(self, sidl_name, target,
+        subroutine sidl_Finder_findLibrary_f(self, sidl_name, target, 
      &     lScope, lResolve, retval, exception)
         implicit none
 C        in sidl.Finder self
@@ -236,7 +236,7 @@ C       URIs as described in class <code>DLL</code>.  This method will
 C       invalidate any existing search path.
 C       
 
-        subroutine sidl_Finder_setSearchPath_f(self, path_name,
+        subroutine sidl_Finder_setSearchPath_f(self, path_name, 
      &     exception)
         implicit none
 C        in sidl.Finder self
@@ -274,7 +274,7 @@ C       by a call to <code>setSearchPath</code>, then this fragment will
 C       be appended to the path in environment variable SIDL_DLL_PATH.
 C       
 
-        subroutine sidl_Finder_addSearchPath_f(self, path_fragment,
+        subroutine sidl_Finder_addSearchPath_f(self, path_fragment, 
      &     exception)
         implicit none
 C        in sidl.Finder self
@@ -291,7 +291,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_Finder__exec_f(self, methodName, inArgs,
+        subroutine sidl_Finder__exec_f(self, methodName, inArgs, 
      &     outArgs, exception)
         implicit none
 C        in sidl.Finder self

@@ -2,7 +2,7 @@
 // File:          sidl_Finder.cxx
 // Symbol:        sidl.Finder-v0.9.15
 // Symbol Type:   interface
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Release:       $Name$
 // Revision:      @(#) $Id$
 // Description:   Client-side glue code for sidl.Finder
@@ -142,8 +142,8 @@ static struct sidl_recursive_mutex_t sidl__Finder__mutex= SIDL_RECURSIVE_MUTEX_I
 #endif
 
   // Static variables to hold version of IOR
-  static const int32_t s_IOR_MAJOR_VERSION = 0;
-  static const int32_t s_IOR_MINOR_VERSION = 10;
+  static const int32_t s_IOR_MAJOR_VERSION = 1;
+  static const int32_t s_IOR_MINOR_VERSION = 0;
 
   // Static variables for managing EPV initialization.
   static int s_remote_initialized = 0;
@@ -183,15 +183,15 @@ static struct sidl_recursive_mutex_t sidl__Finder__mutex= SIDL_RECURSIVE_MUTEX_I
       cmp1 = strcmp(name, "sidl._Finder");
       if (!cmp1) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidl__Finder__object*)self);
         return cast;
       }
     }
     if ((*self->d_epv->f_isType)(self,name, _ex)) {
-      void* (*func)(struct sidl_rmi_InstanceHandle__object*,
-        struct sidl_BaseInterface__object**) = 
-        (void* (*)(struct sidl_rmi_InstanceHandle__object*,
-          struct sidl_BaseInterface__object**)) 
+      void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct 
+        sidl_BaseInterface__object**) = 
+        (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct 
+          sidl_BaseInterface__object**)) 
         sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
       cast =  (*func)(((struct sidl__Finder__remote*)self->d_data)->d_ih, _ex);
     }
@@ -233,7 +233,7 @@ static struct sidl_recursive_mutex_t sidl__Finder__mutex= SIDL_RECURSIVE_MUTEX_I
     struct sidl_rmi_InstanceHandle__object *_conn = ((struct 
       sidl__Finder__remote*)self->d_data)->d_ih;
     sidl_rmi_Response _rsvp = NULL;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "addRef", _ex ); SIDL_CHECK(*_ex);
     // send actual RMI request
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
@@ -377,14 +377,14 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder._set_h
 
       // pack in and inout arguments
       if(iobj){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj, 
           _ex);SIDL_CHECK(*_ex);
-        sidl_rmi_Invocation_packString( _inv, "iobj", _url,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(
+          *_ex);
         free((void*)_url);
       } else {
-        sidl_rmi_Invocation_packString( _inv, "iobj", NULL,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(
+          *_ex);
       }
 
       // send actual RMI request
@@ -400,8 +400,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.isSame
       }
 
       // extract return value
-      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -449,8 +449,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.isType
       }
 
       // extract return value
-      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -497,10 +497,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.getCla
       }
 
       // extract return value
-      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
         _ex);SIDL_CHECK(*_ex);
-      _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,
-        _ex);SIDL_CHECK(*_ex);
+      _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -537,14 +537,14 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.getCla
         _conn, "findLibrary", _ex ); SIDL_CHECK(*_ex);
 
       // pack in and inout arguments
-      sidl_rmi_Invocation_packString( _inv, "sidl_name", sidl_name,
+      sidl_rmi_Invocation_packString( _inv, "sidl_name", sidl_name, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "target", target,
-        _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "lScope", lScope,
-        _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "lResolve", lResolve,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "target", target, _ex);SIDL_CHECK(
+        *_ex);
+      sidl_rmi_Invocation_packInt( _inv, "lScope", lScope, _ex);SIDL_CHECK(
+        *_ex);
+      sidl_rmi_Invocation_packInt( _inv, "lResolve", lResolve, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -559,7 +559,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.findLi
       }
 
       // extract return value
-      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
         _ex);SIDL_CHECK(*_ex);
       _retval = sidl_DLL__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(*_ex);
 
@@ -593,7 +593,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.findLi
         _conn, "setSearchPath", _ex ); SIDL_CHECK(*_ex);
 
       // pack in and inout arguments
-      sidl_rmi_Invocation_packString( _inv, "path_name", path_name,
+      sidl_rmi_Invocation_packString( _inv, "path_name", path_name, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -652,7 +652,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.getSea
       }
 
       // extract return value
-      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval,
+      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval, 
         _ex);SIDL_CHECK(*_ex);
 
       // unpack out and inout arguments
@@ -685,7 +685,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.getSea
         _conn, "addSearchPath", _ex ); SIDL_CHECK(*_ex);
 
       // pack in and inout arguments
-      sidl_rmi_Invocation_packString( _inv, "path_fragment", path_fragment,
+      sidl_rmi_Invocation_packString( _inv, "path_fragment", path_fragment, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -738,70 +738,70 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.addSea
     epv->f_getSearchPath      = remote_sidl__Finder_getSearchPath;
     epv->f_addSearchPath      = remote_sidl__Finder_addSearchPath;
 
-    e0->f__cast        = (void* (*)(void*,const char*,
-      sidl_BaseInterface*)) epv->f__cast;
+    e0->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+      epv->f__cast;
     e0->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
     e0->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
     e0->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-    e0->f__isRemote    = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e0->f__set_hooks   = (void (*)(void*,int32_t,
-      sidl_BaseInterface*)) epv->f__set_hooks;
-    e0->f__exec        = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e0->f_addRef       = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e0->f_deleteRef    = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e0->f_isSame       = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e0->f_isType       = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
-    e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    e0->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e0->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+      epv->f__set_hooks;
+    e0->f__exec        = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e0->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+      epv->f_addRef;
+    e0->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+      epv->f_deleteRef;
+    e0->f_isSame       = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e0->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
+    e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-    e1->f__cast         = (void* (*)(void*,const char*,
-      sidl_BaseInterface*)) epv->f__cast;
+    e1->f__cast         = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+      epv->f__cast;
     e1->f__delete       = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
     e1->f__getURL       = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
     e1->f__raddRef      = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-    e1->f__isRemote     = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e1->f__set_hooks    = (void (*)(void*,int32_t,
-      sidl_BaseInterface*)) epv->f__set_hooks;
-    e1->f__exec         = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e1->f_addRef        = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e1->f_deleteRef     = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e1->f_isSame        = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e1->f_isType        = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
-    e1->f_getClassInfo  = (struct sidl_ClassInfo__object* (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
-    e1->f_findLibrary   = (struct sidl_DLL__object* (*)(void*,const char*,
-      const char*,enum sidl_Scope__enum,enum sidl_Resolve__enum,
-      struct sidl_BaseInterface__object **)) epv->f_findLibrary;
-    e1->f_setSearchPath = (void (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_setSearchPath;
-    e1->f_getSearchPath = (char* (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_getSearchPath;
-    e1->f_addSearchPath = (void (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_addSearchPath;
+    e1->f__isRemote     = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e1->f__set_hooks    = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+      epv->f__set_hooks;
+    e1->f__exec         = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e1->f_addRef        = (void (*)(void*,struct sidl_BaseInterface__object 
+      **)) epv->f_addRef;
+    e1->f_deleteRef     = (void (*)(void*,struct sidl_BaseInterface__object 
+      **)) epv->f_deleteRef;
+    e1->f_isSame        = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e1->f_isType        = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
+    e1->f_getClassInfo  = (struct sidl_ClassInfo__object* (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    e1->f_findLibrary   = (struct sidl_DLL__object* (*)(void*,const char*,const 
+      char*,enum sidl_Scope__enum,enum sidl_Resolve__enum,struct 
+      sidl_BaseInterface__object **)) epv->f_findLibrary;
+    e1->f_setSearchPath = (void (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_setSearchPath;
+    e1->f_getSearchPath = (char* (*)(void*,struct sidl_BaseInterface__object 
+      **)) epv->f_getSearchPath;
+    e1->f_addSearchPath = (void (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_addSearchPath;
 
     s_remote_initialized = 1;
   }
 
   // Create an instance that connects to an existing remote object.
   static struct sidl_Finder__object*
-  sidl_Finder__remoteConnect(const char *url, sidl_bool ar,
-    sidl_BaseInterface *_ex)
+  sidl_Finder__remoteConnect(const char *url, sidl_bool ar, sidl_BaseInterface 
+    *_ex)
   {
     struct sidl__Finder__object* self;
 
@@ -812,8 +812,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.addSea
     char* objectID = NULL;
     objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
     if(objectID) {
-      sidl_BaseInterface bi = 
-        (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
+      sidl_BaseInterface bi = (
+        sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
         objectID, _ex);
       if(ar) {
         sidl_BaseInterface_addRef(bi, _ex);
@@ -856,8 +856,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.addSea
   // Create an instance that uses an already existing 
   // InstanceHandel to connect to an existing remote object.
   static struct sidl_Finder__object*
-  sidl_Finder__IHConnect(sidl_rmi_InstanceHandle instance,
-    sidl_BaseInterface *_ex)
+  sidl_Finder__IHConnect(sidl_rmi_InstanceHandle instance, sidl_BaseInterface 
+    *_ex)
   {
     struct sidl__Finder__object* self;
 
@@ -908,8 +908,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.addSea
 
     *_ex = NULL;
     if(!connect_loaded) {
-      sidl_rmi_ConnectRegistry_registerConnect("sidl.Finder",
-        (void*)sidl_Finder__IHConnect, _ex);
+      sidl_rmi_ConnectRegistry_registerConnect("sidl.Finder", (
+        void*)sidl_Finder__IHConnect, _ex);
       connect_loaded = 1;
     }
     if (obj != NULL) {
@@ -929,8 +929,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.addSea
   // RMI connector function for the class.
   // 
   struct sidl_Finder__object*
-  sidl_Finder__connectI(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex)
+  sidl_Finder__connectI(const char* url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex)
   {
     return sidl_Finder__remoteConnect(url, ar, _ex);
   }
@@ -951,11 +951,11 @@ sidl::Finder::throwException0(
   void * _p = 0;
   struct sidl_BaseInterface__object *throwaway_exception;
 
-  if ( (_p=(*(_exception->d_epv->f__cast))(_exception->d_object,
+  if ( (_p=(*(_exception->d_epv->f__cast))(_exception->d_object, 
     "sidl.RuntimeException", &throwaway_exception)) != 0 ) {
     struct sidl_RuntimeException__object * _realtype = reinterpret_cast< struct 
       sidl_RuntimeException__object*>(_p);
-    (*_exception->d_epv->f_deleteRef)(_exception->d_object,
+    (*_exception->d_epv->f_deleteRef)(_exception->d_object, 
       &throwaway_exception);
     // Note: alternate constructor does not increment refcount.
     ::sidl::RuntimeException _resolved_exception = ::sidl::RuntimeException( 
@@ -1003,26 +1003,26 @@ sidl::Finder::throwException0(
  * The DLL has already been added.
  */
 ::sidl::DLL
-sidl::Finder::findLibrary( /* in */const ::std::string& sidl_name,
-  /* in */const ::std::string& target, /* in */::sidl::Scope lScope,
-  /* in */::sidl::Resolve lResolve )
+sidl::Finder::findLibrary( /* in */const ::std::string& sidl_name, /* in 
+  */const ::std::string& target, /* in */::sidl::Scope lScope, /* in 
+  */::sidl::Resolve lResolve )
 
 {
   ::sidl::DLL _result;
-  ior_t* const loc_self = (ior_t*) ::sidl::Finder::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_Finder__object*) 
+    ::sidl::Finder::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
   _result = ::sidl::DLL( (*(loc_self->d_epv->f_findLibrary))(loc_self->d_object,
-    /* in */ sidl_name.c_str(), /* in */ target.c_str(),
-    /* in */ (enum sidl_Scope__enum)lScope,
-    /* in */ (enum sidl_Resolve__enum)lResolve, &_exception ), false);
+    /* in */ sidl_name.c_str(), /* in */ target.c_str(), /* in */ (enum 
+    sidl_Scope__enum)lScope, /* in */ (enum sidl_Resolve__enum)lResolve, 
+    &_exception ), false);
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
   return _result;
 }
 
@@ -1038,18 +1038,18 @@ sidl::Finder::setSearchPath( /* in */const ::std::string& path_name )
 
 {
 
-  ior_t* const loc_self = (ior_t*) ::sidl::Finder::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_Finder__object*) 
+    ::sidl::Finder::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_setSearchPath))(loc_self->d_object,
-    /* in */ path_name.c_str(), &_exception );
+  (*(loc_self->d_epv->f_setSearchPath))(loc_self->d_object, /* in */ 
+    path_name.c_str(), &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -1064,23 +1064,23 @@ sidl::Finder::getSearchPath(  )
 
 {
   ::std::string _result;
-  ior_t* const loc_self = (ior_t*) ::sidl::Finder::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_Finder__object*) 
+    ::sidl::Finder::_get_ior();
   char * _local_result;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _local_result = (*(loc_self->d_epv->f_getSearchPath))(loc_self->d_object,
+  _local_result = (*(loc_self->d_epv->f_getSearchPath))(loc_self->d_object, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   if (_local_result) {
     _result = _local_result;
     ::sidl_String_free( _local_result );
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
   return _result;
 }
 
@@ -1097,18 +1097,18 @@ sidl::Finder::addSearchPath( /* in */const ::std::string& path_fragment )
 
 {
 
-  ior_t* const loc_self = (ior_t*) ::sidl::Finder::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_Finder__object*) 
+    ::sidl::Finder::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_addSearchPath))(loc_self->d_object,
-    /* in */ path_fragment.c_str(), &_exception );
+  (*(loc_self->d_epv->f_addSearchPath))(loc_self->d_object, /* in */ 
+    path_fragment.c_str(), &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -1120,21 +1120,26 @@ sidl::Finder::addSearchPath( /* in */const ::std::string& path_fragment )
 //  Babel's C++ bindings)
 // 
 
-// remote connector 2
+// remote connector
 ::sidl::Finder
 sidl::Finder::_connect(const std::string& url, const bool ar ) {
   ior_t* ior_self;
-  sidl_BaseInterface__object* _ex = 0;
-  ior_self = sidl_Finder__remoteConnect( url.c_str(), ar?TRUE:FALSE, &_ex );
-  if (_ex != 0 ) {
-    ; //TODO: handle exception
+  struct sidl_BaseInterface__object *_exception;
+  ior_self = sidl_Finder__remoteConnect( url.c_str(), ar?TRUE:FALSE, 
+    &_exception );
+  if (_exception != 0 ) {
+    throwException0(_exception);
   }
   return ::sidl::Finder( ior_self, false );
 }
 
 // copy constructor
 sidl::Finder::Finder ( const ::sidl::Finder& original ) {
-  d_self = ::sidl::Finder::_cast(original._get_ior());
+  d_self = (struct sidl_Finder__object*) original.::sidl::Finder::_get_ior();
+  sidl_Finder_IORCache = (ior_t*) d_self;
+  if(d_self) {
+    addRef();
+  }
   d_weak_reference = false;
 }
 
@@ -1145,8 +1150,11 @@ sidl::Finder::operator=( const ::sidl::Finder& rhs ) {
     if ( d_self != 0 ) {
       deleteRef();
     }
-    d_self = ::sidl::Finder::_cast(rhs._get_ior());
-    // note _cast incremements the reference count
+    d_self = (struct sidl_Finder__object*) rhs.::sidl::Finder::_get_ior();
+    sidl_Finder_IORCache = (ior_t*) d_self;
+    if(d_self) {
+      addRef();
+    }
     d_weak_reference = false;
   }
   return *this;
@@ -1154,13 +1162,16 @@ sidl::Finder::operator=( const ::sidl::Finder& rhs ) {
 
 // conversion from ior to C++ class
 sidl::Finder::Finder ( ::sidl::Finder::ior_t* ior ) 
-   : StubBase(reinterpret_cast< void*>(ior)) { }
+   : StubBase(reinterpret_cast< void*>(ior)) { 
+  sidl_Finder_IORCache = (ior_t*) d_self;
+}
 
 // Alternate constructor: does not call addRef()
 // (sets d_weak_reference=isWeak)
 // For internal use by Impls (fixes bug#275)
 sidl::Finder::Finder ( ::sidl::Finder::ior_t* ior, bool isWeak ) : 
 StubBase(reinterpret_cast< void*>(ior), isWeak){ 
+  sidl_Finder_IORCache = (ior_t*) d_self;
 }
 
 // exec has special argument passing to avoid #include circularities
@@ -1187,23 +1198,23 @@ sidl::Finder::_getURL(  )
 
 {
   ::std::string _result;
-  ior_t* const loc_self = (ior_t*) ::sidl::Finder::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_Finder__object*) 
+    ::sidl::Finder::_get_ior();
   char * _local_result;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _local_result = (*(loc_self->d_epv->f__getURL))(loc_self->d_object,
+  _local_result = (*(loc_self->d_epv->f__getURL))(loc_self->d_object, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   if (_local_result) {
     _result = _local_result;
     ::sidl_String_free( _local_result );
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
   return _result;
 }
 
@@ -1218,19 +1229,19 @@ sidl::Finder::_set_hooks( /* in */bool on )
 
 {
 
-  ior_t* const loc_self = (ior_t*) ::sidl::Finder::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_Finder__object*) 
+    ::sidl::Finder::_get_ior();
   sidl_bool _local_on = on;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f__set_hooks))(loc_self->d_object, /* in */ _local_on,
+  (*(loc_self->d_epv->f__set_hooks))(loc_self->d_object, /* in */ _local_on, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 // protected method that implements casting
@@ -1240,8 +1251,8 @@ struct sidl_Finder__object* sidl::Finder::_cast(const void* src)
 
   if(!connect_loaded) {
     struct sidl_BaseInterface__object *throwaway_exception;
-    sidl_rmi_ConnectRegistry_registerConnect("sidl.Finder",
-      (void*)sidl_Finder__IHConnect, &throwaway_exception);
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.Finder", (
+      void*)sidl_Finder__IHConnect, &throwaway_exception);
     connect_loaded = 1;
   }
   if ( src != 0 ) {
@@ -1250,7 +1261,7 @@ struct sidl_Finder__object* sidl::Finder::_cast(const void* src)
     struct sidl_BaseInterface__object *throwaway_exception;
     struct sidl_BaseInterface__object * base = reinterpret_cast< struct 
       sidl_BaseInterface__object *>(tmp);
-    cast = reinterpret_cast< ior_t*>((*base->d_epv->f__cast)(base->d_object,
+    cast = reinterpret_cast< ior_t*>((*base->d_epv->f__cast)(base->d_object, 
       "sidl.Finder", &throwaway_exception));
   }
   return cast;

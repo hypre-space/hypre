@@ -2,7 +2,7 @@ C
 C       File:          sidl_MemoryAllocationException_Impl.f
 C       Symbol:        sidl.MemoryAllocationException-v0.9.15
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.MemoryAllocationException
@@ -63,7 +63,7 @@ C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine sidl_MemoryAllocationException__cast_f(ref, retval,
+        subroutine sidl_MemoryAllocationException__cast_f(ref, retval, 
      &     exception)
         implicit none
 C        in opaque ref
@@ -80,7 +80,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_MemoryAllocationException__cast2_f(self, name,
+        subroutine sidl_MemoryAllocationException__cast2_f(self, name, 
      &     retval, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -110,7 +110,7 @@ C       class.
 C       </p>
 C       
 
-        subroutine sidl_MemoryAllocationException_addRef_f(self,
+        subroutine sidl_MemoryAllocationException_addRef_f(self, 
      &     exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -129,7 +129,7 @@ C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
 
-        subroutine sidl_MemoryAllocationException_deleteRef_f(self,
+        subroutine sidl_MemoryAllocationException_deleteRef_f(self, 
      &     exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -145,7 +145,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_MemoryAllocationException_isSame_f(self, iobj,
+        subroutine sidl_MemoryAllocationException_isSame_f(self, iobj, 
      &     retval, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -167,7 +167,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_MemoryAllocationException_isType_f(self, name,
+        subroutine sidl_MemoryAllocationException_isType_f(self, name, 
      &     retval, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -186,7 +186,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_MemoryAllocationException_getClassInfo_f(self,
+        subroutine sidl_MemoryAllocationException_getClassInfo_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -203,7 +203,7 @@ C       Method:  getNote[]
 C       Return the message associated with the exception.
 C       
 
-        subroutine sidl_MemoryAllocationException_getNote_f(self,
+        subroutine sidl_MemoryAllocationException_getNote_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -220,7 +220,7 @@ C       Method:  setNote[]
 C       Set the message associated with the exception.
 C       
 
-        subroutine sidl_MemoryAllocationException_setNote_f(self,
+        subroutine sidl_MemoryAllocationException_setNote_f(self, 
      &     message, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -238,7 +238,7 @@ C       Returns formatted string containing the concatenation of all
 C       tracelines.
 C       
 
-        subroutine sidl_MemoryAllocationException_getTrace_f(self,
+        subroutine sidl_MemoryAllocationException_getTrace_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -255,7 +255,7 @@ C       Method:  add[Line]
 C       Adds a stringified entry/line to the stack trace.
 C       
 
-        subroutine sidl_MemoryAllocationException_addLine_f(self,
+        subroutine sidl_MemoryAllocationException_addLine_f(self, 
      &     traceline, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -273,7 +273,7 @@ C       Formats and adds an entry to the stack trace based on the
 C       file name, line number, and method name.
 C       
 
-        subroutine sidl_MemoryAllocationException_add_f(self, filename,
+        subroutine sidl_MemoryAllocationException_add_f(self, filename, 
      &     lineno, methodname, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -293,7 +293,7 @@ C
 C       Method:  packObj[]
 C       
 
-        subroutine sidl_MemoryAllocationException_packObj_f(self, ser,
+        subroutine sidl_MemoryAllocationException_packObj_f(self, ser, 
      &     exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -326,7 +326,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_MemoryAllocationException__exec_f(self,
+        subroutine sidl_MemoryAllocationException__exec_f(self, 
      &     methodName, inArgs, outArgs, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -347,7 +347,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine sidl_MemoryAllocationException__getURL_f(self,
+        subroutine sidl_MemoryAllocationException__getURL_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -364,7 +364,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_MemoryAllocationException__isRemote_f(self,
+        subroutine sidl_MemoryAllocationException__isRemote_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.MemoryAllocationException self
@@ -381,7 +381,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_MemoryAllocationException__isLocal_f(self,
+        subroutine sidl_MemoryAllocationException__isLocal_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.MemoryAllocationException self

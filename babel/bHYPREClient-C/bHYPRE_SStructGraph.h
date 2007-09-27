@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructGraph.h
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -114,11 +114,13 @@ bHYPRE_SStructGraph_SetCommGrid(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommGrid)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommGrid)(
     self,
     mpi_comm,
     grid,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -139,12 +141,14 @@ bHYPRE_SStructGraph_SetStencil(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetStencil)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetStencil)(
     self,
     part,
     var,
     stencil,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -183,10 +187,12 @@ bHYPRE_SStructGraph_SetObjectType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetObjectType)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetObjectType)(
     self,
     type,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -233,10 +239,12 @@ bHYPRE_SStructGraph_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -251,10 +259,12 @@ bHYPRE_SStructGraph_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -268,9 +278,11 @@ bHYPRE_SStructGraph_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -288,10 +300,12 @@ bHYPRE_SStructGraph_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -331,9 +345,11 @@ bHYPRE_SStructGraph_Initialize(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Initialize)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Initialize)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -354,9 +370,11 @@ bHYPRE_SStructGraph_Assemble(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Assemble)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Assemble)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -414,9 +432,11 @@ bHYPRE_SStructGraph__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -450,9 +470,11 @@ bHYPRE_SStructGraph__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -709,8 +731,8 @@ bHYPRE_SStructGraph__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_SStructGraph__object*
-bHYPRE_SStructGraph__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_SStructGraph__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }
