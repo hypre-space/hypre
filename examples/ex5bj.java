@@ -25,7 +25,8 @@
 */
 // --- MPI Notes:
 // 
-// There are problems combining Java and MPI which involve threads and signals.
+// With the mpich version on the CASC cluster, there are problems combining Java and
+// MPI which involve threads and signals.
 // This example code runs well on one processor with Java 1.6.0.  But, rather than
 // use an MPI binding for Java, this example uses Hypre for all MPI calls, even
 // MPI_Init and MPI_Finalize which are normally in user code.
@@ -49,7 +50,7 @@
 // setenv HYPRE_SRC_TOP_DIR /home/painter/linear_solvers
 // ... just used to set environment variables below...
 //
-// setenv CLASSPATH .:${HYPRE_SRC_TOP_DIR}/babel-runtime/java:${HYPRE_SRC_TOP_DIR}/babel/bHYPREClient-J/:$HOME/babel-1.1.0/lib/sidlstubs/Java
+// setenv CLASSPATH .:${HYPRE_SRC_TOP_DIR}/babel-runtime/java:${HYPRE_SRC_TOP_DIR}/babel/bHYPREClient-J/:$HOME/babel-1.0.4/lib/sidlstubs/Java
 // ... Moreover, if you want to try mpiJava, do:
 // setenv CLASSPATH ${CLASSPATH}:$HOME/src/mpiJava/lib/classes
 //
@@ -57,7 +58,7 @@
 // ... Moreover, if you want to try mpiJava, do:
 // setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:$HOME/src/mpiJava/lib
 //
-// setenv SIDL_DLL_PATH $HOME/lib/libsidlstub_java.scl\;${HYPRE_SRC_TOP_DIR}/babel/bHYPREClient-P/libbHYPRE.scl\;${HYPRE_SRC_TOP_DIR}/hypre/lib/\;${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl/libsidl.scl
+// setenv SIDL_DLL_PATH $HOME/lib/libsidlstub_java.scl\;${HYPRE_SRC_TOP_DIR}/babel/bHYPREClient-P/libbHYPRE.scl\;${HYPRE_SRC_TOP_DIR}/hypre/lib/\;${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl/libsidl.scl\;${HYPRE_SRC_TOP_DIR}/babel/bHYPREClient-J/libbHYPRE.scl
 // ... you can "setenv SIDL_DEBUG_DLOPEN" to debug this, it helps a little but not much
 // ... the Python directory bHYPREClient-P is not needed unless you may also run Python
 //
