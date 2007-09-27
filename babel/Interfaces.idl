@@ -984,6 +984,12 @@ package bHYPRE version 1.0.0
        * destroy the object if the reference count goes to zero.
        **/
       void Destroy();
+
+      /** Init and Finalize are to help debug MPI interfaces;
+       * you should normally use the MPI library more directly:
+       **/
+      static void Init();
+      static void Finalize();
    }
 
    /**
