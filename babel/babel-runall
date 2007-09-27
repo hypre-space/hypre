@@ -20,6 +20,7 @@ babel --output-directory=bHYPREClient-F --comment-local-only --include-reference
 # babel --output-directory=bHYPREClient-F90 --comment-local-only --include-referenced -cF90 Interfaces.idl
 babel --output-directory=bHYPREClient-CX --comment-local-only --include-referenced -cUC++ Interfaces.idl
 babel --output-directory=bHYPREClient-P --comment-local-only --include-referenced -cPython Interfaces.idl
+babel --output-directory=bHYPREClient-J --comment-local-only -cJava Interfaces.idl
 
 # Notes:
 # The --include-referenced argument copies a slew of Babel's sidl*.h files into the bHYPREClient*
