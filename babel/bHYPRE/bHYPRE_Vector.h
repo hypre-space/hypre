@@ -2,7 +2,7 @@
  * File:          bHYPRE_Vector.h
  * Symbol:        bHYPRE.Vector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -73,9 +73,11 @@ bHYPRE_Vector_Clear(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Clear)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Clear)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -93,10 +95,12 @@ bHYPRE_Vector_Copy(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Copy)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Copy)(
     self->d_object,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -119,10 +123,12 @@ bHYPRE_Vector_Clone(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Clone)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Clone)(
     self->d_object,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -140,10 +146,12 @@ bHYPRE_Vector_Scale(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Scale)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Scale)(
     self->d_object,
     a,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -162,11 +170,13 @@ bHYPRE_Vector_Dot(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Dot)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Dot)(
     self->d_object,
     x,
     d,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -185,11 +195,13 @@ bHYPRE_Vector_Axpy(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Axpy)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Axpy)(
     self->d_object,
     a,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -236,10 +248,12 @@ bHYPRE_Vector_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self->d_object,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -254,10 +268,12 @@ bHYPRE_Vector_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self->d_object,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -271,9 +287,11 @@ bHYPRE_Vector_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -331,9 +349,11 @@ bHYPRE_Vector__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -367,9 +387,11 @@ bHYPRE_Vector__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -626,8 +648,8 @@ bHYPRE_Vector__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_Vector__object*
-bHYPRE_Vector__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_Vector__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

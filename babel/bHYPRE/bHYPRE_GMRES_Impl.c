@@ -2,7 +2,7 @@
  * File:          bHYPRE_GMRES_Impl.c
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -38,8 +38,8 @@
 #include "hypre_babel_exception_handler.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -56,9 +56,9 @@ impl_bHYPRE_GMRES__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._load) */
   /* Insert-Code-Here {bHYPRE.GMRES._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._load) */
   }
 }
 /*
@@ -78,7 +78,7 @@ impl_bHYPRE_GMRES__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._ctor) */
   /* Insert-Code-Here {bHYPRE.GMRES._ctor} (constructor method) */
 
    struct bHYPRE_GMRES__data * data;
@@ -108,7 +108,7 @@ impl_bHYPRE_GMRES__ctor(
    bHYPRE_GMRES__set_data( self, data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._ctor) */
   }
 }
 
@@ -158,7 +158,7 @@ impl_bHYPRE_GMRES__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._dtor) */
   /* Insert-Code-Here {bHYPRE.GMRES._dtor} (destructor method) */
 
    int i;
@@ -203,7 +203,7 @@ impl_bHYPRE_GMRES__dtor(
    }
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._dtor) */
   }
 }
 
@@ -225,7 +225,7 @@ impl_bHYPRE_GMRES_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Create) */
   /* Insert-Code-Here {bHYPRE.GMRES.Create} (Create method) */
 
    bHYPRE_GMRES solver = bHYPRE_GMRES__create(_ex); SIDL_CHECK(*_ex);
@@ -253,7 +253,7 @@ impl_bHYPRE_GMRES_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Create) */
   }
 }
 
@@ -275,7 +275,7 @@ impl_bHYPRE_GMRES_SetPreconditioner(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetPreconditioner) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetPreconditioner) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetPreconditioner} (SetPreconditioner method) */
 
    int ierr = 0;
@@ -291,7 +291,7 @@ impl_bHYPRE_GMRES_SetPreconditioner(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetPreconditioner) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetPreconditioner) */
   }
 }
 
@@ -313,7 +313,7 @@ impl_bHYPRE_GMRES_GetPreconditioner(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetPreconditioner) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetPreconditioner) */
   /* Insert-Code-Here {bHYPRE.GMRES.GetPreconditioner} (GetPreconditioner method) */
 
    int ierr = 0;
@@ -323,7 +323,7 @@ impl_bHYPRE_GMRES_GetPreconditioner(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetPreconditioner) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetPreconditioner) */
   }
 }
 
@@ -345,7 +345,7 @@ impl_bHYPRE_GMRES_Clone(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Clone) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Clone) */
   /* Insert-Code-Here {bHYPRE.GMRES.Clone} (Clone method) */
 
    int ierr = 0;
@@ -383,7 +383,7 @@ impl_bHYPRE_GMRES_Clone(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Clone) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Clone) */
   }
 }
 
@@ -406,7 +406,7 @@ impl_bHYPRE_GMRES_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetOperator) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetOperator} (SetOperator method) */
 
    /* DEPRECATED  the second argument in Create does the same thing */
@@ -426,7 +426,7 @@ impl_bHYPRE_GMRES_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetOperator) */
   }
 }
 
@@ -449,7 +449,7 @@ impl_bHYPRE_GMRES_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetTolerance) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetTolerance} (SetTolerance method) */
 
    int ierr = 0;
@@ -459,7 +459,7 @@ impl_bHYPRE_GMRES_SetTolerance(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetTolerance) */
   }
 }
 
@@ -482,7 +482,7 @@ impl_bHYPRE_GMRES_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetMaxIterations) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetMaxIterations} (SetMaxIterations method) */
 
    int ierr = 0;
@@ -492,7 +492,7 @@ impl_bHYPRE_GMRES_SetMaxIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetMaxIterations) */
   }
 }
 
@@ -519,7 +519,7 @@ impl_bHYPRE_GMRES_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetLogging) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetLogging} (SetLogging method) */
  
    int ierr = 0;
@@ -529,7 +529,7 @@ impl_bHYPRE_GMRES_SetLogging(
 
    return ierr;
 
- /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetLogging) */
   }
 }
 
@@ -556,7 +556,7 @@ impl_bHYPRE_GMRES_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetPrintLevel) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetPrintLevel} (SetPrintLevel method) */
 
    int ierr = 0;
@@ -566,7 +566,7 @@ impl_bHYPRE_GMRES_SetPrintLevel(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetPrintLevel) */
   }
 }
 
@@ -588,7 +588,7 @@ impl_bHYPRE_GMRES_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetNumIterations) */
   /* Insert-Code-Here {bHYPRE.GMRES.GetNumIterations} (GetNumIterations method) */
 
    int ierr = 0;
@@ -598,7 +598,7 @@ impl_bHYPRE_GMRES_GetNumIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetNumIterations) */
   }
 }
 
@@ -620,7 +620,7 @@ impl_bHYPRE_GMRES_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetRelResidualNorm) */
   /* Insert-Code-Here {bHYPRE.GMRES.GetRelResidualNorm} (GetRelResidualNorm method) */
 
    int ierr = 0;
@@ -630,7 +630,7 @@ impl_bHYPRE_GMRES_GetRelResidualNorm(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetRelResidualNorm) */
   }
 }
 
@@ -653,10 +653,10 @@ impl_bHYPRE_GMRES_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetCommunicator} (SetCommunicator method) */
    return 1;  /* DEPRECATED and will never be implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetCommunicator) */
   }
 }
 
@@ -707,7 +707,7 @@ impl_bHYPRE_GMRES_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetIntParameter} (SetIntParameter method) */
 
    int ierr = 0;
@@ -748,7 +748,7 @@ impl_bHYPRE_GMRES_SetIntParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetIntParameter) */
   }
 }
 
@@ -771,7 +771,7 @@ impl_bHYPRE_GMRES_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetDoubleParameter} (SetDoubleParameter method) */
 
    int ierr = 0;
@@ -792,7 +792,7 @@ impl_bHYPRE_GMRES_SetDoubleParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetDoubleParameter) */
   }
 }
 
@@ -815,12 +815,12 @@ impl_bHYPRE_GMRES_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetStringParameter) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetStringParameter} (SetStringParameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetStringParameter) */
   }
 }
 
@@ -844,12 +844,12 @@ impl_bHYPRE_GMRES_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetIntArray1Parameter) */
   }
 }
 
@@ -872,12 +872,12 @@ impl_bHYPRE_GMRES_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetIntArray2Parameter) */
   }
 }
 
@@ -901,12 +901,12 @@ impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetDoubleArray1Parameter) */
   }
 }
 
@@ -929,12 +929,12 @@ impl_bHYPRE_GMRES_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.GMRES.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetDoubleArray2Parameter) */
   }
 }
 
@@ -957,7 +957,7 @@ impl_bHYPRE_GMRES_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.GMRES.GetIntValue} (GetIntValue method) */
 
    int ierr = 0;
@@ -1006,7 +1006,7 @@ impl_bHYPRE_GMRES_GetIntValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetIntValue) */
   }
 }
 
@@ -1029,7 +1029,7 @@ impl_bHYPRE_GMRES_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.GMRES.GetDoubleValue} (GetDoubleValue method) */
 
    int ierr = 0;
@@ -1057,7 +1057,7 @@ impl_bHYPRE_GMRES_GetDoubleValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetDoubleValue) */
   }
 }
 
@@ -1081,7 +1081,7 @@ impl_bHYPRE_GMRES_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Setup) */
   /* Insert-Code-Here {bHYPRE.GMRES.Setup} (Setup method) */
 
    int ierr = 0;
@@ -1153,7 +1153,7 @@ impl_bHYPRE_GMRES_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Setup) */
   }
 }
 
@@ -1176,7 +1176,7 @@ impl_bHYPRE_GMRES_Apply(
 {
   *_ex = 0;
   {
-   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Apply) */
    /* Insert-Code-Here {bHYPRE.GMRES.Apply} (Apply method) */
 
    int ierr = 0;
@@ -1600,7 +1600,7 @@ impl_bHYPRE_GMRES_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Apply) */
   }
 }
 
@@ -1623,12 +1623,12 @@ impl_bHYPRE_GMRES_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.GMRES.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1; /* not implemented */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
@@ -1636,23 +1636,22 @@ struct bHYPRE_GMRES__object* impl_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_GMRES__connectI(url, ar, _ex);
 }
-struct bHYPRE_GMRES__object* impl_bHYPRE_GMRES_fcast_bHYPRE_GMRES(void* bi,
+struct bHYPRE_GMRES__object* impl_bHYPRE_GMRES_fcast_bHYPRE_GMRES(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_GMRES__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_GMRES_fcast_bHYPRE_MPICommunicator(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_GMRES_fcast_bHYPRE_MPICommunicator(void* bi, sidl_BaseInterface* 
+  _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_GMRES_fconnect_bHYPRE_Operator(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
 struct bHYPRE_Operator__object* impl_bHYPRE_GMRES_fcast_bHYPRE_Operator(void* 
@@ -1660,12 +1659,12 @@ struct bHYPRE_Operator__object* impl_bHYPRE_GMRES_fcast_bHYPRE_Operator(void*
   return bHYPRE_Operator__cast(bi, _ex);
 }
 struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_GMRES_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_PreconditionedSolver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_PreconditionedSolver__connectI(url, ar, _ex);
 }
 struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_GMRES_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  impl_bHYPRE_GMRES_fcast_bHYPRE_PreconditionedSolver(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_PreconditionedSolver__cast(bi, _ex);
 }
@@ -1673,7 +1672,7 @@ struct bHYPRE_Solver__object* impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* impl_bHYPRE_GMRES_fcast_bHYPRE_Solver(void* bi,
+struct bHYPRE_Solver__object* impl_bHYPRE_GMRES_fcast_bHYPRE_Solver(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
@@ -1681,7 +1680,7 @@ struct bHYPRE_Vector__object* impl_bHYPRE_GMRES_fconnect_bHYPRE_Vector(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* impl_bHYPRE_GMRES_fcast_bHYPRE_Vector(void* bi,
+struct bHYPRE_Vector__object* impl_bHYPRE_GMRES_fcast_bHYPRE_Vector(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
@@ -1689,35 +1688,35 @@ struct sidl_BaseClass__object* impl_bHYPRE_GMRES_fconnect_sidl_BaseClass(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* impl_bHYPRE_GMRES_fcast_sidl_BaseClass(void* bi,
+struct sidl_BaseClass__object* impl_bHYPRE_GMRES_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_GMRES_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  impl_bHYPRE_GMRES_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_GMRES_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseInterface__object* impl_bHYPRE_GMRES_fcast_sidl_BaseInterface(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* impl_bHYPRE_GMRES_fconnect_sidl_ClassInfo(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* impl_bHYPRE_GMRES_fcast_sidl_ClassInfo(void* bi,
+struct sidl_ClassInfo__object* impl_bHYPRE_GMRES_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_GMRES_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_GMRES_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_GMRES_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_GMRES_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

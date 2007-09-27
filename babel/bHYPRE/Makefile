@@ -42,7 +42,8 @@ BABEL_RUNTIME_INCLUDES=\
   -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl
 BABEL_RUNTIME_SIDL_LIBS=\
   -L$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl/.libs\
-  -lsidl-1.0.0 -lsidl
+  -lsidl-1.0.4 -lsidl
+# >>> the reference to a specific Babel version (1.0.4) needs to be cleaned up <<<
 # ... note re the use of the .libs directory above.  Its contents will
 # get copied (by babel/Makefile) to hypre/lib, but the copy hasn't
 # happened yet, and we need to point to the sidl libraries now.

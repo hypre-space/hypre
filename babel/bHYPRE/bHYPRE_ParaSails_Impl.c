@@ -2,7 +2,7 @@
  * File:          bHYPRE_ParaSails_Impl.c
  * Symbol:        bHYPRE.ParaSails-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.ParaSails
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -38,8 +38,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -56,9 +56,9 @@ impl_bHYPRE_ParaSails__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._load) */
   /* Insert-Code-Here {bHYPRE.ParaSails._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._load) */
   }
 }
 /*
@@ -78,7 +78,7 @@ impl_bHYPRE_ParaSails__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
@@ -91,7 +91,7 @@ impl_bHYPRE_ParaSails__ctor(
    /* set any other data components here */
    bHYPRE_ParaSails__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._ctor) */
   }
 }
 
@@ -141,7 +141,7 @@ impl_bHYPRE_ParaSails__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    int ierr = 0;
@@ -156,7 +156,7 @@ impl_bHYPRE_ParaSails__dtor(
    hypre_TFree( data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._dtor) */
   }
 }
 
@@ -178,7 +178,7 @@ impl_bHYPRE_ParaSails_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Create) */
   /* Insert-Code-Here {bHYPRE.ParaSails.Create} (Create method) */
 
    int ierr = 0;
@@ -198,7 +198,7 @@ impl_bHYPRE_ParaSails_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.Create) */
   }
 }
 
@@ -221,7 +221,7 @@ impl_bHYPRE_ParaSails_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
 
    int ierr = 0;
@@ -238,7 +238,7 @@ impl_bHYPRE_ParaSails_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetOperator) */
   }
 }
 
@@ -261,12 +261,12 @@ impl_bHYPRE_ParaSails_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
 
    return 1;  /* no such function, this shouldn't be called */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetTolerance) */
   }
 }
 
@@ -289,12 +289,12 @@ impl_bHYPRE_ParaSails_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
 
    return 1;  /* no such function, this shouldn't be called */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetMaxIterations) */
   }
 }
 
@@ -321,7 +321,7 @@ impl_bHYPRE_ParaSails_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
 
    /* This function should be called before Setup.  Log level changes
@@ -339,7 +339,7 @@ impl_bHYPRE_ParaSails_SetLogging(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetLogging) */
   }
 }
 
@@ -366,12 +366,12 @@ impl_bHYPRE_ParaSails_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
 
    return 1;  /* no such function, this shouldn't be called */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetPrintLevel) */
   }
 }
 
@@ -393,12 +393,12 @@ impl_bHYPRE_ParaSails_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
 
    return 1;  /* no such function, this shouldn't be called */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetNumIterations) */
   }
 }
 
@@ -420,12 +420,12 @@ impl_bHYPRE_ParaSails_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
 
    return 1;  /* no such function, this shouldn't be called */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetRelResidualNorm) */
   }
 }
 
@@ -448,7 +448,7 @@ impl_bHYPRE_ParaSails_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
 
    /* DEPRECATED  Use _Create */
@@ -465,7 +465,7 @@ impl_bHYPRE_ParaSails_SetCommunicator(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetCommunicator) */
   }
 }
 
@@ -516,7 +516,7 @@ impl_bHYPRE_ParaSails_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
 
    int ierr = 0;
@@ -549,7 +549,7 @@ impl_bHYPRE_ParaSails_SetIntParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetIntParameter) */
   }
 }
 
@@ -572,7 +572,7 @@ impl_bHYPRE_ParaSails_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
 
    int ierr = 0;
@@ -601,7 +601,7 @@ impl_bHYPRE_ParaSails_SetDoubleParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetDoubleParameter) */
   }
 }
 
@@ -624,10 +624,10 @@ impl_bHYPRE_ParaSails_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetStringParameter) */
   }
 }
 
@@ -651,10 +651,10 @@ impl_bHYPRE_ParaSails_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetIntArray1Parameter) */
   }
 }
 
@@ -677,10 +677,10 @@ impl_bHYPRE_ParaSails_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetIntArray2Parameter) */
   }
 }
 
@@ -704,10 +704,10 @@ impl_bHYPRE_ParaSails_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetDoubleArray1Parameter) */
   }
 }
 
@@ -730,10 +730,10 @@ impl_bHYPRE_ParaSails_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetDoubleArray2Parameter) */
   }
 }
 
@@ -756,7 +756,7 @@ impl_bHYPRE_ParaSails_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
    int ierr = 0;
@@ -785,7 +785,7 @@ impl_bHYPRE_ParaSails_GetIntValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetIntValue) */
   }
 }
 
@@ -808,7 +808,7 @@ impl_bHYPRE_ParaSails_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
 
    int ierr = 0;
@@ -838,7 +838,7 @@ impl_bHYPRE_ParaSails_GetDoubleValue(
    return ierr;
 
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetDoubleValue) */
   }
 }
 
@@ -862,7 +862,7 @@ impl_bHYPRE_ParaSails_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Setup) */
   /* Insert the implementation of the Setup method here... */
 
    /* SetCommunicator or Create should have been called by now, to trigger the
@@ -915,7 +915,7 @@ impl_bHYPRE_ParaSails_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.Setup) */
   }
 }
 
@@ -938,7 +938,7 @@ impl_bHYPRE_ParaSails_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Apply) */
   /* Insert the implementation of the Apply method here... */
 
    int ierr = 0;
@@ -998,7 +998,7 @@ impl_bHYPRE_ParaSails_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.Apply) */
   }
 }
 
@@ -1021,43 +1021,41 @@ impl_bHYPRE_ParaSails_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.ParaSails.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1; /* not implemented */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_ParaSails_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_IJParCSRMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_IJParCSRMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_ParaSails_fcast_bHYPRE_IJParCSRMatrix(void* bi,
+  impl_bHYPRE_ParaSails_fcast_bHYPRE_IJParCSRMatrix(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_IJParCSRMatrix__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_ParaSails_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_ParaSails_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_ParaSails_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_ParaSails_fconnect_bHYPRE_Operator(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_ParaSails_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_ParaSails_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
 struct bHYPRE_ParaSails__object* 
@@ -1065,32 +1063,28 @@ struct bHYPRE_ParaSails__object*
   sidl_BaseInterface *_ex) {
   return bHYPRE_ParaSails__connectI(url, ar, _ex);
 }
-struct bHYPRE_ParaSails__object* 
-  impl_bHYPRE_ParaSails_fcast_bHYPRE_ParaSails(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_ParaSails__object* impl_bHYPRE_ParaSails_fcast_bHYPRE_ParaSails(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_ParaSails__cast(bi, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_ParaSails_fconnect_bHYPRE_Solver(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
 struct bHYPRE_Solver__object* impl_bHYPRE_ParaSails_fcast_bHYPRE_Solver(void* 
   bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_ParaSails_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
 struct bHYPRE_Vector__object* impl_bHYPRE_ParaSails_fcast_bHYPRE_Vector(void* 
   bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_ParaSails_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_ParaSails_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* impl_bHYPRE_ParaSails_fcast_sidl_BaseClass(void* 
@@ -1098,18 +1092,17 @@ struct sidl_BaseClass__object* impl_bHYPRE_ParaSails_fcast_sidl_BaseClass(void*
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ParaSails_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_ParaSails_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ParaSails_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_ParaSails_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
 struct sidl_ClassInfo__object* impl_bHYPRE_ParaSails_fcast_sidl_ClassInfo(void* 
@@ -1117,12 +1110,12 @@ struct sidl_ClassInfo__object* impl_bHYPRE_ParaSails_fcast_sidl_ClassInfo(void*
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ParaSails_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_ParaSails_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ParaSails_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_ParaSails_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }

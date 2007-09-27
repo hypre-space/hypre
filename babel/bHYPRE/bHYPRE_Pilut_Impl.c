@@ -2,7 +2,7 @@
  * File:          bHYPRE_Pilut_Impl.c
  * Symbol:        bHYPRE.Pilut-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.Pilut
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -35,8 +35,8 @@
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -53,9 +53,9 @@ impl_bHYPRE_Pilut__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut._load) */
   /* Insert-Code-Here {bHYPRE.Pilut._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut._load) */
   }
 }
 /*
@@ -75,9 +75,9 @@ impl_bHYPRE_Pilut__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut._ctor) */
   /* Insert the implementation of the constructor method here... */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut._ctor) */
   }
 }
 
@@ -127,9 +127,9 @@ impl_bHYPRE_Pilut__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut._dtor) */
   /* Insert the implementation of the destructor method here... */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut._dtor) */
   }
 }
 
@@ -151,7 +151,7 @@ impl_bHYPRE_Pilut_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Create) */
   /* Insert-Code-Here {bHYPRE.Pilut.Create} (Create method) */
 
    /* int ierr = 0;*/
@@ -166,7 +166,7 @@ impl_bHYPRE_Pilut_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.Create) */
   }
 }
 
@@ -189,10 +189,10 @@ impl_bHYPRE_Pilut_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetOperator) */
   }
 }
 
@@ -215,10 +215,10 @@ impl_bHYPRE_Pilut_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetTolerance) */
   }
 }
 
@@ -241,10 +241,10 @@ impl_bHYPRE_Pilut_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetMaxIterations) */
   }
 }
 
@@ -271,10 +271,10 @@ impl_bHYPRE_Pilut_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetLogging) */
   }
 }
 
@@ -301,10 +301,10 @@ impl_bHYPRE_Pilut_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetPrintLevel) */
   }
 }
 
@@ -326,10 +326,10 @@ impl_bHYPRE_Pilut_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetNumIterations) */
   }
 }
 
@@ -351,10 +351,10 @@ impl_bHYPRE_Pilut_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetRelResidualNorm) */
   }
 }
 
@@ -377,10 +377,10 @@ impl_bHYPRE_Pilut_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetCommunicator) */
   }
 }
 
@@ -431,10 +431,10 @@ impl_bHYPRE_Pilut_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetIntParameter) */
   }
 }
 
@@ -457,10 +457,10 @@ impl_bHYPRE_Pilut_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetDoubleParameter) */
   }
 }
 
@@ -483,10 +483,10 @@ impl_bHYPRE_Pilut_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetStringParameter) */
   }
 }
 
@@ -510,10 +510,10 @@ impl_bHYPRE_Pilut_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetIntArray1Parameter) */
   }
 }
 
@@ -536,10 +536,10 @@ impl_bHYPRE_Pilut_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetIntArray2Parameter) */
   }
 }
 
@@ -563,10 +563,10 @@ impl_bHYPRE_Pilut_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetDoubleArray1Parameter) */
   }
 }
 
@@ -589,10 +589,10 @@ impl_bHYPRE_Pilut_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.SetDoubleArray2Parameter) */
   }
 }
 
@@ -615,10 +615,10 @@ impl_bHYPRE_Pilut_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetIntValue) */
   }
 }
 
@@ -641,10 +641,10 @@ impl_bHYPRE_Pilut_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.GetDoubleValue) */
   }
 }
 
@@ -668,10 +668,10 @@ impl_bHYPRE_Pilut_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Setup) */
   /* Insert the implementation of the Setup method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.Setup) */
   }
 }
 
@@ -694,10 +694,10 @@ impl_bHYPRE_Pilut_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Apply) */
   /* Insert the implementation of the Apply method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.Apply) */
   }
 }
 
@@ -720,28 +720,27 @@ impl_bHYPRE_Pilut_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.Pilut.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1; /* not implemented */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Pilut_fconnect_bHYPRE_MPICommunicator(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_MPICommunicator(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Pilut_fcast_bHYPRE_MPICommunicator(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_Pilut_fcast_bHYPRE_MPICommunicator(void* bi, sidl_BaseInterface* 
+  _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_Pilut_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_Pilut_fconnect_bHYPRE_Operator(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
 struct bHYPRE_Operator__object* impl_bHYPRE_Pilut_fcast_bHYPRE_Operator(void* 
@@ -752,7 +751,7 @@ struct bHYPRE_Pilut__object* impl_bHYPRE_Pilut_fconnect_bHYPRE_Pilut(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Pilut__connectI(url, ar, _ex);
 }
-struct bHYPRE_Pilut__object* impl_bHYPRE_Pilut_fcast_bHYPRE_Pilut(void* bi,
+struct bHYPRE_Pilut__object* impl_bHYPRE_Pilut_fcast_bHYPRE_Pilut(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Pilut__cast(bi, _ex);
 }
@@ -760,7 +759,7 @@ struct bHYPRE_Solver__object* impl_bHYPRE_Pilut_fconnect_bHYPRE_Solver(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* impl_bHYPRE_Pilut_fcast_bHYPRE_Solver(void* bi,
+struct bHYPRE_Solver__object* impl_bHYPRE_Pilut_fcast_bHYPRE_Solver(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
@@ -768,7 +767,7 @@ struct bHYPRE_Vector__object* impl_bHYPRE_Pilut_fconnect_bHYPRE_Vector(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* impl_bHYPRE_Pilut_fcast_bHYPRE_Vector(void* bi,
+struct bHYPRE_Vector__object* impl_bHYPRE_Pilut_fcast_bHYPRE_Vector(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
@@ -776,35 +775,35 @@ struct sidl_BaseClass__object* impl_bHYPRE_Pilut_fconnect_sidl_BaseClass(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* impl_bHYPRE_Pilut_fcast_sidl_BaseClass(void* bi,
+struct sidl_BaseClass__object* impl_bHYPRE_Pilut_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Pilut_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  impl_bHYPRE_Pilut_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Pilut_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseInterface__object* impl_bHYPRE_Pilut_fcast_sidl_BaseInterface(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* impl_bHYPRE_Pilut_fconnect_sidl_ClassInfo(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* impl_bHYPRE_Pilut_fcast_sidl_ClassInfo(void* bi,
+struct sidl_ClassInfo__object* impl_bHYPRE_Pilut_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Pilut_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_Pilut_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Pilut_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_Pilut_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

@@ -2,7 +2,7 @@
  * File:          bHYPRE_ErrorHandler_Impl.c
  * Symbol:        bHYPRE.ErrorHandler-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.ErrorHandler
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -33,8 +33,8 @@
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.ErrorHandler._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -219,52 +219,49 @@ impl_bHYPRE_ErrorHandler_Describe(
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_ErrorHandler__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_bHYPRE_ErrorHandler(const char* url,
+  impl_bHYPRE_ErrorHandler_fconnect_bHYPRE_ErrorHandler(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_ErrorHandler__connectI(url, ar, _ex);
 }
 struct bHYPRE_ErrorHandler__object* 
-  impl_bHYPRE_ErrorHandler_fcast_bHYPRE_ErrorHandler(void* bi,
+  impl_bHYPRE_ErrorHandler_fcast_bHYPRE_ErrorHandler(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_ErrorHandler__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_ErrorHandler_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_ErrorHandler_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_ErrorHandler_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_ErrorHandler_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

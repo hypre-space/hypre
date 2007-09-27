@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructParCSRVector_Impl.c
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -40,8 +40,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -58,9 +58,9 @@ impl_bHYPRE_SStructParCSRVector__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._load) */
   /* Insert-Code-Here {bHYPRE.SStructParCSRVector._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._load) */
   }
 }
 /*
@@ -80,7 +80,7 @@ impl_bHYPRE_SStructParCSRVector__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._ctor) */
   /* Insert the implementation of the constructor method here... */
 
   /* How to make a vector: first call _Create (not __create),
@@ -93,7 +93,7 @@ impl_bHYPRE_SStructParCSRVector__ctor(
    data -> comm = MPI_COMM_NULL;
    bHYPRE_SStructParCSRVector__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._ctor) */
   }
 }
 
@@ -143,7 +143,7 @@ impl_bHYPRE_SStructParCSRVector__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    int ierr = 0;
@@ -155,7 +155,7 @@ impl_bHYPRE_SStructParCSRVector__dtor(
    hypre_assert( ierr==0 );
    hypre_TFree( data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._dtor) */
   }
 }
 
@@ -177,7 +177,7 @@ impl_bHYPRE_SStructParCSRVector_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Create) */
   /* Insert-Code-Here {bHYPRE.SStructParCSRVector.Create} (Create method) */
 
    int ierr = 0;
@@ -201,7 +201,7 @@ impl_bHYPRE_SStructParCSRVector_Create(
    return( vec );
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Create) */
   }
 }
 
@@ -223,7 +223,7 @@ impl_bHYPRE_SStructParCSRVector_SetGrid(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetGrid) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
    /* N.B. This is the only grid-setting function defined in the interface.
     So this is the only place to call HYPRE_SStructVectorCreate, which requires a grid.
@@ -254,7 +254,7 @@ impl_bHYPRE_SStructParCSRVector_SetGrid(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetGrid) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetGrid) */
   }
 }
 
@@ -288,7 +288,7 @@ impl_bHYPRE_SStructParCSRVector_SetValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
 
    int ierr = 0;
@@ -303,7 +303,7 @@ impl_bHYPRE_SStructParCSRVector_SetValues(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetValues) */
   }
 }
 
@@ -339,7 +339,7 @@ impl_bHYPRE_SStructParCSRVector_SetBoxValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetBoxValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
 
    int ierr = 0;
@@ -354,7 +354,7 @@ impl_bHYPRE_SStructParCSRVector_SetBoxValues(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetBoxValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetBoxValues) */
   }
 }
 
@@ -388,7 +388,7 @@ impl_bHYPRE_SStructParCSRVector_AddToValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
 
    int ierr = 0;
@@ -403,7 +403,7 @@ impl_bHYPRE_SStructParCSRVector_AddToValues(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.AddToValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.AddToValues) */
   }
 }
 
@@ -439,7 +439,7 @@ impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToBoxValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToBoxValues) */
   /* Insert the implementation of the AddToBoxValues method here... */
 
    int ierr = 0;
@@ -454,7 +454,7 @@ impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.AddToBoxValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.AddToBoxValues) */
   }
 }
 
@@ -475,7 +475,7 @@ impl_bHYPRE_SStructParCSRVector_Gather(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Gather) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Gather) */
   /* Insert the implementation of the Gather method here... */
 
    int ierr = 0;
@@ -488,7 +488,7 @@ impl_bHYPRE_SStructParCSRVector_Gather(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Gather) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Gather) */
   }
 }
 
@@ -521,7 +521,7 @@ impl_bHYPRE_SStructParCSRVector_GetValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetValues) */
   /* Insert the implementation of the GetValues method here... */
 
    int ierr = 0;
@@ -536,7 +536,7 @@ impl_bHYPRE_SStructParCSRVector_GetValues(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.GetValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.GetValues) */
   }
 }
 
@@ -571,7 +571,7 @@ impl_bHYPRE_SStructParCSRVector_GetBoxValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetBoxValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetBoxValues) */
   /* Insert the implementation of the GetBoxValues method here... */
 
    int ierr = 0;
@@ -586,7 +586,7 @@ impl_bHYPRE_SStructParCSRVector_GetBoxValues(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.GetBoxValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.GetBoxValues) */
   }
 }
 
@@ -607,10 +607,10 @@ impl_bHYPRE_SStructParCSRVector_SetComplex(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetComplex) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetComplex) */
   /* Insert the implementation of the SetComplex method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetComplex) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetComplex) */
   }
 }
 
@@ -634,7 +634,7 @@ impl_bHYPRE_SStructParCSRVector_Print(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Print) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Print) */
   /* Insert the implementation of the Print method here... */
 
    int ierr=0;
@@ -650,7 +650,7 @@ impl_bHYPRE_SStructParCSRVector_Print(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Print) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Print) */
   }
 }
 
@@ -675,7 +675,7 @@ impl_bHYPRE_SStructParCSRVector_GetObject(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetObject) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetObject) */
   /* Insert the implementation of the GetObject method here... */
 
    int ierr=0;
@@ -720,7 +720,7 @@ impl_bHYPRE_SStructParCSRVector_GetObject(
    return( ierr );
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.GetObject) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.GetObject) */
   }
 }
 
@@ -742,7 +742,7 @@ impl_bHYPRE_SStructParCSRVector_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
 
    /* DEPRECATED   use _Create */
@@ -754,7 +754,7 @@ impl_bHYPRE_SStructParCSRVector_SetCommunicator(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetCommunicator) */
   }
 }
 
@@ -804,7 +804,7 @@ impl_bHYPRE_SStructParCSRVector_Initialize(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Initialize) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Initialize) */
   /* Insert the implementation of the Initialize method here... */
 
    int ierr = 0;
@@ -818,7 +818,7 @@ impl_bHYPRE_SStructParCSRVector_Initialize(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Initialize) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Initialize) */
   }
 }
 
@@ -843,7 +843,7 @@ impl_bHYPRE_SStructParCSRVector_Assemble(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Assemble) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Assemble) */
   /* Insert the implementation of the Assemble method here... */
 
    int ierr = 0;
@@ -856,7 +856,7 @@ impl_bHYPRE_SStructParCSRVector_Assemble(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Assemble) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Assemble) */
   }
 }
 
@@ -877,7 +877,7 @@ impl_bHYPRE_SStructParCSRVector_Clear(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clear) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clear) */
   /* Insert the implementation of the Clear method here... */
 
    int ierr = 0;
@@ -894,7 +894,7 @@ impl_bHYPRE_SStructParCSRVector_Clear(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clear) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clear) */
   }
 }
 
@@ -916,7 +916,7 @@ impl_bHYPRE_SStructParCSRVector_Copy(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Copy) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Copy) */
   /* Insert the implementation of the Copy method here... */
 
    int ierr = 0;
@@ -946,7 +946,7 @@ impl_bHYPRE_SStructParCSRVector_Copy(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Copy) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Copy) */
   }
 }
 
@@ -973,7 +973,7 @@ impl_bHYPRE_SStructParCSRVector_Clone(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clone) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clone) */
   /* Insert the implementation of the Clone method here... */
    /* Note that Initialize is called on the new vector, but not Assemble. */
 
@@ -1014,7 +1014,7 @@ impl_bHYPRE_SStructParCSRVector_Clone(
    return( ierr );
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clone) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clone) */
   }
 }
 
@@ -1036,7 +1036,7 @@ impl_bHYPRE_SStructParCSRVector_Scale(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Scale) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Scale) */
   /* Insert the implementation of the Scale method here... */
 
    int ierr = 0;
@@ -1051,7 +1051,7 @@ impl_bHYPRE_SStructParCSRVector_Scale(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Scale) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Scale) */
   }
 }
 
@@ -1074,7 +1074,7 @@ impl_bHYPRE_SStructParCSRVector_Dot(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Dot) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Dot) */
   /* Insert the implementation of the Dot method here... */
 
    int ierr = 0;
@@ -1104,7 +1104,7 @@ impl_bHYPRE_SStructParCSRVector_Dot(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Dot) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Dot) */
   }
 }
 
@@ -1127,7 +1127,7 @@ impl_bHYPRE_SStructParCSRVector_Axpy(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Axpy) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
 
    int ierr = 0;
@@ -1157,7 +1157,7 @@ impl_bHYPRE_SStructParCSRVector_Axpy(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Axpy) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Axpy) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
@@ -1167,7 +1167,7 @@ struct bHYPRE_MPICommunicator__object*
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
@@ -1177,7 +1177,7 @@ struct bHYPRE_MatrixVectorView__object*
   return bHYPRE_MatrixVectorView__connectI(url, ar, _ex);
 }
 struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_MatrixVectorView(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_MatrixVectorView(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MatrixVectorView__cast(bi, _ex);
 }
@@ -1187,17 +1187,17 @@ struct bHYPRE_ProblemDefinition__object*
   return bHYPRE_ProblemDefinition__connectI(url, ar, _ex);
 }
 struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_ProblemDefinition(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_ProblemDefinition(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_ProblemDefinition__cast(bi, _ex);
 }
 struct bHYPRE_SStructGrid__object* 
-  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_SStructGrid(const char* url,
+  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_SStructGrid(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_SStructGrid__connectI(url, ar, _ex);
 }
 struct bHYPRE_SStructGrid__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_SStructGrid(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_SStructGrid(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_SStructGrid__cast(bi, _ex);
 }
@@ -1217,7 +1217,7 @@ struct bHYPRE_SStructParCSRVector__object*
   return bHYPRE_SStructParCSRVector__connectI(url, ar, _ex);
 }
 struct bHYPRE_SStructParCSRVector__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_SStructParCSRVector(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_SStructParCSRVector(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_SStructParCSRVector__cast(bi, _ex);
 }
@@ -1227,47 +1227,47 @@ struct bHYPRE_SStructVectorView__object*
   return bHYPRE_SStructVectorView__connectI(url, ar, _ex);
 }
 struct bHYPRE_SStructVectorView__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_SStructVectorView(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_SStructVectorView(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_SStructVectorView__cast(bi, _ex);
 }
 struct bHYPRE_Vector__object* 
-  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_Vector(const char* url,
+  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_Vector(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
 struct bHYPRE_Vector__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_Vector(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_bHYPRE_Vector(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructParCSRVector_fconnect_sidl_BaseClass(const char* url,
+  impl_bHYPRE_SStructParCSRVector_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_sidl_BaseClass(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructParCSRVector_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_SStructParCSRVector_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructParCSRVector_fconnect_sidl_ClassInfo(const char* url,
+  impl_bHYPRE_SStructParCSRVector_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_sidl_ClassInfo(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
@@ -1277,7 +1277,8 @@ struct sidl_RuntimeException__object*
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_SStructParCSRVector_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_SStructParCSRVector_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

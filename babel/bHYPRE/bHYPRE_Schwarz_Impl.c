@@ -2,7 +2,7 @@
  * File:          bHYPRE_Schwarz_Impl.c
  * Symbol:        bHYPRE.Schwarz-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.Schwarz
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -38,8 +38,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -56,9 +56,9 @@ impl_bHYPRE_Schwarz__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._load) */
   /* Insert-Code-Here {bHYPRE.Schwarz._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._load) */
   }
 }
 /*
@@ -78,7 +78,7 @@ impl_bHYPRE_Schwarz__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._ctor) */
   /* Insert-Code-Here {bHYPRE.Schwarz._ctor} (constructor method) */
 
    /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
@@ -90,7 +90,7 @@ impl_bHYPRE_Schwarz__ctor(
    /* set any other data components here */
    bHYPRE_Schwarz__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._ctor) */
   }
 }
 
@@ -140,7 +140,7 @@ impl_bHYPRE_Schwarz__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz._dtor) */
   /* Insert-Code-Here {bHYPRE.Schwarz._dtor} (destructor method) */
 
    int ierr = 0;
@@ -157,7 +157,7 @@ impl_bHYPRE_Schwarz__dtor(
    hypre_TFree( data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz._dtor) */
   }
 }
 
@@ -178,7 +178,7 @@ impl_bHYPRE_Schwarz_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Create) */
   /* Insert-Code-Here {bHYPRE.Schwarz.Create} (Create method) */
 
    int ierr = 0;
@@ -197,7 +197,7 @@ impl_bHYPRE_Schwarz_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Create) */
   }
 }
 
@@ -220,7 +220,7 @@ impl_bHYPRE_Schwarz_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetOperator) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetOperator} (SetOperator method) */
 
    int ierr = 0;
@@ -237,7 +237,7 @@ impl_bHYPRE_Schwarz_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetOperator) */
   }
 }
 
@@ -260,12 +260,12 @@ impl_bHYPRE_Schwarz_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetTolerance) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetTolerance} (SetTolerance method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetTolerance) */
   }
 }
 
@@ -288,12 +288,12 @@ impl_bHYPRE_Schwarz_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetMaxIterations) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetMaxIterations} (SetMaxIterations method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetMaxIterations) */
   }
 }
 
@@ -320,12 +320,12 @@ impl_bHYPRE_Schwarz_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetLogging) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetLogging} (SetLogging method) */
 
    return 0; /* ignored */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetLogging) */
   }
 }
 
@@ -352,12 +352,12 @@ impl_bHYPRE_Schwarz_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetPrintLevel) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetPrintLevel} (SetPrintLevel method) */
 
    return 0;  /* ignored */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetPrintLevel) */
   }
 }
 
@@ -379,12 +379,12 @@ impl_bHYPRE_Schwarz_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetNumIterations) */
   /* Insert-Code-Here {bHYPRE.Schwarz.GetNumIterations} (GetNumIterations method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetNumIterations) */
   }
 }
 
@@ -406,12 +406,12 @@ impl_bHYPRE_Schwarz_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetRelResidualNorm) */
   /* Insert-Code-Here {bHYPRE.Schwarz.GetRelResidualNorm} (GetRelResidualNorm method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetRelResidualNorm) */
   }
 }
 
@@ -434,11 +434,11 @@ impl_bHYPRE_Schwarz_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetCommunicator} (SetCommunicator method) */
    return 1;  /* no MPI in this solver, and if there were I still wouldn't
                  implement this deprecated function */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetCommunicator) */
   }
 }
 
@@ -489,7 +489,7 @@ impl_bHYPRE_Schwarz_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetIntParameter} (SetIntParameter method) */
 
    int ierr = 0;
@@ -518,7 +518,7 @@ impl_bHYPRE_Schwarz_SetIntParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetIntParameter) */
   }
 }
 
@@ -541,7 +541,7 @@ impl_bHYPRE_Schwarz_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetDoubleParameter} (SetDoubleParameter method) */
 
    int ierr = 0;
@@ -562,7 +562,7 @@ impl_bHYPRE_Schwarz_SetDoubleParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetDoubleParameter) */
   }
 }
 
@@ -585,12 +585,12 @@ impl_bHYPRE_Schwarz_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetStringParameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetStringParameter} (SetStringParameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetStringParameter) */
   }
 }
 
@@ -614,12 +614,12 @@ impl_bHYPRE_Schwarz_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetIntArray1Parameter) */
   }
 }
 
@@ -642,12 +642,12 @@ impl_bHYPRE_Schwarz_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetIntArray2Parameter) */
   }
 }
 
@@ -671,12 +671,12 @@ impl_bHYPRE_Schwarz_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetDoubleArray1Parameter) */
   }
 }
 
@@ -699,12 +699,12 @@ impl_bHYPRE_Schwarz_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.Schwarz.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.SetDoubleArray2Parameter) */
   }
 }
 
@@ -727,12 +727,12 @@ impl_bHYPRE_Schwarz_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.Schwarz.GetIntValue} (GetIntValue method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetIntValue) */
   }
 }
 
@@ -755,12 +755,12 @@ impl_bHYPRE_Schwarz_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.Schwarz.GetDoubleValue} (GetDoubleValue method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.GetDoubleValue) */
   }
 }
 
@@ -784,7 +784,7 @@ impl_bHYPRE_Schwarz_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Setup) */
   /* Insert-Code-Here {bHYPRE.Schwarz.Setup} (Setup method) */
 
    int ierr = 0;
@@ -832,7 +832,7 @@ impl_bHYPRE_Schwarz_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Setup) */
   }
 }
 
@@ -855,7 +855,7 @@ impl_bHYPRE_Schwarz_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.Apply) */
   /* Insert-Code-Here {bHYPRE.Schwarz.Apply} (Apply method) */
 
 
@@ -914,7 +914,7 @@ impl_bHYPRE_Schwarz_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.Apply) */
   }
 }
 
@@ -937,47 +937,45 @@ impl_bHYPRE_Schwarz_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Schwarz.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.Schwarz.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Schwarz.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_Schwarz_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_Schwarz_fconnect_bHYPRE_IJParCSRMatrix(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_IJParCSRMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_Schwarz_fcast_bHYPRE_IJParCSRMatrix(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_Schwarz_fcast_bHYPRE_IJParCSRMatrix(void* bi, sidl_BaseInterface* 
+  _ex) {
   return bHYPRE_IJParCSRMatrix__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Schwarz_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_Schwarz_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Schwarz_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_Schwarz_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_Schwarz_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_Schwarz_fconnect_bHYPRE_Operator(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
 struct bHYPRE_Operator__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Operator(void* 
   bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
-struct bHYPRE_Schwarz__object* 
-  impl_bHYPRE_Schwarz_fconnect_bHYPRE_Schwarz(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Schwarz__object* impl_bHYPRE_Schwarz_fconnect_bHYPRE_Schwarz(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Schwarz__connectI(url, ar, _ex);
 }
 struct bHYPRE_Schwarz__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Schwarz(void* 
@@ -988,7 +986,7 @@ struct bHYPRE_Solver__object* impl_bHYPRE_Schwarz_fconnect_bHYPRE_Solver(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Solver(void* bi,
+struct bHYPRE_Solver__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Solver(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
@@ -996,13 +994,12 @@ struct bHYPRE_Vector__object* impl_bHYPRE_Schwarz_fconnect_bHYPRE_Vector(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Vector(void* bi,
+struct bHYPRE_Vector__object* impl_bHYPRE_Schwarz_fcast_bHYPRE_Vector(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_Schwarz_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_Schwarz_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* impl_bHYPRE_Schwarz_fcast_sidl_BaseClass(void* 
@@ -1014,14 +1011,12 @@ struct sidl_BaseInterface__object*
   sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Schwarz_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseInterface__object* impl_bHYPRE_Schwarz_fcast_sidl_BaseInterface(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_Schwarz_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_Schwarz_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
 struct sidl_ClassInfo__object* impl_bHYPRE_Schwarz_fcast_sidl_ClassInfo(void* 
@@ -1029,12 +1024,12 @@ struct sidl_ClassInfo__object* impl_bHYPRE_Schwarz_fcast_sidl_ClassInfo(void*
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Schwarz_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_Schwarz_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Schwarz_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_Schwarz_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }

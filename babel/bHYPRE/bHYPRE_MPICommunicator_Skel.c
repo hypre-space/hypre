@@ -2,7 +2,7 @@
  * File:          bHYPRE_MPICommunicator_Skel.c
  * Symbol:        bHYPRE.MPICommunicator-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side glue code for bHYPRE.MPICommunicator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -54,35 +54,45 @@ bHYPRE_MPICommunicator
 impl_bHYPRE_MPICommunicator_Create_MPICommWorld(
   /* out */ sidl_BaseInterface *_ex);
 
+extern
+void
+impl_bHYPRE_MPICommunicator_Init(
+  /* out */ sidl_BaseInterface *_ex);
+
+extern
+void
+impl_bHYPRE_MPICommunicator_Finalize(
+  /* out */ sidl_BaseInterface *_ex);
+
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_MPICommunicator_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseClass(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseClass(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_ClassInfo(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_ClassInfo(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern
 void
@@ -91,34 +101,34 @@ impl_bHYPRE_MPICommunicator_Destroy(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_MPICommunicator_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseClass(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseClass(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_ClassInfo(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_ClassInfo(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 extern "C" {
@@ -147,6 +157,8 @@ bHYPRE_MPICommunicator__set_sepv(struct bHYPRE_MPICommunicator__sepv *sepv)
   sepv->f_CreateC = impl_bHYPRE_MPICommunicator_CreateC;
   sepv->f_CreateF = impl_bHYPRE_MPICommunicator_CreateF;
   sepv->f_Create_MPICommWorld = impl_bHYPRE_MPICommunicator_Create_MPICommWorld;
+  sepv->f_Init = impl_bHYPRE_MPICommunicator_Init;
+  sepv->f_Finalize = impl_bHYPRE_MPICommunicator_Finalize;
 }
 #ifdef __cplusplus
 }
@@ -161,63 +173,61 @@ void bHYPRE_MPICommunicator__call_load(void) {
   impl_bHYPRE_MPICommunicator__load(&_throwaway_exception);
 }
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url,
+  skel_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(url, ar,
+  return impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(url, ar, 
     _ex);
 }
 
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_MPICommunicator_fcast_bHYPRE_MPICommunicator(void* bi,
+  skel_bHYPRE_MPICommunicator_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_MPICommunicator_fcast_bHYPRE_MPICommunicator(bi, _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_bHYPRE_MPICommunicator_fconnect_sidl_BaseClass(const char* url,
+  skel_bHYPRE_MPICommunicator_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
-struct sidl_BaseClass__object* 
-  skel_bHYPRE_MPICommunicator_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseClass__object* skel_bHYPRE_MPICommunicator_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_MPICommunicator_fcast_sidl_BaseClass(bi, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_bHYPRE_MPICommunicator_fconnect_sidl_BaseInterface(const char* url,
+  skel_bHYPRE_MPICommunicator_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseInterface(url, ar, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_bHYPRE_MPICommunicator_fcast_sidl_BaseInterface(void* bi,
+  skel_bHYPRE_MPICommunicator_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_MPICommunicator_fcast_sidl_BaseInterface(bi, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_bHYPRE_MPICommunicator_fconnect_sidl_ClassInfo(const char* url,
+  skel_bHYPRE_MPICommunicator_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_MPICommunicator_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
-struct sidl_ClassInfo__object* 
-  skel_bHYPRE_MPICommunicator_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_ClassInfo__object* skel_bHYPRE_MPICommunicator_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_MPICommunicator_fcast_sidl_ClassInfo(bi, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(const char* url,
+  skel_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(url, ar,
+  return impl_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(url, ar, 
     _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi,
+  skel_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(bi, _ex);
 }

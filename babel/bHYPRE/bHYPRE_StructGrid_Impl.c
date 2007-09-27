@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructGrid_Impl.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -36,8 +36,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -54,9 +54,9 @@ impl_bHYPRE_StructGrid__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._load) */
   /* Insert-Code-Here {bHYPRE.StructGrid._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._load) */
   }
 }
 /*
@@ -76,7 +76,7 @@ impl_bHYPRE_StructGrid__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    /* User calls of __create are DEPRECATED.  Instead, call _Create, which
@@ -88,7 +88,7 @@ impl_bHYPRE_StructGrid__ctor(
    data -> comm = MPI_COMM_NULL;
    bHYPRE_StructGrid__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._ctor) */
   }
 }
 
@@ -138,7 +138,7 @@ impl_bHYPRE_StructGrid__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    int ierr = 0;
@@ -150,7 +150,7 @@ impl_bHYPRE_StructGrid__dtor(
    hypre_assert( ierr==0 );
    hypre_TFree( data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._dtor) */
   }
 }
 
@@ -172,7 +172,7 @@ impl_bHYPRE_StructGrid_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.Create) */
   /* Insert-Code-Here {bHYPRE.StructGrid.Create} (Create method) */
 
    int ierr = 0;
@@ -191,7 +191,7 @@ impl_bHYPRE_StructGrid_Create(
    return grid;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.Create) */
   }
 }
 
@@ -214,7 +214,7 @@ impl_bHYPRE_StructGrid_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
 
    /* DEPRECATED   use _Create */
@@ -227,7 +227,7 @@ impl_bHYPRE_StructGrid_SetCommunicator(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetCommunicator) */
   }
 }
 
@@ -277,7 +277,7 @@ impl_bHYPRE_StructGrid_SetDimension(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetDimension) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
    /* SetCommunicator should be called before this function.
       In Hypre, the dimension is permanently set at creation,
@@ -296,7 +296,7 @@ impl_bHYPRE_StructGrid_SetDimension(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetDimension) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetDimension) */
   }
 }
 
@@ -322,7 +322,7 @@ impl_bHYPRE_StructGrid_SetExtents(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetExtents) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetExtents) */
   /* Insert the implementation of the SetExtents method here... */
 
    /* SetCommunicator and SetDimension should have been called before
@@ -342,7 +342,7 @@ impl_bHYPRE_StructGrid_SetExtents(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetExtents) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetExtents) */
   }
 }
 
@@ -374,7 +374,7 @@ impl_bHYPRE_StructGrid_SetPeriodic(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetPeriodic) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetPeriodic) */
   /* Insert the implementation of the SetPeriodic method here... */
 
    int ierr = 0;
@@ -387,7 +387,7 @@ impl_bHYPRE_StructGrid_SetPeriodic(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetPeriodic) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetPeriodic) */
   }
 }
 
@@ -412,7 +412,7 @@ impl_bHYPRE_StructGrid_SetNumGhost(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetNumGhost) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
 
    int ierr = 0;
@@ -426,7 +426,7 @@ impl_bHYPRE_StructGrid_SetNumGhost(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetNumGhost) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.SetNumGhost) */
   }
 }
 
@@ -447,7 +447,7 @@ impl_bHYPRE_StructGrid_Assemble(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.Assemble) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.Assemble) */
   /* Insert the implementation of the Assemble method here... */
 
    /* Call everything else before Assemble: constructor, SetCommunicator,
@@ -463,67 +463,64 @@ impl_bHYPRE_StructGrid_Assemble(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.Assemble) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.Assemble) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructGrid_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_StructGrid_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructGrid__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructGrid_fcast_bHYPRE_StructGrid(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_StructGrid_fcast_bHYPRE_StructGrid(void* bi, sidl_BaseInterface* 
+  _ex) {
   return bHYPRE_StructGrid__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_StructGrid_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_StructGrid_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_StructGrid_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_StructGrid_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_StructGrid_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructGrid_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructGrid_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

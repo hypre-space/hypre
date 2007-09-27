@@ -2,7 +2,7 @@
  * File:          bHYPRE_IJParCSRMatrix_Skel.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -66,76 +66,76 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_CoefficientAccess__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_CoefficientAccess__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_IJMatrixView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_IJMatrixView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern
 int32_t
@@ -368,76 +368,76 @@ impl_bHYPRE_IJParCSRMatrix_GetRow(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_CoefficientAccess__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_CoefficientAccess__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_IJMatrixView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_IJMatrixView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 static bHYPRE_IJParCSRMatrix
 skel_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
@@ -476,6 +476,7 @@ skel_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
       nvalues,
       discretization,
       _ex);
+  sidl_double__array_deleteRef(values_proxy);
   return _return;
 }
 
@@ -487,11 +488,11 @@ skel_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* diag_sizes_proxy = sidl_int__array_ensure(diag_sizes,
+  struct sidl_int__array* diag_sizes_proxy = sidl_int__array_ensure(diag_sizes, 
     1, sidl_column_major_order);
   int32_t* diag_sizes_tmp = diag_sizes_proxy->d_firstElement;
-  struct sidl_int__array* offdiag_sizes_proxy = 
-    sidl_int__array_ensure(offdiag_sizes, 1, sidl_column_major_order);
+  struct sidl_int__array* offdiag_sizes_proxy = sidl_int__array_ensure(
+    offdiag_sizes, 1, sidl_column_major_order);
   int32_t* offdiag_sizes_tmp = offdiag_sizes_proxy->d_firstElement;
   int32_t local_nrows = sidlLength(offdiag_sizes_proxy,0);
   _return =
@@ -501,6 +502,8 @@ skel_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
       offdiag_sizes_tmp,
       local_nrows,
       _ex);
+  sidl_int__array_deleteRef(diag_sizes_proxy);
+  sidl_int__array_deleteRef(offdiag_sizes_proxy);
   return _return;
 }
 
@@ -514,13 +517,13 @@ skel_bHYPRE_IJParCSRMatrix_SetValues(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(ncols, 1,
+  struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(ncols, 1, 
     sidl_column_major_order);
   int32_t* ncols_tmp = ncols_proxy->d_firstElement;
-  struct sidl_int__array* rows_proxy = sidl_int__array_ensure(rows, 1,
+  struct sidl_int__array* rows_proxy = sidl_int__array_ensure(rows, 1, 
     sidl_column_major_order);
   int32_t* rows_tmp = rows_proxy->d_firstElement;
-  struct sidl_int__array* cols_proxy = sidl_int__array_ensure(cols, 1,
+  struct sidl_int__array* cols_proxy = sidl_int__array_ensure(cols, 1, 
     sidl_column_major_order);
   int32_t* cols_tmp = cols_proxy->d_firstElement;
   struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
@@ -538,6 +541,10 @@ skel_bHYPRE_IJParCSRMatrix_SetValues(
       values_tmp,
       nnonzeros,
       _ex);
+  sidl_int__array_deleteRef(ncols_proxy);
+  sidl_int__array_deleteRef(rows_proxy);
+  sidl_int__array_deleteRef(cols_proxy);
+  sidl_double__array_deleteRef(values_proxy);
   return _return;
 }
 
@@ -551,13 +558,13 @@ skel_bHYPRE_IJParCSRMatrix_AddToValues(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(ncols, 1,
+  struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(ncols, 1, 
     sidl_column_major_order);
   int32_t* ncols_tmp = ncols_proxy->d_firstElement;
-  struct sidl_int__array* rows_proxy = sidl_int__array_ensure(rows, 1,
+  struct sidl_int__array* rows_proxy = sidl_int__array_ensure(rows, 1, 
     sidl_column_major_order);
   int32_t* rows_tmp = rows_proxy->d_firstElement;
-  struct sidl_int__array* cols_proxy = sidl_int__array_ensure(cols, 1,
+  struct sidl_int__array* cols_proxy = sidl_int__array_ensure(cols, 1, 
     sidl_column_major_order);
   int32_t* cols_tmp = cols_proxy->d_firstElement;
   struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
@@ -575,6 +582,10 @@ skel_bHYPRE_IJParCSRMatrix_AddToValues(
       values_tmp,
       nnonzeros,
       _ex);
+  sidl_int__array_deleteRef(ncols_proxy);
+  sidl_int__array_deleteRef(rows_proxy);
+  sidl_int__array_deleteRef(cols_proxy);
+  sidl_double__array_deleteRef(values_proxy);
   return _return;
 }
 
@@ -586,13 +597,14 @@ skel_bHYPRE_IJParCSRMatrix_GetRowCounts(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* rows_proxy = sidl_int__array_ensure(rows, 1,
+  struct sidl_int__array* rows_proxy = sidl_int__array_ensure(rows, 1, 
     sidl_column_major_order);
   int32_t* rows_tmp = rows_proxy->d_firstElement;
-  struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(*ncols, 1,
+  struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(*ncols, 1, 
     sidl_column_major_order);
   int32_t* ncols_tmp = ncols_proxy->d_firstElement;
   int32_t nrows = sidlLength(rows_proxy,0);
+  sidl_int__array_deleteRef(*ncols);
   _return =
     impl_bHYPRE_IJParCSRMatrix_GetRowCounts(
       self,
@@ -600,9 +612,10 @@ skel_bHYPRE_IJParCSRMatrix_GetRowCounts(
       rows_tmp,
       ncols_tmp,
       _ex);
-  sidl_int__array_init(ncols_tmp, *ncols, 1, (*ncols)->d_metadata.d_lower,
-    (*ncols)->d_metadata.d_upper, (*ncols)->d_metadata.d_stride);
-
+  *ncols = ncols_proxy;
+  ncols_proxy = NULL;
+  sidl_int__array_deleteRef(rows_proxy);
+  sidl_int__array_deleteRef(ncols_proxy);
   return _return;
 }
 
@@ -616,20 +629,21 @@ skel_bHYPRE_IJParCSRMatrix_GetValues(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(ncols, 1,
+  struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(ncols, 1, 
     sidl_column_major_order);
   int32_t* ncols_tmp = ncols_proxy->d_firstElement;
-  struct sidl_int__array* rows_proxy = sidl_int__array_ensure(rows, 1,
+  struct sidl_int__array* rows_proxy = sidl_int__array_ensure(rows, 1, 
     sidl_column_major_order);
   int32_t* rows_tmp = rows_proxy->d_firstElement;
-  struct sidl_int__array* cols_proxy = sidl_int__array_ensure(cols, 1,
+  struct sidl_int__array* cols_proxy = sidl_int__array_ensure(cols, 1, 
     sidl_column_major_order);
   int32_t* cols_tmp = cols_proxy->d_firstElement;
-  struct sidl_double__array* values_proxy = sidl_double__array_ensure(*values,
+  struct sidl_double__array* values_proxy = sidl_double__array_ensure(*values, 
     1, sidl_column_major_order);
   double* values_tmp = values_proxy->d_firstElement;
   int32_t nnonzeros = sidlLength(values_proxy,0);
   int32_t nrows = sidlLength(rows_proxy,0);
+  sidl_double__array_deleteRef(*values);
   _return =
     impl_bHYPRE_IJParCSRMatrix_GetValues(
       self,
@@ -640,9 +654,12 @@ skel_bHYPRE_IJParCSRMatrix_GetValues(
       values_tmp,
       nnonzeros,
       _ex);
-  sidl_double__array_init(values_tmp, *values, 1, (*values)->d_metadata.d_lower,
-    (*values)->d_metadata.d_upper, (*values)->d_metadata.d_stride);
-
+  *values = values_proxy;
+  values_proxy = NULL;
+  sidl_int__array_deleteRef(ncols_proxy);
+  sidl_int__array_deleteRef(rows_proxy);
+  sidl_int__array_deleteRef(cols_proxy);
+  sidl_double__array_deleteRef(values_proxy);
   return _return;
 }
 
@@ -653,7 +670,7 @@ skel_bHYPRE_IJParCSRMatrix_SetRowSizes(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* sizes_proxy = sidl_int__array_ensure(sizes, 1,
+  struct sidl_int__array* sizes_proxy = sidl_int__array_ensure(sizes, 1, 
     sidl_column_major_order);
   int32_t* sizes_tmp = sizes_proxy->d_firstElement;
   int32_t nrows = sidlLength(sizes_proxy,0);
@@ -663,6 +680,7 @@ skel_bHYPRE_IJParCSRMatrix_SetRowSizes(
       sizes_tmp,
       nrows,
       _ex);
+  sidl_int__array_deleteRef(sizes_proxy);
   return _return;
 }
 
@@ -674,7 +692,7 @@ skel_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
+  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1, 
     sidl_column_major_order);
   int32_t* value_tmp = value_proxy->d_firstElement;
   int32_t nvalues = sidlLength(value_proxy,0);
@@ -685,6 +703,7 @@ skel_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
       value_tmp,
       nvalues,
       _ex);
+  sidl_int__array_deleteRef(value_proxy);
   return _return;
 }
 
@@ -696,7 +715,7 @@ skel_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
+  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2, 
     sidl_column_major_order);
   _return =
     impl_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
@@ -716,7 +735,7 @@ skel_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1, 
     sidl_column_major_order);
   double* value_tmp = value_proxy->d_firstElement;
   int32_t nvalues = sidlLength(value_proxy,0);
@@ -727,6 +746,7 @@ skel_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
       value_tmp,
       nvalues,
       _ex);
+  sidl_double__array_deleteRef(value_proxy);
   return _return;
 }
 
@@ -738,7 +758,7 @@ skel_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2, 
     sidl_column_major_order);
   _return =
     impl_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
@@ -770,10 +790,17 @@ skel_bHYPRE_IJParCSRMatrix_GetRow(
       &col_ind_proxy,
       &values_proxy,
       _ex);
-  *col_ind = sidl_int__array_ensure(col_ind_proxy, 1, sidl_column_major_order);
-  sidl_int__array_deleteRef(col_ind_proxy);
-  *values = sidl_double__array_ensure(values_proxy, 1, sidl_column_major_order);
-  sidl_double__array_deleteRef(values_proxy);
+  if (!(*_ex)) {
+    *col_ind = sidl_int__array_ensure(col_ind_proxy, 1, 
+      sidl_column_major_order);
+    sidl_int__array_deleteRef(col_ind_proxy);
+    *values = sidl_double__array_ensure(values_proxy, 1, 
+      sidl_column_major_order);
+    sidl_double__array_deleteRef(values_proxy);
+  }
+  else {
+    _return = 0;
+  }
   return _return;
 }
 
@@ -847,151 +874,147 @@ void bHYPRE_IJParCSRMatrix__call_load(void) {
   impl_bHYPRE_IJParCSRMatrix__load(&_throwaway_exception);
 }
 struct bHYPRE_CoefficientAccess__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(const char* url,
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(url, ar,
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(url, ar, 
     _ex);
 }
 
 struct bHYPRE_CoefficientAccess__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(void* bi,
+  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(bi, _ex);
 }
 
 struct bHYPRE_IJMatrixView__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(const char* url,
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(url, ar, _ex);
 }
 
 struct bHYPRE_IJMatrixView__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(void* bi,
+  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(bi, _ex);
 }
 
 struct bHYPRE_IJParCSRMatrix__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(url, ar,
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(url, ar, 
     _ex);
 }
 
 struct bHYPRE_IJParCSRMatrix__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(void* bi,
+  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(bi, _ex);
 }
 
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(const char* url,
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(url, ar,
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(url, ar, 
     _ex);
 }
 
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(void* bi,
+  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(bi, _ex);
 }
 
 struct bHYPRE_MatrixVectorView__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(url, ar,
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(url, ar, 
     _ex);
 }
 
 struct bHYPRE_MatrixVectorView__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(void* bi,
+  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(bi, _ex);
 }
 
 struct bHYPRE_Operator__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(const char* url,
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(url, ar, _ex);
 }
 
 struct bHYPRE_Operator__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(void* bi, sidl_BaseInterface 
+  *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(bi, _ex);
 }
 
 struct bHYPRE_ProblemDefinition__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(url, ar,
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(url, ar, 
     _ex);
 }
 
 struct bHYPRE_ProblemDefinition__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(void* bi,
+  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(bi, _ex);
 }
 
-struct bHYPRE_Vector__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+struct bHYPRE_Vector__object* skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(url, ar, _ex);
 }
 
-struct bHYPRE_Vector__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct bHYPRE_Vector__object* skel_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(bi, _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
-struct sidl_BaseClass__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseClass__object* skel_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(bi, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(const char* url,
+  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(url, ar, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(void* bi,
+  skel_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(bi, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
-struct sidl_ClassInfo__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_ClassInfo__object* skel_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(bi, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(const char* url,
+  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(url, ar,
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(url, ar, 
     _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(void* bi,
+  skel_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(bi, _ex);
 }

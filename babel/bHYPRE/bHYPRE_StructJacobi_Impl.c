@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructJacobi_Impl.c
  * Symbol:        bHYPRE.StructJacobi-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.StructJacobi
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -42,8 +42,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -60,9 +60,9 @@ impl_bHYPRE_StructJacobi__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi._load) */
   /* Insert-Code-Here {bHYPRE.StructJacobi._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi._load) */
   }
 }
 /*
@@ -82,7 +82,7 @@ impl_bHYPRE_StructJacobi__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi._ctor) */
   /* Insert-Code-Here {bHYPRE.StructJacobi._ctor} (constructor method) */
 
    struct bHYPRE_StructJacobi__data * data;
@@ -92,7 +92,7 @@ impl_bHYPRE_StructJacobi__ctor(
    data -> matrix = (bHYPRE_StructMatrix) NULL;
    bHYPRE_StructJacobi__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi._ctor) */
   }
 }
 
@@ -142,7 +142,7 @@ impl_bHYPRE_StructJacobi__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi._dtor) */
   /* Insert-Code-Here {bHYPRE.StructJacobi._dtor} (destructor method) */
 
    int ierr = 0;
@@ -153,7 +153,7 @@ impl_bHYPRE_StructJacobi__dtor(
    hypre_TFree( data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi._dtor) */
   }
 }
 
@@ -175,7 +175,7 @@ impl_bHYPRE_StructJacobi_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.Create) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.Create} (Create method) */
 
    int ierr = 0;
@@ -196,7 +196,7 @@ impl_bHYPRE_StructJacobi_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.Create) */
   }
 }
 
@@ -219,7 +219,7 @@ impl_bHYPRE_StructJacobi_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetOperator) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetOperator} (SetOperator method) */
 
    int ierr = 0;
@@ -236,7 +236,7 @@ impl_bHYPRE_StructJacobi_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetOperator) */
   }
 }
 
@@ -259,7 +259,7 @@ impl_bHYPRE_StructJacobi_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetTolerance) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetTolerance} (SetTolerance method) */
 
    int ierr = 0;
@@ -274,7 +274,7 @@ impl_bHYPRE_StructJacobi_SetTolerance(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetTolerance) */
   }
 }
 
@@ -297,7 +297,7 @@ impl_bHYPRE_StructJacobi_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetMaxIterations) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetMaxIterations} (SetMaxIterations method) */
 
    int ierr = 0;
@@ -311,7 +311,7 @@ impl_bHYPRE_StructJacobi_SetMaxIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetMaxIterations) */
   }
 }
 
@@ -338,12 +338,12 @@ impl_bHYPRE_StructJacobi_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetLogging) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetLogging} (SetLogging method) */
 
    return 0;  /* The Jacobi solver has no logging parameter */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetLogging) */
   }
 }
 
@@ -370,12 +370,12 @@ impl_bHYPRE_StructJacobi_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetPrintLevel) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetPrintLevel} (SetPrintLevel method) */
 
    return 0;  /* The Jacobi solver has no print level parameter */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetPrintLevel) */
   }
 }
 
@@ -397,7 +397,7 @@ impl_bHYPRE_StructJacobi_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.GetNumIterations) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.GetNumIterations} (GetNumIterations method) */
 
    int ierr = 0;
@@ -411,7 +411,7 @@ impl_bHYPRE_StructJacobi_GetNumIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.GetNumIterations) */
   }
 }
 
@@ -433,7 +433,7 @@ impl_bHYPRE_StructJacobi_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.GetRelResidualNorm) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.GetRelResidualNorm} (GetRelResidualNorm method) */
 
    int ierr = 0;
@@ -450,7 +450,7 @@ impl_bHYPRE_StructJacobi_GetRelResidualNorm(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.GetRelResidualNorm) */
   }
 }
 
@@ -473,10 +473,10 @@ impl_bHYPRE_StructJacobi_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetCommunicator} (SetCommunicator method) */
    return 1; /* deprecated, will not be implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetCommunicator) */
   }
 }
 
@@ -527,7 +527,7 @@ impl_bHYPRE_StructJacobi_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetIntParameter} (SetIntParameter method) */
 
 
@@ -590,7 +590,7 @@ impl_bHYPRE_StructJacobi_SetIntParameter(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetIntParameter) */
   }
 }
 
@@ -613,7 +613,7 @@ impl_bHYPRE_StructJacobi_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetDoubleParameter} (SetDoubleParameter method) */
 
    int ierr = 0;
@@ -635,7 +635,7 @@ impl_bHYPRE_StructJacobi_SetDoubleParameter(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetDoubleParameter) */
   }
 }
 
@@ -658,12 +658,12 @@ impl_bHYPRE_StructJacobi_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetStringParameter) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetStringParameter} (SetStringParameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetStringParameter) */
   }
 }
 
@@ -687,12 +687,12 @@ impl_bHYPRE_StructJacobi_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetIntArray1Parameter) */
   }
 }
 
@@ -715,12 +715,12 @@ impl_bHYPRE_StructJacobi_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetIntArray2Parameter) */
   }
 }
 
@@ -744,12 +744,12 @@ impl_bHYPRE_StructJacobi_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetDoubleArray1Parameter) */
   }
 }
 
@@ -772,12 +772,12 @@ impl_bHYPRE_StructJacobi_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.SetDoubleArray2Parameter) */
   }
 }
 
@@ -800,7 +800,7 @@ impl_bHYPRE_StructJacobi_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.GetIntValue} (GetIntValue method) */
 
    int ierr = 0;
@@ -847,7 +847,7 @@ impl_bHYPRE_StructJacobi_GetIntValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.GetIntValue) */
   }
 }
 
@@ -870,7 +870,7 @@ impl_bHYPRE_StructJacobi_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.GetDoubleValue} (GetDoubleValue method) */
 
    int ierr = 0;
@@ -899,7 +899,7 @@ impl_bHYPRE_StructJacobi_GetDoubleValue(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.GetDoubleValue) */
   }
 }
 
@@ -923,7 +923,7 @@ impl_bHYPRE_StructJacobi_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.Setup) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.Setup} (Setup method) */
 
    int ierr = 0;
@@ -962,7 +962,7 @@ impl_bHYPRE_StructJacobi_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.Setup) */
   }
 }
 
@@ -985,7 +985,7 @@ impl_bHYPRE_StructJacobi_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.Apply) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.Apply} (Apply method) */
 
    int ierr = 0;
@@ -1057,7 +1057,7 @@ impl_bHYPRE_StructJacobi_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.Apply) */
   }
 }
 
@@ -1080,112 +1080,104 @@ impl_bHYPRE_StructJacobi_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructJacobi.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.StructJacobi.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1; /* not implemented */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructJacobi.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructJacobi_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_StructJacobi_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_Operator(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_Operator(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_StructJacobi_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_StructJacobi_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_StructJacobi_fconnect_bHYPRE_Solver(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_StructJacobi_fcast_bHYPRE_Solver(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_StructJacobi_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
 struct bHYPRE_StructJacobi__object* 
-  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_StructJacobi(const char* url,
+  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_StructJacobi(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructJacobi__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructJacobi__object* 
-  impl_bHYPRE_StructJacobi_fcast_bHYPRE_StructJacobi(void* bi,
+  impl_bHYPRE_StructJacobi_fcast_bHYPRE_StructJacobi(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_StructJacobi__cast(bi, _ex);
 }
 struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_StructMatrix(const char* url,
+  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_StructMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructJacobi_fcast_bHYPRE_StructMatrix(void* bi,
+  impl_bHYPRE_StructJacobi_fcast_bHYPRE_StructMatrix(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_StructMatrix__cast(bi, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructJacobi_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_StructJacobi_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructJacobi_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_StructJacobi_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructJacobi_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_StructJacobi_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructJacobi_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_StructJacobi_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructJacobi_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_StructJacobi_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructJacobi_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_StructJacobi_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructJacobi_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_StructJacobi_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructJacobi_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_StructJacobi_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructJacobi_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructJacobi_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructJacobi_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructJacobi_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

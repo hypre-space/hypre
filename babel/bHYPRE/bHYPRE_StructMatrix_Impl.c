@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructMatrix_Impl.c
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -43,8 +43,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -61,9 +61,9 @@ impl_bHYPRE_StructMatrix__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._load) */
   /* Insert-Code-Here {bHYPRE.StructMatrix._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._load) */
   }
 }
 /*
@@ -83,7 +83,7 @@ impl_bHYPRE_StructMatrix__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    /* To build a StructMatrix via Babel: first call Create.
@@ -101,7 +101,7 @@ impl_bHYPRE_StructMatrix__ctor(
    data -> matrix = NULL;
    bHYPRE_StructMatrix__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._ctor) */
   }
 }
 
@@ -151,7 +151,7 @@ impl_bHYPRE_StructMatrix__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    int ierr = 0;
@@ -163,7 +163,7 @@ impl_bHYPRE_StructMatrix__dtor(
    hypre_assert( ierr==0 );
    hypre_TFree( data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._dtor) */
   }
 }
 
@@ -186,7 +186,7 @@ impl_bHYPRE_StructMatrix_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Create) */
   /* Insert-Code-Here {bHYPRE.StructMatrix.Create} (Create method) */
 
    int ierr = 0;
@@ -215,7 +215,7 @@ impl_bHYPRE_StructMatrix_Create(
    return( mat );
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Create) */
   }
 }
 
@@ -238,7 +238,7 @@ impl_bHYPRE_StructMatrix_SetGrid(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetGrid) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
 
    /* DEPRECATED   call Create */
@@ -277,7 +277,7 @@ impl_bHYPRE_StructMatrix_SetGrid(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetGrid) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetGrid) */
   }
 }
 
@@ -299,7 +299,7 @@ impl_bHYPRE_StructMatrix_SetStencil(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetStencil) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
 
    /* DEPRECATED   call Create */
@@ -330,7 +330,7 @@ impl_bHYPRE_StructMatrix_SetStencil(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetStencil) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetStencil) */
   }
 }
 
@@ -359,7 +359,7 @@ impl_bHYPRE_StructMatrix_SetValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetValues) */
   /* Insert the implementation of the SetValues method here... */
 
    int ierr = 0;
@@ -374,7 +374,7 @@ impl_bHYPRE_StructMatrix_SetValues(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetValues) */
   }
 }
 
@@ -411,7 +411,7 @@ impl_bHYPRE_StructMatrix_SetBoxValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetBoxValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
 
    int ierr = 0;
@@ -428,7 +428,7 @@ impl_bHYPRE_StructMatrix_SetBoxValues(
    return ierr;
 
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetBoxValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetBoxValues) */
   }
 }
 
@@ -453,7 +453,7 @@ impl_bHYPRE_StructMatrix_SetNumGhost(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetNumGhost) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
 
    int ierr = 0;
@@ -467,7 +467,7 @@ impl_bHYPRE_StructMatrix_SetNumGhost(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetNumGhost) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetNumGhost) */
   }
 }
 
@@ -490,7 +490,7 @@ impl_bHYPRE_StructMatrix_SetSymmetric(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetSymmetric) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetSymmetric) */
   /* Insert the implementation of the SetSymmetric method here... */
 
    int ierr = 0;
@@ -504,7 +504,7 @@ impl_bHYPRE_StructMatrix_SetSymmetric(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetSymmetric) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetSymmetric) */
   }
 }
 
@@ -530,7 +530,7 @@ impl_bHYPRE_StructMatrix_SetConstantEntries(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantEntries) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantEntries) */
   /* Insert the implementation of the SetConstantEntries method here... */
 
    int ierr = 0;
@@ -545,7 +545,7 @@ impl_bHYPRE_StructMatrix_SetConstantEntries(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantEntries) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantEntries) */
   }
 }
 
@@ -572,7 +572,7 @@ impl_bHYPRE_StructMatrix_SetConstantValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantValues) */
   /* Insert the implementation of the SetConstantValues method here... */
 
 
@@ -588,7 +588,7 @@ impl_bHYPRE_StructMatrix_SetConstantValues(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantValues) */
   }
 }
 
@@ -610,7 +610,7 @@ impl_bHYPRE_StructMatrix_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
 
    /* DEPRECATED   call Create */
@@ -622,7 +622,7 @@ impl_bHYPRE_StructMatrix_SetCommunicator(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetCommunicator) */
   }
 }
 
@@ -672,7 +672,7 @@ impl_bHYPRE_StructMatrix_Initialize(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Initialize) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Initialize) */
   /* Insert the implementation of the Initialize method here... */
 
    int ierr = 0;
@@ -687,7 +687,7 @@ impl_bHYPRE_StructMatrix_Initialize(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Initialize) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Initialize) */
   }
 }
 
@@ -712,7 +712,7 @@ impl_bHYPRE_StructMatrix_Assemble(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Assemble) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Assemble) */
   /* Insert the implementation of the Assemble method here... */
 
    int ierr=0;
@@ -727,7 +727,7 @@ impl_bHYPRE_StructMatrix_Assemble(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Assemble) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Assemble) */
   }
 }
 
@@ -750,10 +750,10 @@ impl_bHYPRE_StructMatrix_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetIntParameter) */
   }
 }
 
@@ -776,10 +776,10 @@ impl_bHYPRE_StructMatrix_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetDoubleParameter) */
   }
 }
 
@@ -802,10 +802,10 @@ impl_bHYPRE_StructMatrix_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetStringParameter) */
   }
 }
 
@@ -829,10 +829,10 @@ impl_bHYPRE_StructMatrix_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetIntArray1Parameter) */
   }
 }
 
@@ -855,10 +855,10 @@ impl_bHYPRE_StructMatrix_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetIntArray2Parameter) */
   }
 }
 
@@ -882,11 +882,10 @@ impl_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleArray1Parameter) 
-    */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetDoubleArray1Parameter) */
   }
 }
 
@@ -909,11 +908,10 @@ impl_bHYPRE_StructMatrix_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleArray2Parameter) 
-    */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetDoubleArray2Parameter) */
   }
 }
 
@@ -936,7 +934,7 @@ impl_bHYPRE_StructMatrix_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
    int ierr = 0;
@@ -957,7 +955,7 @@ impl_bHYPRE_StructMatrix_GetIntValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.GetIntValue) */
   }
 }
 
@@ -980,10 +978,10 @@ impl_bHYPRE_StructMatrix_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.GetDoubleValue) */
   }
 }
 
@@ -1007,7 +1005,7 @@ impl_bHYPRE_StructMatrix_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Setup) */
   /* Insert the implementation of the Setup method here... */
 
    int ierr=0;
@@ -1021,7 +1019,7 @@ impl_bHYPRE_StructMatrix_Setup(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Setup) */
   }
 }
 
@@ -1044,7 +1042,7 @@ impl_bHYPRE_StructMatrix_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Apply) */
   /* Insert the implementation of the Apply method here... */
 
    /* Apply means to multiply by a vector, x = A*b .  Here, we call
@@ -1083,7 +1081,7 @@ impl_bHYPRE_StructMatrix_Apply(
    return( ierr );
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Apply) */
   }
 }
 
@@ -1106,142 +1104,136 @@ impl_bHYPRE_StructMatrix_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.StructMatrix.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1; /* not implemented */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructMatrix_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_StructMatrix_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MatrixVectorView__connectI(url, ar, _ex);
 }
 struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_StructMatrix_fcast_bHYPRE_MatrixVectorView(void* bi,
+  impl_bHYPRE_StructMatrix_fcast_bHYPRE_MatrixVectorView(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MatrixVectorView__cast(bi, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Operator(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Operator(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_StructMatrix_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_StructMatrix_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
 struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_ProblemDefinition__connectI(url, ar, _ex);
 }
 struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_StructMatrix_fcast_bHYPRE_ProblemDefinition(void* bi,
+  impl_bHYPRE_StructMatrix_fcast_bHYPRE_ProblemDefinition(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_ProblemDefinition__cast(bi, _ex);
 }
 struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructGrid(const char* url,
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructGrid(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructGrid__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructMatrix_fcast_bHYPRE_StructGrid(void* bi,
+  impl_bHYPRE_StructMatrix_fcast_bHYPRE_StructGrid(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_StructGrid__cast(bi, _ex);
 }
 struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrix(const char* url,
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructMatrix_fcast_bHYPRE_StructMatrix(void* bi,
+  impl_bHYPRE_StructMatrix_fcast_bHYPRE_StructMatrix(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_StructMatrix__cast(bi, _ex);
 }
 struct bHYPRE_StructMatrixView__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrixView(const char* url,
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrixView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructMatrixView__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructMatrixView__object* 
-  impl_bHYPRE_StructMatrix_fcast_bHYPRE_StructMatrixView(void* bi,
+  impl_bHYPRE_StructMatrix_fcast_bHYPRE_StructMatrixView(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_StructMatrixView__cast(bi, _ex);
 }
 struct bHYPRE_StructStencil__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructStencil(const char* url,
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructStencil(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructStencil__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructStencil__object* 
-  impl_bHYPRE_StructMatrix_fcast_bHYPRE_StructStencil(void* bi,
+  impl_bHYPRE_StructMatrix_fcast_bHYPRE_StructStencil(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_StructStencil__cast(bi, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructMatrix_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_StructMatrix_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructMatrix_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_StructMatrix_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructMatrix_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_StructMatrix_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructMatrix_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_StructMatrix_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructMatrix_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_StructMatrix_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructMatrix_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_StructMatrix_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructMatrix_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_StructMatrix_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructMatrix_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructMatrix_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructMatrix_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructMatrix_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

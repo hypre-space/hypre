@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructStencil_IOR.h
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -214,69 +214,69 @@ const struct bHYPRE_SStructStencil__external*
 bHYPRE_SStructStencil__externals(void);
 
 extern struct bHYPRE_SStructStencil__object*
-bHYPRE_SStructStencil__new(void* ddata,
-  struct sidl_BaseInterface__object ** _ex);
+bHYPRE_SStructStencil__new(void* ddata,struct sidl_BaseInterface__object ** 
+  _ex);
 
 extern struct bHYPRE_SStructStencil__sepv*
 bHYPRE_SStructStencil__statics(void);
 
 extern void bHYPRE_SStructStencil__init(
-  struct bHYPRE_SStructStencil__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct bHYPRE_SStructStencil__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void bHYPRE_SStructStencil__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
-  struct bHYPRE_SStructStencil__epv **s_arg_epv__bhypre_sstructstencil,
-    struct bHYPRE_SStructStencil__epv **s_arg_epv_hooks__bhypre_sstructstencil);
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct bHYPRE_SStructStencil__epv **s_arg_epv__bhypre_sstructstencil,struct 
+    bHYPRE_SStructStencil__epv **s_arg_epv_hooks__bhypre_sstructstencil);
   extern void bHYPRE_SStructStencil__fini(
-    struct bHYPRE_SStructStencil__object* self,
-      struct sidl_BaseInterface__object ** _ex);
-  extern void bHYPRE_SStructStencil__IOR_version(int32_t *major,
-    int32_t *minor);
+    struct bHYPRE_SStructStencil__object* self, struct 
+      sidl_BaseInterface__object ** _ex);
+  extern void bHYPRE_SStructStencil__IOR_version(int32_t *major, int32_t 
+    *minor);
 
   struct bHYPRE_SStructStencil__object* 
-    skel_bHYPRE_SStructStencil_fconnect_bHYPRE_SStructStencil(const char* url,
+    skel_bHYPRE_SStructStencil_fconnect_bHYPRE_SStructStencil(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_SStructStencil__object* 
-    skel_bHYPRE_SStructStencil_fcast_bHYPRE_SStructStencil(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_SStructStencil_fcast_bHYPRE_SStructStencil(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseClass__object* 
-    skel_bHYPRE_SStructStencil_fconnect_sidl_BaseClass(const char* url,
+    skel_bHYPRE_SStructStencil_fconnect_sidl_BaseClass(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseClass__object* 
-    skel_bHYPRE_SStructStencil_fcast_sidl_BaseClass(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_SStructStencil_fcast_sidl_BaseClass(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
-    skel_bHYPRE_SStructStencil_fconnect_sidl_BaseInterface(const char* url,
+    skel_bHYPRE_SStructStencil_fconnect_sidl_BaseInterface(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseInterface__object* 
-    skel_bHYPRE_SStructStencil_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_SStructStencil_fcast_sidl_BaseInterface(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_ClassInfo__object* 
-    skel_bHYPRE_SStructStencil_fconnect_sidl_ClassInfo(const char* url,
+    skel_bHYPRE_SStructStencil_fconnect_sidl_ClassInfo(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_ClassInfo__object* 
-    skel_bHYPRE_SStructStencil_fcast_sidl_ClassInfo(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_SStructStencil_fcast_sidl_ClassInfo(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
-    skel_bHYPRE_SStructStencil_fconnect_sidl_RuntimeException(const char* url,
+    skel_bHYPRE_SStructStencil_fconnect_sidl_RuntimeException(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_bHYPRE_SStructStencil_fcast_sidl_RuntimeException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_SStructStencil_fcast_sidl_RuntimeException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_SStructStencil__remote{
     int d_refcount;
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

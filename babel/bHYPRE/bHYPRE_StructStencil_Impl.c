@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructStencil_Impl.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -37,8 +37,8 @@
 #include "_hypre_struct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -55,9 +55,9 @@ impl_bHYPRE_StructStencil__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._load) */
   /* Insert-Code-Here {bHYPRE.StructStencil._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._load) */
   }
 }
 /*
@@ -77,7 +77,7 @@ impl_bHYPRE_StructStencil__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    /* User calls of __create are DEPRECATED.  Instead, call _Create, which
@@ -90,7 +90,7 @@ impl_bHYPRE_StructStencil__ctor(
    data -> size = 0;
    bHYPRE_StructStencil__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._ctor) */
   }
 }
 
@@ -140,7 +140,7 @@ impl_bHYPRE_StructStencil__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    int ierr = 0;
@@ -152,7 +152,7 @@ impl_bHYPRE_StructStencil__dtor(
    hypre_assert( ierr==0 );
    hypre_TFree( data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._dtor) */
   }
 }
 
@@ -176,7 +176,7 @@ impl_bHYPRE_StructStencil_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.Create) */
   /* Insert-Code-Here {bHYPRE.StructStencil.Create} (Create method) */
 
    int ierr = 0;
@@ -198,7 +198,7 @@ impl_bHYPRE_StructStencil_Create(
    return stencil;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.Create) */
   }
 }
 
@@ -248,7 +248,7 @@ impl_bHYPRE_StructStencil_SetDimension(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetDimension) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
 
    /* DEPRECATED   use _Create */
@@ -273,7 +273,7 @@ impl_bHYPRE_StructStencil_SetDimension(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetDimension) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetDimension) */
   }
 }
 
@@ -296,7 +296,7 @@ impl_bHYPRE_StructStencil_SetSize(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetSize) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetSize) */
   /* Insert the implementation of the SetSize method here... */
  
    /* DEPRECATED   use _Create */
@@ -321,7 +321,7 @@ impl_bHYPRE_StructStencil_SetSize(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetSize) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetSize) */
   }
 }
 
@@ -347,7 +347,7 @@ impl_bHYPRE_StructStencil_SetElement(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetElement) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetElement) */
   /* Insert the implementation of the SetElement method here... */
 
    int ierr = 0;
@@ -363,57 +363,56 @@ impl_bHYPRE_StructStencil_SetElement(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetElement) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetElement) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_StructStencil__object* 
-  impl_bHYPRE_StructStencil_fconnect_bHYPRE_StructStencil(const char* url,
+  impl_bHYPRE_StructStencil_fconnect_bHYPRE_StructStencil(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructStencil__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructStencil__object* 
-  impl_bHYPRE_StructStencil_fcast_bHYPRE_StructStencil(void* bi,
+  impl_bHYPRE_StructStencil_fcast_bHYPRE_StructStencil(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_StructStencil__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_StructStencil_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_StructStencil_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_StructStencil_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_StructStencil_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_StructStencil_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_StructStencil_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructStencil_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructStencil_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

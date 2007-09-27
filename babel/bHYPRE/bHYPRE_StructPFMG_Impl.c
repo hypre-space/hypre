@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructPFMG_Impl.c
  * Symbol:        bHYPRE.StructPFMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.StructPFMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -42,8 +42,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -60,9 +60,9 @@ impl_bHYPRE_StructPFMG__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._load) */
   /* Insert-Code-Here {bHYPRE.StructPFMG._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._load) */
   }
 }
 /*
@@ -82,7 +82,7 @@ impl_bHYPRE_StructPFMG__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    struct bHYPRE_StructPFMG__data * data;
@@ -92,7 +92,7 @@ impl_bHYPRE_StructPFMG__ctor(
    data -> matrix = (bHYPRE_StructMatrix) NULL;
    bHYPRE_StructPFMG__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._ctor) */
   }
 }
 
@@ -142,7 +142,7 @@ impl_bHYPRE_StructPFMG__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    int ierr = 0;
@@ -153,7 +153,7 @@ impl_bHYPRE_StructPFMG__dtor(
    hypre_TFree( data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._dtor) */
   }
 }
 
@@ -175,7 +175,7 @@ impl_bHYPRE_StructPFMG_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Create) */
   /* Insert-Code-Here {bHYPRE.StructPFMG.Create} (Create method) */
 
    int ierr = 0;
@@ -196,7 +196,7 @@ impl_bHYPRE_StructPFMG_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.Create) */
   }
 }
 
@@ -219,7 +219,7 @@ impl_bHYPRE_StructPFMG_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
 
    int ierr = 0;
@@ -237,7 +237,7 @@ impl_bHYPRE_StructPFMG_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetOperator) */
   }
 }
 
@@ -260,7 +260,7 @@ impl_bHYPRE_StructPFMG_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
 
    int ierr = 0;
@@ -274,7 +274,7 @@ impl_bHYPRE_StructPFMG_SetTolerance(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetTolerance) */
   }
 }
 
@@ -297,7 +297,7 @@ impl_bHYPRE_StructPFMG_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
 
    int ierr = 0;
@@ -311,7 +311,7 @@ impl_bHYPRE_StructPFMG_SetMaxIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetMaxIterations) */
   }
 }
 
@@ -338,7 +338,7 @@ impl_bHYPRE_StructPFMG_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
 
    int ierr = 0;
@@ -352,7 +352,7 @@ impl_bHYPRE_StructPFMG_SetLogging(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetLogging) */
   }
 }
 
@@ -379,7 +379,7 @@ impl_bHYPRE_StructPFMG_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
  
    int ierr = 0;
@@ -393,7 +393,7 @@ impl_bHYPRE_StructPFMG_SetPrintLevel(
 
    return ierr;
 
- /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetPrintLevel) */
   }
 }
 
@@ -415,7 +415,7 @@ impl_bHYPRE_StructPFMG_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
 
    int ierr = 0;
@@ -429,7 +429,7 @@ impl_bHYPRE_StructPFMG_GetNumIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetNumIterations) */
   }
 }
 
@@ -451,7 +451,7 @@ impl_bHYPRE_StructPFMG_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
 
    int ierr = 0;
@@ -465,7 +465,7 @@ impl_bHYPRE_StructPFMG_GetRelResidualNorm(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetRelResidualNorm) */
   }
 }
 
@@ -488,7 +488,7 @@ impl_bHYPRE_StructPFMG_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
 
    int ierr = 0;
@@ -506,7 +506,7 @@ impl_bHYPRE_StructPFMG_SetCommunicator(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetCommunicator) */
   }
 }
 
@@ -557,7 +557,7 @@ impl_bHYPRE_StructPFMG_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
 
    int ierr = 0;
@@ -646,7 +646,7 @@ impl_bHYPRE_StructPFMG_SetIntParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetIntParameter) */
   }
 }
 
@@ -669,7 +669,7 @@ impl_bHYPRE_StructPFMG_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
 
    int ierr = 0;
@@ -690,7 +690,7 @@ impl_bHYPRE_StructPFMG_SetDoubleParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetDoubleParameter) */
   }
 }
 
@@ -713,10 +713,10 @@ impl_bHYPRE_StructPFMG_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetStringParameter) */
   }
 }
 
@@ -740,10 +740,10 @@ impl_bHYPRE_StructPFMG_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetIntArray1Parameter) */
   }
 }
 
@@ -766,10 +766,10 @@ impl_bHYPRE_StructPFMG_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetIntArray2Parameter) */
   }
 }
 
@@ -793,7 +793,7 @@ impl_bHYPRE_StructPFMG_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    int ierr = 0;
    HYPRE_StructSolver solver;
@@ -813,7 +813,7 @@ impl_bHYPRE_StructPFMG_SetDoubleArray1Parameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetDoubleArray1Parameter) */
   }
 }
 
@@ -836,10 +836,10 @@ impl_bHYPRE_StructPFMG_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.SetDoubleArray2Parameter) */
   }
 }
 
@@ -862,7 +862,7 @@ impl_bHYPRE_StructPFMG_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
    int ierr = 0;
@@ -937,7 +937,7 @@ impl_bHYPRE_StructPFMG_GetIntValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetIntValue) */
   }
 }
 
@@ -960,7 +960,7 @@ impl_bHYPRE_StructPFMG_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
 
    int ierr = 0;
@@ -988,7 +988,7 @@ impl_bHYPRE_StructPFMG_GetDoubleValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetDoubleValue) */
   }
 }
 
@@ -1012,7 +1012,7 @@ impl_bHYPRE_StructPFMG_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Setup) */
   /* Insert the implementation of the Setup method here... */
 
    int ierr = 0;
@@ -1051,7 +1051,7 @@ impl_bHYPRE_StructPFMG_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.Setup) */
   }
 }
 
@@ -1074,7 +1074,7 @@ impl_bHYPRE_StructPFMG_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Apply) */
   /* Insert the implementation of the Apply method here... */
 
    int ierr = 0;
@@ -1123,7 +1123,7 @@ impl_bHYPRE_StructPFMG_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.Apply) */
   }
 }
 
@@ -1146,38 +1146,35 @@ impl_bHYPRE_StructPFMG_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.StructPFMG.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1; /* not implemented */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Operator(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_StructPFMG_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
 struct bHYPRE_Solver__object* impl_bHYPRE_StructPFMG_fcast_bHYPRE_Solver(void* 
@@ -1185,71 +1182,67 @@ struct bHYPRE_Solver__object* impl_bHYPRE_StructPFMG_fcast_bHYPRE_Solver(void*
   return bHYPRE_Solver__cast(bi, _ex);
 }
 struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructMatrix(const char* url,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructMatrix(void* bi,
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructMatrix(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_StructMatrix__cast(bi, _ex);
 }
 struct bHYPRE_StructPFMG__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_StructPFMG__connectI(url, ar, _ex);
 }
 struct bHYPRE_StructPFMG__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructPFMG(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructPFMG(void* bi, sidl_BaseInterface* 
+  _ex) {
   return bHYPRE_StructPFMG__cast(bi, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
 struct bHYPRE_Vector__object* impl_bHYPRE_StructPFMG_fcast_bHYPRE_Vector(void* 
   bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_StructPFMG_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_StructPFMG_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_StructPFMG_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_StructPFMG_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_StructPFMG_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructPFMG_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructPFMG_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

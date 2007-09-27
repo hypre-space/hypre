@@ -2,7 +2,7 @@
  * File:          bHYPRE_BiCGSTAB_Impl.c
  * Symbol:        bHYPRE.BiCGSTAB-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.BiCGSTAB
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -38,8 +38,8 @@
 #include "hypre_babel_exception_handler.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -56,9 +56,9 @@ impl_bHYPRE_BiCGSTAB__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB._load) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB._load) */
   }
 }
 /*
@@ -78,7 +78,7 @@ impl_bHYPRE_BiCGSTAB__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB._ctor) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB._ctor} (constructor method) */
 
    struct bHYPRE_BiCGSTAB__data * data;
@@ -115,7 +115,7 @@ impl_bHYPRE_BiCGSTAB__ctor(
    bHYPRE_BiCGSTAB__set_data( self, data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB._ctor) */
   }
 }
 
@@ -165,7 +165,7 @@ impl_bHYPRE_BiCGSTAB__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB._dtor) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB._dtor} (destructor method) */
 
    struct bHYPRE_BiCGSTAB__data * data;
@@ -200,7 +200,7 @@ impl_bHYPRE_BiCGSTAB__dtor(
    }
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB._dtor) */
   }
 }
 
@@ -222,7 +222,7 @@ impl_bHYPRE_BiCGSTAB_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.Create) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.Create} (Create method) */
 
    bHYPRE_BiCGSTAB solver = bHYPRE_BiCGSTAB__create(_ex); SIDL_CHECK(*_ex);
@@ -248,7 +248,7 @@ impl_bHYPRE_BiCGSTAB_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.Create) */
   }
 }
 
@@ -270,7 +270,7 @@ impl_bHYPRE_BiCGSTAB_SetPreconditioner(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetPreconditioner) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetPreconditioner) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetPreconditioner} (SetPreconditioner method) */
 
    int ierr = 0;
@@ -284,7 +284,7 @@ impl_bHYPRE_BiCGSTAB_SetPreconditioner(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetPreconditioner) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetPreconditioner) */
   }
 }
 
@@ -306,7 +306,7 @@ impl_bHYPRE_BiCGSTAB_GetPreconditioner(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetPreconditioner) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetPreconditioner) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.GetPreconditioner} (GetPreconditioner method) */
 
    int ierr = 0;
@@ -316,7 +316,7 @@ impl_bHYPRE_BiCGSTAB_GetPreconditioner(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetPreconditioner) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetPreconditioner) */
   }
 }
 
@@ -338,7 +338,7 @@ impl_bHYPRE_BiCGSTAB_Clone(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.Clone) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.Clone) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.Clone} (Clone method) */
 
    int ierr = 0;
@@ -373,7 +373,7 @@ impl_bHYPRE_BiCGSTAB_Clone(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.Clone) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.Clone) */
   }
 }
 
@@ -396,7 +396,7 @@ impl_bHYPRE_BiCGSTAB_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetOperator) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetOperator} (SetOperator method) */
 
    /* DEPRECATED  the second argument in Create does the same thing */
@@ -414,7 +414,7 @@ impl_bHYPRE_BiCGSTAB_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetOperator) */
   }
 }
 
@@ -437,7 +437,7 @@ impl_bHYPRE_BiCGSTAB_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetTolerance) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetTolerance} (SetTolerance method) */
 
    int ierr = 0;
@@ -447,7 +447,7 @@ impl_bHYPRE_BiCGSTAB_SetTolerance(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetTolerance) */
   }
 }
 
@@ -470,7 +470,7 @@ impl_bHYPRE_BiCGSTAB_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetMaxIterations) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetMaxIterations} (SetMaxIterations method) */
 
    int ierr = 0;
@@ -480,7 +480,7 @@ impl_bHYPRE_BiCGSTAB_SetMaxIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetMaxIterations) */
   }
 }
 
@@ -507,7 +507,7 @@ impl_bHYPRE_BiCGSTAB_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetLogging) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetLogging} (SetLogging method) */
 
    int ierr = 0;
@@ -517,7 +517,7 @@ impl_bHYPRE_BiCGSTAB_SetLogging(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetLogging) */
   }
 }
 
@@ -544,7 +544,7 @@ impl_bHYPRE_BiCGSTAB_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetPrintLevel) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetPrintLevel} (SetPrintLevel method) */
 
    int ierr = 0;
@@ -554,7 +554,7 @@ impl_bHYPRE_BiCGSTAB_SetPrintLevel(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetPrintLevel) */
   }
 }
 
@@ -576,7 +576,7 @@ impl_bHYPRE_BiCGSTAB_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetNumIterations) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.GetNumIterations} (GetNumIterations method) */
 
    int ierr = 0;
@@ -586,7 +586,7 @@ impl_bHYPRE_BiCGSTAB_GetNumIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetNumIterations) */
   }
 }
 
@@ -608,7 +608,7 @@ impl_bHYPRE_BiCGSTAB_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetRelResidualNorm) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.GetRelResidualNorm} (GetRelResidualNorm method) */
 
    int ierr = 0;
@@ -618,7 +618,7 @@ impl_bHYPRE_BiCGSTAB_GetRelResidualNorm(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetRelResidualNorm) */
   }
 }
 
@@ -641,10 +641,10 @@ impl_bHYPRE_BiCGSTAB_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetCommunicator} (SetCommunicator method) */
    return 1;  /* DEPRECATED and will never be implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetCommunicator) */
   }
 }
 
@@ -695,7 +695,7 @@ impl_bHYPRE_BiCGSTAB_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetIntParameter} (SetIntParameter method) */
 
    int ierr = 0;
@@ -728,7 +728,7 @@ impl_bHYPRE_BiCGSTAB_SetIntParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetIntParameter) */
   }
 }
 
@@ -751,7 +751,7 @@ impl_bHYPRE_BiCGSTAB_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetDoubleParameter} (SetDoubleParameter method) */
 
    int ierr = 0;
@@ -772,7 +772,7 @@ impl_bHYPRE_BiCGSTAB_SetDoubleParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetDoubleParameter) */
   }
 }
 
@@ -795,7 +795,7 @@ impl_bHYPRE_BiCGSTAB_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetStringParameter) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetStringParameter} (SetStringParameter method) */
 
    int ierr = 0;
@@ -812,7 +812,7 @@ impl_bHYPRE_BiCGSTAB_SetStringParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetStringParameter) */
   }
 }
 
@@ -836,12 +836,12 @@ impl_bHYPRE_BiCGSTAB_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetIntArray1Parameter) */
   }
 }
 
@@ -864,12 +864,12 @@ impl_bHYPRE_BiCGSTAB_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetIntArray2Parameter) */
   }
 }
 
@@ -893,12 +893,12 @@ impl_bHYPRE_BiCGSTAB_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetDoubleArray1Parameter) */
   }
 }
 
@@ -921,12 +921,12 @@ impl_bHYPRE_BiCGSTAB_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetDoubleArray2Parameter) */
   }
 }
 
@@ -949,7 +949,7 @@ impl_bHYPRE_BiCGSTAB_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.GetIntValue} (GetIntValue method) */
 
    int ierr = 0;
@@ -990,7 +990,7 @@ impl_bHYPRE_BiCGSTAB_GetIntValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetIntValue) */
   }
 }
 
@@ -1013,7 +1013,7 @@ impl_bHYPRE_BiCGSTAB_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.GetDoubleValue} (GetDoubleValue method) */
 
    int ierr = 0;
@@ -1041,7 +1041,7 @@ impl_bHYPRE_BiCGSTAB_GetDoubleValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetDoubleValue) */
   }
 }
 
@@ -1065,7 +1065,7 @@ impl_bHYPRE_BiCGSTAB_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.Setup) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.Setup} (Setup method) */
 
    int ierr = 0;
@@ -1144,7 +1144,7 @@ impl_bHYPRE_BiCGSTAB_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.Setup) */
   }
 }
 
@@ -1167,7 +1167,7 @@ impl_bHYPRE_BiCGSTAB_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.Apply) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.Apply} (Apply method) */
 
    struct bHYPRE_BiCGSTAB__data * data = bHYPRE_BiCGSTAB__get_data( self );
@@ -1475,7 +1475,7 @@ impl_bHYPRE_BiCGSTAB_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.Apply) */
   }
 }
 
@@ -1498,52 +1498,48 @@ impl_bHYPRE_BiCGSTAB_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.BiCGSTAB.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct bHYPRE_BiCGSTAB__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_BiCGSTAB(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_BiCGSTAB__object* impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_BiCGSTAB(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_BiCGSTAB__connectI(url, ar, _ex);
 }
-struct bHYPRE_BiCGSTAB__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_BiCGSTAB(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_BiCGSTAB__object* impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_BiCGSTAB(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_BiCGSTAB__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Operator(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
 struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_PreconditionedSolver__connectI(url, ar, _ex);
 }
 struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_PreconditionedSolver(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_PreconditionedSolver__cast(bi, _ex);
 }
@@ -1563,9 +1559,8 @@ struct bHYPRE_Vector__object* impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Vector(void* bi,
   sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseClass(void* 
@@ -1573,18 +1568,17 @@ struct sidl_BaseClass__object* impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseClass(void*
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_BiCGSTAB_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
 struct sidl_ClassInfo__object* impl_bHYPRE_BiCGSTAB_fcast_sidl_ClassInfo(void* 
@@ -1592,12 +1586,12 @@ struct sidl_ClassInfo__object* impl_bHYPRE_BiCGSTAB_fcast_sidl_ClassInfo(void*
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_BiCGSTAB_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }

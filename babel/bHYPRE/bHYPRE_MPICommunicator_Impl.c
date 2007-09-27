@@ -2,7 +2,7 @@
  * File:          bHYPRE_MPICommunicator_Impl.c
  * Symbol:        bHYPRE.MPICommunicator-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.MPICommunicator
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -37,8 +37,8 @@
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -55,9 +55,9 @@ impl_bHYPRE_MPICommunicator__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator._load) */
   /* Insert-Code-Here {bHYPRE.MPICommunicator._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._load) */
   }
 }
 /*
@@ -77,7 +77,7 @@ impl_bHYPRE_MPICommunicator__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator._ctor) */
   /* Insert-Code-Here {bHYPRE.MPICommunicator._ctor} (constructor method) */
 
    struct bHYPRE_MPICommunicator__data * data;
@@ -86,7 +86,7 @@ impl_bHYPRE_MPICommunicator__ctor(
    data->mpi_comm = MPI_COMM_NULL;
    bHYPRE_MPICommunicator__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._ctor) */
   }
 }
 
@@ -136,9 +136,9 @@ impl_bHYPRE_MPICommunicator__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator._dtor) */
   /* Insert-Code-Here {bHYPRE.MPICommunicator._dtor} (destructor method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._dtor) */
   }
 }
 
@@ -159,7 +159,7 @@ impl_bHYPRE_MPICommunicator_CreateC(
 {
   *_ex = 0;
   {
-      /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator.CreateC) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator.CreateC) */
       /* Insert-Code-Here {bHYPRE.MPICommunicator.CreateC} (CreateC method) */
 
       MPI_Comm mpicomm;
@@ -177,7 +177,7 @@ impl_bHYPRE_MPICommunicator_CreateC(
       return bmpicomm;
 
       hypre_babel_exception_no_return(_ex);
-      /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator.CreateC) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator.CreateC) */
   }
 }
 
@@ -198,7 +198,7 @@ impl_bHYPRE_MPICommunicator_CreateF(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator.CreateF) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator.CreateF) */
   /* Insert-Code-Here {bHYPRE.MPICommunicator.CreateF} (CreateF method) */
 
    ptrdiff_t mpi_int = (ptrdiff_t) mpi_comm;   /* void* to integer of same length */
@@ -218,7 +218,7 @@ impl_bHYPRE_MPICommunicator_CreateF(
    return bmpicomm;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator.CreateF) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator.CreateF) */
   }
 }
 
@@ -256,6 +256,65 @@ impl_bHYPRE_MPICommunicator_Create_MPICommWorld(
 }
 
 /*
+ *  Init and Finalize are to help debug MPI interfaces;
+ * you should normally use the MPI library more directly:
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_MPICommunicator_Init"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_MPICommunicator_Init(
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator.Init) */
+    /* Insert-Code-Here {bHYPRE.MPICommunicator.Init} (Init method) */
+     
+     int argc = 1;
+     char* argv1="no-args";
+     char** argv = &argv1;
+
+     MPI_Init(&argc, &argv);
+
+     return;
+
+    /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator.Init) */
+  }
+}
+
+/*
+ * Method:  Finalize[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_MPICommunicator_Finalize"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_MPICommunicator_Finalize(
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator.Finalize) */
+    /* Insert-Code-Here {bHYPRE.MPICommunicator.Finalize} (Finalize method) */
+
+     MPI_Finalize();
+
+     return;
+
+    /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator.Finalize) */
+  }
+}
+
+/*
  * The Destroy function doesn't necessarily destroy anything.
  * It is just another name for deleteRef.  Thus it decrements the
  * object's reference count.  The Babel memory management system will
@@ -284,52 +343,51 @@ impl_bHYPRE_MPICommunicator_Destroy(
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_MPICommunicator_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseClass(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_MPICommunicator_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_ClassInfo(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_MPICommunicator_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_MPICommunicator_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_MPICommunicator_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

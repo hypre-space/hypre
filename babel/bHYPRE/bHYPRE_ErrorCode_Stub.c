@@ -2,7 +2,7 @@
  * File:          bHYPRE_ErrorCode_Stub.c
  * Symbol:        bHYPRE.ErrorCode-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.ErrorCode
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -20,7 +20,7 @@ bHYPRE_ErrorCode__array_createCol(
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct bHYPRE_ErrorCode__array*)sidl_int__array_createCol(dimen,
+  return (struct bHYPRE_ErrorCode__array*)sidl_int__array_createCol(dimen, 
     lower, upper);
 }
 
@@ -30,7 +30,7 @@ bHYPRE_ErrorCode__array_createRow(
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct bHYPRE_ErrorCode__array*)sidl_int__array_createRow(dimen,
+  return (struct bHYPRE_ErrorCode__array*)sidl_int__array_createRow(dimen, 
     lower, upper);
 }
 
@@ -45,8 +45,8 @@ bHYPRE_ErrorCode__array_create1dInit(
   int32_t len, 
   int32_t* data)
 {
-  return (struct bHYPRE_ErrorCode__array*)sidl_int__array_create1dInit(len,
-    (int32_t*)data);
+  return (struct bHYPRE_ErrorCode__array*)sidl_int__array_create1dInit(len, (
+    int32_t*)data);
 }
 
 struct bHYPRE_ErrorCode__array*

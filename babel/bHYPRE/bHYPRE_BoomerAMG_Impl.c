@@ -2,7 +2,7 @@
  * File:          bHYPRE_BoomerAMG_Impl.c
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -187,8 +187,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -205,9 +205,9 @@ impl_bHYPRE_BoomerAMG__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._load) */
   /* Insert-Code-Here {bHYPRE.BoomerAMG._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._load) */
   }
 }
 /*
@@ -227,7 +227,7 @@ impl_bHYPRE_BoomerAMG__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
@@ -244,7 +244,7 @@ impl_bHYPRE_BoomerAMG__ctor(
    /* set any other data components here */
    bHYPRE_BoomerAMG__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._ctor) */
   }
 }
 
@@ -294,7 +294,7 @@ impl_bHYPRE_BoomerAMG__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    int ierr = 0;
@@ -308,7 +308,7 @@ impl_bHYPRE_BoomerAMG__dtor(
    hypre_TFree( data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._dtor) */
   }
 }
 
@@ -330,7 +330,7 @@ impl_bHYPRE_BoomerAMG_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Create) */
   /* Insert-Code-Here {bHYPRE.BoomerAMG.Create} (Create method) */
 
    bHYPRE_BoomerAMG solver = bHYPRE_BoomerAMG__create(_ex);  SIDL_CHECK(*_ex);
@@ -346,7 +346,7 @@ impl_bHYPRE_BoomerAMG_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.Create) */
   }
 }
 
@@ -369,7 +369,7 @@ impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetLevelRelaxWt) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetLevelRelaxWt) */
   /* Insert the implementation of the SetLevelRelaxWt method here... */
 
    HYPRE_Solver solver;
@@ -380,7 +380,7 @@ impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
 
    return HYPRE_BoomerAMGSetLevelRelaxWt( solver, relax_wt, level );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetLevelRelaxWt) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetLevelRelaxWt) */
   }
 }
 
@@ -399,17 +399,17 @@ impl_bHYPRE_BoomerAMG_InitGridRelaxation(
   /* in */ bHYPRE_BoomerAMG self,
   /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
   /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
-  /* out array<int,2,
-    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* out array<int,2,column-major> */ struct sidl_int__array** 
+    grid_relax_points,
   /* in */ int32_t coarsen_type,
-  /* out array<double,
-    column-major> */ struct sidl_double__array** relax_weights,
+  /* out array<double,column-major> */ struct sidl_double__array** 
+    relax_weights,
   /* in */ int32_t max_levels,
   /* out */ sidl_BaseInterface *_ex)
 {
   *_ex = 0;
   {
-   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.InitGridRelaxation) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.InitGridRelaxation) */
    /* Insert-Code-Here {bHYPRE.BoomerAMG.InitGridRelaxation} (InitGridRelaxation method) */
 
    /* This function is for convenience in writing test drivers. */
@@ -453,7 +453,7 @@ impl_bHYPRE_BoomerAMG_InitGridRelaxation(
 
    return ierr;
 
-   /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.InitGridRelaxation) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.InitGridRelaxation) */
   }
 }
 
@@ -476,7 +476,7 @@ impl_bHYPRE_BoomerAMG_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
 
    int ierr = 0;
@@ -493,7 +493,7 @@ impl_bHYPRE_BoomerAMG_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetOperator) */
   }
 }
 
@@ -516,7 +516,7 @@ impl_bHYPRE_BoomerAMG_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
 
    int ierr = 0;
@@ -530,7 +530,7 @@ impl_bHYPRE_BoomerAMG_SetTolerance(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetTolerance) */
   }
 }
 
@@ -553,7 +553,7 @@ impl_bHYPRE_BoomerAMG_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
 
    int ierr = 0;
@@ -567,7 +567,7 @@ impl_bHYPRE_BoomerAMG_SetMaxIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetMaxIterations) */
   }
 }
 
@@ -594,7 +594,7 @@ impl_bHYPRE_BoomerAMG_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
 
    /* This function should be called before Setup.  Log level changes
@@ -612,7 +612,7 @@ impl_bHYPRE_BoomerAMG_SetLogging(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetLogging) */
   }
 }
 
@@ -639,7 +639,7 @@ impl_bHYPRE_BoomerAMG_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
 
    int ierr = 0;
@@ -653,7 +653,7 @@ impl_bHYPRE_BoomerAMG_SetPrintLevel(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetPrintLevel) */
   }
 }
 
@@ -675,7 +675,7 @@ impl_bHYPRE_BoomerAMG_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
 
    int ierr = 0;
@@ -689,7 +689,7 @@ impl_bHYPRE_BoomerAMG_GetNumIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetNumIterations) */
   }
 }
 
@@ -711,7 +711,7 @@ impl_bHYPRE_BoomerAMG_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
 
    int ierr = 0;
@@ -725,7 +725,7 @@ impl_bHYPRE_BoomerAMG_GetRelResidualNorm(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetRelResidualNorm) */
   }
 }
 
@@ -748,7 +748,7 @@ impl_bHYPRE_BoomerAMG_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
 
    /* DEPRECATED  Use Create */
@@ -758,7 +758,7 @@ impl_bHYPRE_BoomerAMG_SetCommunicator(
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetCommunicator) */
   }
 }
 
@@ -809,7 +809,7 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
 
    int ierr = 0;
@@ -930,7 +930,7 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetIntParameter) */
   }
 }
 
@@ -953,7 +953,7 @@ impl_bHYPRE_BoomerAMG_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
 
    int ierr = 0;
@@ -994,7 +994,7 @@ impl_bHYPRE_BoomerAMG_SetDoubleParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetDoubleParameter) */
   }
 }
 
@@ -1017,7 +1017,7 @@ impl_bHYPRE_BoomerAMG_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
 
    int ierr = 0;
@@ -1038,7 +1038,7 @@ impl_bHYPRE_BoomerAMG_SetStringParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetStringParameter) */
   }
 }
 
@@ -1062,7 +1062,7 @@ impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    int ierr = 0;
    HYPRE_Solver solver;
@@ -1091,7 +1091,7 @@ impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
    }
 
    return ierr;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
   }
 }
 
@@ -1114,7 +1114,7 @@ impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    int ierr = 0;
    int dim, lb0, ub0, lb1, ub1, i, j;
@@ -1155,7 +1155,7 @@ impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
    }
 
    return ierr;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetIntArray2Parameter) */
   }
 }
 
@@ -1179,7 +1179,7 @@ impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    int ierr = 0;
    HYPRE_Solver solver;
@@ -1201,7 +1201,7 @@ impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
   }
 }
 
@@ -1224,10 +1224,10 @@ impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetDoubleArray2Parameter) */
   }
 }
 
@@ -1250,7 +1250,7 @@ impl_bHYPRE_BoomerAMG_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
    int ierr = 0;
@@ -1377,7 +1377,7 @@ impl_bHYPRE_BoomerAMG_GetIntValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetIntValue) */
   }
 }
 
@@ -1400,7 +1400,7 @@ impl_bHYPRE_BoomerAMG_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
 
    int ierr = 0;
@@ -1444,7 +1444,7 @@ impl_bHYPRE_BoomerAMG_GetDoubleValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetDoubleValue) */
   }
 }
 
@@ -1468,7 +1468,7 @@ impl_bHYPRE_BoomerAMG_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Setup) */
   /* Insert the implementation of the Setup method here... */
 
    int ierr = 0;
@@ -1518,7 +1518,7 @@ impl_bHYPRE_BoomerAMG_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.Setup) */
   }
 }
 
@@ -1541,7 +1541,7 @@ impl_bHYPRE_BoomerAMG_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Apply) */
   /* Insert the implementation of the Apply method here... */
 
    int ierr = 0;
@@ -1601,7 +1601,7 @@ impl_bHYPRE_BoomerAMG_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.Apply) */
   }
 }
 
@@ -1624,7 +1624,7 @@ impl_bHYPRE_BoomerAMG_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.BoomerAMG.ApplyAdjoint} (ApplyAdjoint method) */
 
    int ierr = 0;
@@ -1683,7 +1683,7 @@ impl_bHYPRE_BoomerAMG_ApplyAdjoint(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
@@ -1692,62 +1692,56 @@ struct bHYPRE_BoomerAMG__object*
   sidl_BaseInterface *_ex) {
   return bHYPRE_BoomerAMG__connectI(url, ar, _ex);
 }
-struct bHYPRE_BoomerAMG__object* 
-  impl_bHYPRE_BoomerAMG_fcast_bHYPRE_BoomerAMG(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_BoomerAMG__object* impl_bHYPRE_BoomerAMG_fcast_bHYPRE_BoomerAMG(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_BoomerAMG__cast(bi, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_IJParCSRMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_IJParCSRMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_BoomerAMG_fcast_bHYPRE_IJParCSRMatrix(void* bi,
+  impl_bHYPRE_BoomerAMG_fcast_bHYPRE_IJParCSRMatrix(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_IJParCSRMatrix__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_BoomerAMG_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_BoomerAMG_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Operator(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_BoomerAMG_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_BoomerAMG_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
 struct bHYPRE_Solver__object* impl_bHYPRE_BoomerAMG_fcast_bHYPRE_Solver(void* 
   bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
 struct bHYPRE_Vector__object* impl_bHYPRE_BoomerAMG_fcast_bHYPRE_Vector(void* 
   bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* impl_bHYPRE_BoomerAMG_fcast_sidl_BaseClass(void* 
@@ -1755,18 +1749,17 @@ struct sidl_BaseClass__object* impl_bHYPRE_BoomerAMG_fcast_sidl_BaseClass(void*
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_BoomerAMG_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_BoomerAMG_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_BoomerAMG_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_BoomerAMG_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
 struct sidl_ClassInfo__object* impl_bHYPRE_BoomerAMG_fcast_sidl_ClassInfo(void* 
@@ -1774,12 +1767,12 @@ struct sidl_ClassInfo__object* impl_bHYPRE_BoomerAMG_fcast_sidl_ClassInfo(void*
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_BoomerAMG_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_BoomerAMG_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_BoomerAMG_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }

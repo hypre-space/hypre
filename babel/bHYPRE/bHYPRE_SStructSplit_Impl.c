@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructSplit_Impl.c
  * Symbol:        bHYPRE.SStructSplit-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.SStructSplit
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -40,8 +40,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -58,9 +58,9 @@ impl_bHYPRE_SStructSplit__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._load) */
   /* Insert-Code-Here {bHYPRE.SStructSplit._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._load) */
   }
 }
 /*
@@ -80,7 +80,7 @@ impl_bHYPRE_SStructSplit__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._ctor) */
   /* Insert-Code-Here {bHYPRE.SStructSplit._ctor} (constructor method) */
 
    struct bHYPRE_SStructSplit__data * data;
@@ -90,7 +90,7 @@ impl_bHYPRE_SStructSplit__ctor(
    data -> matrix = (bHYPRE_SStructMatrix) NULL;
    bHYPRE_SStructSplit__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._ctor) */
   }
 }
 
@@ -140,7 +140,7 @@ impl_bHYPRE_SStructSplit__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit._dtor) */
   /* Insert-Code-Here {bHYPRE.SStructSplit._dtor} (destructor method) */
 
    int ierr = 0;
@@ -151,7 +151,7 @@ impl_bHYPRE_SStructSplit__dtor(
    hypre_TFree( data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._dtor) */
   }
 }
 
@@ -173,7 +173,7 @@ impl_bHYPRE_SStructSplit_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.Create) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.Create} (Create method) */
 
    int ierr = 0;
@@ -199,7 +199,7 @@ impl_bHYPRE_SStructSplit_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.Create) */
   }
 }
 
@@ -222,7 +222,7 @@ impl_bHYPRE_SStructSplit_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetOperator) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetOperator} (SetOperator method) */
 
    int ierr = 0;
@@ -240,7 +240,7 @@ impl_bHYPRE_SStructSplit_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetOperator) */
   }
 }
 
@@ -263,7 +263,7 @@ impl_bHYPRE_SStructSplit_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetTolerance) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetTolerance} (SetTolerance method) */
 
    int ierr = 0;
@@ -277,7 +277,7 @@ impl_bHYPRE_SStructSplit_SetTolerance(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetTolerance) */
   }
 }
 
@@ -300,7 +300,7 @@ impl_bHYPRE_SStructSplit_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetMaxIterations) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetMaxIterations} (SetMaxIterations method) */
 
    int ierr = 0;
@@ -314,7 +314,7 @@ impl_bHYPRE_SStructSplit_SetMaxIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetMaxIterations) */
   }
 }
 
@@ -341,14 +341,14 @@ impl_bHYPRE_SStructSplit_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetLogging) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetLogging} (SetLogging method) */
 
   /* ignored by HYPRE_SStructSplit, but it sets Logging to 0 for solvers it calls */
    if ( level==0 ) return 0;
    else return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetLogging) */
   }
 }
 
@@ -375,14 +375,14 @@ impl_bHYPRE_SStructSplit_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetPrintLevel) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetPrintLevel} (SetPrintLevel method) */
 
   /* ignored by HYPRE_SStructSplit, but it sets PrintLevel to 0 for solvers it calls */
    if ( level==0 ) return 0;
    else return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetPrintLevel) */
   }
 }
 
@@ -404,7 +404,7 @@ impl_bHYPRE_SStructSplit_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetNumIterations) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.GetNumIterations} (GetNumIterations method) */
 
    int ierr = 0;
@@ -418,7 +418,7 @@ impl_bHYPRE_SStructSplit_GetNumIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetNumIterations) */
   }
 }
 
@@ -440,7 +440,7 @@ impl_bHYPRE_SStructSplit_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetRelResidualNorm) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.GetRelResidualNorm} (GetRelResidualNorm method) */
 
    int ierr = 0;
@@ -454,7 +454,7 @@ impl_bHYPRE_SStructSplit_GetRelResidualNorm(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetRelResidualNorm) */
   }
 }
 
@@ -477,10 +477,10 @@ impl_bHYPRE_SStructSplit_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetCommunicator} (SetCommunicator method) */
    return 1; /* deprecated and will never be implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetCommunicator) */
   }
 }
 
@@ -531,7 +531,7 @@ impl_bHYPRE_SStructSplit_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetIntParameter} (SetIntParameter method) */
 
 
@@ -586,7 +586,7 @@ impl_bHYPRE_SStructSplit_SetIntParameter(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetIntParameter) */
   }
 }
 
@@ -609,7 +609,7 @@ impl_bHYPRE_SStructSplit_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetDoubleParameter} (SetDoubleParameter method) */
 
    int ierr = 0;
@@ -631,7 +631,7 @@ impl_bHYPRE_SStructSplit_SetDoubleParameter(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetDoubleParameter) */
   }
 }
 
@@ -654,7 +654,7 @@ impl_bHYPRE_SStructSplit_SetStringParameter(
 {
   *_ex = 0;
   {
-   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetStringParameter) */
    /* Insert-Code-Here {bHYPRE.SStructSplit.SetStringParameter} (SetStringParameter method) */
 
 
@@ -692,7 +692,7 @@ impl_bHYPRE_SStructSplit_SetStringParameter(
 
    return ierr;
 
-   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetStringParameter) */
   }
 }
 
@@ -716,12 +716,12 @@ impl_bHYPRE_SStructSplit_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetIntArray1Parameter) */
   }
 }
 
@@ -744,12 +744,12 @@ impl_bHYPRE_SStructSplit_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetIntArray2Parameter) */
   }
 }
 
@@ -773,12 +773,12 @@ impl_bHYPRE_SStructSplit_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetDoubleArray1Parameter) */
   }
 }
 
@@ -801,12 +801,12 @@ impl_bHYPRE_SStructSplit_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.SetDoubleArray2Parameter) */
   }
 }
 
@@ -829,12 +829,12 @@ impl_bHYPRE_SStructSplit_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.GetIntValue} (GetIntValue method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetIntValue) */
   }
 }
 
@@ -857,12 +857,12 @@ impl_bHYPRE_SStructSplit_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.GetDoubleValue} (GetDoubleValue method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.GetDoubleValue) */
   }
 }
 
@@ -886,7 +886,7 @@ impl_bHYPRE_SStructSplit_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.Setup) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.Setup} (Setup method) */
 
    int ierr = 0;
@@ -925,7 +925,7 @@ impl_bHYPRE_SStructSplit_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.Setup) */
   }
 }
 
@@ -948,7 +948,7 @@ impl_bHYPRE_SStructSplit_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.Apply) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.Apply} (Apply method) */
 
    int ierr = 0;
@@ -997,7 +997,7 @@ impl_bHYPRE_SStructSplit_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.Apply) */
   }
 }
 
@@ -1020,102 +1020,94 @@ impl_bHYPRE_SStructSplit_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_SStructSplit_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_SStructSplit_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Operator(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Operator(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_SStructSplit_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_SStructSplit_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
 struct bHYPRE_SStructSplit__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_SStructSplit(const char* url,
+  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_SStructSplit(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_SStructSplit__connectI(url, ar, _ex);
 }
 struct bHYPRE_SStructSplit__object* 
-  impl_bHYPRE_SStructSplit_fcast_bHYPRE_SStructSplit(void* bi,
+  impl_bHYPRE_SStructSplit_fcast_bHYPRE_SStructSplit(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_SStructSplit__cast(bi, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Solver(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_SStructSplit_fcast_bHYPRE_Solver(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_SStructSplit_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_SStructSplit_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_SStructSplit_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_SStructSplit_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructSplit_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_SStructSplit_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructSplit_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_SStructSplit_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructSplit_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_SStructSplit_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructSplit_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_SStructSplit_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructSplit_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_SStructSplit_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructSplit_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_SStructSplit_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_SStructSplit_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_SStructSplit_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_SStructSplit_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_SStructSplit_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

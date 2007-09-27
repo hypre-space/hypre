@@ -2,7 +2,7 @@
  * File:          bHYPRE_IJVectorView.h
  * Symbol:        bHYPRE.IJVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.IJVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -87,11 +87,13 @@ bHYPRE_IJVectorView_SetLocalRange(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetLocalRange)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetLocalRange)(
     self->d_object,
     jlower,
     jupper,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -142,11 +144,13 @@ bHYPRE_IJVectorView_GetLocalRange(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetLocalRange)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetLocalRange)(
     self->d_object,
     jlower,
     jupper,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -179,10 +183,12 @@ bHYPRE_IJVectorView_Print(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Print)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Print)(
     self->d_object,
     filename,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -202,11 +208,13 @@ bHYPRE_IJVectorView_Read(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Read)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Read)(
     self->d_object,
     filename,
     comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -221,10 +229,12 @@ bHYPRE_IJVectorView_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self->d_object,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -254,9 +264,11 @@ bHYPRE_IJVectorView_Initialize(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Initialize)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Initialize)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -270,9 +282,11 @@ bHYPRE_IJVectorView_Assemble(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Assemble)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Assemble)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -319,10 +333,12 @@ bHYPRE_IJVectorView_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self->d_object,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -337,10 +353,12 @@ bHYPRE_IJVectorView_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self->d_object,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -354,9 +372,11 @@ bHYPRE_IJVectorView_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -414,9 +434,11 @@ bHYPRE_IJVectorView__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -450,9 +472,11 @@ bHYPRE_IJVectorView__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -709,8 +733,8 @@ bHYPRE_IJVectorView__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_IJVectorView__object*
-bHYPRE_IJVectorView__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_IJVectorView__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }
