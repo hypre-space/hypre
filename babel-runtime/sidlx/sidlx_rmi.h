@@ -2,7 +2,7 @@
  * File:          sidlx_rmi.h
  * Symbol:        sidlx.rmi-v0.1
  * Symbol Type:   package
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for sidlx.rmi
  * 
  * WARNING: Automatically generated; changes will be lost

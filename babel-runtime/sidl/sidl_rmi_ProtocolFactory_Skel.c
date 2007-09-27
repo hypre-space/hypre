@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ProtocolFactory_Skel.c
  * Symbol:        sidl.rmi.ProtocolFactory-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for sidl.rmi.ProtocolFactory
@@ -102,88 +102,88 @@ impl_sidl_rmi_ProtocolFactory_unserializeInstance(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseClass(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseClass(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseInterface(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_ClassInfo(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_RuntimeException(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_io_Serializable(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_io_Serializable(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_InstanceHandle__object* 
   impl_sidl_rmi_ProtocolFactory_fconnect_sidl_rmi_InstanceHandle(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_InstanceHandle__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_InstanceHandle(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_InstanceHandle(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_ProtocolFactory__object* 
   impl_sidl_rmi_ProtocolFactory_fconnect_sidl_rmi_ProtocolFactory(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_ProtocolFactory__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_ProtocolFactory(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_ProtocolFactory(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseClass(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseClass(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseInterface(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_ClassInfo(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_RuntimeException(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_io_Serializable(const char* url,
+  impl_sidl_rmi_ProtocolFactory_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_io_Serializable(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_InstanceHandle__object* 
   impl_sidl_rmi_ProtocolFactory_fconnect_sidl_rmi_InstanceHandle(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_InstanceHandle__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_InstanceHandle(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_InstanceHandle(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_ProtocolFactory__object* 
   impl_sidl_rmi_ProtocolFactory_fconnect_sidl_rmi_ProtocolFactory(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_ProtocolFactory__object* 
-  impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_ProtocolFactory(void* bi,
+  impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_ProtocolFactory(void* bi, 
   sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 extern "C" {
@@ -229,64 +229,64 @@ void sidl_rmi_ProtocolFactory__call_load(void) {
   impl_sidl_rmi_ProtocolFactory__load(&_throwaway_exception);
 }
 struct sidl_BaseClass__object* 
-  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseClass(const char* url,
+  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_sidl_rmi_ProtocolFactory_fcast_sidl_BaseClass(void* bi,
+  skel_sidl_rmi_ProtocolFactory_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseClass(bi, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseInterface(const char* url,
+  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseInterface(url, ar,
+  return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_BaseInterface(url, ar, 
     _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidl_rmi_ProtocolFactory_fcast_sidl_BaseInterface(void* bi,
+  skel_sidl_rmi_ProtocolFactory_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ProtocolFactory_fcast_sidl_BaseInterface(bi, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_ClassInfo(const char* url,
+  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_sidl_rmi_ProtocolFactory_fcast_sidl_ClassInfo(void* bi,
+  skel_sidl_rmi_ProtocolFactory_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ProtocolFactory_fcast_sidl_ClassInfo(bi, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_RuntimeException(const char* url,
+  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_RuntimeException(url, ar,
+  return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_RuntimeException(url, ar, 
     _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidl_rmi_ProtocolFactory_fcast_sidl_RuntimeException(void* bi,
+  skel_sidl_rmi_ProtocolFactory_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ProtocolFactory_fcast_sidl_RuntimeException(bi, _ex);
 }
 
 struct sidl_io_Serializable__object* 
-  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_io_Serializable(const char* url,
+  skel_sidl_rmi_ProtocolFactory_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_io_Serializable(url, ar,
+  return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_io_Serializable(url, ar, 
     _ex);
 }
 
 struct sidl_io_Serializable__object* 
-  skel_sidl_rmi_ProtocolFactory_fcast_sidl_io_Serializable(void* bi,
+  skel_sidl_rmi_ProtocolFactory_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ProtocolFactory_fcast_sidl_io_Serializable(bi, _ex);
 }
@@ -299,7 +299,7 @@ struct sidl_rmi_InstanceHandle__object*
 }
 
 struct sidl_rmi_InstanceHandle__object* 
-  skel_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_InstanceHandle(void* bi,
+  skel_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_InstanceHandle(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_InstanceHandle(bi, _ex);
 }
@@ -307,12 +307,12 @@ struct sidl_rmi_InstanceHandle__object*
 struct sidl_rmi_ProtocolFactory__object* 
   skel_sidl_rmi_ProtocolFactory_fconnect_sidl_rmi_ProtocolFactory(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_rmi_ProtocolFactory(url,
+  return impl_sidl_rmi_ProtocolFactory_fconnect_sidl_rmi_ProtocolFactory(url, 
     ar, _ex);
 }
 
 struct sidl_rmi_ProtocolFactory__object* 
-  skel_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_ProtocolFactory(void* bi,
+  skel_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_ProtocolFactory(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ProtocolFactory_fcast_sidl_rmi_ProtocolFactory(bi, _ex);
 }

@@ -2,7 +2,7 @@
  * File:          sidl_NotImplementedException.h
  * Symbol:        sidl.NotImplementedException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.NotImplementedException
@@ -104,8 +104,8 @@ sidl_NotImplementedException__create(sidl_BaseInterface* _ex);
  * RMI constructor function for the class.
  */
 sidl_NotImplementedException
-sidl_NotImplementedException__createRemote(const char * url,
-  sidl_BaseInterface *_ex);
+sidl_NotImplementedException__createRemote(const char * url, sidl_BaseInterface 
+  *_ex);
 
 
 /**
@@ -179,10 +179,12 @@ sidl_NotImplementedException_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -203,10 +205,12 @@ sidl_NotImplementedException_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -223,9 +227,11 @@ sidl_NotImplementedException_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -242,9 +248,11 @@ sidl_NotImplementedException_getNote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getNote)(
+  char* _result;
+  _result = (*self->d_epv->f_getNote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -283,9 +291,11 @@ sidl_NotImplementedException_getTrace(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getTrace)(
+  char* _result;
+  _result = (*self->d_epv->f_getTrace)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -432,9 +442,11 @@ sidl_NotImplementedException__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -468,9 +480,11 @@ sidl_NotImplementedException__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -987,8 +1001,8 @@ sidl_NotImplementedException__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_NotImplementedException__object*
-sidl_NotImplementedException__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_NotImplementedException__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

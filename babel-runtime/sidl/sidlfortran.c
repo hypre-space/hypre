@@ -39,7 +39,7 @@
  */
 char *
 sidl_copy_fortran_str(const char * restrict fstr,
-                      int                   flen)
+                      ptrdiff_t             flen)
 {
   char *result;
   while ((flen > 0) && (' ' == fstr[flen-1])) {
@@ -57,11 +57,11 @@ sidl_copy_fortran_str(const char * restrict fstr,
 
 void
 sidl_copy_c_str(char * restrict       fstr,
-                int                   flen,
+                size_t                flen,
                 const char * restrict cstr)
 {
   if (fstr && (flen > 0)) {
-    int clen = (cstr ? strlen(cstr) : 0);
+    size_t clen = (cstr ? strlen(cstr) : 0);
     if (clen > 0) {
       memcpy(fstr, cstr, ((flen < clen) ? flen : clen));
     }
@@ -70,15 +70,14 @@ sidl_copy_c_str(char * restrict       fstr,
     }
   }
 } 
-                
-void
-sidl_copy_ior_str(char      **newfstr,
-                  int        *newflen,
-                  const char *iorstr,
-                  const int   minsize)
+
+static size_t
+copy_ior_str(char       **newfstr,
+             const char  *iorstr,
+             const size_t minsize)
 {
-  const int iorLen = (iorstr ? strlen(iorstr) : 0);
-  const int newLen = ((iorLen > minsize) ? iorLen : minsize);
+  const size_t iorLen = (iorstr ? strlen(iorstr) : 0);
+  const size_t newLen = ((iorLen > minsize) ? iorLen : minsize);
   char *newStr = (char*) malloc(newLen+1);
   if (newStr) {
     if (iorLen) {
@@ -90,17 +89,39 @@ sidl_copy_ior_str(char      **newfstr,
     /* put a null character after the area that FORTRAN will use */
     newStr[newLen] = '\0';
     *newfstr = newStr;
-    *newflen = newLen;
+    return newLen;
   }
   else {
     *newfstr = NULL;
-    *newflen = 0;
+    return 0;
   }
 }
 
+#ifndef FORTRAN77_DISABLED                
+void
+sidl_f77_copy_ior_str(char               **newfstr,
+                      SIDL_F77_String_Len *newflen,
+                      const char          *iorstr,
+                      const size_t         minsize)
+{
+  *newflen = (SIDL_F77_String_Len)copy_ior_str(newfstr, iorstr, minsize);
+}
+#endif
+
+#ifndef FORTRAN90_DISABLED                
+void
+sidl_f90_copy_ior_str(char               **newfstr,
+                      SIDL_F90_String_Len *newflen,
+                      const char          *iorstr,
+                      const size_t         minsize)
+{
+  *newflen = (SIDL_F90_String_Len)copy_ior_str(newfstr, iorstr, minsize);
+}
+#endif
+
 char *
 sidl_trim_trailing_space(char * restrict buffer,
-                         int             buflen)
+                         ptrdiff_t       buflen)
 {
   if (buflen >= 0 && buffer) {
     do {

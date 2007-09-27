@@ -80,7 +80,10 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT2],[
 	   _STAR_RESTFP_FIX_FC
 	   LLNL_LIB_FCMAIN dnl needed to define the lib to include
            AC_FC_DUMMY_MAIN 
-           LLNL_SORT_FCLIBS
+	   if test "X$FCLIBS_NOSORT" != "Xtrue" ; then
+	     dnl don't sort when the user specified FCLIBS directly
+             LLNL_SORT_FCLIBS
+	   fi
 	   AC_FC_WRAPPERS dnl        LLNL_F90_NAME_MANGLING
 	   LLNL_F90_NAME_MANGLING dnl required for LLNL_F90_C_CONFIG
            LLNL_F90_C_CONFIG

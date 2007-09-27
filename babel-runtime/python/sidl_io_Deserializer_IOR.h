@@ -2,7 +2,7 @@
  * File:          sidl_io_Deserializer_IOR.h
  * Symbol:        sidl.io.Deserializer-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.io.Deserializer

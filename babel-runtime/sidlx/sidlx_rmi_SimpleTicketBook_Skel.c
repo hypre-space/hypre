@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimpleTicketBook_Skel.c
  * Symbol:        sidlx.rmi.SimpleTicketBook-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side glue code for sidlx.rmi.SimpleTicketBook
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -38,52 +38,52 @@ impl_sidlx_rmi_SimpleTicketBook__dtor(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseClass(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseClass(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_ClassInfo(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
   impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_RuntimeException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_Response__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Response(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Response(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_Response__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Response(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Response(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_Ticket__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_Ticket__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Ticket(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Ticket(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_TicketBook__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_TicketBook(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_TicketBook(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_TicketBook__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_TicketBook(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_TicketBook(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_SimpleTicketBook__object* 
   impl_sidlx_rmi_SimpleTicketBook_fconnect_sidlx_rmi_SimpleTicketBook(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_SimpleTicketBook__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidlx_rmi_SimpleTicketBook(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidlx_rmi_SimpleTicketBook(void* bi, 
   sidl_BaseInterface* _ex);
 extern
 void
@@ -138,52 +138,52 @@ impl_sidlx_rmi_SimpleTicketBook_getResponse(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseClass(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseClass(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_ClassInfo(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
   impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_RuntimeException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_Response__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Response(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Response(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_Response__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Response(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Response(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_Ticket__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_Ticket__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Ticket(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Ticket(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_TicketBook__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_TicketBook(const char* url,
+  impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_TicketBook(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_TicketBook__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_TicketBook(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_TicketBook(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_SimpleTicketBook__object* 
   impl_sidlx_rmi_SimpleTicketBook_fconnect_sidlx_rmi_SimpleTicketBook(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_SimpleTicketBook__object* 
-  impl_sidlx_rmi_SimpleTicketBook_fcast_sidlx_rmi_SimpleTicketBook(void* bi,
+  impl_sidlx_rmi_SimpleTicketBook_fcast_sidlx_rmi_SimpleTicketBook(void* bi, 
   sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 extern "C" {
@@ -219,38 +219,38 @@ void sidlx_rmi_SimpleTicketBook__call_load(void) {
   impl_sidlx_rmi_SimpleTicketBook__load(&_throwaway_exception);
 }
 struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseClass(const char* url,
+  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseClass(void* bi,
+  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseClass(bi, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(const char* url,
+  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(url, ar,
+  return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(url, ar, 
     _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseInterface(void* bi,
+  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_BaseInterface(bi, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_ClassInfo(const char* url,
+  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_ClassInfo(void* bi,
+  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_ClassInfo(bi, _ex);
 }
@@ -263,45 +263,45 @@ struct sidl_RuntimeException__object*
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_RuntimeException(void* bi,
+  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_RuntimeException(bi, _ex);
 }
 
 struct sidl_rmi_Response__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Response(const char* url,
+  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Response(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Response(url, ar,
+  return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Response(url, ar, 
     _ex);
 }
 
 struct sidl_rmi_Response__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Response(void* bi,
+  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Response(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Response(bi, _ex);
 }
 
 struct sidl_rmi_Ticket__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(const char* url,
+  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(url, ar, _ex);
 }
 
 struct sidl_rmi_Ticket__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Ticket(void* bi,
+  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Ticket(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_Ticket(bi, _ex);
 }
 
 struct sidl_rmi_TicketBook__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_TicketBook(const char* url,
+  skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_TicketBook(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_TicketBook(url, ar,
+  return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_TicketBook(url, ar, 
     _ex);
 }
 
 struct sidl_rmi_TicketBook__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_TicketBook(void* bi,
+  skel_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_TicketBook(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleTicketBook_fcast_sidl_rmi_TicketBook(bi, _ex);
 }
@@ -309,15 +309,14 @@ struct sidl_rmi_TicketBook__object*
 struct sidlx_rmi_SimpleTicketBook__object* 
   skel_sidlx_rmi_SimpleTicketBook_fconnect_sidlx_rmi_SimpleTicketBook(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return 
-    impl_sidlx_rmi_SimpleTicketBook_fconnect_sidlx_rmi_SimpleTicketBook(url, ar,
-    _ex);
+  return impl_sidlx_rmi_SimpleTicketBook_fconnect_sidlx_rmi_SimpleTicketBook(
+    url, ar, _ex);
 }
 
 struct sidlx_rmi_SimpleTicketBook__object* 
-  skel_sidlx_rmi_SimpleTicketBook_fcast_sidlx_rmi_SimpleTicketBook(void* bi,
+  skel_sidlx_rmi_SimpleTicketBook_fcast_sidlx_rmi_SimpleTicketBook(void* bi, 
   sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_SimpleTicketBook_fcast_sidlx_rmi_SimpleTicketBook(bi,
+  return impl_sidlx_rmi_SimpleTicketBook_fcast_sidlx_rmi_SimpleTicketBook(bi, 
     _ex);
 }
 

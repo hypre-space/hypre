@@ -49,6 +49,10 @@
 #include "sidl_String.h"
 #include "sidl_Exception.h"
 #include "sidlArray.h"
+#if defined(SIDL_DEBUG_REFCOUNT) && defined(HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
+
 
 #ifndef FALSE
 #define FALSE 0
@@ -77,6 +81,44 @@
  */
 static JavaVM* s_jvm = NULL;
 
+#ifdef SIDL_DEBUG_REFCOUNT
+static void sidl_cleanup_JVM(void *ignored)
+{
+  JNIEnv *env = sidl_Java_getEnv();
+  if (env) {
+    jclass sys = (*env)->FindClass(env, "java/lang/System");
+    if (sys) {
+      jmethodID mid = (*env)->GetStaticMethodID(env, sys, "gc", "()V");
+      if (mid) {
+        int i;
+        printf("\n\n\nCleaningup JVM!!\n\n\n");
+        for(i = 0; i < 3; ++i) {
+          (*env)->CallStaticVoidMethod(env, sys, mid, NULL);
+#ifdef HAVE_UNISTD_H
+          usleep(100);
+#endif
+        }
+      }
+      else {
+        printf("\n\n\nFailed to lookup gc method.\n\n\n");
+      }
+      (*env)->DeleteLocalRef(env, sys);
+    }
+    else {
+      printf("\n\n\nFailed to find class java/lang/System.\n\n\n");
+    }
+  }
+  else {
+    printf("\n\n\nJava env is NULL.\n\n\n");
+  }
+  if (s_jvm){
+    printf("Destroying JVM!!!\n");
+    (*s_jvm)->DestroyJavaVM(s_jvm);
+    s_jvm = NULL;
+  }
+}
+#endif
+
 /*
  * Static method to create a JVM if one has not already been created.  This
  * method takes the CLASSPATH from the environment.
@@ -96,6 +138,7 @@ static void sidl_Java_getJVM(void)
     jvmf_t  jvmf    = NULL;
     char*   clspath = NULL;
     sidl_DLL dll;
+    sidl__array_add(NULL); /* force array leak checking to initialize first */
     babel_jvm_flags = getenv("BABEL_JVM_FLAGS");
     /*This section of code takes any flags passed in through the enviornment
       variable BABEL_JVM_FLAGS and passed them to the JVM*/
@@ -158,6 +201,11 @@ Babel: JVM shared library not found during Babel configuration.\n");
       if (((*jvmf)(&s_jvm, &env, &vm_args)) < 0) {
         s_jvm = NULL;
       }
+#ifdef SIDL_DEBUG_REFCOUNT
+      else {
+        sidl_atexit(sidl_cleanup_JVM, NULL);
+      }
+#endif
     }
     sidl_String_free(clspath);
     free(options);  /*calloced above*/
@@ -418,9 +466,9 @@ jboolean Java_gov_llnl_sidl_BaseClass__1isLocal(
 
   if (ptr != NULL) {
     _tmp_inArgs = (struct sidl_rmi_Call__object*) sidl_Java_J2I_cls(env,
-      inArgs);JAVA_CHECK(env);
+      inArgs, FALSE);JAVA_CHECK(env);
     _tmp_outArgs = (struct sidl_rmi_Return__object*) sidl_Java_J2I_cls(env,
-      outArgs);JAVA_CHECK(env);
+      outArgs, FALSE);JAVA_CHECK(env);
     _tmp_methodName = sidl_Java_J2I_string(env, methodName);
 
     sidl_BaseInterface__exec(ptr, _tmp_methodName, _tmp_inArgs, _tmp_outArgs, &ex); 
@@ -549,11 +597,11 @@ void sidl_Java_CheckException(
     while ((type = va_arg(args, const char*)) != NULL) {
       void* ptr = sidl_BaseInterface__cast2(ex, type, &throwaway_ex);
       if (ptr != NULL) {
-	sidl_BaseInterface_deleteRef((sidl_BaseInterface)ptr, &throwaway_ex);
 	jthrowable obj;
-	obj = (jthrowable) sidl_Java_I2J_cls(env, ptr, type);JAVA_CHECK(env);
+        sidl_BaseInterface_deleteRef(ex, &throwaway_ex);
+	obj = (jthrowable) sidl_Java_I2J_cls(env, ptr, type, FALSE);JAVA_CHECK(env);
 	if(!obj) {
-	  obj = (jthrowable) sidl_Java_I2J_ifc(env, ptr, type);JAVA_CHECK(env);
+	  obj = (jthrowable) sidl_Java_I2J_ifc(env, ptr, type, FALSE);JAVA_CHECK(env);
 	}
 	if (obj != NULL) {
 	  if((*env)->Throw(env, obj) != 0)
@@ -630,13 +678,11 @@ struct sidl_BaseInterface__object* sidl_Java_catch_SIDLException(
       while ((type = va_arg(args, const char*)) != NULL) {
 	void* ptr = sidl_BaseInterface__cast2(ex, type,&ex2);SIDL_CHECK(ex2);
 	if (ptr != NULL) {
-	  sidl_BaseInterface_deleteRef((struct sidl_BaseInterface__object *)ex, 
-				       &ex2);SIDL_CHECK(ex2);
 	  return ex;
 	}
       }
       va_end(args);
-      
+      (*env)->DeleteLocalRef(env, cls);
     }
   }
   return NULL;
@@ -1186,7 +1232,8 @@ jstring sidl_Java_I2J_string(
 void* sidl_Java_J2I_cls_holder(
   JNIEnv* env,
   jobject obj,
-  const char* java_name)
+  const char* java_name,
+  int addRef)
 {
   jclass    cls    = (jclass) NULL;
   jmethodID mid    = (jmethodID) NULL;
@@ -1200,7 +1247,7 @@ void* sidl_Java_J2I_cls_holder(
   cls    = (*env)->GetObjectClass(env, obj);
   mid    = (*env)->GetMethodID(env, cls, "get", signature);
   holdee = (*env)->CallObjectMethod(env, obj, mid);
-  ptr    = sidl_Java_J2I_cls(env, holdee);
+  ptr    = sidl_Java_J2I_cls(env, holdee, addRef);
   (*env)->DeleteLocalRef(env, cls);
   (*env)->DeleteLocalRef(env, holdee);
   sidl_String_free(signature);
@@ -1217,7 +1264,8 @@ void sidl_Java_I2J_cls_holder(
   JNIEnv* env,
   jobject obj,
   void* value,
-  const char* java_name)
+  const char* java_name,
+  int addRef)
 {
   
   jmethodID mid = (jmethodID) NULL;
@@ -1225,13 +1273,14 @@ void sidl_Java_I2J_cls_holder(
   jclass cls = NULL;
   char* signature = NULL;
   cls = (*env)->GetObjectClass(env, obj);
-  holdee = sidl_Java_I2J_cls(env, value, java_name); JAVA_CHECK(env);
+  holdee = sidl_Java_I2J_cls(env, value, java_name, addRef); JAVA_CHECK(env);
   signature = sidl_String_concat3("(L", java_name, ";)V");
   sidl_String_replace(signature, '.', '/');
   
   mid = (*env)->GetMethodID(env, cls, "set", signature);
   (*env)->CallVoidMethod(env, obj, mid, holdee);
   (*env)->DeleteLocalRef(env, cls);
+  (*env)->DeleteLocalRef(env, holdee);
   sidl_String_free(signature);
   return;
  JAVA_EXIT:
@@ -1246,7 +1295,8 @@ void sidl_Java_I2J_cls_holder(
  */
 void* sidl_Java_J2I_cls(
   JNIEnv* env,
-  jobject obj)
+  jobject obj,
+  int addRef)
 {
   void* ptr = NULL;
 
@@ -1254,6 +1304,11 @@ void* sidl_Java_J2I_cls(
     jclass    cls = (*env)->GetObjectClass(env, obj);    
     jmethodID mid = (*env)->GetMethodID(env, cls, "_get_ior", "()J");
     ptr = JLONG_TO_POINTER((*env)->CallLongMethod(env, obj, mid));
+    if (addRef && ptr) {
+      sidl_BaseInterface _throwaway_exception;
+      sidl_BaseInterface_addRef((struct sidl_BaseInterface__object *)ptr,
+                                &_throwaway_exception);
+    }
     (*env)->DeleteLocalRef(env, cls);
   }
 
@@ -1267,9 +1322,10 @@ void* sidl_Java_J2I_cls(
 jobject sidl_Java_I2J_cls(
   JNIEnv* env,
   void* value,
-  const char* java_name)
+  const char* java_name,
+  int addRef)
 {
-  sidl_BaseInterface ex;
+  sidl_BaseInterface ex = NULL;
  
   jobject obj = (jobject) NULL;
   
@@ -1288,21 +1344,26 @@ jobject sidl_Java_I2J_cls(
 	return NULL;
       } else {
 	obj = (*env)->NewObject(env, cls, ctor, POINTER_TO_JLONG(value));
+        if (addRef) {
+          sidl_BaseInterface_addRef((struct sidl_BaseInterface__object *)
+                                    value, &ex);
+        }
       }
-      sidl_BaseInterface_addRef((struct sidl_BaseInterface__object*)value, &ex);SIDL_CHECK(ex);
-      
       (*env)->DeleteLocalRef(env, cls);
     }
     sidl_String_free(name);
   }
-  return obj;
- EXIT:
-  sidl_Java_CheckException(env,
-			   ex,
-			   "sidl.RuntimeException",
-			   NULL);
+  if (ex == NULL) {
+    return obj;
+  }
+  else {
+    sidl_Java_CheckException(env,
+                             ex,
+                             "sidl.RuntimeException",
+                             NULL);
   
-  return NULL;
+    return NULL;
+  }
 }
 
 /*
@@ -1343,7 +1404,8 @@ jobject sidl_Java_create_empty_class(
 void* sidl_Java_J2I_ifc_holder(
   JNIEnv* env,
   jobject obj,
-  const char* java_name)
+  const char* java_name,
+  int addRef)
 {
   jclass    cls    = (jclass) NULL;
   jmethodID mid    = (jmethodID) NULL;
@@ -1356,7 +1418,7 @@ void* sidl_Java_J2I_ifc_holder(
   mid    = (*env)->GetMethodID(env, cls, "get", signature);
 
   holdee = (*env)->CallObjectMethod(env, obj, mid);
-  ptr    = sidl_Java_J2I_ifc(env, holdee, java_name);JAVA_CHECK(env);
+  ptr    = sidl_Java_J2I_ifc(env, holdee, java_name, addRef);JAVA_CHECK(env);
 
   (*env)->DeleteLocalRef(env, cls);
   (*env)->DeleteLocalRef(env, holdee);
@@ -1377,7 +1439,8 @@ void sidl_Java_I2J_ifc_holder(
   JNIEnv* env,
   jobject obj,
   void* value,
-  const char* java_name)
+  const char* java_name,
+  int addRef)
 {
   jmethodID mid = (jmethodID) NULL;
   jobject holdee = NULL;
@@ -1385,7 +1448,7 @@ void sidl_Java_I2J_ifc_holder(
   char* signature = NULL;
 
   signature = sidl_String_concat3("(L", java_name, ";)V");
-  holdee = sidl_Java_I2J_ifc(env, value, java_name); JAVA_CHECK(env);
+  holdee = sidl_Java_I2J_ifc(env, value, java_name,addRef); JAVA_CHECK(env);
   cls = (*env)->GetObjectClass(env, obj);
 
   sidl_String_replace(signature, '.', '/');
@@ -1394,6 +1457,7 @@ void sidl_Java_I2J_ifc_holder(
   (*env)->CallVoidMethod(env, obj, mid, holdee);
 
   (*env)->DeleteLocalRef(env, cls);
+  (*env)->DeleteLocalRef(env, holdee);
   sidl_String_free(signature);
  JAVA_EXIT:
   return;
@@ -1408,7 +1472,8 @@ void sidl_Java_I2J_ifc_holder(
 void* sidl_Java_J2I_ifc(
   JNIEnv* env,
   jobject obj,
-  const char* sidl_name)
+  const char* sidl_name,
+  int addRef)
 {
   void* ptr = NULL;
   struct sidl_BaseInterface__object* ex = NULL;;
@@ -1431,8 +1496,9 @@ void* sidl_Java_J2I_ifc(
     }
     
     ptr = sidl_BaseInterface__cast2(ior, sidl_name, &ex);SIDL_CHECK(ex);
-    sidl_BaseInterface_deleteRef(ptr, &ex);SIDL_CHECK(ex);
-    
+    if (!addRef) {
+      sidl_BaseInterface_deleteRef(ptr, &ex);SIDL_CHECK(ex);
+    }
   }  
   
   return ptr;
@@ -1455,7 +1521,8 @@ void* sidl_Java_J2I_ifc(
 jobject sidl_Java_I2J_ifc(
   JNIEnv* env,
   void* value,
-  const char* java_name)
+  const char* java_name,
+  int addRef)
 {
   struct sidl_BaseInterface__object* _throwaway_exception = NULL;
   jobject obj = (jobject) NULL;
@@ -1474,12 +1541,14 @@ jobject sidl_Java_I2J_ifc(
 	return NULL;
       }
       obj = (*env)->NewObject(env, cls, ctor, POINTER_TO_JLONG(value));
+      if (addRef && value) {
+        sidl_BaseInterface_addRef((struct sidl_BaseInterface__object *)
+                                  value, &_throwaway_exception);
+      }
       if ((*env)->ExceptionCheck(env)) {
 	(*env)->ExceptionDescribe(env);
     	(*env)->ExceptionClear(env);
       }
-      /* Artifically add ref the Wrapper class reference */
-      sidl_BaseInterface_addRef(value, &_throwaway_exception);
       (*env)->DeleteLocalRef(env, cls);
     }
     sidl_String_free(wrapper);
@@ -1603,11 +1672,33 @@ void sidl_Java_I2J_array_holder(
   sidl_String_replace(signature, '.', '/');
   mid = (*env)->GetMethodID(env, cls, "set", signature);
   (*env)->CallVoidMethod(env, obj, mid, holdee);
+  (*env)->DeleteLocalRef(env, holdee);
   (*env)->DeleteLocalRef(env, cls);
   sidl_String_free(signature);
   sidl_String_free(array_name);
 
 }
+
+void
+sidl_Java_destroy_array(JNIEnv* env,
+                        jobject array)
+{
+  jmethodID mid = (jmethodID) NULL;
+  jclass cls = (jclass) NULL;
+  if (array) {
+    cls = (*env)->GetObjectClass(env, array); JAVA_CHECK(env);
+    if (cls) {
+      mid = (*env)->GetMethodID(env, cls, "destroy", "()V");
+      if (mid) {
+        (*env)->CallVoidMethod(env, array, mid);
+      }
+    }
+  }
+ JAVA_EXIT:
+  if (cls) (*env)->DeleteLocalRef(env, cls);
+  if (array) (*env)->DeleteLocalRef(env, array);
+}
+
 /*
  * Extract the IOR array type from the holder class.  The IOR array type
  * returned by this function will need to be cast to the appropriate IOR
@@ -1655,14 +1746,11 @@ void* sidl_Java_J2I_borrow_array(
   void* array = NULL;
   if (obj != NULL) {
     jclass cls = (*env)->GetObjectClass(env, obj);
-    jmethodID mid = (*env)->GetMethodID(env, cls, "_addRef", "()V");
     jfieldID array_field = (*env)->GetFieldID(env, cls, "d_array", "J");
     (*env)->DeleteLocalRef(env, cls);
     
     array = JLONG_TO_POINTER((*env)->GetLongField(env, obj, array_field));
     
-    if(array != NULL)
-      (*env)->CallVoidMethod(env, obj, mid);
   }
   return array;
 }
@@ -4664,5 +4752,3 @@ void sidl_String__register(JNIEnv* env)
     (*env)->DeleteLocalRef(env, cls);
   }
 }
-
-

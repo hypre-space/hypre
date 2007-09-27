@@ -55,7 +55,8 @@ SIDLXINCLUDE=
 endif
 libsidl_la_LIBADD = $(LIBADD_DL) $(CHASM_LIBS) $(LIBXML2_LIB)
 libsidl_la_LDFLAGS = -no-undefined -release $(VERSION)
-$(libsidl_la_OBJECTS) $(nodist_libsidl_la_OBJECTS) : babel_config.h
+$(libsidl_la_OBJECTS) $(nodist_libsidl_la_OBJECTS) : babel_config.h $(STUBHDRS) $(IORHDRS) $(SKELHDRS) $(CUSTOMHDRS)
+
 
 EXTRA_DIST = $(SRCS_EXCLUDED) ltdl.h ignore_me.h.in \
 	libsidl.scl.in scl.dtd changeundef.py

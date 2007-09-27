@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimHandle.h
  * Symbol:        sidlx.rmi.SimHandle-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for sidlx.rmi.SimHandle
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -154,10 +154,12 @@ sidlx_rmi_SimHandle_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -178,10 +180,12 @@ sidlx_rmi_SimHandle_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -198,9 +202,11 @@ sidlx_rmi_SimHandle_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -221,11 +227,13 @@ sidlx_rmi_SimHandle_initCreate(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_initCreate)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_initCreate)(
     self,
     url,
     typeName,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -246,11 +254,13 @@ sidlx_rmi_SimHandle_initConnect(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_initConnect)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_initConnect)(
     self,
     url,
     ar,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -271,10 +281,12 @@ sidlx_rmi_SimHandle_initUnserialize(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_initUnserialize)(
+  sidl_io_Serializable _result;
+  _result = (*self->d_epv->f_initUnserialize)(
     self,
     url,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -291,9 +303,11 @@ sidlx_rmi_SimHandle_getProtocol(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getProtocol)(
+  char* _result;
+  _result = (*self->d_epv->f_getProtocol)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -310,9 +324,11 @@ sidlx_rmi_SimHandle_getObjectID(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getObjectID)(
+  char* _result;
+  _result = (*self->d_epv->f_getObjectID)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -333,9 +349,11 @@ sidlx_rmi_SimHandle_getObjectURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getObjectURL)(
+  char* _result;
+  _result = (*self->d_epv->f_getObjectURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -353,10 +371,12 @@ sidlx_rmi_SimHandle_createInvocation(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_createInvocation)(
+  sidl_rmi_Invocation _result;
+  _result = (*self->d_epv->f_createInvocation)(
     self,
     methodName,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -376,9 +396,11 @@ sidlx_rmi_SimHandle_close(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_close)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_close)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -436,9 +458,11 @@ sidlx_rmi_SimHandle__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -472,9 +496,11 @@ sidlx_rmi_SimHandle__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -991,8 +1017,8 @@ sidlx_rmi_SimHandle__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidlx_rmi_SimHandle__object*
-sidlx_rmi_SimHandle__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidlx_rmi_SimHandle__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

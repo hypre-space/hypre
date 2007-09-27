@@ -181,7 +181,7 @@ AC_CACHE_CHECK([for path to libjvm.{a,so} or client/libjvm.{a,so} ],
      ;;
    aix*)
      llnl_cv_lib_jvm=`find $javatopdir  \
-	-name "libjvm.*" -print2> /dev/null | head -n 1`
+	-name "libjvm.*" -print 2> /dev/null | head -n 1`
      if test -z "$llnl_cv_lib_jvm"; then
 	llnl_cv_lib_jvm=`find $javatopdir \
 	   -name "libkaffevm.*" -print 2> /dev/null | head -n 1`

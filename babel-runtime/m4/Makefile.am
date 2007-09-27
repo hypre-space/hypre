@@ -41,6 +41,7 @@ LLNL_M4_FILES=\
 	llnl_enable_regression.m4\
 	llnl_cxx_library_ldflags.m4\
 	llnl_cxx_old_header_suffix.m4\
+	llnl_fortran_string_test.m4\
 	llnl_f77_c_config.m4\
 	llnl_f77_dummy_main.m4\
 	llnl_f77_library_ldflags.m4\

@@ -53,23 +53,10 @@ else
    if test "$vers" -ge VERSION_TO_NUMBER([echo $LIBXML_REQUIRED_VERSION]); then
 	AC_MSG_RESULT(found version $XML2_VERSION)
 	AC_MSG_CHECKING(for libxml2 library flags)
-	if $XML2_CONFIG --libtool-libs | grep "^Usage:" 2>&1 > /dev/null; then
+	if $XML2_CONFIG --libs --static | grep "^Usage:" 2>&1 > /dev/null; then
 	    LIBXML2_LIB="`$XML2_CONFIG --libs`"
 	else
-	    LIBXML2_LIB="`$XML2_CONFIG --libtool-libs`"
-	    for i in `xml2-config --libtool-libs` ; do
-		case $i in
-	        -*)
-		  AC_MSG_WARN([xml2-config --libtools returned $i; configure cannot verify if this is correct.])
-		  ;;
-	        *) if test \! -e $i; then
-		    AC_MSG_WARN([xml2-config --libtool-libs returned $i, which does not exist in the file system; using xml2-config --libs as a fallback.])
-		    LIBXML2_LIB="`$XML2_CONFIG --libs`"
-		    break
-		  fi
-		  ;;
-	        esac
-	    done
+	    LIBXML2_LIB="`$XML2_CONFIG --libs --static`"
 	fi
 	AC_MSG_RESULT($LIBXML2_LIB)
 	

@@ -250,6 +250,13 @@ public class Opaque {
     public Array get() {
       return d_obj;
     }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
+    }
   }
 
 }
@@ -446,6 +453,13 @@ public class Opaque {
      */
     public Array1 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
   }
@@ -651,6 +665,14 @@ public class Opaque {
      */
     public Array2 get() {
       return d_obj;
+    }
+
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
     }
   }
@@ -864,6 +886,13 @@ public class Opaque {
      */
     public Array3 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 
@@ -1090,6 +1119,13 @@ public class Opaque {
      */
     public Array4 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 
@@ -1325,6 +1361,13 @@ public class Opaque {
      */
     public Array5 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 
@@ -1567,6 +1610,13 @@ public class Opaque {
      */
     public Array6 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
   }
@@ -1823,6 +1873,13 @@ public class Opaque {
      */
     public Array7 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 

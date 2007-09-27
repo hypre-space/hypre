@@ -450,6 +450,13 @@ public abstract class BaseArray {
     public gov.llnl.sidl.BaseArray get() {
       return d_obj;
     }
+
+    /**
+     * Destroy the held array.
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
+    }
   }
 
 } 

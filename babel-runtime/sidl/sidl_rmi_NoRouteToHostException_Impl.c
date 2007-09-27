@@ -2,7 +2,7 @@
  * File:          sidl_rmi_NoRouteToHostException_Impl.c
  * Symbol:        sidl.rmi.NoRouteToHostException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.NoRouteToHostException
@@ -55,8 +55,8 @@
 /* Insert-Code-Here {sidl.rmi.NoRouteToHostException._includes} (includes and arbitrary code) */
 /* DO-NOT-DELETE splicer.end(sidl.rmi.NoRouteToHostException._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -148,12 +148,12 @@ impl_sidl_rmi_NoRouteToHostException__dtor(
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_BaseClass__object* 
-  impl_sidl_rmi_NoRouteToHostException_fconnect_sidl_BaseClass(const char* url,
+  impl_sidl_rmi_NoRouteToHostException_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_BaseClass(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
@@ -163,7 +163,7 @@ struct sidl_BaseException__object*
   return sidl_BaseException__connectI(url, ar, _ex);
 }
 struct sidl_BaseException__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_BaseException(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_BaseException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseException__cast(bi, _ex);
 }
@@ -173,17 +173,17 @@ struct sidl_BaseInterface__object*
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_BaseInterface(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_NoRouteToHostException_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidl_rmi_NoRouteToHostException_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_ClassInfo(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
@@ -193,7 +193,7 @@ struct sidl_RuntimeException__object*
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_RuntimeException(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
@@ -203,7 +203,7 @@ struct sidl_SIDLException__object*
   return sidl_SIDLException__connectI(url, ar, _ex);
 }
 struct sidl_SIDLException__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_SIDLException(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_SIDLException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_SIDLException__cast(bi, _ex);
 }
@@ -213,7 +213,7 @@ struct sidl_io_Deserializer__object*
   return sidl_io_Deserializer__connectI(url, ar, _ex);
 }
 struct sidl_io_Deserializer__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_io_Deserializer(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_io_Deserializer(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_io_Deserializer__cast(bi, _ex);
 }
@@ -223,7 +223,7 @@ struct sidl_io_IOException__object*
   return sidl_io_IOException__connectI(url, ar, _ex);
 }
 struct sidl_io_IOException__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_io_IOException(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_io_IOException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_io_IOException__cast(bi, _ex);
 }
@@ -233,7 +233,7 @@ struct sidl_io_Serializable__object*
   return sidl_io_Serializable__connectI(url, ar, _ex);
 }
 struct sidl_io_Serializable__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_io_Serializable(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_io_Serializable__cast(bi, _ex);
 }
@@ -243,7 +243,7 @@ struct sidl_io_Serializer__object*
   return sidl_io_Serializer__connectI(url, ar, _ex);
 }
 struct sidl_io_Serializer__object* 
-  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_io_Serializer(void* bi,
+  impl_sidl_rmi_NoRouteToHostException_fcast_sidl_io_Serializer(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_io_Serializer__cast(bi, _ex);
 }

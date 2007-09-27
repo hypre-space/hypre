@@ -33,13 +33,14 @@
 AC_DEFUN([_LLNL_F90_LIBRARY_LDFLAGS],
 [_AC_FORTRAN_ASSERT()dnl
 _AC_PROG_FC_V
+[]_AC_LANG_PREFIX[]LIBS_NOSORT=true
 AC_CACHE_CHECK([for Fortran libraries of $[]_AC_FC[] (LLNL)], ac_cv_[]_AC_LANG_ABBREV[]_libs,
 [if test "x$[]_AC_LANG_PREFIX[]LIBS" != "x"; then
-  echo "*****"
-  echo "user Override"
-  echo "*****"
   ac_cv_[]_AC_LANG_ABBREV[]_libs="$[]_AC_LANG_PREFIX[]LIBS" # Let the user override the test.
+  []_AC_LANG_PREFIX[]LIBS_NOSORT=true
+  _AS_ECHO_N([(user override) ])
 else
+  []_AC_LANG_PREFIX[]LIBS_NOSORT=false
 
 _AC_PROG_FC_V_OUTPUT
 
@@ -161,6 +162,7 @@ AC_SUBST([]_AC_LANG_PREFIX[]LIBS)
 AC_DEFUN([LLNL_F90_LIBRARY_LDFLAGS],
 [dnl AC_REQUIRE([AC_PROG_FC])dnl
 AC_LANG_PUSH(Fortran)dnl
+AC_ARG_VAR([FCLIBS],[Linker flags needed to link against F90 code])
 _LLNL_F90_LIBRARY_LDFLAGS
 AC_LANG_POP(Fortran)dnl
 ])# LLNL_F90_LIBRARY_LDFLAGS

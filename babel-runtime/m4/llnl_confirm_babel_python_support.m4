@@ -17,7 +17,7 @@ dnl  @author Gary Kumfert
 
 AC_DEFUN([LLNL_CONFIRM_BABEL_PYTHON_SUPPORT],
  [AC_REQUIRE([LLNL_LIBXML_CONFIG])dnl
-  AC_ARG_VAR([JAR],[Python interpreter])
+  AC_ARG_VAR([PYTHON],[Python interpreter])
   AC_ARG_ENABLE([python],
         AS_HELP_STRING(--enable-python@<:@=PYTHON@:>@,python language bindings @<:@default=yes@:>@),
                [enable_python="$enableval"],

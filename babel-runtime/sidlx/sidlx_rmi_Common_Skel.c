@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_Common_Skel.c
  * Symbol:        sidlx.rmi.Common-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side glue code for sidlx.rmi.Common
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -55,61 +55,61 @@ impl_sidlx_rmi_Common_getCanonicalName(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_Common_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_sidlx_rmi_Common_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
   impl_sidlx_rmi_Common_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_Common_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_Common_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_Common_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_Common_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_Common_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_sidlx_rmi_Common_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
   impl_sidlx_rmi_Common_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_Common_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidlx_rmi_Common_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_Common_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_Common_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_Common__object* 
   impl_sidlx_rmi_Common_fconnect_sidlx_rmi_Common(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_Common__object* 
-  impl_sidlx_rmi_Common_fcast_sidlx_rmi_Common(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_Common_fcast_sidlx_rmi_Common(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_Common_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_sidlx_rmi_Common_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
   impl_sidlx_rmi_Common_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_Common_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_Common_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_Common_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_Common_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_Common_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_sidlx_rmi_Common_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
   impl_sidlx_rmi_Common_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_Common_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidlx_rmi_Common_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_Common_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_Common_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_Common__object* 
   impl_sidlx_rmi_Common_fconnect_sidlx_rmi_Common(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_Common__object* 
-  impl_sidlx_rmi_Common_fcast_sidlx_rmi_Common(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_Common_fcast_sidlx_rmi_Common(void* bi, sidl_BaseInterface* 
+  _ex);
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -149,9 +149,8 @@ void sidlx_rmi_Common__call_load(void) {
   sidl_BaseInterface _throwaway_exception = NULL;
   impl_sidlx_rmi_Common__load(&_throwaway_exception);
 }
-struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_Common_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseClass__object* skel_sidlx_rmi_Common_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_Common_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
@@ -161,20 +160,19 @@ struct sidl_BaseClass__object* skel_sidlx_rmi_Common_fcast_sidl_BaseClass(void*
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_Common_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  skel_sidlx_rmi_Common_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_Common_fconnect_sidl_BaseInterface(url, ar, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_Common_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface *_ex) { 
+  skel_sidlx_rmi_Common_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface 
+  *_ex) { 
   return impl_sidlx_rmi_Common_fcast_sidl_BaseInterface(bi, _ex);
 }
 
-struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_Common_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) { 
+struct sidl_ClassInfo__object* skel_sidlx_rmi_Common_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_Common_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
@@ -184,13 +182,13 @@ struct sidl_ClassInfo__object* skel_sidlx_rmi_Common_fcast_sidl_ClassInfo(void*
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidlx_rmi_Common_fconnect_sidl_RuntimeException(const char* url,
+  skel_sidlx_rmi_Common_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_Common_fconnect_sidl_RuntimeException(url, ar, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidlx_rmi_Common_fcast_sidl_RuntimeException(void* bi,
+  skel_sidlx_rmi_Common_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_Common_fcast_sidl_RuntimeException(bi, _ex);
 }
@@ -201,9 +199,8 @@ struct sidlx_rmi_Common__object*
   return impl_sidlx_rmi_Common_fconnect_sidlx_rmi_Common(url, ar, _ex);
 }
 
-struct sidlx_rmi_Common__object* 
-  skel_sidlx_rmi_Common_fcast_sidlx_rmi_Common(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidlx_rmi_Common__object* skel_sidlx_rmi_Common_fcast_sidlx_rmi_Common(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_Common_fcast_sidlx_rmi_Common(bi, _ex);
 }
 

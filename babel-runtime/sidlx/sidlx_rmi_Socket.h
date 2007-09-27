@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_Socket.h
  * Symbol:        sidlx.rmi.Socket-v0.1
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for sidlx.rmi.Socket
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -76,9 +76,11 @@ sidlx_rmi_Socket_close(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_close)(
+  int32_t _result;
+  _result = (*self->d_epv->f_close)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -97,11 +99,13 @@ sidlx_rmi_Socket_readn(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_readn)(
+  int32_t _result;
+  _result = (*self->d_epv->f_readn)(
     self->d_object,
     nbytes,
     data,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -120,11 +124,13 @@ sidlx_rmi_Socket_readline(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_readline)(
+  int32_t _result;
+  _result = (*self->d_epv->f_readline)(
     self->d_object,
     nbytes,
     data,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -143,11 +149,13 @@ sidlx_rmi_Socket_readstring(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_readstring)(
+  int32_t _result;
+  _result = (*self->d_epv->f_readstring)(
     self->d_object,
     nbytes,
     data,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -165,10 +173,12 @@ sidlx_rmi_Socket_readstring_alloc(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_readstring_alloc)(
+  int32_t _result;
+  _result = (*self->d_epv->f_readstring_alloc)(
     self->d_object,
     data,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -186,10 +196,12 @@ sidlx_rmi_Socket_readint(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_readint)(
+  int32_t _result;
+  _result = (*self->d_epv->f_readint)(
     self->d_object,
     data,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -208,11 +220,13 @@ sidlx_rmi_Socket_writen(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_writen)(
+  int32_t _result;
+  _result = (*self->d_epv->f_writen)(
     self->d_object,
     nbytes,
     data,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -231,11 +245,13 @@ sidlx_rmi_Socket_writestring(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_writestring)(
+  int32_t _result;
+  _result = (*self->d_epv->f_writestring)(
     self->d_object,
     nbytes,
     data,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -253,10 +269,12 @@ sidlx_rmi_Socket_writeint(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_writeint)(
+  int32_t _result;
+  _result = (*self->d_epv->f_writeint)(
     self->d_object,
     data,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -294,9 +312,11 @@ sidlx_rmi_Socket_getFileDescriptor(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getFileDescriptor)(
+  int32_t _result;
+  _result = (*self->d_epv->f_getFileDescriptor)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -315,11 +335,13 @@ sidlx_rmi_Socket_test(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_test)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_test)(
     self->d_object,
     secs,
     usecs,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -391,10 +413,12 @@ sidlx_rmi_Socket_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self->d_object,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -415,10 +439,12 @@ sidlx_rmi_Socket_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self->d_object,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -435,9 +461,11 @@ sidlx_rmi_Socket_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -495,9 +523,11 @@ sidlx_rmi_Socket__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -531,9 +561,11 @@ sidlx_rmi_Socket__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -1050,8 +1082,8 @@ sidlx_rmi_Socket__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidlx_rmi_Socket__object*
-sidlx_rmi_Socket__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidlx_rmi_Socket__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

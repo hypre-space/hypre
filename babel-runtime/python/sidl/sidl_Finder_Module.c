@@ -2,7 +2,7 @@
  * File:          sidl_Finder_Module.c
  * Symbol:        sidl.Finder-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -166,12 +166,12 @@ sidl_Finder__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_Finder__object*
-sidl_Finder__connectI(const char * url, sidl_bool ar,                         \
-  struct sidl_BaseInterface__object **_ex);
+sidl_Finder__connectI(const char * url, sidl_bool ar, struct                  \
+  sidl_BaseInterface__object **_ex);
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -211,15 +211,15 @@ static void* remote_sidl__Finder__cast(
     cmp1 = strcmp(name, "sidl._Finder");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidl__Finder__object*)self);
       return cast;
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,                    \
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,                     \
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct             \
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct              \
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct sidl__Finder__remote*)self->d_data)->d_ih, _ex);
   }
@@ -371,12 +371,12 @@ remote_sidl__Finder_findLibrary(
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "sidl_name", sidl_name,             \
       _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packString( _inv, "target", target,                   \
-      _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "lScope", lScope,                      \
-      _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "lResolve", lResolve,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packString( _inv, "target", target, _ex);SIDL_CHECK(  \
+      *_ex);
+    sidl_rmi_Invocation_packInt( _inv, "lScope", lScope, _ex);SIDL_CHECK(     \
+      *_ex);
+    sidl_rmi_Invocation_packInt( _inv, "lResolve", lResolve, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -605,12 +605,12 @@ remote_sidl__Finder_isSame(
     if(iobj){
       char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,       \
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "iobj", _url,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(    \
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "iobj", NULL,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(    \
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -626,8 +626,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.isSame
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -675,8 +675,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.isType
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -725,8 +725,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl._Finder.getCla
     /* extract return value */
     sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,                    \
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -766,70 +766,70 @@ static void sidl__Finder__init_remote_epv(void)
   epv->f_isType             = remote_sidl__Finder_isType;
   epv->f_getClassInfo       = remote_sidl__Finder_getClassInfo;
 
-  e0->f__cast        = (void* (*)(void*,const char*,                          \
-    sidl_BaseInterface*)) epv->f__cast;
+  e0->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*))     \
+    epv->f__cast;
   e0->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e0->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e0->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e0->f__isRemote    = (sidl_bool (*)(void*,                                  \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e0->f__set_hooks   = (void (*)(void*,int32_t,                               \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e0->f__exec        = (void (*)(void*,const char*,                           \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(void*,                                  \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(void*,const char*,                      \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,             \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e0->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*))             \
+    epv->f__isRemote;
+  e0->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*))         \
+    epv->f__set_hooks;
+  e0->f__exec        = (void (*)(void*,const char*,struct                     \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(void*,struct                            \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(void*,const char*,struct                \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct       \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e1->f__cast         = (void* (*)(void*,const char*,                         \
-    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__cast         = (void* (*)(void*,const char*,sidl_BaseInterface*))    \
+    epv->f__cast;
   e1->f__delete       = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e1->f__getURL       = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e1->f__raddRef      = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote     = (sidl_bool (*)(void*,                                 \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks    = (void (*)(void*,int32_t,                              \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec         = (void (*)(void*,const char*,                          \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_findLibrary   = (struct sidl_DLL__object* (*)(void*,const char*,      \
-    const char*,enum sidl_Scope__enum,enum sidl_Resolve__enum,                \
-    struct sidl_BaseInterface__object **)) epv->f_findLibrary;
-  e1->f_setSearchPath = (void (*)(void*,const char*,                          \
-    struct sidl_BaseInterface__object **)) epv->f_setSearchPath;
-  e1->f_getSearchPath = (char* (*)(void*,                                     \
-    struct sidl_BaseInterface__object **)) epv->f_getSearchPath;
-  e1->f_addSearchPath = (void (*)(void*,const char*,                          \
-    struct sidl_BaseInterface__object **)) epv->f_addSearchPath;
-  e1->f_addRef        = (void (*)(void*,                                      \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef     = (void (*)(void*,                                      \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame        = (sidl_bool (*)(void*,                                 \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType        = (sidl_bool (*)(void*,const char*,                     \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo  = (struct sidl_ClassInfo__object* (*)(void*,            \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f__isRemote     = (sidl_bool (*)(void*,sidl_BaseInterface*))            \
+    epv->f__isRemote;
+  e1->f__set_hooks    = (void (*)(void*,int32_t, sidl_BaseInterface*))        \
+    epv->f__set_hooks;
+  e1->f__exec         = (void (*)(void*,const char*,struct                    \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_findLibrary   = (struct sidl_DLL__object* (*)(void*,const char*,const \
+    char*,enum sidl_Scope__enum,enum sidl_Resolve__enum,struct                \
+    sidl_BaseInterface__object **)) epv->f_findLibrary;
+  e1->f_setSearchPath = (void (*)(void*,const char*,struct                    \
+    sidl_BaseInterface__object **)) epv->f_setSearchPath;
+  e1->f_getSearchPath = (char* (*)(void*,struct sidl_BaseInterface__object    \
+    **)) epv->f_getSearchPath;
+  e1->f_addSearchPath = (void (*)(void*,const char*,struct                    \
+    sidl_BaseInterface__object **)) epv->f_addSearchPath;
+  e1->f_addRef        = (void (*)(void*,struct sidl_BaseInterface__object     \
+    **)) epv->f_addRef;
+  e1->f_deleteRef     = (void (*)(void*,struct sidl_BaseInterface__object     \
+    **)) epv->f_deleteRef;
+  e1->f_isSame        = (sidl_bool (*)(void*,struct                           \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e1->f_isType        = (sidl_bool (*)(void*,const char*,struct               \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo  = (struct sidl_ClassInfo__object* (*)(void*,struct      \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   s_remote_initialized = 1;
 }
 
 /* Create an instance that connects to an existing remote object. */
 static struct sidl_Finder__object*
-sidl_Finder__remoteConnect(const char *url, sidl_bool ar,                     \
-  sidl_BaseInterface *_ex)
+sidl_Finder__remoteConnect(const char *url, sidl_bool ar, sidl_BaseInterface  \
+  *_ex)
 {
   struct sidl__Finder__object* self;
 
@@ -840,8 +840,8 @@ sidl_Finder__remoteConnect(const char *url, sidl_bool ar,                     \
   char* objectID = NULL;
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi =                                                   \
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(      \
+    sidl_BaseInterface bi = (                                                 \
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(       \
       objectID, _ex);
     if(ar) {
       sidl_BaseInterface_addRef(bi, _ex);
@@ -884,8 +884,8 @@ sidl_Finder__remoteConnect(const char *url, sidl_bool ar,                     \
 /* Create an instance that uses an already existing  */
 /* InstanceHandel to connect to an existing remote object. */
 static struct sidl_Finder__object*
-sidl_Finder__IHConnect(sidl_rmi_InstanceHandle instance,                      \
-  sidl_BaseInterface *_ex)
+sidl_Finder__IHConnect(sidl_rmi_InstanceHandle instance, sidl_BaseInterface   \
+  *_ex)
 {
   struct sidl__Finder__object* self;
 
@@ -937,8 +937,8 @@ sidl_Finder__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("sidl.Finder",                   \
-      (void*)sidl_Finder__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.Finder", (                 \
+      void*)sidl_Finder__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
@@ -959,15 +959,15 @@ sidl_Finder__rmicast(
  */
 
 struct sidl_Finder__object*
-sidl_Finder__connectI(const char* url, sidl_bool ar,                          \
-  struct sidl_BaseInterface__object **_ex)
+sidl_Finder__connectI(const char* url, sidl_bool ar, struct                   \
+  sidl_BaseInterface__object **_ex)
 {
   return sidl_Finder__remoteConnect(url, ar, _ex);
 }
 
 static PyObject *
-pStub_Finder__connect(PyObject *_ignored, PyObject *_args,                    \
-  PyObject *_kwdict) {
+pStub_Finder__connect(PyObject *_ignored, PyObject *_args, PyObject *_kwdict) \
+  {
   PyObject *_return_value = NULL;
   struct sidl_Finder__object* self = NULL;
   char* url = NULL;
@@ -990,14 +990,14 @@ pStub_Finder__connect(PyObject *_ignored, PyObject *_args,                    \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -1047,14 +1047,14 @@ pStub_Finder__exec(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1103,22 +1103,22 @@ pStub_Finder__getURL(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "z",
           _return);
+        free((void *)_return);
       }
-      free((void *)_return);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -1161,14 +1161,14 @@ pStub_Finder__isLocal(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1218,14 +1218,14 @@ pStub_Finder__isRemote(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1277,14 +1277,14 @@ pStub_Finder__set_hooks(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1306,8 +1306,8 @@ pStub_Finder__set_hooks(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
 }
 
 static PyObject *
-pStub_Finder_addSearchPath(PyObject *_self, PyObject *_args,                  \
-  PyObject *_kwdict) {
+pStub_Finder_addSearchPath(PyObject *_self, PyObject *_args, PyObject         \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_Finder__object *_self_ior =
     ((struct sidl_Finder__object *)
@@ -1334,14 +1334,14 @@ pStub_Finder_addSearchPath(PyObject *_self, PyObject *_args,                  \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1363,8 +1363,8 @@ pStub_Finder_addSearchPath(PyObject *_self, PyObject *_args,                  \
 }
 
 static PyObject *
-pStub_Finder_findLibrary(PyObject *_self, PyObject *_args,                    \
-  PyObject *_kwdict) {
+pStub_Finder_findLibrary(PyObject *_self, PyObject *_args, PyObject *_kwdict) \
+  {
   PyObject *_return_value = NULL;
   struct sidl_Finder__object *_self_ior =
     ((struct sidl_Finder__object *)
@@ -1406,14 +1406,14 @@ pStub_Finder_findLibrary(PyObject *_self, PyObject *_args,                    \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1436,8 +1436,8 @@ pStub_Finder_findLibrary(PyObject *_self, PyObject *_args,                    \
 }
 
 static PyObject *
-pStub_Finder_getSearchPath(PyObject *_self, PyObject *_args,                  \
-  PyObject *_kwdict) {
+pStub_Finder_getSearchPath(PyObject *_self, PyObject *_args, PyObject         \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_Finder__object *_self_ior =
     ((struct sidl_Finder__object *)
@@ -1462,22 +1462,22 @@ pStub_Finder_getSearchPath(PyObject *_self, PyObject *_args,                  \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "z",
           _return);
+        free((void *)_return);
       }
-      free((void *)_return);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -1493,8 +1493,8 @@ pStub_Finder_getSearchPath(PyObject *_self, PyObject *_args,                  \
 }
 
 static PyObject *
-pStub_Finder_setSearchPath(PyObject *_self, PyObject *_args,                  \
-  PyObject *_kwdict) {
+pStub_Finder_setSearchPath(PyObject *_self, PyObject *_args, PyObject         \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_Finder__object *_self_ior =
     ((struct sidl_Finder__object *)
@@ -1521,14 +1521,14 @@ pStub_Finder_setSearchPath(PyObject *_self, PyObject *_args,                  \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1553,8 +1553,8 @@ static int
 sidl_Finder_createCast(PyObject *self, PyObject *args, PyObject *kwds) {
   struct sidl_Finder__object *optarg = NULL;
   static char *_kwlist[] = { "sobj", NULL };
-  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "O&", _kwlist,          \
-    (void *)sidl_Finder__convert, &optarg);
+  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "O&", _kwlist, (void    \
+    *)sidl_Finder__convert, &optarg);
   if (_okay) {
     return sidl_Object_Init(
       (SPObject *)self,
@@ -1987,10 +1987,10 @@ class <code>DefaultFinder</code> is used."
   dict = PyModule_GetDict(module);
   ExternalAPI[sidl_Finder__wrap_NUM] = (void*)sidl_Finder__wrap;
   ExternalAPI[sidl_Finder__convert_NUM] = (void*)sidl_Finder__convert;
-  ExternalAPI[sidl_Finder__convert_python_array_NUM] =                        \
-    (void*)sidl_Finder__convert_python_array;
-  ExternalAPI[sidl_Finder__convert_sidl_array_NUM] =                          \
-    (void*)sidl_Finder__convert_sidl_array;
+  ExternalAPI[sidl_Finder__convert_python_array_NUM] = (                      \
+    void*)sidl_Finder__convert_python_array;
+  ExternalAPI[sidl_Finder__convert_sidl_array_NUM] = (                        \
+    void*)sidl_Finder__convert_sidl_array;
   ExternalAPI[sidl_Finder__weakRef_NUM] = (void*)sidl_Finder__weakRef;
   ExternalAPI[sidl_Finder_deref_NUM] = (void*)sidl_Finder_deref;
   ExternalAPI[sidl_Finder__newRef_NUM] = (void*)sidl_Finder__newRef;
@@ -2016,8 +2016,8 @@ class <code>DefaultFinder</code> is used."
   sidl_BaseInterface__import();
   _sidl_FinderType.tp_base = sidl_BaseInterface_PyType();
   _sidl_FinderType.tp_bases = PyTuple_New(1);
-  PyTuple_SetItem(_sidl_FinderType.tp_bases,0,                                \
-    (PyObject *)sidl_BaseInterface_PyType());
+  PyTuple_SetItem(_sidl_FinderType.tp_bases,0, (PyObject                      \
+    *)sidl_BaseInterface_PyType());
   if (PyType_Ready(&_sidl_FinderType) < 0) {
     PyErr_Print();
     fprintf(stderr, "PyType_Ready on sidl.Finder failed.\n");
@@ -2026,6 +2026,6 @@ class <code>DefaultFinder</code> is used."
   Py_INCREF(&_sidl_FinderType);
   PyDict_SetItemString(dict, "Finder", (PyObject *)&_sidl_FinderType);
 
-  sidl_rmi_ConnectRegistry_registerConnect("sidl.Finder",                     \
-    (void*)sidl_Finder__IHConnect, &throwaway_exception);
+  sidl_rmi_ConnectRegistry_registerConnect("sidl.Finder", (                   \
+    void*)sidl_Finder__IHConnect, &throwaway_exception);
 }

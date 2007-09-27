@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimpleTicketBook_Module.c
  * Symbol:        sidlx.rmi.SimpleTicketBook-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   implement a C extension type for a sidl extendable
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -140,12 +140,12 @@ sidlx_rmi_SimpleTicketBook__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidlx_rmi_SimpleTicketBook__object*
-sidlx_rmi_SimpleTicketBook__connectI(const char * url, sidl_bool ar,          \
-  struct sidl_BaseInterface__object **_ex);
+sidlx_rmi_SimpleTicketBook__connectI(const char * url, sidl_bool ar, struct   \
+  sidl_BaseInterface__object **_ex);
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -190,7 +190,7 @@ static void* remote_sidlx_rmi_SimpleTicketBook__cast(
       cmp2 = strcmp(name, "sidl.BaseClass");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidl_BaseClass__object*)self);
         return cast;
       }
     }
@@ -199,7 +199,7 @@ static void* remote_sidlx_rmi_SimpleTicketBook__cast(
     cmp1 = strcmp(name, "sidlx.rmi.SimpleTicketBook");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidlx_rmi_SimpleTicketBook__object*)self);
       return cast;
     }
     else if (cmp1 < 0) {
@@ -212,10 +212,10 @@ static void* remote_sidlx_rmi_SimpleTicketBook__cast(
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,                    \
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,                     \
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct             \
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct              \
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct                                                  \
       sidlx_rmi_SimpleTicketBook__remote*)self->d_data)->d_ih, _ex);
@@ -404,12 +404,12 @@ remote_sidlx_rmi_SimpleTicketBook_isSame(
     if(iobj){
       char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,       \
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "iobj", _url,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(    \
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "iobj", NULL,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(    \
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -425,8 +425,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimpleTic
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -474,8 +474,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimpleTic
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -524,8 +524,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimpleTic
     /* extract return value */
     sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,                    \
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -633,8 +633,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimpleTic
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -682,8 +682,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimpleTic
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* unpack out and inout arguments */
     sidl_rmi_Response_unpackString( _rsvp, "t", &t_str, _ex);SIDL_CHECK(*_ex);
@@ -731,8 +731,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimpleTic
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -820,8 +820,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimpleTic
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -920,8 +920,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimpleTic
     /* extract return value */
     sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_rmi_Response__connectI(_retval_str, FALSE,                 \
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_rmi_Response__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -999,125 +999,123 @@ static void sidlx_rmi_SimpleTicketBook__init_remote_epv(void)
   e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,      \
     sidl_BaseInterface*)) epv->f__set_hooks;
   e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,  \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,              \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,              \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct      \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,struct        \
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,struct        \
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,struct   \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,const    \
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct             \
-    sidl_BaseClass__object*,                                                  \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **))            \
+    epv->f_getClassInfo;
 
-  e1->f__cast        = (void* (*)(void*,const char*,                          \
-    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*))     \
+    epv->f__cast;
   e1->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e1->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e1->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote    = (sidl_bool (*)(void*,                                  \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks   = (void (*)(void*,int32_t,                               \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec        = (void (*)(void*,const char*,                           \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef       = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef    = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame       = (sidl_bool (*)(void*,                                  \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType       = (sidl_bool (*)(void*,const char*,                      \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,             \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*))             \
+    epv->f__isRemote;
+  e1->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*))         \
+    epv->f__set_hooks;
+  e1->f__exec        = (void (*)(void*,const char*,struct                     \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_deleteRef;
+  e1->f_isSame       = (sidl_bool (*)(void*,struct                            \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*,struct                \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct       \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   e2->f__cast                 = (void* (*)(void*,const char*,                 \
     sidl_BaseInterface*)) epv->f__cast;
-  e2->f__delete               = (void (*)(void*,                              \
-    sidl_BaseInterface*)) epv->f__delete;
-  e2->f__getURL               = (char* (*)(void*,                             \
-    sidl_BaseInterface*)) epv->f__getURL;
-  e2->f__raddRef              = (void (*)(void*,                              \
-    sidl_BaseInterface*)) epv->f__raddRef;
-  e2->f__isRemote             = (sidl_bool (*)(void*,                         \
-    sidl_BaseInterface*)) epv->f__isRemote;
+  e2->f__delete               = (void (*)(void*,sidl_BaseInterface*))         \
+    epv->f__delete;
+  e2->f__getURL               = (char* (*)(void*,sidl_BaseInterface*))        \
+    epv->f__getURL;
+  e2->f__raddRef              = (void (*)(void*,sidl_BaseInterface*))         \
+    epv->f__raddRef;
+  e2->f__isRemote             = (sidl_bool (*)(void*,sidl_BaseInterface*))    \
+    epv->f__isRemote;
   e2->f__set_hooks            = (void (*)(void*,int32_t,                      \
     sidl_BaseInterface*)) epv->f__set_hooks;
-  e2->f__exec                 = (void (*)(void*,const char*,                  \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e2->f_block                 = (void (*)(void*,                              \
-    struct sidl_BaseInterface__object **)) epv->f_block;
-  e2->f_test                  = (sidl_bool (*)(void*,                         \
-    struct sidl_BaseInterface__object **)) epv->f_test;
-  e2->f_createEmptyTicketBook = (struct sidl_rmi_TicketBook__object*          \
-    (*)(void*,                                                                \
-    struct sidl_BaseInterface__object **)) epv->f_createEmptyTicketBook;
+  e2->f__exec                 = (void (*)(void*,const char*,struct            \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e2->f_block                 = (void (*)(void*,struct                        \
+    sidl_BaseInterface__object **)) epv->f_block;
+  e2->f_test                  = (sidl_bool (*)(void*,struct                   \
+    sidl_BaseInterface__object **)) epv->f_test;
+  e2->f_createEmptyTicketBook = (struct sidl_rmi_TicketBook__object* (*)(     \
+    void*,struct sidl_BaseInterface__object **)) epv->f_createEmptyTicketBook;
   e2->f_getResponse           = (struct sidl_rmi_Response__object* (*)(void*, \
     struct sidl_BaseInterface__object **)) epv->f_getResponse;
-  e2->f_addRef                = (void (*)(void*,                              \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e2->f_deleteRef             = (void (*)(void*,                              \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e2->f_isSame                = (sidl_bool (*)(void*,                         \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e2->f_isType                = (sidl_bool (*)(void*,const char*,             \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e2->f_addRef                = (void (*)(void*,struct                        \
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e2->f_deleteRef             = (void (*)(void*,struct                        \
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e2->f_isSame                = (sidl_bool (*)(void*,struct                   \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e2->f_isType                = (sidl_bool (*)(void*,const char*,struct       \
+    sidl_BaseInterface__object **)) epv->f_isType;
   e2->f_getClassInfo          = (struct sidl_ClassInfo__object* (*)(void*,    \
     struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   e3->f__cast                 = (void* (*)(void*,const char*,                 \
     sidl_BaseInterface*)) epv->f__cast;
-  e3->f__delete               = (void (*)(void*,                              \
-    sidl_BaseInterface*)) epv->f__delete;
-  e3->f__getURL               = (char* (*)(void*,                             \
-    sidl_BaseInterface*)) epv->f__getURL;
-  e3->f__raddRef              = (void (*)(void*,                              \
-    sidl_BaseInterface*)) epv->f__raddRef;
-  e3->f__isRemote             = (sidl_bool (*)(void*,                         \
-    sidl_BaseInterface*)) epv->f__isRemote;
+  e3->f__delete               = (void (*)(void*,sidl_BaseInterface*))         \
+    epv->f__delete;
+  e3->f__getURL               = (char* (*)(void*,sidl_BaseInterface*))        \
+    epv->f__getURL;
+  e3->f__raddRef              = (void (*)(void*,sidl_BaseInterface*))         \
+    epv->f__raddRef;
+  e3->f__isRemote             = (sidl_bool (*)(void*,sidl_BaseInterface*))    \
+    epv->f__isRemote;
   e3->f__set_hooks            = (void (*)(void*,int32_t,                      \
     sidl_BaseInterface*)) epv->f__set_hooks;
-  e3->f__exec                 = (void (*)(void*,const char*,                  \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e3->f_insertWithID          = (void (*)(void*,                              \
-    struct sidl_rmi_Ticket__object*,int32_t,                                  \
-    struct sidl_BaseInterface__object **)) epv->f_insertWithID;
-  e3->f_insert                = (int32_t (*)(void*,                           \
-    struct sidl_rmi_Ticket__object*,                                          \
-    struct sidl_BaseInterface__object **)) epv->f_insert;
-  e3->f_removeReady           = (int32_t (*)(void*,                           \
-    struct sidl_rmi_Ticket__object**,                                         \
-    struct sidl_BaseInterface__object **)) epv->f_removeReady;
-  e3->f_isEmpty               = (sidl_bool (*)(void*,                         \
-    struct sidl_BaseInterface__object **)) epv->f_isEmpty;
-  e3->f_block                 = (void (*)(void*,                              \
-    struct sidl_BaseInterface__object **)) epv->f_block;
-  e3->f_test                  = (sidl_bool (*)(void*,                         \
-    struct sidl_BaseInterface__object **)) epv->f_test;
-  e3->f_createEmptyTicketBook = (struct sidl_rmi_TicketBook__object*          \
-    (*)(void*,                                                                \
-    struct sidl_BaseInterface__object **)) epv->f_createEmptyTicketBook;
+  e3->f__exec                 = (void (*)(void*,const char*,struct            \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e3->f_insertWithID          = (void (*)(void*,struct                        \
+    sidl_rmi_Ticket__object*,int32_t,struct sidl_BaseInterface__object **))   \
+    epv->f_insertWithID;
+  e3->f_insert                = (int32_t (*)(void*,struct                     \
+    sidl_rmi_Ticket__object*,struct sidl_BaseInterface__object **))           \
+    epv->f_insert;
+  e3->f_removeReady           = (int32_t (*)(void*,struct                     \
+    sidl_rmi_Ticket__object**,struct sidl_BaseInterface__object **))          \
+    epv->f_removeReady;
+  e3->f_isEmpty               = (sidl_bool (*)(void*,struct                   \
+    sidl_BaseInterface__object **)) epv->f_isEmpty;
+  e3->f_block                 = (void (*)(void*,struct                        \
+    sidl_BaseInterface__object **)) epv->f_block;
+  e3->f_test                  = (sidl_bool (*)(void*,struct                   \
+    sidl_BaseInterface__object **)) epv->f_test;
+  e3->f_createEmptyTicketBook = (struct sidl_rmi_TicketBook__object* (*)(     \
+    void*,struct sidl_BaseInterface__object **)) epv->f_createEmptyTicketBook;
   e3->f_getResponse           = (struct sidl_rmi_Response__object* (*)(void*, \
     struct sidl_BaseInterface__object **)) epv->f_getResponse;
-  e3->f_addRef                = (void (*)(void*,                              \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e3->f_deleteRef             = (void (*)(void*,                              \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e3->f_isSame                = (sidl_bool (*)(void*,                         \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e3->f_isType                = (sidl_bool (*)(void*,const char*,             \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e3->f_addRef                = (void (*)(void*,struct                        \
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e3->f_deleteRef             = (void (*)(void*,struct                        \
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e3->f_isSame                = (sidl_bool (*)(void*,struct                   \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e3->f_isType                = (sidl_bool (*)(void*,const char*,struct       \
+    sidl_BaseInterface__object **)) epv->f_isType;
   e3->f_getClassInfo          = (struct sidl_ClassInfo__object* (*)(void*,    \
     struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
@@ -1142,13 +1140,13 @@ sidlx_rmi_SimpleTicketBook__remoteConnect(const char *url, sidl_bool ar,      \
   if(url == NULL) {return NULL;}
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi =                                                   \
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(      \
+    sidl_BaseInterface bi = (                                                 \
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(       \
       objectID, _ex); SIDL_CHECK(*_ex);
     return sidlx_rmi_SimpleTicketBook__rmicast(bi,_ex);SIDL_CHECK(*_ex);
   }
-  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,                \
-    _ex ); SIDL_CHECK(*_ex);
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex );         \
+    SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidlx_rmi_SimpleTicketBook__object*) malloc(
@@ -1245,8 +1243,8 @@ sidlx_rmi_SimpleTicketBook__IHConnect(sidl_rmi_InstanceHandle instance,       \
 }
 /* REMOTE: generate remote instance given URL string. */
 static struct sidlx_rmi_SimpleTicketBook__object*
-sidlx_rmi_SimpleTicketBook__remoteCreate(const char *url,                     \
-  sidl_BaseInterface *_ex)
+sidlx_rmi_SimpleTicketBook__remoteCreate(const char *url, sidl_BaseInterface  \
+  *_ex)
 {
   sidl_BaseInterface _throwaway_exception = NULL;
   struct sidlx_rmi_SimpleTicketBook__object* self;
@@ -1255,9 +1253,8 @@ sidlx_rmi_SimpleTicketBook__remoteCreate(const char *url,                     \
   struct sidl_BaseClass__object* s1;
 
   struct sidlx_rmi_SimpleTicketBook__remote* r_obj;
-  sidl_rmi_InstanceHandle instance =                                          \
-    sidl_rmi_ProtocolFactory_createInstance(url, "sidlx.rmi.SimpleTicketBook",\
-    _ex ); SIDL_CHECK(*_ex);
+  sidl_rmi_InstanceHandle instance = sidl_rmi_ProtocolFactory_createInstance( \
+    url, "sidlx.rmi.SimpleTicketBook", _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidlx_rmi_SimpleTicketBook__object*) malloc(
@@ -1314,15 +1311,15 @@ sidlx_rmi_SimpleTicketBook__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.SimpleTicketBook",    \
-      (void*)sidlx_rmi_SimpleTicketBook__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.SimpleTicketBook", (  \
+      void*)sidlx_rmi_SimpleTicketBook__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
     struct sidl_BaseInterface__object* base = (struct                         \
       sidl_BaseInterface__object*) obj;
-    cast = (struct sidlx_rmi_SimpleTicketBook__object*)                       \
-      (*base->d_epv->f__cast)(
+    cast = (struct sidlx_rmi_SimpleTicketBook__object*) (                     \
+      *base->d_epv->f__cast)(
       base->d_object,
       "sidlx.rmi.SimpleTicketBook", _ex); SIDL_CHECK(*_ex);
   }
@@ -1337,15 +1334,15 @@ sidlx_rmi_SimpleTicketBook__rmicast(
  */
 
 struct sidlx_rmi_SimpleTicketBook__object*
-sidlx_rmi_SimpleTicketBook__connectI(const char* url, sidl_bool ar,           \
-  struct sidl_BaseInterface__object **_ex)
+sidlx_rmi_SimpleTicketBook__connectI(const char* url, sidl_bool ar, struct    \
+  sidl_BaseInterface__object **_ex)
 {
   return sidlx_rmi_SimpleTicketBook__remoteConnect(url, ar, _ex);
 }
 
 static PyObject *
-pStub_SimpleTicketBook__connect(PyObject *_ignored, PyObject *_args,          \
-  PyObject *_kwdict) {
+pStub_SimpleTicketBook__connect(PyObject *_ignored, PyObject *_args, PyObject \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimpleTicketBook__object* self = NULL;
   char* url = NULL;
@@ -1368,14 +1365,14 @@ pStub_SimpleTicketBook__connect(PyObject *_ignored, PyObject *_args,          \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -1392,8 +1389,8 @@ staticforward PyTypeObject _sidlx_rmi_SimpleTicketBookType;
 static const struct sidlx_rmi_SimpleTicketBook__external *_implEPV = NULL;
 
 static PyObject *
-pStub_SimpleTicketBook__exec(PyObject *_self, PyObject *_args,                \
-  PyObject *_kwdict) {
+pStub_SimpleTicketBook__exec(PyObject *_self, PyObject *_args, PyObject       \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimpleTicketBook__object *_self_ior =
     ((struct sidlx_rmi_SimpleTicketBook__object *)
@@ -1428,14 +1425,14 @@ pStub_SimpleTicketBook__exec(PyObject *_self, PyObject *_args,                \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1458,8 +1455,8 @@ pStub_SimpleTicketBook__exec(PyObject *_self, PyObject *_args,                \
 }
 
 static PyObject *
-pStub_SimpleTicketBook__getURL(PyObject *_self, PyObject *_args,              \
-  PyObject *_kwdict) {
+pStub_SimpleTicketBook__getURL(PyObject *_self, PyObject *_args, PyObject     \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimpleTicketBook__object *_self_ior =
     ((struct sidlx_rmi_SimpleTicketBook__object *)
@@ -1483,22 +1480,22 @@ pStub_SimpleTicketBook__getURL(PyObject *_self, PyObject *_args,              \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "z",
           _return);
+        free((void *)_return);
       }
-      free((void *)_return);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -1513,8 +1510,8 @@ pStub_SimpleTicketBook__getURL(PyObject *_self, PyObject *_args,              \
 }
 
 static PyObject *
-pStub_SimpleTicketBook__isLocal(PyObject *_self, PyObject *_args,             \
-  PyObject *_kwdict) {
+pStub_SimpleTicketBook__isLocal(PyObject *_self, PyObject *_args, PyObject    \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimpleTicketBook__object *_self_ior =
     ((struct sidlx_rmi_SimpleTicketBook__object *)
@@ -1540,14 +1537,14 @@ pStub_SimpleTicketBook__isLocal(PyObject *_self, PyObject *_args,             \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1569,8 +1566,8 @@ pStub_SimpleTicketBook__isLocal(PyObject *_self, PyObject *_args,             \
 }
 
 static PyObject *
-pStub_SimpleTicketBook__isRemote(PyObject *_self, PyObject *_args,            \
-  PyObject *_kwdict) {
+pStub_SimpleTicketBook__isRemote(PyObject *_self, PyObject *_args, PyObject   \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimpleTicketBook__object *_self_ior =
     ((struct sidlx_rmi_SimpleTicketBook__object *)
@@ -1596,14 +1593,14 @@ pStub_SimpleTicketBook__isRemote(PyObject *_self, PyObject *_args,            \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1625,8 +1622,8 @@ pStub_SimpleTicketBook__isRemote(PyObject *_self, PyObject *_args,            \
 }
 
 static PyObject *
-pStub_SimpleTicketBook__set_hooks(PyObject *_self, PyObject *_args,           \
-  PyObject *_kwdict) {
+pStub_SimpleTicketBook__set_hooks(PyObject *_self, PyObject *_args, PyObject  \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimpleTicketBook__object *_self_ior =
     ((struct sidlx_rmi_SimpleTicketBook__object *)
@@ -1654,14 +1651,14 @@ pStub_SimpleTicketBook__set_hooks(PyObject *_self, PyObject *_args,           \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1688,8 +1685,8 @@ sidlx_rmi_SimpleTicketBook_createCast(PyObject *self, PyObject *args,         \
   char* url = NULL;
   PyObject * implObj = NULL;
   static char *_kwlist[] = {"sobj",  "url", "impl", NULL };
-  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&zO", _kwlist,       \
-    (void *)sidlx_rmi_SimpleTicketBook__convert, &optarg, &url, &implObj);
+  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&zO", _kwlist, (void \
+    *)sidlx_rmi_SimpleTicketBook__convert, &optarg, &url, &implObj);
   if (_okay) {
     if (!optarg && !url && !implObj) {
       struct sidl_BaseInterface__object *_exception;
@@ -1702,14 +1699,14 @@ sidlx_rmi_SimpleTicketBook_createCast(PyObject *self, PyObject *args,         \
           sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
             struct sidl_BaseInterface__object *throwaway_exception;
             PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-            PyObject *_args = PyTuple_New(1);
-            PyTuple_SetItem(_args, 0, _obj);
-            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyObject *_eargs = PyTuple_New(1);
+            PyTuple_SetItem(_eargs, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
             PyErr_SetObject(sidl_RuntimeException__type, _obj);
             Py_XDECREF(_obj);
             (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
               &throwaway_exception);
-            Py_XDECREF(_args);
+            Py_XDECREF(_eargs);
           }
           return -1;
         }
@@ -1727,14 +1724,14 @@ sidlx_rmi_SimpleTicketBook_createCast(PyObject *self, PyObject *args,         \
           sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
             struct sidl_BaseInterface__object *throwaway_exception;
             PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-            PyObject *_args = PyTuple_New(1);
-            PyTuple_SetItem(_args, 0, _obj);
-            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyObject *_eargs = PyTuple_New(1);
+            PyTuple_SetItem(_eargs, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
             PyErr_SetObject(sidl_RuntimeException__type, _obj);
             Py_XDECREF(_obj);
             (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
               &throwaway_exception);
-            Py_XDECREF(_args);
+            Py_XDECREF(_eargs);
           }
           return -1;
         }
@@ -1750,14 +1747,14 @@ sidlx_rmi_SimpleTicketBook_createCast(PyObject *self, PyObject *args,         \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
       return -1;
     }
@@ -1904,9 +1901,8 @@ sidlx_rmi_SimpleTicketBook__wrap_RETURN
 sidlx_rmi_SimpleTicketBook__wrap sidlx_rmi_SimpleTicketBook__wrap_PROTO {
   PyObject *result;
   if (sidlobj) {
-    result =                                                                  \
-      _sidlx_rmi_SimpleTicketBookType.tp_new(&_sidlx_rmi_SimpleTicketBookType,\
-      NULL, NULL);
+    result = _sidlx_rmi_SimpleTicketBookType.tp_new(                          \
+      &_sidlx_rmi_SimpleTicketBookType, NULL, NULL);
     if (result) {
       if (sidl_Object_Init(
         (SPObject *)result,
@@ -1930,9 +1926,8 @@ sidlx_rmi_SimpleTicketBook__weakRef sidlx_rmi_SimpleTicketBook__weakRef_PROTO \
   {
   PyObject *result;
   if (sidlobj) {
-    result =                                                                  \
-      _sidlx_rmi_SimpleTicketBookType.tp_new(&_sidlx_rmi_SimpleTicketBookType,\
-      NULL, NULL);
+    result = _sidlx_rmi_SimpleTicketBookType.tp_new(                          \
+      &_sidlx_rmi_SimpleTicketBookType, NULL, NULL);
     if (result) {
       if (sidl_Object_Init(
         (SPObject *)result,
@@ -1963,9 +1958,8 @@ sidlx_rmi_SimpleTicketBook__newRef_RETURN
 sidlx_rmi_SimpleTicketBook__newRef sidlx_rmi_SimpleTicketBook__newRef_PROTO {
   PyObject *result;
   if (sidlobj) {
-    result =                                                                  \
-      _sidlx_rmi_SimpleTicketBookType.tp_new(&_sidlx_rmi_SimpleTicketBookType,\
-      NULL, NULL);
+    result = _sidlx_rmi_SimpleTicketBookType.tp_new(                          \
+      &_sidlx_rmi_SimpleTicketBookType, NULL, NULL);
     if (result) {
       if (sidl_Object_Init(
         (SPObject *)result,
@@ -2119,28 +2113,28 @@ initSimpleTicketBook(void) {
   struct sidlx_rmi_SimpleTicketBook__external*(*_extFunc)(void) = NULL;
   module = Py_InitModule("SimpleTicketBook", _SimpleTicketBookModuleMethods);
   dict = PyModule_GetDict(module);
-  ExternalAPI[sidlx_rmi_SimpleTicketBook__wrap_NUM] =                         \
-    (void*)sidlx_rmi_SimpleTicketBook__wrap;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook__convert_NUM] =                      \
-    (void*)sidlx_rmi_SimpleTicketBook__convert;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook__convert_python_array_NUM] =         \
-    (void*)sidlx_rmi_SimpleTicketBook__convert_python_array;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook__convert_sidl_array_NUM] =           \
-    (void*)sidlx_rmi_SimpleTicketBook__convert_sidl_array;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook__weakRef_NUM] =                      \
-    (void*)sidlx_rmi_SimpleTicketBook__weakRef;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook_deref_NUM] =                         \
-    (void*)sidlx_rmi_SimpleTicketBook_deref;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook__newRef_NUM] =                       \
-    (void*)sidlx_rmi_SimpleTicketBook__newRef;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook__addRef_NUM] =                       \
-    (void*)sidlx_rmi_SimpleTicketBook__addRef;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook_PyType_NUM] =                        \
-    (void*)sidlx_rmi_SimpleTicketBook_PyType;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook__connectI_NUM] =                     \
-    (void*)sidlx_rmi_SimpleTicketBook__connectI;
-  ExternalAPI[sidlx_rmi_SimpleTicketBook__rmicast_NUM] =                      \
-    (void*)sidlx_rmi_SimpleTicketBook__rmicast;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook__wrap_NUM] = (                       \
+    void*)sidlx_rmi_SimpleTicketBook__wrap;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook__convert_NUM] = (                    \
+    void*)sidlx_rmi_SimpleTicketBook__convert;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook__convert_python_array_NUM] = (       \
+    void*)sidlx_rmi_SimpleTicketBook__convert_python_array;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook__convert_sidl_array_NUM] = (         \
+    void*)sidlx_rmi_SimpleTicketBook__convert_sidl_array;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook__weakRef_NUM] = (                    \
+    void*)sidlx_rmi_SimpleTicketBook__weakRef;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook_deref_NUM] = (                       \
+    void*)sidlx_rmi_SimpleTicketBook_deref;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook__newRef_NUM] = (                     \
+    void*)sidlx_rmi_SimpleTicketBook__newRef;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook__addRef_NUM] = (                     \
+    void*)sidlx_rmi_SimpleTicketBook__addRef;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook_PyType_NUM] = (                      \
+    void*)sidlx_rmi_SimpleTicketBook_PyType;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook__connectI_NUM] = (                   \
+    void*)sidlx_rmi_SimpleTicketBook__connectI;
+  ExternalAPI[sidlx_rmi_SimpleTicketBook__rmicast_NUM] = (                    \
+    void*)sidlx_rmi_SimpleTicketBook__rmicast;
   import_SIDLObjA();
   if (PyErr_Occurred()) {
     Py_FatalError("Error importing sidlObjA module.");
@@ -2160,18 +2154,18 @@ initSimpleTicketBook(void) {
   sidl_rmi_TicketBook__import();
   _sidlx_rmi_SimpleTicketBookType.tp_base = sidl_BaseClass_PyType();
   _sidlx_rmi_SimpleTicketBookType.tp_bases = PyTuple_New(2);
-  PyTuple_SetItem(_sidlx_rmi_SimpleTicketBookType.tp_bases,0,                 \
-    (PyObject *)sidl_BaseClass_PyType());
-  PyTuple_SetItem(_sidlx_rmi_SimpleTicketBookType.tp_bases,1,                 \
-    (PyObject *)sidl_rmi_TicketBook_PyType());
+  PyTuple_SetItem(_sidlx_rmi_SimpleTicketBookType.tp_bases,0, (PyObject       \
+    *)sidl_BaseClass_PyType());
+  PyTuple_SetItem(_sidlx_rmi_SimpleTicketBookType.tp_bases,1, (PyObject       \
+    *)sidl_rmi_TicketBook_PyType());
   if (PyType_Ready(&_sidlx_rmi_SimpleTicketBookType) < 0) {
     PyErr_Print();
     fprintf(stderr, "PyType_Ready on sidlx.rmi.SimpleTicketBook failed.\n");
     return;
   }
   Py_INCREF(&_sidlx_rmi_SimpleTicketBookType);
-  PyDict_SetItemString(dict, "SimpleTicketBook",                              \
-    (PyObject *)&_sidlx_rmi_SimpleTicketBookType);
+  PyDict_SetItemString(dict, "SimpleTicketBook", (PyObject                    \
+    *)&_sidlx_rmi_SimpleTicketBookType);
   /* Load the implementation after initializing the module. */
   /* Try search global namespace first */
   dll = sidl_DLL__create(&throwaway_exception);
@@ -2204,6 +2198,6 @@ initSimpleTicketBook(void) {
       sidlx.rmi.SimpleTicketBook");
   }
 
-  sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.SimpleTicketBook",      \
-    (void*)sidlx_rmi_SimpleTicketBook__IHConnect, &throwaway_exception);
+  sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.SimpleTicketBook", (    \
+    void*)sidlx_rmi_SimpleTicketBook__IHConnect, &throwaway_exception);
 }

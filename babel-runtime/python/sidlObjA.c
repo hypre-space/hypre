@@ -100,6 +100,10 @@ sidl_Opaque_Convert sidl_Opaque_Convert_PROTO {
     *opaque_ptr = PyCObject_AsVoidPtr(obj);
     return 1;
   }
+  else if (obj == Py_None) {
+    *opaque_ptr = NULL;
+    return 1;
+  }
   return 0;
 }
 

@@ -2,7 +2,7 @@
  * File:          sidl_ClassInfo_Module.h
  * Symbol:        sidl.ClassInfo-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   expose a constructor for the Python wrapper

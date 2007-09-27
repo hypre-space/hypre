@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimpleTicketBook_IOR.c
  * Symbol:        sidlx.rmi.SimpleTicketBook-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for sidlx.rmi.SimpleTicketBook
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -63,8 +63,8 @@ static struct sidl_recursive_mutex_t sidlx_rmi_SimpleTicketBook__mutex= SIDL_REC
  * Static variables to hold version of IOR
  */
 
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /*
  * Static variable to hold shared ClassInfo interface.
@@ -206,7 +206,7 @@ sidlx_rmi_SimpleTicketBook_isSame__exec(
   sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
   sidl_rmi_Call_unpackString( inArgs, "iobj", &iobj_str, _ex);SIDL_CHECK(*_ex);
-  iobj = skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(iobj_str,
+  iobj = skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_BaseInterface(iobj_str, 
     TRUE, _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
@@ -220,8 +220,8 @@ sidlx_rmi_SimpleTicketBook_isSame__exec(
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(iobj) {
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)iobj,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)iobj, _ex); SIDL_CHECK(
+      *_ex);
     if(iobj_str) {free(iobj_str);}
   }
   return;
@@ -302,7 +302,7 @@ sidlx_rmi_SimpleTicketBook_getClassInfo__exec(
 
   /* pack return value */
   if(_retval){
-    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval,
+    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval, 
       _ex);SIDL_CHECK(*_ex);
     sidl_rmi_Return_packString( outArgs, "_retval", _url, _ex);SIDL_CHECK(*_ex);
     free((void*)_url);
@@ -311,12 +311,12 @@ sidlx_rmi_SimpleTicketBook_getClassInfo__exec(
   }
   /* pack out and inout argments */
   /* clean-up dangling references */
-  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval,
-    _ex)) {
+  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval, _ex)) 
+    {
     (*((sidl_BaseInterface)_retval)->d_epv->f__raddRef)(((
       sidl_BaseInterface)_retval)->d_object, _ex); SIDL_CHECK(*_ex);
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval, _ex); SIDL_CHECK(
+      *_ex);
   }
   return;
 
@@ -349,7 +349,7 @@ sidlx_rmi_SimpleTicketBook_insertWithID__exec(
   sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
   sidl_rmi_Call_unpackString( inArgs, "t", &t_str, _ex);SIDL_CHECK(*_ex);
-  t = skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(t_str, TRUE,
+  t = skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(t_str, TRUE, 
     _ex);SIDL_CHECK(*_ex);
   sidl_rmi_Call_unpackInt( inArgs, "id", &id, _ex);SIDL_CHECK(*_ex);
 
@@ -398,7 +398,7 @@ sidlx_rmi_SimpleTicketBook_insert__exec(
   sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
   sidl_rmi_Call_unpackString( inArgs, "t", &t_str, _ex);SIDL_CHECK(*_ex);
-  t = skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(t_str, TRUE,
+  t = skel_sidlx_rmi_SimpleTicketBook_fconnect_sidl_rmi_Ticket(t_str, TRUE, 
     _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
@@ -456,7 +456,7 @@ sidlx_rmi_SimpleTicketBook_removeReady__exec(
   sidl_rmi_Return_packInt( outArgs, "_retval", _retval, _ex);SIDL_CHECK(*_ex);
   /* pack out and inout argments */
   if(*t){
-    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)*t,
+    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)*t, 
       _ex);SIDL_CHECK(*_ex);
     sidl_rmi_Return_packString( outArgs, "t", _url, _ex);SIDL_CHECK(*_ex);
     free((void*)_url);
@@ -617,7 +617,7 @@ sidlx_rmi_SimpleTicketBook_createEmptyTicketBook__exec(
 
   /* pack return value */
   if(_retval){
-    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval,
+    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval, 
       _ex);SIDL_CHECK(*_ex);
     sidl_rmi_Return_packString( outArgs, "_retval", _url, _ex);SIDL_CHECK(*_ex);
     free((void*)_url);
@@ -626,12 +626,12 @@ sidlx_rmi_SimpleTicketBook_createEmptyTicketBook__exec(
   }
   /* pack out and inout argments */
   /* clean-up dangling references */
-  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval,
-    _ex)) {
+  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval, _ex)) 
+    {
     (*((sidl_BaseInterface)_retval)->d_epv->f__raddRef)(((
       sidl_BaseInterface)_retval)->d_object, _ex); SIDL_CHECK(*_ex);
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval, _ex); SIDL_CHECK(
+      *_ex);
   }
   return;
 
@@ -669,7 +669,7 @@ sidlx_rmi_SimpleTicketBook_getResponse__exec(
 
   /* pack return value */
   if(_retval){
-    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval,
+    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval, 
       _ex);SIDL_CHECK(*_ex);
     sidl_rmi_Return_packString( outArgs, "_retval", _url, _ex);SIDL_CHECK(*_ex);
     free((void*)_url);
@@ -678,12 +678,12 @@ sidlx_rmi_SimpleTicketBook_getResponse__exec(
   }
   /* pack out and inout argments */
   /* clean-up dangling references */
-  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval,
-    _ex)) {
+  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval, _ex)) 
+    {
     (*((sidl_BaseInterface)_retval)->d_epv->f__raddRef)(((
       sidl_BaseInterface)_retval)->d_object, _ex); SIDL_CHECK(*_ex);
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval, _ex); SIDL_CHECK(
+      *_ex);
   }
   return;
 
@@ -741,7 +741,7 @@ static void* ior_sidlx_rmi_SimpleTicketBook__cast(
       cmp2 = strcmp(name, "sidl.BaseClass");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidl_BaseClass__object*)self);
         return cast;
       }
     }
@@ -750,7 +750,7 @@ static void* ior_sidlx_rmi_SimpleTicketBook__cast(
     cmp1 = strcmp(name, "sidlx.rmi.SimpleTicketBook");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidlx_rmi_SimpleTicketBook__object*)self);
       return cast;
     }
     else if (cmp1 < 0) {
@@ -786,8 +786,8 @@ static void ior_sidlx_rmi_SimpleTicketBook__set_hooks(
  */
 
 static void ior_sidlx_rmi_SimpleTicketBook__delete(
-  struct sidlx_rmi_SimpleTicketBook__object* self,
-    struct sidl_BaseInterface__object **_ex)
+  struct sidlx_rmi_SimpleTicketBook__object* self, struct 
+    sidl_BaseInterface__object **_ex)
 {
   *_ex = NULL; /* default to no exception */
   sidlx_rmi_SimpleTicketBook__fini(self,_ex);
@@ -800,11 +800,10 @@ ior_sidlx_rmi_SimpleTicketBook__getURL(
     struct sidlx_rmi_SimpleTicketBook__object* self,
     struct sidl_BaseInterface__object **_ex) {
   char* ret = NULL;
-  char* objid = 
-    sidl_rmi_InstanceRegistry_getInstanceByClass((sidl_BaseClass)self,
-    _ex); SIDL_CHECK(*_ex);
+  char* objid = sidl_rmi_InstanceRegistry_getInstanceByClass((
+    sidl_BaseClass)self, _ex); SIDL_CHECK(*_ex);
   if(!objid) {
-    objid = sidl_rmi_InstanceRegistry_registerInstance((sidl_BaseClass)self,
+    objid = sidl_rmi_InstanceRegistry_registerInstance((sidl_BaseClass)self, 
       _ex); SIDL_CHECK(*_ex);
   }
   ret = sidl_rmi_ServerRegistry_getServerURL(objid, _ex); SIDL_CHECK(*_ex);
@@ -843,7 +842,7 @@ ior_sidlx_rmi_SimpleTicketBook__exec(
   static const struct sidlx_rmi_SimpleTicketBook__method  s_methods[] = {
     { "addRef", sidlx_rmi_SimpleTicketBook_addRef__exec },
     { "block", sidlx_rmi_SimpleTicketBook_block__exec },
-    { "createEmptyTicketBook",
+    { "createEmptyTicketBook", 
       sidlx_rmi_SimpleTicketBook_createEmptyTicketBook__exec },
     { "deleteRef", sidlx_rmi_SimpleTicketBook_deleteRef__exec },
     { "getClassInfo", sidlx_rmi_SimpleTicketBook_getClassInfo__exec },
@@ -930,20 +929,20 @@ static void sidlx_rmi_SimpleTicketBook__init_epv(void)
   epv->f__ctor2                     = NULL;
   epv->f__dtor                      = NULL;
   epv->f_addRef                     = (void (*)(struct 
-    sidlx_rmi_SimpleTicketBook__object*,
-    struct sidl_BaseInterface__object **)) s1->f_addRef;
+    sidlx_rmi_SimpleTicketBook__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_addRef;
   epv->f_deleteRef                  = (void (*)(struct 
-    sidlx_rmi_SimpleTicketBook__object*,
-    struct sidl_BaseInterface__object **)) s1->f_deleteRef;
+    sidlx_rmi_SimpleTicketBook__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_deleteRef;
   epv->f_isSame                     = (sidl_bool (*)(struct 
     sidlx_rmi_SimpleTicketBook__object*,struct sidl_BaseInterface__object*,
     struct sidl_BaseInterface__object **)) s1->f_isSame;
   epv->f_isType                     = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleTicketBook__object*,const char*,
-    struct sidl_BaseInterface__object **)) s1->f_isType;
-  epv->f_getClassInfo               = (struct sidl_ClassInfo__object* 
-    (*)(struct sidlx_rmi_SimpleTicketBook__object*,
-    struct sidl_BaseInterface__object **)) s1->f_getClassInfo;
+    sidlx_rmi_SimpleTicketBook__object*,const char*,struct 
+    sidl_BaseInterface__object **)) s1->f_isType;
+  epv->f_getClassInfo               = (struct sidl_ClassInfo__object* (*)(
+    struct sidlx_rmi_SimpleTicketBook__object*,struct 
+    sidl_BaseInterface__object **)) s1->f_getClassInfo;
   epv->f_insertWithID               = NULL;
   epv->f_insert                     = NULL;
   epv->f_removeReady                = NULL;
@@ -956,136 +955,136 @@ static void sidlx_rmi_SimpleTicketBook__init_epv(void)
   sidlx_rmi_SimpleTicketBook__set_epv(epv);
 
   memcpy((void*)hepv, epv, sizeof(struct sidlx_rmi_SimpleTicketBook__epv));
-  e0->f__cast               = (void* (*)(struct sidl_BaseClass__object*,
-    const char*, struct sidl_BaseInterface__object**)) epv->f__cast;
-  e0->f__delete             = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e0->f__getURL             = (char* (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e0->f__raddRef            = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e0->f__isRemote           = (sidl_bool (*)(struct sidl_BaseClass__object*,
+  e0->f__cast               = (void* (*)(struct sidl_BaseClass__object*,const 
+    char*, struct sidl_BaseInterface__object**)) epv->f__cast;
+  e0->f__delete             = (void (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e0->f__getURL             = (char* (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e0->f__raddRef            = (void (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e0->f__isRemote           = (sidl_bool (*)(struct sidl_BaseClass__object*, 
     struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e0->f__exec               = (void (*)(struct sidl_BaseClass__object*,
-    const char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef              = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f__exec               = (void (*)(struct sidl_BaseClass__object*,const 
+    char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef              = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
   e0->f_isSame              = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
+    struct sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
   e0->f_isType              = (sidl_bool (*)(struct sidl_BaseClass__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
 
   memcpy((void*) he0, e0, sizeof(struct sidl_BaseClass__epv));
 
-  e1->f__cast               = (void* (*)(void*,const char*,
-    struct sidl_BaseInterface__object**)) epv->f__cast;
-  e1->f__delete             = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e1->f__getURL             = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e1->f__raddRef            = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e1->f__isRemote           = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e1->f__exec               = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef              = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef           = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame              = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType              = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f__cast               = (void* (*)(void*,const char*, struct 
+    sidl_BaseInterface__object**)) epv->f__cast;
+  e1->f__delete             = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e1->f__getURL             = (char* (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e1->f__raddRef            = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e1->f__isRemote           = (sidl_bool (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__isRemote;
+  e1->f__exec               = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef              = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_addRef;
+  e1->f_deleteRef           = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_deleteRef;
+  e1->f_isSame              = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e1->f_isType              = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   memcpy((void*) he1, e1, sizeof(struct sidl_BaseInterface__epv));
 
-  e2->f__cast                 = (void* (*)(void*,const char*,
-    struct sidl_BaseInterface__object**)) epv->f__cast;
-  e2->f__delete               = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e2->f__getURL               = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e2->f__raddRef              = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e2->f__isRemote             = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e2->f__exec                 = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e2->f_block                 = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_block;
-  e2->f_test                  = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_test;
+  e2->f__cast                 = (void* (*)(void*,const char*, struct 
+    sidl_BaseInterface__object**)) epv->f__cast;
+  e2->f__delete               = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e2->f__getURL               = (char* (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e2->f__raddRef              = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e2->f__isRemote             = (sidl_bool (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__isRemote;
+  e2->f__exec                 = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e2->f_block                 = (void (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_block;
+  e2->f_test                  = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_test;
   e2->f_createEmptyTicketBook = (struct sidl_rmi_TicketBook__object* (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_createEmptyTicketBook;
   e2->f_getResponse           = (struct sidl_rmi_Response__object* (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_getResponse;
-  e2->f_addRef                = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e2->f_deleteRef             = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e2->f_isSame                = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e2->f_isType                = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e2->f_addRef                = (void (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e2->f_deleteRef             = (void (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e2->f_isSame                = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e2->f_isType                = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
   e2->f_getClassInfo          = (struct sidl_ClassInfo__object* (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   memcpy((void*) he2, e2, sizeof(struct sidl_rmi_Ticket__epv));
 
-  e3->f__cast                 = (void* (*)(void*,const char*,
-    struct sidl_BaseInterface__object**)) epv->f__cast;
-  e3->f__delete               = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e3->f__getURL               = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e3->f__raddRef              = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e3->f__isRemote             = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e3->f__exec                 = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e3->f__cast                 = (void* (*)(void*,const char*, struct 
+    sidl_BaseInterface__object**)) epv->f__cast;
+  e3->f__delete               = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e3->f__getURL               = (char* (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e3->f__raddRef              = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e3->f__isRemote             = (sidl_bool (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__isRemote;
+  e3->f__exec                 = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
   e3->f_insertWithID          = (void (*)(void*,struct sidl_rmi_Ticket__object*,
     int32_t,struct sidl_BaseInterface__object **)) epv->f_insertWithID;
-  e3->f_insert                = (int32_t (*)(void*,
-    struct sidl_rmi_Ticket__object*,
-    struct sidl_BaseInterface__object **)) epv->f_insert;
-  e3->f_removeReady           = (int32_t (*)(void*,
-    struct sidl_rmi_Ticket__object**,
-    struct sidl_BaseInterface__object **)) epv->f_removeReady;
-  e3->f_isEmpty               = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_isEmpty;
-  e3->f_block                 = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_block;
-  e3->f_test                  = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_test;
+  e3->f_insert                = (int32_t (*)(void*,struct 
+    sidl_rmi_Ticket__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_insert;
+  e3->f_removeReady           = (int32_t (*)(void*,struct 
+    sidl_rmi_Ticket__object**,struct sidl_BaseInterface__object **)) 
+    epv->f_removeReady;
+  e3->f_isEmpty               = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_isEmpty;
+  e3->f_block                 = (void (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_block;
+  e3->f_test                  = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_test;
   e3->f_createEmptyTicketBook = (struct sidl_rmi_TicketBook__object* (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_createEmptyTicketBook;
   e3->f_getResponse           = (struct sidl_rmi_Response__object* (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_getResponse;
-  e3->f_addRef                = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e3->f_deleteRef             = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e3->f_isSame                = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e3->f_isType                = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e3->f_addRef                = (void (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e3->f_deleteRef             = (void (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e3->f_isSame                = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e3->f_isType                = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
   e3->f_getClassInfo          = (struct sidl_ClassInfo__object* (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
@@ -1098,15 +1097,15 @@ static void sidlx_rmi_SimpleTicketBook__init_epv(void)
 void sidlx_rmi_SimpleTicketBook__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct sidl_rmi_Ticket__epv **s_arg_epv__sidl_rmi_ticket,
   struct sidl_rmi_Ticket__epv **s_arg_epv_hooks__sidl_rmi_ticket,
   struct sidl_rmi_TicketBook__epv **s_arg_epv__sidl_rmi_ticketbook,
   struct sidl_rmi_TicketBook__epv **s_arg_epv_hooks__sidl_rmi_ticketbook,
   struct sidlx_rmi_SimpleTicketBook__epv 
-    **s_arg_epv__sidlx_rmi_simpleticketbook,
-    struct sidlx_rmi_SimpleTicketBook__epv 
+    **s_arg_epv__sidlx_rmi_simpleticketbook,struct 
+    sidlx_rmi_SimpleTicketBook__epv 
     **s_arg_epv_hooks__sidlx_rmi_simpleticketbook)
 {
   LOCK_STATIC_GLOBALS;
@@ -1151,7 +1150,7 @@ initClassInfo(sidl_ClassInfo *info, struct sidl_BaseInterface__object **_ex)
     s_classInfo = sidl_ClassInfo__cast(impl,_ex);
     if (impl) {
       sidl_ClassInfoI_setName(impl, "sidlx.rmi.SimpleTicketBook",_ex);
-      sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
+      sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION, 
         s_IOR_MINOR_VERSION,_ex);
       sidl_ClassInfoI_deleteRef(impl,_ex);
       sidl_atexit(sidl_deleteRef_atexit, &s_classInfo);
@@ -1172,13 +1171,13 @@ initClassInfo(sidl_ClassInfo *info, struct sidl_BaseInterface__object **_ex)
  */
 
 static void
-initMetadata(struct sidlx_rmi_SimpleTicketBook__object* self,
+initMetadata(struct sidlx_rmi_SimpleTicketBook__object* self, 
   sidl_BaseInterface* _ex)
 {
   *_ex = 0; /* default no exception */
   if (self) {
-    struct sidl_BaseClass__data *data = (struct 
-      sidl_BaseClass__data*)((*self).d_sidl_baseclass.d_data);
+    struct sidl_BaseClass__data *data = (struct sidl_BaseClass__data*)((
+      *self).d_sidl_baseclass.d_data);
     if (data) {
       data->d_IOR_major_version = s_IOR_MAJOR_VERSION;
       data->d_IOR_minor_version = s_IOR_MINOR_VERSION;
@@ -1194,8 +1193,8 @@ return;
  */
 
 struct sidlx_rmi_SimpleTicketBook__object*
-sidlx_rmi_SimpleTicketBook__new(void* ddata,
-  struct sidl_BaseInterface__object ** _ex)
+sidlx_rmi_SimpleTicketBook__new(void* ddata, struct sidl_BaseInterface__object 
+  ** _ex)
 {
   struct sidlx_rmi_SimpleTicketBook__object* self =
     (struct sidlx_rmi_SimpleTicketBook__object*) malloc(
@@ -1292,8 +1291,8 @@ static const struct sidlx_rmi_SimpleTicketBook__external
 s_externalEntryPoints = {
   sidlx_rmi_SimpleTicketBook__new,
   sidlx_rmi_SimpleTicketBook__super,
-  0, 
-  10
+  1, 
+  0
 };
 
 /*

@@ -538,6 +538,15 @@ sidl__array_isRowOrder(const struct sidl__array* array);
 int32_t
 sidl__array_type(const struct sidl__array* array);
 
+/**
+ * The following two functions are used for low level array reference
+ * count debugging. They are not intended for Babel end-users.
+ */
+void
+sidl__array_add(struct sidl__array * const array);
+
+void 
+sidl__array_remove(struct sidl__array * const array);
 #ifdef __cplusplus
 }
 #endif

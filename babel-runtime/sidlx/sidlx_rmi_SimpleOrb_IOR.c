@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimpleOrb_IOR.c
  * Symbol:        sidlx.rmi.SimpleOrb-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for sidlx.rmi.SimpleOrb
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -63,8 +63,8 @@ static struct sidl_recursive_mutex_t sidlx_rmi_SimpleOrb__mutex= SIDL_RECURSIVE_
  * Static variables to hold version of IOR
  */
 
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /*
  * Static variable to hold shared ClassInfo interface.
@@ -137,7 +137,7 @@ sidlx_rmi_SimpleOrb_serviceRequest__exec(
   sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
   sidl_rmi_Call_unpackString( inArgs, "sock", &sock_str, _ex);SIDL_CHECK(*_ex);
-  sock = skel_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_Socket(sock_str, TRUE,
+  sock = skel_sidlx_rmi_SimpleOrb_fconnect_sidlx_rmi_Socket(sock_str, TRUE, 
     _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
@@ -150,8 +150,8 @@ sidlx_rmi_SimpleOrb_serviceRequest__exec(
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(sock) {
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)sock,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)sock, _ex); SIDL_CHECK(
+      *_ex);
     if(sock_str) {free(sock_str);}
   }
   return;
@@ -192,8 +192,8 @@ sidlx_rmi_SimpleOrb_isLocalObject__exec(
     _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
-  sidl_rmi_Return_packString( outArgs, "_retval", _retval,
-    _ex);SIDL_CHECK(*_ex);
+  sidl_rmi_Return_packString( outArgs, "_retval", _retval, _ex);SIDL_CHECK(
+    *_ex);
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(_retval) {
@@ -235,8 +235,8 @@ sidlx_rmi_SimpleOrb_getProtocol__exec(
     _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
-  sidl_rmi_Return_packString( outArgs, "_retval", _retval,
-    _ex);SIDL_CHECK(*_ex);
+  sidl_rmi_Return_packString( outArgs, "_retval", _retval, _ex);SIDL_CHECK(
+    *_ex);
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(_retval) {
@@ -277,7 +277,7 @@ sidlx_rmi_SimpleOrb_getExceptions__exec(
     _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
-  sidl_rmi_Return_packSerializableArray( outArgs, "_retval", _retval,0,0,0,
+  sidl_rmi_Return_packSerializableArray( outArgs, "_retval", _retval,0,0,0, 
     _ex);SIDL_CHECK(*_ex);
   /* pack out and inout argments */
   /* clean-up dangling references */
@@ -479,8 +479,8 @@ sidlx_rmi_SimpleOrb_getServerName__exec(
     _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
-  sidl_rmi_Return_packString( outArgs, "_retval", _retval,
-    _ex);SIDL_CHECK(*_ex);
+  sidl_rmi_Return_packString( outArgs, "_retval", _retval, _ex);SIDL_CHECK(
+    *_ex);
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(_retval) {
@@ -524,8 +524,8 @@ sidlx_rmi_SimpleOrb_getServerURL__exec(
     _ex);  SIDL_CHECK(*_ex);
 
   /* pack return value */
-  sidl_rmi_Return_packString( outArgs, "_retval", _retval,
-    _ex);SIDL_CHECK(*_ex);
+  sidl_rmi_Return_packString( outArgs, "_retval", _retval, _ex);SIDL_CHECK(
+    *_ex);
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(_retval) {
@@ -709,7 +709,7 @@ sidlx_rmi_SimpleOrb_isSame__exec(
   sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
   sidl_rmi_Call_unpackString( inArgs, "iobj", &iobj_str, _ex);SIDL_CHECK(*_ex);
-  iobj = skel_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseInterface(iobj_str, TRUE,
+  iobj = skel_sidlx_rmi_SimpleOrb_fconnect_sidl_BaseInterface(iobj_str, TRUE, 
     _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
@@ -723,8 +723,8 @@ sidlx_rmi_SimpleOrb_isSame__exec(
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(iobj) {
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)iobj,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)iobj, _ex); SIDL_CHECK(
+      *_ex);
     if(iobj_str) {free(iobj_str);}
   }
   return;
@@ -805,7 +805,7 @@ sidlx_rmi_SimpleOrb_getClassInfo__exec(
 
   /* pack return value */
   if(_retval){
-    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval,
+    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval, 
       _ex);SIDL_CHECK(*_ex);
     sidl_rmi_Return_packString( outArgs, "_retval", _url, _ex);SIDL_CHECK(*_ex);
     free((void*)_url);
@@ -814,12 +814,12 @@ sidlx_rmi_SimpleOrb_getClassInfo__exec(
   }
   /* pack out and inout argments */
   /* clean-up dangling references */
-  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval,
-    _ex)) {
+  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval, _ex)) 
+    {
     (*((sidl_BaseInterface)_retval)->d_epv->f__raddRef)(((
       sidl_BaseInterface)_retval)->d_object, _ex); SIDL_CHECK(*_ex);
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval, _ex); SIDL_CHECK(
+      *_ex);
   }
   return;
 
@@ -870,8 +870,7 @@ static void* ior_sidlx_rmi_SimpleOrb__cast(
     cmp1 = strcmp(name, "sidl.BaseInterface");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = 
-        &((
+      cast = &((
         *self).d_sidlx_rmi_simpleserver.d_sidl_baseclass.d_sidl_baseinterface);
       return cast;
     }
@@ -879,7 +878,7 @@ static void* ior_sidlx_rmi_SimpleOrb__cast(
       cmp2 = strcmp(name, "sidl.BaseClass");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidl_BaseClass__object*)self);
         return cast;
       }
     }
@@ -888,14 +887,14 @@ static void* ior_sidlx_rmi_SimpleOrb__cast(
     cmp1 = strcmp(name, "sidlx.rmi.SimpleServer");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidlx_rmi_SimpleServer__object*)self);
       return cast;
     }
     else if (cmp1 < 0) {
       cmp2 = strcmp(name, "sidlx.rmi.SimpleOrb");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidlx_rmi_SimpleOrb__object*)self);
         return cast;
       }
     }
@@ -924,8 +923,8 @@ static void ior_sidlx_rmi_SimpleOrb__set_hooks(
  */
 
 static void ior_sidlx_rmi_SimpleOrb__delete(
-  struct sidlx_rmi_SimpleOrb__object* self,
-    struct sidl_BaseInterface__object **_ex)
+  struct sidlx_rmi_SimpleOrb__object* self, struct sidl_BaseInterface__object 
+    **_ex)
 {
   *_ex = NULL; /* default to no exception */
   sidlx_rmi_SimpleOrb__fini(self,_ex);
@@ -938,11 +937,10 @@ ior_sidlx_rmi_SimpleOrb__getURL(
     struct sidlx_rmi_SimpleOrb__object* self,
     struct sidl_BaseInterface__object **_ex) {
   char* ret = NULL;
-  char* objid = 
-    sidl_rmi_InstanceRegistry_getInstanceByClass((sidl_BaseClass)self,
-    _ex); SIDL_CHECK(*_ex);
+  char* objid = sidl_rmi_InstanceRegistry_getInstanceByClass((
+    sidl_BaseClass)self, _ex); SIDL_CHECK(*_ex);
   if(!objid) {
-    objid = sidl_rmi_InstanceRegistry_registerInstance((sidl_BaseClass)self,
+    objid = sidl_rmi_InstanceRegistry_registerInstance((sidl_BaseClass)self, 
       _ex); SIDL_CHECK(*_ex);
   }
   ret = sidl_rmi_ServerRegistry_getServerURL(objid, _ex); SIDL_CHECK(*_ex);
@@ -1075,199 +1073,199 @@ static void sidlx_rmi_SimpleOrb__init_epv(void)
   epv->f__ctor2                   = NULL;
   epv->f__dtor                    = NULL;
   epv->f_serviceRequest           = (void (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,struct sidlx_rmi_Socket__object*,
-    struct sidl_BaseInterface__object **)) s1->f_serviceRequest;
+    sidlx_rmi_SimpleOrb__object*,struct sidlx_rmi_Socket__object*,struct 
+    sidl_BaseInterface__object **)) s1->f_serviceRequest;
   epv->f_isLocalObject            = (char* (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,const char*,
-    struct sidl_BaseInterface__object **)) s1->f_isLocalObject;
+    sidlx_rmi_SimpleOrb__object*,const char*,struct sidl_BaseInterface__object 
+    **)) s1->f_isLocalObject;
   epv->f_getProtocol              = NULL;
-  epv->f_getExceptions            = (struct sidl_io_Serializable__array* 
-    (*)(struct sidlx_rmi_SimpleOrb__object*,
-    struct sidl_BaseInterface__object **)) s1->f_getExceptions;
+  epv->f_getExceptions            = (struct sidl_io_Serializable__array* (*)(
+    struct sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_getExceptions;
   epv->f_setMaxThreadPool         = (void (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,int32_t,
-    struct sidl_BaseInterface__object **)) s1->f_setMaxThreadPool;
+    sidlx_rmi_SimpleOrb__object*,int32_t,struct sidl_BaseInterface__object **)) 
+    s1->f_setMaxThreadPool;
   epv->f_requestPort              = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,int32_t,
-    struct sidl_BaseInterface__object **)) s1->f_requestPort;
+    sidlx_rmi_SimpleOrb__object*,int32_t,struct sidl_BaseInterface__object **)) 
+    s1->f_requestPort;
   epv->f_requestPortInRange       = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,int32_t,int32_t,
-    struct sidl_BaseInterface__object **)) s1->f_requestPortInRange;
+    sidlx_rmi_SimpleOrb__object*,int32_t,int32_t,struct 
+    sidl_BaseInterface__object **)) s1->f_requestPortInRange;
   epv->f_getPort                  = (int32_t (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,
-    struct sidl_BaseInterface__object **)) s1->f_getPort;
+    sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_getPort;
   epv->f_getServerName            = (char* (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,
-    struct sidl_BaseInterface__object **)) s1->f_getServerName;
+    sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_getServerName;
   epv->f_getServerURL             = (char* (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,const char*,
-    struct sidl_BaseInterface__object **)) s1->f_getServerURL;
+    sidlx_rmi_SimpleOrb__object*,const char*,struct sidl_BaseInterface__object 
+    **)) s1->f_getServerURL;
   epv->f_run                      = (int64_t (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,
-    struct sidl_BaseInterface__object **)) s1->f_run;
+    sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_run;
   epv->f_shutdown                 = (void (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,
-    struct sidl_BaseInterface__object **)) s1->f_shutdown;
+    sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_shutdown;
   epv->f_addRef                   = (void (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,
-    struct sidl_BaseInterface__object **)) s1->f_addRef;
+    sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_addRef;
   epv->f_deleteRef                = (void (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,
-    struct sidl_BaseInterface__object **)) s1->f_deleteRef;
+    sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_deleteRef;
   epv->f_isSame                   = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) s1->f_isSame;
+    sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object*,struct 
+    sidl_BaseInterface__object **)) s1->f_isSame;
   epv->f_isType                   = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,const char*,
-    struct sidl_BaseInterface__object **)) s1->f_isType;
+    sidlx_rmi_SimpleOrb__object*,const char*,struct sidl_BaseInterface__object 
+    **)) s1->f_isType;
   epv->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(struct 
-    sidlx_rmi_SimpleOrb__object*,
-    struct sidl_BaseInterface__object **)) s1->f_getClassInfo;
+    sidlx_rmi_SimpleOrb__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_getClassInfo;
 
   sidlx_rmi_SimpleOrb__set_epv(epv);
 
   memcpy((void*)hepv, epv, sizeof(struct sidlx_rmi_SimpleOrb__epv));
-  e0->f__cast               = (void* (*)(struct sidl_BaseClass__object*,
-    const char*, struct sidl_BaseInterface__object**)) epv->f__cast;
-  e0->f__delete             = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e0->f__getURL             = (char* (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e0->f__raddRef            = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e0->f__isRemote           = (sidl_bool (*)(struct sidl_BaseClass__object*,
+  e0->f__cast               = (void* (*)(struct sidl_BaseClass__object*,const 
+    char*, struct sidl_BaseInterface__object**)) epv->f__cast;
+  e0->f__delete             = (void (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e0->f__getURL             = (char* (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e0->f__raddRef            = (void (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e0->f__isRemote           = (sidl_bool (*)(struct sidl_BaseClass__object*, 
     struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e0->f__exec               = (void (*)(struct sidl_BaseClass__object*,
-    const char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef              = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f__exec               = (void (*)(struct sidl_BaseClass__object*,const 
+    char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef              = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
   e0->f_isSame              = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
+    struct sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
   e0->f_isType              = (sidl_bool (*)(struct sidl_BaseClass__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
 
   memcpy((void*) he0, e0, sizeof(struct sidl_BaseClass__epv));
 
-  e1->f__cast               = (void* (*)(void*,const char*,
-    struct sidl_BaseInterface__object**)) epv->f__cast;
-  e1->f__delete             = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e1->f__getURL             = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e1->f__raddRef            = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e1->f__isRemote           = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e1->f__exec               = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef              = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef           = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame              = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType              = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f__cast               = (void* (*)(void*,const char*, struct 
+    sidl_BaseInterface__object**)) epv->f__cast;
+  e1->f__delete             = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e1->f__getURL             = (char* (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e1->f__raddRef            = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e1->f__isRemote           = (sidl_bool (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__isRemote;
+  e1->f__exec               = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef              = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_addRef;
+  e1->f_deleteRef           = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_deleteRef;
+  e1->f_isSame              = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e1->f_isType              = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   memcpy((void*) he1, e1, sizeof(struct sidl_BaseInterface__epv));
 
-  e2->f__cast               = (void* (*)(void*,const char*,
-    struct sidl_BaseInterface__object**)) epv->f__cast;
-  e2->f__delete             = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e2->f__getURL             = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e2->f__raddRef            = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e2->f__isRemote           = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e2->f__exec               = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e2->f_getServerURL        = (char* (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_getServerURL;
-  e2->f_isLocalObject       = (char* (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isLocalObject;
+  e2->f__cast               = (void* (*)(void*,const char*, struct 
+    sidl_BaseInterface__object**)) epv->f__cast;
+  e2->f__delete             = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e2->f__getURL             = (char* (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e2->f__raddRef            = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e2->f__isRemote           = (sidl_bool (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__isRemote;
+  e2->f__exec               = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e2->f_getServerURL        = (char* (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_getServerURL;
+  e2->f_isLocalObject       = (char* (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isLocalObject;
   e2->f_getExceptions       = (struct sidl_io_Serializable__array* (*)(void*,
     struct sidl_BaseInterface__object **)) epv->f_getExceptions;
-  e2->f_addRef              = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e2->f_deleteRef           = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e2->f_isSame              = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e2->f_isType              = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e2->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e2->f_addRef              = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_addRef;
+  e2->f_deleteRef           = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_deleteRef;
+  e2->f_isSame              = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e2->f_isType              = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e2->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   memcpy((void*) he2, e2, sizeof(struct sidl_rmi_ServerInfo__epv));
 
   e3->f__cast               = (void* (*)(struct sidlx_rmi_SimpleServer__object*,
     const char*, struct sidl_BaseInterface__object**)) epv->f__cast;
-  e3->f__delete             = (void (*)(struct sidlx_rmi_SimpleServer__object*,
+  e3->f__delete             = (void (*)(struct sidlx_rmi_SimpleServer__object*, 
     struct sidl_BaseInterface__object **)) epv->f__delete;
   e3->f__getURL             = (char* (*)(struct sidlx_rmi_SimpleServer__object*,
     struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e3->f__raddRef            = (void (*)(struct sidlx_rmi_SimpleServer__object*,
+  e3->f__raddRef            = (void (*)(struct sidlx_rmi_SimpleServer__object*, 
     struct sidl_BaseInterface__object **)) epv->f__raddRef;
   e3->f__isRemote           = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleServer__object*,
-    struct sidl_BaseInterface__object **)) epv->f__isRemote;
+    sidlx_rmi_SimpleServer__object*, struct sidl_BaseInterface__object **)) 
+    epv->f__isRemote;
   e3->f__exec               = (void (*)(struct sidlx_rmi_SimpleServer__object*,
     const char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
     struct sidl_BaseInterface__object **)) epv->f__exec;
   e3->f_setMaxThreadPool    = (void (*)(struct sidlx_rmi_SimpleServer__object*,
     int32_t,struct sidl_BaseInterface__object **)) epv->f_setMaxThreadPool;
   e3->f_requestPort         = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleServer__object*,int32_t,
-    struct sidl_BaseInterface__object **)) epv->f_requestPort;
+    sidlx_rmi_SimpleServer__object*,int32_t,struct sidl_BaseInterface__object 
+    **)) epv->f_requestPort;
   e3->f_requestPortInRange  = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleServer__object*,int32_t,int32_t,
-    struct sidl_BaseInterface__object **)) epv->f_requestPortInRange;
+    sidlx_rmi_SimpleServer__object*,int32_t,int32_t,struct 
+    sidl_BaseInterface__object **)) epv->f_requestPortInRange;
   e3->f_getPort             = (int32_t (*)(struct 
-    sidlx_rmi_SimpleServer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getPort;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getPort;
   e3->f_getServerName       = (char* (*)(struct sidlx_rmi_SimpleServer__object*,
     struct sidl_BaseInterface__object **)) epv->f_getServerName;
   e3->f_getServerURL        = (char* (*)(struct sidlx_rmi_SimpleServer__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_getServerURL;
   e3->f_run                 = (int64_t (*)(struct 
-    sidlx_rmi_SimpleServer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_run;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_run;
   e3->f_shutdown            = (void (*)(struct sidlx_rmi_SimpleServer__object*,
     struct sidl_BaseInterface__object **)) epv->f_shutdown;
   e3->f_serviceRequest      = (void (*)(struct sidlx_rmi_SimpleServer__object*,
-    struct sidlx_rmi_Socket__object*,
-    struct sidl_BaseInterface__object **)) epv->f_serviceRequest;
+    struct sidlx_rmi_Socket__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_serviceRequest;
   e3->f_getExceptions       = (struct sidl_io_Serializable__array* (*)(struct 
-    sidlx_rmi_SimpleServer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getExceptions;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getExceptions;
   e3->f_addRef              = (void (*)(struct sidlx_rmi_SimpleServer__object*,
     struct sidl_BaseInterface__object **)) epv->f_addRef;
   e3->f_deleteRef           = (void (*)(struct sidlx_rmi_SimpleServer__object*,
     struct sidl_BaseInterface__object **)) epv->f_deleteRef;
   e3->f_isSame              = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_isSame;
   e3->f_isType              = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleServer__object*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
+    sidlx_rmi_SimpleServer__object*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
   e3->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(struct 
-    sidlx_rmi_SimpleServer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
   e3->f_isLocalObject       = (char* (*)(struct sidlx_rmi_SimpleServer__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_isLocalObject;
 
@@ -1280,15 +1278,14 @@ static void sidlx_rmi_SimpleOrb__init_epv(void)
 void sidlx_rmi_SimpleOrb__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct sidl_rmi_ServerInfo__epv **s_arg_epv__sidl_rmi_serverinfo,
   struct sidl_rmi_ServerInfo__epv **s_arg_epv_hooks__sidl_rmi_serverinfo,
-  struct sidlx_rmi_SimpleServer__epv **s_arg_epv__sidlx_rmi_simpleserver,
-    struct sidlx_rmi_SimpleServer__epv 
-    **s_arg_epv_hooks__sidlx_rmi_simpleserver,
-  struct sidlx_rmi_SimpleOrb__epv **s_arg_epv__sidlx_rmi_simpleorb,
-    struct sidlx_rmi_SimpleOrb__epv **s_arg_epv_hooks__sidlx_rmi_simpleorb)
+  struct sidlx_rmi_SimpleServer__epv **s_arg_epv__sidlx_rmi_simpleserver,struct 
+    sidlx_rmi_SimpleServer__epv **s_arg_epv_hooks__sidlx_rmi_simpleserver,
+  struct sidlx_rmi_SimpleOrb__epv **s_arg_epv__sidlx_rmi_simpleorb,struct 
+    sidlx_rmi_SimpleOrb__epv **s_arg_epv_hooks__sidlx_rmi_simpleorb)
 {
   LOCK_STATIC_GLOBALS;
   if (!s_method_initialized) {
@@ -1331,7 +1328,7 @@ initClassInfo(sidl_ClassInfo *info, struct sidl_BaseInterface__object **_ex)
     s_classInfo = sidl_ClassInfo__cast(impl,_ex);
     if (impl) {
       sidl_ClassInfoI_setName(impl, "sidlx.rmi.SimpleOrb",_ex);
-      sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
+      sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION, 
         s_IOR_MINOR_VERSION,_ex);
       sidl_ClassInfoI_deleteRef(impl,_ex);
       sidl_atexit(sidl_deleteRef_atexit, &s_classInfo);
@@ -1356,8 +1353,7 @@ initMetadata(struct sidlx_rmi_SimpleOrb__object* self, sidl_BaseInterface* _ex)
 {
   *_ex = 0; /* default no exception */
   if (self) {
-    struct sidl_BaseClass__data *data = (struct 
-      sidl_BaseClass__data*)((
+    struct sidl_BaseClass__data *data = (struct sidl_BaseClass__data*)((
       *self).d_sidlx_rmi_simpleserver.d_sidl_baseclass.d_data);
     if (data) {
       data->d_IOR_major_version = s_IOR_MAJOR_VERSION;
@@ -1473,8 +1469,8 @@ static const struct sidlx_rmi_SimpleOrb__external
 s_externalEntryPoints = {
   sidlx_rmi_SimpleOrb__new,
   sidlx_rmi_SimpleOrb__super,
-  0, 
-  10
+  1, 
+  0
 };
 
 /*

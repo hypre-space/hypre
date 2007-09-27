@@ -2,7 +2,7 @@
  * File:          sidl_rmi_MalformedURLException.h
  * Symbol:        sidl.rmi.MalformedURLException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.rmi.MalformedURLException
@@ -102,7 +102,7 @@ sidl_rmi_MalformedURLException__create(sidl_BaseInterface* _ex);
  * RMI constructor function for the class.
  */
 sidl_rmi_MalformedURLException
-sidl_rmi_MalformedURLException__createRemote(const char * url,
+sidl_rmi_MalformedURLException__createRemote(const char * url, 
   sidl_BaseInterface *_ex);
 
 
@@ -122,9 +122,11 @@ sidl_rmi_MalformedURLException_getHopCount(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getHopCount)(
+  int32_t _result;
+  _result = (*self->d_epv->f_getHopCount)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -196,10 +198,12 @@ sidl_rmi_MalformedURLException_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -220,10 +224,12 @@ sidl_rmi_MalformedURLException_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -240,9 +246,11 @@ sidl_rmi_MalformedURLException_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -259,9 +267,11 @@ sidl_rmi_MalformedURLException_getNote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getNote)(
+  char* _result;
+  _result = (*self->d_epv->f_getNote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -300,9 +310,11 @@ sidl_rmi_MalformedURLException_getTrace(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getTrace)(
+  char* _result;
+  _result = (*self->d_epv->f_getTrace)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -449,9 +461,11 @@ sidl_rmi_MalformedURLException__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -485,9 +499,11 @@ sidl_rmi_MalformedURLException__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -1004,8 +1020,8 @@ sidl_rmi_MalformedURLException__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_rmi_MalformedURLException__object*
-sidl_rmi_MalformedURLException__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_rmi_MalformedURLException__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

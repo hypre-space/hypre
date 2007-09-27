@@ -2,7 +2,7 @@
  * File:          sidl_Resolve_Stub.c
  * Symbol:        sidl.Resolve-v0.9.15
  * Symbol Type:   enumeration
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Resolve
@@ -50,7 +50,7 @@ sidl_Resolve__array_createCol(
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct sidl_Resolve__array*)sidl_int__array_createCol(dimen, lower,
+  return (struct sidl_Resolve__array*)sidl_int__array_createCol(dimen, lower, 
     upper);
 }
 
@@ -65,7 +65,7 @@ sidl_Resolve__array_createRow(
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct sidl_Resolve__array*)sidl_int__array_createRow(dimen, lower,
+  return (struct sidl_Resolve__array*)sidl_int__array_createRow(dimen, lower, 
     upper);
 }
 
@@ -93,8 +93,8 @@ sidl_Resolve__array_create1dInit(
   int32_t len, 
   int32_t* data)
 {
-  return (struct sidl_Resolve__array*)sidl_int__array_create1dInit(len,
-    (int32_t*)data);
+  return (struct sidl_Resolve__array*)sidl_int__array_create1dInit(len, (
+    int32_t*)data);
 }
 
 /**

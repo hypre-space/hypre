@@ -339,6 +339,11 @@
 #undef HAVE_RINDEX
 #endif
 
+/* Define to 1 if you have the <sched.h> header file. */
+#ifndef HAVE_SCHED_H
+#undef HAVE_SCHED_H
+#endif
+
 /* Define if you have the shl_load function. */
 #ifndef HAVE_SHL_LOAD
 #undef HAVE_SHL_LOAD
@@ -666,12 +671,17 @@
 #undef SIDL_F77_ONE_UNDERSCORE
 #endif
 
-/* F77 strings lengths immediately follow string */
+/* F77 string length integer size */
+#ifndef SIDL_F77_STR_INT_SIZE
+#undef SIDL_F77_STR_INT_SIZE
+#endif
+
+/* F77 string lengths at end of argument list */
 #ifndef SIDL_F77_STR_LEN_FAR
 #undef SIDL_F77_STR_LEN_FAR
 #endif
 
-/* F77 strings lengths at end */
+/* F77 string lengths immediately follow string */
 #ifndef SIDL_F77_STR_LEN_NEAR
 #undef SIDL_F77_STR_LEN_NEAR
 #endif
@@ -741,12 +751,17 @@
 #undef SIDL_F90_POINTER_SIZE
 #endif
 
-/* Fortran 90 strings lengths immediately follow string */
+/* F90 string length integer size */
+#ifndef SIDL_F90_STR_INT_SIZE
+#undef SIDL_F90_STR_INT_SIZE
+#endif
+
+/* F90 string lengths at end of argument list */
 #ifndef SIDL_F90_STR_LEN_FAR
 #undef SIDL_F90_STR_LEN_FAR
 #endif
 
-/* Fortran 90 strings lengths at end */
+/* F90 string lengths immediately follow string */
 #ifndef SIDL_F90_STR_LEN_NEAR
 #undef SIDL_F90_STR_LEN_NEAR
 #endif
@@ -756,12 +771,12 @@
 #undef SIDL_F90_STR_MINSIZE
 #endif
 
-/* Fortran 90 strings as length-char* structs */
+/* F90 strings as length-char* structs */
 #ifndef SIDL_F90_STR_STRUCT_LEN_STR
 #undef SIDL_F90_STR_STRUCT_LEN_STR
 #endif
 
-/* Fortran 90 strings as char*-length structs */
+/* F90 strings as char*-length structs */
 #ifndef SIDL_F90_STR_STRUCT_STR_LEN
 #undef SIDL_F90_STR_STRUCT_STR_LEN
 #endif

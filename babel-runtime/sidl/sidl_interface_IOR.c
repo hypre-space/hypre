@@ -55,6 +55,9 @@ static void
 sidl_interface__array_bdestroy(struct sidl_interface__array* array)
 {
   if (array) {
+#ifdef SIDL_DEBUG_REFCOUNT
+    sidl__array_remove((struct sidl__array *)array);
+#endif
     memset(array, 0, sizeof(struct sidl_interface__array) +
            3 * array->d_metadata.d_dimen * sizeof(int32_t));
     free(array);
@@ -92,7 +95,11 @@ sidl_interface__array_destroy(struct sidl_interface__array* array)
  */
 static void
 sidl_interface__array_rdestroy(struct sidl_interface__array* array)
-{ }
+{
+#ifdef SIDL_DEBUG_REFCOUNT
+  if (array) sidl__array_remove((struct sidl__array *)array);
+#endif
+}
 /**
  * Destroy the given sliced array. Trying to destroy a NULL array is
  * a noop.
@@ -242,6 +249,9 @@ newArray(int32_t dimen, const int32_t lower[], const int32_t upper[],
   }
   memcpy(result->d_metadata.d_lower, lower, sizeof(int32_t)*dimen);
   memcpy(result->d_metadata.d_upper, upper, sizeof(int32_t)*dimen);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_add((struct sidl__array *)result);
+#endif
   return result;
 }
 
@@ -319,7 +329,10 @@ int32_t lower[], int32_t upper[], int32_t stride[])
   sidl_array->d_metadata.d_lower = lower;
   sidl_array->d_metadata.d_vtable = &rarray_interface_vtable;
   sidl_array->d_metadata.d_refcount = 1;
-  sidl_array->d_firstElement = (sidl_BaseInterface *)c_array; 
+  sidl_array->d_firstElement = (sidl_BaseInterface *)c_array;
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_add((struct sidl__array *)sidl_array);
+#endif
 }
 
 /**

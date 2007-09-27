@@ -141,11 +141,16 @@ fi],
 # W. Eaton for writing this extremely useful macro.  Thank you John.
 AC_DEFUN([LLNL_F77_LIBRARY_LDFLAGS],
 [AC_LANG_PUSH(Fortran 77)dnl
+AC_ARG_VAR([FLIBS],[Linker flags needed to link against F77 code])
 _LLNL_PROG_F77_V
+FLIBS_NOSORT=true
 AC_CACHE_CHECK([for Fortran 77 libraries], ac_cv_flibs,
 [if test "x$FLIBS" != "x"; then
   ac_cv_flibs="$FLIBS" # Let the user override the test.
+  FLIBS_NOSORT=true
+  _AS_ECHO_N([(user override) ])
 else
+  FLIBS_NOSORT=false
 
 _LLNL_PROG_F77_V_OUTPUT
 

@@ -2,7 +2,7 @@
  * File:          sidl_DFinder.h
  * Symbol:        sidl.DFinder-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.DFinder
@@ -182,10 +182,12 @@ sidl_DFinder_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -206,10 +208,12 @@ sidl_DFinder_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -226,9 +230,11 @@ sidl_DFinder_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -271,13 +277,15 @@ sidl_DFinder_findLibrary(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_findLibrary)(
+  sidl_DLL _result;
+  _result = (*self->d_epv->f_findLibrary)(
     self,
     sidl_name,
     target,
     lScope,
     lResolve,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -319,9 +327,11 @@ sidl_DFinder_getSearchPath(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getSearchPath)(
+  char* _result;
+  _result = (*self->d_epv->f_getSearchPath)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -403,9 +413,11 @@ sidl_DFinder__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -439,9 +451,11 @@ sidl_DFinder__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -958,8 +972,8 @@ sidl_DFinder__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_DFinder__object*
-sidl_DFinder__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_DFinder__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

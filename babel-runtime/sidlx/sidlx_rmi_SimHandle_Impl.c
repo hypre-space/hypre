@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimHandle_Impl.c
  * Symbol:        sidlx.rmi.SimHandle-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for sidlx.rmi.SimHandle
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -60,8 +60,8 @@
 
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -198,6 +198,8 @@ impl_sidlx_rmi_SimHandle_initCreate(
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle.initCreate) */
   /* This function creates a remote object on the server named in the url.*/
   sidl_BaseInterface _throwaway_exception = NULL;
+  sidl_BaseException _be = NULL;
+
   struct sidlx_rmi_SimHandle__data *dptr = NULL;
   sidlx_rmi_ClientSocket connSock = NULL;
   sidlx_rmi_Socket locSock = NULL;
@@ -250,6 +252,15 @@ impl_sidlx_rmi_SimHandle_initCreate(
   sidlx_rmi_Simsponse_init(resp, "CREATE", NULL, locSock, _ex);SIDL_CHECK(*_ex);
   /*  sidlx_rmi_Simsponse_test(resp,-1,-1,_ex);SIDL_CHECK(*_ex);*/
   sidlx_rmi_Simsponse_pullData(resp, _ex); SIDL_CHECK(*_ex);
+
+  _be = sidlx_rmi_Simsponse_getExceptionThrown(resp, _ex);SIDL_CHECK(*_ex);
+  if(_be != NULL) {
+    sidl_BaseException_addLine(_be, "Exception unserialized from remote create call.", 
+			       &_throwaway_exception);
+    *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+							    &_throwaway_exception);
+    goto EXIT;
+  }
 
   /* Don't set this stuff until we're sure the object actually was created*/
   dptr->d_prefix = prefix;
@@ -384,6 +395,8 @@ impl_sidlx_rmi_SimHandle_initUnserialize(
   *_ex = 0;
 #line 150 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   sidl_BaseInterface _throwaway_exception = NULL;
+  sidl_BaseException _be = NULL;
+
   struct sidlx_rmi_SimHandle__data *dptr =
     sidlx_rmi_SimHandle__get_data(self);
 
@@ -443,6 +456,16 @@ impl_sidlx_rmi_SimHandle_initUnserialize(
   sidlx_rmi_Simsponse_init(resp, "SERIAL", objectID, locSock, _ex);
   SIDL_CHECK(*_ex);
   sidlx_rmi_Simsponse_pullData(resp, _ex); SIDL_CHECK(*_ex);
+
+  _be = sidlx_rmi_Simsponse_getExceptionThrown(resp, _ex);SIDL_CHECK(*_ex);
+  if(_be != NULL) {
+    sidl_BaseException_addLine(_be, "Exception unserialized from remote create call.", 
+			       &_throwaway_exception);
+    *_ex = (sidl_BaseInterface) sidl_BaseInterface__rmicast(_be,
+							    &_throwaway_exception);
+    goto EXIT;
+  }
+
   /*dptr->d_objectID = sidlx_rmi_Simsponse_getObjectID(resp, _ex); SIDL_CHECK(*_ex);*/
   sidlx_rmi_Simsponse_unpackSerializable(resp, NULL, &ser, _ex); SIDL_CHECK(*_ex);
 
@@ -694,83 +717,79 @@ impl_sidlx_rmi_SimHandle_close(
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimHandle_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_sidlx_rmi_SimHandle_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimHandle_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_sidlx_rmi_SimHandle_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimHandle_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidlx_rmi_SimHandle_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimHandle_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_SimHandle_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimHandle_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_sidlx_rmi_SimHandle_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimHandle_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_sidlx_rmi_SimHandle_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimHandle_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidlx_rmi_SimHandle_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimHandle_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_SimHandle_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
 struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimHandle_fconnect_sidl_io_Serializable(const char* url,
+  impl_sidlx_rmi_SimHandle_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_io_Serializable__connectI(url, ar, _ex);
 }
 struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimHandle_fcast_sidl_io_Serializable(void* bi,
+  impl_sidlx_rmi_SimHandle_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_io_Serializable__cast(bi, _ex);
 }
 struct sidl_rmi_InstanceHandle__object* 
-  impl_sidlx_rmi_SimHandle_fconnect_sidl_rmi_InstanceHandle(const char* url,
+  impl_sidlx_rmi_SimHandle_fconnect_sidl_rmi_InstanceHandle(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_rmi_InstanceHandle__connectI(url, ar, _ex);
 }
 struct sidl_rmi_InstanceHandle__object* 
-  impl_sidlx_rmi_SimHandle_fcast_sidl_rmi_InstanceHandle(void* bi,
+  impl_sidlx_rmi_SimHandle_fcast_sidl_rmi_InstanceHandle(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_rmi_InstanceHandle__cast(bi, _ex);
 }
 struct sidl_rmi_Invocation__object* 
-  impl_sidlx_rmi_SimHandle_fconnect_sidl_rmi_Invocation(const char* url,
+  impl_sidlx_rmi_SimHandle_fconnect_sidl_rmi_Invocation(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_rmi_Invocation__connectI(url, ar, _ex);
 }
 struct sidl_rmi_Invocation__object* 
-  impl_sidlx_rmi_SimHandle_fcast_sidl_rmi_Invocation(void* bi,
+  impl_sidlx_rmi_SimHandle_fcast_sidl_rmi_Invocation(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_rmi_Invocation__cast(bi, _ex);
 }
 struct sidlx_rmi_SimHandle__object* 
-  impl_sidlx_rmi_SimHandle_fconnect_sidlx_rmi_SimHandle(const char* url,
+  impl_sidlx_rmi_SimHandle_fconnect_sidlx_rmi_SimHandle(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidlx_rmi_SimHandle__connectI(url, ar, _ex);
 }
 struct sidlx_rmi_SimHandle__object* 
-  impl_sidlx_rmi_SimHandle_fcast_sidlx_rmi_SimHandle(void* bi,
+  impl_sidlx_rmi_SimHandle_fcast_sidlx_rmi_SimHandle(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidlx_rmi_SimHandle__cast(bi, _ex);
 }

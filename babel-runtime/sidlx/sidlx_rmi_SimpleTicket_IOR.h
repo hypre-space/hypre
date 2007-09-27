@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimpleTicket_IOR.h
  * Symbol:        sidlx.rmi.SimpleTicket-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for sidlx.rmi.SimpleTicket
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -190,90 +190,89 @@ const struct sidlx_rmi_SimpleTicket__external*
 sidlx_rmi_SimpleTicket__externals(void);
 
 extern struct sidlx_rmi_SimpleTicket__object*
-sidlx_rmi_SimpleTicket__new(void* ddata,
-  struct sidl_BaseInterface__object ** _ex);
+sidlx_rmi_SimpleTicket__new(void* ddata,struct sidl_BaseInterface__object ** 
+  _ex);
 
 extern void sidlx_rmi_SimpleTicket__init(
-  struct sidlx_rmi_SimpleTicket__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct sidlx_rmi_SimpleTicket__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void sidlx_rmi_SimpleTicket__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct sidl_rmi_Ticket__epv **s_arg_epv__sidl_rmi_ticket,
   struct sidl_rmi_Ticket__epv **s_arg_epv_hooks__sidl_rmi_ticket,
-  struct sidlx_rmi_SimpleTicket__epv **s_arg_epv__sidlx_rmi_simpleticket,
-    struct sidlx_rmi_SimpleTicket__epv 
-    **s_arg_epv_hooks__sidlx_rmi_simpleticket);
+  struct sidlx_rmi_SimpleTicket__epv **s_arg_epv__sidlx_rmi_simpleticket,struct 
+    sidlx_rmi_SimpleTicket__epv **s_arg_epv_hooks__sidlx_rmi_simpleticket);
   extern void sidlx_rmi_SimpleTicket__fini(
-    struct sidlx_rmi_SimpleTicket__object* self,
-      struct sidl_BaseInterface__object ** _ex);
-  extern void sidlx_rmi_SimpleTicket__IOR_version(int32_t *major,
-    int32_t *minor);
+    struct sidlx_rmi_SimpleTicket__object* self, struct 
+      sidl_BaseInterface__object ** _ex);
+  extern void sidlx_rmi_SimpleTicket__IOR_version(int32_t *major, int32_t 
+    *minor);
 
   struct sidl_BaseClass__object* 
-    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_BaseClass(const char* url,
+    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_BaseClass(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseClass__object* 
-    skel_sidlx_rmi_SimpleTicket_fcast_sidl_BaseClass(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_SimpleTicket_fcast_sidl_BaseClass(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
-    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_BaseInterface(const char* url,
+    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_BaseInterface(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseInterface__object* 
-    skel_sidlx_rmi_SimpleTicket_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_SimpleTicket_fcast_sidl_BaseInterface(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_ClassInfo__object* 
-    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_ClassInfo(const char* url,
+    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_ClassInfo(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_ClassInfo__object* 
-    skel_sidlx_rmi_SimpleTicket_fcast_sidl_ClassInfo(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_SimpleTicket_fcast_sidl_ClassInfo(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
-    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_RuntimeException(const char* url,
+    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_RuntimeException(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_sidlx_rmi_SimpleTicket_fcast_sidl_RuntimeException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_SimpleTicket_fcast_sidl_RuntimeException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_Response__object* 
-    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_rmi_Response(const char* url,
+    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_rmi_Response(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_rmi_Response__object* 
-    skel_sidlx_rmi_SimpleTicket_fcast_sidl_rmi_Response(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_SimpleTicket_fcast_sidl_rmi_Response(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_Ticket__object* 
-    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_rmi_Ticket(const char* url,
+    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_rmi_Ticket(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_rmi_Ticket__object* 
-    skel_sidlx_rmi_SimpleTicket_fcast_sidl_rmi_Ticket(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_SimpleTicket_fcast_sidl_rmi_Ticket(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_TicketBook__object* 
-    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_rmi_TicketBook(const char* url,
+    skel_sidlx_rmi_SimpleTicket_fconnect_sidl_rmi_TicketBook(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_rmi_TicketBook__object* 
-    skel_sidlx_rmi_SimpleTicket_fcast_sidl_rmi_TicketBook(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_SimpleTicket_fcast_sidl_rmi_TicketBook(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidlx_rmi_SimpleTicket__object* 
     skel_sidlx_rmi_SimpleTicket_fconnect_sidlx_rmi_SimpleTicket(const char* url,
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidlx_rmi_SimpleTicket__object* 
-    skel_sidlx_rmi_SimpleTicket_fcast_sidlx_rmi_SimpleTicket(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_SimpleTicket_fcast_sidlx_rmi_SimpleTicket(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidlx_rmi_SimpleTicket__remote{
     int d_refcount;
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

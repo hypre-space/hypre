@@ -1796,3 +1796,4 @@ public class Enum extends sidl.Integer {
 
 }
 
+

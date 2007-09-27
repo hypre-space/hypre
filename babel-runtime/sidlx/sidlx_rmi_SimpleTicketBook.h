@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimpleTicketBook.h
  * Symbol:        sidlx.rmi.SimpleTicketBook-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for sidlx.rmi.SimpleTicketBook
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -76,8 +76,8 @@ sidlx_rmi_SimpleTicketBook__create(sidl_BaseInterface* _ex);
  * RMI constructor function for the class.
  */
 sidlx_rmi_SimpleTicketBook
-sidlx_rmi_SimpleTicketBook__createRemote(const char * url,
-  sidl_BaseInterface *_ex);
+sidlx_rmi_SimpleTicketBook__createRemote(const char * url, sidl_BaseInterface 
+  *_ex);
 
 /**
  * Wraps up the private data struct pointer (struct sidlx_rmi_SimpleTicketBook__data) passed in rather than running the constructor.
@@ -156,10 +156,12 @@ sidlx_rmi_SimpleTicketBook_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -180,10 +182,12 @@ sidlx_rmi_SimpleTicketBook_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -200,9 +204,11 @@ sidlx_rmi_SimpleTicketBook_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -243,10 +249,12 @@ sidlx_rmi_SimpleTicketBook_insert(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_insert)(
+  int32_t _result;
+  _result = (*self->d_epv->f_insert)(
     self,
     t,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -265,10 +273,12 @@ sidlx_rmi_SimpleTicketBook_removeReady(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_removeReady)(
+  int32_t _result;
+  _result = (*self->d_epv->f_removeReady)(
     self,
     t,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -285,9 +295,11 @@ sidlx_rmi_SimpleTicketBook_isEmpty(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isEmpty)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isEmpty)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -325,9 +337,11 @@ sidlx_rmi_SimpleTicketBook_test(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_test)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_test)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -344,9 +358,11 @@ sidlx_rmi_SimpleTicketBook_createEmptyTicketBook(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_createEmptyTicketBook)(
+  sidl_rmi_TicketBook _result;
+  _result = (*self->d_epv->f_createEmptyTicketBook)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -365,9 +381,11 @@ sidlx_rmi_SimpleTicketBook_getResponse(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getResponse)(
+  sidl_rmi_Response _result;
+  _result = (*self->d_epv->f_getResponse)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -425,9 +443,11 @@ sidlx_rmi_SimpleTicketBook__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -461,9 +481,11 @@ sidlx_rmi_SimpleTicketBook__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -980,8 +1002,8 @@ sidlx_rmi_SimpleTicketBook__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidlx_rmi_SimpleTicketBook__object*
-sidlx_rmi_SimpleTicketBook__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidlx_rmi_SimpleTicketBook__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

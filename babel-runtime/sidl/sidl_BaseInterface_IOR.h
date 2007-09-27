@@ -2,7 +2,7 @@
  * File:          sidl_BaseInterface_IOR.h
  * Symbol:        sidl.BaseInterface-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.BaseInterface

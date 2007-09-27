@@ -1543,6 +1543,13 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
     public Array get() {
       return d_obj;
     }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
+    }
   }
 
 }
@@ -1739,6 +1746,13 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
      */
     public Array1 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
   }
@@ -1944,6 +1958,14 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
      */
     public Array2 get() {
       return d_obj;
+    }
+
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
     }
   }
@@ -2157,6 +2179,13 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
      */
     public Array3 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 
@@ -2383,6 +2412,13 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
      */
     public Array4 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 
@@ -2618,6 +2654,13 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
      */
     public Array5 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 
@@ -2860,6 +2903,13 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
      */
     public Array6 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
   }
@@ -3116,6 +3166,13 @@ public class FloatComplex implements java.io.Serializable, Cloneable {
      */
     public Array7 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 

@@ -2,7 +2,7 @@
  * File:          sidl_Resolve_IOR.h
  * Symbol:        sidl.Resolve-v0.9.15
  * Symbol Type:   enumeration
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.Resolve

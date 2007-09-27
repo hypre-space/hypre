@@ -2,7 +2,7 @@
  * File:          sidl_Loader_Skel.c
  * Symbol:        sidl.Loader-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for sidl.Loader
@@ -118,72 +118,68 @@ sidl_Finder
 impl_sidl_Loader_getFinder(
   /* out */ sidl_BaseInterface *_ex);
 
-extern struct sidl_BaseClass__object* 
-  impl_sidl_Loader_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct sidl_BaseClass__object* 
-  impl_sidl_Loader_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* impl_sidl_Loader_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* impl_sidl_Loader_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_Loader_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  impl_sidl_Loader_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
   impl_sidl_Loader_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* _ex);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_Loader_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_Loader_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* impl_sidl_Loader_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* impl_sidl_Loader_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_DLL__object* impl_sidl_Loader_fconnect_sidl_DLL(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
-extern struct sidl_DLL__object* impl_sidl_Loader_fcast_sidl_DLL(void* bi,
+extern struct sidl_DLL__object* impl_sidl_Loader_fcast_sidl_DLL(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_Finder__object* impl_sidl_Loader_fconnect_sidl_Finder(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
-extern struct sidl_Finder__object* impl_sidl_Loader_fcast_sidl_Finder(void* bi,
+extern struct sidl_Finder__object* impl_sidl_Loader_fcast_sidl_Finder(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_Loader__object* impl_sidl_Loader_fconnect_sidl_Loader(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
-extern struct sidl_Loader__object* impl_sidl_Loader_fcast_sidl_Loader(void* bi,
+extern struct sidl_Loader__object* impl_sidl_Loader_fcast_sidl_Loader(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
   impl_sidl_Loader_fconnect_sidl_RuntimeException(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_Loader_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex);
-extern struct sidl_BaseClass__object* 
-  impl_sidl_Loader_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct sidl_BaseClass__object* 
-  impl_sidl_Loader_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+  impl_sidl_Loader_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex);
+extern struct sidl_BaseClass__object* impl_sidl_Loader_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_BaseClass__object* impl_sidl_Loader_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_Loader_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  impl_sidl_Loader_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
   impl_sidl_Loader_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* _ex);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_Loader_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_Loader_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* impl_sidl_Loader_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct sidl_ClassInfo__object* impl_sidl_Loader_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_DLL__object* impl_sidl_Loader_fconnect_sidl_DLL(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
-extern struct sidl_DLL__object* impl_sidl_Loader_fcast_sidl_DLL(void* bi,
+extern struct sidl_DLL__object* impl_sidl_Loader_fcast_sidl_DLL(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_Finder__object* impl_sidl_Loader_fconnect_sidl_Finder(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
-extern struct sidl_Finder__object* impl_sidl_Loader_fcast_sidl_Finder(void* bi,
+extern struct sidl_Finder__object* impl_sidl_Loader_fcast_sidl_Finder(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_Loader__object* impl_sidl_Loader_fconnect_sidl_Loader(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
-extern struct sidl_Loader__object* impl_sidl_Loader_fcast_sidl_Loader(void* bi,
+extern struct sidl_Loader__object* impl_sidl_Loader_fcast_sidl_Loader(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
   impl_sidl_Loader_fconnect_sidl_RuntimeException(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_Loader_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidl_Loader_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex);
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -234,20 +230,18 @@ struct sidl_BaseClass__object* skel_sidl_Loader_fconnect_sidl_BaseClass(const
   return impl_sidl_Loader_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
-struct sidl_BaseClass__object* skel_sidl_Loader_fcast_sidl_BaseClass(void* bi,
+struct sidl_BaseClass__object* skel_sidl_Loader_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_Loader_fcast_sidl_BaseClass(bi, _ex);
 }
 
-struct sidl_BaseInterface__object* 
-  skel_sidl_Loader_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseInterface__object* skel_sidl_Loader_fconnect_sidl_BaseInterface(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidl_Loader_fconnect_sidl_BaseInterface(url, ar, _ex);
 }
 
-struct sidl_BaseInterface__object* 
-  skel_sidl_Loader_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseInterface__object* skel_sidl_Loader_fcast_sidl_BaseInterface(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_sidl_Loader_fcast_sidl_BaseInterface(bi, _ex);
 }
 
@@ -256,17 +250,17 @@ struct sidl_ClassInfo__object* skel_sidl_Loader_fconnect_sidl_ClassInfo(const
   return impl_sidl_Loader_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
-struct sidl_ClassInfo__object* skel_sidl_Loader_fcast_sidl_ClassInfo(void* bi,
+struct sidl_ClassInfo__object* skel_sidl_Loader_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_Loader_fcast_sidl_ClassInfo(bi, _ex);
 }
 
-struct sidl_DLL__object* skel_sidl_Loader_fconnect_sidl_DLL(const char* url,
+struct sidl_DLL__object* skel_sidl_Loader_fconnect_sidl_DLL(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidl_Loader_fconnect_sidl_DLL(url, ar, _ex);
 }
 
-struct sidl_DLL__object* skel_sidl_Loader_fcast_sidl_DLL(void* bi,
+struct sidl_DLL__object* skel_sidl_Loader_fcast_sidl_DLL(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_Loader_fcast_sidl_DLL(bi, _ex);
 }
@@ -276,7 +270,7 @@ struct sidl_Finder__object* skel_sidl_Loader_fconnect_sidl_Finder(const char*
   return impl_sidl_Loader_fconnect_sidl_Finder(url, ar, _ex);
 }
 
-struct sidl_Finder__object* skel_sidl_Loader_fcast_sidl_Finder(void* bi,
+struct sidl_Finder__object* skel_sidl_Loader_fcast_sidl_Finder(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_Loader_fcast_sidl_Finder(bi, _ex);
 }
@@ -286,7 +280,7 @@ struct sidl_Loader__object* skel_sidl_Loader_fconnect_sidl_Loader(const char*
   return impl_sidl_Loader_fconnect_sidl_Loader(url, ar, _ex);
 }
 
-struct sidl_Loader__object* skel_sidl_Loader_fcast_sidl_Loader(void* bi,
+struct sidl_Loader__object* skel_sidl_Loader_fcast_sidl_Loader(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_Loader_fcast_sidl_Loader(bi, _ex);
 }
@@ -298,8 +292,8 @@ struct sidl_RuntimeException__object*
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidl_Loader_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface *_ex) { 
+  skel_sidl_Loader_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface 
+  *_ex) { 
   return impl_sidl_Loader_fcast_sidl_RuntimeException(bi, _ex);
 }
 

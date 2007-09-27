@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_GenNetworkException_Stub.c
  * Symbol:        sidlx.rmi.GenNetworkException-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for sidlx.rmi.GenNetworkException
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -61,10 +61,10 @@ static const struct sidlx_rmi_GenNetworkException__external* _loadIOR(void)
 #else
   _externals = (struct 
     sidlx_rmi_GenNetworkException__external*)sidl_dynamicLoadIOR(
-    "sidlx.rmi.GenNetworkException",
-    "sidlx_rmi_GenNetworkException__externals") ;
-  sidl_checkIORVersion("sidlx.rmi.GenNetworkException",
-    _externals->d_ior_major_version, _externals->d_ior_minor_version, 0, 10);
+    "sidlx.rmi.GenNetworkException","sidlx_rmi_GenNetworkException__externals") 
+    ;
+  sidl_checkIORVersion("sidlx.rmi.GenNetworkException", 
+    _externals->d_ior_major_version, _externals->d_ior_minor_version, 1, 0);
 #endif
   return _externals;
 }
@@ -91,21 +91,21 @@ sidlx_rmi_GenNetworkException__wrapObj(void* data, sidl_BaseInterface* _ex)
 }
 
 static sidlx_rmi_GenNetworkException 
-  sidlx_rmi_GenNetworkException__remoteCreate(const char* url,
+  sidlx_rmi_GenNetworkException__remoteCreate(const char* url, 
   sidl_BaseInterface *_ex);
 /*
  * RMI constructor function for the class.
  */
 
 sidlx_rmi_GenNetworkException
-sidlx_rmi_GenNetworkException__createRemote(const char* url,
-  sidl_BaseInterface *_ex)
+sidlx_rmi_GenNetworkException__createRemote(const char* url, sidl_BaseInterface 
+  *_ex)
 {
   return sidlx_rmi_GenNetworkException__remoteCreate(url, _ex);
 }
 
 static struct sidlx_rmi_GenNetworkException__object* 
-  sidlx_rmi_GenNetworkException__remoteConnect(const char* url, sidl_bool ar,
+  sidlx_rmi_GenNetworkException__remoteConnect(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 static struct sidlx_rmi_GenNetworkException__object* 
   sidlx_rmi_GenNetworkException__IHConnect(struct 
@@ -131,9 +131,11 @@ sidlx_rmi_GenNetworkException_getHopCount(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getHopCount)(
+  int32_t _result;
+  _result = (*self->d_epv->f_getHopCount)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -205,10 +207,12 @@ sidlx_rmi_GenNetworkException_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -229,10 +233,12 @@ sidlx_rmi_GenNetworkException_isType(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -249,9 +255,11 @@ sidlx_rmi_GenNetworkException_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -268,9 +276,11 @@ sidlx_rmi_GenNetworkException_getNote(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getNote)(
+  char* _result;
+  _result = (*self->d_epv->f_getNote)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -309,9 +319,11 @@ sidlx_rmi_GenNetworkException_getTrace(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getTrace)(
+  char* _result;
+  _result = (*self->d_epv->f_getTrace)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -419,8 +431,8 @@ sidlx_rmi_GenNetworkException__cast(
 
   if(!connect_loaded) {
     connect_loaded = 1;
-    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.GenNetworkException",
-      (void*)sidlx_rmi_GenNetworkException__IHConnect,_ex);SIDL_CHECK(*_ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.GenNetworkException", (
+      void*)sidlx_rmi_GenNetworkException__IHConnect,_ex);SIDL_CHECK(*_ex);
   }
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
@@ -490,9 +502,11 @@ sidlx_rmi_GenNetworkException__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -551,9 +565,11 @@ sidlx_rmi_GenNetworkException__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -651,7 +667,7 @@ struct sidlx_rmi_GenNetworkException__array*
 sidlx_rmi_GenNetworkException__array_create2dCol(int32_t m, int32_t n)
 {
   return (struct 
-    sidlx_rmi_GenNetworkException__array*)sidl_interface__array_create2dCol(m,
+    sidlx_rmi_GenNetworkException__array*)sidl_interface__array_create2dCol(m, 
     n);
 }
 
@@ -666,7 +682,7 @@ struct sidlx_rmi_GenNetworkException__array*
 sidlx_rmi_GenNetworkException__array_create2dRow(int32_t m, int32_t n)
 {
   return (struct 
-    sidlx_rmi_GenNetworkException__array*)sidl_interface__array_create2dRow(m,
+    sidlx_rmi_GenNetworkException__array*)sidl_interface__array_create2dRow(m, 
     n);
 }
 
@@ -855,7 +871,7 @@ sidlx_rmi_GenNetworkException__array_get(
   const int32_t indices[])
 {
   return (sidlx_rmi_GenNetworkException)
-    sidl_interface__array_get((const struct sidl_interface__array *)array,
+    sidl_interface__array_get((const struct sidl_interface__array *)array, 
       indices);
 }
 
@@ -981,8 +997,8 @@ sidlx_rmi_GenNetworkException__array_set(
   const int32_t indices[],
   sidlx_rmi_GenNetworkException const value)
 {
-  sidl_interface__array_set((struct sidl_interface__array *)array, indices,
-    (struct sidl_BaseInterface__object *)value);
+  sidl_interface__array_set((struct sidl_interface__array *)array, indices, (
+    struct sidl_BaseInterface__object *)value);
 }
 
 /**
@@ -1006,7 +1022,7 @@ sidlx_rmi_GenNetworkException__array_lower(
   const struct sidlx_rmi_GenNetworkException__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_lower((struct sidl_interface__array *)array,
+  return sidl_interface__array_lower((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1020,7 +1036,7 @@ sidlx_rmi_GenNetworkException__array_upper(
   const struct sidlx_rmi_GenNetworkException__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_upper((struct sidl_interface__array *)array,
+  return sidl_interface__array_upper((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1034,7 +1050,7 @@ sidlx_rmi_GenNetworkException__array_length(
   const struct sidlx_rmi_GenNetworkException__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_length((struct sidl_interface__array *)array,
+  return sidl_interface__array_length((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1048,7 +1064,7 @@ sidlx_rmi_GenNetworkException__array_stride(
   const struct sidlx_rmi_GenNetworkException__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_stride((struct sidl_interface__array *)array,
+  return sidl_interface__array_stride((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1214,7 +1230,7 @@ sidlx_rmi_GenNetworkException__array_ensure(
   int     ordering)
 {
   return (struct sidlx_rmi_GenNetworkException__array*)
-    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
+    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen, 
       ordering);
 }
 
@@ -1269,8 +1285,8 @@ static struct sidl_recursive_mutex_t sidlx_rmi_GenNetworkException__mutex= SIDL_
 #endif
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -1311,15 +1327,14 @@ static void* remote_sidlx_rmi_GenNetworkException__cast(
   cmp0 = strcmp(name, "sidl.SIDLException");
   if (!cmp0) {
     (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-    cast = self;
+    cast = ((struct sidl_SIDLException__object*)self);
     return cast;
   }
   else if (cmp0 < 0) {
     cmp1 = strcmp(name, "sidl.BaseInterface");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = 
-        &((
+      cast = &((
         *self).d_sidl_rmi_networkexception.d_sidl_io_ioexception.d_sidl_sidlexception.d_sidl_baseclass.d_sidl_baseinterface);
       return cast;
     }
@@ -1327,8 +1342,7 @@ static void* remote_sidlx_rmi_GenNetworkException__cast(
       cmp2 = strcmp(name, "sidl.BaseException");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = 
-          &((
+        cast = &((
           *self).d_sidl_rmi_networkexception.d_sidl_io_ioexception.d_sidl_sidlexception.d_sidl_baseexception);
         return cast;
       }
@@ -1336,7 +1350,7 @@ static void* remote_sidlx_rmi_GenNetworkException__cast(
         cmp3 = strcmp(name, "sidl.BaseClass");
         if (!cmp3) {
           (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-          cast = self;
+          cast = ((struct sidl_BaseClass__object*)self);
           return cast;
         }
       }
@@ -1345,8 +1359,7 @@ static void* remote_sidlx_rmi_GenNetworkException__cast(
       cmp2 = strcmp(name, "sidl.RuntimeException");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = 
-          &((
+        cast = &((
           *self).d_sidl_rmi_networkexception.d_sidl_io_ioexception.d_sidl_runtimeexception);
         return cast;
       }
@@ -1356,15 +1369,14 @@ static void* remote_sidlx_rmi_GenNetworkException__cast(
     cmp1 = strcmp(name, "sidl.rmi.NetworkException");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidl_rmi_NetworkException__object*)self);
       return cast;
     }
     else if (cmp1 < 0) {
       cmp2 = strcmp(name, "sidl.io.Serializable");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = 
-          &((
+        cast = &((
           *self).d_sidl_rmi_networkexception.d_sidl_io_ioexception.d_sidl_sidlexception.d_sidl_io_serializable);
         return cast;
       }
@@ -1372,7 +1384,7 @@ static void* remote_sidlx_rmi_GenNetworkException__cast(
         cmp3 = strcmp(name, "sidl.io.IOException");
         if (!cmp3) {
           (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-          cast = self;
+          cast = ((struct sidl_io_IOException__object*)self);
           return cast;
         }
       }
@@ -1381,16 +1393,16 @@ static void* remote_sidlx_rmi_GenNetworkException__cast(
       cmp2 = strcmp(name, "sidlx.rmi.GenNetworkException");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidlx_rmi_GenNetworkException__object*)self);
         return cast;
       }
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct 
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct 
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih, _ex);
@@ -1433,7 +1445,7 @@ static void remote_sidlx_rmi_GenNetworkException__raddRef(
   struct sidl_rmi_InstanceHandle__object *_conn = ((struct 
     sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
   sidl_rmi_Response _rsvp = NULL;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
     "addRef", _ex ); SIDL_CHECK(*_ex);
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
@@ -1478,7 +1490,7 @@ remote_sidlx_rmi_GenNetworkException__set_hooks(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "_set_hooks", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1532,7 +1544,7 @@ remote_sidlx_rmi_GenNetworkException_getHopCount(
     int32_t _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getHopCount", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1550,8 +1562,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.GenNetwor
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1619,12 +1631,12 @@ remote_sidlx_rmi_GenNetworkException_isSame(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "isSame", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
     if(iobj){
-      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj, 
         _ex);SIDL_CHECK(*_ex);
       sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(*_ex);
       free((void*)_url);
@@ -1645,8 +1657,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.GenNetwor
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1675,7 +1687,7 @@ remote_sidlx_rmi_GenNetworkException_isType(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "isType", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1694,8 +1706,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.GenNetwor
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1724,7 +1736,7 @@ remote_sidlx_rmi_GenNetworkException_getClassInfo(
     struct sidl_ClassInfo__object* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getClassInfo", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1742,10 +1754,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.GenNetwor
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1773,7 +1785,7 @@ remote_sidlx_rmi_GenNetworkException_getNote(
     char* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getNote", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1791,8 +1803,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.GenNetwor
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1820,12 +1832,12 @@ remote_sidlx_rmi_GenNetworkException_setNote(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "setNote", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
-    sidl_rmi_Invocation_packString( _inv, "message", message,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packString( _inv, "message", message, _ex);SIDL_CHECK(
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1865,7 +1877,7 @@ remote_sidlx_rmi_GenNetworkException_getTrace(
     char* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getTrace", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1883,8 +1895,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.GenNetwor
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1912,11 +1924,11 @@ remote_sidlx_rmi_GenNetworkException_addLine(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "addLine", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
-    sidl_rmi_Invocation_packString( _inv, "traceline", traceline,
+    sidl_rmi_Invocation_packString( _inv, "traceline", traceline, 
       _ex);SIDL_CHECK(*_ex);
 
     /* send actual RMI request */
@@ -1959,14 +1971,14 @@ remote_sidlx_rmi_GenNetworkException_add(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "add", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
-    sidl_rmi_Invocation_packString( _inv, "filename", filename,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packString( _inv, "filename", filename, _ex);SIDL_CHECK(
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "lineno", lineno, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packString( _inv, "methodname", methodname,
+    sidl_rmi_Invocation_packString( _inv, "methodname", methodname, 
       _ex);SIDL_CHECK(*_ex);
 
     /* send actual RMI request */
@@ -2007,12 +2019,12 @@ remote_sidlx_rmi_GenNetworkException_packObj(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "packObj", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
     if(ser){
-      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)ser,
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)ser, 
         _ex);SIDL_CHECK(*_ex);
       sidl_rmi_Invocation_packString( _inv, "ser", _url, _ex);SIDL_CHECK(*_ex);
       free((void*)_url);
@@ -2058,12 +2070,12 @@ remote_sidlx_rmi_GenNetworkException_unpackObj(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_GenNetworkException__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "unpackObj", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
     if(des){
-      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)des,
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)des, 
         _ex);SIDL_CHECK(*_ex);
       sidl_rmi_Invocation_packString( _inv, "des", _url, _ex);SIDL_CHECK(*_ex);
       free((void*)_url);
@@ -2149,123 +2161,123 @@ static void sidlx_rmi_GenNetworkException__init_remote_epv(void)
     sidl_BaseInterface*)) epv->f__raddRef;
   e0->f__isRemote    = (sidl_bool (*)(struct sidl_BaseClass__object*,
     sidl_BaseInterface*)) epv->f__isRemote;
-  e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,
+  e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t, 
     sidl_BaseInterface*)) epv->f__set_hooks;
   e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,const 
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
 
-  e1->f__cast        = (void* (*)(void*,const char*,
-    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+    epv->f__cast;
   e1->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e1->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e1->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote    = (sidl_bool (*)(void*,
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks   = (void (*)(void*,int32_t,
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec        = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_getNote      = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getNote;
-  e1->f_setNote      = (void (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_setNote;
-  e1->f_getTrace     = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getTrace;
-  e1->f_addLine      = (void (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_addLine;
-  e1->f_add          = (void (*)(void*,const char*,int32_t,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_add;
+  e1->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+    epv->f__isRemote;
+  e1->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+    epv->f__set_hooks;
+  e1->f__exec        = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_getNote      = (char* (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_getNote;
+  e1->f_setNote      = (void (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_setNote;
+  e1->f_getTrace     = (char* (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_getTrace;
+  e1->f_addLine      = (void (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_addLine;
+  e1->f_add          = (void (*)(void*,const char*,int32_t,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_add;
   e1->f_packObj      = (void (*)(void*,struct sidl_io_Serializer__object*,
     struct sidl_BaseInterface__object **)) epv->f_packObj;
   e1->f_unpackObj    = (void (*)(void*,struct sidl_io_Deserializer__object*,
     struct sidl_BaseInterface__object **)) epv->f_unpackObj;
-  e1->f_addRef       = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef    = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e1->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_deleteRef;
   e1->f_isSame       = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
     struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType       = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e2->f__cast        = (void* (*)(void*,const char*,
-    sidl_BaseInterface*)) epv->f__cast;
+  e2->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+    epv->f__cast;
   e2->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e2->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e2->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e2->f__isRemote    = (sidl_bool (*)(void*,
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e2->f__set_hooks   = (void (*)(void*,int32_t,
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e2->f__exec        = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e2->f_addRef       = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e2->f_deleteRef    = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e2->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+    epv->f__isRemote;
+  e2->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+    epv->f__set_hooks;
+  e2->f__exec        = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e2->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_addRef;
+  e2->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_deleteRef;
   e2->f_isSame       = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
     struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e2->f_isType       = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e2->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e2->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e2->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e3->f__cast        = (void* (*)(void*,const char*,
-    sidl_BaseInterface*)) epv->f__cast;
+  e3->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+    epv->f__cast;
   e3->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e3->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e3->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e3->f__isRemote    = (sidl_bool (*)(void*,
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e3->f__set_hooks   = (void (*)(void*,int32_t,
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e3->f__exec        = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e3->f_getNote      = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getNote;
-  e3->f_setNote      = (void (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_setNote;
-  e3->f_getTrace     = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getTrace;
-  e3->f_addLine      = (void (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_addLine;
-  e3->f_add          = (void (*)(void*,const char*,int32_t,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_add;
+  e3->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+    epv->f__isRemote;
+  e3->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+    epv->f__set_hooks;
+  e3->f__exec        = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e3->f_getNote      = (char* (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_getNote;
+  e3->f_setNote      = (void (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_setNote;
+  e3->f_getTrace     = (char* (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_getTrace;
+  e3->f_addLine      = (void (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_addLine;
+  e3->f_add          = (void (*)(void*,const char*,int32_t,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_add;
   e3->f_packObj      = (void (*)(void*,struct sidl_io_Serializer__object*,
     struct sidl_BaseInterface__object **)) epv->f_packObj;
   e3->f_unpackObj    = (void (*)(void*,struct sidl_io_Deserializer__object*,
     struct sidl_BaseInterface__object **)) epv->f_unpackObj;
-  e3->f_addRef       = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e3->f_deleteRef    = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e3->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_addRef;
+  e3->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_deleteRef;
   e3->f_isSame       = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
     struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e3->f_isType       = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e3->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e3->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e3->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e4->f__cast        = (void* (*)(struct sidl_SIDLException__object*,
-    const char*,sidl_BaseInterface*)) epv->f__cast;
+  e4->f__cast        = (void* (*)(struct sidl_SIDLException__object*,const 
+    char*,sidl_BaseInterface*)) epv->f__cast;
   e4->f__delete      = (void (*)(struct sidl_SIDLException__object*,
     sidl_BaseInterface*)) epv->f__delete;
   e4->f__getURL      = (char* (*)(struct sidl_SIDLException__object*,
@@ -2274,42 +2286,42 @@ static void sidlx_rmi_GenNetworkException__init_remote_epv(void)
     sidl_BaseInterface*)) epv->f__raddRef;
   e4->f__isRemote    = (sidl_bool (*)(struct sidl_SIDLException__object*,
     sidl_BaseInterface*)) epv->f__isRemote;
-  e4->f__set_hooks   = (void (*)(struct sidl_SIDLException__object*,int32_t,
+  e4->f__set_hooks   = (void (*)(struct sidl_SIDLException__object*,int32_t, 
     sidl_BaseInterface*)) epv->f__set_hooks;
   e4->f__exec        = (void (*)(struct sidl_SIDLException__object*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e4->f_addRef       = (void (*)(struct sidl_SIDLException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e4->f_deleteRef    = (void (*)(struct sidl_SIDLException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e4->f_isSame       = (sidl_bool (*)(struct sidl_SIDLException__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e4->f_isType       = (sidl_bool (*)(struct sidl_SIDLException__object*,
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e4->f_addRef       = (void (*)(struct sidl_SIDLException__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e4->f_deleteRef    = (void (*)(struct sidl_SIDLException__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e4->f_isSame       = (sidl_bool (*)(struct sidl_SIDLException__object*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e4->f_isType       = (sidl_bool (*)(struct sidl_SIDLException__object*,const 
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e4->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_SIDLException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
-  e4->f_getNote      = (char* (*)(struct sidl_SIDLException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getNote;
+    sidl_SIDLException__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
+  e4->f_getNote      = (char* (*)(struct sidl_SIDLException__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_getNote;
   e4->f_setNote      = (void (*)(struct sidl_SIDLException__object*,const char*,
     struct sidl_BaseInterface__object **)) epv->f_setNote;
-  e4->f_getTrace     = (char* (*)(struct sidl_SIDLException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getTrace;
+  e4->f_getTrace     = (char* (*)(struct sidl_SIDLException__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_getTrace;
   e4->f_addLine      = (void (*)(struct sidl_SIDLException__object*,const char*,
     struct sidl_BaseInterface__object **)) epv->f_addLine;
   e4->f_add          = (void (*)(struct sidl_SIDLException__object*,const char*,
     int32_t,const char*,struct sidl_BaseInterface__object **)) epv->f_add;
-  e4->f_packObj      = (void (*)(struct sidl_SIDLException__object*,
-    struct sidl_io_Serializer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_packObj;
-  e4->f_unpackObj    = (void (*)(struct sidl_SIDLException__object*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_unpackObj;
+  e4->f_packObj      = (void (*)(struct sidl_SIDLException__object*,struct 
+    sidl_io_Serializer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_packObj;
+  e4->f_unpackObj    = (void (*)(struct sidl_SIDLException__object*,struct 
+    sidl_io_Deserializer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_unpackObj;
 
-  e5->f__cast        = (void* (*)(struct sidl_io_IOException__object*,
-    const char*,sidl_BaseInterface*)) epv->f__cast;
+  e5->f__cast        = (void* (*)(struct sidl_io_IOException__object*,const 
+    char*,sidl_BaseInterface*)) epv->f__cast;
   e5->f__delete      = (void (*)(struct sidl_io_IOException__object*,
     sidl_BaseInterface*)) epv->f__delete;
   e5->f__getURL      = (char* (*)(struct sidl_io_IOException__object*,
@@ -2318,67 +2330,66 @@ static void sidlx_rmi_GenNetworkException__init_remote_epv(void)
     sidl_BaseInterface*)) epv->f__raddRef;
   e5->f__isRemote    = (sidl_bool (*)(struct sidl_io_IOException__object*,
     sidl_BaseInterface*)) epv->f__isRemote;
-  e5->f__set_hooks   = (void (*)(struct sidl_io_IOException__object*,int32_t,
+  e5->f__set_hooks   = (void (*)(struct sidl_io_IOException__object*,int32_t, 
     sidl_BaseInterface*)) epv->f__set_hooks;
-  e5->f__exec        = (void (*)(struct sidl_io_IOException__object*,
-    const char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e5->f_addRef       = (void (*)(struct sidl_io_IOException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e5->f_deleteRef    = (void (*)(struct sidl_io_IOException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e5->f__exec        = (void (*)(struct sidl_io_IOException__object*,const 
+    char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e5->f_addRef       = (void (*)(struct sidl_io_IOException__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e5->f_deleteRef    = (void (*)(struct sidl_io_IOException__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
   e5->f_isSame       = (sidl_bool (*)(struct sidl_io_IOException__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e5->f_isType       = (sidl_bool (*)(struct sidl_io_IOException__object*,
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e5->f_isType       = (sidl_bool (*)(struct sidl_io_IOException__object*,const 
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e5->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_io_IOException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
-  e5->f_getNote      = (char* (*)(struct sidl_io_IOException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getNote;
-  e5->f_setNote      = (void (*)(struct sidl_io_IOException__object*,
-    const char*,struct sidl_BaseInterface__object **)) epv->f_setNote;
-  e5->f_getTrace     = (char* (*)(struct sidl_io_IOException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getTrace;
-  e5->f_addLine      = (void (*)(struct sidl_io_IOException__object*,
-    const char*,struct sidl_BaseInterface__object **)) epv->f_addLine;
-  e5->f_add          = (void (*)(struct sidl_io_IOException__object*,
-    const char*,int32_t,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_add;
-  e5->f_packObj      = (void (*)(struct sidl_io_IOException__object*,
-    struct sidl_io_Serializer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_packObj;
-  e5->f_unpackObj    = (void (*)(struct sidl_io_IOException__object*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_unpackObj;
+    sidl_io_IOException__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
+  e5->f_getNote      = (char* (*)(struct sidl_io_IOException__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_getNote;
+  e5->f_setNote      = (void (*)(struct sidl_io_IOException__object*,const 
+    char*,struct sidl_BaseInterface__object **)) epv->f_setNote;
+  e5->f_getTrace     = (char* (*)(struct sidl_io_IOException__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_getTrace;
+  e5->f_addLine      = (void (*)(struct sidl_io_IOException__object*,const 
+    char*,struct sidl_BaseInterface__object **)) epv->f_addLine;
+  e5->f_add          = (void (*)(struct sidl_io_IOException__object*,const 
+    char*,int32_t,const char*,struct sidl_BaseInterface__object **)) epv->f_add;
+  e5->f_packObj      = (void (*)(struct sidl_io_IOException__object*,struct 
+    sidl_io_Serializer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_packObj;
+  e5->f_unpackObj    = (void (*)(struct sidl_io_IOException__object*,struct 
+    sidl_io_Deserializer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_unpackObj;
 
-  e6->f__cast        = (void* (*)(void*,const char*,
-    sidl_BaseInterface*)) epv->f__cast;
+  e6->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+    epv->f__cast;
   e6->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e6->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e6->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e6->f__isRemote    = (sidl_bool (*)(void*,
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e6->f__set_hooks   = (void (*)(void*,int32_t,
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e6->f__exec        = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e6->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+    epv->f__isRemote;
+  e6->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+    epv->f__set_hooks;
+  e6->f__exec        = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
   e6->f_packObj      = (void (*)(void*,struct sidl_io_Serializer__object*,
     struct sidl_BaseInterface__object **)) epv->f_packObj;
   e6->f_unpackObj    = (void (*)(void*,struct sidl_io_Deserializer__object*,
     struct sidl_BaseInterface__object **)) epv->f_unpackObj;
-  e6->f_addRef       = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e6->f_deleteRef    = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e6->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_addRef;
+  e6->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_deleteRef;
   e6->f_isSame       = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
     struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e6->f_isType       = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e6->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e6->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e6->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   e7->f__cast        = (void* (*)(struct sidl_rmi_NetworkException__object*,
     const char*,sidl_BaseInterface*)) epv->f__cast;
@@ -2402,13 +2413,13 @@ static void sidlx_rmi_GenNetworkException__init_remote_epv(void)
   e7->f_deleteRef    = (void (*)(struct sidl_rmi_NetworkException__object*,
     struct sidl_BaseInterface__object **)) epv->f_deleteRef;
   e7->f_isSame       = (sidl_bool (*)(struct sidl_rmi_NetworkException__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
+    struct sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
   e7->f_isType       = (sidl_bool (*)(struct sidl_rmi_NetworkException__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e7->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_rmi_NetworkException__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_rmi_NetworkException__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
   e7->f_getNote      = (char* (*)(struct sidl_rmi_NetworkException__object*,
     struct sidl_BaseInterface__object **)) epv->f_getNote;
   e7->f_setNote      = (void (*)(struct sidl_rmi_NetworkException__object*,
@@ -2418,21 +2429,21 @@ static void sidlx_rmi_GenNetworkException__init_remote_epv(void)
   e7->f_addLine      = (void (*)(struct sidl_rmi_NetworkException__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_addLine;
   e7->f_add          = (void (*)(struct sidl_rmi_NetworkException__object*,
-    const char*,int32_t,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_add;
+    const char*,int32_t,const char*,struct sidl_BaseInterface__object **)) 
+    epv->f_add;
   e7->f_packObj      = (void (*)(struct sidl_rmi_NetworkException__object*,
-    struct sidl_io_Serializer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_packObj;
+    struct sidl_io_Serializer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_packObj;
   e7->f_unpackObj    = (void (*)(struct sidl_rmi_NetworkException__object*,
-    struct sidl_io_Deserializer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_unpackObj;
+    struct sidl_io_Deserializer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_unpackObj;
 
   s_remote_initialized = 1;
 }
 
 /* Create an instance that connects to an existing remote object. */
 static struct sidlx_rmi_GenNetworkException__object*
-sidlx_rmi_GenNetworkException__remoteConnect(const char *url, sidl_bool ar,
+sidlx_rmi_GenNetworkException__remoteConnect(const char *url, sidl_bool ar, 
   sidl_BaseInterface *_ex)
 {
   struct sidlx_rmi_GenNetworkException__object* self;
@@ -2451,13 +2462,13 @@ sidlx_rmi_GenNetworkException__remoteConnect(const char *url, sidl_bool ar,
   if(url == NULL) {return NULL;}
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi = 
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
-      objectID, _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface bi = (
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(objectID,
+      _ex); SIDL_CHECK(*_ex);
     return sidlx_rmi_GenNetworkException__rmicast(bi,_ex);SIDL_CHECK(*_ex);
   }
-  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,
-    _ex ); SIDL_CHECK(*_ex);
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex ); 
+    SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidlx_rmi_GenNetworkException__object*) malloc(
@@ -2517,7 +2528,7 @@ sidlx_rmi_GenNetworkException__remoteConnect(const char *url, sidl_bool ar,
 /* Create an instance that uses an already existing  */
 /* InstanceHandle to connect to an existing remote object. */
 static struct sidlx_rmi_GenNetworkException__object*
-sidlx_rmi_GenNetworkException__IHConnect(sidl_rmi_InstanceHandle instance,
+sidlx_rmi_GenNetworkException__IHConnect(sidl_rmi_InstanceHandle instance, 
   sidl_BaseInterface *_ex)
 {
   struct sidlx_rmi_GenNetworkException__object* self;
@@ -2587,8 +2598,8 @@ sidlx_rmi_GenNetworkException__IHConnect(sidl_rmi_InstanceHandle instance,
 }
 /* REMOTE: generate remote instance given URL string. */
 static struct sidlx_rmi_GenNetworkException__object*
-sidlx_rmi_GenNetworkException__remoteCreate(const char *url,
-  sidl_BaseInterface *_ex)
+sidlx_rmi_GenNetworkException__remoteCreate(const char *url, sidl_BaseInterface 
+  *_ex)
 {
   sidl_BaseInterface _throwaway_exception = NULL;
   struct sidlx_rmi_GenNetworkException__object* self;
@@ -2600,9 +2611,8 @@ sidlx_rmi_GenNetworkException__remoteCreate(const char *url,
   struct sidl_BaseClass__object* s4;
 
   struct sidlx_rmi_GenNetworkException__remote* r_obj;
-  sidl_rmi_InstanceHandle instance = 
-    sidl_rmi_ProtocolFactory_createInstance(url,
-    "sidlx.rmi.GenNetworkException", _ex ); SIDL_CHECK(*_ex);
+  sidl_rmi_InstanceHandle instance = sidl_rmi_ProtocolFactory_createInstance(
+    url, "sidlx.rmi.GenNetworkException", _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidlx_rmi_GenNetworkException__object*) malloc(
@@ -2657,7 +2667,7 @@ sidlx_rmi_GenNetworkException__remoteCreate(const char *url,
 
   return self;
   EXIT:
-  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance,
+  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance, 
     &_throwaway_exception); }
   return NULL;
 }
@@ -2674,15 +2684,15 @@ sidlx_rmi_GenNetworkException__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.GenNetworkException",
-      (void*)sidlx_rmi_GenNetworkException__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.GenNetworkException", (
+      void*)sidlx_rmi_GenNetworkException__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
     struct sidl_BaseInterface__object* base = (struct 
       sidl_BaseInterface__object*) obj;
-    cast = (struct sidlx_rmi_GenNetworkException__object*) 
-      (*base->d_epv->f__cast)(
+    cast = (struct sidlx_rmi_GenNetworkException__object*) (
+      *base->d_epv->f__cast)(
       base->d_object,
       "sidlx.rmi.GenNetworkException", _ex); SIDL_CHECK(*_ex);
   }
@@ -2697,8 +2707,8 @@ sidlx_rmi_GenNetworkException__rmicast(
  */
 
 struct sidlx_rmi_GenNetworkException__object*
-sidlx_rmi_GenNetworkException__connectI(const char* url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex)
+sidlx_rmi_GenNetworkException__connectI(const char* url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex)
 {
   return sidlx_rmi_GenNetworkException__remoteConnect(url, ar, _ex);
 }

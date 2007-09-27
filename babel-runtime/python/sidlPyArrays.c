@@ -77,6 +77,7 @@ void sidl_python_## sidlType ##_destroy(struct sidl__array *array)      \
     struct sidl_python_## sidlType ##_array *parray =                   \
       (struct sidl_python_## sidlType ##_array *)array;                 \
     Py_XDECREF(parray->d_numarray);                                     \
+    sidl__array_remove(array);                                          \
     free((void *)array);                                                \
   }                                                                     \
 }                                                                       \
@@ -125,6 +126,7 @@ sidl_python_## sidlType ##_create(const int32_t dimen,                  \
     memcpy(result->d_array.d_metadata.d_stride,                         \
            stride,sizeof(int32_t)*dimen);                               \
     result->d_array.d_firstElement = first;                             \
+    sidl__array_add((struct sidl__array*)&(result->d_array));           \
     Py_XINCREF(pyobj);                                                  \
     result->d_numarray = pyobj;                                         \
   }                                                                     \

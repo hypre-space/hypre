@@ -2,7 +2,7 @@
  * File:          sidl_io_Deserializer_Module.c
  * Symbol:        sidl.io.Deserializer-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -162,12 +162,12 @@ sidl_io_Deserializer__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_io_Deserializer__object*
-sidl_io_Deserializer__connectI(const char * url, sidl_bool ar,                \
-  struct sidl_BaseInterface__object **_ex);
+sidl_io_Deserializer__connectI(const char * url, sidl_bool ar, struct         \
+  sidl_BaseInterface__object **_ex);
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -207,15 +207,15 @@ static void* remote_sidl_io__Deserializer__cast(
     cmp1 = strcmp(name, "sidl.io._Deserializer");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidl_io__Deserializer__object*)self);
       return cast;
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,                    \
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,                     \
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct             \
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct              \
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct                                                  \
       sidl_io__Deserializer__remote*)self->d_data)->d_ih, _ex);
@@ -377,8 +377,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackBool( _rsvp, "value", value,                      \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "value", value, _ex);SIDL_CHECK(     \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -424,8 +424,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackChar( _rsvp, "value", value,                      \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackChar( _rsvp, "value", value, _ex);SIDL_CHECK(     \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -517,8 +517,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackLong( _rsvp, "value", value,                      \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackLong( _rsvp, "value", value, _ex);SIDL_CHECK(     \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -564,8 +564,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackOpaque( _rsvp, "value", value,                    \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackOpaque( _rsvp, "value", value, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -611,8 +611,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackFloat( _rsvp, "value", value,                     \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackFloat( _rsvp, "value", value, _ex);SIDL_CHECK(    \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -658,8 +658,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackDouble( _rsvp, "value", value,                    \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackDouble( _rsvp, "value", value, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -705,8 +705,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackFcomplex( _rsvp, "value", value,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackFcomplex( _rsvp, "value", value, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -752,8 +752,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackDcomplex( _rsvp, "value", value,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackDcomplex( _rsvp, "value", value, _ex);SIDL_CHECK( \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -799,8 +799,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* unpack out and inout arguments */
-    sidl_rmi_Response_unpackString( _rsvp, "value", value,                    \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackString( _rsvp, "value", value, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -849,8 +849,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     /* unpack out and inout arguments */
     sidl_rmi_Response_unpackString( _rsvp, "value", &value_str,               \
       _ex);SIDL_CHECK(*_ex);
-    *value = sidl_io_Serializable__connectI(value_str, FALSE,                 \
-      _ex);SIDL_CHECK(*_ex);
+    *value = sidl_io_Serializable__connectI(value_str, FALSE, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* cleanup and return */
     EXIT:
@@ -885,11 +885,11 @@ remote_sidl_io__Deserializer_unpackBoolArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -940,11 +940,11 @@ remote_sidl_io__Deserializer_unpackCharArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -995,11 +995,11 @@ remote_sidl_io__Deserializer_unpackIntArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1050,11 +1050,11 @@ remote_sidl_io__Deserializer_unpackLongArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1105,11 +1105,11 @@ remote_sidl_io__Deserializer_unpackOpaqueArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1160,11 +1160,11 @@ remote_sidl_io__Deserializer_unpackFloatArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1215,11 +1215,11 @@ remote_sidl_io__Deserializer_unpackDoubleArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1270,11 +1270,11 @@ remote_sidl_io__Deserializer_unpackFcomplexArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1325,11 +1325,11 @@ remote_sidl_io__Deserializer_unpackDcomplexArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1380,11 +1380,11 @@ remote_sidl_io__Deserializer_unpackStringArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1483,11 +1483,11 @@ remote_sidl_io__Deserializer_unpackSerializableArray(
 
     /* pack in and inout arguments */
     sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,                  \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK( \
+      *_ex);
     sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packBool( _inv, "isRarray", isRarray, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1576,12 +1576,12 @@ remote_sidl_io__Deserializer_isSame(
     if(iobj){
       char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,       \
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "iobj", _url,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(    \
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "iobj", NULL,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(    \
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -1597,8 +1597,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1646,8 +1646,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1696,8 +1696,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Deserializ
     /* extract return value */
     sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,                    \
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1783,115 +1783,115 @@ static void sidl_io__Deserializer__init_remote_epv(void)
   epv->f_getClassInfo                 =                                       \
     remote_sidl_io__Deserializer_getClassInfo;
 
-  e0->f__cast        = (void* (*)(void*,const char*,                          \
-    sidl_BaseInterface*)) epv->f__cast;
+  e0->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*))     \
+    epv->f__cast;
   e0->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e0->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e0->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e0->f__isRemote    = (sidl_bool (*)(void*,                                  \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e0->f__set_hooks   = (void (*)(void*,int32_t,                               \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e0->f__exec        = (void (*)(void*,const char*,                           \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(void*,                                  \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(void*,const char*,                      \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,             \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e0->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*))             \
+    epv->f__isRemote;
+  e0->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*))         \
+    epv->f__set_hooks;
+  e0->f__exec        = (void (*)(void*,const char*,struct                     \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(void*,struct                            \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(void*,const char*,struct                \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct       \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   e1->f__cast                   = (void* (*)(void*,const char*,               \
     sidl_BaseInterface*)) epv->f__cast;
-  e1->f__delete                 = (void (*)(void*,                            \
-    sidl_BaseInterface*)) epv->f__delete;
-  e1->f__getURL                 = (char* (*)(void*,                           \
-    sidl_BaseInterface*)) epv->f__getURL;
-  e1->f__raddRef                = (void (*)(void*,                            \
-    sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote               = (sidl_bool (*)(void*,                       \
-    sidl_BaseInterface*)) epv->f__isRemote;
+  e1->f__delete                 = (void (*)(void*,sidl_BaseInterface*))       \
+    epv->f__delete;
+  e1->f__getURL                 = (char* (*)(void*,sidl_BaseInterface*))      \
+    epv->f__getURL;
+  e1->f__raddRef                = (void (*)(void*,sidl_BaseInterface*))       \
+    epv->f__raddRef;
+  e1->f__isRemote               = (sidl_bool (*)(void*,sidl_BaseInterface*))  \
+    epv->f__isRemote;
   e1->f__set_hooks              = (void (*)(void*,int32_t,                    \
     sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec                   = (void (*)(void*,const char*,                \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f__exec                   = (void (*)(void*,const char*,struct          \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
   e1->f_unpackBool              = (void (*)(void*,const char*,sidl_bool*,     \
     struct sidl_BaseInterface__object **)) epv->f_unpackBool;
-  e1->f_unpackChar              = (void (*)(void*,const char*,char*,          \
-    struct sidl_BaseInterface__object **)) epv->f_unpackChar;
-  e1->f_unpackInt               = (void (*)(void*,const char*,int32_t*,       \
-    struct sidl_BaseInterface__object **)) epv->f_unpackInt;
-  e1->f_unpackLong              = (void (*)(void*,const char*,int64_t*,       \
-    struct sidl_BaseInterface__object **)) epv->f_unpackLong;
-  e1->f_unpackOpaque            = (void (*)(void*,const char*,void**,         \
-    struct sidl_BaseInterface__object **)) epv->f_unpackOpaque;
-  e1->f_unpackFloat             = (void (*)(void*,const char*,float*,         \
-    struct sidl_BaseInterface__object **)) epv->f_unpackFloat;
-  e1->f_unpackDouble            = (void (*)(void*,const char*,double*,        \
-    struct sidl_BaseInterface__object **)) epv->f_unpackDouble;
-  e1->f_unpackFcomplex          = (void (*)(void*,const char*,                \
-    struct sidl_fcomplex*,                                                    \
-    struct sidl_BaseInterface__object **)) epv->f_unpackFcomplex;
-  e1->f_unpackDcomplex          = (void (*)(void*,const char*,                \
-    struct sidl_dcomplex*,                                                    \
-    struct sidl_BaseInterface__object **)) epv->f_unpackDcomplex;
-  e1->f_unpackString            = (void (*)(void*,const char*,char**,         \
-    struct sidl_BaseInterface__object **)) epv->f_unpackString;
-  e1->f_unpackSerializable      = (void (*)(void*,const char*,                \
-    struct sidl_io_Serializable__object**,                                    \
-    struct sidl_BaseInterface__object **)) epv->f_unpackSerializable;
-  e1->f_unpackBoolArray         = (void (*)(void*,const char*,                \
-    struct sidl_bool__array**,int32_t,int32_t,sidl_bool,                      \
-    struct sidl_BaseInterface__object **)) epv->f_unpackBoolArray;
-  e1->f_unpackCharArray         = (void (*)(void*,const char*,                \
-    struct sidl_char__array**,int32_t,int32_t,sidl_bool,                      \
-    struct sidl_BaseInterface__object **)) epv->f_unpackCharArray;
-  e1->f_unpackIntArray          = (void (*)(void*,const char*,                \
-    struct sidl_int__array**,int32_t,int32_t,sidl_bool,                       \
-    struct sidl_BaseInterface__object **)) epv->f_unpackIntArray;
-  e1->f_unpackLongArray         = (void (*)(void*,const char*,                \
-    struct sidl_long__array**,int32_t,int32_t,sidl_bool,                      \
-    struct sidl_BaseInterface__object **)) epv->f_unpackLongArray;
-  e1->f_unpackOpaqueArray       = (void (*)(void*,const char*,                \
-    struct sidl_opaque__array**,int32_t,int32_t,sidl_bool,                    \
-    struct sidl_BaseInterface__object **)) epv->f_unpackOpaqueArray;
-  e1->f_unpackFloatArray        = (void (*)(void*,const char*,                \
-    struct sidl_float__array**,int32_t,int32_t,sidl_bool,                     \
-    struct sidl_BaseInterface__object **)) epv->f_unpackFloatArray;
-  e1->f_unpackDoubleArray       = (void (*)(void*,const char*,                \
-    struct sidl_double__array**,int32_t,int32_t,sidl_bool,                    \
-    struct sidl_BaseInterface__object **)) epv->f_unpackDoubleArray;
-  e1->f_unpackFcomplexArray     = (void (*)(void*,const char*,                \
-    struct sidl_fcomplex__array**,int32_t,int32_t,sidl_bool,                  \
-    struct sidl_BaseInterface__object **)) epv->f_unpackFcomplexArray;
-  e1->f_unpackDcomplexArray     = (void (*)(void*,const char*,                \
-    struct sidl_dcomplex__array**,int32_t,int32_t,sidl_bool,                  \
-    struct sidl_BaseInterface__object **)) epv->f_unpackDcomplexArray;
-  e1->f_unpackStringArray       = (void (*)(void*,const char*,                \
-    struct sidl_string__array**,int32_t,int32_t,sidl_bool,                    \
-    struct sidl_BaseInterface__object **)) epv->f_unpackStringArray;
-  e1->f_unpackGenericArray      = (void (*)(void*,const char*,                \
-    struct sidl__array**,                                                     \
-    struct sidl_BaseInterface__object **)) epv->f_unpackGenericArray;
-  e1->f_unpackSerializableArray = (void (*)(void*,const char*,                \
-    struct sidl_io_Serializable__array**,int32_t,int32_t,sidl_bool,           \
-    struct sidl_BaseInterface__object **)) epv->f_unpackSerializableArray;
-  e1->f_addRef                  = (void (*)(void*,                            \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef               = (void (*)(void*,                            \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame                  = (sidl_bool (*)(void*,                       \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType                  = (sidl_bool (*)(void*,const char*,           \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_unpackChar              = (void (*)(void*,const char*,char*,struct    \
+    sidl_BaseInterface__object **)) epv->f_unpackChar;
+  e1->f_unpackInt               = (void (*)(void*,const char*,int32_t*,struct \
+    sidl_BaseInterface__object **)) epv->f_unpackInt;
+  e1->f_unpackLong              = (void (*)(void*,const char*,int64_t*,struct \
+    sidl_BaseInterface__object **)) epv->f_unpackLong;
+  e1->f_unpackOpaque            = (void (*)(void*,const char*,void**,struct   \
+    sidl_BaseInterface__object **)) epv->f_unpackOpaque;
+  e1->f_unpackFloat             = (void (*)(void*,const char*,float*,struct   \
+    sidl_BaseInterface__object **)) epv->f_unpackFloat;
+  e1->f_unpackDouble            = (void (*)(void*,const char*,double*,struct  \
+    sidl_BaseInterface__object **)) epv->f_unpackDouble;
+  e1->f_unpackFcomplex          = (void (*)(void*,const char*,struct          \
+    sidl_fcomplex*,struct sidl_BaseInterface__object **))                     \
+    epv->f_unpackFcomplex;
+  e1->f_unpackDcomplex          = (void (*)(void*,const char*,struct          \
+    sidl_dcomplex*,struct sidl_BaseInterface__object **))                     \
+    epv->f_unpackDcomplex;
+  e1->f_unpackString            = (void (*)(void*,const char*,char**,struct   \
+    sidl_BaseInterface__object **)) epv->f_unpackString;
+  e1->f_unpackSerializable      = (void (*)(void*,const char*,struct          \
+    sidl_io_Serializable__object**,struct sidl_BaseInterface__object **))     \
+    epv->f_unpackSerializable;
+  e1->f_unpackBoolArray         = (void (*)(void*,const char*,struct          \
+    sidl_bool__array**,int32_t,int32_t,sidl_bool,struct                       \
+    sidl_BaseInterface__object **)) epv->f_unpackBoolArray;
+  e1->f_unpackCharArray         = (void (*)(void*,const char*,struct          \
+    sidl_char__array**,int32_t,int32_t,sidl_bool,struct                       \
+    sidl_BaseInterface__object **)) epv->f_unpackCharArray;
+  e1->f_unpackIntArray          = (void (*)(void*,const char*,struct          \
+    sidl_int__array**,int32_t,int32_t,sidl_bool,struct                        \
+    sidl_BaseInterface__object **)) epv->f_unpackIntArray;
+  e1->f_unpackLongArray         = (void (*)(void*,const char*,struct          \
+    sidl_long__array**,int32_t,int32_t,sidl_bool,struct                       \
+    sidl_BaseInterface__object **)) epv->f_unpackLongArray;
+  e1->f_unpackOpaqueArray       = (void (*)(void*,const char*,struct          \
+    sidl_opaque__array**,int32_t,int32_t,sidl_bool,struct                     \
+    sidl_BaseInterface__object **)) epv->f_unpackOpaqueArray;
+  e1->f_unpackFloatArray        = (void (*)(void*,const char*,struct          \
+    sidl_float__array**,int32_t,int32_t,sidl_bool,struct                      \
+    sidl_BaseInterface__object **)) epv->f_unpackFloatArray;
+  e1->f_unpackDoubleArray       = (void (*)(void*,const char*,struct          \
+    sidl_double__array**,int32_t,int32_t,sidl_bool,struct                     \
+    sidl_BaseInterface__object **)) epv->f_unpackDoubleArray;
+  e1->f_unpackFcomplexArray     = (void (*)(void*,const char*,struct          \
+    sidl_fcomplex__array**,int32_t,int32_t,sidl_bool,struct                   \
+    sidl_BaseInterface__object **)) epv->f_unpackFcomplexArray;
+  e1->f_unpackDcomplexArray     = (void (*)(void*,const char*,struct          \
+    sidl_dcomplex__array**,int32_t,int32_t,sidl_bool,struct                   \
+    sidl_BaseInterface__object **)) epv->f_unpackDcomplexArray;
+  e1->f_unpackStringArray       = (void (*)(void*,const char*,struct          \
+    sidl_string__array**,int32_t,int32_t,sidl_bool,struct                     \
+    sidl_BaseInterface__object **)) epv->f_unpackStringArray;
+  e1->f_unpackGenericArray      = (void (*)(void*,const char*,struct          \
+    sidl__array**,struct sidl_BaseInterface__object **))                      \
+    epv->f_unpackGenericArray;
+  e1->f_unpackSerializableArray = (void (*)(void*,const char*,struct          \
+    sidl_io_Serializable__array**,int32_t,int32_t,sidl_bool,struct            \
+    sidl_BaseInterface__object **)) epv->f_unpackSerializableArray;
+  e1->f_addRef                  = (void (*)(void*,struct                      \
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e1->f_deleteRef               = (void (*)(void*,struct                      \
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e1->f_isSame                  = (sidl_bool (*)(void*,struct                 \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e1->f_isType                  = (sidl_bool (*)(void*,const char*,struct     \
+    sidl_BaseInterface__object **)) epv->f_isType;
   e1->f_getClassInfo            = (struct sidl_ClassInfo__object* (*)(void*,  \
     struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
@@ -1912,8 +1912,8 @@ sidl_io_Deserializer__remoteConnect(const char *url, sidl_bool ar,            \
   char* objectID = NULL;
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi =                                                   \
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(      \
+    sidl_BaseInterface bi = (                                                 \
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(       \
       objectID, _ex);
     if(ar) {
       sidl_BaseInterface_addRef(bi, _ex);
@@ -2009,8 +2009,8 @@ sidl_io_Deserializer__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("sidl.io.Deserializer",          \
-      (void*)sidl_io_Deserializer__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.io.Deserializer", (        \
+      void*)sidl_io_Deserializer__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
@@ -2031,15 +2031,15 @@ sidl_io_Deserializer__rmicast(
  */
 
 struct sidl_io_Deserializer__object*
-sidl_io_Deserializer__connectI(const char* url, sidl_bool ar,                 \
-  struct sidl_BaseInterface__object **_ex)
+sidl_io_Deserializer__connectI(const char* url, sidl_bool ar, struct          \
+  sidl_BaseInterface__object **_ex)
 {
   return sidl_io_Deserializer__remoteConnect(url, ar, _ex);
 }
 
 static PyObject *
-pStub_Deserializer__connect(PyObject *_ignored, PyObject *_args,              \
-  PyObject *_kwdict) {
+pStub_Deserializer__connect(PyObject *_ignored, PyObject *_args, PyObject     \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object* self = NULL;
   char* url = NULL;
@@ -2062,14 +2062,14 @@ pStub_Deserializer__connect(PyObject *_ignored, PyObject *_args,              \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -2084,8 +2084,8 @@ pStub_Deserializer__connect(PyObject *_ignored, PyObject *_args,              \
 staticforward PyTypeObject _sidl_io_DeserializerType;
 
 static PyObject *
-pStub_Deserializer__exec(PyObject *_self, PyObject *_args,                    \
-  PyObject *_kwdict) {
+pStub_Deserializer__exec(PyObject *_self, PyObject *_args, PyObject *_kwdict) \
+  {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2120,14 +2120,14 @@ pStub_Deserializer__exec(PyObject *_self, PyObject *_args,                    \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2151,8 +2151,8 @@ pStub_Deserializer__exec(PyObject *_self, PyObject *_args,                    \
 }
 
 static PyObject *
-pStub_Deserializer__getURL(PyObject *_self, PyObject *_args,                  \
-  PyObject *_kwdict) {
+pStub_Deserializer__getURL(PyObject *_self, PyObject *_args, PyObject         \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2177,22 +2177,22 @@ pStub_Deserializer__getURL(PyObject *_self, PyObject *_args,                  \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "z",
           _return);
+        free((void *)_return);
       }
-      free((void *)_return);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -2208,8 +2208,8 @@ pStub_Deserializer__getURL(PyObject *_self, PyObject *_args,                  \
 }
 
 static PyObject *
-pStub_Deserializer__isLocal(PyObject *_self, PyObject *_args,                 \
-  PyObject *_kwdict) {
+pStub_Deserializer__isLocal(PyObject *_self, PyObject *_args, PyObject        \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2236,14 +2236,14 @@ pStub_Deserializer__isLocal(PyObject *_self, PyObject *_args,                 \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2266,8 +2266,8 @@ pStub_Deserializer__isLocal(PyObject *_self, PyObject *_args,                 \
 }
 
 static PyObject *
-pStub_Deserializer__isRemote(PyObject *_self, PyObject *_args,                \
-  PyObject *_kwdict) {
+pStub_Deserializer__isRemote(PyObject *_self, PyObject *_args, PyObject       \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2294,14 +2294,14 @@ pStub_Deserializer__isRemote(PyObject *_self, PyObject *_args,                \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2324,8 +2324,8 @@ pStub_Deserializer__isRemote(PyObject *_self, PyObject *_args,                \
 }
 
 static PyObject *
-pStub_Deserializer__set_hooks(PyObject *_self, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_Deserializer__set_hooks(PyObject *_self, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2354,14 +2354,14 @@ pStub_Deserializer__set_hooks(PyObject *_self, PyObject *_args,               \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2383,8 +2383,8 @@ pStub_Deserializer__set_hooks(PyObject *_self, PyObject *_args,               \
 }
 
 static PyObject *
-pStub_Deserializer_unpackBool(PyObject *_self, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackBool(PyObject *_self, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2414,14 +2414,14 @@ pStub_Deserializer_unpackBool(PyObject *_self, PyObject *_args,               \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2444,8 +2444,8 @@ pStub_Deserializer_unpackBool(PyObject *_self, PyObject *_args,               \
 }
 
 static PyObject *
-pStub_Deserializer_unpackBoolArray(PyObject *_self, PyObject *_args,          \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackBoolArray(PyObject *_self, PyObject *_args, PyObject \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2488,22 +2488,22 @@ pStub_Deserializer_unpackBoolArray(PyObject *_self, PyObject *_args,          \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -2519,8 +2519,8 @@ pStub_Deserializer_unpackBoolArray(PyObject *_self, PyObject *_args,          \
 }
 
 static PyObject *
-pStub_Deserializer_unpackChar(PyObject *_self, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackChar(PyObject *_self, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2548,14 +2548,14 @@ pStub_Deserializer_unpackChar(PyObject *_self, PyObject *_args,               \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2578,8 +2578,8 @@ pStub_Deserializer_unpackChar(PyObject *_self, PyObject *_args,               \
 }
 
 static PyObject *
-pStub_Deserializer_unpackCharArray(PyObject *_self, PyObject *_args,          \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackCharArray(PyObject *_self, PyObject *_args, PyObject \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2622,22 +2622,22 @@ pStub_Deserializer_unpackCharArray(PyObject *_self, PyObject *_args,          \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -2653,8 +2653,8 @@ pStub_Deserializer_unpackCharArray(PyObject *_self, PyObject *_args,          \
 }
 
 static PyObject *
-pStub_Deserializer_unpackDcomplex(PyObject *_self, PyObject *_args,           \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackDcomplex(PyObject *_self, PyObject *_args, PyObject  \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2685,14 +2685,14 @@ pStub_Deserializer_unpackDcomplex(PyObject *_self, PyObject *_args,           \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2759,22 +2759,22 @@ pStub_Deserializer_unpackDcomplexArray(PyObject *_self, PyObject *_args,      \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -2790,8 +2790,8 @@ pStub_Deserializer_unpackDcomplexArray(PyObject *_self, PyObject *_args,      \
 }
 
 static PyObject *
-pStub_Deserializer_unpackDouble(PyObject *_self, PyObject *_args,             \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackDouble(PyObject *_self, PyObject *_args, PyObject    \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2819,14 +2819,14 @@ pStub_Deserializer_unpackDouble(PyObject *_self, PyObject *_args,             \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -2893,22 +2893,22 @@ pStub_Deserializer_unpackDoubleArray(PyObject *_self, PyObject *_args,        \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -2924,8 +2924,8 @@ pStub_Deserializer_unpackDoubleArray(PyObject *_self, PyObject *_args,        \
 }
 
 static PyObject *
-pStub_Deserializer_unpackFcomplex(PyObject *_self, PyObject *_args,           \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackFcomplex(PyObject *_self, PyObject *_args, PyObject  \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -2956,14 +2956,14 @@ pStub_Deserializer_unpackFcomplex(PyObject *_self, PyObject *_args,           \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -3030,22 +3030,22 @@ pStub_Deserializer_unpackFcomplexArray(PyObject *_self, PyObject *_args,      \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -3061,8 +3061,8 @@ pStub_Deserializer_unpackFcomplexArray(PyObject *_self, PyObject *_args,      \
 }
 
 static PyObject *
-pStub_Deserializer_unpackFloat(PyObject *_self, PyObject *_args,              \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackFloat(PyObject *_self, PyObject *_args, PyObject     \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -3090,14 +3090,14 @@ pStub_Deserializer_unpackFloat(PyObject *_self, PyObject *_args,              \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -3164,22 +3164,22 @@ pStub_Deserializer_unpackFloatArray(PyObject *_self, PyObject *_args,         \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -3224,22 +3224,22 @@ pStub_Deserializer_unpackGenericArray(PyObject *_self, PyObject *_args,       \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_BaseInterface__convert_generic_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -3255,8 +3255,8 @@ pStub_Deserializer_unpackGenericArray(PyObject *_self, PyObject *_args,       \
 }
 
 static PyObject *
-pStub_Deserializer_unpackInt(PyObject *_self, PyObject *_args,                \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackInt(PyObject *_self, PyObject *_args, PyObject       \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -3286,14 +3286,14 @@ pStub_Deserializer_unpackInt(PyObject *_self, PyObject *_args,                \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -3316,8 +3316,8 @@ pStub_Deserializer_unpackInt(PyObject *_self, PyObject *_args,                \
 }
 
 static PyObject *
-pStub_Deserializer_unpackIntArray(PyObject *_self, PyObject *_args,           \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackIntArray(PyObject *_self, PyObject *_args, PyObject  \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -3360,22 +3360,22 @@ pStub_Deserializer_unpackIntArray(PyObject *_self, PyObject *_args,           \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -3391,8 +3391,8 @@ pStub_Deserializer_unpackIntArray(PyObject *_self, PyObject *_args,           \
 }
 
 static PyObject *
-pStub_Deserializer_unpackLong(PyObject *_self, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackLong(PyObject *_self, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -3426,14 +3426,14 @@ pStub_Deserializer_unpackLong(PyObject *_self, PyObject *_args,               \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -3462,8 +3462,8 @@ pStub_Deserializer_unpackLong(PyObject *_self, PyObject *_args,               \
 }
 
 static PyObject *
-pStub_Deserializer_unpackLongArray(PyObject *_self, PyObject *_args,          \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackLongArray(PyObject *_self, PyObject *_args, PyObject \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -3506,22 +3506,22 @@ pStub_Deserializer_unpackLongArray(PyObject *_self, PyObject *_args,          \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -3537,8 +3537,8 @@ pStub_Deserializer_unpackLongArray(PyObject *_self, PyObject *_args,          \
 }
 
 static PyObject *
-pStub_Deserializer_unpackOpaque(PyObject *_self, PyObject *_args,             \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackOpaque(PyObject *_self, PyObject *_args, PyObject    \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -3566,14 +3566,14 @@ pStub_Deserializer_unpackOpaque(PyObject *_self, PyObject *_args,             \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -3640,22 +3640,22 @@ pStub_Deserializer_unpackOpaqueArray(PyObject *_self, PyObject *_args,        \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -3701,14 +3701,14 @@ pStub_Deserializer_unpackSerializable(PyObject *_self, PyObject *_args,       \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -3776,22 +3776,22 @@ pStub_Deserializer_unpackSerializableArray(PyObject *_self, PyObject *_args,  \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_io_Serializable__convert_sidl_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -3807,8 +3807,8 @@ pStub_Deserializer_unpackSerializableArray(PyObject *_self, PyObject *_args,  \
 }
 
 static PyObject *
-pStub_Deserializer_unpackString(PyObject *_self, PyObject *_args,             \
-  PyObject *_kwdict) {
+pStub_Deserializer_unpackString(PyObject *_self, PyObject *_args, PyObject    \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidl_io_Deserializer__object *_self_ior =
     ((struct sidl_io_Deserializer__object *)
@@ -3836,22 +3836,21 @@ pStub_Deserializer_unpackString(PyObject *_self, PyObject *_args,             \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "z",
           value);
-      }
-      free((void *)value);
+      free((void *)value);}
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -3911,22 +3910,22 @@ pStub_Deserializer_unpackStringArray(PyObject *_self, PyObject *_args,        \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "O&",
           (void *)sidl_python_clone_array, value);
+        sidl_python_deleteRef_array((struct sidl__array *)value);
       }
-      sidl_python_deleteRef_array((struct sidl__array *)value);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -3942,12 +3941,12 @@ pStub_Deserializer_unpackStringArray(PyObject *_self, PyObject *_args,        \
 }
 
 static int
-sidl_io_Deserializer_createCast(PyObject *self, PyObject *args,               \
-  PyObject *kwds) {
+sidl_io_Deserializer_createCast(PyObject *self, PyObject *args, PyObject      \
+  *kwds) {
   struct sidl_io_Deserializer__object *optarg = NULL;
   static char *_kwlist[] = { "sobj", NULL };
-  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "O&", _kwlist,          \
-    (void *)sidl_io_Deserializer__convert, &optarg);
+  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "O&", _kwlist, (void    \
+    *)sidl_io_Deserializer__convert, &optarg);
   if (_okay) {
     return sidl_Object_Init(
       (SPObject *)self,
@@ -4101,8 +4100,8 @@ RAISES\n\
     sidl.RuntimeException\n\
 "
    },
-  { "unpackDcomplexArray",                                                    \
-    (PyCFunction)pStub_Deserializer_unpackDcomplexArray,
+  { "unpackDcomplexArray", (                                                  \
+    PyCFunction)pStub_Deserializer_unpackDcomplexArray,
   (METH_VARARGS | METH_KEYWORDS),
 "\
 unpackDcomplexArray( in string key,\n\
@@ -4148,8 +4147,8 @@ RAISES\n\
     sidl.RuntimeException\n\
 "
    },
-  { "unpackFcomplexArray",                                                    \
-    (PyCFunction)pStub_Deserializer_unpackFcomplexArray,
+  { "unpackFcomplexArray", (                                                  \
+    PyCFunction)pStub_Deserializer_unpackFcomplexArray,
   (METH_VARARGS | METH_KEYWORDS),
 "\
 unpackFcomplexArray( in string key,\n\
@@ -4274,8 +4273,8 @@ RAISES\n\
     sidl.RuntimeException\n\
 "
    },
-  { "unpackSerializableArray",                                                \
-    (PyCFunction)pStub_Deserializer_unpackSerializableArray,
+  { "unpackSerializableArray", (                                              \
+    PyCFunction)pStub_Deserializer_unpackSerializableArray,
   (METH_VARARGS | METH_KEYWORDS),
 "\
 unpackSerializableArray( in string key,\n\
@@ -4573,28 +4572,28 @@ initDeserializer(void) {
 Standard interface for unpacking Babel types"
   );
   dict = PyModule_GetDict(module);
-  ExternalAPI[sidl_io_Deserializer__wrap_NUM] =                               \
-    (void*)sidl_io_Deserializer__wrap;
-  ExternalAPI[sidl_io_Deserializer__convert_NUM] =                            \
-    (void*)sidl_io_Deserializer__convert;
-  ExternalAPI[sidl_io_Deserializer__convert_python_array_NUM] =               \
-    (void*)sidl_io_Deserializer__convert_python_array;
-  ExternalAPI[sidl_io_Deserializer__convert_sidl_array_NUM] =                 \
-    (void*)sidl_io_Deserializer__convert_sidl_array;
-  ExternalAPI[sidl_io_Deserializer__weakRef_NUM] =                            \
-    (void*)sidl_io_Deserializer__weakRef;
-  ExternalAPI[sidl_io_Deserializer_deref_NUM] =                               \
-    (void*)sidl_io_Deserializer_deref;
-  ExternalAPI[sidl_io_Deserializer__newRef_NUM] =                             \
-    (void*)sidl_io_Deserializer__newRef;
-  ExternalAPI[sidl_io_Deserializer__addRef_NUM] =                             \
-    (void*)sidl_io_Deserializer__addRef;
-  ExternalAPI[sidl_io_Deserializer_PyType_NUM] =                              \
-    (void*)sidl_io_Deserializer_PyType;
-  ExternalAPI[sidl_io_Deserializer__connectI_NUM] =                           \
-    (void*)sidl_io_Deserializer__connectI;
-  ExternalAPI[sidl_io_Deserializer__rmicast_NUM] =                            \
-    (void*)sidl_io_Deserializer__rmicast;
+  ExternalAPI[sidl_io_Deserializer__wrap_NUM] = (                             \
+    void*)sidl_io_Deserializer__wrap;
+  ExternalAPI[sidl_io_Deserializer__convert_NUM] = (                          \
+    void*)sidl_io_Deserializer__convert;
+  ExternalAPI[sidl_io_Deserializer__convert_python_array_NUM] = (             \
+    void*)sidl_io_Deserializer__convert_python_array;
+  ExternalAPI[sidl_io_Deserializer__convert_sidl_array_NUM] = (               \
+    void*)sidl_io_Deserializer__convert_sidl_array;
+  ExternalAPI[sidl_io_Deserializer__weakRef_NUM] = (                          \
+    void*)sidl_io_Deserializer__weakRef;
+  ExternalAPI[sidl_io_Deserializer_deref_NUM] = (                             \
+    void*)sidl_io_Deserializer_deref;
+  ExternalAPI[sidl_io_Deserializer__newRef_NUM] = (                           \
+    void*)sidl_io_Deserializer__newRef;
+  ExternalAPI[sidl_io_Deserializer__addRef_NUM] = (                           \
+    void*)sidl_io_Deserializer__addRef;
+  ExternalAPI[sidl_io_Deserializer_PyType_NUM] = (                            \
+    void*)sidl_io_Deserializer_PyType;
+  ExternalAPI[sidl_io_Deserializer__connectI_NUM] = (                         \
+    void*)sidl_io_Deserializer__connectI;
+  ExternalAPI[sidl_io_Deserializer__rmicast_NUM] = (                          \
+    void*)sidl_io_Deserializer__rmicast;
   import_SIDLObjA();
   if (PyErr_Occurred()) {
     Py_FatalError("Error importing sidlObjA module.");
@@ -4613,17 +4612,17 @@ Standard interface for unpacking Babel types"
   sidl_BaseInterface__import();
   _sidl_io_DeserializerType.tp_base = sidl_BaseInterface_PyType();
   _sidl_io_DeserializerType.tp_bases = PyTuple_New(1);
-  PyTuple_SetItem(_sidl_io_DeserializerType.tp_bases,0,                       \
-    (PyObject *)sidl_BaseInterface_PyType());
+  PyTuple_SetItem(_sidl_io_DeserializerType.tp_bases,0, (PyObject             \
+    *)sidl_BaseInterface_PyType());
   if (PyType_Ready(&_sidl_io_DeserializerType) < 0) {
     PyErr_Print();
     fprintf(stderr, "PyType_Ready on sidl.io.Deserializer failed.\n");
     return;
   }
   Py_INCREF(&_sidl_io_DeserializerType);
-  PyDict_SetItemString(dict, "Deserializer",                                  \
-    (PyObject *)&_sidl_io_DeserializerType);
+  PyDict_SetItemString(dict, "Deserializer", (PyObject                        \
+    *)&_sidl_io_DeserializerType);
 
-  sidl_rmi_ConnectRegistry_registerConnect("sidl.io.Deserializer",            \
-    (void*)sidl_io_Deserializer__IHConnect, &throwaway_exception);
+  sidl_rmi_ConnectRegistry_registerConnect("sidl.io.Deserializer", (          \
+    void*)sidl_io_Deserializer__IHConnect, &throwaway_exception);
 }

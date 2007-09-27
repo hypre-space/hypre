@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_Simvocation.h
  * Symbol:        sidlx.rmi.Simvocation-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for sidlx.rmi.Simvocation
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -130,9 +130,11 @@ sidlx_rmi_Simvocation_getMethodName(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getMethodName)(
+  char* _result;
+  _result = (*self->d_epv->f_getMethodName)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -204,10 +206,12 @@ sidlx_rmi_Simvocation_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -228,10 +232,12 @@ sidlx_rmi_Simvocation_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -248,9 +254,11 @@ sidlx_rmi_Simvocation_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -270,9 +278,11 @@ sidlx_rmi_Simvocation_invokeMethod(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_invokeMethod)(
+  sidl_rmi_Response _result;
+  _result = (*self->d_epv->f_invokeMethod)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -290,9 +300,11 @@ sidlx_rmi_Simvocation_invokeNonblocking(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_invokeNonblocking)(
+  sidl_rmi_Ticket _result;
+  _result = (*self->d_epv->f_invokeNonblocking)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -978,9 +990,11 @@ sidlx_rmi_Simvocation__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -1014,9 +1028,11 @@ sidlx_rmi_Simvocation__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -1533,8 +1549,8 @@ sidlx_rmi_Simvocation__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidlx_rmi_Simvocation__object*
-sidlx_rmi_Simvocation__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidlx_rmi_Simvocation__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

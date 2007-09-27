@@ -2,7 +2,7 @@
  * File:          sidl_LangSpecificException.h
  * Symbol:        sidl.LangSpecificException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.LangSpecificException
@@ -103,8 +103,8 @@ sidl_LangSpecificException__create(sidl_BaseInterface* _ex);
  * RMI constructor function for the class.
  */
 sidl_LangSpecificException
-sidl_LangSpecificException__createRemote(const char * url,
-  sidl_BaseInterface *_ex);
+sidl_LangSpecificException__createRemote(const char * url, sidl_BaseInterface 
+  *_ex);
 
 
 /**
@@ -178,10 +178,12 @@ sidl_LangSpecificException_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -202,10 +204,12 @@ sidl_LangSpecificException_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -222,9 +226,11 @@ sidl_LangSpecificException_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -241,9 +247,11 @@ sidl_LangSpecificException_getNote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getNote)(
+  char* _result;
+  _result = (*self->d_epv->f_getNote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -282,9 +290,11 @@ sidl_LangSpecificException_getTrace(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getTrace)(
+  char* _result;
+  _result = (*self->d_epv->f_getTrace)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -431,9 +441,11 @@ sidl_LangSpecificException__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -467,9 +479,11 @@ sidl_LangSpecificException__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -986,8 +1000,8 @@ sidl_LangSpecificException__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_LangSpecificException__object*
-sidl_LangSpecificException__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_LangSpecificException__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

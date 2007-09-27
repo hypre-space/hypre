@@ -2,7 +2,7 @@
  * File:          sidl_DLL.h
  * Symbol:        sidl.DLL-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.DLL
@@ -154,12 +154,14 @@ sidl_DLL_loadLibrary(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_loadLibrary)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_loadLibrary)(
     self,
     uri,
     loadGlobally,
     loadLazy,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -178,9 +180,11 @@ sidl_DLL_getName(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getName)(
+  char* _result;
+  _result = (*self->d_epv->f_getName)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -197,9 +201,11 @@ sidl_DLL_isGlobal(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isGlobal)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isGlobal)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -216,9 +222,11 @@ sidl_DLL_isLazy(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isLazy)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isLazy)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -259,10 +267,12 @@ sidl_DLL_lookupSymbol(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_lookupSymbol)(
+  void* _result;
+  _result = (*self->d_epv->f_lookupSymbol)(
     self,
     linker_name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -281,10 +291,12 @@ sidl_DLL_createClass(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_createClass)(
+  sidl_BaseClass _result;
+  _result = (*self->d_epv->f_createClass)(
     self,
     sidl_name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -356,10 +368,12 @@ sidl_DLL_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -380,10 +394,12 @@ sidl_DLL_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -400,9 +416,11 @@ sidl_DLL_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -460,9 +478,11 @@ sidl_DLL__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -496,9 +516,11 @@ sidl_DLL__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -1015,8 +1037,8 @@ sidl_DLL__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_DLL__object*
-sidl_DLL__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_DLL__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }
