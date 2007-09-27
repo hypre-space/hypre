@@ -1,0 +1,101 @@
+# STUBJAVA dependencies.
+BiCGSTAB.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+BoomerAMG.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+CGNR.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+CoefficientAccess.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+ErrorHandler.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+Euclid.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+GMRES.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+HGMRES.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+HPCG.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+Hybrid.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+IJMatrixView.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+IJParCSRMatrix.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+IJParCSRVector.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+IJVectorView.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+IdentitySolver.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+MPICommunicator.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+MatrixVectorView.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+Operator.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+PCG.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+ParCSRDiagScale.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+ParaSails.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+Pilut.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+PreconditionedSolver.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+ProblemDefinition.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructDiagScale.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructGraph.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructGrid.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructMatrix.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructMatrixVectorView.java:                                                 \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructMatrixView.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructParCSRMatrix.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructParCSRVector.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructSplit.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructStencil.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructVector.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+SStructVectorView.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+Schwarz.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+Solver.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructDiagScale.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructGrid.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructJacobi.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructMatrix.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructMatrixView.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructPFMG.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructSMG.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructStencil.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructVector.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+StructVectorView.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+Vector.java: /home/painter/linear_solvers/babel/Interfaces.idl
+
+

@@ -1,0 +1,25 @@
+<?xml version="1.0" ?> 
+<scl>
+  <library uri="@@DIR@@/libbHYPREClient-J.so" scope="global" resolution="now" >
+  <class name="bHYPRE.MPICommunicator" desc="java" />
+  <class name="bHYPRE.StructStencil" desc="java" />
+  </library>
+  <library uri="@@DIR@@/libbHYPRE.so" scope="global" resolution="now" >
+  <class name="bHYPRE.MPICommunicator" desc="ior/impl" />
+  </library>
+  <library uri="@@DIR@@/libsidl.la" scope="global" resolution="now" >
+  <class name="sidl.BaseClass" desc="java" />
+  <class name="sidl.BaseClass" desc="ior/impl" />
+  </library>
+  <library uri="@@DIR@@/../../../src/mpiJava/lib/libmpijava.la" scope="global" resolution="now" >
+  <class name="mpi.Comm" desc="ior/impl" />
+  </library>
+</scl>
+
+<!-- note:
+ The Babel Users' Manual page "SCL Files for Dynamic Loading" says there should be a
+ class element for every one of our classes.  Unless this file is automatically geneated,
+ that is unreasonably many classes, and impossible to maintain.
+ Fortunately, everything seems to work if you just have a class
+ element for the first class which your Python program will try to load.
+-->

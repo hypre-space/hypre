@@ -25,11 +25,11 @@
 
 /* version for functions which return an int error flag */
 #define hypre_babel_exception_return_error(EX) \
-   EXIT:;{ hypre_error(HYPRE_ERROR_GENERIC); return HYPRE_ERROR_GENERIC; }
+   EXIT:;{ hypre_error(HYPRE_ERROR_GENERIC); printf("debugging error handler\n"); return HYPRE_ERROR_GENERIC; }
 
 /* version for functions which do not return an int error flag */
 #define hypre_babel_exception_no_return(EX) \
-   EXIT:;{ hypre_error(HYPRE_ERROR_GENERIC); }
+   EXIT:;{ printf("debugging error handler\n"); hypre_error(HYPRE_ERROR_GENERIC); }
 
 
 #endif
