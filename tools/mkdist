@@ -160,6 +160,7 @@ rmdir $HYPRE_DIR/src/linear_solvers
 
 # remove certain directories that should not appear in the release
 rm -fr $HYPRE_DIR/src/test/AUTOTEST
+rm -fr $HYPRE_DIR/src/babel/bHYPREClient-J
 
 # create the hypre-${VersionId}.tar file
 echo "creating $HYPRE_DIR.tar file ..."
