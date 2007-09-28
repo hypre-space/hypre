@@ -41,13 +41,19 @@ include ../config/Makefile.config
 ifeq ($(BUILD_PYTHON),1)
    BHYPRE_BABEL_PYTHON_DIR=bHYPREClient-P
 endif
+# The build process for the Java interface has environment variable requirements
+# which many people may not have satisfied, so we don't want to do it unless
+# requested.
+ifeq ($(BUILD_JAVA),1)
+   BHYPRE_BABEL_JAVA_DIR=bHYPREClient-J
+endif
 
 BHYPRE_BABEL_DIRS =\
  bHYPRE \
  bHYPREClient-C\
  bHYPREClient-F\
  bHYPREClient-CX\
- bHYPREClient-J\
+ $(BHYPRE_BABEL_JAVA_DIR)\
  $(BHYPRE_BABEL_PYTHON_DIR)
 
 HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl

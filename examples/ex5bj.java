@@ -62,7 +62,7 @@
 // ... you can "setenv SIDL_DEBUG_DLOPEN" to debug this, it helps a little but not much
 // ... the Python directory bHYPREClient-P is not needed unless you may also run Python
 //
-// In hypre directory: ./configure --with-babel --enable-shared --enable-debug
+// In hypre directory: ./configure --with-babel --enable-shared --enable-debug --enable-java
 // (... --enable-debug is optional, but prudent for the first time through!)
 // make
 // In babel/bHYPREClient-J/bHYPRE do: javac -g *.java  (again, -g is optional but prudent)

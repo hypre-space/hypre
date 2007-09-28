@@ -336,7 +336,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK LN_S SET_MAKE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXXFLAGS ac_ct_CXX CXXCPP FFLAGS ac_ct_F77 FLIBS FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR EXAMPLEDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_F77 LINK_CC LINK_CXX BUILD_F77_SHARED BUILD_CC_SHARED BUILD_CXX_SHARED SHARED_COMPILE_FLAG SHARED_BUILD_FLAG BUILD_PYTHON PYTHON HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LINKDIR HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE HYPRE_FEI_SRC_DIR HYPRE_FEI_BASE_DIR HYPRE_FEI_SUBDIRS HYPRE_FEI_SUPERLU_FILES HYPRE_FEI_HYPRE_FILES HYPRE_FEI_FEMLI_FILES MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK LN_S SET_MAKE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXXFLAGS ac_ct_CXX CXXCPP FFLAGS ac_ct_F77 FLIBS FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR EXAMPLEDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_F77 LINK_CC LINK_CXX BUILD_F77_SHARED BUILD_CC_SHARED BUILD_CXX_SHARED SHARED_COMPILE_FLAG SHARED_BUILD_FLAG BUILD_PYTHON PYTHON BUILD_JAVA HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LINKDIR HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE HYPRE_FEI_SRC_DIR HYPRE_FEI_BASE_DIR HYPRE_FEI_SUBDIRS HYPRE_FEI_SUPERLU_FILES HYPRE_FEI_HYPRE_FILES HYPRE_FEI_FEMLI_FILES MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -817,6 +817,10 @@ ac_env_FFLAGS_set=${FFLAGS+set}
 ac_env_FFLAGS_value=$FFLAGS
 ac_cv_env_FFLAGS_set=${FFLAGS+set}
 ac_cv_env_FFLAGS_value=$FFLAGS
+ac_env_FLIBS_set=${FLIBS+set}
+ac_env_FLIBS_value=$FLIBS
+ac_cv_env_FLIBS_set=${FLIBS+set}
+ac_cv_env_FLIBS_value=$FLIBS
 
 #
 # Report the --help message.
@@ -899,6 +903,8 @@ Optional Features:
                           Build interface to specified instance of Python
                           (turns on shared libraries, requires Babel; default
                           is NO).
+    --enable-java         Build interface to Java (turns on shared libraries,
+                          requires Babel; default is NO).
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1028,6 +1034,7 @@ Some influential environment variables:
   CXXCPP      C++ preprocessor
   F77         Fortran 77 compiler command
   FFLAGS      Fortran 77 compiler flags
+  FLIBS       Linker flags needed to link against F77 code
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -1722,6 +1729,22 @@ if test "${enable_python+set}" = set; then
  esac
 else
   casc_using_python=no
+
+fi;
+
+# Check whether --enable-java or --disable-java was given.
+if test "${enable_java+set}" = set; then
+  enableval="$enable_java"
+  case "${enableval}" in
+        yes) casc_using_java=yes
+             ;;
+    no | "") casc_using_java=no ;;
+          *) casc_using_java=yes
+             casc_using_shared=yes
+             ;;
+ esac
+else
+  casc_using_java=no
 
 fi;
 
@@ -5904,7 +5927,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5907:" \
+echo "$as_me:5930:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6053,6 +6076,7 @@ ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
+
 echo "$as_me:$LINENO: checking how to get verbose linking output from $F77" >&5
 echo $ECHO_N "checking how to get verbose linking output from $F77... $ECHO_C" >&6
 if test "${ac_cv_prog_f77_v+set}" = set; then
@@ -6107,7 +6131,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6110: \"$ac_link\") >&5
+(eval echo $as_me:6134: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6182,6 +6206,7 @@ rm -f conftest.err conftest.$ac_objext \
 fi
 echo "$as_me:$LINENO: result: $ac_cv_prog_f77_v" >&5
 echo "${ECHO_T}$ac_cv_prog_f77_v" >&6
+FLIBS_NOSORT=true
 echo "$as_me:$LINENO: checking for Fortran 77 libraries" >&5
 echo $ECHO_N "checking for Fortran 77 libraries... $ECHO_C" >&6
 if test "${ac_cv_flibs+set}" = set; then
@@ -6189,7 +6214,10 @@ if test "${ac_cv_flibs+set}" = set; then
 else
   if test "x$FLIBS" != "x"; then
   ac_cv_flibs="$FLIBS" # Let the user override the test.
+  FLIBS_NOSORT=true
+  echo $ECHO_N "(user override) $ECHO_C" >&6
 else
+  FLIBS_NOSORT=false
 
 ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
@@ -6208,7 +6236,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6211: \"$ac_link\") >&5
+(eval echo $as_me:6239: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6494,7 +6522,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6497: \"$ac_link\") >&5
+(eval echo $as_me:6525: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6572,7 +6600,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6575: \"$ac_link\") >&5
+(eval echo $as_me:6603: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -10303,6 +10331,12 @@ then
   PYTHON="${casc_python}"
 fi
 
+BUILD_JAVA=0
+if test "$casc_using_java" = "yes"
+then
+  BUILD_JAVA=1
+fi
+
 if test "$casc_using_insure" = "yes"
 then
    if test "$casc_using_fortran" = "yes"
@@ -10640,6 +10674,8 @@ then
 else
    HYPRE_LINKDIR="`pwd`/hypre"
 fi
+
+
 
 
 
@@ -11392,6 +11428,7 @@ s,@SHARED_COMPILE_FLAG@,$SHARED_COMPILE_FLAG,;t t
 s,@SHARED_BUILD_FLAG@,$SHARED_BUILD_FLAG,;t t
 s,@BUILD_PYTHON@,$BUILD_PYTHON,;t t
 s,@PYTHON@,$PYTHON,;t t
+s,@BUILD_JAVA@,$BUILD_JAVA,;t t
 s,@HYPRE_INSTALLDIR@,$HYPRE_INSTALLDIR,;t t
 s,@HYPRE_LIBINSTALL@,$HYPRE_LIBINSTALL,;t t
 s,@HYPRE_INCINSTALL@,$HYPRE_INCINSTALL,;t t

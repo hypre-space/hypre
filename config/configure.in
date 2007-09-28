@@ -195,6 +195,20 @@ AC_ARG_ENABLE(python,
 [casc_using_python=no]
 )
 
+AC_ARG_ENABLE(java,
+  AS_HELP_STRING([  --enable-java],
+                 [ Build interface to Java (turns on shared libraries, requires Babel; default is NO).]),
+[case "${enableval}" in
+        yes) casc_using_java=yes
+             ;;
+    no | "") casc_using_java=no ;;
+          *) casc_using_java=yes
+             casc_using_shared=yes
+             ;;
+ esac],
+[casc_using_java=no]
+)
+
 dnl *********************************************************************
 dnl * Determine if user provided C compiler or flags
 dnl *********************************************************************
@@ -1100,7 +1114,7 @@ LINK_CXX="${CXX}"
 HYPRE_LIBSUFFIX=".a"
 
 dnl *********************************************************************
-dnl * Set flags if needed to enable shared libraries and Python
+dnl * Set flags if needed to enable shared libraries and Python, Java
 dnl *********************************************************************
 if test "$casc_using_shared" = "yes"
 then
@@ -1130,6 +1144,12 @@ if test "$casc_using_python" = "yes"
 then
   BUILD_PYTHON=1
   PYTHON="${casc_python}"
+fi
+
+BUILD_JAVA=0
+if test "$casc_using_java" = "yes"
+then
+  BUILD_JAVA=1
 fi
 
 dnl *********************************************************************
@@ -1291,6 +1311,8 @@ AC_SUBST(SHARED_BUILD_FLAG)
 
 AC_SUBST(BUILD_PYTHON)
 AC_SUBST(PYTHON)
+
+AC_SUBST(BUILD_JAVA)
 
 dnl *********************************************************************
 dnl * Installation Directories
