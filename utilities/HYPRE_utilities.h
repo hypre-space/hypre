@@ -84,6 +84,12 @@ int HYPRE_GetErrorArg();
 /* Describe the given error flag in the given string */
 void HYPRE_DescribeError(int hypre_ierr, char *descr);
 
+/* Clears the hypre error flag */
+int HYPRE_ClearAllErrors();
+
+/* Clears the given error code from the hypre error flag */
+int HYPRE_ClearError(int hypre_error_code);
+
 #ifdef __cplusplus
 }
 #endif

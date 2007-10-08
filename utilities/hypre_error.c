@@ -74,3 +74,16 @@ int HYPRE_GetErrorArg()
 {
    return (hypre_error_flag>>3 & 31);
 }
+
+int HYPRE_ClearAllErrors()
+{
+   hypre_error_flag = 0;
+   return (hypre_error_flag != 0);
+}
+
+int HYPRE_ClearError(int hypre_error_code)
+{
+   int tmp;
+   hypre_error_flag &= ~hypre_error_code;
+   return (hypre_error_flag & hypre_error_code);
+}
