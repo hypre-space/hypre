@@ -1564,9 +1564,9 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
 
 int HYPRE_LSI_BlockP::computeBlockInfo()
 {
-   int      mypid, nprocs, start_row, end_row, irow;
-   int      j, row_size, *col_ind, *disp_array;
-   int      field_id, jcol, zero_diag;
+   int      mypid, nprocs, start_row, end_row, irow, nblks, *elem_blk_ids;
+   int      j, row_size, *col_ind, *disp_array, interleave, lumping, elemDOF;
+   int      field_id, jcol, zero_diag, nElems, nNodes, nEqns;
    double   *col_val;
    MPI_Comm mpi_comm;
 
@@ -1622,7 +1622,15 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
    }
    else if ( block1FieldID_ == -7 )
    {
-      P22Size_ = block2FieldID_; 
+      nblks = lookup_->getNumElemBlocks();
+      elem_blk_ids = (int *) lookup_->getElemBlockIDs();
+      P22Size_ = 0;
+      for ( irow = 0; irow < nblks; irow++ )
+      {
+         lookup_->getElemBlockInfo(elem_blk_ids[irow], interleave, lumping, 
+                                   elemDOF, nElems, nNodes, nEqns);
+         P22Size_ += nElems;
+      }
    }
    else
    {
@@ -1678,7 +1686,7 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
 
    MPI_Allreduce(&P22Size_, &P22GSize_, 1, MPI_INT, MPI_SUM, mpi_comm);
 
-   if ( outputLevel_ > 0 )
+   if (outputLevel_ > 0)
    {
       if ( P22GSize_ == 0 && mypid == 0 )
          printf("computeBlockInfo WARNING : P22Size = 0 on all processors.\n");
@@ -2028,7 +2036,7 @@ int HYPRE_LSI_BlockP::buildBlocks()
 int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
                                   HYPRE_LSI_BLOCKP_PARAMS param_ptr)
 {
-   int                i, *nsweeps, *relaxType;
+   int                i, nprocs, *nsweeps, *relaxType;
    char               **targv;
 #ifdef HAVE_MLI
    char               paramString[100];
@@ -2042,6 +2050,7 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
 
    HYPRE_IJMatrixGetObject( Amat, (void **) &Amat_csr );
    HYPRE_ParCSRMatrixGetComm( Amat_csr, &mpi_comm );
+   MPI_Comm_size(mpi_comm, &nprocs);
    precon = NULL;
 
    //------------------------------------------------------------------
@@ -2075,6 +2084,12 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           relaxType = hypre_CTAlloc(int,4);
           for ( i = 0; i < 4; i++ ) relaxType[i] = param_ptr.AMGRelaxType_;
           HYPRE_BoomerAMGSetGridRelaxType(*precon, relaxType);
+          //double relax_wt[25];
+          //if (nprocs > 1)
+          //{
+          //   for ( i = 0; i < 25; i++ ) relax_wt[i] = -10.0;
+          //   HYPRE_BoomerAMGSetRelaxOmega(*precon, relax_wt);
+          //}
           break;
       case 4 :
           HYPRE_ParCSRPilutCreate( mpi_comm, precon );
@@ -2156,7 +2171,7 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
                                   HYPRE_Solver precon, 
                                   HYPRE_LSI_BLOCKP_PARAMS param_ptr)
 {
-   int                i, *nsweeps, *relaxType;
+   int                i, nprocs, *nsweeps, *relaxType;
    MPI_Comm           mpi_comm;
    HYPRE_ParCSRMatrix Amat_csr;
    HYPRE_ParVector    f_csr, x_csr;
@@ -2169,6 +2184,7 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
    HYPRE_IJVectorGetObject( fvec, (void **) &f_csr );
    HYPRE_IJVectorGetObject( xvec, (void **) &x_csr );
    HYPRE_ParCSRMatrixGetComm( Amat_csr, &mpi_comm );
+   MPI_Comm_size(mpi_comm, &nprocs);
 
    //------------------------------------------------------------------
    // create solver context
@@ -2233,7 +2249,7 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
 
       case 1 :
           HYPRE_ParCSRGMRESCreate(mpi_comm, solver);
-          HYPRE_ParCSRGMRESSetMaxIter(*solver, param_ptr.MaxIter_ );
+          HYPRE_ParCSRGMRESSetMaxIter(*solver, param_ptr.MaxIter_);
           HYPRE_ParCSRGMRESSetTol(*solver, param_ptr.Tol_);
           HYPRE_ParCSRGMRESSetLogging(*solver, outputLevel_);
           HYPRE_ParCSRGMRESSetKDim(*solver, 50);
@@ -2287,7 +2303,7 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
 
       case 2 :
           HYPRE_BoomerAMGCreate(solver);
-          HYPRE_BoomerAMGSetMaxIter(*solver, 1);
+          HYPRE_BoomerAMGSetMaxIter(*solver, param_ptr.MaxIter_);
           HYPRE_BoomerAMGSetCycleType(*solver, 1);
           HYPRE_BoomerAMGSetTol(*solver, 1.0e-20);
           HYPRE_BoomerAMGSetPrintLevel(*solver, outputLevel_);
@@ -2303,8 +2319,14 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
           relaxType = hypre_CTAlloc(int,4);
           for ( i = 0; i < 4; i++ ) relaxType[i] = param_ptr.AMGRelaxType_;
           HYPRE_BoomerAMGSetGridRelaxType(*solver, relaxType);
-          HYPRE_BoomerAMGSetup(*solver, Amat_csr, f_csr, x_csr);
+          //double relax_wt[25];
+          //if (nprocs > 1)
+          //{
+          //   for ( i = 0; i < 25; i++ ) relax_wt[i] = -10.0;
+          //   HYPRE_BoomerAMGSetRelaxOmega(*solver, relax_wt);
+          //}
           precon = NULL;
+          HYPRE_BoomerAMGSetup(*solver, Amat_csr, f_csr, x_csr);
           break;
 
       case 3 :
