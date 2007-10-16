@@ -157,7 +157,7 @@ void insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , int *IN_marker , int *no
 int alt_insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , hypre_ParCSRCommPkg *extend_comm_pkg , int *IN_marker , int full_off_procNodes , int *OUT_marker );
 int hypre_ParCSRFindExtendCommPkg ( hypre_ParCSRMatrix *A , int newoff , int *found , hypre_ParCSRCommPkg **extend_comm_pkg );
 void hypre_ParCSRCommExtendA ( hypre_ParCSRMatrix *A , int newoff , int *found , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts , int **p_node_add );
-int ssort ( int *data , int n );
+int hypre_ssort ( int *data , int n );
 int index_of_minimum ( int *data , int n );
 void swap_int ( int *data , int a , int b );
 void initialize_vecs ( int diag_n , int offd_n , int *diag_ftc , int *offd_ftc , int *diag_pm , int *offd_pm , int *tmp_CF );

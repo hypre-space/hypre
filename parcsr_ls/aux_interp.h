@@ -38,7 +38,7 @@ void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, int *IN_marker,
 		      int full_off_procNodes, int num_procs,
 		      int *OUT_marker);
 
-int ssort(int *data, int n);
+int hypre_ssort(int *data, int n);
 int index_of_minimum(int *data, int n);
 void swap_int(int *data, int a, int b);
 int new_offd_nodes(int **found, int A_ext_rows, int *A_ext_i, int *A_ext_j, 

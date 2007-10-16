@@ -412,7 +412,7 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
 	  }
       /* Sort new nodes at end */
       if(proc_found < index - 1)
-	ssort(&new_map[index - (index-proc_found)],index-proc_found);
+	hypre_ssort(&new_map[index - (index-proc_found)],index-proc_found);
       k++;
       i++;
     }
@@ -627,7 +627,7 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
 #endif
 
 /* sort for non-ordered arrays */
-int ssort(int *data, int n)
+int hypre_ssort(int *data, int n)
 {
   int i,si;               
   int change = 0;
@@ -644,7 +644,7 @@ int ssort(int *data, int n)
   return change;
 }
 
-/* Auxilary function for ssort */
+/* Auxilary function for hypre_ssort */
 int index_of_minimum(int *data, int n)
 {
   int answer;

@@ -1035,7 +1035,7 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)
@@ -1880,7 +1880,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)
@@ -2952,7 +2952,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)
@@ -3957,7 +3957,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)
@@ -4969,7 +4969,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)
