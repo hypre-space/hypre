@@ -67,9 +67,19 @@ hypre_SStructKrylovFree( char *ptr )
 void *
 hypre_SStructKrylovCreateVector( void *vvector )
 {
-   hypre_SStructVector *vector = vvector;
-   hypre_SStructVector *new_vector;
-   int                  object_type;
+   hypre_SStructVector  *vector = vvector;
+   hypre_SStructVector  *new_vector;
+   int                   object_type;
+
+   int                   nparts= hypre_SStructVectorNParts(vector);
+   hypre_SStructPVector *pvector;
+   hypre_StructVector   *svector;
+   hypre_SStructPVector *new_pvector;
+   hypre_StructVector   *new_svector;
+   int                  *num_ghost;
+   
+   int    part;
+   int    nvars, var;
 
    object_type= hypre_SStructVectorObjectType(vector);
 
@@ -77,6 +87,26 @@ hypre_SStructKrylovCreateVector( void *vvector )
                              hypre_SStructVectorGrid(vector),
                              &new_vector);
    HYPRE_SStructVectorSetObjectType(new_vector, object_type);
+
+   if (object_type == HYPRE_SSTRUCT || object_type == HYPRE_STRUCT)
+   {
+      for (part= 0; part< nparts; part++)
+      {
+         pvector    = hypre_SStructVectorPVector(vector, part);
+         new_pvector= hypre_SStructVectorPVector(new_vector, part);
+         nvars      = hypre_SStructPVectorNVars(pvector);
+
+         for (var= 0; var< nvars; var++)
+         {
+            svector= hypre_SStructPVectorSVector(pvector, var);
+            num_ghost= hypre_StructVectorNumGhost(svector);
+
+            new_svector= hypre_SStructPVectorSVector(new_pvector, var);
+            hypre_StructVectorSetNumGhost(new_svector, num_ghost);
+         }
+      }
+   }
+
    HYPRE_SStructVectorInitialize(new_vector);
    HYPRE_SStructVectorAssemble(new_vector);
 
@@ -90,9 +120,20 @@ hypre_SStructKrylovCreateVector( void *vvector )
 void *
 hypre_SStructKrylovCreateVectorArray(int n, void *vvector )
 {
-   hypre_SStructVector *vector = vvector;
-   hypre_SStructVector **new_vector;
-   int                  object_type;
+   hypre_SStructVector  *vector = vvector;
+   hypre_SStructVector  **new_vector;
+   int                   object_type;
+
+   int                   nparts= hypre_SStructVectorNParts(vector);
+   hypre_SStructPVector *pvector;
+   hypre_StructVector   *svector;
+   hypre_SStructPVector *new_pvector;
+   hypre_StructVector   *new_svector;
+   int                  *num_ghost;
+   
+   int    part;
+   int    nvars, var;
+
    int i;
 
    object_type= hypre_SStructVectorObjectType(vector);
@@ -104,6 +145,26 @@ hypre_SStructKrylovCreateVectorArray(int n, void *vvector )
                                 hypre_SStructVectorGrid(vector),
                                 &new_vector[i]);
       HYPRE_SStructVectorSetObjectType(new_vector[i], object_type);
+
+      if (object_type == HYPRE_SSTRUCT || object_type == HYPRE_STRUCT)
+      {
+         for (part= 0; part< nparts; part++)
+         {
+            pvector    = hypre_SStructVectorPVector(vector, part);
+            new_pvector= hypre_SStructVectorPVector(new_vector[i], part);
+            nvars      = hypre_SStructPVectorNVars(pvector);
+
+            for (var= 0; var< nvars; var++)
+            {
+               svector= hypre_SStructPVectorSVector(pvector, var);
+               num_ghost= hypre_StructVectorNumGhost(svector);
+
+               new_svector= hypre_SStructPVectorSVector(new_pvector, var);
+               hypre_StructVectorSetNumGhost(new_svector, num_ghost);
+            }
+         }
+      }
+
       HYPRE_SStructVectorInitialize(new_vector[i]);
       HYPRE_SStructVectorAssemble(new_vector[i]);
    }
