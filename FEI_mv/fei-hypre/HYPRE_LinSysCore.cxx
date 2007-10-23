@@ -264,6 +264,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amgSchwarzDomainType_ = 2;  // domain through agglomeration
    amgUseGSMG_         = 0;
    amgGSMGNSamples_    = 0;
+   amgAggLevels_       = 0;
    for (int i = 0; i < 25; i++) amgRelaxWeight_[i] = 1.0; 
    for (int j = 0; j < 25; j++) amgRelaxOmega_[j] = 1.0; 
 
