@@ -1341,6 +1341,8 @@ main( int   argc,
       the opportunity to IJMatrixAddTo before a IJMatrixAssemble. */
 
 
+   if (build_matrix_type > -1)
+   {
        ierr = HYPRE_IJMatrixInitialize( ij_A );
 
        /* Loop through all locally stored rows and insert them into ij_matrix */
@@ -1366,11 +1368,11 @@ main( int   argc,
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
 
-   if (build_matrix_type > -1)
      ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
    ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
    parcsr_A = (HYPRE_ParCSRMatrix) object;
+   }
 
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
