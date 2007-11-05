@@ -1113,7 +1113,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,distribute,P_marker,P_marker_offd,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
+#define HYPRE_SMP_PRIVATE i,j,jl,i1,jj,ns,ne,size,rest,P_marker,jj_counter,jj_counter_offd
 #include "../utilities/hypre_smp_forloop.h"
    for (jl = 0; jl < num_threads; jl++)
    {
