@@ -1705,11 +1705,11 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
 
          hypre_BoxLoop1Begin(loop_size,
                              box, imin, unit_stride, datai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
-#include "hypre_box_smp_forloop.h"
          maxindex = hypre_BoxIndexRank( box, imin );
          maxvalue = data[maxindex];
          hypre_CopyIndex( imin, max_xyz_index );
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
          hypre_BoxLoop1For(loopi, loopj, loopk, datai)
             {
                if ( data[datai] > maxvalue )
