@@ -140,13 +140,13 @@ hypre_CSRMatrixMatvec( double           alpha,
     * y += A*x
     *-----------------------------------------------------------------*/
 
-#define HYPRE_SMP_PRIVATE i,jj
-#include "../utilities/hypre_smp_forloop.h"
-
 /* use rownnz pointer to do the A*x multiplication  when num_rownnz is smaller than num_rows */
 
    if (num_rownnz < xpar*(num_rows))
    {
+#define HYPRE_SMP_PRIVATE i,jj,m,tempx
+#include "../utilities/hypre_smp_forloop.h"
+
       for (i = 0; i < num_rownnz; i++)
       {
          m = A_rownnz[i];
@@ -177,6 +177,8 @@ hypre_CSRMatrixMatvec( double           alpha,
    }
    else
    {
+#define HYPRE_SMP_PRIVATE i,jj,temp
+#include "../utilities/hypre_smp_forloop.h"
       for (i = 0; i < num_rows; i++)
       {
          if ( num_vectors==1 )
