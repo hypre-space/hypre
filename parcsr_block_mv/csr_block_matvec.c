@@ -116,7 +116,7 @@ hypre_CSRBlockMatrixMatvec(double alpha, hypre_CSRBlockMatrix *A,
     * y += A*x
     *-----------------------------------------------------------------*/
 
-#define HYPRE_SMP_PRIVATE i,jj
+#define HYPRE_SMP_PRIVATE i,jj,b1,b2,temp
 #include "../utilities/hypre_smp_forloop.h"
 
    for (i = 0; i < num_rows; i++)
@@ -245,7 +245,7 @@ hypre_CSRBlockMatrixMatvecT( double               alpha,
     * y += A^T*x
     *-----------------------------------------------------------------*/
  
-#define HYPRE_SMP_PRIVATE i, i1,jj,j,ns,ne,size,rest
+#define HYPRE_SMP_PRIVATE i, jj,j, b1, b2
 #include "../utilities/hypre_smp_forloop.h"
     
    for (i = 0; i < num_rows; i++)

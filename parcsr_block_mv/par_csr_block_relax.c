@@ -278,7 +278,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
          if (relax_points == 0)
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res
+#define HYPRE_SMP_PRIVATE i,ii,jj,res_vec
 #include "../utilities/hypre_smp_forloop.h"
             for (i = 0; i < n; i++)
             {
@@ -328,7 +328,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
          
          else
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res
+#define HYPRE_SMP_PRIVATE i,ii,jj,res_vec
 #include "../utilities/hypre_smp_forloop.h"
             for (i = 0; i < n; i++)
             {
@@ -460,7 +460,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 #include "../utilities/hypre_smp_forloop.h"
                   for (i = 0; i < n; i++)
                      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
 #include "../utilities/hypre_smp_forloop.h"
                   for (j = 0; j < num_threads; j++)
                   {
@@ -580,7 +580,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 #include "../utilities/hypre_smp_forloop.h"
                   for (i = 0; i < n; i++)
                      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
 #include "../utilities/hypre_smp_forloop.h"
                   for (j = 0; j < num_threads; j++)
                   {
@@ -718,7 +718,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 #include "../utilities/hypre_smp_forloop.h"
                   for (i = 0; i < n; i++)
                      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
 #include "../utilities/hypre_smp_forloop.h"
                   for (j = 0; j < num_threads; j++)
                   {
@@ -860,7 +860,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 #include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
 #include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
@@ -1087,7 +1087,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 #include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
 #include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
@@ -1302,7 +1302,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 #include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
 #include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
@@ -1544,7 +1544,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 #include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
 #include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
@@ -1804,7 +1804,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 #include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
 #include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
