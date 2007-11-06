@@ -616,7 +616,7 @@ int hypre_BoomerAMGSetNumPaths ( void *data , int num_paths );
 int hypre_BoomerAMGSetAggNumLevels ( void *data , int agg_num_levels );
 int hypre_BoomerAMGSetNumCRRelaxSteps ( void *data , int num_CR_relax_steps );
 int hypre_BoomerAMGSetCRRate ( void *data , double CR_rate );
-int hypre_BoomerAMGSetCRSytongTh ( void *data , double CR_strong_th );
+int hypre_BoomerAMGSetCRStrongTh ( void *data , double CR_strong_th );
 int hypre_BoomerAMGSetISType ( void *data , int IS_type );
 int hypre_BoomerAMGSetCRUseCG ( void *data , int CR_use_CG );
 int hypre_BoomerAMGSetCGCIts ( void *data , int its );
