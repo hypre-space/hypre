@@ -1044,6 +1044,13 @@ int HYPRE_EuclidSetParams(HYPRE_Solver solver,
  **/
 int HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver, char *filename);
 
+
+int HYPRE_EuclidSetLevel(HYPRE_Solver solver, int level);
+
+int HYPRE_EuclidSetDropTol(HYPRE_Solver solver, double drop_tol);
+
+int HYPRE_EuclidSetMaxNzPerRow(HYPRE_Solver solver, int max_nz_per_row);
+
 /*@}*/
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

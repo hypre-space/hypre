@@ -283,7 +283,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
            resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
         }
 
-        conv_factor = resid_nrm / old_resid;
+        if (old_resid) conv_factor = resid_nrm / old_resid;
+        else conv_factor = resid_nrm;
         if (rhs_norm)
         {
            relative_resid = resid_nrm / rhs_norm;
@@ -320,7 +321,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   if (cycle_count > 0 && tol >= 0.) 
+   if (cycle_count > 0 && tol >= 0. && resid_nrm_init) 
      conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/(double) cycle_count));
    else
      conv_factor = 1.;

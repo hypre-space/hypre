@@ -353,3 +353,36 @@ HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver,
   END_FUNC_VAL(0)
 }
 
+int
+HYPRE_EuclidSetLevel(HYPRE_Solver solver, 
+				int level)
+{
+  char *str_level;
+  START_FUNC_DH
+  sprintf(str_level,"%d",level);
+  Parser_dhInsert(parser_dh, "-level", str_level); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetDropTol(HYPRE_Solver solver, 
+				double drop_tol)
+{
+  char *str_drop_tol;
+  START_FUNC_DH
+  sprintf(str_drop_tol,"%f",drop_tol);
+  Parser_dhInsert(parser_dh, "-ilut", str_drop_tol); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetMaxNzPerRow(HYPRE_Solver solver, 
+				int max_nz_per_row)
+{
+  char *str_max_nz_per_row;
+  START_FUNC_DH
+  sprintf(str_max_nz_per_row,"%d",max_nz_per_row);
+  Parser_dhInsert(parser_dh, "-maxNzPerRow", str_max_nz_per_row); 
+  HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}

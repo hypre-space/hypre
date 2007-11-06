@@ -888,7 +888,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
       printf( "  Relaxation Parameters:\n");
       printf( "   Visiting Grid:                     down   up  coarse\n");
-      printf( "            Number of partial sweeps: %4d   %2d  %4d \n",
+      printf( "            Number of sweeps: %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],num_grid_sweeps[3]);
       printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",
@@ -1028,7 +1028,7 @@ void    *data;
       printf( "  Relaxation Parameters:\n");
       printf( "   Visiting Grid:                     down   up  coarse\n");
       printf( "   Visiting Grid:                     down   up  coarse\n");
-      printf( "            Number of partial sweeps: %4d   %2d  %4d \n",
+      printf( "            Number of sweeps: %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],num_grid_sweeps[3]);
       printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",

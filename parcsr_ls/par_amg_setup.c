@@ -1985,6 +1985,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_EuclidCreate(comm, &smoother[j]);
          if (euclidfile)
             HYPRE_EuclidSetParamsFromFile(smoother[j],euclidfile); 
+         if (nlevel)
+            HYPRE_EuclidSetLevel(smoother[j],nlevel); 
+         else
+            HYPRE_EuclidSetLevel(smoother[j],0); 
+         if (drop_tol)
+            HYPRE_EuclidSetDropTol(smoother[j],drop_tol); 
+         if (max_nz_per_row)
+            HYPRE_EuclidSetMaxNzPerRow(smoother[j],max_nz_per_row); 
          HYPRE_EuclidSetup(smoother[j],
                         (HYPRE_ParCSRMatrix) A_array[j],
                         (HYPRE_ParVector) F_array[j],

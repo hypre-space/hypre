@@ -147,12 +147,15 @@ hypre_BoomerAMGCreate()
    smooth_num_levels = 0;
    smooth_type = 6;
 
-   level = 1;
-   sym = 0;
+   /*level = 1;*/
+   level = 0;
+   sym = 1;
    thresh = 0.1;
    filter = 0.05;
-   drop_tol = 0.0001;
-   max_nz_per_row = 20;
+   drop_tol = 0.0;
+   max_nz_per_row = 0;
+   /*drop_tol = 0.0001;
+   max_nz_per_row = 20;*/
    euclidfile = NULL;
 
    /* solve params */
