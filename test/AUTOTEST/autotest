@@ -45,10 +45,13 @@ perform_test()
   then
      if [ "${HYPRE_REMOTE_DIR}" != "${HYPRE_AUTOTEST_EXECUTE_DIR}" ]
      then
+        echo "deleting old local AUTOTEST directory...."
         rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers
+        echo "copying new source...."
         cp -fpr ${HYPRE_AUTOTEST_EXECUTE_DIR}/linear_solvers ${HYPRE_REMOTE_DIR}
      fi
      cd ${HYPRE_REMOTE_DIR}
+     echo "Begin local tests...."
      echo "Autotest Started" > "autotest_start"
      [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT}
@@ -57,6 +60,7 @@ perform_test()
      export HYPRE_RUNTEST_OPTS
      linear_solvers/test/AUTOTEST/autotest_test \
          ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE}
+     echo "End local tests...."
      echo "Autotest Done" > "autotest_done"
 
 #=============================================================================
@@ -68,7 +72,7 @@ perform_test()
 #     completed.
 #=============================================================================
   else
-    echo "deleting old AUTOTEST directory...."
+    echo "deleting old remote AUTOTEST directory...."
     ssh ${HYPRE_COMPILE_MACHINE} "\
     (/bin/sh -c \"\
         rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers;\"\
@@ -77,7 +81,7 @@ perform_test()
     echo "copying new source...."
     cp -fpr linear_solvers ${HYPRE_REMOTE_DIR}
 
-    echo "Begin running remote tests...."
+    echo "Begin remote tests...."
     ssh -f ${HYPRE_COMPILE_MACHINE} "\
     (/bin/sh -c \"\
       cd ${HYPRE_REMOTE_DIR};\
@@ -93,8 +97,8 @@ perform_test()
       chmod -fR a+rX,ug+w,o-w linear_solvers;\
       chgrp -fR hypre linear_solvers\"\
     )" 
+    echo "End remote tests...."
   fi
-  echo "returning to autotest...."
 }
 
 
