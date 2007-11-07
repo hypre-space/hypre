@@ -83,7 +83,6 @@ int HYPRE_ClearAllErrors()
 
 int HYPRE_ClearError(int hypre_error_code)
 {
-   int tmp;
    hypre_error_flag &= ~hypre_error_code;
    return (hypre_error_flag & hypre_error_code);
 }
