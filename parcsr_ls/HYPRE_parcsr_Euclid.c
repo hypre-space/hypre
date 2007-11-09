@@ -365,13 +365,46 @@ HYPRE_EuclidSetLevel(HYPRE_Solver solver,
 }
 
 int
-HYPRE_EuclidSetDropTol(HYPRE_Solver solver, 
-				double drop_tol)
+HYPRE_EuclidSetBJ(HYPRE_Solver solver, 
+				int bj)
 {
-  char *str_drop_tol;
+  char *str_bj;
   START_FUNC_DH
-  sprintf(str_drop_tol,"%f",drop_tol);
-  Parser_dhInsert(parser_dh, "-ilut", str_drop_tol); HYPRE_EUCLID_ERRCHKA;
+  sprintf(str_bj,"%d",bj);
+  Parser_dhInsert(parser_dh, "-bj", str_bj); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetStats(HYPRE_Solver solver, 
+				int eu_stats)
+{
+  char *str_eu_stats;
+  START_FUNC_DH
+  sprintf(str_eu_stats,"%d",eu_stats);
+  Parser_dhInsert(parser_dh, "-eu_stats", str_eu_stats); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetMem(HYPRE_Solver solver, 
+				int eu_mem)
+{
+  char *str_eu_mem;
+  START_FUNC_DH
+  sprintf(str_eu_mem,"%d",eu_mem);
+  Parser_dhInsert(parser_dh, "-eu_mem", str_eu_mem); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetILUT(HYPRE_Solver solver, 
+				double ilut)
+{
+  char *str_ilut;
+  START_FUNC_DH
+  sprintf(str_ilut,"%f",ilut);
+  Parser_dhInsert(parser_dh, "-ilut", str_ilut); HYPRE_EUCLID_ERRCHKA;
   END_FUNC_VAL(0)
 }
 
@@ -383,6 +416,30 @@ HYPRE_EuclidSetMaxNzPerRow(HYPRE_Solver solver,
   START_FUNC_DH
   sprintf(str_max_nz_per_row,"%d",max_nz_per_row);
   Parser_dhInsert(parser_dh, "-maxNzPerRow", str_max_nz_per_row); 
+  HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetSparseA(HYPRE_Solver solver, 
+				double sparse_A)
+{
+  char *str_sparse_A;
+  START_FUNC_DH
+  sprintf(str_sparse_A,"%f",sparse_A);
+  Parser_dhInsert(parser_dh, "-sparseA", str_sparse_A); 
+  HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetRowScale(HYPRE_Solver solver, 
+				int row_scale)
+{
+  char *str_row_scale;
+  START_FUNC_DH
+  sprintf(str_row_scale,"%d",row_scale);
+  Parser_dhInsert(parser_dh, "-rowScale", str_row_scale); 
   HYPRE_EUCLID_ERRCHKA;
   END_FUNC_VAL(0)
 }

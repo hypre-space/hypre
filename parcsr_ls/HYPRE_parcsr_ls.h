@@ -1045,10 +1045,54 @@ int HYPRE_EuclidSetParams(HYPRE_Solver solver,
 int HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver, char *filename);
 
 
+/**
+ * Set level k for ILU(k) factorization, default: 1
+ **/
 int HYPRE_EuclidSetLevel(HYPRE_Solver solver, int level);
 
-int HYPRE_EuclidSetDropTol(HYPRE_Solver solver, double drop_tol);
+/**
+ * Use block Jacobi ILU preconditioning instead of PILU
+ **/
+int HYPRE_EuclidSetBJ(HYPRE_Solver solver, int bj);
 
+/**
+ * if eu_stats not equal 0, a summary of runtime settings and 
+ * timing information is printed to stdout.
+ **/
+int HYPRE_EuclidSetStats(HYPRE_Solver solver, int eu_stats);
+
+/**
+ * if eu_mem not equal 0, a summary of Euclid's memory usage
+ * is printed to stdout.
+ **/
+int HYPRE_EuclidSetMem(HYPRE_Solver solver, int eu_mem);
+
+/**
+ * defines a drop tolerance for ILU(k). Default: 0
+ * Use with HYPRE_EuclidSetRowScale. 
+ * Note that this can destroy symmetry in a matrix.
+ **/
+int HYPRE_EuclidSetSparseA(HYPRE_Solver solver, double sparse_A);
+
+/**
+ * if row_scale not equal 0, values are scaled prior to factorization
+ * so that largest value in any row is +1 or -1.
+ * Note that this can destroy symmetry in a matrix.
+ **/
+int HYPRE_EuclidSetRowScale(HYPRE_Solver solver, int row_scale);
+
+/**
+ * uses ILUT and defines a drop tolerance relative to the largest
+ * absolute value of any entry in the row being factored.
+ **/
+int HYPRE_EuclidSetILUT(HYPRE_Solver solver, double drop_tol);
+
+/**
+ * Sets the maximum number of nonzeros that is permitted in any
+ * row of L+U-I in addition to the number that would result from
+ * an ILU(0) factorziation. A negative value indicates no limit.
+ * Default: no limit for ILU(k), 5 for ILUT.
+ **/
 int HYPRE_EuclidSetMaxNzPerRow(HYPRE_Solver solver, int max_nz_per_row);
 
 /*@}*/

@@ -374,6 +374,14 @@ int HYPRE_EuclidSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVe
 int HYPRE_EuclidSolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector bb , HYPRE_ParVector xx );
 int HYPRE_EuclidSetParams ( HYPRE_Solver solver , int argc , char *argv []);
 int HYPRE_EuclidSetParamsFromFile ( HYPRE_Solver solver , char *filename );
+int HYPRE_EuclidSetLevel ( HYPRE_Solver solver , int level );
+int HYPRE_EuclidSetBJ ( HYPRE_Solver solver , int bj );
+int HYPRE_EuclidSetStats ( HYPRE_Solver solver , int eu_stats );
+int HYPRE_EuclidSetMem ( HYPRE_Solver solver , int eu_mem );
+int HYPRE_EuclidSetSparseA ( HYPRE_Solver solver , double sparse_A );
+int HYPRE_EuclidSetRowScale ( HYPRE_Solver solver , int row_scale );
+int HYPRE_EuclidSetILUT ( HYPRE_Solver solver , double ilut );
+int HYPRE_EuclidSetMaxNzPerRow ( HYPRE_Solver solver , int max_nz_per_row );
 
 /* HYPRE_parcsr_gmres.c */
 int HYPRE_ParCSRGMRESCreate ( MPI_Comm comm , HYPRE_Solver *solver );

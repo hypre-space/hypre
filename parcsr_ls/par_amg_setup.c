@@ -1990,7 +1990,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          else
             HYPRE_EuclidSetLevel(smoother[j],0); 
          if (drop_tol)
-            HYPRE_EuclidSetDropTol(smoother[j],drop_tol); 
+            HYPRE_EuclidSetILUT(smoother[j],drop_tol); 
          if (max_nz_per_row)
             HYPRE_EuclidSetMaxNzPerRow(smoother[j],max_nz_per_row); 
          HYPRE_EuclidSetup(smoother[j],
