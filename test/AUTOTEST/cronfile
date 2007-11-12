@@ -1,14 +1,14 @@
-0 2 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -alc -tuxkai -tux -insure > autotest.cron.Sun.log 2> autotest.cron.Sun.err
-0 5 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -thunder  -tuxpgi -tux -insure > autotest.cron.Mon.log 2> autotest.cron.Mon.err
-0 5 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -mcr -tux -insure > autotest.cron.Tue.log 2> autotest.cron.Tue.err
-0 5 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -yana -tuxintel -tux -insure > autotest.cron.Wed.log 2> autotest.cron.Wed.err
-0 5 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -pengra -tuxgcc -tux -insure > autotest.cron.Thu.log 2> autotest.cron.Thu.err
-0 5 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -up -tuxlahey -tux -insure > autotest.cron.Fri.log 2> autotest.cron.Fri.err
-0 5 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
-0 1 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -ubgl -tuxabsoft -tux > autotest.cron.Sat.log 2> autotest.cron.Sat.err
-0 5 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
+0 1 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tux -insure -alc -tuxkai > autotest.cron.Sun.log 2> autotest.cron.Sun.err
+0 6 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
+0 1 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tux -insure -thunder  -tuxpgi > autotest.cron.Mon.log 2> autotest.cron.Mon.err
+0 6 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
+0 1 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tux -insure -mcr > autotest.cron.Tue.log 2> autotest.cron.Tue.err
+0 6 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
+0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tux -insure -yana -tuxintel > autotest.cron.Wed.log 2> autotest.cron.Wed.err
+0 6 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
+0 1 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tux -insure -pengra -tuxgcc > autotest.cron.Thu.log 2> autotest.cron.Thu.err
+0 6 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
+0 1 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tux -insure -up -tuxlahey > autotest.cron.Fri.log 2> autotest.cron.Fri.err
+0 6 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
+0 1 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tux -insure -ubgl -tuxabsoft > autotest.cron.Sat.log 2> autotest.cron.Sat.err
+0 6 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest_create_summary
