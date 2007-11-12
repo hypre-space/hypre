@@ -2699,6 +2699,25 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
            printf("FGMRES: AMS preconditioning not available.\n");
            exit(1);
            break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					   HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					   HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("FGMRES : SysPDe preconditioning not available.\n");
+#endif
+           break;
    }
    return;
 }
@@ -2902,6 +2921,25 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
       case HYAMS :
            printf("BiCGSTAB : AMS preconditioning not available.\n");
            exit(1);
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					     HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					     HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("BiCGSTAB : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -3108,6 +3146,25 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            printf("BiCGSTABL : AMS preconditioning not available.\n");
            exit(1);
            break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					      HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					      HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("BiCGSTABL : SysPDe preconditioning not available.\n");
+#endif
+           break;
    }
    return;
 }
@@ -3308,6 +3365,25 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
       case HYAMS :
            printf("TFQMR : AMS preconditioning not available.\n");
            exit(1);
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+                                          HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("TFQMR : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -3510,6 +3586,25 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            printf("BiCGS : AMS preconditioning not available.\n");
            exit(1);
            break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					  HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					  HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("BiCGS : SysPDe preconditioning not available.\n");
+#endif
+           break;
    }
    return;
 }
@@ -3690,6 +3785,25 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
       case HYAMS :
            printf("SymQMR : AMS preconditioning not available.\n");
            exit(1);
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					   HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					   HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("SymQMR : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
