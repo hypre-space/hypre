@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -23,6 +23,7 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -1838,7 +1839,6 @@ int hypre_AMSSolve(void *solver,
  * the (i+1)'th subspace. B[i] is an AMG solver for A[i]. r[i] and g[i]
  * are temporary vectors. A0_* are the fine grid smoothing parameters.
  *
- * The string cycle describes how to combine the subspace corrections.
  * The default mode is multiplicative, '+' changes the next correction
  * to additive, based on residual computed at '('.
  *--------------------------------------------------------------------------*/

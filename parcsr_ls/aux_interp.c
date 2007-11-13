@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -12,7 +12,7 @@
  * terms of the GNU General Public License (as published by the Free Software
  * Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is distributed in the hope that it will  useful, but WITHOUT ANY 
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
  * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
  * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
  * Public License for more details.
@@ -23,6 +23,7 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 #include "headers.h"
