@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -23,6 +23,7 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -835,7 +836,6 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    for ( iD = 0; iD < localNRows_; iD++ ) newOffdNNZ += offdRowLengs[iD];
 
    /* -----------------------------------------------------------------
-    * combine the matrices
     * -----------------------------------------------------------------*/
 
    TdiagIA = new int[localNRows_+1];
