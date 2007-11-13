@@ -4,7 +4,7 @@
 # The perl scripts below define how `latex2html' should handle the
 # definitions in `hypre.sty'.
 #
-# (C) 1998 Regents of the University of California.
+# (C) 2007 Lawrence Livermore National Security, LLC.
 #
 # $Revision$
 #
