@@ -8,14 +8,14 @@ extern "C" {
 #endif
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (as published by the Free
@@ -59,14 +59,14 @@ extern "C" {
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (as published by the Free
@@ -279,14 +279,14 @@ int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (as published by the Free
@@ -426,14 +426,14 @@ void hypre_FreeDML( char *ptr , char *file , int line );
 void hypre_SeedRand ( int seed );
 double hypre_Rand ( void );
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (as published by the Free
@@ -553,14 +553,14 @@ int MPI_Irsend( void *buf , int count , MPI_Datatype datatype , int dest , int t
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (as published by the Free
@@ -652,14 +652,14 @@ extern int hypre_NumThreads;
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (as published by the Free
@@ -800,14 +800,14 @@ int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (as published by the Free
@@ -864,14 +864,14 @@ typedef hypre_ListElement  *hypre_LinkList;
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (as published by the Free
@@ -969,14 +969,14 @@ void hypre_qsort2i ( int *v , int *w , int left , int right );
 void hypre_qsort2 ( int *v , double *w , int left , int right );
 void hypre_qsort3i ( int *v , int *w , int *z , int left , int right );
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team, UCRL-CODE-222953.
  * All rights reserved.
  *
  * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
  * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License (as published by the Free
