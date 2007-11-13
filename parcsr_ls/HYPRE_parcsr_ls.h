@@ -1056,26 +1056,26 @@ int HYPRE_EuclidSetLevel(HYPRE_Solver solver, int level);
 int HYPRE_EuclidSetBJ(HYPRE_Solver solver, int bj);
 
 /**
- * if eu_stats not equal 0, a summary of runtime settings and 
+ * If eu\_stats not equal 0, a summary of runtime settings and 
  * timing information is printed to stdout.
  **/
 int HYPRE_EuclidSetStats(HYPRE_Solver solver, int eu_stats);
 
 /**
- * if eu_mem not equal 0, a summary of Euclid's memory usage
+ * If eu\_mem not equal 0, a summary of Euclid's memory usage
  * is printed to stdout.
  **/
 int HYPRE_EuclidSetMem(HYPRE_Solver solver, int eu_mem);
 
 /**
- * defines a drop tolerance for ILU(k). Default: 0
- * Use with HYPRE_EuclidSetRowScale. 
+ * Defines a drop tolerance for ILU(k). Default: 0
+ * Use with HYPRE\_EuclidSetRowScale. 
  * Note that this can destroy symmetry in a matrix.
  **/
 int HYPRE_EuclidSetSparseA(HYPRE_Solver solver, double sparse_A);
 
 /**
- * if row_scale not equal 0, values are scaled prior to factorization
+ * If row\_scale not equal 0, values are scaled prior to factorization
  * so that largest value in any row is +1 or -1.
  * Note that this can destroy symmetry in a matrix.
  **/
