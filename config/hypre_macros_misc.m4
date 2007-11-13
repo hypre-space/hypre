@@ -1,5 +1,5 @@
 dnl #BHEADER**********************************************************************
-dnl # Copyright (c) 2006   The Regents of the University of California.
+dnl # Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
 dnl # Produced at the Lawrence Livermore National Laboratory.
 dnl # Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
 dnl # All rights reserved.

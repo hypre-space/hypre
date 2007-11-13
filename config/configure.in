@@ -1,5 +1,5 @@
 dnl #BHEADER**********************************************************************
-dnl # Copyright (c) 2006   The Regents of the University of California.
+dnl # Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
 dnl # Produced at the Lawrence Livermore National Laboratory.
 dnl # Written by the HYPRE team, UCRL-CODE-222953.
 dnl # All rights reserved.
@@ -64,7 +64,7 @@ AC_PREREQ(2.59)
 AC_REVISION($Id$)
 AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
-AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
+AC_COPYRIGHT([ Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  Produced at the Lawrence Livermore National Laboratory.
  Written by the HYPRE team, UCRL-CODE-222953.
  All rights reserved.
