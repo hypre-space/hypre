@@ -633,7 +633,7 @@ confbuildtest ()
                    2>> ${Hdr}.${MessageStr}.all.err
       fi
 
-      if [ "${HYPRE_RUN_MACHINE}" = "tux136" ]
+      if [ "${HYPRE_RUN_MACHINE}" = "${HYPRE_COMPILE_MACHINE}" ]
       then
          if [ "$DEBUG_MODE" = "yes" ]
          then
