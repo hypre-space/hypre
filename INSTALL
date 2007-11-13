@@ -1,5 +1,5 @@
 #BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
+# Copyright (c) 2007, Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
 # Written by the HYPRE team. UCRL-CODE-222953.
 # All rights reserved.
@@ -24,6 +24,7 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+
 HYPRE Installation Information
 =================================
 
@@ -41,7 +42,7 @@ The simplest way to build this package is:
 
   2. Type `make install' to compile the source code and install the resulting files 
 
-  3. You can remove the program binaries and object files from the source code 
+  3. You can remove the program binaries and object files from the source code
      directory by typing `make clean'.  To remove the files that `configure' 
      created (so you can compile the package for a different kind of computer), 
      type `make distclean'.
