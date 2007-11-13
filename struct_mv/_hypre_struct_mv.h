@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -37,7 +37,7 @@ extern "C" {
 #endif
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -657,7 +657,7 @@ if (hypre__num_blocks > 1)\
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -1069,7 +1069,7 @@ int  kinc = (hypre_IndexZ(stride)*\
 #endif
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -1356,7 +1356,7 @@ typedef struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -1466,7 +1466,7 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
 #endif
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -1532,7 +1532,7 @@ hypre_StructStencilShape(stencil)[i]
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -1745,7 +1745,7 @@ typedef struct hypre_CommHandle_struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -1838,7 +1838,7 @@ typedef struct hypre_ComputePkg_struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -1960,7 +1960,7 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
