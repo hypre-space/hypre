@@ -268,6 +268,9 @@ apply_error_filters ()
 {
   ErrorFile=$1
   if [ -s "${ErrorFile}" ] ; then
+    # make sure $ErrorFile.orig is empty before calling process_filter()
+    rm -f $ErrorFile.orig
+
     HOST=`hostname`
     case $HOST in
       up*)
@@ -483,25 +486,26 @@ create_summary_files ()
         TotalTestCount=`expr $TotalTestCount + 1`
         TestCaseFailedFlag=0
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
-        for k in "${ErrFile}.[0-9]+"; do
-           apply_error_filters ${k}
-           if [ -s "${k}" ] ; then
-              if [ "$DEBUG_MODE" = "yes" ] ; then
-                 printf "nonzero .err file = ${ErrFile}\n"
-              fi
-              errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${k}"\">"${k}"</a><br>"
-              AutotestFailureCount=`expr $AutotestFailureCount + 1`
-              TotalFailureCount=`expr $TotalFailureCount + 1`
-              TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
-              ELIST="${ELIST}${errinfo}\n"
-              TestCaseFailedFlag=1
-              break
-            fi
-        done
+# The following loop doesn't do anything and is not needed
+#         for k in "${ErrFile}.[0-9]+"; do
+#            apply_error_filters ${k}
+#            if [ -s "${k}" ] ; then
+#               if [ "$DEBUG_MODE" = "yes" ] ; then
+#                  printf "nonzero .err file = ${ErrFile}\n"
+#               fi
+#               errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${k}"\">"${k}"</a><br>"
+#               AutotestFailureCount=`expr $AutotestFailureCount + 1`
+#               TotalFailureCount=`expr $TotalFailureCount + 1`
+#               TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
+#               ELIST="${ELIST}${errinfo}\n"
+#               TestCaseFailedFlag=1
+#               break
+#             fi
+#         done
 #               end of k-loop
-#
-#               check for non-zero error file without numerical suffix; which
-#               typically contains errors from insure runs
+
+#       check for non-zero error file without numerical suffix; which
+#       typically contains errors from insure runs
         apply_error_filters ${ErrFile}
         if [ -s "${ErrFile}" ] ; then
            if [ "$DEBUG_MODE" = "yes" ] ; then
