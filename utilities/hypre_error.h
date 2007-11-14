@@ -30,16 +30,6 @@
 #define hypre_ERROR_HEADER
 
 /*--------------------------------------------------------------------------
- * HYPRE error codes
- *--------------------------------------------------------------------------*/
-
-#define HYPRE_ERROR_GENERIC         1   /* generic error */
-#define HYPRE_ERROR_MEMORY          2   /* unable to allocate memory */
-#define HYPRE_ERROR_ARG             4   /* argument error */
-/* bits 4-8 are reserved for the index of the argument error */
-#define HYPRE_ERROR_CONV          256   /* method did not converge as expected */
-
-/*--------------------------------------------------------------------------
  * Global variable used in hypre error checking
  *--------------------------------------------------------------------------*/
 
