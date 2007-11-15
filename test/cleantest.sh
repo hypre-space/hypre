@@ -32,12 +32,13 @@ cat <<EOF
 
    $0 [-h|-help] [{test_dir}]
 
-   where: {test_dir} is the name of some number of 'TEST_*' directories
+   where: {test_dir} is the name of some number of runtest directories
           -h|-help   prints this usage information and exits
 
    This script removes the '*err*', '*out*', and '*log*' files from the
-   specified TEST directories.  If no directory is specified, all of them are
-   cleaned.  This script must be run from within the 'test' directory.
+   specified runtest directories.  If no directory is specified, it is assumed
+   that the script is being run from within the hypre 'test' directory, and all
+   of the 'TEST_*' directories are cleaned.
 
    Example usage: $0 TEST_struct TEST_ij
 
