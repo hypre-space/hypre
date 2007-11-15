@@ -28,7 +28,6 @@
 
 /*
  * File:	timer.c
- * Copyright:	(c) 1997 The Regents of the University of California
  * Author:	Scott Kohn (skohn@llnl.gov)
  * Description:	somewhat portable timing routines for C++, C, and Fortran
  *
