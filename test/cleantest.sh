@@ -25,99 +25,41 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+# Echo usage information
+case $1 in
+   -h|-help)
+cat <<EOF
 
+   $0 [-h|-help] [{test_dir}]
 
+   where: {test_dir} is the name of some number of 'TEST_*' directories
+          -h|-help   prints this usage information and exits
 
-# globals
-DefaultTestDirs="TEST_ams TEST_examples TEST_fac TEST_fei TEST_ij TEST_sstruct TEST_struct"
-InputString=""
+   This script removes the '*err*', '*out*', and '*log*' files from the
+   specified TEST directories.  If no directory is specified, all of them are
+   cleaned.  This script must be run from within the 'test' directory.
 
-function usage
-{
-   printf "\n"
-   printf "$0 [-h | -help] [-t | -trace] {test_path}\n"
-   printf "\n"
-   printf " where: {test_path} the directory from which to remove *.err* and \n"
-   printf "                    *.out* files.\n"
-   printf "                    If TEST, TEST_ or no argument is given for \n"
-   printf "                    {test path}, all TEST_* directories are cleaned.\n"
-   printf "\n"
-   printf "        -h | -help:      prints this usage information and exits.\n"
-   printf "        -t | -trace:     echo each command as it is executed.\n"
-   printf "\n"
-   printf " This script is used to removed output files, *.err* and *.out* \n". 
-   printf " from the specified TEST directory.  If the argument is TEST, \n"
-   printf " TEST_ or omitted, all TEST directories will have output files removed.\n" 
-   printf "\n"
-   printf " Example usage: ./cleantest.sh \n"
-   printf " Example usage: ./cleantest.sh TEST\n"
-   printf " Example usage: ./cleantest.sh -t TEST_sstruct\n"
-   printf "\n"
-}
+   Example usage: $0 TEST_struct TEST_ij
 
+EOF
+   exit
+   ;;
+esac
 
-# main
-
-CurrentDir=`pwd`
-if test "x$1" = "x"
+if [ "x$1" = "x" ]
 then
-   for testdir in $DefaultTestDirs
+   for testdir in TEST*
    do
-      cd $testdir
-      rm -f *.err* *.out*
-      cd $CurrentDir
+      rm -f $testdir/*err*
+      rm -f $testdir/*out*
+      rm -f $testdir/*log*
    done
 else
    while [ "$*" ]
    do
-      case $1 in
-         -h|-help)
-             usage
-             exit
-             ;;
-         -t|-trace)
-             set -xv
-             shift
-             ;;
-         TEST_fac )
-             cd $1
-             rm -f *.err* *.out*
-             cd $CurrentDir
-             shift
-             ;;
-         TEST_fei )
-             cd $1
-             rm -f *.err* *.out*
-             cd $CurrentDir
-             shift
-             ;;
-         TEST_ij )
-             cd $1
-             rm -f *.err* *.out*
-             cd $CurrentDir
-             shift
-             ;;
-         TEST_sstruct )
-             cd $1
-             rm -f *.err* *.out*
-             cd $CurrentDir
-             shift
-             ;;
-         TEST_struct )
-             cd $1
-             rm -f *.err* *.out*
-             cd $CurrentDir
-             shift
-             ;;
-         * )
-             for testdir in $DefaultTestDirs
-             do
-                cd $testdir
-                rm -f *.err* *.out*
-                cd $CurrentDir
-             done
-             shift
-             ;;
-      esac
+      rm -f $1/*err*
+      rm -f $1/*out*
+      rm -f $1/*log*
+      shift
    done
 fi
