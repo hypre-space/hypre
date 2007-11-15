@@ -9,7 +9,7 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-#  Copyright (c) 2006   The Regents of the University of California.
+#  Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
 #  Produced at the Lawrence Livermore National Laboratory.
 #  Written by the HYPRE team, UCRL-CODE-222953.
 #  All rights reserved.
@@ -1142,7 +1142,7 @@ Copyright (C) 2003 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
- Copyright (c) 2006   The Regents of the University of California.
+ Copyright (c) 2007,   Lawrence Livermore National Security, LLC.
  Produced at the Lawrence Livermore National Laboratory.
  Written by the HYPRE team, UCRL-CODE-222953.
  All rights reserved.
