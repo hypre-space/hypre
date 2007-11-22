@@ -1,6 +1,6 @@
 #!/bin/sh
 #BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
+# Copyright (c) 2007, Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
 # Written by the HYPRE team. UCRL-CODE-222953.
 # All rights reserved.
@@ -32,7 +32,7 @@ case $1 in
    -h|-help)
 cat <<EOF
 
-   $0 [-h|-t] {src_dir} [options for configure]
+   $0 [-h] {src_dir} [options for configure]
 
    where: {src_dir}  is the hypre source directory
           -h|-help   prints this usage information and exits
@@ -47,9 +47,20 @@ EOF
 esac
 
 # Setup
+output_dir=`pwd`/$testname.dir
+rm -fr $output_dir
+mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Main body
+# Run configure
 cd $src_dir
-./configure $@
+if [ "`/bin/uname -s`" = "AIX" ]
+then
+   nopoe ./configure $@
+else
+   ./configure $@
+fi
+
+# Save config.log and Makefile.config
+cp config.log config/Makefile.config $output_dir
