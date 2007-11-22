@@ -74,7 +74,7 @@ EOF
 	 cd $autotest_dir
 	 rm -fr linear_solvers AUTOTEST
 	 cvs -d /home/casc/repository checkout $cvs_opts linear_solvers
-	 # cp -R linear_solvers/AUTOTEST .
+	 cp -R linear_solvers/AUTOTEST .
 	 exit
 	 ;;
 
