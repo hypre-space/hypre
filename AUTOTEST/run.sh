@@ -1,6 +1,6 @@
 #!/bin/sh
 #BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
+# Copyright (c) 2007, Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
 # Written by the HYPRE team. UCRL-CODE-222953.
 # All rights reserved.
@@ -32,7 +32,7 @@ case $1 in
    -h|-help)
 cat <<EOF
 
-   $0 [-h|-t] {src_dir} [options for 'runtest.sh']
+   $0 [-h] {src_dir} [options for 'runtest.sh']
 
    where: {src_dir}  is the hypre source directory
           -h|-help   prints this usage information and exits
@@ -53,7 +53,7 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Main body
+# Run the test drivers
 cd $src_dir/test
 cleantest.sh
 runtest.sh $@ TEST_ams/*.sh
