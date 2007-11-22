@@ -1,6 +1,6 @@
 #!/bin/sh
 #BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
+# Copyright (c) 2007, Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
 # Written by the HYPRE team. UCRL-CODE-222953.
 # All rights reserved.
@@ -32,7 +32,7 @@ case $1 in
    -h|-help)
 cat <<EOF
 
-   $0 [-h|-t] {src_dir} [options for configure]
+   $0 [-h] {src_dir} [options for configure]
 
    where: {src_dir}  is the hypre source directory
           -h|-help   prints this usage information and exits
@@ -53,15 +53,15 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Main body
+# Call the configure, make and run scripts
 ./test.sh configure.sh $src_dir --enable-debug $@
-mv -f configure.err configure.out $output_dir
+mv -f configure.??? $output_dir
 
 ./test.sh make.sh $src_dir test
-mv -f make.err make.out $output_dir
+mv -f make.??? $output_dir
 
 ./test.sh run.sh $src_dir
-mv -f run.err run.out run.dir $output_dir
+mv -f run.??? $output_dir
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir -not -empty -and -name "*.err*" )
