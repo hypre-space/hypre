@@ -31,9 +31,9 @@ while [ "$*" ]
       -h|-help)
 cat <<EOF
 
-   $0 [options] {release} {machine:rem_path} {testname}.sh
+   $0 [options] "{cvs_opts}" {machine:rem_path} {testname}.sh
 
-   where: {release}  is a hypre release tar file (gzipped)
+   where: {cvs_opts} are options to be passed to cvs checkout
           {machine}  is the name of the machine to run on
           {rem_path} is the remote path where the {release} source directory
                      will be copied
@@ -44,10 +44,10 @@ cat <<EOF
       -t|-trace      echo each command
 
    This script is similar to the 'testsrc.sh' script.  The main difference is
-   that this script unpacks {release} (in the /tmp directory) to create the
-   {src_dir} argument of 'testsrc.sh'.
+   that this script checks out a version from the CVS repository (in the /tmp
+   directory) to create the {src_dir} argument of 'testsrc.sh'.
 
-   Example usage: $0 hypre-2.0.0.tar.gz tux149:. machine-tux.sh
+   Example usage: $0 "" tux149:. machine-tux.sh
 
 EOF
          exit
@@ -63,18 +63,15 @@ EOF
 done
 
 # Setup
-release_file=$1
-release_name=`basename $release_file`
-release_dir=`echo $release_name | awk -F.t '{print $1}'`
+cvs_opts=$1
 current_dir=`pwd`
 shift
 
-# Extract release in the /tmp directory
+# Checkout the repository in the /tmp directory
 cd /tmp
-rm -fr /tmp/$release_dir
-tar -zxvf $release_file -C /tmp $release_dir/src
-mv -f /tmp/$release_dir/src /tmp/$release_dir/$release_dir-src
+rm -fr linear_solvers
+cvs -d /home/casc/repository checkout $cvs_opts linear_solvers
 cd $current_dir
 
 # Run the test
-testsrc.sh /tmp/$release_dir/$release_dir-src $@
+testsrc.sh /tmp/linear_solvers $@

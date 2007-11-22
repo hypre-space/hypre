@@ -1,6 +1,6 @@
 #!/bin/sh
 #BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
+# Copyright (c) 2007, Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
 # Written by the HYPRE team. UCRL-CODE-222953.
 # All rights reserved.
@@ -68,12 +68,22 @@ EOF
    esac
 done
 
-# machine=$1
-# shift
-# testdir=`dirname $1`
-# testname=`basename $1 .sh`
-# shift
-# echo "Running remote test [$testname] on $machine"
-# ssh $machine "cd ${testdir}; test.sh ${testname}.sh $@"
-# echo "Copying output files from $machine"
-# scp -r $machine:$testdir/$testname.[eod]?? .
+# Setup
+src_dir=`cd $1; pwd`
+machine=`echo $2 | awk -F: '{print $1}'`
+rem_path=`echo $2 | awk -F: '{print $2}'`
+testname=`basename $3 .sh`
+rem_dir=`basename $src_dir`
+
+# Copy the source and AUTOTEST directories
+# ssh $machine "rm -fr $rem_path/$rem_dir"
+# scp -r $src_dir $machine:$rem_path/$rem_dir
+# scp -r . $machine:$rem_path/$rem_dir/AUTOTEST
+scp.sh $src_dir $machine:$rem_path
+scp.sh . $machine:$rem_path/$rem_dir
+
+# Run the test and copy the results
+ssh -q $machine "cd $rem_path/$rem_dir/AUTOTEST; test.sh ${testname}.sh .."
+rm -fr $testname.???
+echo "Copying output files from $machine"
+scp -r $machine:$rem_path/$rem_dir/AUTOTEST/$testname.\?\?\? .
