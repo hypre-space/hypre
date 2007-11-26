@@ -77,9 +77,6 @@ function MpirunString
       alc*) shift
          RunString="srun -p pdebug -n$*"
          ;;
-      mcr*) shift
-         RunString="srun -p pdebug -n$*"
-         ;;
       peng*) shift
          RunString="srun -p pdebug -n$*"
          ;;
@@ -110,6 +107,9 @@ function MpirunString
          RunString="poe $EXECFILE -rmpool pbatch -procs $POE_NUM_PROCS"
          RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          ;;
+      zeus*) shift
+         RunString="srun -p pdebug -n$*"
+         ;;
       tux*) BatchMode=0
          MACHINES_FILE="hostname"
          if [ ! -f $MACHINES_FILE ] ; then
@@ -135,8 +135,6 @@ function CalcNodes
    case $HOST in
       alc*) CPUS_PER_NODE=2
          ;;
-      mcr*) CPUS_PER_NODE=2
-         ;;
       peng*) CPUS_PER_NODE=2
          ;;
       thun*) CPUS_PER_NODE=4
@@ -146,6 +144,8 @@ function CalcNodes
       up*) CPUS_PER_NODE=8
          ;;
       vert*) CPUS_PER_NODE=2
+         ;;
+      zeus*) CPUS_PER_NODE=8
          ;;
       *) CPUS_PER_NODE=1
          ;;
@@ -188,8 +188,6 @@ function CheckBatch
    case $HOST in
       alc*) BATCH_MODE=0
          ;;
-      mcr*) BATCH_MODE=0
-         ;;
       peng*) BATCH_MODE=0
          ;;
       thun*) BATCH_MODE=0
@@ -199,6 +197,8 @@ function CheckBatch
       up*) BATCH_MODE=0
          ;;
       vert*) BATCH_MODE=0
+         ;;
+      zeus*) BATCH_MODE=0
          ;;
       *) BATCH_MODE=0
          ;;
@@ -245,8 +245,6 @@ function PsubCmdStub
    case $HOST in
       alc*) PsubCmd="psub -c alc,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
-      mcr*) PsubCmd="psub -c mcr,pbatch -b casc -r $RunName -ln $NumProcs"
-         ;;
       peng*) PsubCmd="psub -c pengra,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       thun*) PsubCmd="psub -c thunder,pbatch -b casc -r $RunName -ln $NumNodes -g $NumProcs"
@@ -256,6 +254,8 @@ function PsubCmdStub
       up*) PsubCmd="psub -c up -pool pbatch -b a_casc -r $RunName -ln $NumProcs"
          ;;
       vert*) PsubCmd="psub -c vertex,pbatch -b casc -r $RunName -ln $NumProcs"
+         ;;
+      zeus*) PsubCmd="psub -c zeus,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       *) PsubCmd="psub -b casc -r $RunName -ln $NumProcs"
          ;;
