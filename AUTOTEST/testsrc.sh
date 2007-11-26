@@ -79,11 +79,11 @@ rem_dir=`basename $src_dir`
 # ssh $machine "rm -fr $rem_path/$rem_dir"
 # scp -r $src_dir $machine:$rem_path/$rem_dir
 # scp -r . $machine:$rem_path/$rem_dir/AUTOTEST
-scp.sh $src_dir $machine:$rem_path
-scp.sh . $machine:$rem_path/$rem_dir
+./scp.sh $src_dir $machine:$rem_path
+./scp.sh . $machine:$rem_path/$rem_dir
 
 # Run the test and copy the results
-ssh -q $machine "cd $rem_path/$rem_dir/AUTOTEST; test.sh ${testname}.sh .."
+ssh -q $machine "cd $rem_path/$rem_dir/AUTOTEST; ./test.sh ${testname}.sh .."
 rm -fr $testname.???
 echo "Copying output files from $machine"
 scp -r $machine:$rem_path/$rem_dir/AUTOTEST/$testname.\?\?\? .

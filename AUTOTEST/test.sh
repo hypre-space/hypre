@@ -68,4 +68,4 @@ done
 testname=`basename $1 .sh`
 shift
 echo "Running test [$testname]"
-$testname.sh $@ 1>"$testname.out" 2>"$testname.err"
+./$testname.sh $@ 1>"$testname.out" 2>"$testname.err"

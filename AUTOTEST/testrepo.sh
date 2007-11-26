@@ -74,4 +74,4 @@ cvs -d /home/casc/repository checkout $cvs_opts linear_solvers
 cd $current_dir
 
 # Run the test
-testsrc.sh /tmp/linear_solvers $@
+./testsrc.sh /tmp/linear_solvers $@

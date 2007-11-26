@@ -77,4 +77,4 @@ mv -f /tmp/$release_dir/src /tmp/$release_dir/$release_dir-src
 cd $current_dir
 
 # Run the test
-testsrc.sh /tmp/$release_dir/$release_dir-src $@
+./testsrc.sh /tmp/$release_dir/$release_dir-src $@
