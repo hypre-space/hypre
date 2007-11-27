@@ -64,7 +64,7 @@ mv -f make.??? $output_dir
 mv -f run.??? $output_dir
 
 # Echo to stderr all nonempty error files in $output_dir
-for errfile in $( find $output_dir -not -empty -and -name "*.err*" )
+for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
