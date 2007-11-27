@@ -2695,7 +2695,7 @@ if test "$casc_user_chose_ccompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      for ac_prog in mpguidec guidec icc xlc pgcc cc
+      for ac_prog in mpxlc mpguidec guidec icc xlc pgcc cc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2833,7 +2833,7 @@ if test "$casc_user_chose_cxxcompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      for ac_prog in mpguidec++ guidec++ icc xlC pgCC CC
+      for ac_prog in mpxlC mpguidec++ guidec++ icc xlC pgCC CC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2971,7 +2971,7 @@ if test "$casc_user_chose_fcompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      for ac_prog in mpguidef77 guidef77 ifort xlf pg77 f77
+      for ac_prog in mpxlf mpguidef77 guidef77 ifort xlf pg77 f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -9917,7 +9917,7 @@ then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
-      cc|mpcc|mpiicc|xlc)
+      cc|mpcc|mpiicc|mpxlc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -g"
@@ -9981,7 +9981,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|mpCC|mpiicc|xlC|cxx)
+      CC|mpCC|mpiicc|xlC|mpxlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -g"
@@ -10110,7 +10110,7 @@ then
       KCC|mpiKCC)
         CFLAGS="-fast +K3"
         ;;
-      cc|mpcc|mpiicc|xlc)
+      cc|mpcc|mpiicc|mpxlc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -O2"
@@ -10174,7 +10174,7 @@ then
       KCC|mpiKCC)
         CXXFLAGS="-fast +K3"
         ;;
-      CC|mpCC|mpiicc|xlC|cxx)
+      CC|mpCC|mpiicc|mpxlC|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -O2"
