@@ -35,7 +35,6 @@ initialize_variables ()
   umask 002
   Hdr="autotest"
   HYPRE_BATCH_MODE="no"
-  HYPRE_SEND_MAIL="no"
   TEST_CASES="TEST_ams/*.sh TEST_ij/*.sh TEST_fac/*.sh TEST_sstruct/*.sh TEST_struct/*.sh"
   EXAMPLES_TEST_CASES="TEST_examples/*.sh"
   TEST_DIRS="ams ij fac sstruct struct examples"
@@ -147,7 +146,6 @@ parse_arguments ()
       i) confbuildtest $OPTARG "--with-insure"          "all"   " "     "insure";;
      +i) confbuildtest $OPTARG "--with-insure-to-file"  "all"   " "     "insure";;
       l) confbuildtest $OPTARG "--enable-shared"        "all"   " "     "shared";;
-      m) HYPRE_SEND_MAIL="yes";;
       n) confbuildtest $Build  "--without-MPI"          "all"   " "     "no_mpi";;
       o) confbuildtest $OPTARG "--with-openmp"          "all"   " "     "openmp";;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
@@ -190,61 +188,12 @@ usage ()
   printf "%s\n" "-h       Help; display this help message."
   printf "%s\n" "-i opt   Insure++; perform configure --with-insure. Output"
   printf "                is appended to a file called insure.log.\n"
-  printf "%s\n" "-m       Mail; mail error summary to developers."
   printf "%s\n" "-n       NoMPI; configure --without-MPI."
   printf "%s\n" "-o opt   openMP; configure --with-openmp."
   printf "%s\n" "-r host  Remote; remote exection is performed on "host"."
   printf "%s\n" "-s       Strict; configure --with-strict-checking."
   printf "%s\n" "-v text  Additional text to prefix to email subject line."
 }
-
-#=============================================================================
-# Function for mailing error messages
-#=============================================================================
-mail_summary () 
-{
-  echo "Autotest mailing error summary"
-
-  HYPRE_DEFAULT_EMAIL="rfalgout@llnl.gov"
-  HYPRE_ALL_EMAIL="rfalgout@llnl.gov\
-                   abaker@llnl.gov\
-                   painter1@llnl.gov\
-                   lee123@llnl.gov\
-                   kolev1@llnl.gov\
-                   yang11@llnl.gov\
-                   chtong@llnl.gov\
-                   vhenson@llnl.gov"
-
-#
-# Define mail program to be used
-   if [ "$HYPRE_ARCH" = "linux" ] ; then
-      [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
-      [ -x /usr/bin/mhmail ] && HYPRE_MAIL=/usr/bin/mhmail
-   else
-      [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
-      [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
-      [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
-   fi
-#
-#               mail summaries
-  if [ "$AutotestFailureCount" = "0" ] ; then
-    SUBJECT="Autotest NO Errors"
-  else
-    SUBJECT="Autotest $AutotestFailureCount Errors"
-  fi
-
-  if [ -n "${HYPRE_MESSAGE}" ] ; then
-    SUBJECT="$HYPRE_MESSAGE $SUBJECT"
-  fi
-
-  if [ "$DEBUG_MODE" = "yes" ] ; then
-     ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_DEFAULT_EMAIL < $SUMFILE 
-  else
-     ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_ALL_EMAIL < $SUMFILE 
-  fi
-  echo "Autotest mail sent"
-}
-
 
 #=============================================================================
 # Functions for filtering misleading error messages
@@ -361,8 +310,6 @@ apply_error_filters ()
     esac
   fi
 }
-
-
 
 #=============================================================================
 # Function for creating error message summary file
@@ -569,7 +516,6 @@ cleanup () {
   echo "Autotest finished leaving $* after $TOTAL seconds"
 }
 
-
 #=============================================================================
 # General purpose function for configure, make and execute
 #=============================================================================
@@ -658,7 +604,6 @@ confbuildtest ()
    echo "Autotest finished $MessageStr taking $TIME seconds"
 }
 
-
 #==============================================================================
 # return the seconds since midnight in the variable SECS
 #==============================================================================
@@ -673,15 +618,10 @@ seconds ()
    SECS=`expr $SECS + $HOUR`
 }
 
-
 #==============================================================================
 # This script is the implementation script used to regression test hypre.
 #==============================================================================
 initialize_variables
 parse_arguments $*
 create_summary_files
-if [ "$HYPRE_SEND_MAIL" = "yes" ]
-then
-   mail_summary
-fi
 cleanup $*
