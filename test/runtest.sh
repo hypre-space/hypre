@@ -522,3 +522,24 @@ done
 #
 #     remove exectutable files from TEST_* directories
 CleanUp $TestDirNames $ExecFileNames
+
+# Filter misleading error messages
+cat > runtest.filters <<EOF
+srun: job [0-9]* queued and waiting for resources
+srun: job [0-9]* has been allocated resources
+EOF
+for dir in $TestDirNames
+do
+  for errfile in $( find $dir -name "*.err" )
+  do
+    if (egrep -f runtest.filters $errfile > /dev/null) ; then
+        original=`dirname $errfile`/`basename $errfile .err`.fil
+	echo "This file contains the original copy of $errfile before filtering" > $original
+	cat $errfile >> $original
+	mv $errfile $errfile.tmp
+	egrep -v -f runtest.filters $errfile.tmp > $errfile
+	rm -f $errfile.tmp
+    fi
+  done
+done
+rm -f runtest.filters
