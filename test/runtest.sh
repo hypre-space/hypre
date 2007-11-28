@@ -104,8 +104,9 @@ function MpirunString
          shift
          shift
          MY_ARGS="$*"
-         RunString="poe $EXECFILE -rmpool pbatch -procs $POE_NUM_PROCS"
-         RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
+         # RunString="poe $EXECFILE -rmpool pbatch -procs $POE_NUM_PROCS"
+         # RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
+         RunString="poe $MY_ARGS -rmpool pdebug -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
          ;;
       zeus*) shift
          RunString="srun -p pdebug -n$*"
