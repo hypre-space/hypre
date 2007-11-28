@@ -64,3 +64,6 @@ fi
 
 # Save config.log and Makefile.config
 cp config.log config/Makefile.config $output_dir
+
+# Save the environment variables
+set > $output_dir/sh.env
