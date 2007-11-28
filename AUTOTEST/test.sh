@@ -65,7 +65,19 @@ EOF
    esac
 done
 
+# Run the test and capture stdout, stderr
 testname=`basename $1 .sh`
 shift
 echo "Running test [$testname]"
 ./$testname.sh $@ 1>"$testname.out" 2>"$testname.err"
+
+# Filter misleading error messages
+if [ -e $testname.filters ]; then
+    if (egrep -f $testname.filters $testname.err > /dev/null) ; then
+	echo "This file contains the original copy of $testname.err before filtering" > $testname.fil
+	cat $testname.err >> $testname.fil
+	mv $testname.err $testname.tmp
+	egrep -v -f $testname.filters $testname.tmp > $testname.err
+	rm -f $testname.tmp
+    fi
+fi
