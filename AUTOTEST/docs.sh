@@ -51,12 +51,17 @@ src_dir=$1
 shift
 
 # Set some environment variables
-LATEX2HTML=/usr/apps/latex2html/default/bin
-PATH=$LATEX2HTML:$PATH
-export PATH
+# LATEX2HTML=/usr/apps/latex2html/default
+# DOCPP=$HOME/local
+# PATH=$LATEX2HTML/bin:$PATH:$DOCPP/bin
+# export PATH
+
+# Make sure Makefile.config is generated
+cd $src_dir
+./configure > /dev/null 2>&1
 
 # Test documentation build in docs/
-cd $src_dir/docs
+cd docs
 make clean
 make
 
