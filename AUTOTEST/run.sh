@@ -55,22 +55,22 @@ shift
 
 # Run the test drivers
 cd $src_dir/test
-cleantest.sh
-runtest.sh $@ TEST_ams/*.sh
-runtest.sh $@ TEST_fac/*.sh
-runtest.sh $@ TEST_ij/*.sh
-runtest.sh $@ TEST_sstruct/*.sh
-runtest.sh $@ TEST_struct/*.sh
+./cleantest.sh
+./runtest.sh $@ TEST_ams/*.sh
+./runtest.sh $@ TEST_fac/*.sh
+./runtest.sh $@ TEST_ij/*.sh
+./runtest.sh $@ TEST_sstruct/*.sh
+./runtest.sh $@ TEST_struct/*.sh
 
 # Collect all error files from the tests
-for errfile in $( find . -name "*.err" )
+for errfile in $( find . -name "*.err" -o -name "*.fil" -o -name "*.out*" )
 do
    mkdir -p $output_dir/`dirname $errfile`
    mv -f $errfile $output_dir/$errfile
 done
 
 # Echo to stderr all nonempty error files in $output_dir
-for errfile in $( find $output_dir -not -empty -and -name "*.err" )
+for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
