@@ -75,15 +75,21 @@ rem_path=`echo $2 | awk -F: '{print $2}'`
 testname=`basename $3 .sh`
 rem_dir=`basename $src_dir`
 
-# Copy the source and AUTOTEST directories
+# Copy the source and AUTOTEST directories using rsync/tar+ssh
 # ssh $machine "rm -fr $rem_path/$rem_dir"
 # scp -r $src_dir $machine:$rem_path/$rem_dir
 # scp -r . $machine:$rem_path/$rem_dir/AUTOTEST
-./scp.sh $src_dir $machine:$rem_path
-./scp.sh . $machine:$rem_path/$rem_dir
+rem_dir_exists=`ssh -q $machine "(/bin/sh -c \"[ -d $rem_path/$rem_dir ] && echo \"yes\" || (mkdir -p $rem_path/$rem_dir; echo \"no\")\")"`
+if [ "$rem_dir_exists" == "yes" ]
+then
+    rsync -zvae ssh --delete $src_dir/ $machine:$rem_path/$rem_dir
+else
+    tar -C `dirname $src_dir` -zvcf - $rem_dir | ssh $machine tar -C $rem_path -zxf -
+fi
+rsync -zvae ssh --delete . $machine:$rem_path/$rem_dir/AUTOTEST
 
 # Run the test and copy the results
 ssh -q $machine "cd $rem_path/$rem_dir/AUTOTEST; ./test.sh ${testname}.sh .."
 rm -fr $testname.???
 echo "Copying output files from $machine"
-scp -r $machine:$rem_path/$rem_dir/AUTOTEST/$testname.\?\?\? .
+scp -q -r $machine:$rem_path/$rem_dir/AUTOTEST/$testname.\?\?\? .
