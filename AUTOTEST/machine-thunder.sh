@@ -72,16 +72,14 @@ do
 done
 
 # Test link for C++
-cd $src_dir/test
-make clean
-make all++ 1> $output_dir/link-c++.out 2> $output_dir/link-c++.err
-cd $test_dir
+./test.sh make.sh $src_dir all++
+mkdir -p link-c++
+mv -f make.??? link-c++
 
 # Test link for Fortran
-cd $src_dir/test
-make clean
-make all77 1> $output_dir/link-f77.out 2> $output_dir/link-f77.err
-cd $test_dir
+./test.sh make.sh $src_dir all77
+mkdir -p link-f77
+mv -f make.??? link-f77
 
 # Test examples
 
@@ -89,26 +87,8 @@ cd $test_dir
 ./test.sh default.sh $src_dir
 mv -f default.??? $output_dir
 
-# Filter misleading error messages
-for errfile in $( find $output_dir -name "*.err*" )
-do
-  for filter in \
-      'Assembler\ messages'\
-      'Warning'\
-      'queued'\
-      'allocated'
-  do
-    if (egrep "$filter" $errfile > /dev/null) ; then
-	mv $errfile $errfile.tmp
-	egrep -v "$filter" $errfile.tmp > $errfile
-	echo "-- applied filter:$filter" >> $errfile.orig
-	cat $errfile.tmp >> $errfile.orig
-    fi
-  done
-done
-
 # Echo to stderr all nonempty error files in $output_dir
-for errfile in $( find $output_dir -not -empty -and -name "*.err*" )
+for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
