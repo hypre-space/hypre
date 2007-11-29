@@ -26,12 +26,14 @@
 #EHEADER**********************************************************************
 
 # Setup
-autotest_dir=`cd ..; pwd`
-output_dir="$autotest_dir/AUTOTEST-`date +%m.%d.%Y-%a`"
-src_dir="$autotest_dir/linear_solvers"
+testing_dir=`cd ..; pwd`
+autotest_dir="$testing_dir/AUTOTEST"
+finished_dir="$testing_dir/AUTOTEST-FINISHED"
+output_dir="$testing_dir/AUTOTEST-`date +%Y.%m.%d-%a`"
 cvs_opts=""
+src_dir="$testing_dir/linear_solvers"
 subject="NEW Autotest Error Summary `date +%D`"
-email_list="tzanio@llnl.gov"
+email_list="falgout2@llnl.gov, tzanio@gmail.com"
 
 while [ "$*" ]
    do
@@ -43,8 +45,8 @@ cat <<EOF
 
    where: -checkout  Checks the repository and updates the global AUTOTEST directory.
                      Should be called in the beginning of the nightly test cycle.
-          -{test}    Runs the corresponding test, which is either  associated with a
-                     specific machine (-tux, -up, ...), or is something like -docs.
+          -{test}    Runs sequentially the corresponding tests, which are associated
+                     with a specific machine: -tux149, -alc, -thunder, -up, -zeus
           -summary   Generates a file with currently pending and failed tests and sends it
                      in an email. Should be called at the end of the nightly test cycle.
 
@@ -59,7 +61,7 @@ cat <<EOF
    - create summary report (option -summary)
    - will have arguments such as '-tux', '-up', etc.
 
-   Example usage: $0 -checkout ; $0 -tux ; $0 -summary
+   Example usage: $0 -checkout ; $0 -tux149 ; $0 -summary
 
 EOF
          exit
@@ -71,79 +73,112 @@ EOF
 
       # Checkout the repository and update the global AUTOTEST directory
       -checkout)
-	 cd $autotest_dir
-	 rm -fr linear_solvers AUTOTEST
-	 cvs -d /home/casc/repository checkout $cvs_opts linear_solvers
-	 cp -R linear_solvers/AUTOTEST .
-	 exit
-	 ;;
+	   cd $testing_dir
+	   rm -fr linear_solvers
+	   cvs -d /home/casc/repository checkout $cvs_opts linear_solvers
+	   cp -fRp linear_solvers/AUTOTEST .
+	   chmod -fR a+rX,ug+w,o-w linear_solvers $autotest_dir
+	   chgrp -fR hypre linear_solvers $autotest_dir
+	   exit
+	   ;;
+
+       # Run local tests
+       -tux*)
+	   if [ -e autotest-tux-start ]; then
+	       shift
+	       break
+	   fi
+	   host=`echo $1 | awk -F- '{print $2}'`
+	   echo "Test [machine-tux] started at  `date +%T` on `date +%D`" >> autotest-tux-start
+	   ./testsrc.sh $src_dir $host:hypre/testing/$host machine-tux.sh
+	   echo "Test [machine-tux] finished at `date +%T` on `date +%D`" >> autotest-tux-start
+	   echo "Test [docs] started at  `date +%T` on `date +%D`" >> autotest-tux-start
+	   ./testsrc.sh $src_dir $host:hypre/testing/$host docs.sh
+	   echo "Test [docs] finished at `date +%T` on `date +%D`" >> autotest-tux-start
+	   mv machine-tux.??? docs.??? $finished_dir
+	   touch autotest-tux-done
+	   chmod -fR a+rX,ug+w,o-w $autotest_dir $finished_dir
+	   chgrp -fR hypre $autotest_dir $finished_dir
+	   shift
+	   break;
+	   ;;
 
        # Run remote tests
-       -alc|-thunder|-up|-ubgl)
+       -alc|-thunder|-up|-zeus)
+	   if [ -e autotest$1-start ]; then
+	       shift
+	       break
+	   fi
 	   host=`echo $1 | awk -F- '{print $2}'`
-	   mkdir -p $output_dir
-	   rm -f $output_dir/autotest$1-done
-	   touch $output_dir/autotest$1-start
-	   ./testsrc.sh $src_dir $host:test/$host machine-$host.sh
-	   mv machine-$host.??? $output_dir
-	   touch $output_dir/autotest$1-done
+	   echo "Test [machine-$host] started at  `date +%T` on `date +%D`" >> autotest-$host-start
+	   ./testsrc.sh $src_dir $host:hypre/testing/$host machine-$host.sh
+	   echo "Test [machine-$host] finished at `date +%T` on `date +%D`" >> autotest-$host-start
+	   mv machine-$host.??? $finished_dir
+	   touch autotest-$host-done
+	   chmod -fR a+rX,ug+w,o-w $autotest_dir $finished_dir
+	   chgrp -fR hypre $autotest_dir $finished_dir
 	   shift
-	   ;;
-
-       # Run local tests (modifies $src_dir)
-       -tux)
-	   mkdir -p $output_dir
-	   rm -f $output_dir/autotest$1-done
-	   touch $output_dir/autotest$1-start
-	   ./test.sh machine$1.sh $src_dir
-	   mv machine$1.??? $output_dir
-	   touch $output_dir/autotest$1-done
-	   shift
-	   ;;
-
-       # Test documentation (run after -tux)
-       -docs)
-	   mkdir -p $output_dir
-	   rm -f $output_dir/autotest$1-done
-	   touch $output_dir/autotest$1-start
-	   ./test.sh docs.sh $src_dir
-	   mv docs.??? $output_dir
-	   touch $output_dir/autotest$1-done
-	   shift
+	   break
 	   ;;
 
       # Generate a summary file in the output directory
       -summary)
-	 cd $output_dir
-	 echo "" > summary.txt; echo "[PASSED]" >> summary.txt
- 	 for test in $( find .  -maxdepth 1 -empty -and -name "*.err" )
- 	 do
-	   testname=`basename $test .err`
- 	   echo "-${testname#machine-}" >> summary.txt
- 	 done
-	 echo "" >> summary.txt; echo "[PENDING]" >> summary.txt
-	 for test in $( find . -name "*-start" )
-	 do
-	   testname=`echo $test | awk -F- '{print $2}'`
-	   [ ! -e autotest-$testname-done ] && echo "-$testname" >> summary.txt
-	 done
-	 echo "" >> summary.txt; echo "[FAILED]" >> summary.txt
- 	 for test in $( find .  -maxdepth 1 -not -empty -and -name "*.err" )
- 	 do
-	   testname=`basename $test .err`
- 	   echo "-${testname#machine-}" >> summary.txt
- 	 done
-	 echo "" >> summary.txt; echo "[ERROR FILES]" >> summary.txt
-	 for test in $( find $output_dir -not -empty -and -name "*.err" | sort -r )
-	 do
-	   echo "file://$test" >> summary.txt
-	 done
-	 cat summary.txt | /usr/bin/Mail -s "$subject" $email_list
-	 exit
-	 ;;
+           # move the finished logs to todays output directory
+	   mkdir -p $output_dir
+	   mv -f $finished_dir/* $output_dir
+
+           # all top-level tests with empty error files are reported as "passed"
+	   cd $output_dir
+	   echo "" > Summary.txt; echo "[PASSED]" >> Summary.txt
+	   for test in $( find . -maxdepth 1 -size 0 -name "*.err" )
+	   do
+	     testname=`basename $test .err`
+	     echo "-${testname#machine-}" >> Summary.txt
+	   done
+
+           # active tests without a *-done file are reported as "pending"
+	   cd $autotest_dir
+	   echo "" >> Summary.txt; echo "[PENDING]" >> Summary.txt
+	   for test in $( find . -name "*-start" )
+	   do
+	     testname=`echo $test | awk -F- '{print $2}'`
+	     if [ ! -e autotest-$testname-done ]; then
+		 echo "-$testname" >> Summary.txt
+	     else
+		 mv autotest-*$testname* $output_dir
+	     fi
+	   done
+
+           # all top-level tests with non-empty error files are reported as "failed",
+	   # including the cron autotest logs
+	   cd $output_dir
+	   echo "" >> Summary.txt; echo "[FAILED]" >> Summary.txt
+	   for test in $( find .  -maxdepth 1 ! -size 0 -name "*.err" )
+	   do
+	     testname=`basename $test .err`
+	     for prefix in "machine-" "autotest-"; do testname="${testname#$prefix}"; done
+	     echo "-$testname" >> Summary.txt
+	   done
+
+     	   # list all non-empty error files in todays output directory
+	   echo "" >> Summary.txt; echo "[ERROR FILES]" >> Summary.txt
+	   for test in $( find $output_dir ! -size 0 -name "*.err" | sort -r )
+	     do
+	     echo "file://$test" >> Summary.txt
+	   done
+
+	   # fix permissions
+	   chmod -fR a+rX,ug+w,o-w $output_dir
+	   chgrp -fR hypre $output_dir
+
+	   # send the email
+	   cat Summary.txt | /usr/bin/Mail -s "$subject" $email_list
+
+	   exit
+	   ;;
 
        *)
-	   break
+	   shift
 	   ;;
    esac
 done
