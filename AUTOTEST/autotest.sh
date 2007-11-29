@@ -33,7 +33,7 @@ output_dir="$testing_dir/AUTOTEST-`date +%Y.%m.%d-%a`"
 cvs_opts=""
 src_dir="$testing_dir/linear_solvers"
 subject="NEW Autotest Error Summary `date +%D`"
-email_list="falgout2@llnl.gov, tzanio@gmail.com"
+email_list="falgout2@llnl.gov, tzanio@llnl.gov"
 
 while [ "$*" ]
    do
@@ -127,23 +127,24 @@ EOF
 	   mkdir -p $output_dir
 	   mv -f $finished_dir/* $output_dir
 
-           # all top-level tests with empty error files are reported as "passed"
+           # all top-level tests with empty error files are reported as "passed",
+           # not including the cron autotest logs
 	   cd $output_dir
 	   echo "" > Summary.txt; echo "[PASSED]" >> Summary.txt
-	   for test in $( find . -maxdepth 1 -size 0 -name "*.err" )
+	   for test in $( find . -maxdepth 1 -size 0 -name "*.err" ! -name "*cron*" )
 	   do
 	     testname=`basename $test .err`
 	     echo "-${testname#machine-}" >> Summary.txt
 	   done
 
            # active tests without a *-done file are reported as "pending"
-	   cd $autotest_dir
 	   echo "" >> Summary.txt; echo "[PENDING]" >> Summary.txt
+	   cd $autotest_dir
 	   for test in $( find . -name "*-start" )
 	   do
 	     testname=`echo $test | awk -F- '{print $2}'`
 	     if [ ! -e autotest-$testname-done ]; then
-		 echo "-$testname" >> Summary.txt
+		 echo "-$testname" >> $output_dir/Summary.txt
 	     else
 		 mv autotest-*$testname* $output_dir
 	     fi
