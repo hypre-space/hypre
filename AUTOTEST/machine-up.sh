@@ -57,27 +57,29 @@ src_dir=$1
 shift
 
 # Set some environment variables
-PATH=/usr/local/tools/KCC/kcc4.0f18/KCC_BASE/bin
-PATH=$PATH:/usr/local/tools/guide.assure/guide40.31/bin:/usr/java130/bin
-PATH=$PATH:/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb
-PATH=$PATH:/usr/bin/X11:/usr/local/totalview/bin:/usr/local/gnu/bin
-PATH=$PATH:/usr/local/scripts:/usr/apps/bin
-export PATH
-LD_LIBRARY_PATH=`pwd`/../hypre/lib
-export LD_LIBRARY_PATH
-MP_RMPOOL=0
-MP_CPU_USE=unique
-MP_EUIDEVICE=css0
-MP_EUILIB=us
-MP_RESD=yes
-MP_HOSTFILE=NULL
-MP_LABELIO=yes
-MP_INFOLEVEL=1
-MP_RETRY=60
-MP_RETRYCOUNT=10
-export MP_RMPOOL MP_CPU_USE MP_EUIDEVICE MP_EUILIB MP_RESD
-export MP_HOSTFILE MP_LABELIO MP_INFOLEVEL
-export MP_RETRY MP_RETRYCOUNT
+# PATH=/usr/local/tools/KCC/kcc4.0f18/KCC_BASE/bin
+# PATH=$PATH:/usr/local/tools/guide.assure/guide40.31/bin:/usr/java130/bin
+# PATH=$PATH:/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb
+# PATH=$PATH:/usr/bin/X11:/usr/local/totalview/bin:/usr/local/gnu/bin
+# PATH=$PATH:/usr/local/scripts:/usr/apps/bin
+# PATH=/opt/freeware/bin:$PATH
+# PATH=$PATH:.
+# export PATH
+# LD_LIBRARY_PATH=`pwd`/../hypre/lib
+# export LD_LIBRARY_PATH
+# MP_RMPOOL=0
+# MP_CPU_USE=unique
+# MP_EUIDEVICE=css0
+# MP_EUILIB=us
+# MP_RESD=yes
+# MP_HOSTFILE=NULL
+# MP_LABELIO=yes
+# MP_INFOLEVEL=1
+# MP_RETRY=60
+# MP_RETRYCOUNT=10
+# export MP_RMPOOL MP_CPU_USE MP_EUIDEVICE MP_EUILIB MP_RESD
+# export MP_HOSTFILE MP_LABELIO MP_INFOLEVEL
+# export MP_RETRY MP_RETRYCOUNT
 
 # Test various builds (last one is the default build)
 configure_opts="--without-MPI --with-strict-checking"
@@ -92,16 +94,14 @@ do
 done
 
 # Test link for C++
-cd $src_dir/test
-make clean
-make all++ 1> $output_dir/link-c++.out 2> $output_dir/link-c++.err
-cd $test_dir
+./test.sh make.sh $src_dir all++
+mkdir -p link-c++
+mv -f make.??? link-c++
 
 # Test link for Fortran
-cd $src_dir/test
-make clean
-make all77 1> $output_dir/link-f77.out 2> $output_dir/link-f77.err
-cd $test_dir
+./test.sh make.sh $src_dir all77
+mkdir -p link-f77
+mv -f make.??? link-f77
 
 # Test examples
 
@@ -109,38 +109,8 @@ cd $test_dir
 ./test.sh default.sh $src_dir
 mv -f default.??? $output_dir
 
-# Filter misleading error messages
-for errfile in $( find $output_dir -name "*.err*" )
-do
-  for filter in \
-      'INFORMATION:'\
-      '===\ End\ of\ Compilation'\
-      'cpu\ clock'\
-      'wall\ clock'\
-      'Compilation\ successful'\
-      '^\ Guide\ \ \ '\
-      ':\ 0\ errors\ in\ file'\
-      'autoconf\ has\ been\ disabled'\
-      'automake\ has\ been\ disabled'\
-      'autoheader\ has\ been\ disabled'\
-      'ltdl.c:'\
-      'sidl'\
-      '1501-050:\ \(I\)'\
-      '1500-010:\ \(W\)'\
-      'babel_config.h.in:\ No\ such\ file\ or\ directory'\
-      'configure:\ WARNING:\ '
-  do
-    if (egrep "$filter" $errfile > /dev/null) ; then
-	mv $errfile $errfile.tmp
-	egrep -v "$filter" $errfile.tmp > $errfile
-	echo "-- applied filter:$filter" >> $errfile.orig
-	cat $errfile.tmp >> $errfile.orig
-    fi
-  done
-done
-
 # Echo to stderr all nonempty error files in $output_dir
-for errfile in $( find $output_dir -not -empty -and -name "*.err*" )
+for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
