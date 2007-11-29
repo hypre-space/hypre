@@ -43,25 +43,24 @@ cat <<EOF
 
    $0 [options] [-checkout | -{test1} -{test2} ... | -summary]
 
-   where: -checkout  Checks the repository and updates the global AUTOTEST directory.
-                     Should be called in the beginning of the nightly test cycle.
-          -{test}    Runs sequentially the corresponding tests, which are associated
-                     with a specific machine: -tux149, -alc, -thunder, -up, -zeus
-          -summary   Generates a file with currently pending and failed tests and sends it
-                     in an email. Should be called at the end of the nightly test cycle.
+   where: -checkout  Checks out the repository and updates the current AUTOTEST
+                     directory.  Should be called before running tests.
+          -{test}    Runs the indicated tests in sequence, which are associated
+                     with specific machine names (e.g., -tux149, -alc, -up).
+          -summary   Generates a summary file with currently pending and failed
+                     tests and sends it to developers in an email.
 
    with options:
+
       -h|-help       prints this usage information and exits
       -t|-trace      echo each command
 
-   NOTES:
-   - organize the directory structures
-   - change the hypre group permissions appropriately
-   - checkout the repository before calling 'testsrc.sh'
-   - create summary report (option -summary)
-   - will have arguments such as '-tux', '-up', etc.
+   The main purpose of this script is to organize the automatic testing process
+   and to ensure that all related files have the appropriate permissions.
 
-   Example usage: $0 -checkout ; $0 -tux149 ; $0 -summary
+   Example usage: $0 -checkout
+                  $0 -tux149
+                  $0 -summary
 
 EOF
          exit

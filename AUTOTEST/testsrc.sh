@@ -44,12 +44,12 @@ cat <<EOF
       -t|-trace      echo each command
 
    This script is a specialized version of 'test.sh' that runs script
-   {testname}.sh remotely on {machine}.  It is assumed that the {testname}.sh
-   takes only one argument, which will be set to '..' on the remote machine.
+   {testname}.sh remotely on {machine}.  It is assumed that {testname}.sh takes
+   only one argument, which will be set to '..' on the remote machine.
 
    The script first copies the {src_dir} directory into {machine:rem_path}, then
-   copies the current test script directory there (potentially overwriting an
-   already existing AUTOTEST directory).
+   copies the current AUTOTEST script directory there (potentially overwriting
+   an already existing AUTOTEST directory).
 
    The output is still collected locally in exactly the same way as 'test.sh'.
 

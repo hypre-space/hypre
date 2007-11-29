@@ -39,16 +39,19 @@ cat <<EOF
        -h|-help       prints this usage information and exits
        -t|-trace      echo each command
 
-   This script runs the Bourne shell test '{testname}.sh' and creates output files
-   named '{testname}.err' and '{testname}.out' which capture the stderr and stdout
-   output from the test.  The test script is run from the current directory, which
-   should contain this script, '{test_name}.sh', and any other supporting files.
+   This script runs the Bourne shell test '{testname}.sh' and creates output
+   files named '{testname}.err' and '{testname}.out' which capture the stderr
+   and stdout output from the test.  The test script is run from the current
+   directory, which should contain this script, '{test_name}.sh', and any other
+   supporting files.
 
-   A test is deemed to have passed when nothing is written to stderr.  A test may
-   call other tests.  A test may take arguments, such as files or directories.
-   A test may also create output.  It is recommended that all output be collected
-   by the test in a directory named '{testname}.dir'.  Usage documentation should
-   appear at the top of each test.
+   A test is deemed to have passed when nothing is written to stderr.  A test
+   may call other tests.  A test may take arguments, such as directories or
+   files.  A test may also create output, which should be collected by the test
+   in a directory named '{testname}.dir'.  A test may also require additional
+   "filtering" in situations where information is erroneously written to stderr.
+   Text identifying lines to be filtered are added to '{testname}.filters'.
+   Usage documentation should appear at the top of each test.
 
    Example usage: $0 default.sh ..
 

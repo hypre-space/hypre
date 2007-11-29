@@ -1,141 +1,59 @@
 
-This will be a README file describing the structure of this AUTOTEST directory
-and the scripts within.  Some of the below design stuff may appear here...
+This directory contains scripts for running various tests on the hypre library.
+They are run automatically as part of hypre's regression testing, and they are
+run manually to test new distributions of hypre before releasing them to the
+public.  The scripts augment the 'runtest.sh' runtime tests in 'test/TEST_*'.
 
-
-###############################
-
-This file outlines design changes to autotest to make it more flexible,
-maintainable, and extensible.  The current system is not too far away from what
-we want (it's at least headed in the right direction), but there are a number of
-limitations and issues that this redesign will hopefully address.
+Every test in this directory may be run manually by developers without fear of
+interfering with the auto-testing, as long as they are not run from within the
+auto-testing directory (currently '/usr/casc/hypre/testing').
 
 =====================
 
-Goals:
+Organization:
+
+This directory mainly consists of a number of simple Bourne-shell scripts (the
+files with a '.sh' extension).  Except for a few "special scripts" (below), each
+represents an individual test written by a hypre developer.  The special scripts
+are as follows (note that they are the only scripts with "test" in their names):
+
+1. 'test.sh' - Used to run individual tests locally on a machine.
+2. 'testsrc.sh' - Used to run individual tests on a remote machine.
+3. 'testdist.sh' - Used to test a new distribution before release.
+4. 'autotest.sh' - Usually run in an automatic fashion by 'cron', but may also
+                   be run manually by developers (useful for debugging).
+
+Usage information for every script (special or individual test) can be obtained
+by running it with the '-h' option (e.g., 'test.sh -h' or 'make.sh -h').
+
+The file 'cronfile' encapsulates the current 'cron' entries for auto-testing.
+It is possible (and probable) to have multiple developers running 'cron' jobs as
+part of the overall auto-testing.  This needs to be coordinated if the output
+files are being written to the global auto-testing directory.
+
+=====================
+
+Writing tests:
+
+The rules for writing tests are given in the 'test.sh -h' usage information.
+When writing tests, keep in mind the design goals below, especially with respect
+to simplicity, flexibility, and portability.
+
+To write a new test, just use an existing test (e.g., 'default.sh') as a
+template and make the appropriate modifications.  Try not to use the word "test"
+in the name of the script so that we can keep the convention of only the special
+scripts having this in their names.  Try not to use absolute directory paths in
+the script (one exception is the 'machine-*' scripts because they need to set
+machine-specific environment information in order to be run via 'cron').  If in
+doubt, talk to another developer or send an inquiry to hypre-support@llnl.gov.
+
+=====================
+
+Design goals:
 
 - Minimal limitations on the types of tests that are possible.
-- Developers should be able to run the tests manually (as with 'runtest.sh').
+- Developers should be able to run the tests manually.
 - Tests should be runable on both the repository and each release.
 - Minimal dependence on operating system and software tools (for portability).
 - Developers should be able to easily add new tests.
 - Simplicity and flexibility.
-
-=====================
-
-Design Overview:
-
-All of the scripts will be written in the Bourne shell for portability.
-
-There will be three main scripts associated with autotest (the names of these
-scripts are *all* up for negotiation):
-
-1. 'runtest.sh' - Runs a number of mpi jobs and associated tests (the tests are
-   written by the developers).  Can be run manually and is smart enough to deal
-   with batch systems.  This script already exists and probably won't change.
-
-2. 'test.sh' - Runs Bourne shell tests (the tests are written by the developers,
-   and may in turn call 'runtest.sh').  Can be run manually.  The current
-   'autotest_test' script serves a similar role, but needs to be rewritten.
-
-3. 'autotest.sh' - Called by the cron daemon to run nightly regression tests and
-   organize the results in some directory structured that is shared and viewable
-   by the hypre development team.  As part of this process, the script ensures
-   that the results have the right group permissions.  This script should not be
-   called directly by developers.
-
-More detailed documentation on each of these scripts is given below.
-
-There will also be a fourth script (currently called 'autotest_create_summary')
-run by cron that checks the results of the nightly autotest runs and creates a
-summary email that is sent to the hypre developers.
-
-=====================
-
-Script 'runtest.sh':
-
-usage:
-
-  runtest.sh [options] {testpath}/{testname}.sh ...
- 
-  where: {testpath} is the directory path to the test script (and helper files)
-         {testname} is a user-defined name for the test script
- 
-  with options:
-     -h|-help    prints usage information and exits
-     -n|-norun   turn off execute mode, echo what would be run
-     -t|-trace   echo each command
-     -D <var>    define <var> when running tests
-
-This script runs the MPI jobs specified in '{testpath}/{testname}.jobs', then
-runs the test script '{testname}.sh' to test the output from the mpi jobs in
-some way.  More than one test may be specified on the command line.  The two
-{testname} files must both be present.  The format of these files is such that
-they may be run as stand-alone scripts in some environments.
-
-This script first copies the needed MPI codes from the current directory to the
-directory specified by '{testpath}', then runs the MPI jobs and associated test
-script from within the '{testpath}' directory.  Hence, other supporting files
-may be located here.  Also, all output is written here and should use naming
-conventions that distinguish it from other tests.
-
-A test is deemed to have passed when nothing is written to stderr.  This script
-creates an output file named '{testname}.err' which captures the stderr output.
-Some post-filtering is also done to remove erroneous stderr output that is
-sometimes unavoidable (e.g., insure reports a number of MPI errors that are not
-really bugs, so we filter these out).  Filtering should be minimized as much as
-possible!
-
-This script knows about the LC machines and batch system, and is able to submit
-the MPI jobs in the '.jobs' files through the batch system.  There is also an
-additional feature of the '.jobs' file format that allows individual jobs to be
-explicitly grouped together in a single batch script.
-
-Questions: 
-
-The current 'runtest.sh' documentation states that output files should have a
-specific naming convention.  Is this true?  Is it necessary?
-
-=====================
-
-Script 'test.sh':
-
-usage:
-
-  test.sh [options] {testpath}/{testname}.sh [{testname}.sh arguments]
- 
-  where: {testpath} is the directory path to the test script (and helper files)
-         {testname} is the user-defined name for the test script
- 
-  with options:
-     -h|-help    prints usage information and exits
-     -t|-trace   echo each command
-
-This script runs the Bourne shell test '{testname}.sh' and creates an output
-file named '{testname}.err' which captures the stderr output from the test.  The
-test script is run from within the directory specified by '{testpath}'.
-
-A test is deemed to have passed when nothing is written to stderr.  A test may
-call other tests.  A test may take arguments.  Note that care should be taken
-with some types of arguments such as files or directories since scripts are run
-from within the '{testpath}' directory.  In these cases, it is best to require
-absolute path names.  A test may also create output.  It is recommended that all
-output be collected by the test in a directory named '{testname}.out'.  Usage
-documentation should appear at the top of each test.
-
-=====================
-
-Script 'autotest.sh':
-
-More stuff here...
-Must change group permissions.
-
-=====================
-
-Organization of autotest results:
-
-More stuff here...
-
-=====================
-
-Write some examples and plan an initial suite of tests...
