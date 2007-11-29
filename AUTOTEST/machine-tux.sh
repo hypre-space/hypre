@@ -58,9 +58,13 @@ shift
 
 # Set some environment variables
 MPICH=/usr/apps/mpich/default/bin:/usr/apps/mpich/1.2.7p1/bin
-PARASOFT=/usr/apps/insure++/default
-INSURE=/usr/apps/ParaSoft/insure++7.1.0/bin:/usr/apps/insure++/default/bin
-PATH=$MPICH:$INSURE:$PATH
+P4_RSHCOMMAND=/usr/apps/mpich/default/bin/ssh-nobanner
+# P4_RSHCOMMAND=/usr/apps/mpich/1.2.7p1/bin/ssh-nobanner
+export P4_RSHCOMMAND
+PARASOFT=/usr/apps/ParaSoft/insure++7.1.0
+# PARASOFT=/usr/apps/insure++/default
+export PARASOFT
+PATH=$MPICH:$PARASOFT/bin:/usr/local/bin:$PATH
 export PATH
 
 # Test various builds (last one is the default build)
@@ -76,14 +80,14 @@ do
 done
 
 # Test link for C++
-cd $src_dir/test
-make all++ 1> $output_dir/link-c++.out 2> $output_dir/link-c++.err
-cd $test_dir
+./test.sh make.sh $src_dir all++
+mkdir -p link-c++
+mv -f make.??? link-c++
 
 # Test link for Fortran
-cd $src_dir/test
-make all77 1> $output_dir/link-f77.out 2> $output_dir/link-f77.err
-cd $test_dir
+./test.sh make.sh $src_dir all77
+mkdir -p link-f77
+mv -f make.??? link-f77
 
 # Test examples
 
@@ -91,45 +95,8 @@ cd $test_dir
 ./test.sh debug.sh $src_dir --with-insure
 mv -f debug.??? $output_dir
 
-# Filter misleading error messages
-for errfile in $( find $output_dir -name "*.err*" )
-do
-  for filter in \
-      'autoconf\ has\ been\ disabled'\
-      'automake\ has\ been\ disabled'\
-      'autoheader\ has\ been\ disabled'\
-      'configure:\ WARNING:\ Configuration\ for'\
-      'configure:\ WARNING:\ Skipping\ Java'\
-      'cpu\ clock'\
-      'wall\ clock'\
-      'Error:\ PDF'\
-      'babel_config.h.in:\ No\ such\ file\ or\ directory'\
-      '../../../babel/runtime'\
-      'ltdl.c:'\
-      'sidl'\
-      'Insure\ messages\ will\ be\ written\ to'\
-      'Timeout\ in\ waiting\ for\ processes\ to'\
-      'rsh\ program'\
-      'problem'\
-      'This\ is\ not\ a\ problem'\
-      'environment'\
-      'process\ termination'\
-      'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
-      'PGC/x86\ Linux/x86\ 3.3-1:\ compilation\ completed\ with\ warnings'\
-      'sed:\ Couldn.t\ close\ '\
-      'Warning:\ No\ xauth\ data'
-  do
-    if (egrep "$filter" $errfile > /dev/null) ; then
-	mv $errfile $errfile.tmp
-	egrep -v "$filter" $errfile.tmp > $errfile
-	echo "-- applied filter:$filter" >> $errfile.orig
-	cat $errfile.tmp >> $errfile.orig
-    fi
-  done
-done
-
 # Echo to stderr all nonempty error files in $output_dir
-for errfile in $( find $output_dir -not -empty -and -name "*.err*" )
+for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
