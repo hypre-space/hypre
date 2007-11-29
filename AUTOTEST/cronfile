@@ -1,0 +1,7 @@
+30 0 * * * cd /usr/casc/hypre/testing/; ./autotest.sh -checkout
+00 1 * * * cd /usr/casc/hypre/testing/; ./autotest.sh -tux149 >> autotest-tux149-cron.out 2>> autotest-tux149-cron.err
+00 1 * * * cd /usr/casc/hypre/testing/; ./autotest.sh -alc >> autotest-alc-cron.out 2>> autotest-alc-cron.err
+00 1 * * * cd /usr/casc/hypre/testing/; ./autotest.sh -thunder >> autotest-thunder-cron.out 2>> autotest-thunder-cron.err
+00 1 * * * cd /usr/casc/hypre/testing/; ./autotest.sh -up >> autotest-up-cron.out 2>> autotest-up-cron.err
+00 1 * * * cd /usr/casc/hypre/testing/; ./autotest.sh -zeus >> autotest-zeus-cron.out 2>> autotest-zeus-cron.err
+00 6 * * * cd /usr/casc/hypre/testing/; ./autotest.sh -summary
