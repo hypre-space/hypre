@@ -203,7 +203,7 @@ then
       KCC|mpiKCC)
         CFLAGS="-fast +K3"
         ;;
-      cc|mpcc|mpiicc|xlc)
+      cc|mpcc|mpiicc|mpxlc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -O2"
@@ -267,7 +267,7 @@ then
       KCC|mpiKCC)
         CXXFLAGS="-fast +K3"
         ;;
-      CC|mpCC|mpiicc|xlC|cxx)
+      CC|mpCC|mpiicc|mpxlC|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -O2"
@@ -403,7 +403,7 @@ then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
-      cc|mpcc|mpiicc|xlc)
+      cc|mpcc|mpiicc|mpxlc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -g"
@@ -467,7 +467,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|mpCC|mpiicc|xlC|cxx)
+      CC|mpCC|mpiicc|mpxlC|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -g"
