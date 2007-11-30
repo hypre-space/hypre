@@ -195,6 +195,15 @@ main( int   argc,
    double   drop_tol = -1;
    int      nonzeros_to_keep = -1;
 
+   /* parameters for Euclid or ILU smoother in AMG */
+   double   eu_ilut = 0.0;
+   double   eu_sparse_A = 0.0;
+   int	    eu_bj = 0;
+   int	    eu_level = -1;
+   int	    eu_stats = 0;
+   int	    eu_mem = 0;
+   int	    eu_row_scale = 0; /* Euclid only */
+
    /* parameters for GMRES */
    int	    k_dim;
 
@@ -746,6 +755,41 @@ main( int   argc,
          arg_index++;
          nonzeros_to_keep  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-ilut") == 0 )
+      {
+         arg_index++;
+         eu_ilut  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sparseA") == 0 )
+      {
+         arg_index++;
+         eu_sparse_A  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rowScale") == 0 )
+      {
+         arg_index++;
+         eu_row_scale  = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-level") == 0 )
+      {
+         arg_index++;
+         eu_level  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-bj") == 0 )
+      {
+         arg_index++;
+         eu_bj  = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-eu_stats") == 0 )
+      {
+         arg_index++;
+         eu_stats  = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-eu_mem") == 0 )
+      {
+         arg_index++;
+         eu_mem  = 1;
+      }
       else if ( strcmp(argv[arg_index], "-tr") == 0 )
       {
          arg_index++;
@@ -1021,6 +1065,13 @@ main( int   argc,
       printf("\n");
       printf("  -sai_th   <val>        : set ParaSAILS threshold = val \n");
       printf("  -sai_filt <val>        : set ParaSAILS filter = val \n");
+      printf("\n");
+      printf("  -level   <val>         : set k in ILU(k) for Euclid \n");
+      printf("  -bj <val>              : enable block Jacobi ILU for Euclid \n");
+      printf("  -ilut <val>            : set drop tolerance for ILUT in Euclid\n");
+      printf("                           Note ILUT is sequential only!\n");
+      printf("  -sparseA <val>         : set drop tolerance in ILU(k) for Euclid \n");
+      printf("  -rowScale <val>        : enable row scaling in Euclid \n");
       printf("\n");  
       printf("  -drop_tol  <val>       : set threshold for dropping in PILUT\n");
       printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
@@ -1918,6 +1969,10 @@ main( int   argc,
       HYPRE_BoomerAMGSetOverlap(amg_solver, overlap);
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
+      if (eu_level < 0) eu_level = 0;
+      HYPRE_BoomerAMGSetEuLevel(amg_solver, eu_level);
+      HYPRE_BoomerAMGSetEuBJ(amg_solver, eu_bj);
+      HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
@@ -2022,6 +2077,10 @@ main( int   argc,
       HYPRE_BoomerAMGSetOverlap(amg_solver, overlap);
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
+      if (eu_level < 0) eu_level = 0;
+      HYPRE_BoomerAMGSetEuLevel(amg_solver, eu_level);
+      HYPRE_BoomerAMGSetEuBJ(amg_solver, eu_bj);
+      HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
@@ -2156,6 +2215,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2263,6 +2326,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
@@ -2290,7 +2357,15 @@ main( int   argc,
             we'll use what I think is simplest: let Euclid internally 
             parse the command line.
          */   
-         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
+         if (eu_level > -1) HYPRE_EuclidSetLevel(pcg_precond, eu_level);
+         if (eu_ilut) HYPRE_EuclidSetILUT(pcg_precond, eu_ilut);
+         if (eu_sparse_A) HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A);
+         if (eu_row_scale) HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale);
+         if (eu_bj) HYPRE_EuclidSetBJ(pcg_precond, eu_bj);
+         HYPRE_EuclidSetStats(pcg_precond, eu_stats);
+         HYPRE_EuclidSetMem(pcg_precond, eu_mem);
+
+         /*HYPRE_EuclidSetParams(pcg_precond, argc, argv);*/
 
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
@@ -2445,6 +2520,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2541,6 +2620,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
@@ -2579,12 +2662,14 @@ main( int   argc,
 
          HYPRE_EuclidCreate(MPI_COMM_WORLD, &pcg_precond);
 
-         /* note: There are three three methods of setting run-time 
-            parameters for Euclid: (see HYPRE_parcsr_ls.h); here
-            we'll use what I think is simplest: let Euclid internally 
-            parse the command line.
-         */   
-         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
+         if (eu_level > -1) HYPRE_EuclidSetLevel(pcg_precond, eu_level);
+         if (eu_ilut) HYPRE_EuclidSetILUT(pcg_precond, eu_ilut);
+         if (eu_sparse_A) HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A);
+         if (eu_row_scale) HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale);
+         if (eu_bj) HYPRE_EuclidSetBJ(pcg_precond, eu_bj);
+         HYPRE_EuclidSetStats(pcg_precond, eu_stats);
+         HYPRE_EuclidSetMem(pcg_precond, eu_mem);
+         /*HYPRE_EuclidSetParams(pcg_precond, argc, argv);*/
 
          HYPRE_GMRESSetPrecond (pcg_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
@@ -2729,6 +2814,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2783,7 +2872,15 @@ main( int   argc,
             we'll use what I think is simplest: let Euclid internally 
             parse the command line.
          */   
-         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
+         if (eu_level > -1) HYPRE_EuclidSetLevel(pcg_precond, eu_level);
+         if (eu_ilut) HYPRE_EuclidSetILUT(pcg_precond, eu_ilut);
+         if (eu_sparse_A) HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A);
+         if (eu_row_scale) HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale);
+         if (eu_bj) HYPRE_EuclidSetBJ(pcg_precond, eu_bj);
+         HYPRE_EuclidSetStats(pcg_precond, eu_stats);
+         HYPRE_EuclidSetMem(pcg_precond, eu_mem);
+
+         /*HYPRE_EuclidSetParams(pcg_precond, argc, argv);*/
 
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
