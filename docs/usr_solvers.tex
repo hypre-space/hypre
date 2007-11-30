@@ -972,12 +972,16 @@ HYPRE_ParCSRMatrix A;
 //Instantiate the preconditioner.
 HYPRE_EuclidCreate(comm, &eu);
 
-//Optionally use the following two calls to set runtime options.
+//Optionally use the following three methods to set runtime options.
 // 1. pass options from command line or string array.
 HYPRE_EuclidSetParams(eu, argc, argv);
 
 // 2. pass options from a configuration file.
 HYPRE_EuclidSetParamsFromFile(eu, "filename");
+
+// 3. pass options using interface functions.
+HYPRE_EuclidSetLevel(eu, 3);
+...
 
 //Set Euclid as the preconditioning method for some
 //other solver, using the function calls HYPRE_EuclidSetup
@@ -1091,6 +1095,15 @@ mpirun -np 2 phoo -db_filename ../myConfigFile
 \end{verbatim}
 \end{display}
 
+{\bf Method 4.}
+One can also set parameters via interface functions, e.g
+\begin{display}
+\begin{verbatim}
+int HYPRE_EuclidSetLevel(HYPRE_Solver solver, int level);
+\end{verbatim}
+\end{display}
+For a full set of functions, see the reference manual.
+
 %-----------------------------
 
 \subsection{Options Summary}
@@ -1120,12 +1133,6 @@ mpirun -np 2 phoo -db_filename ../myConfigFile
                in MPI\_COMM\_WORLD is 0.
 \item[-printTestData] This option is used in our autotest procedures,
                  and should not normally be invoked by users.
-\end{description}
-
-The following options are partially implemented, but not
-yet fully functional (i.e, don't use them until further notice).
-
-\begin{description}
 \item[-sparseA $\langle float \rangle$] Drop-tolerance for ILU($k$) factorization.
                         Default: 0 (no dropping).
                         Entries are treated as zero if their absolute
@@ -1153,16 +1160,7 @@ yet fully functional (i.e, don't use them until further notice).
                  CAUTION: If the coefficient matrix $A$ is symmetric, this 
                  setting is likely to cause the filled matrix,
                  $F = L+U-I$, to be unsymmetric.
-\item[-maxNzPerRow  $\langle int \rangle$] This sets the maximum number
-                 of nonzeros that is permitted in any row of $F$, in
-                 addition to the number that would result from an ILU(0)
-                 factorization.  A negative value %indicates that
-                 indicates infinity (no limit).
-                 %no limit should be imposed (equivalent to a setting
-                 %if infinity).  
-                 This setting is effective for both ILU($k$)
-                 and ILUT factorization methods.
-                 Default: infinity, for ILU($k$); 5, for ILUT.
+                 NOTE: this option can only be used sequentially!
 \end{description}
 
 %-----------------------------------------------------------------------------
