@@ -10,7 +10,7 @@ HYPRE_DIR = ../hypre
 ########################################################################
 # Compiling and linking options
 ########################################################################
-COPTS     = -g -pedantic -Wall
+COPTS     = -g -Wall
 CINCLUDES = -I$(HYPRE_DIR)/include
 CDEFS     = -DHAVE_CONFIG_H -DHYPRE_TIMING
 CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
@@ -18,7 +18,7 @@ FOPTS     = -g
 FINCLUDES = $(CINCLUDES)
 FDEFS     = $(CDEFS)
 FFLAGS    = $(FOPTS) $(FINCLUDES) $(FDEFS)
-CXXOPTS   = $(COPTS)
+CXXOPTS   = $(COPTS) -Wno-deprecated
 CXXINCLUDES = $(CINCLUDES) -I..
 CXXDEFS   = $(CDEFS)
 IFLAGS_BXX = -I../babel-runtime/sidl
