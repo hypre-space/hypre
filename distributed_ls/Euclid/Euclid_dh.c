@@ -343,7 +343,7 @@ void get_runtime_params_private(Euclid_dh ctx)
   Parser_dhReadInt(parser_dh, "-pc_ilu_levels", &ctx->level);
 
   if (Parser_dhHasSwitch(parser_dh, "-ilut")) {
-    Parser_dhReadDouble(parser_dh, "-dt", &ctx->droptol);
+    Parser_dhReadDouble(parser_dh, "-ilut", &ctx->droptol);
     ctx->isScaled = true;
     strcpy(ctx->algo_ilu, "ilut");
   }
