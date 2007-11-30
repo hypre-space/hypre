@@ -30,7 +30,7 @@ testname=`basename $0 .sh`
 # Echo usage information
 case $1 in
    -h|-help)
-cat <<EOF
+      cat <<EOF
 
    $0 [-h] {src_dir} [options for configure]
 
@@ -42,8 +42,8 @@ cat <<EOF
    Example usage: $0 ..
 
 EOF
-   exit
-   ;;
+      exit
+      ;;
 esac
 
 # Setup

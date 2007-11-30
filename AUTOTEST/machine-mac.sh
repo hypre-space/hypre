@@ -58,25 +58,25 @@ shift
 
 # Test various builds (last one is the default build)
 configure_opts="--without-MPI"
-for copt in $configure_opts ""
+for opt in $configure_opts ""
 do
-   ./test.sh configure.sh $src_dir $copt --enable-debug
-   output_subdir=$output_dir/build$copt
+   output_subdir=$output_dir/build$opt
    mkdir -p $output_subdir
+   ./test.sh configure.sh $src_dir $opt --enable-debug
    mv -f configure.??? $output_subdir
    ./test.sh make.sh $src_dir test
    mv -f make.??? $output_subdir
 done
 
-# Test link for C++
-./test.sh make.sh $src_dir all++
-mkdir -p link-c++
-mv -f make.??? link-c++
-
-# Test link for Fortran
-./test.sh make.sh $src_dir all77
-mkdir -p link-f77
-mv -f make.??? link-f77
+# Test linking for various compilers
+link_opts="all++ all77"
+for opt in $link_opts
+do
+   output_subdir=$output_dir/link$opt
+   mkdir -p $output_subdir
+   ./test.sh link.sh $src_dir $opt
+   mv -f link.??? $output_subdir
+done
 
 # Test runtest tests
 ./test.sh default.sh $src_dir

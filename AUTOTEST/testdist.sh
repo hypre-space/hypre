@@ -26,10 +26,10 @@
 #EHEADER**********************************************************************
 
 while [ "$*" ]
-   do
+do
    case $1 in
       -h|-help)
-cat <<EOF
+         cat <<EOF
 
    $0 [options] {release} {machine:rem_path} {testname}.sh
 

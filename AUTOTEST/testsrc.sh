@@ -26,10 +26,10 @@
 #EHEADER**********************************************************************
 
 while [ "$*" ]
-   do
+do
    case $1 in
       -h|-help)
-cat <<EOF
+         cat <<EOF
 
    $0 [options] {src_dir} {machine:rem_path} {testname}.sh
 
@@ -82,9 +82,9 @@ rem_dir=`basename $src_dir`
 rem_dir_exists=`ssh -q $machine "(/bin/sh -c \"[ -d $rem_path/$rem_dir ] && echo \"yes\" || (mkdir -p $rem_path/$rem_dir; echo \"no\")\")"`
 if [ "$rem_dir_exists" == "yes" ]
 then
-    rsync -zvae ssh --delete $src_dir/ $machine:$rem_path/$rem_dir
+   rsync -zvae ssh --delete $src_dir/ $machine:$rem_path/$rem_dir
 else
-    tar -C `dirname $src_dir` -zvcf - $rem_dir | ssh $machine tar -C $rem_path -zxf -
+   tar -C `dirname $src_dir` -zvcf - $rem_dir | ssh $machine tar -C $rem_path -zxf -
 fi
 rsync -zvae ssh --delete . $machine:$rem_path/$rem_dir/AUTOTEST
 

@@ -30,7 +30,7 @@ testname=`basename $0 .sh`
 # Echo usage information
 case $1 in
    -h|-help)
-cat <<EOF
+      cat <<EOF
 
    **** Only run this script on the uP machine ****
 
@@ -44,8 +44,8 @@ cat <<EOF
    Example usage: $0 ..
 
 EOF
-   exit
-   ;;
+      exit
+      ;;
 esac
 
 # Setup
@@ -55,6 +55,40 @@ rm -fr $output_dir
 mkdir -p $output_dir
 src_dir=$1
 shift
+
+# Test various builds (last one is the default build)
+configure_opts="--without-MPI --with-strict-checking"
+for opt in $configure_opts ""
+do
+   ./test.sh configure.sh $src_dir $opt --enable-debug
+   output_subdir=$output_dir/build$opt
+   mkdir -p $output_subdir
+   mv -f configure.??? $output_subdir
+   ./test.sh make.sh $src_dir test
+   mv -f make.??? $output_subdir
+done
+
+# Test linking for various compilers
+link_opts="all++ all77"
+for opt in $link_opts
+do
+   output_subdir=$output_dir/link$opt
+   mkdir -p $output_subdir
+   ./test.sh link.sh $src_dir $opt
+   mv -f link.??? $output_subdir
+done
+
+# Test examples
+
+# Test runtest tests
+./test.sh default.sh $src_dir
+mv -f default.??? $output_dir
+
+# Echo to stderr all nonempty error files in $output_dir
+for errfile in $( find $output_dir ! -size 0 -name "*.err" )
+do
+   echo $errfile >&2
+done
 
 # Set some environment variables
 # PATH=/usr/local/tools/KCC/kcc4.0f18/KCC_BASE/bin
@@ -80,37 +114,3 @@ shift
 # export MP_RMPOOL MP_CPU_USE MP_EUIDEVICE MP_EUILIB MP_RESD
 # export MP_HOSTFILE MP_LABELIO MP_INFOLEVEL
 # export MP_RETRY MP_RETRYCOUNT
-
-# Test various builds (last one is the default build)
-configure_opts="--without-MPI --with-strict-checking"
-for copt in $configure_opts ""
-do
-   ./test.sh configure.sh $src_dir $copt --enable-debug
-   output_subdir=$output_dir/build$copt
-   mkdir -p $output_subdir
-   mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir test
-   mv -f make.??? $output_subdir
-done
-
-# Test link for C++
-./test.sh make.sh $src_dir all++
-mkdir -p link-c++
-mv -f make.??? link-c++
-
-# Test link for Fortran
-./test.sh make.sh $src_dir all77
-mkdir -p link-f77
-mv -f make.??? link-f77
-
-# Test examples
-
-# Test runtest tests
-./test.sh default.sh $src_dir
-mv -f default.??? $output_dir
-
-# Echo to stderr all nonempty error files in $output_dir
-for errfile in $( find $output_dir ! -size 0 -name "*.err" )
-do
-   echo $errfile >&2
-done

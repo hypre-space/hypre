@@ -30,7 +30,7 @@ testname=`basename $0 .sh`
 # Echo usage information
 case $1 in
    -h|-help)
-cat <<EOF
+      cat <<EOF
 
    $0 [-h|-help] {src_dir}
 
@@ -42,19 +42,13 @@ cat <<EOF
    Example usage: $0 ..
 
 EOF
-   exit
-   ;;
+      exit
+      ;;
 esac
 
 # Setup
 src_dir=$1
 shift
-
-# Set some environment variables
-# LATEX2HTML=/usr/apps/latex2html/default
-# DOCPP=$HOME/local
-# PATH=$LATEX2HTML/bin:$PATH:$DOCPP/bin
-# export PATH
 
 # Make sure Makefile.config is generated
 cd $src_dir

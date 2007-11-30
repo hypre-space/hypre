@@ -30,7 +30,7 @@ testname=`basename $0 .sh`
 # Echo usage information
 case $1 in
    -h|-help)
-cat <<EOF
+      cat <<EOF
 
    **** Only run this script on one of the tux machines. ****
 
@@ -44,8 +44,8 @@ cat <<EOF
    Example usage: $0 ..
 
 EOF
-   exit
-   ;;
+      exit
+      ;;
 esac
 
 # Setup
@@ -56,38 +56,27 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Set some environment variables
-MPICH=/usr/apps/mpich/default/bin:/usr/apps/mpich/1.2.7p1/bin
-P4_RSHCOMMAND=/usr/apps/mpich/default/bin/ssh-nobanner
-# P4_RSHCOMMAND=/usr/apps/mpich/1.2.7p1/bin/ssh-nobanner
-export P4_RSHCOMMAND
-PARASOFT=/usr/apps/ParaSoft/insure++7.1.0
-# PARASOFT=/usr/apps/insure++/default
-export PARASOFT
-PATH=$MPICH:$PARASOFT/bin:/usr/local/bin:$PATH
-export PATH
-
 # Test various builds (last one is the default build)
 configure_opts="--with-babel --without-MPI --with-strict-checking"
-for copt in $configure_opts ""
+for opt in $configure_opts ""
 do
-   ./test.sh configure.sh $src_dir $copt
-   output_subdir=$output_dir/build$copt
+   output_subdir=$output_dir/build$opt
    mkdir -p $output_subdir
+   ./test.sh configure.sh $src_dir $opt
    mv -f configure.??? $output_subdir
    ./test.sh make.sh $src_dir test
    mv -f make.??? $output_subdir
 done
 
-# Test link for C++
-./test.sh make.sh $src_dir all++
-mkdir -p link-c++
-mv -f make.??? link-c++
-
-# Test link for Fortran
-./test.sh make.sh $src_dir all77
-mkdir -p link-f77
-mv -f make.??? link-f77
+# Test linking for various compilers
+link_opts="all++ all77"
+for opt in $link_opts
+do
+   output_subdir=$output_dir/link$opt
+   mkdir -p $output_subdir
+   ./test.sh link.sh $src_dir $opt
+   mv -f link.??? $output_subdir
+done
 
 # Test examples
 
@@ -95,8 +84,28 @@ mv -f make.??? link-f77
 ./test.sh debug.sh $src_dir --with-insure
 mv -f debug.??? $output_dir
 
+# Test documentation build (only if 'docs' directory is present)
+if [ -d $src_dir/docs ]; then
+   ./test.sh docs.sh $src_dir
+   mv -f docs.??? $output_dir
+fi
+
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
+
+# Set some environment variables
+# MPICH=/usr/apps/mpich/default/bin:/usr/apps/mpich/1.2.7p1/bin
+# P4_RSHCOMMAND=/usr/apps/mpich/default/bin/ssh-nobanner
+# P4_RSHCOMMAND=/usr/apps/mpich/1.2.7p1/bin/ssh-nobanner
+# export P4_RSHCOMMAND
+# PARASOFT=/usr/apps/ParaSoft/insure++7.1.0
+# PARASOFT=/usr/apps/insure++/default
+# export PARASOFT
+# PATH=$MPICH:$PARASOFT/bin:/usr/local/bin:$PATH
+# LATEX2HTML=/usr/apps/latex2html/default
+# DOCPP=$HOME/local
+# PATH=$LATEX2HTML/bin:$PATH:$DOCPP/bin
+# export PATH

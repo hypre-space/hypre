@@ -32,14 +32,14 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   $0 [-h] {src_dir} [options for configure]
+   $0 [-h] {src_dir} [options for make in the test directory]
 
    where: {src_dir}  is the hypre source directory
           -h|-help   prints this usage information and exits
 
-   This script runs configure in {src_dir} with optional parameters.
+   This script runs make clean; make [options] in {src_dir}/test.
 
-   Example usage: $0 .. --enable-debug
+   Example usage: $0 .. all++
 
 EOF
       exit
@@ -47,23 +47,10 @@ EOF
 esac
 
 # Setup
-output_dir=`pwd`/$testname.dir
-rm -fr $output_dir
-mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Run configure
-cd $src_dir
-if [ "`/bin/uname -s`" = "AIX" ]
-then
-   nopoe ./configure $@
-else
-   ./configure $@
-fi
-
-# Save config.log and Makefile.config
-cp config.log config/Makefile.config $output_dir
-
-# Save the environment variables
-set > $output_dir/sh.env
+# Run make
+cd $src_dir/test
+make clean
+make $@

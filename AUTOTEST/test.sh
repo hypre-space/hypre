@@ -26,10 +26,10 @@
 #EHEADER**********************************************************************
 
 while [ "$*" ]
-   do
+do
    case $1 in
       -h|-help)
-cat <<EOF
+         cat <<EOF
 
    $0 [options] {testname}.sh [{testname}.sh args]
 
@@ -77,10 +77,11 @@ echo "Running test [$testname]"
 # Filter misleading error messages
 if [ -e $testname.filters ]; then
     if (egrep -f $testname.filters $testname.err > /dev/null) ; then
-	echo "This file contains the original copy of $testname.err before filtering" > $testname.fil
-	cat $testname.err >> $testname.fil
-	mv $testname.err $testname.tmp
-	egrep -v -f $testname.filters $testname.tmp > $testname.err
-	rm -f $testname.tmp
+       echo "This file contains the original $testname.err before filtering" \
+          > $testname.fil
+       cat $testname.err >> $testname.fil
+       mv $testname.err $testname.tmp
+       egrep -v -f $testname.filters $testname.tmp > $testname.err
+       rm -f $testname.tmp
     fi
 fi
