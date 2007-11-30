@@ -358,7 +358,7 @@ int
 HYPRE_EuclidSetLevel(HYPRE_Solver solver, 
 				int level)
 {
-  char *str_level;
+  char str_level[8];
   START_FUNC_DH
   sprintf(str_level,"%d",level);
   Parser_dhInsert(parser_dh, "-level", str_level); HYPRE_EUCLID_ERRCHKA;
@@ -369,7 +369,7 @@ int
 HYPRE_EuclidSetBJ(HYPRE_Solver solver, 
 				int bj)
 {
-  char *str_bj;
+  char str_bj[8];
   START_FUNC_DH
   sprintf(str_bj,"%d",bj);
   Parser_dhInsert(parser_dh, "-bj", str_bj); HYPRE_EUCLID_ERRCHKA;
@@ -380,7 +380,7 @@ int
 HYPRE_EuclidSetStats(HYPRE_Solver solver, 
 				int eu_stats)
 {
-  char *str_eu_stats;
+  char str_eu_stats[8];
   START_FUNC_DH
   sprintf(str_eu_stats,"%d",eu_stats);
   Parser_dhInsert(parser_dh, "-eu_stats", str_eu_stats); HYPRE_EUCLID_ERRCHKA;
@@ -391,7 +391,7 @@ int
 HYPRE_EuclidSetMem(HYPRE_Solver solver, 
 				int eu_mem)
 {
-  char *str_eu_mem;
+  char str_eu_mem[8];
   START_FUNC_DH
   sprintf(str_eu_mem,"%d",eu_mem);
   Parser_dhInsert(parser_dh, "-eu_mem", str_eu_mem); HYPRE_EUCLID_ERRCHKA;
@@ -402,7 +402,7 @@ int
 HYPRE_EuclidSetILUT(HYPRE_Solver solver, 
 				double ilut)
 {
-  char *str_ilut;
+  char str_ilut[256];
   START_FUNC_DH
   sprintf(str_ilut,"%f",ilut);
   Parser_dhInsert(parser_dh, "-ilut", str_ilut); HYPRE_EUCLID_ERRCHKA;
@@ -410,22 +410,10 @@ HYPRE_EuclidSetILUT(HYPRE_Solver solver,
 }
 
 int
-HYPRE_EuclidSetMaxNzPerRow(HYPRE_Solver solver, 
-				int max_nz_per_row)
-{
-  char *str_max_nz_per_row;
-  START_FUNC_DH
-  sprintf(str_max_nz_per_row,"%d",max_nz_per_row);
-  Parser_dhInsert(parser_dh, "-maxNzPerRow", str_max_nz_per_row); 
-  HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
-}
-
-int
 HYPRE_EuclidSetSparseA(HYPRE_Solver solver, 
 				double sparse_A)
 {
-  char *str_sparse_A;
+  char str_sparse_A[256];
   START_FUNC_DH
   sprintf(str_sparse_A,"%f",sparse_A);
   Parser_dhInsert(parser_dh, "-sparseA", str_sparse_A); 
@@ -437,7 +425,7 @@ int
 HYPRE_EuclidSetRowScale(HYPRE_Solver solver, 
 				int row_scale)
 {
-  char *str_row_scale;
+  char str_row_scale[8];
   START_FUNC_DH
   sprintf(str_row_scale,"%d",row_scale);
   Parser_dhInsert(parser_dh, "-rowScale", str_row_scale); 

@@ -90,9 +90,11 @@ hypre_BoomerAMGCreate()
    int      variant, overlap, domain_type;
    double   schwarz_rlx_weight;
    int	    level, sym;
+   int	    eu_level, eu_bj;
+   int	    max_nz_per_row;
    double   thresh, filter;
    double   drop_tol;
-   int	    max_nz_per_row;
+   double   eu_sparse_A;
    char    *euclidfile;
 
    int block_mode;
@@ -155,6 +157,9 @@ hypre_BoomerAMGCreate()
    drop_tol = 0.0001;
    max_nz_per_row = 20;
    euclidfile = NULL;
+   eu_level = 0;
+   eu_sparse_A = 0.0;
+   eu_bj = 0;
 
    /* solve params */
    min_iter  = 0;
@@ -222,6 +227,9 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetDropTol(amg_data, drop_tol);
    hypre_BoomerAMGSetMaxNzPerRow(amg_data, max_nz_per_row);
    hypre_BoomerAMGSetEuclidFile(amg_data, euclidfile);
+   hypre_BoomerAMGSetEuLevel(amg_data, eu_level);
+   hypre_BoomerAMGSetEuSparseA(amg_data, eu_sparse_A);
+   hypre_BoomerAMGSetEuBJ(amg_data, eu_bj);
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
@@ -2817,6 +2825,57 @@ hypre_BoomerAMGSetEuclidFile( void     *data,
       return hypre_error_flag;
    } 
    hypre_ParAMGDataEuclidFile(amg_data) = euclidfile;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetEuLevel( void     *data,
+                            int      eu_level)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataEuLevel(amg_data) = eu_level;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetEuSparseA( void     *data,
+                             double    eu_sparse_A)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataEuSparseA(amg_data) = eu_sparse_A;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetEuBJ( void     *data,
+                        int       eu_bj)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataEuBJ(amg_data) = eu_bj;
 
    return hypre_error_flag;
 }

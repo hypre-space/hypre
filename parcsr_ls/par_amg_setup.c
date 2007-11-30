@@ -147,6 +147,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    double    drop_tol;
    int	     max_nz_per_row;
    char     *euclidfile;
+   int	     eu_level;
+   int	     eu_bj;
+   double    eu_sparse_A;
 
    int interp_type;
    int post_interp_type;  /* what to do after computing the interpolation matrix
@@ -180,6 +183,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    drop_tol = hypre_ParAMGDataDropTol(amg_data);
    max_nz_per_row = hypre_ParAMGDataMaxNzPerRow(amg_data);
    euclidfile = hypre_ParAMGDataEuclidFile(amg_data);
+   eu_level = hypre_ParAMGDataEuLevel(amg_data);
+   eu_sparse_A = hypre_ParAMGDataEuSparseA(amg_data);
+   eu_bj = hypre_ParAMGDataEuBJ(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
    post_interp_type = hypre_ParAMGDataPostInterpType(amg_data);
    IS_type = hypre_ParAMGDataISType(amg_data);
@@ -1986,14 +1992,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_EuclidCreate(comm, &smoother[j]);
          if (euclidfile)
             HYPRE_EuclidSetParamsFromFile(smoother[j],euclidfile); 
-         if (nlevel)
-            HYPRE_EuclidSetLevel(smoother[j],nlevel); 
-         else
-            HYPRE_EuclidSetLevel(smoother[j],0); 
-         if (drop_tol)
-            HYPRE_EuclidSetILUT(smoother[j],drop_tol); 
-         if (max_nz_per_row)
-            HYPRE_EuclidSetMaxNzPerRow(smoother[j],max_nz_per_row); 
+         HYPRE_EuclidSetLevel(smoother[j],eu_level); 
+         if (eu_bj)
+            HYPRE_EuclidSetBJ(smoother[j],eu_bj); 
+         if (eu_sparse_A)
+            HYPRE_EuclidSetSparseA(smoother[j],eu_sparse_A); 
          HYPRE_EuclidSetup(smoother[j],
                         (HYPRE_ParCSRMatrix) A_array[j],
                         (HYPRE_ParVector) F_array[j],

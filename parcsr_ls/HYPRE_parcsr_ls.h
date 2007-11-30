@@ -740,6 +740,27 @@ int HYPRE_BoomerAMGSetEuclidFile(HYPRE_Solver solver,
                          	 char        *euclidfile); 
 
 /**
+ * (Optional) Defines number of levels for ILU(k) in Euclid.
+ * For further explanation see description of Euclid.
+ **/
+int HYPRE_BoomerAMGSetEuLevel(HYPRE_Solver solver,
+                            int          eu_level);
+
+/**
+ * (Optional) Defines filter for ILU(k) for Euclid.
+ * For further explanation see description of Euclid.
+ **/
+int HYPRE_BoomerAMGSetEuSparseA(HYPRE_Solver solver,
+                             double  	  eu_sparse_A);
+
+/**
+ * (Optional) Defines use of block jacobi ILUT for Euclid.
+ * For further explanation see description of Euclid.
+ **/
+int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
+                            int eu_bj);
+
+/**
  * (Optional) Specifies the use of GSMG - geometrically smooth 
  * coarsening and interpolation. Currently any nonzero value for
  * gsmg will lead to the use of GSMG.
@@ -1086,14 +1107,6 @@ int HYPRE_EuclidSetRowScale(HYPRE_Solver solver, int row_scale);
  * absolute value of any entry in the row being factored.
  **/
 int HYPRE_EuclidSetILUT(HYPRE_Solver solver, double drop_tol);
-
-/**
- * Sets the maximum number of nonzeros that is permitted in any
- * row of L+U-I in addition to the number that would result from
- * an ILU(0) factorziation. A negative value indicates no limit.
- * Default: no limit for ILU(k), 5 for ILUT.
- **/
-int HYPRE_EuclidSetMaxNzPerRow(HYPRE_Solver solver, int max_nz_per_row);
 
 /*@}*/
 /*--------------------------------------------------------------------------

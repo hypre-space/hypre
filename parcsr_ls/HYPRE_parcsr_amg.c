@@ -993,6 +993,39 @@ HYPRE_BoomerAMGSetEuclidFile( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetEuLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetEuLevel( HYPRE_Solver  solver,
+                           int           eu_level)
+{
+   return( hypre_BoomerAMGSetEuLevel( (void *) solver, eu_level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetEuSparseA
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetEuSparseA( HYPRE_Solver  solver,
+                             double        eu_sparse_A  )
+{
+   return( hypre_BoomerAMGSetEuSparseA( (void *) solver, eu_sparse_A ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetEuBJ
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetEuBJ( HYPRE_Solver  solver,
+                        int	      eu_bj)
+{
+   return( hypre_BoomerAMGSetEuBJ( (void *) solver, eu_bj ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetNumFunctions, HYPRE_BoomerAMGGetNumFunctions
  *--------------------------------------------------------------------------*/
 
