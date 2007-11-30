@@ -55,7 +55,7 @@ shift
 
 # Run configure
 cd $src_dir
-if [ "`/bin/uname -s`" = "AIX" ]
+if [ "`uname -s`" = "AIX" ]
 then
    nopoe ./configure $@
 else
