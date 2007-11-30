@@ -11,7 +11,7 @@
  *  Calls are:
  *  initialize_disjoint_sets (n) initial call.
  *  s = make_set (i)             returns a set containing only i.
- *  s = link (t, u)		 returns s = t union u, destroying t and u.
+ *  s = lu_link (t, u)		 returns s = t union u, destroying t and u.
  *  s = find (i)		 return name of set containing i.
  *  finalize_disjoint_sets 	 final call.
  *
@@ -58,7 +58,7 @@ int make_set (
 
 
 static
-int link (
+int lu_link (
 	int s,
 	int t
 	)
@@ -171,7 +171,7 @@ sp_coletree(
 			rroot = root[rset];
 			if (rroot != col) {
 				parent[rroot] = col;
-				cset = link (cset, rset);
+				cset = lu_link (cset, rset);
 				root[cset] = col;
 			}
 		}
