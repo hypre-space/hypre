@@ -1,47 +1,16 @@
 #!/usr/bin/ksh
-#BHEADER**********************************************************************
-# Copyright (c) 2007, Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team. UCRL-CODE-222953.
-# All rights reserved.
-#
-# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-# disclaimer, contact information and the GNU Lesser General Public License.
-#
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License (as published by the Free Software 
-# Foundation) version 2.1 dated February 1999.
-#
-# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
-# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
-# Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#
-# $Revision$
-#EHEADER**********************************************************************
-
-
-# This script will be needed to build hypre with the Babel interface
-# in multiprocessing AIX systems. See the file babel-runtime/HYPRE_README.txt .
-#
 # Wrapper script to set up environment so the arguments run a 1 task
 # mpi run on the local node.  Essentially runs ip over ethernet with
 # resd=no and a hostfile (containing the local machine name)
 #
 # Written by John C. Gyllenhaal at LLNL 6/25/02
-# one change, marked with "jfp"
 
 # Print usage
 if [ $# -lt 1 ]; then
    echo "Usage: nopoe executable [args]";
    echo " "
    echo "  Runs executable with args in an environment where any mpi programs"
-   echo "  executed with be run on the local host with 1 task."
+   echo "  executed will be run on the local host with 1 task."
    exit 1;
 fi
 
@@ -49,9 +18,8 @@ fi
 # Get current hostname
 MY_HOSTNAME=`hostname`
 
-# Create hostname file using this name
-#jfp, was: HOSTLIST=hostlist.$MY_HOSTNAME
-HOSTLIST=$PWD/hostlist.$MY_HOSTNAME
+# Create hostname file using this name and pid
+HOSTLIST=hostlist.$MY_HOSTNAME.$$
 
 # Put 1 line of this hostname into HOSTCONTENTS
 HOSTCONTENTS="$MY_HOSTNAME"
@@ -84,6 +52,15 @@ export MP_HOSTFILE=$HOSTLIST
 # Suppress message about RMPOOL being ignored
 unset MP_RMPOOL
 export MP_RMPOOL
+
+# Required for slurm on AIX
+unset MP_RMLIB
+export MP_RMLIB
+
+# Suppress AIX 5.3 message stating 
+#  mp_euilib is not us, high priority daemon has been started
+unset MP_PRIORITY
+export MP_PRIORITY
 
 # Turn of 0: prefix for output
 export MP_LABELIO=NO
