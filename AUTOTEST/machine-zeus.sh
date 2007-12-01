@@ -56,19 +56,11 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Test various builds (last one is the default build)
-configure_opts=""
-for opt in $configure_opts ""
-do
-   output_subdir=$output_dir/build$opt
-   mkdir -p $output_subdir
-   ./test.sh configure.sh $src_dir $opt --enable-debug
-   mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir test
-   mv -f make.??? $output_subdir
-done
+# Test runtest tests
+./test.sh default.sh $src_dir
+mv -f default.??? $output_dir
 
-# Test linking for various compilers
+# Test linking for different languages
 link_opts="all++ all77"
 for opt in $link_opts
 do
@@ -78,9 +70,17 @@ do
    mv -f link.??? $output_subdir
 done
 
-# Test runtest tests
-./test.sh default.sh $src_dir
-mv -f default.??? $output_dir
+# Test other builds
+configure_opts="--enable-debug"
+for opt in $configure_opts
+do
+   ./test.sh configure.sh $src_dir $opt 
+   output_subdir=$output_dir/build$opt
+   mkdir -p $output_subdir
+   mv -f configure.??? $output_subdir
+   ./test.sh make.sh $src_dir test
+   mv -f make.??? $output_subdir
+done
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

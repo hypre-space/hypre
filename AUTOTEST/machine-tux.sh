@@ -56,7 +56,11 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Test various builds (last one is the default build)
+# Test runtest tests with debugging and insure turned on
+./test.sh debug.sh $src_dir --with-insure
+mv -f debug.??? $output_dir
+
+# Test other builds (last one is the default build)
 configure_opts="--with-babel --without-MPI --with-strict-checking"
 for opt in $configure_opts ""
 do
@@ -68,7 +72,7 @@ do
    mv -f make.??? $output_subdir
 done
 
-# Test linking for various compilers
+# Test linking for different languages
 link_opts="all++ all77"
 for opt in $link_opts
 do
@@ -81,10 +85,6 @@ done
 # Test examples
 ./test.sh examples.sh $src_dir/examples
 mv -f examples.??? $output_subdir
-
-# Test runtest tests with debugging and insure turned on
-./test.sh debug.sh $src_dir --with-insure
-mv -f debug.??? $output_dir
 
 # Test documentation build (only if 'docs' directory is present)
 if [ -d $src_dir/docs ]; then
