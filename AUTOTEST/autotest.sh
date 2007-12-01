@@ -117,6 +117,21 @@ EOF
          shift
          ;;
 
+      # Run tests on a Mac
+      -mac)
+         if [ ! -e autotest-mac-start ]; then
+            host="kolev-mac"
+            echo "Test [machine-mac] started at  `date +%T` on `date +%D`" \
+               >> autotest-mac-start
+            ./testsrc.sh $src_dir $host:hypre/testing/$host machine-mac.sh
+            echo "Test [machine-mac] finished at `date +%T` on `date +%D`" \
+               >> autotest-mac-start
+            mv machine-mac.??? $finished_dir
+            touch autotest-mac-done
+         fi
+         shift
+         ;;
+
       # Generate a summary file in the output directory
       -summary)
          # move the finished logs to todays output directory
