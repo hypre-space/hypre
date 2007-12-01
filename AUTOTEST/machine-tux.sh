@@ -79,6 +79,8 @@ do
 done
 
 # Test examples
+./test.sh examples.sh $src_dir/examples
+mv -f examples.??? $output_subdir
 
 # Test runtest tests with debugging and insure turned on
 ./test.sh debug.sh $src_dir --with-insure
