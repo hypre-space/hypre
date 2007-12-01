@@ -57,7 +57,7 @@ src_dir=$1
 shift
 
 # Test various builds (last one is the default build)
-configure_opts="--without-MPI --with-strict-checking"
+configure_opts=""
 for opt in $configure_opts ""
 do
    ./test.sh configure.sh $src_dir $opt --enable-debug
@@ -77,8 +77,6 @@ do
    ./test.sh link.sh $src_dir $opt
    mv -f link.??? $output_subdir
 done
-
-# Test examples
 
 # Test runtest tests
 ./test.sh default.sh $src_dir

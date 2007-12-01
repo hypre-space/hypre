@@ -57,7 +57,7 @@ src_dir=$1
 shift
 
 # Test various builds (last one is the default build)
-configure_opts="--without-MPI"
+configure_opts=""
 for opt in $configure_opts ""
 do
    output_subdir=$output_dir/build$opt
