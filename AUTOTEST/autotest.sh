@@ -84,7 +84,7 @@ EOF
          cd $testing_dir
          rm -fr linear_solvers
          cvs -d /home/casc/repository checkout $cvs_opts linear_solvers
-         cp -fRp linear_solvers/AUTOTEST .
+         cp -fR linear_solvers/AUTOTEST .
          break
          ;;
 
@@ -204,9 +204,9 @@ EOF
             echo Subject: $summary_subject
             echo Content-Type: text/html
             echo MIME-Version: 1.0
-            
+
             cat $summary_file
-            
+
          ) | /usr/sbin/sendmail -t
 
          break
