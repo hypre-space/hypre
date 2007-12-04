@@ -56,12 +56,20 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
+# Make sure Fortran tests are disabled in configure. For now, this is just
+# a Mac hack, but we may want to have it as a configure option in the future.
+cd $src_dir
+mv configure configure.orig
+sed 's/casc_using_fortran=yes/casc_using_fortran=no/g' configure.orig > configure
+chmod a+x configure
+cd $test_dir
+
 # Test runtest tests
 ./test.sh default.sh $src_dir
 mv -f default.??? $output_dir
 
 # Test linking for different languages
-link_opts="all++ all77"
+link_opts="all++"
 for opt in $link_opts
 do
    output_subdir=$output_dir/link$opt
@@ -74,7 +82,7 @@ done
 configure_opts="--enable-debug"
 for opt in $configure_opts
 do
-   ./test.sh configure.sh $src_dir $opt 
+   ./test.sh configure.sh $src_dir $opt
    output_subdir=$output_dir/build$opt
    mkdir -p $output_subdir
    mv -f configure.??? $output_subdir
