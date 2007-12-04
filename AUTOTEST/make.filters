@@ -3,3 +3,4 @@ automake has been disabled
 configure: WARNING: Disabling F90 Support
 configure: WARNING: Configuration for Python failed.
 warning: warning: feupdateenv is not implemented and will always fail
+ranlib: file: lib.*\(.*\) has no symbols
