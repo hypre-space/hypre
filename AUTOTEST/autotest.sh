@@ -32,8 +32,9 @@ finished_dir="$testing_dir/AUTOTEST-FINISHED"
 output_dir="$testing_dir/AUTOTEST-`date +%Y.%m.%d-%a`"
 cvs_opts=""
 src_dir="$testing_dir/linear_solvers"
-subject="NEW Autotest Error Summary `date +%D`"
-email_list="rfalgout@llnl.gov"
+summary_file="SUMMARY.html"
+summary_subject="NEW Autotest Error Summary `date +%D`"
+email_list="rfalgout@llnl.gov, tzanio@llnl.gov"
 # email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 
 # Ensure that important directories exist
@@ -140,33 +141,42 @@ EOF
          cp -fr $finished_dir/* $output_dir
          rm -fr $finished_dir/*
 
+         cd $output_dir
+         echo "<html>"          > $summary_file;
+         echo "<head> </head>" >> $summary_file;
+         echo "<PRE>"          >> $summary_file;
+         echo $summary_subject >> $summary_file
+
+
          # all top-level tests with empty error files are reported as "passed",
          # not including the cron autotest logs
-         cd $output_dir
-         echo "" > Summary.txt; echo "[PASSED]" >> Summary.txt
+         echo ""         >> $summary_file;
+         echo "[PASSED]" >> $summary_file
          for test in $( find . -maxdepth 1 -size 0 -name "*.err" ! -name "*cron*" )
          do
             testname=`basename $test .err`
-            echo "-${testname#machine-}" >> Summary.txt
+            echo "-${testname#machine-}" >> $summary_file
          done
 
          # active tests without a *-done file are reported as "pending"
-         echo "" >> Summary.txt; echo "[PENDING]" >> Summary.txt
+         echo ""          >> $summary_file;
+         echo "[PENDING]" >> $summary_file
          cd $autotest_dir
          for test in $( find . -name "*-start" )
          do
             testname=`echo $test | awk -F- '{print $2}'`
             if [ ! -e autotest-$testname-done ]; then
-               echo "-$testname" >> $output_dir/Summary.txt
+               echo "-$testname" >> $output_dir/$summary_file
             else
                mv autotest-*$testname* $output_dir
             fi
          done
+         cd $output_dir
 
          # all top-level tests with non-empty error files are reported as "failed",
          # including the cron autotest logs
-         cd $output_dir
-         echo "" >> Summary.txt; echo "[FAILED]" >> Summary.txt
+         echo ""         >> $summary_file;
+         echo "[FAILED]" >> $summary_file
          for test in $( find . -maxdepth 1 ! -size 0 -name "*.err" )
          do
             testname=`basename $test .err`
@@ -174,18 +184,30 @@ EOF
             do
                testname="${testname#$prefix}"
             done
-            echo "-$testname" >> Summary.txt
+            echo "-$testname" >> $summary_file
          done
 
          # list all non-empty error files in todays output directory
-         echo "" >> Summary.txt; echo "[ERROR FILES]" >> Summary.txt
+         echo ""              >> $summary_file;
+         echo "[ERROR FILES]" >> $summary_file
          for test in $( find $output_dir ! -size 0 -name "*.err" | sort -r )
          do
-            echo "file://$test" >> Summary.txt
+            echo "<a href=\"file://$test\">$test</a>" >> $summary_file
          done
 
+         echo "</PRE>"  >> $summary_file;
+         echo "</html>" >> $summary_file;
+
          # send the email
-         cat Summary.txt | /usr/bin/Mail -s "$subject" $email_list
+         (
+            echo To: $email_list
+            echo Subject: $summary_subject
+            echo Content-Type: text/html
+            echo MIME-Version: 1.0
+            
+            cat $summary_file
+            
+         ) | /usr/sbin/sendmail -t
 
          break
          ;;
