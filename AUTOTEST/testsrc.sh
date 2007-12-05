@@ -79,14 +79,15 @@ rem_dir=`basename $src_dir`
 # ssh $machine "rm -fr $rem_path/$rem_dir"
 # scp -r $src_dir $machine:$rem_path/$rem_dir
 # scp -r . $machine:$rem_path/$rem_dir/AUTOTEST
+echo "Copying sources to $machine"
 rem_dir_exists=`ssh -q $machine "(/bin/sh -c \"[ -d $rem_path/$rem_dir ] && echo \"yes\" || (mkdir -p $rem_path/$rem_dir; echo \"no\")\")"`
 if [ "$rem_dir_exists" == "no" ]
 then
-   tar -C `dirname $src_dir` -zcf - $rem_dir | ssh $machine tar -C $rem_path -zxf -
+   tar -C `dirname $src_dir` -zcf - $rem_dir | ssh -q $machine tar -C $rem_path -zxf -
 else
-   rsync -zae ssh --delete $src_dir/ $machine:$rem_path/$rem_dir
+   rsync -zae "ssh -q" --delete $src_dir/ $machine:$rem_path/$rem_dir
 fi
-rsync -zae ssh --delete . $machine:$rem_path/$rem_dir/AUTOTEST
+rsync -zae "ssh -q" --delete . $machine:$rem_path/$rem_dir/AUTOTEST
 
 # Run the test and copy the results
 ssh -q $machine "cd $rem_path/$rem_dir/AUTOTEST; ./test.sh ${testname}.sh .."

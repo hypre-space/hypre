@@ -56,11 +56,11 @@ shift
 # Run the test drivers
 cd $src_dir/test
 ./cleantest.sh
-./runtest.sh $@ TEST_ams/*.sh
-./runtest.sh $@ TEST_fac/*.sh
-./runtest.sh $@ TEST_ij/*.sh
+# ./runtest.sh $@ TEST_ams/*.sh
+# ./runtest.sh $@ TEST_fac/*.sh
+# ./runtest.sh $@ TEST_ij/*.sh
 ./runtest.sh $@ TEST_sstruct/*.sh
-./runtest.sh $@ TEST_struct/*.sh
+# ./runtest.sh $@ TEST_struct/*.sh
 
 # Collect all error files from the tests
 for errfile in $( find . -name "*.err" -o -name "*.fil" -o -name "*.out*" )

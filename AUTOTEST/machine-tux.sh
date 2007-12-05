@@ -56,8 +56,20 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
+# Set some environment variables
+MPICH=/usr/apps/mpich/1.2.7p1/bin
+P4_RSHCOMMAND=/usr/apps/mpich/1.2.7p1/bin/ssh-nobanner
+export P4_RSHCOMMAND
+PARASOFT=/usr/apps/insure++/default
+export PARASOFT
+LD_LIBRARY_PATH=/usr/apps/insure++/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH
+PATH=$MPICH:$PARASOFT/bin:/usr/local/bin:$PATH
+export PATH
+
 # Test runtest tests with debugging and insure turned on
-./test.sh debug.sh $src_dir --with-insure
+# ./test.sh debug.sh $src_dir --with-insure
+./test.sh debug.sh $src_dir
 mv -f debug.??? $output_dir
 
 # Test other builds (last one is the default build)
