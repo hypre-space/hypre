@@ -56,11 +56,13 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Make sure Fortran tests are disabled in configure. For now, this is just
-# a Mac hack, but we may want to have it as a configure option in the future.
+# Make sure that Fortran tests and tux's g2c path are disabled in configure.
+# For now, these are just Mac hacks, but we may want to fix them and/or add
+# them as options when we rework configure in the future.
 cd $src_dir
 mv configure configure.orig
-sed 's/casc_using_fortran=yes/casc_using_fortran=no/g' configure.orig > configure
+sed -e 's/casc_using_fortran=yes/casc_using_fortran=no/g' \
+    -e 's/LDFLAGS=\"\$g2c\_SEARCH_PATHS \$LDFLAGS\"//g' configure.orig > configure
 chmod a+x configure
 cd $test_dir
 
