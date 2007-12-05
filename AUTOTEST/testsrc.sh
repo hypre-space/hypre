@@ -80,11 +80,11 @@ rem_dir=`basename $src_dir`
 # scp -r $src_dir $machine:$rem_path/$rem_dir
 # scp -r . $machine:$rem_path/$rem_dir/AUTOTEST
 rem_dir_exists=`ssh -q $machine "(/bin/sh -c \"[ -d $rem_path/$rem_dir ] && echo \"yes\" || (mkdir -p $rem_path/$rem_dir; echo \"no\")\")"`
-if [ "$rem_dir_exists" == "yes" ]
+if [ "$rem_dir_exists" == "no" ]
 then
-   rsync -zae ssh --delete $src_dir/ $machine:$rem_path/$rem_dir
-else
    tar -C `dirname $src_dir` -zcf - $rem_dir | ssh $machine tar -C $rem_path -zxf -
+else
+   rsync -zae ssh --delete $src_dir/ $machine:$rem_path/$rem_dir
 fi
 rsync -zae ssh --delete . $machine:$rem_path/$rem_dir/AUTOTEST
 
