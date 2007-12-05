@@ -220,5 +220,9 @@ done
 
 # Fix permissions
 cd $testing_dir
-chmod -fR a+rX,ug+w,o-w linear_solvers $autotest_dir $finished_dir $output_dir
-chgrp -fR hypre         linear_solvers $autotest_dir $finished_dir $output_dir
+ch_dirs="linear_solvers $autotest_dir $finished_dir"
+if [ -e $output_dir ]; then
+   ch_dirs="$ch_dirs $output_dir"
+fi
+chmod -fR a+rX,ug+w,o-w $ch_dirs
+chgrp -fR hypre         $ch_dirs
