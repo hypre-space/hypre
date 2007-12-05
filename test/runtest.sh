@@ -391,7 +391,7 @@ function ExecuteTest
    SavePWD=`pwd`
    cd $WorkingDir
    (cat $InputFile.err.* > $InputFile.err)
-   (./$InputFile.sh     >> $InputFile.err 2>&1 &) 
+   (./$InputFile.sh     >> $InputFile.err 2>> $InputFile.err)
    cd $SavePWD
 }
 
@@ -444,14 +444,8 @@ function StartCrunch
    CheckBatch
    BatchMode=$?
    ExecuteJobs "$@"
-   RtnCode=$?
-   if [ "$RtnCode" -eq 0 ] ; then
-      ExecuteTest "$@"
-      RtnCode=$?
-   fi
-   if [ "$RtnCode" -eq 0 ] ; then
-      PostProcess "$@"
-   fi
+   ExecuteTest "$@"
+   PostProcess "$@"
 }
 
 # main
