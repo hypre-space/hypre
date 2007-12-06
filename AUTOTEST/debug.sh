@@ -54,7 +54,7 @@ src_dir=$1
 shift
 
 # Call the configure, make and run scripts
-./test.sh configure.sh $src_dir --enable-debug $@
+./test.sh configure.sh $src_dir --enable-debug --with-print-errors $@
 mv -f configure.??? $output_dir
 
 ./test.sh make.sh $src_dir test
