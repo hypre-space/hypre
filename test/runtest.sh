@@ -521,6 +521,7 @@ CleanUp $TestDirNames $ExecFileNames
 cat > runtest.filters <<EOF
 srun: job [0-9]* queued and waiting for resources
 srun: job [0-9]* has been allocated resources
+SLURMINFO: Job [0-9]* is pending allocation of resources.
 EOF
 for dir in $TestDirNames
 do
