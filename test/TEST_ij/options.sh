@@ -75,6 +75,14 @@ tail -39 ${TNAME}.out.verb.0      | head -3 >> ${TNAME}.out
 echo  "# ${TNAME}.out.verb.2"               >> ${TNAME}.out
 tail -11 ${TNAME}.out.verb.2      | head -3 >> ${TNAME}.out
 
+# Make sure that the output files are reasonable
+CHECK_LINE="Complexity"
+OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
+SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
+if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
+   echo "Incorrect number of \"$CHECK_LINE\" lines in ${TNAME}.out" >&2
+fi
+
 if [ -z $HYPRE_NO_SAVED ]; then
    diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
 fi
