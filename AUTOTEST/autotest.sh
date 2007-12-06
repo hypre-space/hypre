@@ -30,11 +30,11 @@ testing_dir=`cd ..; pwd`
 autotest_dir="$testing_dir/AUTOTEST"
 finished_dir="$testing_dir/AUTOTEST-FINISHED"
 output_dir="$testing_dir/AUTOTEST-`date +%Y.%m.%d-%a`"
-cvs_opts=""
 src_dir="$testing_dir/linear_solvers"
+cvs_opts=""
 summary_file="SUMMARY.html"
 summary_subject="NEW Autotest Error Summary `date +%D`"
-email_list="rfalgout@llnl.gov, tzanio@llnl.gov"
+email_list="rfalgout@llnl.gov"
 # email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 
 # Ensure that important directories exist
@@ -44,6 +44,7 @@ mkdir -p $finished_dir
 cd $autotest_dir
 
 # Main loop
+test_opts=""
 while [ "$*" ]
 do
    case $1 in
@@ -74,6 +75,7 @@ do
 EOF
          exit
          ;;
+
       -t|-trace)
          set -xv
          shift
@@ -85,52 +87,8 @@ EOF
          rm -fr linear_solvers
          cvs -d /home/casc/repository checkout $cvs_opts linear_solvers
          cp -fR linear_solvers/AUTOTEST .
+         test_opts=""
          break
-         ;;
-
-      # Run local tests
-      -tux*)
-         if [ ! -e autotest-tux-start ]; then
-            host=`echo $1 | awk -F- '{print $2}'`
-            echo "Test [machine-tux] started at  `date +%T` on `date +%D`" \
-               >> autotest-tux-start
-            ./testsrc.sh $src_dir $host:hypre/testing/$host machine-tux.sh
-            echo "Test [machine-tux] finished at `date +%T` on `date +%D`" \
-               >> autotest-tux-start
-            mv machine-tux.??? $finished_dir
-            touch autotest-tux-done
-         fi
-         shift
-         ;;
-
-      # Run remote tests
-      -alc|-thunder|-up|-zeus)
-         if [ ! -e autotest$1-start ]; then
-            host=`echo $1 | awk -F- '{print $2}'`
-            echo "Test [machine-$host] started at  `date +%T` on `date +%D`" \
-               >> autotest-$host-start
-            ./testsrc.sh $src_dir $host:hypre/testing/$host machine-$host.sh
-            echo "Test [machine-$host] finished at `date +%T` on `date +%D`" \
-               >> autotest-$host-start
-            mv machine-$host.??? $finished_dir
-            touch autotest-$host-done
-         fi
-         shift
-         ;;
-
-      # Run tests on a Mac
-      -mac)
-         if [ ! -e autotest-mac-start ]; then
-            host="kolev-mac"
-            echo "Test [machine-mac] started at  `date +%T` on `date +%D`" \
-               >> autotest-mac-start
-            ./testsrc.sh $src_dir $host:hypre/testing/$host machine-mac.sh
-            echo "Test [machine-mac] finished at `date +%T` on `date +%D`" \
-               >> autotest-mac-start
-            mv machine-mac.??? $finished_dir
-            touch autotest-mac-done
-         fi
-         shift
          ;;
 
       # Generate a summary file in the output directory
@@ -209,13 +167,46 @@ EOF
 
          ) | /usr/sbin/sendmail -t
 
+         test_opts=""
          break
          ;;
 
       *)
+         test_opts="$test_opts $1"
          shift
          ;;
    esac
+done
+
+# Run tests
+for opt in $test_opts
+do
+   case $opt in
+      -tux*)
+         host=`echo $opt | awk -F- '{print $2}'`
+         name="tux"
+         ;;
+
+      -alc|-thunder|-up|-zeus)
+         host=`echo $opt | awk -F- '{print $2}'`
+         name=$host
+         ;;
+
+      -mac)
+         host="kolev-mac"
+         name="mac"
+         ;;
+   esac
+
+   if [ ! -e autotest-$name-start ]; then
+      echo "Test [machine-$name] started at  `date +%T` on `date +%D`" \
+         >> autotest-$name-start
+      ./testsrc.sh $src_dir $host:hypre/testing/$host machine-$name.sh
+      echo "Test [machine-$name] finished at `date +%T` on `date +%D`" \
+         >> autotest-$name-start
+      mv machine-$name.??? $finished_dir
+      touch autotest-$name-done
+   fi
 done
 
 # Fix permissions

@@ -87,28 +87,3 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
-
-# Set some environment variables
-# PATH=/usr/local/tools/KCC/kcc4.0f18/KCC_BASE/bin
-# PATH=$PATH:/usr/local/tools/guide.assure/guide40.31/bin:/usr/java130/bin
-# PATH=$PATH:/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb
-# PATH=$PATH:/usr/bin/X11:/usr/local/totalview/bin:/usr/local/gnu/bin
-# PATH=$PATH:/usr/local/scripts:/usr/apps/bin
-# PATH=/opt/freeware/bin:$PATH
-# PATH=$PATH:.
-# export PATH
-# LD_LIBRARY_PATH=`pwd`/../hypre/lib
-# export LD_LIBRARY_PATH
-# MP_RMPOOL=0
-# MP_CPU_USE=unique
-# MP_EUIDEVICE=css0
-# MP_EUILIB=us
-# MP_RESD=yes
-# MP_HOSTFILE=NULL
-# MP_LABELIO=yes
-# MP_INFOLEVEL=1
-# MP_RETRY=60
-# MP_RETRYCOUNT=10
-# export MP_RMPOOL MP_CPU_USE MP_EUIDEVICE MP_EUILIB MP_RESD
-# export MP_HOSTFILE MP_LABELIO MP_INFOLEVEL
-# export MP_RETRY MP_RETRYCOUNT

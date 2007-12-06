@@ -97,17 +97,3 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
-
-# Set some environment variables
-# MPICH=/usr/apps/mpich/default/bin:/usr/apps/mpich/1.2.7p1/bin
-# P4_RSHCOMMAND=/usr/apps/mpich/default/bin/ssh-nobanner
-# P4_RSHCOMMAND=/usr/apps/mpich/1.2.7p1/bin/ssh-nobanner
-# export P4_RSHCOMMAND
-# PARASOFT=/usr/apps/ParaSoft/insure++7.1.0
-# PARASOFT=/usr/apps/insure++/default
-# export PARASOFT
-# PATH=$MPICH:$PARASOFT/bin:/usr/local/bin:$PATH
-# LATEX2HTML=/usr/apps/latex2html/default
-# DOCPP=$HOME/local
-# PATH=$LATEX2HTML/bin:$PATH:$DOCPP/bin
-# export PATH

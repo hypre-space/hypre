@@ -87,12 +87,3 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
-
-# Set some environment variables
-# PATH=/usr/local/KAI/KCC_BASE/bin:$PATH
-# PATH=/usr/local/mpi/bin:/opt/intel/compiler90/bin:$PATH
-# export PATH
-# LD_LIBRARY_PATH=/opt/intel/compiler90/lib:$LD_LIBRARY_PATH
-# export LD_LIBRARY_PATH
-# LM_LICENSE_FILE="/usr/local/etc/license.client"
-# export LM_LICENSE_FILE
