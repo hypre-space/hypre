@@ -1696,7 +1696,7 @@ main( int   argc,
    Index                *block;
    int                   solver_id, object_type;
    int                   print_system;
-   int                   cosine, struct_cosine;
+   int                   cosine;
    double                scale;
                         
    HYPRE_SStructGrid     grid;
@@ -1845,7 +1845,6 @@ main( int   argc,
    solver_id = 39;
    print_system = 0;
    cosine = 1;
-   struct_cosine = 0;
 
    skip = 0;
    n_pre  = 1;
@@ -1929,7 +1928,6 @@ main( int   argc,
       {
          arg_index++;
          cosine = 1;
-         struct_cosine = 1;
       }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
@@ -2446,11 +2444,6 @@ main( int   argc,
     * 
     *-----------------------------------------------------------*/
 
-   if (object_type == HYPRE_STRUCT)
-   {
-      cosine = struct_cosine;
-   }
-
    if (cosine)
    {
       for (part = 0; part < data.nparts; part++)
@@ -2502,19 +2495,26 @@ main( int   argc,
    if (cosine)
    {
       /* This if/else is due to a bug in SStructMatvec */
-      if (object_type != HYPRE_PARCSR)
+      if (object_type == HYPRE_SSTRUCT)
       {
          /* Apply A to cosine vector to yield righthand side */
          hypre_SStructMatvec(1.0, A, x, 0.0, b);
          /* Reset initial guess to zero */
          hypre_SStructMatvec(0.0, A, b, 0.0, x);
       }
-      else
+      else if (object_type == HYPRE_PARCSR)
       {
          /* Apply A to cosine vector to yield righthand side */
          HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 0.0, par_b );
          /* Reset initial guess to zero */
          HYPRE_ParCSRMatrixMatvec(0.0, par_A, par_b, 0.0, par_x );
+      }
+      else if (object_type == HYPRE_STRUCT)
+      {
+         /* Apply A to cosine vector to yield righthand side */
+         hypre_StructMatvec(1.0, sA, sx, 0.0, sb);
+         /* Reset initial guess to zero */
+         hypre_StructMatvec(0.0, sA, sb, 0.0, sx);
       }
    }
 
