@@ -1582,7 +1582,7 @@ PrintUsage( char *progname,
       printf("                        61 - BiCGSTAB with EUCLID precond\n");
       printf("                        62 - BiCGSTAB with ParaSails precond\n");
       printf("                        120- PCG with hybrid precond\n");
-      printf("                        200- Struct SMG (default)\n");
+      printf("                        200- Struct SMG\n");
       printf("                        201- Struct PFMG\n");
       printf("                        202- Struct SparseMSG\n");
       printf("                        203- Struct PFMG constant coefficients\n");
