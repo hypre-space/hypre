@@ -522,6 +522,8 @@ cat > runtest.filters <<EOF
 srun: job [0-9]* queued and waiting for resources
 srun: job [0-9]* has been allocated resources
 SLURMINFO: Job [0-9]* is pending allocation of resources.
+ATTENTION: [0-9\-]*  Couldn't create .*, job may not be checkpointable
+ATTENTION: [0-9\-]* Error opening file
 EOF
 for dir in $TestDirNames
 do
