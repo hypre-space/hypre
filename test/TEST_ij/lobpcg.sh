@@ -52,3 +52,4 @@ fi
 #=============================================================================
 
 rm -f ${TNAME}.testdata*
+rm -f residuals.txt values.txt vectors.[01].*
