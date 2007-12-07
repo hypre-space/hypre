@@ -38,7 +38,7 @@ void hypre_error_handler(char *filename, int line, int ierr)
 
 #ifdef HYPRE_PRINT_ERRORS
    fprintf(stderr,
-           "hypre error in file \"%s\", line %d, error code = %d ",
+           "hypre error in file \"%s\", line %d, error code = %d\n",
            filename, line, ierr);
 #endif
 }
