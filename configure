@@ -1142,7 +1142,7 @@ Copyright (C) 2003 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
- Copyright (c) 2007,   Lawrence Livermore National Security, LLC.
+ Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  Produced at the Lawrence Livermore National Laboratory.
  Written by the HYPRE team, UCRL-CODE-222953.
  All rights reserved.
@@ -2236,7 +2236,7 @@ if test "${with_strict_checking+set}" = set; then
   casc_using_debug=yes
   casc_using_mpi=no
 
-  for ac_prog in gcc icc pgcc xlc kcc KCC
+  for ac_prog in gcc g++ icc icpc pgcc pgCC xlc xlC kcc KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2307,7 +2307,7 @@ test -n "$CC" || CC=""""
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
   fi
 
-  for ac_prog in g++ gcc icpc icc pgCC xlC KCC
+  for ac_prog in g++ gcc icpc icc pgCC pgcc xlC xlc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2695,7 +2695,7 @@ if test "$casc_user_chose_ccompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      for ac_prog in mpxlc mpguidec guidec icc xlc pgcc cc
+      for ac_prog in mpxlc xlc mpguidec guidec icc pgcc cc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2738,7 +2738,7 @@ test -n "$CC" || CC=""""
 
    elif test "$casc_using_mpi" = "no"
    then
-      for ac_prog in xlc gcc pgcc icc cc kcc
+      for ac_prog in xlc xlC gcc g++ pgcc pgCC icc icpc cc CC kcc KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2833,7 +2833,7 @@ if test "$casc_user_chose_cxxcompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      for ac_prog in mpxlC mpguidec++ guidec++ icc xlC pgCC CC
+      for ac_prog in mpxlC xlC mpguidec++ guidec++ icpc pgCC CC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2876,7 +2876,7 @@ test -n "$CXX" || CXX=""""
 
    elif test "$casc_using_mpi" = "no"
    then
-      for ac_prog in xlC icpc icc pgCC g++ gcc cxx KCC
+      for ac_prog in xlC xlc g++ gcc pgCC pgcc icpc icc CC cc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2918,7 +2918,7 @@ done
 test -n "$CXX" || CXX=""""
 
    else
-      for ac_prog in mpxlC mpCC mpicxx mpiCC mpiicc mpipgCC
+      for ac_prog in mpxlC mpCC mpiCC mpiicc mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2971,7 +2971,7 @@ if test "$casc_user_chose_fcompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      for ac_prog in mpxlf mpguidef77 guidef77 ifort xlf pg77 f77
+      for ac_prog in mpxlf xlf mpguidef77 guidef77 ifort pg77 f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3014,7 +3014,7 @@ test -n "$F77" || F77=""""
 
    elif test "$casc_using_mpi" = "no"
    then
-      for ac_prog in xlf ifort g77 pgf77 f77 kf77
+      for ac_prog in xlf g77 pgf77 ifort f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -9981,7 +9981,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|mpCC|mpiicc|xlC|mpxlC|cxx)
+      CC|mpCC|mpiicc|mpxlC|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -g"

@@ -481,7 +481,7 @@ AC_ARG_WITH(strict-checking,
   casc_using_debug=yes
   casc_using_mpi=no
 
-  AC_CHECK_PROGS(CC, [gcc icc pgcc xlc kcc KCC], [""])
+  AC_CHECK_PROGS(CC, [gcc g++ icc icpc pgcc pgCC xlc xlC kcc KCC], [""])
   if test "x$CC" = "x"
   then
      casc_using_c=no
@@ -512,7 +512,7 @@ AC_ARG_WITH(strict-checking,
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
   fi
  
-  AC_CHECK_PROGS(CXX, [g++ gcc icpc icc pgCC xlC KCC], [""])
+  AC_CHECK_PROGS(CXX, [g++ gcc icpc icc pgCC pgcc xlC xlc KCC kcc], [""])
   if test "x$CXX" = "x"
   then
      casc_using_cxx=no
@@ -790,7 +790,7 @@ then
       AC_CHECK_PROGS(CC, [mpxlc xlc mpguidec guidec icc pgcc cc], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, [xlc gcc pgcc icc cc kcc], [""])
+      AC_CHECK_PROGS(CC, [xlc xlC gcc g++ pgcc pgCC icc icpc cc CC kcc KCC], [""])
    else
       AC_CHECK_PROGS(CC, [mpxlc mpcc mpicc mpiicc mpipgcc], [""])
    fi
@@ -805,12 +805,12 @@ if test "$casc_user_chose_cxxcompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(CXX, [mpxlC xlC mpguidec++ guidec++ icc pgCC CC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC xlC mpguidec++ guidec++ icpc pgCC CC], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CXX, [xlC icpc icc pgCC g++ gcc cxx KCC], [""])
+      AC_CHECK_PROGS(CXX, [xlC xlc g++ gcc pgCC pgcc icpc icc CC cc KCC kcc], [""])
    else
-      AC_CHECK_PROGS(CXX, [mpxlC mpCC mpicxx mpiCC mpiicc mpipgCC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC mpCC mpiCC mpiicc mpipgCC], [""])
    fi
 
    if test "x$CXX" = "x"
@@ -826,7 +826,7 @@ then
       AC_CHECK_PROGS(F77, [mpxlf xlf mpguidef77 guidef77 ifort pg77 f77], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(F77, [xlf ifort g77 pgf77 f77 kf77], [""])
+      AC_CHECK_PROGS(F77, [xlf g77 pgf77 ifort f77], [""])
    else
       AC_CHECK_PROGS(F77, [mpxlf mpf77 mpif77 mpiifort mpipgf77], [""])
    fi
