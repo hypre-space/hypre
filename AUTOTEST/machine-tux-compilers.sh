@@ -73,14 +73,18 @@ do
          export F77="mpif77 -fc=g77"
          ;;
       -absoft)
+         # Must first create a link from 'absoftf90' to the Absoft f90 compiler
+         # and make sure it is in your path
          export  CC="mpicc  -cc=gcc"
          export CXX="mpiCC  -CC=g++"
-         export F77="mpif77 -fc=f90"
+         export F77="mpif77 -fc=absoftf90"
          ;;
       -lahey)
+         # Must first create a link from 'laheyf95' to the Lahey f95 compiler
+         # and make sure it is in your path
          export  CC="mpicc  -cc=gcc"
          export CXX="mpiCC  -CC=g++"
-         export F77="mpif77 -fc=f95"
+         export F77="mpif77 -fc=laheyf95"
          ;;
    esac
 
