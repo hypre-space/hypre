@@ -810,7 +810,7 @@ then
    then
       AC_CHECK_PROGS(CXX, [xlC xlc g++ gcc pgCC pgcc icpc icc CC cc KCC kcc], [""])
    else
-      AC_CHECK_PROGS(CXX, [mpxlC mpCC mpiCC mpiicc mpipgCC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC mpCC mpicxx mpiCC mpiicpc mpipgCC], [""])
    fi
 
    if test "x$CXX" = "x"
