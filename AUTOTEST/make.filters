@@ -4,3 +4,5 @@ configure: WARNING: Disabling F90 Support
 configure: WARNING: Configuration for Python failed.
 warning: warning: feupdateenv is not implemented and will always fail
 ranlib: file: lib.*\(.*\) has no symbols
+/tmp/.*: Assembler messages:
+/tmp/.*: Warning: Additional NOP may be necessary to workaround Itanium processor A/B step errata
