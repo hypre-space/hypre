@@ -182,7 +182,12 @@ done
 for opt in $test_opts
 do
    case $opt in
-      -tux*)
+      -tux[0-9]*-compilers)
+         host=`echo $opt | awk -F- '{print $2}'`
+         name="tux-compilers"
+         ;;
+
+      -tux[0-9]*)
          host=`echo $opt | awk -F- '{print $2}'`
          name="tux"
          ;;
