@@ -86,7 +86,7 @@ EOF
          cd $testing_dir
          rm -fr linear_solvers
          cvs -d /home/casc/repository checkout $cvs_opts linear_solvers
-         cp -fR linear_solvers/AUTOTEST .
+         trap "cp -fR $testing_dir/linear_solvers/AUTOTEST $testing_dir" EXIT
          test_opts=""
          break
          ;;
