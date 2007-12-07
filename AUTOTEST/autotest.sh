@@ -34,7 +34,7 @@ src_dir="$testing_dir/linear_solvers"
 cvs_opts=""
 summary_file="SUMMARY.html"
 summary_subject="NEW Autotest Error Summary `date +%D`"
-email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
+email_list="rfalgout@llnl.gov"
 # email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 
 # Ensure that important directories exist
@@ -120,13 +120,13 @@ EOF
          echo ""          >> $summary_file;
          echo "[PENDING]" >> $summary_file
          cd $autotest_dir
-         for test in $( find . -name "*-start" )
+         for test in $( find . -name "autotest-*-start" )
          do
-            testname=`echo $test | awk -F- '{print $2}'`
-            if [ ! -e autotest-$testname-done ]; then
-               echo "-$testname" >> $output_dir/$summary_file
+            testbase=`basename $test -start`
+            if [ ! -e $testbase-done ]; then
+               echo $testbase | sed {s/autotest//g} >> $output_dir/$summary_file
             else
-               mv autotest-*$testname* $output_dir
+               mv $testbase* $output_dir
             fi
          done
          cd $output_dir
