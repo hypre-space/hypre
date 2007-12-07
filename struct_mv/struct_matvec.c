@@ -1077,7 +1077,7 @@ int hypre_StructMatvecCC2( double              alpha,
                      AAp4 = Ap4[Ai_CC];
                      AAp5 = Ap5[Ai_CC];
                      AAp6 = Ap6[Ai_CC];
-                     if ( 0 <= si_center-si < 7 )
+                     if ( (0 <= si_center-si) && (si_center-si < 7) )
                      {
                         switch ( si_center-si )
                         {
@@ -1141,7 +1141,7 @@ int hypre_StructMatvecCC2( double              alpha,
                      AAp3 = Ap3[Ai_CC];
                      AAp4 = Ap4[Ai_CC];
                      AAp5 = Ap5[Ai_CC];
-                     if ( 0 <= si_center-si < 6 )
+                     if ( (0 <= si_center-si) && (si_center-si < 6) )
                      {
                         switch ( si_center-si )
                         {
@@ -1196,7 +1196,7 @@ int hypre_StructMatvecCC2( double              alpha,
                      AAp2 = Ap2[Ai_CC];
                      AAp3 = Ap3[Ai_CC];
                      AAp4 = Ap4[Ai_CC];
-                     if ( 0 <= si_center-si < 5 )
+                     if ( (0 <= si_center-si) && (si_center-si < 5) )
                      {
                         switch ( si_center-si )
                         {
@@ -1245,7 +1245,7 @@ int hypre_StructMatvecCC2( double              alpha,
                      AAp1 = Ap1[Ai_CC];
                      AAp2 = Ap2[Ai_CC];
                      AAp3 = Ap3[Ai_CC];
-                     if ( 0 <= si_center-si < 4 )
+                     if ( (0 <= si_center-si) && (si_center-si < 4) )
                      {
                         switch ( si_center-si )
                         {
@@ -1288,7 +1288,7 @@ int hypre_StructMatvecCC2( double              alpha,
                      AAp0 = Ap0[Ai_CC];
                      AAp1 = Ap1[Ai_CC];
                      AAp2 = Ap2[Ai_CC];
-                     if ( 0 <= si_center-si < 3 )
+                     if ( (0 <= si_center-si) && (si_center-si < 3) )
                      {
                         switch ( si_center-si )
                         {
@@ -1325,7 +1325,7 @@ int hypre_StructMatvecCC2( double              alpha,
                      Ap1 = hypre_StructMatrixBoxData(A, i, si+1);
                      AAp0 = Ap0[Ai_CC];
                      AAp1 = Ap1[Ai_CC];
-                     if ( 0 <= si_center-si < 2 )
+                     if ( (0 <= si_center-si) && (si_center-si < 2) )
                      {
                         switch ( si_center-si )
                         {
