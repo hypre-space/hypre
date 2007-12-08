@@ -18,4 +18,6 @@
 00 1 * * 5 source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -thunder >> autotest-thunder-cron.out 2>> autotest-thunder-cron.err
 00 6 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -summary
 
-# Tzanio's crontab (on tux???)
+# Tzanio's crontab (on tux252)
+
+00 1 * * * cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -mac >> autotest-mac-cron.out 2>> autotest-mac-cron.err
