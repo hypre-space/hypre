@@ -206,7 +206,6 @@ impl_bHYPRE_ErrorHandler_Describe(
     /* DO-NOT-DELETE splicer.begin(bHYPRE.ErrorHandler.Describe) */
     /* Insert-Code-Here {bHYPRE.ErrorHandler.Describe} (Describe method) */
 
-     int i;
      char * msg = hypre_CTAlloc( char, 128 );
      char * msg2 = msg;
      HYPRE_DescribeError( ierr, msg2 );

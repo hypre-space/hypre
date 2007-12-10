@@ -1183,8 +1183,8 @@ impl_bHYPRE_SStructParCSRMatrix_Apply(
 
    ierr += HYPRE_ParCSRMatrixMatvec( 1.0, pA, pb, 0.0, px );
 
-   bHYPRE_SStructVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
-   bHYPRE_SStructVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_SStructParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_SStructParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return( ierr );
 

@@ -319,7 +319,7 @@ impl_bHYPRE_Hybrid_SetOperator(
    struct bHYPRE_Hybrid__data * data = bHYPRE_Hybrid__get_data( self );
 
    data->operator = A;
-   bHYPRE_Operator_addRef( data->operator, _ex );
+   bHYPRE_Operator_addRef( data->operator, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 

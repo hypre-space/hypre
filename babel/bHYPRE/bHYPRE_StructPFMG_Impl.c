@@ -1045,8 +1045,8 @@ impl_bHYPRE_StructPFMG_Setup(
 
    ierr += HYPRE_StructPFMGSetup( solver, HA, Hb, Hx );
 
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 
@@ -1117,8 +1117,8 @@ impl_bHYPRE_StructPFMG_Apply(
 
    ierr += HYPRE_StructPFMGSolve( solver, HA, Hb, Hx );
 
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 

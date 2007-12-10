@@ -172,6 +172,7 @@ impl_bHYPRE_IdentitySolver_Create(
     /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.Create) */
   /* Insert-Code-Here {bHYPRE.IdentitySolver.Create} (Create method) */
 
+   SIDL_CHECK(*_ex);
    return bHYPRE_IdentitySolver__create(_ex);
 
    hypre_babel_exception_no_return(_ex);

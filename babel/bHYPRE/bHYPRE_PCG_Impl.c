@@ -378,7 +378,7 @@ impl_bHYPRE_PCG_Clone(
    bHYPRE_PCG_deleteRef( PCG_x,_ex ); SIDL_CHECK(*_ex);
    return ierr;
 
-   return; hypre_babel_exception_no_return(_ex);
+   hypre_babel_exception_return_error(_ex);
     /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Clone) */
   }
 }
@@ -1531,7 +1531,7 @@ impl_bHYPRE_PCG_Apply(
 
    return ierr;
 
-   return; hypre_babel_exception_no_return(_ex);
+   hypre_babel_exception_return_error(_ex);
     /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Apply) */
   }
 }

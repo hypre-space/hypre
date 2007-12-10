@@ -1013,8 +1013,8 @@ impl_bHYPRE_StructSMG_Setup(
 
    ierr += HYPRE_StructSMGSetup( solver, HA, Hb, Hx );
 
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 
@@ -1086,8 +1086,8 @@ impl_bHYPRE_StructSMG_Apply(
 
    ierr += HYPRE_StructSMGSolve( solver, HA, Hb, Hx );
 
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_StructVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
 
    return ierr;
 
