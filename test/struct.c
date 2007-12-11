@@ -1505,7 +1505,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, 50 );
+      HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, 100 );
       HYPRE_PCGSetTol( (HYPRE_Solver)solver, 1.0e-06 );
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
       HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );
@@ -2142,7 +2142,7 @@ main( int   argc,
 
       HYPRE_StructHybridCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructHybridSetDSCGMaxIter(solver, 100);
-      HYPRE_StructHybridSetPCGMaxIter(solver, 50);
+      HYPRE_StructHybridSetPCGMaxIter(solver, 100);
       HYPRE_StructHybridSetTol(solver, 1.0e-06);
       /*HYPRE_StructHybridSetPCGAbsoluteTolFactor(solver, 1.0e-200);*/
       HYPRE_StructHybridSetConvergenceTol(solver, cf_tol);
@@ -2268,7 +2268,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, 50 );
+      HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, 100 );
       HYPRE_GMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
       HYPRE_GMRESSetRelChange( (HYPRE_Solver)solver, 0 );
       HYPRE_GMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
@@ -2421,7 +2421,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructBiCGSTABCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)solver, 50 );
+      HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)solver, 100 );
       HYPRE_BiCGSTABSetTol( (HYPRE_Solver)solver, 1.0e-06 );
       HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)solver, 1 );
       HYPRE_BiCGSTABSetLogging( (HYPRE_Solver)solver, 1 );
