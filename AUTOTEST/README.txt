@@ -43,9 +43,8 @@ To write a new test, just use an existing test (e.g., 'default.sh') as a
 template and make the appropriate modifications.  Try not to use the word "test"
 in the name of the script so that we can keep the convention of only the special
 scripts having this in their names.  Try not to use absolute directory paths in
-the script (one exception is the 'machine-*' scripts because they need to set
-machine-specific environment information in order to be run via 'cron').  If in
-doubt, talk to another developer or send an inquiry to hypre-support@llnl.gov.
+the script.  If in doubt, talk to another developer or send an inquiry to
+hypre-support@llnl.gov.
 
 =====================
 
