@@ -156,11 +156,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
         hypre_MatvecCommPkgCreate(A);
-#endif
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -813,11 +809,7 @@ int AmgCGCPrepare (hypre_ParCSRMatrix *S,int nlocal,int *CF_marker,int **CF_mark
   MPI_Comm_rank (comm,&mpirank);
 
   if (!comm_pkg) {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-    hypre_NewCommPkgCreate (S);
-#else
     hypre_MatvecCommPkgCreate (S);
-#endif
     comm_pkg = hypre_ParCSRMatrixCommPkg (S);
   }
   num_sends = hypre_ParCSRCommPkgNumSends (comm_pkg);
