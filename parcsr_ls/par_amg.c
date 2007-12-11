@@ -2439,11 +2439,6 @@ hypre_BoomerAMGSetDofFunc( void     *data,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
-   if (!dof_func)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   } 
    hypre_TFree(hypre_ParAMGDataDofFunc(amg_data));
    hypre_ParAMGDataDofFunc(amg_data) = dof_func;
 
