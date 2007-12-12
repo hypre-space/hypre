@@ -25,29 +25,29 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TEST_ALPHA="-`hostname -a`"
+TEST_BETA="$TEST_ALPHA -alc"
+TEST_GENERAL="$TEST_BETA -thunder -up -zeus"
+
 while [ "$*" ]
 do
    case $1 in
       -h|-help)
          cat <<EOF
 
-   $0 [options] {release} {machine:rem_path} {testname}.sh
+   $0 [options] {release}
 
    where: {release}  is a hypre release tar file (gzipped)
-          {machine}  is the name of the machine to run on
-          {rem_path} is the remote path where the {release} source directory
-                     will be copied
-          {testname} is the user-defined name for the test script
 
    with options:
       -h|-help       prints this usage information and exits
       -t|-trace      echo each command
 
-   This script is similar to the 'testsrc.sh' script.  The main difference is
-   that this script unpacks {release} (in the /tmp directory) to create the
-   {src_dir} argument of 'testsrc.sh'.
+   This script unpacks {release} in the parent directory and lists the tests
+   needed to verify it. The list depends on the release type (alpha, beta, or
+   general).
 
-   Example usage: $0 hypre-2.0.0.tar.gz tux149:. machine-tux.sh
+   Example usage: $0 hypre-2.0.0.tar.gz
 
 EOF
          exit
@@ -63,18 +63,74 @@ EOF
 done
 
 # Setup
+testing_dir=`cd ..; pwd`
+autotest_dir="$testing_dir/AUTOTEST"
 release_file=$1
-release_name=`basename $release_file`
-release_dir=`echo $release_name | awk -F.t '{print $1}'`
-current_dir=`pwd`
-shift
+release_dir=`basename $release_file | awk -F.t '{print $1}'`
+case `basename $release_file | awk -F. '{print $3}'` in
+   *a)
+      TESTS=$TEST_ALPHA
+      ;;
+   *b)
+      TESTS=$TEST_BETA
+      ;;
+   *)
+      TESTS=$TEST_GENERAL
+      ;;
+esac
 
-# Extract release in the /tmp directory
-cd /tmp
-rm -fr /tmp/$release_dir
-tar -zxvf $release_file -C /tmp $release_dir/src
-mv -f /tmp/$release_dir/src /tmp/$release_dir/$release_dir-src
-cd $current_dir
+# Extract the release
+cd $testing_dir
+if [ ! -d $release_dir ]; then
+   echo "Unpacking the release"
+   tar -zxf $release_file
+   rm -rf $autotest_dir/machine-*.???
+fi
 
-# Run the test
-./testsrc.sh /tmp/$release_dir/$release_dir-src $@
+# List the status of the required tests
+cd $autotest_dir
+src_dir="../$release_dir/src"
+echo ""
+echo "The followinfg tests are needed to verify this release:"
+echo ""
+for test in $TESTS
+do
+   case $test in
+      -tux[0-9]*-compilers)
+         host=`echo $test | awk -F- '{print $2}'`
+         name="tux-compilers"
+         ;;
+
+      -tux[0-9]*)
+         host=`echo $test | awk -F- '{print $2}'`
+         name="tux"
+         ;;
+
+      -alc|-thunder|-up|-zeus)
+         host=`echo $test | awk -F- '{print $2}'`
+         name=$host
+         ;;
+
+      -mac)
+         host="kolev-mac"
+         name="mac"
+         ;;
+   esac
+   if [ ! -e machine-$name.err ]; then
+      status="[NOT RUN]"
+   else
+      if [ -s machine-$name.err ]; then
+         status="[FAILED] "
+      else
+         status="[PASSED] "
+      fi
+   fi
+   echo "$status $TERM -e ./testsrc.sh $src_dir $host:hypre/testing/$host machine-$name.sh &"
+done
+cat <<EOF
+
+Each of the above tests will run in a new terminal.  The release is verified
+when all tests are listed as [PASSED].  If a test fails, you can examine
+its error files in the current directory, delete them, and re-run it again.
+
+EOF
