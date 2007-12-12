@@ -34,7 +34,7 @@ src_dir="$testing_dir/linear_solvers"
 cvs_opts=""
 summary_file="SUMMARY.html"
 summary_subject="NEW Autotest Error Summary `date +%D`"
-email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
+email_list="rfalgout@llnl.gov"
 # email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 
 # Main loop
@@ -47,12 +47,14 @@ do
 
    $0 [options] [-checkout | -{test1} -{test2} ... | -summary]
 
-   where: -checkout  Checks out the repository and updates the current AUTOTEST
-                     directory.  Should be called before running tests.
-          -{test}    Runs the indicated tests in sequence, which are associated
-                     with specific machine names (e.g., -tux149, -alc, -up).
-          -summary   Generates a summary file with currently pending and failed
-                     tests and sends it to developers in an email.
+   where: 
+
+      -checkout       Checks out the repository and updates the current AUTOTEST
+                      directory.  Should be called before running tests.
+      -{test}         Runs the indicated tests in sequence, which are associated
+                      with specific machine names (e.g., -tux149, -alc, -up).
+      -summary        Generates a summary file of passed, pending, failed tests.
+      -summary-email  Same as -summary, but also sends developers an email.
 
    with options:
 
@@ -86,7 +88,7 @@ EOF
          ;;
 
       # Generate a summary file in the output directory
-      -summary)
+      -summary*)
          # move the finished logs to todays output directory
          # (using 'cp' then 'rm' produces fewer complaints than using 'mv')
          mkdir -p $output_dir
@@ -150,16 +152,18 @@ EOF
          echo "</PRE>"  >> $summary_file;
          echo "</html>" >> $summary_file;
 
-         # send the email
-         (
-            echo To: $email_list
-            echo Subject: $summary_subject
-            echo Content-Type: text/html
-            echo MIME-Version: 1.0
-
-            cat $summary_file
-
-         ) | /usr/sbin/sendmail -t
+         if [ "$1" = "-summary-email" ]; then
+            # send the email
+            (
+               echo To: $email_list
+               echo Subject: $summary_subject
+               echo Content-Type: text/html
+               echo MIME-Version: 1.0
+               
+               cat $summary_file
+               
+            ) | /usr/sbin/sendmail -t
+         fi
 
          test_opts=""
          break
