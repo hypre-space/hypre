@@ -37,12 +37,6 @@ summary_subject="NEW Autotest Error Summary `date +%D`"
 email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 # email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 
-# Ensure that important directories exist
-cd $testing_dir
-mkdir -p $autotest_dir
-mkdir -p $finished_dir
-cd $autotest_dir
-
 # Main loop
 test_opts=""
 while [ "$*" ]
@@ -178,6 +172,14 @@ EOF
    esac
 done
 
+# Ensure that important directories exist
+if [ -n "$test_opts" ]; then
+   cd $testing_dir
+   mkdir -p $autotest_dir
+   mkdir -p $finished_dir
+   cd $autotest_dir
+fi
+
 # Run tests
 for opt in $test_opts
 do
@@ -216,9 +218,11 @@ done
 
 # Fix permissions
 cd $testing_dir
-ch_dirs="linear_solvers $autotest_dir $finished_dir"
-if [ -e $output_dir ]; then
-   ch_dirs="$ch_dirs $output_dir"
-fi
-chmod -fR a+rX,ug+w,o-w $ch_dirs
-chgrp -fR hypre         $ch_dirs
+ch_dirs="linear_solvers $autotest_dir $finished_dir $output_dir"
+for dir in $ch_dirs
+do
+   if [ -e $dir ]; then
+      chmod -fR a+rX,ug+w,o-w $dir
+      chgrp -fR hypre         $dir
+   fi
+done
