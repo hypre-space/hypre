@@ -64,6 +64,7 @@ mv configure configure.orig
 sed -e 's/casc_using_fortran=yes/casc_using_fortran=no/g' \
     -e 's/LDFLAGS=\"\$g2c\_SEARCH_PATHS \$LDFLAGS\"//g' configure.orig > configure
 chmod a+x configure
+export CXX="mpicxx"
 cd $test_dir
 
 # Test runtest tests
