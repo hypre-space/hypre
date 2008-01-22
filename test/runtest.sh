@@ -111,6 +111,9 @@ function MpirunString
       zeus*) shift
          RunString="srun -p pdebug -n$*"
          ;;
+      atla*) shift
+         RunString="srun -p pdebug -n$*"
+         ;;
       tux*) BatchMode=0
          MACHINES_FILE="hostname"
          if [ ! -f $MACHINES_FILE ] ; then
