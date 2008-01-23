@@ -159,7 +159,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
 
           if (proc == myproc)
           {
-             hypre_SStructMapEntryGetBox(map_entries[j], &own_cboxnums[i][cnt]);
+             hypre_SStructMapEntryGetBoxnum(map_entries[j], &own_cboxnums[i][cnt]);
              hypre_AppendBox(&map_entry_box, 
                               hypre_BoxArrayArrayBoxArray(own_boxes, i));
              cnt++;

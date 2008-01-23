@@ -103,14 +103,15 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
 
 
    hypre_CommInfoCreate(sendboxes, recvboxes, sprocesses, rprocesses,
-                        send_rboxnums, recv_rboxnums, send_rboxes, &comm_info);
+                        send_rboxnums, recv_rboxnums, send_rboxes, NULL,
+                        1, &comm_info);
 
    hypre_CommPkgCreate(comm_info,
                        send_data_space,
                        recv_data_space,
-                       num_values,
-                       comm,
-                      &comm_pkg);
+                       num_values, NULL, 0, comm,
+                       &comm_pkg);
+   hypre_CommInfoDestroy(comm_info);
 
   *comm_pkg_ptr = comm_pkg;
 

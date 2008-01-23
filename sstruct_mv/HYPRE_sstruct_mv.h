@@ -174,6 +174,41 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  * Describe how regions just outside of a part relate to other parts.  This is
  * done a box at a time.
  *
+ * Indexes should increase from {\tt ilower} to {\tt iupper}.  It is not
+ * necessary that indexes increase from {\tt nbor\_ilower} to {\tt
+ * nbor\_iupper}.  This is to ease the transition from the old {\tt
+ * SetNeighborBox} function, and to provide some flexibility for users.
+ * 
+ * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
+ * {\tt part} to the corresponding indexes on part {\tt nbor\_part}.  For
+ * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
+ * map to indexes 1, 2, and 0 on part {\tt nbor\_part}, respectively.
+ *
+ * The {\tt index\_dir} describes the direction of the mapping in {\tt
+ * index\_map}.  For example, triple (1, 1, -1) means that for indexes 0 and 1,
+ * increasing values map to increasing values on {\tt nbor\_part}, while for
+ * index 2, decreasing values map to increasing values.
+ *
+ * NOTE: All parts related to each other via this routine must have an identical
+ * list of variables and variable types.  For example, if part 0 has only two
+ * variables on it, a cell centered variable and a node centered variable, and
+ * we declare part 1 to be a neighbor of part 0, then part 1 must also have only
+ * two variables on it, and they must be of type cell and node.
+ **/
+int HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
+                                     int                part,
+                                     int               *ilower,
+                                     int               *iupper,
+                                     int                nbor_part,
+                                     int               *nbor_ilower,
+                                     int               *nbor_iupper,
+                                     int               *index_map,
+                                     int               *index_dir);
+
+/**
+ * (DEFUNCT) Describe how regions just outside of a part relate to other parts.
+ * This is done a box at a time.  SHOULD USE {\tt SetNeighborPart} INSTEAD!
+ *
  * The indexes {\tt ilower} and {\tt iupper} map directly to the indexes {\tt
  * nbor\_ilower} and {\tt nbor\_iupper}.  Although, it is required that indexes
  * increase from {\tt ilower} to {\tt iupper}, indexes may increase and/or
@@ -198,38 +233,6 @@ int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
                                     int               *nbor_ilower,
                                     int               *nbor_iupper,
                                     int               *index_map);
-
-/*
- * ** TEMPORARY routine until more thorough testing is completed **
- *
- * This is the same as HYPRE_SStructGridSetNeighborBox, except for the addition
- * of the last argument which enables hypre to couple a part to itself.
- *
- * SetNeighborBox calls can imply that certain variables on the grid are the
- * same as other variables on the grid.  This redundancy must be reconciled
- * somehow.  When SetNeighborBox couples the index spaces of two different
- * parts, hypre can resolve this redundancy issue very easily.  However, when
- * SetNeighborBox couples the index space of a part to itself, resolving the
- * redundancey is much more complex and costly in general.  The best solution to
- * this problem is to let the user dictate which variables are primary variables
- * and which are secondary variables.
- *
- * The last argument 'primary' works as follows:
- *
- * 'primary' > 0  - the 'part' box variables are primary variables
- * 'primary' = 0  - the 'part' box variables are secondary variables
- * 'primary' < 0  - let hypre decide; only works for two different parts
- *
- **/
-int HYPRE_SStructGridSetNeighborBoxZ(HYPRE_SStructGrid  grid,
-                                     int                part,
-                                     int               *ilower,
-                                     int               *iupper,
-                                     int                nbor_part,
-                                     int               *nbor_ilower,
-                                     int               *nbor_iupper,
-                                     int               *index_map,
-                                     int                primary);
 
 /**
  * Add an unstructured part to the grid.  The variables in the unstructured part
@@ -609,11 +612,6 @@ int HYPRE_SStructVectorCreate(MPI_Comm              comm,
  **/
 int HYPRE_SStructVectorDestroy(HYPRE_SStructVector vector);
 
-/**
- * Sets ghostlayer size.
- **/
-int HYPRE_SStructVectorSetNumGhost(HYPRE_SStructVector vector,
-                                   int                *num_ghost);
 /**
  * Prepare a vector object for setting coefficient values.
  **/

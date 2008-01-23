@@ -122,6 +122,10 @@ hypre_CyclicReductionCreate( MPI_Comm  comm )
 
 /*--------------------------------------------------------------------------
  * hypre_CycRedCreateCoarseOp
+ *
+ * NOTE: This routine assumes that domain boundary ghost zones (i.e., ghost
+ * zones that do not intersect the grid) have the identity equation in them.
+ * This is currently insured by the MatrixAssemble routine.
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *

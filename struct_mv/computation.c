@@ -313,8 +313,9 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    compute_pkg = hypre_CTAlloc(hypre_ComputePkg, 1);
 
    hypre_CommPkgCreate(hypre_ComputeInfoCommInfo(compute_info),
-                       data_space, data_space, num_values,
+                       data_space, data_space, num_values, NULL, 0,
                        hypre_StructGridComm(grid), &comm_pkg);
+   hypre_CommInfoDestroy(hypre_ComputeInfoCommInfo(compute_info));
    hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
 
    hypre_ComputePkgIndtBoxes(compute_pkg) = 
@@ -373,7 +374,7 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
    int            ierr = 0;
    hypre_CommPkg *comm_pkg = hypre_ComputePkgCommPkg(compute_pkg);
 
-   ierr = hypre_InitializeCommunication(comm_pkg, data, data, comm_handle_ptr);
+   ierr = hypre_InitializeCommunication(comm_pkg, data, data, 0, 0, comm_handle_ptr);
 
    return ierr;
 }

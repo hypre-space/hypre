@@ -59,5 +59,6 @@
 
 #define HYPRE_PFMG    10
 #define HYPRE_SMG     11
+#define HYPRE_Jacobi  17
 
 #endif

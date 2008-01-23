@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -68,6 +68,7 @@ extern "C" {
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -109,7 +110,7 @@ typedef struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -133,6 +134,7 @@ typedef struct
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -154,7 +156,7 @@ typedef struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -178,6 +180,7 @@ typedef struct
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -200,7 +203,7 @@ typedef struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -224,6 +227,7 @@ typedef struct
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -239,7 +243,7 @@ typedef struct
 } hypre_PTopology;
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -263,6 +267,7 @@ typedef struct
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -366,7 +371,7 @@ typedef struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -390,6 +395,7 @@ typedef struct
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 

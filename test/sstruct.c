@@ -123,14 +123,16 @@ typedef struct
    ProblemIndex          *add_indexes;
    HYPRE_SStructVariable *add_vartypes;
 
-   /* for GridSetNeighborBox */
+   /* for GridSetNeighborPart (and defunct GridSetNeighborBox) */
    int                    glue_nboxes;
+   int                   *glue_defunct;
    ProblemIndex          *glue_ilowers;
    ProblemIndex          *glue_iuppers;
    int                   *glue_nbor_parts;
    ProblemIndex          *glue_nbor_ilowers;
    ProblemIndex          *glue_nbor_iuppers;
    Index                 *glue_index_maps;
+   Index                 *glue_index_dirs;
    int                   *glue_primaries;
 
    /* for GraphSetStencil */
@@ -171,6 +173,26 @@ typedef struct
    int                  **matadd_entries;
    double               **matadd_values;
 
+   /* FEMatrixSetValues */
+   int                    fe_matset_nboxes;
+   ProblemIndex          *fe_matset_ilowers;
+   ProblemIndex          *fe_matset_iuppers;
+   int                   *fe_matset_nrows;
+   int                  **fe_matset_rows;
+   int                   *fe_matset_ncols;
+   int                  **fe_matset_cols;
+   double               **fe_matset_values;
+
+   /* FEMatrixAddToValues */
+   int                    fe_matadd_nboxes;
+   ProblemIndex          *fe_matadd_ilowers;
+   ProblemIndex          *fe_matadd_iuppers;
+   int                   *fe_matadd_nrows;
+   int                  **fe_matadd_rows;
+   int                   *fe_matadd_ncols;
+   int                  **fe_matadd_cols;
+   double               **fe_matadd_values;
+
    Index                  periodic;
 
 } ProblemPartData;
@@ -187,6 +209,12 @@ typedef struct
    Index          **stencil_offsets;
    int            **stencil_vars;
    double         **stencil_values;
+
+   int              fe_stencil_size;
+   Index           *fe_stencil_offsets;
+   int             *fe_stencil_vars;
+   double         **fe_stencil_values;
+   int            **fe_stencil_entries;  /* corresponding stencil entries */
 
    int              symmetric_num;
    int             *symmetric_parts;
@@ -389,7 +417,7 @@ ReadData( char         *filename,
 
    char               key[250];
 
-   int                part, var, s, entry, i, il, iu;
+   int                part, var, s, entry, i, j, k, il, iu;
 
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
@@ -439,6 +467,8 @@ ReadData( char         *filename,
     *-----------------------------------------------------------*/
 
    data.max_boxsize = 0;
+   data.nstencils = 0;
+   data.fe_stencil_size = 0;
    data.symmetric_num = 0;
    data.symmetric_parts    = NULL;
    data.symmetric_vars     = NULL;
@@ -520,13 +550,16 @@ ReadData( char         *filename,
             printf("GridAddVariables not yet implemented!\n");
             exit(1);
          }
-         else if ( strcmp(key, "GridSetNeighborBox:") == 0 )
+         else if ( strcmp(key, "GridSetNeighborPart:") == 0 ||
+                   strcmp(key, "GridSetNeighborBox:") == 0 )
          {
             part = strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if ((pdata.glue_nboxes % 10) == 0)
             {
                size = pdata.glue_nboxes + 10;
+               pdata.glue_defunct =
+                  hypre_TReAlloc(pdata.glue_nbor_parts, int, size);
                pdata.glue_ilowers =
                   hypre_TReAlloc(pdata.glue_ilowers, ProblemIndex, size);
                pdata.glue_iuppers =
@@ -539,8 +572,15 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.glue_nbor_iuppers, ProblemIndex, size);
                pdata.glue_index_maps =
                   hypre_TReAlloc(pdata.glue_index_maps, Index, size);
+               pdata.glue_index_dirs =
+                  hypre_TReAlloc(pdata.glue_index_dirs, Index, size);
                pdata.glue_primaries =
                   hypre_TReAlloc(pdata.glue_primaries, int, size);
+            }
+            pdata.glue_defunct[pdata.glue_nboxes] = 0;
+            if ( strcmp(key, "GridSetNeighborBox:") == 0 )
+            {
+               pdata.glue_defunct[pdata.glue_nboxes] = 1;
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.glue_ilowers[pdata.glue_nboxes]);
@@ -557,6 +597,15 @@ ReadData( char         *filename,
             for (i = data.ndim; i < 3; i++)
             {
                pdata.glue_index_maps[pdata.glue_nboxes][i] = i;
+            }
+            if (!pdata.glue_defunct[pdata.glue_nboxes])
+            {
+               SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
+                             pdata.glue_index_dirs[pdata.glue_nboxes]);
+               for (i = data.ndim; i < 3; i++)
+               {
+                  pdata.glue_index_dirs[pdata.glue_nboxes][i] = 1;
+               }
             }
             sdata_ptr += strcspn(sdata_ptr, ":\t\n");
             if ( *sdata_ptr == ':' )
@@ -587,6 +636,11 @@ ReadData( char         *filename,
          }
          else if ( strcmp(key, "StencilCreate:") == 0 )
          {
+            if (data.fe_stencil_size > 0)
+            {
+               printf("Stencil and FEStencil cannot be used together\n");
+               exit(1);
+            }
             data.nstencils = strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_sizes   = hypre_CTAlloc(int, data.nstencils);
             data.stencil_offsets = hypre_CTAlloc(Index *, data.nstencils);
@@ -616,6 +670,43 @@ ReadData( char         *filename,
             }
             data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_values[s][entry] = strtod(sdata_ptr, &sdata_ptr);
+         }
+         else if ( strcmp(key, "FEStencilCreate:") == 0 )
+         {
+            if (data.nstencils > 0)
+            {
+               printf("Stencil and FEStencil cannot be used together\n");
+               exit(1);
+            }
+            data.fe_stencil_size = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.fe_stencil_offsets =
+               hypre_CTAlloc(Index, data.fe_stencil_size);
+            data.fe_stencil_vars =
+               hypre_CTAlloc(int, data.fe_stencil_size);
+            data.fe_stencil_values =
+               hypre_CTAlloc(double *, data.fe_stencil_size);
+            data.fe_stencil_entries =
+               hypre_CTAlloc(int *, data.fe_stencil_size);
+            for (i = 0; i < data.fe_stencil_size; i++)
+            {
+               data.fe_stencil_values[i] =
+                  hypre_CTAlloc(double, data.fe_stencil_size);
+               data.fe_stencil_entries[i] =
+                  hypre_CTAlloc(int, data.fe_stencil_size);
+            }
+         }
+         else if ( strcmp(key, "FEStencilSetRow:") == 0 )
+         {
+            i = strtol(sdata_ptr, &sdata_ptr, 10);
+            SScanIntArray(sdata_ptr, &sdata_ptr,
+                          data.ndim, data.fe_stencil_offsets[i]);
+            for (k = data.ndim; k < 3; k++)
+            {
+               data.fe_stencil_offsets[i][k] = 0;
+            }
+            data.fe_stencil_vars[i] = strtol(sdata_ptr, &sdata_ptr, 10);
+            SScanDblArray(sdata_ptr, &sdata_ptr,
+                          data.fe_stencil_size, data.fe_stencil_values[i]);
          }
          else if ( strcmp(key, "GraphSetStencil:") == 0 )
          {
@@ -827,6 +918,92 @@ ReadData( char         *filename,
             pdata.matadd_nboxes++;
             data.pdata[part] = pdata;
          }
+         else if ( strcmp(key, "FEMatrixSetValues:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            if ((pdata.fe_matset_nboxes% 10) == 0)
+            {
+               size = pdata.fe_matset_nboxes+10;
+               pdata.fe_matset_ilowers=
+                  hypre_TReAlloc(pdata.fe_matset_ilowers, ProblemIndex, size);
+               pdata.fe_matset_iuppers=
+                  hypre_TReAlloc(pdata.fe_matset_iuppers, ProblemIndex, size);
+               pdata.fe_matset_nrows=
+                  hypre_TReAlloc(pdata.fe_matset_nrows, int, size);
+               pdata.fe_matset_rows=
+                  hypre_TReAlloc(pdata.fe_matset_rows, int *, size);
+               pdata.fe_matset_ncols=
+                  hypre_TReAlloc(pdata.fe_matset_ncols, int, size);
+               pdata.fe_matset_cols=
+                  hypre_TReAlloc(pdata.fe_matset_cols, int *, size);
+               pdata.fe_matset_values=
+                  hypre_TReAlloc(pdata.fe_matset_values, double *, size);
+            }
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.fe_matset_ilowers[pdata.fe_matset_nboxes]);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.fe_matset_iuppers[pdata.fe_matset_nboxes]);
+            i= strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.fe_matset_nrows[pdata.fe_matset_nboxes]= i;
+            pdata.fe_matset_rows[pdata.fe_matset_nboxes] = hypre_TAlloc(int, i);
+            SScanIntArray(sdata_ptr, &sdata_ptr, i,
+              (int*) pdata.fe_matset_rows[pdata.fe_matset_nboxes]);
+            j= strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.fe_matset_ncols[pdata.fe_matset_nboxes]= j;
+            pdata.fe_matset_cols[pdata.fe_matset_nboxes] = hypre_TAlloc(int, j);
+            SScanIntArray(sdata_ptr, &sdata_ptr, j,
+              (int*) pdata.fe_matset_cols[pdata.fe_matset_nboxes]);
+            pdata.fe_matset_values[pdata.fe_matset_nboxes] =
+               hypre_TAlloc(double, i*j);
+            SScanDblArray(sdata_ptr, &sdata_ptr, i*j,
+              (double *) pdata.fe_matset_values[pdata.fe_matset_nboxes]);
+            pdata.fe_matset_nboxes++;
+            data.pdata[part] = pdata;
+         }
+         else if ( strcmp(key, "FEMatrixAddToValues:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            if ((pdata.fe_matadd_nboxes% 10) == 0)
+            {
+               size = pdata.fe_matadd_nboxes+10;
+               pdata.fe_matadd_ilowers=
+                  hypre_TReAlloc(pdata.fe_matadd_ilowers, ProblemIndex, size);
+               pdata.fe_matadd_iuppers=
+                  hypre_TReAlloc(pdata.fe_matadd_iuppers, ProblemIndex, size);
+               pdata.fe_matadd_nrows=
+                  hypre_TReAlloc(pdata.fe_matadd_nrows, int, size);
+               pdata.fe_matadd_rows=
+                  hypre_TReAlloc(pdata.fe_matadd_rows, int *, size);
+               pdata.fe_matadd_ncols=
+                  hypre_TReAlloc(pdata.fe_matadd_ncols, int, size);
+               pdata.fe_matadd_cols=
+                  hypre_TReAlloc(pdata.fe_matadd_cols, int *, size);
+               pdata.fe_matadd_values=
+                  hypre_TReAlloc(pdata.fe_matadd_values, double *, size);
+            }
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.fe_matadd_ilowers[pdata.fe_matadd_nboxes]);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.fe_matadd_iuppers[pdata.fe_matadd_nboxes]);
+            i= strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.fe_matadd_nrows[pdata.fe_matadd_nboxes]= i;
+            pdata.fe_matadd_rows[pdata.fe_matadd_nboxes] = hypre_TAlloc(int, i);
+            SScanIntArray(sdata_ptr, &sdata_ptr, i,
+              (int*) pdata.fe_matadd_rows[pdata.fe_matadd_nboxes]);
+            j= strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.fe_matadd_ncols[pdata.fe_matadd_nboxes]= j;
+            pdata.fe_matadd_cols[pdata.fe_matadd_nboxes] = hypre_TAlloc(int, j);
+            SScanIntArray(sdata_ptr, &sdata_ptr, j,
+              (int*) pdata.fe_matadd_cols[pdata.fe_matadd_nboxes]);
+            pdata.fe_matadd_values[pdata.fe_matadd_nboxes] =
+               hypre_TAlloc(double, i*j);
+            SScanDblArray(sdata_ptr, &sdata_ptr, i*j,
+              (double *) pdata.fe_matadd_values[pdata.fe_matadd_nboxes]);
+            pdata.fe_matadd_nboxes++;
+            data.pdata[part] = pdata;
+         }
          else if ( strcmp(key, "ProcessPoolCreate:") == 0 )
          {
             data.npools = strtol(sdata_ptr, &sdata_ptr, 10);
@@ -848,6 +1025,90 @@ ReadData( char         *filename,
    {
       data.max_boxsize =
          hypre_max(data.max_boxsize, data.pdata[part].max_boxsize);
+   }
+
+   /* compute stencils from fe_stencil */
+   if (data.fe_stencil_size)
+   {
+      Index   offset;
+      int     var;
+      double  value;
+
+      data.nstencils       = data.pdata[0].nvars;
+      data.stencil_sizes   = hypre_CTAlloc(int, data.nstencils);
+      data.stencil_offsets = hypre_CTAlloc(Index *, data.nstencils);
+      data.stencil_vars    = hypre_CTAlloc(int *, data.nstencils);
+      data.stencil_values  = hypre_CTAlloc(double *, data.nstencils);
+      /* allocate based on an upper bound */
+      size = data.fe_stencil_size * data.fe_stencil_size;
+      for (s = 0; s < data.nstencils; s++)
+      {
+         data.stencil_offsets[s] = hypre_CTAlloc(Index, size);
+         data.stencil_vars[s]    = hypre_CTAlloc(int, size);
+         data.stencil_values[s]  = hypre_CTAlloc(double, size);
+      }
+
+      for (i = 0; i < data.fe_stencil_size; i++)
+      {
+         s = data.fe_stencil_vars[i];
+
+         for (j = 0; j < data.fe_stencil_size; j++)
+         {
+            /* shift off-diagonal offset by diagonal */
+            for (k = 0; k < 3; k++)
+            {
+               offset[k] =
+                  data.fe_stencil_offsets[j][k] -
+                  data.fe_stencil_offsets[i][k];
+            }
+            var = data.fe_stencil_vars[j];
+            value = data.fe_stencil_values[i][j];
+
+            /* search stencil_offsets */
+            for (entry = 0; entry < data.stencil_sizes[s]; entry++)
+            {
+               /* if offset is already in the stencil, break */
+               if ( (offset[0] == data.stencil_offsets[s][entry][0]) &&
+                    (offset[1] == data.stencil_offsets[s][entry][1]) &&
+                    (offset[2] == data.stencil_offsets[s][entry][2]) &&
+                    (var == data.stencil_vars[s][entry]) )
+               {
+                  break;
+               }
+            }
+            /* if this is a new nonzero stencil offset, add it to the stencil */
+            if ((entry == data.stencil_sizes[s]) && (value != 0.0))
+            {
+               data.stencil_offsets[s][entry][0] = offset[0];
+               data.stencil_offsets[s][entry][1] = offset[1];
+               data.stencil_offsets[s][entry][2] = offset[2];
+               data.stencil_vars[s][entry]       = var;
+               /* set stencil values to zero to initialize AddTo calls */
+               data.stencil_values[s][entry]     = 0.0;
+               data.stencil_sizes[s]++;
+            }
+
+            if (value != 0.0)
+            {
+               data.fe_stencil_entries[i][j] = entry;
+            }
+            else
+            {
+               data.fe_stencil_entries[i][j] = -1;
+            }
+         }
+      }
+
+      for (part = 0; part < data.nparts; part++)
+      {
+         pdata = data.pdata[part];
+         pdata.stencil_num = hypre_CTAlloc(int, pdata.nvars);
+         for (var = 0; var < pdata.nvars; var++)
+         {
+            pdata.stencil_num[var] = var;
+         }
+         data.pdata[part] = pdata;
+      }
    }
 
    hypre_TFree(sdata);
@@ -957,6 +1218,20 @@ DistributeData( ProblemData   global_data,
          pdata.graph_nboxes = 0;
          pdata.matset_nboxes = 0;
          pdata.matadd_nboxes = 0;
+         for (box = 0; box < pdata.fe_matset_nboxes; box++)
+         {
+            hypre_TFree(pdata.fe_matset_rows[box]);
+            hypre_TFree(pdata.fe_matset_cols[box]);
+            hypre_TFree(pdata.fe_matset_values[box]);
+         }
+         pdata.fe_matset_nboxes = 0;
+         for (box = 0; box < pdata.fe_matadd_nboxes; box++)
+         {
+            hypre_TFree(pdata.fe_matadd_rows[box]);
+            hypre_TFree(pdata.fe_matadd_cols[box]);
+            hypre_TFree(pdata.fe_matadd_values[box]);
+         }
+         pdata.fe_matadd_nboxes = 0;
       }
       else
       {
@@ -991,6 +1266,16 @@ DistributeData( ProblemData   global_data,
             {
                MapProblemIndex(pdata.matadd_ilowers[box], m);
                MapProblemIndex(pdata.matadd_iuppers[box], m);
+            }
+            for (box = 0; box < pdata.fe_matset_nboxes; box++)
+            {
+               MapProblemIndex(pdata.fe_matset_ilowers[box], m);
+               MapProblemIndex(pdata.fe_matset_iuppers[box], m);
+            }
+            for (box = 0; box < pdata.fe_matadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.fe_matadd_ilowers[box], m);
+               MapProblemIndex(pdata.fe_matadd_iuppers[box], m);
             }
          }
 
@@ -1169,6 +1454,7 @@ DistributeData( ProblemData   global_data,
                            pdata.matadd_iuppers[box][d];
                      }
                      pdata.matadd_vars[i]     = pdata.matadd_vars[box];
+                     pdata.matadd_nentries[i] = pdata.matadd_nentries[box];
                      pdata.matadd_entries[i]  = pdata.matadd_entries[box];
                      pdata.matadd_values[i]   = pdata.matadd_values[box];
                      i++;
@@ -1177,6 +1463,98 @@ DistributeData( ProblemData   global_data,
                }
             }
             pdata.matadd_nboxes = i;
+
+            i = 0;
+            for (box = 0; box < pdata.fe_matset_nboxes; box++)
+            {
+               MapProblemIndex(pdata.fe_matset_ilowers[box], m);
+               MapProblemIndex(pdata.fe_matset_iuppers[box], m);
+
+               for (b = 0; b < pdata.nboxes; b++)
+               {
+                  /* fe is cell-based, so no need to convert box extents */
+                  size = IntersectBoxes(pdata.fe_matset_ilowers[box],
+                                        pdata.fe_matset_iuppers[box],
+                                        pdata.ilowers[b], pdata.iuppers[b],
+                                        int_ilower, int_iupper);
+                  if (size > 0)
+                  {
+                     /* if there is an intersection, it is the only one */
+                     for (d = 0; d < 3; d++)
+                     {
+                        pdata.fe_matset_ilowers[i][d] = int_ilower[d];
+                        pdata.fe_matset_iuppers[i][d] = int_iupper[d];
+                     }
+                     for (d = 3; d < 9; d++)
+                     {
+                        pdata.fe_matset_ilowers[i][d] =
+                           pdata.fe_matset_ilowers[box][d];
+                        pdata.fe_matset_iuppers[i][d] =
+                           pdata.fe_matset_iuppers[box][d];
+                     }
+                     pdata.fe_matset_nrows[i]  = pdata.fe_matset_nrows[box];
+                     pdata.fe_matset_rows[i]   = pdata.fe_matset_rows[box];
+                     pdata.fe_matset_ncols[i]  = pdata.fe_matset_ncols[box];
+                     pdata.fe_matset_cols[i]   = pdata.fe_matset_cols[box];
+                     pdata.fe_matset_values[i] = pdata.fe_matset_values[box];
+                     i++;
+                     break;
+                  }
+               }
+            }
+            for (box = i; box < pdata.fe_matset_nboxes; box++)
+            {
+               hypre_TFree(pdata.fe_matset_rows[box]);
+               hypre_TFree(pdata.fe_matset_cols[box]);
+               hypre_TFree(pdata.fe_matset_values[box]);
+            }
+            pdata.fe_matset_nboxes = i;
+
+            i = 0;
+            for (box = 0; box < pdata.fe_matadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.fe_matadd_ilowers[box], m);
+               MapProblemIndex(pdata.fe_matadd_iuppers[box], m);
+
+               for (b = 0; b < pdata.nboxes; b++)
+               {
+                  /* fe is cell-based, so no need to convert box extents */
+                  size = IntersectBoxes(pdata.fe_matadd_ilowers[box],
+                                        pdata.fe_matadd_iuppers[box],
+                                        pdata.ilowers[b], pdata.iuppers[b],
+                                        int_ilower, int_iupper);
+                  if (size > 0)
+                  {
+                     /* if there is an intersection, it is the only one */
+                     for (d = 0; d < 3; d++)
+                     {
+                        pdata.fe_matadd_ilowers[i][d] = int_ilower[d];
+                        pdata.fe_matadd_iuppers[i][d] = int_iupper[d];
+                     }
+                     for (d = 3; d < 9; d++)
+                     {
+                        pdata.fe_matadd_ilowers[i][d] =
+                           pdata.fe_matadd_ilowers[box][d];
+                        pdata.fe_matadd_iuppers[i][d] =
+                           pdata.fe_matadd_iuppers[box][d];
+                     }
+                     pdata.fe_matadd_nrows[i]  = pdata.fe_matadd_nrows[box];
+                     pdata.fe_matadd_rows[i]   = pdata.fe_matadd_rows[box];
+                     pdata.fe_matadd_ncols[i]  = pdata.fe_matadd_ncols[box];
+                     pdata.fe_matadd_cols[i]   = pdata.fe_matadd_cols[box];
+                     pdata.fe_matadd_values[i] = pdata.fe_matadd_values[box];
+                     i++;
+                     break;
+                  }
+               }
+            }
+            for (box = i; box < pdata.fe_matadd_nboxes; box++)
+            {
+               hypre_TFree(pdata.fe_matadd_rows[box]);
+               hypre_TFree(pdata.fe_matadd_cols[box]);
+               hypre_TFree(pdata.fe_matadd_values[box]);
+            }
+            pdata.fe_matadd_nboxes = i;
          }
 
          /* refine and block boxes */
@@ -1249,6 +1627,16 @@ DistributeData( ProblemData   global_data,
                MapProblemIndex(pdata.matadd_ilowers[box], m);
                MapProblemIndex(pdata.matadd_iuppers[box], m);
             }
+            for (box = 0; box < pdata.fe_matset_nboxes; box++)
+            {
+               MapProblemIndex(pdata.fe_matset_ilowers[box], m);
+               MapProblemIndex(pdata.fe_matset_iuppers[box], m);
+            }
+            for (box = 0; box < pdata.fe_matadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.fe_matadd_ilowers[box], m);
+               MapProblemIndex(pdata.fe_matadd_iuppers[box], m);
+            }
          }
 
          /* map remaining ilowers & iuppers */
@@ -1312,6 +1700,26 @@ DistributeData( ProblemData   global_data,
             }
             pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
          }
+         for (box = 0; box < pdata.fe_matset_nboxes; box++)
+         {
+            size = 1;
+            for (i = 0; i < 3; i++)
+            {
+               size*= (pdata.fe_matset_iuppers[box][i] -
+                       pdata.fe_matset_ilowers[box][i] + 1);
+            }
+            pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
+         }
+         for (box = 0; box < pdata.fe_matadd_nboxes; box++)
+         {
+            size = 1;
+            for (i = 0; i < 3; i++)
+            {
+               size*= (pdata.fe_matadd_iuppers[box][i] -
+                       pdata.fe_matadd_ilowers[box][i] + 1);
+            }
+            pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
+         }
       }
 
       if (pdata.nboxes == 0)
@@ -1324,12 +1732,14 @@ DistributeData( ProblemData   global_data,
 
       if (pdata.glue_nboxes == 0)
       {
+         hypre_TFree(pdata.glue_defunct);
          hypre_TFree(pdata.glue_ilowers);
          hypre_TFree(pdata.glue_iuppers);
          hypre_TFree(pdata.glue_nbor_parts);
          hypre_TFree(pdata.glue_nbor_ilowers);
          hypre_TFree(pdata.glue_nbor_iuppers);
          hypre_TFree(pdata.glue_index_maps);
+         hypre_TFree(pdata.glue_index_dirs);
          hypre_TFree(pdata.glue_primaries);
       }
 
@@ -1367,13 +1777,30 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.matadd_iuppers);
          hypre_TFree(pdata.matadd_vars);
          hypre_TFree(pdata.matadd_nentries);
-         for (box = 0; box < pdata.matadd_nboxes; box++)
-         {
-            hypre_TFree(pdata.matadd_entries[box]);
-            hypre_TFree(pdata.matadd_values[box]);
-         }
          hypre_TFree(pdata.matadd_entries);
          hypre_TFree(pdata.matadd_values);
+      }
+
+      if (pdata.fe_matset_nboxes == 0)
+      {
+         hypre_TFree(pdata.fe_matset_ilowers);
+         hypre_TFree(pdata.fe_matset_iuppers);
+         hypre_TFree(pdata.fe_matset_nrows);
+         hypre_TFree(pdata.fe_matset_ncols);
+         hypre_TFree(pdata.fe_matset_rows);
+         hypre_TFree(pdata.fe_matset_cols);
+         hypre_TFree(pdata.fe_matset_values);
+      }
+
+      if (pdata.fe_matadd_nboxes == 0)
+      {
+         hypre_TFree(pdata.fe_matadd_ilowers);
+         hypre_TFree(pdata.fe_matadd_iuppers);
+         hypre_TFree(pdata.fe_matadd_nrows);
+         hypre_TFree(pdata.fe_matadd_ncols);
+         hypre_TFree(pdata.fe_matadd_rows);
+         hypre_TFree(pdata.fe_matadd_cols);
+         hypre_TFree(pdata.fe_matadd_values);
       }
 
       data.pdata[part] = pdata;
@@ -1426,12 +1853,14 @@ DestroyData( ProblemData   data )
 
       if (pdata.glue_nboxes > 0)
       {
+         hypre_TFree(pdata.glue_defunct);
          hypre_TFree(pdata.glue_ilowers);
          hypre_TFree(pdata.glue_iuppers);
          hypre_TFree(pdata.glue_nbor_parts);
          hypre_TFree(pdata.glue_nbor_ilowers);
          hypre_TFree(pdata.glue_nbor_iuppers);
          hypre_TFree(pdata.glue_index_maps);
+         hypre_TFree(pdata.glue_index_dirs);
          hypre_TFree(pdata.glue_primaries);
       }
 
@@ -1482,6 +1911,40 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.matadd_entries);
          hypre_TFree(pdata.matadd_values);
       }
+
+      if (pdata.fe_matset_nboxes > 0)
+      {
+         hypre_TFree(pdata.fe_matset_ilowers);
+         hypre_TFree(pdata.fe_matset_iuppers);
+         hypre_TFree(pdata.fe_matset_nrows);
+         hypre_TFree(pdata.fe_matset_ncols);
+         for (box = 0; box < pdata.fe_matset_nboxes; box++)
+         {
+            hypre_TFree(pdata.fe_matset_rows[box]);
+            hypre_TFree(pdata.fe_matset_cols[box]);
+            hypre_TFree(pdata.fe_matset_values[box]);
+         }
+         hypre_TFree(pdata.fe_matset_rows);
+         hypre_TFree(pdata.fe_matset_cols);
+         hypre_TFree(pdata.fe_matset_values);
+      }
+
+      if (pdata.fe_matadd_nboxes > 0)
+      {
+         hypre_TFree(pdata.fe_matadd_ilowers);
+         hypre_TFree(pdata.fe_matadd_iuppers);
+         hypre_TFree(pdata.fe_matadd_nrows);
+         hypre_TFree(pdata.fe_matadd_ncols);
+         for (box = 0; box < pdata.fe_matadd_nboxes; box++)
+         {
+            hypre_TFree(pdata.fe_matadd_rows[box]);
+            hypre_TFree(pdata.fe_matadd_cols[box]);
+            hypre_TFree(pdata.fe_matadd_values[box]);
+         }
+         hypre_TFree(pdata.fe_matadd_rows);
+         hypre_TFree(pdata.fe_matadd_cols);
+         hypre_TFree(pdata.fe_matadd_values);
+      }
    }
    hypre_TFree(data.pdata);
 
@@ -1495,6 +1958,19 @@ DestroyData( ProblemData   data )
    hypre_TFree(data.stencil_offsets);
    hypre_TFree(data.stencil_vars);
    hypre_TFree(data.stencil_values);
+
+   if (data.fe_stencil_size > 0)
+   {
+      for (s = 0; s < data.fe_stencil_size; s++)
+      {
+         hypre_TFree(data.fe_stencil_values[s]);
+         hypre_TFree(data.fe_stencil_entries[s]);
+      }
+      hypre_TFree(data.fe_stencil_offsets);
+      hypre_TFree(data.fe_stencil_vars);
+      hypre_TFree(data.fe_stencil_values);
+      hypre_TFree(data.fe_stencil_entries);
+   }
 
    if (data.symmetric_num > 0)
    {
@@ -1558,7 +2034,10 @@ PrintUsage( char *progname,
       printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
       printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       printf("  -solver <ID>        : solver ID (default = 39)\n");
+      printf("                         0 - SMG split solver\n");
+      printf("                         1 - PFMG split solver\n");
       printf("                         3 - SysPFMG\n");
+      printf("                         8 - 1-step Jacobi split solver\n");
       printf("                        10 - PCG with SMG split precond\n");
       printf("                        11 - PCG with PFMG split precond\n");
       printf("                        13 - PCG with SysPFMG precond\n");
@@ -1587,6 +2066,7 @@ PrintUsage( char *progname,
       printf("                        202- Struct SparseMSG\n");
       printf("                        203- Struct PFMG constant coefficients\n");
       printf("                        204- Struct PFMG constant coefficients variable diagonal\n");
+      printf("                        208- Struct Jacobi\n");
       printf("                        210- Struct CG with SMG precond\n");
       printf("                        211- Struct CG with PFMG precond\n");
       printf("                        212- Struct CG with SparseMSG precond\n");
@@ -1743,6 +2223,7 @@ main( int   argc,
    double                cf_tol;
 
    int                   arg_index, part, var, box, s, entry, i, j, k, size;
+   int                   row, col;
                         
    /* begin lobpcg */
 
@@ -1807,6 +2288,11 @@ main( int   argc,
       {
          arg_index++;
          infile = argv[arg_index++];
+      }
+      else if ( strcmp(argv[arg_index], "-help") == 0 )
+      {
+         PrintUsage(argv[0], myid);
+         exit(1);
       }
    }
 
@@ -1981,12 +2467,6 @@ main( int   argc,
          arg_index++;
          cf_tol = atof(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-help") == 0 )
-      {
-         PrintUsage(argv[0], myid);
-         exit(1);
-         break;
-      }
       /* begin lobpcg */
       else if ( strcmp(argv[arg_index], "-lobpcg") == 0 ) 
       {					 /* use lobpcg */
@@ -2120,27 +2600,30 @@ main( int   argc,
 
       /* GridAddVariabes */
 
-      /* GridSetNeighborBox */
+      /* GridSetNeighborPart (and defunct GridSetNeighborBox) */
       for (box = 0; box < pdata.glue_nboxes; box++)
       {
-#if 1 /* will add primary to the interface soon */
-         HYPRE_SStructGridSetNeighborBox(grid, part,
-                                         pdata.glue_ilowers[box],
-                                         pdata.glue_iuppers[box],
-                                         pdata.glue_nbor_parts[box],
-                                         pdata.glue_nbor_ilowers[box],
-                                         pdata.glue_nbor_iuppers[box],
-                                         pdata.glue_index_maps[box]);
-#else
-         HYPRE_SStructGridSetNeighborBoxZ(grid, part,
-                                          pdata.glue_ilowers[box],
-                                          pdata.glue_iuppers[box],
-                                          pdata.glue_nbor_parts[box],
-                                          pdata.glue_nbor_ilowers[box],
-                                          pdata.glue_nbor_iuppers[box],
-                                          pdata.glue_index_maps[box],
-                                          pdata.glue_primaries[box]);
-#endif
+         if (!pdata.glue_defunct[box])
+         {
+            HYPRE_SStructGridSetNeighborPart(grid, part,
+                                             pdata.glue_ilowers[box],
+                                             pdata.glue_iuppers[box],
+                                             pdata.glue_nbor_parts[box],
+                                             pdata.glue_nbor_ilowers[box],
+                                             pdata.glue_nbor_iuppers[box],
+                                             pdata.glue_index_maps[box],
+                                             pdata.glue_index_dirs[box]);
+         }
+         else
+         {
+            HYPRE_SStructGridSetNeighborBox(grid, part,
+                                            pdata.glue_ilowers[box],
+                                            pdata.glue_iuppers[box],
+                                            pdata.glue_nbor_parts[box],
+                                            pdata.glue_nbor_ilowers[box],
+                                            pdata.glue_nbor_iuppers[box],
+                                            pdata.glue_index_maps[box]);
+         }
       }
 
       HYPRE_SStructGridSetPeriodic(grid, part, pdata.periodic);
@@ -2273,7 +2756,7 @@ main( int   argc,
    {
       pdata = data.pdata[part];
 
-      /* set stencil values */
+      /* StencilSetEntry: set stencil values */
       for (var = 0; var < pdata.nvars; var++)
       {
          s = pdata.stencil_num[var];
@@ -2293,7 +2776,38 @@ main( int   argc,
          }
       }
 
-      /* set non-stencil entries */
+      /* FEStencilSetRow: add to stencil values */
+      for (i = 0; i < data.fe_stencil_size; i++)
+      {
+         s = data.fe_stencil_vars[i];
+
+         for (j = 0; j < data.fe_stencil_size; j++)
+         {
+            var = data.fe_stencil_vars[i];
+            entry = data.fe_stencil_entries[i][j];
+            /* only set valid stencil entries */
+            if (entry < 0)
+            {
+               continue;
+            }
+            for (k = 0; k < pdata.max_boxsize; k++)
+            {
+               values[k] = data.fe_stencil_values[i][j];
+            }
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               for (k = 0; k < 3; k++)
+               {
+                  ilower[k] = pdata.ilowers[box][k] + data.fe_stencil_offsets[i][k];
+                  iupper[k] = pdata.iuppers[box][k] + data.fe_stencil_offsets[i][k];
+               }
+               HYPRE_SStructMatrixAddToBoxValues(A, part, ilower, iupper,
+                                                 var, 1, &entry, values);
+            }
+         }
+      }
+
+      /* GraphAddEntries: set non-stencil entries */
       for (box = 0; box < pdata.graph_nboxes; box++)
       {
          /*
@@ -2343,7 +2857,7 @@ main( int   argc,
 #endif
       }
 
-      /* reset some matrix values */
+      /* MatrixSetValues: reset some matrix values */
       for (box = 0; box < pdata.matset_nboxes; box++)
       {
          size= 1;
@@ -2364,7 +2878,7 @@ main( int   argc,
                                          values);
       }
 
-      /* add to some matrix values */
+      /* MatrixAddToValues: add to some matrix values */
       for (box = 0; box < pdata.matadd_nboxes; box++)
       {
          size = 1;
@@ -2387,6 +2901,94 @@ main( int   argc,
                                               pdata.matadd_vars[box],
                                               1, &pdata.matadd_entries[box][entry],
                                               values);
+         }
+      }
+
+      /* FEMatrixSetValues: set some matrix values */
+      for (box = 0; box < pdata.fe_matset_nboxes; box++)
+      {
+         size = 1;
+         for (k = 0; k < 3; k++)
+         {
+            size*= (pdata.fe_matset_iuppers[box][k] -
+                    pdata.fe_matset_ilowers[box][k] + 1);
+         }
+
+         s = 0;
+         for (i = 0; i < pdata.fe_matset_nrows[box]; i++)
+         {
+            row = pdata.fe_matset_rows[box][i];
+
+            for (j = 0; j < pdata.fe_matset_ncols[box]; j++)
+            {
+               col = pdata.fe_matset_cols[box][j];
+
+               for (k = 0; k < 3; k++)
+               {
+                  ilower[k] = pdata.fe_matset_ilowers[box][k] +
+                     data.fe_stencil_offsets[row][k];
+                  iupper[k] = pdata.fe_matset_iuppers[box][k] +
+                     data.fe_stencil_offsets[row][k];
+               }
+
+               for (k = 0; k < size; k++)
+               {
+                  values[k] = pdata.fe_matset_values[box][s];
+               }
+               s++;
+               
+               var = data.fe_stencil_vars[row];
+               entry = data.fe_stencil_entries[row][col];
+               if (entry > -1)
+               {
+                  HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
+                                                  var, 1, &entry, values);
+               }
+            }
+         }
+      }
+
+      /* FEMatrixAddToValues: add to some matrix values */
+      for (box = 0; box < pdata.fe_matadd_nboxes; box++)
+      {
+         size = 1;
+         for (k = 0; k < 3; k++)
+         {
+            size*= (pdata.fe_matadd_iuppers[box][k] -
+                    pdata.fe_matadd_ilowers[box][k] + 1);
+         }
+
+         s = 0;
+         for (i = 0; i < pdata.fe_matadd_nrows[box]; i++)
+         {
+            row = pdata.fe_matadd_rows[box][i];
+
+            for (j = 0; j < pdata.fe_matadd_ncols[box]; j++)
+            {
+               col = pdata.fe_matadd_cols[box][j];
+
+               for (k = 0; k < 3; k++)
+               {
+                  ilower[k] = pdata.fe_matadd_ilowers[box][k] +
+                     data.fe_stencil_offsets[row][k];
+                  iupper[k] = pdata.fe_matadd_iuppers[box][k] +
+                     data.fe_stencil_offsets[row][k];
+               }
+
+               for (k = 0; k < size; k++)
+               {
+                  values[k] = pdata.fe_matadd_values[box][s];
+               }
+               s++;
+               
+               var = data.fe_stencil_vars[row];
+               entry = data.fe_stencil_entries[row][col];
+               if (entry > -1)
+               {
+                  HYPRE_SStructMatrixAddToBoxValues(A, part, ilower, iupper,
+                                                    var, 1, &entry, values);
+               }
+            }
          }
       }
    }
@@ -2615,7 +3217,7 @@ main( int   argc,
    hypre_TFree(values);
 
    /*-----------------------------------------------------------
-    * Solve the system using SysPFMG
+    * Solve the system using SysPFMG or Split
     *-----------------------------------------------------------*/
 
    if (solver_id == 3)
@@ -2657,10 +3259,52 @@ main( int   argc,
       hypre_ClearTiming();
 
       HYPRE_SStructSysPFMGGetNumIterations(solver, &num_iterations);
-      HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(
-                                           solver, &final_res_norm);
+      HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
 
       HYPRE_SStructSysPFMGDestroy(solver);
+   }
+
+   else if ((solver_id >= 0) && (solver_id < 10) && (solver_id != 3))
+   {
+      time_index = hypre_InitializeTiming("Split Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructSplitCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_SStructSplitSetMaxIter(solver, 100);
+      HYPRE_SStructSplitSetTol(solver, 1.0e-6);
+      if (solver_id == 0)
+      {
+         HYPRE_SStructSplitSetStructSolver(solver, HYPRE_SMG);
+      }
+      else if (solver_id == 1)
+      {
+         HYPRE_SStructSplitSetStructSolver(solver, HYPRE_PFMG);
+      }
+      else if (solver_id == 8)
+      {
+         HYPRE_SStructSplitSetStructSolver(solver, HYPRE_Jacobi);
+      }
+      HYPRE_SStructSplitSetup(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("Split Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructSplitSolve(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_SStructSplitGetNumIterations(solver, &num_iterations);
+      HYPRE_SStructSplitGetFinalRelativeResidualNorm(solver, &final_res_norm);
+
+      HYPRE_SStructSplitDestroy(solver);
    }
 
    /*-----------------------------------------------------------
@@ -3394,8 +4038,7 @@ main( int   argc,
       hypre_ClearTiming();
 
       HYPRE_GMRESGetNumIterations( par_solver, &num_iterations);
-      HYPRE_GMRESGetFinalRelativeResidualNorm( par_solver,
-                                               &final_res_norm);
+      HYPRE_GMRESGetFinalRelativeResidualNorm( par_solver, &final_res_norm);
       HYPRE_ParCSRGMRESDestroy(par_solver);
 
       if (solver_id == 40)
@@ -3560,8 +4203,7 @@ main( int   argc,
       hypre_ClearTiming();
 
       HYPRE_BiCGSTABGetNumIterations( par_solver, &num_iterations);
-      HYPRE_BiCGSTABGetFinalRelativeResidualNorm( par_solver,
-                                               &final_res_norm);
+      HYPRE_BiCGSTABGetFinalRelativeResidualNorm( par_solver, &final_res_norm);
       HYPRE_ParCSRBiCGSTABDestroy(par_solver);
 
       if (solver_id == 60)
@@ -3611,8 +4253,7 @@ main( int   argc,
       hypre_ClearTiming();
 
       HYPRE_ParCSRHybridGetNumIterations(par_solver, &num_iterations);
-      HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(
-                                           par_solver, &final_res_norm);
+      HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
 
       HYPRE_ParCSRHybridDestroy(par_solver);
    }
@@ -3620,6 +4261,7 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Solve the system using Struct solvers
     *-----------------------------------------------------------*/
+
    if (solver_id == 200)
    {
       time_index = hypre_InitializeTiming("SMG Setup");
@@ -3744,6 +4386,42 @@ main( int   argc,
                                                         &final_res_norm);
       HYPRE_StructSparseMSGDestroy(struct_solver);
    }
+
+   /*-----------------------------------------------------------
+    * Solve the system using Jacobi
+    *-----------------------------------------------------------*/
+
+   else if ( solver_id == 208 )
+   {
+      time_index = hypre_InitializeTiming("Jacobi Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructJacobiSetMaxIter(struct_solver, 100);
+      HYPRE_StructJacobiSetTol(struct_solver, 1.0e-06);
+      HYPRE_StructJacobiSetup(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("Jacobi Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructJacobiSolve(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      HYPRE_StructJacobiGetNumIterations(struct_solver, &num_iterations);
+      HYPRE_StructJacobiGetFinalRelativeResidualNorm(struct_solver,
+                                                     &final_res_norm);
+      HYPRE_StructJacobiDestroy(struct_solver);
+   }
+
    /*-----------------------------------------------------------
     * Solve the system using CG
     *-----------------------------------------------------------*/

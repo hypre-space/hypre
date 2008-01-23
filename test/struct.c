@@ -545,6 +545,7 @@ main( int   argc,
       printf("                        2  - SparseMSG\n");
       printf("                        3  - PFMG constant coefficients\n");
       printf("                        4  - PFMG constant coefficients variable diagonal\n");
+      printf("                        8  - Jacobi\n");
       printf("                        10 - CG with SMG precond\n");
       printf("                        11 - CG with PFMG precond\n");
       printf("                        12 - CG with SparseMSG precond\n");
@@ -1493,6 +1494,40 @@ main( int   argc,
       HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(solver,
                                                         &final_res_norm);
       HYPRE_StructSparseMSGDestroy(solver);
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using Jacobi
+    *-----------------------------------------------------------*/
+
+   else if ( solver_id == 8 )
+   {
+      time_index = hypre_InitializeTiming("Jacobi Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_StructJacobiSetMaxIter(solver, 100);
+      HYPRE_StructJacobiSetTol(solver, 1.0e-06);
+      HYPRE_StructJacobiSetup(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("Jacobi Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructJacobiSolve(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      HYPRE_StructJacobiGetNumIterations(solver, &num_iterations);
+      HYPRE_StructJacobiGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      HYPRE_StructJacobiDestroy(solver);
    }
 
    /*-----------------------------------------------------------

@@ -141,7 +141,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    int                      ***send_processes;
    int                      ***send_remote_boxnums;
 
-   hypre_BoxArrayArray       **recv_boxes;
+   hypre_BoxArrayArray       **recv_boxes, *recv_rboxes;
    int                      ***recv_processes;
    int                      ***recv_remote_boxnums;
 
@@ -354,8 +354,8 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                                 hypre_BoxArrayArrayBoxArray(send_boxes[vars], fi));
 
                send_processes[vars][fi][cnt1]= proc;
-               hypre_SStructMapEntryGetBox(map_entries[i],
-                                           &send_remote_boxnums[vars][fi][cnt1]);
+               hypre_SStructMapEntryGetBoxnum(map_entries[i],
+                                              &send_remote_boxnums[vars][fi][cnt1]);
                cnt1++;
             }
            
@@ -363,8 +363,8 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
             {
                hypre_AppendBox(&box,
                                 hypre_BoxArrayArrayBoxArray(fullwgt_ownboxes[vars], fi));
-               hypre_SStructMapEntryGetBox(map_entries[i],
-                                          &own_cboxnums[vars][fi][cnt2]);
+               hypre_SStructMapEntryGetBoxnum(map_entries[i],
+                                              &own_cboxnums[vars][fi][cnt2]);
                cnt2++;
             }
          }
@@ -459,17 +459,20 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
       s_rc     = hypre_SStructPVectorSVector(rc, vars);
       s_cvector= hypre_SStructPVectorSVector(fgrid_cvectors, vars);
       send_rboxes= hypre_BoxArrayArrayDuplicate(send_boxes[vars]);
+      recv_rboxes= hypre_BoxArrayArrayDuplicate(recv_boxes[vars]);
 
-      hypre_CommInfoCreate(send_boxes[vars], recv_boxes[vars], send_processes[vars],
-                           recv_processes[vars], send_remote_boxnums[vars],
-                           recv_remote_boxnums[vars], send_rboxes, &comm_info);
+      hypre_CommInfoCreate(send_boxes[vars], recv_boxes[vars],
+                           send_processes[vars], recv_processes[vars],
+                           send_remote_boxnums[vars], recv_remote_boxnums[vars],
+                           send_rboxes, recv_rboxes, 1, &comm_info);
 
       hypre_CommPkgCreate(comm_info,
                           hypre_StructVectorDataSpace(s_cvector),
                           hypre_StructVectorDataSpace(s_rc),
-                          num_values,
+                          num_values, NULL, 0,
                           hypre_StructVectorComm(s_rc),
-                         &interlevel_comm[vars]);
+                          &interlevel_comm[vars]);
+      hypre_CommInfoDestroy(comm_info);
   }
   hypre_TFree(send_boxes);
   hypre_TFree(recv_boxes);
@@ -820,8 +823,8 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
        xc_var= hypre_SStructPVectorSVector(xc, var);
        hypre_InitializeCommunication(interlevel_comm[var], 
                                      hypre_StructVectorData(xc_temp),
-                                     hypre_StructVectorData(xc_var), 
-                                    &comm_handle);
+                                     hypre_StructVectorData(xc_var), 0, 0,
+                                     &comm_handle);
 
        hypre_FinalizeCommunication(comm_handle);
    }

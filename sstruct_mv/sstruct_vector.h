@@ -49,6 +49,7 @@ typedef struct
    hypre_StructVector    **svectors;     /* nvar array of svectors */
    hypre_CommPkg         **comm_pkgs;    /* nvar array of comm pkgs */
 
+   int                     accumulated;  /* AddTo values accumulated? */
    int                     complex;      /* Is the vector complex */
 
    int                     ref_count;
@@ -74,6 +75,9 @@ typedef struct hypre_SStructVector_struct
    /* u-vector info */
    HYPRE_IJVector          ijvector;
    hypre_ParVector        *parvector;
+
+   /* inter-part communication info */
+   int                     nbor_ncomms;  /* num comm_pkgs with neighbor parts */
 
   /* GEC10020902 pointer to big chunk of memory and auxiliary information   */
 
@@ -102,6 +106,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructVectorPVector(vec, part)  ((vec) -> pvectors[part])
 #define hypre_SStructVectorIJVector(vec)       ((vec) -> ijvector)
 #define hypre_SStructVectorParVector(vec)      ((vec) -> parvector)
+#define hypre_SStructVectorNborNComms(vec)     ((vec) -> nbor_ncomms)
 #define hypre_SStructVectorComplex(vec)        ((vec) -> complex)
 #define hypre_SStructVectorGlobalSize(vec)     ((vec) -> global_size)
 #define hypre_SStructVectorRefCount(vec)       ((vec) -> ref_count)
@@ -121,6 +126,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorSVector(pvec, v)  ((pvec) -> svectors[v])
 #define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
+#define hypre_SStructPVectorAccumulated(pvec) ((pvec) -> accumulated)
 #define hypre_SStructPVectorComplex(pvec)     ((pvec) -> complex)
 #define hypre_SStructPVectorRefCount(pvec)    ((pvec) -> ref_count)
 #define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices  )

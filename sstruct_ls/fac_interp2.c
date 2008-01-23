@@ -164,7 +164,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    int                    ***send_processes;
    int                    ***send_remote_boxnums;
 
-   hypre_BoxArrayArray     **recv_boxes;
+   hypre_BoxArrayArray     **recv_boxes, *recv_rboxes;
    int                    ***recv_processes;
    int                    ***recv_remote_boxnums;
 
@@ -217,8 +217,9 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       hypre_CommPkgCreate(comm_info,
                           hypre_StructVectorDataSpace(e_var),
                           hypre_StructVectorDataSpace(e_var),
-                          1,
-                          hypre_StructVectorComm(e_var), &gnodes_comm_pkg[vars]);
+                          1, NULL, 0, hypre_StructVectorComm(e_var),
+                          &gnodes_comm_pkg[vars]);
+      hypre_CommInfoDestroy(comm_info);
    }
 
   (fac_interp_data -> ndim)           = ndim;
@@ -400,8 +401,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
             {
                hypre_AppendBox(&box,
                                 hypre_BoxArrayArrayBoxArray(ownboxes[vars], fi));
-               hypre_SStructMapEntryGetBox(map_entries[i],
-                                          &own_cboxnums[vars][fi][cnt1]);
+               hypre_SStructMapEntryGetBoxnum(map_entries[i],
+                                              &own_cboxnums[vars][fi][cnt1]);
                cnt1++;
             }
             else
@@ -587,8 +588,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                                  hypre_BoxArrayArrayBoxArray(send_boxes[vars], ci));
 
                 send_processes[vars][ci][cnt1]= proc;
-                hypre_SStructMapEntryGetBox(map_entries[i],
-                                           &send_remote_boxnums[vars][ci][cnt1]);
+                hypre_SStructMapEntryGetBoxnum(
+                   map_entries[i], &send_remote_boxnums[vars][ci][cnt1]);
                 cnt1++;
              }
           }
@@ -614,17 +615,20 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
       s_cvector= hypre_SStructPVectorSVector(recv_cvectors, vars);
       send_rboxes= hypre_BoxArrayArrayDuplicate(send_boxes[vars]);
+      recv_rboxes= hypre_BoxArrayArrayDuplicate(recv_boxes[vars]);
 
-      hypre_CommInfoCreate(send_boxes[vars], recv_boxes[vars], send_processes[vars],
-                           recv_processes[vars], send_remote_boxnums[vars],
-                           recv_remote_boxnums[vars], send_rboxes, &comm_info);
+      hypre_CommInfoCreate(send_boxes[vars], recv_boxes[vars],
+                           send_processes[vars], recv_processes[vars],
+                           send_remote_boxnums[vars], recv_remote_boxnums[vars],
+                           send_rboxes, recv_rboxes, 1, &comm_info);
 
       hypre_CommPkgCreate(comm_info,
                           hypre_StructVectorDataSpace(s_rc),
                           hypre_StructVectorDataSpace(s_cvector),
-                          num_values,
+                          num_values, NULL, 0,
                           hypre_StructVectorComm(s_rc),
-                         &interlevel_comm[vars]);
+                          &interlevel_comm[vars]);
+      hypre_CommInfoDestroy(comm_info);
   }
   hypre_TFree(send_boxes);
   hypre_TFree(recv_boxes);
@@ -798,7 +802,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
       xc_var= hypre_SStructPVectorSVector(xc, var);
       hypre_InitializeCommunication(comm_pkg[var],
                                     hypre_StructVectorData(xc_var),
-                                    hypre_StructVectorData(xc_var),
+                                    hypre_StructVectorData(xc_var), 0, 0,
                                    &comm_handle);
       hypre_FinalizeCommunication(comm_handle);
 
@@ -807,7 +811,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
          recv_var= hypre_SStructPVectorSVector(recv_cvectors, var);
          hypre_InitializeCommunication(interlevel_comm[var],
                                        hypre_StructVectorData(xc_var),
-                                       hypre_StructVectorData(recv_var),
+                                       hypre_StructVectorData(recv_var), 0, 0,
                                       &comm_handle);
          hypre_FinalizeCommunication(comm_handle);
       }

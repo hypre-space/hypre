@@ -361,13 +361,6 @@ int HYPRE_StructVectorDestroy(HYPRE_StructVector vector);
 int HYPRE_StructVectorInitialize(HYPRE_StructVector vector);
 
 /**
- * Clears the ghostvalues of vector object. Beneficial to users that re-assemble
- * a vector object (e.g., in time-stepping).
- **/
-int HYPRE_StructVectorClearGhostValues(HYPRE_StructVector vector);
-
-
-/**
  * Set vector coefficients index by index.
  *
  * NOTE: For better efficiency, use \Ref{HYPRE_StructVectorSetBoxValues} to set

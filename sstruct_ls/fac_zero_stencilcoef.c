@@ -364,7 +364,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                       for (j= 0; j< nmap_entries; j++)
                       {
                          hypre_SStructMapEntryGetProcess(map_entries[j], &proc);
-                         hypre_SStructMapEntryGetBox(map_entries[j], &fj);
+                         hypre_SStructMapEntryGetBoxnum(map_entries[j], &fj);
 
                          if ((proc != myid) || (fj != fi))
                          {

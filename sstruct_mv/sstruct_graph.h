@@ -45,7 +45,7 @@ typedef struct
    int           to_part;
    hypre_Index   to_index;
    int           to_var;
-   int           to_box;         /* local box number */
+   int           to_boxnum;      /* local box number */
    int           to_proc;
    int           rank;
 
@@ -56,7 +56,7 @@ typedef struct
    int                  part;
    hypre_Index          index;
    int                  var;
-   int                  box;     /* local box number */
+   int                  boxnum;  /* local box number */
    int                  nUentries;
    hypre_SStructUEntry *Uentries;
 
@@ -114,14 +114,14 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUVEntryPart(Uv)        ((Uv) -> part)
 #define hypre_SStructUVEntryIndex(Uv)       ((Uv) -> index)
 #define hypre_SStructUVEntryVar(Uv)         ((Uv) -> var)
-#define hypre_SStructUVEntryBox(Uv)         ((Uv) -> box)
+#define hypre_SStructUVEntryBoxnum(Uv)      ((Uv) -> boxnum)
 #define hypre_SStructUVEntryNUEntries(Uv)   ((Uv) -> nUentries)
 #define hypre_SStructUVEntryUEntries(Uv)    ((Uv) -> Uentries)
 #define hypre_SStructUVEntryUEntry(Uv, i)  &((Uv) -> Uentries[i])
 #define hypre_SStructUVEntryToPart(Uv, i)   ((Uv) -> Uentries[i].to_part)
 #define hypre_SStructUVEntryToIndex(Uv, i)  ((Uv) -> Uentries[i].to_index)
 #define hypre_SStructUVEntryToVar(Uv, i)    ((Uv) -> Uentries[i].to_var)
-#define hypre_SStructUVEntryToBox(Uv, i)    ((Uv) -> Uentries[i].to_box)
+#define hypre_SStructUVEntryToBoxnum(Uv, i) ((Uv) -> Uentries[i].to_boxnum)
 #define hypre_SStructUVEntryToProc(Uv, i)   ((Uv) -> Uentries[i].to_proc)
 #define hypre_SStructUVEntryRank(Uv, i)     ((Uv) -> Uentries[i].rank)
 /*--------------------------------------------------------------------------
@@ -131,7 +131,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUEntryToPart(U)   ((U) -> to_part)
 #define hypre_SStructUEntryToIndex(U)  ((U) -> to_index)
 #define hypre_SStructUEntryToVar(U)    ((U) -> to_var)
-#define hypre_SStructUEntryToBox(U)    ((U) -> to_box)
+#define hypre_SStructUEntryToBoxnum(U) ((U) -> to_boxnum)
 #define hypre_SStructUEntryToProc(U)   ((U) -> to_proc)
 #define hypre_SStructUEntryRank(U)     ((U) -> rank)
 

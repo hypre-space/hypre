@@ -479,8 +479,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
 
             hypre_InitializeCommunication(amrA_comm_pkg,
                                           hypre_StructMatrixData(smatrix),
-                                          hypre_StructMatrixData(fac_smatrix),
-                                         &comm_handle);
+                                          hypre_StructMatrixData(fac_smatrix), 0, 0,
+                                          &comm_handle);
             hypre_FinalizeCommunication(comm_handle);
 
             hypre_CommPkgDestroy(amrA_comm_pkg);

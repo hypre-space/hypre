@@ -57,6 +57,7 @@ typedef struct
    int                     sentries_size;
    int                    *sentries;
 
+   int                     accumulated;  /* AddTo values accumulated? */
    int                     complex;      /* Matrix complex? */
 
    int                     ref_count;
@@ -144,6 +145,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructPMatrixSymmetric(pmat)         ((pmat) -> symmetric)
 #define hypre_SStructPMatrixSEntriesSize(pmat)      ((pmat) -> sentries_size)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
+#define hypre_SStructPMatrixAccumulated(pmat)       ((pmat) -> accumulated)
 #define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)
 #define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)
 

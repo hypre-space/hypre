@@ -71,11 +71,6 @@ typedef struct hypre_StructMatrix_struct
                       
    int                   global_size;  /* Total number of nonzero coeffs */
 
-   int                   OffProcAdd;   /* offproc set values flag */
-
-   int                   add_num_ghost[6]; /* ghostlayers to scan for offproc
-                                              add values */
-
    hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
    int                   ref_count;
@@ -101,8 +96,6 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
-#define hypre_StructMatrixOffProcAdd(matrix)    ((matrix) -> OffProcAdd)
-#define hypre_StructMatrixAddNumGhost(matrix)   ((matrix) -> add_num_ghost)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 

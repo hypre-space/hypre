@@ -126,8 +126,8 @@ hypre_SStructSendInfo( hypre_StructGrid  *fgrid,
           if (proc != myproc)
           {
              send_processes[i][cnt]     = proc;
-             hypre_SStructMapEntryGetBox(map_entries[j], 
-                                        &send_remote_boxnums[i][cnt]);
+             hypre_SStructMapEntryGetBoxnum(map_entries[j], 
+                                            &send_remote_boxnums[i][cnt]);
              hypre_AppendBox(&map_entry_box, 
                               hypre_BoxArrayArrayBoxArray(send_boxes, i));
              cnt++;
