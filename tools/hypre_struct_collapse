@@ -2,8 +2,20 @@
 
 for i in $*
 do
-  FILE=$i
-  cat $FILE.* > $FILE.tmp
-  sed -e 's/^[0-9]*: (/(/g' $FILE.tmp | sort | uniq > $FILE
-  rm -fr $FILE.tmp
+   FILE=$i
+   rm -f $FILE.head
+   rm -f $FILE.tail
+   for j in $FILE.*
+   do
+      awk 'BEGIN {printlines = 1};
+           {if (printlines) print};
+           /Data:/ {printlines = 0}' $j >> $FILE.head
+      awk 'BEGIN {printlines = 0};
+           {if (printlines) print};
+           /Data:/ {printlines = 1}' $j >> $FILE.tail
+   done
+   mv $FILE.head $FILE
+   sed -e 's/^[0-9]*: (/(/g' $FILE.tail | sort | uniq >> $FILE
+   rm -f $FILE.head
+   rm -f $FILE.tail
 done
