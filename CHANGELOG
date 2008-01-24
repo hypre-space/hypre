@@ -31,13 +31,29 @@
 # recent release.
 #=============================================================================
 
+- Completed the implementation of SStructGridSetNeighborBox to work for all
+  variable types (not just cell-centered).  In the process, we discovered that
+  the interface design for this routine can result in ambiguous coordinate
+  transformations between parts, so the new SetNeighborPart routine (below)
+  should be used instead.
+
+- Introduced the SStructGridSetNeighborPart routine.  Users migrating from
+  SetNeighborBox to this new routine only need to change the name ("Box" to
+  "Part") and append an additional argument 'index_dir'.  See the reference
+  manual for details.
+
+- The SStructSplit solver can now be used as a standalone solver (before, it
+  could only be used as a preconditioner).  Added HYPRE_Jacobi as an option to
+  SetStructSolver.
+
 - Added capability to change Euclid runtime parameters using individual
-  functions
-- Improved use of Euclid as smoother in BoomerAMG
+  functions.
+
+- Improved use of Euclid as smoother in BoomerAMG.
 
 #====================================
 
-Version 2.2.0b released, 2007/09/XX.
+Version 2.2.0b released, 2007/09/20.
 
 - Renovate the FEI block preconditioner which will be useful for ALE3D
   simulation of mixed variable type problem
