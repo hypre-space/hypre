@@ -174,6 +174,9 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  * Describe how regions just outside of a part relate to other parts.  This is
  * done a box at a time.
  *
+ * Parts {\tt part} and {\tt nbor\_part} must be different, except in the case
+ * where only cell-centered data is used.
+ *
  * Indexes should increase from {\tt ilower} to {\tt iupper}.  It is not
  * necessary that indexes increase from {\tt nbor\_ilower} to {\tt
  * nbor\_iupper}.  This is to ease the transition from the old {\tt
@@ -208,6 +211,9 @@ int HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
 /**
  * (DEFUNCT) Describe how regions just outside of a part relate to other parts.
  * This is done a box at a time.  SHOULD USE {\tt SetNeighborPart} INSTEAD!
+ *
+ * Parts {\tt part} and {\tt nbor\_part} must be different, except in the case
+ * where only cell-centered data is used.
  *
  * The indexes {\tt ilower} and {\tt iupper} map directly to the indexes {\tt
  * nbor\_ilower} and {\tt nbor\_iupper}.  Although, it is required that indexes
