@@ -29,7 +29,7 @@
 TNAME=`basename $0 .sh`
 
 #=============================================================================
-# Test SetNeighborBox by comparing one-part problem against
+# Test SetNeighborPart by comparing one-part problem against
 # equivalent multi-part problems
 #=============================================================================
 
@@ -42,7 +42,7 @@ do
 done
 
 #=============================================================================
-# Test SetNeighborBox by comparing multi-part problems
+# Test SetNeighborPart by comparing multi-part problems
 #=============================================================================
 
 tail -3 ${TNAME}.out.10 > ${TNAME}.testdata

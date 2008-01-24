@@ -26,39 +26,39 @@
 #EHEADER**********************************************************************
 
 mpirun -np 1 ./sstruct -in sstruct.in.fe_node1_2D -solver 8 -rhsone \
- > neighborbox.out.0
+ > neighborpart.out.0
 mpirun -np 2 ./sstruct -in sstruct.in.fe_node2_2D -solver 8 -rhsone \
- > neighborbox.out.1
+ > neighborpart.out.1
 mpirun -np 2 ./sstruct -in sstruct.in.fe_node2_2D_coord -solver 8 -rhsone \
- > neighborbox.out.2
+ > neighborpart.out.2
 mpirun -np 1 ./struct -n 5 5 1 -d 2 -solver 8 \
- > neighborbox.out.3
+ > neighborpart.out.3
 
 mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D -solver 8 -rhsone \
- > neighborbox.out.10
+ > neighborpart.out.10
 mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D_coord -solver 8 -rhsone \
- > neighborbox.out.11
+ > neighborpart.out.11
 
 mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_3D -solver 8 -rhsone \
- > neighborbox.out.20
+ > neighborpart.out.20
 mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_3D_coord -solver 8 -rhsone \
- > neighborbox.out.21
+ > neighborpart.out.21
 
 mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D -r 2 1 1 -solver 8 -rhsone \
- > neighborbox.out.30
+ > neighborpart.out.30
 mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D -b 2 1 1 -solver 8 -rhsone \
- > neighborbox.out.31
+ > neighborpart.out.31
 mpirun -np 4 ./sstruct -in sstruct.in.fe_all2_2D -P 2 1 1 -solver 8 -rhsone \
- > neighborbox.out.32
+ > neighborpart.out.32
 
 mpirun -np 1 ./sstruct -in sstruct.in.fe_all3_3D -solver 8 -rhsone \
- > neighborbox.out.40
+ > neighborpart.out.40
 mpirun -np 1 ./sstruct -in sstruct.in.fe_all3_3D_coord -solver 8 -rhsone \
- > neighborbox.out.41
+ > neighborpart.out.41
 
 mpirun -np 1 ./sstruct -in sstruct.in.fe_all3_3D -r 1 1 2 -solver 8 -rhsone \
- > neighborbox.out.50
+ > neighborpart.out.50
 mpirun -np 1 ./sstruct -in sstruct.in.fe_all3_3D -b 1 1 2 -solver 8 -rhsone \
- > neighborbox.out.51
+ > neighborpart.out.51
 mpirun -np 2 ./sstruct -in sstruct.in.fe_all3_3D -P 1 1 2 -solver 8 -rhsone \
- > neighborbox.out.52
+ > neighborpart.out.52
