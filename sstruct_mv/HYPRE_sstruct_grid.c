@@ -339,13 +339,6 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
    int                      memchunk = 10;
    int                      d, dd, tdir;
 
-   /* parts should not be coupled to themselves with SetNeighborBox */
-   if (part == nbor_part)
-   {
-      hypre_error_in_arg(2);
-      hypre_error_in_arg(5);
-   }
-
    /* allocate more memory if needed */
    if ((nneighbors[part] % memchunk) == 0)
    {
@@ -420,13 +413,6 @@ HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid  grid,
    hypre_IndexRef           coord, dir;
    int                      memchunk = 10;
    int                      d, dd;
-
-   /* parts should not be coupled to themselves with SetNeighborBox */
-   if (part == nbor_part)
-   {
-      hypre_error_in_arg(2);
-      hypre_error_in_arg(5);
-   }
 
    /* allocate more memory if needed */
    if ((nneighbors[part] % memchunk) == 0)
