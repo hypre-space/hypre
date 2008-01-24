@@ -46,6 +46,8 @@
   could only be used as a preconditioner).  Added HYPRE_Jacobi as an option to
   SetStructSolver.
 
+- Added Get(Box)Values routines for Struct/SStruct Matrix.
+
 - Added capability to change Euclid runtime parameters using individual
   functions.
 

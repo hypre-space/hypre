@@ -2249,6 +2249,7 @@ int HYPRE_StructMatrixCreate ( MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_Str
 int HYPRE_StructMatrixDestroy ( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixInitialize ( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixSetValues ( HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values );
+int HYPRE_StructMatrixGetValues ( HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixSetBoxValues ( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixGetBoxValues ( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixSetConstantValues ( HYPRE_StructMatrix matrix , int num_stencil_indices , int *stencil_indices , double *values );

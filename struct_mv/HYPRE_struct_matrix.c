@@ -97,6 +97,33 @@ HYPRE_StructMatrixSetValues( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixGetValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructMatrixGetValues( HYPRE_StructMatrix  matrix,
+                             int                *grid_index,
+                             int                 num_stencil_indices,
+                             int                *stencil_indices,
+                             double             *values )
+{
+   hypre_Index  new_grid_index;
+   int          d;
+
+   hypre_ClearIndex(new_grid_index);
+   for (d = 0; d < hypre_StructGridDim(hypre_StructMatrixGrid(matrix)); d++)
+   {
+      hypre_IndexD(new_grid_index, d) = grid_index[d];
+   }
+
+   hypre_StructMatrixSetValues(matrix, new_grid_index,
+                               num_stencil_indices, stencil_indices,
+                               values, -1, -1, 0);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructMatrixSetBoxValues
  *--------------------------------------------------------------------------*/
 

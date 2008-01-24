@@ -531,6 +531,56 @@ int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
 int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
 
 /**
+ * Get matrix coefficients index by index.  The {\tt values} array is of length
+ * {\tt nentries}.
+ *
+ * NOTE: For better efficiency, use \Ref{HYPRE_SStructMatrixGetBoxValues} to get
+ * coefficients a box at a time.
+ *
+ * NOTE: Users may get values on any process that owns the associated variables.
+ *
+ * NOTE: The entries in this routine must all be of the same type: either
+ * stencil or non-stencil, but not both.  Also, if they are stencil entries,
+ * they must all represent couplings to the same variable type (there are no
+ * such restrictions for non-stencil entries).
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructMatrixSetComplex
+ **/
+int HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
+                                 int                  part,
+                                 int                 *index,
+                                 int                  var,
+                                 int                  nentries,
+                                 int                 *entries,
+                                 double              *values);
+
+/**
+ * Get matrix coefficients a box at a time.  The data in {\tt values} is
+ * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues}.
+ *
+ * NOTE: Users may get values on any process that owns the associated variables.
+ *
+ * NOTE: The entries in this routine must all be of stencil type.  Also, they
+ * must all represent couplings to the same variable type.
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructMatrixSetComplex
+ **/
+int HYPRE_SStructMatrixGetBoxValues(HYPRE_SStructMatrix  matrix,
+                                    int                  part,
+                                    int                 *ilower,
+                                    int                 *iupper,
+                                    int                  var,
+                                    int                  nentries,
+                                    int                 *entries,
+                                    double              *values);
+
+/**
  * Define symmetry properties for the stencil entries in the matrix.  The
  * boolean argument {\tt symmetric} is applied to stencil entries on part {\tt
  * part} that couple variable {\tt var} to variable {\tt to\_var}.  A value of

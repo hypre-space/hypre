@@ -276,6 +276,30 @@ int HYPRE_StructMatrixAddToBoxValues(HYPRE_StructMatrix  matrix,
 int HYPRE_StructMatrixAssemble(HYPRE_StructMatrix matrix);
 
 /**
+ * Get matrix coefficients index by index.  The {\tt values} array is of length
+ * {\tt nentries}.
+ *
+ * NOTE: For better efficiency, use \Ref{HYPRE_StructMatrixGetBoxValues} to get
+ * coefficients a box at a time.
+ **/
+int HYPRE_StructMatrixGetValues(HYPRE_StructMatrix  matrix,
+                                int                *index,
+                                int                 nentries,
+                                int                *entries,
+                                double             *values);
+
+/**
+ * Get matrix coefficients a box at a time.  The data in {\tt values} is
+ * ordered as in \Ref{HYPRE_StructMatrixSetBoxValues}.
+ **/
+int HYPRE_StructMatrixGetBoxValues(HYPRE_StructMatrix  matrix,
+                                   int                *ilower,
+                                   int                *iupper,
+                                   int                 nentries,
+                                   int                *entries,
+                                   double             *values);
+
+/**
  * Define symmetry properties of the matrix.  By default, matrices are assumed
  * to be nonsymmetric.  Significant storage savings can be made if the matrix is
  * symmetric.
