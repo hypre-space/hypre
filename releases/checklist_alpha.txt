@@ -10,51 +10,51 @@ The following steps must be completed, initialed & dated on the [] line by
 the responsible project member before the release is made available to users.
 
 
-- Decision made for release number X.X.Xa.
+- Decision made for release number X.X.Xa
 
   [fml m/d/yyyy]
 
 - Copy this file to 'check{release number}.txt'.
 
-  [] 
+  []
 
 - Project personnel advised of release decision and tentative date with a
   request to not disrupt the repository until the release is complete.
 
-  [] 
+  []
 
 - Update 'CHANGELOG' file with information regarding contents of this release.
 
-  [] 
+  []
 
 - Verify that all agreed-upon changes have been committed.
 
-  [] 
+  []
 
 - Project Lead review and/or concurrence to release.
 
-  [] 
+  []
 
 - Update 'config/configure.in' with release number and date, then run
   'config/bootstrap' and commit changes to the repository.
 
-  [] 
+  []
 
 - Tag repository with release number.
 
-  [] 
+  []
 
 - Create release tar file by running the 'tools/mkdist' script (for more
   information, do 'mkdist -help').  This can be run from within any directory,
   just be sure to use the latest version of the 'mkdist' script.
 
-  [] 
+  []
 
 - On the CASC cluster, copy tar file to '/usr/casc/hypre'.
 
-  [] 
+  []
 
 - FINAL CERTIFICATION: Verify that all steps have been signed off and commit
   this file to the repository.
 
-  [] 
+  []
