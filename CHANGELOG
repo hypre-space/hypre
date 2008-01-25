@@ -31,6 +31,8 @@
 # recent release.
 #=============================================================================
 
+Version 2.3.0a released, 2008/01/xx.
+
 - Completed the implementation of SStructGridSetNeighborBox to work for all
   variable types (not just cell-centered).  In the process, we discovered that
   the interface design for this routine can result in ambiguous coordinate
@@ -48,10 +50,18 @@
 
 - Added Get(Box)Values routines for Struct/SStruct Matrix.
 
+- Added nodal interpolation schemes to BoomerAMG for systems problems.
+
 - Added capability to change Euclid runtime parameters using individual
   functions.
 
 - Improved use of Euclid as smoother in BoomerAMG.
+
+- Fixed two potential bugs in BoomerAMG.
+
+- Fixed a major bug with the OpenMP code in hypre (beginning with v1.7.5b,
+  OpenMP support was effectively disabled in the code).  Also made several
+  additional OpenMP changes/fixes.
 
 #====================================
 
