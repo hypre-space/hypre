@@ -4,50 +4,57 @@ HYPRE Alpha Release Checklist
 Alpha releases are primarily used to get new code to collaborators quickly.
 These releases may not be stable.
 
-The following steps must be completed, initialed & dated on the --->> line by
+See the Developer's Manual for more information on creating new releases.
+
+The following steps must be completed, initialed & dated on the [] line by
 the responsible project member before the release is made available to users.
 
 
- 1. Decision made for release number: X.X.Xa
+- Decision made for release number X.X.Xa.
 
-    --->> 
+  [fml m/d/yyyy]
 
- 2. Copy this file to 'check{release number}.txt' and commit to the repository
+- Copy this file to 'check{release number}.txt'.
 
-    --->> 
+  [] 
 
- 4. Update CHANGELOG file with information regarding contents of this release
+- Project personnel advised of release decision and tentative date with a
+  request to not disrupt the repository until the release is complete.
 
-    --->> 
+  [] 
 
- 5. Verify that all agreed-upon changes have been committed
+- Update 'CHANGELOG' file with information regarding contents of this release.
 
-    --->> 
+  [] 
 
- 6. Project Lead review and/or concurrence to release
+- Verify that all agreed-upon changes have been committed.
 
-    --->> 
+  [] 
 
- 7. Update config/configure.in with release number and date, then run
-    config/bootstrap and commit changes to the repository
+- Project Lead review and/or concurrence to release.
 
-    --->> 
+  [] 
 
- 8. Tag repository with release number
+- Update 'config/configure.in' with release number and date, then run
+  'config/bootstrap' and commit changes to the repository.
 
-    --->> 
+  [] 
 
- 9. Create release tar file by running the mkdist script './mkdist [VersionID]'
-    (this can be run from within any directory, just be sure to use the latest
-    version of the 'mkdist' script)
+- Tag repository with release number.
 
-    --->> 
+  [] 
 
-10. On the CASC cluster, copy tar file to /usr/casc/hypre
+- Create release tar file by running the 'tools/mkdist' script (for more
+  information, do 'mkdist -help').  This can be run from within any directory,
+  just be sure to use the latest version of the 'mkdist' script.
 
-    --->> 
+  [] 
 
-11. FINAL CERTIFICATION: Verify that all steps have been signed off and commit
-    this file to the repository
+- On the CASC cluster, copy tar file to '/usr/casc/hypre'.
 
-    --->> 
+  [] 
+
+- FINAL CERTIFICATION: Verify that all steps have been signed off and commit
+  this file to the repository.
+
+  [] 
