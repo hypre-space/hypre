@@ -43,7 +43,7 @@ The \code{SStruct} interface uses a {\em graph} to allow nearly arbitrary
 relationships between part data.  The graph is constructed from stencils plus
 some additional data-coupling information set by the \code{GraphAddEntries()}
 routine.  Another method for relating part data is the
-\code{GridSetNeighborbox()} routine, which is particularly suited for
+\code{GridSetNeighborPart()} routine, which is particularly suited for
 block-structured grid problems.
 
 There are five basic steps involved in setting up the linear system to be
@@ -66,7 +66,7 @@ solved:
 In this section, we describe how to use the \code{SStruct} interface to
 define block-structured grid problems.  We will do this primarily by
 example, paying particular attention to the construction of stencils
-and the use of the \code{GridSetNeighborbox()} interface routine.
+and the use of the \code{GridSetNeighborPart()} interface routine.
 
 Consider the solution of the diffusion equation
 \begin{equation} \label{eqn-block-diffusion}
@@ -156,6 +156,7 @@ is similar).
     int nb2_exts[][2]   = {{1,0}, {4,0}}, nb4_exts[][2]   = {{0,1}, {0,4}};
     int nb2_n_exts[][2] = {{1,1}, {1,4}}, nb4_n_exts[][2] = {{4,1}, {4,4}};
     int nb2_map[2]      = {1,0},          nb4_map[2]      = {0,1};
+    int nb2_dir[2]      = {1,1},          nb4_dir[2]      = {1,1};
 
 1:  HYPRE_SStructGridCreate(MPI_COMM_WORLD, ndim, nparts, &grid);
     
@@ -164,10 +165,10 @@ is similar).
 3:  HYPRE_SStructGridSetVariables(grid, part, nvars, vartypes);
     
     /* Set spatial relationship between parts 3 and 2, then parts 3 and 4 */
-4:  HYPRE_SStructGridSetNeighborBox(grid, part, nb2_exts[0], nb2_exts[1],
-       nb2_n_part, nb2_n_exts[0], nb2_n_exts[1], nb2_map);
-5:  HYPRE_SStructGridSetNeighborBox(grid, part, nb4_exts[0], nb4_exts[1],
-       nb4_n_part, nb4_n_exts[0], nb4_n_exts[1], nb4_map);
+4:  HYPRE_SStructGridSetNeighborPart(grid, part, nb2_exts[0], nb2_exts[1],
+       nb2_n_part, nb2_n_exts[0], nb2_n_exts[1], nb2_map, nb2_dir);
+5:  HYPRE_SStructGridSetNeighborPart(grid, part, nb4_exts[0], nb4_exts[1],
+       nb4_n_part, nb4_n_exts[0], nb4_n_exts[1], nb4_map, nb4_dir);
     
 6:  HYPRE_SStructGridAssemble(grid);
     
@@ -190,21 +191,21 @@ $x$-face, and $y$-face with part~3.
 At this stage, the description of the data on part~3 is complete.  However, the
 spatial relationship between this data and the data on neighboring parts is not
 yet defined.  To do this, we need to relate the index space for part~3 with the
-index spaces of parts 2 and~4.  More specifically, we need to tell the
-interface that the two grey boxes neighboring part~3 in the bottom-right of
+index spaces of parts 2 and~4.  More specifically, we need to tell the interface
+that the two grey boxes neighboring part~3 in the bottom-right of
 Figure~\ref{fig-sstruct-grid} also correspond to boxes on parts 2 and~4.  This
-is done through the two calls to the \code{SetNeighborbox()} routine.  We will
+is done through the two calls to the \code{SetNeighborPart()} routine.  We will
 discuss only the first call, which describes the grey box on the right of the
 figure.  Note that this grey box lives outside of the box extents for the grid
 on part~3, but it can still be described using the index-space for part~3
 (recall Figure~\ref{fig-struct-boxes}).  That is, the grey box has extents
 $(1,0)$ and $(4,0)$ on part~3's index-space, which is outside of part~3's grid.
-The arguments for the \code{SetNeighborbox()} call are simply the lower and
-upper indices on part~3 and the corresponding indices on part~2.  The final
-argument to the routine indicates that the $x$-direction on part~3 (i.e., the
-$i$ component of the tuple $(i,j)$) corresponds to the $y$-direction on part~2
-and that the $y$-direction on part~3 corresponds to the $x$-direction on
-part~2.
+The arguments for the \code{SetNeighborPart()} call are simply the lower and
+upper indices on part~3 and the corresponding indices on part~2.  The final two
+arguments to the routine indicate that the positive $x$-direction on part~3
+(i.e., the $i$ component of the tuple $(i,j)$) corresponds to the positive
+$y$-direction on part~2 and that the positive $y$-direction on part~3
+corresponds to the positive $x$-direction on part~2.
 
 The \code{Assemble()} routine is a collective call (i.e., must be called on all
 processes from a common synchronization point), and finalizes the grid
@@ -219,10 +220,10 @@ discretization.  However, with the additional neighbor information, when a
 stencil entry reaches into a neighbor box it is then coupled to the part
 described by that neighbor box information.
 
-Another important consequence of the use of the \code{SetNeighborbox()} routine
+Another important consequence of the use of the \code{SetNeighborPart()} routine
 is that it can declare variables on different parts as being the same.  For
 example, the face variables on the boundary of parts 2 and~3 are recognized as
-being shared by both parts (prior to the \code{SetNeighborbox()} call, there
+being shared by both parts (prior to the \code{SetNeighborPart()} call, there
 were two distinct sets of variables).  Note also that these variables are of
 different types on the two parts; on part~2 they are $x$-face variables, but on
 part~3 they are $y$-face variables.
@@ -317,7 +318,7 @@ Section~\ref{sec-Struct-RHS}.  See the \hypre{} reference manual for details.
 
 An alternative approach for describing the above problem through the interface
 is to use the \code{GraphAddEntries()} routine instead of the
-\code{GridSetNeighborBox()} routine.  In this approach, the five parts would be
+\code{GridSetNeighborPart()} routine.  In this approach, the five parts would be
 explicitly ``sewn'' together by adding non-stencil couplings to the matrix
 graph.  The main downside to this approach for block-structured grid problems
 is that variables along block boundaries are no longer considered to be the
@@ -329,7 +330,7 @@ need to explicitly select one of these variables as the representative that
 participates in the discretization, and make the other variable a dummy
 variable that is decoupled from the discretization by zeroing out appropriate
 entries in the matrix.  All of these complications are avoided by using the
-\code{GridSetNeighborBox()} for this example.
+\code{GridSetNeighborPart()} for this example.
 
 %-----------------------------------------------------------------------------
 
@@ -362,7 +363,7 @@ In the example, parts are distributed across the same two processes with
 process 0 having the ``left'' half of both parts.  The composite grid is then
 set up part-by-part by making calls to \code{GridSetExtents()} just as was done
 in Section~\ref{sec-Block-Structured-Grids} and Figure~\ref{fig-sstruct-grid}
-(no \code{SetNeighborBox} calls are made in this example).  Note that in the
+(no \code{SetNeighborPart} calls are made in this example).  Note that in the
 interface there is no required rule relating the indexing on the refinement
 patch to that on the global coarse grid; they are separate parts and thus each
 has its own index space.  In this example, we have chosen the indexing such
