@@ -18,8 +18,9 @@ the responsible project member before the release is made available to users.
 
   []
 
-- Project personnel advised of release decision and tentative date with
-  a request to not disrupt the repository until the release is complete.
+- Create a tracker issue "New hypre release {number}" advising project personnel
+  of release decision and tentative date with a request to not disrupt the
+  repository until the release is complete.
 
   []
 

@@ -10,36 +10,36 @@ The following steps must be completed, initialed & dated on the [] line by
 the responsible project member before the release is made available to users.
 
 
-- Decision made for release number X.X.Xa
+- Decision made for release number 2.3.0a
 
-  [fml m/d/yyyy]
+  [rdf 1/25/2008]
 
 - Copy this file to 'check{release number}.txt'.
 
-  []
+  [rdf 1/25/2008]
 
 - Create a tracker issue "New hypre release {number}" advising project personnel
   of release decision and tentative date with a request to not disrupt the
   repository until the release is complete.
 
-  []
+  [rdf 1/25/2008]
 
 - Update 'CHANGELOG' file with information regarding contents of this release.
 
-  []
+  [rdf 1/25/2008]
 
 - Verify that all agreed-upon changes have been committed.
 
-  []
+  [rdf 1/25/2008]
 
 - Project Lead review and/or concurrence to release.
 
-  []
+  [rdf 1/25/2008]
 
 - Update 'config/configure.in' with release number and date, then run
   'config/bootstrap' and commit changes to the repository.
 
-  []
+  [rdf 1/25/2008]
 
 - Tag repository with release number.
 
