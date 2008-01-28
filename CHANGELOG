@@ -31,7 +31,7 @@
 # recent release.
 #=============================================================================
 
-Version 2.3.0a released, 2008/01/xx.
+Version 2.3.0a released, 2008/01/28.
 
 - Completed the implementation of SStructGridSetNeighborBox to work for all
   variable types (not just cell-centered).  In the process, we discovered that
