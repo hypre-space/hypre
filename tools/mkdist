@@ -160,6 +160,7 @@ mv $HYPRE_DIR/src/linear_solvers/* $HYPRE_DIR/src
 rmdir $HYPRE_DIR/src/linear_solvers
 
 # remove certain directories that should not appear in the release
+rm -fr $HYPRE_DIR/src/AUTOTEST
 rm -fr $HYPRE_DIR/src/test/AUTOTEST
 rm -fr $HYPRE_DIR/src/babel/bHYPREClient-J
 
@@ -175,7 +176,6 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/src/HYPRE.h \
     $HYPRE_DIR/src/IJ_mv \
     $HYPRE_DIR/src/Makefile \
-    $HYPRE_DIR/src/aclocal.m4 \
     $HYPRE_DIR/src/babel \
     $HYPRE_DIR/src/babel-runtime \
     $HYPRE_DIR/src/blas \
