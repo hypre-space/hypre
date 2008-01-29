@@ -561,6 +561,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
 
 	 schwarz_relax_wt = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
+
          HYPRE_SchwarzCreate(&smoother[level]);
          HYPRE_SchwarzSetNumFunctions(smoother[level],num_functions);
          HYPRE_SchwarzSetVariant(smoother[level],
@@ -569,6 +570,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 		hypre_ParAMGDataOverlap(amg_data));
          HYPRE_SchwarzSetDomainType(smoother[level],
 		hypre_ParAMGDataDomainType(amg_data));
+         HYPRE_SchwarzSetNonSymm(smoother[level],
+		hypre_ParAMGDataSchwarzUseNonSymm(amg_data));
 	 if (schwarz_relax_wt > 0)
             HYPRE_SchwarzSetRelaxWeight(smoother[level],schwarz_relax_wt);
          HYPRE_SchwarzSetup(smoother[level],

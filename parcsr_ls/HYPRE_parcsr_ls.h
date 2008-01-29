@@ -691,6 +691,20 @@ int HYPRE_BoomerAMGSetSchwarzRlxWeight(HYPRE_Solver solver,
                                 double    schwarz_rlx_weight);
 
 /**
+ *  (Optional) Indicates that the aggregates may not be SPD for the Schwarz method.
+ * The following options exist for use\_nonsymm:
+ *
+ * \begin{tabular}{|c|l|} \hline
+ * 0  & assume SPD (default) \\
+ * 1  & assume non-symmetric \\
+ * \hline
+ * \end{tabular}
+**/
+
+int HYPRE_BoomerAMGSetSchwarzUseNonSymm( HYPRE_Solver  solver,
+                                         int use_nonsymm);
+
+/**
  * (Optional) Defines symmetry for ParaSAILS. 
  * For further explanation see description of ParaSAILS.
  **/
@@ -2219,6 +2233,8 @@ int HYPRE_SchwarzSetNumFunctions(HYPRE_Solver solver, int num_functions);
 
 int HYPRE_SchwarzSetDofFunc(HYPRE_Solver solver, int *dof_func);
 
+int HYPRE_SchwarzSetNonSymm( HYPRE_Solver  solver, int use_nonsymm);
+   
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 

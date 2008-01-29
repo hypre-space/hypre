@@ -120,6 +120,7 @@ typedef struct
    int                  schw_overlap;
    int                  schw_domain_type;
    double		schwarz_rlx_weight;
+   int                  schwarz_use_nonsymm;
    int			ps_sym;
    int			ps_level;
    int			pi_max_nz_per_row;
@@ -246,6 +247,8 @@ typedef struct
 #define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->schw_domain_type)	
 #define hypre_ParAMGDataSchwarzRlxWeight(amg_data) \
 ((amg_data)->schwarz_rlx_weight)
+#define hypre_ParAMGDataSchwarzUseNonSymm(amg_data) \
+((amg_data)->schwarz_use_nonsymm)
 #define hypre_ParAMGDataSym(amg_data) ((amg_data)->ps_sym)	
 #define hypre_ParAMGDataLevel(amg_data) ((amg_data)->ps_level)	
 #define hypre_ParAMGDataMaxNzPerRow(amg_data) ((amg_data)->pi_max_nz_per_row)

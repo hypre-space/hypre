@@ -914,7 +914,17 @@ HYPRE_BoomerAMGGetSchwarzRlxWeight( HYPRE_Solver  solver,
    return( hypre_BoomerAMGGetSchwarzRlxWeight( (void *) solver, 
 			schwarz_rlx_weight ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSchwarzUseNonSymm
+ *--------------------------------------------------------------------------*/
 
+int
+HYPRE_BoomerAMGSetSchwarzUseNonSymm( HYPRE_Solver  solver,
+                                     int use_nonsymm)
+{
+   return( hypre_BoomerAMGSetSchwarzUseNonSymm( (void *) solver, 
+			use_nonsymm ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSym
  *--------------------------------------------------------------------------*/

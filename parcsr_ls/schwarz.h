@@ -41,6 +41,7 @@ typedef struct
    int      domain_type;
    int      overlap;
    int      num_functions;
+   int      use_nonsymm;  
    double   relax_weight;
 
    hypre_CSRMatrix *domain_structure;
@@ -48,6 +49,9 @@ typedef struct
    hypre_ParVector *Vtemp;
    double  *scale;
    int     *dof_func;
+   int     *pivots;
+   
+   
 
 } hypre_SchwarzData;
 
@@ -60,6 +64,8 @@ typedef struct
 #define hypre_SchwarzDataOverlap(schwarz_data) ((schwarz_data)->overlap)
 #define hypre_SchwarzDataNumFunctions(schwarz_data) \
 ((schwarz_data)->num_functions)
+#define hypre_SchwarzDataUseNonSymm(schwarz_data) \
+((schwarz_data)->use_nonsymm)
 #define hypre_SchwarzDataRelaxWeight(schwarz_data) \
 ((schwarz_data)->relax_weight)
 #define hypre_SchwarzDataDomainStructure(schwarz_data) \
@@ -68,6 +74,7 @@ typedef struct
 #define hypre_SchwarzDataVtemp(schwarz_data) ((schwarz_data)->Vtemp)
 #define hypre_SchwarzDataScale(schwarz_data) ((schwarz_data)->scale)
 #define hypre_SchwarzDataDofFunc(schwarz_data) ((schwarz_data)->dof_func)
+#define hypre_SchwarzDataPivots(schwarz_data) ((schwarz_data)->pivots)
 
 #endif
 

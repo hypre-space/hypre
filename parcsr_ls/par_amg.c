@@ -87,7 +87,7 @@ hypre_BoomerAMGCreate()
    int      smooth_num_levels;
    int      smooth_num_sweeps;
 
-   int      variant, overlap, domain_type;
+   int      variant, overlap, domain_type, schwarz_use_nonsymm;
    double   schwarz_rlx_weight;
    int	    level, sym;
    int	    eu_level, eu_bj;
@@ -149,7 +149,8 @@ hypre_BoomerAMGCreate()
    smooth_num_sweeps = 1;
    smooth_num_levels = 0;
    smooth_type = 6;
-
+   schwarz_use_nonsymm = 0;
+   
    level = 1;
    sym = 0;
    thresh = 0.1;
@@ -219,6 +220,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
+   hypre_BoomerAMGSetSchwarzUseNonSymm(amg_data, schwarz_use_nonsymm);
    hypre_BoomerAMGSetDomainType(amg_data, domain_type);
    hypre_BoomerAMGSetSym(amg_data, sym);
    hypre_BoomerAMGSetLevel(amg_data, level);
@@ -2696,6 +2698,23 @@ hypre_BoomerAMGGetSchwarzRlxWeight( void     *data,
       return hypre_error_flag;
    } 
    *schwarz_rlx_weight = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetSchwarzUseNonSymm( void     *data,
+                                     int use_nonsymm)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataSchwarzUseNonSymm(amg_data) = use_nonsymm;
 
    return hypre_error_flag;
 }
