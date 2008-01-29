@@ -143,6 +143,17 @@ HYPRE_SchwarzSetNumFunctions( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SchwarzSetNonSymm
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SchwarzSetNonSymm( HYPRE_Solver  solver,
+                                int          use_nonsymm  )
+{
+   return( hypre_SchwarzSetNonSymm( (void *) solver, use_nonsymm ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SchwarzSetRelaxWeight
  *--------------------------------------------------------------------------*/
 
