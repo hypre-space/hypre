@@ -36,6 +36,10 @@ Version 2.3.1a released, 2008/01/31.
 - A bug fix (uninitialized variables introduced when AMS was added to
   the FEI preconditioner list).
 
+- Fixed a memory allocation bug in new SStruct SetNeighborPart feature.
+
+#====================================
+
 Version 2.3.0a released, 2008/01/28.
 
 - Completed the implementation of SStructGridSetNeighborBox to work for all
