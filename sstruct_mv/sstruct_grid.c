@@ -933,6 +933,9 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                   /* allocate CommInfo arguments */
                   if (cinfo_a[cinfoi] == NULL)
                   {
+                     int  j_num_boxes = hypre_StructGridNumBoxes(
+                        hypre_SStructPGridSGrid(pgrids[pj], vj));
+
                      cnum_transforms = hypre_CTAlloc(int, 1);
                      ccoords = hypre_CTAlloc(hypre_Index,
                                              hypre_BoxMapNEntries(map));
@@ -951,14 +954,14 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                      cinfo_a[cinfoi] = cinfo;
 
                      cinfo = hypre_TAlloc(CInfo, 1);
-                     (cinfo -> boxes) = hypre_BoxArrayArrayCreate(num_boxes);
-                     (cinfo -> procs) = hypre_CTAlloc(int *, num_boxes);
-                     (cinfo -> rboxnums) = hypre_CTAlloc(int *, num_boxes);
-                     (cinfo -> rboxes) = hypre_BoxArrayArrayCreate(num_boxes);
+                     (cinfo -> boxes) = hypre_BoxArrayArrayCreate(j_num_boxes);
+                     (cinfo -> procs) = hypre_CTAlloc(int *, j_num_boxes);
+                     (cinfo -> rboxnums) = hypre_CTAlloc(int *, j_num_boxes);
+                     (cinfo -> rboxes) = hypre_BoxArrayArrayCreate(j_num_boxes);
                      (cinfo -> num_transforms) = cnum_transforms;
                      (cinfo -> coords) = ccoords;
                      (cinfo -> dirs) = cdirs;
-                     (cinfo -> transforms) = hypre_CTAlloc(int *, num_boxes);
+                     (cinfo -> transforms) = hypre_CTAlloc(int *, j_num_boxes);
                      cinfo_a[cinfoj] = cinfo;
 
                      vnbor_ncomms++;
