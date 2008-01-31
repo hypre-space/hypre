@@ -38,6 +38,14 @@ Version 2.3.1a released, 2008/01/31.
 
 - Fixed a memory allocation bug in new SStruct SetNeighborPart feature.
 
+- Added a new option for the Schwarz smoothers
+(HYPRE_BoomerAMGSetSchwarzUseNonSymm and HYPRE_SchwarzSetNonSymm) to
+use LU instead of Cholesky LAPACK functions to invert the matrix
+blocks.
+
+-Fixed a bug with the Schwarz smoothers and the ESSL compile.
+
+
 #====================================
 
 Version 2.3.0a released, 2008/01/28.
