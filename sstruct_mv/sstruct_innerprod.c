@@ -89,7 +89,7 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
 
    result = 0.0;
 
-   if (x_object_type == HYPRE_SSTRUCT)
+   if ( (x_object_type == HYPRE_SSTRUCT) || (x_object_type == HYPRE_STRUCT) )
    {
       for (part = 0; part < nparts; part++)
       {

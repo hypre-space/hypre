@@ -321,7 +321,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
       printf("possible error: A and x are different object types\n");
    }
 
-   if (x_object_type == HYPRE_SSTRUCT)
+   if ( (x_object_type == HYPRE_SSTRUCT) || (x_object_type == HYPRE_STRUCT) )
    {
      /* do S-matrix computations */
       for (part = 0; part < nparts; part++)
@@ -333,25 +333,29 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
          hypre_SStructPMatvecCompute(pdata, alpha, pA, px, beta, py);
       }
 
-     /* do U-matrix computations */
+      if ( (x_object_type == HYPRE_SSTRUCT) )
+      {
 
-     /* GEC1002 the data chunk pointed by the local-parvectors 
-      *  inside the semistruct vectors x and y is now identical to the
-      *  data chunk of the structure vectors x and y. The role of the function
-      *  convert is to pass the addresses of the data chunk
-      *  to the parx and pary. */  
+         /* do U-matrix computations */
 
-      hypre_SStructVectorConvert(x, &parx);
-      hypre_SStructVectorConvert(y, &pary); 
+         /* GEC1002 the data chunk pointed by the local-parvectors 
+          *  inside the semistruct vectors x and y is now identical to the
+          *  data chunk of the structure vectors x and y. The role of the function
+          *  convert is to pass the addresses of the data chunk
+          *  to the parx and pary. */  
 
-      hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
+         hypre_SStructVectorConvert(x, &parx);
+         hypre_SStructVectorConvert(y, &pary); 
 
-      /* dummy functions since there is nothing to restore  */
+         hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
 
-      hypre_SStructVectorRestore(x, NULL);
-      hypre_SStructVectorRestore(y, pary); 
+         /* dummy functions since there is nothing to restore  */
 
-      parx = NULL; 
+         hypre_SStructVectorRestore(x, NULL);
+         hypre_SStructVectorRestore(y, pary); 
+
+         parx = NULL; 
+      }
 
   }
 
