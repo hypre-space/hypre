@@ -3620,6 +3620,7 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
 
         hypre_MatvecCommPkgCreate(A);
 
+        comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);    
 	recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);    
      }
