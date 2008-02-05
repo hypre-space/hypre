@@ -461,7 +461,7 @@ hypre_SStructPVectorGetValues( hypre_SStructPVector *pvector,
    /* temporarily swap out sgrid boxes in order to get boundary data */
    tboxarray = hypre_StructGridBoxes(sgrid);
    hypre_StructGridBoxes(sgrid) = iboxarray;
-   hypre_StructVectorSetValues(svector, index, value, -1, -1, 1);
+   hypre_StructVectorSetValues(svector, index, value, -1, -1, 0);
    hypre_StructGridBoxes(sgrid) = tboxarray;
 
    return hypre_error_flag;
@@ -490,7 +490,7 @@ hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector,
    /* temporarily swap out sgrid boxes in order to get boundary data */
    tboxarray = hypre_StructGridBoxes(sgrid);
    hypre_StructGridBoxes(sgrid) = iboxarray;
-   hypre_StructVectorSetBoxValues(svector, box, box, values, -1, -1, 1);
+   hypre_StructVectorSetBoxValues(svector, box, box, values, -1, -1, 0);
    hypre_StructGridBoxes(sgrid) = tboxarray;
    hypre_BoxDestroy(box);
 
