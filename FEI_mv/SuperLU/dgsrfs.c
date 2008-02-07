@@ -146,7 +146,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     double   *work;
     double   *rwork;
     int      *iwork;
-    extern double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
     extern int dlacon_(int *, double *, double *, int *, double *, int *);
 #ifdef _CRAY
     extern int SCOPY(int *, double *, int *, double *, int *);
@@ -219,8 +219,8 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 
     /* NZ = maximum number of nonzero elements in each row of A, plus 1 */
     nz     = A->ncol + 1;
-    eps    = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Epsilon");
-    safmin = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Safe minimum");
+    eps    = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Epsilon");
+    safmin = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Safe minimum");
     safe1  = nz * safmin;
     safe2  = safe1 / eps;
 

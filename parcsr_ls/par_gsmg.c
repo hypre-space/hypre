@@ -45,7 +45,7 @@
 #include <essl.h>
 #else
 #include "fortran.h"
-int hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
+int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, int *, int *, int *, double *, 
   int *, double *, int *, double *, int *, int *);
 #endif
 
@@ -725,7 +725,7 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
    {
    char trans = 'N';
    int  one   = 1;
-   hypre_F90_NAME_BLAS(dgels, DGELS)(&trans, &num, &nc, &one, a, &num,
+   hypre_F90_NAME_LAPACK(dgels, DGELS)(&trans, &num, &nc, &one, a, &num,
       b, &temp, work, &work_size, &info);
 
    if (info != 0)

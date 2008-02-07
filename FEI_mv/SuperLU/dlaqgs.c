@@ -84,7 +84,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     double   *Aval;
     int i, j, irow;
     double large, small, cj;
-    extern double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
 
 
     /* Quick return if possible */
@@ -97,7 +97,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     Aval = Astore->nzval;
     
     /* Initialize LARGE and SMALL. */
-    small = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Safe minimum") / hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Precision");
+    small = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Safe minimum") / hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Precision");
     large = 1. / small;
 
     if (rowcnd >= THRESH && amax >= small && amax <= large) {

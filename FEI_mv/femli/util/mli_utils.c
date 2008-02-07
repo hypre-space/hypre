@@ -1164,7 +1164,7 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
 {
     /* prototype */
 #if 0
-    void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, integer *, 
+    void hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(char *, char *, integer *, 
         integer *, doublereal *, int *, doublereal *, doublereal *, integer *, 
         doublereal *, integer *, doublereal *, integer *, integer *);
 #endif
@@ -1177,7 +1177,7 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
     int info;
     info = -1;
 #else
-    extern int hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *, 
+    extern int hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(char *, char *, int *, 
         int *, double *, int *, double *, double *, int *, 
         double *, int *, double *, int *, int *);
 
@@ -1186,7 +1186,7 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
     int  dim = MIN(m,n);
     int  info;
 
-    hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &m, &n, uArray,
+    hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(&jobu, &jobvt, &m, &n, uArray,
         &m, sArray, (double *) NULL, &m, vtArray, &dim, workArray, 
         &workLen, &info);
 #endif
@@ -1211,11 +1211,11 @@ int MLI_Utils_singular_vectors(int n, double *uArray)
     double *sArray = (double *) malloc(n*sizeof(double));
     int workLen = 5*n;
     double *workArray = (double *) malloc(workLen*sizeof(double));
-    extern int hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *,
+    extern int hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(char *, char *, int *,
         int *, double *, int *, double *, double *, int *,
         double *, int *, double *, int *, int *);
 
-    hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &n, &n, uArray,
+    hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(&jobu, &jobvt, &n, &n, uArray,
         &n, sArray, NULL, &n, NULL, &n, workArray, &workLen, &info);
 
     free(workArray);

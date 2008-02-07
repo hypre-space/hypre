@@ -55,12 +55,12 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
     int      i, j, k, oldcol;
     int      *inv_perm_c;
     double   rpg, maxaj, maxuj;
-    extern   double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
+    extern   double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
     double   smlnum;
     double   *luval;
    
     /* Get machine constants. */
-    smlnum = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("S");
+    smlnum = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("S");
     rpg = 1. / smlnum;
 
     Astore = A->Store;

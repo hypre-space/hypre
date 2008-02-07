@@ -59,10 +59,10 @@
 #ifdef ESSL
 #include <essl.h>
 #else
-int hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
-int hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, 
+int hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
+int hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, 
   double *, int *, int *);
-int hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, int *,
+int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, int *, int *, int *, double *, int *,
   double *, int *, double *, int *, int *);
 #endif
 
@@ -1154,7 +1154,7 @@ static int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         dpps(ahat, len, val, 1);
 #else
         /* Solve local linear system - factor phase */
-        hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(&uplo, &len, ahat, &len, &info);
+        hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(&uplo, &len, ahat, &len, &info);
         if (info != 0)
         {
 #if 0
@@ -1168,7 +1168,7 @@ static int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         }
 
         /* Solve local linear system - solve phase */
-        hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &len, &one, ahat, &len, val, &len, 
+        hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(&uplo, &len, &one, ahat, &len, val, &len, 
           &info);
         if (info != 0)
         {
@@ -1342,7 +1342,7 @@ static int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
             &info, work, work_size);
 #else
         /* rhs in bhat, and put solution in bhat */
-        hypre_F90_NAME_BLAS(dgels, DGELS)(&trans, &npat, &len, &one, ahat, &npat,
+        hypre_F90_NAME_LAPACK(dgels, DGELS)(&trans, &npat, &len, &one, ahat, &npat,
             bhat, &npat, work, &work_size, &info);
 
         if (info != 0)

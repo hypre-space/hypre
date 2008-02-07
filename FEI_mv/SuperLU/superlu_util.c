@@ -530,7 +530,7 @@ int superlu_lsame(char *ca, char *cb)
 #define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
 
-double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *cmach)
+double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *cmach)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -588,7 +588,7 @@ double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *cmach)
     static int imin, imax;
     static int lrnd;
     static double rmin, rmax, t, rmach;
-/*    extern int hypre_F90_NAME_BLAS(lsame,LSAME)(char *, char *);*/
+/*    extern int hypre_F90_NAME_LAPACK(lsame,LSAME)(char *, char *);*/
     static double small, sfmin;
     extern /* Subroutine */ int sludlamc2_(int *, int *, int *, 
 	    double *, int *, double *, int *, double *);
@@ -649,7 +649,7 @@ double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *cmach)
 
 /*     End of DLAMCH */
 
-} /* <hypre_F90_NAME_BLAS(dlamch,DLAMCH) */
+} /* <hypre_F90_NAME_LAPACK(dlamch,DLAMCH) */
 
 
 /* Subroutine */ int sludlamc1_(int *beta, int *t, int *rnd, int 

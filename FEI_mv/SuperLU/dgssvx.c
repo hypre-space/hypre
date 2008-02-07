@@ -385,7 +385,7 @@ dgssvx(char *fact, char *trans, char *refact,
 
     /* External functions */
     extern double dlangs(char *, SuperMatrix *);
-    extern double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
 
     Bstore = B->Store;
     Xstore = X->Store;
@@ -411,7 +411,7 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     } else {
 	rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
 	colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
-	smlnum = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Safe minimum");
+	smlnum = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Safe minimum");
 	bignum = 1. / smlnum;
     }
 
@@ -612,7 +612,7 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     }
 
     /* Set INFO = A->ncol+1 if the matrix is singular to working precision. */
-    if ( *rcond < hypre_F90_NAME_BLAS(dlamch,DLAMCH)("E") ) *info = A->ncol + 1;
+    if ( *rcond < hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("E") ) *info = A->ncol + 1;
 
     dQuerySpace(L, U, panel_size, mem_usage);
 
