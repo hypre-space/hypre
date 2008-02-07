@@ -31,6 +31,8 @@
 
 include ../config/Makefile.config
 
+C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../utilities
+
 LAPACK_HEADERS =  f2c.h hypre_lapack.h
 LAPACK_FILES = \
  dbdsqr.c\

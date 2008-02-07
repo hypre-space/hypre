@@ -35,6 +35,7 @@
 
 include ../config/Makefile.config
 
+C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../utilities
 
 BLAS_HEADERS =  f2c.h  hypre_blas.h
 BLAS_FILES = \

@@ -32,32 +32,33 @@
 #ifndef HYPRE_BLAS_H
 #define HYPRE_BLAS_H
 #include "f2c.h"
+#include "fortran.h"
 
 /* --------------------------------------------------------------------------
  *   Change all names to hypre_ to avoid link conflicts
  * --------------------------------------------------------------------------*/
 
-#define dasum_   hypre_dasum
-#define daxpy_   hypre_daxpy
-#define dcopy_   hypre_dcopy
-#define ddot_    hypre_ddot
-#define dgemm_   hypre_dgemm
-#define dgemv_   hypre_dgemv
-#define dger_    hypre_dger
-#define dnrm2_   hypre_dnrm2
-#define drot_    hypre_drot
-#define dscal_   hypre_dscal
-#define dswap_   hypre_dswap
-#define dsymm_   hypre_dsymm
-#define dsymv_   hypre_dsymv
-#define dsyr2_   hypre_dsyr2
-#define dsyr2k_  hypre_dsyr2k
-#define dsyrk_   hypre_dsyrk
-#define dtrmm_   hypre_dtrmm
-#define dtrmv_   hypre_dtrmv
-#define dtrsm_   hypre_dtrsm
-#define dtrsv_   hypre_dtrsv
-#define idamax_  hypre_idamax
+#define dasum_   hypre_F90_NAME_BLAS(dasum,DASUM)
+#define daxpy_   hypre_F90_NAME_BLAS(daxpy,DAXPY)
+#define dcopy_   hypre_F90_NAME_BLAS(dcopy,DCOPY)
+#define ddot_    hypre_F90_NAME_BLAS(ddot,DDOT)
+#define dgemm_   hypre_F90_NAME_BLAS(dgemm,DGEMM)
+#define dgemv_   hypre_F90_NAME_BLAS(dgemv,DGEMV)
+#define dger_    hypre_F90_NAME_BLAS(dger,DGER)
+#define dnrm2_   hypre_F90_NAME_BLAS(dnrm2,DNRM2)
+#define drot_    hypre_F90_NAME_BLAS(drot,DROT)
+#define dscal_   hypre_F90_NAME_BLAS(dscal,DSCAL)
+#define dswap_   hypre_F90_NAME_BLAS(dswap,DSWAP)
+#define dsymm_   hypre_F90_NAME_BLAS(dsymm,DSYMM)
+#define dsymv_   hypre_F90_NAME_BLAS(dsymv,DSYMV)
+#define dsyr2_   hypre_F90_NAME_BLAS(dsyr2,DSYR2)
+#define dsyr2k_  hypre_F90_NAME_BLAS(dsyr2k,DSYR2K)
+#define dsyrk_   hypre_F90_NAME_BLAS(dsyrk,DSYRK)
+#define dtrmm_   hypre_F90_NAME_BLAS(dtrmm,DTRMM)
+#define dtrmv_   hypre_F90_NAME_BLAS(dtrmv,DTRMV)
+#define dtrsm_   hypre_F90_NAME_BLAS(dtrsm,DTRSM)
+#define dtrsv_   hypre_F90_NAME_BLAS(dtrsv,DTRSV)
+#define idamax_  hypre_F90_NAME_BLAS(idamax,IDAMAX)
 
 /* blas_utils.c */
 logical lsame_ ( char *ca , char *cb );
