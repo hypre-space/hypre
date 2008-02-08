@@ -1036,14 +1036,20 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    int *recv_starts=NULL;
    int *response_buf = NULL, *response_buf_starts=NULL;
    int *num_rows_per_proc = NULL;
+   int  tmp_int;
+   int  obj_size_bytes, int_size, double_size;
 
+   void *void_contact_buf = NULL;
+   void *index_ptr;
+   void *recv_data_ptr;
+
+   double tmp_double;
    double *ex_contact_buf=NULL;
-   double *recv_data = NULL;
    double *vector_data;
    double value;
    
    hypre_DataExchangeResponse      response_obj1, response_obj2;
-   hypre_ProcListElements          send_proc_obj_d; 
+   hypre_ProcListElements          send_proc_obj; 
 
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
@@ -1106,13 +1112,9 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       assumed processors and find out who the actual row owner is - we
       will contact with a range (2 numbers) */
 
-
-
-
    ex_contact_procs = hypre_CTAlloc(int, ex_num_contacts);
    ex_contact_vec_starts =  hypre_CTAlloc(int, ex_num_contacts+1);
    ex_contact_buf =  hypre_CTAlloc(double, ex_num_contacts*2);
-
 
    counter = 0;
    range_end = -1;
@@ -1167,14 +1169,11 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
      a proc_id followed by an upper bound for the range.  */
 
 
-
    hypre_TFree(ex_contact_procs);
    hypre_TFree(ex_contact_buf);
    hypre_TFree(ex_contact_vec_starts);
 
    hypre_TFree(a_proc_id);
-
-/* too low */
 
 
    /*how many ranges were returned?*/
@@ -1214,12 +1213,17 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    /* now we have the list of real procesors ids (real_proc_id) - 
       and the number of distinct ones -
       so now we can set up data to be sent - we have int and double data.
-      (row number and value) - we will convert everything to double*/  
+      (row number and value) - we will send everything as a void since
+       we may not know the rel sizes of ints and doubles*/  
  
-
    /*first find out how many elements to send per proc - so we can do
      storage */
-     
+ 
+   int_size = sizeof(int);
+   double_size = sizeof(double);
+   
+   obj_size_bytes = hypre_max(int_size, double_size);
+    
    ex_contact_procs = hypre_CTAlloc(int, num_real_procs);
    num_rows_per_proc = hypre_CTAlloc(int, num_real_procs);
    
@@ -1257,14 +1261,12 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       ex_contact_vec_starts[i+1] = -storage-1; /* need negative for next loop */
    }      
 
-   ex_contact_buf = hypre_CTAlloc (double, storage);
-
-
+   void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);
+   index_ptr = void_contact_buf; /* step through with this index */
 
    /* set up data to be sent to send procs */
-   /* for each proc, ex_contact_buf_d contains #rows, row #, data, ect. */
+   /* for each proc, ex_contact_buf_d contains #rows, row #, data, etc. */
       
-
    /* un-sort real_proc_id  - we want to access data arrays in order */
 
    us_real_proc_id =  hypre_CTAlloc(int, current_num_elmts);
@@ -1286,14 +1288,31 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       indx = hypre_BinarySearch(ex_contact_procs, proc_id, num_real_procs);
       in =  ex_contact_vec_starts[indx];
 
+      index_ptr = (void *) ((char *) void_contact_buf + in*obj_size_bytes);
+
       if (in < 0) /* first time for this processor - add the number of rows to the buffer */
       {
          in = -in - 1;
-         ex_contact_buf[in++] = (double) num_rows_per_proc[indx];
+         /* re-calc. index_ptr since in_i was negative */
+         index_ptr = (void *) ((char *) void_contact_buf + in*obj_size_bytes);
+
+         tmp_int =  num_rows_per_proc[indx];
+         memcpy( index_ptr, &tmp_int, int_size);
+         index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
+
+         in++;
       }
-      
-      ex_contact_buf[in++] = (double) row;
-      ex_contact_buf[in++] = off_proc_data[i]; /* value */
+      /* add row # */   
+      memcpy( index_ptr, &row, int_size);
+      index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
+      in++;
+
+
+      /* add value */
+      tmp_double = off_proc_data[i];
+      memcpy( index_ptr, &tmp_double, double_size);
+      index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
+      in++;
 
       
       /* increment the indexes to keep track of where we are - fix later */
@@ -1336,23 +1355,23 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    /* use the send_proc_obj for the info kept from contacts */
    /*estimate inital storage allocation */
 
-   send_proc_obj_d.length = 0;
-   send_proc_obj_d.storage_length = num_real_procs + 5;
-   send_proc_obj_d.id = NULL; /* don't care who sent it to us */
-   send_proc_obj_d.vec_starts = hypre_CTAlloc(int, send_proc_obj_d.storage_length + 1); 
-   send_proc_obj_d.vec_starts[0] = 0;
-   send_proc_obj_d.element_storage_length = storage + 20;
-   send_proc_obj_d.d_elements = hypre_CTAlloc(double, send_proc_obj_d.element_storage_length);
+   send_proc_obj.length = 0;
+   send_proc_obj.storage_length = num_real_procs + 5;
+   send_proc_obj.id = NULL; /* don't care who sent it to us */
+   send_proc_obj.vec_starts = hypre_CTAlloc(int, send_proc_obj.storage_length + 1); 
+   send_proc_obj.vec_starts[0] = 0;
+   send_proc_obj.element_storage_length = storage + 20;
+   send_proc_obj.v_elements = hypre_MAlloc(obj_size_bytes*send_proc_obj.element_storage_length);
 
-   response_obj2.fill_response = hypre_FillResponseIJOffProcValsDouble;
+   response_obj2.fill_response = hypre_FillResponseIJOffProcVals;
    response_obj2.data1 = NULL;
-   response_obj2.data2 = &send_proc_obj_d;
+   response_obj2.data2 = &send_proc_obj;
 
    max_response_size = 0;
 
    hypre_DataExchangeList(num_real_procs, ex_contact_procs, 
-                          ex_contact_buf, ex_contact_vec_starts, sizeof(double),
-                          sizeof(int), &response_obj2, max_response_size, 5, 
+                          void_contact_buf, ex_contact_vec_starts, obj_size_bytes,
+                          0, &response_obj2, max_response_size, 5, 
                           comm,  (void **) &response_buf, &response_buf_starts);
 
 
@@ -1365,18 +1384,18 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    hypre_TFree(response_buf_starts);
 
    hypre_TFree(ex_contact_procs);
-   hypre_TFree(ex_contact_buf);
+   hypre_TFree(void_contact_buf);
    hypre_TFree(ex_contact_vec_starts);
 
 
    /* Now we can unpack the send_proc_objects and either set or add to 
       the vector data */
 
-   num_recvs = send_proc_obj_d.length; 
+   num_recvs = send_proc_obj.length; 
 
    /* alias */
-   recv_data = send_proc_obj_d.d_elements;
-   recv_starts = send_proc_obj_d.vec_starts;
+   recv_data_ptr = send_proc_obj.v_elements;
+   recv_starts = send_proc_obj.vec_starts;
    
    vector_data = hypre_VectorData(hypre_ParVectorLocalVector(par_vector));
    first_index = hypre_ParVectorFirstIndex(par_vector);
@@ -1384,15 +1403,28 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
 
    for (i=0; i < num_recvs; i++)
    {
-      /* get the number of rows from the this recv */
+    
       indx = recv_starts[i];
-      row_count = (int) recv_data[indx++];
+
+      /* get the number of rows for  this recv */
+      memcpy( &row_count, recv_data_ptr, int_size);
+      recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
+      indx++;
 
       for (j=0; j < row_count; j++) /* for each row: unpack info */
       {
 
-         row = (int) recv_data[indx++]; /* row number*/
-         value = recv_data[indx++];
+         /* row # */
+         memcpy( &row, recv_data_ptr, int_size);
+         recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
+         indx++;
+
+         /* value */
+         memcpy( &value, recv_data_ptr, double_size);
+         recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
+         indx++;
+
+
          if (row < 0) /* add */
          {
             row = -row-1;
@@ -1408,8 +1440,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    }
    
 
-   hypre_TFree(send_proc_obj_d.d_elements);
-   hypre_TFree(send_proc_obj_d.vec_starts);
+   hypre_TFree(send_proc_obj.v_elements);
+   hypre_TFree(send_proc_obj.vec_starts);
 
  
    return hypre_error_flag;
