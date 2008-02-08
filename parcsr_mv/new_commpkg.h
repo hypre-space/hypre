@@ -33,13 +33,15 @@
 
 typedef struct
 {
-  int                   length;
-  int                   storage_length; 
-  int                   *id;
-  int                   *vec_starts;
-  int                   element_storage_length; 
-  int                   *elements;
+   int                   length;
+   int                   storage_length; 
+   int                   *id;
+   int                   *vec_starts;
+   int                   element_storage_length; 
+   int                   *elements;
    double                *d_elements;
+   void                  *v_elements;
+   
 }  hypre_ProcListElements;   
 
 
