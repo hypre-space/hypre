@@ -189,7 +189,7 @@ then
         CFLAGS="-O2"
         ;;
       icc)
-        CFLAGS="-O3 -tpp7"
+        CFLAGS="-O3"
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
         fi
@@ -253,7 +253,7 @@ then
         CXXFLAGS="-O2"
         ;;
       icc)
-        CXXFLAGS="-O3 -tpp7"
+        CXXFLAGS="-O3"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
@@ -317,7 +317,7 @@ then
         FFLAGS="-O"
         ;;
       ifort)
-        FFLAGS="-O3 -tpp7"
+        FFLAGS="-O3"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi
