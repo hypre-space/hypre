@@ -2167,7 +2167,7 @@ int MLI_Method_AMGSA::coarsenSelective(hypre_ParCSRMatrix *hypreG,
    int       localNRows, naggr=0, *node2aggr, *aggrSizes, nUndone;
    int       irow, jcol, colNum, rowLeng, *cols, globalNRows;
    int       *nodeStat, selectFlag, nSelected=0, nNotSelected=0, count;
-   int       *GDiagI, *GDiagJ, *GOffdI;
+   int       *GDiagI, *GDiagJ;
    double    maxVal, *vals, *GDiagA;
    hypre_CSRMatrix *GDiag, *GOffd;
 #ifdef MLI_DEBUG_DETAILED
@@ -2198,7 +2198,6 @@ int MLI_Method_AMGSA::coarsenSelective(hypre_ParCSRMatrix *hypreG,
    GDiagJ = hypre_CSRMatrixJ(GDiag);
    GDiagA = hypre_CSRMatrixData(GDiag);
    GOffd  = hypre_ParCSRMatrixOffd(hypreG);
-   GOffdI = hypre_CSRMatrixI(GOffd);
 
    /*-----------------------------------------------------------------
     * allocate status arrays 
@@ -2670,10 +2669,10 @@ int MLI_Method_AMGSA::setupExtendedDomainDecomp2(MLI *mli)
    /* --------------------------------------------------------------- */
 
    MLI_Matrix         *mli_AExt;
-   hypre_ParCSRMatrix *hypreAExt;
+   //hypre_ParCSRMatrix *hypreAExt;
 
    MLI_Matrix_ComputePtAP(mli_QExt, mli_Amat, &mli_AExt);
-   hypreAExt = (hypre_ParCSRMatrix *) mli_AExt->getMatrix();
+   //hypreAExt = (hypre_ParCSRMatrix *) mli_AExt->getMatrix();
    delete mli_QExt;
    HYPRE_IJMatrixDestroy(IJ_QExt);
 
