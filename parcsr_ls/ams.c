@@ -789,8 +789,9 @@ int hypre_AMSSetTol(void *solver,
  *  12 = 5-level additive solver (0+1+3+4+5)
  *  13 = 5-level multipl. solver (034515430)  <-- small solution time, memory
  *  14 = 5-level additive solver (01(3+4+5)10)
+ *  20 = 2-level multipl. solver (0[12]0)
  *
- *   0 = just the smoother (0)
+ *   0 = a Hiptmair-like smoother (010)
  *
  * The default value is 1.
  *--------------------------------------------------------------------------*/
@@ -1398,6 +1399,191 @@ int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMSComputeGPi
+ *
+ * Construct the matrix [G,Pi] which can be considered an interpolation
+ * matrix from S_h^4 (4 copies of the scalar linear finite element space)
+ * to the edge finite elements space.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
+                        hypre_ParCSRMatrix *G,
+                        hypre_ParVector *x,
+                        hypre_ParVector *y,
+                        hypre_ParVector *z,
+                        hypre_ParVector *Gx,
+                        hypre_ParVector *Gy,
+                        hypre_ParVector *Gz,
+                        int dim,
+                        hypre_ParCSRMatrix **GPi_ptr)
+{
+   int input_info = 0;
+
+   hypre_ParCSRMatrix *GPi;
+
+   if (x != NULL && y != NULL && (dim == 2 || z != NULL))
+      input_info = 1;
+
+   if (Gx != NULL && Gy != NULL && (dim == 2 || Gz != NULL))
+      input_info = 2;
+
+   if (!input_info)
+      hypre_error_in_arg(3);
+
+   /* Take into account G */
+   dim++;
+
+   /* If not given, compute Gx, Gy and Gz */
+   if (input_info == 1)
+   {
+      Gx = hypre_ParVectorInRangeOf(G);
+      hypre_ParCSRMatrixMatvec (1.0, G, x, 0.0, Gx);
+      Gy = hypre_ParVectorInRangeOf(G);
+      hypre_ParCSRMatrixMatvec (1.0, G, y, 0.0, Gy);
+      if (dim == 4)
+      {
+         Gz = hypre_ParVectorInRangeOf(G);
+         hypre_ParCSRMatrixMatvec (1.0, G, z, 0.0, Gz);
+      }
+   }
+
+   /* Compute GPi = [Pi_x, Pi_y, Pi_z, G] */
+   {
+      int i, j, d;
+
+      double *Gx_data, *Gy_data, *Gz_data;
+
+      MPI_Comm comm = hypre_ParCSRMatrixComm(G);
+      int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(G);
+      int global_num_cols = dim*hypre_ParCSRMatrixGlobalNumCols(G);
+      int *row_starts = hypre_ParCSRMatrixRowStarts(G);
+      int col_starts_size, *col_starts;
+      int num_cols_offd = dim*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(G));
+      int num_nonzeros_diag = dim*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
+      int num_nonzeros_offd = dim*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(G));
+      int *col_starts_G = hypre_ParCSRMatrixColStarts(G);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      col_starts_size = 2;
+#else
+      int num_procs;
+      MPI_Comm_size(comm, &num_procs);
+      col_starts_size = num_procs+1;
+#endif
+      col_starts = hypre_TAlloc(int,col_starts_size);
+      for (i = 0; i < col_starts_size; i++)
+         col_starts[i] = dim * col_starts_G[i];
+
+      GPi = hypre_ParCSRMatrixCreate(comm,
+                                     global_num_rows,
+                                     global_num_cols,
+                                     row_starts,
+                                     col_starts,
+                                     num_cols_offd,
+                                     num_nonzeros_diag,
+                                     num_nonzeros_offd);
+
+      hypre_ParCSRMatrixOwnsData(GPi) = 1;
+      hypre_ParCSRMatrixOwnsRowStarts(GPi) = 0;
+      hypre_ParCSRMatrixOwnsColStarts(GPi) = 1;
+
+      hypre_ParCSRMatrixInitialize(GPi);
+
+      Gx_data = hypre_VectorData(hypre_ParVectorLocalVector(Gx));
+      Gy_data = hypre_VectorData(hypre_ParVectorLocalVector(Gy));
+      if (dim == 4)
+         Gz_data = hypre_VectorData(hypre_ParVectorLocalVector(Gz));
+
+      /* Fill-in the diagonal part */
+      {
+         hypre_CSRMatrix *G_diag = hypre_ParCSRMatrixDiag(G);
+         int *G_diag_I = hypre_CSRMatrixI(G_diag);
+         int *G_diag_J = hypre_CSRMatrixJ(G_diag);
+         double *G_diag_data = hypre_CSRMatrixData(G_diag);
+
+         int G_diag_nrows = hypre_CSRMatrixNumRows(G_diag);
+         int G_diag_nnz = hypre_CSRMatrixNumNonzeros(G_diag);
+
+         hypre_CSRMatrix *GPi_diag = hypre_ParCSRMatrixDiag(GPi);
+         int *GPi_diag_I = hypre_CSRMatrixI(GPi_diag);
+         int *GPi_diag_J = hypre_CSRMatrixJ(GPi_diag);
+         double *GPi_diag_data = hypre_CSRMatrixData(GPi_diag);
+
+         for (i = 0; i < G_diag_nrows+1; i++)
+            GPi_diag_I[i] = dim * G_diag_I[i];
+
+         for (i = 0; i < G_diag_nnz; i++)
+            for (d = 0; d < dim; d++)
+               GPi_diag_J[dim*i+d] = dim*G_diag_J[i]+d;
+
+         for (i = 0; i < G_diag_nrows; i++)
+            for (j = G_diag_I[i]; j < G_diag_I[i+1]; j++)
+            {
+               *GPi_diag_data++ = G_diag_data[j];
+               *GPi_diag_data++ = 0.5 * Gx_data[i];
+               *GPi_diag_data++ = 0.5 * Gy_data[i];
+               if (dim == 4)
+                  *GPi_diag_data++ = 0.5 * Gz_data[i];
+            }
+      }
+
+      /* Fill-in the off-diagonal part */
+      {
+         hypre_CSRMatrix *G_offd = hypre_ParCSRMatrixOffd(G);
+         int *G_offd_I = hypre_CSRMatrixI(G_offd);
+         int *G_offd_J = hypre_CSRMatrixJ(G_offd);
+         double *G_offd_data = hypre_CSRMatrixData(G_offd);
+
+         int G_offd_nrows = hypre_CSRMatrixNumRows(G_offd);
+         int G_offd_ncols = hypre_CSRMatrixNumCols(G_offd);
+         int G_offd_nnz = hypre_CSRMatrixNumNonzeros(G_offd);
+
+         hypre_CSRMatrix *GPi_offd = hypre_ParCSRMatrixOffd(GPi);
+         int *GPi_offd_I = hypre_CSRMatrixI(GPi_offd);
+         int *GPi_offd_J = hypre_CSRMatrixJ(GPi_offd);
+         double *GPi_offd_data = hypre_CSRMatrixData(GPi_offd);
+
+         int *G_cmap = hypre_ParCSRMatrixColMapOffd(G);
+         int *GPi_cmap = hypre_ParCSRMatrixColMapOffd(GPi);
+
+         if (G_offd_ncols)
+            for (i = 0; i < G_offd_nrows+1; i++)
+               GPi_offd_I[i] = dim * G_offd_I[i];
+
+         for (i = 0; i < G_offd_nnz; i++)
+            for (d = 0; d < dim; d++)
+               GPi_offd_J[dim*i+d] = dim*G_offd_J[i]+d;
+
+         for (i = 0; i < G_offd_nrows; i++)
+            for (j = G_offd_I[i]; j < G_offd_I[i+1]; j++)
+            {
+               *GPi_offd_data++ = G_offd_data[j];
+               *GPi_offd_data++ = 0.5 * Gx_data[i];
+               *GPi_offd_data++ = 0.5 * Gy_data[i];
+               if (dim == 4)
+                  *GPi_offd_data++ = 0.5 * Gz_data[i];
+            }
+
+         for (i = 0; i < G_offd_ncols; i++)
+            for (d = 0; d < dim; d++)
+               GPi_cmap[dim*i+d] = dim*G_cmap[i]+d;
+      }
+
+   }
+
+   if (input_info == 1)
+   {
+      hypre_ParVectorDestroy(Gx);
+      hypre_ParVectorDestroy(Gy);
+      if (dim == 4)
+         hypre_ParVectorDestroy(Gz);
+   }
+
+   *GPi_ptr = GPi;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AMSSetup
  *
  * Construct the AMS solver components.
@@ -1425,7 +1611,19 @@ int hypre_AMSSetup(void *solver,
       hypre_ParCSRComputeL1Norms(A, ams_data -> A_relax_type,
                                  &ams_data -> A_l1_norms);
 
-   if (ams_data -> cycle_type > 10)
+   if (ams_data -> cycle_type == 20)
+      /* Construct the combined interpolation matrix [G,Pi] */
+      hypre_AMSComputeGPi(ams_data -> A,
+                          ams_data -> G,
+                          ams_data -> x,
+                          ams_data -> y,
+                          ams_data -> z,
+                          ams_data -> Gx,
+                          ams_data -> Gy,
+                          ams_data -> Gz,
+                          ams_data -> dim,
+                          &ams_data -> Pi);
+   else if (ams_data -> cycle_type > 10)
       /* Construct Pi{x,y,z} instead of Pi = [Pix,Piy,Piz] */
       hypre_AMSComputePixyz(ams_data -> A,
                             ams_data -> G,
@@ -1453,7 +1651,7 @@ int hypre_AMSSetup(void *solver,
                          &ams_data -> Pi);
 
    /* Create the AMG solver on the range of G^T */
-   if (!ams_data -> beta_is_zero)
+   if (!ams_data -> beta_is_zero && ams_data -> cycle_type != 20)
    {
       HYPRE_BoomerAMGCreate(&ams_data -> B_G);
       HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_G, ams_data -> B_G_coarsen_type);
@@ -1466,6 +1664,9 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_G, ams_data -> B_G_theta);
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_G, ams_data -> B_G_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_G, ams_data -> B_G_Pmax);
+
+      if (ams_data -> cycle_type == 0)
+         HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_G, 2);
 
       /* don't use exact solve on the coarsest level (matrix may be singular) */
       HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_G,
@@ -1498,7 +1699,7 @@ int hypre_AMSSetup(void *solver,
                            0, 0);
    }
 
-   if (ams_data -> cycle_type > 10)
+   if (ams_data -> cycle_type > 10 && ams_data -> cycle_type != 20)
    /* Create the AMG solvers on the range of Pi{x,y,z}^T */
    {
       HYPRE_BoomerAMGCreate(&ams_data -> B_Pix);
@@ -1536,6 +1737,13 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Piz, ams_data -> B_Pi_theta);
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_Piz, ams_data -> B_Pi_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Piz, ams_data -> B_Pi_Pmax);
+
+      if (ams_data -> cycle_type == 0)
+      {
+         HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Pix, 2);
+         HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Piy, 2);
+         HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Piz, 2);
+      }
 
       /* Construct the coarse space matrices by RAP */
       if (!hypre_ParCSRMatrixCommPkg(ams_data -> Pix))
@@ -1592,6 +1800,9 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_Pi, ams_data -> B_Pi_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Pi, ams_data -> B_Pi_Pmax);
 
+      if (ams_data -> cycle_type == 0)
+         HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Pi, 2);
+
       /* don't use exact solve on the coarsest level (matrix may be singular) */
       HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pi,
                                        ams_data -> B_Pi_relax_type,
@@ -1604,6 +1815,9 @@ int hypre_AMSSetup(void *solver,
          if (!hypre_ParCSRMatrixCommPkg(ams_data -> Pi))
             hypre_MatvecCommPkgCreate(ams_data -> Pi);
 
+         if (!hypre_ParCSRMatrixCommPkg(ams_data -> A))
+            hypre_MatvecCommPkgCreate(ams_data -> A);
+
          hypre_BoomerAMGBuildCoarseOperator(ams_data -> Pi,
                                             ams_data -> A,
                                             ams_data -> Pi,
@@ -1611,7 +1825,10 @@ int hypre_AMSSetup(void *solver,
 
          ams_data -> owns_A_Pi = 1;
 
-         HYPRE_BoomerAMGSetNumFunctions(ams_data -> B_Pi, ams_data -> dim);
+         if (ams_data -> cycle_type != 20)
+            HYPRE_BoomerAMGSetNumFunctions(ams_data -> B_Pi, ams_data -> dim);
+         else
+            HYPRE_BoomerAMGSetNumFunctions(ams_data -> B_Pi, ams_data -> dim + 1);
          /* HYPRE_BoomerAMGSetNodal(ams_data -> B_Pi, 1); */
       }
 
@@ -1715,11 +1932,11 @@ int hypre_AMSSolve(void *solver,
       switch (ams_data -> cycle_type)
       {
          case 0:
-            sprintf(cycle,"%s","0");
+            sprintf(cycle,"%s","010");
             break;
          case 1:
          default:
-            sprintf(cycle,"%s","(01210)");
+            sprintf(cycle,"%s","01210");
             break;
          case 2:
             sprintf(cycle,"%s","(0+1+2)");
@@ -1753,6 +1970,9 @@ int hypre_AMSSolve(void *solver,
             break;
          case 14:
             sprintf(cycle,"%s","01(+3+4+5)10");
+            break;
+         case 20:
+            sprintf(cycle,"%s","020");
             break;
       }
    }
