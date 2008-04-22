@@ -1338,14 +1338,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
       
       }
-      else
+      else /* max_levels = 1 */
       {
 	 S = NULL;
 	 coarse_pnts_global = NULL;
          CF_marker = hypre_CTAlloc(int, local_size );
 	 for (i=0; i < local_size ; i++)
 	    CF_marker[i] = 1;
-         CF_marker_array = hypre_CTAlloc(int*, 1);
+         /* AB removed below - already allocated */
+         /* CF_marker_array = hypre_CTAlloc(int*, 1);*/
 	 CF_marker_array[level] = CF_marker;
 	 coarse_size = fine_size;
       }

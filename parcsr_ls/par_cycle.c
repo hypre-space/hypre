@@ -267,7 +267,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 	}
         relax_type = grid_relax_type[cycle_param];
       }
-      else if (max_levels > 1)
+      else /* AB: 4/08: removed the max_levels > 1 check - should do this when max-levels = 1 also */
       {
         /* If no coarsening occurred, apply a simple smoother once */
         Aux_U = U_array[level];
