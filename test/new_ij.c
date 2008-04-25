@@ -177,6 +177,7 @@ main( int   argc,
    double   outer_wt;
    double   outer_wt_level;
    double   tol = 1.e-8, pc_tol = 0.;
+   double   atol = 0.0;
    double   max_row_sum = 1.;
    int      amg_max_iter = 20;
    /* for CGC BM Aug 25, 2006 */
@@ -213,6 +214,9 @@ main( int   argc,
    int      post_interp_type  = 0; /* default value */
 
    int      print_system = 0;
+
+   int rel_change = 0;
+   
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -730,6 +734,11 @@ main( int   argc,
          arg_index++;
          tol  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-atol") == 0 )
+      {
+         arg_index++;
+         atol  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-mxrs") == 0 )
       {
          arg_index++;
@@ -864,6 +873,11 @@ main( int   argc,
       {
          arg_index++;
          nodal  = atoi(argv[arg_index++]);
+      }
+       else if ( strcmp(argv[arg_index], "-rel_change") == 0 )
+      {
+         arg_index++;
+         rel_change = 1;
       }
       else if ( strcmp(argv[arg_index], "-nodal_diag") == 0 )
       {
@@ -1060,6 +1074,7 @@ main( int   argc,
       printf("  -k   <val>             : dimension Krylov space for GMRES\n");
       printf("  -mxl  <val>            : maximum number of levels (AMG, ParaSAILS)\n");
       printf("  -tol  <val>            : set solver convergence tolerance = val\n");
+      printf("  -atol  <val>           : set solver absolute convergence tolerance = val\n");
       printf("  -agg_nl  <val>         : set number of aggressive coarsening levels (default:0)\n");
       printf("  -np  <val>             : set number of paths of length 2 for aggr. coarsening\n");
       printf("\n");
@@ -2156,7 +2171,7 @@ main( int   argc,
       HYPRE_PCGSetMaxIter(pcg_solver, 1000);
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
-      HYPRE_PCGSetRelChange(pcg_solver, 0);
+      HYPRE_PCGSetRelChange(pcg_solver, rel_change);
       HYPRE_PCGSetPrintLevel(pcg_solver, ioutdat);
  
       if (solver_id == 1)
@@ -2461,9 +2476,11 @@ main( int   argc,
       HYPRE_GMRESSetKDim(pcg_solver, k_dim);
       HYPRE_GMRESSetMaxIter(pcg_solver, 1000);
       HYPRE_GMRESSetTol(pcg_solver, tol);
+      HYPRE_GMRESSetAbsoluteTol(pcg_solver, atol);
       HYPRE_GMRESSetLogging(pcg_solver, 1);
       HYPRE_GMRESSetPrintLevel(pcg_solver, ioutdat);
- 
+      HYPRE_GMRESSetRelChange(pcg_solver, rel_change);
+
       if (solver_id == 3)
       {
          /* use BoomerAMG as preconditioner */
