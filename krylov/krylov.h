@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -69,6 +69,7 @@ extern "C" {
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -241,7 +242,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions );
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -265,6 +266,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions );
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -420,7 +422,7 @@ hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions );
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -444,6 +446,7 @@ hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions );
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -533,6 +536,7 @@ typedef struct
    int      converged;
    double   tol;
    double   cf_tol;
+   double   a_tol;
    double   rel_residual_norm;
 
    void  *A;
@@ -608,7 +612,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions );
 #endif
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the HYPRE team. UCRL-CODE-222953.
  * All rights reserved.
@@ -632,6 +636,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions );
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -860,6 +865,8 @@ int hypre_GMRESSetKDim ( void *gmres_vdata , int k_dim );
 int hypre_GMRESGetKDim ( void *gmres_vdata , int *k_dim );
 int hypre_GMRESSetTol ( void *gmres_vdata , double tol );
 int hypre_GMRESGetTol ( void *gmres_vdata , double *tol );
+int hypre_GMRESSetAbsoluteTol ( void *gmres_vdata , double a_tol );
+int hypre_GMRESGetAbsoluteTol ( void *gmres_vdata , double *a_tol );
 int hypre_GMRESSetConvergenceFactorTol ( void *gmres_vdata , double cf_tol );
 int hypre_GMRESGetConvergenceFactorTol ( void *gmres_vdata , double *cf_tol );
 int hypre_GMRESSetMinIter ( void *gmres_vdata , int min_iter );
@@ -918,6 +925,8 @@ int HYPRE_GMRESSetKDim ( HYPRE_Solver solver , int k_dim );
 int HYPRE_GMRESGetKDim ( HYPRE_Solver solver , int *k_dim );
 int HYPRE_GMRESSetTol ( HYPRE_Solver solver , double tol );
 int HYPRE_GMRESGetTol ( HYPRE_Solver solver , double *tol );
+int HYPRE_GMRESSetAbsoluteTol ( HYPRE_Solver solver , double a_tol );
+int HYPRE_GMRESGetAbsoluteTol ( HYPRE_Solver solver , double *a_tol );
 int HYPRE_GMRESSetConvergenceFactorTol ( HYPRE_Solver solver , double cf_tol );
 int HYPRE_GMRESGetConvergenceFactorTol ( HYPRE_Solver solver , double *cf_tol );
 int HYPRE_GMRESSetMinIter ( HYPRE_Solver solver , int min_iter );

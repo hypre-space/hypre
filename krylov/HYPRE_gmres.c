@@ -114,6 +114,23 @@ HYPRE_GMRESGetTol( HYPRE_Solver solver,
 {
    return( hypre_GMRESGetTol( (void *) solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESSeAtTol, HYPRE_GMRESGetATol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GMRESSetAbsoluteTol( HYPRE_Solver solver,
+                         double             a_tol    )
+{
+   return( hypre_GMRESSetAbsoluteTol( (void *) solver, a_tol ) );
+}
+
+int
+HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver,
+                         double           * a_tol    )
+{
+   return( hypre_GMRESGetAbsoluteTol( (void *) solver, a_tol ) );
+}
 
 /*--------------------------------------------------------------------------
  * HYPRE_GMRESSetConvergenceFactorTol, HYPRE_GMRESGetConvergenceFactorTol
@@ -170,7 +187,7 @@ HYPRE_GMRESGetMaxIter( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GMRESSetStopCrit, HYPRE_GMRESGetStopCrit
+ * HYPRE_GMRESSetStopCrit, HYPRE_GMRESGetStopCrit - OBSOLETE
  *--------------------------------------------------------------------------*/
 
 int

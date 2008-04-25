@@ -2038,6 +2038,18 @@ int HYPRE_ParCSRGMRESSetKDim(HYPRE_Solver solver,
 int HYPRE_ParCSRGMRESSetTol(HYPRE_Solver solver,
                             double       tol);
 
+/**
+ * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r_i\| \leq$ max(relative$\_$tolerance*$\|r_0\|$, absolute$\_$tolerance).)
+ *
+ **/
+
+int HYPRE_ParCSRGMRESSetAbsoluteTol(HYPRE_Solver solver,
+                            double       a_tol);
+
 /*
  * RE-VISIT
  **/
@@ -2051,7 +2063,7 @@ int HYPRE_ParCSRGMRESSetMaxIter(HYPRE_Solver solver,
                                 int          max_iter);
 
 /*
- * RE-VISIT
+ * Obsolete
  **/
 int HYPRE_ParCSRGMRESSetStopCrit(HYPRE_Solver solver,
                                  int          stop_crit);

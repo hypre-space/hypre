@@ -113,6 +113,7 @@ typedef struct
    int      converged;
    double   tol;
    double   cf_tol;
+   double   a_tol;
    double   rel_residual_norm;
 
    void  *A;

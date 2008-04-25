@@ -270,11 +270,23 @@ HYPRE_GMRESSolve(HYPRE_Solver solver,
 
 
 /**
- * (Optional) Set the convergence tolerance.
+ * (Optional) Set the relative convergence tolerance.
  **/
 int
 HYPRE_GMRESSetTol(HYPRE_Solver solver,
                   double       tol);
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r_i\| \leq$ max(relative$\_$tolerance*$\|r_0\|$, absolute$\_$tolerance).)
+ *
+ **/
+int
+HYPRE_GMRESSetAbsoluteTol(HYPRE_Solver solver,
+                  double       a_tol);
 
 /*
  * RE-VISIT
@@ -364,7 +376,7 @@ int HYPRE_GMRESGetTol(HYPRE_Solver solver, double *tol);
 int HYPRE_GMRESGetConvergenceFactorTol(HYPRE_Solver solver, double *cf_tol);
 
 /*
- * RE-VISIT
+ * OBSOLETE 
  **/
 int HYPRE_GMRESGetStopCrit(HYPRE_Solver solver, int *stop_crit);
 

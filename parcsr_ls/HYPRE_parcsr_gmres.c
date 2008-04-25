@@ -123,6 +123,16 @@ HYPRE_ParCSRGMRESSetTol( HYPRE_Solver solver,
 {
    return( HYPRE_GMRESSetTol( solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetAbsoluteTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRGMRESSetAbsoluteTol( HYPRE_Solver solver,
+                         double             a_tol    )
+{
+   return( HYPRE_GMRESSetAbsoluteTol( solver, a_tol ) );
+}
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESSetMinIter
@@ -147,7 +157,7 @@ HYPRE_ParCSRGMRESSetMaxIter( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRGMRESSetStopCrit
+ * HYPRE_ParCSRGMRESSetStopCrit - OBSOLETE
  *--------------------------------------------------------------------------*/
 
 int
