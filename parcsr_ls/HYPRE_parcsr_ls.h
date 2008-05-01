@@ -1907,10 +1907,24 @@ int HYPRE_ParCSRPCGSolve(HYPRE_Solver       solver,
                          HYPRE_ParVector    x);
 
 /**
- * (Optional) Set the convergence tolerance.
+ * (Optional) Set the relative convergence tolerance.
  **/
 int HYPRE_ParCSRPCGSetTol(HYPRE_Solver solver,
                           double       tol);
+
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default is
+ * 0). If one desires the convergence test to check the absolute
+ * convergence tolerance {\it only}, then set the relative convergence
+ * tolerance to 0.0.  (The default convergence test is $ <C*r,r> \leq$
+ * max(relative$\_$tolerance$^{2} \ast <C*b, b>$, absolute$\_$tolerance$^2$).)
+
+
+ **/
+int HYPRE_ParCSRPCGSetAbsoluteTol(HYPRE_Solver solver,
+                          double       tol);
+
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -2043,7 +2057,7 @@ int HYPRE_ParCSRGMRESSetTol(HYPRE_Solver solver,
  * If one desires
  * the convergence test to check the absolute convergence tolerance {\it only}, then
  * set the relative convergence tolerance to 0.0.  (The convergence test is 
- * $\|r_i\| \leq$ max(relative$\_$tolerance*$\|r_0\|$, absolute$\_$tolerance).)
+ * $\|r\| \leq$ max(relative$\_$tolerance $\ast \|b\|$, absolute$\_$tolerance).)
  *
  **/
 
@@ -2148,6 +2162,21 @@ int HYPRE_ParCSRBiCGSTABSolve(HYPRE_Solver       solver,
 int HYPRE_ParCSRBiCGSTABSetTol(HYPRE_Solver solver,
                                double       tol);
 
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r\| \leq$ max(relative$\_$tolerance $\ast \|b\|$, absolute$\_$tolerance).)
+ *
+ **/
+
+int HYPRE_ParCSRBiCGSTABSetAbsoluteTol(HYPRE_Solver solver,
+                                       double       a_tol);
+
+
+
 /**
  * (Optional) Set the minimal number of iterations (default: 0).
  **/
@@ -2163,7 +2192,9 @@ int HYPRE_ParCSRBiCGSTABSetMaxIter(HYPRE_Solver solver,
 /**
  * (Optional) If stop$\_$crit = 1, the absolute residual norm is used
  *  for the stopping criterion. The default is the relative residual
- *  norm (stop$\_$crit = 0).
+ *  norm (stop$\_$crit = 0). Note: This function will be phased out in favor
+ *  of using HYPRE$\_$ParCSRBiCGSTABSetAbsoluteTol if an absolute stopping
+ *  criteria is desired.
  **/
 int HYPRE_ParCSRBiCGSTABSetStopCrit(HYPRE_Solver solver,
                                     int          stop_crit);

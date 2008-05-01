@@ -111,7 +111,16 @@ HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver,
 {
    return( HYPRE_BiCGSTABSetTol( solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRBiCGSTABSetAbsoluteTol
+ *--------------------------------------------------------------------------*/
 
+int
+HYPRE_ParCSRBiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
+                         double             a_tol    )
+{
+   return( HYPRE_BiCGSTABSetAbsoluteTol( solver, a_tol ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABSetMinIter
  *--------------------------------------------------------------------------*/

@@ -116,6 +116,16 @@ HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver,
 {
    return( HYPRE_PCGSetTol( solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetAbsoluteTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRPCGSetAbsoluteTol( HYPRE_Solver solver,
+                               double             a_tol    )
+{
+   return( HYPRE_PCGSetAbsoluteTol( solver, a_tol ) );
+}
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRPCGSetMaxIter
