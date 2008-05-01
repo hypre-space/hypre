@@ -114,10 +114,21 @@ int HYPRE_PCGSolve(HYPRE_Solver solver,
                    HYPRE_Vector x);
 
 /**
- * (Optional) Set the convergence tolerance.
+ * (Optional) Set the relative convergence tolerance.
  **/
 int HYPRE_PCGSetTol(HYPRE_Solver solver,
                     double       tol);
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default is
+ * 0). If one desires the convergence test to check the absolute
+ * convergence tolerance {\it only}, then set the relative convergence
+ * tolerance to 0.0.  (The default convergence test is $ <C*r,r> \leq$
+ * max(relative$\_$tolerance$^{2} \ast <C*b, b>$, absolute$\_$tolerance$^2$).)
+ **/
+int HYPRE_PCGSetAbsoluteTol(HYPRE_Solver solver,
+                            double       a_tol);
+
 
 /*
  * RE-VISIT
@@ -281,7 +292,7 @@ HYPRE_GMRESSetTol(HYPRE_Solver solver,
  * If one desires
  * the convergence test to check the absolute convergence tolerance {\it only}, then
  * set the relative convergence tolerance to 0.0.  (The convergence test is 
- * $\|r_i\| \leq$ max(relative$\_$tolerance*$\|r_0\|$, absolute$\_$tolerance).)
+ * $\|r\| \leq$ max(relative$\_$tolerance$\ast \|b\|$, absolute$\_$tolerance).)
  *
  **/
 int
@@ -370,6 +381,10 @@ HYPRE_GMRESGetResidual(HYPRE_Solver   solver,
  **/
 int HYPRE_GMRESGetTol(HYPRE_Solver solver, double *tol);
 
+/**
+ **/
+int HYPRE_GMRESGetAbsoluteTol(HYPRE_Solver solver, double *tol);
+
 /*
  * RE-VISIT
  **/
@@ -453,6 +468,19 @@ HYPRE_BiCGSTABSolve(HYPRE_Solver solver,
 int
 HYPRE_BiCGSTABSetTol(HYPRE_Solver solver,
                      double       tol);
+
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r\| \leq$ max(relative$\_$tolerance $\ast \|b\|$, absolute$\_$tolerance).)
+ *
+ **/
+int
+HYPRE_BiCGSTABSetAbsoluteTol(HYPRE_Solver solver,
+                             double       a_tol);
 
 /*
  * RE-VISIT

@@ -167,6 +167,8 @@ typedef struct
    double   tol;
    double   cf_tol;
    double   rel_residual_norm;
+   double   a_tol;
+   
 
    void  *A;
    void  *r;
@@ -733,6 +735,7 @@ typedef struct
    double   tol;
    double   atolf;
    double   cf_tol;
+   double   a_tol;
    int      max_iter;
    int      two_norm;
    int      rel_change;
@@ -825,6 +828,7 @@ int hypre_BiCGSTABDestroy ( void *bicgstab_vdata );
 int hypre_BiCGSTABSetup ( void *bicgstab_vdata , void *A , void *b , void *x );
 int hypre_BiCGSTABSolve ( void *bicgstab_vdata , void *A , void *b , void *x );
 int hypre_BiCGSTABSetTol ( void *bicgstab_vdata , double tol );
+int hypre_BiCGSTABSetAbsoluteTol ( void *bicgstab_vdata , double a_tol );
 int hypre_BiCGSTABSetConvergenceFactorTol ( void *bicgstab_vdata , double cf_tol );
 int hypre_BiCGSTABSetMinIter ( void *bicgstab_vdata , int min_iter );
 int hypre_BiCGSTABSetMaxIter ( void *bicgstab_vdata , int max_iter );
@@ -892,6 +896,7 @@ int HYPRE_BiCGSTABDestroy ( HYPRE_Solver solver );
 int HYPRE_BiCGSTABSetup ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_BiCGSTABSolve ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_BiCGSTABSetTol ( HYPRE_Solver solver , double tol );
+int HYPRE_BiCGSTABSetAbsoluteTol ( HYPRE_Solver solver , double a_tol );
 int HYPRE_BiCGSTABSetConvergenceFactorTol ( HYPRE_Solver solver , double cf_tol );
 int HYPRE_BiCGSTABSetMinIter ( HYPRE_Solver solver , int min_iter );
 int HYPRE_BiCGSTABSetMaxIter ( HYPRE_Solver solver , int max_iter );
@@ -953,6 +958,8 @@ int HYPRE_PCGSetup ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYP
 int HYPRE_PCGSolve ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_PCGSetTol ( HYPRE_Solver solver , double tol );
 int HYPRE_PCGGetTol ( HYPRE_Solver solver , double *tol );
+int HYPRE_PCGSetAbsoluteTol ( HYPRE_Solver solver , double a_tol );
+int HYPRE_PCGGetAbsoluteTol ( HYPRE_Solver solver , double *a_tol );
 int HYPRE_PCGSetAbsoluteTolFactor ( HYPRE_Solver solver , double abstolf );
 int HYPRE_PCGGetAbsoluteTolFactor ( HYPRE_Solver solver , double *abstolf );
 int HYPRE_PCGSetConvergenceFactorTol ( HYPRE_Solver solver , double cf_tol );
@@ -987,6 +994,8 @@ int hypre_PCGSetup ( void *pcg_vdata , void *A , void *b , void *x );
 int hypre_PCGSolve ( void *pcg_vdata , void *A , void *b , void *x );
 int hypre_PCGSetTol ( void *pcg_vdata , double tol );
 int hypre_PCGGetTol ( void *pcg_vdata , double *tol );
+int hypre_PCGSetAbsoluteTol ( void *pcg_vdata , double a_tol );
+int hypre_PCGGetAbsoluteTol ( void *pcg_vdata , double *a_tol );
 int hypre_PCGSetAbsoluteTolFactor ( void *pcg_vdata , double atolf );
 int hypre_PCGGetAbsoluteTolFactor ( void *pcg_vdata , double *atolf );
 int hypre_PCGSetConvergenceFactorTol ( void *pcg_vdata , double cf_tol );

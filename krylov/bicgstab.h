@@ -121,6 +121,8 @@ typedef struct
    double   tol;
    double   cf_tol;
    double   rel_residual_norm;
+   double   a_tol;
+   
 
    void  *A;
    void  *r;

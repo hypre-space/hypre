@@ -109,6 +109,23 @@ HYPRE_PCGGetTol( HYPRE_Solver solver,
 {
    return( hypre_PCGGetTol( (void *) solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetAbsoluteTol, HYPRE_PCGGetAbsoluteTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetAbsoluteTol( HYPRE_Solver solver,
+                 double             a_tol    )
+{
+   return( hypre_PCGSetAbsoluteTol( (void *) solver, a_tol ) );
+}
+
+int
+HYPRE_PCGGetAbsoluteTol( HYPRE_Solver solver,
+                 double           * a_tol    )
+{
+   return( hypre_PCGGetAbsoluteTol( (void *) solver, a_tol ) );
+}
 
 /*--------------------------------------------------------------------------
  * HYPRE_PCGSetAbsoluteTolFactor, HYPRE_PCGGetAbsoluteTolFactor

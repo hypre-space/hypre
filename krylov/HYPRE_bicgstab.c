@@ -92,7 +92,16 @@ HYPRE_BiCGSTABSetTol( HYPRE_Solver solver,
 {
    return( hypre_BiCGSTABSetTol( (void *) solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_BiCGSTABSetAbsoluteTol
+ *--------------------------------------------------------------------------*/
 
+int
+HYPRE_BiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
+                         double             a_tol    )
+{
+   return( hypre_BiCGSTABSetAbsoluteTol( (void *) solver, a_tol ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_BiCGSTABSetConvergenceFactorTol
  *--------------------------------------------------------------------------*/

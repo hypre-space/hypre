@@ -120,6 +120,7 @@ typedef struct
    double   tol;
    double   atolf;
    double   cf_tol;
+   double   a_tol;
    int      max_iter;
    int      two_norm;
    int      rel_change;
