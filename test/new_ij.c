@@ -2173,7 +2173,8 @@ main( int   argc,
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
       HYPRE_PCGSetRelChange(pcg_solver, rel_change);
       HYPRE_PCGSetPrintLevel(pcg_solver, ioutdat);
- 
+      HYPRE_PCGSetAbsoluteTol(pcg_solver, atol);
+
       if (solver_id == 1)
       {
          /* use BoomerAMG as preconditioner */
@@ -2773,6 +2774,7 @@ main( int   argc,
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
       HYPRE_BiCGSTABSetTol(pcg_solver, tol);
+      HYPRE_BiCGSTABSetAbsoluteTol(pcg_solver, atol);
       HYPRE_BiCGSTABSetLogging(pcg_solver, ioutdat);
       HYPRE_BiCGSTABSetPrintLevel(pcg_solver, ioutdat);
  
