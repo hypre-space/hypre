@@ -1058,6 +1058,177 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * (outside > 0): clear values possibly outside of the grid extents
+ * (outside = 0): clear values only inside the grid extents
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructMatrixClearValues( hypre_StructMatrix *matrix,
+                               hypre_Index         grid_index,
+                               int                 num_stencil_indices,
+                               int                *stencil_indices,
+                               int                 boxnum,
+                               int                 outside )
+{
+   hypre_BoxArray      *grid_boxes;
+   hypre_Box           *grid_box;
+
+   double              *matp;
+
+   int                  i, s, istart, istop;
+ 
+   /*-----------------------------------------------------------------------
+    * Initialize some things
+    *-----------------------------------------------------------------------*/
+
+   if (outside > 0)
+   {
+      grid_boxes = hypre_StructMatrixDataSpace(matrix);
+   }
+   else
+   {
+      grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(matrix));
+   }
+
+   if (boxnum < 0)
+   {
+      istart = 0;
+      istop  = hypre_BoxArraySize(grid_boxes);
+   }
+   else
+   {
+      istart = boxnum;
+      istop  = istart + 1;
+   }
+
+   /*-----------------------------------------------------------------------
+    * Clear the matrix coefficients
+    *-----------------------------------------------------------------------*/
+
+   for (i = istart; i < istop; i++)
+   {
+      grid_box = hypre_BoxArrayBox(grid_boxes, i);
+
+      if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(grid_box)) &&
+          (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(grid_box)) &&
+          (hypre_IndexY(grid_index) >= hypre_BoxIMinY(grid_box)) &&
+          (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(grid_box)) &&
+          (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(grid_box)) &&
+          (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(grid_box))   )
+      {
+         for (s = 0; s < num_stencil_indices; s++)
+         {
+            matp = hypre_StructMatrixBoxDataValue(matrix, i,
+                                                  stencil_indices[s],
+                                                  grid_index);
+            *matp = 0.0;
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * (outside > 0): clear values possibly outside of the grid extents
+ * (outside = 0): clear values only inside the grid extents
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
+                                hypre_Box          *clear_box,
+                                int                 num_stencil_indices,
+                                int                *stencil_indices,
+                                int                 boxnum,
+                                int                 outside )
+{
+   hypre_BoxArray      *grid_boxes;
+   hypre_Box           *grid_box;
+   hypre_Box           *int_box;
+                   
+   hypre_BoxArray      *data_space;
+   hypre_Box           *data_box;
+   hypre_IndexRef       data_start;
+   hypre_Index          data_stride;
+   int                  datai;
+   double              *datap;
+                   
+   hypre_Index          loop_size;
+                   
+   int                  i, s, istart, istop;
+   int                  loopi, loopj, loopk;
+
+   /*-----------------------------------------------------------------------
+    * Initialize some things
+    *-----------------------------------------------------------------------*/
+
+   if (outside > 0)
+   {
+      grid_boxes = hypre_StructMatrixDataSpace(matrix);
+   }
+   else
+   {
+      grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(matrix));
+   }
+   data_space = hypre_StructMatrixDataSpace(matrix);
+
+   if (boxnum < 0)
+   {
+      istart = 0;
+      istop  = hypre_BoxArraySize(grid_boxes);
+   }
+   else
+   {
+      istart = boxnum;
+      istop  = istart + 1;
+   }
+
+   /*-----------------------------------------------------------------------
+    * Clear the matrix coefficients
+    *-----------------------------------------------------------------------*/
+
+   hypre_SetIndex(data_stride, 1, 1, 1);
+
+   int_box = hypre_BoxCreate();
+
+   for (i = istart; i < istop; i++)
+   {
+      grid_box = hypre_BoxArrayBox(grid_boxes, i);
+      data_box = hypre_BoxArrayBox(data_space, i);
+
+      hypre_IntersectBoxes(clear_box, grid_box, int_box);
+
+      /* if there was an intersection */
+      if (int_box)
+      {
+         data_start = hypre_BoxIMin(int_box);
+
+         for (s = 0; s < num_stencil_indices; s++)
+         {
+            datap = hypre_StructMatrixBoxData(matrix, i,
+                                              stencil_indices[s]);
+
+            hypre_BoxGetSize(int_box, loop_size);
+
+            hypre_BoxLoop1Begin(loop_size,
+                                data_box,data_start,data_stride,datai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
+            hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+            {
+               datap[datai] = 0.0;
+            }
+            hypre_BoxLoop1End(datai);
+         }
+      }
+   }
+
+   hypre_BoxDestroy(int_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 int 

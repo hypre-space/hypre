@@ -290,6 +290,8 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
    int                  *smap    = hypre_SStructPMatrixSMap(pmatrix, var);
    int                  *vars    = hypre_SStructStencilVars(stencil);
    hypre_StructMatrix   *smatrix;
+   hypre_BoxArray       *grid_boxes;
+   hypre_Box            *box;
    int                  *sentries;
    int                   i;
 
@@ -305,13 +307,12 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
    hypre_StructMatrixSetValues(smatrix, index, nentries, sentries, values,
                                action, -1, 0);
 
-   /* set values outside the grid in ghost zones (for AddTo and Get) */
+   /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
    {
+      /* AddTo/Get */
       hypre_SStructPGrid  *pgrid = hypre_SStructPMatrixPGrid(pmatrix);
       hypre_Index          varoffset;
-      hypre_BoxArray      *grid_boxes;
-      hypre_Box           *box;
       int                  done = 0;
 
       grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(smatrix));
@@ -358,6 +359,25 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
          }
       }
    }
+   else
+   {
+      /* Set */
+      grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(smatrix));
+
+      hypre_ForBoxI(i, grid_boxes)
+      {
+         box = hypre_BoxArrayBox(grid_boxes, i);
+         if ((hypre_IndexX(index) < hypre_BoxIMinX(box)) ||
+             (hypre_IndexX(index) > hypre_BoxIMaxX(box)) ||
+             (hypre_IndexY(index) < hypre_BoxIMinY(box)) ||
+             (hypre_IndexY(index) > hypre_BoxIMaxY(box)) ||
+             (hypre_IndexZ(index) < hypre_BoxIMinZ(box)) ||
+             (hypre_IndexZ(index) > hypre_BoxIMaxZ(box))   )
+         {
+            hypre_StructMatrixClearValues(smatrix, index, nentries, sentries, i, 1);
+         }
+      }
+   }
 
    return hypre_error_flag;
 }
@@ -383,10 +403,11 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
    int                  *smap    = hypre_SStructPMatrixSMap(pmatrix, var);
    int                  *vars    = hypre_SStructStencilVars(stencil);
    hypre_StructMatrix   *smatrix;
+   hypre_BoxArray       *grid_boxes;
    hypre_Box            *box;
    hypre_Box            *value_box;
    int                  *sentries;
-   int                   i;
+   int                   i, j;
 
    smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entries[0]]);
 
@@ -405,15 +426,14 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
    hypre_StructMatrixSetBoxValues(smatrix, box, value_box, nentries, sentries,
                                   values, action, -1, 0);
 
-   /* set values outside the grid in ghost zones (for AddTo and Get) */
+   /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
    {
+      /* AddTo/Get */
       hypre_SStructPGrid  *pgrid = hypre_SStructPMatrixPGrid(pmatrix);
       hypre_Index          varoffset;
-      hypre_BoxArray      *grid_boxes;
       hypre_BoxArray      *left_boxes, *done_boxes, *temp_boxes;
       hypre_Box           *left_box, *done_box, *int_box;
-      int                  j;
 
       hypre_SStructVariableGetOffset(hypre_SStructPGridVarType(pgrid, var),
                                      hypre_SStructPGridNDim(pgrid), varoffset);
@@ -457,6 +477,30 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
       hypre_BoxArrayDestroy(left_boxes);
       hypre_BoxArrayDestroy(done_boxes);
       hypre_BoxArrayDestroy(temp_boxes);
+   }
+   else
+   {
+      /* Set */
+      hypre_BoxArray  *diff_boxes;
+      hypre_Box       *grid_box, *diff_box;
+
+      grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(smatrix));
+      diff_boxes = hypre_BoxArrayCreate(0);
+
+      hypre_ForBoxI(i, grid_boxes)
+      {
+         grid_box = hypre_BoxArrayBox(grid_boxes, i);
+         hypre_BoxArraySetSize(diff_boxes, 0);
+         hypre_SubtractBoxes(box, grid_box, diff_boxes);
+
+         hypre_ForBoxI(j, diff_boxes)
+         {
+            diff_box = hypre_BoxArrayBox(diff_boxes, j);
+            hypre_StructMatrixClearBoxValues(smatrix, diff_box, nentries, sentries,
+                                             i, 1);
+         }
+      }
+      hypre_BoxArrayDestroy(diff_boxes);
    }
 
    hypre_BoxDestroy(box);

@@ -2349,6 +2349,8 @@ int hypre_StructMatrixInitialize ( hypre_StructMatrix *matrix );
 int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , int num_stencil_indices , int *stencil_indices , double *values , int action , int boxnum , int outside );
 int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix , hypre_Box *set_box , hypre_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values , int action , int boxnum , int outside );
 int hypre_StructMatrixSetConstantValues ( hypre_StructMatrix *matrix , int num_stencil_indices , int *stencil_indices , double *values , int action );
+int hypre_StructMatrixClearValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , int num_stencil_indices , int *stencil_indices , int boxnum , int outside );
+int hypre_StructMatrixClearBoxValues ( hypre_StructMatrix *matrix , hypre_Box *clear_box , int num_stencil_indices , int *stencil_indices , int boxnum , int outside );
 int hypre_StructMatrixAssemble ( hypre_StructMatrix *matrix );
 int hypre_StructMatrixSetNumGhost ( hypre_StructMatrix *matrix , int *num_ghost );
 int hypre_StructMatrixSetConstantCoefficient ( hypre_StructMatrix *matrix , int constant_coefficient );
@@ -2393,6 +2395,8 @@ int hypre_StructVectorInitializeData ( hypre_StructVector *vector , double *data
 int hypre_StructVectorInitialize ( hypre_StructVector *vector );
 int hypre_StructVectorSetValues ( hypre_StructVector *vector , hypre_Index grid_index , double *values , int action , int boxnum , int outside );
 int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector , hypre_Box *set_box , hypre_Box *value_box , double *values , int action , int boxnum , int outside );
+int hypre_StructVectorClearValues ( hypre_StructVector *vector , hypre_Index grid_index , int boxnum , int outside );
+int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector , hypre_Box *clear_box , int boxnum , int outside );
 int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , int *num_ghost );
 int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );

@@ -427,6 +427,156 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * (outside > 0): clear values possibly outside of the grid extents
+ * (outside = 0): clear values only inside the grid extents
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructVectorClearValues( hypre_StructVector *vector,
+                               hypre_Index         grid_index,
+                               int                 boxnum,
+                               int                 outside    )
+{
+   hypre_BoxArray     *grid_boxes;
+   hypre_Box          *grid_box;
+
+   double             *vecp;
+
+   int                 i, istart, istop;
+
+   if (outside > 0)
+   {
+      grid_boxes = hypre_StructVectorDataSpace(vector);
+   }
+   else
+   {
+      grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   }
+
+   if (boxnum < 0)
+   {
+      istart = 0;
+      istop  = hypre_BoxArraySize(grid_boxes);
+   }
+   else
+   {
+      istart = boxnum;
+      istop  = istart + 1;
+   }
+
+   for (i = istart; i < istop; i++)
+   {
+      grid_box = hypre_BoxArrayBox(grid_boxes, i);
+
+      if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(grid_box)) &&
+          (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(grid_box)) &&
+          (hypre_IndexY(grid_index) >= hypre_BoxIMinY(grid_box)) &&
+          (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(grid_box)) &&
+          (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(grid_box)) &&
+          (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(grid_box))   )
+      {
+         vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
+         *vecp = 0.0;
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * (outside > 0): clear values possibly outside of the grid extents
+ * (outside = 0): clear values only inside the grid extents
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
+                                  hypre_Box          *clear_box,
+                                  int                 boxnum,
+                                  int                 outside )
+{
+   hypre_BoxArray     *grid_boxes;
+   hypre_Box          *grid_box;
+   hypre_Box          *int_box;
+
+   hypre_BoxArray     *data_space;
+   hypre_Box          *data_box;
+   hypre_IndexRef      data_start;
+   hypre_Index         data_stride;
+   int                 datai;
+   double             *datap;
+
+   hypre_Index         loop_size;
+
+   int                 i, istart, istop;
+   int                 loopi, loopj, loopk;
+
+   /*-----------------------------------------------------------------------
+    * Initialize some things
+    *-----------------------------------------------------------------------*/
+
+   if (outside > 0)
+   {
+      grid_boxes = hypre_StructVectorDataSpace(vector);
+   }
+   else
+   {
+      grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   }
+   data_space = hypre_StructVectorDataSpace(vector);
+
+   if (boxnum < 0)
+   {
+      istart = 0;
+      istop  = hypre_BoxArraySize(grid_boxes);
+   }
+   else
+   {
+      istart = boxnum;
+      istop  = istart + 1;
+   }
+
+   /*-----------------------------------------------------------------------
+    * Set the vector coefficients
+    *-----------------------------------------------------------------------*/
+
+   hypre_SetIndex(data_stride, 1, 1, 1);
+ 
+   int_box = hypre_BoxCreate();
+ 
+   for (i = istart; i < istop; i++)
+   {
+      grid_box = hypre_BoxArrayBox(grid_boxes, i);
+      data_box = hypre_BoxArrayBox(data_space, i);
+ 
+      hypre_IntersectBoxes(clear_box, grid_box, int_box);
+
+      /* if there was an intersection */
+      if (int_box)
+      {
+         data_start = hypre_BoxIMin(int_box);
+ 
+         datap = hypre_StructVectorBoxData(vector, i);
+ 
+         hypre_BoxGetSize(int_box, loop_size);
+
+         hypre_BoxLoop1Begin(loop_size,
+                             data_box,data_start,data_stride,datai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
+         hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+         {
+            datap[datai] = 0.0;
+         }
+         hypre_BoxLoop1End(datai);
+      }
+   }
+
+   hypre_BoxDestroy(int_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
  
 int

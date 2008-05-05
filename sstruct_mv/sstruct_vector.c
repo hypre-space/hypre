@@ -179,19 +179,20 @@ hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector,
                                int                   action )
 {
    hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
+   hypre_BoxArray     *grid_boxes;
+   hypre_Box          *box;
+   int                 i;
 
    /* set values inside the grid */
    hypre_StructVectorSetValues(svector, index, value, action, -1, 0);
 
-   /* set values outside the grid in ghost zones (for AddTo and Get) */
+   /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
    {
-      hypre_SStructPGrid  *pgrid = hypre_SStructPVectorPGrid(pvector);
-      hypre_Index          varoffset;
-      hypre_BoxArray      *grid_boxes;
-      hypre_Box           *box;
-      int                  i;
-      int                  done = 0;
+      /* AddTo/Get */
+      hypre_SStructPGrid *pgrid = hypre_SStructPVectorPGrid(pvector);
+      hypre_Index         varoffset;
+      int                 done = 0;
 
       grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(svector));
 
@@ -236,6 +237,25 @@ hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector,
          }
       }
    }
+   else
+   {
+      /* Set */
+      grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(svector));
+
+      hypre_ForBoxI(i, grid_boxes)
+      {
+         box = hypre_BoxArrayBox(grid_boxes, i);
+         if ((hypre_IndexX(index) < hypre_BoxIMinX(box)) ||
+             (hypre_IndexX(index) > hypre_BoxIMaxX(box)) ||
+             (hypre_IndexY(index) < hypre_BoxIMinY(box)) ||
+             (hypre_IndexY(index) > hypre_BoxIMaxY(box)) ||
+             (hypre_IndexZ(index) < hypre_BoxIMinZ(box)) ||
+             (hypre_IndexZ(index) > hypre_BoxIMaxZ(box))   )
+         {
+            hypre_StructVectorClearValues(svector, index, i, 1);
+         }
+      }
+   }
 
    return hypre_error_flag;
 }
@@ -255,8 +275,10 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
                                   int                   action )
 {
    hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
+   hypre_BoxArray     *grid_boxes;
    hypre_Box          *box;
    hypre_Box          *value_box;
+   int                 i, j;
 
    box = hypre_BoxCreate();
    hypre_CopyIndex(ilower, hypre_BoxIMin(box));
@@ -266,15 +288,14 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
    /* set values inside the grid */
    hypre_StructVectorSetBoxValues(svector, box, value_box, values, action, -1, 0);
 
-   /* set values outside the grid in ghost zones (for AddTo and Get) */
+   /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
    {
+      /* AddTo/Get */
       hypre_SStructPGrid  *pgrid = hypre_SStructPVectorPGrid(pvector);
       hypre_Index          varoffset;
-      hypre_BoxArray      *grid_boxes;
       hypre_BoxArray      *left_boxes, *done_boxes, *temp_boxes;
       hypre_Box           *left_box, *done_box, *int_box;
-      int                  i, j;
 
       hypre_SStructVariableGetOffset(hypre_SStructPGridVarType(pgrid, var),
                                      hypre_SStructPGridNDim(pgrid), varoffset);
@@ -317,6 +338,29 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
       hypre_BoxArrayDestroy(left_boxes);
       hypre_BoxArrayDestroy(done_boxes);
       hypre_BoxArrayDestroy(temp_boxes);
+   }
+   else
+   {
+      /* Set */
+      hypre_BoxArray  *diff_boxes;
+      hypre_Box       *grid_box, *diff_box;
+
+      grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(svector));
+      diff_boxes = hypre_BoxArrayCreate(0);
+
+      hypre_ForBoxI(i, grid_boxes)
+      {
+         grid_box = hypre_BoxArrayBox(grid_boxes, i);
+         hypre_BoxArraySetSize(diff_boxes, 0);
+         hypre_SubtractBoxes(box, grid_box, diff_boxes);
+
+         hypre_ForBoxI(j, diff_boxes)
+         {
+            diff_box = hypre_BoxArrayBox(diff_boxes, j);
+            hypre_StructVectorClearBoxValues(svector, diff_box, i, 1);
+         }
+      }
+      hypre_BoxArrayDestroy(diff_boxes);
    }
 
    hypre_BoxDestroy(box);
