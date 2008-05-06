@@ -31,6 +31,20 @@
 # recent release.
 #=============================================================================
 
+
+
+
+
+-Added absolute convergence tolerance stopping criteria to GMRES, CG, and BiCGStab.
+ (See HYPRE_GMRESSetAbsoluteTolerance, HYPRE_PCGSetAbsoluteTolerance,
+  or HYPRE_BiCGSTABSetAbsoluteTolerance in the reference manual for details.)
+
+-Updated error checking for CG and BiCGStab.
+
+-Fixed a bug in AMG when the maximum number of levels is set to 1.
+
+#====================================
+
 Version 2.3.1a released, 2008/01/31.
 
 - A bug fix (uninitialized variables introduced when AMS was added to
