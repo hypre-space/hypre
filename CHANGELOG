@@ -46,6 +46,9 @@ Version 2.3.2a released, 2008/05/08.
 
 - Fixed a bug in AMG when the maximum number of levels is set to 1.
 
+- Added two new solver types to AMS: a Hiptmair-like smoother (type 0), and
+  one based on a block 4x4 coarse-grid matrix (type 20).
+
 #====================================
 
 Version 2.3.1a released, 2008/01/31.
