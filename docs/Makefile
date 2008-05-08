@@ -96,11 +96,7 @@ install: all
 		HYPRE_ref_manual.pdf \
 		bHYPRE_ref_manual.pdf; do \
 	  test -f $$file && cp -fp $$file ${HYPRE_INSTALL_DIR}/docs/$$file; \
-	done; \
-	test -f V1.5.0b.IJ_transition_info && \
-		test -f ${HYPRE_INSTALL_DIR}/docs/V1.5.0b.IJ_transition_info || \
-		cp -fp V1.5.0b.IJ_transition_info \
-		${HYPRE_INSTALL_DIR}/docs/V1.5.0b.IJ_transition_info
+	done
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
