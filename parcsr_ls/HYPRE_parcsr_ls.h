@@ -1593,7 +1593,7 @@ HYPRE_ParCSRHybridSetMeasureType( HYPRE_Solver solver,
  * 8 &  PMIS-coarsening (a parallel coarsening algorithm using independent sets \\
  * & with lower complexities than CLJP, might also lead to slower convergence) \\
  * 9 &  PMIS-coarsening (using a fixed random vector, for debugging purposes only) \\
- * 10 & HMIS-coarsening (uses one pass Ruge-Stueben on each processor independently, \\ 
+ * 10 & HMIS-coarsening (uses one pass Ruge-Stueben on each processor independently, \\
  * & followed by PMIS using the interior C-points as its first independent set) \\
  * 11 & one-pass Ruge-Stueben coarsening on each processor, no boundary treatment \\
  * \hline
