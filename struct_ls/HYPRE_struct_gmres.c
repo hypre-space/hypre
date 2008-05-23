@@ -180,6 +180,29 @@ HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver,
 {
    return( HYPRE_GMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
+/*==========================================================================*/
+/*==========================================================================*/
+/** (Optional) Set the absolute stopping tolerance.
+
+{\bf Input files:}
+headers.h
+
+@return Error code.
+
+@param solver [IN/OUT]
+  solver structure
+@param tol [IN]
+  GMRES solver tolerance
+
+@see HYPRE_StructGMRESSolve, HYPRE_StructGMRESSetup   */
+/*--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
+                       double             atol    )
+{
+   return( HYPRE_GMRESSetAbsoluteTol( (HYPRE_Solver) solver, atol ) );
+}
 
 /*==========================================================================*/
 /*==========================================================================*/
@@ -205,10 +228,32 @@ HYPRE_StructGMRESSetMaxIter( HYPRE_StructSolver solver,
    return( HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
 
+/*==========================================================================*/
+/*==========================================================================*/
+/** (Optional) Sets the dimension of the Krylov subspace.
 
+{\bf Input files:}
+headers.h
+
+@return Error code.
+
+@param solver [IN/OUT]
+  solver structure
+@param k_dim [IN]
+  GMRES dimension of the Krylov subspace
+
+@see HYPRE_StructGMRESSolve, HYPRE_StructGMRESSetup */
+/*--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructGMRESSetKDim( HYPRE_StructSolver solver,
+                           int                k_dim )
+{
+   return( HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
+}
 /*==========================================================================*/
 /*==========================================================================*/
-/** (Optional) Sets the precondioner to use in GMRES.  The Default is no
+/** (Optional) Sets the preconditioner to use in GMRES.  The Default is no
 preconditioner, i.e. the solver is just conjugate gradients (CG).
 
 {\bf Input files:}

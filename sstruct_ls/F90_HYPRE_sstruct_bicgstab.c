@@ -112,6 +112,19 @@ hypre_F90_IFACE(hypre_sstructbicgstabsettol, HYPRE_SSTRUCTBICGSTABSETTOL)
    *ierr = (int) (HYPRE_SStructBiCGSTABSetTol( (HYPRE_SStructSolver) *solver,
                                                (double)              *tol ));
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructBiCGSTABSetAnsoluteTol
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructbicgstabsetabsolutetol, HYPRE_SSTRUCTBICGSTABSETABSOLUTETOL)
+                                                          (long int *solver,
+                                                           double   *tol,
+                                                           int      *ierr)
+{
+   *ierr = (int) (HYPRE_SStructBiCGSTABSetAbsoluteTol( (HYPRE_SStructSolver) *solver,
+                                               (double)              *tol ));
+}
 
 /*--------------------------------------------------------------------------
  * HYPRE_SStructBiCGSTABSetMinIter

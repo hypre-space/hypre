@@ -111,6 +111,16 @@ HYPRE_SStructBiCGSTABSetTol( HYPRE_SStructSolver solver,
 {
    return( HYPRE_BiCGSTABSetTol( (HYPRE_Solver) solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructBiCGSTABSetAbsoluteTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructBiCGSTABSetAbsoluteTol( HYPRE_SStructSolver solver,
+                          double              tol )
+{
+   return( HYPRE_BiCGSTABSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
+}
 
 /*--------------------------------------------------------------------------
  * HYPRE_SStructBiCGSTABSetMinIter

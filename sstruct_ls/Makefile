@@ -64,6 +64,8 @@ HEADERS =\
 FILES =\
  F90_HYPRE_sstruct_bicgstab.c\
  F90_HYPRE_sstruct_gmres.c\
+ F90_HYPRE_sstruct_flexgmres.c\
+ F90_HYPRE_sstruct_lgmres.c\
  F90_HYPRE_sstruct_InterFAC.c\
  F90_HYPRE_sstruct_int.c\
  F90_HYPRE_sstruct_maxwell.c\
@@ -72,6 +74,8 @@ FILES =\
  F90_HYPRE_sstruct_sys_pfmg.c\
  HYPRE_sstruct_bicgstab.c\
  HYPRE_sstruct_gmres.c\
+ HYPRE_sstruct_flexgmres.c\
+ HYPRE_sstruct_lgmres.c\
  HYPRE_sstruct_InterFAC.c\
  HYPRE_sstruct_int.c\
  HYPRE_sstruct_maxwell.c\

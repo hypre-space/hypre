@@ -45,6 +45,8 @@ HEADERS =\
  bicgstab.h\
  cgnr.h\
  gmres.h\
+ flexgmres.h\
+ lgmres.h\
  pcg.h\
  HYPRE_lobpcg.h\
  HYPRE_MatvecFunctions.h\
@@ -54,9 +56,13 @@ FILES =\
  bicgstab.c\
  cgnr.c\
  gmres.c\
+ flexgmres.c\
+ lgmres.c\
  HYPRE_bicgstab.c\
  HYPRE_cgnr.c\
  HYPRE_gmres.c\
+ HYPRE_lgmres.c\
+ HYPRE_flexgmres.c\
  HYPRE_pcg.c\
  pcg.c\
  HYPRE_lobpcg.c\

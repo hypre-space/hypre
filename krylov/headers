@@ -66,14 +66,20 @@ extern "C" {
 cat bicgstab.h   >> $INTERNAL_HEADER
 cat cgnr.h       >> $INTERNAL_HEADER
 cat gmres.h      >> $INTERNAL_HEADER
+cat lgmres.h      >> $INTERNAL_HEADER
+cat flexgmres.h      >> $INTERNAL_HEADER
 cat pcg.h        >> $INTERNAL_HEADER
 
 ../utilities/protos bicgstab.c            >> $INTERNAL_HEADER
 ../utilities/protos cgnr.c                >> $INTERNAL_HEADER
 ../utilities/protos gmres.c               >> $INTERNAL_HEADER
+../utilities/protos flexgmres.c           >> $INTERNAL_HEADER
+../utilities/protos lgmres.c               >> $INTERNAL_HEADER
 ../utilities/protos HYPRE_bicgstab.c      >> $INTERNAL_HEADER
 ../utilities/protos HYPRE_cgnr.c          >> $INTERNAL_HEADER
 ../utilities/protos HYPRE_gmres.c         >> $INTERNAL_HEADER
+../utilities/protos HYPRE_flexgmres.c         >> $INTERNAL_HEADER
+../utilities/protos HYPRE_lgmres.c         >> $INTERNAL_HEADER
 ../utilities/protos HYPRE_pcg.c           >> $INTERNAL_HEADER
 ../utilities/protos pcg.c                 >> $INTERNAL_HEADER
 

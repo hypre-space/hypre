@@ -81,6 +81,12 @@ typedef int (*HYPRE_PtrToParSolverFcn)(HYPRE_Solver,
                                        HYPRE_ParVector,
                                        HYPRE_ParVector);
 
+#ifndef HYPRE_MODIFYPC
+#define HYPRE_MODIFYPC
+typedef int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
+                                         int,
+                                         double);
+#endif
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -1438,7 +1444,12 @@ int HYPRE_ParCSRHybridSolve(HYPRE_Solver solver,
  **/
 int HYPRE_ParCSRHybridSetTol(HYPRE_Solver solver,
                              double             tol);
-                                                                                                              
+ /**
+  *  Set the absolute convergence tolerance for the Krylov solver. The default is 0.
+ **/
+int HYPRE_ParCSRHybridSetAbsoluteTol(HYPRE_Solver solver,
+                             double             tol);
+                                                                                                                        
 /**
   *  Set the desired convergence factor
  **/
@@ -1489,8 +1500,8 @@ int HYPRE_ParCSRHybridSetKDim(HYPRE_Solver solver,
 int HYPRE_ParCSRHybridSetTwoNorm(HYPRE_Solver solver,
                                  int                two_norm);
                                                                                                               
-/**
-  * Set the choice of stopping criterion for PCG.
+/*
+ * RE-VISIT
  **/
 int HYPRE_ParCSRHybridSetStopCrit(HYPRE_Solver solver,
                                  int                stop_crit);
@@ -2117,6 +2128,241 @@ int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
  * Return the norm of the final relative residual.
  **/
 int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                                  double       *norm);
+
+/*@}*/
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR FlexGMRES Solver
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int HYPRE_ParCSRFlexGMRESCreate(MPI_Comm      comm,
+                            HYPRE_Solver *solver);
+
+/**
+ * Destroy a solver object.
+ **/
+int HYPRE_ParCSRFlexGMRESDestroy(HYPRE_Solver solver);
+
+/**
+ **/
+int HYPRE_ParCSRFlexGMRESSetup(HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector    b,
+                           HYPRE_ParVector    x);
+
+/**
+ * Solve the system.
+ **/
+int HYPRE_ParCSRFlexGMRESSolve(HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector    b,
+                           HYPRE_ParVector    x);
+
+/**
+ * (Optional) Set the maximum size of the Krylov space.
+ **/
+int HYPRE_ParCSRFlexGMRESSetKDim(HYPRE_Solver solver,
+                             int          k_dim);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int HYPRE_ParCSRFlexGMRESSetTol(HYPRE_Solver solver,
+                            double       tol);
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r\| \leq$ max(relative$\_$tolerance $\ast \|b\|$, absolute$\_$tolerance).)
+ *
+ **/
+
+int HYPRE_ParCSRFlexGMRESSetAbsoluteTol(HYPRE_Solver solver,
+                            double       a_tol);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_ParCSRFlexGMRESSetMinIter(HYPRE_Solver solver,
+                                int          min_iter);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int HYPRE_ParCSRFlexGMRESSetMaxIter(HYPRE_Solver solver,
+                                int          max_iter);
+
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+int HYPRE_ParCSRFlexGMRESSetPrecond(HYPRE_Solver          solver,
+                                HYPRE_PtrToParSolverFcn  precond,
+                                HYPRE_PtrToParSolverFcn  precond_setup,
+                                HYPRE_Solver          precond_solver);
+
+/**
+ **/
+int HYPRE_ParCSRFlexGMRESGetPrecond(HYPRE_Solver  solver,
+                                HYPRE_Solver *precond_data);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int HYPRE_ParCSRFlexGMRESSetLogging(HYPRE_Solver solver,
+                                int          logging);
+
+/**
+ * (Optional) Set print level.
+ **/
+int HYPRE_ParCSRFlexGMRESSetPrintLevel(HYPRE_Solver solver,
+                                int          print_level);
+
+/**
+ * Return the number of iterations taken.
+ **/
+int HYPRE_ParCSRFlexGMRESGetNumIterations(HYPRE_Solver  solver,
+                                      int          *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                                  double       *norm);
+
+
+
+/**
+ * Set a user-defined function to modify solve-time preconditioner attributes.
+ **/
+int HYPRE_ParCSRFlexGMRESSetModifyPC( HYPRE_Solver  solver,
+                                      HYPRE_PtrToModifyPCFcn modify_pc);
+   
+/*@}*/
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR LGMRES Solver
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int HYPRE_ParCSRLGMRESCreate(MPI_Comm      comm,
+                            HYPRE_Solver *solver);
+
+/**
+ * Destroy a solver object.
+ **/
+int HYPRE_ParCSRLGMRESDestroy(HYPRE_Solver solver);
+
+/**
+ **/
+int HYPRE_ParCSRLGMRESSetup(HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector    b,
+                           HYPRE_ParVector    x);
+
+/**
+ * Solve the system. Details on LGMRES may be found in A. H. Baker,
+ * E.R. Jessup, and T.A. Manteuffel. A technique for accelerating the
+ * convergence of restarted GMRES. SIAM Journal on Matrix Analysis and
+ * Applications, 26 (2005), pp. 962-984. LGMRES(m,k) in the paper
+ * corresponds to LGMRES(Kdim+AugDim, AugDim).
+ **/
+int HYPRE_ParCSRLGMRESSolve(HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector    b,
+                           HYPRE_ParVector    x);
+
+/**
+ * (Optional) Set the maximum size of the approximation space.
+ **/
+int HYPRE_ParCSRLGMRESSetKDim(HYPRE_Solver solver,
+                             int          k_dim);
+
+/**
+ * (Optional) Set the maximum number of augmentation vectors (default: 2).
+ **/
+int HYPRE_ParCSRLGMRESSetAugDim(HYPRE_Solver solver,
+                             int          aug_dim);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int HYPRE_ParCSRLGMRESSetTol(HYPRE_Solver solver,
+                            double       tol);
+/**
+ * (Optional) Set the absolute convergence tolerance (default: 0). 
+ * If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r\| \leq$ max(relative$\_$tolerance $\ast \|b\|$, absolute$\_$tolerance).)
+ *
+ **/
+
+int HYPRE_ParCSRLGMRESSetAbsoluteTol(HYPRE_Solver solver,
+                            double       a_tol);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_ParCSRLGMRESSetMinIter(HYPRE_Solver solver,
+                                int          min_iter);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int HYPRE_ParCSRLGMRESSetMaxIter(HYPRE_Solver solver,
+                                int          max_iter);
+
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+int HYPRE_ParCSRLGMRESSetPrecond(HYPRE_Solver          solver,
+                                HYPRE_PtrToParSolverFcn  precond,
+                                HYPRE_PtrToParSolverFcn  precond_setup,
+                                HYPRE_Solver          precond_solver);
+
+/**
+ **/
+int HYPRE_ParCSRLGMRESGetPrecond(HYPRE_Solver  solver,
+                                HYPRE_Solver *precond_data);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int HYPRE_ParCSRLGMRESSetLogging(HYPRE_Solver solver,
+                                int          logging);
+
+/**
+ * (Optional) Set print level.
+ **/
+int HYPRE_ParCSRLGMRESSetPrintLevel(HYPRE_Solver solver,
+                                int          print_level);
+
+/**
+ * Return the number of iterations taken.
+ **/
+int HYPRE_ParCSRLGMRESGetNumIterations(HYPRE_Solver  solver,
+                                      int          *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                   double       *norm);
 
 /*@}*/

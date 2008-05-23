@@ -30,24 +30,21 @@
 
 /******************************************************************************
  *
- * Preconditioned conjugate gradient (Omin) headers
+ * FLEXGMRES flexible gmres
  *
  *****************************************************************************/
 
-#ifndef hypre_KRYLOV_PCG_HEADER
-#define hypre_KRYLOV_PCG_HEADER
+#ifndef hypre_KRYLOV_FLEXGMRES_HEADER
+#define hypre_KRYLOV_FLEXGMRES_HEADER
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
- * @name Generic PCG Interface
+ * @name Generic FlexGMRES Interface
  *
  * A general description of the interface goes here...
  *
- * @memo A generic PCG linear solver interface
- * @version 0.1
- * @author Jeffrey F. Painter
  **/
 /*@{*/
 
@@ -55,19 +52,19 @@
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
- * hypre_PCGData and hypre_PCGFunctions
+ * hypre_FlexGMRESData and hypre_FlexGMRESFunctions
  *--------------------------------------------------------------------------*/
 
 
 /**
- * @name PCG structs
+ * @name FlexGMRES structs
  *
  * Description...
  **/
 /*@{*/
 
 /**
- * The {\tt hypre\_PCGSFunctions} object ...
+ * The {\tt hypre\_FlexGMRESFunctions} object ...
  **/
 
 typedef struct
@@ -76,6 +73,7 @@ typedef struct
    int    (*Free)          ( char *ptr );
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
    void * (*CreateVector)  ( void *vector );
+   void * (*CreateVectorArray)  ( int size, void *vectors );
    int    (*DestroyVector) ( void *vector );
    void * (*MatvecCreate)  ( void *A, void *x );
    int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
@@ -89,84 +87,60 @@ typedef struct
 
    int    (*precond)();
    int    (*precond_setup)();
-} hypre_PCGFunctions;
+
+   int    (*modify_pc)();
+   
+
+} hypre_FlexGMRESFunctions;
 
 /**
- * The {\tt hypre\_PCGData} object ...
+ * The {\tt hypre\_FlexGMRESData} object ...
  **/
 
-/*
- Summary of Parameters to Control Stopping Test:
- - Standard (default) error tolerance: |delta-residual|/|right-hand-side|<tol
- where the norm is an energy norm wrt preconditioner, |r|=sqrt(<Cr,r>).
- - two_norm!=0 means: the norm is the L2 norm, |r|=sqrt(<r,r>)
- - rel_change!=0 means: if pass the other stopping criteria, also check the
- relative change in the solution x.  Pass iff this relative change is small.
- - tol = relative error tolerance, as above
- -a_tol = absolute convergence tolerance (default is 0.0)
-   If one desires the convergence test to check the absolute
-   convergence tolerance *only*, then set the relative convergence
-   tolerance to 0.0.  (The default convergence test is  <C*r,r> <=
-   max(relative_tolerance^2 * <C*b, b>, absolute_tolerance^2)
-- cf_tol = convergence factor tolerance; if >0 used for special test
-  for slow convergence
-- stop_crit!=0 means (TO BE PHASED OUT):
-  pure absolute error tolerance rather than a pure relative
-  error tolerance on the residual.  Never applies if rel_change!=0 or atolf!=0.
- - atolf = absolute error tolerance factor to be used _together_ with the
- relative error tolerance, |delta-residual| / ( atolf + |right-hand-side| ) < tol
-  (To BE PHASED OUT)
- - recompute_residual means: when the iteration seems to be converged, recompute the
- residual from scratch (r=b-Ax) and use this new residual to repeat the convergence test.
- This can be expensive, use this only if you have seen a problem with the regular
- residual computation.
-*/
+
 
 typedef struct
 {
-   double   tol;
-   double   atolf;
-   double   cf_tol;
-   double   a_tol;
+   int      k_dim;
+   int      min_iter;
    int      max_iter;
-   int      two_norm;
    int      rel_change;
-   int      recompute_residual;
    int      stop_crit;
    int      converged;
+   double   tol;
+   double   cf_tol;
+   double   a_tol;
+   double   rel_residual_norm;
 
-   void    *A;
-   void    *p;
-   void    *s;
-   void    *r; /* ...contains the residual.  This is currently kept permanently.
-                  If that is ever changed, it still must be kept if logging>1 */
+   void   **pre_vecs;
 
-   int      owns_matvec_data;  /* normally 1; if 0, don't delete it */
+   void  *A;
+   void  *r;
+   void  *w;
+   void  *w_2;
+   void  **p;
+
    void    *matvec_data;
    void    *precond_data;
 
-   hypre_PCGFunctions * functions;
+   hypre_FlexGMRESFunctions * functions;
 
    /* log info (always logged) */
    int      num_iterations;
-   double   rel_residual_norm;
-
+ 
    int     print_level; /* printing when print_level>0 */
    int     logging;  /* extra computations for logging when logging>0 */
    double  *norms;
-   double  *rel_norms;
+   char    *log_file_name;
 
-} hypre_PCGData;
-
-#define hypre_PCGDataOwnsMatvecData(pcgdata)  ((pcgdata) -> owns_matvec_data)
+} hypre_FlexGMRESData;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
 /**
- * @name generic PCG Solver
+ * @name generic FlexGMRES Solver
  *
  * Description...
  **/
@@ -178,12 +152,13 @@ extern "C" {
  * @param param [IN] ...
  **/
 
-hypre_PCGFunctions *
-hypre_PCGFunctionsCreate(
+hypre_FlexGMRESFunctions *
+hypre_FlexGMRESFunctionsCreate(
    char * (*CAlloc)        ( int count, int elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
+   void * (*CreateVectorArray)  ( int size, void *vectors ),
    int    (*DestroyVector) ( void *vector ),
    void * (*MatvecCreate)  ( void *A, void *x ),
    int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
@@ -205,10 +180,9 @@ hypre_PCGFunctionsCreate(
  **/
 
 void *
-hypre_PCGCreate( hypre_PCGFunctions *pcg_functions );
+hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions *fgmres_functions );
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

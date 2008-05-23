@@ -30,22 +30,22 @@
 
 /******************************************************************************
  *
- * HYPRE_SStructGMRES interface
+ * HYPRE_SStructFlexGMRES interface
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESCreate
+ * HYPRE_SStructFlexGMRESCreate
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESCreate( MPI_Comm             comm,
+HYPRE_SStructFlexGMRESCreate( MPI_Comm             comm,
                           HYPRE_SStructSolver *solver )
 {
-   hypre_GMRESFunctions * gmres_functions =
-      hypre_GMRESFunctionsCreate(
+   hypre_FlexGMRESFunctions * fgmres_functions =
+      hypre_FlexGMRESFunctionsCreate(
          hypre_CAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
          hypre_SStructKrylovCreateVector,
          hypre_SStructKrylovCreateVectorArray,
@@ -56,184 +56,198 @@ HYPRE_SStructGMRESCreate( MPI_Comm             comm,
          hypre_SStructKrylovScaleVector, hypre_SStructKrylovAxpy,
          hypre_SStructKrylovIdentitySetup, hypre_SStructKrylovIdentity );
 
-   *solver = ( (HYPRE_SStructSolver) hypre_GMRESCreate( gmres_functions ) );
+   *solver = ( (HYPRE_SStructSolver) hypre_FlexGMRESCreate( fgmres_functions ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESDestroy
+ * HYPRE_SStructFlexGMRESDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_SStructGMRESDestroy( HYPRE_SStructSolver solver )
+HYPRE_SStructFlexGMRESDestroy( HYPRE_SStructSolver solver )
 {
-   return( hypre_GMRESDestroy( (void *) solver ) );
+   return( hypre_FlexGMRESDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetup
+ * HYPRE_SStructFlexGMRESSetup
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_SStructGMRESSetup( HYPRE_SStructSolver solver,
+HYPRE_SStructFlexGMRESSetup( HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x )
 {
-   return( HYPRE_GMRESSetup( (HYPRE_Solver) solver,
+   return( HYPRE_FlexGMRESSetup( (HYPRE_Solver) solver,
                              (HYPRE_Matrix) A,
                              (HYPRE_Vector) b,
                              (HYPRE_Vector) x ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSolve
+ * HYPRE_SStructFlexGMRESSolve
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_SStructGMRESSolve( HYPRE_SStructSolver solver,
+HYPRE_SStructFlexGMRESSolve( HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x )
 {
-   return( HYPRE_GMRESSolve( (HYPRE_Solver) solver,
+   return( HYPRE_FlexGMRESSolve( (HYPRE_Solver) solver,
                              (HYPRE_Matrix) A,
                              (HYPRE_Vector) b,
                              (HYPRE_Vector) x ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetKDim
+ * HYPRE_SStructFlexGMRESSetKDim
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetKDim( HYPRE_SStructSolver solver,
+HYPRE_SStructFlexGMRESSetKDim( HYPRE_SStructSolver solver,
                            int                 k_dim )
 {
-   return( HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
+   return( HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetTol
+ * HYPRE_SStructFlexGMRESSetTol
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver,
+HYPRE_SStructFlexGMRESSetTol( HYPRE_SStructSolver solver,
                           double              tol )
 {
-   return( HYPRE_GMRESSetTol( (HYPRE_Solver) solver, tol ) );
+   return( HYPRE_FlexGMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetAbsoluteTol
+ * HYPRE_SStructFlexGMRESSetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetAbsoluteTol( HYPRE_SStructSolver solver,
-                          double              atol )
+HYPRE_SStructFlexGMRESSetAbsoluteTol( HYPRE_SStructSolver solver,
+                          double              tol )
 {
-   return( HYPRE_GMRESSetAbsoluteTol( (HYPRE_Solver) solver, atol ) );
+   return( HYPRE_FlexGMRESSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
 }
+
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetMinIter
+ * HYPRE_SStructFlexGMRESSetMinIter
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver,
+HYPRE_SStructFlexGMRESSetMinIter( HYPRE_SStructSolver solver,
                               int                 min_iter )
 {
-   return( HYPRE_GMRESSetMinIter( (HYPRE_Solver) solver, min_iter ) );
+   return( HYPRE_FlexGMRESSetMinIter( (HYPRE_Solver) solver, min_iter ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetMaxIter
+ * HYPRE_SStructFlexGMRESSetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetMaxIter( HYPRE_SStructSolver solver,
+HYPRE_SStructFlexGMRESSetMaxIter( HYPRE_SStructSolver solver,
                               int                 max_iter )
 {
-   return( HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
+   return( HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetStopCrit
+ * HYPRE_SStructFlexGMRESSetStopCrit
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetStopCrit( HYPRE_SStructSolver solver,
+HYPRE_SStructFlexGMRESSetStopCrit( HYPRE_SStructSolver solver,
                                int                 stop_crit )
 {
-   return( HYPRE_GMRESSetStopCrit( (HYPRE_Solver) solver, stop_crit ) );
+   return( HYPRE_FlexGMRESSetStopCrit( (HYPRE_Solver) solver, stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetPrecond
+ * HYPRE_SStructFlexGMRESSetPrecond
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver          solver,
+HYPRE_SStructFlexGMRESSetPrecond( HYPRE_SStructSolver          solver,
                               HYPRE_PtrToSStructSolverFcn  precond,
                               HYPRE_PtrToSStructSolverFcn  precond_setup,
                               void *          precond_data )
 {
-   return( HYPRE_GMRESSetPrecond( (HYPRE_Solver) solver,
+   return( HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver) solver,
                                   (HYPRE_PtrToSolverFcn) precond,
                                   (HYPRE_PtrToSolverFcn) precond_setup,
                                   (HYPRE_Solver) precond_data ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetLogging
+ * HYPRE_SStructFlexGMRESSetLogging
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver,
+HYPRE_SStructFlexGMRESSetLogging( HYPRE_SStructSolver solver,
                               int                 logging )
 {
-   return( HYPRE_GMRESSetLogging( (HYPRE_Solver) solver, logging ) );
+   return( HYPRE_FlexGMRESSetLogging( (HYPRE_Solver) solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetPrintLevel
+ * HYPRE_SStructFlexGMRESSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetPrintLevel( HYPRE_SStructSolver solver,
+HYPRE_SStructFlexGMRESSetPrintLevel( HYPRE_SStructSolver solver,
                               int                 level )
 {
-   return( HYPRE_GMRESSetPrintLevel( (HYPRE_Solver) solver, level ) );
+   return( HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver) solver, level ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESGetNumIterations
+ * HYPRE_SStructFlexGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver  solver,
+HYPRE_SStructFlexGMRESGetNumIterations( HYPRE_SStructSolver  solver,
                                     int                 *num_iterations )
 {
-   return( HYPRE_GMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
+   return( HYPRE_FlexGMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESGetFinalRelativeResidualNorm
+ * HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
+HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
                                                 double              *norm )
 {
-   return( HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
+   return( HYPRE_FlexGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESGetResidual
+ * HYPRE_SStructFlexGMRESGetResidual
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESGetResidual( HYPRE_SStructSolver  solver,
+HYPRE_SStructFlexGMRESGetResidual( HYPRE_SStructSolver  solver,
                                 void              **residual )
 {
-   return( HYPRE_GMRESGetResidual( (HYPRE_Solver) solver, residual ) );
+   return( HYPRE_FlexGMRESGetResidual( (HYPRE_Solver) solver, residual ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFlexGMRESSetModifyPC
+ *--------------------------------------------------------------------------*/
+ 
+
+int HYPRE_SStructFlexGMRESSetModifyPC( HYPRE_SStructSolver  solver,
+                                      HYPRE_PtrToModifyPCFcn modify_pc)
+
+{
+   return ( HYPRE_FlexGMRESSetModifyPC( (HYPRE_Solver) solver,  (HYPRE_PtrToModifyPCFcn) modify_pc));
+   
+}
+

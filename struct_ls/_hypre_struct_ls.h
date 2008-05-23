@@ -92,6 +92,7 @@ int HYPRE_StructBiCGSTABDestroy ( HYPRE_StructSolver solver );
 int HYPRE_StructBiCGSTABSetup ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
 int HYPRE_StructBiCGSTABSolve ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
 int HYPRE_StructBiCGSTABSetTol ( HYPRE_StructSolver solver , double tol );
+int HYPRE_StructBiCGSTABSetAbsoluteTol ( HYPRE_StructSolver solver , double tol );
 int HYPRE_StructBiCGSTABSetMaxIter ( HYPRE_StructSolver solver , int max_iter );
 int HYPRE_StructBiCGSTABSetPrecond ( HYPRE_StructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
 int HYPRE_StructBiCGSTABSetLogging ( HYPRE_StructSolver solver , int logging );
@@ -100,13 +101,31 @@ int HYPRE_StructBiCGSTABGetNumIterations ( HYPRE_StructSolver solver , int *num_
 int HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , double *norm );
 int HYPRE_StructBiCGSTABGetResidual ( HYPRE_StructSolver solver , void **residual );
 
+/* HYPRE_struct_flexgmres.c */
+int HYPRE_StructFlexGMRESCreate ( MPI_Comm comm , HYPRE_StructSolver *solver );
+int HYPRE_StructFlexGMRESDestroy ( HYPRE_StructSolver solver );
+int HYPRE_StructFlexGMRESSetup ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
+int HYPRE_StructFlexGMRESSolve ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
+int HYPRE_StructFlexGMRESSetTol ( HYPRE_StructSolver solver , double tol );
+int HYPRE_StructFlexGMRESSetAbsoluteTol ( HYPRE_StructSolver solver , double atol );
+int HYPRE_StructFlexGMRESSetMaxIter ( HYPRE_StructSolver solver , int max_iter );
+int HYPRE_StructFlexGMRESSetKDim ( HYPRE_StructSolver solver , int k_dim );
+int HYPRE_StructFlexGMRESSetPrecond ( HYPRE_StructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
+int HYPRE_StructFlexGMRESSetLogging ( HYPRE_StructSolver solver , int logging );
+int HYPRE_StructFlexGMRESSetPrintLevel ( HYPRE_StructSolver solver , int print_level );
+int HYPRE_StructFlexGMRESGetNumIterations ( HYPRE_StructSolver solver , int *num_iterations );
+int HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , double *norm );
+int HYPRE_StructFlexGMRESSetModifyPC ( HYPRE_StructSolver solver , HYPRE_PtrToModifyPCFcn modify_pc );
+
 /* HYPRE_struct_gmres.c */
 int HYPRE_StructGMRESCreate ( MPI_Comm comm , HYPRE_StructSolver *solver );
 int HYPRE_StructGMRESDestroy ( HYPRE_StructSolver solver );
 int HYPRE_StructGMRESSetup ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
 int HYPRE_StructGMRESSolve ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
 int HYPRE_StructGMRESSetTol ( HYPRE_StructSolver solver , double tol );
+int HYPRE_StructGMRESSetAbsoluteTol ( HYPRE_StructSolver solver , double atol );
 int HYPRE_StructGMRESSetMaxIter ( HYPRE_StructSolver solver , int max_iter );
+int HYPRE_StructGMRESSetKDim ( HYPRE_StructSolver solver , int k_dim );
 int HYPRE_StructGMRESSetPrecond ( HYPRE_StructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
 int HYPRE_StructGMRESSetLogging ( HYPRE_StructSolver solver , int logging );
 int HYPRE_StructGMRESSetPrintLevel ( HYPRE_StructSolver solver , int print_level );
@@ -157,12 +176,29 @@ int HYPRE_StructJacobiSetNonZeroGuess ( HYPRE_StructSolver solver );
 int HYPRE_StructJacobiGetNumIterations ( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructJacobiGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , double *norm );
 
+/* HYPRE_struct_lgmres.c */
+int HYPRE_StructLGMRESCreate ( MPI_Comm comm , HYPRE_StructSolver *solver );
+int HYPRE_StructLGMRESDestroy ( HYPRE_StructSolver solver );
+int HYPRE_StructLGMRESSetup ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
+int HYPRE_StructLGMRESSolve ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
+int HYPRE_StructLGMRESSetTol ( HYPRE_StructSolver solver , double tol );
+int HYPRE_StructLGMRESSetAbsoluteTol ( HYPRE_StructSolver solver , double tol );
+int HYPRE_StructLGMRESSetMaxIter ( HYPRE_StructSolver solver , int max_iter );
+int HYPRE_StructLGMRESSetKDim ( HYPRE_StructSolver solver , int k_dim );
+int HYPRE_StructLGMRESSetAugDim ( HYPRE_StructSolver solver , int aug_dim );
+int HYPRE_StructLGMRESSetPrecond ( HYPRE_StructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
+int HYPRE_StructLGMRESSetLogging ( HYPRE_StructSolver solver , int logging );
+int HYPRE_StructLGMRESSetPrintLevel ( HYPRE_StructSolver solver , int print_level );
+int HYPRE_StructLGMRESGetNumIterations ( HYPRE_StructSolver solver , int *num_iterations );
+int HYPRE_StructLGMRESGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , double *norm );
+
 /* HYPRE_struct_pcg.c */
 int HYPRE_StructPCGCreate ( MPI_Comm comm , HYPRE_StructSolver *solver );
 int HYPRE_StructPCGDestroy ( HYPRE_StructSolver solver );
 int HYPRE_StructPCGSetup ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
 int HYPRE_StructPCGSolve ( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
 int HYPRE_StructPCGSetTol ( HYPRE_StructSolver solver , double tol );
+int HYPRE_StructPCGSetAbsoluteTol ( HYPRE_StructSolver solver , double tol );
 int HYPRE_StructPCGSetMaxIter ( HYPRE_StructSolver solver , int max_iter );
 int HYPRE_StructPCGSetTwoNorm ( HYPRE_StructSolver solver , int two_norm );
 int HYPRE_StructPCGSetRelChange ( HYPRE_StructSolver solver , int rel_change );

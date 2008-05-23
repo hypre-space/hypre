@@ -180,6 +180,30 @@ HYPRE_StructBiCGSTABSetTol( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
+/** (Optional) Set the absolute stopping tolerance.
+
+{\bf Input files:}
+headers.h
+
+@return Error code.
+
+@param solver [IN/OUT]
+  solver structure
+@param tol [IN]
+  BiCGSTAB solver tolerance
+
+@see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup   */
+/*--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructBiCGSTABSetAbsoluteTol( HYPRE_StructSolver solver,
+                       double             tol    )
+{
+   return( HYPRE_BiCGSTABSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
+}
+
+/*==========================================================================*/
+/*==========================================================================*/
 /** (Optional) Set the maximum number of iterations.
 
 {\bf Input files:}

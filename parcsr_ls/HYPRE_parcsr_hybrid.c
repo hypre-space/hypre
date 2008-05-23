@@ -98,6 +98,16 @@ HYPRE_ParCSRHybridSetTol( HYPRE_Solver solver,
 {
    return( hypre_AMGHybridSetTol( (void *) solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetAbsoluteTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetAbsoluteTol( HYPRE_Solver solver,
+                          double             tol    )
+{
+   return( hypre_AMGHybridSetAbsoluteTol( (void *) solver, tol ) );
+}
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetConvergenceTol

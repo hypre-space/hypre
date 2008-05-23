@@ -31,7 +31,7 @@
 #include "headers.h"
 
 /*==========================================================================*/
-/** Creates a new PCG solver object.
+/** Creates a new FlexGMRES solver object.
 
 {\bf Input files:}
 headers.h
@@ -43,22 +43,18 @@ headers.h
 @param solver [OUT]
   solver structure
 
-@see HYPRE_StructPCGDestroy */
+@see HYPRE_StructFlexGMRESDestroy */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
+HYPRE_StructFlexGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
-   /* The function names with a PCG in them are in
-      struct_ls/pcg_struct.c .  These functions do rather little -
-      e.g., cast to the correct type - before calling something else.
-      These names should be called, e.g., hypre_struct_Free, to reduce the
-      chance of name conflicts. */
-   hypre_PCGFunctions * pcg_functions =
-      hypre_PCGFunctionsCreate(
+   hypre_FlexGMRESFunctions * fgmres_functions =
+      hypre_FlexGMRESFunctionsCreate(
          hypre_CAlloc, hypre_StructKrylovFree,
          hypre_StructKrylovCommInfo,
          hypre_StructKrylovCreateVector,
+         hypre_StructKrylovCreateVectorArray,
          hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
          hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
          hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
@@ -66,14 +62,14 @@ HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
          hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
          hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
 
-   *solver = ( (HYPRE_StructSolver) hypre_PCGCreate( pcg_functions ) );
+   *solver = ( (HYPRE_StructSolver) hypre_FlexGMRESCreate( fgmres_functions ) );
 
    return 0;
 }
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Destroys a PCG solver object.
+/** Destroys a FlexGMRES solver object.
 
 {\bf Input files:}
 headers.h
@@ -83,13 +79,13 @@ headers.h
 @param solver [IN/OUT]
   solver structure
 
-@see HYPRE_StructPCGCreate */
+@see HYPRE_StructFlexGMRESCreate */
 /*--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructPCGDestroy( HYPRE_StructSolver solver )
+HYPRE_StructFlexGMRESDestroy( HYPRE_StructSolver solver )
 {
-   return( hypre_PCGDestroy( (void *) solver ) );
+   return( hypre_FlexGMRESDestroy( (void *) solver ) );
 }
 
 /*==========================================================================*/
@@ -113,24 +109,24 @@ headers.h
 @param x [IN]
   unknown vector
 
-@see HYPRE_StructPCGSolve */
+@see HYPRE_StructFlexGMRESSolve */
 /*--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
+HYPRE_StructFlexGMRESSetup( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( HYPRE_PCGSetup( (HYPRE_Solver) solver,
-                           (HYPRE_Matrix) A,
-                           (HYPRE_Vector) b,
-                           (HYPRE_Vector) x ) );
+   return( HYPRE_FlexGMRESSetup( (HYPRE_Solver) solver,
+                             (HYPRE_Matrix) A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x ) );
 }
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Performs the PCG linear solve.
+/** Performs the FlexGMRES linear solve.
 
 {\bf Input files:}
 headers.h
@@ -146,19 +142,19 @@ headers.h
 @param x [IN]
   unknown vector
 
-@see HYPRE_StructPCGSetup */
+@see HYPRE_StructFlexGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
+HYPRE_StructFlexGMRESSolve( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( HYPRE_PCGSolve( (HYPRE_Solver) solver,
-                           (HYPRE_Matrix) A,
-                           (HYPRE_Vector) b,
-                           (HYPRE_Vector) x ) );
+   return( HYPRE_FlexGMRESSolve( (HYPRE_Solver) solver,
+                             (HYPRE_Matrix) A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x ) );
 }
 
 /*==========================================================================*/
@@ -173,16 +169,16 @@ headers.h
 @param solver [IN/OUT]
   solver structure
 @param tol [IN]
-  PCG solver tolerance
+  FlexGMRES solver tolerance
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup   */
+@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup   */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
+HYPRE_StructFlexGMRESSetTol( HYPRE_StructSolver solver,
                        double             tol    )
 {
-   return( HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol ) );
+   return( HYPRE_FlexGMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
 /*==========================================================================*/
 /*==========================================================================*/
@@ -196,18 +192,17 @@ headers.h
 @param solver [IN/OUT]
   solver structure
 @param tol [IN]
-  PCG solver tolerance
+  FlexGMRES solver tolerance
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup   */
+@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup   */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGSetAbsoluteTol( HYPRE_StructSolver solver,
-                       double             tol    )
+HYPRE_StructFlexGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
+                       double             atol    )
 {
-   return( HYPRE_PCGSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
+   return( HYPRE_FlexGMRESSetAbsoluteTol( (HYPRE_Solver) solver, atol ) );
 }
-
 /*==========================================================================*/
 /*==========================================================================*/
 /** (Optional) Set the maximum number of iterations.
@@ -220,23 +215,21 @@ headers.h
 @param solver [IN/OUT]
   solver structure
 @param max_iter [IN]
-  PCG solver maximum number of iterations
+  FlexGMRES solver maximum number of iterations
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGSetMaxIter( HYPRE_StructSolver solver,
+HYPRE_StructFlexGMRESSetMaxIter( HYPRE_StructSolver solver,
                            int                max_iter )
 {
-   return( HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
+   return( HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** (Optional) Set the type of norm to use in the stopping criteria.
-If parameter two\_norm is set to 0, the preconditioner norm is used.
-If set to 1, the two-norm is used.
+/** (Optional) Sets the dimension of the Krylov subspace.
 
 {\bf Input files:}
 headers.h
@@ -245,48 +238,21 @@ headers.h
 
 @param solver [IN/OUT]
   solver structure
-@param two_norm [IN]
-  boolean indicating whether or not to use the two-norm
+@param k_dim [IN]
+  FlexGMRES dimension of the Krylov subspace
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver,
-                           int                two_norm )
+HYPRE_StructFlexGMRESSetKDim( HYPRE_StructSolver solver,
+                           int                k_dim )
 {
-   return( HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, two_norm ) );
+   return( HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
 }
-
 /*==========================================================================*/
 /*==========================================================================*/
-/** (Optional) Set whether or not to do an additional relative change
-stopping test.  If parameter rel\_change is set to 0, no additional
-stopping test is done.  If set to 1, the additional test is done.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param rel_change [IN]
-  boolean indicating whether or not to do relative change test
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
-/*--------------------------------------------------------------------------*/
-
-int
-HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver,
-                             int                rel_change )
-{
-   return( HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, rel_change ) );
-}
-
-/*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Sets the precondioner to use in PCG.  The Default is no
+/** (Optional) Sets the precondioner to use in FlexGMRES.  The Default is no
 preconditioner, i.e. the solver is just conjugate gradients (CG).
 
 {\bf Input files:}
@@ -303,16 +269,16 @@ headers.h
 @param precond_solver [IN/OUT]
   preconditioner solver structure
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup*/
+@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup*/
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGSetPrecond( HYPRE_StructSolver         solver,
+HYPRE_StructFlexGMRESSetPrecond( HYPRE_StructSolver         solver,
                            HYPRE_PtrToStructSolverFcn precond,
                            HYPRE_PtrToStructSolverFcn precond_setup,
                            HYPRE_StructSolver         precond_solver )
 {
-   return( HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+   return( HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver) solver,
                                 (HYPRE_PtrToSolverFcn) precond,
                                 (HYPRE_PtrToSolverFcn) precond_setup,
                                 (HYPRE_Solver) precond_solver ) );
@@ -334,18 +300,19 @@ headers.h
 @param logging [IN]
   integer indicating what type of logging to do
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
+HYPRE_StructFlexGMRESSetLogging( HYPRE_StructSolver solver,
                            int                logging )
 {
-   return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
+   return( HYPRE_FlexGMRESSetLogging( (HYPRE_Solver) solver, logging ) );
 }
+
 /*==========================================================================*/
 /*==========================================================================*/
-/** (Optional)  Currently, if parameter print_level is set to 0, no printing 
+/** (Optional) Currently, if parameter print_level is set to 0, no printing 
 is allowed.  If set to 1, printing takes place.
 
 {\bf Input files:}
@@ -358,15 +325,16 @@ headers.h
 @param logging [IN]
   integer allowing printing to take place
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGSetPrintLevel( HYPRE_StructSolver solver,
-                               int            print_level )
+HYPRE_StructFlexGMRESSetPrintLevel( HYPRE_StructSolver solver,
+                           int                print_level )
 {
-   return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
+   return( HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
 }
+
 /*==========================================================================*/
 /*==========================================================================*/
 /** (Optional) Gets the number of iterations done in the solve.
@@ -381,14 +349,14 @@ headers.h
 @param num_iterations [OUT]
   number of iterations
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
+HYPRE_StructFlexGMRESGetNumIterations( HYPRE_StructSolver  solver,
                                  int                *num_iterations )
 {
-   return( HYPRE_PCGGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
+   return( HYPRE_FlexGMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }
 
 /*==========================================================================*/
@@ -405,138 +373,27 @@ headers.h
 @param norm [OUT]
   final relative residual norm
 
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
+HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                              double             *norm   )
 {
-   return( HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
+   return( HYPRE_FlexGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Setup routine for diagonally scaling a vector.
 
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param A [IN]
-  coefficient matrix
-@param b [IN]
-  right-hand-side vector
-@param x [IN]
-  unknown vector
-
-@see HYPRE_StructDiagScale */
-/*--------------------------------------------------------------------------*/
-
-int 
-HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
-                            HYPRE_StructMatrix A,
-                            HYPRE_StructVector y,
-                            HYPRE_StructVector x      )
-{
-   return 0;
-}
-
-/*==========================================================================*/
-/*==========================================================================*/
-/** Diagonally scale a vector.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param A [IN]
-  coefficient matrix
-@param b [IN]
-  right-hand-side vector
-@param x [IN]
-  unknown vector
-
-@see HYPRE_StructDiagScaleSetup */
-/*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------
- * HYPRE_StructDiagScale
+ * HYPRE_FlexGMRESSetModifyPC
  *--------------------------------------------------------------------------*/
+ 
 
-int 
-HYPRE_StructDiagScale( HYPRE_StructSolver solver,
-                       HYPRE_StructMatrix HA,
-                       HYPRE_StructVector Hy,
-                       HYPRE_StructVector Hx      )
+int HYPRE_StructFlexGMRESSetModifyPC( HYPRE_StructSolver  solver,
+                                      HYPRE_PtrToModifyPCFcn modify_pc)
+
 {
-   hypre_StructMatrix   *A = (hypre_StructMatrix *) HA;
-   hypre_StructVector   *y = (hypre_StructVector *) Hy;
-   hypre_StructVector   *x = (hypre_StructVector *) Hx;
-
-   hypre_BoxArray       *boxes;
-   hypre_Box            *box;
-
-   hypre_Box            *A_data_box;
-   hypre_Box            *y_data_box;
-   hypre_Box            *x_data_box;
-                     
-   double               *Ap;
-   double               *yp;
-   double               *xp;
-                       
-   int                   Ai;
-   int                   yi;
-   int                   xi;
-                     
-   hypre_Index           index;
-   hypre_IndexRef        start;
-   hypre_Index           stride;
-   hypre_Index           loop_size;
-                     
-   int                   i;
-   int                   loopi, loopj, loopk;
-
-   int                   ierr = 0;
-  
-   /* x = D^{-1} y */
-   hypre_SetIndex(stride, 1, 1, 1);
-   boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
-   hypre_ForBoxI(i, boxes)
-      {
-         box = hypre_BoxArrayBox(boxes, i);
-
-         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-
-         hypre_SetIndex(index, 0, 0, 0);
-         Ap = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-         xp = hypre_StructVectorBoxData(x, i);
-         yp = hypre_StructVectorBoxData(y, i);
-
-         start  = hypre_BoxIMin(box);
-
-         hypre_BoxGetSize(box, loop_size);
-
-         hypre_BoxLoop3Begin(loop_size,
-                             A_data_box, start, stride, Ai,
-                             x_data_box, start, stride, xi,
-                             y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-            {
-               xp[xi] = yp[yi] / Ap[Ai];
-            }
-         hypre_BoxLoop3End(Ai, xi, yi);
-      }
-
-   return ierr;
+   return ( HYPRE_FlexGMRESSetModifyPC( (HYPRE_Solver) solver,  (HYPRE_PtrToModifyPCFcn) modify_pc));
+   
 }
 

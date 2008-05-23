@@ -107,6 +107,15 @@ HYPRE_SStructPCGSetTol( HYPRE_SStructSolver solver,
 {
    return( HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructPCGSetAbsoluteTol( HYPRE_SStructSolver solver,
+                        double              tol )
+{
+   return( HYPRE_PCGSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
+}
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

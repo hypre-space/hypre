@@ -75,6 +75,8 @@ FILES =\
  HYPRE_struct_sparse_msg.c\
  HYPRE_struct_pcg.c\
  HYPRE_struct_gmres.c\
+ HYPRE_struct_flexgmres.c\
+ HYPRE_struct_lgmres.c\
  jacobi.c\
  pcg_struct.c\
  pfmg2_setup_rap.c\
