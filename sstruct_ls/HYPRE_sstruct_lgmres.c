@@ -167,17 +167,6 @@ HYPRE_SStructLGMRESSetMaxIter( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructLGMRESSetStopCrit
- *--------------------------------------------------------------------------*/
-
-int
-HYPRE_SStructLGMRESSetStopCrit( HYPRE_SStructSolver solver,
-                               int                 stop_crit )
-{
-   return( HYPRE_LGMRESSetStopCrit( (HYPRE_Solver) solver, stop_crit ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_SStructLGMRESSetPrecond
  *--------------------------------------------------------------------------*/
 

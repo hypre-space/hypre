@@ -157,16 +157,6 @@ HYPRE_SStructFlexGMRESSetMaxIter( HYPRE_SStructSolver solver,
    return( HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
 
-/*--------------------------------------------------------------------------
- * HYPRE_SStructFlexGMRESSetStopCrit
- *--------------------------------------------------------------------------*/
-
-int
-HYPRE_SStructFlexGMRESSetStopCrit( HYPRE_SStructSolver solver,
-                               int                 stop_crit )
-{
-   return( HYPRE_FlexGMRESSetStopCrit( (HYPRE_Solver) solver, stop_crit ) );
-}
 
 /*--------------------------------------------------------------------------
  * HYPRE_SStructFlexGMRESSetPrecond

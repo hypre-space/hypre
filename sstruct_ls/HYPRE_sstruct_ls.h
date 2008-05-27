@@ -431,11 +431,7 @@ int HYPRE_SStructFlexGMRESSetMaxIter(HYPRE_SStructSolver solver,
 int HYPRE_SStructFlexGMRESSetKDim(HYPRE_SStructSolver solver,
                               int                 k_dim);
 
-/*
- * RE-VISIT
- **/
-int HYPRE_SStructFlexGMRESSetStopCrit(HYPRE_SStructSolver solver,
-                                  int                 stop_crit);
+
 
 /**
  * (Optional) Set the preconditioner to use.
@@ -574,11 +570,6 @@ int HYPRE_SStructLGMRESSetKDim(HYPRE_SStructSolver solver,
 int HYPRE_SStructLGMRESSetAugDim(HYPRE_SStructSolver solver,
                               int                 aug_dim);
 
-/*
- * RE-VISIT
- **/
-int HYPRE_SStructLGMRESSetStopCrit(HYPRE_SStructSolver solver,
-                                  int                 stop_crit);
 
 /**
  * (Optional) Set the preconditioner to use.

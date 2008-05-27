@@ -522,13 +522,13 @@ int HYPRE_SStructFlexGMRESSetTol ( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructFlexGMRESSetAbsoluteTol ( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructFlexGMRESSetMinIter ( HYPRE_SStructSolver solver , int min_iter );
 int HYPRE_SStructFlexGMRESSetMaxIter ( HYPRE_SStructSolver solver , int max_iter );
-int HYPRE_SStructFlexGMRESSetStopCrit ( HYPRE_SStructSolver solver , int stop_crit );
 int HYPRE_SStructFlexGMRESSetPrecond ( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
 int HYPRE_SStructFlexGMRESSetLogging ( HYPRE_SStructSolver solver , int logging );
 int HYPRE_SStructFlexGMRESSetPrintLevel ( HYPRE_SStructSolver solver , int level );
 int HYPRE_SStructFlexGMRESGetNumIterations ( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , double *norm );
 int HYPRE_SStructFlexGMRESGetResidual ( HYPRE_SStructSolver solver , void **residual );
+int HYPRE_SStructFlexGMRESSetModifyPC ( HYPRE_SStructSolver solver , HYPRE_PtrToModifyPCFcn modify_pc );
 
 /* HYPRE_sstruct_gmres.c */
 int HYPRE_SStructGMRESCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
@@ -593,7 +593,6 @@ int HYPRE_SStructLGMRESSetTol ( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructLGMRESSetAbsoluteTol ( HYPRE_SStructSolver solver , double atol );
 int HYPRE_SStructLGMRESSetMinIter ( HYPRE_SStructSolver solver , int min_iter );
 int HYPRE_SStructLGMRESSetMaxIter ( HYPRE_SStructSolver solver , int max_iter );
-int HYPRE_SStructLGMRESSetStopCrit ( HYPRE_SStructSolver solver , int stop_crit );
 int HYPRE_SStructLGMRESSetPrecond ( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
 int HYPRE_SStructLGMRESSetLogging ( HYPRE_SStructSolver solver , int logging );
 int HYPRE_SStructLGMRESSetPrintLevel ( HYPRE_SStructSolver solver , int level );
