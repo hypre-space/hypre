@@ -489,11 +489,6 @@ int HYPRE_FlexGMRESSetConvergenceFactorTol(HYPRE_Solver solver, double cf_tol);
 /*
  * RE-VISIT
  **/
-int HYPRE_FlexGMRESSetStopCrit(HYPRE_Solver solver, int stop_crit);
-
-/*
- * RE-VISIT
- **/
 int HYPRE_FlexGMRESSetMinIter(HYPRE_Solver solver, int min_iter);
 
 /**
@@ -788,10 +783,6 @@ HYPRE_LGMRESSetAbsoluteTol(HYPRE_Solver solver,
  **/
 int HYPRE_LGMRESSetConvergenceFactorTol(HYPRE_Solver solver, double cf_tol);
 
-/*
- * RE-VISIT
- **/
-int HYPRE_LGMRESSetStopCrit(HYPRE_Solver solver, int stop_crit);
 
 /*
  * RE-VISIT
