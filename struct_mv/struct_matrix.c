@@ -1146,6 +1146,7 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
    hypre_Box           *grid_box;
    hypre_Box           *int_box;
                    
+   int                 *symm_elements;
    hypre_BoxArray      *data_space;
    hypre_Box           *data_box;
    hypre_IndexRef       data_start;
@@ -1189,6 +1190,8 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
 
    hypre_SetIndex(data_stride, 1, 1, 1);
 
+   symm_elements = hypre_StructMatrixSymmElements(matrix);
+
    int_box = hypre_BoxCreate();
 
    for (i = istart; i < istop; i++)
@@ -1205,20 +1208,24 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
 
          for (s = 0; s < num_stencil_indices; s++)
          {
-            datap = hypre_StructMatrixBoxData(matrix, i,
-                                              stencil_indices[s]);
-
-            hypre_BoxGetSize(int_box, loop_size);
-
-            hypre_BoxLoop1Begin(loop_size,
-                                data_box,data_start,data_stride,datai);
+            /* only clear stencil entries that are explicitly stored */
+            if (symm_elements[stencil_indices[s]] < 0)
+            {
+               datap = hypre_StructMatrixBoxData(matrix, i,
+                                                 stencil_indices[s]);
+               
+               hypre_BoxGetSize(int_box, loop_size);
+               
+               hypre_BoxLoop1Begin(loop_size,
+                                   data_box,data_start,data_stride,datai);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
 #include "hypre_box_smp_forloop.h"
-            hypre_BoxLoop1For(loopi, loopj, loopk, datai)
-            {
-               datap[datai] = 0.0;
+               hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+               {
+                  datap[datai] = 0.0;
+               }
+               hypre_BoxLoop1End(datai);
             }
-            hypre_BoxLoop1End(datai);
          }
       }
    }
