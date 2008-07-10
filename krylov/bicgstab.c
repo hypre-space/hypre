@@ -104,7 +104,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
    (bicgstab_data -> r)              = NULL;
    (bicgstab_data -> r0)             = NULL;
    (bicgstab_data -> s)              = NULL;
-   (bicgstab_data -> v)              = NULL;
+   (bicgstab_data -> v)             = NULL;
    (bicgstab_data -> matvec_data)    = NULL;
    (bicgstab_data -> norms)          = NULL;
    (bicgstab_data -> log_file_name)  = NULL;
@@ -232,7 +232,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    void             *r            = (bicgstab_data -> r);
    void             *r0           = (bicgstab_data -> r0);
    void             *s            = (bicgstab_data -> s);
-   void             *v            = (bicgstab_data -> v);
+   void             *v           = (bicgstab_data -> v);
    void             *p            = (bicgstab_data -> p);
    void             *q            = (bicgstab_data -> q);
 
@@ -451,6 +451,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 
         iter++;
 
+	(*(bicgstab_functions->Axpy))(-1.0,v,v);
         precond(precond_data, A, p, v);
         (*(bicgstab_functions->Matvec))(matvec_data,1.0,A,v,0.0,q);
       	temp = (*(bicgstab_functions->InnerProd))(r0,q);
@@ -463,6 +464,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	}
 	(*(bicgstab_functions->Axpy))(alpha,v,x);
 	(*(bicgstab_functions->Axpy))(-alpha,q,r);
+	(*(bicgstab_functions->Axpy))(-1.0,v,v);
         precond(precond_data, A, r, v);
         (*(bicgstab_functions->Matvec))(matvec_data,1.0,A,v,0.0,s);
       	gamma = (*(bicgstab_functions->InnerProd))(r,s) /
