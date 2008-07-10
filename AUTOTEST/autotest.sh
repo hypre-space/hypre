@@ -33,7 +33,7 @@ output_dir="$testing_dir/AUTOTEST-`date +%Y.%m.%d-%a`"
 src_dir="$testing_dir/linear_solvers"
 cvs_opts=""
 summary_file="SUMMARY.html"
-summary_subject="NEW Autotest Error Summary `date +%D`"
+summary_subject="Autotest Error Summary `date +%D`"
 email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 # email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 
