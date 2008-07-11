@@ -49,10 +49,10 @@ DSCG_Iterations = 2
 Final Relative Residual Norm = 5.456956e-09
 
 # Output file: solvers.out.11
-Iterations = 7
-PCG_Iterations = 4
+Iterations = 5
+PCG_Iterations = 2
 DSCG_Iterations = 3
-Final Relative Residual Norm = 5.193610e-09
+Final Relative Residual Norm = 3.235996e-09
 
 # Output file: solvers.out.1.lobpcg
 Iterations = 4
