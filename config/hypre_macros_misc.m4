@@ -237,6 +237,9 @@ then
             ;;
           *)
             CFLAGS="-O"
+            if test "$casc_using_openmp" = "yes" ; then
+               CFLAGS="$CFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -252,7 +255,7 @@ then
       gCC|mpiCC)
         CXXFLAGS="-O2"
         ;;
-      icc)
+      icpc|icc)
         CXXFLAGS="-O3"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
@@ -267,7 +270,7 @@ then
       KCC|mpiKCC)
         CXXFLAGS="-fast +K3"
         ;;
-      CC|mpCC|mpiicc|mpxlC|xlC|cxx)
+      CC|mpCC|mpiicpc|mpiicc|mpxlC|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -O2"
@@ -301,6 +304,9 @@ then
             ;;
           *)
             CXXFLAGS="-O"
+            if test "$casc_using_openmp" = "yes" ; then
+               CXXFLAGS="$CXXFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -365,6 +371,9 @@ then
             ;;
           *)
             FFLAGS="-O"
+            if test "$casc_using_openmp" = "yes" ; then
+               FFLAGS="$FFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -437,6 +446,9 @@ then
             ;;
           *)
             CFLAGS="-g"
+            if test "$casc_using_openmp" = "yes" ; then
+               CFLAGS="$CFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -455,7 +467,7 @@ then
       KCC|mpiKCC)
         CXXFLAGS="-g +K3"
         ;;
-      icc)
+      icpc|icc)
         CXXFLAGS="-g"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
@@ -467,7 +479,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|mpCC|mpiicc|mpxlC|xlC|cxx)
+      CC|mpCC|mpiicpc|mpiicc|mpxlC|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -g"
@@ -501,6 +513,9 @@ then
             ;;
           *)
             CXXFLAGS="-g"
+            if test "$casc_using_openmp" = "yes" ; then
+               CXXFLAGS="$CXXFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -565,6 +580,9 @@ then
             ;;
           *)
             FFLAGS="-g"
+            if test "$casc_using_openmp" = "yes" ; then
+               FFLAGS="$FFLAGS -openmp"
+            fi
             ;;
         esac
         ;;

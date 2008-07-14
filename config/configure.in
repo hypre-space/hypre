@@ -787,7 +787,7 @@ if test "$casc_user_chose_ccompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(CC, [mpxlc xlc mpguidec guidec icc pgcc cc], [""])
+      AC_CHECK_PROGS(CC, [mpxlc xlc mpguidec guidec mpiicc icc pgcc cc], [""])
    elif test "$casc_using_mpi" = "no"
    then
       AC_CHECK_PROGS(CC, [xlc xlC gcc g++ pgcc pgCC icc icpc cc CC kcc KCC], [""])
@@ -805,7 +805,7 @@ if test "$casc_user_chose_cxxcompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(CXX, [mpxlC xlC mpguidec++ guidec++ icpc pgCC CC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC xlC mpguidec++ guidec++ mpiicpc icpc pgCC CC], [""])
    elif test "$casc_using_mpi" = "no"
    then
       AC_CHECK_PROGS(CXX, [xlC xlc g++ gcc pgCC pgcc icpc icc CC cc KCC kcc], [""])
@@ -823,7 +823,7 @@ if test "$casc_user_chose_fcompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(F77, [mpxlf xlf mpguidef77 guidef77 ifort pg77 f77], [""])
+      AC_CHECK_PROGS(F77, [mpxlf xlf mpguidef77 guidef77 mpiifort ifort pg77 f77], [""])
    elif test "$casc_using_mpi" = "no"
    then
       AC_CHECK_PROGS(F77, [xlf g77 pgf77 ifort f77], [""])
