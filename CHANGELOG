@@ -31,6 +31,17 @@
 # recent release.
 #=============================================================================
 
+#====================================
+
+Version 2.4.0b released XXXX/XX/XX
+
+- Added two additional Krylov solvers: Flexible GMRES and LGMRES
+
+- Added a fortran example: /examples/ex5f.f
+
+
+
+
 
 #====================================
 
