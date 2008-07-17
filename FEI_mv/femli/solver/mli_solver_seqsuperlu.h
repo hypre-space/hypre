@@ -24,18 +24,14 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #ifdef MLI_SUPERLU
 
 #ifndef __MLI_SOLVER_SEQSUPERLU_H__
 #define __MLI_SOLVER_SEQSUPERLU_H__
 
 #include <stdio.h>
-#include "dsp_defs.h"
-#include "superlu_util.h"
+#include "SRC/slu_ddefs.h"
+#include "SRC/slu_util.h"
 #include "matrix/mli_matrix.h"
 #include "vector/mli_vector.h"
 #include "solver/mli_solver.h"
