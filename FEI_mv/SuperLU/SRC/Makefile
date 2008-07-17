@@ -149,7 +149,7 @@ FILES =\
  sp_ienv.c \
  sp_preorder.c \
  superlu_timer.c \
- util.o
+ slu_util.c
 
 OBJS = ${FILES:.c=.o}
 
