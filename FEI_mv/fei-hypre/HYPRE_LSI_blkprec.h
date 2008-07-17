@@ -54,8 +54,10 @@
 // -------------------------------------------------------------------------
 
 #define HYPRE_INCFLOW_BDIAG  1
-#define HYPRE_INCFLOW_BTRI   2
-#define HYPRE_INCFLOW_BLU    3
+#define HYPRE_INCFLOW_SDIAG  2
+#define HYPRE_INCFLOW_BTRI   3
+#define HYPRE_INCFLOW_BLU    4
+
 
 // *************************************************************************
 // FEI include files 

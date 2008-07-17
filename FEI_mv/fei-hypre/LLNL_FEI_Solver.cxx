@@ -41,9 +41,13 @@
 #include "HYPRE.h"
 #include "LLNL_FEI_Solver.h"
 
-#if HAVE_SUPERLU
+#if HAVE_SUPERLU_20
 #include "dsp_defs.h"
 #include "superlu_util.h"
+#endif
+#if HAVE_SUPERLU
+#include "SRC/slu_ddefs.h"
+#include "SRC/slu_util.h"
 #endif
 
 /**************************************************************************
@@ -1120,7 +1124,9 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    int    *permC, *permR, *diagIA, *diagJA;
    double *cscAA, diagPivotThresh, dropTol, *rVec, rnorm;
    double *diagAA;
-   char   refact[1], trans[1];
+   trans_t           trans;
+   superlu_options_t slu_options;
+   SuperLUStat_t     slu_stat;
    SuperMatrix superLU_Amat;
    SuperMatrix superLU_Lmat;
    SuperMatrix superLU_Umat;
@@ -1172,23 +1178,29 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
     * -------------------------------------------------------------*/
 
    dCreate_CompCol_Matrix(&superLU_Amat, localNRows, localNRows, 
-                          cscJA[localNRows], cscAA, cscIA, cscJA, NC, 
-                          D_D, GE);
-   *refact   = 'N';
+                          cscJA[localNRows], cscAA, cscIA, cscJA, SLU_NC, 
+                          SLU_D, SLU_GE);
    etree     = new int[localNRows];
    permC     = new int[localNRows];
    permR     = new int[localNRows];
    permcSpec = 0;
    get_perm_c(permcSpec, &superLU_Amat, permC);
-   sp_preorder(refact, &superLU_Amat, permC, etree, &AC);
+   slu_options.Fact = DOFACT;
+   slu_options.SymmetricMode = NO;
+   sp_preorder(&slu_options, &superLU_Amat, permC, etree, &AC);
    diagPivotThresh = 1.0;
    dropTol = 0.0;
    panelSize = sp_ienv(1);
    relax = sp_ienv(2);
-   StatInit(panelSize, relax);
+   StatInit(&slu_stat);
    lwork = 0;
-   dgstrf(refact, &AC, diagPivotThresh, dropTol, relax, panelSize,
-          etree,NULL,lwork,permR,permC,&superLU_Lmat,&superLU_Umat,&info);
+   slu_options.ColPerm = MY_PERMC;
+   slu_options.DiagPivotThresh = diagPivotThresh;
+
+   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+          etree, NULL, lwork, permC, permR, &superLU_Lmat,
+          &superLU_Umat, &slu_stat, &info);
+
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);
    delete [] etree;
@@ -1200,14 +1212,15 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    for ( irow = 0; irow < localNRows; irow++ ) 
       solnVector_[irow] = rhsVector_[irow];
    dCreate_Dense_Matrix(&B, localNRows, 1, solnVector_, localNRows, 
-                        DN, D_D, GE);
+                        SLU_DN, SLU_D, SLU_GE);
 
    /* -------------------------------------------------------------
     * solve the problem
     * -----------------------------------------------------------*/
 
-   *trans  = 'N';
-   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permR, permC, &B, &info);
+   trans = NOTRANS;
+   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permC, permR, &B, 
+           &slu_stat, &info);
    rVec = new double[localNRows];
    matPtr_->matvec( solnVector_, rVec ); 
    for ( irow = 0; irow < localNRows; irow++ ) 
@@ -1235,7 +1248,7 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    }
    delete [] permR;
    delete [] permC;
-   StatFree();
+   StatFree(&slu_stat);
    return (info);
 #else
    return (1);

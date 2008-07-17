@@ -360,6 +360,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsBetaAggLevels_ = 1;
    amsBetaRelaxType_ = 3;
    amsBetaStrengthThresh_ = 0.25;
+   FEI_mixedDiagFlag_ = 0;
+   FEI_mixedDiag_ = NULL;
    sysPDEMethod_ = -1;
    sysPDEFormat_ = -1;
    sysPDETol_ = 0.0;
@@ -604,6 +606,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    if (AMSData_.EdgeNodeList_ != NULL) delete [] AMSData_.EdgeNodeList_;
    if (AMSData_.NodeNumbers_  != NULL) delete [] AMSData_.NodeNumbers_;
    if (AMSData_.NodalCoord_   != NULL) delete [] AMSData_.NodalCoord_;
+   if (FEI_mixedDiag_ != NULL) delete [] FEI_mixedDiag_;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1567,6 +1570,12 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
       printf("sumIntoSystemMatrix ERROR : matrix already assembled\n");
       exit(1);
    }
+   if (FEI_mixedDiagFlag_ && FEI_mixedDiag_ == NULL)
+   {
+      FEI_mixedDiag_ = new double[localEndRow_-localStartRow_+1];
+      for ( i = 0; i < localEndRow_-localStartRow_+1; i++ )
+         FEI_mixedDiag_[i] = 0.0;
+   }
 
    //-------------------------------------------------------------------
    // load the local matrix
@@ -1624,6 +1633,9 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
             colIndex = storedIndices_[auxStoredIndices_[j]] + 1;
          else
             colIndex = ptCols[j] + 1;
+
+         if (FEI_mixedDiag_ && ptRows[i] == ptCols[j] && numPtRows > 1)
+            FEI_mixedDiag_[ptCols[numPtCols-1]-localStartRow_+1] += auxValues[j]; 
 
          while ( index < rowLeng && indptr[index] < colIndex ) index++; 
          if ( index >= rowLeng )
@@ -2170,6 +2182,15 @@ int HYPRE_LinSysCore::matrixLoadComplete()
          MPI_Barrier(comm_);
       }
       if ( HYOutputLevel_ & HYFEI_STOPAFTERPRINT ) exit(1);
+   }
+   if (FEI_mixedDiagFlag_)
+   {
+      for ( i = 0; i < localEndRow_-localStartRow_+1; i++ )
+      {
+         FEI_mixedDiag_[i] *= 0.125;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+            printf("Mixed diag %5d = %e\n", i, FEI_mixedDiag_[i]);
+      }
    }
 
    //-------------------------------------------------------------------
@@ -5041,7 +5062,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               printf("* SuperLU (sequential) solver \n");
               printf("*--------------------------------------------------\n");
            }
-           solveUsingSuperLU(status);
+           rnorm = solveUsingSuperLU(status);
 #ifndef NOFEI
            if ( status == 1 ) status = 0; 
 #endif      
@@ -5061,7 +5082,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               printf("* SuperLU (sequential) solver with refinement \n");
               printf("*--------------------------------------------------\n");
            }
-           solveUsingSuperLUX(status);
+           rnorm = solveUsingSuperLUX(status);
 #ifndef NOFEI
            if ( status == 1 ) status = 0; 
 #endif      

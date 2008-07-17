@@ -46,9 +46,25 @@
  * SUPERLU include files
  *-------------------------------------------------------------------------*/
 
-#ifdef HAVE_SUPERLU
+#ifdef HAVE_SUPERLU_20
 #include "dsp_defs.h"
 #include "superlu_util.h"
+
+typedef struct HYPRE_SuperLU_Struct
+{
+   int          factorized_;
+   int          *permR_;
+   int          *permC_;
+   SuperMatrix  SLU_Lmat;
+   SuperMatrix  SLU_Umat;
+   int          outputLevel_;
+}
+HYPRE_SuperLU;
+#endif
+
+#ifdef HAVE_SUPERLU
+#include "SRC/slu_ddefs.h"
+#include "SRC/slu_util.h"
 
 typedef struct HYPRE_SuperLU_Struct
 {
@@ -102,7 +118,6 @@ int HYPRE_ParCSR_SuperLUDestroy( HYPRE_Solver solver )
 #ifdef HAVE_SUPERLU
    HYPRE_SuperLU *sluPtr = (HYPRE_SuperLU *) solver;
    assert ( sluPtr != NULL );
-   if ( sluPtr->permR_ != NULL ) StatFree();
    if ( sluPtr->permR_ != NULL ) free(sluPtr->permR_);
    if ( sluPtr->permC_ != NULL ) free(sluPtr->permC_);
    free(sluPtr);
@@ -144,10 +159,12 @@ int HYPRE_ParCSR_SuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    int    irow, colNum, index, *cscI, *cscJ, jcol, *colLengs;
    int    *etree, permcSpec, lwork, panelSize, relax, info;
    double *AdiagA, *cscA, diagPivotThresh, dropTol;
-   char    refact[1];
-   hypre_CSRMatrix *Adiag;
-   HYPRE_SuperLU   *sluPtr;
-   SuperMatrix     sluAmat, auxAmat;
+   char              refact[1];
+   hypre_CSRMatrix   *Adiag;
+   HYPRE_SuperLU     *sluPtr;
+   SuperMatrix       sluAmat, auxAmat;
+   superlu_options_t slu_options;
+   SuperLUStat_t     slu_stat;
 
    /* ---------------------------------------------------------------- */
    /* get matrix information                                           */
@@ -219,27 +236,32 @@ int HYPRE_ParCSR_SuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* ---------------------------------------------------------------- */
                                                                                 
    dCreate_CompCol_Matrix(&sluAmat,nrows,nrows,cscJ[nrows],cscA,cscI,
-                          cscJ, NC, D_D, GE);
-   *refact = 'N';
+                          cscJ, SLU_NC, SLU_D, SLU_GE);
    etree   = (int *) malloc(nrows * sizeof(int));
    sluPtr->permC_  = (int *) malloc(nrows * sizeof(int));
    sluPtr->permR_  = (int *) malloc(nrows * sizeof(int));
    permcSpec = 0;
    get_perm_c(permcSpec, &sluAmat, sluPtr->permC_);
-   sp_preorder(refact, &sluAmat, sluPtr->permC_, etree, &auxAmat);
+   slu_options.Fact = DOFACT;
+   slu_options.SymmetricMode = NO;
+   sp_preorder(&slu_options, &sluAmat, sluPtr->permC_, etree, &auxAmat);
    diagPivotThresh = 1.0;
    dropTol = 0.0;
    panelSize = sp_ienv(1);
    relax = sp_ienv(2);
-   StatInit(panelSize, relax);
+   StatInit(&slu_stat);
    lwork = 0;
-   dgstrf(refact, &auxAmat, diagPivotThresh, dropTol, relax, panelSize,
-          etree,NULL,lwork,sluPtr->permR_,sluPtr->permC_,&(sluPtr->SLU_Lmat),
-          &(sluPtr->SLU_Umat),&info);
+   slu_options.ColPerm = MY_PERMC;
+   slu_options.DiagPivotThresh = diagPivotThresh;
+
+   dgstrf(&slu_options, &auxAmat, dropTol, relax, panelSize,
+          etree, NULL, lwork, sluPtr->permC_, sluPtr->permR_,
+          &(sluPtr->SLU_Lmat), &(sluPtr->SLU_Umat), &slu_stat, &info);
    Destroy_CompCol_Permuted(&auxAmat);
    Destroy_CompCol_Matrix(&sluAmat);
    free(etree);
    sluPtr->factorized_ = 1;
+   StatFree(&slu_stat);
    return 0;
 #else
    printf("HYPRE_ParCSR_SuperLUSetup ERROR - SuperLU not enabled.\n");
@@ -258,8 +280,9 @@ int HYPRE_ParCSR_SuperLUSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 #ifdef HAVE_SUPERLU
    int    nrows, i, info;
    double *bData, *xData;
-   char   trans[1];
    SuperMatrix B;
+   SuperLUStat_t slu_stat;
+   trans_t       trans;
    HYPRE_SuperLU *sluPtr = (HYPRE_SuperLU *) solver;
 
    /* ---------------------------------------------------------------- */
@@ -286,16 +309,18 @@ int HYPRE_ParCSR_SuperLUSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* solve                                                            */
    /* ---------------------------------------------------------------- */
 
-   dCreate_Dense_Matrix(&B, nrows, 1, bData, nrows, DN, D_D,GE);
-                                                                                
+   dCreate_Dense_Matrix(&B, nrows, 1, bData, nrows, SLU_DN, SLU_D,SLU_GE);
+
    /* -------------------------------------------------------------
     * solve the problem
     * -----------------------------------------------------------*/
-                                                                                
-   *trans  = 'N';
+
+   trans = NOTRANS;
+   StatInit(&slu_stat);
    dgstrs (trans, &(sluPtr->SLU_Lmat), &(sluPtr->SLU_Umat), 
-           sluPtr->permR_, sluPtr->permC_, &B, &info);
+           sluPtr->permC_, sluPtr->permR_, &B, &slu_stat, &info);
    Destroy_SuperMatrix_Store(&B);
+   StatFree(&slu_stat);
    return 0;
 #else
    printf("HYPRE_ParCSR_SuperLUSolve ERROR - SuperLU not enabled.\n");

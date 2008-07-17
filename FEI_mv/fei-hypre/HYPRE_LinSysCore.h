@@ -477,8 +477,8 @@ class HYPRE_LinSysCore
    void   setupPreconEuclid();
    void   setupPreconSysPDE();
    void   solveUsingBoomeramg(int&);
-   void   solveUsingSuperLU(int&);
-   void   solveUsingSuperLUX(int&);
+   double solveUsingSuperLU(int&);
+   double solveUsingSuperLUX(int&);
    void   solveUsingDSuperLU(int&);
    void   solveUsingY12M(int&);
    void   solveUsingAMGe(int&);
@@ -745,6 +745,8 @@ class HYPRE_LinSysCore
    double          MLI_Hybrid_ConvRate_;
    int             MLI_Hybrid_NTrials_;
    HYPRE_FEI_AMSData AMSData_;
+   int             FEI_mixedDiagFlag_;
+   double          *FEI_mixedDiag_;
 
    // ----------------------------------------------------------------------
    // ML Maxwell variables
