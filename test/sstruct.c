@@ -2046,6 +2046,15 @@ PrintUsage( char *progname,
       printf("                        60 - BiCGSTAB with BoomerAMG precond\n");
       printf("                        61 - BiCGSTAB with EUCLID precond\n");
       printf("                        62 - BiCGSTAB with ParaSails precond\n");
+
+      printf("                        70 - Flexible GMRES with SMG split precond\n");
+      printf("                        71 - Flexible GMRES with PFMG split precond\n");
+      printf("                        78 - Flexible GMRES with diagonal scaling\n");
+      printf("                        80 - Flexible GMRES with BoomerAMG precond\n");
+
+      printf("                        90 - LGMRES with BoomerAMG precond\n");
+
+
       printf("                        120- PCG with hybrid precond\n");
       printf("                        200- Struct SMG\n");
       printf("                        201- Struct PFMG\n");
@@ -2642,6 +2651,8 @@ main( int   argc,
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
         ((solver_id >= 40) && (solver_id < 50)) ||
         ((solver_id >= 60) && (solver_id < 70)) ||
+        ((solver_id >= 80) && (solver_id < 90)) ||
+        ((solver_id >= 90) && (solver_id < 100)) ||
         (solver_id == 120))
    {
        object_type = HYPRE_PARCSR;  
@@ -4205,6 +4216,212 @@ main( int   argc,
          HYPRE_ParCSRParaSailsDestroy(par_precond);
       }
    }
+
+
+
+ /*-----------------------------------------------------------
+    * Solve the system using Flexible GMRES
+    *-----------------------------------------------------------*/
+
+   if ((solver_id >= 70) && (solver_id < 80))
+   {
+      time_index = hypre_InitializeTiming("FlexGMRES Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructFlexGMRESCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, 5 );
+      HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, 100 );
+      HYPRE_FlexGMRESSetTol( (HYPRE_Solver) solver, 1.0e-06 );
+      HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver) solver, 1 );
+      HYPRE_FlexGMRESSetLogging( (HYPRE_Solver) solver, 1 );
+
+      if ((solver_id == 70) || (solver_id == 71))
+      {
+         /* use Split solver as preconditioner */
+         HYPRE_SStructSplitCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSplitSetMaxIter(precond, 1);
+         HYPRE_SStructSplitSetTol(precond, 0.0);
+         HYPRE_SStructSplitSetZeroGuess(precond);
+         if (solver_id == 70)
+         {
+            HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
+         }
+         else if (solver_id == 71)
+         {
+            HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
+         }
+         HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver) solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSolve,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
+                                    (HYPRE_Solver) precond );
+      }
+
+      else if (solver_id == 78)
+      {
+         /* use diagonal scaling as preconditioner */
+         precond = NULL;
+         HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver) solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
+                                    (HYPRE_Solver) precond );
+      }
+
+      HYPRE_FlexGMRESSetup( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
+                            (HYPRE_Vector) b, (HYPRE_Vector) x );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("FlexGMRES Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_FlexGMRESSolve( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
+                        (HYPRE_Vector) b, (HYPRE_Vector) x );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_FlexGMRESGetNumIterations( (HYPRE_Solver) solver, &num_iterations );
+      HYPRE_FlexGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, &final_res_norm );
+      HYPRE_SStructFlexGMRESDestroy(solver);
+
+      if ((solver_id == 70) || (solver_id == 71))
+      {
+         HYPRE_SStructSplitDestroy(precond);
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using ParCSR version of Flexible GMRES
+    *-----------------------------------------------------------*/
+
+   if ((solver_id >= 80) && (solver_id < 90))
+   {
+      time_index = hypre_InitializeTiming("FlexGMRES Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRFlexGMRESCreate(MPI_COMM_WORLD, &par_solver);
+      HYPRE_FlexGMRESSetKDim(par_solver, 5);
+      HYPRE_FlexGMRESSetMaxIter(par_solver, 100);
+      HYPRE_FlexGMRESSetTol(par_solver, 1.0e-06);
+      HYPRE_FlexGMRESSetPrintLevel(par_solver, 1);
+      HYPRE_FlexGMRESSetLogging(par_solver, 1);
+
+      if (solver_id == 80)
+      {
+         /* use BoomerAMG as preconditioner */
+         HYPRE_BoomerAMGCreate(&par_precond); 
+         HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
+         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_FlexGMRESSetPrecond( par_solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
+                                    par_precond);
+      }
+
+      HYPRE_FlexGMRESSetup( par_solver, (HYPRE_Matrix) par_A,
+                            (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("FlexGMRES Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_FlexGMRESSolve( par_solver, (HYPRE_Matrix) par_A,
+                        (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_FlexGMRESGetNumIterations( par_solver, &num_iterations);
+      HYPRE_FlexGMRESGetFinalRelativeResidualNorm( par_solver, &final_res_norm);
+      HYPRE_ParCSRFlexGMRESDestroy(par_solver);
+
+      if (solver_id == 80)
+      {
+         HYPRE_BoomerAMGDestroy(par_precond);
+      }
+   }
+
+
+  /*-----------------------------------------------------------
+    * Solve the system using ParCSR version of LGMRES
+    *-----------------------------------------------------------*/
+
+   if ((solver_id >= 90) && (solver_id < 100))
+   {
+      time_index = hypre_InitializeTiming("LGMRES Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRLGMRESCreate(MPI_COMM_WORLD, &par_solver);
+      HYPRE_LGMRESSetKDim(par_solver, 10);
+      HYPRE_LGMRESSetAugDim(par_solver, 2);
+      HYPRE_LGMRESSetMaxIter(par_solver, 100);
+      HYPRE_LGMRESSetTol(par_solver, 1.0e-06);
+      HYPRE_LGMRESSetPrintLevel(par_solver, 1);
+      HYPRE_LGMRESSetLogging(par_solver, 1);
+
+      if (solver_id == 90)
+      {
+         /* use BoomerAMG as preconditioner */
+         HYPRE_BoomerAMGCreate(&par_precond); 
+         HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
+         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_LGMRESSetPrecond( par_solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
+                                    par_precond);
+      }
+
+      HYPRE_LGMRESSetup( par_solver, (HYPRE_Matrix) par_A,
+                            (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("LGMRES Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_LGMRESSolve( par_solver, (HYPRE_Matrix) par_A,
+                        (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_LGMRESGetNumIterations( par_solver, &num_iterations);
+      HYPRE_LGMRESGetFinalRelativeResidualNorm( par_solver, &final_res_norm);
+      HYPRE_ParCSRLGMRESDestroy(par_solver);
+
+      if (solver_id == 90)
+      {
+         HYPRE_BoomerAMGDestroy(par_precond);
+      }
+   }
+
+
+
+
 
    /*-----------------------------------------------------------
     * Solve the system using ParCSR hybrid DSCG/BoomerAMG
