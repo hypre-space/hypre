@@ -29,6 +29,9 @@
 #    8: ParaSails_PCG
 #   20: Hybrid_PCG
 #
+
+
+
 # lobpcg: Run default case with all available PCG preconditioners
 #    1: BoomerAMG_PCG
 #    2: DS_PCG
@@ -40,6 +43,12 @@
 #	  unknown approach
 #	  hybrid approach with block smoother
 # 	  nodal approach
+#       more solvers:
+#        51: BoomerAMG_LGMRES
+#        50: DS_LGMRES
+#        61: BoomerAMG_FlexGMRES
+#        60: DS_FlexGMRES
+#
 #=============================================================================
 
 mpirun -np 2 ./ij -solver 1 -rhsrand > solvers.out.0
@@ -85,3 +94,9 @@ mpirun -np 2 ./ij -lobpcg -solver 43 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5 > s
 mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
 mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
 mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 > solvers.out.sysn
+
+#LGMRS and FlexGMRES
+mpirun -np 2 ./new_ij -solver 50 -rhsrand > solvers.out.101
+mpirun -np 2 ./new_ij -solver 51 -rhsrand > solvers.out.102
+mpirun -np 2 ./new_ij -solver 60 -rhsrand > solvers.out.103
+mpirun -np 2 ./new_ij -solver 61 -rhsrand > solvers.out.104

@@ -81,6 +81,21 @@ do
   tail -17 $i | head -6
 done >> ${TNAME}.out
 
+
+FILES="\
+ ${TNAME}.out.101\
+ ${TNAME}.out.102\
+ ${TNAME}.out.103\
+ ${TNAME}.out.104\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done >> ${TNAME}.out
+
+
 # Make sure that the output files are reasonable
 CHECK_LINE="Complexity"
 OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
