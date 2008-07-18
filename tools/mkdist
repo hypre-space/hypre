@@ -137,7 +137,8 @@ HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
 # store version info
 (
   cd $HYPRE_DIST_INSTALL_DIR
-  cp src/linear_solvers/COPYRIGHT_and_LICENSE .
+  cp src/linear_solvers/COPYRIGHT .
+  cp src/linear_solvers/COPYING.LESSER .
   cp src/linear_solvers/CHANGELOG .
   cp src/linear_solvers/INSTALL .
   cp src/linear_solvers/README .
@@ -156,7 +157,8 @@ rm -fr $HYPRE_DIR/src/babel/bHYPREClient-J
 echo "creating $HYPRE_DIR.tar file ..."
 tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/CHANGELOG \
-    $HYPRE_DIR/COPYRIGHT_and_LICENSE \
+    $HYPRE_DIR/COPYRIGHT \
+    $HYPRE_DIR/COPYING.LESSER \
     $HYPRE_DIR/INSTALL \
     $HYPRE_DIR/README \
     $HYPRE_DIR/docs \
