@@ -17,11 +17,11 @@ autotest_dir="$testing_dir/AUTOTEST"
 finished_dir="$testing_dir/AUTOTEST-FINISHED"
 output_dir="$testing_dir/AUTOTEST-`date +%Y.%m.%d-%a`"
 src_dir="$testing_dir/linear_solvers"
+remote_dir="hypre/testing"
 cvs_opts=""
 summary_file="SUMMARY.html"
 summary_subject="Autotest Error Summary `date +%D`"
 email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
-# email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 
 # Main loop
 test_opts=""
@@ -31,12 +31,14 @@ do
       -h|-help)
          cat <<EOF
 
-   $0 [options] [-checkout | -{test1} -{test2} ... | -summary]
+   $0 [options] [-checkout | -dist M.mm.rr | -{test1} -{test2} ... | -summary]
 
-   where: 
+   where:
 
       -checkout       Checks out the repository and updates the current AUTOTEST
                       directory.  Should be called before running tests.
+      -dist           Use the hypre release M.mm.rr (e.g. 2.4.0b). This is an
+                      alternative to -checkout and is used by testdist.sh.
       -{test}         Runs the indicated tests in sequence, which are associated
                       with specific machine names (e.g., -tux149, -alc, -up).
       -summary        Generates a summary file of passed, pending, failed tests.
@@ -71,6 +73,14 @@ EOF
          trap "cp -fR $testing_dir/linear_solvers/AUTOTEST $testing_dir" EXIT
          test_opts=""
          break
+         ;;
+
+     -dist)
+         shift
+         finished_dir="$testing_dir/AUTOTEST-hypre-$1"
+         src_dir="$testing_dir/hypre-$1/src"
+         remote_dir="hypre-$1/testing"
+         shift
          ;;
 
       # Generate a summary file in the output directory
@@ -145,7 +155,7 @@ EOF
                echo Subject: $summary_subject
                echo Content-Type: text/html
                echo MIME-Version: 1.0
-               
+
                cat $summary_file
 
             ) | /usr/sbin/sendmail -t
@@ -173,6 +183,7 @@ fi
 # Run tests
 for opt in $test_opts
 do
+   # TODO: use a "-<testname>:<hostname>" format to avoid this?
    case $opt in
       -tux[0-9]*-compilers)
          host=`echo $opt | awk -F- '{print $2}'`
@@ -198,7 +209,7 @@ do
    if [ ! -e autotest-$name-start ]; then
       echo "Test [machine-$name] started at  `date +%T` on `date +%D`" \
          >> autotest-$name-start
-      ./testsrc.sh $src_dir $host:hypre/testing/$host machine-$name.sh
+      ./testsrc.sh $src_dir $host:$remote_dir/$host machine-$name.sh
       echo "Test [machine-$name] finished at `date +%T` on `date +%D`" \
          >> autotest-$name-start
       mv machine-$name.??? $finished_dir
