@@ -42,4 +42,4 @@ shift
 # Run make
 cd $src_dir/test
 make clean
-make $@
+make -j $@
