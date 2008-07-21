@@ -74,10 +74,10 @@ dcopy_to_ucol(
 
 		new_next = nextu + segsze;
 		while ( new_next > nzumax ) {
-		    if (mem_error = dLUMemXpand(jcol, nextu, UCOL, &nzumax, Glu))
+		    if ((mem_error = dLUMemXpand(jcol, nextu, UCOL, &nzumax, Glu)))
 			return (mem_error);
 		    ucol = Glu->ucol;
-		    if (mem_error = dLUMemXpand(jcol, nextu, USUB, &nzumax, Glu))
+		    if ((mem_error = dLUMemXpand(jcol, nextu, USUB, &nzumax, Glu)))
 			return (mem_error);
 		    usub = Glu->usub;
 		    lsub = Glu->lsub;

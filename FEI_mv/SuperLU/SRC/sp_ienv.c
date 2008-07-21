@@ -3,6 +3,8 @@
  * History:             Modified from lapack routine ILAENV
  */
 #include "slu_Cnames.h"
+int xerbla_( char *srname , int *info );
+
 
 int
 sp_ienv(int ispec)
