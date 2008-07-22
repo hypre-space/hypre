@@ -12,6 +12,7 @@
  */
 #include <math.h>
 #include "slu_ddefs.h"
+extern logical lsame_(char *, char *);
 
 double dlangs(char *norm, SuperMatrix *A)
 {

@@ -25,10 +25,10 @@
 /* 
  * Function prototypes 
  */
-void dusolve(int, int, double*, double*);
-void dlsolve(int, int, double*, double*);
-void dmatvec(int, int, int, double*, double*, double*);
-
+extern void dusolve(int, int, double*, double*);
+extern void dlsolve(int, int, double*, double*);
+extern void dmatvec(int, int, int, double*, double*, double*);
+extern int  xerbla_( char *srname , int *info );
 
 void
 dgstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U,

@@ -12,6 +12,8 @@
  */
 #include <math.h>
 #include "slu_ddefs.h"
+extern int     xerbla_( char *srname , int *info );
+extern logical lsame_(char *, char *);
 
 void
 dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,

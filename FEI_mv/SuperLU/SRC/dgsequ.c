@@ -12,6 +12,7 @@
  */
 #include <math.h>
 #include "slu_ddefs.h"
+int  xerbla_( char *srname , int *info );
 
 void
 dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,

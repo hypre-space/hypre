@@ -16,11 +16,12 @@
 /* 
  * Function prototypes 
  */
-void dusolve(int, int, double*, double*);
-void dlsolve(int, int, double*, double*);
-void dmatvec(int, int, int, double*, double*, double*);
-int  dtrsv_(char *,char *,char *,int * ,double * ,int *,double *,int *);
-
+extern void dusolve(int, int, double*, double*);
+extern void dlsolve(int, int, double*, double*);
+extern void dmatvec(int, int, int, double*, double*, double*);
+extern int  dtrsv_(char *,char *,char *,int * ,double * ,int *,double *,int *);
+extern int  xerbla_( char *srname , int *info );
+extern logical lsame_(char *, char *);
 
 int
 sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L, 

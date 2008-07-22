@@ -7,6 +7,8 @@
  *
  */
 #include "slu_ddefs.h"
+extern int xerbla_( char *srname , int *info );
+extern logical lsame_(char *, char *);
 
 void
 dgssvx(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
