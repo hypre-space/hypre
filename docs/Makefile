@@ -46,22 +46,6 @@ USR_FILES =\
  usr_babel.tex\
  usr_manual.tex
 
-DEV_FILES =\
- dev_QA.tex\
- dev_autotest.tex\
- dev_coding.tex\
- dev_design.tex\
- dev_documentation.tex\
- dev_error_handling.tex\
- dev_install.tex\
- dev_language_interop.tex\
- dev_makefile.tex\
- dev_reference.tex\
- dev_repository.tex\
- dev_requirements.tex\
- dev_babel.tex\
- dev_manual.tex
-
 ##################################################################
 # Targets
 ##################################################################
@@ -95,8 +79,6 @@ clean:
 distclean: clean
 	@/bin/rm -fr HYPRE_usr_manual
 	@/bin/rm -f  HYPRE_usr_manual.p*
-	@/bin/rm -fr HYPRE_dev_manual
-	@/bin/rm -f  HYPRE_dev_manual.p*
 	@/bin/rm -fr HYPRE_ref_manual
 	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.p*
 	@/bin/rm -fr bHYPRE_ref_manual
@@ -108,10 +90,9 @@ distclean: clean
 
 html: ref_html bref_html
 
-pdf: usr dev ref_pdf bref_pdf
+pdf: usr ref_pdf bref_pdf
 
 usr: HYPRE_usr_manual.pdf
-dev: HYPRE_dev_manual.pdf
 
 ref: ref_html ref_pdf
 ref_html: HYPRE_ref_manual/index.html
@@ -129,15 +110,6 @@ HYPRE_usr_manual.pdf: version.tex ${USR_FILES}
 	${PDFLATEX} usr_manual
 	${PDFLATEX} usr_manual
 	mv usr_manual.pdf HYPRE_usr_manual.pdf
-
-##########
-
-HYPRE_dev_manual.pdf: version.tex ${DEV_FILES}
-	${PDFLATEX} dev_manual
-	bibtex dev_manual
-	${PDFLATEX} dev_manual
-	${PDFLATEX} dev_manual
-	mv dev_manual.pdf HYPRE_dev_manual.pdf
 
 ##########
 
