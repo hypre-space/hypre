@@ -48,6 +48,11 @@ cd docs
 make clean
 make
 
+# Test documentation build in docs_misc/
+cd docs_misc
+make clean
+make
+
 # Test documentation build in examples/docs/
 cd ../examples/docs
 make distclean
