@@ -471,7 +471,7 @@ dPrintPerf(SuperMatrix *L, SuperMatrix *U, mem_usage_t *mem_usage,
 
 
 
-print_double_vec(char *what, int n, double *vec)
+int print_double_vec(char *what, int n, double *vec)
 {
     int i;
     printf("%s: n %d\n", what, n);
