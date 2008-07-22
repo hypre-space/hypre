@@ -1,0 +1,350 @@
+
+Transitioning from existing HYPRE to Babelized HYPRE:
+=====================================================
+
+This document is designed to help users who have been using HYPRE's
+unstructured codes (the IJ interface for building matrices and
+vectors; Krylov solvers; unstructured preconditioners such as
+BoomerAMG and Pilut) convert to using the new interfaces provided
+through the Babel language interoperability tool.  Babel automatically
+provides interfaces to HYPRE, which is written in C language, in
+several other languages.  However, there are some prices to pay to
+achieve that language interoperability.  Most of these are borne by
+the HYPRE development team, but some changes spill over to the user.
+In many cases, there is an almost one to one translation from current
+function calls to new function calls, with the differences resulting
+from the dictates of the Babel system, for example the naming scheme
+of functions.  In other cases, the changes may involve a couple of
+lines since Babel dictates certain conventions, e.g., for array
+arguments.
+
+This document takes a "how to" approach for those who are looking to
+make a quick transition.  However, the most comprehensive approach to
+understanding Babelized HYPRE is to utilize HYPRE's interface
+description file, written in Babel's "SIDL" interface definition
+language, along with a basic understanding of how the Babel tool
+translates SIDL into interfaces for specfic languages.  HYPRE's SIDL
+file is located in the HYPRE release in 'babel/Interfaces.idl'.  The
+Babel website, at 'www.llnl.gov/CASC/components' contains a
+description of the SIDL language and its translation into interfaces
+in different languages, as well as other useful information on Babel.
+The complete C interface to HYPRE that is generated from HYPRE's SIDL
+file is located in the HYPRE release at 'babel/bHYPREClient-C/' in
+files of the form 'bHYPRE_ObjectName.h', including comments, and these
+should be considered self-contained descriptions of the Babelized
+interface to HYPRE.  A reference manual that is derived from these
+comments is also available in the 'docs' directory; look at the files
+with the 'bHYPRE_' prefixes.
+
+Note that the SIDL language is object-oriented, whereas HYPRE is
+written in C, which is not an object-oriented language.  Babel hides
+the details of the conversion between the object oriented interface
+and the procedural HYPRE library from both the user and the developer.
+However, Babelized HYPRE can be used in a fully object-oriented way by
+users comfortable with that paradigm.  In particular, the interface
+produced by Babel is easiest to understand by someone familiar with
+OO.  It is not necessary, however.  In the following, we will make
+reference to object oriented notions, but they will not be necessary
+for the user just looking to switch interfaces.  In general, it is
+generally sufficient to just consider an object a "distinct part" of
+HYPRE if one is not an OO programmer.  E.g., GMRES is a logical part
+of HYPRE; in Babelized HYPRE, GMRES is an object.
+
+We will describe the changes for a user program calling Babelized
+HYPRE from the C language.  Fortran users can get Fortran-specific
+information in the '*.fif' files in 'babel/bHYPREClient-F/'.
+
+General conventions:
+--------------------
+
+Whereas all user-callable functions in existing HYPRE are prefaced
+with "HYPRE_", all user callable functions in Babelized HYPRE are
+prefaced with "bHYPRE_".
+
+All Babelized HYPRE names have the same naming convention:
+bHYPRE_ClassName_FunctionName.  Existing HYPRE had a similar format,
+HYPRE_ClassNameFunctionName (note the additional underscore in
+Babelized HYPRE), although there are occasional inconsistencies in
+this convention in existing HYPRE.
+
+The use of Babel automatically provides several additional functions
+that users can call for each object in bHYPRE.  These can be
+recognized by a slight shift from the above naming convention: either
+the function is not capitalized, i.e. bHYPRE_ObjectName_functionname,
+or there is an additional underscore, i.e. bHYPRE_ObjectName__function
+name.  These functions do not generally correspond to any existing
+functions in HYPRE, as they are generally more esoteric functions of
+interest to true OO programmers.  Nonetheless, some of them are
+necessary additions that users will have to use, and we will detail
+them below. Extensive documentation on these functions is available on
+the Babel website.
+
+All Babelized HYPRE functions except some of the automatically
+provided functions discussed in the previous paragraph take an object
+of the class in the name of the function as the first argument. E.g.,
+bHYPRE_ClassName_FunctionName always takes a ClassName as its first
+argument.
+
+MPI Communicators: many existing HYPRE classes include an MPI
+communicator in their "Create" function.  Babelized HYPRE often
+requires that the communicator be passed in in a separate call
+beforehand.  So, for example,
+
+     ierr += HYPRE_IJMatrixCreate( comm, ilower, iupper,
+                                   jlower, jupper, &ij_A );
+
+in existing HYPRE becomes two functions in Babelized HYPRE (assuming
+here that the object 'bHYPRE_ij_A' has already been created):
+
+     
+     ierr += bHYPRE_IJBuildMatrix_SetCommunicator( bHYPRE_ij_A, comm );
+     ierr += bHYPRE_IJBuildMatrix_SetLocalRange( bHYPRE_ij_A, 
+                                                 ilower, iupper,
+                                                 jlower, jupper );
+
+Declaring and allocating data:
+------------------------------
+				   
+One of the more confusing things to deal with when migrating from
+existing HYPRE to Babelized HYPRE is the declaration and
+allocation/creation of HYPRE objects.  Experienced OO programmers will
+have less trouble with this aspect of the transition, but even non-OO
+programmers can quickly learn the appropriate pattern of changes.
+
+Referring to the above example, let us give the full sequence of
+declarations and creation routines for both the existing HYPRE:
+
+     HYPRE_IJMatrix  ij_A;
+     /* .. stuff .... */
+     ierr += HYPRE_IJMatrixCreate( comm, ilower, iupper,
+                                   jlower, jupper, &ij_A );
+     ierr += HYPRE_IJMatrixSetObjectType( ij_A, HYPRE_PARCSR );
+
+and the Babelized equivalent:
+
+     bHYPRE_IJBuildMatrix   bHYPRE_ij_A;
+     bHYPRE_IJParCSRMatrix  bHYPRE_ijparcsr_A;
+     /* ...stuff... */
+     bHYPRE_ijparcsr_A = bHYPRE_IJParCSRMatrix__create();
+     bHYPRE_ij_A = bHYPRE_IJBuildMatrix__cast( bHYPRE_ijparcsr_A );
+     ierr += bHYPRE_IJBuildMatrix_SetCommunicator( bHYPRE_ij_A, comm );
+     ierr += bHYPRE_IJBuildMatrix_SetLocalRange( bHYPRE_ij_A, 
+                                                 ilower, iupper,
+                                                 jlower, jupper );
+
+The Babelized version of this process is a slightly longer.  One of
+the extra lines is the MPI communicator issue referred to above, but
+the rest are part of Babel's object oriented model.  Let us go through
+the Babelized HYPRE lines one by one.
+
+     bHYPRE_IJBuildMatrix   bHYPRE_ij_A;
+
+In both existing HYPRE and Babelized HYPRE, there is a difference
+between a "conceptual interface" and an "underlying storage
+format". In existing HYPRE, "IJ" is a conceptual interface, and the
+user indicated that by declaring
+
+     HYPRE_IJMatrix  ij_A;
+
+This indicates that "ij_A" is a matrix that uses the IJ conceptual
+interface. In Babelized HYPRE, the equivalent declaration is to say
+that bHYPRE_ij_A (we use the convention here of prefacing all
+Babelized bHYPRE objects by "bHYPRE_" as a mnemonic to indicate that
+they are Babelized HYPRE objects.  This is not required in user code
+however) is of the type "bHYPRE_IJBuildMatrix" (we will explain the
+difference between IJBuildMatrix and IJMatrix below).
+
+The existing HYPRE line 
+
+     ierr += HYPRE_IJMatrixSetObjectType( ij_A, HYPRE_PARCSR );
+
+determines the "underlying storage type" in existing HYPRE. In
+Babelized HYPRE, instead of doing this through a HYPRE-defined
+function call (SetObjectType), the underlying storage type is
+specified by declaring an object of this specific type and then
+associating the conceptual interface with the underlying storage type
+through assignment, with some "casting" involved for technical
+reasons.  To wit:
+
+     bHYPRE_IJParCSRMatrix  bHYPRE_ijparcsr_A;
+
+declares that bHYPRE_ijparcsr_A, a variable that will exist only for
+clarity's sake for this example, will be of an underlying storage type
+"IJParCSRMatrix".
+
+     bHYPRE_ijparcsr_A = bHYPRE_IJParCSRMatrix__create();
+
+This allocates memory for this object; in existing HYPRE, this is done
+inside of the HYPRE-defined "Create" function, so this is an
+additional function that must be called in Babelized HYPRE.
+
+     bHYPRE_ij_A = bHYPRE_IJBuildMatrix__cast( bHYPRE_ijparcsr_A );
+
+This line essentially says "the object that we declared to be an IJ
+conceptual interface is really the same object as the one we declared
+to be a matrix with underlying storage type ParCSR".  The "cast"
+function is a Babel supplied function that allows up and down casting
+of sub and super classes, for experienced OO programmers.  For OO
+novices, just consider this line a necessary evil of HYPRE's split
+between conceptual interfaces and underlying storage types.
+
+Note that it is not necessary to separately declare bHYPRE_ijparcsr_A
+as we did above.  The __create function and the cast function can be
+combined in one line:
+
+     bHYPRE_ij_A = bHYPRE_IJBuildMatrix__cast(
+        bHYPRE_IJParCSRMatrix__create() );
+
+We have already explained the separate "SetCommunicator" function, so
+let's move to the last function call:
+
+     ierr += bHYPRE_IJBuildMatrix_SetLocalRange( bHYPRE_ij_A, 
+                                                 ilower, iupper,
+                                                 jlower, jupper );
+
+This function catches the Babelized HYPRE version up to the point
+where the current HYPRE "Create" function is.  At this point, the
+object is allocated in memory, the underlying storage type has been
+set, the communicator has been set, and some information about the
+matrix sizes has been given to the object.  Note that the current
+HYPRE version of "Create" returns the created matrix, by reference, as
+the last argument.  In Babelized HYPRE, the memory was allocated for
+the object in the __create routine, so there is no need to return the
+object by reference.  Like all Babelized HYPRE functions (except for
+some of the automatically generated ones), this function takes the
+object being operated on as the first argument.
+
+Array arguments:
+----------------
+
+To achieve language interoperability, Babel requires that array
+arguments be passed into Babelized HYPRE via a Babel-specific
+mechanism.  From C programs, this is a fairly automatic process
+because a simple Babel mechanism (the "borrow" mechanism) can be
+used. In essence, instead of using natural C arrays for array
+arguments, Babel dictates that the user's array be inserted into a
+Babel-specified structure, which additional contains information such
+as indexing conventions and array sizes that are necessary for
+language interoperability.
+
+Consider the array "cols" in the following example from current HYPRE:
+
+   int  *cols;
+
+   /* ...code to allocate and fill cols... */
+
+   ierr += HYPRE_IJMatrixSetValues( ij_A, nrows, ncols, rows, cols, values );
+
+Additional code must be inserted for Babelized HYPRE (and the call to
+SetValues must be changed to reflect the new call); the result is:
+
+   int                    *cols;
+   struct SIDL_int__array *bHYPRE_cols;
+   int                     lower[3], upper[3], stride[3], size;
+
+   /* ...code to allocate and fill cols... */
+   
+   /* Set the indexing into the SIDL arrays to match C conventions */
+   lower[0]  = 0;
+   upper[0]  = ncols[0] - 1;
+   stride[0] = 1;
+
+   bHYPRE_cols = SIDL_int__array_borrow( cols, 1, lower, upper, stride );
+   /* ...code to set up other SetValues array arguments... */
+   
+   ierr += bHYPRE_IJBuildMatrix_SetValues( bHYPRE_ij_A, nrows, bHYPRE_ncols,
+                                           bHYPRE_rows, bHYPRE_cols,
+                                           bHYPRE_values );
+
+The key line here is the one with SIDL_int__array_borrow.  This
+function "stuffs" the C array "cols" into the Babel defined structure
+named "bHYPRE_cols" and of type "struct SIDL_int__array".  It does not
+change the contents of cols, nor does a copy, so there are no hidden
+execution costs in this function.  However, it requires additional
+information that existing HYPRE does not.  Babel needs to know the
+dimension of the array (indicated by the second paramenter, "1", to
+the borrow function); the indexing conventions for each dimension, and
+the stride through physical memory by which data is accessed.  These
+are indicated by the lower, upper, and stride parameters respectively.
+
+Users can almost always use the borrow routine to construct a Babel
+array as an argument to Babelized HYPRE.  There are several other
+methods for construction of Babel arrays, but borrow is the most
+straightforward.
+
+For further explanation of the parameters lower, upper, and stride,
+see the Babel website.  However, for straightforward conversion of
+existing HYPRE code to Babelized HYPRE code, copying the example given
+above should be sufficient in most or all cases.
+
+Reference counting:
+-------------------
+
+In languages like C that do not have automatic memory management,
+memory management is tedious and error prone.  Babelized HYPRE
+provides support for a standard solution to this problem: reference
+counting.  Users do not always have to use reference counting.  In
+particular, if one is interested in quickly prototyping a code, or is
+only solving a single linear system, or is not intending their code to
+subsequently be used by yet another code, it may be sufficient to
+ignore reference counting (a simple rule of thumb is that a simple
+"main" typically does not need to worry about reference counting; any
+subroutines should, however).  It is important to note, though, that
+problems can crop up rather quickly in this case, e.g. running out of
+memory in a time-dependent simulation in which many linear systems are
+solved.  We give a brief overview of reference counting for
+motivational purposes, and then give a formula for user usage.
+
+The traditional C model of memory management is that a user calls
+"malloc" and "free" to explicitly allocate and free memory.  This
+becomes problematic in the case of complex code: if A and B both point
+to the same dynamically allocated memory, and A is done with it and
+thus "frees" it, B is left pointing at garbage; but A may not have any
+way of knowing if any other pointer is pointing at the same memory.
+Reference counting gets around this problem by having each object keep
+track of how many references there are to that object, and memory is
+freed only when there are no remaining references.  Instead of
+"freeing" an object, users call "deleteReference" to indicate that
+they are no longer interested in that memory; inside of
+"deleteReference", the reference count is decremented and if it is
+zero, the memory is safely freed.  Upon allocation of an object, the
+reference count is initialized to 1, and then subsequently anytime a
+user creates an additional reference to that object (say, a pointer in
+a user-defined structure), they call "addReference" to increment the
+reference counter.
+
+Babel automatically provides "_addReference" and "_deleteReference" to
+all Babelize HYPRE objects.  Any Babelized HYPRE function that returns
+an object automatically increments the reference count for that
+object, and HYPRE functions that destroy objects delete the reference
+count for any objects contained in that object. In other words,
+internally HYPRE uses reference counting.
+
+User conventions: to properly account for reference counting, there
+are a few simple rules that a user should follow.
+
+- If the user adds a "permanent" reference to a Babelized HYPRE
+object, they should call _addReference.  By "permanent", we refer to
+references that will persist outside of the current local scope. E.g.,
+if a user iterates over a list of objects with a temporary object
+pointer, there is no need to call _addReference, as that temporary
+object pointer will not persist outside the scope of the local
+subroutine.  If, on the other hand, the user builds a structure from
+dynamic memory that will be passed around through the life of the
+executed program, addReference should be called.  Likewise, any
+user-defined functions that return references (either as return values
+or as parameters by reference) to Babelized HYPRE objects should call
+addReference before returning control to the caller.
+
+- Anytime a user's code is finished with a semi-permanent reference to
+a Babelized HYPRE object, they should call _deleteReference.  In
+user-defined structures with references to HYPRE objects, for example,
+before the structure's memory is freed, deleteReference should be
+called on any enclosed objects.  Take particular care at the end of
+any subroutines: if there are any references to HYPRE objects that
+will go out of scope when the subroutine is exited for which there was
+an addReference, deleteReference should be called as one of the last
+lines of the routine.  In OO languages such as C++, this is handled
+automatically when references go out of scope, but there is no way in
+C to do this automatically so users must be vigilant.
+
