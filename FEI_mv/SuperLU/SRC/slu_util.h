@@ -1,3 +1,9 @@
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
+
+
 #ifndef __SUPERLU_UTIL /* allow multiple inclusions */
 #define __SUPERLU_UTIL
 
@@ -246,8 +252,8 @@ extern int     spcoletree (int *, int *, int *, int, int, int *);
 extern int     *TreePostorder (int, int *);
 extern double  SuperLU_timer_ ();
 extern int     sp_ienv (int);
-extern int     lsame_ (char *, char *);
-extern int     xerbla_ (char *, int *);
+extern int     superlu_lsame (char *, char *);
+extern int     superlu_xerbla (char *, int *);
 extern void    ifill (int *, int, int);
 extern void    snode_profile (int, int *);
 extern void    super_stats (int, int *);

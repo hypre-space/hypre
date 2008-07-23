@@ -14,9 +14,14 @@
  * Purpose:             Sparse matrix types and function prototypes
  * History:
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
 
-#ifdef _CRAY
+#include <HYPRE_utilities.h>
 #include <fortran.h>
+#ifdef _CRAY
 #include <string.h>
 #endif
 
@@ -26,10 +31,8 @@ typedef int int_t; /* default */
 /* Added by Rob Falgout temporarily */
 typedef int logical;
 
-#include "slu_Cnames.h"
 #include "supermatrix.h"
 #include "slu_util.h"
-
 
 /*
  * Global data structures used in LU factorization -
