@@ -457,8 +457,8 @@ hypre_F90_IFACE(hypre_boomeramggetcyclenumsweeps, HYPRE_BOOMERAMGGETCYCLENUMSWEE
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGInitGridRelaxation
  *
- * RDF: This function doesn't look correct.  The 'long' part of the types should
- * not be there unless these are pointers to structures.
+ * RDF: This is probably not a very useful Fortran routine because you can't do
+ * anything with the pointers to arrays that are allocated.
  *--------------------------------------------------------------------------*/
 
 void
@@ -487,8 +487,8 @@ hypre_F90_IFACE(hypre_boomeramginitgridrelaxatn, HYPRE_BOOMERAMGINITGRIDRELAXATN
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGFinalizeGridRelaxation
  *
- * RDF: This function doesn't look correct.  The 'long' part of the types should
- * not be there unless these are pointers to structures.
+ * RDF: This is probably not a very useful Fortran routine because you can't do
+ * anything with the pointers to arrays.
  *--------------------------------------------------------------------------*/
 
 void
@@ -499,10 +499,10 @@ hypre_F90_IFACE(hypre_boomeramgfingridrelaxatn, HYPRE_BOOMERAMGFINGRIDRELAXATN)(
    long int *relax_weights,
    int      *ierr               )
 {
-   hypre_TFree(num_grid_sweeps);
-   hypre_TFree(grid_relax_type);
-   hypre_TFree(grid_relax_points);
-   hypre_TFree(relax_weights);
+   hypre_TFree((char *) *num_grid_sweeps);
+   hypre_TFree((char *) *grid_relax_type);
+   hypre_TFree((char *) *grid_relax_points);
+   hypre_TFree((char *) *relax_weights);
 
    *ierr = 0;
 }
