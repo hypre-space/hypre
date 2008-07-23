@@ -29,6 +29,17 @@
 extern "C" {
 #endif
 
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -203,6 +214,17 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions );
 #endif
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -358,6 +380,17 @@ hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions );
 #endif
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -406,7 +439,7 @@ hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions );
 
 typedef struct
 {
-   char * (*CAlloc)        ( int count, int elt_size );
+   char * (*CAlloc)        ( size_t count, size_t elt_size );
    int    (*Free)          ( char *ptr );
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
    void * (*CreateVector)  ( void *vector );
@@ -485,7 +518,7 @@ extern "C" {
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   char * (*CAlloc)        ( int count, int elt_size ),
+   char * (*CAlloc)        ( size_t count, size_t elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
@@ -517,6 +550,17 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions );
 }
 #endif
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -562,7 +606,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions );
 
 typedef struct
 {
-   char * (*CAlloc)        ( int count, int elt_size );
+   char * (*CAlloc)        ( size_t count, size_t elt_size );
    int    (*Free)          ( char *ptr );
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
    void * (*CreateVector)  ( void *vector );
@@ -650,7 +694,7 @@ extern "C" {
 
 hypre_LGMRESFunctions *
 hypre_LGMRESFunctionsCreate(
-   char * (*CAlloc)        ( int count, int elt_size ),
+   char * (*CAlloc)        ( size_t count, size_t elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
@@ -682,6 +726,17 @@ hypre_LGMRESCreate( hypre_LGMRESFunctions *lgmres_functions );
 }
 #endif
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -728,7 +783,7 @@ hypre_LGMRESCreate( hypre_LGMRESFunctions *lgmres_functions );
 
 typedef struct
 {
-   char * (*CAlloc)        ( int count, int elt_size );
+   char * (*CAlloc)        ( size_t count, size_t elt_size );
    int    (*Free)          ( char *ptr );
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
    void * (*CreateVector)  ( void *vector );
@@ -813,7 +868,7 @@ extern "C" {
 
 hypre_FlexGMRESFunctions *
 hypre_FlexGMRESFunctionsCreate(
-   char * (*CAlloc)        ( int count, int elt_size ),
+   char * (*CAlloc)        ( size_t count, size_t elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
@@ -845,6 +900,17 @@ hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions *fgmres_functions );
 }
 #endif
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -894,7 +960,7 @@ hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions *fgmres_functions );
 
 typedef struct
 {
-   char * (*CAlloc)        ( int count, int elt_size );
+   char * (*CAlloc)        ( size_t count, size_t elt_size );
    int    (*Free)          ( char *ptr );
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
    void * (*CreateVector)  ( void *vector );
@@ -1002,7 +1068,7 @@ extern "C" {
 
 hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
-   char * (*CAlloc)        ( int count, int elt_size ),
+   char * (*CAlloc)        ( size_t count, size_t elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
@@ -1073,7 +1139,7 @@ int hypre_CGNRGetNumIterations ( void *cgnr_vdata , int *num_iterations );
 int hypre_CGNRGetFinalRelativeResidualNorm ( void *cgnr_vdata , double *relative_residual_norm );
 
 /* gmres.c */
-hypre_GMRESFunctions *hypre_GMRESFunctionsCreate ( char *(*CAlloc )(int count ,int elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), void *(*CreateVectorArray )(int size ,void *vectors ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
+hypre_GMRESFunctions *hypre_GMRESFunctionsCreate ( char *(*CAlloc )(size_t count ,size_t elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), void *(*CreateVectorArray )(int size ,void *vectors ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
 void *hypre_GMRESCreate ( hypre_GMRESFunctions *gmres_functions );
 int hypre_GMRESDestroy ( void *gmres_vdata );
 int hypre_GMRESGetResidual ( void *gmres_vdata , void **residual );
@@ -1106,7 +1172,7 @@ int hypre_GMRESGetConverged ( void *gmres_vdata , int *converged );
 int hypre_GMRESGetFinalRelativeResidualNorm ( void *gmres_vdata , double *relative_residual_norm );
 
 /* flexgmres.c */
-hypre_FlexGMRESFunctions *hypre_FlexGMRESFunctionsCreate ( char *(*CAlloc )(int count ,int elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), void *(*CreateVectorArray )(int size ,void *vectors ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
+hypre_FlexGMRESFunctions *hypre_FlexGMRESFunctionsCreate ( char *(*CAlloc )(size_t count ,size_t elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), void *(*CreateVectorArray )(int size ,void *vectors ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
 void *hypre_FlexGMRESCreate ( hypre_FlexGMRESFunctions *fgmres_functions );
 int hypre_FlexGMRESDestroy ( void *fgmres_vdata );
 int hypre_FlexGMRESGetResidual ( void *fgmres_vdata , void **residual );
@@ -1140,7 +1206,7 @@ int hypre_FlexGMRESModifyPCDefault ( void *precond_data , int iteration , double
 int hypre_FlexGMRESModifyPCAMGExample ( void *precond_data , int iterations , double rel_residual_norm );
 
 /* lgmres.c */
-hypre_LGMRESFunctions *hypre_LGMRESFunctionsCreate ( char *(*CAlloc )(int count ,int elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), void *(*CreateVectorArray )(int size ,void *vectors ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
+hypre_LGMRESFunctions *hypre_LGMRESFunctionsCreate ( char *(*CAlloc )(size_t count ,size_t elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), void *(*CreateVectorArray )(int size ,void *vectors ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
 void *hypre_LGMRESCreate ( hypre_LGMRESFunctions *lgmres_functions );
 int hypre_LGMRESDestroy ( void *lgmres_vdata );
 int hypre_LGMRESGetResidual ( void *lgmres_vdata , void **residual );
@@ -1322,7 +1388,7 @@ int HYPRE_PCGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , double *norm )
 int HYPRE_PCGGetResidual ( HYPRE_Solver solver , void **residual );
 
 /* pcg.c */
-hypre_PCGFunctions *hypre_PCGFunctionsCreate ( char *(*CAlloc )(int count ,int elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
+hypre_PCGFunctions *hypre_PCGFunctionsCreate ( char *(*CAlloc )(size_t count ,size_t elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
 void *hypre_PCGCreate ( hypre_PCGFunctions *pcg_functions );
 int hypre_PCGDestroy ( void *pcg_vdata );
 int hypre_PCGGetResidual ( void *pcg_vdata , void **residual );

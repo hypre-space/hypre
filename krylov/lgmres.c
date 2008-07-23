@@ -28,7 +28,7 @@
 
 hypre_LGMRESFunctions *
 hypre_LGMRESFunctionsCreate(
-   char * (*CAlloc)        ( int count, int elt_size ),
+   char * (*CAlloc)        ( size_t count, size_t elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),

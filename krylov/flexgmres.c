@@ -34,7 +34,7 @@ extern int HYPRE_BoomerAMGSetNumSweeps(HYPRE_Solver  solver,
 
 hypre_FlexGMRESFunctions *
 hypre_FlexGMRESFunctionsCreate(
-   char * (*CAlloc)        ( int count, int elt_size ),
+   char * (*CAlloc)        ( size_t count, size_t elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),

@@ -17,8 +17,7 @@
  * Memory management utilities
  *
  *****************************************************************************/
-#include <stdlib.h>
-#include <stdio.h>
+
 #include "_hypre_utilities.h"
 
 #ifdef HYPRE_USE_PTHREADS
@@ -57,7 +56,7 @@
  *--------------------------------------------------------------------------*/
 
 int
-hypre_OutOfMemory( int size )
+hypre_OutOfMemory( size_t size )
 {
    printf("Out of memory trying to allocate %d bytes\n", size);
    fflush(stdout);
@@ -72,7 +71,7 @@ hypre_OutOfMemory( int size )
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_MAlloc( int size )
+hypre_MAlloc( size_t size )
 {
    char *ptr;
 
@@ -106,8 +105,8 @@ hypre_MAlloc( int size )
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_CAlloc( int count,
-              int elt_size )
+hypre_CAlloc( size_t count,
+              size_t elt_size )
 {
    char *ptr;
    int   size = count*elt_size;
@@ -142,8 +141,8 @@ hypre_CAlloc( int count,
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_ReAlloc( char *ptr,
-               int   size )
+hypre_ReAlloc( char   *ptr,
+               size_t  size )
 {
 #ifdef HYPRE_USE_UMALLOC
    if (ptr == NULL)
@@ -216,7 +215,7 @@ double *global_data_ptr;
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_SharedMAlloc( int size )
+hypre_SharedMAlloc( size_t size )
 {
    char *ptr;
    int unthreaded = pthread_equal(initial_thread, pthread_self());
@@ -239,8 +238,8 @@ hypre_SharedMAlloc( int size )
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_SharedCAlloc( int count,
-              int elt_size )
+hypre_SharedCAlloc( size_t count,
+                    size_t elt_size )
 {
    char *ptr;
    int unthreaded = pthread_equal(initial_thread, pthread_self());
@@ -263,8 +262,8 @@ hypre_SharedCAlloc( int count,
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_SharedReAlloc( char *ptr,
-                     int   size )
+hypre_SharedReAlloc( char   *ptr,
+                     size_t  size )
 {
    int unthreaded = pthread_equal(initial_thread, pthread_self());
    int I_call_realloc = unthreaded ||
@@ -304,7 +303,7 @@ hypre_SharedFree( char *ptr )
  *--------------------------------------------------------------------------*/
 
 double *
-hypre_IncrementSharedDataPtr( double *ptr, int size )
+hypre_IncrementSharedDataPtr( double *ptr, size_t size )
 {
    int unthreaded = pthread_equal(initial_thread, pthread_self());
    int I_increment = unthreaded ||

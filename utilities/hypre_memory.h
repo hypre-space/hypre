@@ -20,6 +20,9 @@
 #ifndef hypre_MEMORY_HEADER
 #define hypre_MEMORY_HEADER
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -59,13 +62,13 @@ extern "C" {
 #define hypre_FinalizeMemoryDebug()  
 
 #define hypre_TAlloc(type, count) \
-( (type *)hypre_MAlloc((unsigned int)(sizeof(type) * (count))) )
+( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
 
 #define hypre_CTAlloc(type, count) \
-( (type *)hypre_CAlloc((unsigned int)(count), (unsigned int)sizeof(type)) )
+( (type *)hypre_CAlloc((size_t)(count), (size_t)sizeof(type)) )
 
 #define hypre_TReAlloc(ptr, type, count) \
-( (type *)hypre_ReAlloc((char *)ptr, (unsigned int)(sizeof(type) * (count))) )
+( (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count))) )
 
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
@@ -76,16 +79,16 @@ extern "C" {
 #ifdef HYPRE_USE_PTHREADS
 
 #define hypre_SharedTAlloc(type, count) \
-( (type *)hypre_SharedMAlloc((unsigned int)(sizeof(type) * (count))) )
+( (type *)hypre_SharedMAlloc((size_t)(sizeof(type) * (count))) )
 
 
 #define hypre_SharedCTAlloc(type, count) \
-( (type *)hypre_SharedCAlloc((unsigned int)(count),\
-                             (unsigned int)sizeof(type)) )
+( (type *)hypre_SharedCAlloc((size_t)(count),\
+                             (size_t)sizeof(type)) )
 
 #define hypre_SharedTReAlloc(ptr, type, count) \
 ( (type *)hypre_SharedReAlloc((char *)ptr,\
-                              (unsigned int)(sizeof(type) * (count))) )
+                              (size_t)(sizeof(type) * (count))) )
 
 #define hypre_SharedTFree(ptr) \
 ( hypre_SharedFree((char *)ptr), ptr = NULL )
@@ -104,16 +107,16 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* hypre_memory.c */
-int hypre_OutOfMemory( int size );
-char *hypre_MAlloc( int size );
-char *hypre_CAlloc( int count , int elt_size );
-char *hypre_ReAlloc( char *ptr , int size );
-void hypre_Free( char *ptr );
-char *hypre_SharedMAlloc( int size );
-char *hypre_SharedCAlloc( int count , int elt_size );
-char *hypre_SharedReAlloc( char *ptr , int size );
-void hypre_SharedFree( char *ptr );
-double *hypre_IncrementSharedDataPtr( double *ptr , int size );
+int hypre_OutOfMemory ( size_t size );
+char *hypre_MAlloc ( size_t size );
+char *hypre_CAlloc ( size_t count , size_t elt_size );
+char *hypre_ReAlloc ( char *ptr , size_t size );
+void hypre_Free ( char *ptr );
+char *hypre_SharedMAlloc ( size_t size );
+char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
+char *hypre_SharedReAlloc ( char *ptr , size_t size );
+void hypre_SharedFree ( char *ptr );
+double *hypre_IncrementSharedDataPtr ( double *ptr , size_t size );
 
 /* memory_dmalloc.c */
 int hypre_InitMemoryDebugDML( int id );

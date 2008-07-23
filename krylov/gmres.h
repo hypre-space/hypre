@@ -57,7 +57,7 @@
 
 typedef struct
 {
-   char * (*CAlloc)        ( int count, int elt_size );
+   char * (*CAlloc)        ( size_t count, size_t elt_size );
    int    (*Free)          ( char *ptr );
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
    void * (*CreateVector)  ( void *vector );
@@ -136,7 +136,7 @@ extern "C" {
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   char * (*CAlloc)        ( int count, int elt_size ),
+   char * (*CAlloc)        ( size_t count, size_t elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
