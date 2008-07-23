@@ -6,8 +6,12 @@
  * October 15, 2003
  *
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
+
 #include "slu_ddefs.h"
-extern int xerbla_( char *srname , int *info );
 
 void
 dgssv(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
@@ -156,7 +160,7 @@ dgssv(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
 	*info = -7;
     if ( *info != 0 ) {
 	i = -(*info);
-	xerbla_("dgssv", &i);
+	superlu_xerbla("dgssv", &i);
 	return;
     }
 

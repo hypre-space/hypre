@@ -18,6 +18,10 @@
   granted, provided the above notices are retained, and a notice that
   the code was modified is included with the above copyright notice.
 */
+/*
+  This file has been modified to take out compile warning and
+  to be compatible with the HYPRE linear solver 
+*/
 
 #include "slu_ddefs.h"
 
