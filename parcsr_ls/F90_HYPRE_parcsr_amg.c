@@ -499,10 +499,15 @@ hypre_F90_IFACE(hypre_boomeramgfingridrelaxatn, HYPRE_BOOMERAMGFINGRIDRELAXATN)(
    long int *relax_weights,
    int      *ierr               )
 {
-   hypre_TFree(*num_grid_sweeps);
-   hypre_TFree(*grid_relax_type);
-   hypre_TFree(*grid_relax_points);
-   hypre_TFree(*relax_weights);
+   char *ptr_num_grid_sweeps   = (char *) *num_grid_sweeps;
+   char *ptr_grid_relax_type   = (char *) *grid_relax_type;
+   char *ptr_grid_relax_points = (char *) *grid_relax_points;
+   char *ptr_relax_weights     = (char *) *relax_weights;
+
+   hypre_TFree(ptr_num_grid_sweeps);
+   hypre_TFree(ptr_grid_relax_type);
+   hypre_TFree(ptr_grid_relax_points);
+   hypre_TFree(ptr_relax_weights);
 
    *ierr = 0;
 }
