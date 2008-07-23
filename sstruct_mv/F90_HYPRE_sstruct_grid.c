@@ -79,7 +79,7 @@ hypre_F90_IFACE(hypre_sstructgridsetvariables, HYPRE_SSTRUCTGRIDSETVARIABLES)
                                                           (long int   *grid,
                                                            int        *part,
                                                            int        *nvars,
-                                                           long int   *vartypes,
+                                                           int        *vartypes,
                                                            int        *ierr)
 {
    *ierr = (int) (HYPRE_SStructGridSetVariables( (HYPRE_SStructGrid)      *grid,
@@ -100,7 +100,7 @@ hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
                                                            int        *part,
                                                            int        *var,
                                                            int        *nvars,
-                                                           long int   *vartype,
+                                                           int        *vartype,
                                                            int        *ierr)
 {
    *ierr = (int) (HYPRE_SStructGridSetVariable( (HYPRE_SStructGrid)      *grid,
@@ -120,7 +120,7 @@ hypre_F90_IFACE(hypre_sstructgridaddvariables, HYPRE_SSTRUCTGRIDADDVARIABLES)
                                                            int        *part,
                                                            int        *index,
                                                            int        *nvars,
-                                                           long int   *vartypes,
+                                                           int        *vartypes,
                                                            int        *ierr)
 {
    *ierr = (int) (HYPRE_SStructGridAddVariables( (HYPRE_SStructGrid)      *grid,
@@ -142,7 +142,7 @@ hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
                                                            int        *part,
                                                            int        *index,
                                                            int        *var,
-                                                           long int   *vartype,
+                                                           int        *vartype,
                                                            int        *ierr)
 {
    *ierr = (int) (HYPRE_SStructGridAddVariable( (HYPRE_SStructGrid)      *grid,
