@@ -23,6 +23,9 @@
 /* Define my integer type int_t */
 typedef int int_t; /* default */
 
+/* Added by Rob Falgout temporarily */
+typedef int logical;
+
 #include "slu_Cnames.h"
 #include "supermatrix.h"
 #include "slu_util.h"
