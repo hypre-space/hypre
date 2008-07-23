@@ -18,17 +18,23 @@
   granted, provided the above notices are retained, and a notice that
   the code was modified is included with the above copyright notice.
 */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
 
 #include "slu_ddefs.h"
 
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
 
-/* 
- * Function prototypes 
+/*
+ * Function prototypes
  */
-extern void dusolve(int, int, double*, double*);
-extern void dlsolve(int, int, double*, double*);
-extern void dmatvec(int, int, int, double*, double*, double*);
-extern int  xerbla_( char *srname , int *info );
+void sludusolve(int, int, double*, double*);
+void sludlsolve(int, int, double*, double*);
+void sludmatvec(int, int, int, double*, double*, double*);
 
 void
 dgstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U,
@@ -125,7 +131,7 @@ dgstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U,
 	*info = -6;
     if ( *info ) {
 	i = -(*info);
-	xerbla_("dgstrs", &i);
+	superlu_xerbla("dgstrs", &i);
 	return;
     }
 
@@ -185,12 +191,12 @@ dgstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U,
 			&Lval[luptr+nsupc], &nsupr, &Bmat[fsupc], &ldb, 
 			&beta, &work[0], &n );
 #else
-		dtrsm_("L", "L", "N", "U", &nsupc, &nrhs, &alpha,
-		       &Lval[luptr], &nsupr, &Bmat[fsupc], &ldb);
-		
-		dgemm_( "N", "N", &nrow, &nrhs, &nsupc, &alpha, 
-			&Lval[luptr+nsupc], &nsupr, &Bmat[fsupc], &ldb, 
-			&beta, &work[0], &n );
+                hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L","L","N","U",&nsupc,
+                       &nrhs, &alpha, &Lval[luptr], &nsupr, &Bmat[fsupc], 
+                       &ldb);
+                hypre_F90_NAME_BLAS(dgemm,DGEMM)("N","N",&nrow,&nrhs,&nsupc, 
+                       &alpha, &Lval[luptr+nsupc], &nsupr, &Bmat[fsupc], &ldb,
+                       &beta, &work[0], &n );
 #endif
 		for (j = 0; j < nrhs; j++) {
 		    rhs_work = &Bmat[j*ldb];
@@ -206,8 +212,8 @@ dgstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U,
 #else		
 		for (j = 0; j < nrhs; j++) {
 		    rhs_work = &Bmat[j*ldb];
-		    dlsolve (nsupr, nsupc, &Lval[luptr], &rhs_work[fsupc]);
-		    dmatvec (nsupr, nrow, nsupc, &Lval[luptr+nsupc],
+		    sludlsolve (nsupr, nsupc, &Lval[luptr], &rhs_work[fsupc]);
+		    sludmatvec (nsupr, nrow, nsupc, &Lval[luptr+nsupc],
 			    &rhs_work[fsupc], &work[0] );
 
 		    iptr = istart + nsupc;
@@ -254,12 +260,13 @@ dgstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U,
 		STRSM( ftcs1, ftcs2, ftcs3, ftcs3, &nsupc, &nrhs, &alpha,
 		       &Lval[luptr], &nsupr, &Bmat[fsupc], &ldb);
 #else
-		dtrsm_("L", "U", "N", "N", &nsupc, &nrhs, &alpha,
-		       &Lval[luptr], &nsupr, &Bmat[fsupc], &ldb);
+                hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L","U","N","N", &nsupc, 
+                       &nrhs, &alpha, &Lval[luptr], &nsupr, &Bmat[fsupc], 
+                       &ldb);
 #endif
 #else		
 		for (j = 0; j < nrhs; j++)
-		    dusolve ( nsupr, nsupc, &Lval[luptr], &Bmat[fsupc+j*ldb] );
+		    sludusolve ( nsupr, nsupc, &Lval[luptr], &Bmat[fsupc+j*ldb] );
 #endif		
 	    }
 

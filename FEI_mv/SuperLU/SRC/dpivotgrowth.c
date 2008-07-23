@@ -6,6 +6,11 @@
  * November 15, 1997
  *
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
+
 #include <math.h>
 #include "slu_ddefs.h"
 
@@ -51,12 +56,12 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
     int      i, j, k, oldcol;
     int      *inv_perm_c;
     double   rpg, maxaj, maxuj;
-    extern   double dlamch_(char *);
+    extern   double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
     double   smlnum;
     double   *luval;
    
     /* Get machine constants. */
-    smlnum = dlamch_("S");
+    smlnum = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("S");
     rpg = 1. / smlnum;
 
     Astore = A->Store;

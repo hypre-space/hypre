@@ -18,11 +18,26 @@
   granted, provided the above notices are retained, and a notice that
   the code was modified is included with the above copyright notice.
 */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
 
 #include "slu_ddefs.h"
 
-void dlsolve(int, int, double*, double*);
-void dmatvec(int, int, int, double*, double*, double*);
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
+
+/*
+ * Function prototypes
+ */
+extern int hypre_F90_NAME_BLAS(dtrsv,DTRSV)(char *, char *, char *, int *, double *, int *,
+                                            double *, int *);
+extern int hypre_F90_NAME_BLAS(dgemv,DGEMV)(char *, int *, int *, double *, double *, int *,
+                                            double *, int *, double *, double *, int *);
+void sludlsolve(int, int, double*, double*);
+void sludmatvec(int, int, int, double*, double*, double*);
 
 /*
  * Performs numeric block updates within the relaxed snode. 
@@ -94,14 +109,15 @@ dsnode_bmod (
 	SGEMV( ftcs2, &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr, 
 		&lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #else
-	dtrsv_( "L", "N", "U", &nsupc, &lusup[luptr], &nsupr, 
-	      &lusup[ufirst], &incx );
-	dgemv_( "N", &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr, 
-		&lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
+        hypre_F90_NAME_BLAS(dtrsv,DTRSV)("L","N","U",&nsupc,&lusup[luptr],
+              &nsupr, &lusup[ufirst], &incx );
+        hypre_F90_NAME_BLAS(dgemv,DGEMV)("N",&nrow,&nsupc,&alpha,
+                &lusup[luptr+nsupc], &nsupr,
+                &lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #endif
 #else
-	dlsolve ( nsupr, nsupc, &lusup[luptr], &lusup[ufirst] );
-	dmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc], 
+	sludlsolve ( nsupr, nsupc, &lusup[luptr], &lusup[ufirst] );
+	sludmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc], 
 			&lusup[ufirst], &tempv[0] );
 
         /* Scatter tempv[*] into lusup[*] */

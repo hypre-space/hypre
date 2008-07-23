@@ -17,6 +17,10 @@
   granted, provided the above notices are retained, and a notice that
   the code was modified is included with the above copyright notice.
 */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
 
 #include <math.h>
 #include "slu_ddefs.h"
@@ -406,3 +410,339 @@ int print_int_vec(char *what, int n, int *vec)
     for (i = 0; i < n; ++i) printf("%d\t%d\n", i, vec[i]);
     return 0;
 }
+
+int superlu_lsame(char *ca, char *cb)
+{
+/*  -- LAPACK auxiliary routine (version 2.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       September 30, 1994
+
+    Purpose
+    =======
+
+    LSAME returns .TRUE. if CA is the same letter as CB regardless of case.
+
+    Arguments
+    =========
+
+    CA      (input) CHARACTER*1
+    CB      (input) CHARACTER*1
+            CA and CB specify the single characters to be compared.
+
+   =====================================================================
+*/
+
+    /* System generated locals */
+    int ret_val;
+
+    /* Local variables */
+    int inta, intb, zcode;
+
+    ret_val = *(unsigned char *)ca == *(unsigned char *)cb;
+    if (ret_val) {
+        return ret_val;
+    }
+
+    /* Now test for equivalence if both characters are alphabetic. */
+
+    zcode = 'Z';
+
+    /* Use 'Z' rather than 'A' so that ASCII can be detected on Prime
+       machines, on which ICHAR returns a value with bit 8 set.
+       ICHAR('A') on Prime machines returns 193 which is the same as
+       ICHAR('A') on an EBCDIC machine. */
+
+    inta = *(unsigned char *)ca;
+    intb = *(unsigned char *)cb;
+
+    if (zcode == 90 || zcode == 122) {
+        /* ASCII is assumed - ZCODE is the ASCII code of either lower or
+          upper case 'Z'. */
+        if (inta >= 97 && inta <= 122) inta += -32;
+        if (intb >= 97 && intb <= 122) intb += -32;
+
+    } else if (zcode == 233 || zcode == 169) {
+        /* EBCDIC is assumed - ZCODE is the EBCDIC code of either lower or
+          upper case 'Z'. */
+        if ((inta >= 129 && inta <= 137) || (inta >= 145 && inta <= 153) ||
+                (inta >= 162 && inta <= 169))
+            inta += 64;
+        if ((intb >= 129 && intb <= 137) || (intb >= 145 && intb <= 153) ||
+                (intb >= 162 && intb <= 169))
+            intb += 64;
+    } else if (zcode == 218 || zcode == 250) {
+        /* ASCII is assumed, on Prime machines - ZCODE is the ASCII code
+          plus 128 of either lower or upper case 'Z'. */
+        if (inta >= 225 && inta <= 250) inta += -32;
+        if (intb >= 225 && intb <= 250) intb += -32;
+    }
+    ret_val = inta == intb;
+    return ret_val;
+
+} /* superlu_lsame */
+
+/* Subroutine */ int superlu_xerbla(char *srname, int *info)
+{
+/*  -- LAPACK auxiliary routine (version 2.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       September 30, 1994
+
+
+    Purpose
+    =======
+
+    XERBLA  is an error handler for the LAPACK routines.
+    It is called by an LAPACK routine if an input parameter has an
+    invalid value.  A message is printed and execution stops.
+
+    Installers may consider modifying the STOP statement in order to
+    call system-specific exception-handling facilities.
+
+    Arguments
+    =========
+
+    SRNAME  (input) CHARACTER*6
+            The name of the routine which called XERBLA.
+
+    INFO    (input) INT
+            The position of the invalid parameter in the parameter list
+
+            of the calling routine.
+
+   =====================================================================
+*/
+
+    printf("** On entry to %6s, parameter number %2d had an illegal value\n",
+                srname, *info);
+
+/*     End of XERBLA */
+
+    return 0;
+} /* superlu_xerbla */
+
+
+/*
+ * -- SuperLU routine (version 2.0) --
+ * Univ. of California Berkeley, Xerox Palo Alto Research Center,
+ * and Lawrence Berkeley National Lab.
+ * November 15, 1997
+ *
+ */
+/*
+ * File name:		dmyblas2.c
+ * Purpose:
+ *     Level 2 BLAS operations: solves and matvec, written in C.
+ * Note:
+ *     This is only used when the system lacks an efficient BLAS library.
+ */
+
+/*
+ * Solves a dense UNIT lower triangular system. The unit lower 
+ * triangular matrix is stored in a 2D array M(1:nrow,1:ncol). 
+ * The solution will be returned in the rhs vector.
+ */
+void sludlsolve ( int ldm, int ncol, double *M, double *rhs )
+{
+    int k;
+    double x0, x1, x2, x3, x4, x5, x6, x7;
+    double *M0;
+    register double *Mki0, *Mki1, *Mki2, *Mki3, *Mki4, *Mki5, *Mki6, *Mki7;
+    register int firstcol = 0;
+
+    M0 = &M[0];
+
+    while ( firstcol < ncol - 7 ) { /* Do 8 columns */
+      Mki0 = M0 + 1;
+      Mki1 = Mki0 + ldm + 1;
+      Mki2 = Mki1 + ldm + 1;
+      Mki3 = Mki2 + ldm + 1;
+      Mki4 = Mki3 + ldm + 1;
+      Mki5 = Mki4 + ldm + 1;
+      Mki6 = Mki5 + ldm + 1;
+      Mki7 = Mki6 + ldm + 1;
+
+      x0 = rhs[firstcol];
+      x1 = rhs[firstcol+1] - x0 * *Mki0++;
+      x2 = rhs[firstcol+2] - x0 * *Mki0++ - x1 * *Mki1++;
+      x3 = rhs[firstcol+3] - x0 * *Mki0++ - x1 * *Mki1++ - x2 * *Mki2++;
+      x4 = rhs[firstcol+4] - x0 * *Mki0++ - x1 * *Mki1++ - x2 * *Mki2++
+	                   - x3 * *Mki3++;
+      x5 = rhs[firstcol+5] - x0 * *Mki0++ - x1 * *Mki1++ - x2 * *Mki2++
+	                   - x3 * *Mki3++ - x4 * *Mki4++;
+      x6 = rhs[firstcol+6] - x0 * *Mki0++ - x1 * *Mki1++ - x2 * *Mki2++
+	                   - x3 * *Mki3++ - x4 * *Mki4++ - x5 * *Mki5++;
+      x7 = rhs[firstcol+7] - x0 * *Mki0++ - x1 * *Mki1++ - x2 * *Mki2++
+	                   - x3 * *Mki3++ - x4 * *Mki4++ - x5 * *Mki5++
+			   - x6 * *Mki6++;
+
+      rhs[++firstcol] = x1;
+      rhs[++firstcol] = x2;
+      rhs[++firstcol] = x3;
+      rhs[++firstcol] = x4;
+      rhs[++firstcol] = x5;
+      rhs[++firstcol] = x6;
+      rhs[++firstcol] = x7;
+      ++firstcol;
+    
+      for (k = firstcol; k < ncol; k++)
+	rhs[k] = rhs[k] - x0 * *Mki0++ - x1 * *Mki1++
+	                - x2 * *Mki2++ - x3 * *Mki3++
+                        - x4 * *Mki4++ - x5 * *Mki5++
+			- x6 * *Mki6++ - x7 * *Mki7++;
+ 
+      M0 += 8 * ldm + 8;
+    }
+
+    while ( firstcol < ncol - 3 ) { /* Do 4 columns */
+      Mki0 = M0 + 1;
+      Mki1 = Mki0 + ldm + 1;
+      Mki2 = Mki1 + ldm + 1;
+      Mki3 = Mki2 + ldm + 1;
+
+      x0 = rhs[firstcol];
+      x1 = rhs[firstcol+1] - x0 * *Mki0++;
+      x2 = rhs[firstcol+2] - x0 * *Mki0++ - x1 * *Mki1++;
+      x3 = rhs[firstcol+3] - x0 * *Mki0++ - x1 * *Mki1++ - x2 * *Mki2++;
+
+      rhs[++firstcol] = x1;
+      rhs[++firstcol] = x2;
+      rhs[++firstcol] = x3;
+      ++firstcol;
+    
+      for (k = firstcol; k < ncol; k++)
+	rhs[k] = rhs[k] - x0 * *Mki0++ - x1 * *Mki1++
+	                - x2 * *Mki2++ - x3 * *Mki3++;
+ 
+      M0 += 4 * ldm + 4;
+    }
+
+    if ( firstcol < ncol - 1 ) { /* Do 2 columns */
+      Mki0 = M0 + 1;
+      Mki1 = Mki0 + ldm + 1;
+
+      x0 = rhs[firstcol];
+      x1 = rhs[firstcol+1] - x0 * *Mki0++;
+
+      rhs[++firstcol] = x1;
+      ++firstcol;
+    
+      for (k = firstcol; k < ncol; k++)
+	rhs[k] = rhs[k] - x0 * *Mki0++ - x1 * *Mki1++;
+ 
+    }
+    
+}
+
+/*
+ * Solves a dense upper triangular system. The upper triangular matrix is
+ * stored in a 2-dim array M(1:ldm,1:ncol). The solution will be returned
+ * in the rhs vector.
+ */
+void
+sludusolve ( ldm, ncol, M, rhs )
+int ldm;	/* in */
+int ncol;	/* in */
+double *M;	/* in */
+double *rhs;	/* modified */
+{
+    double xj;
+    int jcol, j, irow;
+
+    jcol = ncol - 1;
+
+    for (j = 0; j < ncol; j++) {
+
+	xj = rhs[jcol] / M[jcol + jcol*ldm]; 		/* M(jcol, jcol) */
+	rhs[jcol] = xj;
+	
+	for (irow = 0; irow < jcol; irow++)
+	    rhs[irow] -= xj * M[irow + jcol*ldm];	/* M(irow, jcol) */
+
+	jcol--;
+
+    }
+}
+
+
+/*
+ * Performs a dense matrix-vector multiply: Mxvec = Mxvec + M * vec.
+ * The input matrix is M(1:nrow,1:ncol); The product is returned in Mxvec[].
+ */
+void sludmatvec ( ldm, nrow, ncol, M, vec, Mxvec )
+
+int ldm;	/* in -- leading dimension of M */
+int nrow;	/* in */ 
+int ncol;	/* in */
+double *M;	/* in */
+double *vec;	/* in */
+double *Mxvec;	/* in/out */
+
+{
+    double vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7;
+    double *M0;
+    register double *Mki0, *Mki1, *Mki2, *Mki3, *Mki4, *Mki5, *Mki6, *Mki7;
+    register int firstcol = 0;
+    int k;
+
+    M0 = &M[0];
+    while ( firstcol < ncol - 7 ) {	/* Do 8 columns */
+
+	Mki0 = M0;
+	Mki1 = Mki0 + ldm;
+        Mki2 = Mki1 + ldm;
+        Mki3 = Mki2 + ldm;
+	Mki4 = Mki3 + ldm;
+	Mki5 = Mki4 + ldm;
+	Mki6 = Mki5 + ldm;
+	Mki7 = Mki6 + ldm;
+
+	vi0 = vec[firstcol++];
+	vi1 = vec[firstcol++];
+	vi2 = vec[firstcol++];
+	vi3 = vec[firstcol++];	
+	vi4 = vec[firstcol++];
+	vi5 = vec[firstcol++];
+	vi6 = vec[firstcol++];
+	vi7 = vec[firstcol++];	
+
+	for (k = 0; k < nrow; k++) 
+	    Mxvec[k] += vi0 * *Mki0++ + vi1 * *Mki1++
+		      + vi2 * *Mki2++ + vi3 * *Mki3++ 
+		      + vi4 * *Mki4++ + vi5 * *Mki5++
+		      + vi6 * *Mki6++ + vi7 * *Mki7++;
+
+	M0 += 8 * ldm;
+    }
+
+    while ( firstcol < ncol - 3 ) {	/* Do 4 columns */
+
+	Mki0 = M0;
+	Mki1 = Mki0 + ldm;
+	Mki2 = Mki1 + ldm;
+	Mki3 = Mki2 + ldm;
+
+	vi0 = vec[firstcol++];
+	vi1 = vec[firstcol++];
+	vi2 = vec[firstcol++];
+	vi3 = vec[firstcol++];	
+	for (k = 0; k < nrow; k++) 
+	    Mxvec[k] += vi0 * *Mki0++ + vi1 * *Mki1++
+		      + vi2 * *Mki2++ + vi3 * *Mki3++ ;
+
+	M0 += 4 * ldm;
+    }
+
+    while ( firstcol < ncol ) {		/* Do 1 column */
+
+ 	Mki0 = M0;
+	vi0 = vec[firstcol++];
+	for (k = 0; k < nrow; k++)
+	    Mxvec[k] += vi0 * *Mki0++;
+
+	M0 += ldm;
+    }
+	
+}
+

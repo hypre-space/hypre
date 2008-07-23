@@ -49,7 +49,6 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- Cnames.h\
  colamd.h\
  slu_ddefs.h\
  slu_util.h\
@@ -128,7 +127,6 @@ FILES =\
  dlangs.c \
  dlaqgs.c \
  dmemory.c \
- dmyblas2.o \
  dpanel_bmod.c \
  dpanel_dfs.c \
  dpivotgrowth.c \
@@ -163,7 +161,7 @@ install: libHYPRE_superlu${HYPRE_LIB_SUFFIX}
 	@echo  " "
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f ../*.o ../libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 distclean: clean
 

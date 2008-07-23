@@ -6,9 +6,13 @@
  * October 15, 2003
  *
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
+
+
 #include "slu_ddefs.h"
-extern int xerbla_( char *srname , int *info );
-extern logical lsame_(char *, char *);
 
 void
 dgssvx(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
@@ -354,7 +358,7 @@ dgssvx(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
 
     /* External functions */
     extern double dlangs(char *, SuperMatrix *);
-    extern double dlamch_(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
 
     Bstore = B->Store;
     Xstore = X->Store;
@@ -373,9 +377,9 @@ dgssvx(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
 	rowequ = FALSE;
 	colequ = FALSE;
     } else {
-	rowequ = lsame_(equed, "R") || lsame_(equed, "B");
-	colequ = lsame_(equed, "C") || lsame_(equed, "B");
-	smlnum = dlamch_("Safe minimum");
+	rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
+	colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
+        smlnum = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Safe minimum");
 	bignum = 1. / smlnum;
     }
 
@@ -395,7 +399,7 @@ printf("dgssvx: Fact=%4d, Trans=%4d, equed=%c\n",
 	      A->Dtype != SLU_D || A->Mtype != SLU_GE )
 	*info = -2;
     else if (options->Fact == FACTORED &&
-	     !(rowequ || colequ || lsame_(equed, "N")))
+	     !(rowequ || colequ || superlu_lsame(equed, "N")))
 	*info = -6;
     else {
 	if (rowequ) {
@@ -437,7 +441,7 @@ printf("dgssvx: Fact=%4d, Trans=%4d, equed=%c\n",
     }
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgssvx", &i);
+	superlu_xerbla("dgssvx", &i);
 	return;
     }
     
@@ -476,8 +480,8 @@ printf("dgssvx: Fact=%4d, Trans=%4d, equed=%c\n",
 	if ( info1 == 0 ) {
 	    /* Equilibrate matrix A. */
 	    dlaqgs(AA, R, C, rowcnd, colcnd, amax, equed);
-	    rowequ = lsame_(equed, "R") || lsame_(equed, "B");
-	    colequ = lsame_(equed, "C") || lsame_(equed, "B");
+	    rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
+	    colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
 	}
 	utime[EQUIL] = SuperLU_timer_() - t0;
     }
@@ -601,7 +605,7 @@ printf("dgssvx: Fact=%4d, Trans=%4d, equed=%c\n",
 
     if ( options->ConditionNumber ) {
         /* Set INFO = A->ncol+1 if the matrix is singular to working precision. */
-        if ( *rcond < dlamch_("E") ) *info = A->ncol + 1;
+       if (*rcond < hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("E")) *info=A->ncol+1;
     }
 
     if ( nofact ) {

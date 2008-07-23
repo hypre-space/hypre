@@ -10,18 +10,25 @@
  * File name:		dsp_blas2.c
  * Purpose:		Sparse BLAS 2, using some dense BLAS 2 operations.
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
 
 #include "slu_ddefs.h"
+
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
+
+extern int hypre_F90_NAME_BLAS(dtrsv,DTRSV)(char *,char *,char *,int *,double *,int *,double *,int *);
 
 /* 
  * Function prototypes 
  */
-extern void dusolve(int, int, double*, double*);
-extern void dlsolve(int, int, double*, double*);
-extern void dmatvec(int, int, int, double*, double*, double*);
-extern int  dtrsv_(char *,char *,char *,int * ,double * ,int *,double *,int *);
-extern int  xerbla_( char *srname , int *info );
-extern logical lsame_(char *, char *);
+extern void sludusolve(int, int, double*, double*);
+extern void sludlsolve(int, int, double*, double*);
+extern void sludmatvec(int, int, int, double*, double*, double*);
 
 int
 sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L, 
@@ -100,15 +107,15 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
     /* Test the input parameters */
     *info = 0;
-    if ( !lsame_(uplo,"L") && !lsame_(uplo, "U") ) *info = -1;
-    else if ( !lsame_(trans, "N") && !lsame_(trans, "T") && 
-              !lsame_(trans, "C")) *info = -2;
-    else if ( !lsame_(diag, "U") && !lsame_(diag, "N") ) *info = -3;
+    if ( !superlu_lsame(uplo,"L") && !superlu_lsame(uplo, "U") ) *info = -1;
+    else if ( !superlu_lsame(trans, "N") && !superlu_lsame(trans, "T") && 
+              !superlu_lsame(trans, "C")) *info = -2;
+    else if ( !superlu_lsame(diag, "U") && !superlu_lsame(diag, "N") ) *info = -3;
     else if ( L->nrow != L->ncol || L->nrow < 0 ) *info = -4;
     else if ( U->nrow != U->ncol || U->nrow < 0 ) *info = -5;
     if ( *info ) {
 	i = -(*info);
-	xerbla_("sp_dtrsv", &i);
+	superlu_xerbla("sp_dtrsv", &i);
 	return 0;
     }
 
@@ -121,9 +128,9 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
     if ( !(work = doubleCalloc(L->nrow)) )
 	ABORT("Malloc fails for work in sp_dtrsv().");
     
-    if ( lsame_(trans, "N") ) {	/* Form x := inv(A)*x. */
+    if ( superlu_lsame(trans, "N") ) {	/* Form x := inv(A)*x. */
 	
-	if ( lsame_(uplo, "L") ) {
+	if ( superlu_lsame(uplo, "L") ) {
 	    /* Form x := inv(L)*x */
     	    if ( L->nrow == 0 ) return 0; /* Quick return */
 	    
@@ -153,16 +160,17 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    SGEMV(ftcs2, &nrow, &nsupc, &alpha, &Lval[luptr+nsupc], 
 		       	&nsupr, &x[fsupc], &incx, &beta, &work[0], &incy);
 #else
-		    dtrsv_("L", "N", "U", &nsupc, &Lval[luptr], &nsupr,
-		       	&x[fsupc], &incx);
-		
-		    dgemv_("N", &nrow, &nsupc, &alpha, &Lval[luptr+nsupc], 
-		       	&nsupr, &x[fsupc], &incx, &beta, &work[0], &incy);
+                    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("L","N","U", &nsupc, 
+                        &Lval[luptr], &nsupr, &x[fsupc], &incx);
+
+                    hypre_F90_NAME_BLAS(dgemv,DGEMV)("N",&nrow, &nsupc, 
+                        &alpha, &Lval[luptr+nsupc],
+                        &nsupr, &x[fsupc], &incx, &beta, &work[0], &incy);
 #endif
 #else
-		    dlsolve ( nsupr, nsupc, &Lval[luptr], &x[fsupc]);
+		    sludlsolve ( nsupr, nsupc, &Lval[luptr], &x[fsupc]);
 		
-		    dmatvec ( nsupr, nsupr-nsupc, nsupc, &Lval[luptr+nsupc],
+		    sludmatvec ( nsupr, nsupr-nsupc, nsupc, &Lval[luptr+nsupc],
                              &x[fsupc], &work[0] );
 #endif		
 		
@@ -201,11 +209,11 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    STRSV(ftcs3, ftcs2, ftcs2, &nsupc, &Lval[luptr], &nsupr,
 		       &x[fsupc], &incx);
 #else
-		    dtrsv_("U", "N", "N", &nsupc, &Lval[luptr], &nsupr,
-                           &x[fsupc], &incx);
+                    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("U","N","N",&nsupc,
+                        &Lval[luptr], &nsupr, &x[fsupc], &incx);
 #endif
 #else		
-		    dusolve ( nsupr, nsupc, &Lval[luptr], &x[fsupc] );
+		    sludusolve ( nsupr, nsupc, &Lval[luptr], &x[fsupc] );
 #endif		
 
 		    for (jcol = fsupc; jcol < L_FST_SUPC(k+1); jcol++) {
@@ -222,7 +230,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 	}
     } else { /* Form x := inv(A')*x */
 	
-	if ( lsame_(uplo, "L") ) {
+	if ( superlu_lsame(uplo, "L") ) {
 	    /* Form x := inv(L')*x */
     	    if ( L->nrow == 0 ) return 0; /* Quick return */
 	    
@@ -254,8 +262,8 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    STRSV(ftcs1, ftcs2, ftcs3, &nsupc, &Lval[luptr], &nsupr,
 			&x[fsupc], &incx);
 #else
-		    dtrsv_("L", "T", "U", &nsupc, &Lval[luptr], &nsupr,
-			&x[fsupc], &incx);
+                    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("L","T","U",&nsupc, 
+                        &Lval[luptr], &nsupr, &x[fsupc], &incx);
 #endif
 		}
 	    }
@@ -289,8 +297,8 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    STRSV( ftcs1, ftcs2, ftcs3, &nsupc, &Lval[luptr], &nsupr,
 			    &x[fsupc], &incx);
 #else
-		    dtrsv_("U", "T", "N", &nsupc, &Lval[luptr], &nsupr,
-			    &x[fsupc], &incx);
+                    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("U","T","N", &nsupc, 
+                           &Lval[luptr], &nsupr, &x[fsupc], &incx);
 #endif
 		}
 	    } /* for k ... */
@@ -375,18 +383,18 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
     int iy, jx, jy, kx, ky;
     int notran;
 
-    notran = lsame_(trans, "N");
+    notran = superlu_lsame(trans, "N");
     Astore = A->Store;
     Aval = Astore->nzval;
     
     /* Test the input parameters */
     info = 0;
-    if ( !notran && !lsame_(trans, "T") && !lsame_(trans, "C")) info = 1;
+    if ( !notran && !superlu_lsame(trans, "T") && !superlu_lsame(trans, "C")) info = 1;
     else if ( A->nrow < 0 || A->ncol < 0 ) info = 3;
     else if (incx == 0) info = 5;
     else if (incy == 0)	info = 8;
     if (info != 0) {
-	xerbla_("sp_dgemv ", &info);
+	superlu_xerbla("sp_dgemv ", &info);
 	return 0;
     }
 
@@ -396,7 +404,7 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
 
     /* Set  LENX  and  LENY, the lengths of the vectors x and y, and set 
        up the start points in  X  and  Y. */
-    if (lsame_(trans, "N")) {
+    if (superlu_lsame(trans, "N")) {
 	lenx = A->ncol;
 	leny = A->nrow;
     } else {

@@ -10,10 +10,13 @@
  * File name:	dgscon.c
  * History:     Modified from lapack routines DGECON.
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
+
 #include <math.h>
 #include "slu_ddefs.h"
-extern int     xerbla_( char *srname , int *info );
-extern logical lsame_(char *, char *);
 
 void
 dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
@@ -79,8 +82,8 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
     
     /* Test the input parameters. */
     *info = 0;
-    onenrm = *(unsigned char *)norm == '1' || lsame_(norm, "O");
-    if (! onenrm && ! lsame_(norm, "I")) *info = -1;
+    onenrm = *(unsigned char *)norm == '1' || superlu_lsame(norm, "O");
+    if (! onenrm && ! superlu_lsame(norm, "I")) *info = -1;
     else if (L->nrow < 0 || L->nrow != L->ncol ||
              L->Stype != SLU_SC || L->Dtype != SLU_D || L->Mtype != SLU_TRLU)
 	 *info = -2;
@@ -89,7 +92,7 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
 	*info = -3;
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgscon", &i);
+	superlu_xerbla("dgscon", &i);
 	return;
     }
 

@@ -10,10 +10,13 @@
  * File name:	dgsrfs.c
  * History:     Modified from lapack routine DGERFS
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
+
 #include <math.h>
 #include "slu_ddefs.h"
-extern int     xerbla_( char *srname , int *info );
-extern logical lsame_(char *, char *);
 
 void
 dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
@@ -150,14 +153,14 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     double   *work;
     double   *rwork;
     int      *iwork;
-    extern double dlamch_(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
     extern int dlacon_(int *, double *, double *, int *, double *, int *);
 #ifdef _CRAY
     extern int SCOPY(int *, double *, int *, double *, int *);
     extern int SSAXPY(int *, double *, double *, int *, double *, int *);
 #else
-    extern int dcopy_(int *, double *, int *, double *, int *);
-    extern int daxpy_(int *, double *, double *, int *, double *, int *);
+    extern int hypre_F90_NAME_BLAS(dcopy,DCOPY)(int *,double *,int *,double *,int *);
+    extern int hypre_F90_NAME_BLAS(daxpy,DAXPY)(int *,double *,double *,int *,double *,int *);
 #endif
 
     Astore = A->Store;
@@ -191,7 +194,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	*info = -11;
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgsrfs", &i);
+	superlu_xerbla("dgsrfs", &i);
 	return;
     }
 
@@ -204,8 +207,8 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	return;
     }
 
-    rowequ = lsame_(equed, "R") || lsame_(equed, "B");
-    colequ = lsame_(equed, "C") || lsame_(equed, "B");
+    rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
+    colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
     
     /* Allocate working space */
     work = doubleMalloc(2*A->nrow);
@@ -224,8 +227,8 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 
     /* NZ = maximum number of nonzero elements in each row of A, plus 1 */
     nz     = A->ncol + 1;
-    eps    = dlamch_("Epsilon");
-    safmin = dlamch_("Safe minimum");
+    eps    = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Epsilon");
+    safmin = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Safe minimum");
     safe1  = nz * safmin;
     safe2  = safe1 / eps;
 
@@ -267,7 +270,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 #ifdef _CRAY
 	    SCOPY(&A->nrow, Bptr, &ione, work, &ione);
 #else
-	    dcopy_(&A->nrow, Bptr, &ione, work, &ione);
+            hypre_F90_NAME_BLAS(dcopy,DCOPY)(&A->nrow,Bptr,&ione,work,&ione);
 #endif
 	    sp_dgemv(transc, ndone, A, Xptr, ione, done, work, ione);
 
@@ -321,8 +324,8 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 		SAXPY(&A->nrow, &done, work, &ione,
 		       &Xmat[j*ldx], &ione);
 #else
-		daxpy_(&A->nrow, &done, work, &ione,
-		       &Xmat[j*ldx], &ione);
+                hypre_F90_NAME_BLAS(daxpy,DAXPY)(&A->nrow, &done, work, &ione,
+                       &Xmat[j*ldx], &ione);
 #endif
 		lstres = berr[j];
 		++count;

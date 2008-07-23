@@ -10,9 +10,13 @@
  * File name:	dlangs.c
  * History:     Modified from lapack routine DLANGE
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
+
 #include <math.h>
 #include "slu_ddefs.h"
-extern logical lsame_(char *, char *);
 
 double dlangs(char *norm, SuperMatrix *A)
 {
@@ -66,14 +70,14 @@ double dlangs(char *norm, SuperMatrix *A)
     if ( SUPERLU_MIN(A->nrow, A->ncol) == 0) {
 	value = 0.;
 	
-    } else if (lsame_(norm, "M")) {
+    } else if (superlu_lsame(norm, "M")) {
 	/* Find max(abs(A(i,j))). */
 	value = 0.;
 	for (j = 0; j < A->ncol; ++j)
 	    for (i = Astore->colptr[j]; i < Astore->colptr[j+1]; i++)
 		value = SUPERLU_MAX( value, fabs( Aval[i]) );
 	
-    } else if (lsame_(norm, "O") || *(unsigned char *)norm == '1') {
+    } else if (superlu_lsame(norm, "O") || *(unsigned char *)norm == '1') {
 	/* Find norm1(A). */
 	value = 0.;
 	for (j = 0; j < A->ncol; ++j) {
@@ -83,7 +87,7 @@ double dlangs(char *norm, SuperMatrix *A)
 	    value = SUPERLU_MAX(value,sum);
 	}
 	
-    } else if (lsame_(norm, "I")) {
+    } else if (superlu_lsame(norm, "I")) {
 	/* Find normI(A). */
 	if ( !(rwork = (double *) SUPERLU_MALLOC(A->nrow * sizeof(double))) )
 	    ABORT("SUPERLU_MALLOC fails for rwork.");
@@ -99,7 +103,7 @@ double dlangs(char *norm, SuperMatrix *A)
 	
 	SUPERLU_FREE (rwork);
 	
-    } else if (lsame_(norm, "F") || lsame_(norm, "E")) {
+    } else if (superlu_lsame(norm, "F") || superlu_lsame(norm, "E")) {
 	/* Find normF(A). */
 	ABORT("Not implemented.");
     } else

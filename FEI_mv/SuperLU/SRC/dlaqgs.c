@@ -10,6 +10,11 @@
  * File name:	dlaqgs.c
  * History:     Modified from LAPACK routine DLAQGE
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
+
 #include <math.h>
 #include "slu_ddefs.h"
 
@@ -81,7 +86,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     double   *Aval;
     int i, j, irow;
     double large, small, cj;
-    extern double dlamch_(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
 
 
     /* Quick return if possible */
@@ -94,7 +99,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     Aval = Astore->nzval;
     
     /* Initialize LARGE and SMALL. */
-    small = dlamch_("Safe minimum") / dlamch_("Precision");
+    small = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Safe minimum") / hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Precision");
     large = 1. / small;
 
     if (rowcnd >= THRESH && amax >= small && amax <= large) {

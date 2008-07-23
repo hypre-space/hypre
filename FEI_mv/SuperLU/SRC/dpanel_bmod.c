@@ -18,16 +18,24 @@
   granted, provided the above notices are retained, and a notice that
   the code was modified is included with the above copyright notice.
 */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "slu_ddefs.h"
 
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
+
 /* 
  * Function prototypes 
  */
-void dlsolve(int, int, double *, double *);
-void dmatvec(int, int, int, double *, double *, double *);
+void sludlsolve(int, int, double *, double *);
+void sludmatvec(int, int, int, double *, double *, double *);
 extern void dcheck_tempv();
 
 void
@@ -214,11 +222,11 @@ dpanel_bmod (
 		    STRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr], 
 			   &nsupr, TriTmp, &incx );
 #else
-		    dtrsv_( "L", "N", "U", &segsze, &lusup[luptr], 
-			   &nsupr, TriTmp, &incx );
+                    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("L","N","U",&segsze,
+                           &lusup[luptr], &nsupr, TriTmp, &incx );
 #endif
 #else		
-		    dlsolve ( nsupr, segsze, &lusup[luptr], TriTmp );
+		    sludlsolve ( nsupr, segsze, &lusup[luptr], TriTmp );
 #endif
 		    
 
@@ -261,11 +269,12 @@ dpanel_bmod (
 		    SGEMV(ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr1], 
 			   &nsupr, TriTmp, &incx, &beta, MatvecTmp, &incy);
 #else
-		    dgemv_("N", &block_nrow, &segsze, &alpha, &lusup[luptr1], 
-			   &nsupr, TriTmp, &incx, &beta, MatvecTmp, &incy);
+                    hypre_F90_NAME_BLAS(dgemv,DGEMV)("N", &block_nrow, &segsze,
+                           &alpha, &lusup[luptr1],
+                           &nsupr, TriTmp, &incx, &beta, MatvecTmp, &incy);
 #endif
 #else
-		    dmatvec(nsupr, block_nrow, segsze, &lusup[luptr1],
+		    sludmatvec(nsupr, block_nrow, segsze, &lusup[luptr1],
 			   TriTmp, MatvecTmp);
 #endif
 		    
@@ -393,8 +402,8 @@ dpanel_bmod (
 		    STRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr], 
 			   &nsupr, tempv, &incx );
 #else
-		    dtrsv_( "L", "N", "U", &segsze, &lusup[luptr], 
-			   &nsupr, tempv, &incx );
+                    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("L","N","U",&segsze,
+                           &lusup[luptr], &nsupr, tempv, &incx );
 #endif
 		    
 		    luptr += segsze;	/* Dense matrix-vector */
@@ -405,15 +414,16 @@ dpanel_bmod (
 		    SGEMV( ftcs2, &nrow, &segsze, &alpha, &lusup[luptr], 
 			   &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #else
-		    dgemv_( "N", &nrow, &segsze, &alpha, &lusup[luptr], 
-			   &nsupr, tempv, &incx, &beta, tempv1, &incy );
+                    hypre_F90_NAME_BLAS(dgemv,DGEMV)("N",&nrow,&segsze,&alpha,
+                           &lusup[luptr],
+                           &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #endif
 #else
-		    dlsolve ( nsupr, segsze, &lusup[luptr], tempv );
+		    sludlsolve ( nsupr, segsze, &lusup[luptr], tempv );
 		    
 		    luptr += segsze;        /* Dense matrix-vector */
 		    tempv1 = &tempv[segsze];
-		    dmatvec (nsupr, nrow, segsze, &lusup[luptr], tempv, tempv1);
+		    sludmatvec (nsupr, nrow, segsze, &lusup[luptr], tempv, tempv1);
 #endif
 		    
 		    /* Scatter tempv[*] into SPA dense[*] temporarily, such

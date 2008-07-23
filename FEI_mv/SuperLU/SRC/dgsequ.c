@@ -10,9 +10,14 @@
  * File name:	dgsequ.c
  * History:     Modified from LAPACK routine DGEEQU
  */
+/*
+  This file has been modified to be compatible with the HYPRE
+  linear solver
+*/
+
+
 #include <math.h>
 #include "slu_ddefs.h"
-int  xerbla_( char *srname , int *info );
 
 void
 dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
@@ -82,7 +87,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
     int i, j, irow;
     double rcmin, rcmax;
     double bignum, smlnum;
-    extern double dlamch_(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
     
     /* Test the input parameters. */
     *info = 0;
@@ -91,7 +96,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
 	*info = -1;
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgsequ", &i);
+	superlu_xerbla("dgsequ", &i);
 	return;
     }
 
@@ -107,7 +112,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
     Aval = Astore->nzval;
     
     /* Get machine constants. */
-    smlnum = dlamch_("S");
+    smlnum = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("S");
     bignum = 1. / smlnum;
 
     /* Compute row scale factors. */
