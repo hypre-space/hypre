@@ -182,7 +182,14 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  * list of variables and variable types.  For example, if part 0 has only two
  * variables on it, a cell centered variable and a node centered variable, and
  * we declare part 1 to be a neighbor of part 0, then part 1 must also have only
- * two variables on it, and they must be of type cell and node.
+ * two variables on it, and they must be of type cell and node.  In addition,
+ * variables associated with FACEs or EDGEs must be grouped together and listed
+ * in X, Y, Z order.  This is to enable the code to correctly associate
+ * variables on one part with variables on its neighbor part when a coordinate
+ * transformation is specified.  For example, an XFACE variable on one part may
+ * correspond to a YFACE variable on a neighbor part under a particular
+ * tranformation, and the code determines this association by assuming that the
+ * variable lists are as noted here.
  **/
 int HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
                                      int                part,
