@@ -75,14 +75,14 @@ clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
 	@/bin/rm -f *.idx *.ilg *.ind *.brf *.out
 	@/bin/rm -f vref_manual.* vbref_manual.* version.tex
-
-distclean: clean
 	@/bin/rm -fr HYPRE_usr_manual
 	@/bin/rm -f  HYPRE_usr_manual.p*
 	@/bin/rm -fr HYPRE_ref_manual
 	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.p*
 	@/bin/rm -fr bHYPRE_ref_manual
 	@/bin/rm -f  bHYPRE_ref_manual.tex bHYPRE_ref_manual.p*
+
+distclean: clean
 
 ##################################################################
 # Rules
