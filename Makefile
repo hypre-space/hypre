@@ -80,7 +80,7 @@ HYPRE_DIRS =\
 HYPRE_EXTRA_DIRS =\
  ${HYPRE_DOCS_DIRS}\
  ${HYPRE_TEST_DIRS}\
- seq_ls/pamg 
+ seq_ls/pamg
 
 #################################################################
 # Targets
@@ -153,7 +153,7 @@ test: all
 	echo "Making test drivers ..."; \
 	(cd test; $(MAKE) clean; $(MAKE) all)
 
-check: 
+check:
 	@ \
 	echo "Checking the library ..."; \
 	(cd test; $(MAKE) all); \
@@ -178,6 +178,7 @@ uninstall:
 
 clean:
 	@ \
+	rm -Rf hypre; \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -188,17 +189,7 @@ clean:
 	done
 	rm -rf tca.map pchdir *inslog*
 
-distclean:
-	@ \
-	rm -Rf hypre; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Dist-cleaning $$i ..."; \
-	    (cd $$i &&  $(MAKE) $@); \
-	  fi; \
-	done
+distclean: clean
 	rm -rf ./config/Makefile.config
 	rm -rf ./TAGS
 	rm -rf ./autom4te.cache
