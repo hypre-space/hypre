@@ -168,8 +168,6 @@ distclean: clean
 libHYPRE_superlu.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
-	cp -fp *.o ..
-	cp -fp *.a ..
 	${RANLIB} $@
 
 libHYPRE_superlu.so: ${OBJS}
