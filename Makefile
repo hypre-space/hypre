@@ -189,7 +189,18 @@ clean:
 	done
 	rm -rf tca.map pchdir *inslog*
 
-distclean: clean
+distclean:
+	@ \
+	rm -Rf hypre; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Dist-Cleaning $$i ..."; \
+	    (cd $$i && $(MAKE) $@); \
+	  fi; \
+	done
+	rm -rf tca.map pchdir *inslog*
 	rm -rf ./config/Makefile.config
 	rm -rf ./TAGS
 	rm -rf ./autom4te.cache
