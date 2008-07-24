@@ -59,10 +59,10 @@ clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
 	@/bin/rm -f *.idx *.ilg *.ind *.brf *.out
 	@/bin/rm -f vref_manual.* vbref_manual.* version.tex
-
-distclean: clean
 	@/bin/rm -fr HYPRE_dev_manual
 	@/bin/rm -f  HYPRE_dev_manual.p*
+
+distclean: clean
 
 ##################################################################
 # Rules
