@@ -979,6 +979,16 @@ hypre_F90_IFACE(hypre_boomeramggetdomaintype, HYPRE_BOOMERAMGGETDOMAINTYPE)(
                                                  (int *)        domain_type ) );
 }
 
+void
+hypre_F90_IFACE(hypre_boomeramgsetschwarznonsym, HYPRE_BOOMERAMGSETSCHWARZNONSYM)(
+   long int *solver,
+   int      *schwarz_non_symm,
+   int      *ierr          )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetSchwarzUseNonSymm( (HYPRE_Solver) *solver,
+                                                 (int)        *schwarz_non_symm ) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetSchwarzRlxWt, HYPRE_BoomerAMGGetSchwarzRlxWt
  *--------------------------------------------------------------------------*/
@@ -1091,6 +1101,48 @@ hypre_F90_IFACE(hypre_boomeramgsetmaxnzperrow, HYPRE_BOOMERAMGSETMAXNZPERROW)(
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetEuBJ
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgseteubj, HYPRE_BOOMERAMGSETEUBJ)(
+   long int *solver,
+   int      *eu_bj,
+   int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetEuBJ( (HYPRE_Solver) *solver,
+                                           (int)          *eu_bj ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetEuLevel
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgseteulevel, HYPRE_BOOMERAMGSETEULEVEL)(
+   long int *solver,
+   int      *eu_level,
+   int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetEuLevel( (HYPRE_Solver) *solver,
+                                              (int)          *eu_level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetEuSparseA
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgseteusparsea, HYPRE_BOOMERAMGSETEUSPARSEA)(
+   long int *solver,
+   double   *eu_sparse_a,
+   int      *ierr          )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetEuSparseA( (HYPRE_Solver) *solver,
+                                              (double)       *eu_sparse_a) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetEuclidFile
  *--------------------------------------------------------------------------*/
 
@@ -1155,6 +1207,20 @@ hypre_F90_IFACE(hypre_boomeramgsetdoffunc, HYPRE_BOOMERAMGSETDOFFUNC)(
    *ierr = (int) ( HYPRE_BoomerAMGSetDofFunc(
                       (HYPRE_Solver) *solver,
                       (int *)         dof_func ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetpmaxelmts, HYPRE_BOOMERAMGSETPMAXELMTS)(
+   long int *solver,
+   int      *p_max_elmts,
+   int      *ierr          )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetPMaxElmts( (HYPRE_Solver) *solver,
+                                               (int)          *p_max_elmts ) );
 }
 
 /*--------------------------------------------------------------------------
