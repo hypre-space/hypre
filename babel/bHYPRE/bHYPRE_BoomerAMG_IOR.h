@@ -127,6 +127,18 @@ extern "C" {
  * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
  * for additive Schwarz.
  * 
+ * \item[SchwarzUseNonSymm] ({\tt Int}) - defines whether to use a nonsymmetric
+ * Schwarz smoother. Default:0 (symmetric smoother)
+ *
+ * \item[EuLevel] ({\tt Int}) - defines number of levels for ILU(k) smoother.
+ *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0
+ *
+ * \item[EuSparseA] ({\tt Double}) - defines drop tolerance for ILU(k) smoother
+ *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0
+ *
+ * \item[EuBJ] ({\tt Int}) - defines use of block Jacobi ILUT smoother.
+ *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0
+ *
  * \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
  * is used as a solver; ignored if this is used as a preconditioner
  * 
@@ -156,6 +168,15 @@ extern "C" {
  * 
  * The default is 0. 
  * 
+ * \item[PMaxElmts] ({\tt Int}) - Defines the maximal number of nonzero entries
+ * allowed in interpolation. Default: 0 (i.e. no limit)
+ *
+ * \item[AggNumLevels] ({\tt Int}) - Defines the number of levels
+ * of aggressive coarsening performed. Default:0
+ *
+ * \item[NumPaths] ({\tt Int}) - Defines the number of paths used for
+ * aggressive coarsening. Default:1
+ *
  * \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
  * in GSMG or LS interpolation.
  * 

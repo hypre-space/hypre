@@ -111,6 +111,18 @@
  * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
  * for additive Schwarz.
  * 
+ * \item[SchwarzUseNonSymm] ({\tt Int}) - defines whether to use a nonsymmetric
+ * Schwarz smoother. Default:0 (symmetric smoother)
+ *
+ * \item[EuLevel] ({\tt Int}) - defines number of levels for ILU(k) smoother.
+ *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0
+ *
+ * \item[EuSparseA] ({\tt Double}) - defines drop tolerance for ILU(k) smoother
+ *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0
+ *
+ * \item[EuBJ] ({\tt Int}) - defines use of block Jacobi ILUT smoother.
+ *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0
+ *
  * \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
  * is used as a solver; ignored if this is used as a preconditioner
  * 
@@ -139,6 +151,15 @@
  * \end{tabular}
  * 
  * The default is 0. 
+ * 
+ * \item[PMaxElmts] ({\tt Int}) - Defines the maximal number of nonzero entries
+ * allowed in interpolation. Default: 0 (i.e. no limit)
+ * 
+ * \item[AggNumLevels] ({\tt Int}) - Defines the number of levels
+ * of aggressive coarsening performed. Default:0
+ * 
+ * \item[NumPaths] ({\tt Int}) - Defines the number of paths used for
+ * aggressive coarsening. Default:1
  * 
  * \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
  * in GSMG or LS interpolation.
@@ -891,6 +912,18 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
    {
       ierr += HYPRE_BoomerAMGSetInterpType( solver, value );
    }
+   else if ( strcmp(name,"PMaxElmts")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetPMaxElmts( solver, value );
+   }
+   else if ( strcmp(name,"AggNumLevels")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetAggNumLevels( solver, value );
+   }
+   else if ( strcmp(name,"NumPaths")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetNumPaths( solver, value );
+   }
    else if ( strcmp(name,"NumSamples")==0 )
    {
       ierr += HYPRE_BoomerAMGSetNumSamples( solver, value );
@@ -906,6 +939,18 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
    else if ( strcmp(name,"DomainType")==0 )
    {
       ierr += HYPRE_BoomerAMGSetDomainType( solver, value );
+   }
+   else if ( strcmp(name,"SchwarzUseNonSymm")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetSchwarzUseNonSymm( solver, value );
+   }
+   else if ( strcmp(name,"EuBJ")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetEuBJ( solver, value );
+   }
+   else if ( strcmp(name,"EuLevel")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetEuLevel( solver, value );
    }
    else if ( strcmp(name,"NumFunctions")==0 )
    {
@@ -986,6 +1031,10 @@ impl_bHYPRE_BoomerAMG_SetDoubleParameter(
    else if ( strcmp(name,"Tolerance")==0 || strcmp(name,"Tol")==0 )
    {
       ierr += HYPRE_BoomerAMGSetTol( solver, value );
+   }
+   else if ( strcmp(name,"EuSparseA")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetEuSparseA( solver, value );
    }
    else
    {
