@@ -9721,7 +9721,7 @@ then
    if test "$casc_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_SUPERLU_FILES="`pwd`/FEI_mv/SuperLU/*.o"
+      HYPRE_FEI_SUPERLU_FILES="`pwd`/FEI_mv/SuperLU/SRC/*.o"
    else
       HYPRE_FEI_SUPERLU_FILES=
    fi
@@ -9952,7 +9952,7 @@ then
           *)
             CFLAGS="-g"
             if test "$casc_using_openmp" = "yes" ; then
-              CFLAGS="$CFLAGS -openmp"
+               CFLAGS="$CFLAGS -openmp"
             fi
             ;;
         esac
@@ -10019,7 +10019,7 @@ then
           *)
             CXXFLAGS="-g"
             if test "$casc_using_openmp" = "yes" ; then
-              CXXFLAGS="$CXXFLAGS -openmp"
+               CXXFLAGS="$CXXFLAGS -openmp"
             fi
             ;;
         esac
@@ -10086,7 +10086,7 @@ then
           *)
             FFLAGS="-g"
             if test "$casc_using_openmp" = "yes" ; then
-            FFLAGS="$FFLAGS -openmp"
+               FFLAGS="$FFLAGS -openmp"
             fi
             ;;
         esac
@@ -10154,7 +10154,7 @@ then
           *)
             CFLAGS="-O"
             if test "$casc_using_openmp" = "yes" ; then
-              CFLAGS="$CFLAGS -openmp"
+               CFLAGS="$CFLAGS -openmp"
             fi
             ;;
         esac
