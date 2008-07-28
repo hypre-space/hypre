@@ -32,6 +32,10 @@ Version 2.4.0b released XXXX/XX/XX
 
 - Updated SuperLU to version 3.0
 
+- Improved relaxation options in AMS.
+
+- Changed 'make clean' to erase the hypre/ directory.
+
 #====================================
 
 Version 2.3.2a released, 2008/05/08.
