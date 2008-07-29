@@ -60,7 +60,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
 
-   int             *CF_marker_offd;
+   int             *CF_marker_offd = NULL;
    int             *dof_func_offd = NULL;
 
    hypre_CSRMatrix *A_ext;
@@ -149,7 +149,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   if (num_cols_A_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
    if (num_functions > 1 && num_cols_A_offd)
 	dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
@@ -479,7 +479,10 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
      P_marker = hypre_CTAlloc(int, n_fine);
-     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     if (num_cols_A_offd)
+ 	P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     else
+ 	P_marker_offd = NULL;
 
      for (i = 0; i < n_fine; i++)
      {      
@@ -1035,7 +1038,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
 
-   int             *CF_marker_offd;
+   int             *CF_marker_offd = NULL;
    int             *dof_func_offd = NULL;
 
    hypre_CSRMatrix *A_ext;
@@ -1122,7 +1125,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   if (num_cols_A_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
    if (num_functions > 1 && num_cols_A_offd)
 	dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
@@ -1451,7 +1454,10 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
      P_marker = hypre_CTAlloc(int, n_fine);
-     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     if (num_cols_A_offd)
+	P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     else
+	P_marker_offd = NULL;
 
      for (i = 0; i < n_fine; i++)
      {      
@@ -1942,7 +1948,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
 
-   int             *CF_marker_offd;
+   int             *CF_marker_offd = NULL;
    int             *dof_func_offd = NULL;
 
    hypre_CSRMatrix    *P_diag;
@@ -2017,7 +2023,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   if (num_cols_A_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
    if (num_functions > 1 && num_cols_A_offd)
 	dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
@@ -2297,7 +2303,10 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
      P_marker = hypre_CTAlloc(int, n_fine);
-     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     if (num_cols_A_offd)
+	P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     else
+	P_marker_offd = NULL;
 
      for (i = 0; i < n_fine; i++)
      {      
@@ -2933,7 +2942,7 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
 
-   int             *CF_marker_offd;
+   int             *CF_marker_offd = NULL;
    int             *dof_func_offd = NULL;
 
    hypre_CSRMatrix *A_ext;
@@ -3022,7 +3031,7 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   if (num_cols_A_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
    if (num_functions > 1 && num_cols_A_offd)
 	dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
@@ -3352,7 +3361,10 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
      P_marker = hypre_CTAlloc(int, n_fine);
-     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     if (num_cols_A_offd)
+	P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     else
+	P_marker_offd = NULL;
 
      for (i = 0; i < n_fine; i++)
      {      
