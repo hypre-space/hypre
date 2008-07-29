@@ -227,3 +227,22 @@ do
       chgrp -fR hypre         $dir
    fi
 done
+
+# move all but the last 10 autotest results into yearly subdirectories
+files=`echo AUTOTEST-2*.*`
+count=`echo $files | wc | awk '{print $2}'`
+for i in $files
+do
+   if [ $count -le 10 ]; then
+      break;
+   fi
+   dir=`echo $i | awk -F '.' '{print $1}'`
+   if [ ! -d $dir ]; then
+      mkdir $dir
+      chmod -fR a+rX,ug+w,o-w $dir
+      chgrp -fR hypre         $dir
+   fi
+   mv $i $dir/$i
+   count=`expr $count - 1`
+done
+
