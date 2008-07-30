@@ -1,9 +1,11 @@
 
 /*  Elimination tree computation and layout routines */
 
+#if 0 /* Rob Falgout: There was a conflict with 'link' below and 'unistd.h' */
 #include <stdio.h>
 #include <stdlib.h>
 #include "slu_ddefs.h"
+#endif
 
 /* 
  *  Implementation of disjoint set union routines.
