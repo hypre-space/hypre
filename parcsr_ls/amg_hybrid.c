@@ -1667,6 +1667,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_ParKrylovMatvec,
          hypre_ParKrylovMatvecDestroy,
          hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovClearVector,
          hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
          hypre_ParKrylovCommInfo,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
