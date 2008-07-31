@@ -36,6 +36,7 @@ hypre_BiCGSTABFunctionsCreate(
    int (*MatvecDestroy)( void *matvec_data ),
    double (*InnerProd)( void *x , void *y ),
    int (*CopyVector)( void *x , void *y ),
+   int (*ClearVector)( void *x ),
    int (*ScaleVector)( double alpha , void *x ),
    int (*Axpy)( double alpha , void *x , void *y ),
    int (*CommInfo)( void *A , int *my_id , int *num_procs ),
@@ -54,6 +55,7 @@ hypre_BiCGSTABFunctionsCreate(
    bicgstab_functions->MatvecDestroy = MatvecDestroy;
    bicgstab_functions->InnerProd = InnerProd;
    bicgstab_functions->CopyVector = CopyVector;
+   bicgstab_functions->ClearVector = ClearVector;
    bicgstab_functions->ScaleVector = ScaleVector;
    bicgstab_functions->Axpy = Axpy;
    bicgstab_functions->CommInfo = CommInfo;
@@ -437,7 +439,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 
         iter++;
 
-	(*(bicgstab_functions->Axpy))(-1.0,v,v);
+	(*(bicgstab_functions->ClearVector))(v);
         precond(precond_data, A, p, v);
         (*(bicgstab_functions->Matvec))(matvec_data,1.0,A,v,0.0,q);
       	temp = (*(bicgstab_functions->InnerProd))(r0,q);
@@ -450,7 +452,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	}
 	(*(bicgstab_functions->Axpy))(alpha,v,x);
 	(*(bicgstab_functions->Axpy))(-alpha,q,r);
-	(*(bicgstab_functions->Axpy))(-1.0,v,v);
+	(*(bicgstab_functions->ClearVector))(v);
         precond(precond_data, A, r, v);
         (*(bicgstab_functions->Matvec))(matvec_data,1.0,A,v,0.0,s);
       	gamma = (*(bicgstab_functions->InnerProd))(r,s) /

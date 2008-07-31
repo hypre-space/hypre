@@ -91,7 +91,6 @@ char *hypre_ParKrylovCAlloc( int count , int elt_size );
 int hypre_ParKrylovFree( char *ptr );
 void *hypre_ParKrylovCreateVectorArray( int n , void *vvector );
 int hypre_ParKrylovMatvecT( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
-int hypre_ParKrylovClearVector( void *x );
 */
 /* functions in pcg_struct.c which are used here:
   void *hypre_ParKrylovCreateVector( void *vvector );
@@ -101,6 +100,7 @@ int hypre_ParKrylovClearVector( void *x );
   int hypre_ParKrylovMatvecDestroy( void *matvec_data );
   double hypre_ParKrylovInnerProd( void *x , void *y );
   int hypre_ParKrylovCopyVector( void *x , void *y );
+  int hypre_ParKrylovClearVector( void *x );
   int hypre_ParKrylovScaleVector( double alpha , void *x );
   int hypre_ParKrylovAxpy( double alpha , void *x , void *y );
   int hypre_ParKrylovCommInfo( void *A , int *my_id , int *num_procs );
@@ -117,6 +117,7 @@ typedef struct
   int (*MatvecDestroy)( void *matvec_data );
   double (*InnerProd)( void *x , void *y );
   int (*CopyVector)( void *x , void *y );
+  int (*ClearVector)( void *x );
   int (*ScaleVector)( double alpha , void *x );
   int (*Axpy)( double alpha , void *x , void *y );
   int (*CommInfo)( void *A , int *my_id , int *num_procs );
@@ -191,6 +192,7 @@ extern "C" {
       int (*MatvecDestroy)( void *matvec_data ),
       double (*InnerProd)( void *x , void *y ),
       int (*CopyVector)( void *x , void *y ),
+      int (*ClearVector)( void *x ),
       int (*ScaleVector)( double alpha , void *x ),
       int (*Axpy)( double alpha , void *x , void *y ),
       int (*CommInfo)( void *A , int *my_id , int *num_procs ),
@@ -1102,7 +1104,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions );
 #endif
 
 /* bicgstab.c */
-hypre_BiCGSTABFunctions *hypre_BiCGSTABFunctionsCreate ( void *(*CreateVector )(void *vvector ), int (*DestroyVector )(void *vvector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
+hypre_BiCGSTABFunctions *hypre_BiCGSTABFunctionsCreate ( void *(*CreateVector )(void *vvector ), int (*DestroyVector )(void *vvector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
 void *hypre_BiCGSTABCreate ( hypre_BiCGSTABFunctions *bicgstab_functions );
 int hypre_BiCGSTABDestroy ( void *bicgstab_vdata );
 int hypre_BiCGSTABSetup ( void *bicgstab_vdata , void *A , void *b , void *x );

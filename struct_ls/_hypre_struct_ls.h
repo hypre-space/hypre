@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 #include "_hypre_utilities.h"
 
 #include "HYPRE_struct_ls.h"

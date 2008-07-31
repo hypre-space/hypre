@@ -36,6 +36,7 @@ HYPRE_SStructBiCGSTABCreate( MPI_Comm             comm,
          hypre_SStructKrylovDestroyVector, hypre_SStructKrylovMatvecCreate,
          hypre_SStructKrylovMatvec, hypre_SStructKrylovMatvecDestroy,
          hypre_SStructKrylovInnerProd, hypre_SStructKrylovCopyVector,
+	 hypre_SStructKrylovClearVector,
          hypre_SStructKrylovScaleVector, hypre_SStructKrylovAxpy,
 	 hypre_SStructKrylovCommInfo,
          hypre_SStructKrylovIdentitySetup, hypre_SStructKrylovIdentity );
