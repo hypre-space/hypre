@@ -1,11 +1,9 @@
 
 /*  Elimination tree computation and layout routines */
 
-#if 0 /* Rob Falgout: There was a conflict with 'link' below and 'unistd.h' */
 #include <stdio.h>
 #include <stdlib.h>
 #include "slu_ddefs.h"
-#endif
 
 /* 
  *  Implementation of disjoint set union routines.
@@ -15,7 +13,7 @@
  *  Calls are:
  *  initialize_disjoint_sets (n) initial call.
  *  s = make_set (i)             returns a set containing only i.
- *  s = link (t, u)		 returns s = t union u, destroying t and u.
+ *  s = splink (t, u)		 returns s = t union u, destroying t and u.
  *  s = find (i)		 return name of set containing i.
  *  finalize_disjoint_sets 	 final call.
  *
@@ -62,7 +60,7 @@ int make_set (
 
 
 static
-int link (
+int splink (
 	int s,
 	int t
 	)
@@ -175,7 +173,7 @@ sp_coletree(
 			rroot = root[rset];
 			if (rroot != col) {
 				parent[rroot] = col;
-				cset = link (cset, rset);
+				cset = splink (cset, rset);
 				root[cset] = col;
 			}
 		}
@@ -323,7 +321,7 @@ sp_symetree(
 			rroot = root[rset];
 			if (rroot != col) {
 				parent[rroot] = col;
-				cset = link (cset, rset);
+				cset = splink (cset, rset);
 				root[cset] = col;
 			}
 		}
