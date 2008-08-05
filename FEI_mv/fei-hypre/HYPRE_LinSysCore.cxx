@@ -4365,6 +4365,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            HYPRE_ParCSRPCGSetTol(HYSolver_, tolerance_);
            HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
            HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
+           HYPRE_PCGSetRecomputeResidual(HYSolver_, 1);
            if ( normAbsRel_ == 0 ) HYPRE_ParCSRPCGSetStopCrit(HYSolver_,0);
            else                    HYPRE_ParCSRPCGSetStopCrit(HYSolver_,1);
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
