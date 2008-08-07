@@ -1614,7 +1614,7 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
    {
       if      (A22Params_.SolverID_ == 0) HYPRE_ParCSRPCGDestroy(A22Solver_);
       else if (A22Params_.SolverID_ == 1) HYPRE_ParCSRGMRESDestroy(A22Solver_);
-      else if (A11Params_.SolverID_ == 2) HYPRE_BoomerAMGDestroy(A22Solver_);
+      else if (A22Params_.SolverID_ == 2) HYPRE_BoomerAMGDestroy(A22Solver_);
    }
    if ( A11Precond_ != NULL ) 
    {
