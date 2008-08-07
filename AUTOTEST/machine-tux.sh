@@ -80,8 +80,8 @@ done
 ./test.sh examples.sh $src_dir/examples
 mv -f examples.??? $output_subdir
 
-# Test documentation build (only if 'docs' directory is present)
-if [ -d $src_dir/docs ]; then
+# Test documentation build (only if 'docs_misc' directory is present)
+if [ -d $src_dir/docs_misc ]; then
    ./test.sh docs.sh $src_dir
    mv -f docs.??? $output_dir
 fi
