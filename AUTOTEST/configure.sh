@@ -51,8 +51,14 @@ else
    ./configure $@
 fi
 
-# Save config.log and Makefile.config
-cp config.log config/Makefile.config $output_dir
+# Save config.log, HYPRE_config.h and Makefile.config
+cp config.log HYPRE_config.h config/Makefile.config $output_dir
 
 # Save the environment variables
 set > $output_dir/sh.env
+
+# Save Babel configuration (if it exists)
+if [ -f babel-runtime/config.log ]
+then
+   cp babel-runtime/config.log $output_dir/babel-config.log
+fi
