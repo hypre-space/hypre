@@ -13,8 +13,8 @@
 
 # Which tests to run?
 TEST_ALPHA="-`hostname -a`"
-TEST_BETA="$TEST_ALPHA -alc"
-TEST_GENERAL="$TEST_BETA -thunder -up -zeus"
+TEST_BETA="$TEST_ALPHA -alc -up"
+TEST_GENERAL="$TEST_BETA -thunder -zeus"
 TERMCMD=""
 
 while [ "$*" ]
