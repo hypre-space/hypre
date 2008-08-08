@@ -48,7 +48,7 @@ HEADERS =\
 FILES =\
  ConjGrad.c\
  DiagScale.c\
- FlexGmres.c\
+ FGmres.c\
  Hash.c\
  hypre_ParaSails.c\
  LoadBal.c\
