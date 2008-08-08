@@ -50,15 +50,17 @@ the responsible project member before the release is made available to users.
 
   []
 
-- Run the 'AUTOTEST/testdist.sh' script to verify a stable release.  For more
-  information on running this script, do 'testdist.sh -help'.  If any of the
-  tests fail, untag the repository, make necessary corrections, and start over.
-
-  []
 
 - Create release tar file by running the 'tools/mkdist' script (for more
   information, do 'mkdist -help').  This can be run from within any directory,
   just be sure to use the latest version of the 'mkdist' script.
+
+  []
+
+
+- Run the 'AUTOTEST/testdist.sh' script to verify a stable release.  For more
+  information on running this script, do 'testdist.sh -help'.  If any of the
+  tests fail, untag the repository, make necessary corrections, and start over.
 
   []
 
