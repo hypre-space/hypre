@@ -46,25 +46,34 @@ the responsible project member before the release is made available to users.
 
   ahb 8/5/2008
 
+  ahb 8/8/2008	
+
 - Tag repository with release number.
 
-  []
+  ahb 8/5/2008 (cvs rtag V2-4-0b linear_solvers)
+  
+  untagged on 8/8/2008 (cvs rtag -d V2-4-0b linear_solvers)
 
-- Run the 'AUTOTEST/testdist.sh' script to verify a stable release.  For more
-  information on running this script, do 'testdist.sh -help'.  If any of the
-  tests fail, untag the repository, make necessary corrections, and start over.
-
-  []
+   ahb 8/8/2008 (cvs rtag V2-4-0b linear_solvers)
 
 - Create release tar file by running the 'tools/mkdist' script (for more
   information, do 'mkdist -help').  This can be run from within any directory,
   just be sure to use the latest version of the 'mkdist' script.
 
-  []
+  ahb 8/5/2008  (./tools/mkdist V2-4-0b)
+
+  ahb 8/8/2008  (./tools/mkdist V2-4-0b)
+
+- Run the 'AUTOTEST/testdist.sh' script to verify a stable release.  For more
+  information on running this script, do 'testdist.sh -help'.  If any of the
+  tests fail, untag the repository, make necessary corrections, and start over.
+
+  ahb 8/14/08
+
 
 - On the CASC cluster, copy tar file to '/usr/casc/hypre'.
 
-  []
+  ahb 8/14/08
 
 - Put release on download page, and inform project team and other appropriate
   users of availability.
