@@ -92,8 +92,7 @@ rows (\code{nrows}) and some number of columns in each row
 (\code{ncols}).  The actual row and column numbers of the matrix
 \code{values} to be set are given by \code{rows} and \code{cols}.
 After the coefficients are set, they can be added to with an
-\code{AddTo()} routine.  Each process should set only those matrix
-values that it ``owns'' in the data distribution.
+\code{AddTo()} routine.  
 
 The \code{Assemble()} routine is a collective call, and finalizes the
 matrix assembly, making the matrix ``ready to use''.  The
