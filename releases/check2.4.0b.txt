@@ -78,9 +78,9 @@ the responsible project member before the release is made available to users.
 - Put release on download page, and inform project team and other appropriate
   users of availability.
 
-  []
+  rdf 9/5/08
 
 - FINAL CERTIFICATION: Verify that all steps have been signed off and commit
   this file to the repository.
 
-  []
+  ahb 9/9/08
