@@ -36,6 +36,8 @@ Version 2.4.0b released 2008/08/08
 
 - Changed 'make clean' to erase the hypre/ directory.
 
+- Fixed a bug in preconditioned BiCGStab.
+
 #====================================
 
 Version 2.3.2a released, 2008/05/08.
