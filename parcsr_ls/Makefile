@@ -72,6 +72,7 @@ FILES =\
  F90_HYPRE_parcsr_pcg.c\
  F90_HYPRE_parcsr_pilut.c\
  F90_HYPRE_parcsr_schwarz.c\
+ F90_HYPRE_ams.c\
  HYPRE_parcsr_amg.c\
  HYPRE_parcsr_bicgstab.c\
  HYPRE_parcsr_block.c\
