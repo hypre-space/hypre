@@ -1375,12 +1375,18 @@ int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
 /**
  * Construct and return the discrete gradient matrix G using some
  * edge and vertex information. We assume that edge\_vertex lists
- * the edge vertices consecutively, and that the orientation of edge i
- * depends only on the sign of edge\_vertex[2*i+1] - edge\_vertex[2*i].
+ * the edge vertices consecutively, and that the orientation of all
+ * edges is consistent.
+ *
+ * If edge_orientation = 1, the edges are already oriented.
+ *
+ * If edge_orientation = 2, the orientation of edge i depends only
+ * on the sign of edge_vertex[2*i+1] - edge_vertex[2*i].
  **/
 int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
                                        HYPRE_ParVector x_coord,
 				       int *edge_vertex,
+                                       int edge_orientation,
                                        HYPRE_ParCSRMatrix *G);
 
 /*@}*/
