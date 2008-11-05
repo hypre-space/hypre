@@ -20,7 +20,7 @@ src_dir="$testing_dir/linear_solvers"
 remote_dir="hypre/testing"
 cvs_opts=""
 summary_file="SUMMARY.html"
-summary_subject="Autotest Error Summary `date +%D`"
+summary_subject="Autotest Error Summary `date +%Y-%m-%d`"
 email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 
 # Main loop
