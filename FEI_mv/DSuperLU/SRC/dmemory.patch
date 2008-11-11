@@ -1,0 +1,8 @@
+132c132
+<     buf = (double *) SUPERLU_MALLOC(n * sizeof(double)); 
+---
+>     buf = (double *) SUPERLU_MALLOC( SUPERLU_MAX(1, n) * sizeof(double) ); 
+141c141
+<     buf = (double *) SUPERLU_MALLOC(n * sizeof(double));
+---
+>     buf = (double *) SUPERLU_MALLOC( SUPERLU_MAX(1, n) * sizeof(double));
