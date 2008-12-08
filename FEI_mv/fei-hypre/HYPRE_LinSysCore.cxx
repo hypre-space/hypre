@@ -3251,6 +3251,7 @@ int HYPRE_LinSysCore::setRHSID(int rhsID)
       {
          currentRHS_ = i;
          HYb_ = HYbs_[currentRHS_];
+         currB_ = HYb_;
          return (0);
       }
    }
