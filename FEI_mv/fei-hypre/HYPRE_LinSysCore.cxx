@@ -2563,7 +2563,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
 int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                                           double* gamma1, int leng)
 {
-   int    i, j, k, localEqnNum, colIndex, rowSize, *colInd;
+   int    i, j, k, l, localEqnNum, colIndex, rowSize, *colInd;
    int    numLocalRows, eqnNum, rowSize2, *colInd2, numLabels, *labels;
    double rhs_term, val, *colVal2, *colVal;
 
@@ -2627,10 +2627,14 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                      {
                         rhs_term = gamma1[i] / alpha[i] * colVal2[k];
                         eqnNum = colIndex - 1;
-                        HYPRE_IJVectorGetValues(HYb_,1,&eqnNum, &val);
-                        val -= rhs_term;
-                        HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                        for( l = 0; l < numRHSs_; l++ ) 
+                        {
+                           HYb_ = HYbs_[l];
+                           HYPRE_IJVectorGetValues(HYb_,1,&eqnNum, &val);
+                           val -= rhs_term;
+                           HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
                                                 (const double *) &val);
+                        }
                         colVal2[k] = 0.0;
                         break;
                      }
@@ -2642,8 +2646,12 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
          // Set rhs for boundary point
          rhs_term = gamma1[i] / alpha[i];
          eqnNum = globalEqn[i];
-         HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
-                                 (const double *) &rhs_term);
+         for( l = 0; l < numRHSs_; l++ ) 
+         {
+            HYb_ = HYbs_[l];
+            HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                                    (const double *) &rhs_term);
+         }
       }
    }
 
@@ -2680,8 +2688,8 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
                                           int** colIndices, int* colIndLen,
                                           double** coefs) 
 {
-   int    i, j, k, numLocalRows, localEqnNum, rowLen, *colInd, eqnNum;
-   double bval, *colVal;
+   int    i, j, k, l, numLocalRows, localEqnNum, rowLen, *colInd, eqnNum;
+   double bval, *colVal, rhs_term;
 
    //-------------------------------------------------------------------
    // diagnostic message and error checking
@@ -2721,11 +2729,16 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
          {
             if (colInd[k]-1 == colIndices[i][j]) 
             {
-               HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&bval);
-               bval -= ( colVal[k] * coefs[i][j] );
+               rhs_term = colVal[k] * coefs[i][j];
+               for ( l = 0; l < numRHSs_; l++ ) 
+               {
+                  HYb_ = HYbs_[l];
+                  HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&bval);
+                  bval -= rhs_term;
+                  HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                                          (const double *) &bval);
+               }
                colVal[k] = 0.0;
-               HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
-                                       (const double *) &bval);
             }
          }
       }
@@ -2752,8 +2765,8 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
 int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha, 
                                      double* beta, double* gamma1, int leng)
 {
-   int    i, j, numLocalRows, localEqnNum, *colInd, rowSize, eqnNum;
-   double val, *colVal;
+   int    i, j, k, numLocalRows, localEqnNum, *colInd, rowSize, eqnNum;
+   double val, *colVal, rhs_term;
 
    //-------------------------------------------------------------------
    // diagnostic message and error checking
@@ -2800,10 +2813,15 @@ int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
       // need to fetch matrix and put it back before assembled
 
       eqnNum = globalEqn[i];
-      HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&val);
-      val += ( gamma1[i] / beta[i] );
-      HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
-                              (const double *) &val);
+      rhs_term = gamma1[i] / beta[i];
+      for ( k = 0; k < numRHSs_; k++ )
+      {
+         HYb_ = HYbs_[k];
+         HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&val);
+         val += rhs_term;
+         HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                                 (const double *) &val);
+      }
    }
 
    //-------------------------------------------------------------------
