@@ -3050,12 +3050,8 @@ main( int   argc,
         if (myid == 0)
           printf("HYPRE_FlexGMRESGetPrecond got good precond\n");
 
-#if 0
-      if (solver_id == 61)                                             
-         HYPRE_FlexGMRESSetModifyPC( pcg_solver, 
-                                  (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
-#endif
-      /* this is optional - could be a user defined one instead*/
+
+      /* this is optional - could be a user defined one instead (see ex5.c)*/
       HYPRE_FlexGMRESSetModifyPC( pcg_solver, 
                                (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCDefault);
 
