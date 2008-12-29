@@ -119,9 +119,6 @@ help:
 	@echo "        to the file names where they reside for actual use"
 	@echo "     executes mkinstalldirs script to create directories needed"
 	@echo "     "
-	@echo "uninstall:"
-	@echo "     deletes all files that the install target creates"
-	@echo "     "
 	@echo "clean:"
 	@echo "     deletes all files from the current directory that are normally"
 	@echo "        created by building the program"
@@ -170,11 +167,6 @@ install: all
 	cp -fr ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
 	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}
 	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}
-
-uninstall:
-	@echo "Un-installing hypre ..."
-	rm -rf ${HYPRE_LIB_INSTALL}
-	rm -rf ${HYPRE_INC_INSTALL}
 
 clean:
 	@ \
