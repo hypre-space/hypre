@@ -1205,7 +1205,6 @@ int hypre_FlexGMRESGetConverged ( void *fgmres_vdata , int *converged );
 int hypre_FlexGMRESGetFinalRelativeResidualNorm ( void *fgmres_vdata , double *relative_residual_norm );
 int hypre_FlexGMRESSetModifyPC ( void *fgmres_vdata , int (*modify_pc )());
 int hypre_FlexGMRESModifyPCDefault ( void *precond_data , int iteration , double rel_residual_norm );
-int hypre_FlexGMRESModifyPCAMGExample ( void *precond_data , int iterations , double rel_residual_norm );
 
 /* lgmres.c */
 hypre_LGMRESFunctions *hypre_LGMRESFunctionsCreate ( char *(*CAlloc )(size_t count ,size_t elt_size ), int (*Free )(char *ptr ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), void *(*CreateVectorArray )(int size ,void *vectors ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ));
