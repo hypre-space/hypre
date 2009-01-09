@@ -247,7 +247,6 @@ int HYPRE_BoomerAMGSetNumSweeps(HYPRE_Solver  solver,
  * There are the following options for k:
  *
  * \begin{tabular}{|l|l|} \hline
- * the finest level &	if k=0 \\
  * the down cycle &	if k=1 \\
  * the up cycle	&	if k=2 \\
  * the coarsest level &  if k=3.\\
@@ -297,7 +296,6 @@ int HYPRE_BoomerAMGSetRelaxType(HYPRE_Solver  solver,
  * description of HYPRE\_BoomerAMGSetRelaxType). Options for k are
  *
  * \begin{tabular}{|l|l|} \hline
- * the finest level &	if k=0 \\
  * the down cycle &	if k=1 \\
  * the up cycle	&	if k=2 \\
  * the coarsest level &  if k=3. \\
