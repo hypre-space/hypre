@@ -42,6 +42,7 @@
 // -------------------------------------------------------------------------
 
 #include "HYPRE_FEI_includes.h"
+#include "HYPRE_SlideReduction.h"
 
 // *************************************************************************
 // local enumerations and defines
@@ -52,7 +53,7 @@ enum HYsolverID {HYPCG,HYLSICG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,
                  HYY12M,HYAMGE,HYHYBRID};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
-                 HYUZAWA,HYMLMAXWELL,HYAMS,HYSYSPDE};
+                 HYUZAWA,HYMLMAXWELL,HYAMS,HYSYSPDE,HYDSLU};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255
@@ -465,7 +466,7 @@ class HYPRE_LinSysCore
    void   solveUsingBoomeramg(int&);
    double solveUsingSuperLU(int&);
    double solveUsingSuperLUX(int&);
-   void   solveUsingDSuperLU(int&);
+   double solveUsingDSuperLU(int&);
    void   solveUsingY12M(int&);
    void   solveUsingAMGe(int&);
    void   buildSlideReducedSystem();
@@ -589,6 +590,7 @@ class HYPRE_LinSysCore
    int             projectCurrSize_;
    double          **projectionMatrix_; 
    int             normalEqnFlag_;
+   HYPRE_SlideReduction *slideObj_;
 
    // ----------------------------------------------------------------------
    // variables for slide and Schur reduction

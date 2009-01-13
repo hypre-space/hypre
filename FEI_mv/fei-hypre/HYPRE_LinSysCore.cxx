@@ -48,10 +48,12 @@
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
 #include "HYPRE_LSI_Uzawa_c.h"
+#include "HYPRE_LSI_Dsuperlu.h"
 #include "HYPRE_MLMaxwell.h"
 #include "HYPRE_SlideReduction.h"
 
 //#define HAVE_SYSPDE
+//#define HAVE_DSUPERLU
 
 //***************************************************************************
 // timers 
@@ -180,6 +182,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   projectCurrSize_(0),
                   projectionMatrix_(NULL),
                   normalEqnFlag_(0),
+                  slideObj_(NULL),
                   selectedList_(NULL),
                   selectedListAux_(NULL),
                   nConstraints_(0),
@@ -528,6 +531,10 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 #ifdef HAVE_SYSPDE
       else if ( HYPreconID_ == HYSYSPDE )
          HYPRE_ParCSRSysPDEDestroy( HYPrecon_ );
+#endif
+#ifdef HAVE_DSUPERLU
+      else if ( HYPreconID_ == HYDSLU )
+         HYPRE_LSI_DSuperLUDestroy(HYPrecon_);
 #endif
 
       HYPrecon_ = NULL;
@@ -891,6 +898,8 @@ int HYPRE_LinSysCore::setConnectivities(GlobalID elemBlk, int nElems,
                        const int* const* connNodes)
 {
 #ifdef HAVE_MLI
+   (void) elemIDs;
+   (void) connNodes;
    if ( HYPreconID_ == HYMLI && haveFEData_ == 2 )
    {
       if (feData_ == NULL) feData_ = (void *) HYPRE_LSI_MLISFEICreate(comm_);
@@ -2111,6 +2120,8 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       currB_ = HYb_;
       currX_ = HYx_;
       currR_ = HYr_;
+      if (slideObj_ != NULL) delete slideObj_;
+      slideObj_ = NULL;
    }
 
    //-------------------------------------------------------------------
@@ -2627,13 +2638,13 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                      {
                         rhs_term = gamma1[i] / alpha[i] * colVal2[k];
                         eqnNum = colIndex - 1;
-                        for( l = 0; l < numRHSs_; l++ ) 
+                        for ( l = 0; l < numRHSs_; l++ ) 
                         {
                            HYb_ = HYbs_[l];
                            HYPRE_IJVectorGetValues(HYb_,1,&eqnNum, &val);
                            val -= rhs_term;
                            HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
-                                                (const double *) &val);
+                                                   (const double *) &val);
                         }
                         colVal2[k] = 0.0;
                         break;
@@ -2646,7 +2657,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
          // Set rhs for boundary point
          rhs_term = gamma1[i] / alpha[i];
          eqnNum = globalEqn[i];
-         for( l = 0; l < numRHSs_; l++ ) 
+         for ( l = 0; l < numRHSs_; l++ ) 
          {
             HYb_ = HYbs_[l];
             HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
@@ -2814,7 +2825,7 @@ int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
 
       eqnNum = globalEqn[i];
       rhs_term = gamma1[i] / beta[i];
-      for ( k = 0; k < numRHSs_; k++ )
+      for ( k = 0; k < numRHSs_; k++ ) 
       {
          HYb_ = HYbs_[k];
          HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&val);
@@ -3696,6 +3707,10 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       else if (HYPreconID_ == HYSYSPDE)
          HYPRE_ParCSRSysPDEDestroy(HYPrecon_);
 #endif
+#ifdef HAVE_DSUPERLU
+      else if (HYPreconID_ == HYDSLU)
+         HYPRE_LSI_DSuperLUDestroy(HYPrecon_);
+#endif
    }
 
    //-------------------------------------------------------------------
@@ -3819,6 +3834,13 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       HYPreconID_ = HYSYSPDE;
    }
 #endif
+#ifdef HAVE_DSUPERLU
+   else if (!strcmp(name, "dsuperlu"))
+   {
+      strcpy(HYPreconName_, name);
+      HYPreconID_ = HYDSLU;
+   }
+#endif
    else
    {
       if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
@@ -3927,6 +3949,13 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            printf("HYPRE_LSC::selectPreconditioner-SYSPDE unsupported.\n");
 #endif
            break;
+      case HYDSLU :
+#ifdef HAVE_DSUPERLU
+           ierr = HYPRE_LSI_DSuperLUCreate(comm_, &HYPrecon_);
+#else
+           printf("HYPRE_LSC::selectPreconditioner-DSUPERLU unsupported.\n");
+#endif
+           break;
    }
 
    //-------------------------------------------------------------------
@@ -4014,11 +4043,12 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
    int                i, j, numIterations=0, status, ierr, localNRows;
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
+   int                slideCheck[2];
 #ifdef HAVE_MLI
    int                *constrMap, *constrEqns, ncount, *iArray;
    double             *tempNodalCoord; 
 #endif
-   int                *numSweeps, *relaxType;
+   int                *numSweeps, *relaxType, reduceAFlag;
    int                *matSizes, *rowInd, retFlag, tempIter, nTrials;
    double             rnorm=0.0, ddata, *colVal, *relaxWt, *diagVals;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
@@ -4032,7 +4062,6 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #endif
    HYPRE_ParCSRMatrix A_csr, I_csr, normalA_csr;
    HYPRE_ParVector    x_csr, b_csr, r_csr;
-   HYPRE_SlideReduction *slideObj;
 
    //-------------------------------------------------------------------
    // diagnostic message 
@@ -4062,28 +4091,43 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       else if ( slideReduction_ == 2 ) buildSlideReducedSystem2();
       else if ( slideReduction_ == 3 || slideReduction_ == 4 ) 
       {
-         slideObj = new HYPRE_SlideReduction(comm_);
+         if (slideObj_ == NULL) slideObj_ = new HYPRE_SlideReduction(comm_);
          TempA = currA_;
          TempX = currX_;
          TempB = currB_;
          TempR = currR_;
+         HYPRE_IJVectorGetLocalRange(HYb_,&slideCheck[0],&slideCheck[1]);
+         // check to see if it has been reduced before
+         // if so, need to redo B and X
+         reduceAFlag = 1;
+         if (currA_ != HYA_)
+         {
+            HYPRE_IJVectorDestroy(currB_);
+            HYPRE_IJVectorDestroy(currX_);
+            HYPRE_IJVectorDestroy(currR_);
+            currB_ = HYb_;
+            currX_ = HYx_;
+            currR_ = HYr_;
+            reduceAFlag = 0;
+         }
+
          if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
-            slideObj->setOutputLevel(1);
+            slideObj_->setOutputLevel(1);
          if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE2 )
-            slideObj->setOutputLevel(2);
+            slideObj_->setOutputLevel(2);
          if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE3 )
-            slideObj->setOutputLevel(3);
+            slideObj_->setOutputLevel(3);
          if ( slideReductionMinNorm_ >= 0.0 )
-            slideObj->setBlockMinNorm( slideReductionMinNorm_ );
+            slideObj_->setBlockMinNorm( slideReductionMinNorm_ );
          if ( slideReductionScaleMatrix_ == 1 )
-            slideObj->setScaleMatrix();
-         slideObj->setTruncationThreshold( truncThresh_ );
-         if ( slideReduction_ == 4 ) slideObj->setUseSimpleScheme();
-         slideObj->setup(currA_, currX_, currB_);
+            slideObj_->setScaleMatrix();
+         slideObj_->setTruncationThreshold( truncThresh_ );
+         if ( slideReduction_ == 4 ) slideObj_->setUseSimpleScheme();
+         slideObj_->setup(currA_, currX_, currB_);
          if ( slideReductionScaleMatrix_ == 1 && HYPreconID_ == HYMLI )
          {
-            diagVals = slideObj->getMatrixDiagonal();
-            nrows    = slideObj->getMatrixNumRows();
+            diagVals = slideObj_->getMatrixDiagonal();
+            nrows    = slideObj_->getMatrixNumRows();
             HYPRE_LSI_MLILoadMatrixScalings(HYPrecon_, nrows, diagVals);
          }
 #ifdef HAVE_MLI
@@ -4091,19 +4135,22 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          {
             HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
             HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
-            slideObj->getProcConstraintMap(&constrMap);
+            slideObj_->getProcConstraintMap(&constrMap);
             HYPRE_LSI_MLIAdjustNodeEqnMap(HYPrecon_, procNRows, constrMap);
             j = constrMap[mypid_+1] - constrMap[mypid_];
             free(procNRows);
-            slideObj->getSlaveEqnList(&constrEqns);
-            slideObj->getPerturbationMatrix(&perturb_csr);
+            slideObj_->getSlaveEqnList(&constrEqns);
+            slideObj_->getPerturbationMatrix(&perturb_csr);
             HYPRE_LSI_MLIAdjustNullSpace(HYPrecon_,j,constrEqns,perturb_csr);
          }
 #endif
-         slideObj->getReducedMatrix(&currA_);
-         slideObj->getReducedSolnVector(&currX_);
-         slideObj->getReducedRHSVector(&currB_);
-         slideObj->getReducedAuxVector(&currR_);
+         if (reduceAFlag == 1)
+         {
+            slideObj_->getReducedMatrix(&currA_);
+            slideObj_->getReducedAuxVector(&currR_);
+         }
+         slideObj_->getReducedSolnVector(&currX_);
+         slideObj_->getReducedRHSVector(&currB_);
          if ( currA_ == NULL )
          {
             currA_ = TempA;
@@ -5108,7 +5155,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               printf("* distributed SuperLU solver \n");
               printf("*--------------------------------------------------\n");
            }
-           solveUsingDSuperLU(status);
+           rnorm = solveUsingDSuperLU(status);
 #ifndef NOFEI
            if ( status == 1 ) status = 0; 
 #endif      
@@ -5192,9 +5239,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
       HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
       if ( slideReduction_ == 3 )
-           slideObj->buildReducedSolnVector(currX_, currB_);
-      else slideObj->buildModifiedSolnVector(currX_);
-      delete slideObj;
+           slideObj_->buildReducedSolnVector(currX_, currB_);
+      else slideObj_->buildModifiedSolnVector(currX_);
       HYPRE_ParVectorCopy( b_csr, r_csr );
       HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
       HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -5278,6 +5324,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
 int HYPRE_LinSysCore::writeSystem(const char *name)
 {
+   (void) name;
    printf("HYPRE_LinsysCore : writeSystem not implemented.\n");
    return (0);
 }
