@@ -178,11 +178,11 @@ slamch.o: slamch.c ; $(CC) $(NOOPTS) $(CDEFS) -c $<
 dlamch.o: dlamch.c ; $(CC) $(NOOPTS) $(CDEFS) -c $<
 ##################################
 
-.c.o:
-	$(CC) $(CFLAGS) $(CDEFS) -DUSE_VENDOR_BLAS -c $< $(VERBOSE)
+#.c.o:
+#	$(CC) $(CFLAGS) $(CDEFS) -DUSE_VENDOR_BLAS -c $< $(VERBOSE)
 
-.f.o:
-	f77 $(FFLAGS) -c $< $(VERBOSE)
+#.f.o:
+#	f77 $(FFLAGS) -c $< $(VERBOSE)
 
 #clean:	
 #	rm -f *.o $(DSUPERLULIB)
