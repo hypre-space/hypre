@@ -2524,6 +2524,7 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
 #else
            printf("GMRES : DSuperLU preconditioning not available.\n");
 #endif
+           break;
    }
    return;
 }
@@ -2773,6 +2774,25 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
            printf("FGMRES : SysPDe preconditioning not available.\n");
 #endif
            break;
+
+      case HYDSLU :
+#ifdef HAVE_DSUPERLU
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("DSuperLU preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                           HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              HYPRE_LSI_DSuperLUSetOutputLevel(HYPrecon_, HYOutputLevel_);
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                           HYPRE_LSI_DSuperLUSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("FGMRES : DSuperLU preconditioning not available.\n");
+#endif
+           break;
    }
    return;
 }
@@ -3004,6 +3024,25 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
            }
 #else
            printf("BiCGSTAB : SysPDe preconditioning not available.\n");
+#endif
+           break;
+
+      case HYDSLU :
+#ifdef HAVE_DSUPERLU
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("DSuperLU preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                             HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              HYPRE_LSI_DSuperLUSetOutputLevel(HYPrecon_, HYOutputLevel_);
+              HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                             HYPRE_LSI_DSuperLUSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("BiCGSTAB : DSuperLU preconditioning not available.\n");
 #endif
            break;
    }
@@ -3240,6 +3279,25 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            printf("BiCGSTABL : SysPDe preconditioning not available.\n");
 #endif
            break;
+
+      case HYDSLU :
+#ifdef HAVE_DSUPERLU
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("DSuperLU preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                              HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              HYPRE_LSI_DSuperLUSetOutputLevel(HYPrecon_, HYOutputLevel_);
+              HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                              HYPRE_LSI_DSuperLUSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("BiCGSTABL : DSuperLU preconditioning not available.\n");
+#endif
+           break;
    }
    return;
 }
@@ -3468,6 +3526,25 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
            }
 #else
            printf("TFQMR : SysPDe preconditioning not available.\n");
+#endif
+           break;
+
+      case HYDSLU :
+#ifdef HAVE_DSUPERLU
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("DSuperLU preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              HYPRE_LSI_DSuperLUSetOutputLevel(HYPrecon_, HYOutputLevel_);
+              HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                          HYPRE_LSI_DSuperLUSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("TFQMR : DSuperLU preconditioning not available.\n");
 #endif
            break;
    }
@@ -3700,6 +3777,25 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            printf("BiCGS : SysPDe preconditioning not available.\n");
 #endif
            break;
+
+      case HYDSLU :
+#ifdef HAVE_DSUPERLU
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("DSuperLU preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              HYPRE_LSI_DSuperLUSetOutputLevel(HYPrecon_, HYOutputLevel_);
+              HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_LSI_DSuperLUSolve,
+                                          HYPRE_LSI_DSuperLUSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("BiCGS : DSuperLU preconditioning not available.\n");
+#endif
+           break;
    }
    return;
 }
@@ -3909,6 +4005,10 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
 #else
            printf("SymQMR : SysPDe preconditioning not available.\n");
 #endif
+           break;
+
+      case HYDSLU :
+           printf("BiCGS : DSuperLU preconditioning not an option.\n");
            break;
    }
    return;
