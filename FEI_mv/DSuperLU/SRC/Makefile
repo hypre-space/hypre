@@ -174,8 +174,8 @@ complex16: $(ZSLUSRC) $(ZPLUSRC) $(ALLAUX) $(LAAUX)
 ##################################
 # Do not optimize these routines #
 ##################################
-slamch.o: slamch.c ; $(CC) $(NOOPTS) $(CDEFS) -c $<
-dlamch.o: dlamch.c ; $(CC) $(NOOPTS) $(CDEFS) -c $<
+slamch.o: slamch.c ; $(CC) $(CFLAGS) $(NOOPTS) $(CDEFS) -c $<
+dlamch.o: dlamch.c ; $(CC) $(CFLAGS) $(NOOPTS) $(CDEFS) -c $<
 ##################################
 
 #.c.o:

@@ -343,4 +343,6 @@
 #define f_check_malloc                   f_check_malloc
 #endif
 
+#include "_hypre_utilities.h"
+
 #endif /* __SUPERLU_CNAMES */
