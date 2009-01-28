@@ -47,7 +47,7 @@
  * Distributed SUPERLU include files
  *-------------------------------------------------------------------------*/
 
-//#define HAVE_DSUPERLU
+/*#define HAVE_DSUPERLU*/
 #ifdef HAVE_DSUPERLU
 #include "../DSuperLU/SRC/superlu_ddefs.h"
 
