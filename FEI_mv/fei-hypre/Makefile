@@ -190,7 +190,7 @@ install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	@echo  ""
 
 clean:
-	rm -rf *.o libHYPRE*
+	rm -rf *.o libHYPRE* dsuperlu_include.h
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

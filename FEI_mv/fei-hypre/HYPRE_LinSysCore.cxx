@@ -54,6 +54,7 @@
 
 //#define HAVE_SYSPDE
 //#define HAVE_DSUPERLU
+#include "dsuperlu_include.h"
 
 //***************************************************************************
 // timers 
