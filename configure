@@ -9743,8 +9743,10 @@ then
    then
       HYPRE_FEI_SUBDIRS="DSuperLU $HYPRE_FEI_SUBDIRS"
       HYPRE_FEI_DSUPERLU_FILES="`pwd`/FEI_mv/DSuperLU/SRC/*.o"
+      echo "#define HAVE_DSUPERLU" > ./FEI_mv/fei-hypre/dsuperlu_include.h
    else
       HYPRE_FEI_DSUPERLU_FILES=
+      echo "" > ./FEI_mv/fei-hypre/dsuperlu_include.h
    fi
    if test "$casc_user_chose_fei" = "yes"
    then
