@@ -321,8 +321,9 @@ int HYPRE_LSI_DSuperLUGenMatrix(HYPRE_Solver solver)
       csrIA[irow-startRow+1] = localNNZ;
       HYPRE_ParCSRMatrixRestoreRow(Amat,irow,&rowSize,&colInd,&colVal);
    }
-   //for (irow = startRow; irow < procNRows[mypid+1]; irow++)
-   //   qsort1(csrJA, csrAA, csrIA[irow-startRow], csrIA[irow-startRow+1]-1);
+   /*for (irow = startRow; irow < procNRows[mypid+1]; irow++)
+    *   qsort1(csrJA, csrAA, csrIA[irow-startRow], csrIA[irow-startRow+1]-1);
+    */
 
    /* ---------------------------------------------------------------- */
    /* create SuperLU matrix                                            */
