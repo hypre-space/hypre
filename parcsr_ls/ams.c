@@ -1840,7 +1840,7 @@ int hypre_AMSSetup(void *solver,
 
          /* Make sure that A_G has no zero rows (this can happen
             if beta is zero in part of the domain). */
-         /* hypre_ParCSRMatrixFixZeroRows(ams_data -> A_G); */
+         hypre_ParCSRMatrixFixZeroRows(ams_data -> A_G);
 
          ams_data -> owns_A_G = 1;
       }
@@ -2554,6 +2554,14 @@ int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
       GenerateDiagAndOffd(local, G,
                           hypre_ParVectorFirstIndex(x_coord),
                           hypre_ParVectorLastIndex(x_coord));
+
+
+      /* Account for empty rows in G. These may appear when A includes only
+         the interior (non-Dirichlet b.c.) edges. */
+      {
+         hypre_CSRMatrix *G_diag = hypre_ParCSRMatrixDiag(G);
+         G_diag->num_cols = hypre_VectorSize(hypre_ParVectorLocalVector(x_coord));
+      }
 
       /* Free the local matrix */
       hypre_CSRMatrixJ(local) = NULL;
