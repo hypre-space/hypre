@@ -1207,8 +1207,7 @@ main( int   argc,
 		&coord_dim, &coordinates);
      else
      {
-       printf("Sorry, coordinates are not yet available for build_matrix_type = %d.\n", build_matrix_type);
-       return(-1);
+       printf("Warning: coordinates are not yet printed for build_matrix_type = %d.\n", build_matrix_type);
      }
    }
 
