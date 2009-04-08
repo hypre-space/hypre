@@ -14,7 +14,7 @@ foreach target (`ls ../*.c`)
     $currentdir/code2html.perl -l c -n -o html $target $target.html
     mv $target.html .
 end
-foreach target (`ls ../*.f`)
+foreach target (`ls ../*.f*`)
     $currentdir/code2html.perl -l f -n -o html $target $target.html
     mv $target.html .
 end
