@@ -78,7 +78,7 @@ done
 
 # Test examples
 ./test.sh examples.sh $src_dir/examples
-mv -f examples.??? $output_subdir
+mv -f examples.??? $output_dir
 
 # Test documentation build (only if 'docs_misc' directory is present)
 if [ -d $src_dir/docs_misc ]; then
