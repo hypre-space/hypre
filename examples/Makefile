@@ -38,7 +38,7 @@ LFLAGS_B =\
  -lbHYPREClient-F\
  -lbHYPRE\
  -lsidl -ldl -lxml2
-LFLAGS77 = $(LIBS)
+LFLAGS77 = $(LFLAGS)
 LFLAGS90 =
 
 ########################################################################

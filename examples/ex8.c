@@ -139,9 +139,8 @@ int main (int argc, char *argv[])
 
              /* These parts map increasing values to increasing values 
               for both variables (note: if decreasing maps to increasing, use -1)*/
-            int index_dir[2] = {1,1};
-            
 #if USE_PART
+            int index_dir[2] = {1,1};
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
                                              index_map, index_dir);
@@ -167,10 +166,9 @@ int main (int argc, char *argv[])
             int index_map[2] = {0,1};
             /* These parts map increasing values to increasing values 
               for both variables (note: if decreasing maps to increasing, use -1)*/
-            int index_dir[2] = {1,1};
-
 #if USE_PART
-           HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
+            int index_dir[2] = {1,1};
+            HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
                                              index_map, index_dir);
 #else
@@ -195,9 +193,8 @@ int main (int argc, char *argv[])
             int index_map[2] = {0,1};
              /* These parts map increasing values to increasing values 
               for both variables (note: if decreasing maps to increasing, use -1)*/
-            int index_dir[2] = {1,1};
-
 #if USE_PART
+            int index_dir[2] = {1,1};
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                             nbor_part, nbor_ilower, nbor_iupper,
                                              index_map, index_dir);
@@ -225,8 +222,8 @@ int main (int argc, char *argv[])
             int index_map[2] = {0,1};
             /* These parts map increasing values to increasing values 
               for both variables (note: if decreasing maps to increasing, use -1)*/
-            int index_dir[2] = {1,1};
 #if USE_PART
+            int index_dir[2] = {1,1};
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
                                              index_map, index_dir); 
