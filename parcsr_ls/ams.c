@@ -2129,7 +2129,7 @@ int hypre_AMSSolve(void *solver,
 {
    hypre_AMSData *ams_data = solver;
 
-   int i, my_id;
+   int i, my_id = -1;
    double r0_norm, r_norm, b_norm, relative_resid = 0, old_resid;
 
    char cycle[30];
