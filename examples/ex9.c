@@ -648,6 +648,7 @@ int main (int argc, char *argv[])
                                                  &final_res_norm);
          /* clean up */
          HYPRE_ParCSRGMRESDestroy(par_solver);
+         HYPRE_BoomerAMGDestroy(par_precond);
       }
       else if (solver_id == 3) /* AMG */
       {
