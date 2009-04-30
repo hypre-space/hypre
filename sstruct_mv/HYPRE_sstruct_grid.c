@@ -369,6 +369,7 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
    {
       hypre_IndexD(coord, d) = d;
       hypre_IndexD(dir, d) = 1;
+      hypre_IndexD(ilower_mapped, d) = 0;
    }
 
    return hypre_error_flag;
