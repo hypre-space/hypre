@@ -97,7 +97,7 @@ hypre_BoomerAMGCreate()
    char     log_file_name[256];
    int      debug_flag;
 
-   char     plot_file_name[251] = {};
+   char     plot_file_name[251] = {0};
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
