@@ -24,8 +24,6 @@
 #include "HYPRE_sstruct_ls.h"
 
 
-#define USE_PART 0
-
 int main (int argc, char *argv[])
 {
    int myid, num_procs;
@@ -136,19 +134,13 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-
-             /* These parts map increasing values to increasing values 
-              for both variables (note: if decreasing maps to increasing, use -1)*/
-#if USE_PART
+            /* These parts map increasing values to increasing values 
+               for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
+
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
                                              index_map, index_dir);
-#else
-            HYPRE_SStructGridSetNeighborBox(grid, part, b_ilower, b_iupper,
-                                             nbor_part, nbor_ilower, nbor_iupper,
-                                             index_map);
-#endif
          }
 
          /* Relation between part 1 and part 0 on processor 0 */
@@ -165,17 +157,12 @@ int main (int argc, char *argv[])
                rotation is necessary */
             int index_map[2] = {0,1};
             /* These parts map increasing values to increasing values 
-              for both variables (note: if decreasing maps to increasing, use -1)*/
-#if USE_PART
+               for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
+
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
                                              index_map, index_dir);
-#else
-             HYPRE_SStructGridSetNeighborBox(grid, part, b_ilower, b_iupper,
-                                             nbor_part, nbor_ilower, nbor_iupper,
-                                             index_map);
-#endif
          }
 
          /* Relation between part 1 and part 2 on processor 0 */
@@ -191,18 +178,13 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-             /* These parts map increasing values to increasing values 
-              for both variables (note: if decreasing maps to increasing, use -1)*/
-#if USE_PART
+            /* These parts map increasing values to increasing values 
+               for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
+
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                             nbor_part, nbor_ilower, nbor_iupper,
                                              index_map, index_dir);
-#else
-            HYPRE_SStructGridSetNeighborBox(grid, part, b_ilower, b_iupper,
-                                            nbor_part, nbor_ilower, nbor_iupper,
-                                             index_map);
-#endif
          }
       }
       else if (myid == 1)
@@ -222,16 +204,11 @@ int main (int argc, char *argv[])
             int index_map[2] = {0,1};
             /* These parts map increasing values to increasing values 
               for both variables (note: if decreasing maps to increasing, use -1)*/
-#if USE_PART
             int index_dir[2] = {1,1};
+
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
                                              index_map, index_dir); 
-#else
-            HYPRE_SStructGridSetNeighborBox(grid, part, b_ilower, b_iupper,
-                                             nbor_part, nbor_ilower, nbor_iupper,
-                                             index_map);
-#endif
          }
       }
 
