@@ -67,11 +67,11 @@ LFLAGS90 =
 ########################################################################
 # List of all programs to be compiled
 ########################################################################
-ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12
+ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f
 BABELPROGS = ex5b ex5b77 ex5bxx ex6b ex6b77
 # ... ex5bp and ex5b90 are not in BABELPROGS because they require a
 # software environment which many people haven't set up.
-FORTRANPROGS = ex5f
+FORTRANPROGS = ex5f ex12f
 
 all: $(ALLPROGS)
 
@@ -192,6 +192,12 @@ ex11: ex11.o
 ########################################################################
 ex12: ex12.o
 	$(CC) -o $@ $^ $(LFLAGS)
+
+########################################################################
+# Example 12 Fortran 77
+########################################################################
+ex12f: ex12f.o
+	$(F77) -o $@ $^ $(LFLAGS77)
 
 ########################################################################
 # Clean up

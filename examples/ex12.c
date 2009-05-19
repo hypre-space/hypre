@@ -15,9 +15,9 @@
                  We recommend viewing the Struct examples before viewing this
                  and the other SStruct examples.  This is one of the simplest
                  SStruct examples, used primarily to demonstrate how to set up
-                 non-cell-centered problems and how easy it is to switch from
-                 structured solvers (PFMG) and to solvers designed for more
-                 general settings (AMG).
+                 non-cell-centered problems, and to demonstrate how easy it is
+                 to switch between structured solvers (PFMG) and solvers
+                 designed for more general settings (AMG).
 */
 
 #include <stdio.h>
