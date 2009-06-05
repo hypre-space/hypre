@@ -791,7 +791,7 @@ int
 hypre_FlexGMRESGetAbsoluteTol( void   *fgmres_vdata,
                    double  * a_tol      )
 {
-   hypre_GMRESData *fgmres_data = fgmres_vdata;
+   hypre_FlexGMRESData *fgmres_data = fgmres_vdata;
 
  
    *a_tol = (fgmres_data -> a_tol);
