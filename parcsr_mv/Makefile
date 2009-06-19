@@ -63,7 +63,7 @@ FILES =\
  par_make_system.c
 
 EXTRA_FILES =\
- parchord_to_parcsr.c\
+ parchord_to_parcsr.c
 
 DRIVER_FILES =\
  driver_aat.c\
