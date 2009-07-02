@@ -76,7 +76,19 @@ hypre_F90_IFACE(hypre_structgmressolve, HYPRE_STRUCTGMRESSOLVE)( long int *solve
                                          (HYPRE_StructVector) *b,
                                          (HYPRE_StructVector) *x ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_StructGMRESSetKDim
+ *--------------------------------------------------------------------------*/
 
+void
+hypre_F90_IFACE(hypre_structgmressetkdim, HYPRE_STRUCTGMRESSETKDIM)
+                                                       (long int  *solver,
+                                                        int       *k_dim,
+                                                        int       *ierr)
+{
+   *ierr = (int) (HYPRE_StructGMRESSetKDim( (HYPRE_StructSolver) *solver,
+                                             (int)                 *k_dim ));
+}
 /*--------------------------------------------------------------------------
  * HYPRE_StructGMRESSetTol
  *--------------------------------------------------------------------------*/
