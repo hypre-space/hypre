@@ -141,23 +141,23 @@ hypre_CSRMatrixMatvec( double           alpha,
          /*
           * for (jj = A_i[m]; jj < A_i[m+1]; jj++)
           * {
-          *         j = A_j[jj];   
+          *         j = A_j[jj];
           *  y_data[m] += A_data[jj] * x_data[j];
           * } */
          if ( num_vectors==1 )
          {
-            tempx = y_data[m];
-            for (jj = A_i[m]; jj < A_i[m+1]; jj++) 
+            tempx = 0.0;
+            for (jj = A_i[m]; jj < A_i[m+1]; jj++)
                tempx +=  A_data[jj] * x_data[A_j[jj]];
-            y_data[m] = tempx;
+            y_data[m] += tempx;
          }
          else
             for ( j=0; j<num_vectors; ++j )
             {
-               tempx = y_data[ j*vecstride_y + m*idxstride_y ];
+               tempx = 0.0;
                for (jj = A_i[m]; jj < A_i[m+1]; jj++) 
                   tempx +=  A_data[jj] * x_data[ j*vecstride_x + A_j[jj]*idxstride_x ];
-               y_data[ j*vecstride_y + m*idxstride_y] = tempx;
+               y_data[ j*vecstride_y + m*idxstride_y] += tempx;
             }
       }
 
@@ -170,20 +170,20 @@ hypre_CSRMatrixMatvec( double           alpha,
       {
          if ( num_vectors==1 )
          {
-            temp = y_data[i];
+            temp = 0.0;
             for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                temp += A_data[jj] * x_data[A_j[jj]];
-            y_data[i] = temp;
+            y_data[i] += temp;
          }
          else
             for ( j=0; j<num_vectors; ++j )
             {
-               temp = y_data[ j*vecstride_y + i*idxstride_y ];
+               temp = 0.0;
                for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                {
                   temp += A_data[jj] * x_data[ j*vecstride_x + A_j[jj]*idxstride_x ];
                }
-               y_data[ j*vecstride_y + i*idxstride_y ] = temp;
+               y_data[ j*vecstride_y + i*idxstride_y ] += temp;
             }
       }
    }
