@@ -122,8 +122,15 @@ int HYPRE_PCGSetTol(HYPRE_Solver solver,
 int HYPRE_PCGSetAbsoluteTol(HYPRE_Solver solver,
                             double       a_tol);
 
-
-/*
+/**
+ * (Optional) Set a residual-based convergence tolerance which checks if
+ * $\|r_old-r_new\| < rtol \|b\|$. This is useful when trying to converge to
+ * very low relative and/or absolute tolerances, in order to bail-out before
+ * roundoff errors affect the approximation.
+ **/
+int HYPRE_PCGSetResidualTol(HYPRE_Solver solver,
+                            double       rtol);
+   /*
  * RE-VISIT
  **/
 int HYPRE_PCGSetAbsoluteTolFactor(HYPRE_Solver solver, double abstolf);
@@ -156,6 +163,18 @@ int HYPRE_PCGSetTwoNorm(HYPRE_Solver solver,
  **/
 int HYPRE_PCGSetRelChange(HYPRE_Solver solver,
                           int          rel_change);
+
+/**
+ * (Optional) Recompute the residual at the end to double-check convergence.
+ **/
+int HYPRE_PCGSetRecomputeResidual( HYPRE_Solver solver,
+                                   int recompute_residual );
+
+/**
+ * (Optional) Periodically recompute the residual while iterating.
+ **/
+int HYPRE_PCGSetRecomputeResidualP( HYPRE_Solver solver,
+                                   int recompute_residual_p );
 
 /**
  * (Optional) Set the preconditioner to use.
@@ -198,6 +217,10 @@ int HYPRE_PCGGetResidual(HYPRE_Solver  solver,
 /**
  **/
 int HYPRE_PCGGetTol(HYPRE_Solver solver, double *tol);
+
+/**
+ **/
+int HYPRE_PCGGetResidualTol(HYPRE_Solver solver, double *rtol);
 
 /*
  * RE-VISIT

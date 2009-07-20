@@ -106,6 +106,10 @@ typedef struct
  residual from scratch (r=b-Ax) and use this new residual to repeat the convergence test.
  This can be expensive, use this only if you have seen a problem with the regular
  residual computation.
+ - recompute_residual_p means: recompute the residual from scratch (r=b-Ax)
+ every "recompute_residual_p" iterations.  This can be expensive and degrade the
+ convergence. Use it only if you have seen a problem with the regular residual
+ computation.
 */
 
 typedef struct
@@ -114,10 +118,12 @@ typedef struct
    double   atolf;
    double   cf_tol;
    double   a_tol;
+   double   rtol;
    int      max_iter;
    int      two_norm;
    int      rel_change;
    int      recompute_residual;
+   int      recompute_residual_p;
    int      stop_crit;
    int      converged;
 

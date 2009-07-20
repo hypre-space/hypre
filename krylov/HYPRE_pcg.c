@@ -114,6 +114,24 @@ HYPRE_PCGGetAbsoluteTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PCGSetResidualTol, HYPRE_PCGGetResidualTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetResidualTol( HYPRE_Solver solver,
+                         double rtol )
+{
+   return( hypre_PCGSetResidualTol( (void *) solver, rtol ) );
+}
+
+int
+HYPRE_PCGGetResidualTol( HYPRE_Solver solver,
+                         double * rtol )
+{
+   return( hypre_PCGGetResidualTol( (void *) solver, rtol ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PCGSetAbsoluteTolFactor, HYPRE_PCGGetAbsoluteTolFactor
  *--------------------------------------------------------------------------*/
 
@@ -239,6 +257,24 @@ HYPRE_PCGGetRecomputeResidual( HYPRE_Solver solver,
                        int              * recompute_residual )
 {
    return( hypre_PCGGetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetRecomputeResidualP, HYPRE_PCGGetRecomputeResidualP
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetRecomputeResidualP( HYPRE_Solver solver,
+                       int                recompute_residual_p )
+{
+   return( hypre_PCGSetRecomputeResidualP( (void *) solver, recompute_residual_p ) );
+}
+
+int
+HYPRE_PCGGetRecomputeResidualP( HYPRE_Solver solver,
+                       int              * recompute_residual_p )
+{
+   return( hypre_PCGGetRecomputeResidualP( (void *) solver, recompute_residual_p ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -98,10 +98,12 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> atolf)        = 0.0;
    (pcg_data -> cf_tol)       = 0.0;
    (pcg_data -> a_tol)        = 0.0;
+   (pcg_data -> rtol)         = 0.0;
    (pcg_data -> max_iter)     = 1000;
    (pcg_data -> two_norm)     = 0;
    (pcg_data -> rel_change)   = 0;
    (pcg_data -> recompute_residual) = 0;
+   (pcg_data -> recompute_residual_p) = 0;
    (pcg_data -> stop_crit)    = 0;
    (pcg_data -> converged)    = 0;
    (pcg_data -> owns_matvec_data ) = 1;
@@ -274,10 +276,12 @@ hypre_PCGSolve( void *pcg_vdata,
    double          a_tol        = (pcg_data -> a_tol);
    double          atolf        = (pcg_data -> atolf);
    double          cf_tol       = (pcg_data -> cf_tol);
+   double          rtol         = (pcg_data -> rtol);
    int             max_iter     = (pcg_data -> max_iter);
    int             two_norm     = (pcg_data -> two_norm);
    int             rel_change   = (pcg_data -> rel_change);
    int             recompute_residual = (pcg_data -> recompute_residual);
+   int             recompute_residual_p = (pcg_data -> recompute_residual_p);
    int             stop_crit    = (pcg_data -> stop_crit);
 /*
    int             converged    = (pcg_data -> converged);
@@ -494,14 +498,50 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->Axpy))(alpha, p, x);
 
       /* r = r - alpha*s */
-      (*(pcg_functions->Axpy))(-alpha, s, r);
-         
+      if ( !recompute_residual_p || ((i+1)%(recompute_residual_p)) )
+      {
+         (*(pcg_functions->Axpy))(-alpha, s, r);
+      }
+      else
+      {
+         /* At user request, periodically recompute the residual from the formula
+            r = b - A x (instead of the above recursive definition). Note that this
+            is potentially expensive and can lead to degraded convergence! */
+         printf("Recomputing the residual...\n");
+         (*(pcg_functions->CopyVector))(b, r);
+         (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
+      }
+
+      /* residual-based stopping criteria: ||r_new-r_old|| < rtol ||b|| */
+      if (rtol && two_norm)
+      {
+         /* use that r_new-r_old = alpha * s */
+         double drob2 = alpha*alpha*(*(pcg_functions->InnerProd))(s,s)/bi_prod;
+         if ( drob2 < rtol*rtol )
+         {
+            printf("\n\n||r_old-r_new||/||b||: %e\n", sqrt(drob2));
+            break;
+         }
+      }
+
       /* s = C*r */
       (*(pcg_functions->ClearVector))(s);
       precond(precond_data, A, r, s);
 
       /* gamma = <r,s> */
       gamma = (*(pcg_functions->InnerProd))(r, s);
+
+      /* residual-based stopping criteria: ||r_new-r_old||_C < rtol ||b||_C */
+      if (rtol && !two_norm)
+      {
+         /* use that ||r_new-r_old||_C^2 = (r_new ,C r_new) + (r_old, C r_old) */
+         double r2ob2 = (gamma + gamma_old)/bi_prod;
+         if ( r2ob2 < rtol*rtol)
+         {
+            printf("\n\n||r_old-r_new||_C/||b||_C: %e\n", sqrt(r2ob2));
+            break;
+         }
+      }
 
       /* set i_prod for convergence test */
       if (two_norm)
@@ -745,6 +785,32 @@ hypre_PCGGetAbsoluteTolFactor( void   *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PCGSetResidualTol, hypre_PCGGetResidualTol
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PCGSetResidualTol( void   *pcg_vdata,
+                         double  rtol   )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+
+   (pcg_data -> rtol) = rtol;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_PCGGetResidualTol( void   *pcg_vdata,
+                         double  * rtol   )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+
+   *rtol = (pcg_data -> rtol);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PCGSetConvergenceFactorTol, hypre_PCGGetConvergenceFactorTol
  *--------------------------------------------------------------------------*/
 
@@ -878,6 +944,32 @@ hypre_PCGGetRecomputeResidual( void *pcg_vdata,
  
    *recompute_residual = (pcg_data -> recompute_residual);
  
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGSetRecomputeResidualP, hypre_PCGGetRecomputeResidualP
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PCGSetRecomputeResidualP( void *pcg_vdata,
+                       int   recompute_residual_p  )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+
+   (pcg_data -> recompute_residual_p) = recompute_residual_p;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_PCGGetRecomputeResidualP( void *pcg_vdata,
+                       int * recompute_residual_p  )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+
+   *recompute_residual_p = (pcg_data -> recompute_residual_p);
+
    return hypre_error_flag;
 }
 

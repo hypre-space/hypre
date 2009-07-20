@@ -1010,7 +1010,11 @@ typedef struct
  residual from scratch (r=b-Ax) and use this new residual to repeat the convergence test.
  This can be expensive, use this only if you have seen a problem with the regular
  residual computation.
-*/
+  - recompute_residual_p means: recompute the residual from scratch (r=b-Ax)
+ every "recompute_residual_p" iterations.  This can be expensive and degrade the
+ convergence. Use it only if you have seen a problem with the regular residual
+ computation.
+ */
 
 typedef struct
 {
@@ -1018,10 +1022,12 @@ typedef struct
    double   atolf;
    double   cf_tol;
    double   a_tol;
+   double   rtol;
    int      max_iter;
    int      two_norm;
    int      rel_change;
    int      recompute_residual;
+   int      recompute_residual_p;
    int      stop_crit;
    int      converged;
 
@@ -1365,6 +1371,8 @@ int HYPRE_PCGSetAbsoluteTol ( HYPRE_Solver solver , double a_tol );
 int HYPRE_PCGGetAbsoluteTol ( HYPRE_Solver solver , double *a_tol );
 int HYPRE_PCGSetAbsoluteTolFactor ( HYPRE_Solver solver , double abstolf );
 int HYPRE_PCGGetAbsoluteTolFactor ( HYPRE_Solver solver , double *abstolf );
+int HYPRE_PCGSetResidualTol ( HYPRE_Solver solver , double rtol );
+int HYPRE_PCGGetResidualTol ( HYPRE_Solver solver , double *rtol );
 int HYPRE_PCGSetConvergenceFactorTol ( HYPRE_Solver solver , double cf_tol );
 int HYPRE_PCGGetConvergenceFactorTol ( HYPRE_Solver solver , double *cf_tol );
 int HYPRE_PCGSetMaxIter ( HYPRE_Solver solver , int max_iter );
@@ -1377,6 +1385,8 @@ int HYPRE_PCGSetRelChange ( HYPRE_Solver solver , int rel_change );
 int HYPRE_PCGGetRelChange ( HYPRE_Solver solver , int *rel_change );
 int HYPRE_PCGSetRecomputeResidual ( HYPRE_Solver solver , int recompute_residual );
 int HYPRE_PCGGetRecomputeResidual ( HYPRE_Solver solver , int *recompute_residual );
+int HYPRE_PCGSetRecomputeResidualP ( HYPRE_Solver solver , int recompute_residual_p );
+int HYPRE_PCGGetRecomputeResidualP ( HYPRE_Solver solver , int *recompute_residual_p );
 int HYPRE_PCGSetPrecond ( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_PCGGetPrecond ( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_PCGSetLogging ( HYPRE_Solver solver , int level );
@@ -1401,6 +1411,8 @@ int hypre_PCGSetAbsoluteTol ( void *pcg_vdata , double a_tol );
 int hypre_PCGGetAbsoluteTol ( void *pcg_vdata , double *a_tol );
 int hypre_PCGSetAbsoluteTolFactor ( void *pcg_vdata , double atolf );
 int hypre_PCGGetAbsoluteTolFactor ( void *pcg_vdata , double *atolf );
+int hypre_PCGSetResidualTol ( void *pcg_vdata , double rtol );
+int hypre_PCGGetResidualTol ( void *pcg_vdata , double *rtol );
 int hypre_PCGSetConvergenceFactorTol ( void *pcg_vdata , double cf_tol );
 int hypre_PCGGetConvergenceFactorTol ( void *pcg_vdata , double *cf_tol );
 int hypre_PCGSetMaxIter ( void *pcg_vdata , int max_iter );
@@ -1411,6 +1423,8 @@ int hypre_PCGSetRelChange ( void *pcg_vdata , int rel_change );
 int hypre_PCGGetRelChange ( void *pcg_vdata , int *rel_change );
 int hypre_PCGSetRecomputeResidual ( void *pcg_vdata , int recompute_residual );
 int hypre_PCGGetRecomputeResidual ( void *pcg_vdata , int *recompute_residual );
+int hypre_PCGSetRecomputeResidualP ( void *pcg_vdata , int recompute_residual_p );
+int hypre_PCGGetRecomputeResidualP ( void *pcg_vdata , int *recompute_residual_p );
 int hypre_PCGSetStopCrit ( void *pcg_vdata , int stop_crit );
 int hypre_PCGGetStopCrit ( void *pcg_vdata , int *stop_crit );
 int hypre_PCGGetPrecond ( void *pcg_vdata , HYPRE_Solver *precond_data_ptr );
