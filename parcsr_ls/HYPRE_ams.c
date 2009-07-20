@@ -139,6 +139,28 @@ int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMSSetSetInteriorNodes
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSSetInteriorNodes(HYPRE_Solver solver,
+                              HYPRE_ParVector interior_nodes)
+{
+   return hypre_AMSSetInteriorNodes((void *) solver,
+                                    (hypre_ParVector *) interior_nodes);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSSetSetProjectionFrequency
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSSetProjectionFrequency(HYPRE_Solver solver,
+                                    int projection_frequency)
+{
+   return hypre_AMSSetProjectionFrequency((void *) solver,
+                                          projection_frequency);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMSSetMaxIter
  *--------------------------------------------------------------------------*/
 

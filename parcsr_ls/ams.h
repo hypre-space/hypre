@@ -60,6 +60,17 @@ typedef struct
    /* Representations of the constant vectors in the Nedelec basis */
    hypre_ParVector *Gx, *Gy, *Gz;
 
+   /* Nodes in the interior of the zero-conductivity region */
+   hypre_ParVector *interior_nodes;
+   /* Discrete gradient matrix for the interior nodes only */
+   hypre_ParCSRMatrix *G0;
+   /* Coarse grid matrix on the interior nodes */
+   hypre_ParCSRMatrix *A_G0;
+   /* AMG solver for A_G0 */
+   HYPRE_Solver B_G0;
+   /* How frequently to project the r.h.s. onto Ker(G0^T)? */
+   int projection_frequency;
+
    /* Solver options */
    int maxit;
    double tol;

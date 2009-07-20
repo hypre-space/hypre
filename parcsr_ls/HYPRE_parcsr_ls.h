@@ -1279,6 +1279,23 @@ int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver solver,
                                   HYPRE_ParCSRMatrix A_beta);
 
 /**
+ * (Optional) Set the list of nodes which are interior to a zero-conductivity
+ * region. This way, a more robust solver is constructed, that can be iterated
+ * to lower tolerance levels. This function should be called before
+ * HYPRE\_AMSSetup()!
+ **/
+int HYPRE_AMSSetInteriorNodes(HYPRE_Solver solver,
+                              HYPRE_ParVector interior_nodes);
+
+/**
+ * (Optional) Set the frequency at which a projection onto the compatible
+ * subspace for problems with zero-conductivity regions is performed. The
+ * default value is 5.
+ **/
+int HYPRE_AMSSetProjectionFrequency(HYPRE_Solver solver,
+                                    int projection_frequency);
+
+/**
  * (Optional) Sets maximum number of iterations, if AMS is used
  * as a solver. To use AMS as a preconditioner, set the maximum
  * number of iterations to $1$. The default is $20$.

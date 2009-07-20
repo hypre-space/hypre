@@ -124,6 +124,8 @@ int hypre_AMSSetCoordinateVectors ( void *solver , hypre_ParVector *x , hypre_Pa
 int hypre_AMSSetEdgeConstantVectors ( void *solver , hypre_ParVector *Gx , hypre_ParVector *Gy , hypre_ParVector *Gz );
 int hypre_AMSSetAlphaPoissonMatrix ( void *solver , hypre_ParCSRMatrix *A_Pi );
 int hypre_AMSSetBetaPoissonMatrix ( void *solver , hypre_ParCSRMatrix *A_G );
+int hypre_AMSSetInteriorNodes ( void *solver , hypre_ParVector *interior_nodes );
+int hypre_AMSSetProjectionFrequency ( void *solver , int projection_frequency );
 int hypre_AMSSetMaxIter ( void *solver , int maxit );
 int hypre_AMSSetTol ( void *solver , double tol );
 int hypre_AMSSetCycleType ( void *solver , int cycle_type );

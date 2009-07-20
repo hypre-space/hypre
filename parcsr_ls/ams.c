@@ -681,6 +681,12 @@ void * hypre_AMSCreate()
    ams_data -> B_Piy  = 0;
    ams_data -> B_Piz  = 0;
 
+   ams_data -> interior_nodes       = NULL;
+   ams_data -> G0                   = NULL;
+   ams_data -> A_G0                 = NULL;
+   ams_data -> B_G0                 = 0;
+   ams_data -> projection_frequency = 5;
+
    ams_data -> A_l1_norms = NULL;
 
    ams_data -> owns_A_G  = 0;
@@ -746,6 +752,13 @@ int hypre_AMSDestroy(void *solver)
       hypre_ParVectorDestroy(ams_data -> r2);
    if (ams_data -> g2)
       hypre_ParVectorDestroy(ams_data -> g2);
+
+   if (ams_data -> G0)
+      hypre_ParCSRMatrixDestroy(ams_data -> G0);
+   if (ams_data -> A_G0)
+      hypre_ParCSRMatrixDestroy(ams_data -> A_G0);
+   if (ams_data -> B_G0)
+      HYPRE_BoomerAMGDestroy(ams_data -> B_G0);
 
    if (ams_data -> A_l1_norms)
       hypre_TFree(ams_data -> A_l1_norms);
@@ -888,6 +901,39 @@ int hypre_AMSSetBetaPoissonMatrix(void *solver,
       /* Make sure that the first entry in each row is the diagonal one. */
       /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_G)); */
    }
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSSetInteriorNodes
+ *
+ * Set the list of nodes which are interior to the zero-conductivity region.
+ *
+ * Should be called before hypre_AMSSetup()!
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSSetInteriorNodes(void *solver,
+                              hypre_ParVector *interior_nodes)
+{
+   hypre_AMSData *ams_data = solver;
+   ams_data -> interior_nodes = interior_nodes;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSSetProjectionFrequency
+ *
+ * How often to project the r.h.s. onto the compatible sub-space Ker(G0^T),
+ * when iterating with the solver.
+ *
+ * The default value is every 5th iteration.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSSetProjectionFrequency(void *solver,
+                                    int projection_frequency)
+{
+   hypre_AMSData *ams_data = solver;
+   ams_data -> projection_frequency = projection_frequency;
    return hypre_error_flag;
 }
 
@@ -1754,8 +1800,121 @@ int hypre_AMSSetup(void *solver,
 
    ams_data -> A = A;
 
+   /* Modifications for problems with zero-conductivity regions */
+   if (ams_data -> interior_nodes)
+   {
+      hypre_ParCSRMatrix *G0t, *Aorig = A;
+
+      /* Construct the discrete gradient matrix for the zero-conductivity region
+         by eliminating the zero-conductivity nodes from G^t */
+      hypre_ParCSRMatrixTranspose(ams_data -> G, &G0t, 1);
+      {
+         int i, j;
+         int nv = hypre_ParCSRMatrixNumCols(ams_data -> G);
+         hypre_CSRMatrix *G0td = hypre_ParCSRMatrixDiag(G0t);
+         int *G0tdI = hypre_CSRMatrixI(G0td);
+         double *G0tdA = hypre_CSRMatrixData(G0td);
+         hypre_CSRMatrix *G0to = hypre_ParCSRMatrixOffd(G0t);
+         int *G0toI = hypre_CSRMatrixI(G0to);
+         double *G0toA = hypre_CSRMatrixData(G0to);
+         double *interior_nodes_data=hypre_VectorData(
+            hypre_ParVectorLocalVector((hypre_ParVector*) ams_data -> interior_nodes));
+
+         for (i = 0; i < nv; i++)
+         {
+            if (interior_nodes_data[i] != 1)
+            {
+               for (j = G0tdI[i]; j < G0tdI[i+1]; j++)
+                  G0tdA[j] = 0.0;
+               if (G0toI)
+                  for (j = G0toI[i]; j < G0toI[i+1]; j++)
+                     G0toA[j] = 0.0;
+            }
+         }
+      }
+      hypre_ParCSRMatrixTranspose(G0t, & ams_data -> G0, 1);
+
+      /* Construct the subspace matrix A_G0 = G0^T G0 */
+      ams_data -> A_G0 = hypre_ParMatmul(G0t, ams_data -> G0);
+      hypre_ParCSRMatrixFixZeroRows(ams_data -> A_G0);
+
+      /* Create AMG solver for A_G0 */
+      HYPRE_BoomerAMGCreate(&ams_data -> B_G0);
+      HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_G0, ams_data -> B_G_coarsen_type);
+      HYPRE_BoomerAMGSetAggNumLevels(ams_data -> B_G0, ams_data -> B_G_agg_levels);
+      HYPRE_BoomerAMGSetRelaxType(ams_data -> B_G0, ams_data -> B_G_relax_type);
+      HYPRE_BoomerAMGSetNumSweeps(ams_data -> B_G0, 1);
+      HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_G0, 25);
+      HYPRE_BoomerAMGSetTol(ams_data -> B_G0, 0.0);
+      HYPRE_BoomerAMGSetMaxIter(ams_data -> B_G0, 3); /* use just a few V-cycles */
+      HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_G0, ams_data -> B_G_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_G0, ams_data -> B_G_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_G0, ams_data -> B_G_Pmax);
+      HYPRE_BoomerAMGSetup(ams_data -> B_G0,
+                           (HYPRE_ParCSRMatrix)ams_data -> A_G0,
+                           0, 0);
+
+      /* Construct the preconditioner for ams_data->A = A + G0 G0^T.
+         NOTE: this can be optimized significantly by taking into account that
+         the sparsity pattern of A is subset of the sparsity pattern of G0 G0^T */
+      {
+         hypre_ParCSRMatrix *A = hypre_ParMatmul(ams_data -> G0, G0t);
+         hypre_ParCSRMatrix *B = Aorig;
+         hypre_ParCSRMatrix **C_ptr = &ams_data -> A;
+
+         hypre_ParCSRMatrix *C;
+         hypre_CSRMatrix *A_local, *B_local, *C_local;
+
+         MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+         int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+         int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+         int *row_starts = hypre_ParCSRMatrixRowStarts(A);
+         int *col_starts = hypre_ParCSRMatrixColStarts(A);
+         int A_num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+         int A_num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(A));
+         int A_num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(A));
+         int B_num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(B));
+         int B_num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(B));
+         int B_num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(B));
+
+         A_local = hypre_MergeDiagAndOffd(A);
+         B_local = hypre_MergeDiagAndOffd(B);
+         /* scale (penalize) G0 G0^T before adding it to the matrix
+         {
+            int i, nnz = hypre_CSRMatrixNumNonzeros(A_local);
+            double *data = hypre_CSRMatrixData(A_local);
+            for (i = 0; i < nnz; i++) data[i] *= 1e-6;
+         } */
+         C_local = hypre_CSRMatrixAdd(A_local, B_local);
+
+         C = hypre_ParCSRMatrixCreate (comm,
+                                       global_num_rows,
+                                       global_num_cols,
+                                       row_starts,
+                                       col_starts,
+                                       A_num_cols_offd + B_num_cols_offd,
+                                       A_num_nonzeros_diag + B_num_nonzeros_diag,
+                                       A_num_nonzeros_offd + B_num_nonzeros_offd);
+         GenerateDiagAndOffd(C_local, C,
+                             hypre_ParCSRMatrixFirstColDiag(A),
+                             hypre_ParCSRMatrixLastColDiag(A));
+         hypre_ParCSRMatrixOwnsRowStarts(C) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(C) = 0;
+
+         hypre_CSRMatrixDestroy(A_local);
+         hypre_CSRMatrixDestroy(B_local);
+         hypre_CSRMatrixDestroy(C_local);
+
+         hypre_ParCSRMatrixDestroy(A);
+
+         *C_ptr = C;
+      }
+
+      hypre_ParCSRMatrixDestroy(G0t);
+   }
+
    /* Make sure that the first entry in each row is the diagonal one. */
-   /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A)); */
+   /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(ams_data -> A)); */
 
    /* Compute the l1 norm of the rows of A */
    if (ams_data -> A_relax_type >= 1 && ams_data -> A_relax_type <= 3)
@@ -2137,6 +2296,9 @@ int hypre_AMSSolve(void *solver,
    HYPRE_Solver Bi[5];
    hypre_ParVector *ri[5], *gi[5];
 
+   /* Use this counter to decide when to project onto Ker(G0^T) */
+   static int solve_counter = 0;
+
    Ai[0] = ams_data -> A_G;   Bi[0] = ams_data -> B_G;   Pi[0] = ams_data -> G;
    Ai[1] = ams_data -> A_Pi;  Bi[1] = ams_data -> B_Pi;  Pi[1] = ams_data -> Pi;
    Ai[2] = ams_data -> A_Pix; Bi[2] = ams_data -> B_Pix; Pi[2] = ams_data -> Pix;
@@ -2151,6 +2313,20 @@ int hypre_AMSSolve(void *solver,
 
    if (ams_data -> print_level > 0)
       MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
+
+   /* Compatible subspace projection for problems with zero-conductivity regions.
+      Note that this modifies the input (r.h.s.) vector b! */
+   if ( (ams_data -> B_G0) &&
+        (++solve_counter % ( ams_data -> projection_frequency ) == 0) )
+   {
+      printf("Projecting onto the compatible subspace...\n");
+      /* b = (I - G0 (G0^t G0)^{-1} G0^T) b */
+      hypre_ParCSRMatrixMatvecT(1.0, ams_data -> G0, b, 0.0, ams_data -> r1);
+      hypre_ParVectorSetConstantValues(ams_data -> g1, 0.0);
+      hypre_BoomerAMGSolve(ams_data -> B_G0, ams_data -> A_G0, ams_data -> r1, ams_data -> g1);
+      hypre_ParCSRMatrixMatvec(1.0, ams_data -> G0, ams_data -> g1, 0.0, ams_data -> g0);
+      hypre_ParVectorAxpy(-1.0, ams_data -> g0, b);
+   }
 
    if (ams_data -> beta_is_zero)
    {
