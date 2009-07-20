@@ -310,7 +310,8 @@ hypre_PCGSolve( void *pcg_vdata,
    double          ratio;
 
    double          guard_zero_residual, sdotp;
-   int             tentatively_converged = 0; 
+   int             tentatively_converged = 0;
+   int             recompute_true_residual = 0;
 
    int             i = 0;
    int             my_id, num_procs;
@@ -479,6 +480,12 @@ hypre_PCGSolve( void *pcg_vdata,
        *--------------------------------------------------------------------*/
       i++;
 
+      /* At user request, periodically recompute the residual from the formula
+         r = b - A x (instead of using the recursive definition). Note that this
+         is potentially expensive and can lead to degraded convergence (since it
+         essentially a "restarted CG"). */
+      recompute_true_residual = recompute_residual_p && !(i%recompute_residual_p);
+
       /* s = A*p */
       (*(pcg_functions->Matvec))(matvec_data, 1.0, A, p, 0.0, s);
 
@@ -498,15 +505,12 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->Axpy))(alpha, p, x);
 
       /* r = r - alpha*s */
-      if ( !recompute_residual_p || ((i+1)%(recompute_residual_p)) )
+      if ( !recompute_true_residual )
       {
          (*(pcg_functions->Axpy))(-alpha, s, r);
       }
       else
       {
-         /* At user request, periodically recompute the residual from the formula
-            r = b - A x (instead of the above recursive definition). Note that this
-            is potentially expensive and can lead to degraded convergence! */
          printf("Recomputing the residual...\n");
          (*(pcg_functions->CopyVector))(b, r);
          (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
@@ -687,8 +691,13 @@ hypre_PCGSolve( void *pcg_vdata,
       beta = gamma / gamma_old;
 
       /* p = s + beta p */
-      (*(pcg_functions->ScaleVector))(beta, p);   
-      (*(pcg_functions->Axpy))(1.0, s, p);
+      if ( !recompute_true_residual )
+      {
+         (*(pcg_functions->ScaleVector))(beta, p);
+         (*(pcg_functions->Axpy))(1.0, s, p);
+      }
+      else
+         (*(pcg_functions->CopyVector))(s, p);
    }
 
    /*--------------------------------------------------------------------
