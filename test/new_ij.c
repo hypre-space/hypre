@@ -205,8 +205,15 @@ main( int   argc,
    int	    aug_dim;
    /* parameters for GSMG */
    int      gsmg_samples = 5;
+   /* interpolation */
    int      interp_type  = 0; /* default value */
    int      post_interp_type  = 0; /* default value */
+   /* aggressive coarsening */
+   int      agg_interp_type  = 4; /* default value */
+   int      agg_P_max_elmts  = 0; /* default value */
+   int      agg_P12_max_elmts  = 0; /* default value */
+   double   agg_trunc_factor  = 0; /* default value */
+   double   agg_P12_trunc_factor  = 0; /* default value */
 
    int      print_system = 0;
 
@@ -879,6 +886,31 @@ main( int   argc,
       {
          arg_index++;
          interp_type  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-agg_interp") == 0 )
+      {
+         arg_index++;
+         agg_interp_type  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-agg_Pmx") == 0 )
+      {
+         arg_index++;
+         agg_P_max_elmts  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-agg_P12_mx") == 0 )
+      {
+         arg_index++;
+         agg_P12_max_elmts  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-agg_tr") == 0 )
+      {
+         arg_index++;
+         agg_trunc_factor  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-agg_P12_tr") == 0 )
+      {
+         arg_index++;
+         agg_P12_trunc_factor  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-postinterptype") == 0 )
       {
@@ -2020,6 +2052,11 @@ main( int   argc,
       HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);
+      HYPRE_BoomerAMGSetAggTruncFactor(amg_solver, agg_trunc_factor);
+      HYPRE_BoomerAMGSetAggP12TruncFactor(amg_solver, agg_P12_trunc_factor);
+      HYPRE_BoomerAMGSetAggPMaxElmts(amg_solver, agg_P_max_elmts);
+      HYPRE_BoomerAMGSetAggP12MaxElmts(amg_solver, agg_P12_max_elmts);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
@@ -2129,6 +2166,11 @@ main( int   argc,
       HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);
+      HYPRE_BoomerAMGSetAggTruncFactor(amg_solver, agg_trunc_factor);
+      HYPRE_BoomerAMGSetAggP12TruncFactor(amg_solver, agg_P12_trunc_factor);
+      HYPRE_BoomerAMGSetAggPMaxElmts(amg_solver, agg_P_max_elmts);
+      HYPRE_BoomerAMGSetAggP12MaxElmts(amg_solver, agg_P12_max_elmts);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
        HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
@@ -2255,6 +2297,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_BoomerAMGSetAggTruncFactor(pcg_precond, agg_trunc_factor);
+         HYPRE_BoomerAMGSetAggP12TruncFactor(pcg_precond, agg_P12_trunc_factor);
+         HYPRE_BoomerAMGSetAggPMaxElmts(pcg_precond, agg_P_max_elmts);
+         HYPRE_BoomerAMGSetAggP12MaxElmts(pcg_precond, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
@@ -2382,6 +2429,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_BoomerAMGSetAggTruncFactor(pcg_precond, agg_trunc_factor);
+         HYPRE_BoomerAMGSetAggP12TruncFactor(pcg_precond, agg_P12_trunc_factor);
+         HYPRE_BoomerAMGSetAggPMaxElmts(pcg_precond, agg_P_max_elmts);
+         HYPRE_BoomerAMGSetAggP12MaxElmts(pcg_precond, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
@@ -2563,6 +2615,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_BoomerAMGSetAggTruncFactor(pcg_precond, agg_trunc_factor);
+         HYPRE_BoomerAMGSetAggP12TruncFactor(pcg_precond, agg_P12_trunc_factor);
+         HYPRE_BoomerAMGSetAggPMaxElmts(pcg_precond, agg_P_max_elmts);
+         HYPRE_BoomerAMGSetAggP12MaxElmts(pcg_precond, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
@@ -2680,6 +2737,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_BoomerAMGSetAggTruncFactor(pcg_precond, agg_trunc_factor);
+         HYPRE_BoomerAMGSetAggP12TruncFactor(pcg_precond, agg_P12_trunc_factor);
+         HYPRE_BoomerAMGSetAggPMaxElmts(pcg_precond, agg_P_max_elmts);
+         HYPRE_BoomerAMGSetAggP12MaxElmts(pcg_precond, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
@@ -2863,6 +2925,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_BoomerAMGSetAggTruncFactor(pcg_precond, agg_trunc_factor);
+         HYPRE_BoomerAMGSetAggP12TruncFactor(pcg_precond, agg_P12_trunc_factor);
+         HYPRE_BoomerAMGSetAggPMaxElmts(pcg_precond, agg_P_max_elmts);
+         HYPRE_BoomerAMGSetAggP12MaxElmts(pcg_precond, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
@@ -3007,6 +3074,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_BoomerAMGSetAggTruncFactor(pcg_precond, agg_trunc_factor);
+         HYPRE_BoomerAMGSetAggP12TruncFactor(pcg_precond, agg_P12_trunc_factor);
+         HYPRE_BoomerAMGSetAggPMaxElmts(pcg_precond, agg_P_max_elmts);
+         HYPRE_BoomerAMGSetAggP12MaxElmts(pcg_precond, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
@@ -3157,6 +3229,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_BoomerAMGSetAggTruncFactor(pcg_precond, agg_trunc_factor);
+         HYPRE_BoomerAMGSetAggP12TruncFactor(pcg_precond, agg_P12_trunc_factor);
+         HYPRE_BoomerAMGSetAggPMaxElmts(pcg_precond, agg_P_max_elmts);
+         HYPRE_BoomerAMGSetAggP12MaxElmts(pcg_precond, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
@@ -3351,6 +3428,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
+         HYPRE_BoomerAMGSetAggTruncFactor(pcg_precond, agg_trunc_factor);
+         HYPRE_BoomerAMGSetAggP12TruncFactor(pcg_precond, agg_P12_trunc_factor);
+         HYPRE_BoomerAMGSetAggPMaxElmts(pcg_precond, agg_P_max_elmts);
+         HYPRE_BoomerAMGSetAggP12MaxElmts(pcg_precond, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
