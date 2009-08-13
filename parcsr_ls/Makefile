@@ -121,6 +121,7 @@ FILES =\
  par_schwarz.c\
  par_stats.c\
  par_strength.c\
+ partial.c\
  pcg_par.c\
  schwarz.c\
  block_tridiag.c\

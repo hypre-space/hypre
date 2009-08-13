@@ -34,6 +34,8 @@ typedef struct
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
+   double   agg_trunc_factor;
+   double   agg_P12_trunc_factor;
    double   jacobi_trunc_threshold;
    double   S_commpkg_switch;
    double   CR_rate;
@@ -43,6 +45,10 @@ typedef struct
    int      coarsen_type;
    int      P_max_elmts;
    int      interp_type;
+   int      sep_weight;
+   int      agg_interp_type;
+   int      agg_P_max_elmts;
+   int      agg_P12_max_elmts;
    int      restr_par;
    int      agg_num_levels;
    int      num_paths;
@@ -51,6 +57,7 @@ typedef struct
    int      IS_type;
    int      CR_use_CG;
    int      cgc_its;
+   int      max_coarse_size;
 
    /* solve params */
    int      max_iter;
@@ -167,13 +174,19 @@ typedef struct
 ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
+#define hypre_ParAMGDataAggTruncFactor(amg_data) ((amg_data)->agg_trunc_factor)
+#define hypre_ParAMGDataAggP12TruncFactor(amg_data) ((amg_data)->agg_P12_trunc_factor)
 #define hypre_ParAMGDataJacobiTruncThreshold(amg_data) ((amg_data)->jacobi_trunc_threshold)
 #define hypre_ParAMGDataSCommPkgSwitch(amg_data) ((amg_data)->S_commpkg_switch)
 #define hypre_ParAMGDataInterpType(amg_data) ((amg_data)->interp_type)
+#define hypre_ParAMGDataSepWeight(amg_data) ((amg_data)->sep_weight)
+#define hypre_ParAMGDataAggInterpType(amg_data) ((amg_data)->agg_interp_type)
 #define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_ParAMGDataMeasureType(amg_data) ((amg_data)->measure_type)
 #define hypre_ParAMGDataSetupType(amg_data) ((amg_data)->setup_type)
 #define hypre_ParAMGDataPMaxElmts(amg_data) ((amg_data)->P_max_elmts)
+#define hypre_ParAMGDataAggPMaxElmts(amg_data) ((amg_data)->agg_P_max_elmts)
+#define hypre_ParAMGDataAggP12MaxElmts(amg_data) ((amg_data)->agg_P12_max_elmts)
 #define hypre_ParAMGDataNumPaths(amg_data) ((amg_data)->num_paths)
 #define hypre_ParAMGDataAggNumLevels(amg_data) ((amg_data)->agg_num_levels)
 #define hypre_ParAMGDataPostInterpType(amg_data) ((amg_data)->post_interp_type)
@@ -184,6 +197,7 @@ typedef struct
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
  #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
+ #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
 
 /* solve params */
 

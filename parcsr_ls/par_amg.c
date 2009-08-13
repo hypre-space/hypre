@@ -35,14 +35,18 @@ hypre_BoomerAMGCreate()
 
    /* setup params */
    int      max_levels;
+   int      max_coarse_size;
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
+   double   agg_trunc_factor;
+   double   agg_P12_trunc_factor;
    double   jacobi_trunc_threshold;
    double   S_commpkg_switch;
    double   CR_rate;
    double   CR_strong_th;
    int      interp_type;
+   int      sep_weight;
    int      coarsen_type;
    int      measure_type;
    int      setup_type;
@@ -51,6 +55,9 @@ hypre_BoomerAMGCreate()
    int 	    nodal, nodal_diag;
    int 	    num_paths;
    int 	    agg_num_levels;
+   int      agg_interp_type;
+   int      agg_P_max_elmts;
+   int      agg_P12_max_elmts;
    int      post_interp_type;
    int 	    num_CR_relax_steps;
    int 	    IS_type;
@@ -105,22 +112,29 @@ hypre_BoomerAMGCreate()
 
    /* setup params */
    max_levels = 25;
+   max_coarse_size = 9;
    strong_threshold = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
+   agg_trunc_factor = 0.0;
+   agg_P12_trunc_factor = 0.0;
    jacobi_trunc_threshold = 0.01;
    S_commpkg_switch = 1.0;
    interp_type = 0;
+   sep_weight = 0;
    coarsen_type = 6;
    measure_type = 0;
    setup_type = 1;
    P_max_elmts = 0;
+   agg_P_max_elmts = 0;
+   agg_P12_max_elmts = 0;
    num_functions = 1;
    nodal = 0;
    nodal_diag = 0;
    num_paths = 1;
    agg_num_levels = 0;
    post_interp_type = 0;
+   agg_interp_type = 4;
    num_CR_relax_steps = 2;
    CR_rate = 0.7;
    CR_strong_th = 0;
@@ -181,21 +195,28 @@ hypre_BoomerAMGCreate()
 
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
    hypre_BoomerAMGSetMaxLevels(amg_data, max_levels);
+   hypre_BoomerAMGSetMaxCoarseSize(amg_data, max_coarse_size);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
+   hypre_BoomerAMGSetAggTruncFactor(amg_data, agg_trunc_factor);
+   hypre_BoomerAMGSetAggP12TruncFactor(amg_data, agg_P12_trunc_factor);
    hypre_BoomerAMGSetJacobiTruncThreshold(amg_data, jacobi_trunc_threshold);
    hypre_BoomerAMGSetSCommPkgSwitch(amg_data, S_commpkg_switch);
    hypre_BoomerAMGSetInterpType(amg_data, interp_type);
+   hypre_BoomerAMGSetSepWeight(amg_data, sep_weight);
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
    hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
    hypre_BoomerAMGSetSetupType(amg_data, setup_type);
    hypre_BoomerAMGSetPMaxElmts(amg_data, P_max_elmts);
+   hypre_BoomerAMGSetAggPMaxElmts(amg_data, agg_P_max_elmts);
+   hypre_BoomerAMGSetAggP12MaxElmts(amg_data, agg_P12_max_elmts);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
    hypre_BoomerAMGSetNodal(amg_data, nodal);
    hypre_BoomerAMGSetNodal(amg_data, nodal_diag);
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
    hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
+   hypre_BoomerAMGSetAggInterpType(amg_data, agg_interp_type);
    hypre_BoomerAMGSetPostInterpType(amg_data, post_interp_type);
    hypre_BoomerAMGSetNumCRRelaxSteps(amg_data, num_CR_relax_steps);
    hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
@@ -513,6 +534,48 @@ hypre_BoomerAMGGetMaxLevels( void *data,
    } 
 
    *max_levels = hypre_ParAMGDataMaxLevels(amg_data);
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetMaxCoarseSize( void *data,
+                          int   max_coarse_size )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   if (max_coarse_size < 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataMaxCoarseSize(amg_data) = max_coarse_size;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGGetMaxCoarseSize( void *data,
+                             int *  max_coarse_size )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *max_coarse_size = hypre_ParAMGDataMaxCoarseSize(amg_data);
 
    return hypre_error_flag;
 }
@@ -845,6 +908,24 @@ hypre_BoomerAMGGetInterpType( void     *data,
    } 
 
    *interp_type = hypre_ParAMGDataInterpType(amg_data);
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetSepWeight( void     *data,
+                           int       sep_weight )
+{
+   hypre_ParAMGData  *amg_data = data;
+
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataSepWeight(amg_data) = sep_weight;
 
    return hypre_error_flag;
 }
@@ -2279,6 +2360,136 @@ hypre_BoomerAMGSetAggNumLevels( void     *data,
       return hypre_error_flag;
    } 
    hypre_ParAMGDataAggNumLevels(amg_data) = agg_num_levels;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the interpolation used with aggressive coarsening
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetAggInterpType( void     *data,
+                            int       agg_interp_type )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   if (agg_interp_type < 0 || agg_interp_type > 4)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataAggInterpType(amg_data) = agg_interp_type;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the number of levels of aggressive coarsening
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetAggPMaxElmts( void     *data,
+                            int       agg_P_max_elmts )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   if (agg_P_max_elmts < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataAggPMaxElmts(amg_data) = agg_P_max_elmts;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the number of levels of aggressive coarsening
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetAggP12MaxElmts( void     *data,
+                            int       agg_P12_max_elmts )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   if (agg_P12_max_elmts < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataAggP12MaxElmts(amg_data) = agg_P12_max_elmts;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the number of levels of aggressive coarsening
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetAggTruncFactor( void     *data,
+                            double      agg_trunc_factor )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   if (agg_trunc_factor < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataAggTruncFactor(amg_data) = agg_trunc_factor;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the number of levels of aggressive coarsening
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetAggP12TruncFactor( void     *data,
+                            double      agg_P12_trunc_factor )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   if (agg_P12_trunc_factor < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataAggP12TruncFactor(amg_data) = agg_P12_trunc_factor;
 
    return hypre_error_flag;
 }

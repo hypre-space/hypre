@@ -1776,3 +1776,25 @@ hypre_BoomerAMGCorrectCFMarker(int *CF_marker, int num_var, int *new_CF_marker)
 
    return 0;
 }
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGCorrectCFMarker2 : corrects CF_marker after aggr. coarsening,
+ * but marks new F-points (previous C-points) as -2
+ *--------------------------------------------------------------------------*/
+int
+hypre_BoomerAMGCorrectCFMarker2(int *CF_marker, int num_var, int *new_CF_marker)
+{
+   int i, cnt;
+
+   cnt = 0;
+   for (i=0; i < num_var; i++)
+   {
+      if (CF_marker[i] > 0 )
+      {
+         if (new_CF_marker[cnt] == -1) CF_marker[i] = -2;
+         else CF_marker[i] = 1;
+         cnt++;
+      }
+   }
+
+   return 0;
+}

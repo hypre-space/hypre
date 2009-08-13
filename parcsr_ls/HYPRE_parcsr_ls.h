@@ -165,6 +165,13 @@ int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
                                 int          max_levels);
 
 /**
+ * (Optional) Sets maximum size of coarsest grid.
+ * The default is 9.
+ **/
+int HYPRE_BoomerAMGSetMaxCoarseSize(HYPRE_Solver solver,
+                                int          max_coarse_size);
+
+/**
  * (Optional) Sets AMG strength threshold. The default is 0.25.
  * For 2d Laplace operators, 0.25 is a good value, for 3d Laplace
  * operators, 0.5 or 0.6 is a better value. For elasticity problems,
@@ -480,8 +487,8 @@ int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
  * 3 &	direct interpolation (with separation of weights) \\
  * 4 &	multipass interpolation \\
  * 5 &	multipass interpolation (with separation of weights) \\
- * 6 &  extended classical modified interpolation \\
- * 7 &  extended (if no common C neighbor) classical modified interpolation \\
+ * 6 &  extended+i interpolation \\
+ * 7 &  extended+i (if no common C neighbor) interpolation \\
  * 8 &	standard interpolation \\
  * 9 &	standard interpolation (with separation of weights) \\
  * 10 &	classical block interpolation (for use with nodal systems version only) \\
@@ -489,6 +496,7 @@ int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
  *   &	with diagonalized diagonal blocks \\
  * 12 &	FF interpolation \\
  * 13 &	FF1 interpolation \\
+ * 14 &	extended interpolation \\
  * \hline
  * \end{tabular}
  * 
@@ -496,6 +504,15 @@ int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
  **/
 int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
                                  int          interp_type);
+
+/**
+ * (Optional) Defines whether separation of weights is used
+ * when defining strength for standard interpolation or
+ * multipass interpolation.
+ * Default: 0, i.e. no separation of weights used.
+ **/
+int HYPRE_BoomerAMGSetSepWeight(HYPRE_Solver solver,
+                              int          sep_weight);
 
 /**
  * (Optional)
@@ -618,6 +635,54 @@ int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver solver,
  **/
 int HYPRE_BoomerAMGSetAggNumLevels(HYPRE_Solver solver,
                                 int          agg_num_levels);
+
+/**
+ * (Optional) Defines the interpolation used on levels of aggressive coarsening
+ * The default is 4, i.e. multipass interpolation.
+ * The following options exist:
+ * 
+ * \begin{tabular}{|c|l|} \hline
+ * 1 & 2-stage extended+i interpolation \\
+ * 2 & 2-stage standard interpolation \\
+ * 3 & 2-stage extended interpolation \\
+ * 4 & multipass interpolation \\
+ * \hline
+ * \end{tabular}
+ **/
+int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
+                                int          agg_interp_type);
+
+/**
+ * (Optional) Defines the truncation factor for the 
+ * interpolation used for aggressive coarsening.
+ * The default is 0.
+ **/
+int HYPRE_BoomerAMGSetAggTruncFactor(HYPRE_Solver solver,
+                                 double       agg_trunc_factor);
+
+/**
+ * (Optional) Defines the truncation factor for the 
+ * matrices P1 and P2 which are used to build 2-stage interpolation.
+ * The default is 0.
+ **/
+int HYPRE_BoomerAMGSetAggP12TruncFactor(HYPRE_Solver solver,
+                                 double       agg_P12_trunc_factor);
+
+/**
+ * (Optional) Defines the maximal number of elements per row for the 
+ * interpolation used for aggressive coarsening.
+ * The default is 0.
+ **/
+int HYPRE_BoomerAMGSetAggPMaxElmts(HYPRE_Solver solver,
+                                 int       agg_P_max_elmts);
+
+/**
+ * (Optional) Defines the maximal number of elements per row for the 
+ * matrices P1 and P2 which are used to build 2-stage interpolation.
+ * The default is 0.
+ **/
+int HYPRE_BoomerAMGSetAggP12MaxElmts(HYPRE_Solver solver,
+                                 int       agg_P12_max_elmts);
 
 /**
  * (Optional) Defines the degree of aggressive coarsening.
