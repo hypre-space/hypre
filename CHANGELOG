@@ -20,6 +20,12 @@
 # recent release.
 #=============================================================================
 
+- Added new 2-stage interpolation operators to be used with aggressive
+  coarsening 
+
+- Added a new routine HYPRE_BoomerAMGSetMaxCoarseSize that allows to set
+  the maximal system size on the coarsest level 
+
 #====================================
 
 Version 2.4.0b released 2008/08/08
