@@ -964,11 +964,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_TFree(col_offd_S_to_A);
                   col_offd_S_to_A = NULL;
                   CF_marker = NULL;
+                  hypre_ParCSRMatrixDestroy(S);
                   hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, 
 			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
 			&CF_marker, &col_offd_S_to_A, &S);
                   if (col_offd_SN_to_AN == NULL)
               	     col_offd_S_to_A = NULL;
+                  hypre_TFree(CFN_marker);
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
                         num_functions, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global);
@@ -1300,23 +1302,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                
                hypre_TFree(col_offd_S_to_A);
             }
-            else /* nodal = -1, -2, -3:  here we build interp using the nodal matrix and then convert 
-                    to regular size - this does not work well */
-            {
-               hypre_BoomerAMGBuildInterp(AN, CFN_marker,
-                                          SN, coarse_pnts_global, 1, NULL,
-                                          debug_flag, trunc_factor, P_max_elmts, col_offd_SN_to_AN, &PN);
-               hypre_TFree(col_offd_SN_to_AN);
-               hypre_BoomerAMGCreateScalarCFS(PN, CFN_marker, NULL,
-                                              num_functions, nodal, 1, &dof_func1,
-                                              &CF_marker, NULL, &P);
-               dof_func_array[level+1] = dof_func1;
-               CF_marker_array[level] = CF_marker;
-               hypre_TFree (CFN_marker);
-               hypre_ParCSRMatrixDestroy(AN);
-               hypre_ParCSRMatrixDestroy(PN);
-               hypre_ParCSRMatrixDestroy(SN);
-            }
          } 
       }
       else
@@ -1372,7 +1357,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 }
 	 if (S)
             hypre_ParCSRMatrixDestroy(S);
-	 hypre_TFree(coarse_pnts_global);
+	 if (P)
+            hypre_ParCSRMatrixDestroy(P);
          if (level > 0)
          {
             /* note special case treatment of CF_marker is necessary
@@ -1518,7 +1504,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParAMGDataNumLevels(amg_data) = num_levels;
    if (hypre_ParAMGDataSmoothNumLevels(amg_data) > num_levels-1)
       hypre_ParAMGDataSmoothNumLevels(amg_data) = num_levels-1;
-
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
+   
    /*-----------------------------------------------------------------------
     * Setup of special smoothers when needed
     *-----------------------------------------------------------------------*/
