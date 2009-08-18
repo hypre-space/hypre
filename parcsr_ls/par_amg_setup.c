@@ -55,7 +55,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int                **CF_marker_array;   
    int                **dof_func_array;   
    int                 *dof_func;
-   int                 *dof_func1;
    int                 *col_offd_S_to_A;
    int                 *col_offd_SN_to_AN;
    double              *relax_weight;
@@ -93,7 +92,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *SN;
    hypre_ParCSRMatrix  *SCR;
    hypre_ParCSRMatrix  *P;
-   hypre_ParCSRMatrix  *PN;
    hypre_ParCSRMatrix  *A_H;
    hypre_ParCSRMatrix  *AN;
    hypre_ParCSRMatrix  *P1;
