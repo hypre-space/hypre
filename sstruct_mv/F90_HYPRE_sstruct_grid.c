@@ -153,6 +153,34 @@ hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
 }
 
 /*--------------------------------------------------------------------------
+ *  HYPRE_SStructGridSetNeighborPart
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridsetneighborpart, HYPRE_SSTRUCTGRIDSETNEIGHBORPART)
+                                                          (long int   *grid,
+                                                           int        *part,
+                                                           int        *ilower,
+                                                           int        *iupper,
+                                                           int        *nbor_part,
+                                                           int        *nbor_ilower,
+                                                           int        *nbor_iupper,
+                                                           int        *index_map,
+                                                           int        *index_dir,
+                                                           int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructGridSetNeighborPart( (HYPRE_SStructGrid) *grid,
+                                                    (int)               *part,
+                                                    (int *)              ilower,
+                                                    (int *)              iupper,
+                                                    (int)               *nbor_part,
+                                                    (int *)              nbor_ilower,
+                                                    (int *)              nbor_iupper,
+                                                    (int *)              index_map,
+                                                    (int *)              index_dir ) );
+}
+
+/*--------------------------------------------------------------------------
  *  HYPRE_SStructGridSetNeighborBox
  *--------------------------------------------------------------------------*/
 
