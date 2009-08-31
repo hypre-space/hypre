@@ -1863,7 +1863,7 @@ int hypre_AMSSetup(void *solver,
          hypre_ParCSRMatrix **C_ptr = &ams_data -> A;
 
          hypre_ParCSRMatrix *C;
-         hypre_CSRMatrix *A_local, *B_local, *C_local;
+         hypre_CSRMatrix *A_local, *B_local, *C_local, *C_tmp;
 
          MPI_Comm comm = hypre_ParCSRMatrixComm(A);
          int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
@@ -1879,13 +1879,16 @@ int hypre_AMSSetup(void *solver,
 
          A_local = hypre_MergeDiagAndOffd(A);
          B_local = hypre_MergeDiagAndOffd(B);
-         /* scale (penalize) G0 G0^T before adding it to the matrix
+         /* scale (penalize) G0 G0^T before adding it to the matrix */
          {
             int i, nnz = hypre_CSRMatrixNumNonzeros(A_local);
             double *data = hypre_CSRMatrixData(A_local);
-            for (i = 0; i < nnz; i++) data[i] *= 1e-6;
-         } */
-         C_local = hypre_CSRMatrixAdd(A_local, B_local);
+            double *dataB = hypre_CSRMatrixData(B_local);
+            double factor = dataB[0]*1e-8; /* assume dataB[0] = A11 */
+            for (i = 0; i < nnz; i++) data[i] *= factor;
+         }
+         C_tmp = hypre_CSRMatrixAdd(A_local, B_local);
+         C_local = hypre_CSRMatrixDeleteZeros(C_tmp,0.0);
 
          C = hypre_ParCSRMatrixCreate (comm,
                                        global_num_rows,
@@ -1899,7 +1902,8 @@ int hypre_AMSSetup(void *solver,
                              hypre_ParCSRMatrixFirstColDiag(A),
                              hypre_ParCSRMatrixLastColDiag(A));
          hypre_ParCSRMatrixOwnsRowStarts(C) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(C) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(C) = 1;
+         hypre_ParCSRMatrixOwnsColStarts(G0t) = 0;
 
          hypre_CSRMatrixDestroy(A_local);
          hypre_CSRMatrixDestroy(B_local);
@@ -1918,7 +1922,7 @@ int hypre_AMSSetup(void *solver,
 
    /* Compute the l1 norm of the rows of A */
    if (ams_data -> A_relax_type >= 1 && ams_data -> A_relax_type <= 3)
-      hypre_ParCSRComputeL1Norms(A, ams_data -> A_relax_type,
+      hypre_ParCSRComputeL1Norms(ams_data -> A, ams_data -> A_relax_type,
                                  &ams_data -> A_l1_norms);
 
    if (ams_data -> cycle_type == 20)
@@ -2319,8 +2323,8 @@ int hypre_AMSSolve(void *solver,
    if ( (ams_data -> B_G0) &&
         (++solve_counter % ( ams_data -> projection_frequency ) == 0) )
    {
-      printf("Projecting onto the compatible subspace...\n");
       /* b = (I - G0 (G0^t G0)^{-1} G0^T) b */
+      /* printf("Projecting onto the compatible subspace...\n"); */
       hypre_ParCSRMatrixMatvecT(1.0, ams_data -> G0, b, 0.0, ams_data -> r1);
       hypre_ParVectorSetConstantValues(ams_data -> g1, 0.0);
       hypre_BoomerAMGSolve(ams_data -> B_G0, ams_data -> A_G0, ams_data -> r1, ams_data -> g1);
