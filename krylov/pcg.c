@@ -523,7 +523,10 @@ hypre_PCGSolve( void *pcg_vdata,
          double drob2 = alpha*alpha*(*(pcg_functions->InnerProd))(s,s)/bi_prod;
          if ( drob2 < rtol*rtol )
          {
-            printf("\n\n||r_old-r_new||/||b||: %e\n", sqrt(drob2));
+            if (print_level > 1 && my_id == 0)
+            {
+               printf("\n\n||r_old-r_new||/||b||: %e\n", sqrt(drob2));
+            }
             break;
          }
       }
@@ -542,7 +545,10 @@ hypre_PCGSolve( void *pcg_vdata,
          double r2ob2 = (gamma + gamma_old)/bi_prod;
          if ( r2ob2 < rtol*rtol)
          {
-            printf("\n\n||r_old-r_new||_C/||b||_C: %e\n", sqrt(r2ob2));
+            if (print_level > 1 && my_id == 0)
+            {
+               printf("\n\n||r_old-r_new||_C/||b||_C: %e\n", sqrt(r2ob2));
+            }
             break;
          }
       }
