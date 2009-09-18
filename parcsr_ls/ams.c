@@ -754,6 +754,8 @@ int hypre_AMSDestroy(void *solver)
       hypre_ParVectorDestroy(ams_data -> g2);
 
    if (ams_data -> G0)
+      hypre_ParCSRMatrixDestroy(ams_data -> A);
+   if (ams_data -> G0)
       hypre_ParCSRMatrixDestroy(ams_data -> G0);
    if (ams_data -> A_G0)
       hypre_ParCSRMatrixDestroy(ams_data -> A_G0);
@@ -1889,6 +1891,10 @@ int hypre_AMSSetup(void *solver,
          }
          C_tmp = hypre_CSRMatrixAdd(A_local, B_local);
          C_local = hypre_CSRMatrixDeleteZeros(C_tmp,0.0);
+	 if (C_local)
+	   hypre_CSRMatrixDestroy(C_tmp);
+	 else
+	   C_local = C_tmp;
 
          C = hypre_ParCSRMatrixCreate (comm,
                                        global_num_rows,
