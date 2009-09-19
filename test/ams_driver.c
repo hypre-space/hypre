@@ -312,6 +312,12 @@ int main (int argc, char *argv[])
       HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Abeta", &Abeta);
    }
 
+   if (zero_cond)
+   {
+      CheckIfFileExists("aFEM.inodes.0");
+      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.inodes", &interior_nodes);
+   }
+
    if (!myid)
       printf("Problem size: %d\n\n",
              hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix*)A));
@@ -699,6 +705,9 @@ int main (int argc, char *argv[])
 
    if (Aalpha) HYPRE_ParCSRMatrixDestroy(Aalpha);
    if (Abeta)  HYPRE_ParCSRMatrixDestroy(Abeta);
+
+   if (zero_cond)
+      HYPRE_ParVectorDestroy(interior_nodes);
 
    MPI_Finalize();
 
