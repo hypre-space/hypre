@@ -511,7 +511,10 @@ hypre_PCGSolve( void *pcg_vdata,
       }
       else
       {
-         printf("Recomputing the residual...\n");
+         if (print_level > 1 && my_id == 0)
+         {
+            printf("Recomputing the residual...\n");
+         }
          (*(pcg_functions->CopyVector))(b, r);
          (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
       }
