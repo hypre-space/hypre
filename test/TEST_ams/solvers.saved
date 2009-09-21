@@ -54,6 +54,11 @@ Final Relative Residual Norm = 9.190335e-07
 Iterations = 9
 Final Relative Residual Norm = 9.190335e-07
 
+# Output file: solvers.out.12
+
+Iterations = 18
+Final Relative Residual Norm = 6.054070e-03
+
 # Output file: solvers.out.8
 
 Eigenvalue lambda   3.02357654194708e+01
