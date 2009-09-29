@@ -304,9 +304,9 @@ int HYPRE_LSI_DSuperLUGenMatrix(HYPRE_Solver solver)
    localNRows = procNRows[mypid+1] - procNRows[mypid];
    sluPtr->localNRows_ = localNRows;
    sluPtr->globalNRows_ = procNRows[nprocs];
-   csrIA = (int *) intMalloc_dist((localNRows+1) * sizeof(int)); 
-   csrJA = (int *) intMalloc_dist(localNNZ * sizeof(int)); 
-   csrAA = (double *) doubleMalloc_dist(localNNZ * sizeof(double)); 
+   csrIA = (int *) intMalloc_dist(localNRows+1); 
+   csrJA = (int *) intMalloc_dist(localNNZ); 
+   csrAA = (double *) doubleMalloc_dist(localNNZ); 
    localNNZ = 0;
 
    csrIA[0] = localNNZ;
