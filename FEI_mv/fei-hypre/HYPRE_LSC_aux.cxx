@@ -2038,7 +2038,6 @@ void HYPRE_LinSysCore::setupPCGPrecon()
                                         HYPRE_DummyFunction, HYPrecon_);
            else
            {
-              setupPreconAMS();
               HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
                                         HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
