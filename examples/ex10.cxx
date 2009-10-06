@@ -10,14 +10,15 @@
    To see options: ex10 -help
 
    Description:    This code solves a system corresponding to a discretization
-                   of the Laplace equation with zero boundary conditions on the
-                   unit square. The domain is split into a n x n grid of
-                   quadrilateral elements and each processors owns a horizontal
-                   strip of size m x n, where m = n/nprocs. We use bilinear
-                   finite element discretization, so there are nodes (vertices)
-                   that are shared between neighboring processors. The Finite
-                   Element Interface is used to assemble the matrix and solve
-                   the problem. Nine different solvers are available.
+                   of the Laplace equation -Delta u = 1 with zero boundary
+                   conditions on the unit square.  The domain is split into
+                   a n x n grid of quadrilateral elements and each processors
+                   owns a horizontal strip of size m x n, where m = n/nprocs. We
+                   use bilinear finite element discretization, so there are
+                   nodes (vertices) that are shared between neighboring
+                   processors. The Finite Element Interface is used to assemble
+                   the matrix and solve the problem. Nine different solvers are
+                   available.
 */
 
 #include <math.h>
