@@ -125,7 +125,8 @@ FILES =\
  slamch.c \
  dmyblas2.c \
  dsp_blas2.c \
- dsp_blas3.c
+ dsp_blas3.c \
+ hypre_interface.c
 
 FILES2 =\
  mc64ad.f \
