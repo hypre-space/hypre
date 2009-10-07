@@ -20,11 +20,30 @@
 # recent release.
 #=============================================================================
 
-- Added new 2-stage interpolation operators to be used with aggressive
-  coarsening 
 
-- Added a new routine HYPRE_BoomerAMGSetMaxCoarseSize that allows to set
-  the maximal system size on the coarsest level 
+#====================================
+
+Version 2.5.0a released, 2009/10/12.
+
+- Added new 2-stage interpolation operators to be used with aggressive
+  coarsening
+
+- Added a new routine HYPRE_BoomerAMGSetMaxCoarseSize that allows to set the
+  maximal system size on the coarsest level
+
+- Added a LOBPCG example: /examples/ex11.c
+
+- Added a "recompute residual" option to PCG which makes it behave like a
+  "restarted CG".  This, can be useful in high-accuracy computation where the
+  CG residuals drift from r = b - Ax.
+
+- Added a residual-based stopping criteria in PCG for high-accuracy
+  computations.
+
+- Initial release of a more robust version of AMS for singular problems with
+  zero-conductivity regions.  This requires a list of the interior nodes in the
+  zero conductivity regions and uses a periodic projection onto a compatible
+  subspace.
 
 #====================================
 
