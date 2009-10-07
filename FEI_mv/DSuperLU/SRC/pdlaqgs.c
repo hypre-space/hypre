@@ -75,7 +75,8 @@ pdlaqgs(SuperMatrix *A, double *r, double *c,
     double *Aval;
     int_t i, j, irow, jcol, m_loc;
     double large, small, cj;
-    extern double dlamch_(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
+    /* extern double dlamch_(char *); */
 
     /* Quick return if possible */
     if (A->nrow <= 0 || A->ncol <= 0) {
@@ -88,7 +89,8 @@ pdlaqgs(SuperMatrix *A, double *r, double *c,
     m_loc = Astore->m_loc;
     
     /* Initialize LARGE and SMALL. */
-    small = dlamch_("Safe minimum") / dlamch_("Precision");
+    /* small = dlamch_("Safe minimum") / dlamch_("Precision"); */
+    small = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Safe minimum") / hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Precision");
     large = 1. / small;
 
     if (rowcnd >= THRESH && amax >= small && amax <= large) {

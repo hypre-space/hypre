@@ -77,7 +77,8 @@ pdgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
     int i, j, irow, jcol, m_loc;
     double rcmin, rcmax;
     double bignum, smlnum;
-    extern double dlamch_(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
+    /* extern double dlamch_(char *); */
     double tempmax, tempmin;
     double *loc_max;
     int *r_sizes, *displs;
@@ -108,7 +109,8 @@ pdgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
     m_loc = Astore->m_loc;
     
     /* Get machine constants. */
-    smlnum = dlamch_("S");
+    smlnum = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("S");
+    /* smlnum = dlamch_("S"); */
     bignum = 1. / smlnum;
 
     /* Compute row scale factors. */

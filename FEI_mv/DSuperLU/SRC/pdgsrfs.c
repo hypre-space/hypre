@@ -115,6 +115,7 @@ pdgsrfs(int_t n, SuperMatrix *A, double anorm, LUstruct_t *LUstruct,
     int   iam;
     double eps, lstres;
     double s, safmin, safe1, safe2;
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
 
     /* Data structures used by matrix-vector multiply routine. */
     pdgsmv_comm_t *gsmv_comm = SOLVEstruct->gsmv_comm;
@@ -161,8 +162,10 @@ pdgsrfs(int_t n, SuperMatrix *A, double anorm, LUstruct_t *LUstruct,
 
     /* NZ = maximum number of nonzero elements in each row of A, plus 1 */
     nz     = A->ncol + 1;
-    eps    = dlamch_("Epsilon");
-    safmin = dlamch_("Safe minimum");
+    /* eps    = dlamch_("Epsilon");
+       safmin = dlamch_("Safe minimum"); */
+    eps    = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Epsilon");
+    safmin = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("Safe minimum");
 
     /* Set SAFE1 essentially to be the underflow threshold times the
        number of additions in each row. */
