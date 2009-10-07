@@ -12,6 +12,9 @@
  * File name:	superlu_defs.h
  * Purpose:     Definitions which are precision-neutral
  */
+
+#include <HYPRE_utilities.h>
+#include <fortran.h>
 #ifdef _CRAY
 #include <fortran.h>
 #include <string.h>

@@ -278,14 +278,14 @@ C Local variables and parameters
 C External routines and functions
 c     EXTERNAL FD05AD
 c     DOUBLE PRECISION FD05AD
-      EXTERNAL MC21AD,MC64BD,MC64RD,MC64SD,MC64WD, DLAMCH
-      DOUBLE PRECISION DLAMCH
+      EXTERNAL MC21AD,MC64BD,MC64RD,MC64SD,MC64WD, HY_DLAMCH
+      DOUBLE PRECISION HY_DLAMCH
 C Intrinsic functions
       INTRINSIC ABS,LOG
 
 C Set RINF to largest positive real number (infinity)
 c XSL    RINF = FD05AD(5)
-      RINF = DLAMCH('Overflow')
+      RINF = HY_DLAMCH('Overflow')
 
 C Check value of JOB
       IF (JOB.LT.1 .OR. JOB.GT.5) THEN
@@ -564,12 +564,12 @@ C Intrinsic functions
 C External subroutines and/or functions
 c      EXTERNAL FD05AD,MC64DD,MC64ED,MC64FD, DLAMCH
 c      DOUBLE PRECISION FD05AD, DLAMCH
-      EXTERNAL MC64DD,MC64ED,MC64FD, DLAMCH
-      DOUBLE PRECISION DLAMCH
+      EXTERNAL MC64DD,MC64ED,MC64FD, HY_DLAMCH
+      DOUBLE PRECISION HY_DLAMCH
 
 C Set RINF to largest positive real number
 c XSL  RINF = FD05AD(5)
-      RINF = DLAMCH('Overflow')
+      RINF = HY_DLAMCH('Overflow')
 
 C Initialization
       NUM = 0
@@ -1235,8 +1235,8 @@ C IW4 is integer work array of length 4N used by MC64U/UD.
       DOUBLE PRECISION BVAL,BMIN,BMAX,RINF
 c      EXTERNAL FD05AD,MC64QD,MC64UD
 c      DOUBLE PRECISION FD05AD
-      EXTERNAL MC64QD,MC64UD, DLAMCH
-      DOUBLE PRECISION DLAMCH
+      EXTERNAL MC64QD,MC64UD, HY_DLAMCH
+      DOUBLE PRECISION HY_DLAMCH
 
 C BMIN and BMAX are such that a maximum matching exists for the input
 C   matrix in which all entries smaller than BMIN are dropped. 
@@ -1247,7 +1247,7 @@ C NUM is the cardinality of last matching found.
 
 C Set RINF to largest positive real number
 c XSL      RINF = FD05AD(5)
-      RINF = DLAMCH('Overflow')
+      RINF = HY_DLAMCH('Overflow')
 
 C Compute a first maximum matching from scratch on whole matrix.
       DO 20 J = 1,N
@@ -1702,13 +1702,13 @@ C Local parameters
 C External subroutines and/or functions
 c      EXTERNAL FD05AD,MC64DD,MC64ED,MC64FD
 c      DOUBLE PRECISION FD05AD
-      EXTERNAL MC64DD,MC64ED,MC64FD, DLAMCH
-      DOUBLE PRECISION DLAMCH
+      EXTERNAL MC64DD,MC64ED,MC64FD, HY_DLAMCH
+      DOUBLE PRECISION HY_DLAMCH
 
 
 C Set RINF to largest positive real number
 c XSL      RINF = FD05AD(5)
-      RINF = DLAMCH('Overflow')
+      RINF = HY_DLAMCH('Overflow')
 
 C Initialization
       NUM = 0
