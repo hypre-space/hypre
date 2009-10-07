@@ -11,6 +11,11 @@
 
 #include <math.h>
 #include "superlu_ddefs.h"
+
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
+
 #if ( VAMPIR>=1 )
 #include <VT.h>
 #endif
@@ -650,11 +655,12 @@ int_t pdgstrf
 #elif defined (USE_VENDOR_BLAS)
 		    dgemm_("N", "N", &nbrow, &ncols, &ldu, &alpha, 
 			   &lusup[luptr+(knsupc-ldu)*nsupr], &nsupr, 
-			   tempu, &ldu, &beta, tempv, &ldt, 1, 1);
-#else
-		    dgemm_("N", "N", &nbrow, &ncols, &ldu, &alpha, 
-			   &lusup[luptr+(knsupc-ldu)*nsupr], &nsupr, 
 			   tempu, &ldu, &beta, tempv, &ldt);
+#else
+		    hypre_F90_NAME_BLAS(dgemm,DGEMM)("N", "N", &nbrow, 
+                           &ncols, &ldu, &alpha, 
+			   &lusup[luptr+(knsupc-ldu)*nsupr], &nsupr, 
+			   tempu, &ldu, &beta, tempv, &ldt, 1, 1);
 #endif
 		    stat->ops[FACT] += 2 * nbrow * ldu * ncols;
 
@@ -864,11 +870,12 @@ int_t pdgstrf
 #elif defined (USE_VENDOR_BLAS)
 		    dgemm_("N", "N", &nbrow, &ncols, &ldu, &alpha, 
 			   &lusup[luptr+(knsupc-ldu)*nsupr], &nsupr, 
-			   tempu, &ldu, &beta, tempv, &ldt, 1, 1);
-#else
-		    dgemm_("N", "N", &nbrow, &ncols, &ldu, &alpha, 
-			   &lusup[luptr+(knsupc-ldu)*nsupr], &nsupr, 
 			   tempu, &ldu, &beta, tempv, &ldt);
+#else
+		    hypre_F90_NAME_BLAS(dgemm,DGEMM)("N", "N", &nbrow, 
+                           &ncols, &ldu, &alpha, 
+			   &lusup[luptr+(knsupc-ldu)*nsupr], &nsupr, 
+			   tempu, &ldu, &beta, tempv, &ldt, 1, 1);
 #endif
 		    stat->ops[FACT] += 2 * nbrow * ldu * ncols;
 
@@ -1174,8 +1181,12 @@ if ( k == 3329 && j == 2 ) {
 #ifdef _CRAY
 		SGER(&l, &c, &alpha, &lusup[luptr+1], &incx,
 		     &ujrow[1], &incy, &lusup[luptr+nsupr+1], &nsupr);
-#else
+#elif defined (USE_VENDOR_BLAS)
 		dger_(&l, &c, &alpha, &lusup[luptr+1], &incx,
+		      &ujrow[1], &incy, &lusup[luptr+nsupr+1], &nsupr);
+#else
+		hypre_F90_NAME_BLAS(dger,DGER)(&l, &c, &alpha, 
+                      &lusup[luptr+1], &incx,
 		      &ujrow[1], &incy, &lusup[luptr+nsupr+1], &nsupr);
 #endif
 		stat->ops[FACT] += 2 * l * c;
@@ -1183,8 +1194,12 @@ if ( k == 3329 && j == 2 ) {
 #ifdef _CRAY
 		SGER(&nsupr, &c, &alpha, &lusup[luptr], &incx, 
 		     &ujrow[1], &incy, &lusup[luptr+nsupr], &nsupr);
-#else
+#elif defined (USE_VENDOR_BLAS)
 		dger_(&nsupr, &c, &alpha, &lusup[luptr], &incx, 
+		      &ujrow[1], &incy, &lusup[luptr+nsupr], &nsupr);
+#else
+		hypre_F90_NAME_BLAS(dger,DGER)(&nsupr, &c, &alpha, 
+                      &lusup[luptr], &incx, 
 		      &ujrow[1], &incy, &lusup[luptr+nsupr], &nsupr);
 #endif
 		stat->ops[FACT] += 2 * nsupr * c;
@@ -1296,10 +1311,11 @@ static void pdgstrs2
 		      &uval[rukp], &incx);
 #elif defined (USE_VENDOR_BLAS)
 		dtrsv_("L", "N", "U", &segsize, &lusup[luptr], &nsupr, 
-		       &uval[rukp], &incx, 1, 1, 1);
-#else
-		dtrsv_("L", "N", "U", &segsize, &lusup[luptr], &nsupr, 
 		       &uval[rukp], &incx);
+#else
+		hypre_F90_NAME_BLAS(dtrsv,DTRSV)("L", "N", "U", &segsize, 
+                       &lusup[luptr], &nsupr, 
+		       &uval[rukp], &incx, 1, 1, 1);
 #endif
 		stat->ops[FACT] += segsize * (segsize + 1);
 		rukp += segsize;

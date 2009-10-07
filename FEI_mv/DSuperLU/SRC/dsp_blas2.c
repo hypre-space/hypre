@@ -12,6 +12,9 @@
 
 #include "superlu_ddefs.h"
 
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
 
 /* 
  * Function prototypes 
@@ -259,7 +262,8 @@ sp_dtrsv_dist(char *uplo, char *trans, char *diag, SuperMatrix *L,
 			&x[fsupc], &incx, 1, 1, 1);
 #endif
 #else
-		    dtrsv_("L", "T", "U", &nsupc, &Lval[luptr], &nsupr,
+		    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("L", "T", "U", 
+                        &nsupc, &Lval[luptr], &nsupr,
 			&x[fsupc], &incx);
 #endif
 		}
@@ -299,7 +303,8 @@ sp_dtrsv_dist(char *uplo, char *trans, char *diag, SuperMatrix *L,
 			    &x[fsupc], &incx, 1, 1, 1);
 #endif
 #else
-		    dtrsv_("U", "T", "N", &nsupc, &Lval[luptr], &nsupr,
+		    hypre_F90_NAME_BLAS(dtrsv,DTRSV)("U", "T", "N", 
+                            &nsupc, &Lval[luptr], &nsupr,
 			    &x[fsupc], &incx);
 #endif
 		}

@@ -9,6 +9,10 @@
 
 #include "superlu_ddefs.h"
 
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
+
 #define ISEND_IRECV
 
 /*
@@ -591,10 +595,11 @@ pdgstrs(int_t n, LUstruct_t *LUstruct,
 		      lusup, &nsupr, &x[ii], &knsupc);
 #elif defined (USE_VENDOR_BLAS)
 		dtrsm_("L", "L", "N", "U", &knsupc, &nrhs, &alpha, 
-		       lusup, &nsupr, &x[ii], &knsupc, 1, 1, 1, 1);
-#else
-		dtrsm_("L", "L", "N", "U", &knsupc, &nrhs, &alpha, 
 		       lusup, &nsupr, &x[ii], &knsupc);
+#else
+		hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "L", "N", "U", 
+                       &knsupc, &nrhs, &alpha, 
+		       lusup, &nsupr, &x[ii], &knsupc, 1, 1, 1, 1);
 #endif
 		stat->ops[SOLVE] += knsupc * (knsupc - 1) * nrhs;
 		--nleaf;
@@ -707,10 +712,11 @@ pdgstrs(int_t n, LUstruct_t *LUstruct,
 			lusup, &nsupr, &x[ii], &knsupc);
 #elif defined (USE_VENDOR_BLAS)
 		  dtrsm_("L", "L", "N", "U", &knsupc, &nrhs, &alpha, 
-			 lusup, &nsupr, &x[ii], &knsupc, 1, 1, 1, 1);
-#else
-		  dtrsm_("L", "L", "N", "U", &knsupc, &nrhs, &alpha, 
 			 lusup, &nsupr, &x[ii], &knsupc);
+#else
+		  hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "L", "N", "U", 
+                         &knsupc, &nrhs, &alpha, 
+			 lusup, &nsupr, &x[ii], &knsupc, 1, 1, 1, 1);
 #endif
 		  stat->ops[SOLVE] += knsupc * (knsupc - 1) * nrhs;
 #if ( DEBUGlevel>=2 )
@@ -979,10 +985,11 @@ pdgstrs(int_t n, LUstruct_t *LUstruct,
 		      lusup, &nsupr, &x[ii], &knsupc);
 #elif defined (USE_VENDOR_BLAS)
 		dtrsm_("L", "U", "N", "N", &knsupc, &nrhs, &alpha, 
-		       lusup, &nsupr, &x[ii], &knsupc, 1, 1, 1, 1);
-#else
-		dtrsm_("L", "U", "N", "N", &knsupc, &nrhs, &alpha, 
 		       lusup, &nsupr, &x[ii], &knsupc);
+#else
+		hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "U", "N", "N", 
+                       &knsupc, &nrhs, &alpha, 
+		       lusup, &nsupr, &x[ii], &knsupc, 1, 1, 1, 1);
 #endif
 		stat->ops[SOLVE] += knsupc * (knsupc + 1) * nrhs;
 		--nroot;
@@ -1072,10 +1079,11 @@ pdgstrs(int_t n, LUstruct_t *LUstruct,
 			  lusup, &nsupr, &x[ii], &knsupc);
 #elif defined (USE_VENDOR_BLAS)
 		    dtrsm_("L", "U", "N", "N", &knsupc, &nrhs, &alpha, 
-			   lusup, &nsupr, &x[ii], &knsupc, 1, 1, 1, 1);
-#else
-		    dtrsm_("L", "U", "N", "N", &knsupc, &nrhs, &alpha, 
 			   lusup, &nsupr, &x[ii], &knsupc);
+#else
+		    hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "U", "N", "N", 
+                           &knsupc, &nrhs, &alpha, 
+			   lusup, &nsupr, &x[ii], &knsupc, 1, 1, 1, 1);
 #endif
 		    stat->ops[SOLVE] += knsupc * (knsupc + 1) * nrhs;
 #if ( DEBUGlevel>=2 )

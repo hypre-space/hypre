@@ -12,6 +12,10 @@
 
 #include "superlu_ddefs.h"
 
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
+
 #define ISEND_IRECV
 
 /*
@@ -83,11 +87,11 @@ void dlsum_fmod
 #elif defined (USE_VENDOR_BLAS)
 	dgemm_( "N", "N", &nbrow, &nrhs, &knsupc,
 	       &alpha, &lusup[luptr], &nsupr, xk,
-	       &knsupc, &beta, rtemp, &nbrow, 1, 1 );
-#else
-	dgemm_( "N", "N", &nbrow, &nrhs, &knsupc,
-	       &alpha, &lusup[luptr], &nsupr, xk,
 	       &knsupc, &beta, rtemp, &nbrow );
+#else
+	hypre_F90_NAME_BLAS(dgemm,DGEMM)( "N", "N", &nbrow, &nrhs, &knsupc,
+	       &alpha, &lusup[luptr], &nsupr, xk,
+	       &knsupc, &beta, rtemp, &nbrow, 1, 1 );
 #endif
 	stat->ops[SOLVE] += 2 * nbrow * nrhs * knsupc + nbrow * nrhs;
    
@@ -141,10 +145,11 @@ void dlsum_fmod
 			  lusup1, &nsupr1, &x[ii], &iknsupc);
 #elif defined (USE_VENDOR_BLAS)
 		    dtrsm_("L", "L", "N", "U", &iknsupc, &nrhs, &alpha, 
-			   lusup1, &nsupr1, &x[ii], &iknsupc, 1, 1, 1, 1);
-#else
-		    dtrsm_("L", "L", "N", "U", &iknsupc, &nrhs, &alpha, 
 			   lusup1, &nsupr1, &x[ii], &iknsupc);
+#else
+		    hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "L", "N", "U", 
+                           &iknsupc, &nrhs, &alpha, 
+			   lusup1, &nsupr1, &x[ii], &iknsupc, 1, 1, 1, 1);
 #endif
 		    stat->ops[SOLVE] += iknsupc * (iknsupc - 1) * nrhs;
 #if ( DEBUGlevel>=2 )
@@ -307,7 +312,8 @@ void dlsum_bmod
 		    dtrsm_("L", "U", "N", "N", &iknsupc, &nrhs, &alpha, 
 			   lusup, &nsupr, &x[ii], &iknsupc, 1, 1, 1, 1);
 #else
-		    dtrsm_("L", "U", "N", "N", &iknsupc, &nrhs, &alpha, 
+		    hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "U", "N", "N", 
+                           &iknsupc, &nrhs, &alpha, 
 			   lusup, &nsupr, &x[ii], &iknsupc);
 #endif
 		    stat->ops[SOLVE] += iknsupc * (iknsupc + 1) * nrhs;
