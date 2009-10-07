@@ -42,7 +42,6 @@
 // -------------------------------------------------------------------------
 
 #include "HYPRE_FEI_includes.h"
-#include "HYPRE_SlideReduction.h"
 
 // *************************************************************************
 // local enumerations and defines
@@ -376,7 +375,8 @@ class HYPRE_LinSysCore
    // 'values' list.
    // ----------------------------------------------------------------------
 
-   int formResidual(double* values, int len);
+   int    formResidual(double* values, int len);
+   double HYPRE_LSC_GetRNorm();
 
    // ----------------------------------------------------------------------
    // function for launching the linear solver
@@ -543,6 +543,7 @@ class HYPRE_LinSysCore
    int             **colIndices_;
    double          **colValues_;
    double          truncThresh_;
+   double          rnorm_;
 
    // ----------------------------------------------------------------------
    // matrix and vectors for reduction
@@ -573,6 +574,13 @@ class HYPRE_LinSysCore
    int             nStored_;
    int             *storedIndices_;
    int             *auxStoredIndices_;
+   int             mRHSFlag_;
+   int             mRHSNumGEqns_;
+   int             *mRHSGEqnIDs_;
+   int             *mRHSNEntries_;
+   int             *mRHSBCType_;
+   int             **mRHSRowInds_;
+   double          **mRHSRowVals_;
 
    // ----------------------------------------------------------------------
    // flags for matrix assembly, various reductions, and projections
@@ -590,7 +598,7 @@ class HYPRE_LinSysCore
    int             projectCurrSize_;
    double          **projectionMatrix_; 
    int             normalEqnFlag_;
-   HYPRE_SlideReduction *slideObj_;
+   void            *slideObj_;
 
    // ----------------------------------------------------------------------
    // variables for slide and Schur reduction
