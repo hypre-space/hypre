@@ -26,12 +26,10 @@
 Version 2.5.0a released, 2009/10/12.
 
 - Added new 2-stage interpolation operators to be used with aggressive
-  coarsening
+  coarsening.
 
 - Added a new routine HYPRE_BoomerAMGSetMaxCoarseSize that allows to set the
-  maximal system size on the coarsest level
-
-- Added a LOBPCG example: /examples/ex11.c
+  maximal system size on the coarsest level.
 
 - Added a "recompute residual" option to PCG which makes it behave like a
   "restarted CG".  This, can be useful in high-accuracy computation where the
@@ -40,10 +38,22 @@ Version 2.5.0a released, 2009/10/12.
 - Added a residual-based stopping criteria in PCG for high-accuracy
   computations.
 
+- Added a Fortran interface for AMS.
+
 - Initial release of a more robust version of AMS for singular problems with
   zero-conductivity regions.  This requires a list of the interior nodes in the
   zero conductivity regions and uses a periodic projection onto a compatible
   subspace.
+
+- Added Distributed SuperLU in the FEI.
+
+- Added support for multiple right-hand-sides in the FEI.
+
+- Added C and Fortran nodal versions of Example 1: ex12.c and ex12f.f.
+
+- Added a LOBPCG example: /examples/ex11.c.
+
+- Removed the make uninstall option.
 
 #====================================
 
