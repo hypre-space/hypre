@@ -50,7 +50,8 @@ USR_FILES =\
 # Targets
 ##################################################################
 
-all: html pdf
+# all: html pdf
+all: pdf
 
 install: all
 	@ \
