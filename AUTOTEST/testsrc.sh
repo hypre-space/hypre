@@ -79,7 +79,14 @@ fi
 rsync -zae "ssh -q" --delete . $machine:$rem_path/$rem_dir/AUTOTEST
 
 # Run the test and copy the results
-ssh -q $machine "cd $rem_path/$rem_dir/AUTOTEST; ./test.sh ${testname}.sh .."
+# Use the '.hyprerc' file when needed to customize the environment
+hyprerc_exists=`ssh -q $machine "( /bin/sh -c '[ -f .hyprerc ] && echo yes' )"`
+if [ "$hyprerc_exists" == "yes" ]
+then
+   ssh -q $machine "source .hyprerc; cd $rem_path/$rem_dir/AUTOTEST; ./test.sh ${testname}.sh .."
+else
+   ssh -q $machine "cd $rem_path/$rem_dir/AUTOTEST; ./test.sh ${testname}.sh .."
+fi
 rm -fr $testname.???
 echo "Copying output files from $machine"
 scp -q -r $machine:$rem_path/$rem_dir/AUTOTEST/$testname.\?\?\? .
