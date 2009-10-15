@@ -70,6 +70,8 @@ typedef struct
    HYPRE_Solver B_G0;
    /* How frequently to project the r.h.s. onto Ker(G0^T)? */
    int projection_frequency;
+   /* Internal counter to use with projection_frequency in PCG */
+   int solve_counter;
 
    /* Solver options */
    int maxit;

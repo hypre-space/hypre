@@ -1807,6 +1807,9 @@ int hypre_AMSSetup(void *solver,
    {
       hypre_ParCSRMatrix *G0t, *Aorig = A;
 
+      /* Make sure that multiple Setup()+Solve() give identical results */
+      ams_data -> solve_counter = 0;
+
       /* Construct the discrete gradient matrix for the zero-conductivity region
          by eliminating the zero-conductivity nodes from G^t */
       hypre_ParCSRMatrixTranspose(ams_data -> G, &G0t, 1);
@@ -2306,9 +2309,6 @@ int hypre_AMSSolve(void *solver,
    HYPRE_Solver Bi[5];
    hypre_ParVector *ri[5], *gi[5];
 
-   /* Use this counter to decide when to project onto Ker(G0^T) */
-   static int solve_counter = 0;
-
    Ai[0] = ams_data -> A_G;   Bi[0] = ams_data -> B_G;   Pi[0] = ams_data -> G;
    Ai[1] = ams_data -> A_Pi;  Bi[1] = ams_data -> B_Pi;  Pi[1] = ams_data -> Pi;
    Ai[2] = ams_data -> A_Pix; Bi[2] = ams_data -> B_Pix; Pi[2] = ams_data -> Pix;
@@ -2327,7 +2327,7 @@ int hypre_AMSSolve(void *solver,
    /* Compatible subspace projection for problems with zero-conductivity regions.
       Note that this modifies the input (r.h.s.) vector b! */
    if ( (ams_data -> B_G0) &&
-        (++solve_counter % ( ams_data -> projection_frequency ) == 0) )
+        (++ams_data->solve_counter % ( ams_data -> projection_frequency ) == 0) )
    {
       /* b = (I - G0 (G0^t G0)^{-1} G0^T) b */
       /* printf("Projecting onto the compatible subspace...\n"); */
