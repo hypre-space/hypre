@@ -21,7 +21,7 @@ remote_dir="hypre/testing"
 cvs_opts=""
 summary_file="SUMMARY.html"
 summary_subject="Autotest Error Summary `date +%Y-%m-%d`"
-email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, lee123@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
+email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, abaker@llnl.gov, chtong@llnl.gov, panayot@llnl.gov"
 
 # Main loop
 test_opts=""
@@ -137,6 +137,23 @@ EOF
             echo "-$testname" >> $summary_file
          done
 
+         # keep a time stamp of last runs and report if more than 10 days
+         echo ""           >> $summary_file;
+         echo "[LAST RUN]" >> $summary_file
+         for test in $( find . -maxdepth 1 -name "autotest-*-done" )
+         do
+            testname=`basename $test -done`
+            testname="${testname#autotest-}"
+            touch $testing_dir/lastrun-$testname
+         done
+         for test in $( find $testing_dir -maxdepth 1 -name "lastrun-*" -atime +10 )
+         do
+            testdate=`ls -l $test | awk '{print $6" "$7" "$8}'`
+            testname=`basename $test`
+            testname="${testname#lastrun-}"
+            echo "-$testname  $testdate" >> $summary_file
+         done
+
          # list all non-empty error files in todays output directory
          echo ""              >> $summary_file;
          echo "[ERROR FILES]" >> $summary_file
@@ -220,7 +237,7 @@ done
 # Fix permissions
 cd $testing_dir
 ch_dirs="linear_solvers $autotest_dir $finished_dir $output_dir"
-for dir in $ch_dirs
+for dir in $ch_dirs lastrun-*
 do
    if [ -e $dir ]; then
       chmod -fR a+rX,ug+w,o-w $dir
