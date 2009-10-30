@@ -52,58 +52,18 @@ int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
 	 relax_points[0] = -1;
 	 relax_points[1] = 1;
       }
-/*      if (relax_type == 6)
-      {
+
+      for (i=0; i < 2; i++)
          Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            3,
-                                            relax_points[0],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-         Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            4,
-                                            relax_points[0],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-         Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            4,
-                                            relax_points[1],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-         Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            3,
-                                            relax_points[1],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-      }
-      else */
-      {
-         for (i=0; i < 2; i++)
-            Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            relax_type,
-                                            relax_points[i],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-      }
+                                               f,
+                                               cf_marker,
+                                               relax_type,
+                                               relax_points[i],
+                                               relax_weight,
+                                               omega,
+                                               u,
+                                               Vtemp); 
+      
    }
    else
    {
@@ -120,3 +80,5 @@ int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
 
    return Solve_err_flag;
 }
+
+
