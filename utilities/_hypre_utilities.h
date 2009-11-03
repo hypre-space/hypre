@@ -531,10 +531,12 @@ int MPI_Irsend( void *buf , int count , MPI_Datatype datatype , int dest , int t
 #if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
 
 int hypre_NumThreads( void );
+int hypre_GetThreadNum( void );
 
 #else
 
 #define hypre_NumThreads() 1
+#define hypre_GetThreadNum() 0
 
 #endif
 

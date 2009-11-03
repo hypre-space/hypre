@@ -34,6 +34,28 @@ hypre_NumThreads( )
    return num_threads;
 }
 
+
+
+/* This next function must be called from within a 
+parallel region! */
+
+int
+hypre_GetThreadNum( )
+{
+   int my_thread_num;
+
+#ifdef HYPRE_USING_OPENMP
+   my_thread_num = omp_get_thread_num();
+#endif
+#ifdef HYPRE_USING_PGCC_SMP
+   /* THIS NEEDS TO BE FIXED */
+   my_thread_num = 0;
+#endif
+
+   return my_thread_num;
+}
+
+
 #endif
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
