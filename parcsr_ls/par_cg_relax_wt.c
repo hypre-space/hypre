@@ -49,6 +49,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    hypre_ParVector    *Ptemp;
    hypre_ParVector    *Rtemp;
    hypre_ParVector    *Ztemp;
+   hypre_ParVector    *Qtemp = NULL;
 
    int     *CF_marker = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
    double   *Ptemp_data;
@@ -93,6 +94,11 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    double   *S_vec;
 #endif
    
+   int num_threads;
+
+   num_threads = hypre_NumThreads();
+
+
    /* Acquire data and allocate storage */
 
    tridiag  = hypre_CTAlloc(double, num_cg_sweeps+1);
@@ -122,6 +128,17 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
                                  hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Ztemp);
    hypre_ParVectorSetPartitioningOwner(Ztemp,0);
+
+   if (num_threads > 1)
+   {
+      
+      Qtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                    hypre_ParCSRMatrixGlobalNumRows(A),
+                                    hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(Qtemp);
+      hypre_ParVectorSetPartitioningOwner(Qtemp,0);
+      
+   }
 
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
    smooth_type         = hypre_ParAMGDataSmoothType(amg_data);
@@ -228,14 +245,15 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 	 else
 	 {
             Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                         Rtemp,
-                                         CF_marker,
-                                         relax_type,
-                                         0,
-                                         1.0,
-                                         1.0,
-                                         Ztemp,
-                                         Vtemp);
+                                                  Rtemp,
+                                                  CF_marker,
+                                                  relax_type,
+                                                  0,
+                                                  1.0,
+                                                  1.0,
+                                                  Ztemp,
+                                                  Vtemp, 
+                                                  Qtemp);
 	 }
  
          if (Solve_err_flag != 0)
@@ -317,6 +335,10 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    hypre_ParVectorDestroy(Ztemp);
    hypre_ParVectorDestroy(Ptemp);
    hypre_ParVectorDestroy(Rtemp);
+
+   if (num_threads > 1)
+      hypre_ParVectorDestroy(Qtemp);
+
    hypre_TFree(tridiag);
    hypre_TFree(trioffd);
 

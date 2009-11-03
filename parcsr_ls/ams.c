@@ -49,7 +49,9 @@ int hypre_ParCSRRelax(/* matrix to relax with */
                       /* initial/updated approximation */
                       hypre_ParVector *u,
                       /* temporary vector */
-                      hypre_ParVector *v)
+                      hypre_ParVector *v,
+                      /* temporary vector */
+                      hypre_ParVector *z )
 {
    int sweep;
 
@@ -304,7 +306,7 @@ int hypre_ParCSRRelax(/* matrix to relax with */
       else /* call BoomerAMG relaxation */
       {
          hypre_BoomerAMGRelax(A, f, NULL, abs(relax_type), 0,
-                              relax_weight, omega, u, v);
+                              relax_weight, omega, u, v, z);
       }
    }
    return hypre_error_flag;
@@ -2309,6 +2311,9 @@ int hypre_AMSSolve(void *solver,
    HYPRE_Solver Bi[5];
    hypre_ParVector *ri[5], *gi[5];
 
+   hypre_ParVector *z = NULL;
+
+
    Ai[0] = ams_data -> A_G;   Bi[0] = ams_data -> B_G;   Pi[0] = ams_data -> G;
    Ai[1] = ams_data -> A_Pi;  Bi[1] = ams_data -> B_Pi;  Pi[1] = ams_data -> Pi;
    Ai[2] = ams_data -> A_Pix; Bi[2] = ams_data -> B_Pix; Pi[2] = ams_data -> Pix;
@@ -2321,6 +2326,17 @@ int hypre_AMSSolve(void *solver,
    ri[3] = ams_data -> r1;    gi[3] = ams_data -> g1;
    ri[4] = ams_data -> r1;    gi[4] = ams_data -> g1;
 
+   /* create an additional temporary vector for relaxation */
+   if (hypre_NumThreads() > 1)
+   {
+      z = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(z);
+      hypre_ParVectorSetPartitioningOwner(z,0);
+   }
+   
+         
    if (ams_data -> print_level > 0)
       MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
 
@@ -2458,7 +2474,8 @@ int hypre_AMSSolve(void *solver,
                                b, x,
                                ams_data -> r0,
                                ams_data -> g0,
-                               cycle);
+                               cycle,
+                               z);
 
       /* Compute new residual norms */
       if (ams_data -> maxit > 1)
@@ -2492,6 +2509,9 @@ int hypre_AMSSolve(void *solver,
 
    if (ams_data -> num_iterations == ams_data -> maxit && ams_data -> tol > 0.0)
       hypre_error(HYPRE_ERROR_CONV);
+
+   if (z)
+      hypre_ParVectorDestroy(z);
 
    return hypre_error_flag;
 }
@@ -2534,7 +2554,9 @@ int hypre_ParCSRSubspacePrec(/* fine space matrix */
                              hypre_ParVector *r0,
                              /* temporary vector */
                              hypre_ParVector *g0,
-                             char *cycle)
+                             char *cycle,
+                             /* temporary vector */
+                             hypre_ParVector *z)
 {
    char *op;
    int use_saved_residual = 0;
@@ -2568,7 +2590,7 @@ int hypre_ParCSRSubspacePrec(/* fine space matrix */
                            A0_l1_norms,
                            A0_relax_weight,
                            A0_omega,
-                           y, g0);
+                           y, g0, z);
       }
 
       /* subspace correction: y += P B^{-1} P^t r */

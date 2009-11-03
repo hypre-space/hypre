@@ -28,14 +28,15 @@
  *--------------------------------------------------------------------------*/
 
 int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
-                        hypre_ParVector    *f,
-                        int                *cf_marker,
-                        int                 relax_type,
-                        int                 relax_points,
-                        double              relax_weight,
-                        double              omega,
-                        hypre_ParVector    *u,
-                        hypre_ParVector    *Vtemp )
+                           hypre_ParVector    *f,
+                           int                *cf_marker,
+                           int                 relax_type,
+                           int                 relax_points,
+                           double              relax_weight,
+                           double              omega,
+                           hypre_ParVector    *u,
+                           hypre_ParVector    *Vtemp,
+                           hypre_ParVector    *Ztemp )
 {
    MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -65,6 +66,9 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    double 	  *Vext_data;
    double 	  *v_buf_data;
    double 	  *tmp_data;
+
+   hypre_Vector   *Ztemp_local;
+   double         *Ztemp_data;
 
    hypre_CSRMatrix *A_CSR;
    int		   *A_CSR_i;   
@@ -357,39 +361,45 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                          Gauss-Seidel on-processor       
                          (forward loop) */
       {
-	if (num_procs > 1)
-	{
-   	  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   	  v_buf_data = hypre_CTAlloc(double, 
-			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
-	  Vext_data = hypre_CTAlloc(double,num_cols_offd);
-        
-	  if (num_cols_offd)
-	  {
-		A_offd_j = hypre_CSRMatrixJ(A_offd);
-		A_offd_data = hypre_CSRMatrixData(A_offd);
-	  }
- 
-   	  index = 0;
-   	  for (i = 0; i < num_sends; i++)
-   	  {
-        	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-        	for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
-                	v_buf_data[index++] 
-                 	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-   	  }
- 
-   	  comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
-        	Vext_data);
+         Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
+         Ztemp_data = hypre_VectorData(Ztemp_local);
 
-          /*-----------------------------------------------------------------
-           * Copy current approximation into temporary vector.
-           *-----------------------------------------------------------------*/
-   	  hypre_ParCSRCommHandleDestroy(comm_handle);
-          comm_handle = NULL;
-	}
+         
+         if (num_procs > 1)
+         {
+            num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+            
+            v_buf_data = hypre_CTAlloc(double, 
+                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+            
+            Vext_data = hypre_CTAlloc(double,num_cols_offd);
+            
+            if (num_cols_offd)
+            {
+               A_offd_j = hypre_CSRMatrixJ(A_offd);
+               A_offd_data = hypre_CSRMatrixData(A_offd);
+            }
+            
+            index = 0;
+            for (i = 0; i < num_sends; i++)
+            {
+               start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
+                  v_buf_data[index++] 
+                     = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+            }
+            
+            comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
+                                                        Vext_data);
+            
+            /*-----------------------------------------------------------------
+             * Copy current approximation into temporary vector.
+             *-----------------------------------------------------------------*/
+            hypre_ParCSRCommHandleDestroy(comm_handle);
+            comm_handle = NULL;
+         }
 
         /*-----------------------------------------------------------------
          * Relax all points.
@@ -401,7 +411,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
           {
-	   tmp_data = hypre_CTAlloc(double,n);
+	   tmp_data = Ztemp_data;
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
@@ -449,7 +459,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }
            }
-           hypre_TFree(tmp_data);
+
           }
 	  else
           {
@@ -487,7 +497,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
 	  {
-	   tmp_data = hypre_CTAlloc(double,n);
+             tmp_data = Ztemp_data;
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
@@ -537,7 +547,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
            }     
-	   hypre_TFree(tmp_data);
+
 	  }
 	  else
 	  {
@@ -583,7 +593,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
           {
-	   tmp_data = hypre_CTAlloc(double,n);
+             tmp_data = Ztemp_data;
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
@@ -640,7 +650,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }
            }
-           hypre_TFree(tmp_data);
+
           }
 	  else
           {
@@ -685,7 +695,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
 	  {
-	   tmp_data = hypre_CTAlloc(double,n);
+             tmp_data = Ztemp_data;
+
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
@@ -744,7 +755,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
            }     
-	  hypre_TFree(tmp_data);
+
+           
 	  }
 	  else
 	  {
@@ -1248,6 +1260,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                   u_data[i] = res / A_diag_data[A_diag_i[i]];
                }
             }
+          
           }
          }
 
@@ -1309,7 +1322,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
            }     
-	  hypre_TFree(tmp_data);
+           hypre_TFree(tmp_data);
+           
 	  }
 	  else
 	  {
@@ -1413,6 +1427,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             }
            }
            hypre_TFree(tmp_data);
+           
           }
 	  else
           {
@@ -1516,7 +1531,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
            }     
-	  hypre_TFree(tmp_data);
+           hypre_TFree(tmp_data);
 	  }
 	  else
 	  {
@@ -1568,6 +1583,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                          Symm. Gauss-Seidel/ SSOR on-processor
 			with outer relaxation parameter */
       {
+
+         Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
+         Ztemp_data = hypre_VectorData(Ztemp_local);
+
          /*-----------------------------------------------------------------
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
@@ -1615,7 +1634,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
           {
-	   tmp_data = hypre_CTAlloc(double,n);
+             tmp_data = Ztemp_data;
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
@@ -1693,7 +1712,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }
            }
-           hypre_TFree(tmp_data);
+
           }
 	  else
           {
@@ -1754,7 +1773,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
 	  {
-	   tmp_data = hypre_CTAlloc(double,n);
+             tmp_data = Ztemp_data;
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
@@ -1836,7 +1855,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
            }     
-	  hypre_TFree(tmp_data);
+
 	  }
 	  else
 	  {
@@ -1908,7 +1927,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
           {
-	   tmp_data = hypre_CTAlloc(double,n);
+             tmp_data = Ztemp_data;
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
@@ -2000,7 +2019,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }
            }
-           hypre_TFree(tmp_data);
+
           }
 	  else
           {
@@ -2075,7 +2094,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
 	  {
-	   tmp_data = hypre_CTAlloc(double,n);
+             tmp_data = Ztemp_data;
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
@@ -2171,7 +2190,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
            }     
-	  hypre_TFree(tmp_data);
+
 	  }
 	  else
 	  {

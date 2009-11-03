@@ -468,6 +468,8 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    hypre_ParVector *Temp;
    hypre_ParVector *U;
 
+   hypre_ParVector    *Qtemp = NULL;
+
    int    i;
    int    n = hypre_ParCSRMatrixGlobalNumRows(A);
    int    n_local = hypre_CSRMatrixNumRows(A_diag);
@@ -485,6 +487,9 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    HYPRE_Solver *smoother;
 
    int debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
+   int num_threads;
+
+   num_threads = hypre_NumThreads();
 
    if (!comm_pkg)
    {
@@ -530,6 +535,19 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    hypre_ParVectorInitialize(U);
    datax = hypre_VectorData(hypre_ParVectorLocalVector(U));
 
+
+   if (num_threads > 1)
+   {
+      Qtemp = hypre_ParVectorCreate(comm, n, starts);
+      hypre_ParVectorInitialize(Qtemp);
+      hypre_ParVectorSetPartitioningOwner(Qtemp,0);
+   }
+
+
+
+
+
+
    /* allocate space for the vectors */
    bp = hypre_CTAlloc(double, nsamples*n_local);
    p = bp;
@@ -553,7 +571,8 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
 	   {
               ret = hypre_BoomerAMGRelax(A, Zero, NULL /*CFmarker*/,
                 rlx_type , 0 /*rel pts*/, 1.0 /*weight*/, 
-		1.0 /*omega*/, U, Temp);
+                                         1.0 /*omega*/, U, Temp, 
+                                         Qtemp);
               hypre_assert(ret == 0);
 	   }
        }
@@ -566,6 +585,8 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    hypre_ParVectorDestroy(Zero);
    hypre_ParVectorDestroy(Temp);
    hypre_ParVectorDestroy(U);
+   if (num_threads > 1)
+      hypre_ParVectorDestroy(Qtemp);
 
    *SmoothVecs_p = bp;
 

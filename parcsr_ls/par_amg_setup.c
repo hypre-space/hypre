@@ -114,7 +114,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       Setup_err_flag = 0;
    int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
    int       j, k;
-   int       num_procs,my_id;
+   int       num_procs,my_id, num_threads;
    int      *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
    int       num_functions = hypre_ParAMGDataNumFunctions(amg_data);
    int       nodal = hypre_ParAMGDataNodal(amg_data);
@@ -155,6 +155,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
+
+   num_threads = hypre_NumThreads();
+
 
    old_num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
@@ -428,17 +431,38 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParVectorSetPartitioningOwner(Rtemp,0);
       hypre_ParAMGDataRtemp(amg_data) = Rtemp;
    }
+  
    if ((smooth_num_levels > 0 && smooth_type > 6)
 		 || relax_weight[0] < 0 || omega[0] < 0 ||
-                hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0)
+                 hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0)
    {
       Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
-                                 hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                 hypre_ParCSRMatrixRowStarts(A_array[0]));
+                                    hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                    hypre_ParCSRMatrixRowStarts(A_array[0]));
       hypre_ParVectorInitialize(Ztemp);
       hypre_ParVectorSetPartitioningOwner(Ztemp,0);
       hypre_ParAMGDataZtemp(amg_data) = Ztemp;
    }
+   else if (num_threads > 1)
+   {
+      /* we need the temp Z vector for relaxation 3 and 6 now if we are
+       * using threading */
+      for (j = 0; j < 4; j++)
+      {
+         if (grid_relax_type[j] ==3 || grid_relax_type[j] == 6)
+         {
+            Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                                          hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                          hypre_ParCSRMatrixRowStarts(A_array[0]));
+            hypre_ParVectorInitialize(Ztemp);
+            hypre_ParVectorSetPartitioningOwner(Ztemp,0);
+            hypre_ParAMGDataZtemp(amg_data) = Ztemp;
+            break;
+         }
+      }
+   }
+
+
    F_array = hypre_ParAMGDataFArray(amg_data);
    U_array = hypre_ParAMGDataUArray(amg_data);
 

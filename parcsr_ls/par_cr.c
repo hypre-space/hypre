@@ -2630,7 +2630,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    int              coarse_size;
    int              ierr = 0;
    int 		    i,j, jj, j2, nstages=0;  
-   int              num_procs, my_id;
+   int              num_procs, my_id, num_threads;
    int              num_nodes;
    double 	    rho,rho0,rho1,*e0,*e1, *sum;
    double           *e2;
@@ -2640,8 +2640,16 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    /*double thresh=1-rho;*/
    double thresh=0.5;
 
+   hypre_ParVector    *Relax_temp = NULL;
+
+
+
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
+   
+   num_threads = hypre_NumThreads();
+
+
    if (AN) AN_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AN));
    if (AN) AN_offd_i     = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AN));
 
@@ -2714,6 +2722,15 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    hypre_ParVectorInitialize(Rtemp);
    hypre_ParVectorSetPartitioningOwner(Rtemp,0);
    Rtemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Rtemp));
+
+   if (num_threads > 1)
+   {
+      Relax_temp = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
+      hypre_ParVectorInitialize(Relax_temp);
+      hypre_ParVectorSetPartitioningOwner(Relax_temp,0);
+   }
+
+
 
    e0 = hypre_VectorData(hypre_ParVectorLocalVector(e0_vec));
    e1 = hypre_VectorData(hypre_ParVectorLocalVector(e1_vec));
@@ -2799,8 +2816,11 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
          {
             for (j=0; j < num_variables; j++)
  	       if (CF_marker[j] == fpt) e0[j] = e1[j];
-	    hypre_BoomerAMGRelax(A, Vtemp, CF_marker, rlx_type, fpt,
-		relax_weight, omega, e1_vec, e0_vec);
+	    hypre_BoomerAMGRelax(A, Vtemp, CF_marker, 
+                                 rlx_type, fpt,
+                                 relax_weight, omega, 
+                                 e1_vec, e0_vec, 
+                                 Relax_temp);
             if (i==1)
             {
                for (j=0; j < num_variables; j++)
@@ -3033,6 +3053,11 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    hypre_ParVectorDestroy(Qtemp);
    hypre_ParVectorDestroy(Rtemp);
    hypre_ParVectorDestroy(Ztemp);
+
+   if (num_threads > 1)
+       hypre_ParVectorDestroy(Relax_temp);
+
+
 
    if (my_id == 0) fprintf(stdout,"\n... Done \n\n");
    coarse_size = 0;
