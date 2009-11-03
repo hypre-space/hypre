@@ -300,7 +300,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    int      ierr = 0;
 
    size *=hypre_VectorNumVectors(x);
-
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < size; i++)
       y_data[i] = x_data[i];
 
@@ -443,6 +444,10 @@ double hypre_VectorSumElts( hypre_Vector *vector )
    int size = hypre_VectorSize( vector );
    int i;
 
+#define HYPRE_SMP_PRIVATE i
+#define HYPRE_SMP_REDUCTION_OP +
+#define HYPRE_SMP_REDUCTION_VARS sum
+#include "../utilities/hypre_smp_forloop.h"
    for ( i=0; i<size; ++i ) sum += data[i];
 
    return sum;
