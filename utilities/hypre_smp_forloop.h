@@ -24,7 +24,7 @@
 #ifdef HYPRE_USING_OPENMP
 
 #ifndef HYPRE_SMP_REDUCTION_OP
-#ifndef HYPRE_SMP_REGION
+#ifndef HYPRE_SMP_PAR_REGION
 #ifndef HYPRE_SMP_FOR
 #pragma omp parallel for private(HYPRE_SMP_PRIVATE) schedule(static)
 #endif
