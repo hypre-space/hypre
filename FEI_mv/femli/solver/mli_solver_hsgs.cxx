@@ -71,6 +71,8 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    int                relaxType=6, relaxPts=0, iS;
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *f, *u, *vTemp;
+   hypre_ParVector    *zTemp = NULL;
+   
    //int              mypid;
    //double           rnorm;
    //MPI_Comm         comm;
@@ -83,12 +85,25 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    u     = (hypre_ParVector *) uIn->getVector();
    f     = (hypre_ParVector *) fIn->getVector();
    vTemp = (hypre_ParVector *) mliVec_->getVector();
+
+   /* AB: need an extra vector for threading */
+   if (hypre_NumThreads() > 1)
+   {
+      zTemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                    hypre_ParCSRMatrixGlobalNumRows(A),
+                                    hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(zTemp);
+      hypre_ParVectorSetPartitioningOwner(zTemp,0);
+   }
+
+
+
    //comm  = hypre_ParCSRMatrixComm(A);
    //MPI_Comm_rank(comm, &mypid);
    for (iS = 0; iS < nSweeps_; iS++)
    {
       hypre_BoomerAMGRelax(A,f,NULL,relaxType,relaxPts,relaxWeights_,
-                           relaxOmega_,u,vTemp);
+                           relaxOmega_,u,vTemp, zTemp);
       //hypre_ParVectorCopy( f, vTemp );
       //hypre_ParCSRMatrixMatvec( -1.0, A, u, 1.0, vTemp );
       //rnorm = sqrt(hypre_ParVectorInnerProd( vTemp, vTemp ));
@@ -96,6 +111,10 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
       //   printf("\tMLI_Solver_HSGS iter = %4d, rnorm = %e (omega=%e)\n", 
       //             iS, rnorm, relaxWeights_);
    }
+
+   if (zTemp)
+      hypre_ParVectorDestroy(zTemp);
+
    return 0;
 }
 

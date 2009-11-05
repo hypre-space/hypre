@@ -89,6 +89,22 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
 
    int                    ierr= 0;
 
+   
+   /* added for the relaxation routines */
+   hypre_ParVector *ze = NULL;
+   
+   if (hypre_NumThreads() > 1)
+   {
+      /* Aee is always bigger than Ann */
+
+      ze = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[0]),
+                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
+                                hypre_ParCSRMatrixRowStarts(Aee_l[0]));
+      hypre_ParVectorInitialize(ze);
+      hypre_ParVectorSetPartitioningOwner(ze,0);
+
+   }
+
    hypre_BeginTiming(maxwell_data-> time_index);
 
    hypre_SStructVectorConvert(f, &f_edge);
@@ -196,15 +212,16 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
           for (j= 0; j< npre_relax; j++)
           {
              Solve_err_flag = hypre_BoomerAMGRelaxIF(Ann_l[level],
-                                            bn_l[level],
-                                            nCF_marker_l[level],
-                                            nrelax_type,
-                                            relax_local,
-                                            cycle_param,
-                                            nrelax_weight[level],
-                                            nomega[level],
-                                            xn_l[level],
-                                            nVtemp2_l[level]);
+                                                     bn_l[level],
+                                                     nCF_marker_l[level],
+                                                     nrelax_type,
+                                                     relax_local,
+                                                     cycle_param,
+                                                     nrelax_weight[level],
+                                                     nomega[level],
+                                                     xn_l[level],
+                                                     nVtemp2_l[level],
+                                                     ze);
           }  /*for (j= 0; j< npre_relax; j++) */
 
          /* compute residuals */
@@ -224,15 +241,16 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
       /* coarsest node solve */
       level= node_numlevs-1;
       Solve_err_flag = hypre_BoomerAMGRelaxIF(Ann_l[level],
-                                            bn_l[level],
-                                            nCF_marker_l[level],
-                                            nrelax_type,
-                                            relax_local,
-                                            cycle_param,
-                                            nrelax_weight[level],
-                                            nomega[level],
-                                            xn_l[level],
-                                            nVtemp2_l[level]);
+                                              bn_l[level],
+                                              nCF_marker_l[level],
+                                              nrelax_type,
+                                              relax_local,
+                                              cycle_param,
+                                              nrelax_weight[level],
+                                              nomega[level],
+                                              xn_l[level],
+                                              nVtemp2_l[level],
+                                              ze);
 
      /*---------------------------------------------------------------------
       *  Cycle up the levels.
@@ -247,15 +265,16 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
           for (j= 0; j< npost_relax; j++)
           {
              Solve_err_flag = hypre_BoomerAMGRelaxIF(Ann_l[level],
-                                            bn_l[level],
-                                            nCF_marker_l[level],
-                                            nrelax_type,
-                                            relax_local,
-                                            cycle_param,
-                                            nrelax_weight[level],
-                                            nomega[level],
-                                            xn_l[level],
-                                            nVtemp2_l[level]);
+                                                     bn_l[level],
+                                                     nCF_marker_l[level],
+                                                     nrelax_type,
+                                                     relax_local,
+                                                     cycle_param,
+                                                     nrelax_weight[level],
+                                                     nomega[level],
+                                                     xn_l[level],
+                                                     nVtemp2_l[level],
+                                                     ze);
           }
       }   /* for (level= (en_numlevs - 2); level>= 1; level--) */
 
@@ -266,15 +285,16 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
       for (j= 0; j< npost_relax; j++)
       {
          Solve_err_flag = hypre_BoomerAMGRelaxIF(Ann_l[0],
-                                            bn_l[0],
-                                            nCF_marker_l[0],
-                                            nrelax_type,
-                                            relax_local,
-                                            cycle_param,
-                                            nrelax_weight[0],
-                                            nomega[0],
-                                            xn_l[0],
-                                            nVtemp2_l[0]);
+                                                 bn_l[0],
+                                                 nCF_marker_l[0],
+                                                 nrelax_type,
+                                                 relax_local,
+                                                 cycle_param,
+                                                 nrelax_weight[0],
+                                                 nomega[0],
+                                                 xn_l[0],
+                                                 nVtemp2_l[0],
+                                                 ze);
       }  /* for (j= 0; j< npost_relax; j++) */
       hypre_ParVectorCopy(bn_l[0], resn_l[0]);
       hypre_ParCSRMatrixMatvec(-1.0, Ann_l[0], xn_l[0], 1.0, resn_l[0]);
@@ -294,15 +314,16 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
           for (j= 0; j< npre_relax; j++)
           {
              Solve_err_flag = hypre_BoomerAMGRelaxIF(Aee_l[level],
-                                            be_l[level],
-                                            eCF_marker_l[level],
-                                            erelax_type,
-                                            relax_local,
-                                            cycle_param,
-                                            erelax_weight[level],
-                                            eomega[level],
-                                            xe_l[level],
-                                            eVtemp2_l[level]);
+                                                     be_l[level],
+                                                     eCF_marker_l[level],
+                                                     erelax_type,
+                                                     relax_local,
+                                                     cycle_param,
+                                                     erelax_weight[level],
+                                                     eomega[level],
+                                                     xe_l[level],
+                                                     eVtemp2_l[level], 
+                                                     ze);
           }  /*for (j= 0; j< npre_relax; j++) */
                                                                                                               
          /* compute residuals */
@@ -327,15 +348,16 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
       for (j= 0; j< npre_relax; j++)
       {
          Solve_err_flag = hypre_BoomerAMGRelaxIF(Aee_l[level],
-                                              be_l[level],
-                                              eCF_marker_l[level],
-                                              erelax_type,
-                                              relax_local,
-                                              cycle_param,
-                                              erelax_weight[level],
-                                              eomega[level],
-                                              xe_l[level],
-                                              eVtemp2_l[level]);
+                                                 be_l[level],
+                                                 eCF_marker_l[level],
+                                                 erelax_type,
+                                                 relax_local,
+                                                 cycle_param,
+                                                 erelax_weight[level],
+                                                 eomega[level],
+                                                 xe_l[level],
+                                                 eVtemp2_l[level], 
+                                                 ze);
       }
 
      /*---------------------------------------------------------------------
@@ -362,7 +384,8 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
                                                     erelax_weight[level],
                                                     eomega[level],
                                                     xe_l[level],
-                                                    eVtemp2_l[level]);
+                                                    eVtemp2_l[level], 
+                                                    ze);
          }
 
       }  /* for (level= (edge_numlevs - 2); level>= 1; level--) */
@@ -386,7 +409,8 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
                                                  erelax_weight[0],
                                                  eomega[0],
                                                  xe_l[0],
-                                                 eVtemp2_l[0]);
+                                                 eVtemp2_l[0],
+                                                 ze);
       }  /* for (j= 0; j< npost_relax; j++) */
 
       e_dot_e= hypre_ParVectorInnerProd(ee_l[0], ee_l[0]);
@@ -399,6 +423,10 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
    }
 
    hypre_EndTiming(maxwell_data -> time_index);
+
+
+   if (ze)
+      hypre_ParVectorDestroy(ze);
 
    return ierr;
 }
