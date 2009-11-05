@@ -92,7 +92,7 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
    
    /* added for the relaxation routines */
    hypre_ParVector *ze = NULL;
-   
+
    if (hypre_NumThreads() > 1)
    {
       /* Aee is always bigger than Ann */

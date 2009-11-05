@@ -96,15 +96,11 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
 
 
    /* added for the relaxation routines */
-   hypre_ParVector *ze = NULL, *zn = NULL;
+   hypre_ParVector *ze = NULL;
    
-   if (hypre_NumThreads() > 1)
+ if (hypre_NumThreads() > 1)
    {
-      zn = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Ann_l[0]),
-                                hypre_ParCSRMatrixGlobalNumRows(Ann_l[0]),
-                                hypre_ParCSRMatrixRowStarts(Ann_l[0]));
-      hypre_ParVectorInitialize(zn);
-      hypre_ParVectorSetPartitioningOwner(zn,0);
+     /* Aee is always bigger than Ann */
 
       ze = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[0]),
                                 hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
@@ -113,7 +109,6 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
       hypre_ParVectorSetPartitioningOwner(ze,0);
 
    }
-   
 
    hypre_BeginTiming(maxwell_data-> time_index);
 
@@ -203,7 +198,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                 nomega[0],
                                                 xn_l[0],
                                                 nVtemp2_l[0], 
-                                                zn);
+                                                ze);
 
         /* update edge right-hand fe_l= fe_l-Aen_l*xn_l[0] */
         hypre_ParVectorCopy(be_l[0], eVtemp_l[0]);
@@ -307,7 +302,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                      nomega[level],
                                                      xn_l[level],
                                                      nVtemp2_l[level], 
-                                                     zn);
+                                                     ze);
 
             /* update edge right-hand fe_l= fe_l-Aen_l*xn_l[level] */
              hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
@@ -391,7 +386,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                      nomega[level],
                                                      xn_l[level],
                                                      nVtemp2_l[level],
-                                                     zn);
+                                                     ze);
 
             /* update edge right-hand fe_l= fe_l-Aen_l*xn_l[level] */
              hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
@@ -427,7 +422,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                  nomega[level],
                                                  xn_l[level],
                                                  nVtemp2_l[level],
-                                                 zn);
+                                                 ze);
 
           hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
           hypre_ParCSRMatrixMatvec(-1.0, Aen_l[level], xn_l[level], 
@@ -537,7 +532,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                        nomega[level],
                                                        xn_l[level],
                                                        nVtemp2_l[level],
-                                                       zn);
+                                                       ze);
              }                                                                                                            
 
              /* compute residuals and restrict */
@@ -562,7 +557,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                   nomega[level],
                                                   xn_l[level],
                                                   nVtemp2_l[level], 
-                                                  zn);
+                                                  ze);
       }   /* else if (node_numlevs > en_numlevs) */
 
       /*---------------------------------------------------------------------
@@ -620,7 +615,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                         nomega[level],
                                                         xn_l[level],
                                                         nVtemp2_l[level], 
-                                                        zn);
+                                                        ze);
              }
 
          }   /* for (level= (node_numlevs - 2); level>= en_numlevs; level--) */
@@ -658,7 +653,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                      nomega[level],
                                                      xn_l[level],
                                                      nVtemp_l[level], 
-                                                     zn);
+                                                     ze);
 
              hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
              hypre_ParCSRMatrixMatvec(-1.0, Aen_l[level], xn_l[level], 
@@ -736,7 +731,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                  nomega[0],
                                                  xn_l[0],
                                                  nVtemp2_l[0], 
-                                                 zn);
+                                                 ze);
 
          hypre_ParVectorCopy(be_l[0], eVtemp_l[0]);
          hypre_ParCSRMatrixMatvec(-1.0, Aen_l[0], xn_l[0], 1.0,
@@ -767,8 +762,6 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_EndTiming(maxwell_data -> time_index);
 
 
-   if (zn)
-      hypre_ParVectorDestroy(zn);
    if (ze)
       hypre_ParVectorDestroy(ze);
 
