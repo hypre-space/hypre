@@ -362,10 +362,12 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                          (forward loop) */
       {
 
-
-         Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
-         Ztemp_data = hypre_VectorData(Ztemp_local);
-
+         if (num_threads > 1)
+         {
+            Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
+            Ztemp_data = hypre_VectorData(Ztemp_local);
+         }
+         
          
          if (num_procs > 1)
          {
@@ -1584,9 +1586,12 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 			with outer relaxation parameter */
       {
 
-         Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
-         Ztemp_data = hypre_VectorData(Ztemp_local);
-
+         if (num_threads > 1)
+         {
+            Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
+            Ztemp_data = hypre_VectorData(Ztemp_local);
+         }
+         
          /*-----------------------------------------------------------------
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
