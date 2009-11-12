@@ -567,7 +567,9 @@ int hypre_BoxManAddEntry( hypre_BoxManager *manager , hypre_Index imin ,
       
       if (nentries + 1 > hypre_BoxManMaxNEntries(manager))
       {
-         hypre_BoxManIncSize( manager, 5);
+         hypre_BoxManIncSize( manager, 5);  
+
+         entries  = hypre_BoxManEntries(manager);
       }
       
       /* we add this to the end entry list - get pointer to location*/
