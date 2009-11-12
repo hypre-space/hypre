@@ -14,3 +14,5 @@ sidlx_rmi_.*_Impl.c:.*: warning: `.*' defined but not used
 bHYPRE_.*_Impl.c:.*: warning: control reaches end of non-void function
 configure: WARNING: The Java compiler javac failed
 configure: WARNING: Disabling Java support
+sidl_search_scl.c: In function `sclCharacters':
+sidl_search_scl.c:319: warning: comparison is always true due to *
