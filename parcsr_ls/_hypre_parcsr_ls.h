@@ -141,6 +141,8 @@ int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , double *rel_resid_nor
 int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector *x_coord , int *edge_vertex , int edge_orientation , hypre_ParCSRMatrix **G_ptr );
 int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , int num_vert , int num_local_vert , int *vert_number , double *vert_coord , int num_edges , int *edge_vertex );
 int hypre_AMSFEIDestroy ( void *solver );
+int hypre_ParCSRComputeL1NormsThreads ( hypre_ParCSRMatrix *A , int option , int num_threads , double **l1_norm_ptr );
+int hypre_ParCSRRelaxThreads ( hypre_ParCSRMatrix *A , hypre_ParVector *f , double relax_weight , double omega , double *l1_norms , hypre_ParVector *u , hypre_ParVector *v );
 
 /* aux_interp.c */
 void insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , int *IN_marker , int *node_add , int num_cols_A_offd , int full_off_procNodes , int num_procs , int *OUT_marker );

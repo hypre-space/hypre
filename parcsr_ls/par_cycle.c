@@ -99,6 +99,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 /*   int      *smooth_option; */
    int       smooth_type;
    int       smooth_num_levels;
+   int       num_threads;
 
    double    alpha;
    double  **l1_norms = NULL;
@@ -109,6 +110,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 #endif
    
    /* Acquire data and allocate storage */
+
+   num_threads = hypre_NumThreads();
 
    A_array           = hypre_ParAMGDataAArray(amg_data);
    P_array           = hypre_ParAMGDataPArray(amg_data);
@@ -308,17 +311,25 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
             if (relax_type == 8)
             {
-               hypre_ParCSRRelax(A_array[level], 
-                                 Aux_F,
-                                 2,
-                                 1,
-                                 l1_norms[level],
-                                 relax_weight[level],
-                                 omega[level],
-                                 Aux_U,
-                                 Vtemp, 
-                                 Ztemp);
-               
+                if (num_threads == 1)
+                   hypre_ParCSRRelax(A_array[level], 
+                                            Aux_F,
+                                            2,
+                                            1,
+                                            l1_norms[level],
+                                            relax_weight[level],
+                                            omega[level],
+                                            Aux_U,
+                                 	    Vtemp, 
+                                            Ztemp);
+                else               
+                   hypre_ParCSRRelaxThreads(A_array[level], 
+                                            Aux_F,
+                                            relax_weight[level],
+                                            omega[level],
+                                            l1_norms[level],
+                                            Aux_U,
+                                            Vtemp);
             }
             if (smooth_num_levels > level && 
 			(smooth_type == 7 || smooth_type == 8 ||
@@ -359,8 +370,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                Solve_err_flag = hypre_BoomerAMGRelax(A_array[level], 
                                                      Aux_F,
                                                      CF_marker_array[level],
-                                                     relax_type,
-                                                     relax_points,
+                                                     relax_type, relax_points,
                                                      relax_weight[level],
                                                      omega[level],
                                                      Aux_U,

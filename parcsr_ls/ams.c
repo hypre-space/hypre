@@ -2959,3 +2959,378 @@ int hypre_AMSFEIDestroy(void *solver)
 
    return hypre_error_flag;
 }
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRComputeL1Norms Threads
+ *
+ * Compute the l1 norms of the rows of a given matrix, depending on
+ * the option parameter:
+ *
+ * option 1 = Compute the l1 norm of the rows
+ * option 2 = Compute the l1 norm of the (processor) off-diagonal
+ *            part of the rows plus the diagonal of A
+ * option 3 = Compute the l2 norm^2 of the rows
+ *--------------------------------------------------------------------------*/
+
+int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
+                               int option,
+                               int num_threads,
+                               double **l1_norm_ptr)
+{
+   int i, j, k;
+   int num_rows = hypre_ParCSRMatrixNumRows(A);
+
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   int *A_diag_I = hypre_CSRMatrixI(A_diag);
+   int *A_diag_J = hypre_CSRMatrixJ(A_diag);
+   double *A_diag_data = hypre_CSRMatrixData(A_diag);
+
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   int *A_offd_I = hypre_CSRMatrixI(A_offd);
+   double *A_offd_data = hypre_CSRMatrixData(A_offd);
+   int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+
+   double *l1_norm = hypre_CTAlloc(double, num_rows);
+   int ii, ns, ne, rest, size;   
+   double res;
+
+#define HYPRE_SMP_PRIVATE i,ii,j,k,ns,ne,res,rest,size
+#include "../utilities/hypre_smp_forloop.h"
+   for (k = 0; k < num_threads; k++)
+   {
+     size = num_rows/num_threads;
+     rest = num_rows - size*num_threads;
+     if (k < rest)
+     {
+         ns = k*size+k;
+         ne = (k+1)*size+k+1;
+     }
+     else
+     {
+         ns = k*size+rest;
+         ne = (k+1)*size+rest;
+     }
+
+     for (i = ns; i < ne; i++)
+     {
+      res = 0.0;
+      if (option == 1)
+      {
+         /* Add the l1 norm of the diag part of the ith row */
+         for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
+            res += fabs(A_diag_data[j]);
+      }
+      else if (option == 2)
+      {
+         /* Add the diag element of the ith row */
+         for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
+         {
+            ii = A_diag_J[j];
+            if (ii == i || ii < ns || ii >= ne)
+            {
+               res += fabs(A_diag_data[j]);
+            }
+         }
+      }
+      else if (option == 3)
+      {
+         for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
+            res += A_diag_data[j] * A_diag_data[j];
+         if (num_cols_offd)
+            for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
+               res += A_offd_data[j] * A_offd_data[j];
+         continue;
+      }
+
+      /* Add the l1 norm of the offd part of the ith row */
+      if (num_cols_offd)
+         for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
+            res += fabs(A_offd_data[j]);
+      l1_norm[i] = res;
+
+      if (l1_norm[i] < DBL_EPSILON)
+         hypre_error_in_arg(1);
+     }
+   }
+   *l1_norm_ptr = l1_norm;
+
+   return hypre_error_flag;
+}
+
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRRelaxThreads
+ *--------------------------------------------------------------------------*/
+
+int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
+                        hypre_ParVector    *f,
+                        double              relax_weight,
+                        double              omega,
+                        double             *l1_norms,
+                        hypre_ParVector    *u,
+                        hypre_ParVector    *Vtemp )
+{
+   MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
+   double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
+   int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
+   hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommHandle *comm_handle;
+
+   int             n       = hypre_CSRMatrixNumRows(A_diag);
+   int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+   
+   hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
+   double         *u_data  = hypre_VectorData(u_local);
+
+   hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
+   double         *f_data  = hypre_VectorData(f_local);
+
+   hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
+   double         *Vtemp_data = hypre_VectorData(Vtemp_local);
+   double 	  *Vext_data;
+   double 	  *v_buf_data;
+   double 	  *tmp_data;
+
+   int             i, j;
+   int             ii, jj;
+   int             ns, ne, size, rest;
+   int             relax_error = 0;
+   int		   num_sends;
+   int		   index, start;
+   int		   num_procs, num_threads, my_id ;
+
+   double          zero = 0.0;
+   double	   res, res2;
+
+   MPI_Comm_size(comm,&num_procs);  
+   MPI_Comm_rank(comm,&my_id);  
+   num_threads = hypre_NumThreads();
+   /*-----------------------------------------------------------------
+    * Copy current approximation into temporary vector.
+    *-----------------------------------------------------------------*/
+   if (num_procs > 1)
+   {
+      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+
+      v_buf_data = hypre_CTAlloc(double, 
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+
+      Vext_data = hypre_CTAlloc(double,num_cols_offd);
+        
+      if (num_cols_offd)
+      {
+		A_offd_j = hypre_CSRMatrixJ(A_offd);
+		A_offd_data = hypre_CSRMatrixData(A_offd);
+      }
+ 
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+        	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+        	for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
+                	v_buf_data[index++] 
+                 	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+      }
+ 
+      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
+        	Vext_data);
+
+      /*-----------------------------------------------------------------
+       * Copy current approximation into temporary vector.
+       *-----------------------------------------------------------------*/
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle = NULL;
+   }
+
+   /*-----------------------------------------------------------------
+    * Relax all points.
+    *-----------------------------------------------------------------*/
+
+   if (relax_weight == 1 && omega == 1)
+   {
+      tmp_data = hypre_CTAlloc(double,n);
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+      for (i = 0; i < n; i++)
+	      tmp_data[i] = u_data[i];
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#include "../utilities/hypre_smp_forloop.h"
+      for (j = 0; j < num_threads; j++)
+      {
+	 size = n/num_threads;
+	 rest = n - size*num_threads;
+	 if (j < rest)
+	 {
+	       ns = j*size+j;
+	       ne = (j+1)*size+j+1;
+	 }
+	 else
+	 {
+	       ns = j*size+rest;
+	       ne = (j+1)*size+rest;
+	 }
+         for (i = ns; i < ne; i++)	/* interior points first */
+         {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+            if ( A_diag_data[A_diag_i[i]] != zero)
+            {
+               res = f_data[i];
+               for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+               {
+                  ii = A_diag_j[jj];
+		  if (ii >= ns && ii < ne)
+		  {
+                     res -= A_diag_data[jj] * u_data[ii];
+		  }
+		  else
+                     res -= A_diag_data[jj] * tmp_data[ii];
+               }
+               for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+               {
+                  ii = A_offd_j[jj];
+                  res -= A_offd_data[jj] * Vext_data[ii];
+               }
+               u_data[i] += res / l1_norms[i];
+            }
+         }
+         for (i = ne-1; i > ns-1; i--)	/* interior points first */
+         {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+            if ( A_diag_data[A_diag_i[i]] != zero)
+            {
+               res = f_data[i];
+               for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+               {
+                  ii = A_diag_j[jj];
+	          if (ii >= ns && ii < ne)
+		  {
+                     res -= A_diag_data[jj] * u_data[ii];
+		  }
+		  else
+                     res -= A_diag_data[jj] * tmp_data[ii];
+               }
+               for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+               {
+                  ii = A_offd_j[jj];
+                  res -= A_offd_data[jj] * Vext_data[ii];
+               }
+               u_data[i] += res / l1_norms[i];
+            }
+         }
+      }
+      hypre_TFree(tmp_data);
+   }
+   else
+   {
+      double c1 = omega*relax_weight;
+      double c2 = omega*(1.0-relax_weight);
+      tmp_data = hypre_CTAlloc(double,n);
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+      for (i = 0; i < n; i++)
+      {
+	 tmp_data[i] = u_data[i];
+      }
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#include "../utilities/hypre_smp_forloop.h"
+      for (j = 0; j < num_threads; j++)
+      {
+         size = n/num_threads;
+	 rest = n - size*num_threads;
+	 if (j < rest)
+	 {
+	     ns = j*size+j;
+	     ne = (j+1)*size+j+1;
+	 }
+	 else
+	 {
+	     ns = j*size+rest;
+	     ne = (j+1)*size+rest;
+	 }
+         for (i = ns; i < ne; i++)	/* interior points first */
+         {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+            if ( A_diag_data[A_diag_i[i]] != zero)
+            {
+               res2 = 0.0;
+               res = f_data[i];
+               Vtemp_data[i] = u_data[i];
+               for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+               {
+                  ii = A_diag_j[jj];
+	          if (ii >= ns && ii < ne)
+		  {
+                     res -= A_diag_data[jj] * u_data[ii];
+	             if (ii < i)
+                        res2 += A_diag_data[jj] * (Vtemp_data[ii] - u_data[ii]);
+		  }
+		  else
+                     res -= A_diag_data[jj] * tmp_data[ii];
+               }
+               for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+               {
+                  ii = A_offd_j[jj];
+                  res -= A_offd_data[jj] * Vext_data[ii];
+               }
+               u_data[i] += (c1*res + c2*res2) / l1_norms[i];
+            }
+         }
+         for (i = ne-1; i > ns-1; i--)	/* interior points first */
+         {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+            if ( A_diag_data[A_diag_i[i]] != zero)
+            {
+               res2 = 0.0;
+               res = f_data[i];
+               for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+               {
+                  ii = A_diag_j[jj];
+                  if (ii >= ns && ii < ne)
+		  {
+                     res -= A_diag_data[jj] * u_data[ii];
+	             if (ii > i)
+                        res2 += A_diag_data[jj] * (Vtemp_data[ii] - u_data[ii]);
+		  }
+		  else
+                     res -= A_diag_data[jj] * tmp_data[ii];
+               }
+               for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+               {
+                  ii = A_offd_j[jj];
+                  res -= A_offd_data[jj] * Vext_data[ii];
+               }
+               u_data[i] += (c1*res + c2*res2) / l1_norms[i];
+            }
+         }
+      }
+      hypre_TFree(tmp_data);
+   }
+   if (num_procs > 1)
+   {
+  	 hypre_TFree(Vext_data);
+	 hypre_TFree(v_buf_data);
+   }
+
+   return(relax_error); 
+}

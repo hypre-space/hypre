@@ -114,7 +114,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       Setup_err_flag = 0;
    int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
    int       j, k;
-   int       num_procs,my_id, num_threads;
+   int       num_procs,my_id,num_threads;
    int      *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
    int       num_functions = hypre_ParAMGDataNumFunctions(amg_data);
    int       nodal = hypre_ParAMGDataNodal(amg_data);
@@ -157,7 +157,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    MPI_Comm_rank(comm,&my_id);
 
    num_threads = hypre_NumThreads();
-
 
    old_num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
@@ -1540,6 +1539,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    for (j = 0; j < num_levels; j++)
    {
+     if (num_threads == 1)
+     {
       if (grid_relax_type[1] == 8 && j < num_levels-1)
       {
 	 hypre_ParCSRComputeL1Norms(A_array[j], 2, &l1_norms[j]);
@@ -1548,6 +1549,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
 	 hypre_ParCSRComputeL1Norms(A_array[j], 2, &l1_norms[j]);
       }
+     }
+     else
+     {
+      if (grid_relax_type[1] == 8 && j < num_levels-1)
+      {
+	 hypre_ParCSRComputeL1NormsThreads(A_array[j], 2, num_threads, &l1_norms[j]);
+      }
+      else if (grid_relax_type[3] == 8 && j == num_levels-1)
+      {
+	 hypre_ParCSRComputeL1NormsThreads(A_array[j], 2, num_threads, &l1_norms[j]);
+      }
+     }
       if (relax_weight[j] == 0.0)
       {
          hypre_ParCSRMatrixScaledNorm(A_array[j], &relax_weight[j]);
