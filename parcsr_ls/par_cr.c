@@ -2633,6 +2633,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    int              num_procs, my_id, num_threads;
    int              num_nodes;
    double 	    rho,rho0,rho1,*e0,*e1, *sum;
+   double 	    rho_old, relrho;
    double           *e2;
    double           alpha, beta, gamma, gammaold;
    int		    num_coarse, global_num_variables, global_nc = 0;
@@ -2743,7 +2744,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    }
 
    for (i = 0; i < num_variables; i++) 
-      e1[i] = 1.0e0+.1*drand48();
+      e1[i] = 1.0e0;
+      /*e1[i] = 1.0e0+.1*drand48();*/
    
   /* stages */
    while(1)
@@ -2812,7 +2814,12 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
       }
       else
       {
-         for (i=0;i<num_CR_relax_steps;i++)
+         rho = 1;
+         rho_old = 1;
+	 relrho = 1.;
+         i = 0;
+         while (rho >= 0.1*theta && (i < num_CR_relax_steps || relrho >= 0.1))
+         /*for (i=0;i<num_CR_relax_steps;i++)*/
          {
             for (j=0; j < num_variables; j++)
  	       if (CF_marker[j] == fpt) e0[j] = e1[j];
@@ -2821,22 +2828,29 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                                  relax_weight, omega, 
                                  e1_vec, e0_vec, 
                                  Relax_temp);
+            /*if (i==num_CR_relax_steps-1) */
             if (i==1)
             {
                for (j=0; j < num_variables; j++)
                   if (CF_marker[j] == fpt) e2[j] = e1[j];
             }
+            rho0 = hypre_ParVectorInnerProd(e0_vec,e0_vec);
+            rho1 = hypre_ParVectorInnerProd(e1_vec,e1_vec);
+            rho_old = rho;
+            rho = sqrt(rho1)/sqrt(rho0);
+            relrho = fabs(rho-rho_old)/rho;
+            i++;
          }
       }
-      rho=0.0e0; rho0=0.0e0; rho1=0.0e0;
+      /*rho=0.0e0; rho0=0.0e0; rho1=0.0e0;*/
       /*for(i=0;i<num_variables;i++){ 
          rho0 += pow(e0[i],2);
          rho1 += pow(e1[i],2);
       }*/
 
-      rho0 = hypre_ParVectorInnerProd(e0_vec,e0_vec);
+      /*rho0 = hypre_ParVectorInnerProd(e0_vec,e0_vec);
       rho1 = hypre_ParVectorInnerProd(e1_vec,e1_vec);
-      rho = sqrt(rho1)/sqrt(rho0);
+      rho = sqrt(rho1)/sqrt(rho0);*/
       for (j=0; j < num_variables; j++)
          if (CF_marker[j] == fpt) e1[j] = e2[j];
       if (rho > theta)
@@ -2847,7 +2861,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
             {
                if (CF_marker[i] ==  fpt)
                {
-                  e1[i] = 1.0e0+.1*drand48();
+                  e1[i] = 1.0e0;
+                  /*e1[i] = 1.0e0+.1*drand48();*/
                   e0[i] = e1[i];
                }
             }
@@ -2892,7 +2907,10 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
          if (nstages)
             thresh=0.5;
          else
-            thresh=0.1;
+	    thresh = 0.3;
+            for (i=1; i < num_CR_relax_steps; i++)
+		thresh *= 0.3;
+            /*thresh=0.1;*/
 
          if (num_functions == 1)
          /*if(CRaddCpoints == 0)*/
@@ -3023,9 +3041,11 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                {  
                   for (j=0; j < num_functions; j++)
                   { 
-		     /*CF_marker[jj] = CFN_marker[i];*/
+		     /*CF_marker[jj] = CFN_marker[i];
                      e0[jj] = 1.0e0+.1*drand48();
-                     e1[jj++] = 1.0e0+.1*drand48();
+                     e1[jj++] = 1.0e0+.1*drand48();*/
+                     e0[jj] = 1.0e0;
+                     e1[jj++] = 1.0e0;
                   } 
                } 
                /*else 

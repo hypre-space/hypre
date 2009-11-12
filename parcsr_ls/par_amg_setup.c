@@ -72,6 +72,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int      amg_logging;
    int      amg_print_level;
    int      debug_flag;
+   int      dbg_flg;
    int      local_num_vars;
    int      P_max_elmts;
    int      agg_P_max_elmts;
@@ -1280,10 +1281,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   {
                      
                      case 19:
+                        dbg_flg = debug_flag;
+                        if (amg_print_level) dbg_flg = -debug_flag;
                         hypre_BoomerAMGBuildInterp(A_array[level], CF_marker, 
                                                    S2, coarse_pnts_global, 1, 
                                                    dof_func_array[level], 
-                                                   debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
+                                                   dbg_flg, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                         break;
                   
                      case 18:
@@ -1299,9 +1302,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                         debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                         break;
                      case 16:
+                        dbg_flg = debug_flag;
+                        if (amg_print_level) dbg_flg = -debug_flag;
                         hypre_BoomerAMGBuildInterpModUnk(A_array[level], CF_marker, 
-                                                         S2, coarse_pnts_global, num_functions, dof_func_array[level], 
-                                                         debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
+                                        S2, coarse_pnts_global, num_functions, dof_func_array[level], 
+                                        dbg_flg, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                         break;
                         
                   }
@@ -1312,11 +1317,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
                else /* one function only or unknown-based interpolation- */
                {
+                  dbg_flg = debug_flag;
+                  if (amg_print_level) dbg_flg = -debug_flag;
                   
                   hypre_BoomerAMGBuildInterp(A_array[level], CF_marker, 
                                              S, coarse_pnts_global, num_functions, 
                                              dof_func_array[level], 
-                                             debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
+                                             dbg_flg, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
 
 
                }
