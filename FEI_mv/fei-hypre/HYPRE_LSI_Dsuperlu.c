@@ -239,6 +239,7 @@ int HYPRE_LSI_DSuperLUSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* get machine, matrix, and vector information                      */
    /* ---------------------------------------------------------------- */
 
+   MPI_Comm_rank(sluPtr->comm_, &mypid);
    localNRows  = sluPtr->localNRows_;
    rhs  = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) b));
    soln = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) x));
@@ -257,10 +258,11 @@ int HYPRE_LSI_DSuperLUSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* diagnostics message                                              */
    /* ---------------------------------------------------------------- */
 
-   MPI_Comm_rank(sluPtr->comm_, &mypid);
    if (mypid == 0 && sluPtr->outputLevel_ >=2)
    {
       printf("DSuperLUSolve: info = %d\n", info);
+      printf("DSuperLUSolve: diagScale = %d\n",
+             sluPtr->ScalePermstruct_.DiagScale);
    }
    return 0;
 }
