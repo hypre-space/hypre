@@ -23,8 +23,8 @@
  */
 
 #include <time.h>
-#include <unistd.h>
 #ifndef WIN32
+#include <unistd.h>
 #include <sys/times.h>
 #endif
 #ifdef TIMER_USE_MPI

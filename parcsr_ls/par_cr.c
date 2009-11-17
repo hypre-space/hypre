@@ -18,6 +18,11 @@
  *====================*/
 #include <headers.h>
 
+/* TK: a hack to make this compile on Windows */
+#ifdef WIN32
+#define drand48 rand
+#endif
+
 #define RelaxScheme1 3 /* cr type */
 #define fptOmegaJac 1  /* 1 is f pt weighted jacobi */
 #define omega1 1.0     /* weight */

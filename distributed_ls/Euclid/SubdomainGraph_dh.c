@@ -24,8 +24,10 @@
 #include "shellSort_dh.h"
 
 
+#ifndef WIN32
 /* for debugging only! */
 #include <unistd.h>
+#endif
 
 static void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A);
 static void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A);

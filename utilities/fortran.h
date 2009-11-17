@@ -23,10 +23,6 @@
 
 #include "HYPRE_config.h"
 
-#ifdef WIN32
-#include "mkl.h"
-#endif
-
 #if defined(F77_FUNC_)
 /* F77_FUNC_ macro assumes underscores exist in name */
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) F77_FUNC_(name,NAME)
