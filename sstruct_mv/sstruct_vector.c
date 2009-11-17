@@ -288,7 +288,7 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
       grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(svector));
 
       left_boxes = hypre_BoxArrayCreate(1);
-      done_boxes = hypre_BoxArrayCreate(1);
+      done_boxes = hypre_BoxArrayCreate(2);
       temp_boxes = hypre_BoxArrayCreate(0);
 
       /* done_box always points to the first box in done_boxes */
