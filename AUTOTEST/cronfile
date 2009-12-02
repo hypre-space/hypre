@@ -11,7 +11,7 @@
 # Rob's crontab (on tux273)
 
 30 0 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -checkout
-00 1 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -tux149  >> autotest-tux-cron.out     2>> autotest-tux-cron.err
+00 1 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -tux273  >> autotest-tux-cron.out     2>> autotest-tux-cron.err
 00 6 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -summary-email
 
 # Rob's crontab (on yana2)
