@@ -39,7 +39,7 @@ foreach file (`ls *.htm`)
 end
 
 # Copy images
-cp -fp *.gif *.jpg $examplesdir/README_files
+cp -fp *.gif $examplesdir/README_files
 
 # Remove the html example files
 rm -f ex*.html
