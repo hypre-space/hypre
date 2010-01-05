@@ -44,6 +44,7 @@ typedef struct hypre_IJMatrix_struct
    int         global_first_col;    /*   to be able to avoind using the global */
    int         global_num_rows;     /*   global partition */ 
    int         global_num_cols;
+   int         print_level;
    
 
 
@@ -69,6 +70,7 @@ typedef struct hypre_IJMatrix_struct
 #define hypre_IJMatrixGlobalFirstCol(matrix)      ((matrix) -> global_first_col)
 #define hypre_IJMatrixGlobalNumRows(matrix)       ((matrix) -> global_num_rows)
 #define hypre_IJMatrixGlobalNumCols(matrix)       ((matrix) -> global_num_cols)
+#define hypre_IJMatrixPrintLevel(matrix)       ((matrix) -> print_level)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
