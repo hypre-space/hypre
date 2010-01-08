@@ -1,0 +1,64 @@
+
+###########################################################
+# In this example, the x/y coordinates are as follows
+#
+#                    x >
+#    ---------------------------------
+#  ^ |       |       |       | (4,2) |
+#  y ---------------------------------  <- part 1
+#    | (1,1) |       |       |       |
+#    =================================
+#  ^ |       |       |       | (4,2) |
+#  y ---------------------------------  <- part 0
+#    | (1,1) |       |       |       |
+#    ---------------------------------
+#                    x >
+#
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 2 2
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (1- 1-) (4+ 2+)
+GridSetExtents: 1 (1- 1-) (4+ 2+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# NODE  = 1
+# XFACE = 2
+# YFACE = 3
+GridSetVariables: 0 3 [1 2 3]
+GridSetVariables: 1 3 [1 2 3]
+
+# GridSetSharedPart: part  ilower(ndim)  iupper(ndim)  offset[ndim] \
+#                    spart silower(ndim) siupper(ndim) soffset[ndim] \
+#                    index_map[ndim] index_dir[ndim]
+GridSetSharedPart: 0 (1- 2+) (4+ 2+) [0  1] 1 (1- 1-) (4+ 1-) [0 -1] [0 1] [1 1]
+GridSetSharedPart: 1 (1- 1-) (4+ 1-) [0 -1] 0 (1- 2+) (4+ 2+) [0  1] [0 1] [1 1]
+
+###########################################################
+
+# FEMStencilCreate: size
+FEMStencilCreate: 8
+ 
+# FEMStencilSetRow: row offset[ndim] var values[size]
+FEMStencilSetRow: 0 [-1 -1] 0 [  1.0 -0.2 -0.2  0.0  0.0  0.0  0.0  0.0 ]
+FEMStencilSetRow: 1 [ 0 -1] 0 [ -0.2  1.0  0.0 -0.2  0.0  0.0  0.0  0.0 ]
+FEMStencilSetRow: 2 [-1  0] 0 [ -0.2  0.0  1.0 -0.2  0.0  0.0  0.0  0.0 ]
+FEMStencilSetRow: 3 [ 0  0] 0 [  0.0 -0.2 -0.2  1.0  0.0  0.0  0.0  0.0 ]
+FEMStencilSetRow: 4 [-1  0] 1 [  0.0  0.0  0.0  0.0 10.0 -4.0  0.0  0.0 ]
+FEMStencilSetRow: 5 [ 0  0] 1 [  0.0  0.0  0.0  0.0 -4.0 10.0  0.0  0.0 ]
+FEMStencilSetRow: 6 [ 0 -1] 2 [  0.0  0.0  0.0  0.0  0.0  0.0 10.0 -4.0 ]
+FEMStencilSetRow: 7 [ 0  0] 2 [  0.0  0.0  0.0  0.0  0.0  0.0 -4.0 10.0 ]
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 2
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1
+
+###########################################################
+

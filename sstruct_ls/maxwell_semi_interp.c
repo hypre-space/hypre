@@ -97,7 +97,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    hypre_Index          **Edge_cstarts, **upper_shifts, **lower_shifts;
    int                  **cfbox_mapping, **fcbox_mapping;
 
-   hypre_BoxMapEntry     *entry;
+   hypre_BoxManEntry     *entry;
    int                    rank, rank2;
    int                    start_rank1; 
 
@@ -487,16 +487,16 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
       fbox     = hypre_BoxArrayBox(box_array, 0);
       hypre_CopyIndex(hypre_BoxIMin(fbox), findex);
-      hypre_SStructGridFindMapEntry(fgrid_element, part, findex, 0,
+      hypre_SStructGridFindBoxManEntry(fgrid_element, part, findex, 0,
                                    &entry);
-      hypre_SStructMapEntryGetGlobalRank(entry, findex, &flower_ranks[part][0],
+      hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &flower_ranks[part][0],
                                          matrix_type);
 
       fbox= hypre_BoxArrayBox(box_array, hypre_BoxArraySize(box_array)-1);
       hypre_CopyIndex(hypre_BoxIMax(fbox), findex);
-      hypre_SStructGridFindMapEntry(fgrid_edge, part, findex, 0,
+      hypre_SStructGridFindBoxManEntry(fgrid_edge, part, findex, 0,
                                    &entry);
-      hypre_SStructMapEntryGetGlobalRank(entry, findex, &fupper_ranks[part][0],
+      hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &fupper_ranks[part][0],
                                          matrix_type);
 
       clower_ranks[part]= hypre_CTAlloc(int, tot_vars);
@@ -508,16 +508,16 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
       cbox     = hypre_BoxArrayBox(box_array, 0);
       hypre_CopyIndex(hypre_BoxIMin(cbox), cindex);
-      hypre_SStructGridFindMapEntry(cgrid_element, part, cindex, 0,
+      hypre_SStructGridFindBoxManEntry(cgrid_element, part, cindex, 0,
                                    &entry);
-      hypre_SStructMapEntryGetGlobalRank(entry, cindex, &clower_ranks[part][0],
+      hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &clower_ranks[part][0],
                                          matrix_type);
 
       cbox= hypre_BoxArrayBox(box_array, hypre_BoxArraySize(box_array)-1);
       hypre_CopyIndex(hypre_BoxIMax(cbox), cindex);
-      hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex, 0,
+      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, 0,
                                    &entry);
-      hypre_SStructMapEntryGetGlobalRank(entry, cindex, &cupper_ranks[part][0],
+      hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &cupper_ranks[part][0],
                                          matrix_type);
 
      /* face grid ranks */
@@ -534,32 +534,32 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
          fbox     = hypre_BoxArrayBox(box_array, 0);
          hypre_CopyIndex(hypre_BoxIMin(fbox), findex);
-         hypre_SStructGridFindMapEntry(fgrid_face, part, findex, i,
+         hypre_SStructGridFindBoxManEntry(fgrid_face, part, findex, i,
                                        &entry);
-         hypre_SStructMapEntryGetGlobalRank(entry, findex, &flower_ranks[part][t],
+         hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &flower_ranks[part][t],
                                             matrix_type);
 
          fbox= hypre_BoxArrayBox(box_array, hypre_BoxArraySize(box_array)-1);
          hypre_CopyIndex(hypre_BoxIMax(fbox), findex);
-         hypre_SStructGridFindMapEntry(fgrid_face, part, findex, i,
+         hypre_SStructGridFindBoxManEntry(fgrid_face, part, findex, i,
                                        &entry);
-         hypre_SStructMapEntryGetGlobalRank(entry, findex, &fupper_ranks[part][t],
+         hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &fupper_ranks[part][t],
                                             matrix_type);
 
          var_cgrid= hypre_SStructPGridSGrid(p_cgrid, i);
          box_array= hypre_StructGridBoxes(var_cgrid);
          cbox     = hypre_BoxArrayBox(box_array, 0);
          hypre_CopyIndex(hypre_BoxIMin(cbox), cindex);
-         hypre_SStructGridFindMapEntry(cgrid_face, part, cindex, i,
+         hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, i,
                                        &entry);
-         hypre_SStructMapEntryGetGlobalRank(entry, cindex, &clower_ranks[part][t],
+         hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &clower_ranks[part][t],
                                             matrix_type);
 
          cbox= hypre_BoxArrayBox(box_array, hypre_BoxArraySize(box_array)-1);
          hypre_CopyIndex(hypre_BoxIMax(cbox), cindex);
-         hypre_SStructGridFindMapEntry(cgrid_face, part, cindex, i,
+         hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, i,
                                        &entry);
-         hypre_SStructMapEntryGetGlobalRank(entry, cindex, &cupper_ranks[part][t],
+         hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &cupper_ranks[part][t],
                                             matrix_type);
       }
      /* edge grid ranks */
@@ -576,32 +576,32 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
          fbox     = hypre_BoxArrayBox(box_array, 0);
          hypre_CopyIndex(hypre_BoxIMin(fbox), findex);
-         hypre_SStructGridFindMapEntry(fgrid_edge, part, findex, i,
+         hypre_SStructGridFindBoxManEntry(fgrid_edge, part, findex, i,
                                        &entry);
-         hypre_SStructMapEntryGetGlobalRank(entry, findex, &flower_ranks[part][t],
+         hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &flower_ranks[part][t],
                                             matrix_type);
 
          fbox= hypre_BoxArrayBox(box_array, hypre_BoxArraySize(box_array)-1);
          hypre_CopyIndex(hypre_BoxIMax(fbox), findex);
-         hypre_SStructGridFindMapEntry(fgrid_edge, part, findex, i,
+         hypre_SStructGridFindBoxManEntry(fgrid_edge, part, findex, i,
                                        &entry);
-         hypre_SStructMapEntryGetGlobalRank(entry, findex, &fupper_ranks[part][t],
+         hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &fupper_ranks[part][t],
                                             matrix_type);
 
          var_cgrid= hypre_SStructPGridSGrid(p_cgrid, i);
          box_array= hypre_StructGridBoxes(var_cgrid);
          cbox     = hypre_BoxArrayBox(box_array, 0);
          hypre_CopyIndex(hypre_BoxIMin(cbox), cindex);
-         hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex, i,
+         hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, i,
                                        &entry);
-         hypre_SStructMapEntryGetGlobalRank(entry, cindex, &clower_ranks[part][t],
+         hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &clower_ranks[part][t],
                                             matrix_type);
 
          cbox= hypre_BoxArrayBox(box_array, hypre_BoxArraySize(box_array)-1);
          hypre_CopyIndex(hypre_BoxIMax(cbox), cindex);
-         hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex, i,
+         hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, i,
                                        &entry);
-         hypre_SStructMapEntryGetGlobalRank(entry, cindex, &cupper_ranks[part][t],
+         hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &cupper_ranks[part][t],
                                             matrix_type);
       }
    }
@@ -615,21 +615,21 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
   /* lower rank */
    part= 0;
    box = 0;
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_element, part, 0, box, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_element, part, 0, box, myproc, &entry);
 
    p_cgrid  = hypre_SStructGridPGrid(cgrid_element, part);
    var_cgrid= hypre_SStructPGridCellSGrid(p_cgrid) ;
    cboxes   = hypre_StructGridBoxes(var_cgrid);
    cbox     = hypre_BoxArrayBox(cboxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
 
    p_fgrid = hypre_SStructGridPGrid(fgrid_edge, part);
-   hypre_SStructGridBoxProcFindMapEntry(fgrid_edge, part, 0, box, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, 0, box, myproc, &entry);
    
    var_fgrid= hypre_SStructPGridSGrid(p_fgrid, 0);
    fboxes   = hypre_StructGridBoxes(var_fgrid);
    fbox     = hypre_BoxArrayBox(fboxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(fbox), &jlower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(fbox), &jlower);
    
   /* upper rank */
    part= nparts-1;
@@ -638,9 +638,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    cboxes   = hypre_StructGridBoxes(var_cgrid);
    cbox     = hypre_BoxArrayBox(cboxes, hypre_BoxArraySize(cboxes)-1);
 
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_element, part, 0, hypre_BoxArraySize(cboxes)-1, 
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_element, part, 0, hypre_BoxArraySize(cboxes)-1, 
                                         myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
 
    p_fgrid = hypre_SStructGridPGrid(fgrid_edge, part);
    nvars   = hypre_SStructPGridNVars(p_fgrid);
@@ -649,9 +649,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    fboxes   = hypre_StructGridBoxes(var_fgrid);
    fbox     = hypre_BoxArrayBox(fboxes, hypre_BoxArraySize(fboxes)-1);
 
-   hypre_SStructGridBoxProcFindMapEntry(fgrid_edge, part, nvars-1, hypre_BoxArraySize(fboxes)-1, 
+   hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, nvars-1, hypre_BoxArraySize(fboxes)-1, 
                                         myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(fbox), &jupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(fbox), &jupper);
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &Element_iedge);
    HYPRE_IJMatrixSetObjectType(Element_iedge, HYPRE_PARCSR);
@@ -663,19 +663,19 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
   /* lower rank */
    part= 0;
    box = 0;
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_edge, part, 0, box, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_edge, part, 0, box, myproc, &entry);
    p_cgrid = hypre_SStructGridPGrid(cgrid_edge, part);
    var_cgrid= hypre_SStructPGridSGrid(p_cgrid, 0);
    cboxes   = hypre_StructGridBoxes(var_cgrid);
    cbox    = hypre_BoxArrayBox(cboxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
 
-   hypre_SStructGridBoxProcFindMapEntry(fgrid_edge, part, 0, box, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, 0, box, myproc, &entry);
    p_fgrid = hypre_SStructGridPGrid(fgrid_edge, part);
    var_fgrid= hypre_SStructPGridSGrid(p_fgrid, 0);
    fboxes   = hypre_StructGridBoxes(var_fgrid);
    fbox    = hypre_BoxArrayBox(fboxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(fbox), &jlower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(fbox), &jlower);
 
   /* upper rank */
    part= nparts-1;
@@ -684,18 +684,18 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    var_cgrid= hypre_SStructPGridSGrid(p_cgrid, nvars-1);
    cboxes   = hypre_StructGridBoxes(var_cgrid);
    cbox    = hypre_BoxArrayBox(cboxes, hypre_BoxArraySize(cboxes)-1);
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_edge, part, nvars-1,
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_edge, part, nvars-1,
                                         hypre_BoxArraySize(cboxes)-1, myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
 
    p_fgrid = hypre_SStructGridPGrid(fgrid_edge, part);
    nvars   = hypre_SStructPGridNVars(p_fgrid);
    var_fgrid= hypre_SStructPGridSGrid(p_fgrid, nvars-1);
    fboxes   = hypre_StructGridBoxes(var_fgrid);
    fbox    = hypre_BoxArrayBox(fboxes, hypre_BoxArraySize(fboxes)-1);
-   hypre_SStructGridBoxProcFindMapEntry(fgrid_edge, part, nvars-1,
+   hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, nvars-1,
                                         hypre_BoxArraySize(fboxes)-1, myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(fbox), &jupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(fbox), &jupper);
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &Edge_iedge);
    HYPRE_IJMatrixSetObjectType(Edge_iedge, HYPRE_PARCSR);
@@ -705,19 +705,19 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
   /* lower rank */
    part= 0;
    box = 0;
-   hypre_SStructGridBoxProcFindMapEntry(fgrid_edge, part, 0, box, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, 0, box, myproc, &entry);
    p_fgrid = hypre_SStructGridPGrid(fgrid_edge, part);
    var_fgrid= hypre_SStructPGridSGrid(p_fgrid, 0);
    fboxes   = hypre_StructGridBoxes(var_fgrid);
    fbox    = hypre_BoxArrayBox(fboxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(fbox), &ilower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(fbox), &ilower);
 
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_edge, part, 0, box, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_edge, part, 0, box, myproc, &entry);
    p_cgrid = hypre_SStructGridPGrid(cgrid_edge, part);
    var_cgrid= hypre_SStructPGridSGrid(p_cgrid, 0);
    cboxes   = hypre_StructGridBoxes(var_cgrid);
    cbox    = hypre_BoxArrayBox(cboxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &jlower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &jlower);
 
   /* upper rank */
    part= nparts-1;
@@ -727,9 +727,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    fboxes   = hypre_StructGridBoxes(var_fgrid);
    fbox    = hypre_BoxArrayBox(fboxes, hypre_BoxArraySize(fboxes)-1);
                                                                                                                         
-   hypre_SStructGridBoxProcFindMapEntry(fgrid_edge, part, nvars-1, 
+   hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, nvars-1, 
                                         hypre_BoxArraySize(fboxes)-1, myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(fbox), &iupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(fbox), &iupper);
 
    p_cgrid = hypre_SStructGridPGrid(cgrid_edge, part);
    nvars   = hypre_SStructPGridNVars(p_cgrid);
@@ -737,9 +737,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    cboxes   = hypre_StructGridBoxes(var_cgrid);
    cbox    = hypre_BoxArrayBox(cboxes, hypre_BoxArraySize(cboxes)-1);
                                                                                                                         
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_edge, part, nvars-1, 
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_edge, part, nvars-1, 
                                         hypre_BoxArraySize(cboxes)-1, myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &jupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &jupper);
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &edge_Edge);
    HYPRE_IJMatrixSetObjectType(edge_Edge , HYPRE_PARCSR);
@@ -751,20 +751,20 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       /* lower rank */
        part= 0;
        box = 0;
-       hypre_SStructGridBoxProcFindMapEntry(cgrid_face, part, 0, box, myproc, &entry);
+       hypre_SStructGridBoxProcFindBoxManEntry(cgrid_face, part, 0, box, myproc, &entry);
 
        p_cgrid  = hypre_SStructGridPGrid(cgrid_face, part);
        var_cgrid= hypre_SStructPGridSGrid(p_cgrid, 0);
        cboxes   = hypre_StructGridBoxes(var_cgrid);
        cbox     = hypre_BoxArrayBox(cboxes, 0);
-       hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
+       hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
 
-       hypre_SStructGridBoxProcFindMapEntry(fgrid_edge, part, 0, box, myproc, &entry);
+       hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, 0, box, myproc, &entry);
        p_fgrid = hypre_SStructGridPGrid(fgrid_edge, part);
        var_fgrid= hypre_SStructPGridSGrid(p_fgrid, 0);
        fboxes   = hypre_StructGridBoxes(var_fgrid);
        fbox     = hypre_BoxArrayBox(fboxes, 0);
-       hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(fbox), &jlower);
+       hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(fbox), &jlower);
 
       /* upper rank */
        part= nparts-1;
@@ -774,9 +774,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
        cboxes   = hypre_StructGridBoxes(var_cgrid);
        cbox    = hypre_BoxArrayBox(cboxes, hypre_BoxArraySize(cboxes)-1);
 
-       hypre_SStructGridBoxProcFindMapEntry(cgrid_face, part, nvars-1, 
+       hypre_SStructGridBoxProcFindBoxManEntry(cgrid_face, part, nvars-1, 
                                        hypre_BoxArraySize(cboxes)-1, myproc, &entry);
-       hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
+       hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
    
        p_fgrid = hypre_SStructGridPGrid(fgrid_edge, part);
        nvars   = hypre_SStructPGridNVars(p_fgrid);
@@ -785,9 +785,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
        fboxes   = hypre_StructGridBoxes(var_fgrid);
        fbox     = hypre_BoxArrayBox(fboxes, hypre_BoxArraySize(fboxes)-1);
 
-       hypre_SStructGridBoxProcFindMapEntry(fgrid_edge, part, nvars-1, 
+       hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, nvars-1, 
                                        hypre_BoxArraySize(fboxes)-1, myproc, &entry);
-       hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(fbox), &jupper);
+       hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(fbox), &jupper);
 
        HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &Face_iedge);
        HYPRE_IJMatrixSetObjectType(Face_iedge, HYPRE_PARCSR);
@@ -800,22 +800,22 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    {
       part= 0;
       box = 0;
-      hypre_SStructGridBoxProcFindMapEntry(cgrid_element, part, 0, box, 
+      hypre_SStructGridBoxProcFindBoxManEntry(cgrid_element, part, 0, box, 
                                            myproc, &entry);
 
       p_cgrid  = hypre_SStructGridPGrid(cgrid_element, part);
       var_cgrid= hypre_SStructPGridSGrid(p_cgrid, 0);
       cboxes   = hypre_StructGridBoxes(var_cgrid);
       cbox     = hypre_BoxArrayBox(cboxes, 0);
-      hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
+      hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
 
-      hypre_SStructGridBoxProcFindMapEntry(cgrid_face, part, 0, box, 
+      hypre_SStructGridBoxProcFindBoxManEntry(cgrid_face, part, 0, box, 
                                            myproc, &entry);
       p_cgrid = hypre_SStructGridPGrid(cgrid_face, part);
       var_cgrid= hypre_SStructPGridSGrid(p_cgrid, 0);
       cboxes  = hypre_StructGridBoxes(var_cgrid);
       cbox    = hypre_BoxArrayBox(cboxes, 0);
-      hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &jlower);
+      hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &jlower);
 
      /* upper rank */
       part= nparts-1;
@@ -825,9 +825,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       cboxes  = hypre_StructGridBoxes(var_cgrid);
       cbox    = hypre_BoxArrayBox(cboxes, hypre_BoxArraySize(cboxes)-1);
 
-      hypre_SStructGridBoxProcFindMapEntry(cgrid_element, part, nvars-1, 
+      hypre_SStructGridBoxProcFindBoxManEntry(cgrid_element, part, nvars-1, 
                                      hypre_BoxArraySize(cboxes)-1, myproc, &entry);
-      hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
+      hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
 
       p_cgrid = hypre_SStructGridPGrid(cgrid_face, part);
       nvars   = hypre_SStructPGridNVars(p_cgrid);
@@ -835,9 +835,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       cboxes  = hypre_StructGridBoxes(var_cgrid);
       cbox    = hypre_BoxArrayBox(cboxes, hypre_BoxArraySize(cboxes)-1);
 
-      hypre_SStructGridBoxProcFindMapEntry(cgrid_face, part, nvars-1, 
+      hypre_SStructGridBoxProcFindBoxManEntry(cgrid_face, part, nvars-1, 
                                      hypre_BoxArraySize(cboxes)-1, myproc, &entry);
-      hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &jupper);
+      hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &jupper);
 
       HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &Element_Face);
       HYPRE_IJMatrixSetObjectType(Element_Face, HYPRE_PARCSR);
@@ -848,20 +848,20 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
   /* lower rank */
    part= 0;
    box = 0;
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_element, part, 0, box, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_element, part, 0, box, myproc, &entry);
 
    p_cgrid  = hypre_SStructGridPGrid(cgrid_element, part);
    var_cgrid= hypre_SStructPGridSGrid(p_cgrid, 0);
    cboxes   = hypre_StructGridBoxes(var_cgrid);
    cbox     = hypre_BoxArrayBox(cboxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &ilower);
 
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_edge, part, 0, box, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_edge, part, 0, box, myproc, &entry);
    p_cgrid = hypre_SStructGridPGrid(cgrid_edge, part);
    var_cgrid= hypre_SStructPGridSGrid(p_cgrid, 0);
    cboxes  = hypre_StructGridBoxes(var_cgrid);
    cbox    = hypre_BoxArrayBox(cboxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &jlower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(cbox), &jlower);
 
   /* upper rank */
    part= nparts-1;
@@ -871,9 +871,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    cboxes  = hypre_StructGridBoxes(var_cgrid);
    cbox    = hypre_BoxArrayBox(cboxes, hypre_BoxArraySize(cboxes)-1);
 
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_element, part, nvars-1, 
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_element, part, nvars-1, 
                                   hypre_BoxArraySize(cboxes)-1, myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &iupper);
 
    p_cgrid = hypre_SStructGridPGrid(cgrid_edge, part);
    nvars   = hypre_SStructPGridNVars(p_cgrid);
@@ -881,9 +881,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    cboxes  = hypre_StructGridBoxes(var_cgrid);
    cbox    = hypre_BoxArrayBox(cboxes, hypre_BoxArraySize(cboxes)-1);
                                                                                                                         
-   hypre_SStructGridBoxProcFindMapEntry(cgrid_edge, part, nvars-1, 
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_edge, part, nvars-1, 
                                   hypre_BoxArraySize(cboxes)-1, myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &jupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &jupper);
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &Element_Edge);
    HYPRE_IJMatrixSetObjectType(Element_Edge, HYPRE_PARCSR);
@@ -1010,8 +1010,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
              hypre_AddIndex(findex, stride, findex);
              
             /* Element(i,j,k) rank */
-             hypre_SStructGridFindMapEntry(cgrid_element, part, cindex, 0, &entry);
-             hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+             hypre_SStructGridFindBoxManEntry(cgrid_element, part, cindex, 0, &entry);
+             hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
              iElement[nElements]= rank;
              nElements++;
 
@@ -1059,9 +1059,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                          for (j= low_index[0]; j<= hi_index[0]; j++)
                          {
                             hypre_SetIndex(var_index, j, k, m);
-                            hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index, 
+                            hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index, 
                                                           t, &entry);
-                            hypre_SStructMapEntryGetGlobalRank(entry, var_index, 
+                            hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, 
                                                                &rank, matrix_type);
                             jElement_edge[nElements_iedges]= rank;
                             nElements_iedges++;
@@ -1102,9 +1102,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                       for (j= low_index[0]; j<= hi_index[0]; j++)
                       {
                          hypre_SetIndex(var_index, j, k, findex[2]);
-                         hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index, 
+                         hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index, 
                                                        t, &entry);
-                         hypre_SStructMapEntryGetGlobalRank(entry, var_index, 
+                         hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, 
                                                             &rank, matrix_type);
                          jElement_edge[nElements_iedges]= rank;
                          nElements_iedges++;
@@ -1276,8 +1276,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                          hypre_SetIndex(cindex, loopi, loopj, loopk);
                          hypre_AddIndex(cindex, start, cindex);
 
-                         hypre_SStructGridFindMapEntry(cgrid_face, part, cindex, t, &entry);
-                         hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+                         hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t, &entry);
+                         hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
 
                         /* check if rank on proc before continuing */
                          if ((rank <= cupper_ranks[part][var]) &&
@@ -1312,9 +1312,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                for (j= 0; j< rfactor[1]; j++)
                                {
                                   hypre_SetIndex(var_index, ilower, j+findex[1], k+findex[2]);
-                                  hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                                  hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                                 vartype_map[6], &entry);
-                                  hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                                  hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                                     &rank, matrix_type);
                                   jFace_edge[nFaces_iedges]= rank;
                                   nFaces_iedges++;
@@ -1327,9 +1327,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                for (j= 0; j< rfactor[1]-1; j++)
                                {
                                   hypre_SetIndex(var_index, ilower, j+findex[1], k+findex[2]);
-                                  hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                                  hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                                 vartype_map[7], &entry);
-                                  hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                                  hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                                     &rank, matrix_type);
                                   jFace_edge[nFaces_iedges]= rank;
                                   nFaces_iedges++;
@@ -1375,8 +1375,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                          hypre_SetIndex(cindex, loopi, loopj, loopk);
                          hypre_AddIndex(cindex, start, cindex);
 
-                         hypre_SStructGridFindMapEntry(cgrid_face, part, cindex, t, &entry);
-                         hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+                         hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t, &entry);
+                         hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
                         /* check if rank on proc before continuing */
                          if ((rank <= cupper_ranks[part][var]) &&
                                            (rank >= clower_ranks[part][var]))
@@ -1410,9 +1410,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                for (j= 0; j< rfactor[0]; j++)
                                {
                                   hypre_SetIndex(var_index, j+findex[0], ilower, k+findex[2]);
-                                  hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                                  hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                                 vartype_map[5], &entry);
-                                  hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                                  hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                                     &rank, matrix_type);
                                   jFace_edge[nFaces_iedges]= rank;
                                   nFaces_iedges++;
@@ -1425,9 +1425,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                for (j= 0; j< rfactor[0]-1; j++)
                                {
                                   hypre_SetIndex(var_index, j+findex[0], ilower, k+findex[2]);
-                                  hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                                  hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                                 vartype_map[7], &entry);
-                                  hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                                  hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                                     &rank, matrix_type);
                                   jFace_edge[nFaces_iedges]= rank;
                                   nFaces_iedges++;
@@ -1473,8 +1473,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                          hypre_SetIndex(cindex, loopi, loopj, loopk);
                          hypre_AddIndex(cindex, start, cindex);
 
-                         hypre_SStructGridFindMapEntry(cgrid_face, part, cindex, t, &entry);
-                         hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+                         hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t, &entry);
+                         hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
 
                         /* check if rank on proc before continuing */
                          if ((rank <= cupper_ranks[part][var]) &&
@@ -1509,9 +1509,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                for (j= 0; j< rfactor[0]; j++)
                                {
                                   hypre_SetIndex(var_index, j+findex[0], k+findex[1], ilower);
-                                  hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                                  hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                                 vartype_map[5], &entry);
-                                  hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                                  hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                                     &rank, matrix_type);
                                   jFace_edge[nFaces_iedges]= rank;
                                   nFaces_iedges++;
@@ -1524,9 +1524,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                for (j= 0; j< rfactor[0]-1; j++)
                                {
                                   hypre_SetIndex(var_index, j+findex[0], k+findex[1], ilower);
-                                  hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                                  hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                                 vartype_map[6], &entry);
-                                  hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                                  hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                                     &rank, matrix_type);
                                   jFace_edge[nFaces_iedges]= rank;
                                   nFaces_iedges++;
@@ -1695,9 +1695,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                hypre_AddIndex(cindex, start, cindex);
 
               /* row rank */
-               hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex, t,
+               hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
                                              &entry);
-               hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+               hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                   matrix_type);
 
               /* check if rank on proc before continuing */
@@ -1729,9 +1729,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      {
                          for (m= 0; m< rfactor[1]; m++)
                          {
-                            hypre_SStructGridFindMapEntry(fgrid_edge, part,
+                            hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
                                                           var_index, t, &entry);
-                            hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                            hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                               &rank, matrix_type);
                             jEdge_iedge[nEdges_iedges]= rank;
                             nEdges_iedges++;
@@ -1747,9 +1747,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      {
                          for (m= 0; m< rfactor[0]; m++)
                          {
-                            hypre_SStructGridFindMapEntry(fgrid_edge, part,
+                            hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
                                                           var_index, t, &entry);
-                            hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                            hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                               &rank, matrix_type);
                             jEdge_iedge[nEdges_iedges]= rank;
                             nEdges_iedges++;
@@ -1765,9 +1765,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      {
                          for (m= 0; m< rfactor[0]; m++)
                          {
-                            hypre_SStructGridFindMapEntry(fgrid_edge, part,
+                            hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
                                                           var_index, t, &entry);
-                            hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                            hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                               &rank, matrix_type);
                             jEdge_iedge[nEdges_iedges]= rank;
                             nEdges_iedges++;
@@ -1783,9 +1783,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      {
                          for (m= 0; m< rfactor[1]; m++)
                          {
-                            hypre_SStructGridFindMapEntry(fgrid_edge, part,
+                            hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
                                                           var_index, t, &entry);
-                            hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                            hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                               &rank, matrix_type);
                             jEdge_iedge[nEdges_iedges]= rank;
                             nEdges_iedges++;
@@ -1801,9 +1801,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      {
                          for (m= 0; m< rfactor[2]; m++)
                          {
-                            hypre_SStructGridFindMapEntry(fgrid_edge, part,
+                            hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
                                                           var_index, t, &entry);
-                            hypre_SStructMapEntryGetGlobalRank(entry, var_index,
+                            hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
                                                               &rank, matrix_type);
                             jEdge_iedge[nEdges_iedges]= rank;
                             nEdges_iedges++;
@@ -1917,17 +1917,17 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                {
                   var= Face_vartypes[t];
 
-                  hypre_SStructGridFindMapEntry(cgrid_face, part, cindex, t,
+                  hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t,
                                                 &entry);
-                  hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                  hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                      matrix_type);
                   jElement_Face[nElements_Faces]= rank;
                   nElements_Faces++;
 
                   hypre_SubtractIndex(cindex, varoffsets[var], var_index);
-                  hypre_SStructGridFindMapEntry(cgrid_face, part, var_index, t,
+                  hypre_SStructGridFindBoxManEntry(cgrid_face, part, var_index, t,
                                                 &entry);
-                  hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                  hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                      matrix_type);
                   jElement_Face[nElements_Faces]= rank;
                   nElements_Faces++;
@@ -1971,17 +1971,17 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                {
                   case 2: /* x_Face= {(i,j), (i-1,j)} */
                   {
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
 
                       hypre_SubtractIndex(cindex, ishift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
@@ -1990,17 +1990,17 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                   case 3: /* y_Face= {(i,j), (i,j-1)} */
                   {
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
 
                       hypre_SubtractIndex(cindex, jshift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
@@ -2009,33 +2009,33 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                   case 5: /* "/" x_Edge={(i,j,k),(i,j-1,k),(i,j-1,k-1),(i,j,k-1)} */
                   {
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
 
                       hypre_SubtractIndex(cindex, jshift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
 
                       hypre_SubtractIndex(var_index, kshift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
 
                       hypre_AddIndex(var_index, jshift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
@@ -2044,33 +2044,33 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                   case 6: /* "-" y_Edge={(i,j,k),(i-1,j,k),(i-1,j,k-1),(i,j,k-1)}*/
                   {
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
 
                       hypre_SubtractIndex(cindex, ishift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
                                                                                                                                       
                       hypre_SubtractIndex(var_index, kshift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
                                                                                                                                       
                       hypre_AddIndex(var_index, ishift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
@@ -2079,33 +2079,33 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                   case 7: /* "|" z_Edge={(i,j,k),(i,j-1,k),(i-1,j-1,k),(i-1,j,k)}*/
                   {
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
 
                       hypre_SubtractIndex(cindex, jshift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
                                                                                                                                       
                       hypre_SubtractIndex(var_index, ishift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
                                                                                                                                       
                       hypre_AddIndex(var_index, jshift, var_index);
-                      hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index, t,
+                      hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
                                                     &entry);
-                      hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                      hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                          matrix_type);
                       jElement_Edge[nElements_Edges]= rank;
                       nElements_Edges++;
@@ -2335,8 +2335,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                 }
                 hypre_AddIndex(findex, start, findex);
 
-                hypre_SStructGridFindMapEntry(fgrid_edge, part, findex, t, &entry);
-                hypre_SStructMapEntryGetGlobalRank(entry, findex, &rank, matrix_type);
+                hypre_SStructGridFindBoxManEntry(fgrid_edge, part, findex, t, &entry);
+                hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &rank, matrix_type);
               /* still row p may be outside the processor- check to make sure in */
                 if ((rank <= fupper_ranks[part][var]) && (rank >= flower_ranks[part][var]))
                 {
@@ -2470,9 +2470,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         for (n= 1; n< rfactor[1]; n++)
                         {
                            var_index[1]++;
-                           hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                           /* still row rank may be outside the processor */
                            if ((rank <= fupper_ranks[part][var]) &&
@@ -2547,9 +2547,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         for (n= 1; n< rfactor[2]; n++)
                         {
                            var_index[2]++;
-                           hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            if ((rank <= fupper_ranks[part][var]) &&
                                                 (rank >= flower_ranks[part][var]))
@@ -2648,9 +2648,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         for (n= 1; n< rfactor[0]; n++)
                         {
                            var_index[0]++;
-                           hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            if ((rank <= fupper_ranks[part][var]) &&
                                                 (rank >= flower_ranks[part][var]))
@@ -2726,9 +2726,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         for (n= 1; n< rfactor[2]; n++)
                         {
                            var_index[2]++;
-                           hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            if ((rank <= fupper_ranks[part][var]) &&
                                                 (rank >= flower_ranks[part][var]))
@@ -2829,9 +2829,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         for (n= 1; n< rfactor[1]; n++)
                         {
                            var_index[1]++;
-                           hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            if ((rank <= fupper_ranks[part][var]) &&
                                                 (rank >= flower_ranks[part][var]))
@@ -2907,9 +2907,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         for (n= 1; n< rfactor[0]; n++)
                         {
                            var_index[0]++;
-                           hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            if ((rank <= fupper_ranks[part][var]) &&
                                                 (rank >= flower_ranks[part][var]))
@@ -2997,9 +2997,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         var_index[0]+= p;
                         for (n= 0; n< rfactor[1]; n++)
                         {
-                           hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            iedgeEdge[j]= rank;
 
@@ -3057,9 +3057,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         var_index[1]+= p;
                         for (n= 0; n< rfactor[0]; n++)
                         {
-                           hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            iedgeEdge[j]= rank;
 
@@ -3118,9 +3118,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            var_index[1]++;
                            for (k= 0; k< rfactor[0]; k++)
                            {
-                              hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               iedgeEdge[j]= rank;
 
@@ -3187,9 +3187,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            var_index[0]++;
                            for (k= 0; k< rfactor[1]; k++)
                            {
-                              hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               iedgeEdge[j]= rank;
 
@@ -3257,9 +3257,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            var_index[0]++;
                            for (k= 0; k< rfactor[2]; k++)
                            {
-                              hypre_SStructGridFindMapEntry(fgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               iedgeEdge[j]= rank;
 
@@ -3498,8 +3498,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                 }
 
                 hypre_AddIndex(findex, start, findex);
-                hypre_SStructGridFindMapEntry(fgrid_edge, part, findex, t, &entry);
-                hypre_SStructMapEntryGetGlobalRank(entry, findex, &j, matrix_type);
+                hypre_SStructGridFindBoxManEntry(fgrid_edge, part, findex, t, &entry);
+                hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &j, matrix_type);
                                                                                                                   
                /* still row p may be outside the processor- check to make sure in */
                 if ((j <= fupper_ranks[part][var]) && (j >= flower_ranks[part][var]))
@@ -3516,9 +3516,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      var_index= cindex - subtract_index.*/
                    hypre_SubtractIndex(cindex, varoffsets[var], var_index);
 
-                   hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                   hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                  t, &entry);
-                   hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                   hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                       matrix_type);
                    jedge_Edge[k]= rank;
                    vals_edgeEdge[k]= fCedge_ratio;
@@ -3658,15 +3658,15 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_AddIndex(findex, start, findex);
 
                      hypre_SubtractIndex(cindex, kshift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank2,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank2,
                                                         matrix_type);
 
                      hypre_SubtractIndex(var_index, jshift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                         matrix_type);
 
                     /* loop over the strips of x_edges making up the Z_Face and
@@ -3801,15 +3801,15 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      * x_Edge (i,j-1,k), (i,j-1,k-1)
                      ******************************************************/
                      hypre_SubtractIndex(cindex, jshift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank2,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank2,
                                                         matrix_type);
 
                      hypre_SubtractIndex(var_index, kshift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                         matrix_type);
 
                     /* loop over the strips of x_edges making up the Y_Face and
@@ -3962,15 +3962,15 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_AddIndex(findex, start, findex);
 
                      hypre_SubtractIndex(cindex, kshift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank2,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank2,
                                                         matrix_type);
 
                      hypre_SubtractIndex(var_index, ishift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                         matrix_type);
 
                     /* loop over the strips of y_edges making up the Z_Face and
@@ -4100,15 +4100,15 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      * y_Edge (i-1,j,k), (i-1,j,k-1)
                      ******************************************************/
                      hypre_SubtractIndex(cindex, ishift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank2,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank2,
                                                         matrix_type);
 
                      hypre_SubtractIndex(var_index, kshift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                         matrix_type);
 
                     /* loop over the strips of y_edges making up the X_Face and
@@ -4261,15 +4261,15 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_AddIndex(findex, start, findex);
 
                      hypre_SubtractIndex(cindex, ishift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank2,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank2,
                                                         matrix_type);
 
                      hypre_SubtractIndex(var_index, jshift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                         matrix_type);
 
                     /* loop over the strips of z_edges making up the X_Face and
@@ -4398,15 +4398,15 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      * z_Edge (i,j-1,k), (i-1,j-1,k)
                      **********************************************************/
                      hypre_SubtractIndex(cindex, jshift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank2,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank2,
                                                         matrix_type);
 
                      hypre_SubtractIndex(var_index, ishift, var_index);
-                     hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                    t, &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                         matrix_type);
 
                     /* loop over the strips of y_edges making up the Y_Face and
@@ -4558,33 +4558,33 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                          /*interior of Face. Extract the four coarse Edge
                            (x_Edge ijk & (i-1,j,k) and y_Edge ijk & (i,j-1,k)
                            column ranks. No weights determined. */
-                           hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                           hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                               matrix_type);
                            jedge_Edge[k]= rank;
                            k++;
 
                            hypre_SubtractIndex(cindex, ishift, var_index);
-                           hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            jedge_Edge[k]= rank;
                            k++;
 
                           /* y_Edges */
-                           hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                           hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                          vartype_map[3], &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                               matrix_type);
                            jedge_Edge[k]= rank;
                            k++;
 
                            hypre_SubtractIndex(cindex, jshift, var_index);
-                           hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                          vartype_map[3], &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            jedge_Edge[k]= rank;
                            k++;
@@ -4643,33 +4643,33 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                          /*lies interior of Face. Extract the four coarse Edge
                            (y_Edge ijk & (i,j-1,k) and x_Edge ijk & (i-1,j,k)
                            column ranks. No weights determined. */
-                           hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                           hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                               matrix_type);
                            jedge_Edge[k]= rank;
                            k++;
 
                            hypre_SubtractIndex(cindex, jshift, var_index);
-                           hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                          t, &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            jedge_Edge[k]= rank;
                            k++;
 
                           /* x_Edges */
-                           hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                           hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                          vartype_map[2], &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                               matrix_type);
                            jedge_Edge[k]= rank;
                            k++;
 
                            hypre_SubtractIndex(cindex, ishift, var_index);
-                           hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                           hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                          vartype_map[2], &entry);
-                           hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                               matrix_type);
                            jedge_Edge[k]= rank;
                            k++;
@@ -4735,97 +4735,97 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               *
                               * vals_edgeEdge's are not set.
                               ***********************************************/
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(cindex, jshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(var_index, kshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_AddIndex(var_index, jshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                              /* y_Edge */
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             vartype_map[6], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(cindex, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[6], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(var_index, kshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[6], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_AddIndex(var_index, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[6], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                              /* z_Edge */
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             vartype_map[7], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(cindex, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[7], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(var_index, jshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[7], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_AddIndex(var_index, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[7], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
@@ -4892,97 +4892,97 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               *
                               * vals_edgeEdge's are not set.
                               ***********************************************/
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(cindex, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(var_index, kshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_AddIndex(var_index, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                           /* z_Edge */
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             vartype_map[7], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(cindex, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[7], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(var_index, jshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[7], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_AddIndex(var_index, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[7], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                             /* x_Edge */
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             vartype_map[5], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(cindex, jshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[5], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(var_index, kshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[5], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_AddIndex(var_index, jshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[5], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
@@ -5049,97 +5049,97 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               *
                               * vals_edgeEdge's are not set.
                               *************************************************/
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(cindex, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(var_index, jshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_AddIndex(var_index, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             t, &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                              /* x_Edge */
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             vartype_map[5], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(cindex, jshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[5], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(var_index, kshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[5], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_AddIndex(var_index, jshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[5], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                              /* y_Edge */
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, cindex,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             vartype_map[6], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, cindex, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(cindex, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[6], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_SubtractIndex(var_index, kshift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[6], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
 
                               hypre_AddIndex(var_index, ishift, var_index);
-                              hypre_SStructGridFindMapEntry(cgrid_edge, part, var_index,
+                              hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index,
                                                             vartype_map[6], &entry);
-                              hypre_SStructMapEntryGetGlobalRank(entry, var_index, &rank,
+                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                               jedge_Edge[k]= rank;
                               k++;
@@ -5267,7 +5267,7 @@ hypre_CollapseStencilToStencil(hypre_ParCSRMatrix     *Aee,
    int                      start_rank = hypre_ParCSRMatrixFirstRowIndex(Aee);
    int                      end_rank   = hypre_ParCSRMatrixLastRowIndex(Aee);
 
-   hypre_BoxMapEntry       *entry;
+   hypre_BoxManEntry       *entry;
 
    int                     *ranks;
    int                     *marker;     /* marker to record the rank groups */
@@ -5293,8 +5293,8 @@ hypre_CollapseStencilToStencil(hypre_ParCSRMatrix     *Aee,
   /* check if the row corresponding to pt_location is on this proc. If
      not, return an identity row. THIS SHOULD BE CORRECTED IN THE FUTURE
      TO GIVE SOMETHING MORE REASONABLE. */
-    hypre_SStructGridFindMapEntry(grid, part, pt_location, var, &entry);
-    hypre_SStructMapEntryGetGlobalRank(entry, pt_location, &rank, matrix_type);
+    hypre_SStructGridFindBoxManEntry(grid, part, pt_location, var, &entry);
+    hypre_SStructBoxManEntryGetGlobalRank(entry, pt_location, &rank, matrix_type);
     if (rank < start_rank || rank > end_rank)
     {
        collapsed_vals[1] = 1.0;
@@ -5320,10 +5320,10 @@ hypre_CollapseStencilToStencil(hypre_ParCSRMatrix     *Aee,
           hypre_CopyIndex(index1, index2);
           index2[collapse_dir]+= i;
           
-          hypre_SStructGridFindMapEntry(grid, part, index2, var, &entry);
+          hypre_SStructGridFindBoxManEntry(grid, part, index2, var, &entry);
           if (entry)
           {
-             hypre_SStructMapEntryGetGlobalRank(entry, index2, &rank, matrix_type);
+             hypre_SStructBoxManEntryGetGlobalRank(entry, index2, &rank, matrix_type);
              ranks[cnt] = rank;
              marker[cnt]= j+1;
 

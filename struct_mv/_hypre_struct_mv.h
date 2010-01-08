@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 #include "_hypre_utilities.h"
 
 #include "HYPRE_struct_mv.h"
@@ -22,6 +21,17 @@
 extern "C" {
 #endif
 
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -618,6 +628,17 @@ if (hypre__num_blocks > 1)\
 #endif  /* ifndef HYPRE_USE_PTHREADS */
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -1006,6 +1027,17 @@ int  kinc = (hypre_IndexZ(stride)*\
 
 #endif
 
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -1063,17 +1095,26 @@ typedef struct
 #define hypre_StructAssumedPartMyPartitionProcId(apart, i) ((apart)->my_partition_proc_ids[i])
 #define hypre_StructAssumedPartMyPartitionBoxnum(apart, i) ((apart)->my_partition_boxnums[i])
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 #ifndef hypre_BOX_MANAGER_HEADER
 #define hypre_BOX_MANAGER_HEADER
 
 
-/*---------------------------------------------------------------------------
- *
- * Box Manager: organizes arbitrary information in a spatial way
- *
- *----------------------------------------------------------------------------*/
 
+/*--------------------------------------------------------------------------
+ * BoxManEntry
+ *--------------------------------------------------------------------------*/
 
 typedef struct hypre_BoxManEntry_struct
 {
@@ -1084,14 +1125,23 @@ typedef struct hypre_BoxManEntry_struct
    int id;
    int num_ghost[6];
 
-   void *info; 
-
+   int position; /* this indicates the location of the entry in the
+                  * the box manager entries array and is used for
+                  * pairing with the info object (populated in addentry) */
+   
+   void *boxman; /* the owning manager (populated in addentry)*/
+   
    struct hypre_BoxManEntry_struct  *next;
 
 } hypre_BoxManEntry;
 
 
-/*-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------
+ *
+ * Box Manager: organizes arbitrary information in a spatial way
+ *
+ *----------------------------------------------------------------------------*/
+
 
 typedef struct
 {
@@ -1166,6 +1216,10 @@ typedef struct
    hypre_BoxManEntry   **my_entries;   /* points into *entries that are mine & corresponds to
                                           my_ids array.  This is destroyed in the assemble */
    
+   void               *info_objects;    /* this is an array of info objects (of each is of 
+                                         size entry_info_size) -this is managed byte-wise */ 
+   
+
    hypre_StructAssumedPart *assumed_partition; /* the assumed partition object  - for now this is only
                                                   used during the assemble (where it is created)*/
    int                 dim;           /* problem dimension (known in the grid) */
@@ -1173,13 +1227,18 @@ typedef struct
    hypre_Box           *bounding_box;  /* bounding box - from associated grid */
    
 
-   /* ghost stuff - leave for now */
+   int                 next_id; /* counter to indicate the next id 
+                                   that would be unique (regardless of proc id) */  
+
+   /* ghost stuff  */
 
    int                num_ghost[6]; 
 
 
 
 } hypre_BoxManager;
+
+
 
 
 /*--------------------------------------------------------------------------
@@ -1197,6 +1256,7 @@ typedef struct
 #define hypre_BoxManEntryInfoSize(manager)      ((manager) -> entry_info_size)
 #define hypre_BoxManNEntries(manager)           ((manager) -> nentries)
 #define hypre_BoxManEntries(manager)            ((manager) -> entries)
+#define hypre_BoxManInfoObjects(manager)        ((manager) -> info_objects)
 #define hypre_BoxManIsAssembled(manager)        ((manager) -> is_assembled) 
 
 #define hypre_BoxManProcsSort(manager)          ((manager) -> procs_sort)
@@ -1219,6 +1279,8 @@ typedef struct
 #define hypre_BoxManDim(manager)                ((manager) -> dim)
 #define hypre_BoxManBoundingBox(manager)        ((manager) -> bounding_box)
 
+#define hypre_BoxManNextId(manager)             ((manager) -> next_id)
+
 #define hypre_BoxManNumGhost(manager)           ((manager) -> num_ghost)
 
 #define hypre_BoxManIndexesD(manager, d)    hypre_BoxManIndexes(manager)[d]
@@ -1228,6 +1290,8 @@ typedef struct
 hypre_BoxManIndexTable(manager)[((k*hypre_BoxManSizeD(manager, 1) + j)*\
                            hypre_BoxManSizeD(manager, 0) + i)]
 
+#define hypre_BoxManInfoObject(manager, i) \
+(void *) ((char *)hypre_BoxManInfoObjects(manager) + i* hypre_BoxManEntryInfoSize(manager))
 
 
 
@@ -1239,37 +1303,24 @@ hypre_BoxManIndexTable(manager)[((k*hypre_BoxManSizeD(manager, 1) + j)*\
 #define hypre_BoxManEntryIMax(entry)     ((entry) -> imax)
 #define hypre_BoxManEntryProc(entry)     ((entry) -> proc)
 #define hypre_BoxManEntryId(entry)       ((entry) -> id)
-#define hypre_BoxManEntryInfo(entry)     ((entry) -> info)
+#define hypre_BoxManEntryPosition(entry) ((entry) -> position)
 #define hypre_BoxManEntryNumGhost(entry) ((entry) -> num_ghost)
 #define hypre_BoxManEntryNext(entry)     ((entry) -> next)
-
-
-
-
-/*--------------------------------------------------------------------------
- * Info objects 
- *--------------------------------------------------------------------------*/
-
-
-
-typedef struct
-{
-   int  type;
-   int  proc;
-   int  offset;
-   int  box;
-   int  ghoffset;
-
-} hypre_BoxManInfoDefault;
-
-#define hypre_BoxManInfoDType(info)            ((info) -> type)
-#define hypre_BoxManInfoDProc(info)            ((info) -> proc)
-#define hypre_BoxManInfoDOffset(info)          ((info) -> offset)
-#define hypre_BoxManInfoDBox(info)             ((info) -> box)
-#define hypre_BoxManInfoDGhoffset(info)        ((info) -> ghoffset)
-
+#define hypre_BoxManEntryBoxMan(entry)   ((entry) -> boxman)
+#
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -1356,6 +1407,17 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
 
 #endif
 
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -1398,6 +1460,17 @@ typedef struct hypre_StructStencil_struct
 hypre_StructStencilShape(stencil)[i]
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -1629,6 +1702,17 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleAction(comm_handle)      (comm_handle -> action)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -1698,6 +1782,17 @@ typedef struct hypre_ComputePkg_struct
 #define hypre_ComputePkgNumValues(compute_pkg)    (compute_pkg -> num_values)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -1789,6 +1884,17 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
  hypre_CCBoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -1925,9 +2031,12 @@ int hypre_BoxManSetAllGlobalKnown ( hypre_BoxManager *manager , int known );
 int hypre_BoxManGetAllGlobalKnown ( hypre_BoxManager *manager , int *known );
 int hypre_BoxManSetIsEntriesSort ( hypre_BoxManager *manager , int is_sort );
 int hypre_BoxManGetIsEntriesSort ( hypre_BoxManager *manager , int *is_sort );
+int hypre_BoxManGetGlobalIsGatherCalled ( hypre_BoxManager *manager , MPI_Comm comm , int *is_gather );
 int hypre_BoxManGetAssumedPartition ( hypre_BoxManager *manager , hypre_StructAssumedPart **assumed_partition );
 int hypre_BoxManSetAssumedPartition ( hypre_BoxManager *manager , hypre_StructAssumedPart *assumed_partition );
-int hypre_BoxManDeleteMultipleEntries ( hypre_BoxManager *manager , int *indices , int num );
+int hypre_BoxManSetBoundingBox ( hypre_BoxManager *manager , hypre_Box *bounding_box );
+int hypre_BoxManSetNumGhost ( hypre_BoxManager *manager , int *num_ghost );
+int hypre_BoxManDeleteMultipleEntriesAndInfo ( hypre_BoxManager *manager , int *indices , int num );
 int hypre_BoxManCreate ( int max_nentries , int info_size , int dim , hypre_Box *bounding_box , MPI_Comm comm , hypre_BoxManager **manager_ptr );
 int hypre_BoxManIncSize ( hypre_BoxManager *manager , int inc_size );
 int hypre_BoxManDestroy ( hypre_BoxManager *manager );
@@ -1935,11 +2044,11 @@ int hypre_BoxManAddEntry ( hypre_BoxManager *manager , hypre_Index imin , hypre_
 int hypre_BoxManGetEntry ( hypre_BoxManager *manager , int proc , int id , hypre_BoxManEntry **entry_ptr );
 int hypre_BoxManGetAllEntries ( hypre_BoxManager *manager , int *num_entries , hypre_BoxManEntry **entries );
 int hypre_BoxManGetAllEntriesBoxes ( hypre_BoxManager *manager , hypre_BoxArray *boxes );
+int hypre_BoxManGetLocalEntriesBoxes ( hypre_BoxManager *manager , hypre_BoxArray *boxes );
 int hypre_BoxManGetAllEntriesBoxesProc ( hypre_BoxManager *manager , hypre_BoxArray *boxes , int *procs );
 int hypre_BoxManGatherEntries ( hypre_BoxManager *manager , hypre_Index imin , hypre_Index imax );
 int hypre_BoxManAssemble ( hypre_BoxManager *manager );
 int hypre_BoxManIntersect ( hypre_BoxManager *manager , hypre_Index ilower , hypre_Index iupper , hypre_BoxManEntry ***entries_ptr , int *nentries_ptr );
-int hypre_BoxManSetNumGhost ( hypre_BoxManager *manager , int *num_ghost );
 int hypre_FillResponseBoxManAssemble1 ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
 int hypre_FillResponseBoxManAssemble2 ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
 void hypre_entryqsort2 ( int *v , hypre_BoxManEntry **ent , int left , int right );

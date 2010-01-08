@@ -184,7 +184,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    double                 *stencil_vals;
    int                    *common_rank_stencils, *common_stencil_ranks;
    int                    *common_stencil_i;
-   hypre_BoxMapEntry      *map_entry;
+   hypre_BoxManEntry      *boxman_entry;
 
    int                    *temp1, *temp2;
    double                 *temp3;
@@ -2162,9 +2162,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                                    k+loopj*stridef[1], l+loopk*stridef[2]);
                                     hypre_AddIndex(fstart, index_temp, index_temp);
 
-                                    hypre_SStructGridFindMapEntry(grid, part_fine, index_temp,
-                                                                  var1, &map_entry);
-                                    hypre_SStructMapEntryGetGlobalRank(map_entry, index_temp,
+                                    hypre_SStructGridFindBoxManEntry(grid, part_fine, index_temp,
+                                                                     var1, &boxman_entry);
+                                    hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index_temp,
                                                                        &rank, matrix_type);
 
                                     found= false;
@@ -2227,9 +2227,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                                    k+loopj*stridef[1], l+loopk*stridef[2]);
                                     hypre_AddIndex(fstart, index_temp, index_temp);
 
-                                    hypre_SStructGridFindMapEntry(grid, part_fine, index_temp,
-                                                                  var1, &map_entry);
-                                    hypre_SStructMapEntryGetGlobalRank(map_entry, index_temp,
+                                    hypre_SStructGridFindBoxManEntry(grid, part_fine, index_temp,
+                                                                     var1, &boxman_entry);
+                                    hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index_temp,
                                                                        &rank, matrix_type);
 
                                     found= false;
@@ -2782,8 +2782,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                    Uventry = Uventries[ coarse_contrib_Uv[i][j] ];
                    hypre_CopyIndex(hypre_SStructUVEntryIndex(Uventry), index);
 
-                   hypre_SStructGridFindMapEntry(grid, part_fine, index, var1, &map_entry);
-                   hypre_SStructMapEntryGetGlobalRank(map_entry, index, &rank, matrix_type);
+                   hypre_SStructGridFindBoxManEntry(grid, part_fine, index, var1, &boxman_entry);
+                   hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &rank, matrix_type);
 
                    Uventry= hypre_SStructGraphUVEntry(graph, rank-startrank);
                    nUentries= hypre_SStructUVEntryNUEntries(Uventry);

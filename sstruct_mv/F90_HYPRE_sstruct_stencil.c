@@ -11,8 +11,6 @@
  ***********************************************************************EHEADER*/
 
 
-
-
 /******************************************************************************
  *
  * HYPRE_SStructStencil interface
@@ -28,14 +26,15 @@
 
 void
 hypre_F90_IFACE(hypre_sstructstencilcreate, HYPRE_SSTRUCTSTENCILCREATE)
-                                                                (int      *ndim,
-                                                                 int      *size,
-                                                                 long int *stencil_ptr,
-                                                                 int      *ierr)
+   (int      *ndim,
+    int      *size,
+    long int *stencil_ptr,
+    int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructStencilCreate( (int)                   *ndim,
-                                              (int)                   *size,
-                                              (HYPRE_SStructStencil *) stencil_ptr ) );
+   *ierr = (int) (HYPRE_SStructStencilCreate(
+                     (int)                   *ndim,
+                     (int)                   *size,
+                     (HYPRE_SStructStencil *) stencil_ptr ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -44,10 +43,11 @@ hypre_F90_IFACE(hypre_sstructstencilcreate, HYPRE_SSTRUCTSTENCILCREATE)
 
 void
 hypre_F90_IFACE(hypre_sstructstencildestroy, HYPRE_SSTRUCTSTENCILDESTROY)
-                                                                (long int *stencil,
-                                                                 int      *ierr)
+   (long int *stencil,
+    int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructStencilDestroy( (HYPRE_SStructStencil) *stencil ) );
+   *ierr = (int) (HYPRE_SStructStencilDestroy(
+                     (HYPRE_SStructStencil) *stencil ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -56,14 +56,15 @@ hypre_F90_IFACE(hypre_sstructstencildestroy, HYPRE_SSTRUCTSTENCILDESTROY)
 
 void
 hypre_F90_IFACE(hypre_sstructstencilsetentry, HYPRE_SSTRUCTSTENCILSETENTRY)
-                                                                (long int *stencil,
-                                                                 int      *entry,
-                                                                 int      *offset,
-                                                                 int      *var,
-                                                                 int      *ierr)
+   (long int *stencil,
+    int      *entry,
+    int      *offset,
+    int      *var,
+    int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructStencilSetEntry( (HYPRE_SStructStencil) *stencil,
-                                                 (int)                 *entry,
-                                                 (int *)                offset,
-                                                 (int)                 *var ) );
+   *ierr = (int) (HYPRE_SStructStencilSetEntry(
+                     (HYPRE_SStructStencil) *stencil,
+                     (int)                  *entry,
+                     (int *)                 offset,
+                     (int)                  *var ) );
 }

@@ -11,8 +11,6 @@
  ***********************************************************************EHEADER*/
 
 
-
-
 /******************************************************************************
  *
  * Header info for the hypre_SStructGraph structures
@@ -25,6 +23,19 @@
 /*--------------------------------------------------------------------------
  * hypre_SStructGraph:
  *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   int           part;
+   hypre_Index   index;
+   int           var;
+   int           to_part;     
+   hypre_Index   to_index;
+   int           to_var;
+
+} hypre_SStructGraphEntry;
+
+
 
 typedef struct
 {
@@ -53,22 +64,38 @@ typedef struct hypre_SStructGraph_struct
    MPI_Comm                comm;
    int                     ndim;
    hypre_SStructGrid      *grid;
+   hypre_SStructGrid      *domain_grid; /* same as grid by default */
    int                     nparts;
    hypre_SStructPGrid    **pgrids;
    hypre_SStructStencil ***stencils; /* each (part, var) has a stencil */
+
+   /* info for fem-based user input */
+   int                    *fem_nsparse;
+   int                   **fem_sparse_i;
+   int                   **fem_sparse_j;
+   int                   **fem_entries;
 
    /* U-graph info: Entries are referenced via local grid-variable rank. */
    int                     nUventries;  /* number of iUventries */
    int                     aUventries;  /* alloc size of iUventries */
    int                    *iUventries;
- 
 
    hypre_SStructUVEntry  **Uventries;
    int                     totUentries;
 
    int                     ref_count;
 
-  int                     type;    /* GEC0203 */
+   int                     type;    /* GEC0203 */
+
+   hypre_SStructGraphEntry **graph_entries; /* these are stored from
+                                             * the AddGraphEntries calls
+                                             * and then deleted in the
+                                             * GraphAssemble */
+   int                     n_graph_entries; /* number graph entries */
+   int                     a_graph_entries; /* alloced graph entries */
+   
+
+
 } hypre_SStructGraph;
 
 /*--------------------------------------------------------------------------
@@ -78,11 +105,24 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphComm(graph)           ((graph) -> comm)
 #define hypre_SStructGraphNDim(graph)           ((graph) -> ndim)
 #define hypre_SStructGraphGrid(graph)           ((graph) -> grid)
+#define hypre_SStructGraphDomainGrid(graph)     ((graph) -> domain_grid)
 #define hypre_SStructGraphNParts(graph)         ((graph) -> nparts)
-#define hypre_SStructGraphPGrids(graph)         ((graph) -> pgrids)
-#define hypre_SStructGraphPGrid(graph, p)       ((graph) -> pgrids[p])
+#define hypre_SStructGraphPGrids(graph) \
+   hypre_SStructGridPGrids(hypre_SStructGraphGrid(graph))
+#define hypre_SStructGraphPGrid(graph, p) \
+   hypre_SStructGridPGrid(hypre_SStructGraphGrid(graph), p)
 #define hypre_SStructGraphStencils(graph)       ((graph) -> stencils)
 #define hypre_SStructGraphStencil(graph, p, v)  ((graph) -> stencils[p][v])
+
+#define hypre_SStructGraphFEMNSparse(graph)     ((graph) -> fem_nsparse)
+#define hypre_SStructGraphFEMSparseI(graph)     ((graph) -> fem_sparse_i)
+#define hypre_SStructGraphFEMSparseJ(graph)     ((graph) -> fem_sparse_j)
+#define hypre_SStructGraphFEMEntries(graph)     ((graph) -> fem_entries)
+#define hypre_SStructGraphFEMPNSparse(graph, p) ((graph) -> fem_nsparse[p])
+#define hypre_SStructGraphFEMPSparseI(graph, p) ((graph) -> fem_sparse_i[p])
+#define hypre_SStructGraphFEMPSparseJ(graph, p) ((graph) -> fem_sparse_j[p])
+#define hypre_SStructGraphFEMPEntries(graph, p) ((graph) -> fem_entries[p])
+
 #define hypre_SStructGraphNUVEntries(graph)     ((graph) -> nUventries)
 #define hypre_SStructGraphAUVEntries(graph)     ((graph) -> aUventries)
 #define hypre_SStructGraphIUVEntries(graph)     ((graph) -> iUventries)
@@ -92,6 +132,10 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphTotUEntries(graph)    ((graph) -> totUentries)
 #define hypre_SStructGraphRefCount(graph)       ((graph) -> ref_count)
 #define hypre_SStructGraphObjectType(graph)     ((graph) -> type)
+#define hypre_SStructGraphEntries(graph)        ((graph) -> graph_entries)
+#define hypre_SStructNGraphEntries(graph)       ((graph) -> n_graph_entries)
+#define hypre_SStructAGraphEntries(graph)       ((graph) -> a_graph_entries)
+
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUVEntry
@@ -121,6 +165,18 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUEntryToProc(U)   ((U) -> to_proc)
 #define hypre_SStructUEntryRank(U)     ((U) -> rank)
 
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_SStructGraphEntry
+ *--------------------------------------------------------------------------*/
+#define hypre_SStructGraphEntryPart(g)     ((g) -> part)
+#define hypre_SStructGraphEntryIndex(g)    ((g) -> index)
+#define hypre_SStructGraphEntryVar(g)      ((g) -> var)
+#define hypre_SStructGraphEntryToPart(g)   ((g) -> to_part)
+#define hypre_SStructGraphEntryToIndex(g)  ((g) -> to_index)
+#define hypre_SStructGraphEntryToVar(g)    ((g) -> to_var)
+
+
+
+
 #endif
-
-

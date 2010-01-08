@@ -21,7 +21,7 @@
  * the refinement patches.
  *    Algo.:For each cbox
  *       {
- *          1) refine cbox and boxmap_intersect with fmap
+ *          1) refine cbox and boxman_intersect with fboxman
  *          2) loop over intersection boxes
  *                3) coarsen and contract (only the coarse nodes on this 
  *                   processor) and zero data.
@@ -42,9 +42,9 @@ hypre_FacZeroCData( void                 *fac_vdata,
    hypre_BoxArray        *cgrid_boxes;
    hypre_Box             *cgrid_box;
 
-   hypre_BoxMap          *fmap;
-   hypre_BoxMapEntry    **map_entries;
-   int                    nmap_entries;
+   hypre_BoxManager      *fboxman;
+   hypre_BoxManEntry    **boxman_entries;
+   int                    nboxman_entries;
 
    hypre_Box              scaled_box;
    hypre_Box              intersect_box;
@@ -92,7 +92,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
           *---------------------------------------------------------------------*/
          cgrid        = hypre_SStructPGridSGrid(p_cgrid, var);
          cgrid_boxes  = hypre_StructGridBoxes(cgrid);
-         fmap         = hypre_SStructGridMap(grid, part_fine, var);
+         fboxman         = hypre_SStructGridBoxManager(grid, part_fine, var);
 
          hypre_ForBoxI(ci, cgrid_boxes)
          {
@@ -108,13 +108,13 @@ hypre_FacZeroCData( void                 *fac_vdata,
              hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), temp_index,
                                         *refine_factors, hypre_BoxIMax(&scaled_box));
 
-             hypre_BoxMapIntersect(fmap, hypre_BoxIMin(&scaled_box),
-                                   hypre_BoxIMax(&scaled_box), &map_entries,
-                                  &nmap_entries);
+             hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&scaled_box),
+                                   hypre_BoxIMax(&scaled_box), &boxman_entries,
+                                  &nboxman_entries);
 
-             for (i= 0; i< nmap_entries; i++)
+             for (i= 0; i< nboxman_entries; i++)
              {
-                hypre_BoxMapEntryGetExtents(map_entries[i], ilower, iupper);
+                hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
                 hypre_BoxSetExtents(&intersect_box, ilower, iupper);
                 hypre_IntersectBoxes(&intersect_box, &scaled_box, &intersect_box);
 
@@ -160,9 +160,9 @@ hypre_FacZeroCData( void                 *fac_vdata,
                    hypre_TFree(values);
 
                 }  /* if (intersect_size > 0) */
-             }     /* for (i= 0; i< nmap_entries; i++) */
+             }     /* for (i= 0; i< nboxman_entries; i++) */
 
-             hypre_TFree(map_entries);
+             hypre_TFree(boxman_entries);
 
          }   /* hypre_ForBoxI(ci, cgrid_boxes) */
       }      /* for (var= 0; var< nvars; var++) */

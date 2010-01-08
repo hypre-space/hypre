@@ -14,12 +14,10 @@
 #define hypre_BOX_MANAGER_HEADER
 
 
-/*---------------------------------------------------------------------------
- *
- * Box Manager: organizes arbitrary information in a spatial way
- *
- *----------------------------------------------------------------------------*/
 
+/*--------------------------------------------------------------------------
+ * BoxManEntry
+ *--------------------------------------------------------------------------*/
 
 typedef struct hypre_BoxManEntry_struct
 {
@@ -30,14 +28,23 @@ typedef struct hypre_BoxManEntry_struct
    int id;
    int num_ghost[6];
 
-   void *info; 
-
+   int position; /* this indicates the location of the entry in the
+                  * the box manager entries array and is used for
+                  * pairing with the info object (populated in addentry) */
+   
+   void *boxman; /* the owning manager (populated in addentry)*/
+   
    struct hypre_BoxManEntry_struct  *next;
 
 } hypre_BoxManEntry;
 
 
-/*-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------
+ *
+ * Box Manager: organizes arbitrary information in a spatial way
+ *
+ *----------------------------------------------------------------------------*/
+
 
 typedef struct
 {
@@ -112,6 +119,10 @@ typedef struct
    hypre_BoxManEntry   **my_entries;   /* points into *entries that are mine & corresponds to
                                           my_ids array.  This is destroyed in the assemble */
    
+   void               *info_objects;    /* this is an array of info objects (of each is of 
+                                         size entry_info_size) -this is managed byte-wise */ 
+   
+
    hypre_StructAssumedPart *assumed_partition; /* the assumed partition object  - for now this is only
                                                   used during the assemble (where it is created)*/
    int                 dim;           /* problem dimension (known in the grid) */
@@ -119,13 +130,18 @@ typedef struct
    hypre_Box           *bounding_box;  /* bounding box - from associated grid */
    
 
-   /* ghost stuff - leave for now */
+   int                 next_id; /* counter to indicate the next id 
+                                   that would be unique (regardless of proc id) */  
+
+   /* ghost stuff  */
 
    int                num_ghost[6]; 
 
 
 
 } hypre_BoxManager;
+
+
 
 
 /*--------------------------------------------------------------------------
@@ -143,6 +159,7 @@ typedef struct
 #define hypre_BoxManEntryInfoSize(manager)      ((manager) -> entry_info_size)
 #define hypre_BoxManNEntries(manager)           ((manager) -> nentries)
 #define hypre_BoxManEntries(manager)            ((manager) -> entries)
+#define hypre_BoxManInfoObjects(manager)        ((manager) -> info_objects)
 #define hypre_BoxManIsAssembled(manager)        ((manager) -> is_assembled) 
 
 #define hypre_BoxManProcsSort(manager)          ((manager) -> procs_sort)
@@ -165,6 +182,8 @@ typedef struct
 #define hypre_BoxManDim(manager)                ((manager) -> dim)
 #define hypre_BoxManBoundingBox(manager)        ((manager) -> bounding_box)
 
+#define hypre_BoxManNextId(manager)             ((manager) -> next_id)
+
 #define hypre_BoxManNumGhost(manager)           ((manager) -> num_ghost)
 
 #define hypre_BoxManIndexesD(manager, d)    hypre_BoxManIndexes(manager)[d]
@@ -174,6 +193,8 @@ typedef struct
 hypre_BoxManIndexTable(manager)[((k*hypre_BoxManSizeD(manager, 1) + j)*\
                            hypre_BoxManSizeD(manager, 0) + i)]
 
+#define hypre_BoxManInfoObject(manager, i) \
+(void *) ((char *)hypre_BoxManInfoObjects(manager) + i* hypre_BoxManEntryInfoSize(manager))
 
 
 
@@ -185,34 +206,10 @@ hypre_BoxManIndexTable(manager)[((k*hypre_BoxManSizeD(manager, 1) + j)*\
 #define hypre_BoxManEntryIMax(entry)     ((entry) -> imax)
 #define hypre_BoxManEntryProc(entry)     ((entry) -> proc)
 #define hypre_BoxManEntryId(entry)       ((entry) -> id)
-#define hypre_BoxManEntryInfo(entry)     ((entry) -> info)
+#define hypre_BoxManEntryPosition(entry) ((entry) -> position)
 #define hypre_BoxManEntryNumGhost(entry) ((entry) -> num_ghost)
 #define hypre_BoxManEntryNext(entry)     ((entry) -> next)
-
-
-
-
-/*--------------------------------------------------------------------------
- * Info objects 
- *--------------------------------------------------------------------------*/
-
-
-
-typedef struct
-{
-   int  type;
-   int  proc;
-   int  offset;
-   int  box;
-   int  ghoffset;
-
-} hypre_BoxManInfoDefault;
-
-#define hypre_BoxManInfoDType(info)            ((info) -> type)
-#define hypre_BoxManInfoDProc(info)            ((info) -> proc)
-#define hypre_BoxManInfoDOffset(info)          ((info) -> offset)
-#define hypre_BoxManInfoDBox(info)             ((info) -> box)
-#define hypre_BoxManInfoDGhoffset(info)        ((info) -> ghoffset)
-
+#define hypre_BoxManEntryBoxMan(entry)   ((entry) -> boxman)
+#
 
 #endif

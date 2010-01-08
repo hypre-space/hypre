@@ -22,9 +22,9 @@
  *--------------------------------------------------------------------------*/
 
 hypre_SStructSendInfoData *
-hypre_SStructSendInfo( hypre_StructGrid  *fgrid,
-                       hypre_BoxMap      *cmap,
-                       hypre_Index        rfactor )
+hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
+                       hypre_BoxManager      *cboxman,
+                       hypre_Index            rfactor )
 {
    hypre_SStructSendInfoData *sendinfo_data;
 
@@ -32,10 +32,10 @@ hypre_SStructSendInfo( hypre_StructGrid  *fgrid,
 
    hypre_BoxArray            *grid_boxes;
    hypre_Box                 *grid_box, cbox;
-   hypre_Box                 *intersect_box, map_entry_box;
+   hypre_Box                 *intersect_box, boxman_entry_box;
 
-   hypre_BoxMapEntry        **map_entries;
-   int                        nmap_entries;
+   hypre_BoxManEntry        **boxman_entries;
+   int                        nboxman_entries;
 
    hypre_BoxArrayArray       *send_boxes;
    int                      **send_processes;
@@ -57,7 +57,7 @@ hypre_SStructSendInfo( hypre_StructGrid  *fgrid,
     * Create the structured sendbox patterns. 
     *
     *   send_boxes are obtained by intersecting this proc's fgrid boxes
-    *   with cgrid's box_map. Intersecting BoxMapEntries not on this proc
+    *   with cgrid's box_man. Intersecting BoxManEntries not on this proc
     *   will give boxes that we will need to send data to- i.e., we scan
     *   through the boxes of grid and find the processors that own a chunk
     *   of it.
@@ -74,7 +74,7 @@ hypre_SStructSendInfo( hypre_StructGrid  *fgrid,
        grid_box= hypre_BoxArrayBox(grid_boxes, i);
 
        /*---------------------------------------------------------------------
-        * Find the boxarray that must be sent. BoxMapIntersect returns
+        * Find the boxarray that must be sent. BoxManIntersect returns
         * the full extents of the boxes that intersect with the given box.
         * We further need to intersect each box in the list with the given
         * box to determine the actual box that needs to be sent.
@@ -84,13 +84,13 @@ hypre_SStructSendInfo( hypre_StructGrid  *fgrid,
        hypre_SStructIndexScaleF_C(hypre_BoxIMax(grid_box), index,
                                   rfactor, hypre_BoxIMax(&cbox));
 
-       hypre_BoxMapIntersect(cmap, hypre_BoxIMin(&cbox), hypre_BoxIMax(&cbox),
-                            &map_entries, &nmap_entries);
+       hypre_BoxManIntersect(cboxman, hypre_BoxIMin(&cbox), hypre_BoxIMax(&cbox),
+                            &boxman_entries, &nboxman_entries);
 
        cnt= 0;
-       for (j= 0; j< nmap_entries; j++)
+       for (j= 0; j< nboxman_entries; j++)
        {
-          hypre_SStructMapEntryGetProcess(map_entries[j], &proc);
+          hypre_SStructBoxManEntryGetProcess(boxman_entries[j], &proc);
           if (proc != myproc)
           {
              cnt++;
@@ -100,26 +100,26 @@ hypre_SStructSendInfo( hypre_StructGrid  *fgrid,
        send_remote_boxnums[i]= hypre_CTAlloc(int, cnt);
 
        cnt= 0;
-       for (j= 0; j< nmap_entries; j++)
+       for (j= 0; j< nboxman_entries; j++)
        {
-          hypre_SStructMapEntryGetProcess(map_entries[j], &proc);
+          hypre_SStructBoxManEntryGetProcess(boxman_entries[j], &proc);
 
-          /* determine the chunk of the map_entries[j] box that is needed */
-          hypre_BoxMapEntryGetExtents(map_entries[j], ilower, iupper);
-          hypre_BoxSetExtents(&map_entry_box, ilower, iupper);
-          hypre_IntersectBoxes(&map_entry_box, &cbox, &map_entry_box);
+          /* determine the chunk of the boxman_entries[j] box that is needed */
+          hypre_BoxManEntryGetExtents(boxman_entries[j], ilower, iupper);
+          hypre_BoxSetExtents(&boxman_entry_box, ilower, iupper);
+          hypre_IntersectBoxes(&boxman_entry_box, &cbox, &boxman_entry_box);
 
           if (proc != myproc)
           {
              send_processes[i][cnt]     = proc;
-             hypre_SStructMapEntryGetBoxnum(map_entries[j], 
+             hypre_SStructBoxManEntryGetBoxnum(boxman_entries[j], 
                                             &send_remote_boxnums[i][cnt]);
-             hypre_AppendBox(&map_entry_box, 
+             hypre_AppendBox(&boxman_entry_box, 
                               hypre_BoxArrayArrayBoxArray(send_boxes, i));
              cnt++;
           }
       } 
-      hypre_TFree(map_entries);
+      hypre_TFree(boxman_entries);
    }  /* hypre_ForBoxI(i, grid_boxes) */ 
 
    hypre_TFree(intersect_box);

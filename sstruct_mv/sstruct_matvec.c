@@ -43,13 +43,12 @@ typedef struct
 int
 hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
 {
-   int ierr = 0;
    hypre_SStructPMatvecData *pmatvec_data;
 
    pmatvec_data = hypre_CTAlloc(hypre_SStructPMatvecData, 1);
    *pmatvec_vdata_ptr = (void *) pmatvec_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -61,7 +60,6 @@ hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
                            hypre_SStructPMatrix *pA,
                            hypre_SStructPVector *px )
 {
-   int ierr = 0;
    hypre_SStructPMatvecData   *pmatvec_data = pmatvec_vdata;
    int                         nvars;
    void                     ***smatvec_data;
@@ -89,7 +87,7 @@ hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
    (pmatvec_data -> nvars)        = nvars;
    (pmatvec_data -> smatvec_data) = smatvec_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -104,8 +102,6 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
                              double                beta,
                              hypre_SStructPVector *py )
 {
-   int ierr = 0;
-
    hypre_SStructPMatvecData   *pmatvec_data = pmatvec_vdata;
    int                         nvars        = (pmatvec_data -> nvars);
    void                     ***smatvec_data = (pmatvec_data -> smatvec_data);
@@ -147,7 +143,7 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -157,7 +153,6 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
 int
 hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
 {
-   int ierr = 0;
    hypre_SStructPMatvecData   *pmatvec_data = pmatvec_vdata;
    int                         nvars;
    void                     ***smatvec_data;
@@ -182,7 +177,7 @@ hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
       hypre_TFree(pmatvec_data);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -196,16 +191,14 @@ hypre_SStructPMatvec( double                alpha,
                       double                beta,
                       hypre_SStructPVector *py )
 {
-   int ierr = 0;
-
    void *pmatvec_data;
 
    hypre_SStructPMatvecCreate(&pmatvec_data);
-   ierr = hypre_SStructPMatvecSetup(pmatvec_data, pA, px);
-   ierr = hypre_SStructPMatvecCompute(pmatvec_data, alpha, pA, px, beta, py);
-   ierr = hypre_SStructPMatvecDestroy(pmatvec_data);
+   hypre_SStructPMatvecSetup(pmatvec_data, pA, px);
+   hypre_SStructPMatvecCompute(pmatvec_data, alpha, pA, px, beta, py);
+   hypre_SStructPMatvecDestroy(pmatvec_data);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*==========================================================================
@@ -230,13 +223,12 @@ typedef struct
 int
 hypre_SStructMatvecCreate( void **matvec_vdata_ptr )
 {
-   int ierr = 0;
    hypre_SStructMatvecData *matvec_data;
 
    matvec_data = hypre_CTAlloc(hypre_SStructMatvecData, 1);
    *matvec_vdata_ptr = (void *) matvec_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -248,7 +240,6 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
                           hypre_SStructMatrix *A,
                           hypre_SStructVector *x )
 {
-   int ierr = 0;
    hypre_SStructMatvecData  *matvec_data = matvec_vdata;
    int                       nparts;
    void                    **pmatvec_data;
@@ -268,7 +259,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
    (matvec_data -> nparts)       = nparts;
    (matvec_data -> pmatvec_data) = pmatvec_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -283,8 +274,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
                             double               beta,
                             hypre_SStructVector *y )
 {
-   int ierr = 0;
-
    hypre_SStructMatvecData  *matvec_data  = matvec_vdata;
    int                       nparts       = (matvec_data -> nparts);
    void                    **pmatvec_data = (matvec_data -> pmatvec_data);
@@ -304,7 +293,9 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
    if (x_object_type != A_object_type)
    {
-      printf("possible error: A and x are different object types\n");
+      hypre_error_in_arg(2);
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
    }
 
    if ( (x_object_type == HYPRE_SSTRUCT) || (x_object_type == HYPRE_STRUCT) )
@@ -358,7 +349,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
       parx = NULL; 
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -368,7 +359,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 int
 hypre_SStructMatvecDestroy( void *matvec_vdata )
 {
-   int ierr = 0;
    hypre_SStructMatvecData  *matvec_data = matvec_vdata;
    int                       nparts;
    void                    **pmatvec_data;
@@ -386,7 +376,7 @@ hypre_SStructMatvecDestroy( void *matvec_vdata )
       hypre_TFree(matvec_data);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -400,14 +390,12 @@ hypre_SStructMatvec( double               alpha,
                      double               beta,
                      hypre_SStructVector *y )
 {
-   int ierr = 0;
-
    void *matvec_data;
 
    hypre_SStructMatvecCreate(&matvec_data);
-   ierr = hypre_SStructMatvecSetup(matvec_data, A, x);
-   ierr = hypre_SStructMatvecCompute(matvec_data, alpha, A, x, beta, y);
-   ierr = hypre_SStructMatvecDestroy(matvec_data);
+   hypre_SStructMatvecSetup(matvec_data, A, x);
+   hypre_SStructMatvecCompute(matvec_data, alpha, A, x, beta, y);
+   hypre_SStructMatvecDestroy(matvec_data);
 
-   return ierr;
+   return hypre_error_flag;
 }

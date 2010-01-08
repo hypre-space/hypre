@@ -12,23 +12,8 @@ GridSetExtents: 1 (6- 12-) (13+ 19+)
 
 # GridSetVariables: part nvars vartypes[nvars]
 # CELL  = 0
-# NODE  = 1
-# XFACE = 2
-# YFACE = 3
-# ZFACE = 4
-# XEDGE = 5
-# YEDGE = 6
-# ZEDGE = 7
 GridSetVariables: 0 1 [0]
 GridSetVariables: 1 1 [0]
-
-# GridAddVariables: part index(ndim) vartype
-
-# GridSetNeighborBox: part      ilower(ndim)      iupper(ndim) \
-#                     nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
-#                     index_map[ndim]
-
-# GridSetPeriodic: part periodic[ndim]
 
 ###########################################################
 
@@ -54,18 +39,6 @@ GraphSetStencil: 1 0 0
 #   index_map[ndim] entry value
 GraphAddEntries: 1 (6- 12- : 0 0) (13+ 12- :-1 0) [2 1] 0   0 (3- 5+  : 0 0) (6+ 5+  :  0 0) [1 1] 0 [0 1] 5 -1.0
 GraphAddEntries: 0 (3- 5+  : 0 0) (6+ 5+   : 0 0)  [1 1] 0   1 (6- 12- : 0 0) (13+ 12-: -1 0) [2 1] 0 [0 1] 5 -1.0
-
-###########################################################
-
-# MatrixCreate:
-
-# MatrixSetSymmetric: part var to_var symmetric
-
-# MatrixSetNSSymmetric: symmetric
-
-###########################################################
-
-# VectorCreate:
 
 ###########################################################
 

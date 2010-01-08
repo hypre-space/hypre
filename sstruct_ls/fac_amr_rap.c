@@ -75,8 +75,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_BoxArray              *own_composite_cbox;
    int                        **own_cboxnums;
 
-   hypre_BoxMap                *fmap, *cmap;
-   hypre_BoxMapEntry           *map_entry;
+   hypre_BoxManager            *fboxman, *cboxman;
+   hypre_BoxManEntry           *boxman_entry;
    hypre_Index                  ilower;
 
    double                      *values;
@@ -129,8 +129,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       nUentries= hypre_SStructUVEntryNUEntries(Uventry);
 
       ncols[i]= nUentries;
-      hypre_SStructGridFindMapEntry(grid, part, index, var1, &map_entry);
-      hypre_SStructMapEntryGetGlobalRank(map_entry, index, &rows[i], matrix_type);
+      hypre_SStructGridFindBoxManEntry(grid, part, index, var1, &boxman_entry);
+      hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &rows[i], matrix_type);
 
       for (j= 0; j< nUentries; j++)
       {
@@ -160,13 +160,13 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
 
       for (var1= 0; var1< nvars; var1++)
       {
-         fmap= hypre_SStructGridMap(fac_grid, part, var1);
-         cmap= hypre_SStructGridMap(fac_grid, part-1, var1);
+         fboxman= hypre_SStructGridBoxManager(fac_grid, part, var1);
+         cboxman= hypre_SStructGridBoxManager(fac_grid, part-1, var1);
 
          fgrid= hypre_SStructPGridSGrid(f_pgrid, var1);
          cgrid= hypre_SStructPGridSGrid(c_pgrid, var1);
 
-         owninfo[part][var1]= hypre_SStructOwnInfo(fgrid, cgrid, cmap, fmap,
+         owninfo[part][var1]= hypre_SStructOwnInfo(fgrid, cgrid, cboxman, fboxman,
                                                    rfactors[part]); 
       }
    }
@@ -437,14 +437,14 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       *-----------------------------------------------------------------------*/
       for (var1= 0; var1< nvars; var1++)
       {
-         fmap= hypre_SStructGridMap(fac_grid, part, var1);
-         cmap= hypre_SStructGridMap(fac_grid, part-1, var1);
+         fboxman= hypre_SStructGridBoxManager(fac_grid, part, var1);
+         cboxman= hypre_SStructGridBoxManager(fac_grid, part-1, var1);
 
          fgrid= hypre_SStructPGridSGrid(f_pgrid, var1);
          cgrid= hypre_SStructPGridSGrid(c_pgrid, var1);
 
-         sendinfo= hypre_SStructSendInfo(fgrid, cmap, rfactors[part]);
-         recvinfo= hypre_SStructRecvInfo(cgrid, fmap, rfactors[part]);
+         sendinfo= hypre_SStructSendInfo(fgrid, cboxman, rfactors[part]);
+         recvinfo= hypre_SStructRecvInfo(cgrid, fboxman, rfactors[part]);
 
         /*-------------------------------------------------------------------
          * need to check this for more than one variable- are the comm. info

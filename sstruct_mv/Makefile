@@ -35,7 +35,6 @@ C_COMPILE_FLAGS = \
 HEADERS =\
  HYPRE_sstruct_mv.h\
  _hypre_sstruct_mv.h\
- box_map.h\
  headers.h\
  sstruct_graph.h\
  sstruct_grid.h\
@@ -44,7 +43,6 @@ HEADERS =\
  sstruct_vector.h
 
 FILES =\
- box_map.c\
  F90_HYPRE_sstruct_graph.c\
  F90_HYPRE_sstruct_grid.c\
  F90_HYPRE_sstruct_matrix.c\

@@ -12,8 +12,6 @@
 #EHEADER**********************************************************************
 
 
-
-
 mpirun -np 1 ./sstruct -in sstruct.in.fe_node1_2D -solver 8 -rhsone \
  > neighborpart.out.0
 mpirun -np 2 ./sstruct -in sstruct.in.fe_node2_2D -solver 8 -rhsone \
@@ -51,3 +49,10 @@ mpirun -np 1 ./sstruct -in sstruct.in.fe_all3_3D -b 1 1 2 -solver 8 -rhsone \
  > neighborpart.out.51
 mpirun -np 2 ./sstruct -in sstruct.in.fe_all3_3D -P 1 1 2 -solver 8 -rhsone \
  > neighborpart.out.52
+
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D -solver 28 -rhsone \
+ > neighborpart.out.60
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2Ds -solver 28 -rhsone \
+ > neighborpart.out.61
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2Dss -solver 28 -rhsone \
+ > neighborpart.out.62

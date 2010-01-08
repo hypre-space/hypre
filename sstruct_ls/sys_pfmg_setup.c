@@ -605,6 +605,7 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
    hypre_SStructPGridSetCellSGrid(cgrid, scgrid);
 
    hypre_SStructPGridPNeighbors(cgrid) = hypre_BoxArrayCreate(0);
+   hypre_SStructPGridPNborOffsets(cgrid) = NULL;
 
    hypre_SStructPGridLocalSize(cgrid)  = 0;
    hypre_SStructPGridGlobalSize(cgrid) = 0;

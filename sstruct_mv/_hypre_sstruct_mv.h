@@ -25,100 +25,17 @@
 extern "C" {
 #endif
 
-
-
-
-
-/******************************************************************************
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- *****************************************************************************/
-
-#ifndef hypre_BOX_MAP_HEADER
-#define hypre_BOX_MAP_HEADER
-
-
-/*--------------------------------------------------------------------------
- * hypre_StructMap:
- *--------------------------------------------------------------------------*/
-
-typedef struct hypre_BoxMapEntry_struct
-{
-   hypre_Index  imin;
-   hypre_Index  imax;
-
-  /* GEC0902 additional information for ghost calculation in the offset */
-   int   num_ghost[6];
-
-   void        *info;
-
-  /* link list of hypre_BoxMapEntries, ones on the process listed first. */
-   struct hypre_BoxMapEntry_struct  *next;
-
-} hypre_BoxMapEntry;
-
-typedef struct
-{
-   int                 max_nentries;
-   hypre_Index         global_imin;
-   hypre_Index         global_imax;
-
-  /* GEC0902 additional information for ghost calculation in the offset */
-   int                num_ghost[6];
-
-   int                 nentries;
-   hypre_BoxMapEntry  *entries;
-   hypre_BoxMapEntry **table; /* this points into 'entries' array */
-   hypre_BoxMapEntry  *boxproc_table; /* (proc, local_box) table pointer */
-   int                *indexes[3];
-   int                 size[3];
-   int                *boxproc_offset;                        
-
-   int                 last_index[3];
-
-} hypre_BoxMap;
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_BoxMap
- *--------------------------------------------------------------------------*/
-
-#define hypre_BoxMapMaxNEntries(map)    ((map) -> max_nentries)
-#define hypre_BoxMapGlobalIMin(map)     ((map) -> global_imin)
-#define hypre_BoxMapGlobalIMax(map)     ((map) -> global_imax)
-#define hypre_BoxMapNEntries(map)       ((map) -> nentries)
-#define hypre_BoxMapEntries(map)        ((map) -> entries)
-#define hypre_BoxMapTable(map)          ((map) -> table)
-#define hypre_BoxMapBoxProcTable(map)   ((map) -> boxproc_table)
-#define hypre_BoxMapBoxProcOffset(map)  ((map) -> boxproc_offset)
-#define hypre_BoxMapIndexes(map)        ((map) -> indexes)
-#define hypre_BoxMapSize(map)           ((map) -> size)
-#define hypre_BoxMapLastIndex(map)      ((map) -> last_index)
-#define hypre_BoxMapNumGhost(map)       ((map) -> num_ghost)
-
-#define hypre_BoxMapIndexesD(map, d)    hypre_BoxMapIndexes(map)[d]
-#define hypre_BoxMapSizeD(map, d)       hypre_BoxMapSize(map)[d]
-#define hypre_BoxMapLastIndexD(map, d)  hypre_BoxMapLastIndex(map)[d]
-
-#define hypre_BoxMapTableEntry(map, i, j, k) \
-hypre_BoxMapTable(map)[((k*hypre_BoxMapSizeD(map, 1) + j)*\
-                           hypre_BoxMapSizeD(map, 0) + i)]
-
-#define hypre_BoxMapBoxProcTableEntry(map, box, proc) \
-hypre_BoxMapBoxProcTable(map)[ box + \
-                               hypre_BoxMapBoxProcOffset(map)[proc] ]
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_BoxMapEntry
- *--------------------------------------------------------------------------*/
-
-#define hypre_BoxMapEntryIMin(entry)  ((entry) -> imin)
-#define hypre_BoxMapEntryIMax(entry)  ((entry) -> imax)
-#define hypre_BoxMapEntryInfo(entry)  ((entry) -> info)
-#define hypre_BoxMapEntryNumGhost(entry) ((entry) -> num_ghost)
-#define hypre_BoxMapEntryNext(entry)  ((entry) -> next)
-
-#endif
-
-
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 /******************************************************************************
@@ -167,6 +84,7 @@ typedef struct
    hypre_BoxArray         *iboxarrays[8];    /* interface boxes */
                                        
    hypre_BoxArray         *pneighbors;
+   hypre_Index            *pnbor_offsets;
 
    int                     local_size;       /* Number of variables locally */
    int                     global_size;      /* Total number of variables */
@@ -190,37 +108,36 @@ typedef struct
 
 } hypre_SStructNeighbor;
 
-enum hypre_SStructMapInfoType
+enum hypre_SStructBoxManInfoType
 {
-   hypre_SSTRUCT_MAP_INFO_DEFAULT  = 0,
-   hypre_SSTRUCT_MAP_INFO_NEIGHBOR = 1
+   hypre_SSTRUCT_BOXMAN_INFO_DEFAULT  = 0,
+   hypre_SSTRUCT_BOXMAN_INFO_NEIGHBOR = 1
 };
 
 typedef struct
 {
    int  type;
-   int  proc;
    int  offset;
-   int  boxnum;
-   int  ghoffset; /* GEC0902 ghost offset   */
+   int  ghoffset; 
 
-} hypre_SStructMapInfo;
+} hypre_SStructBoxManInfo;
 
 typedef struct
 {
    int          type;
-   int          proc;
    int          offset;   /* minimum offset for this box */
-   int          boxnum;
-   int          ghoffset; /* GEC0902 minimum offset ghost for this box */
+   int          ghoffset; /* minimum offset ghost for this box */
+   int          proc;      /* redundant with the proc in the entry, but
+                              makes some coding easier */
+   int          boxnum;   /* this is different from the entry id */ 
    int          part;     /* part the box lives on */
    hypre_Index  ilower;   /* box ilower, but on the neighbor index-space */
    hypre_Index  coord;    /* lives on local index-space */
    hypre_Index  dir;      /* lives on local index-space */
    hypre_Index  stride;   /* lives on local index-space */
-   hypre_Index  ghstride; /* GEC1002 the ghost equivalent of strides */ 
+   hypre_Index  ghstride; /* the ghost equivalent of strides */ 
 
-} hypre_SStructNMapInfo;
+} hypre_SStructBoxManNborInfo;
 
 typedef struct
 {
@@ -244,6 +161,7 @@ typedef struct hypre_SStructGrid_struct
    /* neighbor info */    
    int                       *nneighbors;
    hypre_SStructNeighbor    **neighbors;
+   hypre_Index              **nbor_offsets;
    int                      **nvneighbors;
    hypre_SStructNeighbor   ***vneighbors;
    hypre_SStructCommInfo    **vnbor_comm_info; /* for updating shared data */
@@ -254,10 +172,15 @@ typedef struct hypre_SStructGrid_struct
    int                        nucvars;
    hypre_SStructUCVar       **ucvars;
 
+   /* info for fem-based user input (for each part) */
+   int                       *fem_nvars;
+   int                      **fem_vars;
+   hypre_Index              **fem_offsets;
+
    /* info for mapping (part, index, var) --> rank */
-   hypre_BoxMap            ***maps;        /* map for each part, var */
-   hypre_SStructMapInfo    ***info;
-   hypre_SStructNMapInfo   ***ninfo;
+   hypre_BoxManager        ***boxmans;      /* manager for each part, var */
+   hypre_BoxManager        ***nbor_boxmans; /* manager for each part, var */
+
    int                        start_rank;
 
    int                        local_size;  /* Number of variables locally */
@@ -283,6 +206,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridPGrid(grid, part)    ((grid) -> pgrids[part])
 #define hypre_SStructGridNNeighbors(grid)     ((grid) -> nneighbors)
 #define hypre_SStructGridNeighbors(grid)      ((grid) -> neighbors)
+#define hypre_SStructGridNborOffsets(grid)    ((grid) -> nbor_offsets)
 #define hypre_SStructGridNVNeighbors(grid)    ((grid) -> nvneighbors)
 #define hypre_SStructGridVNeighbors(grid)     ((grid) -> vneighbors)
 #define hypre_SStructGridVNborCommInfo(grid)  ((grid) -> vnbor_comm_info)
@@ -290,10 +214,20 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridNUCVars(grid)        ((grid) -> nucvars)
 #define hypre_SStructGridUCVars(grid)         ((grid) -> ucvars)
 #define hypre_SStructGridUCVar(grid, i)       ((grid) -> ucvars[i])
-#define hypre_SStructGridMaps(grid)           ((grid) -> maps)
-#define hypre_SStructGridMap(grid, part, var) ((grid) -> maps[part][var])
-#define hypre_SStructGridInfo(grid)           ((grid) -> info)
-#define hypre_SStructGridNInfo(grid)          ((grid) -> ninfo)
+
+#define hypre_SStructGridFEMNVars(grid)       ((grid) -> fem_nvars)
+#define hypre_SStructGridFEMVars(grid)        ((grid) -> fem_vars)
+#define hypre_SStructGridFEMOffsets(grid)     ((grid) -> fem_offsets)
+#define hypre_SStructGridFEMPNVars(grid, part)   ((grid) -> fem_nvars[part])
+#define hypre_SStructGridFEMPVars(grid, part)    ((grid) -> fem_vars[part])
+#define hypre_SStructGridFEMPOffsets(grid, part) ((grid) -> fem_offsets[part])
+
+#define hypre_SStructGridBoxManagers(grid)           ((grid) -> boxmans)
+#define hypre_SStructGridBoxManager(grid, part, var) ((grid) -> boxmans[part][var])
+
+#define hypre_SStructGridNborBoxManagers(grid)           ((grid) -> nbor_boxmans)
+#define hypre_SStructGridNborBoxManager(grid, part, var) ((grid) -> nbor_boxmans[part][var])
+
 #define hypre_SStructGridStartRank(grid)      ((grid) -> start_rank)
 #define hypre_SStructGridLocalSize(grid)      ((grid) -> local_size)
 #define hypre_SStructGridGlobalSize(grid)     ((grid) -> global_size)
@@ -328,33 +262,33 @@ typedef struct hypre_SStructGrid_struct
 ((pgrid) -> iboxarrays[vartype])
 
 #define hypre_SStructPGridPNeighbors(pgrid)       ((pgrid) -> pneighbors)
+#define hypre_SStructPGridPNborOffsets(pgrid)     ((pgrid) -> pnbor_offsets)
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
 #define hypre_SStructPGridGlobalSize(pgrid)       ((pgrid) -> global_size)
 #define hypre_SStructPGridPeriodic(pgrid)         ((pgrid) -> periodic)
 #define hypre_SStructPGridGhlocalSize(pgrid)      ((pgrid) -> ghlocal_size)
 
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_SStructMapInfo
+ * Accessor macros: hypre_SStructBoxManInfo
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructMapInfoType(info)            ((info) -> type)
-#define hypre_SStructMapInfoProc(info)            ((info) -> proc)
-#define hypre_SStructMapInfoOffset(info)          ((info) -> offset)
-#define hypre_SStructMapInfoBoxnum(info)          ((info) -> boxnum)
-#define hypre_SStructMapInfoGhoffset(info)        ((info) -> ghoffset)
+#define hypre_SStructBoxManInfoType(info)            ((info) -> type)
+#define hypre_SStructBoxManInfoOffset(info)          ((info) -> offset)
+#define hypre_SStructBoxManInfoGhoffset(info)        ((info) -> ghoffset)
 
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_SStructNMapInfo
+ * Accessor macros: hypre_SStructBoxManInfo
  *--------------------------------------------------------------------------*/
 
-/* Use the MapInfo macros to access the first five structure components */
-
-#define hypre_SStructNMapInfoPart(info)    ((info) -> part)
-#define hypre_SStructNMapInfoILower(info)  ((info) -> ilower)
-#define hypre_SStructNMapInfoCoord(info)   ((info) -> coord)
-#define hypre_SStructNMapInfoDir(info)     ((info) -> dir)
-#define hypre_SStructNMapInfoStride(info)  ((info) -> stride)
-#define hypre_SStructNMapInfoGhstride(info)  ((info) -> ghstride)
+/* Use the MapInfo macros to access the first three structure components */
+#define hypre_SStructBoxManNborInfoProc(info)    ((info) -> proc)
+#define hypre_SStructBoxManNborInfoBoxnum(info)  ((info) -> boxnum)
+#define hypre_SStructBoxManNborInfoPart(info)    ((info) -> part)
+#define hypre_SStructBoxManNborInfoILower(info)  ((info) -> ilower)
+#define hypre_SStructBoxManNborInfoCoord(info)   ((info) -> coord)
+#define hypre_SStructBoxManNborInfoDir(info)     ((info) -> dir)
+#define hypre_SStructBoxManNborInfoStride(info)  ((info) -> stride)
+#define hypre_SStructBoxManNborInfoGhstride(info)  ((info) -> ghstride)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructNeighbor
@@ -390,6 +324,17 @@ typedef struct hypre_SStructGrid_struct
 
 #endif
 
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -437,8 +382,17 @@ hypre_StructStencilDim( hypre_SStructStencilSStencil(stencil) )
 hypre_StructStencilElement( hypre_SStructStencilSStencil(stencil), i )
 
 #endif
-
-
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 /******************************************************************************
@@ -453,6 +407,19 @@ hypre_StructStencilElement( hypre_SStructStencilSStencil(stencil), i )
 /*--------------------------------------------------------------------------
  * hypre_SStructGraph:
  *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   int           part;
+   hypre_Index   index;
+   int           var;
+   int           to_part;     
+   hypre_Index   to_index;
+   int           to_var;
+
+} hypre_SStructGraphEntry;
+
+
 
 typedef struct
 {
@@ -481,22 +448,38 @@ typedef struct hypre_SStructGraph_struct
    MPI_Comm                comm;
    int                     ndim;
    hypre_SStructGrid      *grid;
+   hypre_SStructGrid      *domain_grid; /* same as grid by default */
    int                     nparts;
    hypre_SStructPGrid    **pgrids;
    hypre_SStructStencil ***stencils; /* each (part, var) has a stencil */
+
+   /* info for fem-based user input */
+   int                    *fem_nsparse;
+   int                   **fem_sparse_i;
+   int                   **fem_sparse_j;
+   int                   **fem_entries;
 
    /* U-graph info: Entries are referenced via local grid-variable rank. */
    int                     nUventries;  /* number of iUventries */
    int                     aUventries;  /* alloc size of iUventries */
    int                    *iUventries;
- 
 
    hypre_SStructUVEntry  **Uventries;
    int                     totUentries;
 
    int                     ref_count;
 
-  int                     type;    /* GEC0203 */
+   int                     type;    /* GEC0203 */
+
+   hypre_SStructGraphEntry **graph_entries; /* these are stored from
+                                             * the AddGraphEntries calls
+                                             * and then deleted in the
+                                             * GraphAssemble */
+   int                     n_graph_entries; /* number graph entries */
+   int                     a_graph_entries; /* alloced graph entries */
+   
+
+
 } hypre_SStructGraph;
 
 /*--------------------------------------------------------------------------
@@ -506,11 +489,24 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphComm(graph)           ((graph) -> comm)
 #define hypre_SStructGraphNDim(graph)           ((graph) -> ndim)
 #define hypre_SStructGraphGrid(graph)           ((graph) -> grid)
+#define hypre_SStructGraphDomainGrid(graph)     ((graph) -> domain_grid)
 #define hypre_SStructGraphNParts(graph)         ((graph) -> nparts)
-#define hypre_SStructGraphPGrids(graph)         ((graph) -> pgrids)
-#define hypre_SStructGraphPGrid(graph, p)       ((graph) -> pgrids[p])
+#define hypre_SStructGraphPGrids(graph) \
+   hypre_SStructGridPGrids(hypre_SStructGraphGrid(graph))
+#define hypre_SStructGraphPGrid(graph, p) \
+   hypre_SStructGridPGrid(hypre_SStructGraphGrid(graph), p)
 #define hypre_SStructGraphStencils(graph)       ((graph) -> stencils)
 #define hypre_SStructGraphStencil(graph, p, v)  ((graph) -> stencils[p][v])
+
+#define hypre_SStructGraphFEMNSparse(graph)     ((graph) -> fem_nsparse)
+#define hypre_SStructGraphFEMSparseI(graph)     ((graph) -> fem_sparse_i)
+#define hypre_SStructGraphFEMSparseJ(graph)     ((graph) -> fem_sparse_j)
+#define hypre_SStructGraphFEMEntries(graph)     ((graph) -> fem_entries)
+#define hypre_SStructGraphFEMPNSparse(graph, p) ((graph) -> fem_nsparse[p])
+#define hypre_SStructGraphFEMPSparseI(graph, p) ((graph) -> fem_sparse_i[p])
+#define hypre_SStructGraphFEMPSparseJ(graph, p) ((graph) -> fem_sparse_j[p])
+#define hypre_SStructGraphFEMPEntries(graph, p) ((graph) -> fem_entries[p])
+
 #define hypre_SStructGraphNUVEntries(graph)     ((graph) -> nUventries)
 #define hypre_SStructGraphAUVEntries(graph)     ((graph) -> aUventries)
 #define hypre_SStructGraphIUVEntries(graph)     ((graph) -> iUventries)
@@ -520,6 +516,10 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphTotUEntries(graph)    ((graph) -> totUentries)
 #define hypre_SStructGraphRefCount(graph)       ((graph) -> ref_count)
 #define hypre_SStructGraphObjectType(graph)     ((graph) -> type)
+#define hypre_SStructGraphEntries(graph)        ((graph) -> graph_entries)
+#define hypre_SStructNGraphEntries(graph)       ((graph) -> n_graph_entries)
+#define hypre_SStructAGraphEntries(graph)       ((graph) -> a_graph_entries)
+
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUVEntry
@@ -549,9 +549,32 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUEntryToProc(U)   ((U) -> to_proc)
 #define hypre_SStructUEntryRank(U)     ((U) -> rank)
 
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_SStructGraphEntry
+ *--------------------------------------------------------------------------*/
+#define hypre_SStructGraphEntryPart(g)     ((g) -> part)
+#define hypre_SStructGraphEntryIndex(g)    ((g) -> index)
+#define hypre_SStructGraphEntryVar(g)      ((g) -> var)
+#define hypre_SStructGraphEntryToPart(g)   ((g) -> to_part)
+#define hypre_SStructGraphEntryToIndex(g)  ((g) -> to_index)
+#define hypre_SStructGraphEntryToVar(g)    ((g) -> to_var)
+
+
+
+
 #endif
-
-
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -679,6 +702,17 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 
 
@@ -790,24 +824,13 @@ typedef struct hypre_SStructVector_struct
 
 #endif
 
-/* box_map.c */
-int hypre_BoxMapEntrySetInfo ( hypre_BoxMapEntry *entry , void *info );
-int hypre_BoxMapEntryGetInfo ( hypre_BoxMapEntry *entry , void **info_ptr );
-int hypre_BoxMapEntryGetExtents ( hypre_BoxMapEntry *entry , hypre_Index imin , hypre_Index imax );
-int hypre_BoxMapCreate ( int max_nentries , hypre_Index global_imin , hypre_Index global_imax , int nprocs , hypre_BoxMap **map_ptr );
-int hypre_BoxMapIncSize ( hypre_BoxMap *map , int inc_nentries );
-int hypre_BoxMapAddEntry ( hypre_BoxMap *map , hypre_Index imin , hypre_Index imax , void *info );
-int hypre_BoxMapAssemble ( hypre_BoxMap *map , MPI_Comm comm );
-int hypre_BoxMapDestroy ( hypre_BoxMap *map );
-int hypre_BoxMapFindEntry ( hypre_BoxMap *map , hypre_Index index , hypre_BoxMapEntry **entry_ptr );
-int hypre_BoxMapFindBoxProcEntry ( hypre_BoxMap *map , int box , int proc , hypre_BoxMapEntry **entry_ptr );
-int hypre_BoxMapIntersect ( hypre_BoxMap *map , hypre_Index ilower , hypre_Index iupper , hypre_BoxMapEntry ***entries_ptr , int *nentries_ptr );
-int hypre_BoxMapSetNumGhost ( hypre_BoxMap *map , int *num_ghost );
-
 /* HYPRE_sstruct_graph.c */
 int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructGraph *graph_ptr );
 int HYPRE_SStructGraphDestroy ( HYPRE_SStructGraph graph );
+int HYPRE_SStructGraphSetDomainGrid ( HYPRE_SStructGraph graph , HYPRE_SStructGrid domain_grid );
 int HYPRE_SStructGraphSetStencil ( HYPRE_SStructGraph graph , int part , int var , HYPRE_SStructStencil stencil );
+int HYPRE_SStructGraphSetFEM ( HYPRE_SStructGraph graph , int part );
+int HYPRE_SStructGraphSetFEMSparsity ( HYPRE_SStructGraph graph , int part , int nsparse , int *sparsity );
 int HYPRE_SStructGraphAddEntries ( HYPRE_SStructGraph graph , int part , int *index , int var , int to_part , int *to_index , int to_var );
 int HYPRE_SStructGraphAssemble ( HYPRE_SStructGraph graph );
 int HYPRE_SStructGraphSetObjectType ( HYPRE_SStructGraph graph , int type );
@@ -820,8 +843,9 @@ int HYPRE_SStructGridSetVariables ( HYPRE_SStructGrid grid , int part , int nvar
 int HYPRE_SStructGridSetVariable ( HYPRE_SStructGrid grid , int part , int var , int nvars , HYPRE_SStructVariable vartype );
 int HYPRE_SStructGridAddVariables ( HYPRE_SStructGrid grid , int part , int *index , int nvars , HYPRE_SStructVariable *vartypes );
 int HYPRE_SStructGridAddVariable ( HYPRE_SStructGrid grid , int part , int *index , int var , HYPRE_SStructVariable vartype );
+int HYPRE_SStructGridSetFEMOrdering ( HYPRE_SStructGrid grid , int part , int *ordering );
 int HYPRE_SStructGridSetNeighborPart ( HYPRE_SStructGrid grid , int part , int *ilower , int *iupper , int nbor_part , int *nbor_ilower , int *nbor_iupper , int *index_map , int *index_dir );
-int HYPRE_SStructGridSetNeighborBox ( HYPRE_SStructGrid grid , int part , int *ilower , int *iupper , int nbor_part , int *nbor_ilower , int *nbor_iupper , int *index_map );
+int HYPRE_SStructGridSetSharedPart ( HYPRE_SStructGrid grid , int part , int *ilower , int *iupper , int *offset , int shared_part , int *shared_ilower , int *shared_iupper , int *shared_offset , int *index_map , int *index_dir );
 int HYPRE_SStructGridAddUnstructuredPart ( HYPRE_SStructGrid grid , int ilower , int iupper );
 int HYPRE_SStructGridAssemble ( HYPRE_SStructGrid grid );
 int HYPRE_SStructGridSetPeriodic ( HYPRE_SStructGrid grid , int part , int *periodic );
@@ -832,11 +856,12 @@ int HYPRE_SStructMatrixCreate ( MPI_Comm comm , HYPRE_SStructGraph graph , HYPRE
 int HYPRE_SStructMatrixDestroy ( HYPRE_SStructMatrix matrix );
 int HYPRE_SStructMatrixInitialize ( HYPRE_SStructMatrix matrix );
 int HYPRE_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , int part , int *index , int var , int nentries , int *entries , double *values );
-int HYPRE_SStructMatrixSetBoxValues ( HYPRE_SStructMatrix matrix , int part , int *ilower , int *iupper , int var , int nentries , int *entries , double *values );
-int HYPRE_SStructMatrixGetValues ( HYPRE_SStructMatrix matrix , int part , int *index , int var , int nentries , int *entries , double *values );
-int HYPRE_SStructMatrixGetBoxValues ( HYPRE_SStructMatrix matrix , int part , int *ilower , int *iupper , int var , int nentries , int *entries , double *values );
 int HYPRE_SStructMatrixAddToValues ( HYPRE_SStructMatrix matrix , int part , int *index , int var , int nentries , int *entries , double *values );
+int HYPRE_SStructMatrixAddFEMValues ( HYPRE_SStructMatrix matrix , int part , int *index , double *values );
+int HYPRE_SStructMatrixGetValues ( HYPRE_SStructMatrix matrix , int part , int *index , int var , int nentries , int *entries , double *values );
+int HYPRE_SStructMatrixSetBoxValues ( HYPRE_SStructMatrix matrix , int part , int *ilower , int *iupper , int var , int nentries , int *entries , double *values );
 int HYPRE_SStructMatrixAddToBoxValues ( HYPRE_SStructMatrix matrix , int part , int *ilower , int *iupper , int var , int nentries , int *entries , double *values );
+int HYPRE_SStructMatrixGetBoxValues ( HYPRE_SStructMatrix matrix , int part , int *ilower , int *iupper , int var , int nentries , int *entries , double *values );
 int HYPRE_SStructMatrixAssemble ( HYPRE_SStructMatrix matrix );
 int HYPRE_SStructMatrixSetSymmetric ( HYPRE_SStructMatrix matrix , int part , int var , int to_var , int symmetric );
 int HYPRE_SStructMatrixSetNSSymmetric ( HYPRE_SStructMatrix matrix , int symmetric );
@@ -856,13 +881,14 @@ int HYPRE_SStructVectorCreate ( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_S
 int HYPRE_SStructVectorDestroy ( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorInitialize ( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorSetValues ( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
-int HYPRE_SStructVectorSetBoxValues ( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
 int HYPRE_SStructVectorAddToValues ( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
+int HYPRE_SStructVectorAddFEMValues ( HYPRE_SStructVector vector , int part , int *index , double *values );
+int HYPRE_SStructVectorGetValues ( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
+int HYPRE_SStructVectorSetBoxValues ( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
 int HYPRE_SStructVectorAddToBoxValues ( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
+int HYPRE_SStructVectorGetBoxValues ( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
 int HYPRE_SStructVectorAssemble ( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorGather ( HYPRE_SStructVector vector );
-int HYPRE_SStructVectorGetValues ( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
-int HYPRE_SStructVectorGetBoxValues ( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
 int HYPRE_SStructVectorSetConstantValues ( HYPRE_SStructVector vector , double value );
 int HYPRE_SStructVectorSetObjectType ( HYPRE_SStructVector vector , int type );
 int HYPRE_SStructVectorGetObject ( HYPRE_SStructVector vector , void **object );
@@ -895,28 +921,32 @@ int hypre_SStructPGridSetExtents ( hypre_SStructPGrid *pgrid , hypre_Index ilowe
 int hypre_SStructPGridSetCellSGrid ( hypre_SStructPGrid *pgrid , hypre_StructGrid *cell_sgrid );
 int hypre_SStructPGridSetVariables ( hypre_SStructPGrid *pgrid , int nvars , HYPRE_SStructVariable *vartypes );
 int hypre_SStructPGridSetVariable ( hypre_SStructPGrid *pgrid , int var , int nvars , HYPRE_SStructVariable vartype );
-int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box );
+int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box , hypre_Index pnbor_offset );
 int hypre_SStructPGridAssemble ( hypre_SStructPGrid *pgrid );
 int hypre_SStructGridRef ( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );
-int hypre_SStructGridAssembleMaps ( hypre_SStructGrid *grid );
-int hypre_SStructGridAssembleNborMaps ( hypre_SStructGrid *grid );
+int hypre_SStructGridAssembleBoxManagers ( hypre_SStructGrid *grid );
+int hypre_SStructGridAssembleNborBoxManagers ( hypre_SStructGrid *grid );
 int hypre_SStructGridCreateCommInfo ( hypre_SStructGrid *grid );
-int hypre_SStructGridFindMapEntry ( hypre_SStructGrid *grid , int part , hypre_Index index , int var , hypre_BoxMapEntry **entry_ptr );
-int hypre_SStructGridBoxProcFindMapEntry ( hypre_SStructGrid *grid , int part , int var , int box , int proc , hypre_BoxMapEntry **entry_ptr );
-int hypre_SStructMapEntryGetCSRstrides ( hypre_BoxMapEntry *entry , hypre_Index strides );
-int hypre_SStructMapEntryGetGhstrides ( hypre_BoxMapEntry *entry , hypre_Index strides );
-int hypre_SStructMapEntryGetGlobalCSRank ( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr );
-int hypre_SStructMapEntryGetGlobalGhrank ( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr );
-int hypre_SStructMapEntryGetProcess ( hypre_BoxMapEntry *entry , int *proc_ptr );
-int hypre_SStructMapEntryGetBoxnum ( hypre_BoxMapEntry *entry , int *boxnum_ptr );
+int hypre_SStructGridFindBoxManEntry ( hypre_SStructGrid *grid , int part , hypre_Index index , int var , hypre_BoxManEntry **entry_ptr );
+int hypre_SStructGridFindNborBoxManEntry ( hypre_SStructGrid *grid , int part , hypre_Index index , int var , hypre_BoxManEntry **entry_ptr );
+int hypre_SStructGridBoxProcFindBoxManEntry ( hypre_SStructGrid *grid , int part , int var , int box , int proc , hypre_BoxManEntry **entry_ptr );
+int hypre_SStructBoxManEntryGetCSRstrides ( hypre_BoxManEntry *entry , hypre_Index strides );
+int hypre_SStructBoxManEntryGetGhstrides ( hypre_BoxManEntry *entry , hypre_Index strides );
+int hypre_SStructBoxManEntryGetGlobalCSRank ( hypre_BoxManEntry *entry , hypre_Index index , int *rank_ptr );
+int hypre_SStructBoxManEntryGetGlobalGhrank ( hypre_BoxManEntry *entry , hypre_Index index , int *rank_ptr );
+int hypre_SStructBoxManEntryGetProcess ( hypre_BoxManEntry *entry , int *proc_ptr );
+int hypre_SStructBoxManEntryGetBoxnum ( hypre_BoxManEntry *entry , int *id_ptr );
+int hypre_SStructBoxManEntryGetPart ( hypre_BoxManEntry *entry , int part , int *part_ptr );
 int hypre_SStructBoxToNborBox ( hypre_Box *box , hypre_Index index , hypre_Index nbor_index , hypre_Index coord , hypre_Index dir );
 int hypre_SStructNborBoxToBox ( hypre_Box *nbor_box , hypre_Index index , hypre_Index nbor_index , hypre_Index coord , hypre_Index dir );
 int hypre_SStructVarToNborVar ( hypre_SStructGrid *grid , int part , int var , int *coord , int *nbor_var_ptr );
 int hypre_SStructGridSetNumGhost ( hypre_SStructGrid *grid , int *num_ghost );
-int hypre_SStructMapEntryGetGlobalRank ( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr , int type );
-int hypre_SStructMapEntryGetStrides ( hypre_BoxMapEntry *entry , hypre_Index strides , int type );
+int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry , hypre_Index index , int *rank_ptr , int type );
+int hypre_SStructBoxManEntryGetStrides ( hypre_BoxManEntry *entry , hypre_Index strides , int type );
 int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid , int part , int boxnum , int **num_varboxes_ptr , int ***map_ptr );
 int hypre_SStructCellGridBoxNumMap ( hypre_SStructGrid *grid , int part , int ***num_varboxes_ptr , int ****map_ptr );
+int hypre_SStructCellBoxToVarBox ( hypre_Box *box , hypre_Index offset , hypre_Index varoffset , int *valid );
+int hypre_SStructGridIntersect ( hypre_SStructGrid *grid , int part , int var , hypre_Box *box , int action , hypre_BoxManEntry ***entries_ptr , int *nentries_ptr );
 
 /* sstruct_innerprod.c */
 int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , double *presult_ptr );
@@ -939,6 +969,9 @@ int hypre_SStructUMatrixSetBoxValues ( hypre_SStructMatrix *matrix , int part , 
 int hypre_SStructUMatrixAssemble ( hypre_SStructMatrix *matrix );
 int hypre_SStructMatrixRef ( hypre_SStructMatrix *matrix , hypre_SStructMatrix **matrix_ref );
 int hypre_SStructMatrixSplitEntries ( hypre_SStructMatrix *matrix , int part , int var , int nentries , int *entries , int *nSentries_ptr , int **Sentries_ptr , int *nUentries_ptr , int **Uentries_ptr );
+int hypre_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , int part , int *index , int var , int nentries , int *entries , double *values , int action );
+int hypre_SStructMatrixSetBoxValues ( HYPRE_SStructMatrix matrix , int part , int *ilower , int *iupper , int var , int nentries , int *entries , double *values , int action );
+int hypre_SStructMatrixSetInterPartValues ( HYPRE_SStructMatrix matrix , int part , hypre_Index ilower , hypre_Index iupper , int var , int nentries , int *entries , double *values , int action );
 
 /* sstruct_matvec.c */
 int hypre_SStructPMatvecCreate ( void **pmatvec_vdata_ptr );

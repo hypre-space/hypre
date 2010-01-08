@@ -668,15 +668,15 @@ int hypre_SStructAMRInterCommunication ( hypre_SStructSendInfoData *sendinfo , h
 /* sstruct_owninfo.c */
 int hypre_SStructIndexScaleF_C ( hypre_Index findex , hypre_Index index , hypre_Index stride , hypre_Index cindex );
 int hypre_SStructIndexScaleC_F ( hypre_Index cindex , hypre_Index index , hypre_Index stride , hypre_Index findex );
-hypre_SStructOwnInfoData *hypre_SStructOwnInfo ( hypre_StructGrid *fgrid , hypre_StructGrid *cgrid , hypre_BoxMap *cmap , hypre_BoxMap *fmap , hypre_Index rfactor );
+hypre_SStructOwnInfoData *hypre_SStructOwnInfo ( hypre_StructGrid *fgrid , hypre_StructGrid *cgrid , hypre_BoxManager *cboxman , hypre_BoxManager *fboxman , hypre_Index rfactor );
 int hypre_SStructOwnInfoDataDestroy ( hypre_SStructOwnInfoData *owninfo_data );
 
 /* sstruct_recvinfo.c */
-hypre_SStructRecvInfoData *hypre_SStructRecvInfo ( hypre_StructGrid *cgrid , hypre_BoxMap *fmap , hypre_Index rfactor );
+hypre_SStructRecvInfoData *hypre_SStructRecvInfo ( hypre_StructGrid *cgrid , hypre_BoxManager *fboxman , hypre_Index rfactor );
 int hypre_SStructRecvInfoDataDestroy ( hypre_SStructRecvInfoData *recvinfo_data );
 
 /* sstruct_sendinfo.c */
-hypre_SStructSendInfoData *hypre_SStructSendInfo ( hypre_StructGrid *fgrid , hypre_BoxMap *cmap , hypre_Index rfactor );
+hypre_SStructSendInfoData *hypre_SStructSendInfo ( hypre_StructGrid *fgrid , hypre_BoxManager *cboxman , hypre_Index rfactor );
 int hypre_SStructSendInfoDataDestroy ( hypre_SStructSendInfoData *sendinfo_data );
 
 /* sstruct_sharedDOFComm.c */

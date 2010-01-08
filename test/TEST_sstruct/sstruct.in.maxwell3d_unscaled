@@ -8,23 +8,10 @@ GridCreate: 3 1
 GridSetExtents: 0 (1- 1- 1-) (16+ 16+ 16+)
 
 # GridSetVariables: part nvars vartypes[nvars]
-# CELL  = 0
-# NODE  = 1
-# XFACE = 2
-# YFACE = 3
-# ZFACE = 4
 # XEDGE = 5
 # YEDGE = 6
 # ZEDGE = 7
 GridSetVariables: 0 3 [5 6 7]
-
-# GridAddVariables: part index(ndim) vartype
-
-# GridSetNeighborBox: part      ilower(ndim)      iupper(ndim) \
-#                     nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
-#                     index_map[ndim]
-
-# GridSetPeriodic: part periodic[ndim]
 
 ###########################################################
 
@@ -90,6 +77,7 @@ StencilSetEntry: 1 17 [ 0 -1  1] 0  0.1666666667
 StencilSetEntry: 1 18 [ 0  0  1] 0 -0.1666666667
 StencilSetEntry: 1 19 [ 1 -1  1] 0 -0.1666666667
 StencilSetEntry: 1 20 [ 1  0  1] 0  0.1666666667
+
 StencilSetEntry: 1 21 [ 0  0  0] 2 -0.6666666667
 StencilSetEntry: 1 22 [ 0 -1  0] 2  0.6666666667
 StencilSetEntry: 1 23 [-1  0  0] 2 -0.1666666667
@@ -139,8 +127,6 @@ StencilSetEntry: 2 30 [-1  1 -1] 1 -0.1666666667
 StencilSetEntry: 2 31 [ 1  1  0] 1  0.1666666667
 StencilSetEntry: 2 32 [ 1  1 -1] 1 -0.1666666667
 
-
-
 StencilSetEntry: 3  0 [ 0  0  0] 0  0.444444444
 StencilSetEntry: 3  1 [ 0  1  0] 0  0.111111111
 StencilSetEntry: 3  2 [ 0  1  1] 0  0.02777777777778
@@ -150,7 +136,7 @@ StencilSetEntry: 3  5 [ 0 -1  1] 0  0.02777777777778
 StencilSetEntry: 3  6 [ 0  0 -1] 0  0.111111111
 StencilSetEntry: 3  7 [ 0  1 -1] 0  0.02777777777778
 StencilSetEntry: 3  8 [ 0 -1 -1] 0  0.02777777777778
-                                                                                                                              
+
 StencilSetEntry: 4  0 [ 0  0  0] 1  0.444444444
 StencilSetEntry: 4  1 [-1  0  0] 1  0.111111111
 StencilSetEntry: 4  2 [ 0  0 -1] 1  0.111111111
@@ -171,7 +157,6 @@ StencilSetEntry: 5  6 [ 0  1  0] 2  0.111111111
 StencilSetEntry: 5  7 [-1  1  0] 2  0.02777777777778
 StencilSetEntry: 5  8 [ 1  1  0] 2  0.02777777777778
 
-
 ###########################################################
 
 # GraphSetStencil: part var stencil_num
@@ -179,23 +164,9 @@ GraphSetStencil: 0 0 0
 GraphSetStencil: 0 1 1
 GraphSetStencil: 0 2 2
 
-# GraphAddEntries: \
-#   part    ilower(ndim)    iupper(ndim)    stride[ndim]    var \
-#   to_part to_ilower(ndim) to_iupper(ndim) to_stride[ndim] to_var \
-#   index_map[ndim] entry value
-
 # rfactor:\
 #   rfactor(ndim)
 rfactor: [2 2 2]
-###########################################################
-
-# MatrixCreate:
-
-# MatrixSetValues: \
-#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
-###########################################################
-
-# VectorCreate:
 
 ###########################################################
 

@@ -1,0 +1,102 @@
+
+###########################################################
+#
+# This is a 2D enhanced connectivity nodal FEM example
+# for 5 rhombus-shaped parts rotated about the origin.
+#
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 2 5
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (1- 1-) (10+ 10+)
+GridSetExtents: 1 (1- 1-) (10+ 10+)
+GridSetExtents: 2 (1- 1-) (10+ 10+)
+GridSetExtents: 3 (1- 1-) (10+ 10+)
+GridSetExtents: 4 (1- 1-) (10+ 10+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# NODE  = 1
+GridSetVariables: 0 1 [1]
+GridSetVariables: 1 1 [1]
+GridSetVariables: 2 1 [1]
+GridSetVariables: 3 1 [1]
+GridSetVariables: 4 1 [1]
+
+# GridSetSharedPart: part  ilower(ndim)  iupper(ndim)  offset[ndim] \
+#                    spart silower(ndim) siupper(ndim) soffset[ndim] \
+#                    index_map[ndim] index_dir[ndim]
+GridSetSharedPart: 0 (1- 0+) (10+  0+) [0 0] 4 (1- 1-) ( 1- 10+) [0 0] [1 0] [ 1 -1]
+GridSetSharedPart: 0 (0+ 1-) ( 0+ 10+) [0 0] 1 (1- 1-) (10+  1-) [0 0] [1 0] [-1  1]
+GridSetSharedPart: 0 (1- 1-) (1- 1-) [-1 -1] 2 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+GridSetSharedPart: 0 (1- 1-) (1- 1-) [-1 -1] 3 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+
+GridSetSharedPart: 1 (1- 0+) (10+  0+) [0 0] 0 (1- 1-) ( 1- 10+) [0 0] [1 0] [ 1 -1]
+GridSetSharedPart: 1 (0+ 1-) ( 0+ 10+) [0 0] 2 (1- 1-) (10+  1-) [0 0] [1 0] [-1  1]
+GridSetSharedPart: 1 (1- 1-) (1- 1-) [-1 -1] 3 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+GridSetSharedPart: 1 (1- 1-) (1- 1-) [-1 -1] 4 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+
+GridSetSharedPart: 2 (1- 0+) (10+  0+) [0 0] 1 (1- 1-) ( 1- 10+) [0 0] [1 0] [ 1 -1]
+GridSetSharedPart: 2 (0+ 1-) ( 0+ 10+) [0 0] 3 (1- 1-) (10+  1-) [0 0] [1 0] [-1  1]
+GridSetSharedPart: 2 (1- 1-) (1- 1-) [-1 -1] 4 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+GridSetSharedPart: 2 (1- 1-) (1- 1-) [-1 -1] 0 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+
+GridSetSharedPart: 3 (1- 0+) (10+  0+) [0 0] 2 (1- 1-) ( 1- 10+) [0 0] [1 0] [ 1 -1]
+GridSetSharedPart: 3 (0+ 1-) ( 0+ 10+) [0 0] 4 (1- 1-) (10+  1-) [0 0] [1 0] [-1  1]
+GridSetSharedPart: 3 (1- 1-) (1- 1-) [-1 -1] 0 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+GridSetSharedPart: 3 (1- 1-) (1- 1-) [-1 -1] 1 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+
+GridSetSharedPart: 4 (1- 0+) (10+  0+) [0 0] 3 (1- 1-) ( 1- 10+) [0 0] [1 0] [ 1 -1]
+GridSetSharedPart: 4 (0+ 1-) ( 0+ 10+) [0 0] 0 (1- 1-) (10+  1-) [0 0] [1 0] [-1  1]
+GridSetSharedPart: 4 (1- 1-) (1- 1-) [-1 -1] 1 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+GridSetSharedPart: 4 (1- 1-) (1- 1-) [-1 -1] 2 (1-1-) (1- 1-) [-1 -1] [0 1] [1 1]
+
+###########################################################
+
+# FEMStencilCreate: size
+FEMStencilCreate: 4
+ 
+# FEMStencilSetRow: row offset[ndim] var values[size]
+FEMStencilSetRow: 0 [-1 -1] 0 [ 0.538514968042 -0.175243704040 -0.188027559963 -0.175243704040]
+FEMStencilSetRow: 1 [ 0 -1] 0 [-0.175243704040  0.863434664275 -0.175243704040 -0.512947256196]
+FEMStencilSetRow: 2 [ 0  0] 0 [-0.188027559963 -0.175243704040  0.538514968042 -0.175243704040]
+FEMStencilSetRow: 3 [-1  0] 0 [-0.175243704040 -0.512947256196 -0.175243704040  0.863434664275]
+
+# FEMRhsSet: values[size]
+FEMRhsSet: [ 0.00237764 0.00237764 0.00237764 0.00237764]
+
+###########################################################
+
+# Implement boundary conditions by adding a big value to the diagonal.
+
+# MatrixAddToValues: \
+#   part ilower(ndim) iupper(ndim) var nentries entries[nentries] values[nentries]
+MatrixAddToValues: 0 (10+ 0+) (10+ 10+) 0 1 [0] [1000000000000.0]
+MatrixAddToValues: 0 (0+ 10+) (10+ 10+) 0 1 [0] [1000000000000.0]
+
+MatrixAddToValues: 1 (10+ 0+) (10+ 10+) 0 1 [0] [1000000000000.0]
+MatrixAddToValues: 1 (0+ 10+) (10+ 10+) 0 1 [0] [1000000000000.0]
+
+MatrixAddToValues: 2 (10+ 0+) (10+ 10+) 0 1 [0] [1000000000000.0]
+MatrixAddToValues: 2 (0+ 10+) (10+ 10+) 0 1 [0] [1000000000000.0]
+
+MatrixAddToValues: 3 (10+ 0+) (10+ 10+) 0 1 [0] [1000000000000.0]
+MatrixAddToValues: 3 (0+ 10+) (10+ 10+) 0 1 [0] [1000000000000.0]
+
+MatrixAddToValues: 4 (10+ 0+) (10+ 10+) 0 1 [0] [1000000000000.0]
+MatrixAddToValues: 4 (0+ 10+) (10+ 10+) 0 1 [0] [1000000000000.0]
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 5
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1
+ProcessPoolSetPart: 2 2
+ProcessPoolSetPart: 3 3
+ProcessPoolSetPart: 4 4
+
+###########################################################

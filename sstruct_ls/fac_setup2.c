@@ -70,7 +70,7 @@ hypre_FacSetup2( void                 *fac_vdata,
    int                     var, to_var, to_part, level_part, level_topart;
    int                     var1, var2;
    int                     i, j, k, to_rank, row_coord, nUentries;
-   hypre_BoxMapEntry      *map_entry;
+   hypre_BoxManEntry      *boxman_entry;
 
    hypre_SStructMatrix    *A_rap;
    hypre_SStructMatrix   **A_level;
@@ -631,8 +631,8 @@ hypre_FacSetup2( void                 *fac_vdata,
       hypre_CopyIndex(hypre_SStructUVEntryIndex(Uventry), index);
       var      =  hypre_SStructUVEntryVar(Uventry);
 
-      hypre_SStructGridFindMapEntry(grid, part, index, var, &map_entry);
-      hypre_SStructMapEntryGetGlobalRank(map_entry, index, &row_coord,
+      hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
+      hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &row_coord,
                                          matrix_type);
 
       nUentries=  hypre_SStructUVEntryNUEntries(Uventry);
@@ -681,8 +681,8 @@ hypre_FacSetup2( void                 *fac_vdata,
          hypre_CopyIndex(hypre_SStructUVEntryIndex(Uventry), index);
          var      =  hypre_SStructUVEntryVar(Uventry);
    
-         hypre_SStructGridFindMapEntry(grid_level[level], part, index, var, &map_entry);
-         hypre_SStructMapEntryGetGlobalRank(map_entry, index, &row_coord, matrix_type);
+         hypre_SStructGridFindBoxManEntry(grid_level[level], part, index, var, &boxman_entry);
+         hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &row_coord, matrix_type);
 
          nUentries=  hypre_SStructUVEntryNUEntries(Uventry);
          for (k= 0; k< nUentries; k++)

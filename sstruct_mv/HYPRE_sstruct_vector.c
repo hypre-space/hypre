@@ -11,8 +11,6 @@
  ***********************************************************************EHEADER*/
 
 
-
-
 /******************************************************************************
  *
  * HYPRE_SStructVector interface
@@ -282,30 +280,6 @@ HYPRE_SStructVectorSetValues( HYPRE_SStructVector  vector,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector  vector,
-                                 int                  part,
-                                 int                 *ilower,
-                                 int                 *iupper,
-                                 int                  var,
-                                 double              *values )
-{
-   int                   ndim    = hypre_SStructVectorNDim(vector);
-   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
-   hypre_Index           cilower;
-   hypre_Index           ciupper;
-
-   hypre_CopyToCleanIndex(ilower, ndim, cilower);
-   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
-
-   hypre_SStructPVectorSetBoxValues(pvector, cilower, ciupper, var, values, 0);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-int
 HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
                                 int                  part,
                                 int                 *index,
@@ -334,6 +308,88 @@ HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
  *--------------------------------------------------------------------------*/
 
 int
+HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector  vector,
+                                 int                  part,
+                                 int                 *index,
+                                 double              *values )
+{
+   int                 ndim         = hypre_SStructVectorNDim(vector);
+   hypre_SStructGrid  *grid         = hypre_SStructVectorGrid(vector);
+   int                 fem_nvars    = hypre_SStructGridFEMPNVars(grid, part);
+   int                *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
+   hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
+   int                 i, d, vindex[3];
+
+   for (i = 0; i < fem_nvars; i++)
+   {
+      for (d = 0; d < ndim; d++)
+      {
+         /* note: these offsets are different from what the user passes in */
+         vindex[d] = index[d] + hypre_IndexD(fem_offsets[i], d);
+      }
+      HYPRE_SStructVectorAddToValues(
+         vector, part, vindex, fem_vars[i], &values[i]);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructVectorGetValues( HYPRE_SStructVector  vector,
+                              int                  part,
+                              int                 *index,
+                              int                  var,
+                              double              *value )
+{
+   int                   ndim    = hypre_SStructVectorNDim(vector);
+   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
+   hypre_Index           cindex;
+
+   hypre_CopyToCleanIndex(index, ndim, cindex);
+
+   if (var < hypre_SStructPVectorNVars(pvector))
+   {
+      hypre_SStructPVectorGetValues(pvector, cindex, var, value);
+   }
+   else
+   {
+      /* TODO */
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector  vector,
+                                 int                  part,
+                                 int                 *ilower,
+                                 int                 *iupper,
+                                 int                  var,
+                                 double              *values )
+{
+   int                   ndim    = hypre_SStructVectorNDim(vector);
+   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
+   hypre_Index           cilower;
+   hypre_Index           ciupper;
+
+   hypre_CopyToCleanIndex(ilower, ndim, cilower);
+   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
+
+   hypre_SStructPVectorSetBoxValues(pvector, cilower, ciupper, var, values, 0);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
 HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector  vector,
                                    int                  part,
                                    int                 *ilower,
@@ -351,6 +407,31 @@ HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector  vector,
 
    hypre_SStructPVectorSetBoxValues(pvector, cilower, ciupper,
                                     var, values, 1);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
+                                int                  part,
+                                int                 *ilower,
+                                int                 *iupper,
+                                int                  var,
+                                double              *values )
+{
+   int                   ndim    = hypre_SStructVectorNDim(vector);
+   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
+   hypre_Index           cilower;
+   hypre_Index           ciupper;
+
+   hypre_CopyToCleanIndex(ilower, ndim, cilower);
+   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
+
+   hypre_SStructPVectorGetBoxValues(pvector, cilower, ciupper,
+                                    var, values);
 
    return hypre_error_flag;
 }
@@ -447,6 +528,10 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 }
 
 /*--------------------------------------------------------------------------
+ * RDF: I don't think this will work correctly in the case where a processor's
+ * data is shared entirely with other processors.  The code in PGridAssemble
+ * ensures that data is uniquely distributed, so the data box for this processor
+ * would be empty and there would be no ghost zones to fill in Gather.
  *--------------------------------------------------------------------------*/
 
 int 
@@ -506,59 +591,6 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
       hypre_FinalizeCommunication(comm_handle);
       hypre_CommPkgDestroy(comm_pkg);
    }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-int
-HYPRE_SStructVectorGetValues( HYPRE_SStructVector  vector,
-                              int                  part,
-                              int                 *index,
-                              int                  var,
-                              double              *value )
-{
-   int                   ndim    = hypre_SStructVectorNDim(vector);
-   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
-   hypre_Index           cindex;
-
-   hypre_CopyToCleanIndex(index, ndim, cindex);
-
-   if (var < hypre_SStructPVectorNVars(pvector))
-   {
-      hypre_SStructPVectorGetValues(pvector, cindex, var, value);
-   }
-   else
-   {
-      /* TODO */
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-int
-HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
-                                int                  part,
-                                int                 *ilower,
-                                int                 *iupper,
-                                int                  var,
-                                double              *values )
-{
-   int                   ndim    = hypre_SStructVectorNDim(vector);
-   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
-   hypre_Index           cilower;
-   hypre_Index           ciupper;
-
-   hypre_CopyToCleanIndex(ilower, ndim, cilower);
-   hypre_CopyToCleanIndex(iupper, ndim, ciupper);
-
-   hypre_SStructPVectorGetBoxValues(pvector, cilower, ciupper,
-                                    var, values);
 
    return hypre_error_flag;
 }

@@ -30,7 +30,6 @@ hypre_SStructPAxpy( double                alpha,
                     hypre_SStructPVector *px,
                     hypre_SStructPVector *py )
 {
-   int ierr = 0;
    int nvars = hypre_SStructPVectorNVars(px);
    int var;
 
@@ -41,7 +40,7 @@ hypre_SStructPAxpy( double                alpha,
                        hypre_SStructPVectorSVector(py, var));
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -53,7 +52,6 @@ hypre_SStructAxpy( double               alpha,
                    hypre_SStructVector *x,
                    hypre_SStructVector *y )
 {
-   int ierr = 0;
    int nparts = hypre_SStructVectorNParts(x);
    int part;
 
@@ -62,8 +60,9 @@ hypre_SStructAxpy( double               alpha,
                                                                                                                      
    if (x_object_type != y_object_type)
    {
-       printf("vector object types different- cannot compute Axpy\n");
-       return ierr;
+      hypre_error_in_arg(2);
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
    }
 
    if (x_object_type == HYPRE_SSTRUCT)
@@ -87,5 +86,5 @@ hypre_SStructAxpy( double               alpha,
       hypre_ParVectorAxpy(alpha, x_par, y_par);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }

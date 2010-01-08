@@ -62,8 +62,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    hypre_Box              layer, interior_box;
    hypre_Box             *box_piece;
 
-   hypre_BoxMap          *map;
-   hypre_BoxMapEntry     *entry;
+   hypre_BoxManager      *boxman;
+   hypre_BoxManEntry     *entry;
 
    int                   *inode, *jedge;
    int                    nrows, nnodes, *nflag, *eflag, *ncols;
@@ -189,19 +189,19 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    part= 0;
    i   = 0;
 
-   hypre_SStructGridBoxProcFindMapEntry(edge_grid, part, 0, i, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(edge_grid, part, 0, i, myproc, &entry);
    pgrid   = hypre_SStructGridPGrid(edge_grid, part);
    var_grid= hypre_SStructPGridSGrid(pgrid, 0);
    boxes   = hypre_StructGridBoxes(var_grid);
    box     = hypre_BoxArrayBox(boxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(box), &ilower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(box), &ilower);
 
-   hypre_SStructGridBoxProcFindMapEntry(node_grid, part, 0, i, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(node_grid, part, 0, i, myproc, &entry);
    pgrid   = hypre_SStructGridPGrid(node_grid, part);
    var_grid= hypre_SStructPGridSGrid(pgrid, 0);
    boxes   = hypre_StructGridBoxes(var_grid);
    box     = hypre_BoxArrayBox(boxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(box), &jlower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(box), &jlower);
 
   /* upper rank */
    part= nparts-1;
@@ -212,10 +212,10 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    boxes   = hypre_StructGridBoxes(var_grid);
    box     = hypre_BoxArrayBox(boxes, hypre_BoxArraySize(boxes)-1);
 
-   hypre_SStructGridBoxProcFindMapEntry(edge_grid, part, nvars-1, 
-                                        hypre_BoxArraySize(boxes)-1, myproc,
-                                       &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(box), &iupper);
+   hypre_SStructGridBoxProcFindBoxManEntry(edge_grid, part, nvars-1, 
+                                           hypre_BoxArraySize(boxes)-1, myproc,
+                                           &entry);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(box), &iupper);
 
    pgrid   = hypre_SStructGridPGrid(node_grid, part);
    nvars   = hypre_SStructPGridNVars(pgrid);
@@ -223,10 +223,10 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    boxes   = hypre_StructGridBoxes(var_grid);
    box     = hypre_BoxArrayBox(boxes, hypre_BoxArraySize(boxes)-1);
 
-   hypre_SStructGridBoxProcFindMapEntry(node_grid, part, nvars-1, 
-                                        hypre_BoxArraySize(boxes)-1, myproc,
-                                       &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(box), &jupper);
+   hypre_SStructGridBoxProcFindBoxManEntry(node_grid, part, nvars-1, 
+                                           hypre_BoxArraySize(boxes)-1, myproc,
+                                           &entry);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(box), &jupper);
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &T_grad);
    HYPRE_IJMatrixSetObjectType(T_grad, HYPRE_PARCSR);
@@ -298,12 +298,12 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       pgrid   = hypre_SStructGridPGrid(node_grid, part);  
       var_grid= hypre_SStructPGridSGrid(pgrid, 0);
       boxes   = hypre_StructGridBoxes(var_grid);
-      map     = hypre_SStructGridMap(node_grid, part, 0);
+      boxman     = hypre_SStructGridBoxManager(node_grid, part, 0);
 
       hypre_ForBoxI(j, boxes)
       {
          box= hypre_BoxArrayBox(boxes, j);
-         hypre_BoxMapFindBoxProcEntry(map, j, myproc, &entry);
+         hypre_BoxManGetEntry(boxman, myproc, j, &entry);
          i= hypre_BoxVolume(box);
 
          tmp_box_array1= hypre_BoxArrayCreate(0);
@@ -325,7 +325,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                    hypre_SetIndex(index, loopi, loopj, loopk);
                    hypre_AddIndex(index, start, index);
 
-                   hypre_SStructMapEntryGetGlobalRank(entry, index,
+                   hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                      &rank, matrix_type);
                    nflag[rank-start_rank1]= 0; 
                }
@@ -355,7 +355,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       {
          var_grid= hypre_SStructPGridSGrid(pgrid, m);
          boxes   = hypre_StructGridBoxes(var_grid);
-         map     = hypre_SStructGridMap(edge_grid, part, m);
+         boxman  = hypre_SStructGridBoxManager(edge_grid, part, m);
 
          j= vartype_edges[m];
          switch(j)
@@ -402,7 +402,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
          hypre_ForBoxI(j, boxes)
          {
             box= hypre_BoxArrayBox(boxes, j);
-            hypre_BoxMapFindBoxProcEntry(map, j, myproc, &entry);
+            hypre_BoxManGetEntry(boxman, myproc, j, &entry);
             i= hypre_BoxVolume(box);
                                                                                                                         
             for (d= 0; d< ndirection; d++)
@@ -428,8 +428,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                         hypre_SetIndex(index, loopi, loopj, loopk);
                         hypre_AddIndex(index, start, index);
 
-                        hypre_SStructMapEntryGetGlobalRank(entry, index,
-                                                          &rank, matrix_type);
+                        hypre_SStructBoxManEntryGetGlobalRank(entry, index,
+                                                              &rank, matrix_type);
                         eflag[rank-start_rank2]= 0;
                      }
                      hypre_BoxLoop0End();
@@ -454,8 +454,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                         hypre_SetIndex(index, loopi, loopj, loopk);
                         hypre_AddIndex(index, start, index);
                                                                                                                         
-                        hypre_SStructMapEntryGetGlobalRank(entry, index,
-                                                          &rank, matrix_type);
+                        hypre_SStructBoxManEntryGetGlobalRank(entry, index,
+                                                              &rank, matrix_type);
                         eflag[rank-start_rank2]= 0;
                      }
                      hypre_BoxLoop0End();
@@ -588,22 +588,22 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
               /* edge ijk connected to nodes ijk & ijk-offsets. Interior edges
                  and so no boundary edges to consider. */ 
-               hypre_SStructGridFindMapEntry(edge_grid, part, index, n,
-                                            &entry);
-               hypre_SStructMapEntryGetGlobalRank(entry, index, &m, matrix_type);
+               hypre_SStructGridFindBoxManEntry(edge_grid, part, index, n,
+                                                &entry);
+               hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, matrix_type);
                inode[nrows]= m;
 
-               hypre_SStructGridFindMapEntry(node_grid, part, index, 0,
-                                            &entry);
-               hypre_SStructMapEntryGetGlobalRank(entry, index, &m, matrix_type);
+               hypre_SStructGridFindBoxManEntry(node_grid, part, index, 0,
+                                                &entry);
+               hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, matrix_type);
                jedge[i]= m;
                vals[i] = 1.0; /* change only this connection */
                i++;
 
                hypre_SubtractIndex(index, offsets[n], index);
-               hypre_SStructGridFindMapEntry(node_grid, part, index, 0,
-                                            &entry);
-               hypre_SStructMapEntryGetGlobalRank(entry, index, &m, matrix_type);
+               hypre_SStructGridFindBoxManEntry(node_grid, part, index, 0,
+                                                &entry);
+               hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, matrix_type);
                jedge[i]= m;
                i++;
  
@@ -650,10 +650,10 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_AddIndex(index, start, index);
 
                     /* edge ijk connects to nodes ijk & ijk+offsets. */
-                     hypre_SStructGridFindMapEntry(edge_grid, part, index, n,
-                                                  &entry);
-                     hypre_SStructMapEntryGetGlobalRank(entry, index, &m, 
-                                                        matrix_type);
+                     hypre_SStructGridFindBoxManEntry(edge_grid, part, index, n,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, 
+                                                           matrix_type);
 
                     /* check if the edge lies on the boundary & if not
                        check if the connecting node is on the boundary. */
@@ -662,9 +662,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                         inode[nrows]= m;
                        /* edge not completely on the boundary. One connecting
                           node must be in the interior. */
-                        hypre_SStructGridFindMapEntry(node_grid, part, index, 0,
-                                                     &entry);
-                        hypre_SStructMapEntryGetGlobalRank(entry, index, &m, 
+                        hypre_SStructGridFindBoxManEntry(node_grid, part, index, 0,
+                                                         &entry);
+                        hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, 
                                                            matrix_type);
 
                        /* check if node on my processor. If not, the node must
@@ -692,10 +692,10 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
                        /* ijk+offsets */
                         hypre_SubtractIndex(index, offsets[n], index);
-                        hypre_SStructGridFindMapEntry(node_grid, part, index, 0,
-                                                     &entry);
-                        hypre_SStructMapEntryGetGlobalRank(entry, index, &m, 
-                                                           matrix_type);
+                        hypre_SStructGridFindBoxManEntry(node_grid, part, index, 0,
+                                                         &entry);
+                        hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, 
+                                                              matrix_type);
                        /* boundary checks again */
                         if (m >= start_rank1 && m <= jupper)
                         {
