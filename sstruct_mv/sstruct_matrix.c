@@ -858,7 +858,6 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    int                      ncoeffs;
    double                  *coeffs;
    int                      i, entry;
-   int                      proc, myproc;
    /* GEC1002 the matrix type */
    int                      matrix_type = hypre_SStructMatrixObjectType(matrix);
 
@@ -879,18 +878,6 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    else
    {
       hypre_BoxManEntryGetInfo(boxman_entry, (void **) &entry_info);
-   }
-
-   /* Only Set values if I am the owner process; off-process AddTo and Get
-    * values are done by IJ */
-   if (!action)
-   {
-      hypre_SStructBoxManEntryGetProcess(boxman_entry, &proc);
-      MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
-      if (proc != myproc)
-      {
-         return hypre_error_flag;
-      }
    }
 
    /* GEC1002 get the rank using the function with the type=matrixtype*/
@@ -1012,7 +999,6 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    int                   row_base, col_base, val_base;
    int                   e, entry, ii, jj, i, j, k;
    
-   int                   proc, myproc;
   /* GEC1002 the matrix type */
    int                   matrix_type = hypre_SStructMatrixObjectType(matrix);
 
@@ -1047,18 +1033,6 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
       for (ii = 0; ii < nboxman_entries; ii++)
       {
-         /* Only Set values if I am the owner process; off-process AddTo and Get
-          * values are done by IJ */
-         if (!action)
-         {
-            hypre_SStructBoxManEntryGetProcess(boxman_entries[ii], &proc);
-            MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
-            if (proc != myproc)
-            {
-               continue;
-            }
-         }
-            
          /* GEC1002 introducing the strides based on the type of the matrix  */
          hypre_SStructBoxManEntryGetStrides(boxman_entries[ii], rs, matrix_type);
             
