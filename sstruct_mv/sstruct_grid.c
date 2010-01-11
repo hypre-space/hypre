@@ -797,47 +797,49 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
           * for the AP case - not used in the non-AP box manager*/
 #if HYPRE_NO_GLOBAL_PARTITION
          {
-             hypre_Box   *vbox;
-             hypre_Index  min_index, max_index;
-             int          d, dim  = hypre_SStructGridNDim(grid);
-             int          sendbuf6[6], recvbuf6[6];
-             hypre_CopyBox( hypre_StructGridBoundingBox(sgrid),bounding_box); 
-             hypre_CopyToCleanIndex( hypre_BoxIMin(bounding_box), dim, min_index);
-             hypre_CopyToCleanIndex( hypre_BoxIMax(bounding_box), dim, max_index);
+            MPI_Comm     comm        = hypre_SStructGridComm(grid);
+            hypre_Box   *vbox;
+            hypre_Index  min_index, max_index;
+            int          d, dim  = hypre_SStructGridNDim(grid);
+            int          sendbuf6[6], recvbuf6[6];
+            hypre_CopyBox( hypre_StructGridBoundingBox(sgrid),bounding_box); 
+            hypre_CopyToCleanIndex( hypre_BoxIMin(bounding_box), dim, min_index);
+            hypre_CopyToCleanIndex( hypre_BoxIMax(bounding_box), dim, max_index);
 
-             for (b = 0; b < nvneighbors[part][var]; b++)
-             {
+            for (b = 0; b < nvneighbors[part][var]; b++)
+            {
                 
-                vneighbor = &vneighbors[part][var][b];
-                vbox = hypre_SStructNeighborBox(vneighbor);
-                /* find min and max box extents */  
-                for (d = 0; d < dim; d++)
-                {
-                   hypre_IndexD(min_index, d) = hypre_min( hypre_IndexD(min_index, d), 
-                                                           hypre_BoxIMinD(bounding_box, d));
-                   hypre_IndexD(max_index, d) = hypre_max( hypre_IndexD(max_index, d), 
-                                                           hypre_BoxIMaxD(bounding_box, d));
-                } 
-             }
-             /* this is based on local info - all procs need to have
-              * the same bounding box!  */
-             hypre_BoxSetExtents( bounding_box, min_index, max_index);
+               vneighbor = &vneighbors[part][var][b];
+               vbox = hypre_SStructNeighborBox(vneighbor);
+               /* find min and max box extents */  
+               for (d = 0; d < dim; d++)
+               {
+                  hypre_IndexD(min_index, d) =
+                     hypre_min( hypre_IndexD(min_index, d), 
+                                hypre_BoxIMinD(bounding_box, d));
+                  hypre_IndexD(max_index, d) =
+                     hypre_max( hypre_IndexD(max_index, d), 
+                                hypre_BoxIMaxD(bounding_box, d));
+               } 
+            }
+            /* this is based on local info - all procs need to have
+             * the same bounding box!  */
+            hypre_BoxSetExtents( bounding_box, min_index, max_index);
              
-             /* communication needed for the bounding box */
-             /* pack buffer */
-             for (d = 0; d < 3; d++) 
-             {
-                sendbuf6[d] = hypre_BoxIMinD(bounding_box, d);
-                sendbuf6[d+3] = -hypre_BoxIMaxD(bounding_box, d);
-             }
-             MPI_Allreduce(sendbuf6, recvbuf6, 6, MPI_INT, MPI_MIN, comm);
-             /* unpack buffer */
-             for (d = 0; d < 3; d++)
-             {
-                hypre_BoxIMinD(bounding_box, d) = recvbuf6[d];
-                hypre_BoxIMaxD(bounding_box, d) = -recvbuf6[d+3];
-             }
-
+            /* communication needed for the bounding box */
+            /* pack buffer */
+            for (d = 0; d < 3; d++) 
+            {
+               sendbuf6[d] = hypre_BoxIMinD(bounding_box, d);
+               sendbuf6[d+3] = -hypre_BoxIMaxD(bounding_box, d);
+            }
+            MPI_Allreduce(sendbuf6, recvbuf6, 6, MPI_INT, MPI_MIN, comm);
+            /* unpack buffer */
+            for (d = 0; d < 3; d++)
+            {
+               hypre_BoxIMinD(bounding_box, d) = recvbuf6[d];
+               hypre_BoxIMaxD(bounding_box, d) = -recvbuf6[d+3];
+            }
          }
 #else
          hypre_CopyBox( hypre_StructGridBoundingBox(sgrid), bounding_box); 
