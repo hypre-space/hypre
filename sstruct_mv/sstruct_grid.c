@@ -738,7 +738,6 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
 int
 hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
 {
-   MPI_Comm                     comm        = hypre_SStructGridComm(grid);
    int                          nparts      = hypre_SStructGridNParts(grid);
    int                        **nvneighbors = hypre_SStructGridNVNeighbors(grid);
    hypre_SStructNeighbor     ***vneighbors  = hypre_SStructGridVNeighbors(grid);
@@ -766,7 +765,6 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
    int                          part, var, b, bb, i, d, sub_part, info_size;
 
    hypre_Box                    *bounding_box;
-   
 
    /*------------------------------------------------------
     * Create a box manager for the neighbor boxes 
