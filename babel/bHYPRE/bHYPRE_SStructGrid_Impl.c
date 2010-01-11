@@ -471,6 +471,7 @@ impl_bHYPRE_SStructGrid_SetNeighborBox(
   /* in */ int32_t dim,
   /* out */ sidl_BaseInterface *_ex)
 {
+  int  index_dir[3] = {1, 1, 1};
   *_ex = 0;
   {
     /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNeighborBox) */
@@ -482,14 +483,15 @@ impl_bHYPRE_SStructGrid_SetNeighborBox(
    data = bHYPRE_SStructGrid__get_data( self );
    Hgrid = data -> grid;
 
-   ierr += HYPRE_SStructGridSetNeighborBox
+   ierr += HYPRE_SStructGridSetNeighborPart
       ( Hgrid, part,
         ilower,
         iupper,
         nbor_part,
         nbor_ilower,
         nbor_iupper,
-        index_map );
+        index_map,
+        index_dir );
 
       return ierr;
 
