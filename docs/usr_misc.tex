@@ -16,6 +16,11 @@ general and beta distributions as well as documentation.
 
 \section{Building the Library}
 
+In this, and the following several sections we discuss the steps to install
+and use \hypre{} on a Unix-like operating system, such as Linux, AIX and Mac
+OS X. Information on using \hypre{} under Windows is given in Section
+\ref{sec-windows}.
+
 After unpacking the \hypre{} tar file, the source code will be in the ``src''
 sub-directory of a directory named hypre-VERSION, where VERSION is the current
 version number (e.g., hypre-1.8.4, with a ``b'' appended for a beta release).
@@ -173,9 +178,183 @@ specifying each of the separate \hypre{} libraries, i.e.
 to change their link flags.
 
 As an example of linking with \hypre{}, a user may refer to the \kbd{Makefile}
-in the \file{examples} subdirectory.  It is designed to build codes similar to
+in the \file{examples} sub-directory.  It is designed to build codes similar to
 user applications that link with and call \hypre{}.  All include and linking
 flags are defined in the \file{Makefile.config} file by \file{configure}.
+
+%-----------------------------------------------------------------------------
+
+\section{Building and Using the Library Under Windows} \label{sec-windows}
+
+The \hypre{} installation system is based on Makefiles, which are not
+straightforward to use under Windows. Nevertheless, the library can be built and
+linked to in a Windows environment with the help of the following tools:
+
+\begin{itemize}
+\item Cygwin {\bf (required)} - a Unix-like environment for Windows that can be
+  downloaded from \url{http://www.cygwin.com/}.  Make sure to select the
+  Development Tools checkbox during installation.
+\item MPICH2 {\bf (optional)} - an MPI implementation for Windows that can be
+  downloaded from
+  \url{http://www.mcs.anl.gov/research/projects/mpich2/downloads/index.php?s=downloads}.
+  Other MPI implementations for Windows should also work with appropriate
+  modifications. {\em For simplicity we will assume below that MPICH2 was
+  installed in \verb|C:\MPICH2|}.
+\item Microsoft Visual Studio C++ {\bf (optional)} - a popular C++ compiler
+  environment with a freely available Express Edition that can be downloaded
+  from \url{http://www.microsoft.com/express/download/}. Visual C++ includes the
+  command-line compiler \kbd{CL.exe}.
+\end{itemize}
+
+After downloading the \hypre{} distribution, make sure to unpack it using
+tar/gunzip under Cygwin, instead of a Windows tool such as WinZip which will
+save the text files in DOS format. In general Cygwin does not handle very well
+filenames with spaces, so it is a good idea to do your Cygwin work in a
+directory path that does not contain spaces.
+
+Below we outline several options for building and using \hypre{} depending on
+your needs.  Using Cygwin is central to all of them, but they differ by the
+amount they rely on the Cygwin-provided GNU compiler (GCC) for the compilation
+and the linking of the Library.
+
+\subsection{Building and Using the Library Exclusively Under Cygwin}
+
+This is the most straightforward option, as the Cygwin environment is
+essentially compatible with Unix and the build system in \hypre{} should work
+with minimal modifications.
+
+If you don't need MPI, just change into \hypre{}'s \kbd{src} directory and type
+\verb|./configure --without-MPI| followed by \verb|make|. Now you should be able
+to build the non-MPI examples as well as the drivers in the \kbd{test} directory
+and run them directly.
+
+If you have MPICH2 installed in \verb|C:\MPICH2|, then configure and build
+\hypre{} with:
+\begin{verbatim}
+./configure CC=gcc CXX=g++ \
+            CFLAGS="-O2 -I/cygdrive/c/MPICH2/include/" \
+            CXXFLAGS="-O2 -I/cygdrive/c/MPICH2/include" \
+            LDFLAGS="-L/cygdrive/c/MPICH2/lib/ -lmpi"
+make
+\end{verbatim}
+
+The example codes (in the \kbd{examples} directory) and the test drivers in the
+\kbd{test} directory can now be built using the above include and link options,
+and can be run in parallel, for example, as follows:
+\begin{verbatim}
+/cygdrive/c/MPICH2/bin/mpiexec.exe -localonly 4 examples/ex5.exe
+\end{verbatim}
+
+\subsection{Building and Using a Static Windows Library With GCC Under Cygwin}
+
+This is the recommended way to link an existing Visual C++ project with
+\hypre{}. The build line (with MPICH2) is:
+\begin{verbatim}
+./configure CC=gcc CXX=g++ \
+            CFLAGS="-mno-cygwin -O2 -I/cygdrive/c/MPICH2/include" \
+            CXXFLAGS="-mno-cygwin -O2 -I/cygdrive/c/MPICH2/include" \
+            LDFLAGS="-mno-cygwin -L/cygdrive/c/MPICH2/lib -lmpi"
+make
+\end{verbatim}
+The \kbd{-mno-cygwin} flag ensures that the static library will not depend on
+the Cygwin-specific library \kbd{cygwin1.dll}, and therefore can be moved to a
+different Windows box.
+
+\subsubsection{Building an Example Code Under Cygwin}
+\begin{enumerate}
+\item
+\begin{verbatim}
+gcc -mno-cygwin -DMPICH_SKIP_MPICXX -I../hypre/include \
+                -I/cygdrive/c/MPICH2/include -c ex5.c
+\end{verbatim}
+\item
+\begin{verbatim}
+gcc -o ex5 ex5.o -mno-cygwin -L../hypre/lib -lHYPRE \
+                             -L/cygdrive/c/MPICH2/lib -lmpi
+\end{verbatim}
+\item
+The resulting executable can now be run on machines without a Cygwin
+installation.
+\end{enumerate}
+
+\subsubsection{Building an Example Code with \kbd{CL.exe} (outside of Cygwin)}
+\begin{enumerate}
+\item Start Visual Studio command prompt (from the Start menu).
+\item Make sure that the environment variables are correct. For example, is
+\kbd{CL.exe} in the path (\verb|echo %PATH%|)? Is \kbd{kernel32.lib} in the
+library path (\verb|echo %LIB%|)? When using \kbd{CL.exe}, you may need to
+add, e.g.
+\verb|\Program Files\Microsoft SDKs\Windows\v6.0A\Lib| to the \verb|%LIB%|
+variable by right-clicking on \kbd{My Computer} and pressing the
+\kbd{Environment Variables} button from the \kbd{Advanced} tab of
+\kbd{Properties}.
+\item \kbd{cd} into \hypre{}'s \verb|hypre\lib| directory
+\item \verb|copy libHYPRE.a HYPRE.lib|
+\item \verb|copy \cygwin\lib\gcc\i686-pc-mingw32\3.4.4\libgcc.a gcc.lib|
+\item \kbd{cd} into \hypre{}'s \kbd{examples} directory
+\item
+\begin{verbatim}
+cl ex5.c -nologo -MD -I..\hypre\include -I\MPICH2\include \
+                      HYPRE.lib gcc.lib mpi.lib \
+                     -link /libpath:..\hypre\lib /libpath:\MPICH2\lib
+\end{verbatim}
+\end{enumerate}
+
+\subsubsection{Building an Example Code in the Visual C++ GUI}
+\begin{enumerate}
+\item Create an empty Win32 console application with no precompiled headers: \\
+\verb|  New project -> Win32 -> Win32 Console Application -> Application Settings|.
+\item Add a driver source file, e.g. ex5.c, to the project.
+\item Make sure \kbd{HYPRE.lib} and \kbd{gcc.lib} are in the \verb|hypre\lib|
+directory (see Steps 4 and 5 in the \kbd{CL.exe} list above).
+\item Select \kbd{Project -> Properties} from the Menu (or press \kbd{Alt-F7}).
+\begin{itemize}
+\item
+  Add \verb|hypre\include| and \verb|MPICH2\include| in \\
+  \verb|C/C++ -> General -> Additional Include Directories|.
+\item
+  Add \verb|hypre\lib| and \verb|MPICH2\lib| in \\
+  \verb|Linker -> General -> Additional Library Directories|.
+\item
+  Add \kbd{HYPRE.lib}, \kbd{gcc.lib} and \kbd{mpi.lib} in \\
+  \verb|Linker -> Input -> Additional Dependencies|.
+\end{itemize}
+\item Select \verb|Build -> Build Solution| from the Menu (or press \kbd{F7}).
+\item Executable will be in the project's \kbd{Debug} sub-directory.
+\end{enumerate}
+
+\subsection{Building and Using a Static Windows Library With CL.exe Under Cygwin}
+
+In some cases, it may be preferable to build \hypre{} using the native Visual
+C++ compiler instead of GCC. The procedure for doing this is outlined in the
+steps below:
+
+\begin{enumerate}
+\item Open a Visual Studio command prompt (from the Start menu) and run
+\kbd{cygwin.bat} in it. Make sure that the compilers you need (e.g. a non-GCC
+Fortran compiler) are in the Cygwin \verb|$PATH| variable.
+\item
+\begin{verbatim}
+./configure CC=cl CXX=cl \
+            CFLAGS="-nologo -DWIN32 -O2 -I/MPICH2/include" \
+            CXXFLAGS="-nologo -DWIN32 -O2 -I/MPICH2/include"
+\end{verbatim}
+\item If the above step fails with a ``cannot create executable'' error, make
+sure that \kbd{kernel32.lib} is in the library path as discussed in the
+\kbd{CL.exe} from the previous subsection.
+%% \item \kbd{cd} into the top-level \kbd{src} directory.
+\item Run \verb|config/windows.sh|
+\item \verb|make|
+\item Now you should be able to link with \hypre{} as in the previous section,
+but without the need for the MD switch:
+\begin{verbatim}
+cl ex5.c -nologo -I..\hypre\include -I\MPICH2\include \
+                  HYPRE.lib gcc.lib mpi.lib \
+                 -link /libpath:..\hypre\lib /libpath:\MPICH2\lib
+\end{verbatim}
+\item You can also tell Visual Studio's linker to ignore the default library
+\verb|libcmt.lib|.
+\end{enumerate}
 
 %-----------------------------------------------------------------------------
 
@@ -185,7 +364,7 @@ Every \hypre{} function returns an integer, which is used to indicate errors
 during execution.  Note that the error flag returned by a given function
 reflects the errors from {\em all} previous calls to \hypre{} functions.  In
 particular, a value of zero means that all \hypre{} functions up to (and
-including) the current one have completed successfully.  This new error flags
+including) the current one have completed successfully.  This new error flag
 system is being implemented throughout the library, but currently there are
 still functions that do not support it.  The error flag value is a combination
 of one or a few of the following error codes:
