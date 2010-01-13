@@ -687,7 +687,7 @@ main( int   argc,
    if (solver_id == 5) 
    {
       /* fine grid */
-      relax_default = 0;
+      relax_default = 7;
       grid_relax_type[0] = relax_default; 
       num_grid_sweeps[0] = num_sweep;
       grid_relax_points[0] = hypre_CTAlloc(int, num_sweep); 
