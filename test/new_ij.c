@@ -665,9 +665,11 @@ main( int   argc,
    outer_wt = 1.;
 
    /* for CGNR preconditioned with Boomeramg, only relaxation scheme 0 is
-      implemented, i.e. Jacobi relaxation */
+      implemented, i.e. Jacobi relaxation, and needs to be used without CF
+      ordering */
    if (solver_id == 5) 
-      relax_type = 7;
+      relax_type = 0;
+      relax_order = 0;
    }
 
    /* defaults for Schwarz */

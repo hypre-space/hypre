@@ -681,12 +681,13 @@ main( int   argc,
 	omega[i] = 1.;
    }
 
-   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 7 is
-      implemented, i.e. Jacobi relaxation */
+   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 0 is
+      implemented, i.e. Jacobi relaxation, and it needs to be used without
+      CF ordering */
    if (solver_id == 5) 
    {
       /* fine grid */
-      relax_default = 7;
+      relax_default = 0;
       grid_relax_type[0] = relax_default; 
       num_grid_sweeps[0] = num_sweep;
       grid_relax_points[0] = hypre_CTAlloc(int, num_sweep); 
