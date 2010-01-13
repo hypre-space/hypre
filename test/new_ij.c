@@ -668,8 +668,10 @@ main( int   argc,
       implemented, i.e. Jacobi relaxation, and needs to be used without CF
       ordering */
    if (solver_id == 5) 
+   {     
       relax_type = 0;
       relax_order = 0;
+   }
    }
 
    /* defaults for Schwarz */
