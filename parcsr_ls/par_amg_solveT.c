@@ -333,12 +333,14 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    int      *num_grid_sweeps;   
    int      *grid_relax_type;   
    int     **grid_relax_points;  
+   int       relax_points;
+   int       relax_pts[2];
  
    /* Local variables  */
 
    int      *lev_counter;
    int       Solve_err_flag;
-   int       k;
+   int       i,k;
    int       j;
    int       level;
    int       cycle_param;
@@ -347,7 +349,6 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    int       Not_Finished;
    int       num_sweep;
    int       relax_type;
-   int       relax_points;
    double   *relax_weight;
 
    int       relax_local;
@@ -437,7 +438,7 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    {
       num_sweep = num_grid_sweeps[cycle_param];
       relax_type = grid_relax_type[cycle_param];
-
+      if (relax_type != 7 && relax_type != 9) relax_type = 7;
       /*------------------------------------------------------------------
        * Do the relaxation num_sweep times
        *-----------------------------------------------------------------*/
@@ -481,8 +482,9 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
 
          /* note: this does not use relax_points, so it doesn't matter if
             its the "old version" */
-         
-         Solve_err_flag = hypre_BoomerAMGRelaxT(A_array[level], 
+         if (old_version)
+         { 
+            Solve_err_flag = hypre_BoomerAMGRelaxT(A_array[level], 
                                                 F_array[level],
                                                 CF_marker_array[level],
                                                 relax_type,
@@ -490,8 +492,45 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
                                                 relax_weight[level],
                                                 U_array[level],
                                                 Vtemp);
-        
-         
+         } 
+         else 
+         { 
+            if (relax_order == 1 && cycle_type < 3)
+            {
+               if (cycle_type < 2)
+               {
+                  relax_pts[0] = 1;
+                  relax_pts[1] = -1;
+               }
+               else
+               {
+                  relax_pts[0] = -1;
+                  relax_pts[1] = 1;
+               }
+
+               for (i=0; i < 2; i++)
+                  Solve_err_flag = hypre_BoomerAMGRelaxT(A_array[level],
+                                               F_array[level],
+                                               CF_marker_array[level],
+                                               relax_type,
+                                               relax_pts[i],
+                                               relax_weight[level],
+                                               U_array[level],
+                                               Vtemp);
+
+            }
+            else
+            {
+               Solve_err_flag = hypre_BoomerAMGRelaxT(A_array[level],
+                                               F_array[level],
+                                               CF_marker_array[level],
+                                               relax_type,
+                                               0,
+                                               relax_weight[level],
+                                               U_array[level],
+                                               Vtemp);
+            }
+         } 
          if (Solve_err_flag != 0)
             return(Solve_err_flag);
       }
