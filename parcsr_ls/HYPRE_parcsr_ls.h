@@ -1453,10 +1453,10 @@ int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
 
 /**
  * For problems with zero-conductivity regions, project the vector onto the
- * compatible subspace: x = (I - G0 (G0^t G0)^{-1} G0^T) x, where G0 is the
- * discrete gradient restricted to the interior nodes of the regions with
- * zero conductivity. This ensures that x is orthogonal to the gradients in
- * the range of G0.
+ * compatible subspace: $x = (I - G_0 (G_0^t G_0)^{-1} G_0^T) x$, where $G_0$ is
+ * the discrete gradient restricted to the interior nodes of the regions with
+ * zero conductivity. This ensures that x is orthogonal to the gradients in the
+ * range of $G_0$.
  *
  * This function is typically called after the solution iteration is complete,
  * in order to facilitate the visualization of the computed field. Without it
