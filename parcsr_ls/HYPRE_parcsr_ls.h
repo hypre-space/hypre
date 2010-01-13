@@ -1451,6 +1451,19 @@ int HYPRE_AMSGetNumIterations(HYPRE_Solver solver,
 int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
                                           double *rel_resid_norm);
 
+/**
+ * For problems with zero-conductivity regions, project the vector onto the
+ * compatible subspace: x = (I - G0 (G0^t G0)^{-1} G0^T) x, where G0 is the
+ * discrete gradient restricted to the interior nodes of the regions with
+ * zero conductivity. This ensures that x is orthogonal to the gradients in
+ * the range of G0.
+ *
+ * This function is typically called after the solution iteration is complete,
+ * in order to facilitate the visualization of the computed field. Without it
+ * the values in the zero-conductivity regions contain kernel components.
+ **/
+int HYPRE_AMSProjectOutGradients(HYPRE_Solver solver,
+                                 HYPRE_ParVector x);
 
 /**
  * Construct and return the discrete gradient matrix G using some

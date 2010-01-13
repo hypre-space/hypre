@@ -138,6 +138,7 @@ int hypre_AMSSolve ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b ,
 int hypre_ParCSRSubspacePrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type , int A0_relax_times , double *A0_l1_norms , double A0_relax_weight , double A0_omega , hypre_ParCSRMatrix **A , HYPRE_Solver *B , hypre_ParCSRMatrix **P , hypre_ParVector **r , hypre_ParVector **g , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *g0 , char *cycle , hypre_ParVector *z );
 int hypre_AMSGetNumIterations ( void *solver , int *num_iterations );
 int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , double *rel_resid_norm );
+int hypre_AMSProjectOutGradients ( void *solver , hypre_ParVector *x );
 int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector *x_coord , int *edge_vertex , int edge_orientation , hypre_ParCSRMatrix **G_ptr );
 int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , int num_vert , int num_local_vert , int *vert_number , double *vert_coord , int num_edges , int *edge_vertex );
 int hypre_AMSFEIDestroy ( void *solver );

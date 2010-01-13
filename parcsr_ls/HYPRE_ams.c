@@ -282,6 +282,17 @@ int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMSProjectOutGradients
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSProjectOutGradients(HYPRE_Solver solver,
+                                 HYPRE_ParVector x)
+{
+   return hypre_AMSProjectOutGradients((void *) solver,
+                                       (hypre_ParVector *) x);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMSConstructDiscreteGradient
  *--------------------------------------------------------------------------*/
 

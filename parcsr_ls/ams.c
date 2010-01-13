@@ -2335,8 +2335,8 @@ int hypre_AMSSolve(void *solver,
       hypre_ParVectorInitialize(z);
       hypre_ParVectorSetPartitioningOwner(z,0);
    }
-   
-         
+
+
    if (ams_data -> print_level > 0)
       MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
 
@@ -2345,13 +2345,8 @@ int hypre_AMSSolve(void *solver,
    if ( (ams_data -> B_G0) &&
         (++ams_data->solve_counter % ( ams_data -> projection_frequency ) == 0) )
    {
-      /* b = (I - G0 (G0^t G0)^{-1} G0^T) b */
       /* printf("Projecting onto the compatible subspace...\n"); */
-      hypre_ParCSRMatrixMatvecT(1.0, ams_data -> G0, b, 0.0, ams_data -> r1);
-      hypre_ParVectorSetConstantValues(ams_data -> g1, 0.0);
-      hypre_BoomerAMGSolve(ams_data -> B_G0, ams_data -> A_G0, ams_data -> r1, ams_data -> g1);
-      hypre_ParCSRMatrixMatvec(1.0, ams_data -> G0, ams_data -> g1, 0.0, ams_data -> g0);
-      hypre_ParVectorAxpy(-1.0, ams_data -> g0, b);
+      hypre_AMSProjectOutGradients(ams_data, b);
    }
 
    if (ams_data -> beta_is_zero)
@@ -2654,6 +2649,37 @@ int hypre_AMSGetFinalRelativeResidualNorm(void *solver,
 {
    hypre_AMSData *ams_data = solver;
    *rel_resid_norm = ams_data -> rel_resid_norm;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSProjectOutGradients
+ *
+ * For problems with zero-conductivity regions, project the vector onto the
+ * compatible subspace: x = (I - G0 (G0^t G0)^{-1} G0^T) x, where G0 is the
+ * discrete gradient restricted to the interior nodes of the regions with
+ * zero conductivity. This ensures that x is orthogonal to the gradients in
+ * the range of G0.
+ *
+ * This function is typically called after the solution iteration is complete,
+ * in order to facilitate the visualization of the computed field. Without it
+ * the values in the zero-conductivity regions contain kernel components.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSProjectOutGradients(void *solver,
+                                 hypre_ParVector *x)
+{
+   hypre_AMSData *ams_data = solver;
+
+   if (ams_data -> B_G0)
+   {
+      hypre_ParCSRMatrixMatvecT(1.0, ams_data -> G0, x, 0.0, ams_data -> r1);
+      hypre_ParVectorSetConstantValues(ams_data -> g1, 0.0);
+      hypre_BoomerAMGSolve(ams_data -> B_G0, ams_data -> A_G0, ams_data -> r1, ams_data -> g1);
+      hypre_ParCSRMatrixMatvec(1.0, ams_data -> G0, ams_data -> g1, 0.0, ams_data -> g0);
+      hypre_ParVectorAxpy(-1.0, ams_data -> g0, x);
+   }
+
    return hypre_error_flag;
 }
 
@@ -2990,7 +3016,7 @@ int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
    int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    double *l1_norm = hypre_CTAlloc(double, num_rows);
-   int ii, ns, ne, rest, size;   
+   int ii, ns, ne, rest, size;
    double res;
 
 #define HYPRE_SMP_PRIVATE i,ii,j,k,ns,ne,res,rest,size
@@ -3083,7 +3109,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 
    int             n       = hypre_CSRMatrixNumRows(A_diag);
    int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
-   
+
    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
    double         *u_data  = hypre_VectorData(u_local);
 
@@ -3092,9 +3118,9 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 
    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    double         *Vtemp_data = hypre_VectorData(Vtemp_local);
-   double 	  *Vext_data;
-   double 	  *v_buf_data;
-   double 	  *tmp_data;
+   double	  *Vext_data;
+   double	  *v_buf_data;
+   double	  *tmp_data;
 
    int             i, j;
    int             ii, jj;
@@ -3107,8 +3133,8 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
    double          zero = 0.0;
    double	   res, res2;
 
-   MPI_Comm_size(comm,&num_procs);  
-   MPI_Comm_rank(comm,&my_id);  
+   MPI_Comm_size(comm,&num_procs);
+   MPI_Comm_rank(comm,&my_id);
    num_threads = hypre_NumThreads();
    /*-----------------------------------------------------------------
     * Copy current approximation into temporary vector.
@@ -3117,28 +3143,28 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
    {
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-      v_buf_data = hypre_CTAlloc(double, 
+      v_buf_data = hypre_CTAlloc(double,
 			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
       Vext_data = hypre_CTAlloc(double,num_cols_offd);
-        
+
       if (num_cols_offd)
       {
 		A_offd_j = hypre_CSRMatrixJ(A_offd);
 		A_offd_data = hypre_CSRMatrixData(A_offd);
       }
- 
+
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
-        	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-        	for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
-                	v_buf_data[index++] 
-                 	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
+	v_buf_data[index++]
+	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
- 
-      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
-        	Vext_data);
+
+      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data,
+	Vext_data);
 
       /*-----------------------------------------------------------------
        * Copy current approximation into temporary vector.
@@ -3176,11 +3202,10 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 	 }
          for (i = ns; i < ne; i++)	/* interior points first */
          {
+            /*-----------------------------------------------------------
+             * If diagonal is nonzero, relax point i; otherwise, skip it.
+             *-----------------------------------------------------------*/
 
-               /*-----------------------------------------------------------
-                * If diagonal is nonzero, relax point i; otherwise, skip it.
-                *-----------------------------------------------------------*/
-             
             if ( A_diag_data[A_diag_i[i]] != zero)
             {
                res = f_data[i];
@@ -3204,11 +3229,10 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
          }
          for (i = ne-1; i > ns-1; i--)	/* interior points first */
          {
+            /*-----------------------------------------------------------
+             * If diagonal is nonzero, relax point i; otherwise, skip it.
+             *-----------------------------------------------------------*/
 
-               /*-----------------------------------------------------------
-                * If diagonal is nonzero, relax point i; otherwise, skip it.
-                *-----------------------------------------------------------*/
-             
             if ( A_diag_data[A_diag_i[i]] != zero)
             {
                res = f_data[i];
@@ -3262,11 +3286,10 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 	 }
          for (i = ns; i < ne; i++)	/* interior points first */
          {
+            /*-----------------------------------------------------------
+             * If diagonal is nonzero, relax point i; otherwise, skip it.
+             *-----------------------------------------------------------*/
 
-               /*-----------------------------------------------------------
-                * If diagonal is nonzero, relax point i; otherwise, skip it.
-                *-----------------------------------------------------------*/
-             
             if ( A_diag_data[A_diag_i[i]] != zero)
             {
                res2 = 0.0;
@@ -3294,11 +3317,10 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
          }
          for (i = ne-1; i > ns-1; i--)	/* interior points first */
          {
+            /*-----------------------------------------------------------
+             * If diagonal is nonzero, relax point i; otherwise, skip it.
+             *-----------------------------------------------------------*/
 
-               /*-----------------------------------------------------------
-                * If diagonal is nonzero, relax point i; otherwise, skip it.
-                *-----------------------------------------------------------*/
-             
             if ( A_diag_data[A_diag_i[i]] != zero)
             {
                res2 = 0.0;
@@ -3328,9 +3350,9 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
    }
    if (num_procs > 1)
    {
-  	 hypre_TFree(Vext_data);
+	 hypre_TFree(Vext_data);
 	 hypre_TFree(v_buf_data);
    }
 
-   return(relax_error); 
+   return(relax_error);
 }
