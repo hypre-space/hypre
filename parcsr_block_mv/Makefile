@@ -11,12 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -65,14 +59,16 @@ DRIVER_FILES =
 OBJS = ${FILES:.c=.o}
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
+SONAME = libHYPRE_parcsr_block_mv-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/par_csr_block_matrix.h $(HYPRE_BUILD_DIR)/include	
-	cp -fp $(srcdir)/csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
+	cp -fpd $(srcdir)/par_csr_block_matrix.h $(HYPRE_BUILD_DIR)/include	
+	cp -fpd $(srcdir)/csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
+	cp -fpd libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
  
 driver: driver.o libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
@@ -99,9 +95,9 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
 
 install: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/par_csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(srcdir)/csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
-	cp -fp libHYPRE_* $(HYPRE_LIB_INSTALL)/.
+	cp -fpd $(srcdir)/par_csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
+	cp -fpd $(srcdir)/csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
+	cp -fpd libHYPRE_* $(HYPRE_LIB_INSTALL)/.
  
 clean:
 	rm -rf *.o libHYPRE_*
@@ -120,7 +116,8 @@ libHYPRE_parcsr_block_mv.a: ${OBJS}
 
 libHYPRE_parcsr_block_mv.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ ${OBJS}
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
 

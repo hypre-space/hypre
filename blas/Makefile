@@ -11,12 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
 ###  Internal BLAS routines may be compiled in this sub-directory
 ###  Generally, the Makefile in the utilities subdirectory controls
 ###  the inclusion of these routines based on the configure options.

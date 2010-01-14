@@ -11,12 +11,7 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
 ###  the inclusion of these routines based on the configure options.
-###
 
 include ../config/Makefile.config
 

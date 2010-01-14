@@ -11,15 +11,8 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
 include ../config/Makefile.config
 
- 
 SUPERLUFILES = ${HYPRE_FEI_SUPERLU_FILES}
 FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
 FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
@@ -40,24 +33,6 @@ SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
 STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
 STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
 UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
-
-UTILFILES = \
- ${HYPRE_SRC_TOP_DIR}/utilities/amg_linklist.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/exchange_data.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/fortran_matrix.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_memory.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_qsort.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/memory_dmalloc.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/mpistubs.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/qsplit.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/random.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/thread_mpistubs.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/threading.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/timer.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/timing.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error.o
 
 FILES_HYPRE = \
 $(SUPERLUFILES)\
@@ -81,36 +56,17 @@ $(STRUCTLSFILES)\
 $(STRUCTMVFILES)\
 $(UTILITIESFILES)
 
-FILES_LSI = \
-$(FEIHYPREFILES)\
-$(FEMLIFILES)\
-$(IJMVFILES)\
-$(EUCLIDFILES)\
-$(PARASAILSFILES)\
-$(PILUTFILES)\
-$(DISTMATRIXFILES)\
-$(KRYLOVFILES)\
-$(MATMATFILES)\
-$(MULTIVECFILES)\
-$(PARCSRLSFILES)\
-$(PARCSRMVFILES)\
-$(PARCSRBLOCKMVFILES)\
-$(SEQMVFILES)\
-$(SSTRUCTLSFILES)\
-$(SSTRUCTMVFILES)\
-$(STRUCTLSFILES)\
-$(STRUCTMVFILES)\
-$(UTILFILES)
+SONAME = libHYPRE-${HYPRE_RELEASE_VERSION}.so
 
 ##################################################################
 # Targets
 ##################################################################
 
-all: libHYPRE${HYPRE_LIB_SUFFIX} libHYPRE_LSI${HYPRE_LIB_SUFFIX}
-	cp -fp libHYPRE* ${HYPRE_BUILD_DIR}/lib
+all: libHYPRE${HYPRE_LIB_SUFFIX}
+	cp -fpd libHYPRE* ${HYPRE_BUILD_DIR}/lib
 
 install: all
-	cp -fp libHYPRE* ${HYPRE_LIB_INSTALL}
+	cp -fpd libHYPRE* ${HYPRE_LIB_INSTALL}
 
 clean:
 	rm -f *.o libHYPRE*
@@ -144,31 +100,6 @@ libHYPRE.a: ${FILES_HYPRE}
 	${RANLIB} $@
 
 libHYPRE.so: ${FILES_HYPRE}
-	@echo  "Building libHYPRE ... "
-	${BUILD_CC_SHARED} -o $@ ${FILES_HYPRE}
-
-libHYPRE_LSI.a: ${FILES_LSI}
-	@echo  "Building libHYPRE_LSI ... "
-	${AR} $@ $(FEIHYPREFILES) $(FEMLIFILES) $(IJMVFILES)
-	${AR} $@ $(EUCLIDFILES)
-	${AR} $@ $(PARASAILSFILES)
-	${AR} $@ $(PILUTFILES)
-	${AR} $@ $(DISTMATRIXFILES)
-	${AR} $@ $(KRYLOVFILES)
-	${AR} $@ $(MATMATFILES)
-	${AR} $@ $(MULTIVECFILES)
-	${AR} $@ $(PARCSRLSFILES)
-	${AR} $@ $(PARCSRMVFILES)
-	${AR} $@ $(PARCSRBLOCKMVFILES)
-	${AR} $@ $(SEQMVFILES)
-	${AR} $@ $(SSTRUCTLSFILES)
-	${AR} $@ $(SSTRUCTMVFILES)
-	${AR} $@ $(STRUCTLSFILES)
-	${AR} $@ $(STRUCTMVFILES)
-	${AR} $@ $(UTILFILES)
-	${RANLIB} $@
-
-libHYPRE_LSI.so: ${FILES_LSI}
-	@echo  "Building libHYPRE_LSI ... "
-	${BUILD_CC_SHARED} -o $@ ${FILES_LSI}
-
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o ${SONAME} ${FILES_HYPRE} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@

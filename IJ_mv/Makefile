@@ -11,12 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -59,19 +53,21 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
+SONAME = libHYPRE_IJ_mv-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/_hypre_IJ_mv.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fpd $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpd $(srcdir)/_hypre_IJ_mv.h $(HYPRE_BUILD_DIR)/include
+	cp -fpd libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/_hypre_IJ_mv.h $(HYPRE_INC_INSTALL)
-	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fpd $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fpd $(srcdir)/_hypre_IJ_mv.h $(HYPRE_INC_INSTALL)
+	cp -fpd libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*
@@ -90,6 +86,7 @@ libHYPRE_IJ_mv.a: ${OBJS}
 
 libHYPRE_IJ_mv.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ ${OBJS}
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

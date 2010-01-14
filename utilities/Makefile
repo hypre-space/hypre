@@ -11,7 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -24,9 +23,6 @@ C_COMPILE_FLAGS =\
    ${CINCLUDES}\
    ${CDEFS}
 
-##################################################################
-# Utilities Header Files
-##################################################################
 HEADERS =\
  amg_linklist.h\
  exchange_data.h\
@@ -43,9 +39,6 @@ HEADERS =\
  umalloc_local.h\
  _hypre_utilities.h
 
-##################################################################
-# Utilities Files
-##################################################################
 FILES =\
  amg_linklist.c\
  binsearch.c\
@@ -68,21 +61,23 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
+SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fpd $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpd $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fpd $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpd libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
-	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fpd $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fpd $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
+	cp -fpd $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
+	cp -fpd libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE* f2c.h *blas.h *lapack.h 
@@ -101,6 +96,7 @@ libHYPRE_utilities.a: ${OBJS}
  
 libHYPRE_utilities.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ *.o
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

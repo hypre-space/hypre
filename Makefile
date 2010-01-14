@@ -11,23 +11,33 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
 # Include all variables defined by configure
 include config/Makefile.config
 
-
 # These are the directories for internal blas, lapack and general utilities
-HYPRE_BASIC_DIRS = ${HYPRE_BLAS_SRC_DIR}\
+HYPRE_BASIC_DIRS =\
+ ${HYPRE_BLAS_SRC_DIR}\
  ${HYPRE_LAPACK_SRC_DIR}\
-  utilities
+ utilities
+
+#These are the directories for multivector
+HYPRE_MULTIVEC_DIRS =\
+ multivector
 
 # These are the directories for the generic Krylov solvers
-HYPRE_KRYLOV_DIRS = krylov
+HYPRE_KRYLOV_DIRS =\
+ krylov
+
+#These are the directories for the IJ interface
+HYPRE_IJ_DIRS =\
+ seq_mv\
+ parcsr_mv\
+ parcsr_block_mv\
+ distributed_matrix\
+ IJ_mv\
+ matrix_matrix\
+ distributed_ls\
+ parcsr_ls
 
 #These are the directories for the structured interface
 HYPRE_STRUCT_DIRS =\
@@ -38,20 +48,6 @@ HYPRE_STRUCT_DIRS =\
 HYPRE_SSTRUCT_DIRS =\
  sstruct_mv\
  sstruct_ls
-
-#These are the directories for the IJ interface
-HYPRE_IJ_DIRS =\
- seq_mv\
- parcsr_mv\
- parcsr_block_mv\
- distributed_matrix\
- matrix_matrix\
- IJ_mv\
- distributed_ls\
- parcsr_ls
-
-#These are the directories for multivector
-HYPRE_MULTIVEC_DIRS = multivector
 
 #These are the directories for the FEI
 HYPRE_FEI_DIRS = ${HYPRE_FEI_SRC_DIR}
@@ -68,11 +64,11 @@ HYPRE_TEST_DIRS = test
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
  ${HYPRE_BASIC_DIRS}\
+ ${HYPRE_MULTIVEC_DIRS}\
  ${HYPRE_KRYLOV_DIRS}\
+ ${HYPRE_IJ_DIRS}\
  ${HYPRE_STRUCT_DIRS}\
  ${HYPRE_SSTRUCT_DIRS}\
- ${HYPRE_IJ_DIRS}\
- ${HYPRE_MULTIVEC_DIRS}\
  ${HYPRE_FEI_DIRS}\
  ${HYPRE_LIBS_DIRS}
 
@@ -90,9 +86,9 @@ all:
 	@ \
 	mkdir -p ${HYPRE_BUILD_DIR}/include; \
 	mkdir -p ${HYPRE_BUILD_DIR}/lib; \
-	cp -fp HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
-	cp -fp $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
-	cp -fp $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fpd HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fpd $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fpd $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
 	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
@@ -173,7 +169,7 @@ clean:
 	rm -Rf hypre; \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
-	  if [ -d $$i ]; \
+	  if [ -f $$i/Makefile ]; \
 	  then \
 	    echo "Cleaning $$i ..."; \
 	    (cd $$i && $(MAKE) $@); \

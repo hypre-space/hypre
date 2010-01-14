@@ -11,12 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
 ###  Copy needed header and source files to lib sub-directory to be compiled
 ###  and create libHYPRE_mli*
 
@@ -43,7 +37,6 @@ HEADERS = \
  ./solver/mli_solver_superlu.h\
  ./solver/mli_solver_seqsuperlu.h\
  ./solver/mli_solver_arpacksuperlu.h
-
 
 FILES =\
  ./util/mli_utils.c\
@@ -88,16 +81,15 @@ FILES =\
  ./solver/mli_solver_arpacksuperlu.cxx\
  ./vector/mli_vector.cxx
 
-
 all: 
 	@ \
 	for head in ${HEADERS}; \
 	do \
-	    (cp -fp $$head ./lib); \
+	    (cp -fpd $$head ./lib); \
 	done;\
 	for file in ${FILES}; \
 	do \
-	    (cp -fp $$file ./lib); \
+	    (cp -fpd $$file ./lib); \
 	done;\
 	(cd ./lib && $(MAKE) $@)
 
@@ -105,11 +97,11 @@ install:
 	@ \
 	for head in ${HEADERS}; \
 	do \
-	    (cp -fp $$head ./lib); \
+	    (cp -fpd $$head ./lib); \
 	done;\
 	for file in ${FILES}; \
 	do \
-	    (cp -fp $$file ./lib); \
+	    (cp -fpd $$file ./lib); \
 	done;\
 	(cd ./lib && $(MAKE) $@)
 

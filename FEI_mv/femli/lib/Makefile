@@ -11,12 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
 include ../../../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -47,7 +41,6 @@ CXX_COMPILE_FLAGS =\
  -DMLI_SUPERLU -DMPICH_SKIP_MPICXX\
  ${MLI_INCLUDES}\
  ${CINCLUDES}
-
 
 HEADERS =\
  ../amgs/mli_method.h\
@@ -133,15 +126,17 @@ OBJSC = ${FILES:.c=.o}
 OBJSCXX = ${OBJSC:.cxx=.o}
 OBJS = ${OBJSCXX:.f=.o}
 
+SONAME = libHYPRE_mli-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_mli${HYPRE_LIB_SUFFIX}
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fpd libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_mli${HYPRE_LIB_SUFFIX}
-	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fpd libHYPRE* $(HYPRE_LIB_INSTALL)
 	@echo  " "
 
 clean:
@@ -149,7 +144,6 @@ clean:
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
-
 
 ##################################################################
 # Rules
@@ -162,6 +156,7 @@ libHYPRE_mli.a: ${OBJS}
 
 libHYPRE_mli.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ ${OBJS}
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

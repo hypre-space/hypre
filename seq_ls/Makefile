@@ -11,12 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
 include ../config/Makefile.config
 
 # These are directories that are not yet officially in HYPRE

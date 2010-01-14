@@ -11,13 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-# Generated automatically from Makefile.in by configure.
-
 include ../../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -43,7 +36,6 @@ LFLAGS =\
  -lHYPRE_utilities\
  -lHYPRE_krylov\
  ${MPILIBFLAGS} ${LIBS}
- 
 
 HEADERS =\
  headers.h\
@@ -93,6 +85,8 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
+SONAME = libHYPRE_amg_ls-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
@@ -124,6 +118,7 @@ libHYPRE_amg_ls.a: ${OBJS}
 
 libHYPRE_amg_ls.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ ${OBJS}
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

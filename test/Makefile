@@ -11,10 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -41,7 +37,7 @@ F77_COMPILE_FLAGS = \
  -I$(srcdir)/..\
  -I${HYPRE_LINK_DIR}/include\
  ${CINCLUDES}
- 
+
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS} 
 LIBFLAGS = ${LIBDIRS} ${LIBS} 
 LDLIBFLAGS = ${LDLIBDIRS} ${LDLIBS} ${LIBM} ${LDFLAGS}
@@ -63,10 +59,10 @@ BABELLIBFLAGS =\
  -lbHYPRE\
  -lsidl -ldl -lxml2
 
-
 ##################################################################
 # Targets
 ##################################################################
+
 HYPRE_DRIVERS =\
  ij.c\
  ij_mv.c\

@@ -1027,9 +1027,9 @@ dnl *********************************************************************
 if test "$casc_using_fei" = "yes"
 then
    HYPRE_FEI_SRC_DIR="HYPRE_TOP_SRC_DIR/FEI_mv"
-   HYPRE_FEI_SUBDIRS="fei-hypre femli"
-   HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.o"
+   HYPRE_FEI_SUBDIRS="femli fei-hypre"
    HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.o"
+   HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.o"
    if test "$casc_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
@@ -1122,6 +1122,8 @@ then
    BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
    BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
    BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
+   SHARED_SET_SONAME="-Wl,-soname,"
+   SHARED_OPTIONS="-Wl,-z,defs"
 fi
 
 BUILD_PYTHON=0
@@ -1294,6 +1296,8 @@ AC_SUBST(BUILD_CXX_SHARED)
 
 AC_SUBST(SHARED_COMPILE_FLAG)
 AC_SUBST(SHARED_BUILD_FLAG)
+AC_SUBST(SHARED_SET_SONAME)
+AC_SUBST(SHARED_OPTIONS)
 
 AC_SUBST(BUILD_PYTHON)
 AC_SUBST(PYTHON)
