@@ -93,6 +93,20 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsettol, HYPRE_PARCSRBICGSTABSETTOL)( long in
    *ierr = (int) ( HYPRE_ParCSRBiCGSTABSetTol( (HYPRE_Solver) *solver,
                                             (double)       *tol     ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRBiCGSTABSetAbsoluteTol
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrbicgstabsetatol, HYPRE_PARCSRBICGSTABSETATOL)( long int *solver,
+                                          double   *tol,
+                                          int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParCSRBiCGSTABSetAbsoluteTol( (HYPRE_Solver) *solver,
+                                                       (double)       *tol     ) );
+}
+
+
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABSetMinIter

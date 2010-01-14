@@ -97,3 +97,45 @@ hypre_F90_IFACE(hypre_euclidsetparamsfromfile, HYPRE_EUCLIDSETPARAMSFROMFILE)
    *ierr = (int) HYPRE_EuclidSetParamsFromFile( (HYPRE_Solver) *solver, 
                                                 (char *)        filename );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_EuclidSetLevel
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_euclidsetlevel, HYPRE_EUCLIDSETLEVEL)(
+   long int *solver,
+   int      *eu_level,
+   int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_EuclidSetLevel( (HYPRE_Solver) *solver,
+                                         (int)          *eu_level ) );
+}
+
+
+/*--------------------------------------------------------------------------
+ * HYPRE_EuclidSetBJ
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_euclidsetbj, HYPRE_EUCLIDSETBJ)(
+   long int *solver,
+   int      *bj,
+   int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_EuclidSetBJ( (HYPRE_Solver) *solver,
+                                         (int)          *bj ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_EuclidSetSparseA
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_euclidsetsparsea, HYPRE_EUCLIDSETSPARSEA)(
+   long int *solver,
+   double   *spa,
+   int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_EuclidSetSparseA( (HYPRE_Solver) *solver,
+                                           (double)          *spa ) );
+}
