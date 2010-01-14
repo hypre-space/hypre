@@ -42,12 +42,12 @@ SONAME = libHYPRE_MatrixMatrix-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}
-	cp -fpd $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}
-	cp -fpd $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fpd libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o lib*

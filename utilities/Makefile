@@ -68,16 +68,16 @@ SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
-	cp -fpd $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
-	cp -fpd $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
-	cp -fpd libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE* f2c.h *blas.h *lapack.h 

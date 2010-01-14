@@ -85,11 +85,11 @@ all:
 	@ \
 	for head in ${HEADERS}; \
 	do \
-	    (cp -fpd $$head ./lib); \
+	    (cp -fpPR $$head ./lib); \
 	done;\
 	for file in ${FILES}; \
 	do \
-	    (cp -fpd $$file ./lib); \
+	    (cp -fpPR $$file ./lib); \
 	done;\
 	(cd ./lib && $(MAKE) $@)
 
@@ -97,11 +97,11 @@ install:
 	@ \
 	for head in ${HEADERS}; \
 	do \
-	    (cp -fpd $$head ./lib); \
+	    (cp -fpPR $$head ./lib); \
 	done;\
 	for file in ${FILES}; \
 	do \
-	    (cp -fpd $$file ./lib); \
+	    (cp -fpPR $$file ./lib); \
 	done;\
 	(cd ./lib && $(MAKE) $@)
 

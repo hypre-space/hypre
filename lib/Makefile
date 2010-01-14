@@ -63,10 +63,10 @@ SONAME = libHYPRE-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE${HYPRE_LIB_SUFFIX}
-	cp -fpd libHYPRE* ${HYPRE_BUILD_DIR}/lib
+	cp -fpPR libHYPRE* ${HYPRE_BUILD_DIR}/lib
 
 install: all
-	cp -fpd libHYPRE* ${HYPRE_LIB_INSTALL}
+	cp -fpPR libHYPRE* ${HYPRE_LIB_INSTALL}
 
 clean:
 	rm -f *.o libHYPRE*

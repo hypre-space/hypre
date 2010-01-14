@@ -86,9 +86,9 @@ all:
 	@ \
 	mkdir -p ${HYPRE_BUILD_DIR}/include; \
 	mkdir -p ${HYPRE_BUILD_DIR}/lib; \
-	cp -fpd HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
-	cp -fpd $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
-	cp -fpd $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fpPR HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fpPR $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fpPR $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
 	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \

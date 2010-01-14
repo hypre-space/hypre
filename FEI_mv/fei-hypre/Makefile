@@ -159,30 +159,30 @@ SONAME = libHYPRE_FEI-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
-	cp -fpd $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fpPR $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
-	cp -fpd $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
-	cp -fpd $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)
-	cp -fpd $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)
-	cp -fpd libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fpPR $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)
+	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 	@echo  ""
 
 clean:
