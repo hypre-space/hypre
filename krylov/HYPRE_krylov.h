@@ -970,6 +970,11 @@ HYPRE_CGNRSetMaxIter(HYPRE_Solver solver,
 
 /**
  * (Optional) Set the preconditioner to use.
+ * Note that the only preconditioner available in hypre for use with
+ * CGNR is currently BoomerAMG. It will require to use Jacobi as
+ * a smoother (i.e. relax_type = 0 or 7) with or without relax_weight
+ * and without CF smoothing, i.e. relax_order needs to be set to 0 by 
+ * the user, since it is not the default.
  **/
 int
 HYPRE_CGNRSetPrecond(HYPRE_Solver         solver,
