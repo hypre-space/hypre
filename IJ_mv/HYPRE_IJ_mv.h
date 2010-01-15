@@ -107,9 +107,14 @@ int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
  * corresponds directly to the column entries in {\tt cols}.  Erases
  * any previous values at the specified locations and replaces them
  * with new ones, or, if there was no value there before, inserts a
- * new one.
+ * new one if set locally. Note that it is not possible to set values
+ * on other processors. If one tries to set a value from proc i on proc j,
+ * proc i will erase all previous occurrences of this value in its stack
+ * (including values generated with AddToValues), and treat it like
+ * a zero value. The actual value needs to be set on proc j.
  *
  * Not collective.
+ *
  **/
 int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
                             int             nrows,
@@ -120,12 +125,13 @@ int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
 
 /**
  * Adds to values for {\tt nrows} rows or partial rows of the matrix.  
- * Usage details are
- * analogous to \Ref{HYPRE_IJMatrixSetValues}.  Adds to any previous
- * values at the specified locations, or, if there was no value there
- * before, inserts a new one.
+ * Usage details are analogous to \Ref{HYPRE_IJMatrixSetValues}.  
+ * Adds to any previous values at the specified locations, or, if 
+ * there was no value there before, inserts a new one. 
+ * AddToValues can be used to add to values on other processors.
  *
  * Not collective.
+ *
  **/
 int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix  matrix,
                               int             nrows,
@@ -235,6 +241,14 @@ int HYPRE_IJMatrixSetMaxOffProcElmts(HYPRE_IJMatrix  matrix,
                                      int max_off_proc_elmts);
 
 /**
+ * (Optional) Sets the print level, if the user wants to print
+ * error messages. The default is 0, i.e. no error messages are printed.
+ *
+ **/
+int HYPRE_IJMatrixSetPrintLevel(HYPRE_IJMatrix  matrix,
+                               int      print_level);
+
+/**
  * Read the matrix from file.  This is mainly for debugging purposes.
  **/
 int HYPRE_IJMatrixRead(const char     *filename,
@@ -314,7 +328,11 @@ int HYPRE_IJVectorSetMaxOffProcElmts(HYPRE_IJVector  vector,
  * are of dimension {\tt nvalues} and contain the vector values to be
  * set and the corresponding global vector indices, respectively.
  * Erases any previous values at the specified locations and replaces
- * them with new ones.
+ * them with new ones.  Note that it is not possible to set values
+ * on other processors. If one tries to set a value from proc i on proc j,
+ * proc i will erase all previous occurrences of this value in its stack
+ * (including values generated with AddToValues), and treat it like
+ * a zero value. The actual value needs to be set on proc j.
  *
  * Not collective.
  **/
@@ -326,6 +344,9 @@ int HYPRE_IJVectorSetValues(HYPRE_IJVector  vector,
 /**
  * Adds to values in vector.  Usage details are analogous to
  * \Ref{HYPRE_IJVectorSetValues}.
+ * Adds to any previous values at the specified locations, or, if 
+ * there was no value there before, inserts a new one. 
+ * AddToValues can be used to add to values on other processors.
  *
  * Not collective.
  **/
@@ -381,6 +402,14 @@ int HYPRE_IJVectorGetLocalRange(HYPRE_IJVector  vector,
  **/
 int HYPRE_IJVectorGetObject(HYPRE_IJVector   vector,
                             void           **object);
+
+/**
+ * (Optional) Sets the print level, if the user wants to print
+ * error messages. The default is 0, i.e. no error messages are printed.
+ *
+ **/
+int HYPRE_IJVectorSetPrintLevel(HYPRE_IJVector  vector,
+                               int      print_level);
 
 /**
  * Read the vector from file.  This is mainly for debugging purposes.
