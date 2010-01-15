@@ -36,6 +36,8 @@ typedef struct
    int	    current_num_elmts; /* current no. of elements stored in stash */
    int     *off_proc_i; /* contains column indices */
    double  *off_proc_data; /* contains corresponding data */
+   int	    cancel_indx; /* number of elements that have to be deleted due
+                           to setting values from another processor */
 } hypre_AuxParVector;
 
 /*--------------------------------------------------------------------------
@@ -46,5 +48,6 @@ typedef struct
 #define hypre_AuxParVectorCurrentNumElmts(matrix)  ((matrix) -> current_num_elmts)
 #define hypre_AuxParVectorOffProcI(matrix)  ((matrix) -> off_proc_i)
 #define hypre_AuxParVectorOffProcData(matrix)  ((matrix) -> off_proc_data)
+#define hypre_AuxParVectorCancelIndx(matrix)  ((matrix) -> cancel_indx)
 
 #endif

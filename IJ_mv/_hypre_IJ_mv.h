@@ -144,6 +144,8 @@ typedef struct
    int	    current_num_elmts; /* current no. of elements stored in stash */
    int     *off_proc_i; /* contains column indices */
    double  *off_proc_data; /* contains corresponding data */
+   int	    cancel_indx; /* number of elements that have to be deleted due
+                           to setting values from another processor */
 } hypre_AuxParVector;
 
 /*--------------------------------------------------------------------------
@@ -154,6 +156,7 @@ typedef struct
 #define hypre_AuxParVectorCurrentNumElmts(matrix)  ((matrix) -> current_num_elmts)
 #define hypre_AuxParVectorOffProcI(matrix)  ((matrix) -> off_proc_i)
 #define hypre_AuxParVectorOffProcData(matrix)  ((matrix) -> off_proc_data)
+#define hypre_AuxParVectorCancelIndx(matrix)  ((matrix) -> cancel_indx)
 
 #endif
 /*BHEADER**********************************************************************
@@ -289,9 +292,9 @@ typedef struct hypre_IJVector_struct
 				       information */
 
    int         global_first_row;    /* these for data items are necessary */
-   int         global_num_rows;     /*    to be able to avoind using the global */
+   int         global_num_rows;     /*   to be able to avoid using the global */
                                     /*    global partition */ 
-   
+   int	       print_level; 
    
 
 
@@ -314,6 +317,8 @@ typedef struct hypre_IJVector_struct
 #define hypre_IJVectorGlobalFirstRow(vector)  ((vector) -> global_first_row)
 
 #define hypre_IJVectorGlobalNumRows(vector)  ((vector) -> global_num_rows)
+
+#define hypre_IJVectorPrintLevel(vector)  ((vector) -> print_level)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
@@ -430,6 +435,7 @@ int HYPRE_IJMatrixPrint ( HYPRE_IJMatrix matrix , const char *filename );
 int HYPRE_IJVectorCreate ( MPI_Comm comm , int jlower , int jupper , HYPRE_IJVector *vector );
 int HYPRE_IJVectorDestroy ( HYPRE_IJVector vector );
 int HYPRE_IJVectorInitialize ( HYPRE_IJVector vector );
+int HYPRE_IJVectorSetPrintLevel ( HYPRE_IJVector vector , int print_level );
 int HYPRE_IJVectorSetValues ( HYPRE_IJVector vector , int nvalues , const int *indices , const double *values );
 int HYPRE_IJVectorAddToValues ( HYPRE_IJVector vector , int nvalues , const int *indices , const double *values );
 int HYPRE_IJVectorAssemble ( HYPRE_IJVector vector );

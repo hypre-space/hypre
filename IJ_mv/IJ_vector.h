@@ -40,9 +40,9 @@ typedef struct hypre_IJVector_struct
 				       information */
 
    int         global_first_row;    /* these for data items are necessary */
-   int         global_num_rows;     /*    to be able to avoind using the global */
+   int         global_num_rows;     /*   to be able to avoid using the global */
                                     /*    global partition */ 
-   
+   int	       print_level; 
    
 
 
@@ -65,6 +65,8 @@ typedef struct hypre_IJVector_struct
 #define hypre_IJVectorGlobalFirstRow(vector)  ((vector) -> global_first_row)
 
 #define hypre_IJVectorGlobalNumRows(vector)  ((vector) -> global_num_rows)
+
+#define hypre_IJVectorPrintLevel(vector)  ((vector) -> print_level)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
