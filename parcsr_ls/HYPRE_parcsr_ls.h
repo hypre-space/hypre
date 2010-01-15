@@ -127,7 +127,10 @@ int HYPRE_BoomerAMGSolve(HYPRE_Solver       solver,
 
 /**
  * Solve the transpose system $A^T x = b$ or apply AMG as a preconditioner
- * to the transpose system .
+ * to the transpose system . Note that this function should only be used
+ * when preconditioning CGNR with BoomerAMG. It can only be used with
+ * Jacobi smoothing (relax_type 0 or 7) and without CF smoothing,
+ * i.e relax_order needs to be set to 0.
  * If used as a preconditioner, this function should be passed
  * to the iterative solver {\tt SetPrecond} function.
  *
