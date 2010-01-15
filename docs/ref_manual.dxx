@@ -15,5 +15,6 @@ HYPRECopyright
 	//@Include: ../sstruct_ls/HYPRE_sstruct_ls.h
 	//@Include: ../parcsr_ls/HYPRE_parcsr_ls.h
 	//@Include: ../krylov/HYPRE_krylov.h
+	//@Include: ../krylov/HYPRE_lobpcg.h
 	//@Include: ../FEI_mv/fei-hypre/LLNL_FEI.doc
 //@}
