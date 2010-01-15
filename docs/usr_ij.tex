@@ -91,8 +91,17 @@ The \code{SetValues()} routine sets matrix values for some number of
 rows (\code{nrows}) and some number of columns in each row
 (\code{ncols}).  The actual row and column numbers of the matrix
 \code{values} to be set are given by \code{rows} and \code{cols}.
-After the coefficients are set, they can be added to with an
-\code{AddTo()} routine.  
+The coefficients can be modified with the
+\code{AddToValues()} routine. If \code{AddToValues()} is used to add
+to a value that previously didn't exist, it will set this value.
+Note that while \code{AddToValues()}
+will add to values on other processors, \code{SetValues()} does not set
+values on other processors. Instead if a user calls \code{SetValues()}
+on processor $i$ to set a matrix coefficient belonging to processor $j$, 
+processor $i$ will
+erase all previous occurrences of this matrix coefficient,
+so they will not contribute to this coefficient on processor $j$.
+The actual coefficient has to be set on processor $j$.
 
 The \code{Assemble()} routine is a collective call, and finalizes the
 matrix assembly, making the matrix ``ready to use''.  The
@@ -179,8 +188,17 @@ not involve the allocation of memory for the coefficient data,
 depending on the implementation.
 
 The \code{SetValues()} routine sets the vector \code{values} for some
-number (\code{nvalues}) of \code{indices}.  Each process should set
-only those vector values that it ``owns'' in the data distribution.
+number (\code{nvalues}) of \code{indices}.  
+The values can be modified with the
+\code{AddToValues()} routine. 
+Note that while \code{AddToValues()}
+will add to values on other processors, \code{SetValues()} does not set
+values on other processors. Instead if a user calls \code{SetValues()}
+on processor $i$ to set a value belonging to processor $j$, 
+processor $i$ will
+erase all previous occurrences of this matrix coefficient,
+so they will not contribute to this value on processor $j$.
+The actual value has to be set on processor $j$.
 
 The \code{Assemble()} routine is a trivial collective call, and
 finalizes the vector assembly, making the vector ``ready to use''.
