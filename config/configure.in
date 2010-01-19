@@ -73,7 +73,6 @@ AC_COPYRIGHT([ Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA])
 
 AC_CONFIG_AUX_DIR(config)
-AC_CONFIG_MACRO_DIR([babel-runtime/m4])
 AC_CONFIG_SRCDIR([HYPRE.h])
 
 dnl *********************************************************************
@@ -823,7 +822,6 @@ then
    fi
 fi
 
-
 dnl *********************************************************************
 dnl * Check for general programs 
 dnl *********************************************************************
@@ -832,7 +830,6 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-
 
 dnl *********************************************************************
 dnl * Check for compiler related programs 
@@ -894,6 +891,7 @@ then
  BABELDIR="babel-runtime babel"
  export CC CXX F77 CPP LD
  export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
+ AC_CONFIG_MACRO_DIR([babel-runtime/m4])
  AC_CONFIG_SUBDIRS(babel-runtime)
 fi
 AC_SUBST(BABELDIR)
@@ -1170,11 +1168,9 @@ dnl * Define machine architecture
 dnl *********************************************************************
 HYPRE_SET_ARCH
 
-
 dnl *********************************************************************
 dnl * Check if user set test option.
 dnl *********************************************************************
-
 AC_ARG_WITH(test-alpha,
   AS_HELP_STRING([  --with-test-alpha], [ Test alpha version of HYPRE.
                                           NOTE: ONLY exists on the CASC cluster.]),
@@ -1203,11 +1199,9 @@ AC_ARG_WITH(test-general,
 [casc_testing_general=no]
 )
 
-
 dnl *********************************************************************
 dnl * Set link path for test codes.
 dnl *********************************************************************
-
 if test "$casc_testing_alpha" = "yes"
 then
    case $HOSTNAME in
@@ -1383,7 +1377,6 @@ AC_SUBST(RANLIB)
 dnl *********************************************************************
 dnl * Define the files to be configured and made 
 dnl *********************************************************************
-
 if test -d tools; then
    AC_DEFINE(TOOLSDIR)
 fi

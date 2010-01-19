@@ -1536,17 +1536,6 @@ ac_config_guess="$SHELL $ac_aux_dir/config.guess"
 ac_config_sub="$SHELL $ac_aux_dir/config.sub"
 ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 
-case babel-runtime/m4 in
-  [\\/]* | ?:[\\/]* ) ac_macro_dir=babel-runtime/m4         ;;
-  *)                      ac_macro_dir=$srcdir/babel-runtime/m4 ;;
-esac
-if test -d "$ac_macro_dir"; then :
-else
-  { { echo "$as_me:$LINENO: error: cannot find macro directory \`babel-runtime/m4'" >&5
-echo "$as_me: error: cannot find macro directory \`babel-runtime/m4'" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
 
 
 
@@ -3105,7 +3094,6 @@ test -n "$F77" || F77=""""
    fi
 fi
 
-
 if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}ranlib", so it can be a program name with args.
 set dummy ${ac_tool_prefix}ranlib; ac_word=$2
@@ -3344,7 +3332,6 @@ else
 echo "${ECHO_T}no" >&6
   SET_MAKE="MAKE=${MAKE-make}"
 fi
-
 
 
 if test "$casc_using_c" = "yes"
@@ -5927,7 +5914,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5930:" \
+echo "$as_me:5917:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6131,7 +6118,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6134: \"$ac_link\") >&5
+(eval echo $as_me:6121: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6236,7 +6223,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6239: \"$ac_link\") >&5
+(eval echo $as_me:6226: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6522,7 +6509,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6525: \"$ac_link\") >&5
+(eval echo $as_me:6512: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6600,7 +6587,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6603: \"$ac_link\") >&5
+(eval echo $as_me:6590: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9089,6 +9076,17 @@ then
  BABELDIR="babel-runtime babel"
  export CC CXX F77 CPP LD
  export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
+ case babel-runtime/m4 in
+  [\\/]* | ?:[\\/]* ) ac_macro_dir=babel-runtime/m4         ;;
+  *)                      ac_macro_dir=$srcdir/babel-runtime/m4 ;;
+esac
+if test -d "$ac_macro_dir"; then :
+else
+  { { echo "$as_me:$LINENO: error: cannot find macro directory \`babel-runtime/m4'" >&5
+echo "$as_me: error: cannot find macro directory \`babel-runtime/m4'" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 
 
 subdirs="$subdirs babel-runtime"
@@ -10523,8 +10521,6 @@ _ACEOF
 
 
 
-
-
 # Check whether --with-test-alpha or --without-test-alpha was given.
 if test "${with_test_alpha+set}" = set; then
   withval="$with_test_alpha"
@@ -10562,8 +10558,6 @@ else
   casc_testing_general=no
 
 fi;
-
-
 
 if test "$casc_testing_alpha" = "yes"
 then
@@ -10694,7 +10688,6 @@ then
 else
    HYPRE_LINKDIR="`pwd`/hypre"
 fi
-
 
 
 
