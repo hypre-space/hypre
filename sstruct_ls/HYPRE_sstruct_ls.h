@@ -11,9 +11,6 @@
  ***********************************************************************EHEADER*/
 
 
-
-
-
 #ifndef HYPRE_SSTRUCT_LS_HEADER
 #define HYPRE_SSTRUCT_LS_HEADER
 
@@ -60,7 +57,6 @@ typedef int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
                                            HYPRE_SStructVector,
                                            HYPRE_SStructVector);
 
-
 #ifndef HYPRE_MODIFYPC
 #define HYPRE_MODIFYPC
 /* if pc not defined, then may need HYPRE_SOLVER also */
@@ -76,640 +72,6 @@ typedef int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                          double);
 #endif
 
-
-
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name SStruct PCG Solver
- **/
-/*@{*/
-
-/**
- * Create a solver object.
- **/
-int HYPRE_SStructPCGCreate(MPI_Comm             comm,
-                           HYPRE_SStructSolver *solver);
-
-/**
- * Destroy a solver object.  An object should be explicitly destroyed
- * using this destructor when the user's code no longer needs direct
- * access to it.  Once destroyed, the object must not be referenced
- * again.  Note that the object may not be deallocated at the
- * completion of this call, since there may be internal package
- * references to the object.  The object will then be destroyed when
- * all internal reference counts go to zero.
- **/
-int HYPRE_SStructPCGDestroy(HYPRE_SStructSolver solver);
-
-/**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
- * ignored here, but information about the layout of the data may be used.
- **/
-int HYPRE_SStructPCGSetup(HYPRE_SStructSolver solver,
-                          HYPRE_SStructMatrix A,
-                          HYPRE_SStructVector b,
-                          HYPRE_SStructVector x);
-
-/**
- * Solve the system.
- **/
-int HYPRE_SStructPCGSolve(HYPRE_SStructSolver solver,
-                          HYPRE_SStructMatrix A,
-                          HYPRE_SStructVector b,
-                          HYPRE_SStructVector x);
-
-/**
- * (Optional) Set the convergence tolerance.
- **/
-int HYPRE_SStructPCGSetTol(HYPRE_SStructSolver solver,
-                           double              tol);
-
-/**
- * (Optional) Set the absolute convergence tolerance (default is
- * 0). If one desires the convergence test to check the absolute
- * convergence tolerance {\it only}, then set the relative convergence
- * tolerance to 0.0.  (The default convergence test is $ <C*r,r> \leq$
- * max(relative$\_$tolerance$^{2} \ast <C*b, b>$, absolute$\_$tolerance$^2$).)
- **/
-int HYPRE_SStructPCGSetAbsoluteTol(HYPRE_SStructSolver solver,
-                                   double              tol);
-
-
-/**
- * (Optional) Set maximum number of iterations.
- **/
-int HYPRE_SStructPCGSetMaxIter(HYPRE_SStructSolver solver,
-                               int                 max_iter);
-
-/**
- * (Optional) Use the two-norm in stopping criteria.
- **/
-int
-HYPRE_SStructPCGSetTwoNorm( HYPRE_SStructSolver solver,
-                            int                 two_norm );
-
-/**
- * (Optional) Additionally require that the relative difference in
- * successive iterates be small.
- **/
-int
-HYPRE_SStructPCGSetRelChange( HYPRE_SStructSolver solver,
-                              int                 rel_change );
-
-/**
- * (Optional) Set the preconditioner to use.
- **/
-int HYPRE_SStructPCGSetPrecond(HYPRE_SStructSolver          solver,
-                               HYPRE_PtrToSStructSolverFcn  precond,
-                               HYPRE_PtrToSStructSolverFcn  precond_setup,
-                               void                        *precond_solver);
-
-/**
- * (Optional) Set the amount of logging to do.
- **/
-int HYPRE_SStructPCGSetLogging(HYPRE_SStructSolver solver,
-                               int                 logging);
-
-
-/**
- * (Optional) Set the amount of printing to do to the screen.
- **/
-int HYPRE_SStructPCGSetPrintLevel(HYPRE_SStructSolver solver,
-                                  int                 level);
-
-/**
- * Return the number of iterations taken.
- **/
-int HYPRE_SStructPCGGetNumIterations(HYPRE_SStructSolver  solver,
-                                     int                 *num_iterations);
-
-/**
- * Return the norm of the final relative residual.
- **/
-int HYPRE_SStructPCGGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                                 double              *norm);
-
-/**
- * Return the residual.
- **/
-int HYPRE_SStructPCGGetResidual(HYPRE_SStructSolver  solver,
-                                void  **residual);
-
-/**
- * Setup routine for diagonal preconditioning.
- **/
-int HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
-                                 HYPRE_SStructMatrix A,
-                                 HYPRE_SStructVector y,
-                                 HYPRE_SStructVector x      );
-
-/**
- * Solve routine for diagonal preconditioning.
- **/
-int HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
-                            HYPRE_SStructMatrix A,
-                            HYPRE_SStructVector y,
-                            HYPRE_SStructVector x      );
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name SStruct GMRES Solver
- **/
-/*@{*/
-
-/**
- * Create a solver object.
- **/
-int HYPRE_SStructGMRESCreate(MPI_Comm             comm,
-                             HYPRE_SStructSolver *solver);
-
-/**
- * Destroy a solver object.  An object should be explicitly destroyed
- * using this destructor when the user's code no longer needs direct
- * access to it.  Once destroyed, the object must not be referenced
- * again.  Note that the object may not be deallocated at the
- * completion of this call, since there may be internal package
- * references to the object.  The object will then be destroyed when
- * all internal reference counts go to zero.
- **/
-int HYPRE_SStructGMRESDestroy(HYPRE_SStructSolver solver);
-
-/**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
- * ignored here, but information about the layout of the data may be used.
- **/
-int HYPRE_SStructGMRESSetup(HYPRE_SStructSolver solver,
-                            HYPRE_SStructMatrix A,
-                            HYPRE_SStructVector b,
-                            HYPRE_SStructVector x);
-
-/**
- * Solve the system.
- **/
-int HYPRE_SStructGMRESSolve(HYPRE_SStructSolver solver,
-                            HYPRE_SStructMatrix A,
-                            HYPRE_SStructVector b,
-                            HYPRE_SStructVector x);
-
-/**
- * (Optional) Set the relative convergence tolerance.
- **/
-int HYPRE_SStructGMRESSetTol(HYPRE_SStructSolver solver,
-                             double              tol);
-/**
- * (Optional) Set the absolute convergence tolerance  (default: 0).
- *  If one desires
- * the convergence test to check the absolute convergence tolerance {\it only}, then
- * set the relative convergence tolerance to 0.0.  (The convergence test is 
- * $\|r\| \leq$ max(relative$\_$tolerance$\ast \|b\|$, absolute$\_$tolerance).)
- **/
-int HYPRE_SStructGMRESSetAbsoluteTol(HYPRE_SStructSolver solver,
-                             double              tol);
-
-/*
- * RE-VISIT
- **/
-int HYPRE_SStructGMRESSetMinIter(HYPRE_SStructSolver solver,
-                                 int                 min_iter);
-
-/**
- * (Optional) Set maximum number of iterations.
- **/
-int HYPRE_SStructGMRESSetMaxIter(HYPRE_SStructSolver solver,
-                                 int                 max_iter);
-
-/**
- * (Optional) Set the maximum size of the Krylov space.
- **/
-int HYPRE_SStructGMRESSetKDim(HYPRE_SStructSolver solver,
-                              int                 k_dim);
-
-/*
- * RE-VISIT
- **/
-int HYPRE_SStructGMRESSetStopCrit(HYPRE_SStructSolver solver,
-                                  int                 stop_crit);
-
-/**
- * (Optional) Set the preconditioner to use.
- **/
-int HYPRE_SStructGMRESSetPrecond(HYPRE_SStructSolver          solver,
-                                 HYPRE_PtrToSStructSolverFcn  precond,
-                                 HYPRE_PtrToSStructSolverFcn  precond_setup,
-                                 void                        *precond_solver);
-
-/**
- * (Optional) Set the amount of logging to do.
- **/
-int HYPRE_SStructGMRESSetLogging(HYPRE_SStructSolver solver,
-                                 int                 logging);
-
-/**
- * (Optional) Set the amount of printing to do to the screen.
- **/
-int HYPRE_SStructGMRESSetPrintLevel(HYPRE_SStructSolver solver,
-                                    int                 print_level);
-
-/**
- * Return the number of iterations taken.
- **/
-int HYPRE_SStructGMRESGetNumIterations(HYPRE_SStructSolver  solver,
-                                       int                 *num_iterations);
-
-/**
- * Return the norm of the final relative residual.
- **/
-int HYPRE_SStructGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                                   double              *norm);
-
-/**
- * Return the residual.
- **/
-int HYPRE_SStructGMRESGetResidual(HYPRE_SStructSolver  solver,
-                                  void   **residual);
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name SStruct FlexGMRES Solver
- **/
-/*@{*/
-
-/**
- * Create a solver object.
- **/
-int HYPRE_SStructFlexGMRESCreate(MPI_Comm             comm,
-                             HYPRE_SStructSolver *solver);
-
-/**
- * Destroy a solver object.  An object should be explicitly destroyed
- * using this destructor when the user's code no longer needs direct
- * access to it.  Once destroyed, the object must not be referenced
- * again.  Note that the object may not be deallocated at the
- * completion of this call, since there may be internal package
- * references to the object.  The object will then be destroyed when
- * all internal reference counts go to zero.
- **/
-int HYPRE_SStructFlexGMRESDestroy(HYPRE_SStructSolver solver);
-
-/**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
- * ignored here, but information about the layout of the data may be used.
- **/
-int HYPRE_SStructFlexGMRESSetup(HYPRE_SStructSolver solver,
-                            HYPRE_SStructMatrix A,
-                            HYPRE_SStructVector b,
-                            HYPRE_SStructVector x);
-
-/**
- * Solve the system.
- **/
-int HYPRE_SStructFlexGMRESSolve(HYPRE_SStructSolver solver,
-                            HYPRE_SStructMatrix A,
-                            HYPRE_SStructVector b,
-                            HYPRE_SStructVector x);
-
-/**
- * (Optional) Set the relative convergence tolerance.
- **/
-int HYPRE_SStructFlexGMRESSetTol(HYPRE_SStructSolver solver,
-                             double              tol);
-
-/**
- * (Optional) Set the absolute convergence tolerance (default: 0).
- *  If one desires
- * the convergence test to check the absolute convergence tolerance {\it only}, then
- * set the relative convergence tolerance to 0.0.  (The convergence test is 
- * $\|r\| \leq$ max(relative$\_$tolerance$\ast \|b\|$, absolute$\_$tolerance).)
- **/
-int HYPRE_SStructFlexGMRESSetAbsoluteTol(HYPRE_SStructSolver solver,
-                             double              tol);
-
-
-
-/*
- * RE-VISIT
- **/
-int HYPRE_SStructFlexGMRESSetMinIter(HYPRE_SStructSolver solver,
-                                 int                 min_iter);
-
-/**
- * (Optional) Set maximum number of iterations.
- **/
-int HYPRE_SStructFlexGMRESSetMaxIter(HYPRE_SStructSolver solver,
-                                 int                 max_iter);
-
-/**
- * (Optional) Set the maximum size of the Krylov space.
- **/
-int HYPRE_SStructFlexGMRESSetKDim(HYPRE_SStructSolver solver,
-                              int                 k_dim);
-
-
-
-/**
- * (Optional) Set the preconditioner to use.
- **/
-int HYPRE_SStructFlexGMRESSetPrecond(HYPRE_SStructSolver          solver,
-                                 HYPRE_PtrToSStructSolverFcn  precond,
-                                 HYPRE_PtrToSStructSolverFcn  precond_setup,
-                                 void                        *precond_solver);
-
-/**
- * (Optional) Set the amount of logging to do.
- **/
-int HYPRE_SStructFlexGMRESSetLogging(HYPRE_SStructSolver solver,
-                                 int                 logging);
-
-/**
- * (Optional) Set the amount of printing to do to the screen.
- **/
-int HYPRE_SStructFlexGMRESSetPrintLevel(HYPRE_SStructSolver solver,
-                                    int                 print_level);
-
-/**
- * Return the number of iterations taken.
- **/
-int HYPRE_SStructFlexGMRESGetNumIterations(HYPRE_SStructSolver  solver,
-                                       int                 *num_iterations);
-
-/**
- * Return the norm of the final relative residual.
- **/
-int HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                                   double              *norm);
-
-/**
- * Return the residual.
- **/
-int HYPRE_SStructFlexGMRESGetResidual(HYPRE_SStructSolver  solver,
-                                  void   **residual);
-
-
-/**
- * Set a user-defined function to modify solve-time preconditioner attributes.
- **/
-
-int HYPRE_SStructFlexGMRESSetModifyPC( HYPRE_SStructSolver  solver,
-                                      HYPRE_PtrToModifyPCFcn modify_pc);
-
-
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name SStruct LGMRES Solver
- **/
-/*@{*/
-
-/**
- * Create a solver object.
- **/
-int HYPRE_SStructLGMRESCreate(MPI_Comm             comm,
-                             HYPRE_SStructSolver *solver);
-
-/**
- * Destroy a solver object.  An object should be explicitly destroyed
- * using this destructor when the user's code no longer needs direct
- * access to it.  Once destroyed, the object must not be referenced
- * again.  Note that the object may not be deallocated at the
- * completion of this call, since there may be internal package
- * references to the object.  The object will then be destroyed when
- * all internal reference counts go to zero.
- **/
-int HYPRE_SStructLGMRESDestroy(HYPRE_SStructSolver solver);
-
-/**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
- * ignored here, but information about the layout of the data may be used.
- **/
-int HYPRE_SStructLGMRESSetup(HYPRE_SStructSolver solver,
-                            HYPRE_SStructMatrix A,
-                            HYPRE_SStructVector b,
-                            HYPRE_SStructVector x);
-
-/**
- * Solve the system.Details on LGMRES may be found in A. H. Baker,
- * E.R. Jessup, and T.A. Manteuffel. A technique for accelerating the
- * convergence of restarted GMRES. SIAM Journal on Matrix Analysis and
- * Applications, 26 (2005), pp. 962-984. LGMRES(m,k) in the paper
- * corresponds to LGMRES(Kdim+AugDim, AugDim).
- **/
-int HYPRE_SStructLGMRESSolve(HYPRE_SStructSolver solver,
-                            HYPRE_SStructMatrix A,
-                            HYPRE_SStructVector b,
-                            HYPRE_SStructVector x);
-
-/**
- * (Optional) Set the relative convergence tolerance.
- **/
-int HYPRE_SStructLGMRESSetTol(HYPRE_SStructSolver solver,
-                             double              tol);
-
-
-/**
- * (Optional) Set the absolute convergence tolerance  (default: 0).
- *  If one desires
- * the convergence test to check the absolute convergence tolerance {\it only}, then
- * set the relative convergence tolerance to 0.0.  (The convergence test is 
- * $\|r\| \leq$ max(relative$\_$tolerance$\ast \|b\|$, absolute$\_$tolerance).)
- **/
-int HYPRE_SStructLGMRESSetAbsoluteTol(HYPRE_SStructSolver solver,
-                             double              tol);
-
-
-/*
- * RE-VISIT
- **/
-int HYPRE_SStructLGMRESSetMinIter(HYPRE_SStructSolver solver,
-                                 int                 min_iter);
-
-/**
- * (Optional) Set maximum number of iterations.
- **/
-int HYPRE_SStructLGMRESSetMaxIter(HYPRE_SStructSolver solver,
-                                 int                 max_iter);
-
-/**
- * (Optional) Set the maximum size of the approximation space.
- **/
-int HYPRE_SStructLGMRESSetKDim(HYPRE_SStructSolver solver,
-                              int                 k_dim);
-/**
- * (Optional) Set the number of augmentation vectors(default: 2).
- **/
-int HYPRE_SStructLGMRESSetAugDim(HYPRE_SStructSolver solver,
-                              int                 aug_dim);
-
-
-/**
- * (Optional) Set the preconditioner to use.
- **/
-int HYPRE_SStructLGMRESSetPrecond(HYPRE_SStructSolver          solver,
-                                 HYPRE_PtrToSStructSolverFcn  precond,
-                                 HYPRE_PtrToSStructSolverFcn  precond_setup,
-                                 void                        *precond_solver);
-
-/**
- * (Optional) Set the amount of logging to do.
- **/
-int HYPRE_SStructLGMRESSetLogging(HYPRE_SStructSolver solver,
-                                 int                 logging);
-
-/**
- * (Optional) Set the amount of printing to do to the screen.
- **/
-int HYPRE_SStructLGMRESSetPrintLevel(HYPRE_SStructSolver solver,
-                                    int                 print_level);
-
-/**
- * Return the number of iterations taken.
- **/
-int HYPRE_SStructLGMRESGetNumIterations(HYPRE_SStructSolver  solver,
-                                       int                 *num_iterations);
-
-/**
- * Return the norm of the final relative residual.
- **/
-int HYPRE_SStructLGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                                   double              *norm);
-
-/**
- * Return the residual.
- **/
-int HYPRE_SStructLGMRESGetResidual(HYPRE_SStructSolver  solver,
-                                  void   **residual);
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name SStruct BiCGSTAB Solver
- **/
-/*@{*/
-
-/**
- * Create a solver object.
- **/
-int HYPRE_SStructBiCGSTABCreate(MPI_Comm             comm,
-                             HYPRE_SStructSolver *solver);
-
-/**
- * Destroy a solver object.  An object should be explicitly destroyed
- * using this destructor when the user's code no longer needs direct
- * access to it.  Once destroyed, the object must not be referenced
- * again.  Note that the object may not be deallocated at the
- * completion of this call, since there may be internal package
- * references to the object.  The object will then be destroyed when
- * all internal reference counts go to zero.
- **/
-int HYPRE_SStructBiCGSTABDestroy(HYPRE_SStructSolver solver);
-
-/**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
- * ignored here, but information about the layout of the data may be used.
- **/
-int HYPRE_SStructBiCGSTABSetup(HYPRE_SStructSolver solver,
-                            HYPRE_SStructMatrix A,
-                            HYPRE_SStructVector b,
-                            HYPRE_SStructVector x);
-
-/**
- * Solve the system.
- **/
-int HYPRE_SStructBiCGSTABSolve(HYPRE_SStructSolver solver,
-                            HYPRE_SStructMatrix A,
-                            HYPRE_SStructVector b,
-                            HYPRE_SStructVector x);
-
-/**
- * (Optional) Set the convergence tolerance.
- **/
-int HYPRE_SStructBiCGSTABSetTol(HYPRE_SStructSolver solver,
-                             double              tol);
-/**
- * (Optional) Set the absolute convergence tolerance (default is 0). 
- * If one desires
- * the convergence test to check the absolute convergence tolerance {\it only}, then
- * set the relative convergence tolerance to 0.0.  (The convergence test is 
- * $\|r\| \leq$ max(relative$\_$tolerance $\ast \|b\|$, absolute$\_$tolerance).)
- *
- **/
-int HYPRE_SStructBiCGSTABSetAbsoluteTol(HYPRE_SStructSolver solver,
-                                        double              tol);
-/*
- * RE-VISIT
- **/
-int HYPRE_SStructBiCGSTABSetMinIter(HYPRE_SStructSolver solver,
-                                 int                 min_iter);
-
-/**
- * (Optional) Set maximum number of iterations.
- **/
-int HYPRE_SStructBiCGSTABSetMaxIter(HYPRE_SStructSolver solver,
-                                 int                 max_iter);
-
-/*
- * RE-VISIT
- **/
-int HYPRE_SStructBiCGSTABSetStopCrit(HYPRE_SStructSolver solver,
-                                  int                 stop_crit);
-
-/**
- * (Optional) Set the preconditioner to use.
- **/
-int HYPRE_SStructBiCGSTABSetPrecond(HYPRE_SStructSolver          solver,
-                                 HYPRE_PtrToSStructSolverFcn  precond,
-                                 HYPRE_PtrToSStructSolverFcn  precond_setup,
-                                 void                        *precond_solver);
-
-/**
- * (Optional) Set the amount of logging to do.
- **/
-int HYPRE_SStructBiCGSTABSetLogging(HYPRE_SStructSolver solver,
-                                 int                 logging);
-
-/**
- * (Optional) Set the amount of printing to do to the screen.
- **/
-int HYPRE_SStructBiCGSTABSetPrintLevel(HYPRE_SStructSolver solver,
-                                 int                 level);
-
-/**
- * Return the number of iterations taken.
- **/
-int HYPRE_SStructBiCGSTABGetNumIterations(HYPRE_SStructSolver  solver,
-                                       int                 *num_iterations);
-
-/**
- * Return the norm of the final relative residual.
- **/
-int HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                                   double              *norm);
-
-/**
- * Return the residual.
- **/
-int HYPRE_SStructBiCGSTABGetResidual(HYPRE_SStructSolver  solver,
-                                    void   **residual);
-
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -723,8 +85,8 @@ int HYPRE_SStructBiCGSTABGetResidual(HYPRE_SStructSolver  solver,
 /**
  * Create a solver object.
  **/
-int HYPRE_SStructSysPFMGCreate( MPI_Comm             comm,
-                                HYPRE_SStructSolver *solver );
+int HYPRE_SStructSysPFMGCreate(MPI_Comm             comm,
+                               HYPRE_SStructSolver *solver);
 
 /**
  * Destroy a solver object.  An object should be explicitly destroyed
@@ -963,8 +325,8 @@ int HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
 /**
  * Create a solver object.
  **/
-int HYPRE_SStructFACCreate( MPI_Comm             comm,
-                            HYPRE_SStructSolver *solver );
+int HYPRE_SStructFACCreate(MPI_Comm             comm,
+                           HYPRE_SStructSolver *solver);
 
 /**
  * Destroy a solver object.  An object should be explicitly destroyed
@@ -975,15 +337,15 @@ int HYPRE_SStructFACCreate( MPI_Comm             comm,
  * references to the object.  The object will then be destroyed when
  * all internal reference counts go to zero.
  **/
-int HYPRE_SStructFACDestroy2( HYPRE_SStructSolver solver );
+int HYPRE_SStructFACDestroy2(HYPRE_SStructSolver solver);
 
 /**
  * Re-distribute the composite matrix so that the amr hierachy is approximately
  * nested. Coarse underlying operators are also formed.
  **/
-int HYPRE_SStructFACAMR_RAP( HYPRE_SStructMatrix  A,
-                             int                (*rfactors)[3],
-                             HYPRE_SStructMatrix *fac_A );
+int HYPRE_SStructFACAMR_RAP(HYPRE_SStructMatrix  A,
+                            int                (*rfactors)[3],
+                            HYPRE_SStructMatrix *fac_A);
 
 /**
  * Set up the FAC solver structure .
@@ -1294,8 +656,424 @@ int HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct PCG Solver
+ * 
+ * These routines should be used in conjunction with the generic interface in
+ * \Ref{PCG Solver}.
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int HYPRE_SStructPCGCreate(MPI_Comm             comm,
+                           HYPRE_SStructSolver *solver);
+
+/**
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
+ **/
+int HYPRE_SStructPCGDestroy(HYPRE_SStructSolver solver);
+
+int HYPRE_SStructPCGSetup(HYPRE_SStructSolver solver,
+                          HYPRE_SStructMatrix A,
+                          HYPRE_SStructVector b,
+                          HYPRE_SStructVector x);
+
+int HYPRE_SStructPCGSolve(HYPRE_SStructSolver solver,
+                          HYPRE_SStructMatrix A,
+                          HYPRE_SStructVector b,
+                          HYPRE_SStructVector x);
+
+int HYPRE_SStructPCGSetTol(HYPRE_SStructSolver solver,
+                           double              tol);
+
+int HYPRE_SStructPCGSetAbsoluteTol(HYPRE_SStructSolver solver,
+                                   double              tol);
+
+int HYPRE_SStructPCGSetMaxIter(HYPRE_SStructSolver solver,
+                               int                 max_iter);
+
+int HYPRE_SStructPCGSetTwoNorm(HYPRE_SStructSolver solver,
+                               int                 two_norm);
+
+int HYPRE_SStructPCGSetRelChange(HYPRE_SStructSolver solver,
+                                 int                 rel_change);
+
+int HYPRE_SStructPCGSetPrecond(HYPRE_SStructSolver          solver,
+                               HYPRE_PtrToSStructSolverFcn  precond,
+                               HYPRE_PtrToSStructSolverFcn  precond_setup,
+                               void                        *precond_solver);
+
+int HYPRE_SStructPCGSetLogging(HYPRE_SStructSolver solver,
+                               int                 logging);
+
+int HYPRE_SStructPCGSetPrintLevel(HYPRE_SStructSolver solver,
+                                  int                 level);
+
+int HYPRE_SStructPCGGetNumIterations(HYPRE_SStructSolver  solver,
+                                     int                 *num_iterations);
+
+int HYPRE_SStructPCGGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
+                                                 double              *norm);
+
+int HYPRE_SStructPCGGetResidual(HYPRE_SStructSolver   solver,
+                                void                **residual);
+
+/**
+ * Setup routine for diagonal preconditioning.
+ **/
+int HYPRE_SStructDiagScaleSetup(HYPRE_SStructSolver solver,
+                                HYPRE_SStructMatrix A,
+                                HYPRE_SStructVector y,
+                                HYPRE_SStructVector x);
+
+/**
+ * Solve routine for diagonal preconditioning.
+ **/
+int HYPRE_SStructDiagScale(HYPRE_SStructSolver solver,
+                           HYPRE_SStructMatrix A,
+                           HYPRE_SStructVector y,
+                           HYPRE_SStructVector x);
+
 /*@}*/
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct GMRES Solver
+ *
+ * These routines should be used in conjunction with the generic interface in
+ * \Ref{GMRES Solver}.
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int HYPRE_SStructGMRESCreate(MPI_Comm             comm,
+                             HYPRE_SStructSolver *solver);
+
+/**
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
+ **/
+int HYPRE_SStructGMRESDestroy(HYPRE_SStructSolver solver);
+
+int HYPRE_SStructGMRESSetup(HYPRE_SStructSolver solver,
+                            HYPRE_SStructMatrix A,
+                            HYPRE_SStructVector b,
+                            HYPRE_SStructVector x);
+
+int HYPRE_SStructGMRESSolve(HYPRE_SStructSolver solver,
+                            HYPRE_SStructMatrix A,
+                            HYPRE_SStructVector b,
+                            HYPRE_SStructVector x);
+
+int HYPRE_SStructGMRESSetTol(HYPRE_SStructSolver solver,
+                             double              tol);
+
+int HYPRE_SStructGMRESSetAbsoluteTol(HYPRE_SStructSolver solver,
+                                     double              tol);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_SStructGMRESSetMinIter(HYPRE_SStructSolver solver,
+                                 int                 min_iter);
+
+int HYPRE_SStructGMRESSetMaxIter(HYPRE_SStructSolver solver,
+                                 int                 max_iter);
+
+int HYPRE_SStructGMRESSetKDim(HYPRE_SStructSolver solver,
+                              int                 k_dim);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_SStructGMRESSetStopCrit(HYPRE_SStructSolver solver,
+                                  int                 stop_crit);
+
+int HYPRE_SStructGMRESSetPrecond(HYPRE_SStructSolver          solver,
+                                 HYPRE_PtrToSStructSolverFcn  precond,
+                                 HYPRE_PtrToSStructSolverFcn  precond_setup,
+                                 void                        *precond_solver);
+
+int HYPRE_SStructGMRESSetLogging(HYPRE_SStructSolver solver,
+                                 int                 logging);
+
+int HYPRE_SStructGMRESSetPrintLevel(HYPRE_SStructSolver solver,
+                                    int                 print_level);
+
+int HYPRE_SStructGMRESGetNumIterations(HYPRE_SStructSolver  solver,
+                                       int                 *num_iterations);
+
+int HYPRE_SStructGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
+                                                   double              *norm);
+
+int HYPRE_SStructGMRESGetResidual(HYPRE_SStructSolver   solver,
+                                  void                **residual);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct FlexGMRES Solver
+ *
+ * These routines should be used in conjunction with the generic interface in
+ * \Ref{FlexGMRES Solver}.
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int HYPRE_SStructFlexGMRESCreate(MPI_Comm             comm,
+                                 HYPRE_SStructSolver *solver);
+
+/**
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
+ **/
+int HYPRE_SStructFlexGMRESDestroy(HYPRE_SStructSolver solver);
+
+int HYPRE_SStructFlexGMRESSetup(HYPRE_SStructSolver solver,
+                                HYPRE_SStructMatrix A,
+                                HYPRE_SStructVector b,
+                                HYPRE_SStructVector x);
+
+int HYPRE_SStructFlexGMRESSolve(HYPRE_SStructSolver solver,
+                                HYPRE_SStructMatrix A,
+                                HYPRE_SStructVector b,
+                                HYPRE_SStructVector x);
+
+int HYPRE_SStructFlexGMRESSetTol(HYPRE_SStructSolver solver,
+                                 double              tol);
+
+int HYPRE_SStructFlexGMRESSetAbsoluteTol(HYPRE_SStructSolver solver,
+                                         double              tol);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_SStructFlexGMRESSetMinIter(HYPRE_SStructSolver solver,
+                                     int                 min_iter);
+
+int HYPRE_SStructFlexGMRESSetMaxIter(HYPRE_SStructSolver solver,
+                                     int                 max_iter);
+
+int HYPRE_SStructFlexGMRESSetKDim(HYPRE_SStructSolver solver,
+                                  int                 k_dim);
+
+int HYPRE_SStructFlexGMRESSetPrecond(HYPRE_SStructSolver          solver,
+                                     HYPRE_PtrToSStructSolverFcn  precond,
+                                     HYPRE_PtrToSStructSolverFcn  precond_setup,
+                                     void                        *precond_solver);
+
+int HYPRE_SStructFlexGMRESSetLogging(HYPRE_SStructSolver solver,
+                                     int                 logging);
+
+int HYPRE_SStructFlexGMRESSetPrintLevel(HYPRE_SStructSolver solver,
+                                        int                 print_level);
+
+int HYPRE_SStructFlexGMRESGetNumIterations(HYPRE_SStructSolver  solver,
+                                           int                 *num_iterations);
+
+int HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
+                                                       double              *norm);
+
+int HYPRE_SStructFlexGMRESGetResidual(HYPRE_SStructSolver   solver,
+                                      void                **residual);
+
+int HYPRE_SStructFlexGMRESSetModifyPC(HYPRE_SStructSolver    solver,
+                                      HYPRE_PtrToModifyPCFcn modify_pc);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct LGMRES Solver
+ *
+ * These routines should be used in conjunction with the generic interface in
+ * \Ref{LGMRES Solver}.
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int HYPRE_SStructLGMRESCreate(MPI_Comm             comm,
+                             HYPRE_SStructSolver *solver);
+
+/**
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
+ **/
+int HYPRE_SStructLGMRESDestroy(HYPRE_SStructSolver solver);
+
+int HYPRE_SStructLGMRESSetup(HYPRE_SStructSolver solver,
+                             HYPRE_SStructMatrix A,
+                             HYPRE_SStructVector b,
+                             HYPRE_SStructVector x);
+   
+int HYPRE_SStructLGMRESSolve(HYPRE_SStructSolver solver,
+                             HYPRE_SStructMatrix A,
+                             HYPRE_SStructVector b,
+                             HYPRE_SStructVector x);
+
+int HYPRE_SStructLGMRESSetTol(HYPRE_SStructSolver solver,
+                              double              tol);
+
+
+int HYPRE_SStructLGMRESSetAbsoluteTol(HYPRE_SStructSolver solver,
+                                      double              tol);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_SStructLGMRESSetMinIter(HYPRE_SStructSolver solver,
+                                  int                 min_iter);
+
+int HYPRE_SStructLGMRESSetMaxIter(HYPRE_SStructSolver solver,
+                                  int                 max_iter);
+
+int HYPRE_SStructLGMRESSetKDim(HYPRE_SStructSolver solver,
+                               int                 k_dim);
+int HYPRE_SStructLGMRESSetAugDim(HYPRE_SStructSolver solver,
+                                 int                 aug_dim);
+
+int HYPRE_SStructLGMRESSetPrecond(HYPRE_SStructSolver          solver,
+                                  HYPRE_PtrToSStructSolverFcn  precond,
+                                  HYPRE_PtrToSStructSolverFcn  precond_setup,
+                                  void                        *precond_solver);
+
+int HYPRE_SStructLGMRESSetLogging(HYPRE_SStructSolver solver,
+                                  int                 logging);
+
+int HYPRE_SStructLGMRESSetPrintLevel(HYPRE_SStructSolver solver,
+                                     int                 print_level);
+
+int HYPRE_SStructLGMRESGetNumIterations(HYPRE_SStructSolver  solver,
+                                        int                 *num_iterations);
+
+int HYPRE_SStructLGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
+                                                   double              *norm);
+
+int HYPRE_SStructLGMRESGetResidual(HYPRE_SStructSolver   solver,
+                                   void                **residual);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct BiCGSTAB Solver
+ *
+ * These routines should be used in conjunction with the generic interface in
+ * \Ref{BiCGSTAB Solver}.
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int HYPRE_SStructBiCGSTABCreate(MPI_Comm             comm,
+                                HYPRE_SStructSolver *solver);
+
+/**
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
+ **/
+int HYPRE_SStructBiCGSTABDestroy(HYPRE_SStructSolver solver);
+
+int HYPRE_SStructBiCGSTABSetup(HYPRE_SStructSolver solver,
+                               HYPRE_SStructMatrix A,
+                               HYPRE_SStructVector b,
+                               HYPRE_SStructVector x);
+
+int HYPRE_SStructBiCGSTABSolve(HYPRE_SStructSolver solver,
+                               HYPRE_SStructMatrix A,
+                               HYPRE_SStructVector b,
+                               HYPRE_SStructVector x);
+
+int HYPRE_SStructBiCGSTABSetTol(HYPRE_SStructSolver solver,
+                                double              tol);
+
+int HYPRE_SStructBiCGSTABSetAbsoluteTol(HYPRE_SStructSolver solver,
+                                        double              tol);
+/*
+ * RE-VISIT
+ **/
+int HYPRE_SStructBiCGSTABSetMinIter(HYPRE_SStructSolver solver,
+                                    int                 min_iter);
+
+int HYPRE_SStructBiCGSTABSetMaxIter(HYPRE_SStructSolver solver,
+                                    int                 max_iter);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_SStructBiCGSTABSetStopCrit(HYPRE_SStructSolver solver,
+                                  int                 stop_crit);
+
+int HYPRE_SStructBiCGSTABSetPrecond(HYPRE_SStructSolver          solver,
+                                    HYPRE_PtrToSStructSolverFcn  precond,
+                                    HYPRE_PtrToSStructSolverFcn  precond_setup,
+                                    void                        *precond_solver);
+
+int HYPRE_SStructBiCGSTABSetLogging(HYPRE_SStructSolver solver,
+                                    int                 logging);
+
+int HYPRE_SStructBiCGSTABSetPrintLevel(HYPRE_SStructSolver solver,
+                                       int                 level);
+
+int HYPRE_SStructBiCGSTABGetNumIterations(HYPRE_SStructSolver  solver,
+                                          int                 *num_iterations);
+
+int HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
+                                                      double              *norm);
+
+int HYPRE_SStructBiCGSTABGetResidual(HYPRE_SStructSolver   solver,
+                                     void                **residual);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+/*@}*/
 
 #ifdef __cplusplus
 }
