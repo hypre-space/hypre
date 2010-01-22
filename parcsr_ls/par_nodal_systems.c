@@ -830,7 +830,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 /* This creates a scalar version of the CF_marker, dof_array and strength matrix (SN) */
 
 int
-hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
+hypre_BoomerAMGCreateScalarCFS( hypre_ParCSRMatrix    *A,
+		       hypre_ParCSRMatrix    *SN,
                        int                   *CFN_marker,
                        int                   *col_offd_SN_to_AN,
                        int                    num_functions,
@@ -855,6 +856,14 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    int		      *col_starts_S;
    int		      *row_starts_SN = hypre_ParCSRMatrixRowStarts(SN);
    int		      *col_starts_SN = hypre_ParCSRMatrixColStarts(SN);
+   hypre_CSRMatrix    *A_diag = hypre_ParCSRMatrixDiag(A);
+   int		      *A_diag_i = hypre_CSRMatrixI(A_diag);
+   int		      *A_diag_j = hypre_CSRMatrixJ(A_diag);
+   double	      *A_diag_data;
+   hypre_CSRMatrix    *A_offd = hypre_ParCSRMatrixOffd(A);
+   int		      *A_offd_i = hypre_CSRMatrixI(A_offd);
+   int		      *A_offd_j = hypre_CSRMatrixJ(A_offd);
+   double	      *A_offd_data;
    hypre_CSRMatrix    *SN_diag = hypre_ParCSRMatrixDiag(SN);
    int		      *SN_diag_i = hypre_CSRMatrixI(SN_diag);
    int		      *SN_diag_j = hypre_CSRMatrixJ(SN_diag);
@@ -865,10 +874,11 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    double	      *SN_offd_data;
    int		      *CF_marker;
    int		      *col_map_offd_SN = hypre_ParCSRMatrixColMapOffd(SN);
+   int		      *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
    int		      *col_map_offd_S;
    int		      *dof_func;
    int		       num_nodes = hypre_CSRMatrixNumRows(SN_diag);
-   int		       num_variables;
+   int		       num_variables = hypre_CSRMatrixNumRows(A_diag);
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(SN);
    int		       num_sends;
    int		       num_recvs;
@@ -884,12 +894,16 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    int		      *recv_procs_S;
    int		      *recv_vec_starts_S;
    int		      *col_offd_S_to_A = NULL;
+   int		      *check_A = NULL;
+   int		      *map_S_to_A = NULL;
    
+   int		       new_j, col_A, col_S;
    int		       num_coarse_nodes;
    int		       i,j,k,k1,jj,cnt;
    int		       row, start, end;
    int		       num_procs;
    int		       num_cols_offd_SN = hypre_CSRMatrixNumCols(SN_offd);
+   int		       num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
    int		       num_cols_offd_S;
    int		       SN_num_nonzeros_diag;
    int		       SN_num_nonzeros_offd;
@@ -1008,7 +1022,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    }
    hypre_CSRMatrixI(S_offd) = S_offd_i;
 
-   if (comm_pkg)
+   /*if (comm_pkg)
    {
       comm_pkg_S = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
       hypre_ParCSRCommPkgComm(comm_pkg_S) = comm;
@@ -1061,7 +1075,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
       hypre_ParCSRCommPkgRecvProcs(comm_pkg_S) = recv_procs_S;
       hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_S) = recv_vec_starts_S;
       hypre_ParCSRMatrixCommPkg(S) = comm_pkg_S;
-   }
+   }*/
 
    if (num_cols_offd_S)
    {
@@ -1095,10 +1109,35 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    }
    
 
+   check_A = hypre_CTAlloc(int, num_variables);
+   for (i=0; i < num_variables; i++) check_A[i] = -1;
 
    cnt = 0;
    row = 0;
+   S_diag_i[0] = 0;
    for (i=0; i < num_nodes; i++)
+   {
+      for (k1=0; k1 < num_functions; k1++)
+      {
+         for (j=A_diag_i[row]; j < A_diag_i[row+1]; j++)
+            check_A[A_diag_j[j]] = row;
+
+         for (k=SN_diag_i[i]; k < SN_diag_i[i+1]; k++)
+         {
+            new_j = (SN_diag_j[k]*num_functions)+k1;
+            if (check_A[new_j] == row)
+            {
+               if (data) S_diag_data[cnt] = S_diag_data[k];
+               S_diag_j[cnt++] = new_j;
+            }
+         }
+         row++;
+         S_diag_i[row] = cnt;
+      }
+   }
+   hypre_TFree(check_A);
+   check_A = NULL;
+/*   for (i=0; i < num_nodes; i++)
    {
       row++;
       start = cnt;
@@ -1120,11 +1159,71 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
 	 }
          S_diag_i[row] = cnt;
       }
-   } 
+   } */ 
 
-   cnt = 0;
-   row = 0;
-   for (i=0; i < num_nodes; i++)
+   if (num_cols_offd_A)
+   {
+      check_A = hypre_CTAlloc(int, num_cols_offd_A);
+      map_S_to_A = hypre_CTAlloc(int,num_cols_offd_S);
+      for (i=0; i < num_cols_offd_A; i++) 
+      {
+         check_A[i] = -1;
+         map_S_to_A[i] = -1;
+      }
+  
+      cnt = 0;
+      col_A = col_map_offd_A[cnt];
+      for (i=0; i < num_cols_offd_S; i++)
+      {
+         col_S = col_map_offd_S[i];
+         while (col_A < col_S)
+         {
+	    cnt++;
+            if (cnt < num_cols_offd_A)
+		col_A = col_map_offd_A[cnt];
+            else
+		break;
+         }
+         if (col_A == col_S)
+         {
+	    map_S_to_A[i] = cnt++;
+            if (cnt < num_cols_offd_A)
+		col_A = col_map_offd_A[cnt];
+            else
+		break;
+         }
+         else if (col_A > col_S)
+	    map_S_to_A[i] = -1;
+      }
+   
+      cnt = 0;
+      row = 0;
+      S_offd_i[0] = 0;
+      for (i=0; i < num_nodes; i++)
+      {
+         for (k1=0; k1 < num_functions; k1++)
+         {
+            for (j=A_offd_i[row]; j < A_offd_i[row+1]; j++)
+               check_A[A_offd_j[j]] = row;
+
+            for (k=SN_offd_i[i]; k < SN_offd_i[i+1]; k++)
+            {
+               new_j = map_S_to_A[(SN_offd_j[k]*num_functions)+k1];
+               if (new_j > -1 && check_A[new_j] == row)
+               {
+                  if (data) S_offd_data[cnt] = S_offd_data[k];
+                  S_offd_j[cnt++] = new_j;
+               }
+            }
+            row++;
+            S_offd_i[row] = cnt;
+         }
+      }
+      hypre_TFree(check_A);
+      hypre_TFree(map_S_to_A);
+   }
+
+   /*for (i=0; i < num_nodes; i++)
    {
       row++;
       start = cnt;
@@ -1146,7 +1245,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
 	 }
          S_offd_i[row] = cnt;
       }
-   } 
+   }*/ 
 
    *S_ptr = S; 
 

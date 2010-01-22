@@ -836,7 +836,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            else
            {
               col_offd_S_to_A = NULL;
-              hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, col_offd_SN_to_AN,
+              hypre_BoomerAMGCreateScalarCFS(A_array[level],
+              			SN, CFN_marker, col_offd_SN_to_AN,
                                 num_functions, nodal, 0, NULL, &CF_marker, 
                                 &col_offd_S_to_A, &S);
               if (col_offd_SN_to_AN == NULL)
@@ -934,7 +935,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 		  hypre_TFree (CF2_marker);
                   hypre_TFree(coarse_pnts_global1);
                   col_offd_S_to_A = NULL;
-                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, 
+                  hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker, 
 			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
 			&CF_marker, &col_offd_S_to_A, &S);
                   if (col_offd_SN_to_AN == NULL)
@@ -952,7 +953,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	       else
 	       {
                   col_offd_S_to_A = NULL;
-                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, 
+                  hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker, 
 			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
 			&CF_marker, &col_offd_S_to_A, &S);
 #ifdef HYPRE_NO_GLOBAL_PARTITION 
@@ -987,7 +988,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   col_offd_S_to_A = NULL;
                   CF_marker = NULL;
                   hypre_ParCSRMatrixDestroy(S);
-                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, 
+                  hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker, 
 			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
 			&CF_marker, &col_offd_S_to_A, &S);
                   if (col_offd_SN_to_AN == NULL)
