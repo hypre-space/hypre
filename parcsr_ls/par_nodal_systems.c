@@ -859,11 +859,9 @@ hypre_BoomerAMGCreateScalarCFS( hypre_ParCSRMatrix    *A,
    hypre_CSRMatrix    *A_diag = hypre_ParCSRMatrixDiag(A);
    int		      *A_diag_i = hypre_CSRMatrixI(A_diag);
    int		      *A_diag_j = hypre_CSRMatrixJ(A_diag);
-   double	      *A_diag_data;
    hypre_CSRMatrix    *A_offd = hypre_ParCSRMatrixOffd(A);
    int		      *A_offd_i = hypre_CSRMatrixI(A_offd);
    int		      *A_offd_j = hypre_CSRMatrixJ(A_offd);
-   double	      *A_offd_data;
    hypre_CSRMatrix    *SN_diag = hypre_ParCSRMatrixDiag(SN);
    int		      *SN_diag_i = hypre_CSRMatrixI(SN_diag);
    int		      *SN_diag_j = hypre_CSRMatrixJ(SN_diag);
@@ -879,7 +877,7 @@ hypre_BoomerAMGCreateScalarCFS( hypre_ParCSRMatrix    *A,
    int		      *dof_func;
    int		       num_nodes = hypre_CSRMatrixNumRows(SN_diag);
    int		       num_variables = hypre_CSRMatrixNumRows(A_diag);
-   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(SN);
+/*   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(SN);
    int		       num_sends;
    int		       num_recvs;
    int		      *send_procs;
@@ -892,15 +890,15 @@ hypre_BoomerAMGCreateScalarCFS( hypre_ParCSRMatrix    *A,
    int		      *send_map_starts_S;
    int		      *send_map_elmts_S;
    int		      *recv_procs_S;
-   int		      *recv_vec_starts_S;
+   int		      *recv_vec_starts_S; */
    int		      *col_offd_S_to_A = NULL;
    int		      *check_A = NULL;
    int		      *map_S_to_A = NULL;
    
    int		       new_j, col_A, col_S;
    int		       num_coarse_nodes;
-   int		       i,j,k,k1,jj,cnt;
-   int		       row, start, end;
+   int		       i,j,k,k1,cnt;
+   int		       row;
    int		       num_procs;
    int		       num_cols_offd_SN = hypre_CSRMatrixNumCols(SN_offd);
    int		       num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
