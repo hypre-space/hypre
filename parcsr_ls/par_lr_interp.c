@@ -122,7 +122,8 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   double          *ahat_offd = NULL; 
   double           sum_pos, sum_pos_C, sum_neg, sum_neg_C, sum, sum_C;
   double           diagonal, distribute;
-  double           alfa, beta;
+  double           alfa = 1.;
+  double           beta = 1.;
   
   /* Loop variables */
   int              index;
@@ -830,8 +831,8 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 	     ahat_offd[jj] = 0;
 	   }
 	 }
-	 if (sum_neg_C) alfa = sum_neg/sum_neg_C/diagonal;
-	 if (sum_pos_C) beta = sum_pos/sum_pos_C/diagonal;
+	 if (sum_neg_C*diagonal) alfa = sum_neg/sum_neg_C/diagonal;
+	 if (sum_pos_C*diagonal) beta = sum_pos/sum_pos_C/diagonal;
        
 	 /*-----------------------------------------------------------------
 	  * Set interpolation weight by dividing by the diagonal.
@@ -893,7 +894,7 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 	       ahat_offd[jj] = 0;
 	    }
 	 }
-	 if (sum_C) alfa = sum/sum_C/diagonal;
+	 if (sum_C*diagonal) alfa = sum/sum_C/diagonal;
        
 	 /*-----------------------------------------------------------------
 	  * Set interpolation weight by dividing by the diagonal.
@@ -1761,10 +1762,13 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 	   }
 	 }
        }
-       for(jj = jj_begin_row; jj < jj_end_row; jj++)
+       if (diagonal)
+       {
+        for(jj = jj_begin_row; jj < jj_end_row; jj++)
 	 P_diag_data[jj] /= -diagonal;
-       for(jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
+        for(jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
 	 P_offd_data[jj] /= -diagonal;
+       }
      }
      strong_f_marker--;
    }
@@ -2844,10 +2848,13 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 	   }
 	 }
        }
+       if (diagonal)
+       {
        for(jj = jj_begin_row; jj < jj_end_row; jj++)
 	 P_diag_data[jj] /= -diagonal;
        for(jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
 	 P_offd_data[jj] /= -diagonal;
+       }
      }
      strong_f_marker--;
    }
@@ -3849,10 +3856,13 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 	   }
 	 }
        }
+       if (diagonal)
+       {
        for(jj = jj_begin_row; jj < jj_end_row; jj++)
 	 P_diag_data[jj] /= -diagonal;
        for(jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
 	 P_offd_data[jj] /= -diagonal;
+       }
      }
      strong_f_marker--;
    }
@@ -4861,10 +4871,13 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
 	   }
 	 }
        }
+       if (diagonal)
+       {
        for(jj = jj_begin_row; jj < jj_end_row; jj++)
 	 P_diag_data[jj] /= -diagonal;
        for(jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
 	 P_offd_data[jj] /= -diagonal;
+       }
      }
      strong_f_marker--;
    }
@@ -5682,10 +5695,13 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 	   }
 	 }
        }
+       if (diagonal)
+       {
        for(jj = jj_begin_row; jj < jj_end_row; jj++)
 	 P_diag_data[jj] /= -diagonal;
        for(jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
 	 P_offd_data[jj] /= -diagonal;
+       }
      }
      strong_f_marker--;
    }
