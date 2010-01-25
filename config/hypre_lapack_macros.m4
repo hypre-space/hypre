@@ -13,7 +13,7 @@ dnl #EHEADER********************************************************************
 
 
 
-dnl @synopsis HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
+dnl @synopsis AC_HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
 dnl This macro looks for a library that implements the LAPACK
 dnl linear-algebra interface (see http://www.netlib.org/lapack/).
@@ -42,7 +42,7 @@ dnl
 dnl @version $Id$
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
-AC_DEFUN([HYPRE_FIND_LAPACK], 
+AC_DEFUN([AC_HYPRE_FIND_LAPACK], 
 [
   AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
@@ -53,7 +53,7 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
   LAPACKLIBDIRS="null"
 
   AC_ARG_WITH(lapack,
-        [AS_HELP_STRING([  --with-lapack], [Find a system-provided LAPACK library])])
+        [AS_HELP_STRING([--with-lapack], [Find a system-provided LAPACK library])])
 
   case $with_lapack in
       yes) ;;
@@ -66,11 +66,6 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
   hypre_save_LIBS="$LIBS"
   hypre_save_LDFLGS="$LDFLAGS"
   LIBS="$LIBS $FLIBS"
-
-#***************************************************************
-# Get fortran linker name of LAPACK function to check for.
-#***************************************************************
-  AC_F77_FUNC(dsygv)
 
 #***************************************************************
 #   Set possible LAPACK library names
@@ -86,11 +81,12 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
 #***************************************************************
 #   Check for function dsygv in LAPACK_LIB_NAMES
 #***************************************************************
-  for lib in $LAPACK_LIB_NAMES; do
-     if test "$LAPACKLIBS" = "null"; then
+  if test "$LAPACKLIBS" = "null"; then
+     AC_F77_FUNC(dsygv)
+     for lib in $LAPACK_LIB_NAMES; do
         AC_CHECK_LIB($lib, $dsygv, [LAPACKLIBS=$lib], [], [-lblas])
-     fi
-  done
+     done
+  fi
 
 #***************************************************************
 #   Set path to selected LAPACK library
@@ -126,4 +122,4 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
   LIBS="$hypre_save_LIBS"
   LDFLAGS="$hypre_save_LDFLGS"
 
-])dnl HYPRE_FIND_LAPACK
+])dnl AC_HYPRE_FIND_LAPACK

@@ -27,10 +27,10 @@ void Timer_dhCreate(Timer_dh *t)
   tmp->isRunning = false;
   tmp->begin_wall = 0.0;
   tmp->end_wall = 0.0;
-#ifdef WIN32
-  tmp->sc_clk_tck = CLOCKS_PER_SEC;
-#else
+#ifdef EUCLID_TIMING
   tmp->sc_clk_tck = sysconf(_SC_CLK_TCK);
+#else
+  tmp->sc_clk_tck = CLOCKS_PER_SEC;
 #endif
 
 #if defined(EUCLID_TIMING)

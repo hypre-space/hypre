@@ -53,12 +53,7 @@
 /*--------------------------------------------------------------------------*/
 
 #include "HYPRE_utilities.h"
-#if HAVE_STRING_H
-#  include <string.h>
-#endif /* HAVE_STRING_H */
-#if HAVE_STRINGS_H
-#  include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>

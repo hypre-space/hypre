@@ -27,9 +27,7 @@
 
 #include "HYPRE_config.h"
 #include <stdlib.h>
-#if HAVE_UNISTD_H
-#  include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+/* #include <unistd.h> */
 #include <time.h>
 
 #include "DistributedMatrixPilutSolver.h"

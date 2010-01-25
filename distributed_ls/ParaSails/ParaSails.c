@@ -22,12 +22,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#if HAVE_STRING_H
-#  include <string.h>
-#endif /* HAVE_STRING_H */
-#if HAVE_STRINGS_H
-#  include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include "Common.h"
 #include "Matrix.h"
 #include "Numbering.h"

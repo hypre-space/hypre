@@ -11,151 +11,63 @@
  ***********************************************************************EHEADER*/
 
 
-
-
 /* config/HYPRE_config.h.in.  Generated from configure.in by autoheader.  */
 
-/* Define to dummy `main' function (if any) required to link to the Fortran
-   libraries. */
-#undef F77_DUMMY_MAIN
+/* Release name */
+#undef HYPRE_RELEASE_NAME
 
-/* Define to a macro mangling the given C identifier (in lower and upper
-   case), which must not contain underscores, for linking with Fortran. */
-#undef F77_FUNC
+/* Version number */
+#undef HYPRE_RELEASE_VERSION
 
-/* As F77_FUNC, but for C identifiers containing underscores. */
-#undef F77_FUNC_
+/* Date of release */
+#undef HYPRE_RELEASE_DATE
 
-/* Define if F77 and FC dummy `main' functions are identical. */
-#undef FC_DUMMY_MAIN_EQ_F77
+/* Time of release */
+#undef HYPRE_RELEASE_TIME
 
-/* BLAS library is system or user provided. */
-#undef HAVE_BLAS
-
-/* Define to 1 if you have the `bzero' function. */
-#undef HAVE_BZERO
-
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
-
-/* Define to 1 if you have the <float.h> header file. */
-#undef HAVE_FLOAT_H
-
-/* Define to 1 if you have the `floor' function. */
-#undef HAVE_FLOOR
-
-/* Define to 1 if you have the `gethrtime' function. */
-#undef HAVE_GETHRTIME
-
-/* Define to 1 if you have the `gettimeofday' function. */
-#undef HAVE_GETTIMEOFDAY
-
-/* Define to 1 if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
-
-/* LAPACK library is system or user provided. */
-#undef HAVE_LAPACK
-
-/* Define to 1 if you have the <limits.h> header file. */
-#undef HAVE_LIMITS_H
-
-/* Define to 1 if you have the <malloc.h> header file. */
-#undef HAVE_MALLOC_H
-
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
-/* Define to 1 if you have the `memset' function. */
-#undef HAVE_MEMSET
-
-/* Define to 1 if you have the `pow' function. */
-#undef HAVE_POW
-
-/* Define to 1 if the system has the type `ptrdiff_t'. */
-#undef HAVE_PTRDIFF_T
-
-/* Define to 1 if you have the `sqrt' function. */
-#undef HAVE_SQRT
-
-/* Define to 1 if you have the <stddef.h> header file. */
-#undef HAVE_STDDEF_H
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
-
-/* Define to 1 if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
-
-/* Define to 1 if you have the `strcspn' function. */
-#undef HAVE_STRCSPN
-
-/* Define to 1 if you have the `strdup' function. */
-#undef HAVE_STRDUP
-
-/* Define to 1 if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
-
-/* Define to 1 if you have the <string.h> header file. */
-#undef HAVE_STRING_H
-
-/* Define to 1 if you have the `strspn' function. */
-#undef HAVE_STRSPN
-
-/* Define to 1 if you have the `strtol' function. */
-#undef HAVE_STRTOL
-
-/* Define to 1 if you have the <sys/param.h> header file. */
-#undef HAVE_SYS_PARAM_H
-
-/* Define to 1 if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
-
-/* Define to 1 if you have the <sys/time.h> header file. */
-#undef HAVE_SYS_TIME_H
-
-/* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
-
-/* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
-
-/* Define to 1 if the routine MPI_Comm_f2c is found. */
-#undef HYPRE_HAVE_MPI_COMM_F2C
+/* Bug reports */
+#undef HYPRE_RELEASE_BUGS
 
 /* Define to 1 for Solaris. */
 #undef HYPRE_SOLARIS
 
-/* Define to 1 for Linux on platforms running any version of CHAOS. */
+/* Define to 1 for Linux on platforms running any version of CHAOS */
 #undef HYPRE_LINUX_CHAOS
 
-/* Define to 1 for Linux platforms. */
+/* Define to 1 for Linux platforms */
 #undef HYPRE_LINUX
 
-/* Define to 1 for Alpha platforms. */
+/* Define to 1 for Alpha platforms */
 #undef HYPRE_ALPHA
 
-/* Define to 1 for RS6000 platforms. */
+/* Define to 1 for RS6000 platforms */
 #undef HYPRE_RS6000
 
-/* Define to 1 for IRIX64 platforms. */
+/* Define to 1 for IRIX64 platforms */
 #undef HYPRE_IRIX64
+
+/* Define to 1 if an MPI library is found */
+#undef HYPRE_HAVE_MPI
+
+/* Define to 1 if the routine MPI_Comm_f2c is found */
+#undef HYPRE_HAVE_MPI_COMM_F2C
 
 /* Disable MPI, enable serial codes */
 #undef HYPRE_SEQUENTIAL
 
-/* HYPRE timing routines are being used */
+/* Using HYPRE timing routines */
 #undef HYPRE_TIMING
 
-/* Using dxml for Blas */
+/* Using dxml for BLAS */
 #undef HYPRE_USING_DXML
 
-/* Using essl for Blas */
+/* Using essl for BLAS */
 #undef HYPRE_USING_ESSL
 
-/* Using internal Hypre routines. */
+/* Using internal Hypre routines */
 #undef HYPRE_USING_HYPRE_BLAS
 
-/* Using internal Hypre routines. */
+/* Using internal Hypre routines */
 #undef HYPRE_USING_HYPRE_LAPACK
 
 /* No global partitioning being used */
@@ -167,45 +79,23 @@
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
 
-/* Define to the address where bug reports for this package should be sent. */
-#undef HYPRE_PACKAGE_BUGREPORT
+/* Define as follows to set the Fortran name mangling scheme:
+ * 0 = unspecified
+ * 1 = no underscores
+ * 2 = one underscore
+ * 3 = two underscores
+ * 4 = caps, no underscores */
+#undef HYPRE_FMANGLE
 
-/* Date of release */
-#undef HYPRE_PACKAGE_DATE
+/* Define as in HYPRE_FMANGLE to set the BLAS name mangling scheme */
+#undef HYPRE_FMANGLE_BLAS
 
-/* Date and time of release */
-#undef HYPRE_PACKAGE_DATETIME
+/* Define as in HYPRE_FMANGLE to set the LAPACK name mangling scheme */
+#undef HYPRE_FMANGLE_LAPACK
 
-/* Define to the full name of this package. */
-#undef HYPRE_PACKAGE_NAME
+/* Define to a macro mangling the given C identifier (in lower and upper
+ * case), which must not contain underscores, for linking with Fortran. */
+#undef F77_FUNC
 
-/* Define to the full name and version of this package. */
-#undef HYPRE_PACKAGE_STRING
-
-/* Define to the one symbol short name of this package. */
-#undef HYPRE_PACKAGE_TARNAME
-
-/* Time of release */
-#undef HYPRE_PACKAGE_TIME
-
-/* Define to the version of this package. */
-#undef HYPRE_PACKAGE_VERSION
-
-/* Define as the return type of signal handlers (`int' or `void'). */
-#undef RETSIGTYPE
-
-/* Define to 1 if you have the ANSI C header files. */
-#undef STDC_HEADERS
-
-/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
-#undef TIME_WITH_SYS_TIME
-
-/* Define to empty if `const' does not conform to ANSI C. */
-#undef const
-
-/* Define to `unsigned' if <sys/types.h> does not define. */
-#undef size_t
-
-/* Define to empty if the keyword `volatile' does not work. Warning: valid
-   code using `volatile' can become incorrect without. Disable with care. */
-#undef volatile
+/* As F77_FUNC, but for C identifiers containing underscores. */
+#undef F77_FUNC_

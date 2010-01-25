@@ -13,7 +13,7 @@ dnl #EHEADER********************************************************************
 
 
 
-dnl @synopsis HYPRE_FIND_BLAS([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
+dnl @synopsis AC_HYPRE_FIND_BLAS([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
 dnl This macro looks for a library that implements the BLAS
 dnl linear-algebra interface (see http://www.netlib.org/blas/).
@@ -43,8 +43,8 @@ dnl This macro requires autoconf 2.50 or later.
 dnl
 dnl @version $Id$
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
-dnl
-AC_DEFUN([HYPRE_FIND_BLAS],
+
+AC_DEFUN([AC_HYPRE_FIND_BLAS],
 [
   AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
@@ -55,7 +55,7 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   BLASLIBDIRS="null"
 
   AC_ARG_WITH(blas,
-	[AS_HELP_STRING([  --with-blas], [Find a system-provided BLAS library])])
+	[AS_HELP_STRING([--with-blas], [Find a system-provided BLAS library])])
 
   case $with_blas in
       yes) ;;
@@ -68,11 +68,6 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   hypre_save_LIBS="$LIBS"
   hypre_save_LDFLGS="$LDFLAGS"
   LIBS="$LIBS $FLIBS"
-
-#***************************************************************
-#   Get fortran linker names for a BLAS function
-#***************************************************************
-  AC_F77_FUNC(dgemm)
 
 #***************************************************************
 #   Set possible BLAS library names
@@ -88,16 +83,17 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 #***************************************************************
 #   Check for function dgemm in BLAS_LIB_NAMES
 #***************************************************************
-  for lib in $BLAS_LIB_NAMES; do
-     if test "$BLASLIBS" = "null"; then
+  if test "$BLASLIBS" = "null"; then
+     AC_F77_FUNC(dgemm)
+     for lib in $BLAS_LIB_NAMES; do
         AC_CHECK_LIB($lib, $dgemm, [BLASLIBS=$lib])
-     fi
-  done
+     done
+  fi
 
 #***************************************************************
 #   Set path to selected BLAS library 
 #***************************************************************
-  BLAS_SEARCH_DIRS="/usr/lib /usr/local/lib /lib /opt/intel/mkl70/lib/32"
+  BLAS_SEARCH_DIRS="/usr/lib /usr/local/lib /lib"
 
   if test "$BLASLIBS" != "null"; then
      for dir in $BLAS_SEARCH_DIRS; do
@@ -112,7 +108,7 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   fi
 
 #***************************************************************
-#   Set variables if ATLAS or DMXL libraries are used 
+#   Set variables if ATLAS or DXML libraries are used 
 #***************************************************************
   if test "$BLASLIBS" = "dxml"; then
      AC_DEFINE(HYPRE_USING_DXML, 1, [Using dxml for Blas])
@@ -139,4 +135,4 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   LIBS="$hypre_save_LIBS"
   LDFLAGS="$hypre_save_LDFLGS"
 
-])dnl HYPRE_FIND_BLAS
+])dnl AC_HYPRE_FIND_BLAS
