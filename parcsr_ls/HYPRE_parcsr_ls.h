@@ -139,16 +139,16 @@ int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
 
 /**
  * (Optional) Set the convergence tolerance, if BoomerAMG is used
- * as a solver. If it is used as a preconditioner, this function has
- * no effect. The default is 1.e-7.
+ * as a solver. If it is used as a preconditioner, it should be set to 0.
+ * The default is 1.e-7.
  **/
 int HYPRE_BoomerAMGSetTol(HYPRE_Solver solver,
                           double       tol);
 
 /**
  * (Optional) Sets maximum number of iterations, if BoomerAMG is used
- * as a solver. If it is used as a preconditioner, this function has
- * no effect. The default is 20.
+ * as a solver. If it is used as a preconditioner, it should be set to 1.
+ * The default is 20.
  **/
 int HYPRE_BoomerAMGSetMaxIter(HYPRE_Solver solver,
                               int          max_iter);
