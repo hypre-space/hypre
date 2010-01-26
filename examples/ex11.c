@@ -124,7 +124,7 @@ int main (int argc, char *argv[])
    h2 = h*h;
 
    /* Each processor knows only of its own rows - the range is denoted by ilower
-      and upper.  Here we partition the rows. We account for the fact that
+      and iupper.  Here we partition the rows. We account for the fact that
       N may not divide evenly by the number of processors. */
    local_size = N/num_procs;
    extra = N - local_size*num_procs;
