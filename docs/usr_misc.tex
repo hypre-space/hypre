@@ -332,7 +332,7 @@ steps below:
 \begin{enumerate}
 \item Open a Visual Studio command prompt (from the Start menu) and run
 \kbd{cygwin.bat} in it. Make sure that the compilers you need (e.g. a non-GCC
-Fortran compiler) are in the Cygwin \verb|$PATH| variable.
+Fortran compiler) are in the Cygwin \verb\$PATH\ variable.
 \item
 \begin{verbatim}
 ./configure CC=cl CXX=cl \
@@ -529,9 +529,9 @@ fortran as either of the following:
 
 \hypre{} objects can usually be declared as in the table because
 \code{integer*8} usually corresponds to the length of a pointer.  However, there
-may be some machines where this is not the case (although we are not aware of
-any at this time).  On such machines, the Fortran type for a \hypre{} object
-should be an \code{integer} of the appropriate length.
+may be some machines where this is not the case.  On such machines, the Fortran
+type for a \hypre{} object should be an \code{integer} of the appropriate
+length.
 
 This simple example illustrates the above information: 
 
