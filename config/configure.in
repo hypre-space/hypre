@@ -143,55 +143,62 @@ dnl *********************************************************************
 dnl * Define optional features
 dnl *********************************************************************
 AC_ARG_ENABLE(debug,
-  AS_HELP_STRING([--enable-debug],
-                 [Set compiler flags for debugging.]),
+AS_HELP_STRING([--enable-debug],
+               [Set compiler flags for debugging.]),
 [case "${enableval}" in
-        yes) hypre_using_debug=yes ;;
-    no | "") hypre_using_debug=no ;;
-          *) AC_MSG_ERROR([Bad value ${enableval} for --enable-debug]) ;;
+    yes) hypre_using_debug=yes ;;
+    no)  hypre_using_debug=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-debug]) ;;
  esac],
 [hypre_using_debug=no]
 )
 
 AC_ARG_ENABLE(shared,
-  AS_HELP_STRING([--enable-shared],
-                 [Build shared libraries (default is NO).]),
+AS_HELP_STRING([--enable-shared],
+               [Build shared libraries (default is NO).]),
 [case "${enableval}" in
-        yes) hypre_using_shared=yes ;;
-    no | "") hypre_using_shared=no ;;
-          *) AC_MSG_ERROR([Bad value ${enableval} for --enable-shared]) ;;
+    yes) hypre_using_shared=yes ;;
+    no)  hypre_using_shared=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-shared]) ;;
  esac],
 [hypre_using_shared=no]
 )
 
-AC_ARG_ENABLE(python,
-  AS_HELP_STRING([--enable-python=PYTHON],
-                 [Build interface to specified instance of Python (turns on
-                  shared libraries, requires Babel; default is NO).]),
+AC_ARG_ENABLE(fortran,
+AS_HELP_STRING([--enable-fortran],
+               [Require a working Fortran compiler (default is YES).]),
 [case "${enableval}" in
-        yes) hypre_using_python=yes
-             hypre_python="python"
-             ;;
-    no | "") hypre_using_python=no ;;
-          *) hypre_using_python=yes
-             hypre_python=${enableval}
-             hypre_using_shared=yes
-             ;;
+    yes) hypre_using_fortran=yes ;;
+    no)  hypre_using_fortran=no ;;
+    *)   hypre_using_fortran=yes ;;
+ esac],
+[hypre_using_fortran=yes]
+)
+
+AC_ARG_ENABLE(python,
+AS_HELP_STRING([--enable-python=PYTHON],
+               [Build interface to specified instance of Python (turns on
+                shared libraries, requires Babel; default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_python=yes
+         hypre_python="python" ;;
+    no)  hypre_using_python=no ;;
+    *)   hypre_using_python=yes
+         hypre_python=${enableval}
+         hypre_using_shared=yes ;;
  esac],
 [hypre_using_python=no]
 )
 
 AC_ARG_ENABLE(java,
-  AS_HELP_STRING([--enable-java],
-                 [Build interface to Java (turns on shared libraries, requires
-                  Babel; default is NO).]),
+AS_HELP_STRING([--enable-java],
+               [Build interface to Java (turns on shared libraries, requires
+                Babel; default is NO).]),
 [case "${enableval}" in
-        yes) hypre_using_java=yes
-             ;;
-    no | "") hypre_using_java=no ;;
-          *) hypre_using_java=yes
-             hypre_using_shared=yes
-             ;;
+    yes) hypre_using_java=yes ;;
+    no)  hypre_using_java=no ;;
+    *)   hypre_using_java=yes
+         hypre_using_shared=yes ;;
  esac],
 [hypre_using_java=no]
 )
@@ -272,7 +279,6 @@ hypre_user_chose_fei=no
 
 hypre_using_c=yes
 hypre_using_cxx=yes
-hypre_using_fortran=yes
 
 hypre_using_fei=yes
 hypre_using_superlu=yes
@@ -288,209 +294,210 @@ hypre_testing_general=no
 
 
 AC_ARG_WITH(LD,
-  AS_HELP_STRING([--with-LD=ARG],
-                 [Set linker to ARG.  The environment variable 'LD'
-                  will be overridden.]),
+AS_HELP_STRING([--with-LD=ARG],
+               [Set linker to ARG.  The environment variable 'LD'
+                will be overridden.]),
 [LD=$withval]
 )
 
 AC_ARG_WITH(LDFLAGS,
-  AS_HELP_STRING([--with-LDFLAGS=ARG],
-                 [User can manually set linker flags. The 'LDFLAGS'
-                  environment variable will be overridden.]),
+AS_HELP_STRING([--with-LDFLAGS=ARG],
+               [User can manually set linker flags. The 'LDFLAGS'
+                environment variable will be overridden.]),
 [LDFLAGS=$withval]
 )
 
 AC_ARG_WITH(extra-incpath,
-  AS_HELP_STRING([--with-extra-incpath=PATH],
-                 [Define extra include path, where PATH is a space-separated
-                  list (enclosed in quotes) of directories.]),
+AS_HELP_STRING([--with-extra-incpath=PATH],
+               [Define extra include path, where PATH is a space-separated
+                list (enclosed in quotes) of directories.]),
 [CCFLAGS="${CCFLAGS} -I`echo ${withval}|sed 's/ /\ -I/g'`"]
 )
 
 AC_ARG_WITH(extra-ldpath,
-  AS_HELP_STRING([--with-extra-ldpath=PATH],
-                 [Define extra ld path, where PATH is a space-separated
-                  list (enclosed in quotes) of directories.]),
+AS_HELP_STRING([--with-extra-ldpath=PATH],
+               [Define extra ld path, where PATH is a space-separated
+                list (enclosed in quotes) of directories.]),
 [LDFLAGS="-L`echo ${withval}|sed 's/ /\ -L/g'` ${LDFLAGS}"]
 )
 
 AC_ARG_WITH(insure,
-  AS_HELP_STRING([--with-insure=FLAGS],
-                 [FLAGS are options to pass to insure. Nothing is done
-                  to verify that insure is available]),
+AS_HELP_STRING([--with-insure=FLAGS],
+               [FLAGS are options to pass to insure. Nothing is done
+                to verify that insure is available]),
 [case "${withval}" in
-   yes) hypre_using_insure=yes
-        hypre_using_debug=yes
-        hypre_insure_flags=""
-        ;;
-   no)  ;;
-    *)  hypre_using_insure=yes
-        hypre_using_debug=yes
-        hypre_insure_flags="$withval"
-        ;;
+    yes) hypre_using_insure=yes
+         hypre_using_debug=yes
+         hypre_insure_flags="" ;;
+    no)  ;;
+     *)  hypre_using_insure=yes
+         hypre_using_debug=yes
+         hypre_insure_flags="$withval" ;;
  esac]
 )
 
 AC_ARG_WITH(strict-checking,
-  AS_HELP_STRING([--with-strict-checking],
-                 [Compiles without MPI ('--without-MPI') and tries to
-                  find a compiler option that warns of as many non-ISO
-                  features as possible.]),
-[ 
-  hypre_user_chose_ccompilers=yes
-  hypre_user_chose_cflags=yes
-  hypre_user_chose_cxxcompilers=yes
-  hypre_user_chose_cxxflags=yes
-  hypre_user_chose_fcompilers=yes
-  hypre_user_chose_fflags=yes
-  hypre_using_debug=yes
-  hypre_using_mpi=no
+AS_HELP_STRING([--with-strict-checking],
+               [Compiles without MPI ('--without-MPI') and tries to
+                find a compiler option that warns of as many non-ISO
+                features as possible.]),
+[
+ hypre_user_chose_ccompilers=yes
+ hypre_user_chose_cflags=yes
+ hypre_user_chose_cxxcompilers=yes
+ hypre_user_chose_cxxflags=yes
+ hypre_user_chose_fcompilers=yes
+ hypre_user_chose_fflags=yes
+ hypre_using_debug=yes
+ hypre_using_mpi=no
 
-  AC_CHECK_PROGS(CC, [gcc g++ icc icpc pgcc pgCC xlc xlC kcc KCC], [""])
-  if test "x$CC" = "x"
-  then
-     hypre_using_c=no
-     CFLAGS=""
-  elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
+ AC_CHECK_PROGS(CC, [gcc g++ icc icpc pgcc pgCC xlc xlC kcc KCC], [""])
+ if test "x$CC" = "x"
+ then
+    hypre_using_c=no
+    CFLAGS=""
+ elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -Wall -pedantic"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
     CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
-  elif test "x$CC" = "xicc"; then
+ elif test "x$CC" = "xicc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -Xc -Wall -x c"
     CXXFLAGS="-g -Xc -Wall -x c++"
-  elif test "x$CC" = "xpgcc"; then
+ elif test "x$CC" = "xpgcc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -Xa -Minform,inform"
     CXXFLAGS="-g -A --display_error_number -Minform,inform"
-  elif test "x$CC" = "xxlc"; then
+ elif test "x$CC" = "xxlc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -qinfo=dcl:eff:pro:rea:ret:use"
     CXXFLAGS="-g  -qinfo=dcl:eff:obs:pro:rea:ret:use"
-  elif test "x$CC" = "xKCC" || test "x$CC" = "xkcc"; then
+ elif test "x$CC" = "xKCC" || test "x$CC" = "xkcc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g --c --strict --lint --display_error_number"
     CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
     CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
     CXXFLAGS="-g --strict --lint --display_error_number"
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
-  fi
+ fi
  
-  AC_CHECK_PROGS(CXX, [g++ gcc icpc icc pgCC pgcc xlC xlc KCC kcc], [""])
-  if test "x$CXX" = "x"
-  then
-     hypre_using_cxx=no
-     CXXFLAGS=""
-  fi
-  AC_CHECK_PROGS(F77, [g77 ifort pgf77 xlf], [""])
-  if test "x$F77" = "x"
-  then
-     hypre_using_fortran=no
-     FFLAGS=""
-  fi
+ AC_CHECK_PROGS(CXX, [g++ gcc icpc icc pgCC pgcc xlC xlc KCC kcc], [""])
+ if test "x$CXX" = "x"
+ then
+    hypre_using_cxx=no
+    CXXFLAGS=""
+ fi
+ if test "$hypre_using_fortran" = "yes"
+ then
+    AC_CHECK_PROGS(F77, [g77 ifort pgf77 xlf], [""])
+    if test "x$F77" = "x"
+    then
+       hypre_using_fortran=no
+       FFLAGS=""
+    fi
+ fi
 
-  AC_DEFINE(HYPRE_SEQUENTIAL,1,[No MPI being used])]
+ AC_DEFINE(HYPRE_SEQUENTIAL,1,[No MPI being used])]
 )
 
 AC_ARG_WITH(MPI-include,
-  AS_HELP_STRING([--with-MPI-include=DIR],
-                 [User specifies that mpi.h is in DIR.  The options
-                  --with-MPI-include --with-MPI-libs and 
-                  --with-MPI-lib-dirs must be used together.]),
+AS_HELP_STRING([--with-MPI-include=DIR],
+               [User specifies that mpi.h is in DIR.  The options
+                --with-MPI-include --with-MPI-libs and 
+                --with-MPI-lib-dirs must be used together.]),
 [for mpi_dir in $withval; do
-   MPIINCLUDE="$MPIINCLUDE -I$mpi_dir"
+    MPIINCLUDE="$MPIINCLUDE -I$mpi_dir"
  done;
  hypre_user_chose_mpi=yes],
 [hypre_user_chose_mpi=no]
 )
 
 AC_ARG_WITH(MPI-libs,
-  AS_HELP_STRING([--with-MPI-libs=LIBS],
-                 [LIBS is space-separated list (enclosed in quotes) of library
-                  names needed for MPI, e.g. "nsl socket mpi".  The options 
-                  --with-MPI-include --with-MPI-libs and --with-MPI-lib-dirs
-                  must be used together.]),
+AS_HELP_STRING([--with-MPI-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of library
+                names needed for MPI, e.g. "nsl socket mpi".  The options 
+                --with-MPI-include --with-MPI-libs and --with-MPI-lib-dirs
+                must be used together.]),
 [for mpi_lib in $withval; do
-   MPILIBS="$MPILIBS -l$mpi_lib"
+    MPILIBS="$MPILIBS -l$mpi_lib"
  done;
  hypre_user_chose_mpi=yes]
 )
 
 AC_ARG_WITH(MPI-lib-dirs,
-  AS_HELP_STRING([--with-MPI-lib-dirs=DIRS],
-                 [DIRS is space-separated list (enclosed in quotes) of
-                  directories containing the libraries specified by
-                  --with-MPI-libs, e.g "usr/lib /usr/local/mpi/lib".
-                  The options --with-MPI-include --with-MPI-libs and
-                  --with-MPI-lib-dirs must be used together.]),
+AS_HELP_STRING([--with-MPI-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries specified by
+                --with-MPI-libs, e.g "usr/lib /usr/local/mpi/lib".
+                The options --with-MPI-include --with-MPI-libs and
+                --with-MPI-lib-dirs must be used together.]),
 [for mpi_lib_dir in $withval; do
-   MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
+    MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
  done;
  hypre_user_chose_mpi=yes]
 )
 
 AC_ARG_WITH(MPI-flags,
-  AS_HELP_STRING([--with-MPI-flags=FLAGS],
-                 [FLAGS is a space separated list (enclosed in quotes) of 
-                  whatever flags other than -l and -L are needed to link
-                  with MPI libraries-- Does not de-activate autosearch for
-                  other MPI information. May be used with the other three
-                  MPI options or alone in conjunction with the automatic MPI
-                  search.]),
+AS_HELP_STRING([--with-MPI-flags=FLAGS],
+               [FLAGS is a space separated list (enclosed in quotes) of 
+                whatever flags other than -l and -L are needed to link
+                with MPI libraries-- Does not de-activate autosearch for
+                other MPI information. May be used with the other three
+                MPI options or alone in conjunction with the automatic MPI
+                search.]),
 [case "${withval}" in
-   yes) MPIFLAGS="" ;;
-   no)  MPIFLAGS="" ;;
-   *)   MPIFLAGS=$withval ;;
+    yes) MPIFLAGS="" ;;
+    no)  MPIFLAGS="" ;;
+    *)   MPIFLAGS=$withval ;;
  esac],
 [MPIFLAGS=""]
 )
 
 AC_ARG_WITH(blas-libs,
-  AS_HELP_STRING([--with-blas-libs=LIBS],
-                 [LIBS is space-separated list (enclosed in quotes) of libraries
-                  needed for BLAS. The options --with-blas-libs and
-                  --with-blas-lib-dirs must be used together.]),
+AS_HELP_STRING([--with-blas-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of libraries
+                needed for BLAS. The options --with-blas-libs and
+                --with-blas-lib-dirs must be used together.]),
 [for blas_lib in $withval; do
-   BLASLIBS="$BLASLIBS -l$blas_lib"
+    BLASLIBS="$BLASLIBS -l$blas_lib"
  done;
  hypre_user_chose_blas=yes]
 )
 
 AC_ARG_WITH(blas-lib-dirs,
-  AS_HELP_STRING([--with-blas-lib-dirs=DIRS],
-                 [DIRS is space-separated list (enclosed in quotes) of 
-                  directories containing the libraries specified by 
-                  --with-blas-libs, e.g "usr/lib /usr/local/blas/lib".
-                  The  options --with-blas-libs and --with-blas-lib-dirs
-                  must be used together.]),
+AS_HELP_STRING([--with-blas-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of 
+                directories containing the libraries specified by 
+                --with-blas-libs, e.g "usr/lib /usr/local/blas/lib".
+                The  options --with-blas-libs and --with-blas-lib-dirs
+                must be used together.]),
 [for blas_lib_dir in $withval; do
-   BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
+    BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
  done;
  hypre_user_chose_blas=yes]
 )
 
 AC_ARG_WITH(lapack-libs,
-  AS_HELP_STRING([--with-lapack-libs=LIBS],
-                 [LIBS is space-separated list (enclosed in quotes) of libraries
-                  needed for LAPACK. The options --with-lapack-libs and
-                  --with-lapack-lib-dirs must be used together.]),
+AS_HELP_STRING([--with-lapack-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of libraries
+                needed for LAPACK. The options --with-lapack-libs and
+                --with-lapack-lib-dirs must be used together.]),
 [for lapack_lib in $withval; do
-   LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
+    LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
  done;
  hypre_user_chose_lapack=yes]
 )
 
 AC_ARG_WITH(lapack-lib-dirs,
-  AS_HELP_STRING([--with-lapack-lib-dirs=DIRS],
-                 [DIRS is space-separated list (enclosed in quotes) of 
-                  directories containing the libraries specified by 
-                  --with-lapack-libs, e.g "usr/lib /usr/local/lapack/lib".
-                  The options --with-lapack-libs and --with-lapack-lib-dirs
-                  must be used together.]),
+AS_HELP_STRING([--with-lapack-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of 
+                directories containing the libraries specified by 
+                --with-lapack-libs, e.g "usr/lib /usr/local/lapack/lib".
+                The options --with-lapack-libs and --with-lapack-lib-dirs
+                must be used together.]),
 [for lapack_lib_dir in $withval; do
-   LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
+    LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
  done;
  hypre_user_chose_lapack=yes]
 )
@@ -499,20 +506,20 @@ dnl * Define a generic macro to set hypre_fmangle based on withval
 AC_DEFUN([AC_HYPRE_SET_FMANGLE],
 [
  case "$withval" in
-   no-underscores)      hypre_fmangle=1 ;;
-   one-underscore)      hypre_fmangle=2 ;;
-   two-underscores)     hypre_fmangle=3 ;;
-   caps-no-underscores) hypre_fmangle=4 ;;
+    no-underscores)      hypre_fmangle=1 ;;
+    one-underscore)      hypre_fmangle=2 ;;
+    two-underscores)     hypre_fmangle=3 ;;
+    caps-no-underscores) hypre_fmangle=4 ;;
  esac
 ])
 
 dnl * Define --with-fmangle
 AC_ARG_WITH(fmangle,
-  AS_HELP_STRING([--with-fmangle=FMANGLE],
-                 [FMANGLE contains a string indicating the type of name mangling
-                  to use when calling hypre from Fortran.  It can be set to:
-                  "no-underscores", "one-underscore", "two-underscores", and
-                  "caps-no-underscores".]),
+AS_HELP_STRING([--with-fmangle=FMANGLE],
+               [FMANGLE contains a string indicating the type of name mangling
+                to use when calling hypre from Fortran.  It can be set to:
+                "no-underscores", "one-underscore", "two-underscores", and
+                "caps-no-underscores".]),
 [hypre_fmangle=0; AC_HYPRE_SET_FMANGLE],
 [hypre_fmangle=0]
 )
@@ -520,8 +527,8 @@ AC_DEFINE_UNQUOTED(HYPRE_FMANGLE, [$hypre_fmangle], [Fortran mangling])
 
 dnl * Define --with-fmangle-blas
 AC_ARG_WITH(fmangle-blas,
-  AS_HELP_STRING([--with-fmangle-blas=FMANGLE],
-                 [Name mangling for BLAS.  See --with-fmangle.]),
+AS_HELP_STRING([--with-fmangle-blas=FMANGLE],
+               [Name mangling for BLAS.  See --with-fmangle.]),
 [hypre_fmangle=0; AC_HYPRE_SET_FMANGLE],
 [hypre_fmangle=0]
 )
@@ -529,121 +536,115 @@ AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_BLAS, [$hypre_fmangle], [BLAS mangling])
 
 dnl * Define --with-fmangle-lapack
 AC_ARG_WITH(fmangle-lapack,
-  AS_HELP_STRING([--with-fmangle-lapack=FMANGLE],
-                 [Name mangling for LAPACK.  See --with-fmangle.]),
+AS_HELP_STRING([--with-fmangle-lapack=FMANGLE],
+               [Name mangling for LAPACK.  See --with-fmangle.]),
 [hypre_fmangle=0; AC_HYPRE_SET_FMANGLE],
 [hypre_fmangle=0]
 )
 AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_LAPACK, [$hypre_fmangle], [LAPACK mangling])
 
 AC_ARG_WITH(fei-inc-dir,
-  AS_HELP_STRING([--with-fei-inc-dir=DIR],
-                 [DIR is the directory containing the FEI distribution.]),
+AS_HELP_STRING([--with-fei-inc-dir=DIR],
+               [DIR is the directory containing the FEI distribution.]),
 [HYPRE_FEI_BASE_DIR="$withval";
  hypre_using_fei=yes;
  hypre_user_chose_fei=yes]
 )
 
 AC_ARG_WITH(no-global-partition,
-  AS_HELP_STRING([--with-no-global-partition],
-                 [Do not use global partitioning.]),
+AS_HELP_STRING([--with-no-global-partition],
+               [Do not use global partitioning.]),
 [if test "$withval" = "yes"
  then
-   AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION,1,[No global partitioning being used])
+    AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION,1,[No global partitioning being used])
  fi]
 )
 
 AC_ARG_WITH(print-errors,
-  AS_HELP_STRING([--with-print-errors],
-                 [Print HYPRE errors.]),
+AS_HELP_STRING([--with-print-errors],
+               [Print HYPRE errors.]),
 [if test "$withval" = "yes"
  then
-   AC_DEFINE(HYPRE_PRINT_ERRORS,1,[Print HYPRE errors])
+    AC_DEFINE(HYPRE_PRINT_ERRORS,1,[Print HYPRE errors])
  fi]
 )
 
 AC_ARG_WITH(timing,
-  AS_HELP_STRING([--with-timing],
-                 [Use HYPRE timing routines.]),
+AS_HELP_STRING([--with-timing],
+               [Use HYPRE timing routines.]),
 [if test "$withval" = "yes"
  then
-   AC_DEFINE(HYPRE_TIMING,1,[Using HYPRE timing routines])
+    AC_DEFINE(HYPRE_TIMING,1,[Using HYPRE timing routines])
  fi]
 )
 
 AC_ARG_WITH(openmp,
-  AS_HELP_STRING([--with-openmp],
-                 [Use OpenMP.  This may affect which compiler is chosen.]),
+AS_HELP_STRING([--with-openmp],
+               [Use OpenMP.  This may affect which compiler is chosen.]),
 [case "${withval}" in
-   yes) hypre_using_openmp=yes
-        AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support]) ;;
-   no)  hypre_using_openmp=no ;;
+    yes) hypre_using_openmp=yes
+         AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support]) ;;
+    no)  hypre_using_openmp=no ;;
  esac],
 [hypre_using_openmp=no]
 )
 
 AC_ARG_WITH(babel,
-  AS_HELP_STRING([--with-babel],
-                 [Use babel.]),
+AS_HELP_STRING([--with-babel],
+               [Use babel.]),
 [case "${withval}" in
-   yes) hypre_using_babel=yes ;;
-   no)  hypre_using_babel=no ;;
+    yes) hypre_using_babel=yes ;;
+    no)  hypre_using_babel=no ;;
  esac],
 [hypre_using_babel=no]
 )
 
 AC_ARG_WITH(examples,
-  AS_HELP_STRING([--with-examples],
-                 [Build example codes.]),
+AS_HELP_STRING([--with-examples],
+               [Build example codes.]),
 [case "${withval}" in
-   yes) hypre_using_mpi=yes 
-        hypre_using_examples=yes 
-        ;;
-   no)  hypre_using_examples=no 
-        ;;
+    yes) hypre_using_mpi=yes 
+         hypre_using_examples=yes ;;
+    no)  hypre_using_examples=no ;;
  esac],
 [hypre_using_examples=no]
 )
 
 AC_ARG_WITH(fei,
-  AS_HELP_STRING([--with-fei],
-                 [Use internal FEI routines.]),
+AS_HELP_STRING([--with-fei],
+               [Use internal FEI routines.]),
 [case "${withval}" in
-    no) hypre_using_fei=no
-        ;;
-     *) hypre_using_fei=yes
-        ;;
+    no) hypre_using_fei=no ;;
+    *)  hypre_using_fei=yes ;;
  esac]
 )
 
 AC_ARG_WITH(superlu,
-  AS_HELP_STRING([--with-superlu],
-                 [Use internal SuperLU routines.]),
+AS_HELP_STRING([--with-superlu],
+               [Use internal SuperLU routines.]),
 [case "${withval}" in
-    no) hypre_using_superlu=no
-        ;;
-     *) hypre_using_superlu=yes
-        ;;
+    no) hypre_using_superlu=no ;;
+    *)  hypre_using_superlu=yes ;;
  esac]
 )
 
 AC_ARG_WITH(mli,
-  AS_HELP_STRING([--with-mli],
-                 [Use MLI]),
+AS_HELP_STRING([--with-mli],
+               [Use MLI]),
 [case "${withval}" in
-   yes) hypre_using_mli=yes ;;
-   no)  hypre_using_mli=no ;;
+    yes) hypre_using_mli=yes ;;
+    no)  hypre_using_mli=no ;;
  esac],
 [hypre_using_mli=no]
 )
 
 AC_ARG_WITH(MPI,
-  AS_HELP_STRING([--with-MPI],
-                 [DEFAULT: Compile with MPI.  Selecting --without-MPI
-                  may affect which compiler is chosen.]),
+AS_HELP_STRING([--with-MPI],
+               [DEFAULT: Compile with MPI.  Selecting --without-MPI
+                may affect which compiler is chosen.]),
 [case "$withval" in 
     no) hypre_using_mpi=no ;;
-     *) hypre_using_mpi=yes ;;
+    *)  hypre_using_mpi=yes ;;
  esac],
 [hypre_using_mpi=yes])
 
@@ -686,7 +687,7 @@ then
    fi
 fi
 
-if test "$hypre_user_chose_fcompilers" = "no"
+if test "$hypre_using_fortran" = "yes" -a "$hypre_user_chose_fcompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
@@ -752,11 +753,11 @@ dnl *********************************************************************
 BABELDIR=""
 if test "$hypre_using_babel" = "yes"
 then
- BABELDIR="babel-runtime babel"
- export CC CXX F77 CPP LD
- export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
- AC_CONFIG_MACRO_DIR([babel-runtime/m4])
- AC_CONFIG_SUBDIRS(babel-runtime)
+   BABELDIR="babel-runtime babel"
+   export CC CXX F77 CPP LD
+   export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
+   AC_CONFIG_MACRO_DIR([babel-runtime/m4])
+   AC_CONFIG_SUBDIRS(babel-runtime)
 fi
 AC_SUBST(BABELDIR)
 
@@ -908,8 +909,7 @@ case $hypre_platform in
    AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
                        CFLAGS="${CFLAGS} -blpdata"
                        CXXFLAGS="${CXXFLAGS} -blpdata"
-                       FFLAGS="${FFLAGS} -blpdata"
-   ;;
+                       FFLAGS="${FFLAGS} -blpdata" ;;
 esac
 
 dnl *********************************************************************
@@ -932,11 +932,9 @@ then
                           SHARED_BUILD_FLAG="-G"
                           LINK_F77="${F77} -brtl"
                           LINK_CC="${CC} -brtl"
-                          LINK_CXX="${CXX} -brtl"
-                          ;;
+                          LINK_CXX="${CXX} -brtl" ;;
                        *) SHARED_COMPILE_FLAG="-fPIC"
-                          SHARED_BUILD_FLAG="-shared"
-                          ;;
+                          SHARED_BUILD_FLAG="-shared" ;;
    esac
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
@@ -952,14 +950,14 @@ BUILD_PYTHON=0
 PYTHON=""
 if test "$hypre_using_python" = "yes"
 then
-  BUILD_PYTHON=1
-  PYTHON="${hypre_python}"
+   BUILD_PYTHON=1
+   PYTHON="${hypre_python}"
 fi
 
 BUILD_JAVA=0
 if test "$hypre_using_java" = "yes"
 then
-  BUILD_JAVA=1
+   BUILD_JAVA=1
 fi
 
 dnl *********************************************************************

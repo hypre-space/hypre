@@ -842,6 +842,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          Set compiler flags for debugging.
   --enable-shared         Build shared libraries (default is NO).
+  --enable-fortran        Require a working Fortran compiler (default is YES).
   --enable-python=PYTHON  Build interface to specified instance of Python
                           (turns on shared libraries, requires Babel; default
                           is NO).
@@ -1559,9 +1560,9 @@ fi
 if test "${enable_debug+set}" = set; then
   enableval="$enable_debug"
   case "${enableval}" in
-        yes) hypre_using_debug=yes ;;
-    no | "") hypre_using_debug=no ;;
-          *) { { echo "$as_me:$LINENO: error: Bad value ${enableval} for --enable-debug" >&5
+    yes) hypre_using_debug=yes ;;
+    no)  hypre_using_debug=no ;;
+    *)   { { echo "$as_me:$LINENO: error: Bad value ${enableval} for --enable-debug" >&5
 echo "$as_me: error: Bad value ${enableval} for --enable-debug" >&2;}
    { (exit 1); exit 1; }; } ;;
  esac
@@ -1574,9 +1575,9 @@ fi;
 if test "${enable_shared+set}" = set; then
   enableval="$enable_shared"
   case "${enableval}" in
-        yes) hypre_using_shared=yes ;;
-    no | "") hypre_using_shared=no ;;
-          *) { { echo "$as_me:$LINENO: error: Bad value ${enableval} for --enable-shared" >&5
+    yes) hypre_using_shared=yes ;;
+    no)  hypre_using_shared=no ;;
+    *)   { { echo "$as_me:$LINENO: error: Bad value ${enableval} for --enable-shared" >&5
 echo "$as_me: error: Bad value ${enableval} for --enable-shared" >&2;}
    { (exit 1); exit 1; }; } ;;
  esac
@@ -1585,18 +1586,29 @@ else
 
 fi;
 
+# Check whether --enable-fortran or --disable-fortran was given.
+if test "${enable_fortran+set}" = set; then
+  enableval="$enable_fortran"
+  case "${enableval}" in
+    yes) hypre_using_fortran=yes ;;
+    no)  hypre_using_fortran=no ;;
+    *)   hypre_using_fortran=yes ;;
+ esac
+else
+  hypre_using_fortran=yes
+
+fi;
+
 # Check whether --enable-python or --disable-python was given.
 if test "${enable_python+set}" = set; then
   enableval="$enable_python"
   case "${enableval}" in
-        yes) hypre_using_python=yes
-             hypre_python="python"
-             ;;
-    no | "") hypre_using_python=no ;;
-          *) hypre_using_python=yes
-             hypre_python=${enableval}
-             hypre_using_shared=yes
-             ;;
+    yes) hypre_using_python=yes
+         hypre_python="python" ;;
+    no)  hypre_using_python=no ;;
+    *)   hypre_using_python=yes
+         hypre_python=${enableval}
+         hypre_using_shared=yes ;;
  esac
 else
   hypre_using_python=no
@@ -1607,12 +1619,10 @@ fi;
 if test "${enable_java+set}" = set; then
   enableval="$enable_java"
   case "${enableval}" in
-        yes) hypre_using_java=yes
-             ;;
-    no | "") hypre_using_java=no ;;
-          *) hypre_using_java=yes
-             hypre_using_shared=yes
-             ;;
+    yes) hypre_using_java=yes ;;
+    no)  hypre_using_java=no ;;
+    *)   hypre_using_java=yes
+         hypre_using_shared=yes ;;
  esac
 else
   hypre_using_java=no
@@ -1675,7 +1685,6 @@ hypre_user_chose_fei=no
 
 hypre_using_c=yes
 hypre_using_cxx=yes
-hypre_using_fortran=yes
 
 hypre_using_fei=yes
 hypre_using_superlu=yes
@@ -1727,15 +1736,13 @@ fi;
 if test "${with_insure+set}" = set; then
   withval="$with_insure"
   case "${withval}" in
-   yes) hypre_using_insure=yes
-        hypre_using_debug=yes
-        hypre_insure_flags=""
-        ;;
-   no)  ;;
-    *)  hypre_using_insure=yes
-        hypre_using_debug=yes
-        hypre_insure_flags="$withval"
-        ;;
+    yes) hypre_using_insure=yes
+         hypre_using_debug=yes
+         hypre_insure_flags="" ;;
+    no)  ;;
+     *)  hypre_using_insure=yes
+         hypre_using_debug=yes
+         hypre_insure_flags="$withval" ;;
  esac
 
 fi;
@@ -1745,16 +1752,16 @@ fi;
 if test "${with_strict_checking+set}" = set; then
   withval="$with_strict_checking"
 
-  hypre_user_chose_ccompilers=yes
-  hypre_user_chose_cflags=yes
-  hypre_user_chose_cxxcompilers=yes
-  hypre_user_chose_cxxflags=yes
-  hypre_user_chose_fcompilers=yes
-  hypre_user_chose_fflags=yes
-  hypre_using_debug=yes
-  hypre_using_mpi=no
+ hypre_user_chose_ccompilers=yes
+ hypre_user_chose_cflags=yes
+ hypre_user_chose_cxxcompilers=yes
+ hypre_user_chose_cxxflags=yes
+ hypre_user_chose_fcompilers=yes
+ hypre_user_chose_fflags=yes
+ hypre_using_debug=yes
+ hypre_using_mpi=no
 
-  for ac_prog in gcc g++ icc icpc pgcc pgCC xlc xlC kcc KCC
+ for ac_prog in gcc g++ icc icpc pgcc pgCC xlc xlC kcc KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -1795,37 +1802,37 @@ fi
 done
 test -n "$CC" || CC=""""
 
-  if test "x$CC" = "x"
-  then
-     hypre_using_c=no
-     CFLAGS=""
-  elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
+ if test "x$CC" = "x"
+ then
+    hypre_using_c=no
+    CFLAGS=""
+ elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -Wall -pedantic"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
     CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
-  elif test "x$CC" = "xicc"; then
+ elif test "x$CC" = "xicc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -Xc -Wall -x c"
     CXXFLAGS="-g -Xc -Wall -x c++"
-  elif test "x$CC" = "xpgcc"; then
+ elif test "x$CC" = "xpgcc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -Xa -Minform,inform"
     CXXFLAGS="-g -A --display_error_number -Minform,inform"
-  elif test "x$CC" = "xxlc"; then
+ elif test "x$CC" = "xxlc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -qinfo=dcl:eff:pro:rea:ret:use"
     CXXFLAGS="-g  -qinfo=dcl:eff:obs:pro:rea:ret:use"
-  elif test "x$CC" = "xKCC" || test "x$CC" = "xkcc"; then
+ elif test "x$CC" = "xKCC" || test "x$CC" = "xkcc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g --c --strict --lint --display_error_number"
     CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
     CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
     CXXFLAGS="-g --strict --lint --display_error_number"
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
-  fi
+ fi
 
-  for ac_prog in g++ gcc icpc icc pgCC pgcc xlC xlc KCC kcc
+ for ac_prog in g++ gcc icpc icc pgCC pgcc xlC xlc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -1866,12 +1873,14 @@ fi
 done
 test -n "$CXX" || CXX=""""
 
-  if test "x$CXX" = "x"
-  then
-     hypre_using_cxx=no
-     CXXFLAGS=""
-  fi
-  for ac_prog in g77 ifort pgf77 xlf
+ if test "x$CXX" = "x"
+ then
+    hypre_using_cxx=no
+    CXXFLAGS=""
+ fi
+ if test "$hypre_using_fortran" = "yes"
+ then
+    for ac_prog in g77 ifort pgf77 xlf
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -1912,11 +1921,12 @@ fi
 done
 test -n "$F77" || F77=""""
 
-  if test "x$F77" = "x"
-  then
-     hypre_using_fortran=no
-     FFLAGS=""
-  fi
+    if test "x$F77" = "x"
+    then
+       hypre_using_fortran=no
+       FFLAGS=""
+    fi
+ fi
 
 
 cat >>confdefs.h <<\_ACEOF
@@ -1931,7 +1941,7 @@ fi;
 if test "${with_MPI_include+set}" = set; then
   withval="$with_MPI_include"
   for mpi_dir in $withval; do
-   MPIINCLUDE="$MPIINCLUDE -I$mpi_dir"
+    MPIINCLUDE="$MPIINCLUDE -I$mpi_dir"
  done;
  hypre_user_chose_mpi=yes
 else
@@ -1944,7 +1954,7 @@ fi;
 if test "${with_MPI_libs+set}" = set; then
   withval="$with_MPI_libs"
   for mpi_lib in $withval; do
-   MPILIBS="$MPILIBS -l$mpi_lib"
+    MPILIBS="$MPILIBS -l$mpi_lib"
  done;
  hypre_user_chose_mpi=yes
 
@@ -1955,7 +1965,7 @@ fi;
 if test "${with_MPI_lib_dirs+set}" = set; then
   withval="$with_MPI_lib_dirs"
   for mpi_lib_dir in $withval; do
-   MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
+    MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
  done;
  hypre_user_chose_mpi=yes
 
@@ -1966,9 +1976,9 @@ fi;
 if test "${with_MPI_flags+set}" = set; then
   withval="$with_MPI_flags"
   case "${withval}" in
-   yes) MPIFLAGS="" ;;
-   no)  MPIFLAGS="" ;;
-   *)   MPIFLAGS=$withval ;;
+    yes) MPIFLAGS="" ;;
+    no)  MPIFLAGS="" ;;
+    *)   MPIFLAGS=$withval ;;
  esac
 else
   MPIFLAGS=""
@@ -1980,7 +1990,7 @@ fi;
 if test "${with_blas_libs+set}" = set; then
   withval="$with_blas_libs"
   for blas_lib in $withval; do
-   BLASLIBS="$BLASLIBS -l$blas_lib"
+    BLASLIBS="$BLASLIBS -l$blas_lib"
  done;
  hypre_user_chose_blas=yes
 
@@ -1991,7 +2001,7 @@ fi;
 if test "${with_blas_lib_dirs+set}" = set; then
   withval="$with_blas_lib_dirs"
   for blas_lib_dir in $withval; do
-   BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
+    BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
  done;
  hypre_user_chose_blas=yes
 
@@ -2002,7 +2012,7 @@ fi;
 if test "${with_lapack_libs+set}" = set; then
   withval="$with_lapack_libs"
   for lapack_lib in $withval; do
-   LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
+    LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
  done;
  hypre_user_chose_lapack=yes
 
@@ -2013,7 +2023,7 @@ fi;
 if test "${with_lapack_lib_dirs+set}" = set; then
   withval="$with_lapack_lib_dirs"
   for lapack_lib_dir in $withval; do
-   LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
+    LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
  done;
  hypre_user_chose_lapack=yes
 
@@ -2027,10 +2037,10 @@ if test "${with_fmangle+set}" = set; then
   withval="$with_fmangle"
   hypre_fmangle=0;
  case "$withval" in
-   no-underscores)      hypre_fmangle=1 ;;
-   one-underscore)      hypre_fmangle=2 ;;
-   two-underscores)     hypre_fmangle=3 ;;
-   caps-no-underscores) hypre_fmangle=4 ;;
+    no-underscores)      hypre_fmangle=1 ;;
+    one-underscore)      hypre_fmangle=2 ;;
+    two-underscores)     hypre_fmangle=3 ;;
+    caps-no-underscores) hypre_fmangle=4 ;;
  esac
 
 else
@@ -2049,10 +2059,10 @@ if test "${with_fmangle_blas+set}" = set; then
   withval="$with_fmangle_blas"
   hypre_fmangle=0;
  case "$withval" in
-   no-underscores)      hypre_fmangle=1 ;;
-   one-underscore)      hypre_fmangle=2 ;;
-   two-underscores)     hypre_fmangle=3 ;;
-   caps-no-underscores) hypre_fmangle=4 ;;
+    no-underscores)      hypre_fmangle=1 ;;
+    one-underscore)      hypre_fmangle=2 ;;
+    two-underscores)     hypre_fmangle=3 ;;
+    caps-no-underscores) hypre_fmangle=4 ;;
  esac
 
 else
@@ -2071,10 +2081,10 @@ if test "${with_fmangle_lapack+set}" = set; then
   withval="$with_fmangle_lapack"
   hypre_fmangle=0;
  case "$withval" in
-   no-underscores)      hypre_fmangle=1 ;;
-   one-underscore)      hypre_fmangle=2 ;;
-   two-underscores)     hypre_fmangle=3 ;;
-   caps-no-underscores) hypre_fmangle=4 ;;
+    no-underscores)      hypre_fmangle=1 ;;
+    one-underscore)      hypre_fmangle=2 ;;
+    two-underscores)     hypre_fmangle=3 ;;
+    caps-no-underscores) hypre_fmangle=4 ;;
  esac
 
 else
@@ -2147,13 +2157,13 @@ fi;
 if test "${with_openmp+set}" = set; then
   withval="$with_openmp"
   case "${withval}" in
-   yes) hypre_using_openmp=yes
+    yes) hypre_using_openmp=yes
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_OPENMP 1
 _ACEOF
  ;;
-   no)  hypre_using_openmp=no ;;
+    no)  hypre_using_openmp=no ;;
  esac
 else
   hypre_using_openmp=no
@@ -2165,8 +2175,8 @@ fi;
 if test "${with_babel+set}" = set; then
   withval="$with_babel"
   case "${withval}" in
-   yes) hypre_using_babel=yes ;;
-   no)  hypre_using_babel=no ;;
+    yes) hypre_using_babel=yes ;;
+    no)  hypre_using_babel=no ;;
  esac
 else
   hypre_using_babel=no
@@ -2178,11 +2188,9 @@ fi;
 if test "${with_examples+set}" = set; then
   withval="$with_examples"
   case "${withval}" in
-   yes) hypre_using_mpi=yes
-        hypre_using_examples=yes
-        ;;
-   no)  hypre_using_examples=no
-        ;;
+    yes) hypre_using_mpi=yes
+         hypre_using_examples=yes ;;
+    no)  hypre_using_examples=no ;;
  esac
 else
   hypre_using_examples=no
@@ -2194,10 +2202,8 @@ fi;
 if test "${with_fei+set}" = set; then
   withval="$with_fei"
   case "${withval}" in
-    no) hypre_using_fei=no
-        ;;
-     *) hypre_using_fei=yes
-        ;;
+    no) hypre_using_fei=no ;;
+    *)  hypre_using_fei=yes ;;
  esac
 
 fi;
@@ -2207,10 +2213,8 @@ fi;
 if test "${with_superlu+set}" = set; then
   withval="$with_superlu"
   case "${withval}" in
-    no) hypre_using_superlu=no
-        ;;
-     *) hypre_using_superlu=yes
-        ;;
+    no) hypre_using_superlu=no ;;
+    *)  hypre_using_superlu=yes ;;
  esac
 
 fi;
@@ -2220,8 +2224,8 @@ fi;
 if test "${with_mli+set}" = set; then
   withval="$with_mli"
   case "${withval}" in
-   yes) hypre_using_mli=yes ;;
-   no)  hypre_using_mli=no ;;
+    yes) hypre_using_mli=yes ;;
+    no)  hypre_using_mli=no ;;
  esac
 else
   hypre_using_mli=no
@@ -2234,7 +2238,7 @@ if test "${with_MPI+set}" = set; then
   withval="$with_MPI"
   case "$withval" in
     no) hypre_using_mpi=no ;;
-     *) hypre_using_mpi=yes ;;
+    *)  hypre_using_mpi=yes ;;
  esac
 else
   hypre_using_mpi=yes
@@ -2516,7 +2520,7 @@ test -n "$CXX" || CXX=""""
    fi
 fi
 
-if test "$hypre_user_chose_fcompilers" = "no"
+if test "$hypre_using_fortran" = "yes" -a "$hypre_user_chose_fcompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
@@ -4615,7 +4619,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:4618:" \
+echo "$as_me:4622:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -4811,7 +4815,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:4814: \"$ac_link\") >&5
+(eval echo $as_me:4818: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -4889,7 +4893,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:4892: \"$ac_link\") >&5
+(eval echo $as_me:4896: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6045,10 +6049,10 @@ fi
 BABELDIR=""
 if test "$hypre_using_babel" = "yes"
 then
- BABELDIR="babel-runtime babel"
- export CC CXX F77 CPP LD
- export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
- case babel-runtime/m4 in
+   BABELDIR="babel-runtime babel"
+   export CC CXX F77 CPP LD
+   export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
+   case babel-runtime/m4 in
   [\\/]* | ?:[\\/]* ) ac_macro_dir=babel-runtime/m4         ;;
   *)                      ac_macro_dir=$srcdir/babel-runtime/m4 ;;
 esac
@@ -7068,8 +7072,7 @@ case $hypre_platform in
    AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
                        CFLAGS="${CFLAGS} -blpdata"
                        CXXFLAGS="${CXXFLAGS} -blpdata"
-                       FFLAGS="${FFLAGS} -blpdata"
-   ;;
+                       FFLAGS="${FFLAGS} -blpdata" ;;
 esac
 
 LINK_F77="${F77}"
@@ -7086,11 +7089,9 @@ then
                           SHARED_BUILD_FLAG="-G"
                           LINK_F77="${F77} -brtl"
                           LINK_CC="${CC} -brtl"
-                          LINK_CXX="${CXX} -brtl"
-                          ;;
+                          LINK_CXX="${CXX} -brtl" ;;
                        *) SHARED_COMPILE_FLAG="-fPIC"
-                          SHARED_BUILD_FLAG="-shared"
-                          ;;
+                          SHARED_BUILD_FLAG="-shared" ;;
    esac
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
@@ -7106,14 +7107,14 @@ BUILD_PYTHON=0
 PYTHON=""
 if test "$hypre_using_python" = "yes"
 then
-  BUILD_PYTHON=1
-  PYTHON="${hypre_python}"
+   BUILD_PYTHON=1
+   PYTHON="${hypre_python}"
 fi
 
 BUILD_JAVA=0
 if test "$hypre_using_java" = "yes"
 then
-  BUILD_JAVA=1
+   BUILD_JAVA=1
 fi
 
 if test "$hypre_using_insure" = "yes"
