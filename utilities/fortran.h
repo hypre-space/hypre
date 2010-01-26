@@ -50,9 +50,9 @@
 #elif (HYPRE_FMANGLE == 4)
 #define hypre_F90_NAME(name,NAME) hypre_F90_NAME_4(name,NAME)
 
-#elif defined(F77_FUNC_)
-/* F77_FUNC_ macro assumes underscores exist in name */
-#define hypre_F90_NAME(name,NAME) F77_FUNC_(name,NAME)
+#elif defined(HYPRE_F77_FUNC_)
+/* HYPRE_F77_FUNC_ macro assumes underscores exist in name */
+#define hypre_F90_NAME(name,NAME) HYPRE_F77_FUNC_(name,NAME)
 
 #else
 #define hypre_F90_NAME(name,NAME) hypre_F90_NAME_2(name,NAME)
@@ -77,9 +77,9 @@
 #elif (HYPRE_FMANGLE_BLAS == 4)
 #define hypre_F90_NAME_BLAS(name,NAME) hypre_F90_NAME_4(name,NAME)
 
-#elif defined(F77_FUNC)
-/* F77_FUNC macro assumes NO underscores exist in name */
-#define hypre_F90_NAME_BLAS(name,NAME) F77_FUNC(name,NAME)
+#elif defined(HYPRE_F77_FUNC)
+/* HYPRE_F77_FUNC macro assumes NO underscores exist in name */
+#define hypre_F90_NAME_BLAS(name,NAME) HYPRE_F77_FUNC(name,NAME)
 
 #else
 #define hypre_F90_NAME_BLAS(name,NAME) hypre_F90_NAME_2(name,NAME)
@@ -102,9 +102,9 @@
 #elif (HYPRE_FMANGLE_LAPACK == 4)
 #define hypre_F90_NAME_LAPACK(name,NAME) hypre_F90_NAME_4(name,NAME)
 
-#elif defined(F77_FUNC)
-/* F77_FUNC macro assumes NO underscores exist in name */
-#define hypre_F90_NAME_LAPACK(name,NAME) F77_FUNC(name,NAME)
+#elif defined(HYPRE_F77_FUNC)
+/* HYPRE_F77_FUNC macro assumes NO underscores exist in name */
+#define hypre_F90_NAME_LAPACK(name,NAME) HYPRE_F77_FUNC(name,NAME)
 
 #else
 #define hypre_F90_NAME_LAPACK(name,NAME) hypre_F90_NAME_2(name,NAME)

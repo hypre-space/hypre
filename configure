@@ -8739,3 +8739,8 @@ echo "$as_me: error: $ac_sub_configure failed for $ac_dir" >&2;}
   done
 fi
 
+
+mv HYPRE_config.h HYPRE_config.h.tmp
+sed 's/F77_FUNC/HYPRE_F77_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
+rm -f HYPRE_config.h.tmp
+
