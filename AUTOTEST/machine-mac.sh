@@ -45,16 +45,12 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Make sure that we don't check for a working Fortran compiler.
-cd $src_dir
-mv configure configure.orig
-sed -e 's/hypre_using_fortran=yes/hypre_using_fortran=no/g' configure.orig > configure
-chmod a+x configure
+# Make sure that we don't check for a working Fortran compiler
+copts=--disable-fortran
 export CXX="mpicxx"
-cd $test_dir
 
 # Test runtest tests
-./test.sh default.sh $src_dir
+./test.sh default.sh $src_dir $copts
 mv -f default.??? $output_dir
 
 # Test linking for different languages
@@ -71,7 +67,7 @@ done
 configure_opts="--enable-debug"
 for opt in $configure_opts
 do
-   ./test.sh configure.sh $src_dir $opt
+   ./test.sh configure.sh $src_dir $opt $copts
    output_subdir=$output_dir/build$opt
    mkdir -p $output_subdir
    mv -f configure.??? $output_subdir
