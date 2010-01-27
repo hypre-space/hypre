@@ -61,6 +61,10 @@ m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [hypre-support@llnl.gov])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
 
+m4_include([config/hypre_blas_macros.m4])
+m4_include([config/hypre_lapack_macros.m4])
+m4_include([config/hypre_macros_misc.m4])
+
 AC_PREREQ(2.59)
 AC_REVISION($Id$)
 AC_INIT(M4_HYPRE_NAME, M4_HYPRE_VERSION)
@@ -75,6 +79,7 @@ Software Foundation) version 2.1 dated February 1999.])
 
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([HYPRE.h])
+dnl m4_pattern_allow([AC_HYPRE_[A-Z_]+])
 
 dnl * Change default prefix from /usr/local to ./hypre
 dnl * Note that $ expansion of shell variables doesn't work with this AC macro.
@@ -756,7 +761,7 @@ then
    BABELDIR="babel-runtime babel"
    export CC CXX F77 CPP LD
    export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
-   AC_CONFIG_MACRO_DIR([babel-runtime/m4])
+dnl   AC_CONFIG_MACRO_DIR([babel-runtime/m4])
    AC_CONFIG_SUBDIRS(babel-runtime)
 fi
 AC_SUBST(BABELDIR)

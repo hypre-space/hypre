@@ -6052,17 +6052,6 @@ then
    BABELDIR="babel-runtime babel"
    export CC CXX F77 CPP LD
    export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
-   case babel-runtime/m4 in
-  [\\/]* | ?:[\\/]* ) ac_macro_dir=babel-runtime/m4         ;;
-  *)                      ac_macro_dir=$srcdir/babel-runtime/m4 ;;
-esac
-if test -d "$ac_macro_dir"; then :
-else
-  { { echo "$as_me:$LINENO: error: cannot find macro directory \`babel-runtime/m4'" >&5
-echo "$as_me: error: cannot find macro directory \`babel-runtime/m4'" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
 
 
 subdirs="$subdirs babel-runtime"
