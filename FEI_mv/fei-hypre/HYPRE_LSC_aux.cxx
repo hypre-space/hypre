@@ -4023,7 +4023,6 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
 void HYPRE_LinSysCore::setupPreconBoomerAMG()
 {
    int          i, j, *num_sweeps, *relax_type, **relax_points;
-   int          max_levels = 25;
    double       *relax_wt, *relax_omega;
 
    if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -4067,12 +4066,12 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
    for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
 
    HYPRE_BoomerAMGSetGridRelaxType(HYPrecon_, relax_type);
-   relax_wt = hypre_CTAlloc(double,max_levels);
-   for ( i = 0; i < max_levels; i++ ) relax_wt[i] = amgRelaxWeight_[i];
+   relax_wt = hypre_CTAlloc(double,amgMaxLevels_);
+   for ( i = 0; i < amgMaxLevels_; i++ ) relax_wt[i] = amgRelaxWeight_[i];
    HYPRE_BoomerAMGSetRelaxWeight(HYPrecon_, relax_wt);
 
-   relax_omega = hypre_CTAlloc(double,max_levels);
-   for ( i = 0; i < max_levels; i++ ) relax_omega[i] = amgRelaxOmega_[i];
+   relax_omega = hypre_CTAlloc(double,amgMaxLevels_);
+   for ( i = 0; i < amgMaxLevels_; i++ ) relax_omega[i] = amgRelaxOmega_[i];
    HYPRE_BoomerAMGSetOmega(HYPrecon_, relax_omega);
 
    if (amgGridRlxType_) 
@@ -4422,7 +4421,6 @@ void HYPRE_LinSysCore::setupPreconSysPDE()
 void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
 {
    int                i, j, *relax_type, *num_sweeps, **relax_points;
-   int                max_levels = 25;
    double             *relax_wt, *relax_omega;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    b_csr;
@@ -4453,12 +4451,12 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
    HYPRE_BoomerAMGSetGridRelaxType(HYSolver_, relax_type);
 
    HYPRE_BoomerAMGSetMaxLevels(HYPrecon_, amgMaxLevels_);
-   relax_wt = hypre_CTAlloc(double,max_levels);
-   for ( i = 0; i < max_levels; i++ ) relax_wt[i] = amgRelaxWeight_[i];
+   relax_wt = hypre_CTAlloc(double, amgMaxLevels_);
+   for ( i = 0; i <  amgMaxLevels_; i++ ) relax_wt[i] = amgRelaxWeight_[i];
    HYPRE_BoomerAMGSetRelaxWeight(HYSolver_, relax_wt);
 
-   relax_omega = hypre_CTAlloc(double,max_levels);
-   for ( i = 0; i < max_levels; i++ ) relax_omega[i] = amgRelaxOmega_[i];
+   relax_omega = hypre_CTAlloc(double, amgMaxLevels_);
+   for ( i = 0; i <  amgMaxLevels_; i++ ) relax_omega[i] = amgRelaxOmega_[i];
    HYPRE_BoomerAMGSetOmega(HYPrecon_, relax_omega);
 
    relax_points = hypre_CTAlloc(int*,4);
