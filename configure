@@ -6100,8 +6100,11 @@ _ACEOF
    done
 fi
 
-if test "$hypre_user_chose_blas" = "no" -a "$hypre_using_fortran" = "yes"
+if test "$hypre_user_chose_blas" = "no"
 then
+   hypre_using_hypre_blas=yes
+   if test "$hypre_using_fortran" = "yes"
+   then
 
 
 
@@ -6299,26 +6302,22 @@ _ACEOF
   LDFLAGS="$hypre_save_LDFLGS"
 
 
-   if test "$BLASLIBS" = "null"
-   then
-      { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
+      if test "$BLASLIBS" = "null"
+      then
+         { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
 echo "$as_me: WARNING: ***************************************" >&2;}
-      { echo "$as_me:$LINENO: WARNING: Cannot find BLAS library" >&5
+         { echo "$as_me:$LINENO: WARNING: Cannot find BLAS library" >&5
 echo "$as_me: WARNING: Cannot find BLAS library" >&2;}
-      { echo "$as_me:$LINENO: WARNING:   configuring --without-blas" >&5
+         { echo "$as_me:$LINENO: WARNING:   configuring --without-blas" >&5
 echo "$as_me: WARNING:   configuring --without-blas" >&2;}
-      { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
+         { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
 echo "$as_me: WARNING: ***************************************" >&2;}
-      HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
-      BLAS_DIR="$HYPRE_SRCDIR/hypre/lib"
-      BLASLIBDIRS="-L$BLAS_DIR"
-      BLASLIBS="-lHYPRE_utilities"
-
-cat >>confdefs.h <<\_ACEOF
-#define HYPRE_USING_HYPRE_BLAS 1
-_ACEOF
-
-   elif test "$BLASLIBS" = "internal"
+      elif test "$BLASLIBS" != "internal"
+      then
+         hypre_using_hypre_blas=no
+      fi
+   fi
+   if test "$hypre_using_hypre_blas" = "yes"
    then
       HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
       BLAS_DIR="$HYPRE_SRCDIR/hypre/lib"
@@ -6346,8 +6345,11 @@ _ACEOF
    done
 fi
 
-if test "$hypre_user_chose_lapack" = "no" -a "$hypre_using_fortran" = "yes"
+if test "$hypre_user_chose_lapack" = "no"
 then
+   hypre_using_hypre_lapack=yes
+   if test "$hypre_using_fortran" = "yes"
+   then
 
 
 
@@ -6526,26 +6528,22 @@ fi
   LDFLAGS="$hypre_save_LDFLGS"
 
 
-   if test "$LAPACKLIBS" = "null"
-   then
-      { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
+      if test "$LAPACKLIBS" = "null"
+      then
+         { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
 echo "$as_me: WARNING: ***************************************" >&2;}
-      { echo "$as_me:$LINENO: WARNING: Cannot find LAPACK library" >&5
+         { echo "$as_me:$LINENO: WARNING: Cannot find LAPACK library" >&5
 echo "$as_me: WARNING: Cannot find LAPACK library" >&2;}
-      { echo "$as_me:$LINENO: WARNING:   configuring --without-lapack" >&5
+         { echo "$as_me:$LINENO: WARNING:   configuring --without-lapack" >&5
 echo "$as_me: WARNING:   configuring --without-lapack" >&2;}
-      { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
+         { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
 echo "$as_me: WARNING: ***************************************" >&2;}
-      HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
-      LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"
-      LAPACKLIBDIRS="-L$LAPACK_DIR"
-      LAPACKLIBS="-lHYPRE_utilities"
-
-cat >>confdefs.h <<\_ACEOF
-#define HYPRE_USING_HYPRE_LAPACK 1
-_ACEOF
-
-   elif test "$LAPACKLIBS" = "internal"
+      elif test "$LAPACKLIBS" != "internal"
+      then
+         hypre_using_hypre_lapack=no
+      fi
+   fi
+   if test "$hypre_using_hypre_lapack" = "yes"
    then
       HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
       LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"

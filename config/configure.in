@@ -794,21 +794,24 @@ dnl * Find BLAS library if not already set by the user
 dnl * If user specified --without-blas or a system one cannot be found,
 dnl * default to internal HYPRE routines
 dnl *********************************************************************
-if test "$hypre_user_chose_blas" = "no" -a "$hypre_using_fortran" = "yes"
+if test "$hypre_user_chose_blas" = "no"
 then
-   AC_HYPRE_FIND_BLAS
-   if test "$BLASLIBS" = "null"
+   hypre_using_hypre_blas=yes
+   if test "$hypre_using_fortran" = "yes"
    then
-      AC_MSG_WARN([***************************************])
-      AC_MSG_WARN([Cannot find BLAS library])
-      AC_MSG_WARN([  configuring --without-blas])
-      AC_MSG_WARN([***************************************])
-      HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
-      BLAS_DIR="$HYPRE_SRCDIR/hypre/lib"
-      BLASLIBDIRS="-L$BLAS_DIR"
-      BLASLIBS="-lHYPRE_utilities"
-      AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines])
-   elif test "$BLASLIBS" = "internal"
+      AC_HYPRE_FIND_BLAS
+      if test "$BLASLIBS" = "null"
+      then
+         AC_MSG_WARN([***************************************])
+         AC_MSG_WARN([Cannot find BLAS library])
+         AC_MSG_WARN([  configuring --without-blas])
+         AC_MSG_WARN([***************************************])
+      elif test "$BLASLIBS" != "internal"
+      then
+         hypre_using_hypre_blas=no
+      fi
+   fi
+   if test "$hypre_using_hypre_blas" = "yes"
    then
       HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
       BLAS_DIR="$HYPRE_SRCDIR/hypre/lib"
@@ -836,21 +839,24 @@ dnl * Find LAPACK library if not already set by the user
 dnl * If user specified --without-lapack or a system one cannot be found,
 dnl * default to internal HYPRE routines
 dnl *********************************************************************
-if test "$hypre_user_chose_lapack" = "no" -a "$hypre_using_fortran" = "yes"
+if test "$hypre_user_chose_lapack" = "no"
 then
-   AC_HYPRE_FIND_LAPACK
-   if test "$LAPACKLIBS" = "null"
+   hypre_using_hypre_lapack=yes
+   if test "$hypre_using_fortran" = "yes"
    then
-      AC_MSG_WARN([***************************************])
-      AC_MSG_WARN([Cannot find LAPACK library])
-      AC_MSG_WARN([  configuring --without-lapack])
-      AC_MSG_WARN([***************************************])
-      HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
-      LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"
-      LAPACKLIBDIRS="-L$LAPACK_DIR"
-      LAPACKLIBS="-lHYPRE_utilities"
-      AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines])
-   elif test "$LAPACKLIBS" = "internal"
+      AC_HYPRE_FIND_LAPACK
+      if test "$LAPACKLIBS" = "null"
+      then
+         AC_MSG_WARN([***************************************])
+         AC_MSG_WARN([Cannot find LAPACK library])
+         AC_MSG_WARN([  configuring --without-lapack])
+         AC_MSG_WARN([***************************************])
+      elif test "$LAPACKLIBS" != "internal"
+      then
+         hypre_using_hypre_lapack=no
+      fi
+   fi
+   if test "$hypre_using_hypre_lapack" = "yes"
    then
       HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
       LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"
