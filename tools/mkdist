@@ -12,8 +12,6 @@
 #EHEADER**********************************************************************
 
 
-
-
 #
 # MaKe hypre DISTribution
 # This script is used to create the hypre distribution tar files.
@@ -22,36 +20,32 @@
 
 help ()
 {
-  printf "$0: [-help] | [-display] | VersionId\n"
-  printf " where:\n"
-  printf " -help displays this message.\n"
-  printf " -display will report the cvs rtag history.\n"
-  printf " VersionId, is the desired version identification\n"
-  printf "  (e.g., V1-2-0 which creates tar file hypre-1.2.0.tar.gz).\n"
-  printf "  \n"
-  printf "  VersionID is used in the tar file name and as the root\n"
-  printf "  directory name for the distribution.\n"
-  printf "  \n"
-  printf "  By convention, the syntax for VersionId is: \"M.mm.rr\";\n"
-  printf "  where \"M\" is the major release number, \"mm\" is the minor\n"
-  printf "  number, and \"rr\" an update number.\n"
-  printf "  \n"
-  printf "  The number syntax within the repository is VM-mm-rr so that is\n"
-  printf "  the format input to this script.\n"
-  printf "  \n"
-  printf "  Alpha releases are denoted as \"VM-nn-rra\" and \"VM-nn-rrb\" for\n"
-  printf "  beta releases.\n"
-  printf "  \n"
-  printf "  If VersionId can be mapped to a valid rtag branch from the source\n"
-  printf "  repository; it is assumed that the rtag id will follow the naming\n"
-  printf "  convention, \"VM-nn-rr\".  If the VersionId can not be mapped to a\n"
-  printf "  current rtag id an error message is generated.\n"
-  printf "  \n"
-}
+  cat <<EOF
 
-usage ()
-{
-  printf "usage: $0 VersionId\n"
+   $0 [-help] | [-display] | VersionId
+   
+   where:
+   
+      -help        Displays this message.
+      
+      -display     Reports the cvs rtag history.
+      
+      VersionId    Creates a distribution, where VersionId determines the
+                   repository revision to use.  VersionId can either have the
+                   form VM-m-r to specify a release tag or Dyyyy-mm-dd to
+                   specify a date.  For example, V2-5-0a checks out source with
+                   rtag 'V2-5-0a' and creates the tar file hypre-2.5.0a.tar.gz.
+                   The option D2010-01-27 checks out the most recent source not
+                   later than the date '2010-01-27' and creates the tar file
+                   hypre-2010.01.27.tar.gz.  The V option is used to create
+                   official releases while the D option is useful for building
+                   temporary releases for colleagues.
+
+   Example usage: $0 -display
+                  $0 V2-5-0a
+                  $0 D2010-01-27
+
+EOF
 }
 
 display ()
@@ -73,12 +67,14 @@ case $1 in
         exit;;
 esac
 
-if [ $# -gt 0 ]
+if [ $# -eq 1 ]
 then
   VersionId=$1
-  RtagVersionId=${VersionId}
+  # determine version type and strip leading character from VersionId
+  VersionType=`echo ${VersionId}|cut -c1`
+  Version=`echo ${VersionId}|cut -c2-`
 else
-  usage
+  help
   exit
 fi
 
@@ -101,20 +97,29 @@ mkdir $HYPRE_DIST_INSTALL_DIR/src
     echo "Error: no CVS repository, CVSROOT = $CVSROOT"
     exit
   fi
-  cvs export -r ${RtagVersionId} linear_solvers
-  if [  $? -ne 0 ]
+  if [ "$VersionType" = "V" ]
   then
-    echo "Error: Rtag Version=${RtagVersionId} not found in CVS repository"
-    display
+    cvs export -r ${VersionId} linear_solvers
+    if [  $? -ne 0 ]
+    then
+      echo "Error: Rtag Version=${VersionId} not found in CVS repository"
+      display
+      exit
+    fi
+  elif [ "$VersionType" = "D" ]
+  then
+    cvs export -D ${Version} linear_solvers
+  else
+    echo "Error: Invalid leading character in VersionID=${VersionId}"
     exit
   fi
 )
 
-## replace dashes in version number with dots and redefine directory names
-Version=`echo ${RtagVersionId}|cut -c2- |sed 's/-/\./g'`
+# replace dashes in version with dots and redefine directory names
+Version=`echo ${Version}|sed 's/-/\./g'`
 if [  $? -ne 0 ]
 then
-  echo "Error: CVS repository defective"
+  echo "Error: Invalid VersionID=${VersionId}"
   exit
 fi
 mv $HYPRE_DIR "hypre-${Version}"
@@ -153,49 +158,63 @@ rm -fr $HYPRE_DIR/src/AUTOTEST
 rm -fr $HYPRE_DIR/src/test/AUTOTEST
 rm -fr $HYPRE_DIR/src/babel/bHYPREClient-J
 
-# create the hypre-${VersionId}.tar file
-echo "creating $HYPRE_DIR.tar file ..."
-tar cf $HYPRE_DIR.tar \
-    $HYPRE_DIR/CHANGELOG \
-    $HYPRE_DIR/COPYRIGHT \
-    $HYPRE_DIR/COPYING.LESSER \
-    $HYPRE_DIR/INSTALL \
-    $HYPRE_DIR/README \
-    $HYPRE_DIR/docs \
-    $HYPRE_DIR/src/FEI_mv \
-    $HYPRE_DIR/src/HYPRE.h \
-    $HYPRE_DIR/src/HYPREf.h \
-    $HYPRE_DIR/src/IJ_mv \
-    $HYPRE_DIR/src/Makefile \
-    $HYPRE_DIR/src/babel \
-    $HYPRE_DIR/src/babel-runtime \
-    $HYPRE_DIR/src/blas \
-    $HYPRE_DIR/src/config \
-    $HYPRE_DIR/src/configure \
-    $HYPRE_DIR/src/distributed_ls \
-    $HYPRE_DIR/src/distributed_matrix \
-    $HYPRE_DIR/src/docs \
-    $HYPRE_DIR/src/examples/ex* \
-    $HYPRE_DIR/src/examples/Make* \
-    $HYPRE_DIR/src/examples/README.html \
-    $HYPRE_DIR/src/examples/README_files \
-    $HYPRE_DIR/src/krylov \
-    $HYPRE_DIR/src/lapack \
-    $HYPRE_DIR/src/lib \
-    $HYPRE_DIR/src/matrix_matrix \
-    $HYPRE_DIR/src/multivector \
-    $HYPRE_DIR/src/nopoe \
-    $HYPRE_DIR/src/parcsr_block_mv \
-    $HYPRE_DIR/src/parcsr_ls \
-    $HYPRE_DIR/src/parcsr_mv \
-    $HYPRE_DIR/src/seq_mv \
-    $HYPRE_DIR/src/seq_ls/pamg \
-    $HYPRE_DIR/src/sstruct_ls \
-    $HYPRE_DIR/src/sstruct_mv \
-    $HYPRE_DIR/src/struct_ls \
-    $HYPRE_DIR/src/struct_mv \
-    $HYPRE_DIR/src/tarch \
-    $HYPRE_DIR/src/test \
-    $HYPRE_DIR/src/utilities
+HYPRE_TARNAME=$HYPRE_DIR.tar
+HYPRE_FILES="\
+  $HYPRE_DIR/CHANGELOG \
+  $HYPRE_DIR/COPYRIGHT \
+  $HYPRE_DIR/COPYING.LESSER \
+  $HYPRE_DIR/INSTALL \
+  $HYPRE_DIR/README \
+  $HYPRE_DIR/docs \
+  $HYPRE_DIR/src/FEI_mv \
+  $HYPRE_DIR/src/HYPRE.h \
+  $HYPRE_DIR/src/HYPREf.h \
+  $HYPRE_DIR/src/IJ_mv \
+  $HYPRE_DIR/src/Makefile \
+  $HYPRE_DIR/src/blas \
+  $HYPRE_DIR/src/config \
+  $HYPRE_DIR/src/configure \
+  $HYPRE_DIR/src/distributed_ls \
+  $HYPRE_DIR/src/distributed_matrix \
+  $HYPRE_DIR/src/docs \
+  $HYPRE_DIR/src/examples/ex* \
+  $HYPRE_DIR/src/examples/Make* \
+  $HYPRE_DIR/src/examples/README.html \
+  $HYPRE_DIR/src/examples/README_files \
+  $HYPRE_DIR/src/krylov \
+  $HYPRE_DIR/src/lapack \
+  $HYPRE_DIR/src/lib \
+  $HYPRE_DIR/src/matrix_matrix \
+  $HYPRE_DIR/src/multivector \
+  $HYPRE_DIR/src/nopoe \
+  $HYPRE_DIR/src/parcsr_block_mv \
+  $HYPRE_DIR/src/parcsr_ls \
+  $HYPRE_DIR/src/parcsr_mv \
+  $HYPRE_DIR/src/seq_mv \
+  $HYPRE_DIR/src/seq_ls/pamg \
+  $HYPRE_DIR/src/sstruct_ls \
+  $HYPRE_DIR/src/sstruct_mv \
+  $HYPRE_DIR/src/struct_ls \
+  $HYPRE_DIR/src/struct_mv \
+  $HYPRE_DIR/src/tarch \
+  $HYPRE_DIR/src/test \
+  $HYPRE_DIR/src/utilities \
+"
 
-gzip $HYPRE_DIR.tar
+HYPRE_TARNAME_BABEL=$HYPRE_DIR+babel.tar
+HYPRE_FILES_BABEL="\
+  $HYPRE_FILES \
+  $HYPRE_DIR/src/babel \
+  $HYPRE_DIR/src/babel-runtime \
+"
+
+# create the hypre tar file
+echo "creating $HYPRE_TARNAME file ..."
+tar cf $HYPRE_TARNAME $HYPRE_FILES
+gzip $HYPRE_TARNAME
+
+# create the hypre+babel tar file
+echo "creating $HYPRE_TARNAME_BABEL file ..."
+tar cf $HYPRE_TARNAME_BABEL $HYPRE_FILES_BABEL
+gzip $HYPRE_TARNAME_BABEL
+
