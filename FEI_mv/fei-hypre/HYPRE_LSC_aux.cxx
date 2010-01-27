@@ -4067,7 +4067,6 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
    for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
 
    HYPRE_BoomerAMGSetGridRelaxType(HYPrecon_, relax_type);
-   HYPRE_BoomerAMGSetMaxLevels(HYPrecon_, max_levels);
    relax_wt = hypre_CTAlloc(double,max_levels);
    for ( i = 0; i < max_levels; i++ ) relax_wt[i] = amgRelaxWeight_[i];
    HYPRE_BoomerAMGSetRelaxWeight(HYPrecon_, relax_wt);
@@ -4453,7 +4452,7 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
    for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
    HYPRE_BoomerAMGSetGridRelaxType(HYSolver_, relax_type);
 
-   HYPRE_BoomerAMGSetMaxLevels(HYSolver_, max_levels);
+   HYPRE_BoomerAMGSetMaxLevels(HYPrecon_, amgMaxLevels_);
    relax_wt = hypre_CTAlloc(double,max_levels);
    for ( i = 0; i < max_levels; i++ ) relax_wt[i] = amgRelaxWeight_[i];
    HYPRE_BoomerAMGSetRelaxWeight(HYSolver_, relax_wt);
