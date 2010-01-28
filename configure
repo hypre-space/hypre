@@ -6309,9 +6309,8 @@ echo "$as_me: WARNING: ***************************************" >&2;}
    if test "$hypre_using_hypre_blas" = "yes"
    then
       HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
-      BLAS_DIR="$HYPRE_SRCDIR/hypre/lib"
-      BLASLIBDIRS="-L$BLAS_DIR"
-      BLASLIBS="-lHYPRE_utilities"
+      BLASLIBDIRS=""
+      BLASLIBS=""
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_BLAS 1
@@ -6535,9 +6534,8 @@ echo "$as_me: WARNING: ***************************************" >&2;}
    if test "$hypre_using_hypre_lapack" = "yes"
    then
       HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
-      LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"
-      LAPACKLIBDIRS="-L$LAPACK_DIR"
-      LAPACKLIBS="-lHYPRE_utilities"
+      LAPACKLIBDIRS=""
+      LAPACKLIBS=""
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_LAPACK 1

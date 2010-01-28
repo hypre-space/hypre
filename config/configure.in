@@ -819,9 +819,9 @@ then
    if test "$hypre_using_hypre_blas" = "yes"
    then
       HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
-      BLAS_DIR="$HYPRE_SRCDIR/hypre/lib"
-      BLASLIBDIRS="-L$BLAS_DIR"
-      BLASLIBS="-lHYPRE_utilities"
+dnl      BLAS_DIR="$HYPRE_SRCDIR/hypre/lib"
+      BLASLIBDIRS=""
+      BLASLIBS=""
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines])
    fi
 fi
@@ -864,9 +864,9 @@ then
    if test "$hypre_using_hypre_lapack" = "yes"
    then
       HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
-      LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"
-      LAPACKLIBDIRS="-L$LAPACK_DIR"
-      LAPACKLIBS="-lHYPRE_utilities"
+dnl      LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"
+      LAPACKLIBDIRS=""
+      LAPACKLIBS=""
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines])
    fi
 fi
