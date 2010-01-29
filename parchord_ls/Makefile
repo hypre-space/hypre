@@ -11,27 +11,20 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
 include ../config/Makefile.config
 
- 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
- 
+
 C_COMPILE_FLAGS = \
  -I..\
  -I../utilities\
  -I../seq_mv\
  ${CINCLUDES}
- 
+
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LIBFLAGS = ${LIBDIRS} ${LIBS}
 LDLIBFLAGS = ${LDLIBDIRS} ${LDLIBS}
- 
+
 LFLAGS =\
  -L.\
  -L../seq_mv\
@@ -43,7 +36,6 @@ LFLAGS =\
 
 HEADERS =\
  par_chord_matrix.h
-
 
 FILES =\
  par_chord_mm.c\
@@ -61,18 +53,17 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
-	@cp -f HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_BUILD_DIR)/include/.
-	@cp -f libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
- 
+	@cp -fpPR HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_BUILD_DIR)/include/.
+#	@cp -fpPR libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
+
 driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS} 
- 
 
 install: all
-	@cp -f HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_INC_INSTALL)/.
-	@cp -f libHYPRE_* $(HYPRE_LIB_INSTALL)/.
- 
+	@cp -fpPR HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_INC_INSTALL)/.
+#	@cp -fpPR libHYPRE_* $(HYPRE_LIB_INSTALL)/.
+
 clean:
 	@rm -f *.o lib* driver
 

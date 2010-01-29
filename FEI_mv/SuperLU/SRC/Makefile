@@ -153,11 +153,11 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_superlu${HYPRE_LIB_SUFFIX}
 	cp -fp *.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+#	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_superlu${HYPRE_LIB_SUFFIX}
 	cp -f *.h $(HYPRE_INC_INSTALL)
-	cp -f libHYPRE* $(HYPRE_LIB_INSTALL)
+#	cp -f libHYPRE* $(HYPRE_LIB_INSTALL)
 	@echo  " "
 
 clean:

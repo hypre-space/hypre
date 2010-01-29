@@ -159,8 +159,8 @@ install: all
 	@echo "Installing hypre ..."
 	@echo "lib-install: ${HYPRE_LIB_INSTALL}"
 	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}
-	cp -fr ${HYPRE_BUILD_DIR}/lib/* ${HYPRE_LIB_INSTALL}/.
-	cp -fr ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
+	cp -fpPR ${HYPRE_BUILD_DIR}/lib/* ${HYPRE_LIB_INSTALL}/.
+	cp -fpPR ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
 	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}
 	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}
 

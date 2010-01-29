@@ -11,14 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
-
-
-
-
 include ../../config/Makefile.config
 include babel.make
 
@@ -77,12 +69,12 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libbHYPRE.scl libbHYPREClient-J${HYPRE_LIB_SUFFIX} classes
-	cp -fp $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
-	cp -fp libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
+	cp -fpPR $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
+	cp -fpPR libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
  
 install: all
-	cp -fp $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
-	cp -fp libbHYPRE* ${HYPRE_LIB_INSTALL}/.
+	cp -fpPR $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
+	cp -fpPR libbHYPRE* ${HYPRE_LIB_INSTALL}/.
  
 clean:
 	rm -f *.o *.a *.so libbHYPRE.scl

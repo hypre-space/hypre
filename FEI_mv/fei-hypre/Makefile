@@ -169,7 +169,7 @@ all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include
 	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include
 	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fpPR $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
@@ -182,7 +182,7 @@ install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)
 	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)
 	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)
-	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
+#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 	@echo  ""
 
 clean:

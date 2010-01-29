@@ -70,12 +70,12 @@ SONAME = libHYPRE_sstruct_mv-${HYPRE_RELEASE_VERSION}.so
 all: libHYPRE_sstruct_mv${HYPRE_LIB_SUFFIX}
 	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fpPR $(srcdir)/_hypre_sstruct_mv.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_sstruct_mv${HYPRE_LIB_SUFFIX}
 	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fpPR $(srcdir)/_hypre_sstruct_mv.h $(HYPRE_INC_INSTALL)
-	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
+#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*
