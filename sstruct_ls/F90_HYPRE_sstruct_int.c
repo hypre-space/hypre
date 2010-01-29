@@ -22,7 +22,6 @@
 
 #include "headers.h"
 #include "fortran.h"
-#include "HYPRE_sstruct_int.h"
 #include "HYPRE_MatvecFunctions.h"
 
 

@@ -32,7 +32,6 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- HYPRE_sstruct_int.h\
  HYPRE_sstruct_ls.h\
  _hypre_sstruct_ls.h\
  fac.h\

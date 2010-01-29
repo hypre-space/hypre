@@ -44,8 +44,6 @@
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
 
-#include "HYPRE_parcsr_int.h"
-
 int
 BuildParIsoLaplacian( int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
 

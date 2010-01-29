@@ -165,6 +165,8 @@ with some suggestions on how to choose the parameters as well as references for 
 who are interested in a more detailed description and analysis of the solvers.
 A complete list of all routines that are available can be found in the reference manual.
 
+%-----------------------------------------------------------------------------
+
 \section{SMG}
 
 SMG is a parallel semicoarsening multigrid solver for the linear
@@ -197,7 +199,7 @@ uses simple pointwise smoothing.  As a result, PFMG is not as robust
 as SMG, but is much more efficient per V-cycle.
 
 %-----------------------------------------------------------------------------
-                                                                                                                                                             
+
 \section{SysPFMG}
 
 SysPFMG is a parallel semicoarsening multigrid solver for systems of 
@@ -215,7 +217,7 @@ variables.
 %-----------------------------------------------------------------------------
 
 \section{SplitSolve}
-                                                                                                                                                             
+
 SplitSolve is a parallel block Gauss-Seidel solver for semi-structured
 problems with multiple parts. For problems with only one variable, it can be viewed as 
 a domain-decomposition solver with no grid overlapping.
@@ -344,7 +346,6 @@ cheaper scheme, HYPRE$\_$SStructMaxwellSolve2, keeps the coupling operators only
 separate edge and nodal V-cycles that couple only on the finest level.
 
 %-----------------------------------------------------------------------------
-
 
 \section{Hybrid}
 
@@ -775,6 +776,7 @@ FEI section of the reference manual.
 
 
 %-----------------------------------------------------------------------------
+
 \section{ParaSails}
 
 ParaSails is a parallel implementation of a sparse approximate inverse
@@ -1218,3 +1220,36 @@ also lead to increases in the time to calculate the preconditioner.
 
 %-----------------------------------------------------------------------------
 
+\section{LOBPCG Eigensolver}
+
+LOBPCG (Locally Optimal Block Preconditioned Conjugate Gradient) is a simple,
+yet very efficient, algorithm suggested in \cite{LOBPCG_2001, BLOPEX_2007,
+BLOPEXWebPage} for computing several smallest eigenpairs of the symmetric
+generalized eigenvalue problem $Ax=\lambda Bx$ with large, possibly sparse,
+symmetric matrix $A$ and symmetric positive definite matrix $B$. The matrix $A$
+is not assumed to be positive, which also allows one to use LOBPCG to compute
+the largest eigenpairs of $Ax=\lambda Bx$ simply by solving $-Ax=\mu Bx$ for the
+smallest eigenvalues $\mu=-\lambda$.
+
+LOBPCG simultaneously computes several eigenpairs together, which is controlled
+by the \code{blockSize} parameter, see example \file{ex11.c}. The LOBCPG also
+allows one to impose constraints on the eigenvectors of the form $x^T B y_i=0$
+for a set of vectors $y_i$ given to LOBPCG as input parameters. This makes it
+possible to compute, e.g., 50 eigenpairs by 5 subsequent calls to LOBPCG with
+the \code{blockSize}=10, using deflation.  LOBPCG can use preconditioning in two
+different ways: by running an inner preconditioned PCG linear solver, or by
+applying the preconditioner directly to the eigenvector residual (option
+\code{-pcgitr 0}).  In all other respects, LOBPCG is similar to the PCG linear
+solver.
+
+The LOBPCG code is available for system interfaces: Struct, SStruct, and IJ.  It
+is also used in the Auxiliary-space Maxwell Eigensolver (AME).  The LOBPCG setup
+is similar to the setup for PCG.
+
+% The LOBPCG code and related functions and utilities in \emph{hypre} are pulled
+% from the package Block Locally Optimal Preconditioned Eigenvalue Xolvers
+% (BLOPEX) revision 1.1, see \cite{2,3}.  No special configuration for the LOBPCG
+% during the hypre setup is necessary, since all LOBPCG-relevant files are already
+% built-in into the \emph{hypre} source.
+
+%-----------------------------------------------------------------------------

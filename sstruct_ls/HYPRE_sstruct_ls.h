@@ -1073,6 +1073,57 @@ int HYPRE_SStructBiCGSTABGetResidual(HYPRE_SStructSolver   solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
+/* These includes shouldn't be here. (RDF) */
+#include "interpreter.h"
+#include "HYPRE_MatvecFunctions.h"
+#include "_hypre_sstruct_mv.h"
+
+/**
+ * @name SStruct LOBPCG Eigensolver
+ *
+ * These routines should be used in conjunction with the generic interface in
+ * \Ref{LOBPCG Eigensolver}.
+ **/
+/*@{*/
+
+/**
+  * Load interface interpreter.  Vector part loaded with hypre_SStructKrylov
+  * functions and multivector part loaded with mv_TempMultiVector functions.
+  **/
+int
+HYPRE_SStructSetupInterpreter(mv_InterfaceInterpreter *i);
+
+/**
+  * Load Matvec interpreter with hypre_SStructKrylov functions.
+  **/
+int
+HYPRE_SStructSetupMatvec(HYPRE_MatvecFunctions *mv);
+
+/* The next routines should not be here (lower-case prefix). (RDF) */
+
+/*
+ * Set hypre_SStructPVector to random values.
+ **/
+int
+hypre_SStructPVectorSetRandomValues(hypre_SStructPVector *pvector, int seed);
+
+/*
+ * Set hypre_SStructVector to random values.
+ **/
+int
+hypre_SStructVectorSetRandomValues(hypre_SStructVector *vector, int seed);
+
+/*
+ * Same as hypre_SStructVectorSetRandomValues except uses void pointer.
+ **/
+int
+hypre_SStructSetRandomValues(void *v, int seed);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 /*@}*/
 
 #ifdef __cplusplus

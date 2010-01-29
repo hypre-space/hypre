@@ -13,8 +13,6 @@
 
 
 
-#include "HYPRE_struct_int.h"
-#include "HYPRE_sstruct_int.h"
 #include "_hypre_sstruct_ls.h"
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"

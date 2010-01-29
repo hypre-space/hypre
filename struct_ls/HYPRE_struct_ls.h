@@ -995,6 +995,51 @@ int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/* These includes shouldn't be here. (RDF) */
+#include "interpreter.h"
+#include "HYPRE_MatvecFunctions.h"
+#include "_hypre_struct_mv.h"
+
+/**
+ * @name Struct LOBPCG Eigensolver
+ *
+ * These routines should be used in conjunction with the generic interface in
+ * \Ref{LOBPCG Eigensolver}.
+ **/
+/*@{*/
+
+/**
+ * Load interface interpreter. Vector part loaded with hypre_StructKrylov
+ * functions and multivector part loaded with mv_TempMultiVector functions.
+ **/
+int
+HYPRE_StructSetupInterpreter(mv_InterfaceInterpreter *i);
+
+/**
+ * Load Matvec interpreter with hypre_StructKrylov functions.
+ **/
+int
+HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions *mv);
+
+/* The next routines should not be here (lower-case prefix). (RDF) */
+
+/*
+ * Set hypre_StructPVector to random values.
+ **/
+int
+hypre_StructVectorSetRandomValues(hypre_StructVector *vector, int seed);
+
+/*
+ * Same as hypre_StructVectorSetRandomValues except uses void pointer.
+ **/
+int
+hypre_StructSetRandomValues(void *v, int seed);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 /*@}*/
 
 #ifdef __cplusplus

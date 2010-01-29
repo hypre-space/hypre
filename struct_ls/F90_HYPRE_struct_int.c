@@ -16,7 +16,6 @@
 
 #include "headers.h"
 #include "fortran.h"
-#include "HYPRE_struct_int.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructVectorSetRandomValues

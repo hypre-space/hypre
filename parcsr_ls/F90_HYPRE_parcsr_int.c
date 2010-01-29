@@ -21,7 +21,6 @@
 
 #include "headers.h"
 #include "fortran.h"
-#include "HYPRE_parcsr_int.h"
 
 int hypre_ParVectorSize( void *x );
 int aux_maskCount( int n, int *mask );

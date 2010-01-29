@@ -11,13 +11,9 @@
  ***********************************************************************EHEADER*/
 
 
-
-
 /******************************************************************************
  *
  * Locally optimal preconditioned conjugate gradient functions
- *
- * Evgueni Ovtchinnikov -- 21 Apr 2004 / 12 May 2004
  *
  *****************************************************************************/
 
@@ -854,7 +850,10 @@ es" argument */
       }
 		
     }
-		
+
+/* follwing line is bug fix in Google Rev 8 of code, by ilya.lashuk Aug 29,2008   */
+    mv_MultiVectorSetMask( blockVectorW, NULL );
+    
     mv_MultiVectorCopy( blockVectorX, blockVectorW );
     lobpcg_MultiVectorByMatrix( blockVectorW, coordXX, blockVectorX );
     mv_MultiVectorAxpy( 1.0, blockVectorP, blockVectorX );

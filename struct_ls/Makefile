@@ -26,7 +26,6 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- HYPRE_struct_int.h\
  HYPRE_struct_ls.h\
  _hypre_struct_ls.h\
  headers.h\

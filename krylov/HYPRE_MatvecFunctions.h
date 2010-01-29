@@ -11,8 +11,6 @@
  ***********************************************************************EHEADER*/
 
 
-
-
 #ifndef HYPRE_MATVEC_FUNCTIONS
 #define HYPRE_MATVEC_FUNCTIONS
 

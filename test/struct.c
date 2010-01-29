@@ -41,7 +41,6 @@
 #include "interpreter.h"
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
-#include "HYPRE_struct_int.h"
 
 /* end lobpcg */
 

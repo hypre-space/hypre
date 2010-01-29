@@ -37,15 +37,14 @@ C_COMPILE_FLAGS =\
  ${CINCLUDES}
 
 HEADERS =\
- aux_interp.h\
- Common.h\
- headers.h\
- HYPRE_parcsr_int.h\
  HYPRE_parcsr_ls.h\
  _hypre_parcsr_ls.h\
+ aux_interp.h\
+ block_tridiag.h\
+ Common.h\
+ headers.h\
  par_amg.h\
- schwarz.h\
- block_tridiag.h
+ schwarz.h
 
 FILES =\
  amg_hybrid.c\

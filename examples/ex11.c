@@ -27,7 +27,6 @@
 #include "HYPRE_lobpcg.h"
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"
-#include "HYPRE_parcsr_int.h"
 #include "temp_multivector.h"
 
 int main (int argc, char *argv[])

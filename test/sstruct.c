@@ -29,7 +29,6 @@
 #include "interpreter.h"
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
-#include "HYPRE_sstruct_int.h"
 
 #define NO_SOLVER -9198
 

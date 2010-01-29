@@ -123,8 +123,8 @@ static int dpotrf_interface (char *uplo, int *n, double *a, int *
 
 
 int
-lobpcg_initialize( lobpcg_Data* data ) {
-
+lobpcg_initialize( lobpcg_Data* data )
+{
    (data->tolerance).absolute    = 1.0e-06;
    (data->tolerance).relative    = 0.0;
    (data->maxIterations)         = 500;
@@ -138,8 +138,8 @@ lobpcg_initialize( lobpcg_Data* data ) {
 }
 
 int
-lobpcg_clean( lobpcg_Data* data ) {
-
+lobpcg_clean( lobpcg_Data* data )
+{
    utilities_FortranMatrixDestroy( data->eigenvaluesHistory );
    utilities_FortranMatrixDestroy( data->residualNorms );
    utilities_FortranMatrixDestroy( data->residualNormsHistory );
@@ -303,8 +303,8 @@ hypre_LOBPCGSetPrintLevel( void *pcg_vdata, int level )
 }
 
 void
-hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y ) {
-
+hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y )
+{
    hypre_LOBPCGData *data = vdata;
    mv_InterfaceInterpreter* ii = data->interpreter;
    int (*precond)() = (data->precondFunctions).Precond;
@@ -326,8 +326,8 @@ hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y ) {
 }
 
 void
-hypre_LOBPCGOperatorA( void *pcg_vdata, void* x, void* y ) {
-
+hypre_LOBPCGOperatorA( void *pcg_vdata, void* x, void* y )
+{
    hypre_LOBPCGData*           pcg_data    = pcg_vdata;
    HYPRE_MatvecFunctions * mv = pcg_data->matvecFunctions;
    void*	              	      matvec_data = (pcg_data -> matvecData);
@@ -336,8 +336,8 @@ hypre_LOBPCGOperatorA( void *pcg_vdata, void* x, void* y ) {
 }
 
 void
-hypre_LOBPCGOperatorB( void *pcg_vdata, void* x, void* y ) {
-
+hypre_LOBPCGOperatorB( void *pcg_vdata, void* x, void* y )
+{
    hypre_LOBPCGData*           pcg_data    = pcg_vdata;
    mv_InterfaceInterpreter* ii          = pcg_data->interpreter;
    HYPRE_MatvecFunctions * mv = pcg_data->matvecFunctions;
@@ -358,8 +358,8 @@ hypre_LOBPCGOperatorB( void *pcg_vdata, void* x, void* y ) {
 }
 
 void
-hypre_LOBPCGMultiPreconditioner( void *data, void * x, void*  y ) {
-
+hypre_LOBPCGMultiPreconditioner( void *data, void * x, void*  y )
+{
    hypre_LOBPCGData *pcg_data = data;
    mv_InterfaceInterpreter* ii = pcg_data->interpreter; 
   
@@ -367,8 +367,8 @@ hypre_LOBPCGMultiPreconditioner( void *data, void * x, void*  y ) {
 }
 
 void
-hypre_LOBPCGMultiOperatorA( void *data, void * x, void*  y ) {
-
+hypre_LOBPCGMultiOperatorA( void *data, void * x, void*  y )
+{
    hypre_LOBPCGData *pcg_data = data;
    mv_InterfaceInterpreter* ii = pcg_data->interpreter;
   
@@ -376,8 +376,8 @@ hypre_LOBPCGMultiOperatorA( void *data, void * x, void*  y ) {
 }
 
 void
-hypre_LOBPCGMultiOperatorB( void *data, void * x, void*  y ) {
-
+hypre_LOBPCGMultiOperatorB( void *data, void * x, void*  y )
+{
    hypre_LOBPCGData *pcg_data = data;
    mv_InterfaceInterpreter* ii = pcg_data->interpreter;
   
@@ -615,10 +615,9 @@ HYPRE_LOBPCGIterations( HYPRE_Solver solver )
 }
 
 void
-lobpcg_MultiVectorByMultiVector(
-   mv_MultiVectorPtr x,
-   mv_MultiVectorPtr y,
-   utilities_FortranMatrix* xy )
+lobpcg_MultiVectorByMultiVector( mv_MultiVectorPtr x,
+                                 mv_MultiVectorPtr y,
+                                 utilities_FortranMatrix* xy )
 {
    mv_MultiVectorByMultiVector( x, y,
                                 utilities_FortranMatrixGlobalHeight( xy ),
