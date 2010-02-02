@@ -57,6 +57,9 @@ $(STRUCTMVFILES)\
 $(UTILITIESFILES)
 
 SONAME = libHYPRE-${HYPRE_RELEASE_VERSION}.so
+SOLIBS = ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
+ ${BLASLIBDIRS} ${BLASLIBS} ${LIBS} ${FLIBS}
+
 
 ##################################################################
 # Targets
@@ -101,5 +104,5 @@ libHYPRE.a: ${FILES_HYPRE}
 
 libHYPRE.so: ${FILES_HYPRE}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o ${SONAME} ${FILES_HYPRE} ${SHARED_SET_SONAME}${SONAME}
+	${BUILD_CC_SHARED} -o ${SONAME} ${FILES_HYPRE} ${SOLIBS} ${SHARED_SET_SONAME}${SONAME} ${SHARED_OPTIONS}
 	ln -s ${SONAME} $@
