@@ -16,6 +16,5 @@ mv -f /tmp/Makefile.lapack lapack/Makefile
 
 # Take care of the special compilation of SuperLU/superlu_timer.c
 sed -e s,' $<',' $<; mv -f $*.obj $*.o',g \
-    -e s,' -c ',' -c -DWIN32 ',g \
        FEI_mv/SuperLU/SRC/Makefile > /tmp/Makefile.SuperLU
 mv -f /tmp/Makefile.SuperLU FEI_mv/SuperLU/SRC/Makefile

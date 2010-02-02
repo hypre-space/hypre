@@ -43,7 +43,9 @@
 
 #elif !defined(JUNK_TIMING)
 #include <time.h>
+#ifndef WIN32
 #include <unistd.h>  /* needed for sysconf(_SC_CLK_TCK) */
+#endif
 #endif
 
 

@@ -206,7 +206,7 @@ complex16: $(ZLUSRC) $(ALLAUX) $(LAAUX) $(ZLASRC) $(DZLAUX)
 ##################################
 slamch.o: slamch.c ; $(CC) -c $(NOOPTS) $(CDEFS) $<
 dlamch.o: dlamch.c ; $(CC) -c $(NOOPTS) $(CDEFS) $<
-superlu_timer.o:  superlu_timer.c ; $(CC) -c $(NOOPTS) $<
+superlu_timer.o:  superlu_timer.c ; $(CC) -c -DNO_TIMER $(NOOPTS) $<
 ##################################
 
 #.c.o:
