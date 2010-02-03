@@ -62,8 +62,6 @@ Version 2.6.0b released 2010/02/xx
 - Added a configure option to --disable-fortran for users who do not have a
   working fortran compiler.  This is most useful for Mac users.
 
-- AMS for zero-conductivity regions?
-
 - Threading work?
 
 #====================================
