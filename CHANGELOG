@@ -11,15 +11,60 @@
 #EHEADER**********************************************************************
 
 
-
-
-
-
 #=============================================================================
 # This file chronicles user-level changes to hypre, beginning with the most
 # recent release.
 #=============================================================================
 
+
+#====================================
+
+Version 2.6.0b released 2010/02/xx
+
+- Added a new interface routine to SStruct called GridSetSharedPart() which is
+  used to describe how regions inside a part are shared with regions in other
+  parts in a block-structured grid setting.  The routine is similar to
+  SetNeighborPart(), but allows more flexibility in finite-element settings.
+
+- Added new finite element routines to the SStruct interface as an alternative
+  to using stencils: GridSetFEMOrdering(), GraphSetFEM(), GraphSetFEMSparsity(),
+  MatrixAddFEMValues(), and VectorAddFEMValues().
+
+- Added new examples, ex13.c, ex14.c, and ex15.c, to illustrate the use of the
+  new SetSharedPart and FEM routines, the new rectangular matrix feature in
+  SStruct, and the use of the AMS solver through the SStruct interface.
+
+- Removed support for SetNeighborBox() in the SStruct interface.  This was
+  replaced by SetNeighborPart() in release 2.4.0b.
+
+- Added the assumed partition algorithm to the implementation of the SStruct
+  interface to improve scaling at huge processor counts.
+
+- Changed the behavior of IJMatrixSetValues so that it is deterministic and
+  consistent with the behavior of SStructMatrixSetValues when setting values
+  owned by other processors (a similar change was made to IJVectorSetValues).
+
+- Added user documentation for building hypre under Windows.
+
+- Added user and reference documentation for the LOBPCG eigensolver.
+
+- Did some cleaning up in the 'configure' script.
+
+- Changed to install only one hypre library now: libHYPRE.a (or libHYPRE.so).
+
+- Added the release number to the hypre shared library soname and changed to
+  resolve all symbols in the shared library.
+
+- Updated the non-babel fortran interface.
+
+- Added configure options to explicitly set the mangling scheme for Fortran.
+
+- Added a configure option to --disable-fortran for users who do not have a
+  working fortran compiler.  This is most useful for Mac users.
+
+- AMS for zero-conductivity regions?
+
+- Threading work?
 
 #====================================
 
