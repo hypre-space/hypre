@@ -201,12 +201,15 @@ HYPRE_FILES="\
   $HYPRE_DIR/src/utilities \
 "
 
-HYPRE_TARNAME_BABEL=$HYPRE_DIR+babel.tar
-HYPRE_FILES_BABEL="\
+HYPRE_BABEL_DIR=$HYPRE_DIR+babel
+HYPRE_BABEL_TARNAME=$HYPRE_BABEL_DIR.tar
+HYPRE_BABEL_FILES="\
   $HYPRE_FILES \
   $HYPRE_DIR/src/babel \
   $HYPRE_DIR/src/babel-runtime \
 "
+HYPRE_BABEL_FILES=`echo $HYPRE_BABEL_FILES | sed "s/$HYPRE_DIR/$HYPRE_BABEL_DIR/g"`
+cp -fr $HYPRE_DIR $HYPRE_BABEL_DIR
 
 # create the hypre tar file
 echo "creating $HYPRE_TARNAME file ..."
@@ -214,7 +217,7 @@ tar cf $HYPRE_TARNAME $HYPRE_FILES
 gzip $HYPRE_TARNAME
 
 # create the hypre+babel tar file
-echo "creating $HYPRE_TARNAME_BABEL file ..."
-tar cf $HYPRE_TARNAME_BABEL $HYPRE_FILES_BABEL
-gzip $HYPRE_TARNAME_BABEL
+echo "creating $HYPRE_BABEL_TARNAME file ..."
+tar cf $HYPRE_BABEL_TARNAME $HYPRE_BABEL_FILES
+gzip $HYPRE_BABEL_TARNAME
 
