@@ -12,8 +12,8 @@
 #EHEADER**********************************************************************
 
 # Which tests to run?
-TEST_ALPHA="-`hostname -a`"
-TEST_BETA="$TEST_ALPHA -alc -up"
+TEST_ALPHA="-tux273"
+TEST_BETA="$TEST_ALPHA -zeus -up"
 TEST_GENERAL="$TEST_BETA -thunder -zeus"
 TERMCMD=""
 
@@ -63,24 +63,25 @@ done
 testing_dir=`cd ..; pwd`
 autotest_dir="$testing_dir/AUTOTEST"
 release_file=$1
-release_dir=`basename $release_file | awk -F.t '{print $1}'`
+release_dir=`basename $release_file | awk -F.tar '{print $1}'`
 release=`echo $release_dir | awk -F- '{print $2}'`
 output_dir="$testing_dir/AUTOTEST-hypre-$release"
-case `basename $release_file | awk -F. '{print $3}'` in
-   *a) NAME="ALPHA"; TESTS=$TEST_ALPHA ;;
-   *b) NAME="BETA"; TESTS=$TEST_BETA ;;
-   *)  NAME="GENERAL"; TESTS=$TEST_GENERAL ;;
+case $release in
+   *[0-9].*[0-9].*[0-9])  NAME="GENERAL"; TESTS=$TEST_GENERAL ;;
+   *[0-9].*[0-9].*[0-9]b) NAME="BETA";    TESTS=$TEST_BETA ;;
+   *[0-9].*[0-9].*[0-9]a) NAME="ALPHA";   TESTS=$TEST_ALPHA ;;
+   *)                     NAME="ALPHA";   TESTS=$TEST_ALPHA ;;
 esac
 
 # Extract the release
 cd $testing_dir
 echo "Checking the distribution file..."
-if !(tar -dzf $release_file 2>/dev/null 1>&2) then
-   rm -rf $release_dir $output_dir $autotest_dir/autotest-*
-   tar -zxf $release_file
-fi
+#if !(tar -dzf $release_file 2>/dev/null 1>&2) then
+#   rm -rf $release_dir $output_dir $autotest_dir/autotest-*
+#   tar -zxf $release_file
+#fi
 echo ""
-echo "The followinfg tests are needed to verify this $NAME release: $TESTS"
+echo "The following tests are needed to verify this $NAME release: $TESTS"
 echo ""
 
 # List the status of the required tests
@@ -92,18 +93,18 @@ for test in $TESTS
 do
    name=`echo $test | sed 's/[0-9]//g'`
    # Determine failed, pending, passed and tests that have not been run
-   if [ -s $output_dir/machine$name.err -o -s autotest$name.err ]; then
-      status="[FAILED] "; FAILED="$FAILED $test"
-   else
-      if [ ! -e autotest$name-start ]; then
-         status="[NOT RUN]"; NOTRUN="$NOTRUN $test"
+   if [ -f $output_dir/machine$name.err ]; then
+      if [ -s $output_dir/machine$name.err ]; then
+         status="[FAILED] "; FAILED="$FAILED $test"
       else
-         if [ ! -e autotest$name-done ]; then
-            status="[PENDING]"; PENDING="$PENDING $test"
-         else
-            status="[PASSED] "
-         fi
+         status="[PASSED] ";
       fi
+   elif [ ! -e autotest$name-start ]; then
+      status="[NOT RUN]"; NOTRUN="$NOTRUN $test"
+   elif [ ! -e autotest$name-done ]; then
+      status="[PENDING]"; PENDING="$PENDING $test"
+   else
+      status="[UNKNOWN]";
    fi
    if [ "$TERMCMD" == "" ]; then
       echo "$status ./autotest.sh -dist $release $test"
@@ -112,26 +113,33 @@ do
    fi
 done
 
-# If all tests have passed, return a tarball of the log files
-if [ "$NOTRUN$FAILED$PENDING" == "" ]; then
+# If all tests have been run, create a tarball of the log files
+if [ "$NOTRUN$PENDING" == "" ]; then
    echo ""; echo "Generating the verification file AUTOTEST-hypre-$release.tgz"
    cd $testing_dir
    mv -f $autotest_dir/autotest-* $output_dir
    tar -zcf $autotest_dir/AUTOTEST-hypre-$release.tgz `basename $output_dir`
+fi
+
+# If all tests have passed, print a message and exit
+if [ "$NOTRUN$FAILED$PENDING" == "" ]; then
    echo "The release is verified!"
    exit
 fi
 
 cat <<EOF
 
-The release can not be verified at this time, because not all tests are listed
-as [PASSED]. This script can start the remaining tests now. Alternatively, you
-can run the above commands manually (or in a cron job). If you do this, make
-sure to examine the standart error of the autotest.sh script.
+The release can not be automatically verified at this time because not all tests
+are listed as [PASSED].  You may choose to continue with the release anyway, but
+it is your responsibility to ensure that the test errors are acceptable.
+
+This script can start the remaining tests now.  Alternatively, you can run the
+above commands manually (or in a cron job). If you do this, make sure to examine
+the standart error of the autotest.sh script.
 
 EOF
 
-echo -n "Do you want to start the tests that have failed or have not run yet? (yes,no) : "
+echo -n "Do you want to start the remaining tests? (yes,no) : "
 read -e RUN
 if [ "$RUN" == "yes" ]; then
    for test in $FAILED $NOTRUN

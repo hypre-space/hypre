@@ -49,11 +49,22 @@ shift
 ./test.sh debug.sh $src_dir --with-insure
 mv -f debug.??? $output_dir
 
+# Test babel build (only if 'babel-runtime' directory is present)
+if [ -d $src_dir/babel-runtime ]; then
+   opt="--with-babel"
+   output_subdir="build--with-babel"
+   mkdir -p $output_subdir
+   ./test.sh configure.sh $src_dir $opt
+   mv -f configure.??? $output_subdir
+   ./test.sh make.sh $src_dir test
+   mv -f make.??? $output_subdir
+fi
+
 # Test other builds (last one is the default build)
 # temporarily change word delimeter in order to have spaces in options
 tmpIFS=$IFS
 IFS=:
-configure_opts="--with-babel --enable-debug:--without-MPI:--with-strict-checking:--enable-shared:--with-no-global-partition: "
+configure_opts="--without-MPI:--with-strict-checking:--enable-shared:--with-no-global-partition: "
 for opt in $configure_opts
 do
    # only use first part of $opt for subdir name
