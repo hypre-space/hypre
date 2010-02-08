@@ -76,10 +76,15 @@ esac
 # Extract the release
 cd $testing_dir
 echo "Checking the distribution file..."
-#if !(tar -dzf $release_file 2>/dev/null 1>&2) then
-#   rm -rf $release_dir $output_dir $autotest_dir/autotest-*
-#   tar -zxf $release_file
-#fi
+tmpdir=$release_dir.TMP
+mkdir -p $tmpdir
+rm -rf $tmpdir/$release_dir
+tar -C $tmpdir -zxf $release_file
+if !(diff -r $release_dir $tmpdir/$release_dir 2>/dev/null 1>&2) then
+   rm -rf $release_dir $output_dir $autotest_dir/autotest-*
+   tar -zxf $release_file
+fi
+rm -rf $tmpdir
 echo ""
 echo "The following tests are needed to verify this $NAME release: $TESTS"
 echo ""
