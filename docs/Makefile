@@ -155,4 +155,4 @@ vbref_manual.dxx: bref_manual.dxx
 version.tex:
 	@ \
 	echo "\def\HYPREVersion{$(HYPRE_RELEASE_VERSION)}" > version.tex; \
-	echo "\def\HYPREVersionDate{$(HYPRE_RELEASE_DATETIME)}" >> version.tex
+	echo "\def\HYPREVersionDate{$(HYPRE_RELEASE_DATE)}" >> version.tex
