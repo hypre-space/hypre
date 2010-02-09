@@ -120,17 +120,19 @@ a new \file{configure} script
       cvs rtag VM-mm-rr linear_solvers
 \end{verbatim}
 \item Create the distribution tar file by running the \file{tools/mkdist}
-script.  Output is a new directory named \file{hypre-M.mm.rr} and a compressed
-tar file named \file{hypre-M.mm.rr.tar.gz}.  This may be run from within any
+script.  Output are two compressed tar files named \file{hypre-M.mm.rr.tar.gz}
+and \file{hypre-M.mm.rr-babel.tar.gz}.  This may be run from within any
 directory, as long as the latest version of the script is being used (the
 following is being run from the root directory).
 \begin{verbatim}
       ./tools/mkdist VM-mm-rr
 \end{verbatim}
+\item Test the release tar files with the \file{testdist.sh} script.
 \item Copy the tar file to /usr/casc/hypre on the local system
 \begin{verbatim}
       cp hypre-M.mm.rr.tar.gz /usr/casc/hypre
 \end{verbatim}
+\item Put the release on the download page.
 \end{enumerate}
 
 %==========================================================================
