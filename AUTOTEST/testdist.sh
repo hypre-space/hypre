@@ -41,6 +41,12 @@ do
 
    Example usage: $0 /usr/casc/hypre/hypre-2.0.0.tar.gz
 
+   NOTE: Because of ssh restrictions at LLNL, run this script on an LC machine.
+   You may need to change the default tux platform at the top of this file to
+   your own tux machine.  Finally, for each release tar file, it is recommended
+   that you run this script inside a separate copy of the AUTOTEST directory
+   (this will avoid result conflicts in common tests).
+
 EOF
          exit
          ;;
