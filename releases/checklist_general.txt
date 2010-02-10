@@ -58,7 +58,7 @@ the responsible project member before the release is made available to users.
 
   []
 
-- Create release tar file by running the 'tools/mkdist' script (for more
+- Create release tar files by running the 'tools/mkdist' script (for more
   information, do 'mkdist -help').  This can be run from within any directory,
   just be sure to use the latest version of the 'mkdist' script.
 
