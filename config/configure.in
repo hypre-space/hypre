@@ -699,7 +699,7 @@ then
       AC_CHECK_PROGS(F77, [mpxlf xlf mpguidef77 guidef77 mpiifort ifort pg77 f77], [""])
    elif test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(F77, [xlf g77 pgf77 ifort f77], [""])
+      AC_CHECK_PROGS(F77, [xlf gfortran g77 g95 pgf77 ifort f77], [""])
    else
       AC_CHECK_PROGS(F77, [mpxlf mpf77 mpif77 mpiifort mpipgf77], [""])
    fi
