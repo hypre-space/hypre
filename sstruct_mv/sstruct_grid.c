@@ -1510,6 +1510,7 @@ hypre_SStructGridFindNborBoxManEntry( hypre_SStructGrid  *grid,
    else
    {
       *entry_ptr = entries[0];
+      hypre_TFree(entries); 
    }
    
    return hypre_error_flag;
