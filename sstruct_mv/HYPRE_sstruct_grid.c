@@ -644,6 +644,21 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    int                      part, var, b, vb, d, i, valid;
 
    /*-------------------------------------------------------------
+    * if I own no data on some part, prune that part's neighbor info
+    *-------------------------------------------------------------*/
+
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      if (hypre_StructGridNumBoxes(hypre_SStructPGridCellSGrid(pgrid)) == 0)
+      {
+         nneighbors[part] = 0;
+         hypre_TFree(neighbors[part]);
+         hypre_TFree(nbor_offsets[part]);
+      }
+   }
+
+   /*-------------------------------------------------------------
     * set pneighbors for each pgrid info to crop pgrids
     *-------------------------------------------------------------*/
 
