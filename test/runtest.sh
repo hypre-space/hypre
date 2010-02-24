@@ -384,6 +384,10 @@ function PostProcess
          mv purify.log $InputFile.purify.log
          grep -i hypre_ $InputFile.purify.log >> $InputFile.err
       elif [ -f insure.log ] ; then
+         if [ -f ~/insure.log ] ; then
+            cat ~/insure.log >> insure.log
+            rm -f ~/insure.log*
+         fi
          mv insure.log $InputFile.insure.log
          grep -i hypre_ $InputFile.insure.log >> $InputFile.err
       fi
@@ -417,12 +421,17 @@ function CleanUp
 # process files
 function StartCrunch
 {
+   rm -f ~/insure.log*
+
    CheckBatch
    BatchMode=$?
    ExecuteJobs "$@"
    ExecuteTest "$@"
    PostProcess "$@"
 }
+
+#==========================================================================
+#==========================================================================
 
 # main
 
