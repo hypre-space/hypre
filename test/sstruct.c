@@ -1124,7 +1124,9 @@ DistributeData( ProblemData   global_data,
       {
          /* none of this part data lives on this process */
          pdata.nboxes = 0;
+#if 1 /* set this to 0 to make all of the SetSharedPart calls */
          pdata.glue_nboxes = 0;
+#endif
          pdata.graph_nboxes = 0;
          pdata.matset_nboxes = 0;
          for (box = 0; box < pdata.matadd_nboxes; box++)
