@@ -193,6 +193,8 @@ int main (int argc, char *argv[])
    int amg_interp_type, amg_Pmax;
    int singular_problem ;
 
+   int time_index;
+
    HYPRE_SStructGrid     edge_grid;
    HYPRE_SStructGraph    A_graph;
    HYPRE_SStructMatrix   A;
@@ -390,6 +392,10 @@ int main (int argc, char *argv[])
    pk = myid / (N*N);
    pj = myid/N - pk*N;
    pi = myid - pj*N - pk*N*N;
+
+   /* Start timing */
+   time_index = hypre_InitializeTiming("SStruct Setup");
+   hypre_BeginTiming(time_index);
 
    /* 1. Set up the edge and nodal grids.  Note that we do this simultaneously
          to make sure that they have the same extends.  For simplicity we use
@@ -802,6 +808,12 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorAssemble(x);
    }
 
+   /* Finalize current timing */
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("SStruct phase times", MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
    /* 6. Set up and call the PCG-AMS solver (Solver options can be found in the
          Reference Manual.) */
    {
@@ -825,6 +837,14 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorGetObject(xcoord, (void **) &par_xcoord);
       HYPRE_SStructVectorGetObject(ycoord, (void **) &par_ycoord);
       HYPRE_SStructVectorGetObject(zcoord, (void **) &par_zcoord);
+
+      if (myid == 0)
+         printf("Problem size: %d\n\n",
+             hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix*)par_A));
+
+      /* Start timing */
+      time_index = hypre_InitializeTiming("AMS Setup");
+      hypre_BeginTiming(time_index);
 
       /* Create solver */
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &solver);
@@ -877,8 +897,24 @@ int main (int argc, char *argv[])
       /* Call the setup */
       HYPRE_ParCSRPCGSetup(solver, par_A, par_b, par_x);
 
+      /* Finalize current timing */
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      /* Start timing again */
+      time_index = hypre_InitializeTiming("AMS Solve");
+      hypre_BeginTiming(time_index);
+
       /* Call the solve */
       HYPRE_ParCSRPCGSolve(solver, par_A, par_b, par_x);
+
+      /* Finalize current timing */
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
 
       /* Get some info */
       HYPRE_PCGGetNumIterations(solver, &its);
