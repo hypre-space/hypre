@@ -637,31 +637,39 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
    } /* end of part loop */
 
 
-
-
 #if  HYPRE_NO_GLOBAL_PARTITION
    {
       /* need to do a gather entries on neighbor information so
          that we have what we need for the NborBoxManagers function */
+      
+      /* these neighbor boxes are much parger than the data that we
+         care about, so first we need to intersect them with the grid
+         and just pass the intersected box into the Box Manager */
+      
 
       hypre_SStructNeighbor    *vneighbor;
-      int b;
+      int                       b, i;
       hypre_Box                *vbox;
       int                     **nvneighbors = hypre_SStructGridNVNeighbors(grid);
       hypre_SStructNeighbor  ***vneighbors  = hypre_SStructGridVNeighbors(grid);
       int                      *coord, *dir;
       hypre_Index               imin0, imin1;
       int                       nbor_part, nbor_var;
-      hypre_Box                *nbor_box;
       hypre_IndexRef            max_distance;
       hypre_Box                *grow_box;
-
-      nbor_box = hypre_BoxCreate();
+      hypre_Box                *int_box;
+      hypre_Box                *nbor_box;
+      hypre_BoxManager         *box_man;
+      hypre_BoxArray           *local_boxes;
+     
       grow_box = hypre_BoxCreate();
+      int_box = hypre_BoxCreate();
+      nbor_box =  hypre_BoxCreate();
+
+      local_boxes = hypre_BoxArrayCreate(0);
 
       for (part = 0; part < nparts; part++)
       {
-
          pgrid = hypre_SStructGridPGrid(grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
 
@@ -669,42 +677,54 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
          {
             sgrid = hypre_SStructPGridSGrid(pgrid, var);
             max_distance = hypre_StructGridMaxDistance(sgrid);
-   
-            for (b = 0; b < nvneighbors[part][var]; b++)
+  
+            /* now loop through my boxes, grow them, and intersect
+             * with all of the neighbors */
+           
+            box_man = hypre_StructGridBoxMan(sgrid);
+            hypre_BoxManGetLocalEntriesBoxes(box_man, local_boxes);
+            
+            hypre_ForBoxI(i, local_boxes)
             {
-         
-               vneighbor = &vneighbors[part][var][b];
-               vbox = hypre_SStructNeighborBox(vneighbor);
-         
-               nbor_part = hypre_SStructNeighborPart(vneighbor);
-               
-               hypre_CopyBox(vbox, nbor_box);
-               
-               hypre_CopyIndex(hypre_BoxIMin(vbox), imin0);
-               hypre_CopyIndex(hypre_SStructNeighborILower(vneighbor), imin1);
-               
-               coord = hypre_SStructNeighborCoord(vneighbor);
-               dir   = hypre_SStructNeighborDir(vneighbor);
-         
-               /* map to neighbor part index space */
-               hypre_SStructBoxToNborBox(nbor_box, imin0, imin1, coord, dir);
-               hypre_SStructVarToNborVar(grid, part, var, coord, &nbor_var);
-         
-               /* need to grow the box (because of shared variables
-                * needing to overlap */
-               hypre_CopyBox(nbor_box, grow_box);     
+               hypre_CopyBox(hypre_BoxArrayBox(local_boxes, i), grow_box); 
                hypre_BoxExpandConstantDim(grow_box, max_distance);
+              
+               /* loop through neighbors */
+               for (b = 0; b < nvneighbors[part][var]; b++)
+               {
+                  vneighbor = &vneighbors[part][var][b];
+                  vbox = hypre_SStructNeighborBox(vneighbor);
 
-               hypre_BoxManGatherEntries( managers[nbor_part][nbor_var],  
-                                          hypre_BoxIMin(grow_box),
-                                          hypre_BoxIMax(grow_box));
-               
-            }
+                  /* grow neighbor box by 1 to account for shared parts */
+                  hypre_CopyBox(vbox, nbor_box);
+                  hypre_BoxExpandConstant(nbor_box, 1);
+
+                  nbor_part = hypre_SStructNeighborPart(vneighbor);
+              
+                  coord = hypre_SStructNeighborCoord(vneighbor);
+                  dir   = hypre_SStructNeighborDir(vneighbor);
+        
+                  /* find intersection of neighbor and my local box */
+                  hypre_IntersectBoxes(grow_box, nbor_box, int_box); 
+                  if (hypre_BoxVolume(int_box) > 0)
+                  {
+                     hypre_CopyIndex(hypre_BoxIMin(vbox), imin0);
+                     hypre_CopyIndex(hypre_SStructNeighborILower(vneighbor), imin1);
+
+                     /* map int_box to neighbor part index space */
+                     hypre_SStructBoxToNborBox(int_box, imin0, imin1, coord, dir);
+                     hypre_SStructVarToNborVar(grid, part, var, coord, &nbor_var);
+                    
+                     hypre_BoxManGatherEntries( managers[nbor_part][nbor_var], 
+                                                hypre_BoxIMin(int_box), hypre_BoxIMax(int_box));
+                  }
+               } /* end neighbor loop */
+            } /* end local box loop */
          }
       }
-      hypre_BoxDestroy(nbor_box);
       hypre_BoxDestroy(grow_box);
-
+      hypre_BoxDestroy(nbor_box);
+      hypre_BoxArrayDestroy(local_boxes);
    }
 #endif
 
