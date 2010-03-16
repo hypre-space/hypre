@@ -218,7 +218,7 @@ int main (int argc, char *argv[])
    print_solution   = 0;
    optionAlpha      = 0;
    optionBeta       = 0;
-   maxit            = 20;
+   maxit            = 100;
    tol              = 1e-6;
    cycle_type       = 13;
    rlx_type         = 2;
