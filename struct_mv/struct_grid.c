@@ -394,9 +394,8 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       /*************** set the global size *****************/
 
       MPI_Allreduce(&size, &global_size, 1, MPI_INT, MPI_SUM, comm);
-      hypre_StructGridGlobalSize(grid) = global_size; /* this int
-                                                       * could
-                                                       * overflow!*/
+      hypre_StructGridGlobalSize(grid) = global_size; /* TO DO: this int could
+                                                       * overflow! (used for calc flops) */
       
   
       /*************** set bounding box ***********/
