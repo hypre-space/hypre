@@ -104,7 +104,7 @@ int hypre_AMGHybridSetup ( void *AMGhybrid_vdata , hypre_ParCSRMatrix *A , hypre
 int hypre_AMGHybridSolve ( void *AMGhybrid_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 
 /* ams.c */
-int hypre_ParCSRRelax ( hypre_ParCSRMatrix *A , hypre_ParVector *f , int relax_type , int relax_times , double *l1_norms , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *z );
+int hypre_ParCSRRelax ( hypre_ParCSRMatrix *A , hypre_ParVector *f , int relax_type , int relax_times , double *l1_norms , double relax_weight , double omega , double max_eig_est , double min_eig_est , int cheby_order , double cheby_fraction , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *z );
 hypre_ParVector *hypre_ParVectorInRangeOf ( hypre_ParCSRMatrix *A );
 hypre_ParVector *hypre_ParVectorInDomainOf ( hypre_ParCSRMatrix *A );
 int hypre_ParVectorBlockSplit ( hypre_ParVector *x , hypre_ParVector *x_ [3 ], int dim );
@@ -128,6 +128,7 @@ int hypre_AMSSetTol ( void *solver , double tol );
 int hypre_AMSSetCycleType ( void *solver , int cycle_type );
 int hypre_AMSSetPrintLevel ( void *solver , int print_level );
 int hypre_AMSSetSmoothingOptions ( void *solver , int A_relax_type , int A_relax_times , double A_relax_weight , double A_omega );
+int hypre_AMSSetChebySmoothingOptions ( void *solver , int A_cheby_order , int A_cheby_fraction );
 int hypre_AMSSetAlphaAMGOptions ( void *solver , int B_Pi_coarsen_type , int B_Pi_agg_levels , int B_Pi_relax_type , double B_Pi_theta , int B_Pi_interp_type , int B_Pi_Pmax );
 int hypre_AMSSetBetaAMGOptions ( void *solver , int B_G_coarsen_type , int B_G_agg_levels , int B_G_relax_type , double B_G_theta , int B_G_interp_type , int B_G_Pmax );
 int hypre_AMSComputePi ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *G , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *z , hypre_ParVector *Gx , hypre_ParVector *Gy , hypre_ParVector *Gz , int dim , hypre_ParCSRMatrix **Pi_ptr );
@@ -135,7 +136,7 @@ int hypre_AMSComputePixyz ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *G , hypr
 int hypre_AMSComputeGPi ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *G , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *z , hypre_ParVector *Gx , hypre_ParVector *Gy , hypre_ParVector *Gz , int dim , hypre_ParCSRMatrix **GPi_ptr );
 int hypre_AMSSetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 int hypre_AMSSolve ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
-int hypre_ParCSRSubspacePrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type , int A0_relax_times , double *A0_l1_norms , double A0_relax_weight , double A0_omega , hypre_ParCSRMatrix **A , HYPRE_Solver *B , hypre_ParCSRMatrix **P , hypre_ParVector **r , hypre_ParVector **g , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *g0 , char *cycle , hypre_ParVector *z );
+int hypre_ParCSRSubspacePrec ( hypre_ParCSRMatrix *A0 , int A0_relax_type , int A0_relax_times , double *A0_l1_norms , double A0_relax_weight , double A0_omega , double A0_max_eig_est , double A0_min_eig_est , int A0_cheby_order , double A0_cheby_fraction , hypre_ParCSRMatrix **A , HYPRE_Solver *B , hypre_ParCSRMatrix **P , hypre_ParVector **r , hypre_ParVector **g , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *g0 , char *cycle , hypre_ParVector *z );
 int hypre_AMSGetNumIterations ( void *solver , int *num_iterations );
 int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , double *rel_resid_norm );
 int hypre_AMSProjectOutGradients ( void *solver , hypre_ParVector *x );
@@ -143,7 +144,7 @@ int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector
 int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , int num_vert , int num_local_vert , int *vert_number , double *vert_coord , int num_edges , int *edge_vertex );
 int hypre_AMSFEIDestroy ( void *solver );
 int hypre_ParCSRComputeL1NormsThreads ( hypre_ParCSRMatrix *A , int option , int num_threads , double **l1_norm_ptr );
-int hypre_ParCSRRelaxThreads ( hypre_ParCSRMatrix *A , hypre_ParVector *f , double relax_weight , double omega , double *l1_norms , hypre_ParVector *u , hypre_ParVector *v );
+int hypre_ParCSRRelaxThreads ( hypre_ParCSRMatrix *A , hypre_ParVector *f , int relax_type , int relax_times , double *l1_norms , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *z );
 
 /* aux_interp.c */
 void insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , int *IN_marker , int *node_add , int num_cols_A_offd , int full_off_procNodes , int num_procs , int *OUT_marker );
@@ -212,6 +213,7 @@ int HYPRE_AMSSetAlphaAMGOptions ( HYPRE_Solver solver , int alpha_coarsen_type ,
 int HYPRE_AMSSetBetaAMGOptions ( HYPRE_Solver solver , int beta_coarsen_type , int beta_agg_levels , int beta_relax_type , double beta_strength_threshold , int beta_interp_type , int beta_Pmax );
 int HYPRE_AMSGetNumIterations ( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_AMSGetFinalRelativeResidualNorm ( HYPRE_Solver solver , double *rel_resid_norm );
+int HYPRE_AMSProjectOutGradients ( HYPRE_Solver solver , HYPRE_ParVector x );
 int HYPRE_AMSConstructDiscreteGradient ( HYPRE_ParCSRMatrix A , HYPRE_ParVector x_coord , int *edge_vertex , int edge_orientation , HYPRE_ParCSRMatrix *G );
 int HYPRE_AMSFEISetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x , int *EdgeNodeList_ , int *NodeNumbers_ , int numEdges_ , int numLocalNodes_ , int numNodes_ , double *NodalCoord_ );
 int HYPRE_AMSFEIDestroy ( HYPRE_Solver solver );
@@ -331,6 +333,8 @@ int HYPRE_BoomerAMGSetPlotGrids ( HYPRE_Solver solver , int plotgrids );
 int HYPRE_BoomerAMGSetPlotFileName ( HYPRE_Solver solver , const char *plotfilename );
 int HYPRE_BoomerAMGSetCoordDim ( HYPRE_Solver solver , int coorddim );
 int HYPRE_BoomerAMGSetCoordinates ( HYPRE_Solver solver , float *coordinates );
+int HYPRE_BoomerAMGSetChebyOrder ( HYPRE_Solver solver , int order );
+int HYPRE_BoomerAMGSetChebyFraction ( HYPRE_Solver solver , double ratio );
 
 /* HYPRE_parcsr_bicgstab.c */
 int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -714,6 +718,8 @@ int hypre_BoomerAMGSetEuclidFile ( void *data , char *euclidfile );
 int hypre_BoomerAMGSetEuLevel ( void *data , int eu_level );
 int hypre_BoomerAMGSetEuSparseA ( void *data , double eu_sparse_A );
 int hypre_BoomerAMGSetEuBJ ( void *data , int eu_bj );
+int hypre_BoomerAMGSetChebyOrder ( void *data , int order );
+int hypre_BoomerAMGSetChebyFraction ( void *data , double ratio );
 
 /* par_amg_setup.c */
 int hypre_BoomerAMGSetup ( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
@@ -849,6 +855,16 @@ int gselim ( double *A , double *x , int n );
 
 /* par_relax_interface.c */
 int hypre_BoomerAMGRelaxIF ( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_order , int cycle_type , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *Ztemp );
+
+/* par_relax_more.c */
+int hypre_ParCSRMaxEigEstimate ( hypre_ParCSRMatrix *A , int scale , double *max_eig );
+int hypre_ParCSRMaxEigEstimateCG ( hypre_ParCSRMatrix *A , int scale , int max_iter , double *max_eig , double *min_eig );
+int hypre_ParCSRRelax_Cheby ( hypre_ParCSRMatrix *A , hypre_ParVector *f , double max_eig , double min_eig , double fraction , int order , int scale , int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
+int hypre_BoomerAMGRelax_FCFJacobi ( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp );
+int hypre_ParCSRRelax_CG ( HYPRE_Solver solver , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u , int num_its );
+int hypre_LINPACKcgtql1 ( int *n , double *d , double *e , int *ierr );
+double hypre_LINPACKcgpthy ( double *a , double *b );
+int hypre_ParCSRRelax_L1_Jacobi ( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_points , double relax_weight , double *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp );
 
 /* par_rotate_7pt.c */
 HYPRE_ParCSRMatrix GenerateRotate7pt ( MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double alpha , double eps );

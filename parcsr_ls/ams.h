@@ -85,6 +85,10 @@ typedef struct
    double *A_l1_norms;
    double A_relax_weight;
    double A_omega;
+   double A_max_eig_est;
+   double A_min_eig_est;
+   int A_cheby_order;
+   double  A_cheby_fraction;
 
    /* AMG options for B_G */
    int B_G_coarsen_type;
@@ -152,6 +156,12 @@ typedef struct
 #define hypre_AMSDataAL1Norms(ams_data) ((ams_data)->A_l1_norms)
 #define hypre_AMSDataARelaxWeight(ams_data) ((ams_data)->A_relax_weight)
 #define hypre_AMSDataAOmega(ams_data) ((ams_data)->A_omega)
+#define hypre_AMSDataAMaxEigEst(ams_data) ((ams_data)->A_max_eig_est)	
+#define hypre_AMSDataAMinEigEst(ams_data) ((ams_data)->A_min_eig_est)	
+#define hypre_AMSDataAChebyOrder(ams_data) ((ams_data)->A_cheby_order)
+#define hypre_AMSDataAChebyFraction(ams_data) ((ams_data)->A_cheby_fraction)
+
+
 #define hypre_AMSDataPoissonBetaAMGCoarsenType(ams_data) ((ams_data)->B_G_coarsen_type)
 #define hypre_AMSDataPoissonBetaAMGAggLevels(ams_data) ((ams_data)->B_G_agg_levels)
 #define hypre_AMSDataPoissonBetaAMGRelaxType(ams_data) ((ams_data)->B_G_relax_type)

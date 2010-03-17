@@ -90,6 +90,9 @@ hypre_BoomerAMGCreate()
    double   eu_sparse_A;
    char    *euclidfile;
 
+   int cheby_order;
+   double cheby_eig_ratio;
+
    int block_mode;
    
 
@@ -174,6 +177,9 @@ hypre_BoomerAMGCreate()
    relax_wt = 1.0;
    outer_wt = 1.0;
 
+   cheby_order = 2;
+   cheby_eig_ratio = .3;
+
    block_mode = 0;
 
    /* log info */
@@ -253,6 +259,9 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetSmoothNumLevels(amg_data, smooth_num_levels);
    hypre_BoomerAMGSetSmoothNumSweeps(amg_data, smooth_num_sweeps);
 
+   hypre_BoomerAMGSetChebyOrder(amg_data, cheby_order);
+   hypre_BoomerAMGSetChebyFraction(amg_data, cheby_eig_ratio);
+
    hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
 #ifdef CUMNUMIT
    hypre_ParAMGDataCumNumIterations(amg_data) = cum_num_iterations;
@@ -292,6 +301,9 @@ hypre_BoomerAMGCreate()
    /* this can not be set by the user currently */
    hypre_ParAMGDataBlockMode(amg_data) = block_mode;
 
+   hypre_ParAMGDataMaxEigEst(amg_data) = NULL;
+   hypre_ParAMGDataMinEigEst(amg_data) = NULL;
+
    /* BM Oct 22, 2006 */
    hypre_ParAMGDataPlotGrids(amg_data) = 0;
    hypre_BoomerAMGSetPlotFileName (amg_data, plot_file_name);
@@ -316,6 +328,16 @@ hypre_BoomerAMGDestroy( void *data )
    HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
    int i;
 
+   if (hypre_ParAMGDataMaxEigEst(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataMaxEigEst(amg_data));
+      hypre_ParAMGDataMaxEigEst(amg_data) = NULL;
+   }
+   if (hypre_ParAMGDataMinEigEst(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataMinEigEst(amg_data));
+      hypre_ParAMGDataMinEigEst(amg_data) = NULL;
+   }
    if (hypre_ParAMGDataNumGridSweeps(amg_data))
    {
       hypre_TFree (hypre_ParAMGDataNumGridSweeps(amg_data));
@@ -3091,3 +3113,45 @@ hypre_BoomerAMGSetEuBJ( void     *data,
    return hypre_error_flag;
 }
 
+int
+hypre_BoomerAMGSetChebyOrder( void     *data,
+                              int       order)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   if (order < 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataChebyOrder(amg_data) = order;
+
+   return hypre_error_flag;
+}
+int
+hypre_BoomerAMGSetChebyFraction( void     *data,
+                                 double      ratio)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   if (ratio <= 0.0 || ratio > 1.0 )
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataChebyFraction(amg_data) = ratio;
+
+   return hypre_error_flag;
+}

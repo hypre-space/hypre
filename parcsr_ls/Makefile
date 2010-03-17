@@ -108,6 +108,7 @@ FILES =\
  par_rotate_7pt.c\
  par_vardifconv.c\
  par_relax.c\
+ par_relax_more.c\
  par_relax_interface.c\
  par_scaled_matnorm.c\
  par_schwarz.c\

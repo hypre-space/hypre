@@ -287,7 +287,12 @@ int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
  * 4 & hybrid Gauss-Seidel or SOR, backward solve \\
  * 5 & hybrid chaotic Gauss-Seidel (works only with OpenMP) \\
  * 6 & hybrid symmetric Gauss-Seidel or SSOR \\
+ * 8 & L1-scaled hybrid symmetric Gauss-Seidel\\
  * 9 & Gaussian elimination (only on coarsest level) \\
+ * 15 & CG (warning - not a fixed smoother - may require FGMRES)\\
+ * 16 & Chebyshev\\
+ * 17 & FCF-Jacobi\\                              
+ * 18 & L1-scaled jacobi\\
  * \hline
  * \end{tabular}
  **/
@@ -416,6 +421,24 @@ int HYPRE_BoomerAMGSetOuterWt(HYPRE_Solver  solver,
 int HYPRE_BoomerAMGSetLevelOuterWt(HYPRE_Solver  solver,
                                    double        omega,
                                    int           level);
+
+
+/**
+ * (Optional) Defines the Order for Chebyshev smoother.
+ *  The default is 2 (valid options are 1-4).
+ **/
+int HYPRE_BoomerAMGSetChebyOrder(HYPRE_Solver solver,
+                                 int          order);
+
+/**
+ * (Optional) Fraction of the spectrum to use for the Chebyshev smoother.
+ *  The default is .3 (i.e., damp on upper 30% of the spectrum).
+ **/
+int HYPRE_BoomerAMGSetChebyFraction (HYPRE_Solver solver,
+                                     double         ratio);
+
+
+
 
 /**
  * (Optional)

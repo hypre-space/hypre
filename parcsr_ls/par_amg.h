@@ -125,6 +125,12 @@ typedef struct
    double		eu_sparse_A;
    char		       *euclidfile;
 
+   double              *max_eig_est;
+   double              *min_eig_est;
+   int                  cheby_order;
+   double               cheby_fraction;
+
+
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
    hypre_Vector      *Vtemp_local;
@@ -259,6 +265,12 @@ typedef struct
 #define hypre_ParAMGDataEuLevel(amg_data) ((amg_data)->eu_level)	
 #define hypre_ParAMGDataEuSparseA(amg_data) ((amg_data)->eu_sparse_A)
 #define hypre_ParAMGDataEuBJ(amg_data) ((amg_data)->eu_bj)
+
+#define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)	
+#define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)	
+#define hypre_ParAMGDataChebyOrder(amg_data) ((amg_data)->cheby_order)
+#define hypre_ParAMGDataChebyFraction(amg_data) ((amg_data)->cheby_fraction)
+
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)

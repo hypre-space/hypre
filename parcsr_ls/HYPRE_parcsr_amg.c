@@ -1316,3 +1316,23 @@ HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver solver,
 {
   return (hypre_BoomerAMGSetCoordinates ( (void *) solver, coordinates ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetChebyOrder
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetChebyOrder( HYPRE_Solver  solver,
+                              int        order )
+{
+   return( hypre_BoomerAMGSetChebyOrder( (void *) solver, order ) );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetChebyEigRatio
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetChebyFraction( HYPRE_Solver  solver,
+                                 double         ratio )
+{
+   return( hypre_BoomerAMGSetChebyFraction( (void *) solver, ratio ) );
+}
