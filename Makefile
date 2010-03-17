@@ -197,5 +197,5 @@ distclean:
 	rm -rf ./HYPRE_config.h
 
 tags:
-	find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
-	-name "*.c??" -or -name "*.h??" -or -name "*.f" | etags -
+	find . -name "*.c" -o -name "*.C" -o -name "*.h" -o\
+	-name "*.c??" -o -name "*.h??" -o -name "*.f" | etags -
