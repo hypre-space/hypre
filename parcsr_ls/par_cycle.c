@@ -400,6 +400,17 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                      Aux_U,
                                      Vtemp, 
                                      Ztemp);
+                else
+                   hypre_ParCSRRelaxThreads(A_array[level], 
+                                            Aux_F,
+                                            1,
+                                            1,
+                                            l1_norms[level],
+                                            relax_weight[level],
+                                            omega[level],
+                                            Aux_U,
+                                            Vtemp,
+                                            Ztemp);
             }
             else if (relax_type == 15)
             {  /* CG */
