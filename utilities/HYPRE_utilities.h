@@ -89,6 +89,15 @@ int HYPRE_ClearAllErrors();
 /* Clears the given error code from the hypre error flag */
 int HYPRE_ClearError(int hypre_error_code);
 
+/*--------------------------------------------------------------------------
+ * HYPRE AP user functions
+ *--------------------------------------------------------------------------*/
+
+
+/*Checks whether the AP is on */
+int HYPRE_AssumedPartitionCheck();
+
+
 #ifdef __cplusplus
 }
 #endif
