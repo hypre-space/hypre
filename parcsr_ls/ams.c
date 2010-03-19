@@ -98,7 +98,7 @@ int hypre_ParCSRRelax(/* matrix to relax with */
          double res;
 
          int num_procs;
-         MPI_Comm_size( hypre_ParCSRMatrixComm(A), &num_procs);
+         MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
 
          /* Copy off-diagonal values of u to the current processor */
          if (num_procs > 1)
@@ -313,13 +313,13 @@ int hypre_ParCSRRelax(/* matrix to relax with */
       {
          if (relax_type == 16)
          {
-            hypre_ParCSRRelax_Cheby(A, 
+            hypre_ParCSRRelax_Cheby(A,
                                     f,
-                                    max_eig_est,     
-                                    min_eig_est,     
+                                    max_eig_est,
+                                    min_eig_est,
                                     cheby_fraction, cheby_order, 1,
                                     0, u, v, z );
-            
+
 
          }
          else
@@ -654,9 +654,9 @@ void * hypre_AMSCreate()
    ams_data -> A_relax_times = 1;      /* one relaxation sweep */
    ams_data -> A_relax_weight = 1.0;   /* damping parameter */
    ams_data -> A_omega = 1.0;          /* SSOR coefficient */
-   ams_data -> A_cheby_order = 2;      /* Cheby: order (1 -4 are vaild) */  
+   ams_data -> A_cheby_order = 2;      /* Cheby: order (1 -4 are vaild) */
    ams_data -> A_cheby_fraction = .3;  /* Cheby: fraction of spectrum to smooth */
-   
+
    ams_data -> B_G_coarsen_type = 10;  /* HMIS coarsening */
    ams_data -> B_G_agg_levels = 1;     /* Levels of aggressive coarsening */
    ams_data -> B_G_relax_type = 3;     /* hybrid G-S/Jacobi */
@@ -1063,11 +1063,11 @@ int hypre_AMSSetSmoothingOptions(void *solver,
    return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------
- * hypre_AMSSetChebySmoothingOptions 
- *  AB: note: this could be added to the above, 
-        but I didn't want to change parameter list) 
-* Set parameters for chebyshev smoother for A. Default values: 2,.3.  
-*--------------------------------------------------------------------------*/
+ * hypre_AMSSetChebySmoothingOptions
+ *  AB: note: this could be added to the above,
+ *      but I didn't want to change parameter list)
+ * Set parameters for chebyshev smoother for A. Default values: 2,.3.
+ *--------------------------------------------------------------------------*/
 
 int hypre_AMSSetChebySmoothingOptions(void *solver,
                                       int A_cheby_order,
@@ -1076,7 +1076,7 @@ int hypre_AMSSetChebySmoothingOptions(void *solver,
    hypre_AMSData *ams_data = solver;
    ams_data -> A_cheby_order =  A_cheby_order;
    ams_data -> A_cheby_fraction =  A_cheby_fraction;
-        
+
    return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------
@@ -1132,7 +1132,7 @@ int hypre_AMSSetBetaAMGOptions(void *solver,
  *
  * Construct the Pi interpolation matrix, which maps the space of vector
  * linear finite elements to the space of edge finite elements.
-
+ *
  * The construction is based on the fact that Pi = [Pi_x, Pi_y, Pi_z],
  * where each block has the same sparsity structure as G, and the entries
  * can be computed from the vectors Gx, Gy, Gz.
@@ -1930,7 +1930,9 @@ int hypre_AMSSetup(void *solver,
             int i, nnz = hypre_CSRMatrixNumNonzeros(A_local);
             double *data = hypre_CSRMatrixData(A_local);
             double *dataB = hypre_CSRMatrixData(B_local);
-            double factor = dataB[0]*1e-8; /* assume dataB[0] = A11 */
+            double factor, lfactor = dataB[0]*1e-10; /* assume dataB[0] = A11 */
+            MPI_Allreduce(&lfactor, &factor, 1, MPI_DOUBLE, MPI_MAX,
+                          hypre_ParCSRMatrixComm(A));
             for (i = 0; i < nnz; i++) data[i] *= factor;
          }
          C_tmp = hypre_CSRMatrixAdd(A_local, B_local);
@@ -1974,17 +1976,15 @@ int hypre_AMSSetup(void *solver,
    if (ams_data -> A_relax_type >= 1 && ams_data -> A_relax_type <= 3)
       hypre_ParCSRComputeL1Norms(ams_data -> A, ams_data -> A_relax_type,
                                  &ams_data -> A_l1_norms);
-   
-   /* Chebyshev ?*/
+
+   /* Chebyshev? */
    if (ams_data -> A_relax_type == 16)
    {
-      
-       hypre_ParCSRMaxEigEstimateCG(ams_data->A, 1, 10, 
-                                    &ams_data->A_max_eig_est, 
+       hypre_ParCSRMaxEigEstimateCG(ams_data->A, 1, 10,
+                                    &ams_data->A_max_eig_est,
                                     &ams_data->A_min_eig_est);
-      
    }
-   
+
    if (ams_data -> cycle_type == 20)
       /* Construct the combined interpolation matrix [G,Pi] */
       hypre_AMSComputeGPi(ams_data -> A,
@@ -3157,7 +3157,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                                double              relax_weight,
                                double              omega,
                                hypre_ParVector    *u,
-                               hypre_ParVector    *Vtemp, 
+                               hypre_ParVector    *Vtemp,
                                hypre_ParVector    *z )
 {
    MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
@@ -3243,7 +3243,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 
    if (relax_type == 1) /* Jacobi */
    {
-      
+
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
       for (i = 0; i < n; i++)
@@ -3304,7 +3304,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
-               
+
                if ( A_diag_data[A_diag_i[i]] != zero)
                {
                   res = f_data[i];
@@ -3331,7 +3331,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
-               
+
                if ( A_diag_data[A_diag_i[i]] != zero)
                {
                   res = f_data[i];
@@ -3388,7 +3388,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
-               
+
                if ( A_diag_data[A_diag_i[i]] != zero)
                {
                   res2 = 0.0;
@@ -3419,7 +3419,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
-               
+
                if ( A_diag_data[A_diag_i[i]] != zero)
                {
                   res2 = 0.0;
@@ -3447,7 +3447,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
          }
          hypre_TFree(tmp_data);
       }
-   } /* end of JAcobi or G.S. */
+   } /* end of Jacobi or G.S. */
 
 
    if (num_procs > 1)
