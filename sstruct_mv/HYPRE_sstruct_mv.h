@@ -155,7 +155,6 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
                                   int                    nvars,
                                   HYPRE_SStructVariable *vartypes);
 
-/* NEW */
 /**
  * Set the ordering of variables in a finite element problem.  This overrides
  * the default ordering described below.
@@ -226,7 +225,6 @@ int HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
                                      int               *index_map,
                                      int               *index_dir);
 
-/* NEW */
 /**
  * Describe how regions inside a part are shared with regions in other parts.
  *
@@ -394,7 +392,6 @@ int HYPRE_SStructGraphCreate(MPI_Comm             comm,
  **/
 int HYPRE_SStructGraphDestroy(HYPRE_SStructGraph graph);
 
-/* NEW */
 /**
  * Set the domain grid.
  **/
@@ -409,14 +406,12 @@ int HYPRE_SStructGraphSetStencil(HYPRE_SStructGraph   graph,
                                  int                  var,
                                  HYPRE_SStructStencil stencil);
 
-/* NEW */
 /**
  * Indicate that an FEM approach will be used to set matrix values on this part.
  **/
 int HYPRE_SStructGraphSetFEM(HYPRE_SStructGraph graph,
                              int                part);
 
-/* NEW */
 /**
  * Set the finite element stiffness matrix sparsity.  This overrides the default
  * full sparsity pattern described below.
@@ -554,7 +549,6 @@ int HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
                                    int                 *entries,
                                    double              *values);
 
-/* NEW */
 /**
  * Add finite element stiffness matrix coefficients index by index.  The layout
  * of the data in {\tt values} is determined by the routines
@@ -815,7 +809,6 @@ int HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
                                    int                  var,
                                    double              *value);
 
-/* NEW */
 /**
  * Add finite element vector coefficients index by index.  The layout of the
  * data in {\tt values} is determined by the routine
