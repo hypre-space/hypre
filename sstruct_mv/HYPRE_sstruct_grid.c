@@ -781,8 +781,17 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
             /* it's important to change ilower */
             for (d = 0; d < 3; d++)
             {
+               /* Compare the imin of the neighbor cell box ('i') to its imin
+                * value after being converted to a variable box ('IMin(box,d)').
+                * If the coordinates in the two parts move in the same direction
+                * (i.e., dir[d] > 0) and the local imin changed, then also
+                * change the corresponding neighbor ilower.  If the coordinates
+                * in the two parts move in opposite directions and the local
+                * imin did not change, then change the corresponding neighbor
+                * ilower based on the value of 'varoffset'. */
                i = hypre_BoxIMinD(hypre_SStructNeighborBox(neighbor), d);
-               if ((dir[d] > 0) && (hypre_BoxIMinD(box, d) != i))
+               if (((dir[d] > 0) && (hypre_BoxIMinD(box, d) != i)) ||
+                   ((dir[d] < 0) && (hypre_BoxIMinD(box, d) == i)))
                {
                   hypre_IndexD(ilower, coord[d]) -= hypre_IndexD(varoffset, d);
                }
