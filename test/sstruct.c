@@ -210,6 +210,9 @@ typedef struct
 
    int              npools;
    int             *pools;   /* array of size nparts */
+   int              ndists;  /* number of (pool) distributions */
+   int             *dist_npools;
+   int            **dist_pools;
 
 } ProblemData;
  
@@ -460,6 +463,9 @@ ReadData( char         *filename,
    data.symmetric_to_vars  = NULL;
    data.symmetric_booleans = NULL;
    data.ns_symmetric = 0;
+   data.ndists = 0;
+   data.dist_npools = NULL;
+   data.dist_pools  = NULL;
 
    sdata_line = sdata;
    while (sdata_line < (sdata + sdata_size))
@@ -961,14 +967,21 @@ ReadData( char         *filename,
          }
          else if ( strcmp(key, "ProcessPoolCreate:") == 0 )
          {
+            data.ndists++;
+            data.dist_npools= hypre_TReAlloc(data.dist_npools, int, data.ndists);
+            data.dist_pools= hypre_TReAlloc(data.dist_pools, int *, data.ndists);
+            data.dist_npools[data.ndists-1] = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.dist_pools[data.ndists-1] = hypre_CTAlloc(int, data.nparts);
+#if 0
             data.npools = strtol(sdata_ptr, &sdata_ptr, 10);
             data.pools = hypre_CTAlloc(int, data.nparts);
+#endif
          }
          else if ( strcmp(key, "ProcessPoolSetPart:") == 0 )
          {
             i = strtol(sdata_ptr, &sdata_ptr, 10);
             part = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.pools[part] = i;
+            data.dist_pools[data.ndists-1][part] = i;
          }
          else if ( strcmp(key, "GridSetNeighborBox:") == 0 )
          {
@@ -1074,6 +1087,7 @@ IntersectBoxes( ProblemIndex ilower1,
 
 int
 DistributeData( ProblemData   global_data,
+                int           pooldist,
                 Index        *refine,
                 Index        *distribute,
                 Index        *block,
@@ -1089,6 +1103,10 @@ DistributeData( ProblemData   global_data,
    int              dmap, sign, size;
    Index            m, mmap, n;
    ProblemIndex     ilower, iupper, int_ilower, int_iupper;
+
+   /* set default pool distribution */
+   data.npools = data.dist_npools[pooldist];
+   data.pools  = data.dist_pools[pooldist];
 
    /* determine first process number in each pool */
    pool_procs = hypre_CTAlloc(int, (data.npools+1));
@@ -1662,7 +1680,7 @@ int
 DestroyData( ProblemData   data )
 {
    ProblemPartData  pdata;
-   int              part, box, s;
+   int              part, box, s, i;
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1811,7 +1829,12 @@ DestroyData( ProblemData   data )
       hypre_TFree(data.symmetric_booleans);
    }
 
-   hypre_TFree(data.pools);
+   for (i = 0; i < data.ndists; i++)
+   {
+      hypre_TFree(data.dist_pools[i]);
+   }
+   hypre_TFree(data.dist_pools);
+   hypre_TFree(data.dist_npools);
 
    return 0;
 }
@@ -1855,12 +1878,13 @@ PrintUsage( char *progname,
    if ( myid == 0 )
    {
       printf("\n");
-      printf("Usage: %s [<options>]\n", progname);
+      printf("Usage: %s [-in <filename>] [<options>]\n", progname);
       printf("\n");
       printf("  -in <filename> : input file (default is `%s')\n",
              infile_default);
       printf("\n");
       printf("  -pt <pt1> <pt2> ... : set part(s) for subsequent options\n");
+      printf("  -pooldist <p>       : pool distribution to use\n");
       printf("  -r <rx> <ry> <rz>   : refine part(s)\n");
       printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
       printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
@@ -2006,6 +2030,7 @@ main( int   argc,
    ProblemData           data;
    ProblemPartData       pdata;
    int                   nparts;
+   int                   pooldist;
    int                  *parts;
    Index                *refine;
    Index                *distribute;
@@ -2149,6 +2174,7 @@ main( int   argc,
    cf_tol = 0.90;
 
    nparts = global_data.nparts;
+   pooldist = 0;
 
    parts      = hypre_TAlloc(int, nparts);
    refine     = hypre_TAlloc(Index, nparts);
@@ -2191,6 +2217,11 @@ main( int   argc,
          {
             parts[nparts++] = atoi(argv[arg_index++]);
          }
+      }
+      else if ( strcmp(argv[arg_index], "-pooldist") == 0 )
+      {
+         arg_index++;
+         pooldist = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-r") == 0 )
       {
@@ -2387,7 +2418,7 @@ main( int   argc,
     * Distribute data
     *-----------------------------------------------------------*/
 
-   DistributeData(global_data, refine, distribute, block,
+   DistributeData(global_data, pooldist, refine, distribute, block,
                   num_procs, myid, &data);
 
    /*-----------------------------------------------------------
