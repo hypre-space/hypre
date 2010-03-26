@@ -28,7 +28,8 @@ Version 2.6.1a released 2010/03/xx
 - Fixed a bug in the void-zone version of AMS, which sometimes produced a
   non-symmetric preconditioner.
 
-- Added new smoothers to BoomerAMG (Chebyshev, FCF-Jacobi, and CG).
+- Added new smoothers to BoomerAMG (Chebyshev, FCF-Jacobi, and CG) and
+  AMS (Chebyshev).
 
 - Made some performance improvements to the implementation of the assumed
   partition algorithm used in SStruct.
