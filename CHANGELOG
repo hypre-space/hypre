@@ -19,7 +19,23 @@
 
 #====================================
 
-Version 2.6.0b released 2010/02/xx
+Version 2.6.1a released 2010/03/xx
+
+- Made several bug fixes related to the new SetSharedPar() and FEM() routines:
+  Fixed a memory leak.  Fixed to allow SetSharedPart() or SetNeighborPart()
+  calls from any processor, even if the processor doesn't own data on 'part'.
+
+- Fixed a bug in the void-zone version of AMS, which sometimes produced a
+  non-symmetric preconditioner.
+
+- Added new smoothers to BoomerAMG (Chebyshev, FCF-Jacobi, and CG).
+
+- Made some performance improvements to the implementation of the assumed
+  partition algorithm used in SStruct.
+
+#====================================
+
+Version 2.6.0b released 2010/02/04
 
 - Added a new interface routine to SStruct called GridSetSharedPart() which is
   used to describe how regions inside a part are shared with regions in other
