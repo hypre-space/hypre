@@ -19,7 +19,7 @@
 
 #====================================
 
-Version 2.6.1a released 2010/03/xx
+Version 2.6.1a released 2010/03/30
 
 - Made several bug fixes related to the new SetSharedPar() and FEM() routines:
   Fixed a memory leak.  Fixed to allow SetSharedPart() or SetNeighborPart()
