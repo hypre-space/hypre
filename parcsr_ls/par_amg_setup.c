@@ -1855,7 +1855,67 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
    }
 }
+#endif
 
+/* run compatible relaxation on all levels and print results */
+#if 0
+{
+   hypre_ParVector *u_vec, *f_vec;
+   double          *u, rho0, rho1, rho;
+   int              n;
+
+   for (level = 0; level < (num_levels-1); level++)
+   {
+      u_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
+                                    hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
+                                    hypre_ParCSRMatrixRowStarts(A_array[level]));
+      hypre_ParVectorInitialize(u_vec);
+      hypre_ParVectorSetPartitioningOwner(u_vec,0);
+      f_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
+                                    hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
+                                    hypre_ParCSRMatrixRowStarts(A_array[level]));
+      hypre_ParVectorInitialize(f_vec);
+      hypre_ParVectorSetPartitioningOwner(f_vec,0);
+
+      hypre_ParVectorSetRandomValues(u_vec, 99);
+      hypre_ParVectorSetConstantValues(f_vec, 0.0);
+
+      /* set C-pt values to zero */
+      n = hypre_VectorSize(hypre_ParVectorLocalVector(u_vec));
+      u = hypre_VectorData(hypre_ParVectorLocalVector(u_vec));
+      for (i = 0; i < n; i++)
+      {
+         if (CF_marker_array[level][i] == 1)
+         {
+            u[i] = 0.0;
+         }
+      }
+
+      rho1 = hypre_ParVectorInnerProd(u_vec, u_vec);
+      for (i = 0; i < 5; i++)
+      {
+         rho0 = rho1;
+         hypre_BoomerAMGRelax(A_array[level], f_vec, CF_marker_array[level],
+                              grid_relax_type[0], -1,
+                              relax_weight[level], omega[level],
+                              u_vec, Vtemp, Ztemp);
+         rho1 = hypre_ParVectorInnerProd(u_vec,u_vec);
+         rho = sqrt(rho1/rho0);
+         if (rho < 0.01)
+         {
+            break;
+         }
+      }
+
+      hypre_ParVectorDestroy(u_vec);
+      hypre_ParVectorDestroy(f_vec);
+
+      if (my_id == 0)
+      {
+         printf("level = %d, rhocr = %f\n", level, rho);
+      }
+   }
+}
 #endif
 
    return(Setup_err_flag);
