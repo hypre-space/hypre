@@ -33,3 +33,16 @@ hypre_F90_IFACE(hypre_geterrorarg, HYPRE_GETERRORARG)(int *result)
 {
    *result = (int) HYPRE_GetErrorArg();
 }
+
+void
+hypre_F90_IFACE(hypre_clearallerrors, HYPRE_CLEARALLERRORS)(int *result)
+{
+   *result = HYPRE_ClearAllErrors();
+}
+
+void
+hypre_F90_IFACE(hypre_clearerror, HYPRE_CLEARERROR)(int *hypre_error_code,
+                                                    int *result)
+{
+   *result = (int) HYPRE_ClearError(*hypre_error_code);
+}
