@@ -629,16 +629,16 @@ int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
                                    int          num_functions);
 
 /**
- * (Optional) Sets whether to use the nodal systems version.
- * The default is 0.
+ * (Optional) Sets whether to use the nodal systems coarsening.
+ * The default is 0 (unknown-based coarsening).
  **/
 int HYPRE_BoomerAMGSetNodal(HYPRE_Solver solver,
                             int          nodal);
-/**
+/*  Don't want this in manual...
  * (Optional) Sets whether to give spoecial treatment to diagonal elements in 
  * the nodal systems version.
  * The default is 0.
- **/
+ */
 int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
                                 int          nodal_diag);
 /**
