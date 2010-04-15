@@ -1,21 +1,21 @@
 # Output file: matrix.out.0
- Average Convergence Factor = 0.017308
+ Average Convergence Factor = 0.017332
 
-     Complexity:    grid = 2.024000
-                operator = 5.666563
-                   cycle = 11.327500
+     Complexity:    grid = 2.036000
+                operator = 5.803438
+                   cycle = 11.601250
 
 # Output file: matrix.out.1
- Average Convergence Factor = 0.017308
+ Average Convergence Factor = 0.017332
 
-     Complexity:    grid = 2.024000
-                operator = 5.666563
-                   cycle = 11.327500
+     Complexity:    grid = 2.036000
+                operator = 5.803438
+                   cycle = 11.601250
 
 # Output file: matrix.out.2
- Average Convergence Factor = 0.017308
+ Average Convergence Factor = 0.017332
 
-     Complexity:    grid = 2.024000
-                operator = 5.666563
-                   cycle = 11.327500
+     Complexity:    grid = 2.036000
+                operator = 5.803438
+                   cycle = 11.601250
 

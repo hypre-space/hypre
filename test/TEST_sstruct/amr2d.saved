@@ -24,11 +24,11 @@ Final Relative Residual Norm = 8.510163e-07
 
 # Output file: amr2d.out.6
 Iterations = 3
-Final Relative Residual Norm = 5.985620e-08
+Final Relative Residual Norm = 6.033671e-08
 
 # Output file: amr2d.out.7
 Iterations = 3
-Final Relative Residual Norm = 5.069719e-08
+Final Relative Residual Norm = 7.452823e-08
 
 # Output file: amr2d.out.8
 Iterations = 21
