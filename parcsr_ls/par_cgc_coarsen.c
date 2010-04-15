@@ -501,7 +501,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
 
       for (i=0; i < num_variables; i++)
       {
-	 if (ci_tilde_mark |= i) ci_tilde = -1;
+	 if (ci_tilde_mark != i) ci_tilde = -1;
          if (CF_marker[i] == -1)
          {
    	    for (ji = S_i[i]; ji < S_i[i+1]; ji++)

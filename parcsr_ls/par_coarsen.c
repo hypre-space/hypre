@@ -1317,8 +1317,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 	
       for (i=0; i < num_variables; i++)
       {
-	 if (ci_tilde_mark |= i) ci_tilde = -1;
-	 if (ci_tilde_offd_mark |= i) ci_tilde_offd = -1;
+	 if (ci_tilde_mark != i) ci_tilde = -1;
+	 if (ci_tilde_offd_mark != i) ci_tilde_offd = -1;
          if (CF_marker[i] == -1)
          {
             break_var = 1;
@@ -1463,7 +1463,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    {
       for (i=0; i < num_variables; i++)
       {
-	 if (ci_tilde_mark |= i) ci_tilde = -1;
+	 if (ci_tilde_mark != i) ci_tilde = -1;
          if (CF_marker[i] == -1)
          {
    	    for (ji = S_i[i]; ji < S_i[i+1]; ji++)
@@ -1565,8 +1565,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 	 graph_array[i] = -1;
       for (i=0; i < num_cols_offd; i++)
       {
-	 if (ci_tilde_mark |= i) ci_tilde = -1;
-	 if (ci_tilde_offd_mark |= i) ci_tilde_offd = -1;
+	 if (ci_tilde_mark != i) ci_tilde = -1;
+	 if (ci_tilde_offd_mark != i) ci_tilde_offd = -1;
          if (CF_marker_offd[i] == -1)
          {
    	    for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
