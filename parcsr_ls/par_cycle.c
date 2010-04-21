@@ -388,29 +388,58 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                             Ztemp);
             }
             else if (relax_type == 18)
-            {   /* L1 - Jacobi through ams*/
-                if (num_threads == 1)
-                   hypre_ParCSRRelax(A_array[level], 
-                                     Aux_F,
-                                     1,
-                                     1,
-                                     l1_norms[level],
-                                     relax_weight[level],
-                                     omega[level],0,0,0,0,
-                                     Aux_U,
-                                     Vtemp, 
-                                     Ztemp);
-                else
-                   hypre_ParCSRRelaxThreads(A_array[level], 
-                                            Aux_F,
-                                            1,
-                                            1,
-                                            l1_norms[level],
-                                            relax_weight[level],
-                                            omega[level],
-                                            Aux_U,
-                                            Vtemp,
-                                            Ztemp);
+            {   /* L1 - Jacobi*/
+               if (relax_order == 1 && cycle_type < 3)
+               {
+                  /* need to do CF - so can't use the AMS one */
+                  int i;
+                  int loc_relax_points[2];
+                  if (cycle_type < 2)
+                  {
+                     loc_relax_points[0] = 1;
+                     loc_relax_points[1] = -1;
+                  }
+                  else
+                  {
+                     loc_relax_points[0] = -1;
+                     loc_relax_points[1] = 1;
+                  }
+                  for (i=0; i < 2; i++)
+                     hypre_ParCSRRelax_L1_Jacobi(A_array[level],
+                                                 Aux_F,
+                                                 CF_marker_array[level],
+                                                 loc_relax_points[i],
+                                                 relax_weight[level],
+                                                 l1_norms[level],
+                                                 Aux_U,
+                                                 Vtemp);
+               }
+               else /* not CF - so use through AMS */
+               {
+                  if (num_threads == 1)
+                     hypre_ParCSRRelax(A_array[level], 
+                                       Aux_F,
+                                       1,
+                                       1,
+                                       l1_norms[level],
+                                       relax_weight[level],
+                                       omega[level],0,0,0,0,
+                                       Aux_U,
+                                       Vtemp, 
+                                       Ztemp);
+
+                  else
+                     hypre_ParCSRRelaxThreads(A_array[level], 
+                                              Aux_F,
+                                              1,
+                                              1,
+                                              l1_norms[level],
+                                              relax_weight[level],
+                                              omega[level],
+                                              Aux_U,
+                                              Vtemp,
+                                              Ztemp);
+               }
             }
             else if (relax_type == 15)
             {  /* CG */

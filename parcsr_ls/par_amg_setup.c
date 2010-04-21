@@ -67,7 +67,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    double               agg_trunc_factor, agg_P12_trunc_factor;
    double               S_commpkg_switch;
    double      		CR_rate;
-
+   int       relax_order;
    int      max_levels; 
    int      amg_logging;
    int      amg_print_level;
@@ -190,6 +190,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    CR_rate = hypre_ParAMGDataCRRate(amg_data);
    CR_use_CG = hypre_ParAMGDataCRUseCG(amg_data);
    cgc_its = hypre_ParAMGDataCGCIts(amg_data);
+
+   relax_order         = hypre_ParAMGDataRelaxOrder(amg_data);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    hypre_ParCSRMatrixSetDNumNonzeros(A);
@@ -1586,38 +1588,44 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          if (grid_relax_type[1] == 8 && j < num_levels-1)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 2, &l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 2, NULL, &l1_norms[j]);
          }
          else if (grid_relax_type[3] == 8 && j == num_levels-1)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 2, &l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 2, NULL, &l1_norms[j]);
          }
          if (grid_relax_type[1] == 18 && j < num_levels-1)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, &l1_norms[j]);
+            if (relax_order)
+               hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norms[j]);
+            else
+               hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
          }
          else if (grid_relax_type[3] == 18 && j == num_levels-1)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, &l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
          }
       }
       else
       {
          if (grid_relax_type[1] == 8 && j < num_levels-1)
          {
-            hypre_ParCSRComputeL1NormsThreads(A_array[j], 2, num_threads, &l1_norms[j]);
+            hypre_ParCSRComputeL1NormsThreads(A_array[j], 2, num_threads, NULL, &l1_norms[j]);
          }
          else if (grid_relax_type[3] == 8 && j == num_levels-1)
          {
-            hypre_ParCSRComputeL1NormsThreads(A_array[j], 2, num_threads, &l1_norms[j]);
+            hypre_ParCSRComputeL1NormsThreads(A_array[j], 2, num_threads, NULL, &l1_norms[j]);
          }
          if (grid_relax_type[1] == 18 && j < num_levels-1)
          {
-            hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, &l1_norms[j]);
+            if (relax_order)
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, CF_marker_array[j], &l1_norms[j]);
+            else
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
          }
          else if (grid_relax_type[3] == 18 && j == num_levels-1)
          {
-            hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, &l1_norms[j]);
+            hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
          }
 
       }

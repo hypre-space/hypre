@@ -111,7 +111,7 @@ int hypre_ParVectorBlockSplit ( hypre_ParVector *x , hypre_ParVector *x_ [3 ], i
 int hypre_ParVectorBlockGather ( hypre_ParVector *x , hypre_ParVector *x_ [3 ], int dim );
 int hypre_BoomerAMGBlockSolve ( void *B , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 int hypre_ParCSRMatrixFixZeroRows ( hypre_ParCSRMatrix *A );
-int hypre_ParCSRComputeL1Norms ( hypre_ParCSRMatrix *A , int option , double **l1_norm_ptr );
+int hypre_ParCSRComputeL1Norms ( hypre_ParCSRMatrix *A , int option , int *cf_marker , double **l1_norm_ptr );
 int hypre_ParCSRMatrixSetDiagRows ( hypre_ParCSRMatrix *A , double d );
 void *hypre_AMSCreate ( void );
 int hypre_AMSDestroy ( void *solver );
@@ -143,7 +143,7 @@ int hypre_AMSProjectOutGradients ( void *solver , hypre_ParVector *x );
 int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_ParVector *x_coord , int *edge_vertex , int edge_orientation , hypre_ParCSRMatrix **G_ptr );
 int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , int num_vert , int num_local_vert , int *vert_number , double *vert_coord , int num_edges , int *edge_vertex );
 int hypre_AMSFEIDestroy ( void *solver );
-int hypre_ParCSRComputeL1NormsThreads ( hypre_ParCSRMatrix *A , int option , int num_threads , double **l1_norm_ptr );
+int hypre_ParCSRComputeL1NormsThreads ( hypre_ParCSRMatrix *A , int option , int num_threads , int *cf_marker , double **l1_norm_ptr );
 int hypre_ParCSRRelaxThreads ( hypre_ParCSRMatrix *A , hypre_ParVector *f , int relax_type , int relax_times , double *l1_norms , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *z );
 
 /* aux_interp.c */

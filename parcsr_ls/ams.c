@@ -533,10 +533,15 @@ int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  * option 2 = Compute the l1 norm of the (processor) off-diagonal
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
+ * option 4 - Compute l1 norms of Acc and Aff part (requires a CF marker)
+ * 
+ *
+ * Note cf_marker only used for 4
  *--------------------------------------------------------------------------*/
 
 int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
                                int option,
+                               int  *cf_marker,
                                double **l1_norm_ptr)
 {
    int i, j;
@@ -549,10 +554,49 @@ int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
 
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    int *A_offd_I = hypre_CSRMatrixI(A_offd);
+   int *A_offd_J = hypre_CSRMatrixJ(A_offd);
    double *A_offd_data = hypre_CSRMatrixData(A_offd);
    int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    double *l1_norm = hypre_TAlloc(double, num_rows);
+
+   int *cf_marker_offd = NULL;
+   int cf_diag;
+
+   /* for option 4, we need to collect the cf marker data from other
+    * procs */
+   if (option == 4)
+   {
+      int index;
+      int num_sends;
+      int start;
+      int *int_buf_data = NULL;
+
+      hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      hypre_ParCSRCommHandle *comm_handle;
+
+      if (num_cols_offd) 
+         cf_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+      if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
+         int_buf_data = hypre_CTAlloc(int, 
+                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         {
+            int_buf_data[index++] = cf_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+         }
+         
+      }
+      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+                                                  cf_marker_offd);
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
+      hypre_TFree(int_buf_data);
+   }
+
 
    for (i = 0; i < num_rows; i++)
    {
@@ -585,9 +629,33 @@ int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
       }
 
       /* Add the l1 norm of the offd part of the ith row */
-      if (num_cols_offd)
+      if (num_cols_offd && option < 3)
+      {
          for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
             l1_norm[i] += fabs(A_offd_data[j]);
+      }
+      
+      if (option == 4)
+      {
+         cf_diag = cf_marker[i];
+         l1_norm[i] = 0.0;
+         for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
+         {
+            if (cf_diag == cf_marker[A_diag_J[j]])
+            {
+               l1_norm[i] += fabs(A_diag_data[j]);
+            }
+         }
+         if (num_cols_offd)
+         {
+            for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
+            {
+               if (cf_diag == cf_marker_offd[A_offd_J[j]])
+                  l1_norm[i] += fabs(A_offd_data[j]);
+            }
+         }
+            
+      }
 
       if (l1_norm[i] < DBL_EPSILON)
          hypre_error_in_arg(1);
@@ -1975,7 +2043,7 @@ int hypre_AMSSetup(void *solver,
    /* Compute the l1 norm of the rows of A */
    if (ams_data -> A_relax_type >= 1 && ams_data -> A_relax_type <= 3)
       hypre_ParCSRComputeL1Norms(ams_data -> A, ams_data -> A_relax_type,
-                                 &ams_data -> A_l1_norms);
+                                 NULL, &ams_data -> A_l1_norms);
 
    /* Chebyshev? */
    if (ams_data -> A_relax_type == 16)
@@ -3056,12 +3124,17 @@ int hypre_AMSFEIDestroy(void *solver)
  * option 2 = Compute the l1 norm of the (processor) off-diagonal
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
+ * option 4 - Compute l1 norms of Acc and Aff part (requires a CF marker)
+ * 
+ *
+ * Note cf_marker only used for 4
  *--------------------------------------------------------------------------*/
 
 int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
-                               int option,
-                               int num_threads,
-                               double **l1_norm_ptr)
+                                      int option,
+                                      int num_threads,
+                                      int *cf_marker,       
+                                      double **l1_norm_ptr)
 {
    int i, j, k;
    int num_rows = hypre_ParCSRMatrixNumRows(A);
@@ -3073,12 +3146,50 @@ int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
 
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    int *A_offd_I = hypre_CSRMatrixI(A_offd);
+   int *A_offd_J = hypre_CSRMatrixJ(A_offd);
    double *A_offd_data = hypre_CSRMatrixData(A_offd);
    int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    double *l1_norm = hypre_CTAlloc(double, num_rows);
    int ii, ns, ne, rest, size;
    double res;
+
+   int *cf_marker_offd = NULL;
+   int cf_diag;
+
+   /* for option 4, we need to collect the cf marker data from other
+    * procs */
+   if (option == 4)
+   {
+      int index;
+      int num_sends;
+      int start;
+      int *int_buf_data = NULL;
+
+      hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      hypre_ParCSRCommHandle *comm_handle;
+
+      if (num_cols_offd) 
+         cf_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+      if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
+         int_buf_data = hypre_CTAlloc(int, 
+                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         {
+            int_buf_data[index++] = cf_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+         }
+         
+      }
+      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+                                                  cf_marker_offd);
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
+      hypre_TFree(int_buf_data);
+   }
 
 #define HYPRE_SMP_PRIVATE i,ii,j,k,ns,ne,res,rest,size
 #include "../utilities/hypre_smp_forloop.h"
@@ -3129,10 +3240,33 @@ int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
       }
 
       /* Add the l1 norm of the offd part of the ith row */
-      if (num_cols_offd)
+      if (num_cols_offd && option < 3)
+      {
          for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
             res += fabs(A_offd_data[j]);
+      }
+      
       l1_norm[i] = res;
+
+      if (option == 4)
+      {
+         cf_diag = cf_marker[i];
+         l1_norm[i] = 0.0;
+         for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
+         {
+            if (cf_diag == cf_marker[A_diag_J[j]])
+               l1_norm[i] += fabs(A_diag_data[j]);
+         }
+         if (num_cols_offd)
+         {
+            for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
+            {
+               if (cf_diag == cf_marker_offd[A_offd_J[j]])
+                  l1_norm[i] += fabs(A_offd_data[j]);
+            }
+         }
+         
+      }
 
       if (l1_norm[i] < DBL_EPSILON)
          hypre_error_in_arg(1);

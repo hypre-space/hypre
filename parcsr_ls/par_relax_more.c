@@ -980,18 +980,9 @@ L20:
 } /* cgpthy_ */
 
 
-
-
-
-
-
-
-#if 0
 /*--------------------------------------------------------------------------
- * hypre_ParCSRRelax_L1_Jacobi (allows CF)
+ * hypre_ParCSRRelax_L1_Jacobi (same as the one in AMS, but this allows CF)
   
- For this I need to modify the creating of the L1 norms
-
   u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 
  *--------------------------------------------------------------------------*/
 
@@ -1167,4 +1158,3 @@ int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
 }
 
 
-#endif
