@@ -1098,7 +1098,7 @@ main( int   argc,
       printf("       15=CG  \n");
       printf("       16=Chebyshev  \n");
       printf("       17=FCF-Jacobi  \n");
-      printf("       18=L1-Jacobi  \n");
+      printf("       18=L1-Jacobi (may be used with -CF) \n");
       printf("       9=Gauss elimination (use for coarsest grid only)  \n");
       printf("       20= Nodal Weighted Jacobi (for systems only) \n");
       printf("       23= Nodal Hybrid Jacobi/Gauss-Seidel (for systems only) \n");
