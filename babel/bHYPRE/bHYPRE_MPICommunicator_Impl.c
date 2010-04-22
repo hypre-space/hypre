@@ -138,6 +138,11 @@ impl_bHYPRE_MPICommunicator__dtor(
   {
     /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator._dtor) */
   /* Insert-Code-Here {bHYPRE.MPICommunicator._dtor} (destructor method) */
+
+   struct bHYPRE_MPICommunicator__data * data;
+   data = bHYPRE_MPICommunicator__get_data( self );
+   hypre_TFree( data );
+
     /* DO-NOT-DELETE splicer.end(bHYPRE.MPICommunicator._dtor) */
   }
 }

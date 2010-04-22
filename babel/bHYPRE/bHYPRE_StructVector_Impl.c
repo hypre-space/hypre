@@ -651,7 +651,6 @@ impl_bHYPRE_StructVector_Clone(
 
    grid = hypre_StructVectorGrid(yy);
    ierr += HYPRE_StructVectorCreate( data_x->comm, grid, &xx );
-   ierr += HYPRE_StructVectorInitialize( xx );
    data_x -> vec = xx;
 
    num_ghost = hypre_StructVectorNumGhost(yy);
