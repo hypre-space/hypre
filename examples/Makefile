@@ -31,7 +31,6 @@ LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm
 LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
 LFLAGS_B =\
  -L${HYPRE_DIR}/lib\
- -L${HYPRE_DIR}/../babel-runtime/sidl/.libs\
  -lbHYPREClient-C\
  -lbHYPREClient-CX\
  -lbHYPREClient-F\
