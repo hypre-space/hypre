@@ -170,6 +170,19 @@ typedef struct
    int                  **fem_matadd_cols;
    double               **fem_matadd_values;
 
+   /* RhsAddToValues */
+   int                    rhsadd_nboxes;
+   ProblemIndex          *rhsadd_ilowers;
+   ProblemIndex          *rhsadd_iuppers;
+   int                   *rhsadd_vars;
+   double                *rhsadd_values;
+
+   /* FEMRhsAddToValues */
+   int                    fem_rhsadd_nboxes;
+   ProblemIndex          *fem_rhsadd_ilowers;
+   ProblemIndex          *fem_rhsadd_iuppers;
+   double               **fem_rhsadd_values;
+
    Index                  periodic;
 
 } ProblemPartData;
@@ -186,6 +199,9 @@ typedef struct
    Index          **stencil_offsets;
    int            **stencil_vars;
    double         **stencil_values;
+
+   int              rhs_true;
+   double           rhs_value;
 
    int              fem_nvars;
    Index           *fem_offsets;
@@ -455,6 +471,7 @@ ReadData( char         *filename,
 
    data.max_boxsize = 0;
    data.nstencils = 0;
+   data.rhs_true = 0;
    data.fem_nvars = 0;
    data.fem_rhs_true = 0;
    data.symmetric_num = 0;
@@ -672,6 +689,14 @@ ReadData( char         *filename,
             }
             data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_values[s][entry] = strtod(sdata_ptr, &sdata_ptr);
+         }
+         else if ( strcmp(key, "RhsSet:") == 0 )
+         {
+            if (data.rhs_true == 0)
+            {
+               data.rhs_true = 1;
+            }
+            data.rhs_value = strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "FEMStencilCreate:") == 0 )
          {
@@ -965,6 +990,58 @@ ReadData( char         *filename,
             pdata.fem_matadd_nboxes++;
             data.pdata[part] = pdata;
          }
+         else if ( strcmp(key, "RhsAddToValues:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            if ((pdata.rhsadd_nboxes% 10) == 0)
+            {
+               size = pdata.rhsadd_nboxes+10;
+               pdata.rhsadd_ilowers=
+                  hypre_TReAlloc(pdata.rhsadd_ilowers, ProblemIndex, size);
+               pdata.rhsadd_iuppers=
+                  hypre_TReAlloc(pdata.rhsadd_iuppers, ProblemIndex, size);
+               pdata.rhsadd_vars=
+                  hypre_TReAlloc(pdata.rhsadd_vars, int, size);
+               pdata.rhsadd_values=
+                  hypre_TReAlloc(pdata.rhsadd_values, double, size);
+            }
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.rhsadd_ilowers[pdata.rhsadd_nboxes]);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.rhsadd_iuppers[pdata.rhsadd_nboxes]);
+            pdata.rhsadd_vars[pdata.rhsadd_nboxes]=
+               strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.rhsadd_values[pdata.rhsadd_nboxes] =
+               strtod(sdata_ptr, &sdata_ptr);
+            pdata.rhsadd_nboxes++;
+            data.pdata[part] = pdata;
+         }
+         else if ( strcmp(key, "FEMRhsAddToValues:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            if ((pdata.fem_rhsadd_nboxes% 10) == 0)
+            {
+               size = pdata.fem_rhsadd_nboxes+10;
+               pdata.fem_rhsadd_ilowers=
+                  hypre_TReAlloc(pdata.fem_rhsadd_ilowers, ProblemIndex, size);
+               pdata.fem_rhsadd_iuppers=
+                  hypre_TReAlloc(pdata.fem_rhsadd_iuppers, ProblemIndex, size);
+               pdata.fem_rhsadd_values=
+                  hypre_TReAlloc(pdata.fem_rhsadd_values, double *, size);
+            }
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.fem_rhsadd_ilowers[pdata.fem_rhsadd_nboxes]);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.fem_rhsadd_iuppers[pdata.fem_rhsadd_nboxes]);
+            pdata.fem_rhsadd_values[pdata.fem_rhsadd_nboxes] =
+               hypre_TAlloc(double, data.fem_nvars);
+            SScanDblArray(sdata_ptr, &sdata_ptr, data.fem_nvars,
+              (double *) pdata.fem_rhsadd_values[pdata.fem_rhsadd_nboxes]);
+            pdata.fem_rhsadd_nboxes++;
+            data.pdata[part] = pdata;
+         }
          else if ( strcmp(key, "ProcessPoolCreate:") == 0 )
          {
             data.ndists++;
@@ -1160,6 +1237,12 @@ DistributeData( ProblemData   global_data,
             hypre_TFree(pdata.fem_matadd_values[box]);
          }
          pdata.fem_matadd_nboxes = 0;
+         pdata.rhsadd_nboxes = 0;
+         for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
+         {
+            hypre_TFree(pdata.fem_rhsadd_values[box]);
+         }
+         pdata.fem_rhsadd_nboxes = 0;
       }
       else
       {
@@ -1199,6 +1282,16 @@ DistributeData( ProblemData   global_data,
             {
                MapProblemIndex(pdata.fem_matadd_ilowers[box], m);
                MapProblemIndex(pdata.fem_matadd_iuppers[box], m);
+            }
+            for (box = 0; box < pdata.rhsadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.rhsadd_ilowers[box], m);
+               MapProblemIndex(pdata.rhsadd_iuppers[box], m);
+            }
+            for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.fem_rhsadd_ilowers[box], m);
+               MapProblemIndex(pdata.fem_rhsadd_iuppers[box], m);
             }
          }
 
@@ -1432,6 +1525,86 @@ DistributeData( ProblemData   global_data,
                hypre_TFree(pdata.fem_matadd_values[box]);
             }
             pdata.fem_matadd_nboxes = i;
+
+            i = 0;
+            for (box = 0; box < pdata.rhsadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.rhsadd_ilowers[box], m);
+               MapProblemIndex(pdata.rhsadd_iuppers[box], m);
+
+               for (b = 0; b < pdata.nboxes; b++)
+               {
+                  /* first convert the box extents based on vartype */
+                  GetVariableBox(pdata.ilowers[b], pdata.iuppers[b],
+                                 pdata.vartypes[pdata.rhsadd_vars[box]],
+                                 ilower, iupper);
+                  size = IntersectBoxes(pdata.rhsadd_ilowers[box],
+                                        pdata.rhsadd_iuppers[box],
+                                        ilower, iupper,
+                                        int_ilower, int_iupper);
+                  if (size > 0)
+                  {
+                     /* if there is an intersection, it is the only one */
+                     for (d = 0; d < 3; d++)
+                     {
+                        pdata.rhsadd_ilowers[i][d] = int_ilower[d];
+                        pdata.rhsadd_iuppers[i][d] = int_iupper[d];
+                     }
+                     for (d = 3; d < 9; d++)
+                     {
+                        pdata.rhsadd_ilowers[i][d] =
+                           pdata.rhsadd_ilowers[box][d];
+                        pdata.rhsadd_iuppers[i][d] =
+                           pdata.rhsadd_iuppers[box][d];
+                     }
+                     pdata.rhsadd_vars[i]   = pdata.rhsadd_vars[box];
+                     pdata.rhsadd_values[i] = pdata.rhsadd_values[box];
+                     i++;
+                     break;
+                  }
+               }
+            }
+            pdata.rhsadd_nboxes = i;
+
+            i = 0;
+            for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.fem_rhsadd_ilowers[box], m);
+               MapProblemIndex(pdata.fem_rhsadd_iuppers[box], m);
+
+               for (b = 0; b < pdata.nboxes; b++)
+               {
+                  /* fe is cell-based, so no need to convert box extents */
+                  size = IntersectBoxes(pdata.fem_rhsadd_ilowers[box],
+                                        pdata.fem_rhsadd_iuppers[box],
+                                        pdata.ilowers[b], pdata.iuppers[b],
+                                        int_ilower, int_iupper);
+                  if (size > 0)
+                  {
+                     /* if there is an intersection, it is the only one */
+                     for (d = 0; d < 3; d++)
+                     {
+                        pdata.fem_rhsadd_ilowers[i][d] = int_ilower[d];
+                        pdata.fem_rhsadd_iuppers[i][d] = int_iupper[d];
+                     }
+                     for (d = 3; d < 9; d++)
+                     {
+                        pdata.fem_rhsadd_ilowers[i][d] =
+                           pdata.fem_rhsadd_ilowers[box][d];
+                        pdata.fem_rhsadd_iuppers[i][d] =
+                           pdata.fem_rhsadd_iuppers[box][d];
+                     }
+                     pdata.fem_rhsadd_values[i] = pdata.fem_rhsadd_values[box];
+                     i++;
+                     break;
+                  }
+               }
+            }
+            for (box = i; box < pdata.fem_rhsadd_nboxes; box++)
+            {
+               hypre_TFree(pdata.fem_rhsadd_values[box]);
+            }
+            pdata.fem_rhsadd_nboxes = i;
          }
 
          /* refine and block boxes */
@@ -1509,6 +1682,16 @@ DistributeData( ProblemData   global_data,
                MapProblemIndex(pdata.fem_matadd_ilowers[box], m);
                MapProblemIndex(pdata.fem_matadd_iuppers[box], m);
             }
+            for (box = 0; box < pdata.rhsadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.rhsadd_ilowers[box], m);
+               MapProblemIndex(pdata.rhsadd_iuppers[box], m);
+            }
+            for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.fem_rhsadd_ilowers[box], m);
+               MapProblemIndex(pdata.fem_rhsadd_iuppers[box], m);
+            }
          }
 
          /* map remaining ilowers & iuppers */
@@ -1579,6 +1762,26 @@ DistributeData( ProblemData   global_data,
             {
                size*= (pdata.fem_matadd_iuppers[box][i] -
                        pdata.fem_matadd_ilowers[box][i] + 1);
+            }
+            pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
+         }
+         for (box = 0; box < pdata.rhsadd_nboxes; box++)
+         {
+            size = 1;
+            for (i = 0; i < 3; i++)
+            {
+               size*= (pdata.rhsadd_iuppers[box][i] -
+                       pdata.rhsadd_ilowers[box][i] + 1);
+            }
+            pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
+         }
+         for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
+         {
+            size = 1;
+            for (i = 0; i < 3; i++)
+            {
+               size*= (pdata.fem_rhsadd_iuppers[box][i] -
+                       pdata.fem_rhsadd_ilowers[box][i] + 1);
             }
             pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
          }
@@ -1654,6 +1857,21 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.fem_matadd_rows);
          hypre_TFree(pdata.fem_matadd_cols);
          hypre_TFree(pdata.fem_matadd_values);
+      }
+
+      if (pdata.rhsadd_nboxes == 0)
+      {
+         hypre_TFree(pdata.rhsadd_ilowers);
+         hypre_TFree(pdata.rhsadd_iuppers);
+         hypre_TFree(pdata.rhsadd_vars);
+         hypre_TFree(pdata.rhsadd_values);
+      }
+
+      if (pdata.fem_rhsadd_nboxes == 0)
+      {
+         hypre_TFree(pdata.fem_rhsadd_ilowers);
+         hypre_TFree(pdata.fem_rhsadd_iuppers);
+         hypre_TFree(pdata.fem_rhsadd_values);
       }
 
       data.pdata[part] = pdata;
@@ -1782,6 +2000,25 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.fem_matadd_rows);
          hypre_TFree(pdata.fem_matadd_cols);
          hypre_TFree(pdata.fem_matadd_values);
+      }
+
+      if (pdata.rhsadd_nboxes > 0)
+      {
+         hypre_TFree(pdata.rhsadd_ilowers);
+         hypre_TFree(pdata.rhsadd_iuppers);
+         hypre_TFree(pdata.rhsadd_vars);
+         hypre_TFree(pdata.rhsadd_values);
+      }
+
+      if (pdata.fem_rhsadd_nboxes > 0)
+      {
+         hypre_TFree(pdata.fem_rhsadd_ilowers);
+         hypre_TFree(pdata.fem_rhsadd_iuppers);
+         for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
+         {
+            hypre_TFree(pdata.fem_rhsadd_values[box]);
+         }
+         hypre_TFree(pdata.fem_rhsadd_values);
       }
    }
    hypre_TFree(data.pdata);
@@ -2194,7 +2431,7 @@ main( int   argc,
    solver_id = 39;
    print_system = 0;
    cosine = 1;
-   if (global_data.fem_rhs_true)
+   if (global_data.rhs_true || global_data.fem_rhs_true)
    {
       cosine = 0;
    }
@@ -2871,14 +3108,21 @@ main( int   argc,
    HYPRE_SStructVectorInitialize(b);
 
    /* Initialize the rhs values */
-   if (data.fem_rhs_true)
+   if (data.rhs_true)
+   {
+      for (j = 0; j < data.max_boxsize; j++)
+      {
+         values[j] = data.rhs_value;
+      }
+   }
+   else if (data.fem_rhs_true)
    {
       for (j = 0; j < data.max_boxsize; j++)
       {
          values[j] = 0.0;
       }
    }
-   else
+   else /* rhs=1 is the default */
    {
       for (j = 0; j < data.max_boxsize; j++)
       {
@@ -2920,6 +3164,54 @@ main( int   argc,
                      HYPRE_SStructVectorAddFEMValues(b, part, index,
                                                      data.fem_rhs_values);
                   }
+               }
+            }
+         }
+      }
+   }
+
+   /* RhsAddToValues: add to some RHS values */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (box = 0; box < pdata.rhsadd_nboxes; box++)
+      {
+         size = 1;
+         for (j = 0; j < 3; j++)
+         {
+            size*= (pdata.rhsadd_iuppers[box][j] -
+                    pdata.rhsadd_ilowers[box][j] + 1);
+         }
+
+         for (j = 0; j < size; j++)
+         {
+            values[j] = pdata.rhsadd_values[box];
+         }
+          
+         HYPRE_SStructVectorAddToBoxValues(b, part, 
+                                           pdata.rhsadd_ilowers[box],
+                                           pdata.rhsadd_iuppers[box],
+                                           pdata.rhsadd_vars[box], values);
+      }
+   }
+
+   /* FEMRhsAddToValues: add to some RHS values */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
+      {
+         for (index[2] = pdata.fem_rhsadd_ilowers[box][2];
+              index[2] <= pdata.fem_rhsadd_iuppers[box][2]; index[2]++)
+         {
+            for (index[1] = pdata.fem_rhsadd_ilowers[box][1];
+                 index[1] <= pdata.fem_rhsadd_iuppers[box][1]; index[1]++)
+            {
+               for (index[0] = pdata.fem_rhsadd_ilowers[box][0];
+                    index[0] <= pdata.fem_rhsadd_iuppers[box][0]; index[0]++)
+               {
+                  HYPRE_SStructVectorAddFEMValues(b, part, index,
+                                                  pdata.fem_rhsadd_values[box]);
                }
             }
          }
