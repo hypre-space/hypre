@@ -781,6 +781,10 @@ hypre_StructGridPrint( FILE             *file,
                  hypre_BoxIMaxY(box),
                  hypre_BoxIMaxZ(box));
       }
+   fprintf(file, "\nPeriodic: %d %d %d\n",
+           hypre_StructGridPeriodic(grid)[0],
+           hypre_StructGridPeriodic(grid)[1],
+           hypre_StructGridPeriodic(grid)[2]);
 
    return hypre_error_flag;
 }
