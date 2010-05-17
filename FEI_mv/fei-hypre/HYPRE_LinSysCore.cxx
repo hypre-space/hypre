@@ -352,11 +352,11 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsPrintLevel_ = 0;
    amsAlphaCoarsenType_ = 10;
    amsAlphaAggLevels_ = 1;
-   amsAlphaRelaxType_ = 3;
+   amsAlphaRelaxType_ = 6;
    amsAlphaStrengthThresh_ = 0.25;
    amsBetaCoarsenType_ = 10;
    amsBetaAggLevels_ = 1;
-   amsBetaRelaxType_ = 3;
+   amsBetaRelaxType_ = 6;
    amsBetaStrengthThresh_ = 0.25;
    FEI_mixedDiagFlag_ = 0;
    FEI_mixedDiag_ = NULL;
