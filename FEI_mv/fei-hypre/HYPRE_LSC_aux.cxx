@@ -609,6 +609,18 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //----------------------------------------------------------------
+      // for PCG, whether to recompute true residual
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "pcgRecomputeRes") )
+      {
+         pcgRecomputeRes_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+             printf("       HYPRE_LSC::parameters pcgRecomputeRes = %s\n",
+                   param1);
+      }
+
+      //----------------------------------------------------------------
       // for GMRES, the convergence criterion 
       //----------------------------------------------------------------
 
@@ -4537,7 +4549,7 @@ double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    HYPRE_ParVector    b_csr;
    HYPRE_ParVector    x_csr;
 
-   int                info=0, panel_size, permc_spec;
+   int                info=0, permc_spec;
    int                *perm_r, *perm_c;
    double             *rhs, *soln;
    superlu_options_t  slu_options;
@@ -4617,9 +4629,9 @@ double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    perm_c = new int[nrows];
    permc_spec = superluOrdering_;
    get_perm_c(permc_spec, &A2, perm_c);
-   panel_size = sp_ienv(1);
    for ( i = 0; i < nrows; i++ ) perm_r[i] = 0;
 
+   set_default_options(&slu_options);
    slu_options.ColPerm = MY_PERMC;
    slu_options.Fact = DOFACT;
    StatInit(&slu_stat);
@@ -4716,7 +4728,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    HYPRE_ParVector    b_csr;
    HYPRE_ParVector    x_csr;
 
-   int                info, permc_spec, panel_size;
+   int                info, permc_spec;
    int                *perm_r, *perm_c, *etree, lwork;
    double             *rhs, *soln;
    double             *R, *C;
@@ -4813,6 +4825,8 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    permc_spec = superluOrdering_;
    get_perm_c(permc_spec, &A2, perm_c);
    lwork                    = 0;
+   set_default_options(&slu_options);
+   slu_options.ColPerm      = MY_PERMC;
    slu_options.Equil        = NO;
    slu_options.Trans        = NOTRANS;
    slu_options.Fact         = DOFACT;
@@ -4854,7 +4868,6 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
          printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
          printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
          printf("SuperLUX : NNZ in L+U = %d\n", Lstore->nnz+Ustore->nnz-nrows);
-         panel_size = sp_ienv(1);
       }
    } 
    else 
