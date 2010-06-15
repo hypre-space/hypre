@@ -622,6 +622,7 @@ class HYPRE_LinSysCore
    int             maxIterations_;
    double          tolerance_;
    int             normAbsRel_;
+   int             pcgRecomputeRes_;
 
    char            *HYPreconName_;
    HYPRE_Solver    HYPrecon_;
