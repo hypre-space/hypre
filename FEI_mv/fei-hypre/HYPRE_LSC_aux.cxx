@@ -609,18 +609,6 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //----------------------------------------------------------------
-      // for PCG, whether to recompute true residual
-      //----------------------------------------------------------------
-
-      else if ( !strcmp(param1, "pcgRecomputeRes") )
-      {
-         pcgRecomputeRes_ = 1;
-         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-             printf("       HYPRE_LSC::parameters pcgRecomputeRes = %s\n",
-                   param1);
-      }
-
-      //----------------------------------------------------------------
       // for GMRES, the convergence criterion 
       //----------------------------------------------------------------
 
@@ -4721,7 +4709,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 #ifdef HAVE_SUPERLU
    int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
-   int                j, nz_ptr;
+   int                nz_ptr;
    int                *partition, start_row, end_row;
    double             *colVal, *new_a, rnorm=-1.0;
    HYPRE_ParCSRMatrix A_csr;
