@@ -534,7 +534,6 @@ int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
  * option 4 - Compute l1 norms of Acc and Aff part (requires a CF marker)
- * 
  *
  * Note cf_marker only used for 4
  *--------------------------------------------------------------------------*/
@@ -563,8 +562,7 @@ int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
    int *cf_marker_offd = NULL;
    int cf_diag;
 
-   /* for option 4, we need to collect the cf marker data from other
-    * procs */
+   /* for option 4, we need to collect the cf marker data from other procs */
    if (option == 4)
    {
       int index;
@@ -575,11 +573,11 @@ int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
       hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
       hypre_ParCSRCommHandle *comm_handle;
 
-      if (num_cols_offd) 
+      if (num_cols_offd)
          cf_marker_offd = hypre_CTAlloc(int, num_cols_offd);
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
-         int_buf_data = hypre_CTAlloc(int, 
+         int_buf_data = hypre_CTAlloc(int,
                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
       index = 0;
       for (i = 0; i < num_sends; i++)
@@ -589,14 +587,12 @@ int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
          {
             int_buf_data[index++] = cf_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
          }
-         
       }
-      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
                                                   cf_marker_offd);
-      hypre_ParCSRCommHandleDestroy(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(int_buf_data);
    }
-
 
    for (i = 0; i < num_rows; i++)
    {
@@ -634,7 +630,7 @@ int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
          for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
             l1_norm[i] += fabs(A_offd_data[j]);
       }
-      
+
       if (option == 4)
       {
          cf_diag = cf_marker[i];
@@ -654,7 +650,6 @@ int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
                   l1_norm[i] += fabs(A_offd_data[j]);
             }
          }
-            
       }
 
       if (l1_norm[i] < DBL_EPSILON)
@@ -2005,10 +2000,10 @@ int hypre_AMSSetup(void *solver,
          }
          C_tmp = hypre_CSRMatrixAdd(A_local, B_local);
          C_local = hypre_CSRMatrixDeleteZeros(C_tmp,0.0);
-	 if (C_local)
-	   hypre_CSRMatrixDestroy(C_tmp);
-	 else
-	   C_local = C_tmp;
+         if (C_local)
+           hypre_CSRMatrixDestroy(C_tmp);
+         else
+           C_local = C_tmp;
 
          C = hypre_ParCSRMatrixCreate (comm,
                                        global_num_rows,
@@ -2132,6 +2127,9 @@ int hypre_AMSSetup(void *solver,
          /* Make sure that A_G has no zero rows (this can happen
             if beta is zero in part of the domain). */
          hypre_ParCSRMatrixFixZeroRows(ams_data -> A_G);
+
+         hypre_ParCSRMatrixOwnsColStarts(ams_data -> G) = 1;
+         hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_G) = 0;
 
          ams_data -> owns_A_G = 1;
       }
@@ -3125,7 +3123,6 @@ int hypre_AMSFEIDestroy(void *solver)
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
  * option 4 - Compute l1 norms of Acc and Aff part (requires a CF marker)
- * 
  *
  * Note cf_marker only used for 4
  *--------------------------------------------------------------------------*/
@@ -3133,7 +3130,7 @@ int hypre_AMSFEIDestroy(void *solver)
 int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                                       int option,
                                       int num_threads,
-                                      int *cf_marker,       
+                                      int *cf_marker,
                                       double **l1_norm_ptr)
 {
    int i, j, k;
@@ -3169,11 +3166,11 @@ int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
       hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
       hypre_ParCSRCommHandle *comm_handle;
 
-      if (num_cols_offd) 
+      if (num_cols_offd)
          cf_marker_offd = hypre_CTAlloc(int, num_cols_offd);
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
-         int_buf_data = hypre_CTAlloc(int, 
+         int_buf_data = hypre_CTAlloc(int,
                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
       index = 0;
       for (i = 0; i < num_sends; i++)
@@ -3183,11 +3180,10 @@ int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
          {
             int_buf_data[index++] = cf_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
          }
-         
       }
-      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
                                                   cf_marker_offd);
-      hypre_ParCSRCommHandleDestroy(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(int_buf_data);
    }
 
@@ -3245,7 +3241,7 @@ int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
          for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
             res += fabs(A_offd_data[j]);
       }
-      
+
       l1_norm[i] = res;
 
       if (option == 4)
@@ -3265,7 +3261,6 @@ int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                   l1_norm[i] += fabs(A_offd_data[j]);
             }
          }
-         
       }
 
       if (l1_norm[i] < DBL_EPSILON)
@@ -3294,7 +3289,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                                hypre_ParVector    *Vtemp,
                                hypre_ParVector    *z )
 {
-   MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm        comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
    int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
@@ -3317,20 +3312,20 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 
    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    double         *Vtemp_data = hypre_VectorData(Vtemp_local);
-   double	  *Vext_data;
-   double	  *v_buf_data;
-   double	  *tmp_data;
+   double         *Vext_data;
+   double         *v_buf_data;
+   double         *tmp_data;
 
    int             i, j;
    int             ii, jj;
    int             ns, ne, size, rest;
    int             relax_error = 0;
-   int		   num_sends;
-   int		   index, start;
-   int		   num_procs, num_threads, my_id ;
+   int             num_sends;
+   int             index, start;
+   int             num_procs, num_threads, my_id ;
 
    double          zero = 0.0;
-   double	   res, res2;
+   double          res, res2;
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
@@ -3347,26 +3342,26 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
    {
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       v_buf_data = hypre_CTAlloc(double,
-			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
       Vext_data = hypre_CTAlloc(double,num_cols_offd);
       if (num_cols_offd)
       {
-		A_offd_j = hypre_CSRMatrixJ(A_offd);
-		A_offd_data = hypre_CSRMatrixData(A_offd);
+                A_offd_j = hypre_CSRMatrixJ(A_offd);
+                A_offd_data = hypre_CSRMatrixData(A_offd);
       }
 
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
-	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-	for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
+        start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+        for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
            v_buf_data[index++]
-	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+        = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
 
       comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data,
-	Vext_data);
+        Vext_data);
 
       /*-----------------------------------------------------------------
        * Copy current approximation into temporary vector.
@@ -3416,7 +3411,7 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
          for (i = 0; i < n; i++)
-	      tmp_data[i] = u_data[i];
+              tmp_data[i] = u_data[i];
 #define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
 #include "../utilities/hypre_smp_forloop.h"
          for (j = 0; j < num_threads; j++)
@@ -3425,13 +3420,13 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
             rest = n - size*num_threads;
             if (j < rest)
             {
-	       ns = j*size+j;
-	       ne = (j+1)*size+j+1;
+               ns = j*size+j;
+               ne = (j+1)*size+j+1;
             }
             else
             {
-	       ns = j*size+rest;
-	       ne = (j+1)*size+rest;
+               ns = j*size+rest;
+               ne = (j+1)*size+rest;
             }
             for (i = ns; i < ne; i++)	/* interior points first */
             {
@@ -3586,8 +3581,8 @@ int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 
    if (num_procs > 1)
    {
-	 hypre_TFree(Vext_data);
-	 hypre_TFree(v_buf_data);
+         hypre_TFree(Vext_data);
+         hypre_TFree(v_buf_data);
    }
 
    return(relax_error);
