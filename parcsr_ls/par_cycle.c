@@ -107,6 +107,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    double    alpha;
    double  **l1_norms = NULL;
+   double   *l1_norms_level;
 
 #if 0
    double   *D_mat;
@@ -276,6 +277,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
         relax_type = 0;
       }
 
+      if (l1_norms != NULL)
+         l1_norms_level = l1_norms[level];
+      else
+         l1_norms_level = NULL;
+
       /*------------------------------------------------------------------
        * Do the relaxation num_sweep times
        *-----------------------------------------------------------------*/
@@ -362,31 +368,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                  (HYPRE_ParVector) Aux_F,
                                   (HYPRE_ParVector) Aux_U);
             }
-            else if (relax_type == 8)
-            {   /* L1 - SGS through ams*/
-                if (num_threads == 1)
-                   hypre_ParCSRRelax(A_array[level], 
-                                     Aux_F,
-                                     2,
-                                     1,
-                                     l1_norms[level],
-                                     relax_weight[level],
-                                     omega[level],0,0,0,0,
-                                     Aux_U,
-                                     Vtemp, 
-                                     Ztemp);
-                else               
-                   hypre_ParCSRRelaxThreads(A_array[level], 
-                                            Aux_F,
-                                            2,
-                                            1,
-                                            l1_norms[level],
-                                            relax_weight[level],
-                                            omega[level],
-                                            Aux_U,
-                                            Vtemp,
-                                            Ztemp);
-            }
             else if (relax_type == 18)
             {   /* L1 - Jacobi*/
                if (relax_order == 1 && cycle_type < 3)
@@ -421,7 +402,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                        Aux_F,
                                        1,
                                        1,
-                                       l1_norms[level],
+                                       l1_norms_level,
                                        relax_weight[level],
                                        omega[level],0,0,0,0,
                                        Aux_U,
@@ -433,7 +414,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                               Aux_F,
                                               1,
                                               1,
-                                              l1_norms[level],
+                                              l1_norms_level,
                                               relax_weight[level],
                                               omega[level],
                                               Aux_U,
@@ -478,6 +459,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                      relax_type, relax_points,
                                                      relax_weight[level],
                                                      omega[level],
+                                                     l1_norms_level,
                                                      Aux_U,
                                                      Vtemp, 
                                                      Ztemp);
@@ -509,6 +491,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                           cycle_param,
                                                           relax_weight[level],
                                                           omega[level],
+                                                          l1_norms_level,
                                                           Aux_U,
                                                           Vtemp, 
                                                           Ztemp);

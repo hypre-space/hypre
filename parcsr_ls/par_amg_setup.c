@@ -1588,16 +1588,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          if (grid_relax_type[1] == 8 && j < num_levels-1)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 2, NULL, &l1_norms[j]);
+            if (relax_order)
+               hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norms[j]);
+            else
+               hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norms[j]);
          }
          else if (grid_relax_type[3] == 8 && j == num_levels-1)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 2, NULL, &l1_norms[j]);
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norms[j]);
          }
          if (grid_relax_type[1] == 18 && j < num_levels-1)
          {
             if (relax_order)
-               hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norms[j]);
+               hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norms[j]);
             else
                hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
          }
@@ -1610,16 +1613,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          if (grid_relax_type[1] == 8 && j < num_levels-1)
          {
-            hypre_ParCSRComputeL1NormsThreads(A_array[j], 2, num_threads, NULL, &l1_norms[j]);
+            if (relax_order)
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, CF_marker_array[j] , &l1_norms[j]);
+            else
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, NULL, &l1_norms[j]);
          }
          else if (grid_relax_type[3] == 8 && j == num_levels-1)
          {
-            hypre_ParCSRComputeL1NormsThreads(A_array[j], 2, num_threads, NULL, &l1_norms[j]);
+            hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, NULL, &l1_norms[j]);
          }
          if (grid_relax_type[1] == 18 && j < num_levels-1)
          {
             if (relax_order)
-               hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, CF_marker_array[j], &l1_norms[j]);
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, CF_marker_array[j], &l1_norms[j]);
             else
                hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
          }
@@ -1905,7 +1911,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          rho0 = rho1;
          hypre_BoomerAMGRelax(A_array[level], f_vec, CF_marker_array[level],
                               grid_relax_type[0], -1,
-                              relax_weight[level], omega[level],
+                              relax_weight[level], omega[level], l1_norms[level],
                               u_vec, Vtemp, Ztemp);
          rho1 = hypre_ParVectorInnerProd(u_vec,u_vec);
          rho = sqrt(rho1/rho0);
