@@ -674,6 +674,7 @@ int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
                             0,
                             relax_weight,
                             0.0,
+                            NULL,
                             u,
                             Vtemp, Ztemp); 
    }
@@ -687,6 +688,7 @@ int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
                               relax_points[i],
                               relax_weight,
                               0.0,
+                              NULL,
                               u,
                               Vtemp, Ztemp); 
    }

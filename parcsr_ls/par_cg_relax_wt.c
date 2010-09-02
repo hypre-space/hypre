@@ -75,6 +75,8 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    int       smooth_num_levels;
    int       smooth_option = 0;
 
+   double   *l1_norms = NULL;
+
    double    alpha;
    double    beta;
    double    gamma = 1.0;
@@ -128,6 +130,9 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
                                  hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Ztemp);
    hypre_ParVectorSetPartitioningOwner(Ztemp,0);
+
+   if (hypre_ParAMGDataL1Norms(amg_data) != NULL)
+      l1_norms = hypre_ParAMGDataL1Norms(amg_data)[level];
 
    if (num_threads > 1)
    {
@@ -251,6 +256,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
                                                   0,
                                                   1.0,
                                                   1.0,
+                                                  l1_norms,
                                                   Ztemp,
                                                   Vtemp, 
                                                   Qtemp);

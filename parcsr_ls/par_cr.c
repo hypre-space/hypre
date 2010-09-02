@@ -2830,7 +2830,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
  	       if (CF_marker[j] == fpt) e0[j] = e1[j];
 	    hypre_BoomerAMGRelax(A, Vtemp, CF_marker, 
                                  rlx_type, fpt,
-                                 relax_weight, omega, 
+                                 relax_weight, omega, NULL,
                                  e1_vec, e0_vec, 
                                  Relax_temp);
             /*if (i==num_CR_relax_steps-1) */
@@ -2881,7 +2881,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                if (i==0)
                   hypre_ParCSRMatrixMatvec_FF(-1.0,A,e0_vec,0.0,Rtemp,CF_marker,fpt);
             /*hypre_BoomerAMGRelax(A, Rtemp, CF_marker, rlx_type, fpt,
-                relax_weight, omega, Ztemp, Vtemp);*/
+                relax_weight, omega, NULL, Ztemp, Vtemp);*/
                HYPRE_ParCSRDiagScale(NULL,(HYPRE_ParCSRMatrix) A, (HYPRE_ParVector) Rtemp,
                    (HYPRE_ParVector) Ztemp);
                gammaold = gamma;
