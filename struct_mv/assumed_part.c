@@ -2041,8 +2041,15 @@ int hypre_StructAssumedPartitionGetProcsFromBox( hypre_StructAssumedPart *assume
          in_regions++;
       }
    }
+#if 0
    if (in_regions == 0)  
    {
+
+      /* 9/16/10 in hypre_SStructGridAssembleBoxManagers we grow boxes by 1
+         before the gather boxes call because of shared variables, so
+         now so we can get the situation that the gather box is outside of
+         the assumed region */
+      
          if (hypre_BoxVolume(box) > 0)
          { 
             hypre_error(HYPRE_ERROR_GENERIC);
@@ -2067,7 +2074,7 @@ int hypre_StructAssumedPartitionGetProcsFromBox( hypre_StructAssumedPart *assume
          }
       
    }
-   
+#endif   
    /*for each region, who is assumed to own this box? add the proc number
      to proc array */ 
    for (r = 0; r< in_regions; r++)
