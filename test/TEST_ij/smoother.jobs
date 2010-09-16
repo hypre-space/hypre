@@ -40,8 +40,8 @@ mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -rlx_up 4 \
 mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -CF 0 \
  > smoother.out.3
 
-mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -CF 0 -w -10 \
- > smoother.out.4
+mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 -CF 0 \
+-w -10 > smoother.out.4
 
 mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 CF 0 \
 -sysL 2 -nf 2 -smlv 1 -smtype 6 -dom 1 -ov 0 -var 1 > smoother.out.5
