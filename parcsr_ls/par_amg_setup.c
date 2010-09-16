@@ -1670,18 +1670,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
         else
            printf (" Warning ! Matrix norm is zero !!!");
      }
-     if (relax_weight[j] < 0 )
-     {
-        num_cg_sweeps = (int) (-relax_weight[j]);
-        hypre_BoomerAMGCGRelaxWt(amg_data, j, num_cg_sweeps,
-                                 &relax_weight[j]);
-     }
-     if (omega[j] < 0 )
-     {
-        num_cg_sweeps = (int) (-omega[j]);
-        hypre_BoomerAMGCGRelaxWt(amg_data, j, num_cg_sweeps,
-                                 &omega[j]);
-     }
      if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > j)
      {
         
@@ -1755,6 +1743,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                (HYPRE_ParVector) U_array[j]);
         HYPRE_ParCSRPilutSetDropTolerance(smoother[j],drop_tol);
         HYPRE_ParCSRPilutSetFactorRowSize(smoother[j],max_nz_per_row);
+     }
+     if (relax_weight[j] < 0 )
+     {
+        num_cg_sweeps = (int) (-relax_weight[j]);
+        hypre_BoomerAMGCGRelaxWt(amg_data, j, num_cg_sweeps,
+                                 &relax_weight[j]);
+     }
+     if (omega[j] < 0 )
+     {
+        num_cg_sweeps = (int) (-omega[j]);
+        hypre_BoomerAMGCGRelaxWt(amg_data, j, num_cg_sweeps,
+                                 &omega[j]);
      }
    } /* end of levels loop */
 
