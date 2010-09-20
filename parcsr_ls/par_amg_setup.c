@@ -1744,7 +1744,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
         HYPRE_ParCSRPilutSetDropTolerance(smoother[j],drop_tol);
         HYPRE_ParCSRPilutSetFactorRowSize(smoother[j],max_nz_per_row);
      }
-     else 
+     else if ((j < num_levels-1) || ((j == num_levels-1) && (grid_relax_type[3]!= 9) && coarse_size > 9))
      {
         if (relax_weight[j] < 0 )
         {
