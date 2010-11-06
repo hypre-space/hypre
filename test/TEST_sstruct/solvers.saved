@@ -55,8 +55,8 @@ Iterations = 31
 Final Relative Residual Norm = 7.336388e-07
 
 # Output file: solvers.out.14
-Iterations = 10
-Final Relative Residual Norm = 7.234584e-07
+Iterations = 11
+Final Relative Residual Norm = 3.883504e-07
 
 # Output file: solvers.out.15
 Iterations = 5

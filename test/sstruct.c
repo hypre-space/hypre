@@ -1785,6 +1785,11 @@ DistributeData( ProblemData   global_data,
             }
             pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
          }
+
+         /* refine periodicity */
+         pdata.periodic[0] *= refine[part][0]*block[part][0]*distribute[part][0];
+         pdata.periodic[1] *= refine[part][1]*block[part][1]*distribute[part][1];
+         pdata.periodic[2] *= refine[part][2]*block[part][2]*distribute[part][2];
       }
 
       if (pdata.nboxes == 0)

@@ -1390,8 +1390,8 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
-      /*HYPRE_StructPFMGSetMaxLevels( solver, 3 );*/  /*jfp normally not set, default 10 */
-      HYPRE_StructPFMGSetMaxIter(solver, 50); /* <<< jfp normally 50 */
+      /*HYPRE_StructPFMGSetMaxLevels( solver, 9 );*/
+      HYPRE_StructPFMGSetMaxIter(solver, 200);
       HYPRE_StructPFMGSetTol(solver, 1.0e-06);
       HYPRE_StructPFMGSetRelChange(solver, 0);
       HYPRE_StructPFMGSetRAPType(solver, rap);
