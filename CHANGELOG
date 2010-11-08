@@ -17,11 +17,20 @@
 #=============================================================================
 
 
+Version x.x.x released xxxx/xx/xx
+
+- Relaxed the power-of-two restrictions for the PFMG and SysPFMG solvers.  See
+  the reference manual for more details.  SMG still requires a power-of-two.
+
+- Fixed some bugs in the coarsening routines for BoomerAMG.
+
+- Added some new smoothers to BoomerAMG.
+
 #====================================
 
 Version 2.6.1a released 2010/03/30
 
-- Made several bug fixes related to the new SetSharedPar() and FEM() routines:
+- Made several bug fixes related to the new SetSharedPart() and FEM() routines:
   Fixed a memory leak.  Fixed to allow SetSharedPart() or SetNeighborPart()
   calls from any processor, even if the processor doesn't own data on 'part'.
 
