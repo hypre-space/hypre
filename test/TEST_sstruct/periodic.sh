@@ -12,9 +12,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
 TNAME=`basename $0 .sh`
 
 #=============================================================================
@@ -34,6 +31,22 @@ tail -3 ${TNAME}.out.31 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
+# Check SysPFMG for power-of-two and non-power-of-two systems
+#=============================================================================
+
+tail -3 ${TNAME}.out.40 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.41 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.42 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+tail -3 ${TNAME}.out.50 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.51 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.52 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -42,6 +55,12 @@ FILES="\
  ${TNAME}.out.21\
  ${TNAME}.out.30\
  ${TNAME}.out.31\
+ ${TNAME}.out.40\
+ ${TNAME}.out.41\
+ ${TNAME}.out.42\
+ ${TNAME}.out.50\
+ ${TNAME}.out.51\
+ ${TNAME}.out.52\
 "
 
 for i in $FILES

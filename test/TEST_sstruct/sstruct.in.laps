@@ -5,7 +5,7 @@
 GridCreate: 2 1
 
 # GridSetExtents: part ilower(ndim) iupper(ndim)
-GridSetExtents: 0 (0- 0-) (5+ 5+)
+GridSetExtents: 0 (0- 0-) (7+ 7+)
 
 # GridSetVariables: part nvars vartypes[nvars]
 # CELL  = 0
@@ -41,14 +41,14 @@ GraphSetStencil: 0 1 1
 
 # MatrixSetValues: \
 #   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
-MatrixSetValues: 0 (0- 0-) (0- 5+) [1 1] 0 1 0.0
-MatrixSetValues: 0 (0- 0-) (0- 5+) [1 1] 1 1 0.0
-MatrixSetValues: 0 (5+ 0-) (5+ 5+) [1 1] 0 2 0.0
-MatrixSetValues: 0 (5+ 0-) (5+ 5+) [1 1] 1 2 0.0
-MatrixSetValues: 0 (0- 0-) (5+ 0-) [1 1] 0 3 0.0
-MatrixSetValues: 0 (0- 0-) (5+ 0-) [1 1] 1 3 0.0
-MatrixSetValues: 0 (0- 5+) (5+ 5+) [1 1] 0 4 0.0
-MatrixSetValues: 0 (0- 5+) (5+ 5+) [1 1] 1 4 0.0
+MatrixSetValues: 0 (0- 0-) (0- 7+) [1 1] 0 1 0.0
+MatrixSetValues: 0 (0- 0-) (0- 7+) [1 1] 1 1 0.0
+MatrixSetValues: 0 (7+ 0-) (7+ 7+) [1 1] 0 2 0.0
+MatrixSetValues: 0 (7+ 0-) (7+ 7+) [1 1] 1 2 0.0
+MatrixSetValues: 0 (0- 0-) (7+ 0-) [1 1] 0 3 0.0
+MatrixSetValues: 0 (0- 0-) (7+ 0-) [1 1] 1 3 0.0
+MatrixSetValues: 0 (0- 7+) (7+ 7+) [1 1] 0 4 0.0
+MatrixSetValues: 0 (0- 7+) (7+ 7+) [1 1] 1 4 0.0
 
 ###########################################################
 
