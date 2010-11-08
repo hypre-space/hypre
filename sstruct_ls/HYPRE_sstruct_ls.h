@@ -79,6 +79,11 @@ typedef int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
 
 /**
  * @name SStruct SysPFMG Solver
+ *
+ * SysPFMG is a semicoarsening multigrid solver similar to PFMG, but for systems
+ * of PDEs.  For periodic problems, users should try to set the grid size in
+ * periodic dimensions to be as close to a power-of-two as possible (for more
+ * details, see \Ref{Struct PFMG Solver}).
  **/
 /*@{*/
 

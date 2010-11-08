@@ -156,6 +156,13 @@ int HYPRE_StructJacobiGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
 
 /**
  * @name Struct PFMG Solver
+ *
+ * PFMG is a semicoarsening multigrid solver that uses pointwise relaxation.
+ * For periodic problems, users should try to set the grid size in periodic
+ * dimensions to be as close to a power-of-two as possible.  That is, if the
+ * grid size in a periodic dimension is given by $N = 2^m * M$ where $M$ is not
+ * a power-of-two, then $M$ should be as small as possible.  Large values of $M$
+ * will generally result in slower convergence rates.
  **/
 /*@{*/
 
@@ -323,6 +330,11 @@ int HYPRE_StructPFMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
 
 /**
  * @name Struct SMG Solver
+ *
+ * SMG is a semicoarsening multigrid solver that uses plane smoothing (in 3D).
+ * The plane smoother calls a 2D SMG algorithm with line smoothing, and the line
+ * smoother is cyclic reduction (1D SMG).  For periodic problems, the grid size
+ * in periodic dimensions currently must be a power-of-two.
  **/
 /*@{*/
 
