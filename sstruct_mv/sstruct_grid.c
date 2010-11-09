@@ -305,8 +305,9 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 
    pneighbors_size = hypre_BoxArraySize(pneighbors);
 
+   /* Add one since hood_first_local can be -1 */
    nbor_boxes =
-      hypre_BoxArrayCreate(pneighbors_size + hood_first_local + hood_num_local);
+      hypre_BoxArrayCreate(pneighbors_size + hood_first_local + hood_num_local + 1);
    diff_boxes = hypre_BoxArrayCreate(0);
    tmp_boxes  = hypre_BoxArrayCreate(0);
 
