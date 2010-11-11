@@ -93,7 +93,7 @@ c     Set preconditioner id (PFMG = 1, BoomerAMG = 2)
          object_type = HYPRE_PARCSR
       else
          if (myid .eq. 0) then
-            print "Invalid solver!"
+            print *, "Invalid solver!"
             stop
          endif
       endif
@@ -216,13 +216,15 @@ c     Stencil entry labels correspond to the offsets defined above
          ilower(2) =  0
          iupper(1) = -1
          iupper(2) =  2
-         nvalues = 60 /* 12 grid points, each with 5 stencil entries */
+c        12 grid points, each with 5 stencil entries
+         nvalues = 60 
       else if (myid .eq. 1) then
          ilower(1) = -1
          ilower(2) =  0
          iupper(1) =  2
          iupper(2) =  4
-         nvalues = 100 /* 12 grid points, each with 5 stencil entries */
+c        12 grid points, each with 5 stencil entries
+         nvalues = 100 
       endif
 
       do i = 1, nvalues, nentries
@@ -471,3 +473,4 @@ c     Finalize MPI
 
       stop
       end
+
