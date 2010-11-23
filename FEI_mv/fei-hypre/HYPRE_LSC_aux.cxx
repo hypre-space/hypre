@@ -363,6 +363,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //----------------------------------------------------------------
+      // turn on multiple right hand side
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "mRHS") )
+      {
+         mRHSFlag_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters multiple rhs on\n");
+      }
+
+      //----------------------------------------------------------------
       // set matrix trunction threshold
       //----------------------------------------------------------------
 
