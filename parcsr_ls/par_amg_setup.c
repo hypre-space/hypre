@@ -153,7 +153,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 
    /*for fittting interp vectors */
-   int                smooth_interp_vectors= hypre_ParAMGSmoothInterpVectors(amg_data);
+   /*int                smooth_interp_vectors= hypre_ParAMGSmoothInterpVectors(amg_data); */
    double             abs_q_trunc= hypre_ParAMGInterpVecAbsQTrunc(amg_data);
    int                q_max = hypre_ParAMGInterpVecQMax(amg_data);
    int                num_interp_vectors= hypre_ParAMGNumInterpVectors(amg_data);
