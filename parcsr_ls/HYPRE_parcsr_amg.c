@@ -1079,6 +1079,18 @@ HYPRE_BoomerAMGSetNodal( HYPRE_Solver  solver,
    return( hypre_BoomerAMGSetNodal( (void *) solver, nodal ) );
 }
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNodalLevels
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetNodalLevels( HYPRE_Solver  solver,
+                         int          nodal_levels  )
+{
+   return( hypre_BoomerAMGSetNodalLevels( (void *) solver, nodal_levels ) );
+}
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetNodalDiag
  *--------------------------------------------------------------------------*/
 
@@ -1316,6 +1328,7 @@ HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver solver,
 {
   return (hypre_BoomerAMGSetCoordinates ( (void *) solver, coordinates ) );
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetChebyOrder
  *--------------------------------------------------------------------------*/
@@ -1335,4 +1348,78 @@ HYPRE_BoomerAMGSetChebyFraction( HYPRE_Solver  solver,
                                  double         ratio )
 {
    return( hypre_BoomerAMGSetChebyFraction( (void *) solver, ratio ) );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetInterpVectors
+ *--------------------------------------------------------------------------*/
+                                                                                                       
+int
+HYPRE_BoomerAMGSetInterpVectors (HYPRE_Solver solver, int num_vectors,
+                                 HYPRE_ParVector *vectors)
+{
+   return (hypre_BoomerAMGSetInterpVectors ( (void *) solver, 
+                                             num_vectors, 
+                                             (hypre_ParVector **) vectors ) );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetInterpVecVariant
+ *--------------------------------------------------------------------------*/
+                                                                                                       
+int
+HYPRE_BoomerAMGSetInterpVecVariant(HYPRE_Solver solver, int num)
+                            
+{
+   return (hypre_BoomerAMGSetInterpVecVariant ( (void *) solver, num ) );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetInterpVecQMax
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetInterpVecQMax( HYPRE_Solver solver,
+                                 int       q_max  )
+{
+   return( hypre_BoomerAMGSetInterpVecQMax( (void *) solver,
+                                            q_max ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetInterpVecAbsQTrunc
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_BoomerAMGSetInterpVecAbsQTrunc( HYPRE_Solver solver,
+                                      double       q_trunc  )
+{
+   return( hypre_BoomerAMGSetInterpVecAbsQTrunc( (void *) solver,
+                                                 q_trunc ) );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSmoothInterpVectors
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_BoomerAMGSetSmoothInterpVectors( HYPRE_Solver solver,
+                                       int       smooth_interp_vectors  )
+{
+   return( hypre_BoomerAMGSetSmoothInterpVectors( (void *) solver,
+                                                  smooth_interp_vectors) );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetInterpRefine
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_BoomerAMGSetInterpRefine( HYPRE_Solver solver,
+                                int          num_refine  )
+{
+   return( hypre_BoomerAMGSetInterpRefine( (void *) solver,
+                                           num_refine ) );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetInterpVecFirstLevel(
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_BoomerAMGSetInterpVecFirstLevel( HYPRE_Solver solver,
+                                       int       level  )
+{
+   return( hypre_BoomerAMGSetInterpVecFirstLevel( (void *) solver,
+                                                  level ) );
 }

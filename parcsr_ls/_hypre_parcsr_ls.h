@@ -312,6 +312,7 @@ int HYPRE_BoomerAMGSetEuBJ ( HYPRE_Solver solver , int eu_bj );
 int HYPRE_BoomerAMGSetNumFunctions ( HYPRE_Solver solver , int num_functions );
 int HYPRE_BoomerAMGGetNumFunctions ( HYPRE_Solver solver , int *num_functions );
 int HYPRE_BoomerAMGSetNodal ( HYPRE_Solver solver , int nodal );
+int HYPRE_BoomerAMGSetNodalLevels ( HYPRE_Solver solver , int nodal_levels );
 int HYPRE_BoomerAMGSetNodalDiag ( HYPRE_Solver solver , int nodal );
 int HYPRE_BoomerAMGSetDofFunc ( HYPRE_Solver solver , int *dof_func );
 int HYPRE_BoomerAMGSetNumPaths ( HYPRE_Solver solver , int num_paths );
@@ -335,6 +336,13 @@ int HYPRE_BoomerAMGSetCoordDim ( HYPRE_Solver solver , int coorddim );
 int HYPRE_BoomerAMGSetCoordinates ( HYPRE_Solver solver , float *coordinates );
 int HYPRE_BoomerAMGSetChebyOrder ( HYPRE_Solver solver , int order );
 int HYPRE_BoomerAMGSetChebyFraction ( HYPRE_Solver solver , double ratio );
+int HYPRE_BoomerAMGSetInterpVectors ( HYPRE_Solver solver , int num_vectors , HYPRE_ParVector *vectors );
+int HYPRE_BoomerAMGSetInterpVecVariant ( HYPRE_Solver solver , int num );
+int HYPRE_BoomerAMGSetInterpVecQMax ( HYPRE_Solver solver , int q_max );
+int HYPRE_BoomerAMGSetInterpVecAbsQTrunc ( HYPRE_Solver solver , double q_trunc );
+int HYPRE_BoomerAMGSetSmoothInterpVectors ( HYPRE_Solver solver , int smooth_interp_vectors );
+int HYPRE_BoomerAMGSetInterpRefine ( HYPRE_Solver solver , int num_refine );
+int HYPRE_BoomerAMGSetInterpVecFirstLevel ( HYPRE_Solver solver , int level );
 
 /* HYPRE_parcsr_bicgstab.c */
 int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -678,6 +686,7 @@ int hypre_BoomerAMGSetCoordinates ( void *data , float *coordinates );
 int hypre_BoomerAMGSetNumFunctions ( void *data , int num_functions );
 int hypre_BoomerAMGGetNumFunctions ( void *data , int *num_functions );
 int hypre_BoomerAMGSetNodal ( void *data , int nodal );
+int hypre_BoomerAMGSetNodalLevels ( void *data , int nodal_levels );
 int hypre_BoomerAMGSetNodalDiag ( void *data , int nodal );
 int hypre_BoomerAMGSetNumPaths ( void *data , int num_paths );
 int hypre_BoomerAMGSetAggNumLevels ( void *data , int agg_num_levels );
@@ -720,6 +729,13 @@ int hypre_BoomerAMGSetEuSparseA ( void *data , double eu_sparse_A );
 int hypre_BoomerAMGSetEuBJ ( void *data , int eu_bj );
 int hypre_BoomerAMGSetChebyOrder ( void *data , int order );
 int hypre_BoomerAMGSetChebyFraction ( void *data , double ratio );
+int hypre_BoomerAMGSetInterpVectors ( void *solver , int num_vectors , hypre_ParVector **interp_vectors );
+int hypre_BoomerAMGSetInterpVecVariant ( void *solver , int var );
+int hypre_BoomerAMGSetInterpVecQMax ( void *data , int q_max );
+int hypre_BoomerAMGSetInterpVecAbsQTrunc ( void *data , double q_trunc );
+int hypre_BoomerAMGSetSmoothInterpVectors ( void *solver , int smooth_interp_vectors );
+int hypre_BoomerAMGSetInterpRefine ( void *data , int num_refine );
+int hypre_BoomerAMGSetInterpVecFirstLevel ( void *data , int level );
 
 /* par_amg_setup.c */
 int hypre_BoomerAMGSetup ( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
@@ -838,7 +854,7 @@ int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , int *CF_marker , hyp
 
 /* par_nodal_systems.c */
 int hypre_BoomerAMGCreateNodalA ( hypre_ParCSRMatrix *A , int num_functions , int *dof_func , int option , int diag_option , hypre_ParCSRMatrix **AN_ptr );
-int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *SN , int *CFN_marker , int *col_offd_SN_to_AN , int num_functions , int nodal , int data , int **dof_func_ptr , int **CF_marker_ptr , int **col_offd_S_to_A_ptr , hypre_ParCSRMatrix **S_ptr );
+int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , int *CFN_marker , int *col_offd_SN_to_AN , int num_functions , int nodal , int data , int **dof_func_ptr , int **CF_marker_ptr , int **col_offd_S_to_A_ptr , hypre_ParCSRMatrix **S_ptr );
 int hypre_BoomerAMGCreateScalarCF ( int *CFN_marker , int num_functions , int num_nodes , int **dof_func_ptr , int **CF_marker_ptr );
 
 /* par_rap.c */
@@ -865,6 +881,10 @@ int hypre_ParCSRRelax_CG ( HYPRE_Solver solver , hypre_ParCSRMatrix *A , hypre_P
 int hypre_LINPACKcgtql1 ( int *n , double *d , double *e , int *ierr );
 double hypre_LINPACKcgpthy ( double *a , double *b );
 int hypre_ParCSRRelax_L1_Jacobi ( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_points , double relax_weight , double *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp );
+
+/* par_relax_old.c */
+int hypre_BoomerAMGRelax ( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , double omega , double *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *Ztemp );
+int gselim ( double *A , double *x , int n );
 
 /* par_rotate_7pt.c */
 HYPRE_ParCSRMatrix GenerateRotate7pt ( MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double alpha , double eps );
@@ -900,6 +920,16 @@ int hypre_BoomerAMGCreateSCommPkg ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *
 int hypre_BoomerAMGCreate2ndS ( hypre_ParCSRMatrix *S , int *CF_marker , int num_paths , int *coarse_row_starts , hypre_ParCSRMatrix **C_ptr );
 int hypre_BoomerAMGCorrectCFMarker ( int *CF_marker , int num_var , int *new_CF_marker );
 int hypre_BoomerAMGCorrectCFMarker2 ( int *CF_marker , int num_var , int *new_CF_marker );
+
+/* par_sv_interp.c */
+int hypre_BoomerAMGSmoothInterpVectors ( hypre_ParCSRMatrix *A , int num_smooth_vecs , hypre_ParVector **smooth_vecs , int smooth_steps );
+int hypre_BoomerAMGCoarsenInterpVectors ( hypre_ParCSRMatrix *P , int num_smooth_vecs , hypre_ParVector **smooth_vecs , int *CF_marker , hypre_ParVector ***new_smooth_vecs , int expand_level , int num_functions );
+int hypre_BoomerAMG_GMExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , int num_smooth_vecs , hypre_ParVector **smooth_vecs , int *nf , int *dof_func , int **coarse_dof_func , int variant , int level , double abs_trunc , double *weights , int q_max , int *CF_marker , int interp_vec_first_level );
+int hypre_BoomerAMGRefineInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , int *num_cpts_global , int *nf , int *dof_func , int *CF_marker , int level );
+int hypre_BoomerAMG_LNExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , int *num_cpts_global , int *nf , int *dof_func , int **coarse_dof_func , int *CF_marker , int level , double *weights , int num_smooth_vecs , hypre_ParVector **smooth_vecs , double abs_trunc , int q_max , int interp_vec_first_level );
+
+/* par_sv_interp_ln.c */
+int hypre_BoomerAMG_LNExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , int *num_cpts_global , int *nf , int *dof_func , int **coarse_dof_func , int *CF_marker , int level , double *weights , int num_smooth_vecs , hypre_ParVector **smooth_vecs , double abs_trunc , int q_max , int interp_vec_first_level );
 
 /* partial.c */
 int hypre_BoomerAMGBuildPartialExtPIInterp ( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int *num_old_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int max_elmts , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );

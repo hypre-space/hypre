@@ -52,7 +52,7 @@ hypre_BoomerAMGCreate()
    int      setup_type;
    int      P_max_elmts;
    int 	    num_functions;
-   int 	    nodal, nodal_diag;
+   int 	    nodal, nodal_levels, nodal_diag;
    int 	    num_paths;
    int 	    agg_num_levels;
    int      agg_interp_type;
@@ -133,6 +133,7 @@ hypre_BoomerAMGCreate()
    agg_P12_max_elmts = 0;
    num_functions = 1;
    nodal = 0;
+   nodal_levels = max_levels;
    nodal_diag = 0;
    num_paths = 1;
    agg_num_levels = 0;
@@ -219,6 +220,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetAggP12MaxElmts(amg_data, agg_P12_max_elmts);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
    hypre_BoomerAMGSetNodal(amg_data, nodal);
+   hypre_BoomerAMGSetNodalLevels(amg_data, nodal_levels);
    hypre_BoomerAMGSetNodal(amg_data, nodal_diag);
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
    hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
@@ -311,6 +313,20 @@ hypre_BoomerAMGCreate()
    /* BM Oct 17, 2006 */
    hypre_ParAMGDataCoordDim(amg_data) = 0;
    hypre_ParAMGDataCoordinates(amg_data) = NULL;
+
+  /* for fitting vectors for interp */ 
+   hypre_BoomerAMGSetInterpVecVariant(amg_data, 0);
+   hypre_BoomerAMGSetInterpVectors(amg_data, 0, NULL); 
+   hypre_ParAMGNumLevelsInterpVectors(amg_data) = max_levels;
+   hypre_ParAMGInterpVectorsArray(amg_data) = NULL;
+   hypre_ParAMGInterpVecQMax(amg_data) = 0;
+   hypre_ParAMGInterpVecAbsQTrunc(amg_data) = 0.0;
+   hypre_ParAMGInterpRefine(amg_data) = 0;
+   hypre_ParAMGInterpVecFirstLevel(amg_data) = 0;
+   hypre_ParAMGNumInterpVectors(amg_data) = 0;
+   hypre_ParAMGSmoothInterpVectors(amg_data) = 0;
+   hypre_ParAMGDataExpandPWeights(amg_data) = NULL;
+
 
    return (void *) amg_data;
 }
@@ -491,6 +507,32 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_ParVectorDestroy( hypre_ParAMGDataResidual(amg_data) );
       hypre_ParAMGDataResidual(amg_data) = NULL;
    }
+
+   
+   if (hypre_ParAMGInterpVecVariant(amg_data) > 0 
+        &&  hypre_ParAMGNumInterpVectors(amg_data) > 0)
+   {
+
+      int j;
+      int num_vecs =  hypre_ParAMGNumInterpVectors(amg_data);
+      hypre_ParVector **sm_vecs;
+      int num_il;
+      num_il = hypre_min(hypre_ParAMGNumLevelsInterpVectors(amg_data),num_levels);
+
+      /* don't destroy lev = 0 - this was user input */
+      for (i = 1; i< num_il; i++)
+      {
+         sm_vecs = hypre_ParAMGInterpVectorsArray(amg_data)[i];
+         for (j = 0; j< num_vecs; j++)
+         {
+            hypre_ParVectorDestroy(sm_vecs[j]);
+         }
+         hypre_TFree(sm_vecs);
+      }
+      hypre_TFree( hypre_ParAMGInterpVectorsArray(amg_data));
+   
+   }
+   
 
    hypre_TFree(amg_data);
    return hypre_error_flag;
@@ -2315,6 +2357,28 @@ hypre_BoomerAMGSetNodal( void     *data,
    return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------
+ * Indicate number of levels for nodal coarsening
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetNodalLevels( void     *data,
+                          int    nodal_levels )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataNodalLevels(amg_data) = nodal_levels;
+
+   return hypre_error_flag;
+}
+
+
+/*--------------------------------------------------------------------------
  * Indicate how to treat diag for primary matrix with  nodal systems function
  *--------------------------------------------------------------------------*/
 
@@ -3112,7 +3176,6 @@ hypre_BoomerAMGSetEuBJ( void     *data,
 
    return hypre_error_flag;
 }
-
 int
 hypre_BoomerAMGSetChebyOrder( void     *data,
                               int       order)
@@ -3152,6 +3215,141 @@ hypre_BoomerAMGSetChebyFraction( void     *data,
       return hypre_error_flag;
    } 
    hypre_ParAMGDataChebyFraction(amg_data) = ratio;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGSetInterpVectors
+ * -used for post-interpolation fitting of smooth vectors
+ *--------------------------------------------------------------------------*/
+
+int hypre_BoomerAMGSetInterpVectors(void *solver,
+                                    int  num_vectors,
+                                    hypre_ParVector **interp_vectors)
+
+{
+   hypre_ParAMGData *amg_data = solver;
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGInterpVectors(amg_data) =  interp_vectors;
+   hypre_ParAMGNumInterpVectors(amg_data) = num_vectors;
+   
+   return hypre_error_flag;
+}
+
+int hypre_BoomerAMGSetInterpVecVariant(void *solver,
+                                       int  var)
+
+
+{
+   hypre_ParAMGData *amg_data = solver;
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   if (var < 1)
+      var = 0;
+   if (var > 3)
+      var = 3;
+
+   hypre_ParAMGInterpVecVariant(amg_data) = var;
+   
+   return hypre_error_flag;
+  
+}
+
+int
+hypre_BoomerAMGSetInterpVecQMax( void     *data,
+                                 int    q_max)
+{
+   hypre_ParAMGData  *amg_data = data;
+   
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGInterpVecQMax(amg_data) = q_max;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetInterpVecAbsQTrunc( void     *data,
+                                      double    q_trunc)
+{
+   hypre_ParAMGData  *amg_data = data;
+   
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGInterpVecAbsQTrunc(amg_data) = q_trunc;
+
+   return hypre_error_flag;
+}
+
+int hypre_BoomerAMGSetSmoothInterpVectors(void *solver,
+                                          int  smooth_interp_vectors)
+
+{
+   hypre_ParAMGData *amg_data = solver;
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGSmoothInterpVectors(amg_data) = smooth_interp_vectors;
+   
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetInterpRefine( void     *data,
+                                int       num_refine )
+{
+   hypre_ParAMGData  *amg_data = data;
+
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGInterpRefine(amg_data) = num_refine;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetInterpVecFirstLevel( void     *data,
+                                       int  level )
+{
+   hypre_ParAMGData  *amg_data = data;
+
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGInterpVecFirstLevel(amg_data) = level;
 
    return hypre_error_flag;
 }

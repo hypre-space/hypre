@@ -77,6 +77,7 @@ typedef struct
    int      num_variables;
    int      num_functions;
    int      nodal;
+   int      nodal_levels;
    int      nodal_diag;
    int      num_points;
    int     *dof_func;
@@ -166,6 +167,21 @@ typedef struct
    int      coorddim;
    float    *coordinates;
 
+ /* data for fitting vectors in interpolation */
+   int               num_interp_vectors;
+   int               num_levels_interp_vectors; /* not set by user */
+   hypre_ParVector **interp_vectors;
+   hypre_ParVector ***interp_vectors_array;   
+   int               interp_vec_variant;
+   int               interp_vec_first_level;
+   double            interp_vectors_abs_q_trunc;
+   int               interp_vectors_q_max;
+   int               interp_refine;
+   int               smooth_interp_vectors;
+   double           *expandp_weights; /* currently not set by user */
+   
+
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -224,6 +240,7 @@ typedef struct
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
 #define hypre_ParAMGDataNumFunctions(amg_data) ((amg_data)->num_functions)
 #define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
+#define hypre_ParAMGDataNodalLevels(amg_data) ((amg_data)->nodal_levels)
 #define hypre_ParAMGDataNodalDiag(amg_data) ((amg_data)->nodal_diag)
 #define hypre_ParAMGDataNumPoints(amg_data) ((amg_data)->num_points)
 #define hypre_ParAMGDataDofFunc(amg_data) ((amg_data)->dof_func)
@@ -314,6 +331,20 @@ typedef struct
 /* coordinates BM Oct 17, 2006 */
 #define hypre_ParAMGDataCoordDim(amg_data) ((amg_data)->coorddim)
 #define hypre_ParAMGDataCoordinates(amg_data) ((amg_data)->coordinates)
+
+
+#define hypre_ParAMGNumInterpVectors(amg_data) ((amg_data)->num_interp_vectors)
+#define hypre_ParAMGNumLevelsInterpVectors(amg_data) ((amg_data)->num_levels_interp_vectors)
+#define hypre_ParAMGInterpVectors(amg_data) ((amg_data)->interp_vectors)
+#define hypre_ParAMGInterpVectorsArray(amg_data) ((amg_data)->interp_vectors_array)
+#define hypre_ParAMGInterpVecVariant(amg_data) ((amg_data)->interp_vec_variant)
+#define hypre_ParAMGInterpVecFirstLevel(amg_data) ((amg_data)->interp_vec_first_level)
+#define hypre_ParAMGInterpVecAbsQTrunc(amg_data) ((amg_data)->interp_vectors_abs_q_trunc)
+#define hypre_ParAMGInterpVecQMax(amg_data) ((amg_data)->interp_vectors_q_max)
+#define hypre_ParAMGInterpRefine(amg_data) ((amg_data)->interp_refine)
+#define hypre_ParAMGSmoothInterpVectors(amg_data) ((amg_data)->smooth_interp_vectors)
+#define hypre_ParAMGDataExpandPWeights(amg_data) ((amg_data)->expandp_weights)
+
 
 #endif
 

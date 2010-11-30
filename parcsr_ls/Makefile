@@ -114,6 +114,8 @@ FILES =\
  par_schwarz.c\
  par_stats.c\
  par_strength.c\
+ par_sv_interp.c\
+ par_sv_interp_ln.c\
  partial.c\
  pcg_par.c\
  schwarz.c\

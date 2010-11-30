@@ -21,7 +21,14 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include "Common.h"
 
+#ifdef HYPRE_USING_ESSL
+#include <essl.h>
+#else
+int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (int *, int *, double *, int *, int *, int *);
+int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, int *, int *, double *, int *, int *, double *b, int*, int *);
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGRelax
@@ -121,6 +128,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     		    with outer relaxation parameters 
     *     relax_type = 7 -> Jacobi (uses Matvec), only needed in CGNR
     *     relax_type = 9 -> Direct Solve
+    *     relax_type = 99-> Direct solve: use gaussian elimination & BLAS (with pivoting)
     *-----------------------------------------------------------------------*/
    switch (relax_type)
    {            
@@ -3044,6 +3052,103 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             relax_error = gselim(A_mat,b_vec,n_global);
             /* use version with pivoting */
             /* relax_error = gselim_piv(A_mat,b_vec,n_global);*/
+
+            for (i = 0; i < n; i++)
+            {
+               u_data[i] = b_vec[first_index+i];
+            }
+
+	    hypre_TFree(A_mat); 
+            hypre_TFree(b_vec);
+            hypre_CSRMatrixDestroy(A_CSR);
+            A_CSR = NULL;
+            hypre_SeqVectorDestroy(f_vector);
+            f_vector = NULL;
+         
+         }
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         else
+         {
+            
+            hypre_CSRMatrixDestroy(A_CSR);
+            A_CSR = NULL;
+            hypre_SeqVectorDestroy(f_vector);
+            f_vector = NULL;
+         }
+#endif
+
+      }
+      break;   
+      case 99: /* Direct solve: use gaussian elimination & BLAS (with pivoting) */
+      {
+
+         int info;
+         int one_i = 1;
+         int *piv;
+         /*-----------------------------------------------------------------
+          *  Generate CSR matrix from ParCSRMatrix A
+          *-----------------------------------------------------------------*/
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         /* all processors are needed for these routines */
+         A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+         f_vector = hypre_ParVectorToVectorAll(f);
+	 if (n)
+	 {
+	 
+#else
+	 if (n)
+	 {
+	    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+	    f_vector = hypre_ParVectorToVectorAll(f);
+#endif
+ 	    A_CSR_i = hypre_CSRMatrixI(A_CSR);
+ 	    A_CSR_j = hypre_CSRMatrixJ(A_CSR);
+ 	    A_CSR_data = hypre_CSRMatrixData(A_CSR);
+   	    f_vector_data = hypre_VectorData(f_vector);
+
+            A_mat = hypre_CTAlloc(double, n_global*n_global);
+            b_vec = hypre_CTAlloc(double, n_global);    
+
+            /*---------------------------------------------------------------
+             *  Load CSR matrix into A_mat.
+             *---------------------------------------------------------------*/
+
+            for (i = 0; i < n_global; i++)
+            {
+               for (jj = A_CSR_i[i]; jj < A_CSR_i[i+1]; jj++)
+               {
+             
+                  /* need col major */
+                  column = A_CSR_j[jj];
+                  A_mat[i + n_global*column] = A_CSR_data[jj];
+               }
+               b_vec[i] = f_vector_data[i];
+            }
+
+            piv = hypre_CTAlloc(int, n_global);
+
+           /* write over A with LU */
+#ifdef HYPRE_USING_ESSL
+            dgetrf(n_global, n_global, A_mat, n_global, piv, &info);
+
+#else
+            hypre_F90_NAME_LAPACK(dgetrf, DGETRF)(&n_global, &n_global, 
+                                             A_mat, &n_global, piv, &info);
+#endif
+            
+           /*now b_vec = inv(A)*b_vec  */
+#ifdef HYPRE_USING_ESSL
+            dgetrs("N", n_global, &one_i, A_mat, 
+                   n_global, piv, b_vec, 
+                   n_global, &info);
+
+#else
+            hypre_F90_NAME_LAPACK(dgetrs, DGETRS)("N", &n_global, &one_i, A_mat, 
+                                             &n_global, piv, b_vec, 
+                                             &n_global, &info);
+#endif
+            hypre_TFree(piv);
+            
 
             for (i = 0; i < n; i++)
             {
