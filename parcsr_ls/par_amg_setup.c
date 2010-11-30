@@ -1503,7 +1503,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       /*  Post processing of interpolation operators to incorporate
           smooth vectors NOTE: must pick nodal coarsening !!!
           (nodal is changed above to 1 if it is 0)  */
-      if (interp_vec_variant && nodal)
+      if (interp_vec_variant && nodal && num_interp_vectors)
       {
          /* TO DO: add option of smoothing the vectors at
           * coarser levels?*/
