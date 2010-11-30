@@ -11,6 +11,8 @@
  ***********************************************************************EHEADER*/
 
 
+#include <math.h>
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -88,6 +90,72 @@ void hypre_swap3i(int  *v,
    z[j] = temp;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+void hypre_swap3_d(double  *v,
+                  int  *w,
+                  int  *z,
+                  int  i,
+                  int  j )
+{
+   int temp;
+   double temp_d;
+   
+
+   temp_d = v[i];
+   v[i] = v[j];
+   v[j] = temp_d;
+   temp = w[i];
+   w[i] = w[j];
+   w[j] = temp;
+   temp = z[i];
+   z[i] = z[j];
+   z[j] = temp;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+void hypre_swap4_d(double  *v,
+                  int  *w,
+                  int  *z,
+                  int *y, 
+                  int  i,
+                  int  j )
+{
+   int temp;
+   double temp_d;
+   
+
+   temp_d = v[i];
+   v[i] = v[j];
+   v[j] = temp_d;
+   temp = w[i];
+   w[i] = w[j];
+   w[j] = temp;
+   temp = z[i];
+   z[i] = z[j];
+   z[j] = temp;
+   temp = y[i];
+   y[i] = y[j];
+   y[j] = temp;
+
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+void hypre_swap_d( double *v,
+                   int  i,
+                   int  j )
+{
+   double temp;
+
+   temp = v[i];
+   v[i] = v[j];
+   v[j] = temp;
+}
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -221,3 +289,84 @@ void hypre_qsort3i( int *v,
    hypre_qsort3i(v, w, z, left, last-1);
    hypre_qsort3i(v, w, z, last+1, right);
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/* sort min to max based on absolute value */
+
+void hypre_qsort3_abs(double *v,
+                      int *w,
+                      int *z,
+                      int  left,
+                      int  right )
+{
+   int i, last;
+   if (left >= right)
+      return;
+   hypre_swap3_d( v, w, z, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+      if (fabs(v[i]) < fabs(v[left]))
+      {
+         hypre_swap3_d(v,w, z, ++last, i);
+      }
+   hypre_swap3_d(v, w, z, left, last);
+   hypre_qsort3_abs(v, w, z, left, last-1);
+   hypre_qsort3_abs(v, w, z, last+1, right);
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/* sort min to max based on absolute value */
+
+void hypre_qsort4_abs(double *v,
+                      int *w,
+                      int *z,
+                      int *y,
+                      int  left,
+                      int  right )
+{
+   int i, last;
+   if (left >= right)
+      return;
+   hypre_swap4_d( v, w, z, y, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+      if (fabs(v[i]) < fabs(v[left]))
+      {
+         hypre_swap4_d(v,w, z, y, ++last, i);
+      }
+   hypre_swap4_d(v, w, z, y, left, last);
+   hypre_qsort4_abs(v, w, z, y, left, last-1);
+   hypre_qsort4_abs(v, w, z, y, last+1, right);
+}
+
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+/* sort min to max based on absolute value */
+
+void hypre_qsort_abs(double *w,
+                     int  left,
+                     int  right )
+{
+   int i, last;
+   if (left >= right)
+      return;
+   hypre_swap_d( w, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+      if (fabs(w[i]) < fabs(w[left]))
+      {
+         hypre_swap_d(w, ++last, i);
+      }
+   hypre_swap_d(w, left, last);
+   hypre_qsort_abs(w, left, last-1);
+   hypre_qsort_abs(w, last+1, right);
+}
+
+
+
+

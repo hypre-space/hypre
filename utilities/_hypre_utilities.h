@@ -909,11 +909,17 @@ void swap ( int *v , int i , int j );
 void swap2 ( int *v , double *w , int i , int j );
 void hypre_swap2i ( int *v , int *w , int i , int j );
 void hypre_swap3i ( int *v , int *w , int *z , int i , int j );
+void hypre_swap3_d ( double *v , int *w , int *z , int i , int j );
+void hypre_swap4_d ( double *v , int *w , int *z , int *y , int i , int j );
+void hypre_swap_d ( double *v , int i , int j );
 void qsort0 ( int *v , int left , int right );
 void qsort1 ( int *v , double *w , int left , int right );
 void hypre_qsort2i ( int *v , int *w , int left , int right );
 void hypre_qsort2 ( int *v , double *w , int left , int right );
 void hypre_qsort3i ( int *v , int *w , int *z , int left , int right );
+void hypre_qsort3_abs ( double *v , int *w , int *z , int left , int right );
+void hypre_qsort4_abs ( double *v , int *w , int *z , int *y , int left , int right );
+void hypre_qsort_abs ( double *w , int left , int right );
 
 /* qsplit.c */
 int hypre_DoubleQuickSplit ( double *values , int *indices , int list_length , int NumberKept );
