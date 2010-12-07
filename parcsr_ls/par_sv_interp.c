@@ -1329,7 +1329,7 @@ int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       new_col_starts[0] = (col_starts[0]/num_functions)*new_nf ;
       new_col_starts[1] = (col_starts[1]/num_functions)*new_nf;
        
-      if (my_id == (num_procs -1)) g_nc = new_col_starts[1];
+      if (myid == (num_procs -1)) g_nc = new_col_starts[1];
       MPI_Bcast(&g_nc, 1, MPI_INT, num_procs-1, comm);
 #else
       new_col_starts =  hypre_CTAlloc(int,num_procs+1);
