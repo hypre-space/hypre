@@ -3244,7 +3244,7 @@ int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
       hypre_TFree(int_buf_data);
    }
 
-#define HYPRE_SMP_PRIVATE i,ii,j,k,ns,ne,rest,size
+#define HYPRE_SMP_PRIVATE i,ii,j,k,ns,ne,rest,size,diag
 #include "../utilities/hypre_smp_forloop.h"
    for (k = 0; k < num_threads; k++)
    {
