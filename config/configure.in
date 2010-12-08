@@ -660,12 +660,12 @@ if test "$hypre_user_chose_ccompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(CC, [mpxlc xlc mpguidec guidec mpiicc icc pgcc cc], [""])
+      AC_CHECK_PROGS(CC, [mpxlc mpixlc_r xlc mpiicc icc mpguidec guidec pgcc cc], [""])
    elif test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, [xlc xlC gcc g++ pgcc pgCC icc icpc cc CC kcc KCC], [""])
+      AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC], [""])
    else
-      AC_CHECK_PROGS(CC, [mpxlc mpcc mpicc mpiicc mpipgcc], [""])
+      AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpcc mpicc mpipgcc], [""])
    fi
 
    if test "x$CC" = "x"
@@ -678,12 +678,12 @@ if test "$hypre_user_chose_cxxcompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(CXX, [mpxlC xlC mpguidec++ guidec++ mpiicpc icpc pgCC CC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r xlC mpiicpc mpguidec++ guidec++ icpc pgCC CC], [""])
    elif test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CXX, [xlC xlc g++ gcc pgCC pgcc icpc icc CC cc KCC kcc], [""])
+      AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc], [""])
    else
-      AC_CHECK_PROGS(CXX, [mpxlC mpCC mpiCC mpicxx mpiicpc mpipgCC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpCC mpiCC mpicxx mpipgCC], [""])
    fi
 
    if test "x$CXX" = "x"
@@ -696,12 +696,12 @@ if test "$hypre_using_fortran" = "yes" -a "$hypre_user_chose_fcompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(F77, [mpxlf xlf mpguidef77 guidef77 mpiifort ifort pg77 f77], [""])
+      AC_CHECK_PROGS(F77, [mpxlf mpixlf77_r xlf mpiifort ifort mpguidef77 guidef77 pg77 f77], [""])
    elif test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(F77, [xlf gfortran g77 g95 pgf77 ifort f77], [""])
+      AC_CHECK_PROGS(F77, [xlf ifort gfortran g77 g95 pgf77 f77], [""])
    else
-      AC_CHECK_PROGS(F77, [mpxlf mpf77 mpif77 mpiifort mpipgf77], [""])
+      AC_CHECK_PROGS(F77, [mpxlf mpixlf77 mpiifort mpf77 mpif77 mpipgf77], [""])
    fi
 
    if test "x$F77" = "x"

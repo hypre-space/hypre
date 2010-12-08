@@ -2248,7 +2248,7 @@ if test "$hypre_user_chose_ccompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
-      for ac_prog in mpxlc xlc mpguidec guidec mpiicc icc pgcc cc
+      for ac_prog in mpxlc mpixlc_r xlc mpiicc icc mpguidec guidec pgcc cc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2291,7 +2291,7 @@ test -n "$CC" || CC=""""
 
    elif test "$hypre_using_mpi" = "no"
    then
-      for ac_prog in xlc xlC gcc g++ pgcc pgCC icc icpc cc CC kcc KCC
+      for ac_prog in xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2333,7 +2333,7 @@ done
 test -n "$CC" || CC=""""
 
    else
-      for ac_prog in mpxlc mpcc mpicc mpiicc mpipgcc
+      for ac_prog in mpxlc mpixlc mpiicc mpcc mpicc mpipgcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2386,7 +2386,7 @@ if test "$hypre_user_chose_cxxcompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
-      for ac_prog in mpxlC xlC mpguidec++ guidec++ mpiicpc icpc pgCC CC
+      for ac_prog in mpxlC mpixlcxx_r xlC mpiicpc mpguidec++ guidec++ icpc pgCC CC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2429,7 +2429,7 @@ test -n "$CXX" || CXX=""""
 
    elif test "$hypre_using_mpi" = "no"
    then
-      for ac_prog in xlC xlc g++ gcc pgCC pgcc icpc icc CC cc KCC kcc
+      for ac_prog in xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2471,7 +2471,7 @@ done
 test -n "$CXX" || CXX=""""
 
    else
-      for ac_prog in mpxlC mpCC mpiCC mpicxx mpiicpc mpipgCC
+      for ac_prog in mpxlC mpixlcxx mpiicpc mpCC mpiCC mpicxx mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2524,7 +2524,7 @@ if test "$hypre_using_fortran" = "yes" -a "$hypre_user_chose_fcompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
-      for ac_prog in mpxlf xlf mpguidef77 guidef77 mpiifort ifort pg77 f77
+      for ac_prog in mpxlf mpixlf77_r xlf mpiifort ifort mpguidef77 guidef77 pg77 f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2567,7 +2567,7 @@ test -n "$F77" || F77=""""
 
    elif test "$hypre_using_mpi" = "no"
    then
-      for ac_prog in xlf gfortran g77 g95 pgf77 ifort f77
+      for ac_prog in xlf ifort gfortran g77 g95 pgf77 f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2609,7 +2609,7 @@ done
 test -n "$F77" || F77=""""
 
    else
-      for ac_prog in mpxlf mpf77 mpif77 mpiifort mpipgf77
+      for ac_prog in mpxlf mpixlf77 mpiifort mpf77 mpif77 mpipgf77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2

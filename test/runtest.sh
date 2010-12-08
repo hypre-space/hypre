@@ -83,6 +83,20 @@ function MpirunString
          # RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          RunString="poe $MY_ARGS -rmpool pdebug -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
          ;;
+      dawn*) shift
+         BatchMode=1
+         MY_NUM_TASKS=$1  
+         MY_EXECUTE_DIR=`pwd`
+         MY_EXECUTE_JOB=`pwd`/$EXECFILE
+         shift
+         shift
+         MY_ARGS="$*"
+         RunString="mpirun -verbose 1 -np $MY_NUM_TASKS -exe $MY_EXECUTE_JOB"
+         RunString="${RunString} -cwd $MY_EXECUTE_DIR -args \" $MY_ARGS \" "
+         ;;
+      hera*) shift
+         RunString="srun -p pdebug -n$*"
+         ;;
       zeus*) shift
          RunString="srun -p pdebug -n$*"
          ;;
@@ -122,7 +136,11 @@ function CalcNodes
          ;;
       up*) CPUS_PER_NODE=8
          ;;
+      dawn*) CPUS_PER_NODE=4
+         ;;
       vert*) CPUS_PER_NODE=2
+         ;;
+      hera*) CPUS_PER_NODE=16
          ;;
       zeus*) CPUS_PER_NODE=8
          ;;
@@ -175,7 +193,11 @@ function CheckBatch
          ;;
       up*) BATCH_MODE=0
          ;;
+      dawn*) BATCH_MODE=1
+         ;;
       vert*) BATCH_MODE=0
+         ;;
+      hera*) BATCH_MODE=0
          ;;
       zeus*) BATCH_MODE=0
          ;;
@@ -228,13 +250,19 @@ function PsubCmdStub
          ;;
       thun*) PsubCmd="psub -c thunder,pbatch -b casc -r $RunName -ln $NumNodes -g $NumProcs"
          ;;
-      ubgl*) PsubCmd="psub -c ubgl -pool pbatch -b science -r $RunName -ln 32"
+      vert*) PsubCmd="psub -c vertex,pbatch -b casc -r $RunName -ln $NumProcs"
+         ;;
+      *bgl*) PsubCmd="psub -c ubgl -pool pbatch -b science -r $RunName -ln 32"
          ;;
       up*) PsubCmd="psub -c up -pool pbatch -b a_casc -r $RunName -ln $NumProcs"
          ;;
-      vert*) PsubCmd="psub -c vertex,pbatch -b casc -r $RunName -ln $NumProcs"
+      dawn*) PsubCmd="psub -c dawndev -pool pdebug -r $RunName"
+         ;;
+      hera*) PsubCmd="psub -c hera,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       zeus*) PsubCmd="psub -c zeus,pbatch -b casc -r $RunName -ln $NumProcs"
+         ;;
+      atla*) PsubCmd="psub -c atlas,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       *) PsubCmd="psub -b casc -r $RunName -ln $NumProcs"
          ;;
@@ -297,6 +325,9 @@ EOF
             MpirunString $RunCmd            # construct "RunString"
             case $HOST in
                *bgl*) RunString="${RunString} > `pwd`/$OutFile 2>`pwd`/$ErrFile"
+                      ;;
+               dawn*) RunString="${RunString} > `pwd`/$OutFile 2>`pwd`/$ErrFile"
+                      ;;
             esac
             if [ "$BatchMode" -eq 0 ] ; then
                ${RunString} > $OutFile 2> $ErrFile </dev/null
@@ -311,6 +342,8 @@ EOF
                   PsubCmdStub ${RunCmd}
                   case $HOST in
                      *bgl*) PsubCmd="$PsubCmd `pwd`/$BatchFile"
+                            ;;
+                     dawn*) PsubCmd="$PsubCmd `pwd`/$BatchFile"
                             ;;
                          *) PsubCmd="$PsubCmd -o $OutFile -e $ErrFile `pwd`/$BatchFile"
                             ;;
