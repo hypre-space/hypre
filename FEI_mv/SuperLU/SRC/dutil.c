@@ -267,12 +267,13 @@ void
 dPrint_Dense_Matrix(char *what, SuperMatrix *A)
 {
     DNformat     *Astore;
-    register int i, j, lda = Astore->lda;
+    register int i, j, lda;
     double       *dp;
     
     printf("\nDense matrix %s:\n", what);
     printf("Stype %d, Dtype %d, Mtype %d\n", A->Stype,A->Dtype,A->Mtype);
     Astore = (DNformat *) A->Store;
+    lda = Astore->lda;
     dp = (double *) Astore->nzval;
     printf("nrow %d, ncol %d, lda %d\n", A->nrow,A->ncol,lda);
     printf("\nnzval: ");
