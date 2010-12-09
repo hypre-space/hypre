@@ -212,14 +212,14 @@ do
          name="tux"
          ;;
 
-      -alc|-thunder|-up|-zeus)
-         host=`echo $opt | awk -F- '{print $2}'`
-         name=$host
-         ;;
-
       -mac)
          host="kolev-mac"
          name="mac"
+         ;;
+
+      *)
+         host=`echo $opt | awk -F- '{print $2}'`
+         name=$host
          ;;
    esac
 
