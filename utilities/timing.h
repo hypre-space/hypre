@@ -68,11 +68,11 @@ typedef struct
    double  *cpu_time;
    double  *flops;
    char   **name;
-   int     *state;     /* boolean flag to allow for recursive timing */
-   int     *num_regs;  /* count of how many times a name is registered */
+   HYPRE_Int     *state;     /* boolean flag to allow for recursive timing */
+   HYPRE_Int     *num_regs;  /* count of how many times a name is registered */
 
-   int      num_names;
-   int      size;
+   HYPRE_Int      num_names;
+   HYPRE_Int      size;
 
    double   wall_count;
    double   CPU_count;
@@ -118,13 +118,13 @@ extern hypre_TimingType *hypre_global_timing;
  *-------------------------------------------------------*/
 
 /* timing.c */
-int hypre_InitializeTiming( const char *name );
-int hypre_FinalizeTiming( int time_index );
-int hypre_IncFLOPCount( int inc );
-int hypre_BeginTiming( int time_index );
-int hypre_EndTiming( int time_index );
-int hypre_ClearTiming( void );
-int hypre_PrintTiming( const char *heading , MPI_Comm comm );
+HYPRE_Int hypre_InitializeTiming( const char *name );
+HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
+HYPRE_Int hypre_IncFLOPCount( HYPRE_Int inc );
+HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
+HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
+HYPRE_Int hypre_ClearTiming( void );
+HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 
 #endif
 

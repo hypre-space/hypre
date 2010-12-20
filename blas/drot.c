@@ -8,7 +8,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ int drot_(integer *n, doublereal *dx, integer *incx, 
+/* Subroutine */ HYPRE_Int drot_(integer *n, doublereal *dx, integer *incx, 
 	doublereal *dy, integer *incy, doublereal *c, doublereal *s)
 {
 

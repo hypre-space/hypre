@@ -26,53 +26,53 @@
 
 #include "headers.h" 
 
-int hypre_AMGeSchurComplement(int *i_domain_chord,
-			      int *j_domain_chord,
+HYPRE_Int hypre_AMGeSchurComplement(HYPRE_Int *i_domain_chord,
+			      HYPRE_Int *j_domain_chord,
 			      double *a_domain_chord,
 
-			      int *i_chord_dof, int *j_chord_dof,
+			      HYPRE_Int *i_chord_dof, HYPRE_Int *j_chord_dof,
 
-			      int *i_domain_dof,
-			      int *j_domain_dof,
+			      HYPRE_Int *i_domain_dof,
+			      HYPRE_Int *j_domain_dof,
 
-			      int *i_subdomain_dof,
-			      int *j_subdomain_dof,
+			      HYPRE_Int *i_subdomain_dof,
+			      HYPRE_Int *j_subdomain_dof,
 
-			      int **i_Schur_dof_dof_pointer,
+			      HYPRE_Int **i_Schur_dof_dof_pointer,
 			      double **a_Schur_dof_dof_pointer,
 			      
-			      int num_domains, int num_chords, int num_dofs)
+			      HYPRE_Int num_domains, HYPRE_Int num_chords, HYPRE_Int num_dofs)
 
 {
 
-  int ierr = 0;
-  int i,j;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j;
 
-  int i_loc, j_loc, l_loc, k_loc;
-  int chord;
+  HYPRE_Int i_loc, j_loc, l_loc, k_loc;
+  HYPRE_Int chord;
 
-  int *i_Schur_dof_dof, *j_Schur_dof_dof;
+  HYPRE_Int *i_Schur_dof_dof, *j_Schur_dof_dof;
   double *a_Schur_dof_dof;
 
 
 
-  int *i_local_to_global, *i_global_to_local;
-  int *first, *second;
+  HYPRE_Int *i_local_to_global, *i_global_to_local;
+  HYPRE_Int *first, *second;
 
-  int first_counter, second_counter;
+  HYPRE_Int first_counter, second_counter;
 
   double *A, *A_11, *A_22, *X_11;
 
-  int max_num_local_dofs = 0;
-  int local_dof_counter;
-  int Schur_dof_dof_counter;
+  HYPRE_Int max_num_local_dofs = 0;
+  HYPRE_Int local_dof_counter;
+  HYPRE_Int Schur_dof_dof_counter;
 
-  int *i_dof_index;
+  HYPRE_Int *i_dof_index;
 
   /* check if subdomain[i] \subset domain[i]: */
   
 
-  i_dof_index = hypre_CTAlloc(int, num_dofs);
+  i_dof_index = hypre_CTAlloc(HYPRE_Int, num_dofs);
 
   for (i=0; i < num_dofs; i++)
     i_dof_index[i] = -1;
@@ -84,7 +84,7 @@ int hypre_AMGeSchurComplement(int *i_domain_chord,
       for (j=i_subdomain_dof[i]; j < i_subdomain_dof[i+1]; j++)
 	if (i_dof_index[j_subdomain_dof[j]] < 0)
 	  {
-	    printf("subdomain %d contains entry %d not in domain %d\n",
+	    hypre_printf("subdomain %d contains entry %d not in domain %d\n",
 		   i, j_subdomain_dof[j], i);
 	    
 	    hypre_TFree(i_dof_index);
@@ -104,9 +104,9 @@ int hypre_AMGeSchurComplement(int *i_domain_chord,
 
 
   i_global_to_local = i_dof_index;
-  i_local_to_global = hypre_CTAlloc(int, max_num_local_dofs);
-  first = hypre_CTAlloc(int, max_num_local_dofs);
-  second = hypre_CTAlloc(int, max_num_local_dofs);
+  i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_num_local_dofs);
+  first = hypre_CTAlloc(HYPRE_Int, max_num_local_dofs);
+  second = hypre_CTAlloc(HYPRE_Int, max_num_local_dofs);
 
   A    = hypre_CTAlloc(double, max_num_local_dofs*max_num_local_dofs);
   A_11 = hypre_CTAlloc(double, max_num_local_dofs*max_num_local_dofs);
@@ -114,7 +114,7 @@ int hypre_AMGeSchurComplement(int *i_domain_chord,
   A_22 = hypre_CTAlloc(double, max_num_local_dofs*max_num_local_dofs);
 
 
-  i_Schur_dof_dof = hypre_CTAlloc(int, num_domains+1);
+  i_Schur_dof_dof = hypre_CTAlloc(HYPRE_Int, num_domains+1);
 
   Schur_dof_dof_counter = 0;
   for (i=0;  i < num_domains; i++)
@@ -182,20 +182,20 @@ int hypre_AMGeSchurComplement(int *i_domain_chord,
 	ierr = matrix_inverse(X_11, A_11, first_counter);
 
       /*
-      printf("mat_inv_ierr: %d, first_counter: %d\n", ierr, first_counter);
+      hypre_printf("mat_inv_ierr: %d, first_counter: %d\n", ierr, first_counter);
       */
 
       if (ierr < 0) 
 	{
-	  printf("ierr in Schur complement.c: %d\n ", ierr);	 
+	  hypre_printf("ierr in Schur complement.c: %d\n ", ierr);	 
 	  /* ----------------------------------------------------------
 	  for (i_loc=0; i_loc < first_counter; i_loc++)
 	    {
-	      printf("\n ");
+	      hypre_printf("\n ");
 	      for (j_loc=0; j_loc < first_counter; j_loc++)
-		printf("%e ", A[first[j_loc]+first[i_loc]*local_dof_counter]);
+		hypre_printf("%e ", A[first[j_loc]+first[i_loc]*local_dof_counter]);
 
-	      printf("\n ");	 
+	      hypre_printf("\n ");	 
 	    }
 	    -------------------------------------------------------- */	 
 	}

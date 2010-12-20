@@ -31,7 +31,7 @@ typedef struct
    hypre_Index         stride;
    hypre_Index         strideR;
 
-   int                 time_index;
+   HYPRE_Int                 time_index;
 
 } hypre_SparseMSGRestrictData;
 
@@ -55,7 +55,7 @@ hypre_SparseMSGRestrictCreate( )
  * hypre_SparseMSGRestrictSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
                               hypre_StructMatrix *R,
                               hypre_StructVector *r,
@@ -73,7 +73,7 @@ hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
-   int                     ierr = 0;
+   HYPRE_Int                     ierr = 0;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -106,13 +106,13 @@ hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
  * hypre_SparseMSGRestrict:
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SparseMSGRestrict( void               *restrict_vdata,
                          hypre_StructMatrix *R,
                          hypre_StructVector *r,
                          hypre_StructVector *rc             )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SparseMSGRestrictData *restrict_data = restrict_vdata;
 
@@ -122,10 +122,10 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    hypre_IndexRef          strideR;
 
    hypre_StructGrid       *fgrid;
-   int                    *fgrid_ids;
+   HYPRE_Int                    *fgrid_ids;
    hypre_StructGrid       *cgrid;
    hypre_BoxArray         *cgrid_boxes;
-   int                    *cgrid_ids;
+   HYPRE_Int                    *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
                        
@@ -137,9 +137,9 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    hypre_Box              *r_dbox;
    hypre_Box              *rc_dbox;
                        
-   int                     Ri;
-   int                     ri;
-   int                     rci;
+   HYPRE_Int                     Ri;
+   HYPRE_Int                     ri;
+   HYPRE_Int                     rci;
                          
    double                 *Rp0, *Rp1;
    double                 *rp, *rp0, *rp1;
@@ -154,8 +154,8 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
-   int                     compute_i, fi, ci, j;
-   int                     loopi, loopj, loopk;
+   HYPRE_Int                     compute_i, fi, ci, j;
+   HYPRE_Int                     loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things.
@@ -264,10 +264,10 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
  * hypre_SparseMSGRestrictDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SparseMSGRestrictDestroy( void *restrict_vdata )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SparseMSGRestrictData *restrict_data = restrict_vdata;
 

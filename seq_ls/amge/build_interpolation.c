@@ -34,35 +34,35 @@
  ****************************************************************************/
 #include "headers.h" 
 
-int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
+HYPRE_Int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
 
-				 int *i_AE_dof, int *j_AE_dof,
-				 int *i_dof_AE, int *j_dof_AE,
+				 HYPRE_Int *i_AE_dof, HYPRE_Int *j_AE_dof,
+				 HYPRE_Int *i_dof_AE, HYPRE_Int *j_dof_AE,
 
-				 int *i_dof_neighbor_coarsedof,
-				 int *j_dof_neighbor_coarsedof,
+				 HYPRE_Int *i_dof_neighbor_coarsedof,
+				 HYPRE_Int *j_dof_neighbor_coarsedof,
 
-				 int *i_dof_coarsedof,
-				 int *j_dof_coarsedof,
+				 HYPRE_Int *i_dof_coarsedof,
+				 HYPRE_Int *j_dof_coarsedof,
 
 				 hypre_CSRMatrix  *Matrix,
 
 
-				 int *dof_function, 
-				 int num_functions,
+				 HYPRE_Int *dof_function, 
+				 HYPRE_Int num_functions,
 
-				 int **coarsedof_function_pointer, 
+				 HYPRE_Int **coarsedof_function_pointer, 
 
-				 int num_AEs, 
-				 int num_dofs,
-				 int num_coarsedofs)
+				 HYPRE_Int num_AEs, 
+				 HYPRE_Int num_dofs,
+				 HYPRE_Int num_coarsedofs)
 
 {
-  int ierr = 0;
-  int i,j,k,l, i_dof, j_dof, i_loc, j_loc, k_loc;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k,l, i_dof, j_dof, i_loc, j_loc, k_loc;
 
-  int *i_dof_dof_a, *j_dof_dof_a;
+  HYPRE_Int *i_dof_dof_a, *j_dof_dof_a;
   double *a_dof_dof;
 
 
@@ -71,7 +71,7 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   hypre_CSRMatrix  *P;
 
 
-  int *coarsedof_function;
+  HYPRE_Int *coarsedof_function;
 
 
   double delta; 
@@ -79,13 +79,13 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   double *AE, *XE;
 
-  int local_dof_counter, int_dof_counter, boundary_dof_counter;
-  int coarsedof_counter;
+  HYPRE_Int local_dof_counter, int_dof_counter, boundary_dof_counter;
+  HYPRE_Int coarsedof_counter;
 
-  int max_local_dof_counter = 0;
-  int AE_coarsedof_counter;
+  HYPRE_Int max_local_dof_counter = 0;
+  HYPRE_Int AE_coarsedof_counter;
 
-  int *i_global_to_local, *i_local_to_global;
+  HYPRE_Int *i_global_to_local, *i_local_to_global;
 
 
   /* ------------------------------------------------------------------ */
@@ -145,7 +145,7 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   P_coeff = hypre_CTAlloc(double, i_dof_neighbor_coarsedof[num_dofs]);
 
-  i_global_to_local = hypre_CTAlloc(int, num_dofs); 
+  i_global_to_local = hypre_CTAlloc(HYPRE_Int, num_dofs); 
 
 
   for (i_dof =0; i_dof < num_dofs; i_dof++)
@@ -186,7 +186,7 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	  max_local_dof_counter = local_dof_counter;
     }
 	    
-  i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
+  i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
   AE = hypre_CTAlloc(double, max_local_dof_counter *
@@ -278,9 +278,9 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	  ierr = mat_inv(XE, AE, int_dof_counter);
 	  if (ierr == -1)
 	    {
-	      printf("============= build_interpolation: ===============\n");
-	      printf("Indefinite principal submatrix AE_ii: +++++++++\n");
-	      printf("==================================================\n");
+	      hypre_printf("============= build_interpolation: ===============\n");
+	      hypre_printf("Indefinite principal submatrix AE_ii: +++++++++\n");
+	      hypre_printf("==================================================\n");
 	      return ierr;
 	    }
 	}
@@ -341,7 +341,7 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   *P_pointer = P;
 
-  coarsedof_function = hypre_CTAlloc(int, num_coarsedofs);
+  coarsedof_function = hypre_CTAlloc(HYPRE_Int, num_coarsedofs);
 
   for (i=0; i < num_dofs; i++)
     if (i_dof_coarsedof[i+1] > i_dof_coarsedof[i])
@@ -351,9 +351,9 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   *coarsedof_function_pointer = coarsedof_function;
 
   /*
-  printf("===============================================================\n");
-  printf("END Build Interpolation Matrix: ===============================\n");
-  printf("===============================================================\n");
+  hypre_printf("===============================================================\n");
+  hypre_printf("END Build Interpolation Matrix: ===============================\n");
+  hypre_printf("===============================================================\n");
   */
 
 
@@ -364,9 +364,9 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
  mat_inv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
       
-int mat_inv(double *x, double *a, int k)
+HYPRE_Int mat_inv(double *x, double *a, HYPRE_Int k)
 {
-  int i,j,l, ierr =0;
+  HYPRE_Int i,j,l, ierr =0;
   double *b;
 
   if (k > 0)
@@ -381,22 +381,22 @@ int mat_inv(double *x, double *a, int k)
       if (a[i+i*k] <= 1.e-20)
 	{
 	  ierr = -1; 
-	  printf("                        diagonal entry: %e\n", a[i+k*i]);
+	  hypre_printf("                        diagonal entry: %e\n", a[i+k*i]);
 	    /*	  
-	    printf("mat_inv: ==========================================\n");
-	    printf("size: %d, entry: %d, %f\n", k, i, a[i+i*k]);
+	    hypre_printf("mat_inv: ==========================================\n");
+	    hypre_printf("size: %d, entry: %d, %f\n", k, i, a[i+i*k]);
 
-            printf("indefinite singular matrix in *** mat_inv ***:\n");
-            printf("i:%d;  diagonal entry: %e\n", i, a[i+k*i]);
+            hypre_printf("indefinite singular matrix in *** mat_inv ***:\n");
+            hypre_printf("i:%d;  diagonal entry: %e\n", i, a[i+k*i]);
 
 
 	    for (l=0; l < k; l++)
 	      {
-		printf("\n");
+		hypre_printf("\n");
 		for (j=0; j < k; j++)
-		  printf("%f ", b[j+k*l]);
+		  hypre_printf("%f ", b[j+k*l]);
 
-		printf("\n");
+		hypre_printf("\n");
 	      }
 
 	    return ierr;
@@ -451,9 +451,9 @@ int mat_inv(double *x, double *a, int k)
     {
       for (j=0; j < k; j++)
 	  if (x[j+k*i] != x[i+k*j])
-	    printf("\n non_symmetry: %f %f", x[j+k*i], x[i+k*j] );
+	    hypre_printf("\n non_symmetry: %f %f", x[j+k*i], x[i+k*j] );
     }
-  printf("\n");
+  hypre_printf("\n");
 
    -----------------------------------------------------------------*/
 

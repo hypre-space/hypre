@@ -20,11 +20,11 @@
 option summary:
 ---------------
 processor topology
-     -px <int> -py <int> -pz <int>
+     -px <HYPRE_Int> -py <HYPRE_Int> -pz <HYPRE_Int>
      defaults:  -px 1 -py 1 -pz 0
 
 grid topology
-  -m <int>
+  -m <HYPRE_Int>
   if pz=0, each processor has a square grid of dimension m*m,
   hence there are m*m*px*py unknowns.
   if pz > 0, each local grid is of dimension m*m*m, hence
@@ -39,7 +39,7 @@ convection coefficients (default is 0.0)
 
 grid dimension; if more than one mpi process, this is
 the local size for each processor:
-     -m <int>
+     -m <HYPRE_Int>
 
 boundary conditions:
   This is very primitive; boundary conditions can only be generated for
@@ -67,13 +67,13 @@ struct _matgenfd {
          * allocated memory when run is called.  
          * Default is "true"
          */
-  int px, py, pz;  /* Processor graph dimensions */
+  HYPRE_Int px, py, pz;  /* Processor graph dimensions */
   bool threeD;  
-  int m;           /* number of matrix rows in local matrix */
-  int cc;          /* Dimension of each processor's subgrid */
+  HYPRE_Int m;           /* number of matrix rows in local matrix */
+  HYPRE_Int cc;          /* Dimension of each processor's subgrid */
   double hh;       /* Grid spacing; this is constant,  equal to 1.0/(px*cc-1) */
-  int id;          /* the processor whose submatrix is to be generated */
-  int np;          /* number of subdomains (processors, mpi tasks) */
+  HYPRE_Int id;          /* the processor whose submatrix is to be generated */
+  HYPRE_Int np;          /* number of subdomains (processors, mpi tasks) */
   double stencil[8];
 
 
@@ -82,7 +82,7 @@ struct _matgenfd {
    */
   double a, b, c, d, e, f, g, h;
 
-  int first; /* global number of first locally owned row */
+  HYPRE_Int first; /* global number of first locally owned row */
   bool debug;
 
   /* boundary conditions; if value is < 0, neumen; else, dirichelet */
@@ -103,7 +103,7 @@ struct _matgenfd {
 
 extern void MatGenFD_Create(MatGenFD *mg);
 extern void MatGenFD_Destroy(MatGenFD mg);
-extern void MatGenFD_Run(MatGenFD mg, int id, int np, Mat_dh *A, Vec_dh *rhs);
+extern void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *A, Vec_dh *rhs);
 
  /* =========== coefficient functions ============== */
 extern double konstant(double coeff, double x, double y, double z);

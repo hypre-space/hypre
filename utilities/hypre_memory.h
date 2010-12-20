@@ -37,16 +37,16 @@ extern "C" {
 #define hypre_FinalizeMemoryDebug()  hypre_FinalizeMemoryDebugDML()
 
 #define hypre_TAlloc(type, count) \
-( (type *)hypre_MAllocDML((unsigned int)(sizeof(type) * (count)),\
+( (type *)hypre_MAllocDML((size_t)(sizeof(type) * (count)),\
                           __FILE__, __LINE__) )
 
 #define hypre_CTAlloc(type, count) \
-( (type *)hypre_CAllocDML((unsigned int)(count), (unsigned int)sizeof(type),\
+( (type *)hypre_CAllocDML((size_t)(count), (size_t)sizeof(type),\
                           __FILE__, __LINE__) )
 
 #define hypre_TReAlloc(ptr, type, count) \
 ( (type *)hypre_ReAllocDML((char *)ptr,\
-                           (unsigned int)(sizeof(type) * (count)),\
+                           (size_t)(sizeof(type) * (count)),\
                            __FILE__, __LINE__) )
 
 #define hypre_TFree(ptr) \
@@ -107,7 +107,7 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* hypre_memory.c */
-int hypre_OutOfMemory ( size_t size );
+HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc ( size_t size );
 char *hypre_CAlloc ( size_t count , size_t elt_size );
 char *hypre_ReAlloc ( char *ptr , size_t size );
@@ -119,12 +119,12 @@ void hypre_SharedFree ( char *ptr );
 double *hypre_IncrementSharedDataPtr ( double *ptr , size_t size );
 
 /* memory_dmalloc.c */
-int hypre_InitMemoryDebugDML( int id );
-int hypre_FinalizeMemoryDebugDML( void );
-char *hypre_MAllocDML( int size , char *file , int line );
-char *hypre_CAllocDML( int count , int elt_size , char *file , int line );
-char *hypre_ReAllocDML( char *ptr , int size , char *file , int line );
-void hypre_FreeDML( char *ptr , char *file , int line );
+HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
+HYPRE_Int hypre_FinalizeMemoryDebugDML( void );
+char *hypre_MAllocDML( HYPRE_Int size , char *file , HYPRE_Int line );
+char *hypre_CAllocDML( HYPRE_Int count , HYPRE_Int elt_size , char *file , HYPRE_Int line );
+char *hypre_ReAllocDML( char *ptr , HYPRE_Int size , char *file , HYPRE_Int line );
+void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 
 #ifdef __cplusplus
 }

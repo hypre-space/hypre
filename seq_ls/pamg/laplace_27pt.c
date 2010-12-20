@@ -21,34 +21,34 @@
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_GenerateLaplacian27pt(int      nx,
-                            int      ny,
-                            int      nz,
-                            int      P,
-                            int      Q,
-                            int      R,
+hypre_GenerateLaplacian27pt(HYPRE_Int      nx,
+                            HYPRE_Int      ny,
+                            HYPRE_Int      nz,
+                            HYPRE_Int      P,
+                            HYPRE_Int      Q,
+                            HYPRE_Int      R,
                             double  *value )
 {
    hypre_CSRMatrix *A;
 
-   int    *A_i;
-   int    *A_j;
+   HYPRE_Int    *A_i;
+   HYPRE_Int    *A_j;
    double *A_data;
 
-   int *global_part;
-   int ix, iy, iz;
-   int cnt;
-   int row_index;
-   int p, q, r;
+   HYPRE_Int *global_part;
+   HYPRE_Int ix, iy, iz;
+   HYPRE_Int cnt;
+   HYPRE_Int row_index;
+   HYPRE_Int p, q, r;
 
-   int nx_local, ny_local;
-   int nx_size, ny_size, nz_size;
-   int nxy;
-   int grid_size;
+   HYPRE_Int nx_local, ny_local;
+   HYPRE_Int nx_size, ny_size, nz_size;
+   HYPRE_Int nxy;
+   HYPRE_Int grid_size;
 
-   int *nx_part;
-   int *ny_part;
-   int *nz_part;
+   HYPRE_Int *nx_part;
+   HYPRE_Int *ny_part;
+   HYPRE_Int *nz_part;
 
    grid_size = nx*ny*nz;
 
@@ -56,7 +56,7 @@ hypre_GenerateLaplacian27pt(int      nx,
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(int,P*Q*R+1);
+   global_part = hypre_CTAlloc(HYPRE_Int,P*Q*R+1);
 
    global_part[0] = 0;
    cnt = 1;
@@ -75,7 +75,7 @@ hypre_GenerateLaplacian27pt(int      nx,
       }
    }
    
-   A_i = hypre_CTAlloc(int, grid_size+1);
+   A_i = hypre_CTAlloc(HYPRE_Int, grid_size+1);
 
    cnt = 0;
    A_i[0] = 0;
@@ -663,7 +663,7 @@ hypre_GenerateLaplacian27pt(int      nx,
    }
    }
 
-   A_j = hypre_CTAlloc(int, A_i[grid_size]);
+   A_j = hypre_CTAlloc(HYPRE_Int, A_i[grid_size]);
    A_data = hypre_CTAlloc(double, A_i[grid_size]);
 
    row_index = 0;
@@ -1554,28 +1554,28 @@ hypre_GenerateLaplacian27pt(int      nx,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
-map3( int  ix,
-      int  iy,
-      int  iz,
-      int  p,
-      int  q,
-      int  r,
-      int  P,
-      int  Q,
-      int  R,
-      int *nx_part,
-      int *ny_part,
-      int *nz_part,
-      int *global_part )
+HYPRE_Int
+map3( HYPRE_Int  ix,
+      HYPRE_Int  iy,
+      HYPRE_Int  iz,
+      HYPRE_Int  p,
+      HYPRE_Int  q,
+      HYPRE_Int  r,
+      HYPRE_Int  P,
+      HYPRE_Int  Q,
+      HYPRE_Int  R,
+      HYPRE_Int *nx_part,
+      HYPRE_Int *ny_part,
+      HYPRE_Int *nz_part,
+      HYPRE_Int *global_part )
 {
-   int nx_local;
-   int ix_local;
-   int iy_local;
-   int iz_local;
-   int nxy;
-   int global_index;
-   int proc_num;
+   HYPRE_Int nx_local;
+   HYPRE_Int ix_local;
+   HYPRE_Int iy_local;
+   HYPRE_Int iz_local;
+   HYPRE_Int nxy;
+   HYPRE_Int global_index;
+   HYPRE_Int proc_num;
  
    proc_num = r*P*Q + q*P + p;
    nx_local = nx_part[p+1] - nx_part[p];

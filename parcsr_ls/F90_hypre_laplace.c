@@ -28,31 +28,31 @@
 
 void
 hypre_F90_IFACE(hypre_generatelaplacian, HYPRE_GENERATELAPLACIAN)
-                                  ( int      *comm,
-                                    int      *nx,
-                                    int      *ny,
-                                    int      *nz,
-                                    int      *P,
-                                    int      *Q,
-                                    int      *R,
-                                    int      *p,
-                                    int      *q,
-                                    int      *r,
+                                  ( HYPRE_Int      *comm,
+                                    HYPRE_Int      *nx,
+                                    HYPRE_Int      *ny,
+                                    HYPRE_Int      *nz,
+                                    HYPRE_Int      *P,
+                                    HYPRE_Int      *Q,
+                                    HYPRE_Int      *R,
+                                    HYPRE_Int      *p,
+                                    HYPRE_Int      *q,
+                                    HYPRE_Int      *r,
                                     double   *value,
-                                    long int *matrix,
-                                    int      *ierr   )
+                                    hypre_F90_Obj *matrix,
+                                    HYPRE_Int      *ierr   )
 
 {
-   *matrix = (long int) ( GenerateLaplacian( (MPI_Comm) *comm,
-                                             (int)      *nx,
-                                             (int)      *ny,
-                                             (int)      *nz,
-                                             (int)      *P,
-                                             (int)      *Q,
-                                             (int)      *R,
-                                             (int)      *p,
-                                             (int)      *q,
-                                             (int)      *r,
+   *matrix = (hypre_F90_Obj) ( GenerateLaplacian( (MPI_Comm) *comm,
+                                             (HYPRE_Int)      *nx,
+                                             (HYPRE_Int)      *ny,
+                                             (HYPRE_Int)      *nz,
+                                             (HYPRE_Int)      *P,
+                                             (HYPRE_Int)      *Q,
+                                             (HYPRE_Int)      *R,
+                                             (HYPRE_Int)      *p,
+                                             (HYPRE_Int)      *q,
+                                             (HYPRE_Int)      *r,
                                              (double *)  value ) );
 
    *ierr = 0;

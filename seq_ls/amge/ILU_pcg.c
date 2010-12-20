@@ -27,28 +27,28 @@
 
 #include "headers.h"  
 
-int hypre_ILUpcg(double *x, double *rhs,
+HYPRE_Int hypre_ILUpcg(double *x, double *rhs,
 		 double *sparse_matrix, 
 
-		 int *i_dof_dof, int *j_dof_dof,
+		 HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 
-		 int *i_ILUdof_to_dof,
-		 int *i_ILUdof_ILUdof, int *j_ILUdof_ILUdof,
+		 HYPRE_Int *i_ILUdof_to_dof,
+		 HYPRE_Int *i_ILUdof_ILUdof, HYPRE_Int *j_ILUdof_ILUdof,
 		 double *LD_data,
-		 int *i_ILUdof_ILUdof_t, int *j_ILUdof_ILUdof_t,
+		 HYPRE_Int *i_ILUdof_ILUdof_t, HYPRE_Int *j_ILUdof_ILUdof_t,
 		 double *U_data,
 
 		 double *v, double *w, double *d,
-		 int max_iter, 
+		 HYPRE_Int max_iter, 
 
-		 int num_dofs)
+		 HYPRE_Int num_dofs)
 
 {
 
-  int ierr=0, i, j;
+  HYPRE_Int ierr=0, i, j;
   float delta0, delta_old, delta, asfac, arfac, eps = 1.e-12;
   
-  int iter=0;
+  HYPRE_Int iter=0;
   float tau, alpha, beta;
   float delta_x;
 
@@ -144,7 +144,7 @@ int hypre_ILUpcg(double *x, double *rhs,
     delta0+= w[i] * d[i];
 
   if (max_iter > 999)
-    printf("hypre_ILUpcg_delta0: %e\n", delta0); 
+    hypre_printf("hypre_ILUpcg_delta0: %e\n", delta0); 
 
   delta_old = delta0;
 
@@ -167,7 +167,7 @@ loop:
 
       if (tau <= 0.e0) 
 	{
-	  printf("indefinite matrix: %e\n", tau);
+	  hypre_printf("indefinite matrix: %e\n", tau);
 	  /*	  return -1;                               */
 	}
 
@@ -203,7 +203,7 @@ loop:
   iter++;
 
   if (max_iter > 999)
-    printf("              hypre_ILUpcg_iteration: %d;  residual_delta: %e,   arfac: %e\n", iter, sqrt(delta), sqrt(beta));	 
+    hypre_printf("              hypre_ILUpcg_iteration: %d;  residual_delta: %e,   arfac: %e\n", iter, sqrt(delta), sqrt(beta));	 
 
   delta_old = delta;
 
@@ -218,8 +218,8 @@ loop:
   if (max_iter > 999)
     {
       /*==================================================================*/
-      printf("hypre_ILUpcg: delta0: %e; delta: %e\n", delta0, delta);
-      printf("hypre_ILUpcg: iterations: %d; reduction factors: %e, %e\n", iter, asfac, arfac);
+      hypre_printf("hypre_ILUpcg: delta0: %e; delta: %e\n", delta0, delta);
+      hypre_printf("hypre_ILUpcg: iterations: %d; reduction factors: %e, %e\n", iter, asfac, arfac);
       /*==================================================================*/
     }
  
@@ -227,13 +227,13 @@ loop:
   return ierr;
 
 }
-int sparse_matrix_vector_product(double *v,
+HYPRE_Int sparse_matrix_vector_product(double *v,
 				 double *sparse_matrix, 
 				 double *w, 
-				 int *i_dof_dof, int *j_dof_dof,
-				 int num_dofs)
+				 HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
+				 HYPRE_Int num_dofs)
 {
-  int ierr =0, i,k;
+  HYPRE_Int ierr =0, i,k;
 
   for (i=0; i < num_dofs; i++)
     v[i] = 0.e0;

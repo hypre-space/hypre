@@ -31,7 +31,7 @@ hypre_SparseMSGCreateRAPOp( hypre_StructMatrix *R,
                             hypre_StructMatrix *A,
                             hypre_StructMatrix *P,
                             hypre_StructGrid   *coarse_grid,
-                            int                 cdir        )
+                            HYPRE_Int                 cdir        )
 {
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
@@ -59,17 +59,17 @@ hypre_SparseMSGCreateRAPOp( hypre_StructMatrix *R,
  * entries in RAP. Incomplete error handling at the moment. 
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_SparseMSGSetupRAPOp( hypre_StructMatrix *R,
                            hypre_StructMatrix *A,
                            hypre_StructMatrix *P,
-                           int                 cdir,
+                           HYPRE_Int                 cdir,
                            hypre_Index         cindex,
                            hypre_Index         cstride,
                            hypre_Index         stridePR,
                            hypre_StructMatrix *Ac       )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
  
    hypre_StructStencil   *stencil;
 

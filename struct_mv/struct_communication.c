@@ -24,7 +24,7 @@ FILE      *file;
 
 /* this computes a (large enough) size (in doubles) for the message prefix */
 #define hypre_CommPrefixSize(ne) \
-( (((1+ne)*sizeof(int) + ne*sizeof(hypre_Box))/sizeof(double)) + 1 )
+( (((1+ne)*sizeof(HYPRE_Int) + ne*sizeof(hypre_Box))/sizeof(double)) + 1 )
 
 /*--------------------------------------------------------------------------
  * Create a communication package.  A grid-based description of a communication
@@ -40,13 +40,13 @@ FILE      *file;
  *
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
                      hypre_BoxArray   *send_data_space,
                      hypre_BoxArray   *recv_data_space,
-                     int               num_values,
-                     int             **orders,
-                     int               reverse,
+                     HYPRE_Int               num_values,
+                     HYPRE_Int             **orders,
+                     HYPRE_Int               reverse,
                      MPI_Comm          comm,
                      hypre_CommPkg   **comm_pkg_ptr )
 {
@@ -54,37 +54,37 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    hypre_BoxArrayArray  *recv_boxes;
    hypre_IndexRef        send_stride;
    hypre_IndexRef        recv_stride;
-   int                 **send_processes;
-   int                 **recv_processes;
-   int                 **send_rboxnums;
+   HYPRE_Int                 **send_processes;
+   HYPRE_Int                 **recv_processes;
+   HYPRE_Int                 **send_rboxnums;
    hypre_BoxArrayArray  *send_rboxes;
 
-   int                   num_transforms;
+   HYPRE_Int                   num_transforms;
    hypre_Index          *coords;
    hypre_Index          *dirs;
-   int                 **send_transforms;
-   int                 **cp_orders;
+   HYPRE_Int                 **send_transforms;
+   HYPRE_Int                 **cp_orders;
 
    hypre_CommPkg        *comm_pkg;
    hypre_CommType       *comm_types;
    hypre_CommType       *comm_type;
    hypre_CommEntryType  *ct_entries;
-   int                  *ct_rem_boxnums;
+   HYPRE_Int                  *ct_rem_boxnums;
    hypre_Box            *ct_rem_boxes;
-   int                  *p_comm_types;
-   int                   num_comms, num_entries, comm_bufsize;
+   HYPRE_Int                  *p_comm_types;
+   HYPRE_Int                   num_comms, num_entries, comm_bufsize;
 
    hypre_BoxArray       *box_array;
    hypre_Box            *box;
    hypre_BoxArray       *rbox_array;
    hypre_Box            *data_box;
-   int                  *data_offsets;
-   int                   data_offset;
+   HYPRE_Int                  *data_offsets;
+   HYPRE_Int                   data_offset;
    hypre_IndexRef        send_coord, send_dir;
-   int                  *send_order;
+   HYPRE_Int                  *send_order;
 
-   int                   i, j, k, p, m, size;
-   int                   num_procs, my_proc;
+   HYPRE_Int                   i, j, k, p, m, size;
+   HYPRE_Int                   num_procs, my_proc;
                         
    /*------------------------------------------------------
     *------------------------------------------------------*/
@@ -122,8 +122,8 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    coords         = hypre_CommInfoCoords(comm_info); /* may be NULL */
    dirs           = hypre_CommInfoDirs(comm_info);   /* may be NULL */
 
-   MPI_Comm_size(comm, &num_procs );
-   MPI_Comm_rank(comm, &my_proc );
+   hypre_MPI_Comm_size(comm, &num_procs );
+   hypre_MPI_Comm_rank(comm, &my_proc );
 
    /*------------------------------------------------------
     * Set up various entries in CommPkg
@@ -139,10 +139,10 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    if ( (send_transforms != NULL) && (orders != NULL) )
    {
       hypre_CommPkgNumOrders(comm_pkg) = num_transforms;
-      cp_orders = hypre_TAlloc(int *, num_transforms);
+      cp_orders = hypre_TAlloc(HYPRE_Int *, num_transforms);
       for (i = 0; i < num_transforms; i++)
       {
-         cp_orders[i] = hypre_TAlloc(int, num_values);
+         cp_orders[i] = hypre_TAlloc(HYPRE_Int, num_values);
          for (j = 0; j < num_values; j++)
          {
             cp_orders[i][j] = orders[i][j];
@@ -154,7 +154,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    hypre_CopyIndex(recv_stride, hypre_CommPkgRecvStride(comm_pkg));
 
    /* set identity transform and send_coord/dir/order if needed below */
-   hypre_CommPkgIdentityOrder(comm_pkg) = hypre_TAlloc(int, num_values);
+   hypre_CommPkgIdentityOrder(comm_pkg) = hypre_TAlloc(HYPRE_Int, num_values);
    send_coord = hypre_CommPkgIdentityCoord(comm_pkg);
    send_dir   = hypre_CommPkgIdentityDir(comm_pkg);
    send_order = hypre_CommPkgIdentityOrder(comm_pkg);
@@ -172,10 +172,10 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
     * Set up send CommType information
     *------------------------------------------------------*/
 
-   p_comm_types = hypre_CTAlloc(int, num_procs);
+   p_comm_types = hypre_CTAlloc(HYPRE_Int, num_procs);
 
    /* set send_data_offsets and send_data_space */
-   data_offsets = hypre_TAlloc(int, hypre_BoxArraySize(send_data_space));
+   data_offsets = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(send_data_space));
    data_offset = 0;
    hypre_ForBoxI(i, send_data_space)
       {
@@ -213,7 +213,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 
    comm_types = hypre_CTAlloc(hypre_CommType, (num_comms + 1));
    ct_entries = hypre_TAlloc(hypre_CommEntryType, num_entries);
-   ct_rem_boxnums = hypre_TAlloc(int, num_entries);
+   ct_rem_boxnums = hypre_TAlloc(HYPRE_Int, num_entries);
    ct_rem_boxes = hypre_TAlloc(hypre_Box, num_entries);
 
    /* initialize local copy type */
@@ -311,7 +311,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    }
 
    /* set data_offsets and recv_data_space */
-   data_offsets = hypre_TAlloc(int, hypre_BoxArraySize(recv_data_space));
+   data_offsets = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(recv_data_space));
    data_offset = 0;
    hypre_ForBoxI(i, recv_data_space)
       {
@@ -425,34 +425,34 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 
 #if DEBUG
 {
-   MPI_Comm_rank(MPI_COMM_WORLD, &my_proc);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_proc);
 
-   sprintf(filename, "zcommboxes.%05d", my_proc);
+   hypre_sprintf(filename, "zcommboxes.%05d", my_proc);
 
    if ((file = fopen(filename, "a")) == NULL)
    {
-      printf("Error: can't open output file %s\n", filename);
+      hypre_printf("Error: can't open output file %s\n", filename);
       exit(1);
    }
 
-   fprintf(file, "\n\n============================\n\n");
-   fprintf(file, "SEND boxes:\n\n");
+   hypre_fprintf(file, "\n\n============================\n\n");
+   hypre_fprintf(file, "SEND boxes:\n\n");
 
-   fprintf(file, "Stride = (%d,%d,%d)\n",
+   hypre_fprintf(file, "Stride = (%d,%d,%d)\n",
            hypre_IndexX(send_stride),
            hypre_IndexY(send_stride),
            hypre_IndexZ(send_stride));
-   fprintf(file, "BoxArrayArraySize = %d\n",
+   hypre_fprintf(file, "BoxArrayArraySize = %d\n",
            hypre_BoxArrayArraySize(send_boxes));
    hypre_ForBoxArrayI(i, send_boxes)
       {
          box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
 
-         fprintf(file, "BoxArraySize = %d\n", hypre_BoxArraySize(box_array));
+         hypre_fprintf(file, "BoxArraySize = %d\n", hypre_BoxArraySize(box_array));
          hypre_ForBoxI(j, box_array)
             {
                box = hypre_BoxArrayBox(box_array, j);
-               fprintf(file, "(%d,%d): (%d,%d,%d) x (%d,%d,%d)\n",
+               hypre_fprintf(file, "(%d,%d): (%d,%d,%d) x (%d,%d,%d)\n",
                        i, j,
                        hypre_BoxIMinX(box),
                        hypre_BoxIMinY(box),
@@ -460,29 +460,29 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
                        hypre_BoxIMaxX(box),
                        hypre_BoxIMaxY(box),
                        hypre_BoxIMaxZ(box));
-               fprintf(file, "(%d,%d): %d,%d\n",
+               hypre_fprintf(file, "(%d,%d): %d,%d\n",
                        i, j, send_processes[i][j], send_rboxnums[i][j]);
             }
       }
 
-   fprintf(file, "\n\n============================\n\n");
-   fprintf(file, "RECV boxes:\n\n");
+   hypre_fprintf(file, "\n\n============================\n\n");
+   hypre_fprintf(file, "RECV boxes:\n\n");
 
-   fprintf(file, "Stride = (%d,%d,%d)\n",
+   hypre_fprintf(file, "Stride = (%d,%d,%d)\n",
            hypre_IndexX(recv_stride),
            hypre_IndexY(recv_stride),
            hypre_IndexZ(recv_stride));
-   fprintf(file, "BoxArrayArraySize = %d\n",
+   hypre_fprintf(file, "BoxArrayArraySize = %d\n",
            hypre_BoxArrayArraySize(recv_boxes));
    hypre_ForBoxArrayI(i, recv_boxes)
       {
          box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
 
-         fprintf(file, "BoxArraySize = %d\n", hypre_BoxArraySize(box_array));
+         hypre_fprintf(file, "BoxArraySize = %d\n", hypre_BoxArraySize(box_array));
          hypre_ForBoxI(j, box_array)
             {
                box = hypre_BoxArrayBox(box_array, j);
-               fprintf(file, "(%d,%d): (%d,%d,%d) x (%d,%d,%d)\n",
+               hypre_fprintf(file, "(%d,%d): (%d,%d,%d) x (%d,%d,%d)\n",
                        i, j,
                        hypre_BoxIMinX(box),
                        hypre_BoxIMinY(box),
@@ -490,7 +490,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
                        hypre_BoxIMaxX(box),
                        hypre_BoxIMaxY(box),
                        hypre_BoxIMaxZ(box));
-               fprintf(file, "(%d,%d): %d\n",
+               hypre_fprintf(file, "(%d,%d): %d\n",
                        i, j, recv_processes[i][j]);
             }
       }
@@ -503,31 +503,31 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 #if DEBUG
 {
    hypre_CommEntryType  *comm_entry;
-   int                   offset, dim;
-   int                  *length;
-   int                  *stride;
+   HYPRE_Int                   offset, dim;
+   HYPRE_Int                  *length;
+   HYPRE_Int                  *stride;
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &my_proc);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_proc);
 
-   sprintf(filename, "zcommentries.%05d", my_proc);
+   hypre_sprintf(filename, "zcommentries.%05d", my_proc);
 
    if ((file = fopen(filename, "a")) == NULL)
    {
-      printf("Error: can't open output file %s\n", filename);
+      hypre_printf("Error: can't open output file %s\n", filename);
       exit(1);
    }
 
-   fprintf(file, "\n\n============================\n\n");
-   fprintf(file, "SEND entries:\n\n");
+   hypre_fprintf(file, "\n\n============================\n\n");
+   hypre_fprintf(file, "SEND entries:\n\n");
 
-   fprintf(file, "num_sends = %d\n", hypre_CommPkgNumSends(comm_pkg));
+   hypre_fprintf(file, "num_sends = %d\n", hypre_CommPkgNumSends(comm_pkg));
 
    comm_types = hypre_CommPkgCopyFromType(comm_pkg);
    for (m = 0; m < (hypre_CommPkgNumSends(comm_pkg) + 1); m++)
    {
       comm_type = &comm_types[m];
-      fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
-      fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
+      hypre_fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
+      hypre_fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
       for (i = 0; i < hypre_CommTypeNumEntries(comm_type); i++)
       {
          comm_entry = hypre_CommTypeEntry(comm_type, i);
@@ -535,23 +535,23 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
          dim    = hypre_CommEntryTypeDim(comm_entry);
          length = hypre_CommEntryTypeLengthArray(comm_entry);
          stride = hypre_CommEntryTypeStrideArray(comm_entry);
-         fprintf(file, "%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
+         hypre_fprintf(file, "%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
                  i, offset, dim,
                  length[0], length[1], length[2], length[3],
                  stride[0], stride[1], stride[2], stride[3]);
       }
    }
 
-   fprintf(file, "\n\n============================\n\n");
-   fprintf(file, "RECV entries:\n\n");
+   hypre_fprintf(file, "\n\n============================\n\n");
+   hypre_fprintf(file, "RECV entries:\n\n");
 
-   fprintf(file, "num_recvs = %d\n", hypre_CommPkgNumRecvs(comm_pkg));
+   hypre_fprintf(file, "num_recvs = %d\n", hypre_CommPkgNumRecvs(comm_pkg));
 
    comm_types = hypre_CommPkgCopyToType(comm_pkg);
 
    comm_type = &comm_types[0];
-   fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
-   fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
+   hypre_fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
+   hypre_fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
    for (i = 0; i < hypre_CommTypeNumEntries(comm_type); i++)
    {
       comm_entry = hypre_CommTypeEntry(comm_type, i);
@@ -559,7 +559,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
       dim    = hypre_CommEntryTypeDim(comm_entry);
       length = hypre_CommEntryTypeLengthArray(comm_entry);
       stride = hypre_CommEntryTypeStrideArray(comm_entry);
-      fprintf(file, "%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
+      hypre_fprintf(file, "%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
               i, offset, dim,
               length[0], length[1], length[2], length[3],
               stride[0], stride[1], stride[2], stride[3]);
@@ -568,8 +568,8 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    for (m = 1; m < (hypre_CommPkgNumRecvs(comm_pkg) + 1); m++)
    {
       comm_type = &comm_types[m];
-      fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
-      fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
+      hypre_fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
+      hypre_fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
    }
 
    fflush(file);
@@ -592,22 +592,22 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
  * Note that this routine assumes an identity coordinate transform
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CommTypeSetEntries( hypre_CommType  *comm_type,
-                          int             *boxnums,
+                          HYPRE_Int             *boxnums,
                           hypre_Box       *boxes,
                           hypre_Index      stride,
                           hypre_Index      coord,
                           hypre_Index      dir,
-                          int             *order,
+                          HYPRE_Int             *order,
                           hypre_BoxArray  *data_space,
-                          int             *data_offsets )
+                          HYPRE_Int             *data_offsets )
 {
-   int                   num_entries = hypre_CommTypeNumEntries(comm_type);
+   HYPRE_Int                   num_entries = hypre_CommTypeNumEntries(comm_type);
    hypre_CommEntryType  *entries     = hypre_CommTypeEntries(comm_type);
    hypre_Box            *box;
    hypre_Box            *data_box;
-   int                   i, j;
+   HYPRE_Int                   i, j;
                 
    for (j = 0; j < num_entries; j++)
    {
@@ -625,22 +625,22 @@ hypre_CommTypeSetEntries( hypre_CommType  *comm_type,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CommTypeSetEntry( hypre_Box           *box,
                         hypre_Index          stride,
                         hypre_Index          coord,
                         hypre_Index          dir,
-                        int                 *order,
+                        HYPRE_Int                 *order,
                         hypre_Box           *data_box,
-                        int                  data_box_offset,
+                        HYPRE_Int                  data_box_offset,
                         hypre_CommEntryType *comm_entry )
 {
-   int           offset;
-   int           dim;
-   int          *length_array, tmp_length_array[3];
-   int          *stride_array, tmp_stride_array[3];
+   HYPRE_Int           offset;
+   HYPRE_Int           dim;
+   HYPRE_Int          *length_array, tmp_length_array[3];
+   HYPRE_Int          *stride_array, tmp_stride_array[3];
    hypre_Index   size;
-   int           i, j;
+   HYPRE_Int           i, j;
 
    length_array = hypre_CommEntryTypeLengthArray(comm_entry);
    stride_array = hypre_CommEntryTypeStrideArray(comm_entry);
@@ -750,48 +750,48 @@ hypre_CommTypeSetEntry( hypre_Box           *box,
  *   action = 1    - add the data to existing values in memory
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                                double            *send_data,
                                double            *recv_data,
-                               int                action,
-                               int                tag,
+                               HYPRE_Int                action,
+                               HYPRE_Int                tag,
                                hypre_CommHandle **comm_handle_ptr )
 {
    hypre_CommHandle    *comm_handle;
                      
-   int                  num_values = hypre_CommPkgNumValues(comm_pkg);
-   int                  num_sends  = hypre_CommPkgNumSends(comm_pkg);
-   int                  num_recvs  = hypre_CommPkgNumRecvs(comm_pkg);
+   HYPRE_Int                  num_values = hypre_CommPkgNumValues(comm_pkg);
+   HYPRE_Int                  num_sends  = hypre_CommPkgNumSends(comm_pkg);
+   HYPRE_Int                  num_recvs  = hypre_CommPkgNumRecvs(comm_pkg);
    MPI_Comm             comm       = hypre_CommPkgComm(comm_pkg);
                      
-   int                  num_requests;
-   MPI_Request         *requests;
-   MPI_Status          *status;
+   HYPRE_Int                  num_requests;
+   hypre_MPI_Request         *requests;
+   hypre_MPI_Status          *status;
    double             **send_buffers;
    double             **recv_buffers;
 
    hypre_CommType      *comm_type, *from_type, *to_type;
    hypre_CommEntryType *comm_entry;
-   int                  num_entries;
+   HYPRE_Int                  num_entries;
 
-   int                 *length_array, length;
-   int                 *stride_array, stride;
-   int                 *order;
+   HYPRE_Int                 *length_array, length;
+   HYPRE_Int                 *stride_array, stride;
+   HYPRE_Int                 *order;
 
    double              *dptr, *iptr, *jptr, *kptr, *lptr;
-   int                 *qptr;
+   HYPRE_Int                 *qptr;
 
-   int                  i, j, ii, jj, kk, ll;
-   int                  size;
+   HYPRE_Int                  i, j, ii, jj, kk, ll;
+   HYPRE_Int                  size;
                       
    /*--------------------------------------------------------------------
     * allocate requests and status
     *--------------------------------------------------------------------*/
 
    num_requests = num_sends + num_recvs;
-   requests = hypre_CTAlloc(MPI_Request, num_requests);
-   status   = hypre_CTAlloc(MPI_Status, num_requests);
+   requests = hypre_CTAlloc(hypre_MPI_Request, num_requests);
+   status   = hypre_CTAlloc(hypre_MPI_Status, num_requests);
 
    /*--------------------------------------------------------------------
     * allocate buffers
@@ -838,11 +838,11 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
-         qptr = (int *) send_buffers[i];
+         qptr = (HYPRE_Int *) send_buffers[i];
          *qptr = num_entries;
          qptr ++;
          memcpy(qptr, hypre_CommTypeRemBoxnums(comm_type),
-                num_entries*sizeof(int));
+                num_entries*sizeof(HYPRE_Int));
          qptr += num_entries;
          memcpy(qptr, hypre_CommTypeRemBoxes(comm_type),
                 num_entries*sizeof(hypre_Box));
@@ -911,8 +911,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    for(i = 0; i < num_recvs; i++)
    {
       comm_type = hypre_CommPkgRecvType(comm_pkg, i);
-      MPI_Irecv(recv_buffers[i],
-                hypre_CommTypeBufsize(comm_type)*sizeof(double), MPI_BYTE,
+      hypre_MPI_Irecv(recv_buffers[i],
+                hypre_CommTypeBufsize(comm_type)*sizeof(double), hypre_MPI_BYTE,
                 hypre_CommTypeProc(comm_type), tag, comm, &requests[j++]);
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
@@ -925,8 +925,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    for(i = 0; i < num_sends; i++)
    {
       comm_type = hypre_CommPkgSendType(comm_pkg, i);
-      MPI_Isend(send_buffers[i],
-                hypre_CommTypeBufsize(comm_type)*sizeof(double), MPI_BYTE,
+      hypre_MPI_Isend(send_buffers[i],
+                hypre_CommTypeBufsize(comm_type)*sizeof(double), hypre_MPI_BYTE,
                 hypre_CommTypeProc(comm_type), tag, comm, &requests[j++]);
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
@@ -992,33 +992,33 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
  * manually unpacked.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 {
    hypre_CommPkg       *comm_pkg     = hypre_CommHandleCommPkg(comm_handle);
    double             **send_buffers = hypre_CommHandleSendBuffers(comm_handle);
    double             **recv_buffers = hypre_CommHandleRecvBuffers(comm_handle);
-   int                  action       = hypre_CommHandleAction(comm_handle);
+   HYPRE_Int                  action       = hypre_CommHandleAction(comm_handle);
                       
-   int                  num_values   = hypre_CommPkgNumValues(comm_pkg);
-   int                  num_sends    = hypre_CommPkgNumSends(comm_pkg);
-   int                  num_recvs    = hypre_CommPkgNumRecvs(comm_pkg);
+   HYPRE_Int                  num_values   = hypre_CommPkgNumValues(comm_pkg);
+   HYPRE_Int                  num_sends    = hypre_CommPkgNumSends(comm_pkg);
+   HYPRE_Int                  num_recvs    = hypre_CommPkgNumRecvs(comm_pkg);
 
    hypre_CommType      *comm_type;
    hypre_CommEntryType *comm_entry;
-   int                  num_entries;
+   HYPRE_Int                  num_entries;
 
-   int                 *length_array, length;
-   int                 *stride_array, stride;
+   HYPRE_Int                 *length_array, length;
+   HYPRE_Int                 *stride_array, stride;
 
    double              *iptr, *jptr, *kptr, *lptr;
    double              *dptr;
-   int                 *qptr;
+   HYPRE_Int                 *qptr;
 
-   int                 *boxnums;
+   HYPRE_Int                 *boxnums;
    hypre_Box           *boxes;
 
-   int                  i, j, ii, jj, kk, ll;
+   HYPRE_Int                  i, j, ii, jj, kk, ll;
 
    /*--------------------------------------------------------------------
     * finish communications
@@ -1026,7 +1026,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    if (hypre_CommHandleNumRequests(comm_handle))
    {
-      MPI_Waitall(hypre_CommHandleNumRequests(comm_handle),
+      hypre_MPI_Waitall(hypre_CommHandleNumRequests(comm_handle),
                   hypre_CommHandleRequests(comm_handle),
                   hypre_CommHandleStatus(comm_handle));
    }
@@ -1045,7 +1045,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
       {
          comm_type = hypre_CommPkgRecvType(comm_pkg, i);
 
-         qptr = (int *) recv_buffers[i];
+         qptr = (HYPRE_Int *) recv_buffers[i];
          hypre_CommTypeNumEntries(comm_type) = *qptr;
          num_entries += hypre_CommTypeNumEntries(comm_type);
       }
@@ -1060,7 +1060,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
          hypre_CommTypeEntries(comm_type) = ct_entries;
          ct_entries += hypre_CommTypeNumEntries(comm_type);
 
-         qptr = (int *) recv_buffers[i];
+         qptr = (HYPRE_Int *) recv_buffers[i];
          num_entries = *qptr;
          qptr ++;
          boxnums = qptr;
@@ -1179,31 +1179,31 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
  * Execute local data exchanges.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                          double        *send_data,
                          double        *recv_data,
-                         int            action )
+                         HYPRE_Int            action )
 {
-   int                  num_values = hypre_CommPkgNumValues(comm_pkg);
+   HYPRE_Int                  num_values = hypre_CommPkgNumValues(comm_pkg);
    hypre_CommType      *copy_from_type;
    hypre_CommType      *copy_to_type;
    hypre_CommEntryType *copy_from_entry;
    hypre_CommEntryType *copy_to_entry;
 
    double              *from_dp;
-   int                 *from_stride_array;
-   int                  from_i;
+   HYPRE_Int                 *from_stride_array;
+   HYPRE_Int                  from_i;
    double              *to_dp;
-   int                 *to_stride_array;
-   int                  to_i;
+   HYPRE_Int                 *to_stride_array;
+   HYPRE_Int                  to_i;
                       
-   int                 *length_array;
-   int                  i0, i1, i2, i3;
+   HYPRE_Int                 *length_array;
+   HYPRE_Int                  i0, i1, i2, i3;
 
-   int                 *order;
+   HYPRE_Int                 *order;
 
-   int                  i;
+   HYPRE_Int                  i;
 
    /*--------------------------------------------------------------------
     * copy local data
@@ -1278,12 +1278,12 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
 {
    hypre_CommType  *comm_type;
-   int            **orders;
-   int              i;
+   HYPRE_Int            **orders;
+   HYPRE_Int              i;
 
    if (comm_pkg)
    {

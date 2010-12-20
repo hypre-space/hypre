@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dgeqrf_(integer *m, integer *n, doublereal *a, integer *
+/* Subroutine */ HYPRE_Int dgeqrf_(integer *m, integer *n, doublereal *a, integer *
 	lda, doublereal *tau, doublereal *work, integer *lwork, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -90,15 +90,15 @@
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
     static integer i__, k, nbmin, iinfo;
-    extern /* Subroutine */ int dgeqr2_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dgeqr2_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
     static integer ib, nb;
-    extern /* Subroutine */ int dlarfb_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int dlarfb_(char *, char *, char *, char *, 
 	    integer *, integer *, integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer nx;
-    extern /* Subroutine */ int dlarft_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlarft_(char *, char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);

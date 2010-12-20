@@ -52,12 +52,12 @@
 /* Include C interface to ksp_driver */
 #include "incfactt_facsol_f.h"
 
-int incfact_setup ( void *input_data, Matrix *INCFACT_A )
+HYPRE_Int incfact_setup ( void *input_data, Matrix *INCFACT_A )
 {
    INCFACTData *incfact_data = input_data;
-   int         i, ierr_incfactt, ierr_ksp, ierr_input;
+   HYPRE_Int         i, ierr_incfactt, ierr_ksp, ierr_input;
    double     *INCFACT_b, *INCFACT_x;
-   int         n, nnz, lenpmx;
+   HYPRE_Int         n, nnz, lenpmx;
    Matrix     *INCFACT_A_copy=NULL;
    Matrix     *FACTOR_A;
 
@@ -71,8 +71,8 @@ int incfact_setup ( void *input_data, Matrix *INCFACT_A )
    if( INCFACTDataMode(incfact_data) == 1 ) 
    {
 #ifdef ICFact
-     printf("Incomplete Cholesky code currently needs to overwrite the input matrix.\n");
-     printf("Please see ic_setup.c for an explanation. Terminating...\n");
+     hypre_printf("Incomplete Cholesky code currently needs to overwrite the input matrix.\n");
+     hypre_printf("Please see ic_setup.c for an explanation. Terminating...\n");
      return(-1);
 #elif defined ILUFact
      /* Make temporary copy input matrix */
@@ -80,11 +80,11 @@ int incfact_setup ( void *input_data, Matrix *INCFACT_A )
    
      MatrixSize(INCFACT_A_copy) = MatrixSize(INCFACT_A);
 
-     MatrixIA(INCFACT_A_copy) = ctalloc( int, MatrixSize(INCFACT_A)+1 );
+     MatrixIA(INCFACT_A_copy) = ctalloc( HYPRE_Int, MatrixSize(INCFACT_A)+1 );
      for ( i=0; i < MatrixSize(INCFACT_A)+1; i++) 
        MatrixIA(INCFACT_A_copy)[i] = MatrixIA(INCFACT_A)[i];
 
-     MatrixJA(INCFACT_A_copy) = ctalloc( int, MatrixNNZ(INCFACT_A) );
+     MatrixJA(INCFACT_A_copy) = ctalloc( HYPRE_Int, MatrixNNZ(INCFACT_A) );
 
      MatrixData(INCFACT_A_copy) = ctalloc( double, MatrixNNZ(INCFACT_A) );
      for ( i=0; i < MatrixNNZ(INCFACT_A); i++) 
@@ -111,7 +111,7 @@ int incfact_setup ( void *input_data, Matrix *INCFACT_A )
 
    if( ierr_input != 0 ) 
    {
-     printf("Error when converting matrix from csr to symmetric, error %d\n", ierr_input);
+     hypre_printf("Error when converting matrix from csr to symmetric, error %d\n", ierr_input);
 
      if (INCFACT_A_copy) FreeMatrix(INCFACT_A_copy);
 
@@ -126,8 +126,8 @@ int incfact_setup ( void *input_data, Matrix *INCFACT_A )
 
    if( (INCFACTDataIpar(incfact_data)[0] != 0) )
    {
-      INCFACTDataPerm(incfact_data) = ctalloc( int, MatrixSize(FACTOR_A) );
-      INCFACTDataInversePerm(incfact_data) = ctalloc( int, MatrixSize(FACTOR_A) );
+      INCFACTDataPerm(incfact_data) = ctalloc( HYPRE_Int, MatrixSize(FACTOR_A) );
+      INCFACTDataInversePerm(incfact_data) = ctalloc( HYPRE_Int, MatrixSize(FACTOR_A) );
    }
 
 #ifdef ILUFact
@@ -150,7 +150,7 @@ int incfact_setup ( void *input_data, Matrix *INCFACT_A )
    INCFACTDataLIwork(incfact_data) = 3*MatrixSize(FACTOR_A) +
                                      2*n*INCFACTDataIpar(incfact_data)[5];
 #endif
-   INCFACTDataIwork(incfact_data) = ctalloc(int, INCFACTDataLIwork(incfact_data) );
+   INCFACTDataIwork(incfact_data) = ctalloc(HYPRE_Int, INCFACTDataLIwork(incfact_data) );
 
 #ifdef ILUFact
    INCFACTDataLRwork(incfact_data) = (MatrixSize(FACTOR_A)+3)*(INCFACTDataIpar(incfact_data)[6]+3)
@@ -175,13 +175,13 @@ int incfact_setup ( void *input_data, Matrix *INCFACT_A )
    INCFACTDataLenpmx(incfact_data) = lenpmx;
 
 #ifdef ILUFact
-   MatrixIA(INCFACTDataPreconditioner(incfact_data)) = ctalloc( int, MatrixSize(FACTOR_A)+1);
+   MatrixIA(INCFACTDataPreconditioner(incfact_data)) = ctalloc( HYPRE_Int, MatrixSize(FACTOR_A)+1);
 #endif
-   MatrixJA(INCFACTDataPreconditioner(incfact_data)) = ctalloc( int, 
+   MatrixJA(INCFACTDataPreconditioner(incfact_data)) = ctalloc( HYPRE_Int, 
            lenpmx );
    if( MatrixJA(INCFACTDataPreconditioner(incfact_data)) == NULL ) 
    {
-     printf("Allocation of workspace in INCFACT_setup failed\n");
+     hypre_printf("Allocation of workspace in INCFACT_setup failed\n");
      return(-10);
    }
 
@@ -189,7 +189,7 @@ int incfact_setup ( void *input_data, Matrix *INCFACT_A )
            lenpmx );
    if( MatrixData(INCFACTDataPreconditioner(incfact_data)) == NULL ) 
    {
-     printf("Allocation of workspace in INCFACT_setup failed\n");
+     hypre_printf("Allocation of workspace in INCFACT_setup failed\n");
      return(-11);
    }
 
@@ -230,18 +230,18 @@ int incfact_setup ( void *input_data, Matrix *INCFACT_A )
 
 #if 0
    for(i = 0; i < n; i ++ ) {
-     printf("Perm(%d) = %d\n",i, INCFACTDataPerm(incfact_data)[i] ); }
+     hypre_printf("Perm(%d) = %d\n",i, INCFACTDataPerm(incfact_data)[i] ); }
 #endif
 
   if( ierr_input != 0 ) 
   {
-    printf("Input error to INCFACTT, error %d\n", ierr_input);
+    hypre_printf("Input error to INCFACTT, error %d\n", ierr_input);
     return(ierr_input);
   }
 
   if( ierr_incfactt != 0 ) 
   {
-    printf("Computational error in INCFACTT, error %d\n", ierr_incfactt);
+    hypre_printf("Computational error in INCFACTT, error %d\n", ierr_incfactt);
     return(ierr_incfactt);
   }
 

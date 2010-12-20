@@ -106,44 +106,44 @@
  *      Coarsening routine
  *
  **************************************************************/
-int
+HYPRE_Int
 hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
                   double              strength_threshold,
                   double	      relax_weight,
-                  int		      relax_type,
-                  int		      num_relax_steps,
-                  int               **CF_marker_ptr,
-                  int                *coarse_size_ptr     )
+                  HYPRE_Int		      relax_type,
+                  HYPRE_Int		      num_relax_steps,
+                  HYPRE_Int               **CF_marker_ptr,
+                  HYPRE_Int                *coarse_size_ptr     )
 {
-   int              num_variables = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A);
                   
-   int             *CF_marker;
-   int              coarse_size;
+   HYPRE_Int             *CF_marker;
+   HYPRE_Int              coarse_size;
 
    double          *measure_array;
    hypre_Vector    *measure_vector;
    hypre_Vector    *zero_vector;
    hypre_Vector    *tmp_vector;
-   int             *graph_array;
-   /* int             *tmp_array; */
-   int              graph_size;
-   /* int              tmp_size; */
+   HYPRE_Int             *graph_array;
+   /* HYPRE_Int             *tmp_array; */
+   HYPRE_Int              graph_size;
+   /* HYPRE_Int              tmp_size; */
 
-   int              i, ig;
+   HYPRE_Int              i, ig;
 
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
 #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 #endif
 
    /*---------------------------------------------------
     * Initialize the C/F marker array
     *---------------------------------------------------*/
 
-   CF_marker = hypre_CTAlloc(int, num_variables);
+   CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    measure_vector = hypre_SeqVectorCreate(num_variables);
    zero_vector = hypre_SeqVectorCreate(num_variables);
@@ -164,7 +164,7 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   graph_array   = hypre_CTAlloc(int, num_variables);
+   graph_array   = hypre_CTAlloc(HYPRE_Int, num_variables);
    coarse_size = 0;
    graph_size = 0;
  
@@ -182,7 +182,7 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
    }
 
 /*  for second path of coarse point determination if needed */
-/*   tmp_array   = hypre_CTAlloc(int, graph_size);  */
+/*   tmp_array   = hypre_CTAlloc(HYPRE_Int, graph_size);  */
 
    while (graph_size)
    {

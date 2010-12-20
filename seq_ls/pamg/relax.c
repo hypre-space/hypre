@@ -27,20 +27,20 @@
  * hypre_AMGRelax
  *--------------------------------------------------------------------------*/
 
-int  hypre_AMGRelax( hypre_CSRMatrix *A,
+HYPRE_Int  hypre_AMGRelax( hypre_CSRMatrix *A,
                          hypre_Vector    *f,
-                         int            *cf_marker,
-                         int             relax_type,
-                         int             relax_points,
+                         HYPRE_Int            *cf_marker,
+                         HYPRE_Int             relax_type,
+                         HYPRE_Int             relax_points,
                          double          relax_weight,
                          hypre_Vector    *u,
                          hypre_Vector    *Vtemp )
 {
    double         *A_data  = hypre_CSRMatrixData(A);
-   int            *A_i     = hypre_CSRMatrixI(A);
-   int            *A_j     = hypre_CSRMatrixJ(A);
+   HYPRE_Int            *A_i     = hypre_CSRMatrixI(A);
+   HYPRE_Int            *A_j     = hypre_CSRMatrixJ(A);
 
-   int             n       = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int             n       = hypre_CSRMatrixNumRows(A);
    
    double         *u_data  = hypre_VectorData(u);
    double         *f_data  = hypre_VectorData(f);
@@ -49,10 +49,10 @@ int  hypre_AMGRelax( hypre_CSRMatrix *A,
    
    double          res;
 	          
-   int             i, ii;
-   int             jj;
-   int             column;
-   int             relax_error = 0;
+   HYPRE_Int             i, ii;
+   HYPRE_Int             jj;
+   HYPRE_Int             column;
+   HYPRE_Int             relax_error = 0;
 
    double         *A_mat;
    double         *b_vec;
@@ -338,13 +338,13 @@ int  hypre_AMGRelax( hypre_CSRMatrix *A,
  *
  *------------------------------------------------------------------------ */
 
-int gselim(A,x,n)
+HYPRE_Int gselim(A,x,n)
 double *A;
 double *x;
-int n;
+HYPRE_Int n;
 {
-   int    err_flag = 0;
-   int    j,k,m;
+   HYPRE_Int    err_flag = 0;
+   HYPRE_Int    j,k,m;
    double factor;
    
    if (n==1)                           /* A is 1x1 */  

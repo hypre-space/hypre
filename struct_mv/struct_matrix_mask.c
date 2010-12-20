@@ -38,22 +38,22 @@
 
 hypre_StructMatrix *
 hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
-                              int                 num_stencil_indices,
-                              int                *stencil_indices     )
+                              HYPRE_Int                 num_stencil_indices,
+                              HYPRE_Int                *stencil_indices     )
 {
    hypre_StructMatrix   *mask;
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   int                   stencil_size;
+   HYPRE_Int                   stencil_size;
    hypre_Index          *mask_stencil_shape;
-   int                   mask_stencil_size;
+   HYPRE_Int                   mask_stencil_size;
 
    hypre_BoxArray       *data_space;
-   int                 **data_indices;
-   int                 **mask_data_indices;
+   HYPRE_Int                 **data_indices;
+   HYPRE_Int                 **mask_data_indices;
 
-   int                   i, j;
+   HYPRE_Int                   i, j;
 
    stencil       = hypre_StructMatrixStencil(matrix);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -91,10 +91,10 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    hypre_StructMatrixDataSize(mask) = hypre_StructMatrixDataSize(matrix);
    data_space   = hypre_StructMatrixDataSpace(matrix);
    data_indices = hypre_StructMatrixDataIndices(matrix);
-   mask_data_indices = hypre_CTAlloc(int *, hypre_BoxArraySize(data_space));
+   mask_data_indices = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(data_space));
    hypre_ForBoxI(i, data_space)
       {
-         mask_data_indices[i] = hypre_TAlloc(int, num_stencil_indices);
+         mask_data_indices[i] = hypre_TAlloc(HYPRE_Int, num_stencil_indices);
          for (j = 0; j < num_stencil_indices; j++)
          {
             mask_data_indices[i][j] = data_indices[i][stencil_indices[j]];
@@ -104,7 +104,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
 
    hypre_StructMatrixSymmetric(mask) = hypre_StructMatrixSymmetric(matrix);
 
-   hypre_StructMatrixSymmElements(mask) = hypre_TAlloc(int, stencil_size);
+   hypre_StructMatrixSymmElements(mask) = hypre_TAlloc(HYPRE_Int, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_StructMatrixSymmElements(mask)[i] =

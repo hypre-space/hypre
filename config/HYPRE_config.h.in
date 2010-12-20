@@ -46,6 +46,9 @@
 /* Define to 1 for IRIX64 platforms */
 #undef HYPRE_IRIX64
 
+/* Define to 1 if using long long int for HYPRE_Int */
+#undef HYPRE_BIGINT
+
 /* Define to 1 if an MPI library is found */
 #undef HYPRE_HAVE_MPI
 

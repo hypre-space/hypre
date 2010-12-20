@@ -46,7 +46,7 @@
  * HYPRE_ParCSRPilutCreate
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    HYPRE_NewDistributedMatrixPilutSolver( comm, NULL, 
@@ -62,7 +62,7 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRPilutDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
 {
    HYPRE_DistributedMatrix mat = HYPRE_DistributedMatrixPilutSolverGetMatrix(
@@ -79,7 +79,7 @@ HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRPilutSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector b,
@@ -103,7 +103,7 @@ HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRPilutSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRPilutSolve( HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector b,
@@ -125,9 +125,9 @@ HYPRE_ParCSRPilutSolve( HYPRE_Solver solver,
  * HYPRE_ParCSRPilutSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRPilutSetMaxIter( HYPRE_Solver solver,
-                        int          max_iter  )
+                        HYPRE_Int          max_iter  )
 {
 
    HYPRE_DistributedMatrixPilutSolverSetMaxIts(
@@ -140,7 +140,7 @@ HYPRE_ParCSRPilutSetMaxIter( HYPRE_Solver solver,
  * HYPRE_ParCSRPilutSetDropTolerance
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRPilutSetDropTolerance( HYPRE_Solver solver,
                     double       tol    )
 {
@@ -154,9 +154,9 @@ HYPRE_ParCSRPilutSetDropTolerance( HYPRE_Solver solver,
  * HYPRE_ParCSRPilutSetFactorRowSize
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRPilutSetFactorRowSize( HYPRE_Solver solver,
-                    int       size    )
+                    HYPRE_Int       size    )
 {
    HYPRE_DistributedMatrixPilutSolverSetFactorRowSize(
       (HYPRE_DistributedMatrixPilutSolver) solver, size );

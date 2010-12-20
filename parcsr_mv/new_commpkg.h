@@ -19,12 +19,12 @@
 
 typedef struct
 {
-   int                   length;
-   int                   storage_length; 
-   int                   *id;
-   int                   *vec_starts;
-   int                   element_storage_length; 
-   int                   *elements;
+   HYPRE_Int                   length;
+   HYPRE_Int                   storage_length; 
+   HYPRE_Int                   *id;
+   HYPRE_Int                   *vec_starts;
+   HYPRE_Int                   element_storage_length; 
+   HYPRE_Int                   *elements;
    double                *d_elements;
    void                  *v_elements;
    

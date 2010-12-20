@@ -27,7 +27,7 @@
  * hypre_AMGCycle
  *--------------------------------------------------------------------------*/
 
-int         hypre_AMGCycle(U_array,F_array, tol, data)
+HYPRE_Int         hypre_AMGCycle(U_array,F_array, tol, data)
 
 hypre_Vector      **U_array;
 hypre_Vector      **F_array;
@@ -45,40 +45,40 @@ void        *data;
    hypre_VectorInt **ICG_array;
    hypre_Vector    *Vtemp;
 
-   int       Fcycle_flag;
-   int       Vstar_flag;
-   int       cycle_op_count;   
-   int      *imin;
-   int      *imax;
-   int      *ipmn;
-   int      *ipmx;
-   int      *mu;
-   int      *ntrlx;
-   int      *iprlx;
-   int      *num_coeffs;
-   int      *numv;
-   int       num_levels;
-   int       num_unknowns;
+   HYPRE_Int       Fcycle_flag;
+   HYPRE_Int       Vstar_flag;
+   HYPRE_Int       cycle_op_count;   
+   HYPRE_Int      *imin;
+   HYPRE_Int      *imax;
+   HYPRE_Int      *ipmn;
+   HYPRE_Int      *ipmx;
+   HYPRE_Int      *mu;
+   HYPRE_Int      *ntrlx;
+   HYPRE_Int      *iprlx;
+   HYPRE_Int      *num_coeffs;
+   HYPRE_Int      *numv;
+   HYPRE_Int       num_levels;
+   HYPRE_Int       num_unknowns;
 
 
 /* Local variables  */
 
-   int      *iarr;
-   int      *ity, *ipt;
-   int      *lev_counter;
-   int       Solve_err_flag;
-   int       k;
-   int       j;
-   int       ii;
-   int       level;
-   int       cycle_param;
-   int       coarse_grid;
-   int       fine_grid;
-   int       Not_Finished;
-   int       num_integers;
-   int       num_digits;
-   int       num_sweep;
-   int       base_lev;
+   HYPRE_Int      *iarr;
+   HYPRE_Int      *ity, *ipt;
+   HYPRE_Int      *lev_counter;
+   HYPRE_Int       Solve_err_flag;
+   HYPRE_Int       k;
+   HYPRE_Int       j;
+   HYPRE_Int       ii;
+   HYPRE_Int       level;
+   HYPRE_Int       cycle_param;
+   HYPRE_Int       coarse_grid;
+   HYPRE_Int       fine_grid;
+   HYPRE_Int       Not_Finished;
+   HYPRE_Int       num_integers;
+   HYPRE_Int       num_digits;
+   HYPRE_Int       num_sweep;
+   HYPRE_Int       base_lev;
 
    double    alpha;
    double    beta;
@@ -113,10 +113,10 @@ void        *data;
    Fcycle_flag = hypre_AMGDataFcycleFlag(amg_data);
    Vstar_flag = hypre_AMGDataVstarFlag(amg_data);
 
-   lev_counter = hypre_CTAlloc(int, num_levels);
-   iarr = hypre_CTAlloc(int, 10);
-   ity  = hypre_CTAlloc(int, 10);
-   ipt  = hypre_CTAlloc(int, 10);
+   lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels);
+   iarr = hypre_CTAlloc(HYPRE_Int, 10);
+   ity  = hypre_CTAlloc(HYPRE_Int, 10);
+   ipt  = hypre_CTAlloc(HYPRE_Int, 10);
 
    D_mat = hypre_CTAlloc(double, num_unknowns * num_unknowns);
    S_vec = hypre_CTAlloc(double, num_unknowns);

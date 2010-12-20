@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dsyev_(char *jobz, char *uplo, integer *n, doublereal *a,
+/* Subroutine */ HYPRE_Int dsyev_(char *jobz, char *uplo, integer *n, doublereal *a,
 	 integer *lda, doublereal *w, doublereal *work, integer *lwork, 
 	integer *info)
 {
@@ -93,7 +93,7 @@
     static integer imax;
     static doublereal rmin, rmax;
 /***static integer lopt;***/
-    extern /* Subroutine */ int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     static doublereal sigma;
     extern logical lsame_(char *, char *);
@@ -102,21 +102,21 @@
     static integer nb;
     extern doublereal dlamch_(char *);
     static integer iscale;
-    extern /* Subroutine */ int dlascl_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlascl_(char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal safmin;
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
     static doublereal bignum;
     static integer indtau;
-    extern /* Subroutine */ int dsterf_(integer *, doublereal *, doublereal *,
+    extern /* Subroutine */ HYPRE_Int dsterf_(integer *, doublereal *, doublereal *,
 	     integer *);
     extern doublereal dlansy_(char *, char *, integer *, doublereal *, 
 	    integer *, doublereal *);
     static integer indwrk;
-    extern /* Subroutine */ int dorgtr_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dorgtr_(char *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, integer *), dsteqr_(char *, integer *, doublereal *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *), 
 	    dsytrd_(char *, integer *, doublereal *, integer *, doublereal *, 

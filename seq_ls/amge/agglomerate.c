@@ -22,38 +22,38 @@
 /* unacceptable faces: i_face_to_prefer_weight[] = -1; ------------------*/
 
 
-int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
+HYPRE_Int hypre_AMGeAgglomerate(HYPRE_Int *i_AE_element, HYPRE_Int *j_AE_element,
 
-			  int *i_face_face, int *j_face_face, int *w_face_face,
+			  HYPRE_Int *i_face_face, HYPRE_Int *j_face_face, HYPRE_Int *w_face_face,
 		     
-			  int *i_face_element, int *j_face_element,
-			  int *i_element_face, int *j_element_face,
+			  HYPRE_Int *i_face_element, HYPRE_Int *j_face_element,
+			  HYPRE_Int *i_element_face, HYPRE_Int *j_element_face,
 
-			  int *i_face_to_prefer_weight,
-			  int *i_face_weight,
+			  HYPRE_Int *i_face_to_prefer_weight,
+			  HYPRE_Int *i_face_weight,
 
-			  int num_faces, int num_elements,
-			  int *num_AEs_pointer)
+			  HYPRE_Int num_faces, HYPRE_Int num_elements,
+			  HYPRE_Int *num_AEs_pointer)
 {
 
-  int ierr = 0;
-  int i, j, k, l, m;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i, j, k, l, m;
 
-  int face_to_eliminate;
-  int max_weight_old, max_weight;
+  HYPRE_Int face_to_eliminate;
+  HYPRE_Int max_weight_old, max_weight;
 
-  int AE_counter=0, AE_element_counter=0;
+  HYPRE_Int AE_counter=0, AE_element_counter=0;
 
-  int i_element_face_counter;
+  HYPRE_Int i_element_face_counter;
 
-  int *i_element_to_AE;
+  HYPRE_Int *i_element_to_AE;
 
-  int *previous, *next, *first;
-  int head, tail, last;
+  HYPRE_Int *previous, *next, *first;
+  HYPRE_Int head, tail, last;
 
-  int face_max_weight, face_local_max_weight, preferred_weight;
+  HYPRE_Int face_max_weight, face_local_max_weight, preferred_weight;
 
-  int weight, weight_max;
+  HYPRE_Int weight, weight_max;
 
   max_weight = 1;
   for (i=0; i < num_faces; i++)
@@ -64,14 +64,14 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
       if (max_weight < weight) max_weight = weight;
     }
 
-  first = hypre_CTAlloc(int, max_weight+1);
+  first = hypre_CTAlloc(HYPRE_Int, max_weight+1);
 
 
 
-  next = hypre_CTAlloc(int, num_faces);
+  next = hypre_CTAlloc(HYPRE_Int, num_faces);
 
 
-  previous = hypre_CTAlloc(int, num_faces+1);
+  previous = hypre_CTAlloc(HYPRE_Int, num_faces+1);
 
 
   tail = num_faces;
@@ -89,7 +89,7 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
   for (weight=1; weight <= max_weight; weight++)
     first[weight] = tail;
 
-  i_element_to_AE = hypre_CTAlloc(int, num_elements);
+  i_element_to_AE = hypre_CTAlloc(HYPRE_Int, num_elements);
 
   /*=======================================================================
                      AGGLOMERATION PROCEDURE:
@@ -183,7 +183,7 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
 
   if (face_max_weight == -1)
     {
-      printf("all faces are unacceptable, i.e., no faces to eliminate !\n");
+      hypre_printf("all faces are unacceptable, i.e., no faces to eliminate !\n");
 
       *num_AEs_pointer = 1;
 
@@ -283,7 +283,7 @@ eliminate_face:
 
 	weight = i_face_weight[j_face_face[j]];
 
-	/* printf("update entry: %d\n", j_face_face[j]);   */
+	/* hypre_printf("update entry: %d\n", j_face_face[j]);   */
 
 	last = previous[tail];
 	if (last == head) 
@@ -379,7 +379,7 @@ eliminate_face:
       
   if (AE_element_counter > i_AE_element[AE_counter]) 
     {
-      /* printf("completing agglomerated element: %d\n", 
+      /* hypre_printf("completing agglomerated element: %d\n", 
 		  AE_counter);   */ 
       AE_counter++;
     }
@@ -396,7 +396,7 @@ eliminate_face:
   weight_max = i_face_weight[last];
 
       
-  /* printf("global search: ======================================\n"); */
+  /* hypre_printf("global search: ======================================\n"); */
 
   face_max_weight = -1;
 
@@ -552,17 +552,17 @@ end_agglomerate:
   return ierr;
 }
 
-int update_entry(int weight, int *weight_max, 
-		 int *previous, int *next, int *first, int *last,
-		 int head, int tail, 
-		 int i)
+HYPRE_Int update_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+		 HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
+		 HYPRE_Int head, HYPRE_Int tail, 
+		 HYPRE_Int i)
 
 {
-  int ierr = 0, weight0;
+  HYPRE_Int ierr = 0, weight0;
 
   /*
-  printf("update_entry i: %d\n", i);
-  printf("next[%d]: %d\n", i, next[i]);
+  hypre_printf("update_entry i: %d\n", i);
+  hypre_printf("next[%d]: %d\n", i, next[i]);
   */
 
   if (previous[i] != head) next[previous[i]] = next[i];
@@ -573,19 +573,19 @@ int update_entry(int weight, int *weight_max,
     {
       if (weight <= weight_max[0]) 
 	{
-	  printf("ERROR IN UPDATE_ENTRY: ===================\n");
-	  printf("weight: %d, weight_max: %d\n",
+	  hypre_printf("ERROR IN UPDATE_ENTRY: ===================\n");
+	  hypre_printf("weight: %d, weight_max: %d\n",
 		 weight, weight_max[0]);
 	  return -1;
 	}
       for (weight0=weight_max[0]+1; weight0 <= weight; weight0++)
 	{
 	  first[weight0] = i;
-	  /* printf("create first[%d] = %d\n", weight0, i); */
+	  /* hypre_printf("create first[%d] = %d\n", weight0, i); */
 	}
 
       /*
-      printf("tail: %d, previous[tail]: %d\n", tail, previous[tail]);
+      hypre_printf("tail: %d, previous[tail]: %d\n", tail, previous[tail]);
       */
       previous[i] = previous[tail];
       next[i] = tail;
@@ -616,26 +616,26 @@ int update_entry(int weight, int *weight_max,
     
 }
 
-int remove_entry(int weight, int *weight_max, 
-		 int *previous, int *next, int *first, int *last,
-		 int head, int tail, 
-		 int i)
+HYPRE_Int remove_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+		 HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
+		 HYPRE_Int head, HYPRE_Int tail, 
+		 HYPRE_Int i)
 {
-  int ierr=0, weight0;
+  HYPRE_Int ierr=0, weight0;
 
   if (previous[i] != head) next[previous[i]] = next[i];
   previous[next[i]] = previous[i];
 
   for (weight0=1; weight0 <= weight_max[0]; weight0++)
     {
-      /* printf("first[%d}: %d\n", weight0,  first[weight0]); */
+      /* hypre_printf("first[%d}: %d\n", weight0,  first[weight0]); */
       if (first[weight0] == i)
 	{
 	  first[weight0] = next[i];
-	  /* printf("shift: first[%d]= %d to %d\n",
+	  /* hypre_printf("shift: first[%d]= %d to %d\n",
 		 weight0, i, next[i]);
 	  if (i == last[0]) 
-	    printf("i= last[0]: %d\n", i); */
+	    hypre_printf("i= last[0]: %d\n", i); */
 	}
     }
 
@@ -646,12 +646,12 @@ int remove_entry(int weight, int *weight_max,
 
 }
 
-int move_entry(int weight, int *weight_max, 
-	       int *previous, int *next, int *first, int *last,
-	       int head, int tail, 
-	       int i)
+HYPRE_Int move_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+	       HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
+	       HYPRE_Int head, HYPRE_Int tail, 
+	       HYPRE_Int i)
 {
-  int ierr=0, weight0;
+  HYPRE_Int ierr=0, weight0;
 
   if (previous[i] != head) next[previous[i]] = next[i];
   previous[next[i]] = previous[i];

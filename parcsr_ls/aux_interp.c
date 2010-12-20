@@ -28,19 +28,19 @@
  * This is different than the send/recv vecs
  * explanation: old offd nodes take up first chunk of CF_marker_offd, new offd 
  * nodes take up the second chunk 0f CF_marker_offd. */
-void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, int *IN_marker, 
-		      int *node_add, int num_cols_A_offd, 
-		      int full_off_procNodes, int num_procs,
-		      int *OUT_marker)
+void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int *IN_marker, 
+		      HYPRE_Int *node_add, HYPRE_Int num_cols_A_offd, 
+		      HYPRE_Int full_off_procNodes, HYPRE_Int num_procs,
+		      HYPRE_Int *OUT_marker)
 {   
   hypre_ParCSRCommHandle  *comm_handle;
 
-  int i, j, start, index, ip, min, max;
-  int num_sends, back_shift, original_off;
-  int num_recvs;
-  int *recv_procs;
-  int *recv_vec_starts;
-  int *end_diag, *int_buf_data;
+  HYPRE_Int i, j, start, index, ip, min, max;
+  HYPRE_Int num_sends, back_shift, original_off;
+  HYPRE_Int num_recvs;
+  HYPRE_Int *recv_procs;
+  HYPRE_Int *recv_vec_starts;
+  HYPRE_Int *end_diag, *int_buf_data;
 
   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
   num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
@@ -50,7 +50,7 @@ void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, int *IN_marker,
   index = hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends);
   if(index < full_off_procNodes)
     index = full_off_procNodes;
-  int_buf_data = hypre_CTAlloc(int, index);
+  int_buf_data = hypre_CTAlloc(HYPRE_Int, index);
 
   index = 0;
   for (i = 0; i < num_sends; i++)
@@ -70,7 +70,7 @@ void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, int *IN_marker,
   
   /* Sort fine_to_coarse so that the original off processors are first*/
   back_shift = 0;
-  end_diag = hypre_CTAlloc(int, num_procs);
+  end_diag = hypre_CTAlloc(HYPRE_Int, num_procs);
   if(num_recvs)
   {
     min = recv_procs[0];
@@ -114,24 +114,24 @@ void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, int *IN_marker,
 
 
 
-int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, 
+HYPRE_Int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, 
                           hypre_ParCSRCommPkg *extend_comm_pkg,
-                          int *IN_marker, 
-                          int full_off_procNodes,
-                          int *OUT_marker)
+                          HYPRE_Int *IN_marker, 
+                          HYPRE_Int full_off_procNodes,
+                          HYPRE_Int *OUT_marker)
 {   
   hypre_ParCSRCommHandle  *comm_handle;
 
-  int i, j, start, index, shift;
+  HYPRE_Int i, j, start, index, shift;
 
-  int num_sends, num_recvs;
+  HYPRE_Int num_sends, num_recvs;
   
-  int *recv_vec_starts;
+  HYPRE_Int *recv_vec_starts;
 
-  int e_num_sends;
+  HYPRE_Int e_num_sends;
 
-  int *int_buf_data;
-  int *e_out_marker;
+  HYPRE_Int *int_buf_data;
+  HYPRE_Int *e_out_marker;
   
 
   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -144,7 +144,7 @@ int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
   index = hypre_max(hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                     hypre_ParCSRCommPkgSendMapStart(extend_comm_pkg, e_num_sends));
 
-  int_buf_data = hypre_CTAlloc(int, index);
+  int_buf_data = hypre_CTAlloc(HYPRE_Int, index);
 
   /* orig commpkg data*/
   index = 0;
@@ -197,34 +197,34 @@ int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
 /* AHB 11/06 : alternate to the extend function below - creates a
  * second comm pkg based on found - this makes it easier to use the
  * global partition*/
-int
-hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, int newoff, int *found, 
+HYPRE_Int
+hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, HYPRE_Int newoff, HYPRE_Int *found, 
                               hypre_ParCSRCommPkg **extend_comm_pkg)
 
 {
    
 
-   int			num_sends;
-   int			*send_procs;
-   int			*send_map_starts;
-   int			*send_map_elmts;
+   HYPRE_Int			num_sends;
+   HYPRE_Int			*send_procs;
+   HYPRE_Int			*send_map_starts;
+   HYPRE_Int			*send_map_elmts;
  
-   int			num_recvs;
-   int			*recv_procs;
-   int			*recv_vec_starts;
+   HYPRE_Int			num_recvs;
+   HYPRE_Int			*recv_procs;
+   HYPRE_Int			*recv_vec_starts;
 
    hypre_ParCSRCommPkg	*new_comm_pkg;
 
    MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
 
-   int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
   /* use found instead of col_map_offd in A, and newoff instead 
       of num_cols_offd*/
 
 #if HYPRE_NO_GLOBAL_PARTITION
 
-   int        row_start=0, row_end=0, col_start = 0, col_end = 0;
-   int        global_num_cols;
+   HYPRE_Int        row_start=0, row_end=0, col_start = 0, col_end = 0;
+   HYPRE_Int        global_num_cols;
    hypre_IJAssumedPart   *apart;
    
    hypre_ParCSRMatrixGetLocalRange( A,
@@ -250,8 +250,8 @@ hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, int newoff, int *found,
                                 &send_map_elmts, apart);
 
 #else   
-   int  *col_starts = hypre_ParCSRMatrixColStarts(A);
-   int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int  *col_starts = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_Int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
    
    hypre_MatvecCommPkgCreate_core
       (
@@ -294,68 +294,68 @@ hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, int newoff, int *found,
 /* Add new communication patterns for new offd nodes */
 
 void
-hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
-			int *p_num_recvs, int **p_recv_procs,
-			int **p_recv_vec_starts, int *p_num_sends,
-			int **p_send_procs, int **p_send_map_starts,
-			int **p_send_map_elmts, int **p_node_add)
+hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, HYPRE_Int newoff, HYPRE_Int *found,
+			HYPRE_Int *p_num_recvs, HYPRE_Int **p_recv_procs,
+			HYPRE_Int **p_recv_vec_starts, HYPRE_Int *p_num_sends,
+			HYPRE_Int **p_send_procs, HYPRE_Int **p_send_map_starts,
+			HYPRE_Int **p_send_map_elmts, HYPRE_Int **p_node_add)
 {
   hypre_ParCSRCommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
-  int num_recvs_A = hypre_ParCSRCommPkgNumRecvs(comm_pkg_A);
-  int *recv_procs_A = hypre_ParCSRCommPkgRecvProcs(comm_pkg_A);
-  int *recv_vec_starts_A = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_A);
-  int *col_starts = hypre_ParCSRMatrixColStarts(A);
+  HYPRE_Int num_recvs_A = hypre_ParCSRCommPkgNumRecvs(comm_pkg_A);
+  HYPRE_Int *recv_procs_A = hypre_ParCSRCommPkgRecvProcs(comm_pkg_A);
+  HYPRE_Int *recv_vec_starts_A = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_A);
+  HYPRE_Int *col_starts = hypre_ParCSRMatrixColStarts(A);
   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-  int num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-  int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
-  int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+  HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
+  HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+  HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
 
-  int new_num_recv;
-  int *new_recv_proc;   
-  int *tmp_recv_proc;
-  int *tmp;
-  int *new_recv_vec_starts;   
-  int num_sends;
-  int num_elmts;
-  int *send_procs;   
-  int *send_map_starts;   
-  int *send_map_elmts;   
-  int *nodes_recv;
+  HYPRE_Int new_num_recv;
+  HYPRE_Int *new_recv_proc;   
+  HYPRE_Int *tmp_recv_proc;
+  HYPRE_Int *tmp;
+  HYPRE_Int *new_recv_vec_starts;   
+  HYPRE_Int num_sends;
+  HYPRE_Int num_elmts;
+  HYPRE_Int *send_procs;   
+  HYPRE_Int *send_map_starts;   
+  HYPRE_Int *send_map_elmts;   
+  HYPRE_Int *nodes_recv;
 
-  int i, j, k;
-  int vec_len, vec_start;
-  int num_procs, my_id;
-  int num_requests;
-  int local_info;
-  int *info;
-  int *displs;
-  int *recv_buf;
-  int ip;
-  int glob_col;
-  int proc_found;
-  int *proc_add;
-  int *proc_mark;
-  int *new_map;
-  int *new_map_starts;
-  int j1,index;
-  int total_cols = num_cols_A_offd + newoff;
-  int *node_addition;
+  HYPRE_Int i, j, k;
+  HYPRE_Int vec_len, vec_start;
+  HYPRE_Int num_procs, my_id;
+  HYPRE_Int num_requests;
+  HYPRE_Int local_info;
+  HYPRE_Int *info;
+  HYPRE_Int *displs;
+  HYPRE_Int *recv_buf;
+  HYPRE_Int ip;
+  HYPRE_Int glob_col;
+  HYPRE_Int proc_found;
+  HYPRE_Int *proc_add;
+  HYPRE_Int *proc_mark;
+  HYPRE_Int *new_map;
+  HYPRE_Int *new_map_starts;
+  HYPRE_Int j1,index;
+  HYPRE_Int total_cols = num_cols_A_offd + newoff;
+  HYPRE_Int *node_addition;
 
   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-  MPI_Request *requests;
-  MPI_Status *status;
+  hypre_MPI_Request *requests;
+  hypre_MPI_Status *status;
   
-  MPI_Comm_size(comm,&num_procs);
-  MPI_Comm_rank(comm,&my_id);
+  hypre_MPI_Comm_size(comm,&num_procs);
+  hypre_MPI_Comm_rank(comm,&my_id);
   
   new_num_recv = num_recvs_A;
 
   /* Allocate vectors for temporary variables */
-  tmp_recv_proc = hypre_CTAlloc(int, num_procs);
-  nodes_recv = hypre_CTAlloc(int, num_procs);
-  proc_add = hypre_CTAlloc(int, num_procs);
-  proc_mark = hypre_CTAlloc(int, num_procs);
-  info = hypre_CTAlloc(int, num_procs);
+  tmp_recv_proc = hypre_CTAlloc(HYPRE_Int, num_procs);
+  nodes_recv = hypre_CTAlloc(HYPRE_Int, num_procs);
+  proc_add = hypre_CTAlloc(HYPRE_Int, num_procs);
+  proc_mark = hypre_CTAlloc(HYPRE_Int, num_procs);
+  info = hypre_CTAlloc(HYPRE_Int, num_procs);
 
   /* Initialize the new node proc counter (already accounted for procs
    * will stay 0 in the loop */
@@ -364,9 +364,9 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
 
   /* Set up full offd map, col_map_offd only has neighbor off diag entries.
    * We need neighbor of neighbor nodes as well.*/
-  new_map = hypre_CTAlloc(int, total_cols);
-  new_map_starts = hypre_CTAlloc(int, num_procs+1);
-  node_addition = hypre_CTAlloc(int, num_procs);
+  new_map = hypre_CTAlloc(HYPRE_Int, total_cols);
+  new_map_starts = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+  node_addition = hypre_CTAlloc(HYPRE_Int, num_procs);
   for(i = 0; i < num_procs; i++)
   {
     nodes_recv[i] = 0;
@@ -456,30 +456,30 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
     }
   }
   
-  new_recv_proc = hypre_CTAlloc(int, new_num_recv);
+  new_recv_proc = hypre_CTAlloc(HYPRE_Int, new_num_recv);
   for(i = 0; i < new_num_recv; i++)
     new_recv_proc[i] = tmp_recv_proc[i];
 
-  new_recv_vec_starts = hypre_CTAlloc(int, new_num_recv+1);
+  new_recv_vec_starts = hypre_CTAlloc(HYPRE_Int, new_num_recv+1);
   new_recv_vec_starts[0] = 0;
  
   /* Now tell new processors that they need to send some info and change
    * their send comm*/
   local_info = 2*new_num_recv;
-  MPI_Allgather(&local_info, 1, MPI_INT, info, 1, MPI_INT, comm); 
+  hypre_MPI_Allgather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, comm); 
 
   /* ----------------------------------------------------------------------
    * generate information to be sent: tmp contains for each recv_proc:
    * id of recv_procs, number of elements to be received for this processor,
    * indices of elements (in this order)
    * ---------------------------------------------------------------------*/
-   displs = hypre_CTAlloc(int, num_procs+1);
+   displs = hypre_CTAlloc(HYPRE_Int, num_procs+1);
    displs[0] = 0;
    for (i=1; i < num_procs+1; i++)
 	displs[i] = displs[i-1]+info[i-1]; 
-   recv_buf = hypre_CTAlloc(int, displs[num_procs]); 
+   recv_buf = hypre_CTAlloc(HYPRE_Int, displs[num_procs]); 
 
-   tmp = hypre_CTAlloc(int, local_info);
+   tmp = hypre_CTAlloc(HYPRE_Int, local_info);
 
    j = 0;
    /* Load old information if recv proc was already in comm */  
@@ -500,7 +500,7 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
      tmp[j++] = num_elmts;
    }
 
-   MPI_Allgatherv(tmp,local_info,MPI_INT,recv_buf,info,displs,MPI_INT,comm);
+   hypre_MPI_Allgatherv(tmp,local_info,HYPRE_MPI_INT,recv_buf,info,displs,HYPRE_MPI_INT,comm);
 	
    hypre_TFree(tmp);
 
@@ -538,15 +538,15 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
 
    if (num_sends)
    {
-      send_procs = hypre_CTAlloc(int, num_sends);
-      send_map_elmts = hypre_CTAlloc(int, proc_add[num_sends]);
+      send_procs = hypre_CTAlloc(HYPRE_Int, num_sends);
+      send_map_elmts = hypre_CTAlloc(HYPRE_Int, proc_add[num_sends]);
    }
-   send_map_starts = hypre_CTAlloc(int, num_sends+1);
+   send_map_starts = hypre_CTAlloc(HYPRE_Int, num_sends+1);
    num_requests = new_num_recv+num_sends;
    if (num_requests)
    {
-      requests = hypre_CTAlloc(MPI_Request, num_requests);
-      status = hypre_CTAlloc(MPI_Status, num_requests);
+      requests = hypre_CTAlloc(hypre_MPI_Request, num_requests);
+      status = hypre_CTAlloc(hypre_MPI_Status, num_requests);
    }
 
    if (num_sends) send_map_starts[0] = 0;
@@ -564,7 +564,7 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
      ip = new_recv_proc[i];
      if(newoff)
        vec_start = new_map_starts[ip];
-     MPI_Isend(&new_map[vec_start], vec_len, MPI_INT,
+     hypre_MPI_Isend(&new_map[vec_start], vec_len, HYPRE_MPI_INT,
 	       ip, 0, comm, &requests[j++]);
    }
    for (i=0; i < num_sends; i++)
@@ -572,13 +572,13 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
       vec_start = send_map_starts[i];
       vec_len = send_map_starts[i+1] - vec_start;
       ip = send_procs[i];
-      MPI_Irecv(&send_map_elmts[vec_start], vec_len, MPI_INT,
+      hypre_MPI_Irecv(&send_map_elmts[vec_start], vec_len, HYPRE_MPI_INT,
                         ip, 0, comm, &requests[j++]);
    }
 
    if (num_requests)
    {
-      MPI_Waitall(num_requests, requests, status);
+      hypre_MPI_Waitall(num_requests, requests, status);
       hypre_TFree(requests);
       hypre_TFree(status);
    }
@@ -614,10 +614,10 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
 #endif
 
 /* sort for non-ordered arrays */
-int hypre_ssort(int *data, int n)
+HYPRE_Int hypre_ssort(HYPRE_Int *data, HYPRE_Int n)
 {
-  int i,si;               
-  int change = 0;
+  HYPRE_Int i,si;               
+  HYPRE_Int change = 0;
   
   if(n > 0)
     for(i = n-1; i > 0; i--){
@@ -632,10 +632,10 @@ int hypre_ssort(int *data, int n)
 }
 
 /* Auxilary function for hypre_ssort */
-int index_of_minimum(int *data, int n)
+HYPRE_Int index_of_minimum(HYPRE_Int *data, HYPRE_Int n)
 {
-  int answer;
-  int i;
+  HYPRE_Int answer;
+  HYPRE_Int i;
                                                                                
   answer = 0;
   for(i = 1; i < n; i++)
@@ -645,9 +645,9 @@ int index_of_minimum(int *data, int n)
   return answer;
 }
                                                                                
-void swap_int(int *data, int a, int b)
+void swap_int(HYPRE_Int *data, HYPRE_Int a, HYPRE_Int b)
 {
-  int temp;
+  HYPRE_Int temp;
                                                                                
   temp = data[a];
   data[a] = data[b];
@@ -657,10 +657,10 @@ void swap_int(int *data, int a, int b)
 }
 
 /* Initialize CF_marker_offd, CF_marker, P_marker, P_marker_offd, tmp */
-void initialize_vecs(int diag_n, int offd_n, int *diag_ftc, int *offd_ftc, 
-		     int *diag_pm, int *offd_pm, int *tmp_CF)
+void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_Int *offd_ftc, 
+		     HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF)
 {
-  int i;
+  HYPRE_Int i;
 
   /* Quicker initialization */
   if(offd_n < diag_n)
@@ -701,27 +701,27 @@ void initialize_vecs(int diag_n, int offd_n, int *diag_ftc, int *offd_ftc,
 
 /* Find nodes that are offd and are not contained in original offd
  * (neighbors of neighbors) */
-int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j, 
-		   int num_cols_S_offd, int *col_map_offd, int col_1, 
-		   int col_n, int *Sop_i, int *Sop_j,
-		   int *CF_marker, hypre_ParCSRCommPkg *comm_pkg)
+HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int *A_ext_i, HYPRE_Int *A_ext_j, 
+		   HYPRE_Int num_cols_S_offd, HYPRE_Int *col_map_offd, HYPRE_Int col_1, 
+		   HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j,
+		   HYPRE_Int *CF_marker, hypre_ParCSRCommPkg *comm_pkg)
 {
-  int i, i1, ii, j, ifound, kk, k1;
-  int got_loc, loc_col;
+  HYPRE_Int i, i1, ii, j, ifound, kk, k1;
+  HYPRE_Int got_loc, loc_col;
 
-  int min;
+  HYPRE_Int min;
 
-  int size_offP;
+  HYPRE_Int size_offP;
 
-  int *tmp_found;
-  int *CF_marker_offd = NULL;
-  int *int_buf_data;
-  int newoff = 0;
-  int full_off_procNodes = 0;
+  HYPRE_Int *tmp_found;
+  HYPRE_Int *CF_marker_offd = NULL;
+  HYPRE_Int *int_buf_data;
+  HYPRE_Int newoff = 0;
+  HYPRE_Int full_off_procNodes = 0;
   hypre_ParCSRCommHandle *comm_handle;
                                                                                                                                          
-  CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
-  int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+  CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
+  int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                 hypre_ParCSRCommPkgNumSends(comm_pkg)));
   ii = 0;
   for (i=0; i < hypre_ParCSRCommPkgNumSends(comm_pkg); i++)
@@ -737,7 +737,7 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
   hypre_TFree(int_buf_data);
 
   size_offP = A_ext_i[num_cols_A_offd];
-  tmp_found = hypre_CTAlloc(int, size_offP);
+  tmp_found = hypre_CTAlloc(HYPRE_Int, size_offP);
 
   /* Find nodes that will be added to the off diag list */ 
   for (i = 0; i < num_cols_A_offd; i++)
@@ -811,7 +811,7 @@ int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j,
 	 }
 	 if(loc_col < 0)
 	 {
-	   printf("Could not find node: STOP\n");
+	   hypre_printf("Could not find node: STOP\n");
 	   return(-1);
 	 }
 	 Sop_j[kk] = -loc_col - 1;

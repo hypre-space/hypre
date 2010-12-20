@@ -41,8 +41,8 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
    hypre_StructStencil   *stencil;
 
 #if NEWRAP
-   int                    cdir;
-   int                    P_stored_as_transpose = 1;
+   HYPRE_Int                    cdir;
+   HYPRE_Int                    P_stored_as_transpose = 1;
 #endif
 
    stencil = hypre_StructMatrixStencil(A);
@@ -87,7 +87,7 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
  * entries in RAP. Incomplete error handling at the moment. 
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
                      hypre_StructMatrix *A,
                      hypre_StructMatrix *PT,
@@ -95,11 +95,11 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
                      hypre_Index         cindex,
                      hypre_Index         cstride )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
  
 #if NEWRAP
-   int                    cdir;
-   int                    P_stored_as_transpose = 1;
+   HYPRE_Int                    cdir;
+   HYPRE_Int                    P_stored_as_transpose = 1;
 #endif
 
    hypre_StructStencil   *stencil;

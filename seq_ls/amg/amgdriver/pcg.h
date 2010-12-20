@@ -30,15 +30,15 @@
 
 typedef struct
 {
-   int      max_iter;
-   int      two_norm;
+   HYPRE_Int      max_iter;
+   HYPRE_Int      two_norm;
 
    hypre_Matrix  *A;
    hypre_Vector  *p;
    hypre_Vector  *s;
    hypre_Vector  *r;
 
-   int    (*precond)();
+   HYPRE_Int    (*precond)();
    void    *precond_data;
 
    char    *log_file_name;

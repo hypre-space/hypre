@@ -27,8 +27,8 @@ char amg_malloclog[256];
  * Main driver for AMG
  *--------------------------------------------------------------------------*/
 
-int   main(argc, argv)
-int   argc;
+HYPRE_Int   main(argc, argv)
+HYPRE_Int   argc;
 char *argv[];
 {
    char    *run_name;
@@ -64,7 +64,7 @@ char *argv[];
 
    if (argc < 2)
    {
-      fprintf(stderr, "Usage:  amg <run name>\n");
+      hypre_fprintf(stderr, "Usage:  amg <run name>\n");
       exit(1);
    }
 
@@ -75,7 +75,7 @@ char *argv[];
 #ifdef AMG_MALLOC_DEBUG
    /* malloc debug stuff */
    malloc_logpath = amg_malloclog;
-   sprintf(malloc_logpath, "malloc.log");
+   hypre_sprintf(malloc_logpath, "malloc.log");
 #endif
 
    /*-------------------------------------------------------
@@ -89,14 +89,14 @@ char *argv[];
     * Set up the problem
     *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.problem.strp", GlobalsInFileName);
+   hypre_sprintf(file_name, "%s.problem.strp", GlobalsInFileName);
    problem = NewProblem(file_name);
 
    /*-------------------------------------------------------
     * Set up the solver
     *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.solver.strp", GlobalsInFileName);
+   hypre_sprintf(file_name, "%s.solver.strp", GlobalsInFileName);
    solver = NewSolver(file_name);
 
    /*-------------------------------------------------------
@@ -138,25 +138,25 @@ char *argv[];
 
    if (SolverType(solver) == SOLVER_AMG)
    {
-      int setup_err_flag;
-      int solve_err_flag;
+      HYPRE_Int setup_err_flag;
+      HYPRE_Int solve_err_flag;
 
       setup_err_flag = HYPRE_AMGSetup(A, amg_data);
       if (setup_err_flag != 0) 
       {
-         printf("setup error = %d\n",setup_err_flag);
+         hypre_printf("setup error = %d\n",setup_err_flag);
          if (setup_err_flag > 0)
          {
             return 1;
          }
-         printf("Setup Error Warning. Execution Continues.\n");
+         hypre_printf("Setup Error Warning. Execution Continues.\n");
       }
 
       setup_ticks = HYPRE_AMGClock() - start_ticks;
       setup_cpu =   HYPRE_AMGCPUClock() - start_cpu;
 
       solve_err_flag = HYPRE_AMGSolve(u, f, stop_tolerance, amg_data);
-      if (solve_err_flag != 0) printf("solve error = %d\n",solve_err_flag);
+      if (solve_err_flag != 0) hypre_printf("solve error = %d\n",solve_err_flag);
 
       solve_ticks = HYPRE_AMGClock() - (start_ticks + setup_ticks);
       solve_cpu =   HYPRE_AMGCPUClock() - (start_cpu + setup_cpu);
@@ -222,23 +222,23 @@ char *argv[];
 
       fp = fopen(GlobalsLogFileName, "a");
  
-      fprintf(fp,"\nTIMING INFORMATION\n");
-      fprintf(fp,"\nSetup Time:\n");
-      fprintf(fp, " wall clock time = %f seconds\n", 
+      hypre_fprintf(fp,"\nTIMING INFORMATION\n");
+      hypre_fprintf(fp,"\nSetup Time:\n");
+      hypre_fprintf(fp, " wall clock time = %f seconds\n", 
                          ((double) setup_ticks)/AMG_TICKS_PER_SEC);
-      fprintf(fp," CPU clock time  = %f seconds\n", 
+      hypre_fprintf(fp," CPU clock time  = %f seconds\n", 
                          ((double) setup_cpu)/AMG_CPU_TICKS_PER_SEC);
 
-      fprintf(fp,"\nSolve Time:\n");
-      fprintf(fp, " wall clock time = %f seconds\n", 
+      hypre_fprintf(fp,"\nSolve Time:\n");
+      hypre_fprintf(fp, " wall clock time = %f seconds\n", 
                          ((double) solve_ticks)/AMG_TICKS_PER_SEC);
-      fprintf(fp," CPU clock time  = %f seconds\n", 
+      hypre_fprintf(fp," CPU clock time  = %f seconds\n", 
                          ((double) solve_cpu)/AMG_CPU_TICKS_PER_SEC);
  
-      fprintf(fp,"\nOverall Time:\n");
-      fprintf(fp, " wall clock time = %f seconds\n", 
+      hypre_fprintf(fp,"\nOverall Time:\n");
+      hypre_fprintf(fp, " wall clock time = %f seconds\n", 
                          ((double) time_ticks)/AMG_TICKS_PER_SEC);
-      fprintf(fp," CPU clock time  = %f seconds\n", 
+      hypre_fprintf(fp," CPU clock time  = %f seconds\n", 
                          ((double) cpu_ticks)/AMG_CPU_TICKS_PER_SEC);
   
       fclose(fp);
@@ -257,24 +257,24 @@ char *argv[];
 #endif
 
 #if 0
-   sprintf(file_name, "%s.lastu", GlobalsOutFileName);
+   hypre_sprintf(file_name, "%s.lastu", GlobalsOutFileName);
    hypre_WriteVec(file_name, u);
 #endif
 #if 0
-   printf("soln norm = %e\n", sqrt(hypre_InnerProd(u,u)));
+   hypre_printf("soln norm = %e\n", sqrt(hypre_InnerProd(u,u)));
 
-   printf("rhs norm = %e\n", sqrt(hypre_InnerProd(f,f)));
+   hypre_printf("rhs norm = %e\n", sqrt(hypre_InnerProd(f,f)));
    hypre_Matvec(-1.0, A, u, 1.0, f);
-   sprintf(file_name, "%s.res", GlobalsOutFileName);
+   hypre_sprintf(file_name, "%s.res", GlobalsOutFileName);
    hypre_WriteVec(file_name, f);
 
-   printf("res_norm = %e\n", sqrt(hypre_InnerProd(f,f)));
+   hypre_printf("res_norm = %e\n", sqrt(hypre_InnerProd(f,f)));
 
-   sprintf(file_name, "%s.A", GlobalsOutFileName);
+   hypre_sprintf(file_name, "%s.A", GlobalsOutFileName);
    hypre_WriteYSMP(file_name, A);
 
    hypre_Matvec(1.0, A, u, 0.0, f);
-   sprintf(file_name, "%s.Au", GlobalsOutFileName);
+   hypre_sprintf(file_name, "%s.Au", GlobalsOutFileName);
    hypre_WriteVec(file_name, f);
 #endif
 

@@ -30,9 +30,9 @@
 
 hypre_Matrix  *hypre_NewMatrix(data, ia, ja, size)
 double  *data;
-int     *ia;
-int     *ja;
-int      size;
+HYPRE_Int     *ia;
+HYPRE_Int     *ja;
+HYPRE_Int      size;
 {
    hypre_Matrix     *new;
 

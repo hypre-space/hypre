@@ -21,7 +21,7 @@
 /* 
 hypre_AMGeMatrixTopology * 
 */
-int
+HYPRE_Int
 hypre_CreateAMGeMatrixTopology(hypre_AMGeMatrixTopology *matrix )
 
 {
@@ -66,10 +66,10 @@ hypre_CreateAMGeMatrixTopology(hypre_AMGeMatrixTopology *matrix )
  * hypre_DestroyAMGeMatrixToplogy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_DestroyAMGeMatrixTopology( hypre_AMGeMatrixTopology *matrix )
 {
-   int   ierr = 0;
+   HYPRE_Int   ierr = 0;
 
    if (matrix)
    {

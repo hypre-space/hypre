@@ -31,14 +31,14 @@
  *
  *--------------------------------------------------------------------------*/
 
-int hypre_BCSRMatrixRelax(hypre_BCSRMatrix *A, hypre_Vector *f, int *cf_marker,
-			  int relax_points, hypre_Vector *u) {
+HYPRE_Int hypre_BCSRMatrixRelax(hypre_BCSRMatrix *A, hypre_Vector *f, HYPRE_Int *cf_marker,
+			  HYPRE_Int relax_points, hypre_Vector *u) {
    hypre_BCSRMatrixBlock** A_blocks = hypre_BCSRMatrixBlocks(A);
-   int* A_i = hypre_BCSRMatrixI(A);
-   int* A_j = hypre_BCSRMatrixJ(A);
+   HYPRE_Int* A_i = hypre_BCSRMatrixI(A);
+   HYPRE_Int* A_j = hypre_BCSRMatrixJ(A);
 
-   int n = hypre_BCSRMatrixNumBlockRows(A);
-   int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
+   HYPRE_Int n = hypre_BCSRMatrixNumBlockRows(A);
+   HYPRE_Int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
    
    double *u_data  = hypre_VectorData(u);
    double *f_data  = hypre_VectorData(f);
@@ -51,9 +51,9 @@ int hypre_BCSRMatrixRelax(hypre_BCSRMatrix *A, hypre_Vector *f, int *cf_marker,
 
    double* eye;
 
-   int i, ii, jj;
+   HYPRE_Int i, ii, jj;
 
-   int relax_error = 0;
+   HYPRE_Int relax_error = 0;
 
    hypre_BCSRMatrixBlockInitialise(inv);
    eye = hypre_CTAlloc(double, num_rows_per_block*num_rows_per_block);

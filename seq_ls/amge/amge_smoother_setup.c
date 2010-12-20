@@ -25,55 +25,55 @@
  ****************************************************************************/
 
 
-int hypre_AMGeSmootherSetup(int ***i_ILUdof_to_dof_pointer,
+HYPRE_Int hypre_AMGeSmootherSetup(HYPRE_Int ***i_ILUdof_to_dof_pointer,
 
-			    int ***i_ILUdof_ILUdof_pointer,
-			    int ***j_ILUdof_ILUdof_pointer,
+			    HYPRE_Int ***i_ILUdof_ILUdof_pointer,
+			    HYPRE_Int ***j_ILUdof_ILUdof_pointer,
 			    double ***LD_data_pointer,
 			     
-			    int ***i_ILUdof_ILUdof_t_pointer,
-			    int ***j_ILUdof_ILUdof_t_pointer,
+			    HYPRE_Int ***i_ILUdof_ILUdof_t_pointer,
+			    HYPRE_Int ***j_ILUdof_ILUdof_t_pointer,
 			    double ***U_data_pointer,
 
 
 			    hypre_CSRMatrix **Matrix,
 
-			    int *level_pointer,
+			    HYPRE_Int *level_pointer,
 
-			    int **i_block_node, int **j_block_node,
+			    HYPRE_Int **i_block_node, HYPRE_Int **j_block_node,
 
-			    int **i_node_dof, int **j_node_dof,
+			    HYPRE_Int **i_node_dof, HYPRE_Int **j_node_dof,
 
-			    int *Num_blocks, 
-			    int *Num_nodes,
-			    int *Num_dofs)
+			    HYPRE_Int *Num_blocks, 
+			    HYPRE_Int *Num_nodes,
+			    HYPRE_Int *Num_dofs)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int l;
-  int level = level_pointer[0];
-  int **i_ILUdof_to_dof;
-  int **i_ILUdof_ILUdof, **j_ILUdof_ILUdof;
+  HYPRE_Int l;
+  HYPRE_Int level = level_pointer[0];
+  HYPRE_Int **i_ILUdof_to_dof;
+  HYPRE_Int **i_ILUdof_ILUdof, **j_ILUdof_ILUdof;
   double **LD_data;
 			     
-  int **i_ILUdof_ILUdof_t, **j_ILUdof_ILUdof_t;
+  HYPRE_Int **i_ILUdof_ILUdof_t, **j_ILUdof_ILUdof_t;
   double **U_data;
 
-  i_ILUdof_to_dof = hypre_CTAlloc(int*, level);
+  i_ILUdof_to_dof = hypre_CTAlloc(HYPRE_Int*, level);
 
-  i_ILUdof_ILUdof = hypre_CTAlloc(int*, level);
-  j_ILUdof_ILUdof = hypre_CTAlloc(int*, level);
+  i_ILUdof_ILUdof = hypre_CTAlloc(HYPRE_Int*, level);
+  j_ILUdof_ILUdof = hypre_CTAlloc(HYPRE_Int*, level);
   LD_data = hypre_CTAlloc(double*, level);
 
-  i_ILUdof_ILUdof_t = hypre_CTAlloc(int*, level);
-  j_ILUdof_ILUdof_t = hypre_CTAlloc(int*, level);
+  i_ILUdof_ILUdof_t = hypre_CTAlloc(HYPRE_Int*, level);
+  j_ILUdof_ILUdof_t = hypre_CTAlloc(HYPRE_Int*, level);
   U_data = hypre_CTAlloc(double*, level);
 
 
   l=0;
 factorization_step:
-  printf("\n\nB U I L D I N G  level[%d] ILU(1)  FACTORIZATION  M A T R I X\n",l);
+  hypre_printf("\n\nB U I L D I N G  level[%d] ILU(1)  FACTORIZATION  M A T R I X\n",l);
   ierr = hypre_ILUfactor(&i_ILUdof_to_dof[l],
 
 
@@ -96,9 +96,9 @@ factorization_step:
 			 Num_nodes[l]);
 
 
-  printf("LD_nnz: %d\n", i_ILUdof_ILUdof[l][Num_dofs[l]]);
-  printf("U_nnz: %d\n", i_ILUdof_ILUdof_t[l][Num_dofs[l]]);
-  printf("\n\n END building ILU(1) FACTORIZATION  MATRIX;------------------------\n");
+  hypre_printf("LD_nnz: %d\n", i_ILUdof_ILUdof[l][Num_dofs[l]]);
+  hypre_printf("U_nnz: %d\n", i_ILUdof_ILUdof_t[l][Num_dofs[l]]);
+  hypre_printf("\n\n END building ILU(1) FACTORIZATION  MATRIX;------------------------\n");
 
 
   /*

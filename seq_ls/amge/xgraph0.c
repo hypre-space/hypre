@@ -8,9 +8,9 @@ Window          myWindow;
 Pixmap          myPixmap;
 Display         *myDisplay;
 Screen          *myScreen;
-unsigned long   ColorMapPixels[256];
-int             ColorStatus[256];
-int             scale;
+HYPRE_Int        ColorMapPixels[256];
+HYPRE_Int        ColorStatus[256];
+HYPRE_Int        scale;
 
 /**********************************************************************/
 /*                                                                    */
@@ -19,10 +19,10 @@ int             scale;
 /*                  edition 7.1 - - - june, 1994                      */
 /*                                                                    */
 /**********************************************************************/
-void xutl0_(int *ncolor, float red[], float  green[], float blue[] )
+void xutl0_(HYPRE_Int *ncolor, float red[], float  green[], float blue[] )
     {
-        int winX, winY, winW, winH, bwidth, i, done;
-        unsigned long valuemask;
+        HYPRE_Int winX, winY, winW, winH, bwidth, i, done;
+        HYPRE_Int valuemask;
         XSetWindowAttributes xswa;
         XEvent myEvent;
         KeySym myKeysym;
@@ -122,17 +122,17 @@ void xutl0_(int *ncolor, float red[], float  green[], float blue[] )
 /*                  edition 8.1 - - - february, 1999                 */
 /*                                                                    */
 /**********************************************************************/
-void xline0_( float x[], float y[], int *np, int *icolor)
+void xline0_( float x[], float y[], HYPRE_Int *np, HYPRE_Int *icolor)
 {
-        int i;
+        HYPRE_Int i;
         XPoint *pp, *pts;
 
         pts = (XPoint *) malloc( *np * sizeof(XPoint) );
         pp = pts;
 
         for(i = 0; i < *np; i++)  {
-                pp->x = (int) ( x[i] * scale);
-                pp->y = (int) ( ( 1.- y[i] ) * scale );
+                pp->x = (HYPRE_Int) ( x[i] * scale);
+                pp->y = (HYPRE_Int) ( ( 1.- y[i] ) * scale );
                 pp++ ;
         }
         XSetForeground(myDisplay, 
@@ -154,21 +154,21 @@ void xline0_( float x[], float y[], int *np, int *icolor)
 /*                  edition 8.1 - - - february, 1999                 */
 /*                                                                    */
 /**********************************************************************/
-void xfill0_( float x[], float y[], int *np, int *icolor)
+void xfill0_( float x[], float y[], HYPRE_Int *np, HYPRE_Int *icolor)
 {
-        int i;
+        HYPRE_Int i;
         XPoint *pp, *pts;
 
         pts = (XPoint *) malloc( ( *np + 1) * sizeof(XPoint) );
         pp = pts;
 
         for(i = 0; i < *np; i++)  {
-                pp->x = (int) ( x[i] * scale );
-                pp->y = (int) ( ( 1.- y[i] ) * scale );
+                pp->x = (HYPRE_Int) ( x[i] * scale );
+                pp->y = (HYPRE_Int) ( ( 1.- y[i] ) * scale );
                 pp++ ;
         }
-        pp->x = (int) ( x[0] * scale );
-        pp->y = (int) ( ( 1.- y[0] ) * scale );
+        pp->x = (HYPRE_Int) ( x[0] * scale );
+        pp->y = (HYPRE_Int) ( ( 1.- y[0] ) * scale );
 
         XSetForeground(myDisplay, 
                 DefaultGCOfScreen(myScreen), 

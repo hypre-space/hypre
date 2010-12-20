@@ -14,13 +14,15 @@
 #ifndef FORTRAN_STYLE_MATRIX
 #define FORTRAN_STYLE_MATRIX
 
+#include "_hypre_utilities.h"
+
 typedef struct
 {
   long	globalHeight;
   long	height;
   long	width;
   double* value;
-  int		ownsValues;
+  HYPRE_Int		ownsValues;
 } utilities_FortranMatrix;
 
 #ifdef __cplusplus
@@ -60,11 +62,11 @@ void
 utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx );
 
 void 
-utilities_FortranMatrixCopy( utilities_FortranMatrix* src, int t, 
+utilities_FortranMatrixCopy( utilities_FortranMatrix* src, HYPRE_Int t, 
 			     utilities_FortranMatrix* dest );
 void 
-utilities_FortranMatrixIndexCopy( int* index, 
-				  utilities_FortranMatrix* src, int t, 
+utilities_FortranMatrixIndexCopy( HYPRE_Int* index, 
+				  utilities_FortranMatrix* src, HYPRE_Int t, 
 				  utilities_FortranMatrix* dest );
 
 void 
@@ -85,8 +87,8 @@ void
 utilities_FortranMatrixMultiplyD( utilities_FortranMatrix* mtx, 
 				  utilities_FortranMatrix* d );
 void 
-utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA, 
-				 utilities_FortranMatrix* mtxB, int tB,
+utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, HYPRE_Int tA, 
+				 utilities_FortranMatrix* mtxB, HYPRE_Int tB,
 				 utilities_FortranMatrix* mtxC );
 double 
 utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx );
@@ -108,7 +110,7 @@ utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
 void 
 utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u );
 
-int
+HYPRE_Int
 utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] );
 
 #ifdef __cplusplus

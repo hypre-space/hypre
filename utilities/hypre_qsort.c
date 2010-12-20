@@ -12,15 +12,16 @@
 
 
 #include <math.h>
+#include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void swap( int *v,
-           int  i,
-           int  j )
+void swap( HYPRE_Int *v,
+           HYPRE_Int  i,
+           HYPRE_Int  j )
 {
-   int temp;
+   HYPRE_Int temp;
 
    temp = v[i];
    v[i] = v[j];
@@ -30,12 +31,12 @@ void swap( int *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void swap2(int     *v,
+void swap2(HYPRE_Int     *v,
            double  *w,
-           int      i,
-           int      j )
+           HYPRE_Int      i,
+           HYPRE_Int      j )
 {
-   int temp;
+   HYPRE_Int temp;
    double temp2;
 
    temp = v[i];
@@ -49,12 +50,12 @@ void swap2(int     *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void hypre_swap2i(int  *v,
-                  int  *w,
-                  int  i,
-                  int  j )
+void hypre_swap2i(HYPRE_Int  *v,
+                  HYPRE_Int  *w,
+                  HYPRE_Int  i,
+                  HYPRE_Int  j )
 {
-   int temp;
+   HYPRE_Int temp;
 
    temp = v[i];
    v[i] = v[j];
@@ -71,13 +72,13 @@ void hypre_swap2i(int  *v,
 
 /* AB 11/04 */
 
-void hypre_swap3i(int  *v,
-                  int  *w,
-                  int  *z,
-                  int  i,
-                  int  j )
+void hypre_swap3i(HYPRE_Int  *v,
+                  HYPRE_Int  *w,
+                  HYPRE_Int  *z,
+                  HYPRE_Int  i,
+                  HYPRE_Int  j )
 {
-   int temp;
+   HYPRE_Int temp;
 
    temp = v[i];
    v[i] = v[j];
@@ -94,12 +95,12 @@ void hypre_swap3i(int  *v,
  *--------------------------------------------------------------------------*/
 
 void hypre_swap3_d(double  *v,
-                  int  *w,
-                  int  *z,
-                  int  i,
-                  int  j )
+                  HYPRE_Int  *w,
+                  HYPRE_Int  *z,
+                  HYPRE_Int  i,
+                  HYPRE_Int  j )
 {
-   int temp;
+   HYPRE_Int temp;
    double temp_d;
    
 
@@ -118,13 +119,13 @@ void hypre_swap3_d(double  *v,
  *--------------------------------------------------------------------------*/
 
 void hypre_swap4_d(double  *v,
-                  int  *w,
-                  int  *z,
-                  int *y, 
-                  int  i,
-                  int  j )
+                  HYPRE_Int  *w,
+                  HYPRE_Int  *z,
+                  HYPRE_Int *y, 
+                  HYPRE_Int  i,
+                  HYPRE_Int  j )
 {
-   int temp;
+   HYPRE_Int temp;
    double temp_d;
    
 
@@ -147,8 +148,8 @@ void hypre_swap4_d(double  *v,
  *--------------------------------------------------------------------------*/
 
 void hypre_swap_d( double *v,
-                   int  i,
-                   int  j )
+                   HYPRE_Int  i,
+                   HYPRE_Int  j )
 {
    double temp;
 
@@ -160,11 +161,11 @@ void hypre_swap_d( double *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void qsort0( int *v,
-             int  left,
-             int  right )
+void qsort0( HYPRE_Int *v,
+             HYPRE_Int  left,
+             HYPRE_Int  right )
 {
-   int i, last;
+   HYPRE_Int i, last;
 
    if (left >= right)
       return;
@@ -183,12 +184,12 @@ void qsort0( int *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void qsort1( int *v,
+void qsort1( HYPRE_Int *v,
 	     double *w,
-             int  left,
-             int  right )
+             HYPRE_Int  left,
+             HYPRE_Int  right )
 {
-   int i, last;
+   HYPRE_Int i, last;
 
    if (left >= right)
       return;
@@ -207,12 +208,12 @@ void qsort1( int *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void hypre_qsort2i( int *v,
-                    int *w,
-                    int  left,
-                    int  right )
+void hypre_qsort2i( HYPRE_Int *v,
+                    HYPRE_Int *w,
+                    HYPRE_Int  left,
+                    HYPRE_Int  right )
 {
-   int i, last;
+   HYPRE_Int i, last;
 
    if (left >= right)
    {
@@ -238,12 +239,12 @@ void hypre_qsort2i( int *v,
 /*   sort on w (double), move v (AB 11/04) */
 
 
-void hypre_qsort2( int *v,
+void hypre_qsort2( HYPRE_Int *v,
 	     double *w,
-             int  left,
-             int  right )
+             HYPRE_Int  left,
+             HYPRE_Int  right )
 {
-   int i, last;
+   HYPRE_Int i, last;
 
    if (left >= right)
       return;
@@ -264,13 +265,13 @@ void hypre_qsort2( int *v,
 
 /* sort on v, move w and z (AB 11/04) */
 
-void hypre_qsort3i( int *v,
-                    int *w,
-                    int *z,
-                    int  left,
-                    int  right )
+void hypre_qsort3i( HYPRE_Int *v,
+                    HYPRE_Int *w,
+                    HYPRE_Int *z,
+                    HYPRE_Int  left,
+                    HYPRE_Int  right )
 {
-   int i, last;
+   HYPRE_Int i, last;
 
    if (left >= right)
    {
@@ -296,12 +297,12 @@ void hypre_qsort3i( int *v,
 /* sort min to max based on absolute value */
 
 void hypre_qsort3_abs(double *v,
-                      int *w,
-                      int *z,
-                      int  left,
-                      int  right )
+                      HYPRE_Int *w,
+                      HYPRE_Int *z,
+                      HYPRE_Int  left,
+                      HYPRE_Int  right )
 {
-   int i, last;
+   HYPRE_Int i, last;
    if (left >= right)
       return;
    hypre_swap3_d( v, w, z, left, (left+right)/2);
@@ -322,13 +323,13 @@ void hypre_qsort3_abs(double *v,
 /* sort min to max based on absolute value */
 
 void hypre_qsort4_abs(double *v,
-                      int *w,
-                      int *z,
-                      int *y,
-                      int  left,
-                      int  right )
+                      HYPRE_Int *w,
+                      HYPRE_Int *z,
+                      HYPRE_Int *y,
+                      HYPRE_Int  left,
+                      HYPRE_Int  right )
 {
-   int i, last;
+   HYPRE_Int i, last;
    if (left >= right)
       return;
    hypre_swap4_d( v, w, z, y, left, (left+right)/2);
@@ -349,10 +350,10 @@ void hypre_qsort4_abs(double *v,
 /* sort min to max based on absolute value */
 
 void hypre_qsort_abs(double *w,
-                     int  left,
-                     int  right )
+                     HYPRE_Int  left,
+                     HYPRE_Int  right )
 {
-   int i, last;
+   HYPRE_Int i, last;
    if (left >= right)
       return;
    hypre_swap_d( w, left, (left+right)/2);

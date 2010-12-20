@@ -43,7 +43,7 @@
  * size if a row with a larger local index needs to be put in StoredRows.
  *--------------------------------------------------------------------------*/
 
-StoredRows *StoredRowsCreate(Matrix *mat, int size)
+StoredRows *StoredRowsCreate(Matrix *mat, HYPRE_Int size)
 {
     StoredRows *p = (StoredRows *) malloc(sizeof(StoredRows));
 
@@ -53,8 +53,8 @@ StoredRows *StoredRowsCreate(Matrix *mat, int size)
     p->size = size;
     p->num_loc = mat->end_row - mat->beg_row + 1;
 
-    p->len = (int *)     calloc(size,  sizeof(int));
-    p->ind = (int **)    malloc(size * sizeof(int *));
+    p->len = (HYPRE_Int *)     calloc(size,  sizeof(HYPRE_Int));
+    p->ind = (HYPRE_Int **)    malloc(size * sizeof(HYPRE_Int *));
     p->val = (double **) malloc(size * sizeof(double *));
 
     p->count = 0;
@@ -80,9 +80,9 @@ void StoredRowsDestroy(StoredRows *p)
  * stored rows object "p".  The indices may span several rows.
  *--------------------------------------------------------------------------*/
 
-int *StoredRowsAllocInd(StoredRows *p, int len)
+HYPRE_Int *StoredRowsAllocInd(StoredRows *p, HYPRE_Int len)
 {
-    return (int *) MemAlloc(p->mem, len*sizeof(int));
+    return (HYPRE_Int *) MemAlloc(p->mem, len*sizeof(HYPRE_Int));
 }
 
 /*--------------------------------------------------------------------------
@@ -90,7 +90,7 @@ int *StoredRowsAllocInd(StoredRows *p, int len)
  * stored rows object "p".  The values may span several rows.
  *--------------------------------------------------------------------------*/
 
-double *StoredRowsAllocVal(StoredRows *p, int len)
+double *StoredRowsAllocVal(StoredRows *p, HYPRE_Int len)
 {
     return (double *) MemAlloc(p->mem, len*sizeof(double));
 }
@@ -101,22 +101,22 @@ double *StoredRowsAllocVal(StoredRows *p, int len)
  * this interface; the local stored rows are put using the create function.
  *--------------------------------------------------------------------------*/
 
-void StoredRowsPut(StoredRows *p, int index, int len, int *ind, double *val)
+void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind, double *val)
 {
-    int i = index - p->num_loc;
+    HYPRE_Int i = index - p->num_loc;
 
     /* Reallocate if necessary */
     if (i >= p->size)
     {
-        int j;
-        int newsize;
+        HYPRE_Int j;
+        HYPRE_Int newsize;
 
 	newsize = i*2;
 #ifdef PARASAILS_DEBUG
-		    printf("StoredRows resize %d\n", newsize);
+		    hypre_printf("StoredRows resize %d\n", newsize);
 #endif
-        p->len = (int *)     realloc(p->len, newsize * sizeof(int));
-        p->ind = (int **)    realloc(p->ind, newsize * sizeof(int *));
+        p->len = (HYPRE_Int *)     realloc(p->len, newsize * sizeof(HYPRE_Int));
+        p->ind = (HYPRE_Int **)    realloc(p->ind, newsize * sizeof(HYPRE_Int *));
         p->val = (double **) realloc(p->val, newsize * sizeof(double *));
 
 	/* set lengths to zero */
@@ -141,7 +141,7 @@ void StoredRowsPut(StoredRows *p, int index, int len, int *ind, double *val)
  * "lenp", "indp" and "valp" in the stored rows object "p".
  *--------------------------------------------------------------------------*/
 
-void StoredRowsGet(StoredRows *p, int index, int *lenp, int **indp, 
+void StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp, 
   double **valp)
 {
     if (index < p->num_loc)

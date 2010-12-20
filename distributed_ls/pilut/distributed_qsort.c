@@ -23,16 +23,17 @@
  */
 
 #include <stdlib.h>			/* only for type declarations */
+#include "_hypre_utilities.h"
 
 #define		THRESH		4	/* threshold for insertion */
 #define		MTHRESH		6	/* threshold for median */
 
-static int (*qcmp) ();		/* the comparison routine */
-static int qsz;			/* size of each record */
+static HYPRE_Int (*qcmp) ();		/* the comparison routine */
+static HYPRE_Int qsz;			/* size of each record */
 static void qst(char *, char *);
 
-static int thresh;		/* THRESHold in chars */
-static int mthresh;		/* MTHRESHold in chars */
+static HYPRE_Int thresh;		/* THRESHold in chars */
+static HYPRE_Int mthresh;		/* MTHRESHold in chars */
 
 
 
@@ -46,9 +47,9 @@ static int mthresh;		/* MTHRESHold in chars */
 void
 tex_qsort(base, n, size, compar)
 char *base;
-int n;
-int size;
-int (*compar) ();
+HYPRE_Int n;
+HYPRE_Int size;
+HYPRE_Int (*compar) ();
 {
     register char *i;
     register char *j;
@@ -136,11 +137,11 @@ static void qst(char *base, char *max)
     register char *j;
     register char *jj;
     register char *mid;
-    register int ii;
+    register HYPRE_Int ii;
     register char c;
     char *tmp;
-    int lo;
-    int hi;
+    HYPRE_Int lo;
+    HYPRE_Int hi;
 
     lo = max - base;		/* number of elements as chars */
     do

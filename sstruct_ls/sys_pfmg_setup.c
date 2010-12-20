@@ -45,7 +45,7 @@
  * hypre_SysPFMGSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
                     hypre_SStructMatrix  *A_in,
                     hypre_SStructVector  *b_in,
@@ -59,16 +59,16 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_SStructPVector *b;
    hypre_SStructPVector *x;
 
-   int                   relax_type = (sys_pfmg_data -> relax_type);
-   int                   usr_jacobi_weight= (sys_pfmg_data -> usr_jacobi_weight);
+   HYPRE_Int                   relax_type = (sys_pfmg_data -> relax_type);
+   HYPRE_Int                   usr_jacobi_weight= (sys_pfmg_data -> usr_jacobi_weight);
    double                jacobi_weight    = (sys_pfmg_data -> jacobi_weight);
-   int                   skip_relax = (sys_pfmg_data -> skip_relax);
+   HYPRE_Int                   skip_relax = (sys_pfmg_data -> skip_relax);
    double               *dxyz       = (sys_pfmg_data -> dxyz);
                      
-   int                   max_iter;
-   int                   max_levels;
+   HYPRE_Int                   max_iter;
+   HYPRE_Int                   max_levels;
                       
-   int                   num_levels;
+   HYPRE_Int                   num_levels;
                      
    hypre_Index           cindex;
    hypre_Index           findex;
@@ -76,8 +76,8 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    hypre_Index           coarsen;
 
-   int                    *cdir_l;
-   int                    *active_l;
+   HYPRE_Int                    *cdir_l;
+   HYPRE_Int                    *active_l;
    hypre_SStructPGrid    **grid_l;
    hypre_SStructPGrid    **P_grid_l;
                     
@@ -99,26 +99,26 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    hypre_SStructPGrid     *grid;
    hypre_StructGrid       *sgrid;
-   int                     dim;
-   int                     full_periodic;
+   HYPRE_Int                     dim;
+   HYPRE_Int                     full_periodic;
 
    hypre_Box            *cbox;
 
    double               *relax_weights;
    double               *mean, *deviation;
    double                alpha, beta;
-   int                   dxyz_flag;
+   HYPRE_Int                   dxyz_flag;
 
    double                min_dxyz;
-   int                   cdir, periodic, cmaxsize;
-   int                   d, l;
-   int                   i;
+   HYPRE_Int                   cdir, periodic, cmaxsize;
+   HYPRE_Int                   d, l;
+   HYPRE_Int                   i;
 
    double**              sys_dxyz;
                        
-   int                   nvars;
+   HYPRE_Int                   nvars;
 
-   int                   ierr = 0;
+   HYPRE_Int                   ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -202,8 +202,8 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    grid_l[0] = grid;
    P_grid_l = hypre_TAlloc(hypre_SStructPGrid *, max_levels);
    P_grid_l[0] = NULL;
-   cdir_l = hypre_TAlloc(int, max_levels);
-   active_l = hypre_TAlloc(int, max_levels);
+   cdir_l = hypre_TAlloc(HYPRE_Int, max_levels);
+   active_l = hypre_TAlloc(HYPRE_Int, max_levels);
    relax_weights = hypre_CTAlloc(double, max_levels);
    hypre_SetIndex(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
    for (l = 0; ; l++)
@@ -503,7 +503,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       /* change coarsest grid relaxation parameters */
       l = num_levels - 1;
       {
-         int maxwork, maxiter;
+         HYPRE_Int maxwork, maxiter;
          hypre_SysPFMGRelaxSetType(relax_data_l[l], 0);
          /* do no more work on the coarsest grid than the cost of a V-cycle
           * (estimating roughly 4 communications per V-cycle level) */
@@ -511,7 +511,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
          /* do sweeps proportional to the coarsest grid size */
          maxiter = hypre_min(maxwork, cmaxsize);
 #if 0
-         printf("maxwork = %d, cmaxsize = %d, maxiter = %d\n",
+         hypre_printf("maxwork = %d, cmaxsize = %d, maxiter = %d\n",
                 maxwork, cmaxsize, maxiter);
 #endif
          hypre_SysPFMGRelaxSetMaxIter(relax_data_l[l], maxiter);
@@ -551,12 +551,12 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 #if DEBUG
    for (l = 0; l < (num_levels - 1); l++)
    {
-      sprintf(filename, "zout_A.%02d", l);
+      hypre_sprintf(filename, "zout_A.%02d", l);
       hypre_SStructPMatrixPrint(filename, A_l[l], 0);
-      sprintf(filename, "zout_P.%02d", l);
+      hypre_sprintf(filename, "zout_P.%02d", l);
       hypre_SStructPMatrixPrint(filename, P_l[l], 0);
    }
-   sprintf(filename, "zout_A.%02d", l);
+   hypre_sprintf(filename, "zout_A.%02d", l);
    hypre_SStructPMatrixPrint(filename, A_l[l], 0);
 #endif
 
@@ -575,14 +575,14 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
  * hypre_SysStructCoarsen
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid, 
                         hypre_Index          index,
                         hypre_Index          stride,
-                        int                  prune,
+                        HYPRE_Int                  prune,
                         hypre_SStructPGrid **cgrid_ptr )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SStructPGrid   *cgrid;
 
@@ -590,12 +590,12 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
    hypre_StructGrid     *scgrid;
 
    MPI_Comm               comm;
-   int                    ndim;
-   int                    nvars;
+   HYPRE_Int                    ndim;
+   HYPRE_Int                    nvars;
    hypre_SStructVariable *vartypes;
    hypre_SStructVariable *new_vartypes;
-   int                    i;
-   int                    t;
+   HYPRE_Int                    i;
+   HYPRE_Int                    t;
 
    /*-----------------------------------------
     * Copy information from fine grid

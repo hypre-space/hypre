@@ -27,26 +27,26 @@
 
 #include "headers.h"  
 
-int hypre_Schwarzpcg(double *x, double *rhs, 
+HYPRE_Int hypre_Schwarzpcg(double *x, double *rhs, 
 		     double *sparse_matrix, 
 
-		     int *i_dof_dof, int *j_dof_dof,
+		     HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 
-		     int *i_domain_dof, int *j_domain_dof,
+		     HYPRE_Int *i_domain_dof, HYPRE_Int *j_domain_dof,
 		     double *domain_matrixinverse,
-		     int num_domains,
+		     HYPRE_Int num_domains,
 
 		     double *v, double *w, double *d, double *aux,
-		     int max_iter, 
+		     HYPRE_Int max_iter, 
 
-		     int num_dofs)
+		     HYPRE_Int num_dofs)
 
 {
 
-  int ierr=0, i, j;
+  HYPRE_Int ierr=0, i, j;
   float delta0, delta_old, delta, asfac, arfac, eps = 1.e-12;
   
-  int iter=0;
+  HYPRE_Int iter=0;
   float tau, alpha, beta;
   float delta_x;
 
@@ -126,7 +126,7 @@ int hypre_Schwarzpcg(double *x, double *rhs,
     delta0+= w[i] * d[i];
 
   if (max_iter > 999)
-    printf("hypre_Schwarzpcg_delta0: %e\n", delta0); 
+    hypre_printf("hypre_Schwarzpcg_delta0: %e\n", delta0); 
 
   delta_old = delta0;
 
@@ -149,7 +149,7 @@ loop:
 
       if (tau <= 0.e0) 
 	{
-	  printf("indefinite matrix: %e\n", tau);
+	  hypre_printf("indefinite matrix: %e\n", tau);
 	  /*	  return -1;                               */
 	}
 
@@ -180,7 +180,7 @@ loop:
   iter++;
 
   if (max_iter > 999)
-    printf("              hypre_Schwarzpcg_iteration: %d;  residual_delta: %e,   arfac: %e\n", iter, sqrt(delta), sqrt(beta));	 
+    hypre_printf("              hypre_Schwarzpcg_iteration: %d;  residual_delta: %e,   arfac: %e\n", iter, sqrt(delta), sqrt(beta));	 
 
   delta_old = delta;
 
@@ -195,8 +195,8 @@ loop:
   if (max_iter > 999)
     {
       /*==================================================================*/
-      printf("hypre_Schwarzpcg: delta0: %e; delta: %e\n", delta0, delta);
-      printf("hypre_Schwarzpcg: iterations: %d; reduction factors: %e, %e\n", iter, asfac, arfac);
+      hypre_printf("hypre_Schwarzpcg: delta0: %e; delta: %e\n", delta0, delta);
+      hypre_printf("hypre_Schwarzpcg: iterations: %d; reduction factors: %e, %e\n", iter, asfac, arfac);
       /*==================================================================*/
     }
  
@@ -205,13 +205,13 @@ loop:
 
 }
 
-int sparse_matrix_vector_product(double *v,
+HYPRE_Int sparse_matrix_vector_product(double *v,
 				 double *sparse_matrix, 
 				 double *w, 
-				 int *i_dof_dof, int *j_dof_dof,
-				 int num_dofs)
+				 HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
+				 HYPRE_Int num_dofs)
 {
-  int ierr =0, i,k;
+  HYPRE_Int ierr =0, i,k;
 
   for (i=0; i < num_dofs; i++)
     v[i] = 0.e0;

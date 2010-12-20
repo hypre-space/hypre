@@ -127,6 +127,25 @@ PACKAGE_TARNAME=
 PACKAGE_BUGREPORT=
 
 dnl *********************************************************************
+dnl * Initialize hypre variables
+dnl *********************************************************************
+hypre_user_chose_mpi=no
+hypre_user_chose_blas=no
+hypre_user_chose_lapack=no
+hypre_user_chose_fei=no
+
+hypre_using_c=yes
+hypre_using_cxx=yes
+
+hypre_using_fei=yes
+hypre_using_superlu=yes
+
+hypre_using_babel=no
+hypre_using_examples=no
+hypre_using_openmp=no
+hypre_using_insure=no
+
+dnl *********************************************************************
 dnl * Determine BUILD, HOST, and TARGET types
 dnl *********************************************************************
 if test "x$build_alias" = "x"
@@ -168,6 +187,23 @@ AS_HELP_STRING([--enable-shared],
  esac],
 [hypre_using_shared=no]
 )
+
+AC_ARG_ENABLE(bigint,
+AS_HELP_STRING([--enable-bigint],
+               [Use long long int for HYPRE_Int (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_babel=no
+         hypre_using_bigint=yes ;;
+    no)  hypre_using_bigint=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-bigint]) ;;
+ esac],
+[hypre_using_bigint=no]
+)
+if test "$hypre_using_bigint" = "yes"
+then
+   AC_DEFINE(HYPRE_BIGINT, 1)
+fi
 
 AC_ARG_ENABLE(fortran,
 AS_HELP_STRING([--enable-fortran],
@@ -277,26 +313,6 @@ dnl * if the user indicated any MPI include, library, or directory
 dnl * to use with the chosen compiler those options are identified
 dnl * and the appropriate macros are assigned values.
 dnl *********************************************************************
-hypre_user_chose_mpi=no
-hypre_user_chose_blas=no
-hypre_user_chose_lapack=no
-hypre_user_chose_fei=no
-
-hypre_using_c=yes
-hypre_using_cxx=yes
-
-hypre_using_fei=yes
-hypre_using_superlu=yes
-
-hypre_using_babel=no
-hypre_using_examples=no
-hypre_using_openmp=no
-hypre_using_insure=no
-
-hypre_testing_alpha=no
-hypre_testing_beta=no
-hypre_testing_general=no
-
 
 AC_ARG_WITH(LD,
 AS_HELP_STRING([--with-LD=ARG],

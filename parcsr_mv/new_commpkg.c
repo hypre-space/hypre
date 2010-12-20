@@ -27,16 +27,16 @@
 
 
 
-int PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
+HYPRE_Int PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
 {
    
-   int num_sends, num_recvs;
+   HYPRE_Int num_sends, num_recvs;
    
-   int *recv_vec_starts, *recv_procs;
-   int *send_map_starts, *send_map_elements, *send_procs;
+   HYPRE_Int *recv_vec_starts, *recv_procs;
+   HYPRE_Int *send_map_starts, *send_map_elements, *send_procs;
 
-   int i;
-   int my_id;
+   HYPRE_Int i;
+   HYPRE_Int my_id;
    
    MPI_Comm comm;
    
@@ -60,26 +60,26 @@ int PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
    send_map_elements = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
 
    
-   MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
-   sprintf(new_file,"%s.%d",file_name,my_id);
+   hypre_sprintf(new_file,"%s.%d",file_name,my_id);
 
    fp = fopen(new_file, "w");
-   fprintf(fp, "num_recvs = %d\n", num_recvs);
+   hypre_fprintf(fp, "num_recvs = %d\n", num_recvs);
    for (i=0; i < num_recvs; i++)
    {
-      fprintf(fp, "recv_proc [start, end] = %d [%d, %d] \n", recv_procs[i], recv_vec_starts[i], recv_vec_starts[i+1]-1);
+      hypre_fprintf(fp, "recv_proc [start, end] = %d [%d, %d] \n", recv_procs[i], recv_vec_starts[i], recv_vec_starts[i+1]-1);
    }
 
-   fprintf(fp, "num_sends = %d\n", num_sends);
+   hypre_fprintf(fp, "num_sends = %d\n", num_sends);
    for (i=0; i < num_sends; i++)
    {
-      fprintf(fp, "send_proc [start, end] = %d [%d, %d] \n", send_procs[i], send_map_starts[i], send_map_starts[i+1]-1);
+      hypre_fprintf(fp, "send_proc [start, end] = %d [%d, %d] \n", send_procs[i], send_map_starts[i], send_map_starts[i+1]-1);
    }
 
    for (i = 0; i< send_map_starts[num_sends]; i++)
    {
-      fprintf(fp, "send_map_elements (%d) = %d\n", i, send_map_elements[i]);
+      hypre_fprintf(fp, "send_map_elements (%d) = %d\n", i, send_map_elements[i]);
    }
 
    fclose(fp);
@@ -98,64 +98,64 @@ int PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
  * off so that it can also be used for block matrices.
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_NewCommPkgCreate_core(
 /* input args: */
-   MPI_Comm comm, int *col_map_off_d, int first_col_diag,
-   int col_start, int col_end, 
-   int num_cols_off_d, int global_num_cols,
+   MPI_Comm comm, HYPRE_Int *col_map_off_d, HYPRE_Int first_col_diag,
+   HYPRE_Int col_start, HYPRE_Int col_end, 
+   HYPRE_Int num_cols_off_d, HYPRE_Int global_num_cols,
 /* pointers to output args: */
-   int *p_num_recvs, int **p_recv_procs, int **p_recv_vec_starts,
-   int *p_num_sends, int **p_send_procs, int ** p_send_map_starts,
-   int **p_send_map_elements, hypre_IJAssumedPart *apart)
+   HYPRE_Int *p_num_recvs, HYPRE_Int **p_recv_procs, HYPRE_Int **p_recv_vec_starts,
+   HYPRE_Int *p_num_sends, HYPRE_Int **p_send_procs, HYPRE_Int ** p_send_map_starts,
+   HYPRE_Int **p_send_map_elements, hypre_IJAssumedPart *apart)
 
 {
-   int        num_procs, myid;
-   int        j, i;
-   int        range_start, range_end; 
+   HYPRE_Int        num_procs, myid;
+   HYPRE_Int        j, i;
+   HYPRE_Int        range_start, range_end; 
 
-   int        size;
-   int        count;  
+   HYPRE_Int        size;
+   HYPRE_Int        count;  
 
-   int        num_recvs, *recv_procs = NULL, *recv_vec_starts=NULL;
-   int        tmp_id, prev_id;
+   HYPRE_Int        num_recvs, *recv_procs = NULL, *recv_vec_starts=NULL;
+   HYPRE_Int        tmp_id, prev_id;
 
-   int        num_sends;
+   HYPRE_Int        num_sends;
 
-   int        ex_num_contacts, *ex_contact_procs=NULL, *ex_contact_vec_starts=NULL;
-   int        *ex_contact_buf=NULL;
+   HYPRE_Int        ex_num_contacts, *ex_contact_procs=NULL, *ex_contact_vec_starts=NULL;
+   HYPRE_Int        *ex_contact_buf=NULL;
     
-   int        num_ranges, upper_bound;
+   HYPRE_Int        num_ranges, upper_bound;
    
 
-   int        *response_buf = NULL, *response_buf_starts=NULL;
+   HYPRE_Int        *response_buf = NULL, *response_buf_starts=NULL;
 
-   int        max_response_size;
+   HYPRE_Int        max_response_size;
    
    hypre_DataExchangeResponse        response_obj1, response_obj2;
    hypre_ProcListElements            send_proc_obj; 
 
 #if mydebug
-   int tmp_int, index;
+   HYPRE_Int tmp_int, index;
 #endif
 
-   MPI_Comm_size(comm, &num_procs );
-   MPI_Comm_rank(comm, &myid );
+   hypre_MPI_Comm_size(comm, &num_procs );
+   hypre_MPI_Comm_rank(comm, &myid );
 
 
 #if mydebug
 
-    printf("myid = %i, my assumed local range: [%i, %i]\n", myid, 
+    hypre_printf("myid = %i, my assumed local range: [%i, %i]\n", myid, 
                          apart->row_start, apart->row_end);
 
       for (i=0; i<apart.length; i++)
       {
-        printf("myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
+        hypre_printf("myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
                 myid, apart->proc_list[i], apart->row_start_list[i], 
 	        apart->row_end_list[i]);
       }
 
-      printf("myid = %d, length of apart = %d\n", myid, apart->length);
+      hypre_printf("myid = %d, length of apart = %d\n", myid, apart->length);
 
 #endif
 
@@ -208,9 +208,9 @@ hypre_NewCommPkgCreate_core(
    /* it is ok to contact yourself - because then there doesn't
       need to be separate code */
 
-   ex_contact_procs = hypre_CTAlloc(int, size);
-   ex_contact_vec_starts =  hypre_CTAlloc(int, size+1);
-   ex_contact_buf =  hypre_CTAlloc(int, size*2);
+   ex_contact_procs = hypre_CTAlloc(HYPRE_Int, size);
+   ex_contact_vec_starts =  hypre_CTAlloc(HYPRE_Int, size+1);
+   ex_contact_buf =  hypre_CTAlloc(HYPRE_Int, size*2);
 
    range_end = -1;
    for (i=0; i< num_cols_off_d; i++) 
@@ -225,9 +225,9 @@ hypre_NewCommPkgCreate_core(
          if (ex_num_contacts == size) /*need more space? */ 
          {
            size += 20;
-           ex_contact_procs = hypre_TReAlloc(ex_contact_procs, int, size);
-           ex_contact_vec_starts = hypre_TReAlloc(ex_contact_vec_starts, int, size+1);
-           ex_contact_buf = hypre_TReAlloc(ex_contact_buf, int, size*2);
+           ex_contact_procs = hypre_TReAlloc(ex_contact_procs, HYPRE_Int, size);
+           ex_contact_vec_starts = hypre_TReAlloc(ex_contact_vec_starts, HYPRE_Int, size+1);
+           ex_contact_buf = hypre_TReAlloc(ex_contact_buf, HYPRE_Int, size*2);
          }
 
          /* end of prev. range */
@@ -265,8 +265,8 @@ hypre_NewCommPkgCreate_core(
    
    
    hypre_DataExchangeList(ex_num_contacts, ex_contact_procs, 
-                    ex_contact_buf, ex_contact_vec_starts, sizeof(int), 
-                     sizeof(int), &response_obj1, max_response_size, 1, 
+                    ex_contact_buf, ex_contact_vec_starts, sizeof(HYPRE_Int), 
+                     sizeof(HYPRE_Int), &response_obj1, max_response_size, 1, 
                      comm, (void**) &response_buf, &response_buf_starts);
 
 
@@ -282,8 +282,8 @@ hypre_NewCommPkgCreate_core(
                                  to number of contacts  - add a buffer of 20*/
  
    
-   recv_procs = hypre_CTAlloc(int, size);
-   recv_vec_starts =  hypre_CTAlloc(int, size+1);
+   recv_procs = hypre_CTAlloc(HYPRE_Int, size);
+   recv_vec_starts =  hypre_CTAlloc(HYPRE_Int, size+1);
    recv_vec_starts[0] = 0;
    
    /*how many ranges were returned?*/
@@ -317,8 +317,8 @@ hypre_NewCommPkgCreate_core(
                if (num_recvs == size) 
                {
                   size+=20;
-                  recv_procs = hypre_TReAlloc(recv_procs,int, size);
-                  recv_vec_starts =  hypre_TReAlloc(recv_vec_starts,int, size+1);
+                  recv_procs = hypre_TReAlloc(recv_procs,HYPRE_Int, size);
+                  recv_vec_starts =  hypre_TReAlloc(recv_vec_starts,HYPRE_Int, size+1);
                }
             
                recv_vec_starts[num_recvs+1] = j; /*the new start is at this element*/
@@ -344,7 +344,7 @@ hypre_NewCommPkgCreate_core(
 #if mydebug
       for (i=0; i < num_recvs; i++) 
       {
-          printf("myid = %d, recv proc = %d, vec_starts = [%d : %d]\n", 
+          hypre_printf("myid = %d, recv proc = %d, vec_starts = [%d : %d]\n", 
                   myid, recv_procs[i], recv_vec_starts[i],recv_vec_starts[i+1]-1);
       }
 #endif
@@ -371,11 +371,11 @@ hypre_NewCommPkgCreate_core(
      as we recv from + pad by 5*/
    send_proc_obj.length = 0;
    send_proc_obj.storage_length = num_recvs + 5;
-   send_proc_obj.id = hypre_CTAlloc(int, send_proc_obj.storage_length);
-   send_proc_obj.vec_starts = hypre_CTAlloc(int, send_proc_obj.storage_length + 1); 
+   send_proc_obj.id = hypre_CTAlloc(HYPRE_Int, send_proc_obj.storage_length);
+   send_proc_obj.vec_starts = hypre_CTAlloc(HYPRE_Int, send_proc_obj.storage_length + 1); 
    send_proc_obj.vec_starts[0] = 0;
    send_proc_obj.element_storage_length = num_cols_off_d;
-   send_proc_obj.elements = hypre_CTAlloc(int, send_proc_obj.element_storage_length);
+   send_proc_obj.elements = hypre_CTAlloc(HYPRE_Int, send_proc_obj.element_storage_length);
 
    response_obj2.fill_response = hypre_FillResponseIJDetermineSendProcs;
    response_obj2.data1 = NULL;
@@ -386,8 +386,8 @@ hypre_NewCommPkgCreate_core(
 
 
    hypre_DataExchangeList(num_recvs, recv_procs, 
-                     col_map_off_d, recv_vec_starts, sizeof(int),
-                    sizeof(int), &response_obj2, max_response_size, 2, 
+                     col_map_off_d, recv_vec_starts, sizeof(HYPRE_Int),
+                    sizeof(HYPRE_Int), &response_obj2, max_response_size, 2, 
                     comm,  (void **) &response_buf, &response_buf_starts);
 
 
@@ -398,14 +398,14 @@ hypre_NewCommPkgCreate_core(
    /*send proc starts are in send_proc_obj.vec_starts */
 
 #if mydebug
-   printf("myid = %d, num_sends = %d\n", myid, num_sends);   
+   hypre_printf("myid = %d, num_sends = %d\n", myid, num_sends);   
    for (i=0; i < num_sends; i++) 
    {
       tmp_int = send_proc_obj.vec_starts[i+1] - send_proc_obj.vec_starts[i];
       index = send_proc_obj.vec_starts[i];
       for (j=0; j< tmp_int; j++) 
       {
-         printf("myid = %d, send proc = %d, send element = %d\n",myid,  
+         hypre_printf("myid = %d, send proc = %d, send element = %d\n",myid,  
                 send_proc_obj.id[i],send_proc_obj.elements[index+j]); 
       }   
    }
@@ -419,14 +419,14 @@ hypre_NewCommPkgCreate_core(
    
    {
       
-      int *orig_order;
-      int *orig_send_map_starts;
-      int *orig_send_elements;
-      int  ct, sz, pos;
+      HYPRE_Int *orig_order;
+      HYPRE_Int *orig_send_map_starts;
+      HYPRE_Int *orig_send_elements;
+      HYPRE_Int  ct, sz, pos;
       
-      orig_order = hypre_CTAlloc(int, num_sends);
-      orig_send_map_starts = hypre_CTAlloc(int, num_sends+1);
-      orig_send_elements = hypre_CTAlloc(int, send_proc_obj.vec_starts[num_sends]);
+      orig_order = hypre_CTAlloc(HYPRE_Int, num_sends);
+      orig_send_map_starts = hypre_CTAlloc(HYPRE_Int, num_sends+1);
+      orig_send_elements = hypre_CTAlloc(HYPRE_Int, send_proc_obj.vec_starts[num_sends]);
       
       orig_send_map_starts[0] = 0;
       /* copy send map starts and elements */ 
@@ -541,21 +541,21 @@ hypre_NewCommPkgCreate_core(
  * that should be more scalable 
  *-------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
 {
 
-   int        row_start=0, row_end=0, col_start = 0, col_end = 0;
-   int        num_recvs, *recv_procs, *recv_vec_starts;
+   HYPRE_Int        row_start=0, row_end=0, col_start = 0, col_end = 0;
+   HYPRE_Int        num_recvs, *recv_procs, *recv_vec_starts;
 
-   int        num_sends, *send_procs, *send_map_starts;
-   int        *send_map_elements;
+   HYPRE_Int        num_sends, *send_procs, *send_map_starts;
+   HYPRE_Int        *send_map_elements;
 
-   int        num_cols_off_d; 
-   int       *col_map_off_d; 
+   HYPRE_Int        num_cols_off_d; 
+   HYPRE_Int       *col_map_off_d; 
 
-   int        first_col_diag;
-   int        global_num_cols;
+   HYPRE_Int        first_col_diag;
+   HYPRE_Int        global_num_cols;
 
 
    MPI_Comm   comm;
@@ -646,7 +646,7 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
  *------------------------------------------------------------------*/
 
 
-int
+HYPRE_Int
 hypre_NewCommPkgDestroy(hypre_ParCSRMatrix *parcsr_A)
 {
 
@@ -694,24 +694,24 @@ hypre_NewCommPkgDestroy(hypre_ParCSRMatrix *parcsr_A)
  * data exchange
  *--------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_RangeFillResponseIJDetermineRecvProcs(void *p_recv_contact_buf,
-                                      int contact_size, int contact_proc, void *ro, 
+                                      HYPRE_Int contact_size, HYPRE_Int contact_proc, void *ro, 
                                       MPI_Comm comm, void **p_send_response_buf, 
-                                      int *response_message_size)
+                                      HYPRE_Int *response_message_size)
 {
-   int    myid, tmp_id, row_end;
-   int    j;
-   int    row_val, index, size;
+   HYPRE_Int    myid, tmp_id, row_end;
+   HYPRE_Int    j;
+   HYPRE_Int    row_val, index, size;
    
-   int   *send_response_buf = (int *) *p_send_response_buf;
-   int   *recv_contact_buf = (int * ) p_recv_contact_buf;
+   HYPRE_Int   *send_response_buf = (HYPRE_Int *) *p_send_response_buf;
+   HYPRE_Int   *recv_contact_buf = (HYPRE_Int * ) p_recv_contact_buf;
 
 
    hypre_DataExchangeResponse  *response_obj = ro; 
    hypre_IJAssumedPart               *part = response_obj->data1;
    
-   int overhead = response_obj->send_response_overhead;
+   HYPRE_Int overhead = response_obj->send_response_overhead;
 
    /*-------------------------------------------------------------------
     * we are getting a range of off_d entries - need to see if we own them
@@ -719,7 +719,7 @@ hypre_RangeFillResponseIJDetermineRecvProcs(void *p_recv_contact_buf,
     * with format [proc_id end_row  proc_id #end_row  proc_id #end_row etc...].
     *----------------------------------------------------------------------*/ 
 
-   MPI_Comm_rank(comm, &myid );
+   hypre_MPI_Comm_rank(comm, &myid );
 
 
    /* populate send_response_buf */
@@ -738,7 +738,7 @@ hypre_RangeFillResponseIJDetermineRecvProcs(void *p_recv_contact_buf,
    {
 
       response_obj->send_response_storage =  hypre_max(size, 20); 
-      send_response_buf = hypre_TReAlloc( send_response_buf, int, 
+      send_response_buf = hypre_TReAlloc( send_response_buf, HYPRE_Int, 
                                          response_obj->send_response_storage + overhead );
       *p_send_response_buf = send_response_buf;    /* needed when using ReAlloc */
    }
@@ -788,32 +788,32 @@ hypre_RangeFillResponseIJDetermineRecvProcs(void *p_recv_contact_buf,
  * data exchange
  *--------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FillResponseIJDetermineSendProcs(void *p_recv_contact_buf, 
-                                 int contact_size, int contact_proc, void *ro, 
+                                 HYPRE_Int contact_size, HYPRE_Int contact_proc, void *ro, 
                                  MPI_Comm comm, void **p_send_response_buf, 
-                                 int *response_message_size )
+                                 HYPRE_Int *response_message_size )
 {
-   int    myid;
-   int    i, index, count, elength;
+   HYPRE_Int    myid;
+   HYPRE_Int    i, index, count, elength;
 
-   int    *recv_contact_buf = (int * ) p_recv_contact_buf;
+   HYPRE_Int    *recv_contact_buf = (HYPRE_Int * ) p_recv_contact_buf;
 
    hypre_DataExchangeResponse  *response_obj = ro;  
 
    hypre_ProcListElements      *send_proc_obj = response_obj->data2;   
 
 
-   MPI_Comm_rank(comm, &myid );
+   hypre_MPI_Comm_rank(comm, &myid );
 
 
    /*check to see if we need to allocate more space in send_proc_obj for ids*/
    if (send_proc_obj->length == send_proc_obj->storage_length)
    {
       send_proc_obj->storage_length +=20; /*add space for 20 more processors*/
-      send_proc_obj->id = hypre_TReAlloc(send_proc_obj->id,int, 
+      send_proc_obj->id = hypre_TReAlloc(send_proc_obj->id,HYPRE_Int, 
 					 send_proc_obj->storage_length);
-      send_proc_obj->vec_starts = hypre_TReAlloc(send_proc_obj->vec_starts,int, 
+      send_proc_obj->vec_starts = hypre_TReAlloc(send_proc_obj->vec_starts,HYPRE_Int, 
                                   send_proc_obj->storage_length + 1);
    }
   
@@ -830,7 +830,7 @@ hypre_FillResponseIJDetermineSendProcs(void *p_recv_contact_buf,
       elength = hypre_max(contact_size, 50);   
       elength += index;
       send_proc_obj->elements = hypre_TReAlloc(send_proc_obj->elements, 
-					       int, elength);
+					       HYPRE_Int, elength);
       send_proc_obj->element_storage_length = elength; 
    }
    /*populate send_proc_obj*/

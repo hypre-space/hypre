@@ -20,13 +20,14 @@
  *   hypre_F90_NAME() or hypre_F90_IFACE()
  *   hypre_F90_NAME_BLAS()
  *   hypre_F90_NAME_LAPACK()
+ *   any of the interface argument macros at the bottom of this file
  *
  *****************************************************************************/
 
 #ifndef HYPRE_FORT_HEADER
 #define HYPRE_FORT_HEADER
 
-#include "HYPRE_config.h"
+#include "HYPRE_utilities.h"
 
 /*-------------------------------------------------------
  * Define specific name mangling macros to be used below
@@ -110,5 +111,25 @@
 #define hypre_F90_NAME_LAPACK(name,NAME) hypre_F90_NAME_2(name,NAME)
 
 #endif
+
+/*-------------------------------------------------------
+ * Define interface argument types and macros
+ *-------------------------------------------------------*/
+
+typedef HYPRE_Int  hypre_F90_Comm;
+typedef HYPRE_Int  hypre_F90_Int;
+typedef HYPRE_Int  hypre_F90_IntArray;
+typedef double     hypre_F90_Dbl;
+typedef double     hypre_F90_DblArray;
+typedef HYPRE_Int *hypre_F90_Obj;
+typedef HYPRE_Int *hypre_F90_ObjRef;
+
+#define hypre_F90_PassComm(arg)       ((MPI_Comm) *arg)
+#define hypre_F90_PassInt(arg)        ((HYPRE_Int) *arg)
+#define hypre_F90_PassIntArray(arg)   ((HYPRE_Int *) arg)
+#define hypre_F90_PassDbl(arg)        ((double) *arg)
+#define hypre_F90_PassDblArray(arg)   ((double *) arg)
+#define hypre_F90_PassObj(obj,arg)    ((obj) *arg)
+#define hypre_F90_PassObjRef(obj,arg) ((obj *) arg)
 
 #endif

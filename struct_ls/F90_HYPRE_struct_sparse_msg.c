@@ -22,12 +22,12 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgcreate, HYPRE_STRUCTSPARSEMSGCREATE)( int      *comm,
-                                            long int *solver,
-                                            int      *ierr   )
+hypre_F90_IFACE(hypre_structsparsemsgcreate, HYPRE_STRUCTSPARSEMSGCREATE)( HYPRE_Int      *comm,
+                                            hypre_F90_Obj *solver,
+                                            HYPRE_Int      *ierr   )
 
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGCreate( (MPI_Comm)             *comm,
                                (HYPRE_StructSolver *) solver ) );
 }
@@ -37,10 +37,10 @@ hypre_F90_IFACE(hypre_structsparsemsgcreate, HYPRE_STRUCTSPARSEMSGCREATE)( int  
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structsparsemsgdestroy, HYPRE_STRUCTSPARSEMSGDESTROY)( long int *solver,
-                                          int      *ierr   )
+hypre_F90_IFACE(hypre_structsparsemsgdestroy, HYPRE_STRUCTSPARSEMSGDESTROY)( hypre_F90_Obj *solver,
+                                          HYPRE_Int      *ierr   )
 {
-   *ierr = (int) ( HYPRE_StructSparseMSGDestroy( (HYPRE_StructSolver) *solver ) );
+   *ierr = (HYPRE_Int) ( HYPRE_StructSparseMSGDestroy( (HYPRE_StructSolver) *solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -48,13 +48,13 @@ hypre_F90_IFACE(hypre_structsparsemsgdestroy, HYPRE_STRUCTSPARSEMSGDESTROY)( lon
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structsparsemsgsetup, HYPRE_STRUCTSPARSEMSGSETUP)( long int *solver,
-                                       long int *A,
-                                       long int *b,
-                                       long int *x,
-                                       int      *ierr   )
+hypre_F90_IFACE(hypre_structsparsemsgsetup, HYPRE_STRUCTSPARSEMSGSETUP)( hypre_F90_Obj *solver,
+                                       hypre_F90_Obj *A,
+                                       hypre_F90_Obj *b,
+                                       hypre_F90_Obj *x,
+                                       HYPRE_Int      *ierr   )
 {
-   *ierr = (int) ( HYPRE_StructSparseMSGSetup( (HYPRE_StructSolver) *solver,
+   *ierr = (HYPRE_Int) ( HYPRE_StructSparseMSGSetup( (HYPRE_StructSolver) *solver,
                                          (HYPRE_StructMatrix) *A,
                                          (HYPRE_StructVector) *b,
                                          (HYPRE_StructVector) *x ) );
@@ -65,13 +65,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetup, HYPRE_STRUCTSPARSEMSGSETUP)( long in
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structsparsemsgsolve, HYPRE_STRUCTSPARSEMSGSOLVE)( long int *solver,
-                                       long int *A,
-                                       long int *b,
-                                       long int *x,
-                                       int      *ierr   )
+hypre_F90_IFACE(hypre_structsparsemsgsolve, HYPRE_STRUCTSPARSEMSGSOLVE)( hypre_F90_Obj *solver,
+                                       hypre_F90_Obj *A,
+                                       hypre_F90_Obj *b,
+                                       hypre_F90_Obj *x,
+                                       HYPRE_Int      *ierr   )
 {
-   *ierr = (int) ( HYPRE_StructSparseMSGSolve( (HYPRE_StructSolver) *solver,
+   *ierr = (HYPRE_Int) ( HYPRE_StructSparseMSGSolve( (HYPRE_StructSolver) *solver,
                                          (HYPRE_StructMatrix) *A,
                                          (HYPRE_StructVector) *b,
                                          (HYPRE_StructVector) *x ) );
@@ -82,11 +82,11 @@ hypre_F90_IFACE(hypre_structsparsemsgsolve, HYPRE_STRUCTSPARSEMSGSOLVE)( long in
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsettol, HYPRE_STRUCTSPARSEMSGSETTOL)( long int *solver,
+hypre_F90_IFACE(hypre_structsparsemsgsettol, HYPRE_STRUCTSPARSEMSGSETTOL)( hypre_F90_Obj *solver,
                                         double   *tol,
-                                        int      *ierr   )
+                                        HYPRE_Int      *ierr   )
 {
-   *ierr = (int) ( HYPRE_StructSparseMSGSetTol( (HYPRE_StructSolver) *solver,
+   *ierr = (HYPRE_Int) ( HYPRE_StructSparseMSGSetTol( (HYPRE_StructSolver) *solver,
                                           (double)             *tol ) );
 }
 
@@ -95,13 +95,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsettol, HYPRE_STRUCTSPARSEMSGSETTOL)( long 
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetmaxiter, HYPRE_STRUCTSPARSEMSGSETMAXITER)( long int *solver,
-                                            int      *max_iter,
-                                            int      *ierr     )
+hypre_F90_IFACE(hypre_structsparsemsgsetmaxiter, HYPRE_STRUCTSPARSEMSGSETMAXITER)( hypre_F90_Obj *solver,
+                                            HYPRE_Int      *max_iter,
+                                            HYPRE_Int      *ierr     )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetMaxIter( (HYPRE_StructSolver) *solver,
-                                   (int)                *max_iter ) );
+                                   (HYPRE_Int)                *max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -109,13 +109,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetmaxiter, HYPRE_STRUCTSPARSEMSGSETMAXITER
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetjump, HYPRE_STRUCTSPARSEMSGSETJUMP)( long int *solver,
-                                            int      *jump,
-                                            int      *ierr     )
+hypre_F90_IFACE(hypre_structsparsemsgsetjump, HYPRE_STRUCTSPARSEMSGSETJUMP)( hypre_F90_Obj *solver,
+                                            HYPRE_Int      *jump,
+                                            HYPRE_Int      *ierr     )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetJump( (HYPRE_StructSolver) *solver,
-                                   (int)                *jump ) );
+                                   (HYPRE_Int)                *jump ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -123,13 +123,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetjump, HYPRE_STRUCTSPARSEMSGSETJUMP)( lon
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetrelchan, HYPRE_STRUCTSPARSEMSGSETRELCHAN)( long int *solver,
-                                              int      *rel_change,
-                                              int      *ierr       )
+hypre_F90_IFACE(hypre_structsparsemsgsetrelchan, HYPRE_STRUCTSPARSEMSGSETRELCHAN)( hypre_F90_Obj *solver,
+                                              HYPRE_Int      *rel_change,
+                                              HYPRE_Int      *ierr       )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetRelChange( (HYPRE_StructSolver) *solver,
-                                     (int)                *rel_change ) );
+                                     (HYPRE_Int)                *rel_change ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -137,10 +137,10 @@ hypre_F90_IFACE(hypre_structsparsemsgsetrelchan, HYPRE_STRUCTSPARSEMSGSETRELCHAN
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetzerogue, HYPRE_STRUCTSPARSEMSGSETZEROGUE)( long int *solver,
-                                              int      *ierr       )
+hypre_F90_IFACE(hypre_structsparsemsgsetzerogue, HYPRE_STRUCTSPARSEMSGSETZEROGUE)( hypre_F90_Obj *solver,
+                                              HYPRE_Int      *ierr       )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetZeroGuess( (HYPRE_StructSolver) *solver ) );
 }
 
@@ -149,10 +149,10 @@ hypre_F90_IFACE(hypre_structsparsemsgsetzerogue, HYPRE_STRUCTSPARSEMSGSETZEROGUE
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetnonzero, HYPRE_STRUCTSPARSEMSGSETNONZERO)( long int *solver,
-                                              int      *ierr       )
+hypre_F90_IFACE(hypre_structsparsemsgsetnonzero, HYPRE_STRUCTSPARSEMSGSETNONZERO)( hypre_F90_Obj *solver,
+                                              HYPRE_Int      *ierr       )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetNonZeroGuess( (HYPRE_StructSolver) *solver ) );
 }
 
@@ -161,13 +161,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetnonzero, HYPRE_STRUCTSPARSEMSGSETNONZERO
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetrelaxty, HYPRE_STRUCTSPARSEMSGSETRELAXTY)( long int *solver,
-                                              int      *relax_type,
-                                              int      *ierr       )
+hypre_F90_IFACE(hypre_structsparsemsgsetrelaxty, HYPRE_STRUCTSPARSEMSGSETRELAXTY)( hypre_F90_Obj *solver,
+                                              HYPRE_Int      *relax_type,
+                                              HYPRE_Int      *ierr       )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetRelaxType( (HYPRE_StructSolver) *solver,
-                                     (int)                *relax_type ) );
+                                     (HYPRE_Int)                *relax_type ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -175,11 +175,11 @@ hypre_F90_IFACE(hypre_structsparsemsgsetrelaxty, HYPRE_STRUCTSPARSEMSGSETRELAXTY
  *--------------------------------------------------------------------------*/
 void
 hypre_F90_IFACE(hypre_structsparsemsgsetjacobiweigh, HYPRE_STRUCTSPARSEMSGSETJACOBIWEIGH)
-                                                  (long int *solver,
+                                                  (hypre_F90_Obj *solver,
                                                    double   *weight,
-                                                   int      *ierr)
+                                                   HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_StructSparseMSGSetJacobiWeight( (HYPRE_StructSolver) *solver,
+   *ierr = (HYPRE_Int) (HYPRE_StructSparseMSGSetJacobiWeight( (HYPRE_StructSolver) *solver,
                                                         (double)             *weight ) );
 }
 
@@ -188,13 +188,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetjacobiweigh, HYPRE_STRUCTSPARSEMSGSETJAC
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetnumprer, HYPRE_STRUCTSPARSEMSGSETNUMPRER)( long int *solver,
-                                              int      *num_pre_relax,
-                                              int      *ierr       )
+hypre_F90_IFACE(hypre_structsparsemsgsetnumprer, HYPRE_STRUCTSPARSEMSGSETNUMPRER)( hypre_F90_Obj *solver,
+                                              HYPRE_Int      *num_pre_relax,
+                                              HYPRE_Int      *ierr       )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetNumPreRelax( (HYPRE_StructSolver) *solver,
-                                     (int)                *num_pre_relax ) );
+                                     (HYPRE_Int)                *num_pre_relax ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -202,13 +202,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetnumprer, HYPRE_STRUCTSPARSEMSGSETNUMPRER
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetnumpost, HYPRE_STRUCTSPARSEMSGSETNUMPOST)( long int *solver,
-                                              int      *num_post_relax,
-                                              int      *ierr       )
+hypre_F90_IFACE(hypre_structsparsemsgsetnumpost, HYPRE_STRUCTSPARSEMSGSETNUMPOST)( hypre_F90_Obj *solver,
+                                              HYPRE_Int      *num_post_relax,
+                                              HYPRE_Int      *ierr       )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetNumPostRelax( (HYPRE_StructSolver) *solver,
-                                     (int)                *num_post_relax ) );
+                                     (HYPRE_Int)                *num_post_relax ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -216,13 +216,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetnumpost, HYPRE_STRUCTSPARSEMSGSETNUMPOST
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetnumfine, HYPRE_STRUCTSPARSEMSGSETNUMFINE)( long int *solver,
-                                              int      *num_fine_relax,
-                                              int      *ierr       )
+hypre_F90_IFACE(hypre_structsparsemsgsetnumfine, HYPRE_STRUCTSPARSEMSGSETNUMFINE)( hypre_F90_Obj *solver,
+                                              HYPRE_Int      *num_fine_relax,
+                                              HYPRE_Int      *ierr       )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetNumFineRelax( (HYPRE_StructSolver) *solver,
-                                     (int)                *num_fine_relax ) );
+                                     (HYPRE_Int)                *num_fine_relax ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -230,13 +230,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetnumfine, HYPRE_STRUCTSPARSEMSGSETNUMFINE
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetlogging, HYPRE_STRUCTSPARSEMSGSETLOGGING)( long int *solver,
-                                            int      *logging,
-                                            int      *ierr    )
+hypre_F90_IFACE(hypre_structsparsemsgsetlogging, HYPRE_STRUCTSPARSEMSGSETLOGGING)( hypre_F90_Obj *solver,
+                                            HYPRE_Int      *logging,
+                                            HYPRE_Int      *ierr    )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetLogging( (HYPRE_StructSolver) *solver,
-                                   (int)                *logging ) );
+                                   (HYPRE_Int)                *logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -244,13 +244,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetlogging, HYPRE_STRUCTSPARSEMSGSETLOGGING
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsgsetprintle, HYPRE_STRUCTSPARSEMSGSETPRINTLE)( long int *solver,
-                                            int      *print_level,
-                                            int      *ierr    )
+hypre_F90_IFACE(hypre_structsparsemsgsetprintle, HYPRE_STRUCTSPARSEMSGSETPRINTLE)( hypre_F90_Obj *solver,
+                                            HYPRE_Int      *print_level,
+                                            HYPRE_Int      *ierr    )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGSetPrintLevel( (HYPRE_StructSolver) *solver,
-                                   (int)                *print_level ) );
+                                   (HYPRE_Int)                *print_level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -258,14 +258,14 @@ hypre_F90_IFACE(hypre_structsparsemsgsetprintle, HYPRE_STRUCTSPARSEMSGSETPRINTLE
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsggetnumiter, HYPRE_STRUCTSPARSEMSGGETNUMITER)( long int *solver,
-                                                  int      *num_iterations,
-                                                  int      *ierr   )
+hypre_F90_IFACE(hypre_structsparsemsggetnumiter, HYPRE_STRUCTSPARSEMSGGETNUMITER)( hypre_F90_Obj *solver,
+                                                  HYPRE_Int      *num_iterations,
+                                                  HYPRE_Int      *ierr   )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGGetNumIterations(
          (HYPRE_StructSolver) *solver,
-         (int *)              num_iterations ) );
+         (HYPRE_Int *)              num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -273,11 +273,11 @@ hypre_F90_IFACE(hypre_structsparsemsggetnumiter, HYPRE_STRUCTSPARSEMSGGETNUMITER
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsparsemsggetfinalre, HYPRE_STRUCTSPARSEMSGGETFINALRE)( long int *solver,
+hypre_F90_IFACE(hypre_structsparsemsggetfinalre, HYPRE_STRUCTSPARSEMSGGETFINALRE)( hypre_F90_Obj *solver,
                                                   double   *norm,
-                                                  int      *ierr   )
+                                                  HYPRE_Int      *ierr   )
 {
-   *ierr = (int)
+   *ierr = (HYPRE_Int)
       ( HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(
          (HYPRE_StructSolver) *solver,
          (double *)           norm ) );

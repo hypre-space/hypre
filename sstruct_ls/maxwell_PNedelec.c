@@ -31,56 +31,56 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
    hypre_BoxArray       **contract_fedgeBoxes;
    hypre_Index          **Edge_cstarts, **upper_shifts, **lower_shifts;
-   int                  **cfbox_mapping, **fcbox_mapping;
+   HYPRE_Int                  **cfbox_mapping, **fcbox_mapping;
 
    hypre_BoxManEntry     *entry;
-   int                    rank, rank2;
-   int                    start_rank1, start_rank2; 
+   HYPRE_Int                    rank, rank2;
+   HYPRE_Int                    start_rank1, start_rank2; 
 
-   int                    nedges;
+   HYPRE_Int                    nedges;
 
-   int                   *iedgeEdge;
-   int                   *jedge_Edge;
+   HYPRE_Int                   *iedgeEdge;
+   HYPRE_Int                   *jedge_Edge;
 
    double                *vals_edgeEdge;
    double                 fCedge_ratio;
-   int                   *ncols_edgeEdge;
+   HYPRE_Int                   *ncols_edgeEdge;
 
    hypre_Index            cindex;
    hypre_Index            findex;
    hypre_Index            var_index, *boxoffset, *suboffset;
    hypre_Index            loop_size, start, cstart, stride, hi_index;
    hypre_Index            ishift, jshift, kshift, zero_index, one_index;
-   int                    loopi, loopj, loopk;
-   int                    n_boxoffsets, component_stride;
+   HYPRE_Int                    loopi, loopj, loopk;
+   HYPRE_Int                    n_boxoffsets, component_stride;
 
-   int                    nparts= hypre_SStructGridNParts(fgrid_edge);
-   int                    ndim  = hypre_SStructGridNDim(fgrid_edge);
+   HYPRE_Int                    nparts= hypre_SStructGridNParts(fgrid_edge);
+   HYPRE_Int                    ndim  = hypre_SStructGridNDim(fgrid_edge);
 
    HYPRE_SStructVariable *vartypes, *Edge_vartypes;
    hypre_Index           *varoffsets;
-   int                   *vartype_map;
-   int                    matrix_type= HYPRE_PARCSR;
+   HYPRE_Int                   *vartype_map;
+   HYPRE_Int                    matrix_type= HYPRE_PARCSR;
 
-   int                    nvars, Edge_nvars, part, var;
-   int                    tot_vars= 8;
+   HYPRE_Int                    nvars, Edge_nvars, part, var;
+   HYPRE_Int                    tot_vars= 8;
 
-   int                    t, i, j, k, l, m, n, p, r, size;
+   HYPRE_Int                    t, i, j, k, l, m, n, p, r, size;
 
-   int                    ilower, iupper;
-   int                    jlower, jupper;
-   int                  **lower_ranks, **upper_ranks;
+   HYPRE_Int                    ilower, iupper;
+   HYPRE_Int                    jlower, jupper;
+   HYPRE_Int                  **lower_ranks, **upper_ranks;
 
-   int                 ***n_CtoVbox, ****CtoVboxnums;
-   int                   *num_vboxes, **vboxnums;
+   HYPRE_Int                 ***n_CtoVbox, ****CtoVboxnums;
+   HYPRE_Int                   *num_vboxes, **vboxnums;
 
-   int                    true = 1;
-   int                    false= 0;
-   int                    row_in;
+   HYPRE_Int                    true = 1;
+   HYPRE_Int                    false= 0;
+   HYPRE_Int                    row_in;
 
-   int                    myproc;
+   HYPRE_Int                    myproc;
 
-   MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm_rank(comm, &myproc);
    hypre_SetIndex(ishift, 1, 0, 0);
    hypre_SetIndex(jshift, 0, 1, 0);
    hypre_SetIndex(kshift, 0, 0, 1);
@@ -112,7 +112,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    
    /* total of 8 variable types. Create a mapping between user enumeration
       to hypre enumeration. Only need for edge grids. */
-   vartype_map= hypre_CTAlloc(int, tot_vars);
+   vartype_map= hypre_CTAlloc(HYPRE_Int, tot_vars);
 
    part= 0;
    p_cgrid = hypre_SStructGridPGrid(cgrid_edge, part);       
@@ -179,21 +179,21 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    *  the extraction, a cbox can land in more than 1 fboxes (e.g., cbox
    *  boundary extending into other fboxes).
    *--------------------------------------------------------------------------*/
-   cfbox_mapping= hypre_TAlloc(int *, nparts);
-   fcbox_mapping= hypre_TAlloc(int *, nparts);
+   cfbox_mapping= hypre_TAlloc(HYPRE_Int *, nparts);
+   fcbox_mapping= hypre_TAlloc(HYPRE_Int *, nparts);
    for (i= 0; i< nparts; i++)
    {
       p_fgrid  = hypre_SStructGridPGrid(fgrid_edge, i);
       var_fgrid= hypre_SStructPGridCellSGrid(p_fgrid);
       fboxes   = hypre_StructGridBoxes(var_fgrid);
       j        = hypre_BoxArraySize(fboxes);
-      fcbox_mapping[i]= hypre_CTAlloc(int, j);
+      fcbox_mapping[i]= hypre_CTAlloc(HYPRE_Int, j);
 
       p_cgrid  = hypre_SStructGridPGrid(cgrid_edge, i);
       var_cgrid= hypre_SStructPGridCellSGrid(p_cgrid);
       cboxes   = hypre_StructGridBoxes(var_cgrid);
       j        = hypre_BoxArraySize(fboxes);
-      cfbox_mapping[i]= hypre_CTAlloc(int, j);
+      cfbox_mapping[i]= hypre_CTAlloc(HYPRE_Int, j);
 
      /* assuming if i1 > i2 and (box j1) is coarsened from (box i1)
         and (box j2) from (box i2), then j1 > j2. */
@@ -224,8 +224,8 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    }        /* for (i= 0; i< nparts; i++) */
 
   /* variable rank bounds for this processor */
-   n_CtoVbox   = hypre_TAlloc(int **, nparts);
-   CtoVboxnums = hypre_TAlloc(int ***, nparts);
+   n_CtoVbox   = hypre_TAlloc(HYPRE_Int **, nparts);
+   CtoVboxnums = hypre_TAlloc(HYPRE_Int ***, nparts);
    for (part= 0; part< nparts; part++)
    {
       hypre_SStructCellGridBoxNumMap(fgrid_edge, part, &n_CtoVbox[part],
@@ -233,15 +233,15 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    }
 
   /* variable rank bounds for this processor */
-   lower_ranks= hypre_TAlloc(int *, nparts);
-   upper_ranks= hypre_TAlloc(int *, nparts);
+   lower_ranks= hypre_TAlloc(HYPRE_Int *, nparts);
+   upper_ranks= hypre_TAlloc(HYPRE_Int *, nparts);
    for (part= 0; part< nparts; part++)
    {
       p_fgrid  = hypre_SStructGridPGrid(fgrid_edge, part);
       Edge_nvars= hypre_SStructPGridNVars(p_fgrid);
 
-      lower_ranks[part]= hypre_CTAlloc(int, Edge_nvars);
-      upper_ranks[part]= hypre_CTAlloc(int, Edge_nvars);
+      lower_ranks[part]= hypre_CTAlloc(HYPRE_Int, Edge_nvars);
+      upper_ranks[part]= hypre_CTAlloc(HYPRE_Int, Edge_nvars);
       for (t= 0; t< Edge_nvars; t++)
       {
          var_fgrid= hypre_SStructPGridSGrid(p_fgrid, t);
@@ -320,8 +320,8 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    *-----------------------------------------------------------------------*/
 
   /* count the row/col connections */
-   iedgeEdge     = hypre_CTAlloc(int, nedges);
-   ncols_edgeEdge= hypre_CTAlloc(int, nedges);
+   iedgeEdge     = hypre_CTAlloc(HYPRE_Int, nedges);
+   ncols_edgeEdge= hypre_CTAlloc(HYPRE_Int, nedges);
 
   /* get the contracted boxes */
    contract_fedgeBoxes= hypre_TAlloc(hypre_BoxArray *, nparts);
@@ -1478,7 +1478,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
       }
    }
    vals_edgeEdge = hypre_CTAlloc(double, k);
-   jedge_Edge    = hypre_CTAlloc(int, k);
+   jedge_Edge    = hypre_CTAlloc(HYPRE_Int, k);
 
    /* update nedges so that the true number of rows is set */
    size= j;
@@ -2878,7 +2878,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    }        /* for (part= 0; part< nparts; part++) */
 
    HYPRE_IJMatrixSetValues(edge_Edge, size, ncols_edgeEdge,
-                          (const int*) iedgeEdge, (const int*) jedge_Edge,
+                          (const HYPRE_Int*) iedgeEdge, (const HYPRE_Int*) jedge_Edge,
                           (const double*) vals_edgeEdge);
    HYPRE_IJMatrixAssemble((HYPRE_IJMatrix) edge_Edge);
 

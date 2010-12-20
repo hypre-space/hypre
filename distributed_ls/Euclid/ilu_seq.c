@@ -23,25 +23,25 @@
 #include "Factor_dh.h"
 #include "SubdomainGraph_dh.h"
 
-static bool check_constraint_private(Euclid_dh ctx, int b, int j);
+static bool check_constraint_private(Euclid_dh ctx, HYPRE_Int b, HYPRE_Int j);
 
-static int symbolic_row_private(int localRow, 
-                 int *list, int *marker, int *tmpFill,
-                 int len, int *CVAL, double *AVAL,
-                 int *o2n_col, Euclid_dh ctx, bool debug);
+static HYPRE_Int symbolic_row_private(HYPRE_Int localRow, 
+                 HYPRE_Int *list, HYPRE_Int *marker, HYPRE_Int *tmpFill,
+                 HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                 HYPRE_Int *o2n_col, Euclid_dh ctx, bool debug);
 
-static int numeric_row_private(int localRow, 
-                        int len, int *CVAL, double *AVAL,
-                        REAL_DH *work, int *o2n_col, Euclid_dh ctx, bool debug);
+static HYPRE_Int numeric_row_private(HYPRE_Int localRow, 
+                        HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                        REAL_DH *work, HYPRE_Int *o2n_col, Euclid_dh ctx, bool debug);
 
 
 #undef __FUNC__
 #define __FUNC__ "compute_scaling_private"
-void compute_scaling_private(int row, int len, double *AVAL, Euclid_dh ctx)
+void compute_scaling_private(HYPRE_Int row, HYPRE_Int len, double *AVAL, Euclid_dh ctx)
 {
   START_FUNC_DH
   double tmp = 0.0;
-  int j;
+  HYPRE_Int j;
 
   for (j=0; j<len; ++j) tmp = MAX( tmp, fabs(AVAL[j]) );
   if (tmp) {
@@ -55,10 +55,10 @@ void compute_scaling_private(int row, int len, double *AVAL, Euclid_dh ctx)
 /* not used ? */
 #undef __FUNC__
 #define __FUNC__ "fixPivot_private"
-double fixPivot_private(int row, int len, float *vals)
+double fixPivot_private(HYPRE_Int row, HYPRE_Int len, float *vals)
 {
   START_FUNC_DH
-  int i;
+  HYPRE_Int i;
   float max = 0.0;
   bool debug = false;
 
@@ -79,12 +79,12 @@ double fixPivot_private(int row, int len, float *vals)
 void iluk_seq(Euclid_dh ctx)
 {
   START_FUNC_DH
-  int      *rp, *cval, *diag;
-  int      *CVAL;
-  int      i, j, len, count, col, idx = 0;
-  int      *list, *marker, *fill, *tmpFill;
-  int      temp, m, from = ctx->from, to = ctx->to;
-  int      *n2o_row, *o2n_col, beg_row, beg_rowP;
+  HYPRE_Int      *rp, *cval, *diag;
+  HYPRE_Int      *CVAL;
+  HYPRE_Int      i, j, len, count, col, idx = 0;
+  HYPRE_Int      *list, *marker, *fill, *tmpFill;
+  HYPRE_Int      temp, m, from = ctx->from, to = ctx->to;
+  HYPRE_Int      *n2o_row, *o2n_col, beg_row, beg_rowP;
   double   *AVAL;
   REAL_DH  *work, *aval;
   Factor_dh F = ctx->F;
@@ -112,9 +112,9 @@ void iluk_seq(Euclid_dh ctx)
   beg_rowP  = ctx->sg->beg_rowP[myid_dh];
 
   /* allocate and initialize working space */
-  list   = (int*)MALLOC_DH((m+1)*sizeof(int)); CHECK_V_ERROR;
-  marker = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
-  tmpFill = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  tmpFill = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = -1;
 
   /* working space for values */
@@ -127,14 +127,14 @@ void iluk_seq(Euclid_dh ctx)
   /*---------- main loop ----------*/
 
   for (i=from; i<to; ++i) {
-    int row = n2o_row[i];             /* local row number */
-    int globalRow = row+beg_row;      /* global row number */
+    HYPRE_Int row = n2o_row[i];             /* local row number */
+    HYPRE_Int globalRow = row+beg_row;      /* global row number */
 
-/*fprintf(logFile, "--------------------------------- localRow= %i\n", 1+i);
+/*hypre_fprintf(logFile, "--------------------------------- localRow= %i\n", 1+i);
 */
 
     if (debug) {
-	fprintf(logFile, "ILU_seq ================================= starting local row: %i, (global= %i) level= %i\n", i+1, i+1+sg->beg_rowP[myid_dh], ctx->level);
+	hypre_fprintf(logFile, "ILU_seq ================================= starting local row: %i, (global= %i) level= %i\n", i+1, i+1+sg->beg_rowP[myid_dh], ctx->level);
     }
 
     EuclidGetRow(ctx->A, globalRow, &len, &CVAL, &AVAL); CHECK_V_ERROR;
@@ -166,7 +166,7 @@ void iluk_seq(Euclid_dh ctx)
       cval[idx] = col;  
       fill[idx] = tmpFill[col];
       ++idx;
-/*fprintf(logFile, "  col= %i\n", 1+col);
+/*hypre_fprintf(logFile, "  col= %i\n", 1+col);
 */
       col = list[col];
     }
@@ -179,7 +179,7 @@ void iluk_seq(Euclid_dh ctx)
     while (cval[temp] != i) ++temp; 
     diag[i] = temp;
 
-/*fprintf(logFile, "  diag[i]= %i\n", diag);
+/*hypre_fprintf(logFile, "  diag[i]= %i\n", diag);
 */
 
     /* compute numeric factor for current row */
@@ -191,15 +191,15 @@ void iluk_seq(Euclid_dh ctx)
        and re-zero work vector
      */
     if (debug) {
-      fprintf(logFile, "ILU_seq:  ");
+      hypre_fprintf(logFile, "ILU_seq:  ");
       for (j=rp[i]; j<rp[i+1]; ++j) {
         col = cval[j];  
         aval[j] = work[col];  
         work[col] = 0.0;
-        fprintf(logFile, "%i,%i,%g ; ", 1+cval[j], fill[j], aval[j]);
+        hypre_fprintf(logFile, "%i,%i,%g ; ", 1+cval[j], fill[j], aval[j]);
         fflush(logFile);
       }
-      fprintf(logFile, "\n");
+      hypre_fprintf(logFile, "\n");
     } else {
       for (j=rp[i]; j<rp[i+1]; ++j) {
         col = cval[j];  
@@ -210,7 +210,7 @@ void iluk_seq(Euclid_dh ctx)
 
     /* check for zero diagonal */
     if (! aval[diag[i]]) {
-      sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
+      hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }
   }
@@ -221,8 +221,8 @@ void iluk_seq(Euclid_dh ctx)
 
   /* adjust column indices back to global */
   if (beg_rowP) {
-    int start = rp[from];
-    int stop = rp[to];
+    HYPRE_Int start = rp[from];
+    HYPRE_Int stop = rp[to];
     for (i=start; i<stop; ++i) cval[i] += beg_rowP;
   }
 
@@ -240,25 +240,25 @@ void iluk_seq(Euclid_dh ctx)
 void iluk_seq_block(Euclid_dh ctx)
 {
   START_FUNC_DH
-  int      *rp, *cval, *diag;
-  int      *CVAL;
-  int      h, i, j, len, count, col, idx = 0;
-  int      *list, *marker, *fill, *tmpFill;
-  int      temp, m;
-  int      *n2o_row, *o2n_col, *beg_rowP, *n2o_sub, blocks;
-  int      *row_count, *dummy = NULL, dummy2[1];
+  HYPRE_Int      *rp, *cval, *diag;
+  HYPRE_Int      *CVAL;
+  HYPRE_Int      h, i, j, len, count, col, idx = 0;
+  HYPRE_Int      *list, *marker, *fill, *tmpFill;
+  HYPRE_Int      temp, m;
+  HYPRE_Int      *n2o_row, *o2n_col, *beg_rowP, *n2o_sub, blocks;
+  HYPRE_Int      *row_count, *dummy = NULL, dummy2[1];
   double   *AVAL;
   REAL_DH  *work, *aval;
   Factor_dh F = ctx->F;
   SubdomainGraph_dh sg = ctx->sg;
   bool bj = false, constrained = false;
-  int discard = 0;
-  int gr = -1;  /* globalRow */
+  HYPRE_Int discard = 0;
+  HYPRE_Int gr = -1;  /* globalRow */
   bool debug = false;
 
   if (logFile != NULL  &&  Parser_dhHasSwitch(parser_dh, "-debug_ilu")) debug = true;
 
-/*fprintf(stderr, "====================== starting iluk_seq_block; level= %i\n\n", ctx->level); 
+/*hypre_fprintf(stderr, "====================== starting iluk_seq_block; level= %i\n\n", ctx->level); 
 */
 
   if (!strcmp(ctx->algo_par, "bj")) bj = true;
@@ -283,7 +283,7 @@ void iluk_seq_block(Euclid_dh ctx)
   }
 
   else {
-    dummy = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+    dummy = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) dummy[i] = i;
     n2o_row   = dummy;
     o2n_col   = dummy;
@@ -295,9 +295,9 @@ void iluk_seq_block(Euclid_dh ctx)
   }
 
   /* allocate and initialize working space */
-  list   = (int*)MALLOC_DH((m+1)*sizeof(int)); CHECK_V_ERROR;
-  marker = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
-  tmpFill = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  tmpFill = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = -1;
 
   /* working space for values */
@@ -307,20 +307,20 @@ void iluk_seq_block(Euclid_dh ctx)
 
  for (h=0; h<blocks; ++h) {
   /* 1st and last row in current block, with respect to A */
-  int curBlock = n2o_sub[h];
-  int first_row = beg_rowP[curBlock];
-  int end_row   = first_row + row_count[curBlock];
+  HYPRE_Int curBlock = n2o_sub[h];
+  HYPRE_Int first_row = beg_rowP[curBlock];
+  HYPRE_Int end_row   = first_row + row_count[curBlock];
 
     if (debug) {
-        fprintf(logFile, "\n\nILU_seq BLOCK: %i @@@@@@@@@@@@@@@ \n", curBlock);
+        hypre_fprintf(logFile, "\n\nILU_seq BLOCK: %i @@@@@@@@@@@@@@@ \n", curBlock);
     }
 
   for (i=first_row; i<end_row; ++i) {
-    int row = n2o_row[i];  
+    HYPRE_Int row = n2o_row[i];  
     ++gr;
 
     if (debug) {
-      fprintf(logFile, "ILU_seq  global: %i  local: %i =================================\n", 1+gr, 1+i-first_row);
+      hypre_fprintf(logFile, "ILU_seq  global: %i  local: %i =================================\n", 1+gr, 1+i-first_row);
     }
 
 /*prinft("first_row= %i  end_row= %i\n", first_row, end_row);
@@ -409,14 +409,14 @@ void iluk_seq_block(Euclid_dh ctx)
        and re-zero work vector
      */
     if (debug) {
-      fprintf(logFile, "ILU_seq: ");
+      hypre_fprintf(logFile, "ILU_seq: ");
       for (j=rp[i]; j<rp[i+1]; ++j) {
         col = cval[j];  
         aval[j] = work[col];  
         work[col] = 0.0;
-        fprintf(logFile, "%i,%i,%g ; ", 1+cval[j], fill[j], aval[j]);
+        hypre_fprintf(logFile, "%i,%i,%g ; ", 1+cval[j], fill[j], aval[j]);
       }
-      fprintf(logFile, "\n");
+      hypre_fprintf(logFile, "\n");
      } 
 
      /* normal operation */
@@ -430,13 +430,13 @@ void iluk_seq_block(Euclid_dh ctx)
 
     /* check for zero diagonal */
     if (! aval[diag[i]]) {
-      sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
+      hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }
   }
  }
 
-/*  printf("bj= %i  constrained= %i  discarded= %i\n", bj, constrained, discard); */
+/*  hypre_printf("bj= %i  constrained= %i  discarded= %i\n", bj, constrained, discard); */
 
   if (dummy != NULL) { FREE_DH(dummy); CHECK_V_ERROR; }
   FREE_DH(list); CHECK_V_ERROR;
@@ -455,18 +455,18 @@ void iluk_seq_block(Euclid_dh ctx)
 */
 #undef __FUNC__
 #define __FUNC__ "symbolic_row_private"
-int symbolic_row_private(int localRow, 
-                 int *list, int *marker, int *tmpFill,
-                 int len, int *CVAL, double *AVAL,
-                 int *o2n_col, Euclid_dh ctx, bool debug)
+HYPRE_Int symbolic_row_private(HYPRE_Int localRow, 
+                 HYPRE_Int *list, HYPRE_Int *marker, HYPRE_Int *tmpFill,
+                 HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                 HYPRE_Int *o2n_col, Euclid_dh ctx, bool debug)
 {
   START_FUNC_DH
-  int level = ctx->level, m = ctx->F->m;
-  int *cval = ctx->F->cval, *diag = ctx->F->diag, *rp = ctx->F->rp; 
-  int *fill = ctx->F->fill;
-  int count = 0;
-  int j, node, tmp, col, head;
-  int fill1, fill2, beg_row;
+  HYPRE_Int level = ctx->level, m = ctx->F->m;
+  HYPRE_Int *cval = ctx->F->cval, *diag = ctx->F->diag, *rp = ctx->F->rp; 
+  HYPRE_Int *fill = ctx->F->fill;
+  HYPRE_Int count = 0;
+  HYPRE_Int j, node, tmp, col, head;
+  HYPRE_Int fill1, fill2, beg_row;
   double val;
   double thresh = ctx->sparseTolA;
   REAL_DH scale;
@@ -518,7 +518,7 @@ int symbolic_row_private(int localRow,
       fill1 = tmpFill[node];
 
       if (debug) {
-        fprintf(logFile, "ILU_seq   sf updating from row: %i\n", 1+node);
+        hypre_fprintf(logFile, "ILU_seq   sf updating from row: %i\n", 1+node);
       }
 
       if (fill1 < level) {
@@ -556,16 +556,16 @@ int symbolic_row_private(int localRow,
 
 #undef __FUNC__
 #define __FUNC__ "numeric_row_private"
-int numeric_row_private(int localRow, 
-                        int len, int *CVAL, double *AVAL,
-                        REAL_DH *work, int *o2n_col, Euclid_dh ctx, bool debug)
+HYPRE_Int numeric_row_private(HYPRE_Int localRow, 
+                        HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                        REAL_DH *work, HYPRE_Int *o2n_col, Euclid_dh ctx, bool debug)
 {
   START_FUNC_DH
   double  pc, pv, multiplier;
-  int     j, k, col, row;
-  int     *rp = ctx->F->rp, *cval = ctx->F->cval;
-  int     *diag = ctx->F->diag;
-  int     beg_row;
+  HYPRE_Int     j, k, col, row;
+  HYPRE_Int     *rp = ctx->F->rp, *cval = ctx->F->cval;
+  HYPRE_Int     *diag = ctx->F->diag;
+  HYPRE_Int     beg_row;
   double  val;
   REAL_DH *aval = ctx->F->aval, scale;
 
@@ -591,7 +591,7 @@ int numeric_row_private(int localRow,
 
 
 
-/*fprintf(stderr, "local row= %i\n", 1+localRow);
+/*hypre_fprintf(stderr, "local row= %i\n", 1+localRow);
 */
 
 
@@ -604,7 +604,7 @@ int numeric_row_private(int localRow,
 
 /*
 if (pc == 0.0 || pv == 0.0) {
-fprintf(stderr, "pv= %g; pc= %g\n", pv, pc);
+hypre_fprintf(stderr, "pv= %g; pc= %g\n", pv, pc);
 }
 */
 
@@ -613,7 +613,7 @@ fprintf(stderr, "pv= %g; pc= %g\n", pv, pc);
       work[row] = multiplier;
 
       if (debug) {
-        fprintf(logFile, "ILU_seq   nf updating from row: %i; multiplier= %g\n", 1+row, multiplier);
+        hypre_fprintf(logFile, "ILU_seq   nf updating from row: %i; multiplier= %g\n", 1+row, multiplier);
       }
 
       for (k=diag[row]+1; k<rp[row+1]; ++k) {
@@ -622,7 +622,7 @@ fprintf(stderr, "pv= %g; pc= %g\n", pv, pc);
       }
     } else  {
       if (debug) {
-        fprintf(logFile, "ILU_seq   nf NO UPDATE from row %i; pc = %g; pv = %g\n", 1+row, pc, pv);
+        hypre_fprintf(logFile, "ILU_seq   nf NO UPDATE from row %i; pc = %g; pv = %g\n", 1+row, pc, pv);
       }
     }
   }
@@ -642,8 +642,8 @@ fprintf(stderr, "pv= %g; pc= %g\n", pv, pc);
 /*-----------------------------------------------------------------------*
  * ILUT starts here
  *-----------------------------------------------------------------------*/
-int ilut_row_private(int localRow, int *list, int *o2n_col, int *marker,
-                     int len, int *CVAL, double *AVAL,
+HYPRE_Int ilut_row_private(HYPRE_Int localRow, HYPRE_Int *list, HYPRE_Int *o2n_col, HYPRE_Int *marker,
+                     HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
                      REAL_DH *work, Euclid_dh ctx, bool debug);
 
 #undef __FUNC__
@@ -651,11 +651,11 @@ int ilut_row_private(int localRow, int *list, int *o2n_col, int *marker,
 void ilut_seq(Euclid_dh ctx)
 {
   START_FUNC_DH
-  int      *rp, *cval, *diag, *CVAL;
-  int      i, len, count, col, idx = 0;
-  int      *list, *marker;
-  int      temp, m, from, to;
-  int      *n2o_row, *o2n_col, beg_row, beg_rowP;
+  HYPRE_Int      *rp, *cval, *diag, *CVAL;
+  HYPRE_Int      i, len, count, col, idx = 0;
+  HYPRE_Int      *list, *marker;
+  HYPRE_Int      temp, m, from, to;
+  HYPRE_Int      *n2o_row, *o2n_col, beg_row, beg_rowP;
   double   *AVAL, droptol; 
   REAL_DH *work, *aval, val;
   Factor_dh F = ctx->F;
@@ -686,8 +686,8 @@ void ilut_seq(Euclid_dh ctx)
 
 
   /* allocate and initialize working space */
-  list   = (int*)MALLOC_DH((m+1)*sizeof(int)); CHECK_V_ERROR;
-  marker = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = -1;
   rp[0] = 0;
 
@@ -696,8 +696,8 @@ void ilut_seq(Euclid_dh ctx)
 
   /* ----- main loop start ----- */
   for (i=from; i<to; ++i) {
-    int row = n2o_row[i];             /* local row number */
-    int globalRow = row + beg_row;    /* global row number */
+    HYPRE_Int row = n2o_row[i];             /* local row number */
+    HYPRE_Int globalRow = row + beg_row;    /* global row number */
     EuclidGetRow(ctx->A, globalRow, &len, &CVAL, &AVAL); CHECK_V_ERROR;
 
     /* compute scaling value for row(i) */
@@ -742,15 +742,15 @@ void ilut_seq(Euclid_dh ctx)
 
     /* check for zero diagonal */
     if (! aval[diag[i]]) {
-      sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
+      hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }
   } /* --------- main loop end --------- */
 
   /* adjust column indices back to global */
   if (beg_rowP) {
-    int start = rp[from];
-    int stop = rp[to];
+    HYPRE_Int start = rp[from];
+    HYPRE_Int stop = rp[to];
     for (i=start; i<stop; ++i) cval[i] += beg_rowP;
   }
 
@@ -762,16 +762,16 @@ void ilut_seq(Euclid_dh ctx)
 
 #undef __FUNC__
 #define __FUNC__ "ilut_row_private"
-int ilut_row_private(int localRow, int *list, int *o2n_col, int *marker,
-                     int len, int *CVAL, double *AVAL,
+HYPRE_Int ilut_row_private(HYPRE_Int localRow, HYPRE_Int *list, HYPRE_Int *o2n_col, HYPRE_Int *marker,
+                     HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
                      REAL_DH *work, Euclid_dh ctx, bool debug)
 {
   START_FUNC_DH
   Factor_dh F = ctx->F;
-  int     j, col, m = ctx->m, *rp = F->rp, *cval = F->cval;
-  int     tmp, *diag = F->diag;
-  int     head;
-  int     count = 0, beg_row;
+  HYPRE_Int     j, col, m = ctx->m, *rp = F->rp, *cval = F->cval;
+  HYPRE_Int     tmp, *diag = F->diag;
+  HYPRE_Int     head;
+  HYPRE_Int     count = 0, beg_row;
   double  val;
   double  mult, *aval = F->aval;
   double  scale, pv, pc;
@@ -819,7 +819,7 @@ int ilut_row_private(int localRow, int *list, int *o2n_col, int *marker,
   /* update current row from previously factored rows */
   head = m;
   while (list[head] < localRow) {
-    int row = list[head];
+    HYPRE_Int row = list[head];
 
     /* get the multiplier, and apply 1st drop tolerance test */
     pc = work[row];
@@ -856,12 +856,12 @@ int ilut_row_private(int localRow, int *list, int *o2n_col, int *marker,
 
 #undef __FUNC__
 #define __FUNC__ "check_constraint_private"
-bool check_constraint_private(Euclid_dh ctx, int p1, int j) 
+bool check_constraint_private(Euclid_dh ctx, HYPRE_Int p1, HYPRE_Int j) 
 {
   START_FUNC_DH
   bool retval = false;
-  int i, p2;
-  int *nabors, count;
+  HYPRE_Int i, p2;
+  HYPRE_Int *nabors, count;
   SubdomainGraph_dh sg = ctx->sg;
 
   if (sg == NULL) {
@@ -875,13 +875,13 @@ bool check_constraint_private(Euclid_dh ctx, int p1, int j)
   count = sg->ptrs[p1+1]  - sg->ptrs[p1];
 
 /*
-printf("p1= %i, p2= %i;  p1's nabors: ", p1, p2);
-for (i=0; i<count; ++i) printf("%i ", nabors[i]);
-printf("\n");
+hypre_printf("p1= %i, p2= %i;  p1's nabors: ", p1, p2);
+for (i=0; i<count; ++i) hypre_printf("%i ", nabors[i]);
+hypre_printf("\n");
 */
 
   for (i=0; i<count; ++i) {
-/* printf("  @@@ next nabor= %i\n", nabors[i]);
+/* hypre_printf("  @@@ next nabor= %i\n", nabors[i]);
 */
     if (nabors[i] == p2) {
       retval = true;

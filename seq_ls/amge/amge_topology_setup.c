@@ -24,31 +24,31 @@
  *
  ****************************************************************************/
 
-int hypre_AMGeMatrixTopologySetup(hypre_AMGeMatrixTopology ***A_pointer,
-				  int *level_pointer, 
+HYPRE_Int hypre_AMGeMatrixTopologySetup(hypre_AMGeMatrixTopology ***A_pointer,
+				  HYPRE_Int *level_pointer, 
 
-				  int *i_element_node,
-				  int *j_element_node,
+				  HYPRE_Int *i_element_node,
+				  HYPRE_Int *j_element_node,
 
-				  int num_elements, int num_nodes, 
+				  HYPRE_Int num_elements, HYPRE_Int num_nodes, 
 
-				  int Max_level)
+				  HYPRE_Int Max_level)
 
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int num_faces;
+  HYPRE_Int num_faces;
 
-  int level;
+  HYPRE_Int level;
 
-  int num_AEs;
+  HYPRE_Int num_AEs;
 
-  int *i_face_to_prefer_weight, *i_face_weight;
+  HYPRE_Int *i_face_to_prefer_weight, *i_face_weight;
   hypre_AMGeMatrixTopology **A;
 
-  int *i_boundarysurface_node=NULL, *j_boundarysurface_node=NULL;
-  int num_boundarysurfaces = 0;
+  HYPRE_Int *i_boundarysurface_node=NULL, *j_boundarysurface_node=NULL;
+  HYPRE_Int num_boundarysurfaces = 0;
 
 
   A = hypre_CTAlloc(hypre_AMGeMatrixTopology*, Max_level);
@@ -68,8 +68,8 @@ int hypre_AMGeMatrixTopologySetup(hypre_AMGeMatrixTopology ***A_pointer,
 
   num_faces = hypre_AMGeMatrixTopologyNumFaces(A[0]);
 
-  i_face_to_prefer_weight = hypre_CTAlloc(int, num_faces);
-  i_face_weight = hypre_CTAlloc(int, num_faces);
+  i_face_to_prefer_weight = hypre_CTAlloc(HYPRE_Int, num_faces);
+  i_face_weight = hypre_CTAlloc(HYPRE_Int, num_faces);
 
   level = 0;
 
@@ -88,16 +88,16 @@ agglomerate:
 
   num_AEs = hypre_AMGeMatrixTopologyNumElements(A[level+1]);
 
-  printf("level %d num_AEs: %d\n\n\n", level+1, num_AEs);
+  hypre_printf("level %d num_AEs: %d\n\n\n", level+1, num_AEs);
 
   level++;
    
   if (num_AEs > 1 && level+1 < Max_level) 
     goto agglomerate;
 
-  printf("\n================================================================\n");
-  printf("number of grids: from 0 to %d\n\n\n", level);
-  printf("================================================================\n\n");
+  hypre_printf("\n================================================================\n");
+  hypre_printf("number of grids: from 0 to %d\n\n\n", level);
+  hypre_printf("================================================================\n\n");
 
 
   hypre_TFree(i_face_to_prefer_weight);

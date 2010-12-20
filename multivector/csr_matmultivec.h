@@ -25,7 +25,7 @@ extern "C" {
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatMultivec
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
                            hypre_Multivector *x, double beta,
                            hypre_Multivector *y);
@@ -39,7 +39,7 @@ hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
  *   From Van Henson's modification of hypre_CSRMatrixMatvec.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRMatrixMatMultivecT(double alpha, hypre_CSRMatrix *A,
                             hypre_Multivector *x, double beta,
                             hypre_Multivector *y);

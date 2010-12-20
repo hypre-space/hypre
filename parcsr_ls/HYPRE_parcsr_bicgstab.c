@@ -25,7 +25,7 @@
  * HYPRE_ParCSRBiCGSTABCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    hypre_BiCGSTABFunctions * bicgstab_functions =
@@ -50,7 +50,7 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRBiCGSTABDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRBiCGSTABDestroy( HYPRE_Solver solver )
 {
    return( hypre_BiCGSTABDestroy( (void *) solver ) );
@@ -60,7 +60,7 @@ HYPRE_ParCSRBiCGSTABDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRBiCGSTABSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -76,7 +76,7 @@ HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRBiCGSTABSolve( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -92,7 +92,7 @@ HYPRE_ParCSRBiCGSTABSolve( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
@@ -102,7 +102,7 @@ HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
                          double             a_tol    )
 {
@@ -112,9 +112,9 @@ HYPRE_ParCSRBiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetMinIter( HYPRE_Solver solver,
-                             int          min_iter )
+                             HYPRE_Int          min_iter )
 {
    return( HYPRE_BiCGSTABSetMinIter( solver, min_iter ) );
 }
@@ -123,9 +123,9 @@ HYPRE_ParCSRBiCGSTABSetMinIter( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetMaxIter( HYPRE_Solver solver,
-                             int          max_iter )
+                             HYPRE_Int          max_iter )
 {
    return( HYPRE_BiCGSTABSetMaxIter( solver, max_iter ) );
 }
@@ -134,9 +134,9 @@ HYPRE_ParCSRBiCGSTABSetMaxIter( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSetStopCrit
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetStopCrit( HYPRE_Solver solver,
-                              int          stop_crit )
+                              HYPRE_Int          stop_crit )
 {
    return( HYPRE_BiCGSTABSetStopCrit( solver, stop_crit ) );
 }
@@ -145,7 +145,7 @@ HYPRE_ParCSRBiCGSTABSetStopCrit( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetPrecond( HYPRE_Solver         solver,
                                 HYPRE_PtrToParSolverFcn precond,
                                 HYPRE_PtrToParSolverFcn precond_setup,
@@ -161,7 +161,7 @@ HYPRE_ParCSRBiCGSTABSetPrecond( HYPRE_Solver         solver,
  * HYPRE_ParCSRBiCGSTABGetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABGetPrecond( HYPRE_Solver  solver,
                              HYPRE_Solver *precond_data_ptr )
 {
@@ -172,9 +172,9 @@ HYPRE_ParCSRBiCGSTABGetPrecond( HYPRE_Solver  solver,
  * HYPRE_ParCSRBiCGSTABSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetLogging( HYPRE_Solver solver,
-                             int logging)
+                             HYPRE_Int logging)
 {
    return( HYPRE_BiCGSTABSetLogging( solver, logging ) );
 }
@@ -183,9 +183,9 @@ HYPRE_ParCSRBiCGSTABSetLogging( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSetPrintLevel
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetPrintLevel( HYPRE_Solver solver,
-                             int print_level)
+                             HYPRE_Int print_level)
 {
    return( HYPRE_BiCGSTABSetPrintLevel( solver, print_level ) );
 }
@@ -194,9 +194,9 @@ HYPRE_ParCSRBiCGSTABSetPrintLevel( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABGetNumIterations( HYPRE_Solver  solver,
-                                   int                *num_iterations )
+                                   HYPRE_Int                *num_iterations )
 {
    return( HYPRE_BiCGSTABGetNumIterations( solver, num_iterations ) );
 }
@@ -205,7 +205,7 @@ HYPRE_ParCSRBiCGSTABGetNumIterations( HYPRE_Solver  solver,
  * HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {

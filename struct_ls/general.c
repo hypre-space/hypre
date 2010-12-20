@@ -26,10 +26,10 @@
  *   If p <= 0, it returns a -1.
  *--------------------------------------------------------------------------*/
 
-int
-hypre_Log2(int p)
+HYPRE_Int
+hypre_Log2(HYPRE_Int p)
 {
-   int  e;
+   HYPRE_Int  e;
 
    if (p <= 0)
       return -1;

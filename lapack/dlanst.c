@@ -69,7 +69,7 @@ doublereal dlanst_(char *norm, integer *n, doublereal *d__, doublereal *e)
     static doublereal scale;
     extern logical lsame_(char *, char *);
     static doublereal anorm;
-    extern /* Subroutine */ int dlassq_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlassq_(integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *);
     static doublereal sum;
 

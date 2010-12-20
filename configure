@@ -842,6 +842,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          Set compiler flags for debugging.
   --enable-shared         Build shared libraries (default is NO).
+  --enable-bigint         Use long long int for HYPRE_Int (default is NO).
   --enable-fortran        Require a working Fortran compiler (default is YES).
   --enable-python=PYTHON  Build interface to specified instance of Python
                           (turns on shared libraries, requires Babel; default
@@ -1489,6 +1490,22 @@ PACKAGE_STRING=
 PACKAGE_TARNAME=
 PACKAGE_BUGREPORT=
 
+hypre_user_chose_mpi=no
+hypre_user_chose_blas=no
+hypre_user_chose_lapack=no
+hypre_user_chose_fei=no
+
+hypre_using_c=yes
+hypre_using_cxx=yes
+
+hypre_using_fei=yes
+hypre_using_superlu=yes
+
+hypre_using_babel=no
+hypre_using_examples=no
+hypre_using_openmp=no
+hypre_using_insure=no
+
 if test "x$build_alias" = "x"
 then
    # Make sure we can run config.sub.
@@ -1586,6 +1603,30 @@ else
 
 fi;
 
+# Check whether --enable-bigint or --disable-bigint was given.
+if test "${enable_bigint+set}" = set; then
+  enableval="$enable_bigint"
+  case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_babel=no
+         hypre_using_bigint=yes ;;
+    no)  hypre_using_bigint=no ;;
+    *)   { { echo "$as_me:$LINENO: error: Bad value ${enableval} for --enable-bigint" >&5
+echo "$as_me: error: Bad value ${enableval} for --enable-bigint" >&2;}
+   { (exit 1); exit 1; }; } ;;
+ esac
+else
+  hypre_using_bigint=no
+
+fi;
+if test "$hypre_using_bigint" = "yes"
+then
+   cat >>confdefs.h <<\_ACEOF
+#define HYPRE_BIGINT 1
+_ACEOF
+
+fi
+
 # Check whether --enable-fortran or --disable-fortran was given.
 if test "${enable_fortran+set}" = set; then
   enableval="$enable_fortran"
@@ -1677,26 +1718,6 @@ if test "x$AR" = "x"
 then
    AR="ar -rcu"
 fi
-
-hypre_user_chose_mpi=no
-hypre_user_chose_blas=no
-hypre_user_chose_lapack=no
-hypre_user_chose_fei=no
-
-hypre_using_c=yes
-hypre_using_cxx=yes
-
-hypre_using_fei=yes
-hypre_using_superlu=yes
-
-hypre_using_babel=no
-hypre_using_examples=no
-hypre_using_openmp=no
-hypre_using_insure=no
-
-hypre_testing_alpha=no
-hypre_testing_beta=no
-hypre_testing_general=no
 
 
 
@@ -4619,7 +4640,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:4622:" \
+echo "$as_me:4643:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -4815,7 +4836,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:4818: \"$ac_link\") >&5
+(eval echo $as_me:4839: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -4893,7 +4914,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:4896: \"$ac_link\") >&5
+(eval echo $as_me:4917: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS

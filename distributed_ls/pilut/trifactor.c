@@ -50,13 +50,13 @@
 void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
                    hypre_PilutSolverGlobals *globals)
 {
-  int ii, i, j, l, TAG;
-  int nlevels, snbrpes, rnbrpes;
-  int *perm, *iperm, *nnodes, *rowptr, *colind,
+  HYPRE_Int ii, i, j, l, TAG;
+  HYPRE_Int nlevels, snbrpes, rnbrpes;
+  HYPRE_Int *perm, *iperm, *nnodes, *rowptr, *colind,
     *spes, *sptr, *sindex, *auxsptr, *rpes, *rdone, *rnum;
   double *lx, *ux, *values, *dvalues, *gatherbuf, **raddr, xx;
-  MPI_Status Status;
-  MPI_Request *receive_requests;
+  hypre_MPI_Status Status;
+  hypre_MPI_Request *receive_requests;
 
   /* hypre_PrintLine("hypre_LDUSolve start", globals); */
 
@@ -110,7 +110,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *
 
 
   /* Allocate requests */
-  receive_requests = hypre_CTAlloc( MPI_Request, npes );
+  receive_requests = hypre_CTAlloc( hypre_MPI_Request, npes );
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->Lp_timer );
@@ -126,7 +126,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *
     /* Recv the required lx elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	MPI_Irecv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE,
+	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_DOUBLE,
 		  rpes[i], TAG, pilut_comm, &receive_requests[i] );
 
 	rdone[i] += rnum[i] ;
@@ -139,7 +139,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *
         for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]<nnodes[ii];   j++, l++) 
           gatherbuf[l] = lx[sindex[j]];
 
-	MPI_Send( gatherbuf, l, MPI_DOUBLE,
+	hypre_MPI_Send( gatherbuf, l, hypre_MPI_DOUBLE,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
@@ -149,7 +149,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *
     /* Wait for receives */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-        MPI_Wait( &receive_requests[i], &Status);
+        hypre_MPI_Wait( &receive_requests[i], &Status);
       }
     }
 
@@ -212,7 +212,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *
     /* Recv the required ux elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	MPI_Irecv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE,
+	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_DOUBLE,
 		  rpes[i], TAG, pilut_comm, &receive_requests[ i ] );
 
 	rdone[i] += rnum[i] ;
@@ -225,7 +225,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *
         for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]>=nnodes[ii-1];   j++, l++) 
           gatherbuf[l] = ux[sindex[j]];
 
-	MPI_Send( gatherbuf, l, MPI_DOUBLE,
+	hypre_MPI_Send( gatherbuf, l, hypre_MPI_DOUBLE,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
@@ -235,7 +235,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *
     /* Finish receives */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	MPI_Wait( &receive_requests[ i ], &Status );
+	hypre_MPI_Wait( &receive_requests[ i ], &Status );
       }
     }
 
@@ -273,11 +273,11 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *
 * This function sets-up the communication parameters for the forward
 * and backward substitution, and relabels the L and U matrices 
 **************************************************************************/
-int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
+HYPRE_Int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
                    hypre_PilutSolverGlobals *globals )
 {
-  int maxsend;
-  int *petotal, *rind, *imap;
+  HYPRE_Int maxsend;
+  HYPRE_Int *petotal, *rind, *imap;
 
   petotal = hypre_idx_malloc(npes+1,       "hypre_SetUpLUFactor: petotal");
   rind    = hypre_idx_malloc(ddist->ddist_nrows, "hypre_SetUpLUFactor: rind"   );
@@ -288,7 +288,7 @@ int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 
 #ifdef HYPRE_TIMING
 {
-   int Ltimer;
+   HYPRE_Int Ltimer;
 
    Ltimer = hypre_InitializeTiming( "hypre_SetUpFactor for L" );
 
@@ -305,7 +305,7 @@ int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 
 #ifdef HYPRE_TIMING
  {
-   int Utimer;
+   HYPRE_Int Utimer;
 
    Utimer = hypre_InitializeTiming( "hypre_SetUpFactor for U" );
 
@@ -338,21 +338,21 @@ int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 * differentiates the two calls for the minor differences between them.
 * These differences are marked by **** in comments
 **************************************************************************/
-void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
-		 int *petotal, int *rind, int *imap,
-		 int *maxsendP, int DoingL,
+void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
+		 HYPRE_Int *petotal, HYPRE_Int *rind, HYPRE_Int *imap,
+		 HYPRE_Int *maxsendP, HYPRE_Int DoingL,
                    hypre_PilutSolverGlobals *globals )
 {
-  int i, ii, j, k, l, 
+  HYPRE_Int i, ii, j, k, l, 
     nlevels, nrecv, nsend, snbrpes, rnbrpes;
-  int *rowdist, *sptr, *sindex, *spes, *rpes,
+  HYPRE_Int *rowdist, *sptr, *sindex, *spes, *rpes,
     *perm, *iperm, *newrowptr, *newcolind,
     *srowptr, *erowptr, *colind, *rnum ;
   double *newvalues, *values, *x, **raddr;
   TriSolveCommType *TriSolveComm;
-  MPI_Status Status;
-  MPI_Request *receive_requests;
-  MPI_Datatype MyColType_rnbr;
+  hypre_MPI_Status Status;
+  hypre_MPI_Request *receive_requests;
+  hypre_MPI_Datatype MyColType_rnbr;
 
   /* data common to L and U */
   lnrows   = ddist->ddist_lnrows;
@@ -414,8 +414,8 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   }
   TriSolveComm->rnbrpes = rnbrpes ;
 
-  MPI_Alltoall( petotal, 1, MPI_INT,
-		lu_recv, 1, MPI_INT, pilut_comm );
+  hypre_MPI_Alltoall( petotal, 1, HYPRE_MPI_INT,
+		lu_recv, 1, HYPRE_MPI_INT, pilut_comm );
 
   /* Determine to how many processors you will be sending data */
   snbrpes = 0;
@@ -462,11 +462,11 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   sptr[0] = 0;
 
   /* Allocate requests */
-  receive_requests = hypre_CTAlloc( MPI_Request, npes );
+  receive_requests = hypre_CTAlloc( hypre_MPI_Request, npes );
 
   /* Start asynchronous receives */
   for (i=0; i<snbrpes; i++) {
-    MPI_Irecv( sindex+sptr[i], sptr[i+1]-sptr[i], MPI_INT,
+    hypre_MPI_Irecv( sindex+sptr[i], sptr[i+1]-sptr[i], HYPRE_MPI_INT,
 	      spes[i], TAG_SetUp_rind, pilut_comm, &receive_requests[i] );
   }
 
@@ -475,7 +475,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   k = 0;
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
-      MPI_Send( rind+k, petotal[i], MPI_INT ,
+      hypre_MPI_Send( rind+k, petotal[i], HYPRE_MPI_INT ,
 		i, TAG_SetUp_rind, pilut_comm );
 
       /* recv info for hypre_LDUSolve */
@@ -493,7 +493,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 
   /* complete asynchronous receives */
   for (i=0; i<snbrpes; i++) {
-    MPI_Wait( &receive_requests[i], &Status );
+    hypre_MPI_Wait( &receive_requests[i], &Status );
   }
 
   /* At this point, the set of indexes that you need to send to processors are
@@ -525,7 +525,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   k = 0;
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
-      MPI_Irecv( rind+k, petotal[i], MPI_INT,
+      hypre_MPI_Irecv( rind+k, petotal[i], HYPRE_MPI_INT,
 	        i, TAG_SetUp_reord, pilut_comm, &receive_requests[i] );
       k += petotal[i];
     }
@@ -533,14 +533,14 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 
   /* Write them back to the processors that send them to me */
   for (i=0; i<snbrpes; i++) {
-    MPI_Send( sindex+sptr[i], sptr[i+1]-sptr[i], MPI_INT,
+    hypre_MPI_Send( sindex+sptr[i], sptr[i+1]-sptr[i], HYPRE_MPI_INT,
 	      spes[i], TAG_SetUp_reord, pilut_comm );
   }
 
   /* Finish Recv  */
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
-      MPI_Wait( &receive_requests[i], &Status );
+      hypre_MPI_Wait( &receive_requests[i], &Status );
     }
   }
 
@@ -587,23 +587,23 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
       }
     }
 
-    MPI_Send( rnum, nlevels, MPI_INT,
+    hypre_MPI_Send( rnum, nlevels, HYPRE_MPI_INT,
 	      spes[i], TAG_SetUp_rnum, pilut_comm );
   }
 
   if (rnum) free(rnum);
 
   /* recieve data as columns rather than rows */
-  MPI_Type_vector( nlevels, 1, rnbrpes, MPI_INT, &MyColType_rnbr );
-  MPI_Type_commit( &MyColType_rnbr );
+  hypre_MPI_Type_vector( nlevels, 1, rnbrpes, HYPRE_MPI_INT, &MyColType_rnbr );
+  hypre_MPI_Type_commit( &MyColType_rnbr );
 
   /* receive each column */
   for (i=0; i<rnbrpes; i++) {
-    MPI_Recv( TriSolveComm->rnum+i, 1, MyColType_rnbr,
+    hypre_MPI_Recv( TriSolveComm->rnum+i, 1, MyColType_rnbr,
 	      rpes[i], TAG_SetUp_rnum, pilut_comm, &Status );
   }
 
-  MPI_Type_free( &MyColType_rnbr );
+  hypre_MPI_Type_free( &MyColType_rnbr );
 
   /* Now, go and create the renumbered L (U) that is also in CSR format */
   newrowptr = hypre_idx_malloc(lnrows+1,     "hypre_SetUpFactor: rowptr");

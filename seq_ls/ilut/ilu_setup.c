@@ -52,12 +52,12 @@
 /* Include C interface to gmres_driver */
 #include "ilut_facsol_f.h"
 
-int ilu_setup ( void *input_data, Matrix *ILU_A )
+HYPRE_Int ilu_setup ( void *input_data, Matrix *ILU_A )
 {
    ILUData *ilu_data = input_data;
-   int         i, ierr_ilut, ierr_gmres, ierr_input;
+   HYPRE_Int         i, ierr_ilut, ierr_gmres, ierr_input;
    double     *ILU_b, *ILU_x;
-   int         n, nnz, lenpmx;
+   HYPRE_Int         n, nnz, lenpmx;
    Matrix     *ILU_A_copy=NULL;
    Matrix     *FACTOR_A;
 
@@ -71,8 +71,8 @@ int ilu_setup ( void *input_data, Matrix *ILU_A )
    if( ILUDataMode(ilu_data) == 1 ) 
    {
 #ifdef ICFact
-     printf("Incomplete Cholesky code currently needs to overwrite the input matrix.\n");
-     printf("Please see ic_setup.c for an explanation. Terminating...\n");
+     hypre_printf("Incomplete Cholesky code currently needs to overwrite the input matrix.\n");
+     hypre_printf("Please see ic_setup.c for an explanation. Terminating...\n");
      return(-1);
 #elif defined ILUFact
      /* Make temporary copy input matrix */
@@ -80,11 +80,11 @@ int ilu_setup ( void *input_data, Matrix *ILU_A )
    
      MatrixSize(ILU_A_copy) = MatrixSize(ILU_A);
 
-     MatrixIA(ILU_A_copy) = ctalloc( int, MatrixSize(ILU_A)+1 );
+     MatrixIA(ILU_A_copy) = ctalloc( HYPRE_Int, MatrixSize(ILU_A)+1 );
      for ( i=0; i < MatrixSize(ILU_A)+1; i++) 
        MatrixIA(ILU_A_copy)[i] = MatrixIA(ILU_A)[i];
 
-     MatrixJA(ILU_A_copy) = ctalloc( int, MatrixNNZ(ILU_A) );
+     MatrixJA(ILU_A_copy) = ctalloc( HYPRE_Int, MatrixNNZ(ILU_A) );
 
      MatrixData(ILU_A_copy) = ctalloc( double, MatrixNNZ(ILU_A) );
      for ( i=0; i < MatrixNNZ(ILU_A); i++) 
@@ -111,7 +111,7 @@ int ilu_setup ( void *input_data, Matrix *ILU_A )
 
    if( ierr_input != 0 ) 
    {
-     printf("Error when converting matrix from csr to symmetric, error %d\n", ierr_input);
+     hypre_printf("Error when converting matrix from csr to symmetric, error %d\n", ierr_input);
 
      if (ILU_A_copy) FreeMatrix(ILU_A_copy);
 
@@ -126,8 +126,8 @@ int ilu_setup ( void *input_data, Matrix *ILU_A )
 
    if( (ILUDataIpar(ilu_data)[0] != 0) )
    {
-      ILUDataPerm(ilu_data) = ctalloc( int, MatrixSize(FACTOR_A) );
-      ILUDataInversePerm(ilu_data) = ctalloc( int, MatrixSize(FACTOR_A) );
+      ILUDataPerm(ilu_data) = ctalloc( HYPRE_Int, MatrixSize(FACTOR_A) );
+      ILUDataInversePerm(ilu_data) = ctalloc( HYPRE_Int, MatrixSize(FACTOR_A) );
    }
 
 #ifdef ILUFact
@@ -150,7 +150,7 @@ int ilu_setup ( void *input_data, Matrix *ILU_A )
    ILUDataLIwork(ilu_data) = 3*MatrixSize(FACTOR_A) +
                                      2*n*ILUDataIpar(ilu_data)[5];
 #endif
-   ILUDataIwork(ilu_data) = ctalloc(int, ILUDataLIwork(ilu_data) );
+   ILUDataIwork(ilu_data) = ctalloc(HYPRE_Int, ILUDataLIwork(ilu_data) );
 
 #ifdef ILUFact
    ILUDataLRwork(ilu_data) = (MatrixSize(FACTOR_A)+3)*(ILUDataIpar(ilu_data)[6]+3)
@@ -175,13 +175,13 @@ int ilu_setup ( void *input_data, Matrix *ILU_A )
    ILUDataLenpmx(ilu_data) = lenpmx;
 
 #ifdef ILUFact
-   MatrixIA(ILUDataPreconditioner(ilu_data)) = ctalloc( int, MatrixSize(FACTOR_A)+1);
+   MatrixIA(ILUDataPreconditioner(ilu_data)) = ctalloc( HYPRE_Int, MatrixSize(FACTOR_A)+1);
 #endif
-   MatrixJA(ILUDataPreconditioner(ilu_data)) = ctalloc( int, 
+   MatrixJA(ILUDataPreconditioner(ilu_data)) = ctalloc( HYPRE_Int, 
            lenpmx );
    if( MatrixJA(ILUDataPreconditioner(ilu_data)) == NULL ) 
    {
-     printf("Allocation of worgmresace in ILU_setup failed\n");
+     hypre_printf("Allocation of worgmresace in ILU_setup failed\n");
      return(-10);
    }
 
@@ -189,7 +189,7 @@ int ilu_setup ( void *input_data, Matrix *ILU_A )
            lenpmx );
    if( MatrixData(ILUDataPreconditioner(ilu_data)) == NULL ) 
    {
-     printf("Allocation of worgmresace in ILU_setup failed\n");
+     hypre_printf("Allocation of worgmresace in ILU_setup failed\n");
      return(-11);
    }
 
@@ -230,18 +230,18 @@ int ilu_setup ( void *input_data, Matrix *ILU_A )
 
 #if 0
    for(i = 0; i < n; i ++ ) {
-     printf("Perm(%d) = %d\n",i, ILUDataPerm(ilu_data)[i] ); }
+     hypre_printf("Perm(%d) = %d\n",i, ILUDataPerm(ilu_data)[i] ); }
 #endif
 
   if( ierr_input != 0 ) 
   {
-    printf("Input error to ILUT, error %d\n", ierr_input);
+    hypre_printf("Input error to ILUT, error %d\n", ierr_input);
     return(ierr_input);
   }
 
   if( ierr_ilut != 0 ) 
   {
-    printf("Computational error in ILUT, error %d\n", ierr_ilut);
+    hypre_printf("Computational error in ILUT, error %d\n", ierr_ilut);
     return(ierr_ilut);
   }
 

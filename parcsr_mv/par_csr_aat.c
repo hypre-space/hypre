@@ -21,25 +21,25 @@
 
 
 extern hypre_CSRMatrix * 
-hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, int data,
-                               int ** pA_ext_row_map );
+hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, HYPRE_Int data,
+                               HYPRE_Int ** pA_ext_row_map );
 
 void hypre_ParAat_RowSizes
-( int ** C_diag_i, int ** C_offd_i, int * B_marker,
-  int * A_diag_i, int * A_diag_j,
-  int * A_offd_i, int * A_offd_j, int * A_col_map_offd,
-  int * A_ext_i, int * A_ext_j, int * A_ext_row_map,
-  int *C_diag_size, int *C_offd_size,
-  int num_rows_diag_A, int num_cols_offd_A,
-  int num_rows_A_ext,
-  int first_col_diag_A, int first_row_index_A
+( HYPRE_Int ** C_diag_i, HYPRE_Int ** C_offd_i, HYPRE_Int * B_marker,
+  HYPRE_Int * A_diag_i, HYPRE_Int * A_diag_j,
+  HYPRE_Int * A_offd_i, HYPRE_Int * A_offd_j, HYPRE_Int * A_col_map_offd,
+  HYPRE_Int * A_ext_i, HYPRE_Int * A_ext_j, HYPRE_Int * A_ext_row_map,
+  HYPRE_Int *C_diag_size, HYPRE_Int *C_offd_size,
+  HYPRE_Int num_rows_diag_A, HYPRE_Int num_cols_offd_A,
+  HYPRE_Int num_rows_A_ext,
+  HYPRE_Int first_col_diag_A, HYPRE_Int first_row_index_A
    )
 /* computes the sizes of the rows of C = A * A^T.
-   Out: int** C_diag_i, C_offd_i
-   Workspace provided: int * B_marker
-   In: int* A_diag_i, A_diag_j, A_offd_i, A_offd_j, A_ext_i, A_ext_j, A_ext_row_map
-   Out: int* C_diag_size, C_offd_size
-   In: int num_rows_diag_A, num_cols_offd_A, num_rows_offd_A_ext, first_row_index_A
+   Out: HYPRE_Int** C_diag_i, C_offd_i
+   Workspace provided: HYPRE_Int * B_marker
+   In: HYPRE_Int* A_diag_i, A_diag_j, A_offd_i, A_offd_j, A_ext_i, A_ext_j, A_ext_row_map
+   Out: HYPRE_Int* C_diag_size, C_offd_size
+   In: HYPRE_Int num_rows_diag_A, num_cols_offd_A, num_rows_offd_A_ext, first_row_index_A
 */
 {
    /* There are 3 CSRMatrix or CSRBooleanMatrix objects behind the arrays here:
@@ -48,13 +48,13 @@ void hypre_ParAat_RowSizes
       columns.  So we have to do 4:
       offd*ext, diag*diag, diag*ext, and offd*offd.
    */
-   int i1, i2, i3, jj2, jj3;
-   int jj_count_diag, jj_count_offd, jj_row_begin_diag, jj_row_begin_offd;
-   int last_col_diag_C;
-   int start_indexing = 0; /* start indexing for C_data at 0 */
+   HYPRE_Int i1, i2, i3, jj2, jj3;
+   HYPRE_Int jj_count_diag, jj_count_offd, jj_row_begin_diag, jj_row_begin_offd;
+   HYPRE_Int last_col_diag_C;
+   HYPRE_Int start_indexing = 0; /* start indexing for C_data at 0 */
 
-   *C_diag_i = hypre_CTAlloc(int, num_rows_diag_A+1);
-   *C_offd_i = hypre_CTAlloc(int, num_rows_diag_A+1);
+   *C_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A+1);
+   *C_offd_i = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A+1);
 
    last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
 
@@ -304,62 +304,62 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    
    double          *A_diag_data = hypre_CSRMatrixData(A_diag);
-   int             *A_diag_i = hypre_CSRMatrixI(A_diag);
-   int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Int             *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
 
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    
    double          *A_offd_data = hypre_CSRMatrixData(A_offd);
-   int             *A_offd_i = hypre_CSRMatrixI(A_offd);
-   int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
-   int             *A_col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
-   int             * A_ext_row_map;
+   HYPRE_Int             *A_offd_i = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Int             *A_col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int             * A_ext_row_map;
 
-   int *row_starts_A = hypre_ParCSRMatrixRowStarts(A);
-   int	num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
-   int	num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Int *row_starts_A = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int	num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int	num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
    
    hypre_ParCSRMatrix *C;
-   int		      *col_map_offd_C;
+   HYPRE_Int		      *col_map_offd_C;
 
    hypre_CSRMatrix *C_diag;
 
    double          *C_diag_data;
-   int             *C_diag_i;
-   int             *C_diag_j;
+   HYPRE_Int             *C_diag_i;
+   HYPRE_Int             *C_diag_j;
 
    hypre_CSRMatrix *C_offd;
 
    double          *C_offd_data=NULL;
-   int             *C_offd_i=NULL;
-   int             *C_offd_j=NULL;
-   int             *new_C_offd_j;
+   HYPRE_Int             *C_offd_i=NULL;
+   HYPRE_Int             *C_offd_j=NULL;
+   HYPRE_Int             *new_C_offd_j;
 
-   int              C_diag_size;
-   int              C_offd_size;
-   int		    last_col_diag_C;
-   int		    num_cols_offd_C;
+   HYPRE_Int              C_diag_size;
+   HYPRE_Int              C_offd_size;
+   HYPRE_Int		    last_col_diag_C;
+   HYPRE_Int		    num_cols_offd_C;
    
    hypre_CSRMatrix *A_ext;
    
    double          *A_ext_data;
-   int             *A_ext_i;
-   int             *A_ext_j;
-   int             num_rows_A_ext=0;
+   HYPRE_Int             *A_ext_i;
+   HYPRE_Int             *A_ext_j;
+   HYPRE_Int             num_rows_A_ext=0;
 
-   int	first_row_index_A = hypre_ParCSRMatrixFirstRowIndex(A);
-   int	first_col_diag_A = hypre_ParCSRMatrixFirstColDiag(A);
-   int		   *B_marker;
+   HYPRE_Int	first_row_index_A = hypre_ParCSRMatrixFirstRowIndex(A);
+   HYPRE_Int	first_col_diag_A = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_Int		   *B_marker;
 
-   int              i;
-   int              i1, i2, i3;
-   int              jj2, jj3;
+   HYPRE_Int              i;
+   HYPRE_Int              i1, i2, i3;
+   HYPRE_Int              jj2, jj3;
    
-   int              jj_count_diag, jj_count_offd;
-   int              jj_row_begin_diag, jj_row_begin_offd;
-   int              start_indexing = 0; /* start indexing for C_data at 0 */
-   int		    count;
-   int		    n_rows_A, n_cols_A;
+   HYPRE_Int              jj_count_diag, jj_count_offd;
+   HYPRE_Int              jj_row_begin_diag, jj_row_begin_offd;
+   HYPRE_Int              start_indexing = 0; /* start indexing for C_data at 0 */
+   HYPRE_Int		    count;
+   HYPRE_Int		    n_rows_A, n_cols_A;
 
    double           a_entry;
    double           a_b_product;
@@ -371,7 +371,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
    if (n_cols_A != n_rows_A)
    {
-	printf(" Error! Incompatible matrix dimensions!\n");
+	hypre_printf(" Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
    /*-----------------------------------------------------------------------
@@ -400,7 +400,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    *  Allocate marker array.
     *-----------------------------------------------------------------------*/
 
-   B_marker = hypre_CTAlloc(int, num_rows_diag_A+num_rows_A_ext );
+   B_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A+num_rows_A_ext );
 
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
@@ -425,13 +425,13 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
 #if 0
 /* debugging output: */
-   printf("A_ext_row_map (%i):",num_rows_A_ext);
-   for ( i1=0; i1<num_rows_A_ext; ++i1 ) printf(" %i",A_ext_row_map[i1] );
-   printf("\nC_diag_i (%i):",C_diag_size);
-   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) printf(" %i",C_diag_i[i1] );
-   printf("\nC_offd_i (%i):",C_offd_size);
-   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) printf(" %i",C_offd_i[i1] );
-   printf("\n");
+   hypre_printf("A_ext_row_map (%i):",num_rows_A_ext);
+   for ( i1=0; i1<num_rows_A_ext; ++i1 ) hypre_printf(" %i",A_ext_row_map[i1] );
+   hypre_printf("\nC_diag_i (%i):",C_diag_size);
+   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) hypre_printf(" %i",C_diag_i[i1] );
+   hypre_printf("\nC_offd_i (%i):",C_offd_size);
+   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) hypre_printf(" %i",C_offd_i[i1] );
+   hypre_printf("\n");
 #endif
 
    /*-----------------------------------------------------------------------
@@ -441,11 +441,11 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
  
    last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
    C_diag_data = hypre_CTAlloc(double, C_diag_size);
-   C_diag_j    = hypre_CTAlloc(int, C_diag_size);
+   C_diag_j    = hypre_CTAlloc(HYPRE_Int, C_diag_size);
    if (C_offd_size)
    { 
    	C_offd_data = hypre_CTAlloc(double, C_offd_size);
-   	C_offd_j    = hypre_CTAlloc(int, C_offd_size);
+   	C_offd_j    = hypre_CTAlloc(HYPRE_Int, C_offd_size);
    } 
 
 
@@ -712,21 +712,21 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
       }        /* end of fourth and last i2 loop */
 #if 0          /* debugging printout */
-         printf("end of i1 loop: i1=%i jj_count_diag=%i\n", i1, jj_count_diag );
-         printf("  C_diag_j=");
-         for ( jj3=0; jj3<jj_count_diag; ++jj3) printf("%i ",C_diag_j[jj3]);
-         printf("  C_diag_data=");
-         for ( jj3=0; jj3<jj_count_diag; ++jj3) printf("%f ",C_diag_data[jj3]);
-         printf("\n");
-         printf("  C_offd_j=");
-         for ( jj3=0; jj3<jj_count_offd; ++jj3) printf("%i ",C_offd_j[jj3]);
-         printf("  C_offd_data=");
-         for ( jj3=0; jj3<jj_count_offd; ++jj3) printf("%f ",C_offd_data[jj3]);
-         printf("\n");
-         printf( "  B_marker =" );
+         hypre_printf("end of i1 loop: i1=%i jj_count_diag=%i\n", i1, jj_count_diag );
+         hypre_printf("  C_diag_j=");
+         for ( jj3=0; jj3<jj_count_diag; ++jj3) hypre_printf("%i ",C_diag_j[jj3]);
+         hypre_printf("  C_diag_data=");
+         for ( jj3=0; jj3<jj_count_diag; ++jj3) hypre_printf("%f ",C_diag_data[jj3]);
+         hypre_printf("\n");
+         hypre_printf("  C_offd_j=");
+         for ( jj3=0; jj3<jj_count_offd; ++jj3) hypre_printf("%i ",C_offd_j[jj3]);
+         hypre_printf("  C_offd_data=");
+         for ( jj3=0; jj3<jj_count_offd; ++jj3) hypre_printf("%f ",C_offd_data[jj3]);
+         hypre_printf("\n");
+         hypre_printf( "  B_marker =" );
          for ( it=0; it<num_rows_diag_A+num_rows_A_ext; ++it )
-            printf(" %i", B_marker[it] );
-         printf( "\n" );
+            hypre_printf(" %i", B_marker[it] );
+         hypre_printf( "\n" );
 #endif
    }           /* end of i1 loop */
 
@@ -751,8 +751,8 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    num_cols_offd_C = count;
 
    if (num_cols_offd_C) {
-      col_map_offd_C = hypre_CTAlloc(int,num_cols_offd_C);
-      new_C_offd_j = hypre_CTAlloc(int,C_offd_size);
+      col_map_offd_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_C);
+      new_C_offd_j = hypre_CTAlloc(HYPRE_Int,C_offd_size);
       /* ... a bit big, but num_cols_offd_C is too small.  It might be worth
          computing the correct size, which is sum( no. columns in row i, over all rows i )
       */
@@ -822,8 +822,8 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix * 
-hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, int data,
-                               int ** pA_ext_row_map )
+hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, HYPRE_Int data,
+                               HYPRE_Int ** pA_ext_row_map )
 {
    /* Note that A's role as the first factor in A*A^T is used only
       through ...CommPkgT(A), which basically says which rows of A
@@ -831,38 +831,38 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, int data,
       serves as an input, it is through its role as A^T, the matrix
       whose data needs to be passed between processors. */
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-   int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-   int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
-   int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
+   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkgT(A);
    /* ... CommPkgT(A) should identify all rows of A^T needed for A*A^T (that is
     * generally a bigger set than ...CommPkg(A), the rows of B needed for A*B) */
-   int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-   int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
-   int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
-   int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+   HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   HYPRE_Int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+   HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   HYPRE_Int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   HYPRE_Int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
  
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(A);
 
-   int *diag_i = hypre_CSRMatrixI(diag);
-   int *diag_j = hypre_CSRMatrixJ(diag);
+   HYPRE_Int *diag_i = hypre_CSRMatrixI(diag);
+   HYPRE_Int *diag_j = hypre_CSRMatrixJ(diag);
    double *diag_data = hypre_CSRMatrixData(diag);
 
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(A);
 
-   int *offd_i = hypre_CSRMatrixI(offd);
-   int *offd_j = hypre_CSRMatrixJ(offd);
+   HYPRE_Int *offd_i = hypre_CSRMatrixI(offd);
+   HYPRE_Int *offd_j = hypre_CSRMatrixJ(offd);
    double *offd_data = hypre_CSRMatrixData(offd);
 
-   int num_cols_A, num_nonzeros;
-   int num_rows_A_ext;
+   HYPRE_Int num_cols_A, num_nonzeros;
+   HYPRE_Int num_rows_A_ext;
 
    hypre_CSRMatrix *A_ext;
 
-   int *A_ext_i;
-   int *A_ext_j;
+   HYPRE_Int *A_ext_i;
+   HYPRE_Int *A_ext_j;
    double *A_ext_data;
  
    num_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);

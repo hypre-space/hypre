@@ -26,19 +26,19 @@
 #ifdef HYPRE_USING_ESSL
 #include <essl.h>
 #else
-int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (int *, int *, double *, int *, int *, int *);
-int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, int *, int *, double *, int *, int *, double *b, int*, int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *, double *b, HYPRE_Int*, HYPRE_Int *);
 #endif
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGRelax
  *--------------------------------------------------------------------------*/
 
-int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
+HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                            hypre_ParVector    *f,
-                           int                *cf_marker,
-                           int                 relax_type,
-                           int                 relax_points,
+                           HYPRE_Int                *cf_marker,
+                           HYPRE_Int                 relax_type,
+                           HYPRE_Int                 relax_points,
                            double              relax_weight,
                            double              omega,
                            double             *l1_norms,
@@ -49,19 +49,19 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
-   int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-   int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
    double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
-   int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
 
-   int             n_global= hypre_ParCSRMatrixGlobalNumRows(A);
-   int             n       = hypre_CSRMatrixNumRows(A_diag);
-   int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
-   int	      	   first_index = hypre_ParVectorFirstIndex(u);
+   HYPRE_Int             n_global= hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Int	      	   first_index = hypre_ParVectorFirstIndex(u);
    
    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
    double         *u_data  = hypre_VectorData(u_local);
@@ -79,25 +79,25 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    double         *Ztemp_data;
 
    hypre_CSRMatrix *A_CSR;
-   int		   *A_CSR_i;   
-   int		   *A_CSR_j;
+   HYPRE_Int		   *A_CSR_i;   
+   HYPRE_Int		   *A_CSR_j;
    double	   *A_CSR_data;
    
    hypre_Vector    *f_vector;
    double	   *f_vector_data;
 
-   int             i, j, jr;
-   int             ii, jj;
-   int             ns, ne, size, rest;
-   int             column;
-   int             relax_error = 0;
-   int		   num_sends;
-   int		   num_recvs;
-   int		   index, start;
-   int		   num_procs, num_threads, my_id, ip, p;
-   int		   vec_start, vec_len;
-   MPI_Status     *status;
-   MPI_Request    *requests;
+   HYPRE_Int             i, j, jr;
+   HYPRE_Int             ii, jj;
+   HYPRE_Int             ns, ne, size, rest;
+   HYPRE_Int             column;
+   HYPRE_Int             relax_error = 0;
+   HYPRE_Int		   num_sends;
+   HYPRE_Int		   num_recvs;
+   HYPRE_Int		   index, start;
+   HYPRE_Int		   num_procs, num_threads, my_id, ip, p;
+   HYPRE_Int		   vec_start, vec_len;
+   hypre_MPI_Status     *status;
+   hypre_MPI_Request    *requests;
 
    double         *A_mat;
    double         *b_vec;
@@ -110,8 +110,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
    one_minus_weight = 1.0 - relax_weight;
    one_minus_omega = 1.0 - omega;
-   MPI_Comm_size(comm,&num_procs);  
-   MPI_Comm_rank(comm,&my_id);  
+   hypre_MPI_Comm_size(comm,&num_procs);  
+   hypre_MPI_Comm_rank(comm,&my_id);  
    num_threads = hypre_NumThreads();
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
@@ -827,8 +827,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
-	status  = hypre_CTAlloc(MPI_Status,num_recvs+num_sends);
-	requests= hypre_CTAlloc(MPI_Request, num_recvs+num_sends);
+	status  = hypre_CTAlloc(hypre_MPI_Status,num_recvs+num_sends);
+	requests= hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends);
 
 	if (num_cols_offd)
 	{
@@ -863,12 +863,12 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	       vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-vec_start;
                for (j=vec_start; j < vec_start+vec_len; j++)
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-	       MPI_Isend(&v_buf_data[vec_start], vec_len, MPI_DOUBLE,
+	       hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, hypre_MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	    }
    	  }
-	  MPI_Waitall(jr,requests,status);
-	  MPI_Barrier(comm);
+	  hypre_MPI_Waitall(jr,requests,status);
+	  hypre_MPI_Barrier(comm);
         }
 	else
         {
@@ -879,10 +879,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
              ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
              vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
              vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
-             MPI_Irecv(&Vext_data[vec_start], vec_len, MPI_DOUBLE,
+             hypre_MPI_Irecv(&Vext_data[vec_start], vec_len, hypre_MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	  }
-	  MPI_Waitall(jr,requests,status);
+	  hypre_MPI_Waitall(jr,requests,status);
 	  }
           if (relax_points == 0)
           {
@@ -944,7 +944,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             }     
           }
 	  if (num_procs > 1)
-	  MPI_Barrier(comm);
+	  hypre_MPI_Barrier(comm);
 	 }
 	}
 	if (num_procs > 1)
@@ -970,8 +970,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
-	status  = hypre_CTAlloc(MPI_Status,num_recvs+num_sends);
-	requests= hypre_CTAlloc(MPI_Request, num_recvs+num_sends);
+	status  = hypre_CTAlloc(hypre_MPI_Status,num_recvs+num_sends);
+	requests= hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends);
 
 	if (num_cols_offd)
 	{
@@ -1052,12 +1052,12 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	       vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-vec_start;
                for (j=vec_start; j < vec_start+vec_len; j++)
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-	       MPI_Isend(&v_buf_data[vec_start], vec_len, MPI_DOUBLE,
+	       hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, hypre_MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	    }
    	  }
-	  MPI_Waitall(jr,requests,status);
-	  MPI_Barrier(comm);
+	  hypre_MPI_Waitall(jr,requests,status);
+	  hypre_MPI_Barrier(comm);
         }
 	else
         {
@@ -1068,10 +1068,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
              ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
              vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
              vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
-             MPI_Irecv(&Vext_data[vec_start], vec_len, MPI_DOUBLE,
+             hypre_MPI_Irecv(&Vext_data[vec_start], vec_len, hypre_MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	  }
-	  MPI_Waitall(jr,requests,status);
+	  hypre_MPI_Waitall(jr,requests,status);
 	  }
           if (relax_points == 0)
           {
@@ -1135,7 +1135,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             }     
           }
 	  if (num_procs > 1)
-	  MPI_Barrier(comm);
+	  hypre_MPI_Barrier(comm);
 	 }
 	}
 	if (num_procs > 1)
@@ -3082,9 +3082,9 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
       case 99: /* Direct solve: use gaussian elimination & BLAS (with pivoting) */
       {
 
-         int info;
-         int one_i = 1;
-         int *piv;
+         HYPRE_Int info;
+         HYPRE_Int one_i = 1;
+         HYPRE_Int *piv;
          /*-----------------------------------------------------------------
           *  Generate CSR matrix from ParCSRMatrix A
           *-----------------------------------------------------------------*/
@@ -3125,7 +3125,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                b_vec[i] = f_vector_data[i];
             }
 
-            piv = hypre_CTAlloc(int, n_global);
+            piv = hypre_CTAlloc(HYPRE_Int, n_global);
 
            /* write over A with LU */
 #ifdef HYPRE_USING_ESSL
@@ -3187,13 +3187,13 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
  *
  *------------------------------------------------------------------------ */
 
-int gselim(A,x,n)
+HYPRE_Int gselim(A,x,n)
 double *A;
 double *x;
-int n;
+HYPRE_Int n;
 {
-   int    err_flag = 0;
-   int    j,k,m;
+   HYPRE_Int    err_flag = 0;
+   HYPRE_Int    j,k,m;
    double factor;
    
    if (n==1)                           /* A is 1x1 */  

@@ -25,20 +25,20 @@
  * hypre_SMGAxpy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGAxpy( double              alpha,
                hypre_StructVector *x,
                hypre_StructVector *y,
                hypre_Index         base_index,
                hypre_Index         base_stride )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
                  
-   int               xi;
-   int               yi;
+   HYPRE_Int               xi;
+   HYPRE_Int               yi;
                     
    double           *xp;
    double           *yp;
@@ -48,8 +48,8 @@ hypre_SMGAxpy( double              alpha,
    hypre_Index       loop_size;
    hypre_IndexRef    start;
                     
-   int               i;
-   int               loopi, loopj, loopk;
+   HYPRE_Int               i;
+   HYPRE_Int               loopi, loopj, loopk;
 
    box = hypre_BoxCreate();
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));

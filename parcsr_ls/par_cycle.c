@@ -28,7 +28,7 @@
  * hypre_BoomerAMGCycle
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoomerAMGCycle( void              *amg_vdata, 
                    hypre_ParVector  **F_array,
                    hypre_ParVector  **U_array   )
@@ -56,54 +56,54 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    double   *Ztemp_data;
    double   *Ptemp_data;
-   int     **CF_marker_array;
-   /* int     **unknown_map_array;
-   int     **point_map_array;
-   int     **v_at_point_array; */
+   HYPRE_Int     **CF_marker_array;
+   /* HYPRE_Int     **unknown_map_array;
+   HYPRE_Int     **point_map_array;
+   HYPRE_Int     **v_at_point_array; */
 
    double    cycle_op_count;   
-   int       cycle_type;
-   int       num_levels;
-   int       max_levels;
+   HYPRE_Int       cycle_type;
+   HYPRE_Int       num_levels;
+   HYPRE_Int       max_levels;
 
    double   *num_coeffs;
-   int      *num_grid_sweeps;   
-   int      *grid_relax_type;   
-   int     **grid_relax_points;  
+   HYPRE_Int      *num_grid_sweeps;   
+   HYPRE_Int      *grid_relax_type;   
+   HYPRE_Int     **grid_relax_points;  
 
-   int     block_mode;
+   HYPRE_Int     block_mode;
    
    double  *max_eig_est;
    double  *min_eig_est;
-   int      cheby_order;
+   HYPRE_Int      cheby_order;
    double   cheby_fraction;
 
  /* Local variables  */ 
-   int      *lev_counter;
-   int       Solve_err_flag;
-   int       k;
-   int       i, j, jj;
-   int       level;
-   int       cycle_param;
-   int       coarse_grid;
-   int       fine_grid;
-   int       Not_Finished;
-   int       num_sweep;
-   int       cg_num_sweep = 1;
-   int       relax_type;
-   int       relax_points;
-   int       relax_order;
-   int       relax_local;
-   int       old_version = 0;
+   HYPRE_Int      *lev_counter;
+   HYPRE_Int       Solve_err_flag;
+   HYPRE_Int       k;
+   HYPRE_Int       i, j, jj;
+   HYPRE_Int       level;
+   HYPRE_Int       cycle_param;
+   HYPRE_Int       coarse_grid;
+   HYPRE_Int       fine_grid;
+   HYPRE_Int       Not_Finished;
+   HYPRE_Int       num_sweep;
+   HYPRE_Int       cg_num_sweep = 1;
+   HYPRE_Int       relax_type;
+   HYPRE_Int       relax_points;
+   HYPRE_Int       relax_order;
+   HYPRE_Int       relax_local;
+   HYPRE_Int       old_version = 0;
    double   *relax_weight;
    double   *omega;
    double    alfa, beta, gammaold;
    double    gamma = 1.0;
-   int       local_size;
-/*   int      *smooth_option; */
-   int       smooth_type;
-   int       smooth_num_levels;
-   int       num_threads;
+   HYPRE_Int       local_size;
+/*   HYPRE_Int      *smooth_option; */
+   HYPRE_Int       smooth_type;
+   HYPRE_Int       smooth_num_levels;
+   HYPRE_Int       num_threads;
 
    double    alpha;
    double  **l1_norms = NULL;
@@ -153,7 +153,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
-   lev_counter = hypre_CTAlloc(int, num_levels);
+   lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels);
 
    /* Initialize */
 
@@ -373,8 +373,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                if (relax_order == 1 && cycle_type < 3)
                {
                   /* need to do CF - so can't use the AMS one */
-                  int i;
-                  int loc_relax_points[2];
+                  HYPRE_Int i;
+                  HYPRE_Int loc_relax_points[2];
                   if (cycle_type < 2)
                   {
                      loc_relax_points[0] = 1;
@@ -433,8 +433,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             }
             else if (relax_type == 16)
             { /* scaled Chebyshev */
-               int scale = 1;
-               int variant = 0;
+               HYPRE_Int scale = 1;
+               HYPRE_Int variant = 0;
                hypre_ParCSRRelax_Cheby(A_array[level], 
                                        Aux_F,
                                        max_eig_est[level],     

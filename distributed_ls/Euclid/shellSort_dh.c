@@ -19,10 +19,10 @@
 
 #undef __FUNC__
 #define __FUNC__ "shellSort_int"
-void shellSort_int(const int n, int *x)
+void shellSort_int(const HYPRE_Int n, HYPRE_Int *x)
 {
   START_FUNC_DH
-  int m, max, j, k, itemp;
+  HYPRE_Int m, max, j, k, itemp;
 
   m = n/2;
   while (m > 0) {
@@ -42,10 +42,10 @@ void shellSort_int(const int n, int *x)
 
 #undef __FUNC__
 #define __FUNC__ "shellSort_float"
-void shellSort_float(const int n, double *x)
+void shellSort_float(const HYPRE_Int n, double *x)
 {
   START_FUNC_DH
-  int m, max, j, k;
+  HYPRE_Int m, max, j, k;
   double itemp;
 
   m = n/2;
@@ -68,10 +68,10 @@ void shellSort_float(const int n, double *x)
 #if 0
 #undef __FUNC__
 #define __FUNC__ "shellSort_int_float"
-void shellSort_int_float(int n, int *x, VAL_DH *xVals)
+void shellSort_int_float(HYPRE_Int n, HYPRE_Int *x, VAL_DH *xVals)
 {
   START_FUNC_DH
-  int m, max, j, k, itemp;
+  HYPRE_Int m, max, j, k, itemp;
   VAL_DH atemp;
 
   m = n/2;

@@ -20,18 +20,18 @@
  * hypre_AMGBuildInterpCR
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
-                   int                 *CF_marker,
-		   int			n_coarse,
-		   int			num_relax_steps,
-		   int			relax_type,
+                   HYPRE_Int                 *CF_marker,
+		   HYPRE_Int			n_coarse,
+		   HYPRE_Int			num_relax_steps,
+		   HYPRE_Int			relax_type,
 		   double	        relax_weight,
                    hypre_CSRMatrix     **P_ptr )
 {
    
-   int             *A_i;
-   int             *A_j;
+   HYPRE_Int             *A_i;
+   HYPRE_Int             *A_j;
 
    hypre_CSRMatrix *P; 
    hypre_Vector	   *zero_vector;
@@ -40,22 +40,22 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
    double          *x_data;
 
    double          *P_data;
-   int             *P_i;
-   int             *P_j;
+   HYPRE_Int             *P_i;
+   HYPRE_Int             *P_j;
 
-   int              P_size;
+   HYPRE_Int              P_size;
    
-   int             *P_marker;
+   HYPRE_Int             *P_marker;
 
-   int              n_fine;
+   HYPRE_Int              n_fine;
 
-   int             *coarse_to_fine;
-   int              coarse_counter;
+   HYPRE_Int             *coarse_to_fine;
+   HYPRE_Int              coarse_counter;
    
-   int              i,ic,i1,i2;
-   int              j,jj;
-   int              kk,k1;
-   int              extended_nghbr;
+   HYPRE_Int              i,ic,i1,i2;
+   HYPRE_Int              j,jj;
+   HYPRE_Int              kk,k1;
+   HYPRE_Int              extended_nghbr;
    
    double           summ, sump;
    
@@ -80,14 +80,14 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
    if (num_relax_steps > 1) extended_nghbr = 1;
    coarse_counter = 0;
 
-   coarse_to_fine = hypre_CTAlloc(int, n_coarse);
+   coarse_to_fine = hypre_CTAlloc(HYPRE_Int, n_coarse);
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid.
     *-----------------------------------------------------------------------*/
     
-   P_i    = hypre_CTAlloc(int, n_fine+1);
-   P_marker = hypre_CTAlloc(int, n_fine);
+   P_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
+   P_marker = hypre_CTAlloc(HYPRE_Int, n_fine);
 
    for (i = 0; i < n_fine; i++)
    {
@@ -145,7 +145,7 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
 
    P_size = P_i[n_fine];
 
-   P_j    = hypre_CTAlloc(int, P_size);
+   P_j    = hypre_CTAlloc(HYPRE_Int, P_size);
    P_data = hypre_CTAlloc(double, P_size);
    zero_vector = hypre_SeqVectorCreate(n_fine);
    x_vector = hypre_SeqVectorCreate(n_fine);

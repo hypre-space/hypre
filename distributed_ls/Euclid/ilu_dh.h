@@ -18,8 +18,8 @@
 
 #include "euclid_common.h"
 
-void reallocate_private(int row, int newEntries, int *nzHave,
-                int **rp, int **cval, float **aval, double **avalD, int **fill);
+void reallocate_private(HYPRE_Int row, HYPRE_Int newEntries, HYPRE_Int *nzHave,
+                HYPRE_Int **rp, HYPRE_Int **cval, float **aval, double **avalD, HYPRE_Int **fill);
 
 extern void ilu_mpi_pilu(Euclid_dh ctx);
   /* driver for comms intermingled with factorization */
@@ -28,7 +28,7 @@ extern void ilu_mpi_pilu(Euclid_dh ctx);
 extern void iluk_mpi_pilu(Euclid_dh ctx);
   /* the factorization algorithm */
 
-extern void compute_scaling_private(int row, int len, double *AVAL, Euclid_dh ctx);
+extern void compute_scaling_private(HYPRE_Int row, HYPRE_Int len, double *AVAL, Euclid_dh ctx);
 
 extern void iluk_mpi_bj(Euclid_dh ctx);
 

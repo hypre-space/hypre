@@ -26,15 +26,15 @@
  * consists of boxes that can be on the boundary.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                             hypre_SStructPGrid     *pgrid,
                             hypre_BoxArrayArray ****bdry_ptr )
 {
 
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
-   int                    nvars    = hypre_SStructPGridNVars(pgrid);
+   HYPRE_Int                    nvars    = hypre_SStructPGridNVars(pgrid);
 
    hypre_BoxArrayArray   *cellgrid_bdry;
    hypre_BoxArrayArray ***bdry;
@@ -42,14 +42,14 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
    hypre_BoxArray        *cell_boxes;
    hypre_Box             *box, *bdy_box, *shifted_box;
 
-   int                    ndim     = hypre_SStructPGridNDim(pgrid);
+   HYPRE_Int                    ndim     = hypre_SStructPGridNDim(pgrid);
 
    HYPRE_SStructVariable *vartypes = hypre_SStructPGridVarTypes(pgrid);
    hypre_Index            varoffset, ishift, jshift, kshift;
    hypre_Index            lower, upper;
 
-   int                   *flag;
-   int                    i, j, k, t, nboxes, bdy;
+   HYPRE_Int                   *flag;
+   HYPRE_Int                    i, j, k, t, nboxes, bdy;
 
    hypre_SetIndex(ishift, 1, 0, 0);
    hypre_SetIndex(jshift, 0, 1, 0);
@@ -67,7 +67,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
 
      /* find the cellgrid boundaries of box if there are any. */
       cellgrid_bdry= hypre_BoxArrayArrayCreate(2*ndim); 
-      flag= hypre_CTAlloc(int, 2*ndim);
+      flag= hypre_CTAlloc(HYPRE_Int, 2*ndim);
       bdy = 0;
 
       for (i= 0; i< ndim; i++)

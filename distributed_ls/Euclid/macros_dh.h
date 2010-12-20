@@ -50,7 +50,7 @@
 #define ASSERT_DH(ptr) \
     { \
       if (ptr == NULL) { \
-        sprintf(msgBuf_dh, "%s is NULL", ptr); \
+        hypre_sprintf(msgBuf_dh, "%s is NULL", ptr); \
         SET_V_ERROR(msgBuf_dh); \
       } \
     }
@@ -60,8 +60,8 @@
 #define CHECK_MPI_V_ERROR(errCode)  \
       { \
         if (errCode) { \
-          int len; \
-          MPI_Error_string(errCode, msgBuf_dh, &len); \
+          HYPRE_Int len; \
+          hypre_MPI_Error_string(errCode, msgBuf_dh, &len); \
           setError_dh(msgBuf_dh, __FUNC__, __FILE__, __LINE__); \
           return; \
         } \
@@ -70,8 +70,8 @@
 #define CHECK_MPI_ERROR(errCode)  \
       { \
         if (errCode) { \
-          int len; \
-          MPI_Error_string(errCode, msgBuf_dh, &len); \
+          HYPRE_Int len; \
+          hypre_MPI_Error_string(errCode, msgBuf_dh, &len); \
           setError_dh(msgBuf_dh, __FUNC__, __FILE__, __LINE__); \
           return(errCode); \
         } \

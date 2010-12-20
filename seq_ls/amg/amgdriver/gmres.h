@@ -30,7 +30,7 @@
 
 typedef struct
 {
-   int    (*precond)();
+   HYPRE_Int    (*precond)();
    void    *precond_data;
 
    hypre_Vector  *s;
@@ -44,8 +44,8 @@ typedef struct
 
 typedef struct
 {
-   int        max_krylov;
-   int        max_restarts;
+   HYPRE_Int        max_krylov;
+   HYPRE_Int        max_restarts;
 
    void      *A_data;
    void      *P_data;

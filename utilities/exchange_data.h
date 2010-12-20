@@ -22,9 +22,9 @@
 
 typedef struct
 {
-   int                   parent_id;
-   int                   num_child;
-   int		        *child_id;
+   HYPRE_Int                   parent_id;
+   HYPRE_Int                   num_child;
+   HYPRE_Int		        *child_id;
 } hypre_BinaryTree;
 
 
@@ -40,29 +40,29 @@ typedef struct
 
 typedef struct
 {
-   int    (*fill_response)(void* recv_buf, int contact_size, 
-                           int contact_proc, void* response_obj, 
+   HYPRE_Int    (*fill_response)(void* recv_buf, HYPRE_Int contact_size, 
+                           HYPRE_Int contact_proc, void* response_obj, 
                            MPI_Comm comm, void** response_buf, 
-                           int* response_message_size);
-   int     send_response_overhead; /*set by exchange data */
-   int     send_response_storage;  /*storage allocated for send_response_buf*/
+                           HYPRE_Int* response_message_size);
+   HYPRE_Int     send_response_overhead; /*set by exchange data */
+   HYPRE_Int     send_response_storage;  /*storage allocated for send_response_buf*/
    void    *data1;                 /*data fields user may want to access in fill_response */
    void    *data2;
    
 } hypre_DataExchangeResponse;
 
 
-int hypre_CreateBinaryTree(int, int, hypre_BinaryTree*);
-int hypre_DestroyBinaryTree(hypre_BinaryTree*);
+HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int, HYPRE_Int, hypre_BinaryTree*);
+HYPRE_Int hypre_DestroyBinaryTree(hypre_BinaryTree*);
 
 
-int hypre_DataExchangeList(int num_contacts, 
-		     int *contact_proc_list, void *contact_send_buf, 
-		     int *contact_send_buf_starts, int contact_obj_size, 
-                     int response_obj_size,
-		     hypre_DataExchangeResponse *response_obj, int max_response_size, 
-                     int rnum, MPI_Comm comm,  void **p_response_recv_buf, 
-                     int **p_response_recv_buf_starts);
+HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, 
+		     HYPRE_Int *contact_proc_list, void *contact_send_buf, 
+		     HYPRE_Int *contact_send_buf_starts, HYPRE_Int contact_obj_size, 
+                     HYPRE_Int response_obj_size,
+		     hypre_DataExchangeResponse *response_obj, HYPRE_Int max_response_size, 
+                     HYPRE_Int rnum, MPI_Comm comm,  void **p_response_recv_buf, 
+                     HYPRE_Int **p_response_recv_buf_starts);
 
 
 #endif /* end of header */

@@ -21,10 +21,10 @@
 #include "euclid_common.h"
 
 typedef struct _srecord {
-    int    col;
-    int    level;
+    HYPRE_Int    col;
+    HYPRE_Int    level;
     double val;
-    int next;
+    HYPRE_Int next;
 } SRecord;
 
 
@@ -33,9 +33,9 @@ extern void SortedList_dhDestroy(SortedList_dh sList);
 extern void SortedList_dhInit(SortedList_dh sList, SubdomainGraph_dh sg);
 extern void SortedList_dhEnforceConstraint(SortedList_dh sList, SubdomainGraph_dh sg);
 
-extern void SortedList_dhReset(SortedList_dh sList, int row);
+extern void SortedList_dhReset(SortedList_dh sList, HYPRE_Int row);
 
-extern int SortedList_dhReadCount(SortedList_dh sList);
+extern HYPRE_Int SortedList_dhReadCount(SortedList_dh sList);
   /* returns number of records inserted since last reset */
 
 extern void SortedList_dhResetGetSmallest(SortedList_dh sList);

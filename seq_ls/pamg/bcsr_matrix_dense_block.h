@@ -22,8 +22,8 @@
 
 typedef struct {
   double* data;
-  int num_rows;
-  int num_cols;
+  HYPRE_Int num_rows;
+  HYPRE_Int num_cols;
 } hypre_BCSRMatrixDenseBlock;
 
 /*****************************************************************************
@@ -33,56 +33,56 @@ typedef struct {
  *****************************************************************************/
 
 hypre_BCSRMatrixDenseBlock*
-hypre_BCSRMatrixDenseBlockCreate(int num_rows, int num_cols);
+hypre_BCSRMatrixDenseBlockCreate(HYPRE_Int num_rows, HYPRE_Int num_cols);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockDestroy(hypre_BCSRMatrixDenseBlock* A);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockInitialise(hypre_BCSRMatrixDenseBlock* A);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockFillData(hypre_BCSRMatrixDenseBlock* A,
 				   double* data);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockGetData(hypre_BCSRMatrixDenseBlock* A,
 				   double* data);
 
 hypre_BCSRMatrixDenseBlock*
 hypre_BCSRMatrixDenseBlockCopy(hypre_BCSRMatrixDenseBlock* A);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockAdd(hypre_BCSRMatrixDenseBlock* A,
 			      hypre_BCSRMatrixDenseBlock* B);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockMultiply(hypre_BCSRMatrixDenseBlock* A,
 				   hypre_BCSRMatrixDenseBlock* B);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockNeg(hypre_BCSRMatrixDenseBlock* A);
 
 hypre_BCSRMatrixDenseBlock*
 hypre_BCSRMatrixDenseBlockDiag(hypre_BCSRMatrixDenseBlock* A);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
 			      hypre_BCSRMatrixDenseBlock* B);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
 			      hypre_BCSRMatrixDenseBlock* B);
 
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockTranspose(hypre_BCSRMatrixDenseBlock* A);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixBlockMatvec(double alpha, hypre_BCSRMatrixDenseBlock* A,
 			    double* x_data, double beta, double* y_data);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixBlockMatvecT(double alpha, hypre_BCSRMatrixDenseBlock* A,
 			     double* x_data, double beta, double* y_data);
 
@@ -90,7 +90,7 @@ double
 hypre_BCSRMatrixDenseBlockNorm(hypre_BCSRMatrixDenseBlock* A,
 			       const char* norm);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockPrint(hypre_BCSRMatrixDenseBlock* A,
 				FILE* out_file);
 

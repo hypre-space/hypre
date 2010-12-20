@@ -28,10 +28,10 @@
  *--------------------------------------------------------------------------*/
 
 void   hypre_NAME_C_FOR_FORTRAN(amg_initialize)(data, port_data)
-int   *data;
-int   *port_data;
+HYPRE_Int   *data;
+HYPRE_Int   *port_data;
 {
-   *data = (int) HYPRE_AMGInitialize((void *) *port_data);
+   *data = (HYPRE_Int) HYPRE_AMGInitialize((void *) *port_data);
 }
 
 /*--------------------------------------------------------------------------
@@ -39,7 +39,7 @@ int   *port_data;
  *--------------------------------------------------------------------------*/
 
 void   hypre_NAME_C_FOR_FORTRAN(amg_finalize)(data)
-int   *data;
+HYPRE_Int   *data;
 {
    HYPRE_AMGFinalize((void *) *data);
 }

@@ -70,10 +70,10 @@
 */
    
 
-int BlockJacobiILUPcKspSetup(void *in_ptr, Vec x, Vec b )
+HYPRE_Int BlockJacobiILUPcKspSetup(void *in_ptr, Vec x, Vec b )
      /* Sets up data for ILU from Petsc matrix */
 {
-   int         nlocal, its, first, lens;
+   HYPRE_Int         nlocal, its, first, lens;
    Scalar      zero = 0.0, one = 1.0, norm;
   
    SLES        *sles, *subsles;
@@ -87,7 +87,7 @@ int BlockJacobiILUPcKspSetup(void *in_ptr, Vec x, Vec b )
    void       *ilu_data;
    BJData     *BJ_data = (BJData *) in_ptr;
    Matrix     *ILU_A;
-   int         i, ierr, flg, size, first_row, last_row;
+   HYPRE_Int         i, ierr, flg, size, first_row, last_row;
 
    Mat         local_pmat;
    /* variables for dereferencing Petsc matrix */
@@ -103,9 +103,9 @@ int BlockJacobiILUPcKspSetup(void *in_ptr, Vec x, Vec b )
    {
      if( !SystemMatrix )
      {
-       printf(
+       hypre_printf(
         "BlockJacobiILUPcKspSetup: you must call either SetSLES or ");
-       printf("SetSystemMatrix before Setup\n");
+       hypre_printf("SetSystemMatrix before Setup\n");
        ierr = -1; CHKERRA( ierr );
      }
      else
@@ -116,7 +116,7 @@ int BlockJacobiILUPcKspSetup(void *in_ptr, Vec x, Vec b )
 
        BJDataSlesOwner(BJ_data) = BJLibrary;
 
-       ierr = SLESCreate(MPI_COMM_WORLD,sles); CHKERRA(ierr);
+       ierr = SLESCreate(hypre_MPI_COMM_WORLD,sles); CHKERRA(ierr);
 
        if( PreconditionerMatrix )
        {
@@ -235,7 +235,7 @@ int BlockJacobiILUPcKspSetup(void *in_ptr, Vec x, Vec b )
    } else
    {
      ierr = 1;
-     PetscPrintf( MPI_COMM_WORLD, 
+     PetscPrintf( hypre_MPI_COMM_WORLD, 
        "Preconditioner must be Block Jacobi or Additive Schwarz\n");
      CHKERRA(ierr);
      return(PETSC_NULL);
@@ -289,7 +289,7 @@ int BlockJacobiILUPcKspSetup(void *in_ptr, Vec x, Vec b )
 
    if ( ierr != 0 )
    {
-     printf("Error returned by ilu_setup = %d\n",ierr);
+     hypre_printf("Error returned by ilu_setup = %d\n",ierr);
      CHKERRA(ierr);
    }
 

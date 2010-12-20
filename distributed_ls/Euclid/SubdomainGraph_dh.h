@@ -33,35 +33,35 @@ enum{ TOTAL_SGT,  /* total Init (setup) time */
     };
 
 struct _subdomain_dh {
-  int blocks;          /* number of subdomains */
-  int *ptrs, *adj;     /* csr structure for representing subdomain graph */
-  int *o2n_sub;        /* subdomain graph permutation; */
-  int *n2o_sub;        /* inverse permutation; */
-  int colors;    /* number of colors used  for coloring the subdomain graph */
+  HYPRE_Int blocks;          /* number of subdomains */
+  HYPRE_Int *ptrs, *adj;     /* csr structure for representing subdomain graph */
+  HYPRE_Int *o2n_sub;        /* subdomain graph permutation; */
+  HYPRE_Int *n2o_sub;        /* inverse permutation; */
+  HYPRE_Int colors;    /* number of colors used  for coloring the subdomain graph */
   bool doNotColor; /* if true, subdomain graph is not colored and reordered */
-  int *colorVec;  /* if colorVec[i] = x, then subdomain i was colored "x".
+  HYPRE_Int *colorVec;  /* if colorVec[i] = x, then subdomain i was colored "x".
                      this array is probably only useful for debugging.
                    */
 
-  int *beg_row;   /* global ordering of first local row owned by P_i */
-  int *beg_rowP;  /* global ordering of first local row owned by P_i after
+  HYPRE_Int *beg_row;   /* global ordering of first local row owned by P_i */
+  HYPRE_Int *beg_rowP;  /* global ordering of first local row owned by P_i after
                      subdomain reordering 
                    */
-  int *row_count; /* P_i owns row_count[i] local rows */
-  int *bdry_count; /* bdry_count[i] of P_i's rows are boundary rows */
+  HYPRE_Int *row_count; /* P_i owns row_count[i] local rows */
+  HYPRE_Int *bdry_count; /* bdry_count[i] of P_i's rows are boundary rows */
 
   /* Nearest neighbors in subdomain graph, before reordering;
      "self" is not included.  Not used for sequential case.
    */
-  int *loNabors, loCount;
-  int *hiNabors, hiCount;
-  int *allNabors, allCount;
+  HYPRE_Int *loNabors, loCount;
+  HYPRE_Int *hiNabors, hiCount;
+  HYPRE_Int *allNabors, allCount;
 
 
   /* permutation information for global unknowns (matrix rows) */
-  int m;               /* length of n2o_row and o2n_col */
-  int *n2o_row;        /* permutation for locally owned matrix rows */
-  int *o2n_col;        /* permutation for locally owned matrix columns */
+  HYPRE_Int m;               /* length of n2o_row and o2n_col */
+  HYPRE_Int *n2o_row;        /* permutation for locally owned matrix rows */
+  HYPRE_Int *o2n_col;        /* permutation for locally owned matrix columns */
 
   Hash_i_dh o2n_ext;   /* permutation for external columns */
   Hash_i_dh n2o_ext;   /* inverse permutation for external columns */
@@ -73,7 +73,7 @@ struct _subdomain_dh {
 extern void SubdomainGraph_dhCreate(SubdomainGraph_dh *s);
 extern void SubdomainGraph_dhDestroy(SubdomainGraph_dh s);
 
-extern void SubdomainGraph_dhInit(SubdomainGraph_dh s, int blocks, bool bj, void *A);
+extern void SubdomainGraph_dhInit(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A);
   /* Partitions matrix A into the specified number of blocks,
      if there is a single MPI task; for mpi use, "blocks" must be the same 
      as the number of mpi tasks; for sequential, it may vary.
@@ -95,7 +95,7 @@ extern void SubdomainGraph_dhColor(SubdomainGraph_dh s);
      end_rowP[] may be altered.
   */
 
-extern int SubdomainGraph_dhFindOwner(SubdomainGraph_dh s, int idx, bool permuted);
+extern HYPRE_Int SubdomainGraph_dhFindOwner(SubdomainGraph_dh s, HYPRE_Int idx, bool permuted);
   /* Returns the subdomain block to which row idx belongs, or throws an error.
      If "permuted" is true, it's assumed the graph has been permuted (i.e.,
      'globally reordering phase' in PILU algorithm).

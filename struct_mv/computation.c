@@ -21,13 +21,13 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ComputeInfoCreate( hypre_CommInfo       *comm_info,
                          hypre_BoxArrayArray  *indt_boxes,
                          hypre_BoxArrayArray  *dept_boxes,
                          hypre_ComputeInfo   **compute_info_ptr )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
    hypre_ComputeInfo  *compute_info;
 
    compute_info = hypre_TAlloc(hypre_ComputeInfo, 1);
@@ -46,12 +46,12 @@ hypre_ComputeInfoCreate( hypre_CommInfo       *comm_info,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ComputeInfoProjectSend( hypre_ComputeInfo  *compute_info,
                               hypre_Index         index,
                               hypre_Index         stride )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
 
    hypre_CommInfoProjectSend(hypre_ComputeInfoCommInfo(compute_info),
                              index, stride);
@@ -62,12 +62,12 @@ hypre_ComputeInfoProjectSend( hypre_ComputeInfo  *compute_info,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ComputeInfoProjectRecv( hypre_ComputeInfo  *compute_info,
                               hypre_Index         index,
                               hypre_Index         stride )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
 
    hypre_CommInfoProjectRecv(hypre_ComputeInfoCommInfo(compute_info),
                              index, stride);
@@ -78,12 +78,12 @@ hypre_ComputeInfoProjectRecv( hypre_ComputeInfo  *compute_info,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ComputeInfoProjectComp( hypre_ComputeInfo  *compute_info,
                               hypre_Index         index,
                               hypre_Index         stride )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
 
    hypre_ProjectBoxArrayArray(hypre_ComputeInfoIndtBoxes(compute_info),
                               index, stride);
@@ -97,10 +97,10 @@ hypre_ComputeInfoProjectComp( hypre_ComputeInfo  *compute_info,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
 
    hypre_TFree(compute_info);
 
@@ -116,12 +116,12 @@ hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
  * Note: This routine assumes that the grid boxes do not overlap.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CreateComputeInfo( hypre_StructGrid      *grid,
                          hypre_StructStencil   *stencil,
                          hypre_ComputeInfo    **compute_info_ptr )
 {
-   int                      ierr = 0;
+   HYPRE_Int                      ierr = 0;
 
    hypre_CommInfo          *comm_info;
    hypre_BoxArrayArray     *indt_boxes;
@@ -132,14 +132,14 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
    hypre_BoxArray          *cbox_array;
    hypre_Box               *cbox;
 
-   int                      i;
+   HYPRE_Int                      i;
 
 #ifdef HYPRE_OVERLAP_COMM_COMP
    hypre_Box               *rembox;
    hypre_Index             *stencil_shape;
-   int                      border[3][2] = {{0, 0}, {0, 0}, {0, 0}};
-   int                      cbox_array_size;
-   int                      s, d;
+   HYPRE_Int                      border[3][2] = {{0, 0}, {0, 0}, {0, 0}};
+   HYPRE_Int                      cbox_array_size;
+   HYPRE_Int                      s, d;
 #endif
 
    /*------------------------------------------------------
@@ -285,14 +285,14 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
  * Note: The input boxes and processes are destroyed.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
                         hypre_BoxArray        *data_space,
-                        int                    num_values,
+                        HYPRE_Int                    num_values,
                         hypre_StructGrid      *grid,
                         hypre_ComputePkg     **compute_pkg_ptr )
 {
-   int                ierr = 0;
+   HYPRE_Int                ierr = 0;
    hypre_ComputePkg  *compute_pkg;
    hypre_CommPkg     *comm_pkg;
 
@@ -326,10 +326,10 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
  * Destroy a computation package.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    if (compute_pkg)
    {
@@ -352,12 +352,12 @@ hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
  * overlap of communications and computations.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
                                   double            *data,
                                   hypre_CommHandle **comm_handle_ptr )
 {
-   int            ierr = 0;
+   HYPRE_Int            ierr = 0;
    hypre_CommPkg *comm_pkg = hypre_ComputePkgCommPkg(compute_pkg);
 
    ierr = hypre_InitializeCommunication(comm_pkg, data, data, 0, 0, comm_handle_ptr);
@@ -370,10 +370,10 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
  * be done after a call to this routine.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    ierr = hypre_FinalizeCommunication(comm_handle );
 

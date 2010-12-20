@@ -36,7 +36,7 @@ HYPRE_MultiblockMatrixCreate( )
  * HYPRE_MultiblockMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_MultiblockMatrixDestroy( HYPRE_MultiblockMatrix matrix )
 {
    return( hypre_MultiblockMatrixDestroy( (hypre_MultiblockMatrix *) matrix ) );
@@ -46,7 +46,7 @@ HYPRE_MultiblockMatrixDestroy( HYPRE_MultiblockMatrix matrix )
  * HYPRE_MultiblockMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_MultiblockMatrixLimitedDestroy( HYPRE_MultiblockMatrix matrix )
 {
    return( hypre_MultiblockMatrixLimitedDestroy( (hypre_MultiblockMatrix *) matrix ) );
@@ -56,7 +56,7 @@ HYPRE_MultiblockMatrixLimitedDestroy( HYPRE_MultiblockMatrix matrix )
  * HYPRE_MultiblockMatrixInitialize
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_MultiblockMatrixInitialize( HYPRE_MultiblockMatrix matrix )
 {
    return ( hypre_MultiblockMatrixInitialize( (hypre_MultiblockMatrix *) matrix ) );
@@ -67,7 +67,7 @@ HYPRE_MultiblockMatrixInitialize( HYPRE_MultiblockMatrix matrix )
  * HYPRE_MultiblockMatrixAssemble
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_MultiblockMatrixAssemble( HYPRE_MultiblockMatrix matrix )
 {
    return( hypre_MultiblockMatrixAssemble( (hypre_MultiblockMatrix *) matrix ) );
@@ -94,8 +94,8 @@ HYPRE_MultiblockMatrixPrint( HYPRE_MultiblockMatrix matrix )
  * HYPRE_MultiblockMatrixSetNumSubmatrices
  *--------------------------------------------------------------------------*/
 
-int 
-HYPRE_MultiblockMatrixSetNumSubmatrices( HYPRE_MultiblockMatrix matrix, int n )
+HYPRE_Int 
+HYPRE_MultiblockMatrixSetNumSubmatrices( HYPRE_MultiblockMatrix matrix, HYPRE_Int n )
 {
    return( hypre_MultiblockMatrixSetNumSubmatrices( 
              (hypre_MultiblockMatrix *) matrix, n ) );
@@ -105,10 +105,10 @@ HYPRE_MultiblockMatrixSetNumSubmatrices( HYPRE_MultiblockMatrix matrix, int n )
  * HYPRE_MultiblockMatrixSetSubmatrixType
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_MultiblockMatrixSetSubmatrixType( HYPRE_MultiblockMatrix matrix, 
-                                      int j,
-                                      int type )
+                                      HYPRE_Int j,
+                                      HYPRE_Int type )
 {
    return( hypre_MultiblockMatrixSetSubmatrixType( 
              (hypre_MultiblockMatrix *) matrix, j, type ) );

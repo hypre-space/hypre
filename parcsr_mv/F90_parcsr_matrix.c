@@ -27,11 +27,11 @@
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS)( long int *matrix,
-                                                  int      *num_rows,
-                                                  int      *ierr      )
+hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS)( hypre_F90_Obj *matrix,
+                                                  HYPRE_Int      *num_rows,
+                                                  HYPRE_Int      *ierr      )
 {
-   *num_rows = (int) ( hypre_ParCSRMatrixGlobalNumRows
+   *num_rows = (HYPRE_Int) ( hypre_ParCSRMatrixGlobalNumRows
                           ( (hypre_ParCSRMatrix *) *matrix ) );
 
    *ierr = 0;
@@ -42,11 +42,11 @@ hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixrowstarts, HYPRE_PARCSRMATRIXROWSTARTS)( long int *matrix,
-                                              long int *row_starts,
-                                              int      *ierr      )
+hypre_F90_IFACE(hypre_parcsrmatrixrowstarts, HYPRE_PARCSRMATRIXROWSTARTS)( hypre_F90_Obj *matrix,
+                                              hypre_F90_Obj *row_starts,
+                                              HYPRE_Int      *ierr      )
 {
-   *row_starts = (long int) ( hypre_ParCSRMatrixRowStarts
+   *row_starts = (hypre_F90_Obj) ( hypre_ParCSRMatrixRowStarts
                                  ( (hypre_ParCSRMatrix *) *matrix ) );
 
    *ierr = 0;

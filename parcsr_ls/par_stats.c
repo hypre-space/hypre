@@ -27,7 +27,7 @@
  *****************************************************************************/
 
 
-int
+HYPRE_Int
 hypre_BoomerAMGSetupStats( void               *amg_vdata,
                         hypre_ParCSRMatrix *A         )
 {
@@ -45,40 +45,40 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    hypre_CSRMatrix *A_diag;
    double          *A_diag_data;
-   int             *A_diag_i;
+   HYPRE_Int             *A_diag_i;
 
    hypre_CSRBlockMatrix *A_block_diag;
 
    hypre_CSRMatrix *A_offd;   
    double          *A_offd_data;
-   int             *A_offd_i;
+   HYPRE_Int             *A_offd_i;
 
    hypre_CSRBlockMatrix *A_block_offd;
 
    hypre_CSRMatrix *P_diag;
    double          *P_diag_data;
-   int             *P_diag_i;
+   HYPRE_Int             *P_diag_i;
 
    hypre_CSRBlockMatrix *P_block_diag;
 
    hypre_CSRMatrix *P_offd;   
    double          *P_offd_data;
-   int             *P_offd_i;
+   HYPRE_Int             *P_offd_i;
 
    hypre_CSRBlockMatrix *P_block_offd;
 
 
-   int	    numrows;
+   HYPRE_Int	    numrows;
 
-   int	    *row_starts;
+   HYPRE_Int	    *row_starts;
 
  
-   int      num_levels; 
-   int      coarsen_type;
-   int      interp_type;
-   int      agg_interp_type;
-   int      measure_type;
-   int      agg_num_levels;
+   HYPRE_Int      num_levels; 
+   HYPRE_Int      coarsen_type;
+   HYPRE_Int      interp_type;
+   HYPRE_Int      agg_interp_type;
+   HYPRE_Int      measure_type;
+   HYPRE_Int      agg_num_levels;
    double   global_nonzeros;
 
    double  *send_buff;
@@ -86,14 +86,14 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
  
    /* Local variables */
 
-   int       level;
-   int       j;
-   int       fine_size;
+   HYPRE_Int       level;
+   HYPRE_Int       j;
+   HYPRE_Int       fine_size;
  
-   int       min_entries;
-   int       max_entries;
+   HYPRE_Int       min_entries;
+   HYPRE_Int       max_entries;
 
-   int       num_procs,my_id;
+   HYPRE_Int       num_procs,my_id;
 
 
    double    min_rowsum;
@@ -101,11 +101,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double    sparse;
 
 
-   int       i;
+   HYPRE_Int       i;
    
 
-   int       coarse_size;
-   int       entries;
+   HYPRE_Int       coarse_size;
+   HYPRE_Int       entries;
 
    double    avg_entries;
    double    rowsum;
@@ -113,8 +113,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double    min_weight;
    double    max_weight;
 
-   int       global_min_e;
-   int       global_max_e;
+   HYPRE_Int       global_min_e;
+   HYPRE_Int       global_max_e;
    double    global_min_rsum;
    double    global_max_rsum;
    double    global_min_wt;
@@ -127,30 +127,30 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double   grid_cmplxty;
 
    /* amg solve params */
-   int      max_iter;
-   int      cycle_type;    
-   int     *num_grid_sweeps;  
-   int     *grid_relax_type;   
-   int      relax_order;
-   int    **grid_relax_points; 
+   HYPRE_Int      max_iter;
+   HYPRE_Int      cycle_type;    
+   HYPRE_Int     *num_grid_sweeps;  
+   HYPRE_Int     *grid_relax_type;   
+   HYPRE_Int      relax_order;
+   HYPRE_Int    **grid_relax_points; 
    double  *relax_weight;
    double  *omega;
    double   tol;
 
-   int block_mode;
-   int block_size, bnnz;
+   HYPRE_Int block_mode;
+   HYPRE_Int block_size, bnnz;
    
    double tmp_norm;
    
 
-   int one = 1;
-   int minus_one = -1;
-   int zero = 0;
-   int smooth_type;
-   int smooth_num_levels;
+   HYPRE_Int one = 1;
+   HYPRE_Int minus_one = -1;
+   HYPRE_Int zero = 0;
+   HYPRE_Int smooth_type;
+   HYPRE_Int smooth_num_levels;
  
-   MPI_Comm_size(comm, &num_procs);   
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);   
+   hypre_MPI_Comm_rank(comm,&my_id);
 
    A_array = hypre_ParAMGDataAArray(amg_data);
    P_array = hypre_ParAMGDataPArray(amg_data);
@@ -193,184 +193,184 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    if (my_id==0)
    {
-      printf("\nBoomerAMG SETUP PARAMETERS:\n\n");
-      printf(" Max levels = %d\n",hypre_ParAMGDataMaxLevels(amg_data));
-      printf(" Num levels = %d\n\n",num_levels);
-      printf(" Strength Threshold = %f\n", 
+      hypre_printf("\nBoomerAMG SETUP PARAMETERS:\n\n");
+      hypre_printf(" Max levels = %d\n",hypre_ParAMGDataMaxLevels(amg_data));
+      hypre_printf(" Num levels = %d\n\n",num_levels);
+      hypre_printf(" Strength Threshold = %f\n", 
                          hypre_ParAMGDataStrongThreshold(amg_data));
-      printf(" Interpolation Truncation Factor = %f\n", 
+      hypre_printf(" Interpolation Truncation Factor = %f\n", 
                          hypre_ParAMGDataTruncFactor(amg_data));
-      printf(" Maximum Row Sum Threshold for Dependency Weakening = %f\n\n", 
+      hypre_printf(" Maximum Row Sum Threshold for Dependency Weakening = %f\n\n", 
                          hypre_ParAMGDataMaxRowSum(amg_data));
 
       if (coarsen_type == 0)
       {
-	printf(" Coarsening Type = Cleary-Luby-Jones-Plassman\n");
+	hypre_printf(" Coarsening Type = Cleary-Luby-Jones-Plassman\n");
       }
       else if (abs(coarsen_type) == 1) 
       {
-	printf(" Coarsening Type = Ruge\n");
+	hypre_printf(" Coarsening Type = Ruge\n");
       }
       else if (abs(coarsen_type) == 2) 
       {
-	printf(" Coarsening Type = Ruge2B\n");
+	hypre_printf(" Coarsening Type = Ruge2B\n");
       }
       else if (abs(coarsen_type) == 3) 
       {
-	printf(" Coarsening Type = Ruge3\n");
+	hypre_printf(" Coarsening Type = Ruge3\n");
       }
       else if (abs(coarsen_type) == 4) 
       {
-	printf(" Coarsening Type = Ruge 3c \n");
+	hypre_printf(" Coarsening Type = Ruge 3c \n");
       }
       else if (abs(coarsen_type) == 5) 
       {
-	printf(" Coarsening Type = Ruge relax special points \n");
+	hypre_printf(" Coarsening Type = Ruge relax special points \n");
       }
       else if (abs(coarsen_type) == 6) 
       {
-	printf(" Coarsening Type = Falgout-CLJP \n");
+	hypre_printf(" Coarsening Type = Falgout-CLJP \n");
       }
       else if (abs(coarsen_type) == 8) 
       {
-	printf(" Coarsening Type = PMIS \n");
+	hypre_printf(" Coarsening Type = PMIS \n");
       }
       else if (abs(coarsen_type) == 10) 
       {
-	printf(" Coarsening Type = HMIS \n");
+	hypre_printf(" Coarsening Type = HMIS \n");
       }
       else if (abs(coarsen_type) == 11) 
       {
-	printf(" Coarsening Type = Ruge 1st pass only \n");
+	hypre_printf(" Coarsening Type = Ruge 1st pass only \n");
       }
       else if (abs(coarsen_type) == 9) 
       {
-	printf(" Coarsening Type = PMIS fixed random \n");
+	hypre_printf(" Coarsening Type = PMIS fixed random \n");
       }
       else if (abs(coarsen_type) == 7) 
       {
-	printf(" Coarsening Type = CLJP, fixed random \n");
+	hypre_printf(" Coarsening Type = CLJP, fixed random \n");
       }
       else if (abs(coarsen_type) == 21) /* BM Aug 29, 2006 */
       {
-        printf(" Coarsening Type = CGC \n");
+        hypre_printf(" Coarsening Type = CGC \n");
       }
       else if (abs(coarsen_type) == 22) /* BM Aug 29, 2006 */
       {
-        printf(" Coarsening Type = CGC-E \n");
+        hypre_printf(" Coarsening Type = CGC-E \n");
       }
       /*if (coarsen_type > 0) 
       {
-	printf(" Hybrid Coarsening (switch to CLJP when coarsening slows)\n");
+	hypre_printf(" Hybrid Coarsening (switch to CLJP when coarsening slows)\n");
       }*/
 
       if (agg_num_levels > 0)
       {
-	printf("\n No. of levels of aggressive coarsening: %d\n\n", agg_num_levels);
+	hypre_printf("\n No. of levels of aggressive coarsening: %d\n\n", agg_num_levels);
         if (agg_interp_type == 4)
-	   printf(" Interpolation on agg. levels= multipass interpolation\n");
+	   hypre_printf(" Interpolation on agg. levels= multipass interpolation\n");
         else if (agg_interp_type == 1)
-	   printf(" Interpolation on agg. levels = 2-stage extended+i interpolation \n");
+	   hypre_printf(" Interpolation on agg. levels = 2-stage extended+i interpolation \n");
         else if (agg_interp_type == 2)
-	   printf(" Interpolation on agg. levels = 2-stage std interpolation \n");
+	   hypre_printf(" Interpolation on agg. levels = 2-stage std interpolation \n");
         else if (agg_interp_type == 3)
-	   printf(" Interpolation on agg. levels = 2-stage extended interpolation \n");
+	   hypre_printf(" Interpolation on agg. levels = 2-stage extended interpolation \n");
       }
       
 
       if (coarsen_type)
-      	printf(" measures are determined %s\n\n", 
+      	hypre_printf(" measures are determined %s\n\n", 
                   (measure_type ? "globally" : "locally"));
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-      printf( "\n No global partition option chosen.\n\n");
+      hypre_printf( "\n No global partition option chosen.\n\n");
 #endif
 
       if (interp_type == 0)
       {
-	printf(" Interpolation = modified classical interpolation\n");
+	hypre_printf(" Interpolation = modified classical interpolation\n");
       }
       else if (interp_type == 1) 
       {
-	printf(" Interpolation = LS interpolation \n");
+	hypre_printf(" Interpolation = LS interpolation \n");
       }
       else if (interp_type == 2) 
       {
-	printf(" Interpolation = modified classical interpolation for hyperbolic PDEs\n");
+	hypre_printf(" Interpolation = modified classical interpolation for hyperbolic PDEs\n");
       }
       else if (interp_type == 3) 
       {
-	printf(" Interpolation = direct interpolation with separation of weights\n");
+	hypre_printf(" Interpolation = direct interpolation with separation of weights\n");
       }
       else if (interp_type == 4) 
       {
-	printf(" Interpolation = multipass interpolation\n");
+	hypre_printf(" Interpolation = multipass interpolation\n");
       }
       else if (interp_type == 5) 
       {
-	printf(" Interpolation = multipass interpolation with separation of weights\n");
+	hypre_printf(" Interpolation = multipass interpolation with separation of weights\n");
       }
       else if (interp_type == 6) 
       {
-	printf(" Interpolation = extended+i interpolation\n");
+	hypre_printf(" Interpolation = extended+i interpolation\n");
       }
       else if (interp_type == 7) 
       {
-	printf(" Interpolation = extended+i interpolation (if no common C point)\n");
+	hypre_printf(" Interpolation = extended+i interpolation (if no common C point)\n");
       }
       else if (interp_type == 12) 
       {
-	printf(" Interpolation = F-F interpolation\n");
+	hypre_printf(" Interpolation = F-F interpolation\n");
       }
       else if (interp_type == 13) 
       {
-	printf(" Interpolation = F-F1 interpolation\n");
+	hypre_printf(" Interpolation = F-F1 interpolation\n");
       }
       else if (interp_type == 14) 
       {
-	printf(" Interpolation = extended interpolation\n");
+	hypre_printf(" Interpolation = extended interpolation\n");
       }
       else if (interp_type == 8) 
       {
-	printf(" Interpolation = standard interpolation\n");
+	hypre_printf(" Interpolation = standard interpolation\n");
       }
       else if (interp_type == 9) 
       {
-	printf(" Interpolation = standard interpolation with separation of weights\n");
+	hypre_printf(" Interpolation = standard interpolation with separation of weights\n");
       }
       else if (interp_type == 10) 
       {
-	printf(" Interpolation = block classical interpolation for nodal systems AMG\n");
+	hypre_printf(" Interpolation = block classical interpolation for nodal systems AMG\n");
       }
       else if (interp_type == 11) 
       {
-	printf(" Interpolation = block classical interpolation with diagonal blocks\n");
-	printf("                 for nodal systems AMG\n");
+	hypre_printf(" Interpolation = block classical interpolation with diagonal blocks\n");
+	hypre_printf("                 for nodal systems AMG\n");
       }
       else if (interp_type == 24) 
       {
-	printf(" Interpolation = block direct interpolation \n");
-	printf("                 for nodal systems AMG\n");
+	hypre_printf(" Interpolation = block direct interpolation \n");
+	hypre_printf("                 for nodal systems AMG\n");
       }
 
 
 
       if (block_mode)
       {
-         printf( "\nBlock Operator Matrix Information:\n");
-           printf( "(Row sums and weights use sum of all elements in the block -keeping signs)\n\n");
+         hypre_printf( "\nBlock Operator Matrix Information:\n");
+           hypre_printf( "(Row sums and weights use sum of all elements in the block -keeping signs)\n\n");
       }
       else 
       {
-         printf( "\nOperator Matrix Information:\n\n");
+         hypre_printf( "\nOperator Matrix Information:\n\n");
       }
       
-      printf("            nonzero         entries p");
-      printf("er row        row sums\n");
-      printf("lev   rows  entries  sparse  min  max   ");
-      printf("avg       min         max\n");
-      printf("=======================================");
-      printf("============================\n");
+      hypre_printf("            nonzero         entries p");
+      hypre_printf("er row        row sums\n");
+      hypre_printf("lev   rows  entries  sparse  min  max   ");
+      hypre_printf("avg       min         max\n");
+      hypre_printf("=======================================");
+      hypre_printf("============================\n");
 
    }
   
@@ -521,7 +521,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        send_buff[2] = - min_rowsum;
        send_buff[3] = max_rowsum;
 
-       MPI_Reduce(send_buff, gather_buff, 4, MPI_DOUBLE, MPI_MAX, 0, comm);
+       hypre_MPI_Reduce(send_buff, gather_buff, 4, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm);
        
        if (my_id ==0)
        {
@@ -530,10 +530,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
           global_min_rsum = - gather_buff[2];
           global_max_rsum = gather_buff[3];
           
-          printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
+          hypre_printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
                   level, fine_size, global_nonzeros, sparse, global_min_e, 
                   global_max_e);
-          printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
+          hypre_printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
                  global_min_rsum, global_max_rsum);
        }
        
@@ -544,7 +544,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        send_buff[2] = min_rowsum;
        send_buff[3] = max_rowsum;
        
-       MPI_Gather(send_buff,4,MPI_DOUBLE,gather_buff,4,MPI_DOUBLE,0,comm);
+       hypre_MPI_Gather(send_buff,4,hypre_MPI_DOUBLE,gather_buff,4,hypre_MPI_DOUBLE,0,comm);
 
        if (my_id == 0)
        {
@@ -557,17 +557,17 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
              numrows = row_starts[j+1]-row_starts[j];
              if (numrows)
              {
-                global_min_e = hypre_min(global_min_e, (int) gather_buff[j*4]);
+                global_min_e = hypre_min(global_min_e, (HYPRE_Int) gather_buff[j*4]);
                 global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*4 +2]);
              }
-             global_max_e = hypre_max(global_max_e, (int) gather_buff[j*4 +1]);
+             global_max_e = hypre_max(global_max_e, (HYPRE_Int) gather_buff[j*4 +1]);
              global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
           }
 
-          printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
+          hypre_printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
                   level, fine_size, global_nonzeros, sparse, global_min_e, 
                   global_max_e);
-          printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
+          hypre_printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
                  global_min_rsum, global_max_rsum);
        }
 
@@ -581,21 +581,21 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    {
       if (block_mode)
       {
-         printf( "\n\nBlock Interpolation Matrix Information:\n\n");
-         printf( "(Row sums and weights use sum of all elements in the block - keeping signs)\n\n");
+         hypre_printf( "\n\nBlock Interpolation Matrix Information:\n\n");
+         hypre_printf( "(Row sums and weights use sum of all elements in the block - keeping signs)\n\n");
       }
       else 
       {
-         printf( "\n\nInterpolation Matrix Information:\n");
+         hypre_printf( "\n\nInterpolation Matrix Information:\n");
         
       }
       
-      printf("                 entries/row    min     max");
-      printf("         row sums\n");
-      printf("lev  rows cols    min max  ");
-      printf("   weight   weight     min       max \n");
-      printf("=======================================");
-      printf("==========================\n");
+      hypre_printf("                 entries/row    min     max");
+      hypre_printf("         row sums\n");
+      hypre_printf("lev  rows cols    min max  ");
+      hypre_printf("   weight   weight     min       max \n");
+      hypre_printf("=======================================");
+      hypre_printf("==========================\n");
    }
   
    /*-----------------------------------------------------
@@ -798,7 +798,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       send_buff[4] = - min_weight;
       send_buff[5] = max_weight;
 
-      MPI_Reduce(send_buff, gather_buff, 6, MPI_DOUBLE, MPI_MAX, 0, comm);
+      hypre_MPI_Reduce(send_buff, gather_buff, 6, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm);
 
       if (my_id == 0)
       {
@@ -809,9 +809,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          global_min_wt = -gather_buff[4];
          global_max_wt = gather_buff[5];
 
-          printf( "%2d %5d x %-5d %3d %3d",
+          hypre_printf( "%2d %5d x %-5d %3d %3d",
                  level, fine_size, coarse_size,  global_min_e, global_max_e);
-         printf("  %10.3e %9.3e %9.3e %9.3e\n",
+         hypre_printf("  %10.3e %9.3e %9.3e %9.3e\n",
                 global_min_wt, global_max_wt, 
                 global_min_rsum, global_max_rsum);
       }
@@ -826,7 +826,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       send_buff[4] = min_weight;
       send_buff[5] = max_weight;
       
-      MPI_Gather(send_buff,6,MPI_DOUBLE,gather_buff,6,MPI_DOUBLE,0,comm);
+      hypre_MPI_Gather(send_buff,6,hypre_MPI_DOUBLE,gather_buff,6,hypre_MPI_DOUBLE,0,comm);
       
       if (my_id == 0)
       {
@@ -842,18 +842,18 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             numrows = row_starts[j+1] - row_starts[j];
             if (numrows)
             {
-               global_min_e = hypre_min(global_min_e, (int) gather_buff[j*6]);
+               global_min_e = hypre_min(global_min_e, (HYPRE_Int) gather_buff[j*6]);
                global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*6+2]);
                global_min_wt = hypre_min(global_min_wt, gather_buff[j*6+4]);
             }
-            global_max_e = hypre_max(global_max_e, (int) gather_buff[j*6+1]);
+            global_max_e = hypre_max(global_max_e, (HYPRE_Int) gather_buff[j*6+1]);
             global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*6+3]);
             global_max_wt = hypre_max(global_max_wt, gather_buff[j*6+5]);
          }
          
-         printf( "%2d %5d x %-5d %3d %3d",
+         hypre_printf( "%2d %5d x %-5d %3d %3d",
                  level, fine_size, coarse_size,  global_min_e, global_max_e);
-         printf("  %10.3e %9.3e %9.3e %9.3e\n",
+         hypre_printf("  %10.3e %9.3e %9.3e %9.3e\n",
                 global_min_wt, global_max_wt, 
                 global_min_rsum, global_max_rsum);
       }
@@ -875,82 +875,82 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
  
    if (my_id == 0 )
    {
-      printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-      printf("                operator = %f\n",operat_cmplxty);
+      hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
+      hypre_printf("                operator = %f\n",operat_cmplxty);
    }
 
-   if (my_id == 0) printf("\n\n");
+   if (my_id == 0) hypre_printf("\n\n");
 
    if (my_id == 0)
    { 
-      printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
-      printf( "  Maximum number of cycles:         %d \n",max_iter);
-      printf( "  Stopping Tolerance:               %e \n",tol); 
-      printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
-      printf( "  Relaxation Parameters:\n");
-      printf( "   Visiting Grid:                     down   up  coarse\n");
-      printf( "            Number of sweeps:         %4d   %2d  %4d \n",
+      hypre_printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
+      hypre_printf( "  Maximum number of cycles:         %d \n",max_iter);
+      hypre_printf( "  Stopping Tolerance:               %e \n",tol); 
+      hypre_printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
+      hypre_printf( "  Relaxation Parameters:\n");
+      hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
+      hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],num_grid_sweeps[3]);
-      printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",
+      hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",
               grid_relax_type[1],
               grid_relax_type[2],grid_relax_type[3]);
-      printf( "   Point types, partial sweeps (1=C, -1=F):\n");
+      hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
       if (grid_relax_points && grid_relax_type[1] != 8)
       {
-         printf( "                  Pre-CG relaxation (down):");
+         hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
-              printf("  %2d", grid_relax_points[1][j]);
-         printf( "\n");
-         printf( "                   Post-CG relaxation (up):");
+              hypre_printf("  %2d", grid_relax_points[1][j]);
+         hypre_printf( "\n");
+         hypre_printf( "                   Post-CG relaxation (up):");
          for (j = 0; j < num_grid_sweeps[2]; j++)
-              printf("  %2d", grid_relax_points[2][j]);
-         printf( "\n");
-         printf( "                             Coarsest grid:");
+              hypre_printf("  %2d", grid_relax_points[2][j]);
+         hypre_printf( "\n");
+         hypre_printf( "                             Coarsest grid:");
          for (j = 0; j < num_grid_sweeps[3]; j++)
-              printf("  %2d", grid_relax_points[3][j]);
-         printf( "\n\n");
+              hypre_printf("  %2d", grid_relax_points[3][j]);
+         hypre_printf( "\n\n");
       }
       else if (relax_order == 1 && grid_relax_type[1] != 8)
       {
-         printf( "                  Pre-CG relaxation (down):");
+         hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
-              printf("  %2d  %2d", one, minus_one);
-         printf( "\n");
-         printf( "                   Post-CG relaxation (up):");
+              hypre_printf("  %2d  %2d", one, minus_one);
+         hypre_printf( "\n");
+         hypre_printf( "                   Post-CG relaxation (up):");
          for (j = 0; j < num_grid_sweeps[2]; j++)
-              printf("  %2d  %2d", minus_one, one);
-         printf( "\n");
-         printf( "                             Coarsest grid:");
+              hypre_printf("  %2d  %2d", minus_one, one);
+         hypre_printf( "\n");
+         hypre_printf( "                             Coarsest grid:");
          for (j = 0; j < num_grid_sweeps[3]; j++)
-              printf("  %2d", zero);
-         printf( "\n\n");
+              hypre_printf("  %2d", zero);
+         hypre_printf( "\n\n");
       }
       else 
       {
-         printf( "                  Pre-CG relaxation (down):");
+         hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
-              printf("  %2d", zero);
-         printf( "\n");
-         printf( "                   Post-CG relaxation (up):");
+              hypre_printf("  %2d", zero);
+         hypre_printf( "\n");
+         hypre_printf( "                   Post-CG relaxation (up):");
          for (j = 0; j < num_grid_sweeps[2]; j++)
-              printf("  %2d", zero);
-         printf( "\n");
-         printf( "                             Coarsest grid:");
+              hypre_printf("  %2d", zero);
+         hypre_printf( "\n");
+         hypre_printf( "                             Coarsest grid:");
          for (j = 0; j < num_grid_sweeps[3]; j++)
-              printf("  %2d", zero);
-         printf( "\n\n");
+              hypre_printf("  %2d", zero);
+         hypre_printf( "\n\n");
       }
       if (smooth_type == 6)
          for (j=0; j < smooth_num_levels; j++)
-            printf( " Schwarz Relaxation Weight %f level %d\n",
+            hypre_printf( " Schwarz Relaxation Weight %f level %d\n",
 			hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
       for (j=0; j < num_levels; j++)
          if (relax_weight[j] != 1)
-	       printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
+	       hypre_printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
       for (j=0; j < num_levels; j++)
          if (omega[j] != 1)
-               printf( " Outer relaxation weight %f level %d\n",omega[j],j);
+               hypre_printf( " Outer relaxation weight %f level %d\n",omega[j],j);
    }
 
    hypre_TFree(num_coeffs);
@@ -969,32 +969,32 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
  *---------------------------------------------------------------*/
 
 
-int    hypre_BoomerAMGWriteSolverParams(data)
+HYPRE_Int    hypre_BoomerAMGWriteSolverParams(data)
 void    *data;
  
 { 
    hypre_ParAMGData  *amg_data = data;
  
    /* amg solve params */
-   int      num_levels; 
-   int      max_iter;
-   int      cycle_type;    
-   int     *num_grid_sweeps;  
-   int     *grid_relax_type;   
-   int    **grid_relax_points; 
-   int      relax_order;
+   HYPRE_Int      num_levels; 
+   HYPRE_Int      max_iter;
+   HYPRE_Int      cycle_type;    
+   HYPRE_Int     *num_grid_sweeps;  
+   HYPRE_Int     *grid_relax_type;   
+   HYPRE_Int    **grid_relax_points; 
+   HYPRE_Int      relax_order;
    double  *relax_weight;
    double  *omega;
    double   tol;
-   int      smooth_type; 
-   int      smooth_num_levels; 
+   HYPRE_Int      smooth_type; 
+   HYPRE_Int      smooth_num_levels; 
    /* amg output params */
-   int      amg_print_level;
+   HYPRE_Int      amg_print_level;
  
-   int      j;
-   int      one = 1;
-   int      minus_one = -1;
-   int      zero = 0;
+   HYPRE_Int      j;
+   HYPRE_Int      one = 1;
+   HYPRE_Int      minus_one = -1;
+   HYPRE_Int      zero = 0;
  
  
    /*----------------------------------------------------------
@@ -1022,76 +1022,76 @@ void    *data;
  
    if (amg_print_level == 1 || amg_print_level == 3)
    { 
-      printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
-      printf( "  Maximum number of cycles:         %d \n",max_iter);
-      printf( "  Stopping Tolerance:               %e \n",tol); 
-      printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
-      printf( "  Relaxation Parameters:\n");
-      printf( "   Visiting Grid:                     down   up  coarse\n");
-      printf( "            Number of sweeps:         %4d   %2d  %4d \n",
+      hypre_printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
+      hypre_printf( "  Maximum number of cycles:         %d \n",max_iter);
+      hypre_printf( "  Stopping Tolerance:               %e \n",tol); 
+      hypre_printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
+      hypre_printf( "  Relaxation Parameters:\n");
+      hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
+      hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],num_grid_sweeps[3]);
-      printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",
+      hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",
               grid_relax_type[1],
               grid_relax_type[2],grid_relax_type[3]);
-      printf( "   Point types, partial sweeps (1=C, -1=F):\n");
+      hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
       if (grid_relax_points)
       {
-         printf( "                  Pre-CG relaxation (down):");
+         hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
-              printf("  %2d", grid_relax_points[1][j]);
-         printf( "\n");
-         printf( "                   Post-CG relaxation (up):");
+              hypre_printf("  %2d", grid_relax_points[1][j]);
+         hypre_printf( "\n");
+         hypre_printf( "                   Post-CG relaxation (up):");
          for (j = 0; j < num_grid_sweeps[2]; j++)
-              printf("  %2d", grid_relax_points[2][j]);
-         printf( "\n");
-         printf( "                             Coarsest grid:");
+              hypre_printf("  %2d", grid_relax_points[2][j]);
+         hypre_printf( "\n");
+         hypre_printf( "                             Coarsest grid:");
          for (j = 0; j < num_grid_sweeps[3]; j++)
-              printf("  %2d", grid_relax_points[3][j]);
-         printf( "\n\n");
+              hypre_printf("  %2d", grid_relax_points[3][j]);
+         hypre_printf( "\n\n");
       }
       else if (relax_order == 1)
       {
-         printf( "                  Pre-CG relaxation (down):");
+         hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
-              printf("  %2d  %2d", one, minus_one);
-         printf( "\n");
-         printf( "                   Post-CG relaxation (up):");
+              hypre_printf("  %2d  %2d", one, minus_one);
+         hypre_printf( "\n");
+         hypre_printf( "                   Post-CG relaxation (up):");
          for (j = 0; j < num_grid_sweeps[2]; j++)
-              printf("  %2d  %2d", minus_one, one);
-         printf( "\n");
-         printf( "                             Coarsest grid:");
+              hypre_printf("  %2d  %2d", minus_one, one);
+         hypre_printf( "\n");
+         hypre_printf( "                             Coarsest grid:");
          for (j = 0; j < num_grid_sweeps[3]; j++)
-              printf("  %2d", zero);
-         printf( "\n\n");
+              hypre_printf("  %2d", zero);
+         hypre_printf( "\n\n");
       }
       else 
       {
-         printf( "                  Pre-CG relaxation (down):");
+         hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
-              printf("  %2d", zero);
-         printf( "\n");
-         printf( "                   Post-CG relaxation (up):");
+              hypre_printf("  %2d", zero);
+         hypre_printf( "\n");
+         hypre_printf( "                   Post-CG relaxation (up):");
          for (j = 0; j < num_grid_sweeps[2]; j++)
-              printf("  %2d", zero);
-         printf( "\n");
-         printf( "                             Coarsest grid:");
+              hypre_printf("  %2d", zero);
+         hypre_printf( "\n");
+         hypre_printf( "                             Coarsest grid:");
          for (j = 0; j < num_grid_sweeps[3]; j++)
-              printf("  %2d", zero);
-         printf( "\n\n");
+              hypre_printf("  %2d", zero);
+         hypre_printf( "\n\n");
       }
       if (smooth_type == 6)
          for (j=0; j < smooth_num_levels; j++)
-            printf( " Schwarz Relaxation Weight %f level %d\n",
+            hypre_printf( " Schwarz Relaxation Weight %f level %d\n",
 			hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
       for (j=0; j < num_levels; j++)
          if (relax_weight[j] != 1)
-	       printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
+	       hypre_printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
       for (j=0; j < num_levels; j++)
          if (omega[j] != 1)
-               printf( " Outer relaxation weight %f level %d\n",omega[j],j);
+               hypre_printf( " Outer relaxation weight %f level %d\n",omega[j],j);
 
-      printf( " Output flag (print_level): %d \n", amg_print_level);
+      hypre_printf( " Output flag (print_level): %d \n", amg_print_level);
    }
  
    return 0;

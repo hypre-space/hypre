@@ -19,18 +19,18 @@
 /* Include solver calling sequence */
 
 /***********************************************************************/
-int INCFACT_Apply ( void *solver_data, Vec b, Vec x)
+HYPRE_Int INCFACT_Apply ( void *solver_data, Vec b, Vec x)
      /* Wrapper around inc_fact_solve in form needed by Petsc */
 {
   double    *INCFACT_b, *INCFACT_x;
   void      *incfact_data;
   Scalar     zero = 0.0;
   BJData    *BJ_data = solver_data;
-  int        ierr;
-  int        size;
-  int        ierr_incfactt, ierr_solver, ierr_input;
-  int        n, nnz, lenpmx;
-  int        scale, reorder;
+  HYPRE_Int        ierr;
+  HYPRE_Int        size;
+  HYPRE_Int        ierr_incfactt, ierr_solver, ierr_input;
+  HYPRE_Int        n, nnz, lenpmx;
+  HYPRE_Int        scale, reorder;
 
 
   /***********                                    ***********/

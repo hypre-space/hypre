@@ -37,7 +37,7 @@
  *
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParCSRMatrixMatMultiVec(double alpha, hypre_ParCSRMatrix *A,
                               hypre_ParMultivector *x, double beta,
                               hypre_ParMultivector *y)
@@ -48,19 +48,19 @@ hypre_ParCSRMatrixMatMultiVec(double alpha, hypre_ParCSRMatrix *A,
    hypre_CSRMatrix     *offd   = hypre_ParCSRMatrixOffd(A);
    hypre_Multivector  *x_local  = hypre_ParMultivectorLocalVector(x);   
    hypre_Multivector  *y_local  = hypre_ParMultivectorLocalVector(y);   
-   int                 num_rows = hypre_CSRMatrixNumRows(diag);
-   int                 num_cols = hypre_CSRMatrixNumCols(diag);
-   int                 *x_active_ind = x->active_indices;
-   int                 *y_active_ind = y->active_indices;
+   HYPRE_Int                 num_rows = hypre_CSRMatrixNumRows(diag);
+   HYPRE_Int                 num_cols = hypre_CSRMatrixNumCols(diag);
+   HYPRE_Int                 *x_active_ind = x->active_indices;
+   HYPRE_Int                 *y_active_ind = y->active_indices;
 
    hypre_Multivector   *x_tmp;
-   int        x_size = hypre_MultivectorSize(x_local);
-   int        y_size = hypre_MultivectorSize(y_local);
-   int        num_vectors = hypre_MultivectorNumVectors(x_local);
-   int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
-   int        ierr = 0, send_leng, num_vec_sends, endp1;
-   int	      num_sends, i, j, jj, index, start, offset, length, jv;
-   int        num_active_vectors;
+   HYPRE_Int        x_size = hypre_MultivectorSize(x_local);
+   HYPRE_Int        y_size = hypre_MultivectorSize(y_local);
+   HYPRE_Int        num_vectors = hypre_MultivectorNumVectors(x_local);
+   HYPRE_Int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
+   HYPRE_Int        ierr = 0, send_leng, num_vec_sends, endp1;
+   HYPRE_Int	      num_sends, i, j, jj, index, start, offset, length, jv;
+   HYPRE_Int        num_active_vectors;
 
    double     *x_tmp_data, *x_buf_data;
    double     *x_local_data = hypre_MultivectorData(x_local);
@@ -164,7 +164,7 @@ hypre_ParCSRMatrixMatMultiVec(double alpha, hypre_ParCSRMatrix *A,
  *
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParCSRMatrixMultiMatVecT(double alpha, hypre_ParCSRMatrix *A,
                                hypre_ParMultivector *x, double beta,
                                hypre_ParMultivector *y)
@@ -175,18 +175,18 @@ hypre_ParCSRMatrixMultiMatVecT(double alpha, hypre_ParCSRMatrix *A,
    hypre_CSRMatrix     *offd   = hypre_ParCSRMatrixOffd(A);
    hypre_Multivector   *x_local  = hypre_ParMultivectorLocalVector(x);   
    hypre_Multivector   *y_local  = hypre_ParMultivectorLocalVector(y);   
-   int                 num_rows = hypre_CSRMatrixNumRows(diag);
-   int                 num_cols = hypre_CSRMatrixNumCols(diag);
-   int                 *x_active_ind = x->active_indices;
+   HYPRE_Int                 num_rows = hypre_CSRMatrixNumRows(diag);
+   HYPRE_Int                 num_cols = hypre_CSRMatrixNumCols(diag);
+   HYPRE_Int                 *x_active_ind = x->active_indices;
 
    hypre_Multivector   *y_tmp;
-   int        x_size = hypre_MultivectorSize(x_local);
-   int        y_size = hypre_MultivectorSize(y_local);
-   int        num_vectors = hypre_MultivectorNumVectors(x_local);
-   int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
-   int        ierr = 0, send_leng, num_vec_sends, endp1;
-   int	      num_sends, i, j, jj, index, start, offset, length, jv;
-   int        num_active_vectors;
+   HYPRE_Int        x_size = hypre_MultivectorSize(x_local);
+   HYPRE_Int        y_size = hypre_MultivectorSize(y_local);
+   HYPRE_Int        num_vectors = hypre_MultivectorNumVectors(x_local);
+   HYPRE_Int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
+   HYPRE_Int        ierr = 0, send_leng, num_vec_sends, endp1;
+   HYPRE_Int	      num_sends, i, j, jj, index, start, offset, length, jv;
+   HYPRE_Int        num_active_vectors;
 
    double     *y_tmp_data, *y_buf_data;
    double     *y_local_data = hypre_MultivectorData(y_local);

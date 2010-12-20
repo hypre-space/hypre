@@ -36,21 +36,21 @@
  * We omit this case and assume only one part for now.
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
-                       int                      num_levels,
+                       HYPRE_Int                      num_levels,
                        hypre_Index              rfactors,
-                       int                   ***BdryRanksl_ptr, 
-                       int                    **BdryRanksCntsl_ptr )
+                       HYPRE_Int                   ***BdryRanksl_ptr, 
+                       HYPRE_Int                    **BdryRanksCntsl_ptr )
 {
 
    MPI_Comm                comm= (grid_l[0]-> comm);
 
-   int                   **BdryRanks_l;
-   int                    *BdryRanksCnts_l;
+   HYPRE_Int                   **BdryRanks_l;
+   HYPRE_Int                    *BdryRanksCnts_l;
 
-   int                    *npts;
-   int                    *ranks, *upper_rank, *lower_rank;
+   HYPRE_Int                    *npts;
+   HYPRE_Int                    *ranks, *upper_rank, *lower_rank;
    hypre_BoxManEntry      *boxman_entry;
 
    hypre_SStructGrid      *grid;
@@ -68,37 +68,37 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    hypre_Box              *box, *contract_fbox, rbox;
    hypre_Box               intersect;
 
-   int                   **cbox_mapping, **fbox_mapping;
-   int                   **boxes_with_bdry;
+   HYPRE_Int                   **cbox_mapping, **fbox_mapping;
+   HYPRE_Int                   **boxes_with_bdry;
 
-   int                     ndim, nvars;
-   int                     nboxes, nfboxes;
-   int                     boxi;
+   HYPRE_Int                     ndim, nvars;
+   HYPRE_Int                     nboxes, nfboxes;
+   HYPRE_Int                     boxi;
    
    hypre_Index             zero_shift, upper_shift, lower_shift;
    hypre_Index             loop_size, start, index;
-   int                     loopi, loopj, loopk;
+   HYPRE_Int                     loopi, loopj, loopk;
 
-   int                     i, j, k, l, m, n, p;
-   int                     d;
-   int                     cnt;
+   HYPRE_Int                     i, j, k, l, m, n, p;
+   HYPRE_Int                     d;
+   HYPRE_Int                     cnt;
 
-   int                     part= 0;  /* NOTE, ASSUMING ONE PART */
-   int                     matrix_type= HYPRE_PARCSR;
-   int                     myproc;
+   HYPRE_Int                     part= 0;  /* NOTE, ASSUMING ONE PART */
+   HYPRE_Int                     matrix_type= HYPRE_PARCSR;
+   HYPRE_Int                     myproc;
 
-   int                     ierr= 0;
+   HYPRE_Int                     ierr= 0;
 
-   MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm_rank(comm, &myproc);
 
    ndim= hypre_SStructGridNDim(grid_l[0]);
    hypre_SetIndex(zero_shift, 0, 0, 0);
 
   /* bounding global ranks of this processor & allocate boundary box markers. */
-   upper_rank= hypre_CTAlloc(int, num_levels);
-   lower_rank= hypre_CTAlloc(int, num_levels);
+   upper_rank= hypre_CTAlloc(HYPRE_Int, num_levels);
+   lower_rank= hypre_CTAlloc(HYPRE_Int, num_levels);
 
-   boxes_with_bdry= hypre_TAlloc(int *, num_levels);
+   boxes_with_bdry= hypre_TAlloc(HYPRE_Int *, num_levels);
    for (i= 0; i< num_levels; i++)
    {
       grid = grid_l[i];
@@ -118,7 +118,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
 
       sgrid= hypre_SStructPGridCellSGrid(pgrid);
       box_array= hypre_StructGridBoxes(sgrid);
-      boxes_with_bdry[i]= hypre_CTAlloc(int, hypre_BoxArraySize(box_array));
+      boxes_with_bdry[i]= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(box_array));
    }
  
   /*-----------------------------------------------------------------------------
@@ -133,8 +133,8 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    *-----------------------------------------------------------------------------*/
    if (num_levels > 1)
    {
-      cbox_mapping= hypre_CTAlloc(int *, num_levels);
-      fbox_mapping= hypre_CTAlloc(int *, num_levels);
+      cbox_mapping= hypre_CTAlloc(HYPRE_Int *, num_levels);
+      fbox_mapping= hypre_CTAlloc(HYPRE_Int *, num_levels);
    }
    for (i= 0; i< (num_levels-1); i++)
    {
@@ -143,7 +143,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cell_fgrid= hypre_SStructPGridCellSGrid(pgrid);
       fboxes= hypre_StructGridBoxes(cell_fgrid);
       nfboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_fgrid));
-      fbox_mapping[i]= hypre_CTAlloc(int, nfboxes);
+      fbox_mapping[i]= hypre_CTAlloc(HYPRE_Int, nfboxes);
 
       grid = grid_l[i+1];
       pgrid= hypre_SStructGridPGrid(grid, 0); /* assuming one part */
@@ -151,7 +151,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cboxes= hypre_StructGridBoxes(cell_cgrid);
       nboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_cgrid));
 
-      cbox_mapping[i+1]= hypre_CTAlloc(int, nboxes);
+      cbox_mapping[i+1]= hypre_CTAlloc(HYPRE_Int, nboxes);
 
      /* assuming if i1 > i2 and (box j1) is coarsened from (box i1)
         and (box j2) from (box i2), then j1 > j2. */
@@ -182,7 +182,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    }        /* for (i= 0; i< (num_levels-1); i++) */
          
    bdry= hypre_TAlloc(hypre_BoxArrayArray ***, num_levels);
-   npts= hypre_CTAlloc(int, num_levels);
+   npts= hypre_CTAlloc(HYPRE_Int, num_levels);
 
   /* finest level boundary determination */
    grid = grid_l[0];
@@ -435,8 +435,8 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    }
 
   /* find the ranks for the boundary points */
-   BdryRanks_l    = hypre_TAlloc(int *, num_levels);
-   BdryRanksCnts_l= hypre_TAlloc(int  , num_levels);
+   BdryRanks_l    = hypre_TAlloc(HYPRE_Int *, num_levels);
+   BdryRanksCnts_l= hypre_TAlloc(HYPRE_Int  , num_levels);
 
   /* loop over levels and extract boundary ranks. Only extract unique
      ranks */
@@ -449,7 +449,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cboxes= hypre_StructGridBoxes(cell_cgrid);
       nboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_cgrid));
  
-      ranks= hypre_TAlloc(int, npts[i]);
+      ranks= hypre_TAlloc(HYPRE_Int, npts[i]);
       cnt= 0;
       for (j= 0; j< nboxes; j++)
       {
@@ -535,7 +535,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                l++;
             }
          }
-         BdryRanks_l[i]= hypre_TAlloc(int, l);
+         BdryRanks_l[i]= hypre_TAlloc(HYPRE_Int, l);
          BdryRanksCnts_l[i]= l;
 
          l= 0;
@@ -580,12 +580,12 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
  * hypre_BoxArrayArray of size 2*ndim, one array for the upper side and one
  * for the lower side, for each direction.
  *-----------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_Maxwell_VarBdy( hypre_SStructPGrid       *pgrid,
                       hypre_BoxArrayArray     **bdry )
 {
-   int                    ierr = 0;
-   int                    nvars= hypre_SStructPGridNVars(pgrid);
+   HYPRE_Int                    ierr = 0;
+   HYPRE_Int                    nvars= hypre_SStructPGridNVars(pgrid);
 
    hypre_BoxArrayArray   *cell_bdry= bdry[0];
    hypre_BoxArray        *box_array, *box_array2;
@@ -595,8 +595,8 @@ hypre_Maxwell_VarBdy( hypre_SStructPGrid       *pgrid,
    hypre_Index            varoffset, ishift, jshift, kshift;
    hypre_Index            lower, upper;
 
-   int                    ndim = hypre_SStructPGridNDim(pgrid);
-   int                    i, k, t;
+   HYPRE_Int                    ndim = hypre_SStructPGridNDim(pgrid);
+   HYPRE_Int                    i, k, t;
 
    hypre_SetIndex(ishift, 1, 0, 0);
    hypre_SetIndex(jshift, 0, 1, 0);

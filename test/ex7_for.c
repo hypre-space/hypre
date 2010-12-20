@@ -72,7 +72,7 @@
 #include "hypre_sstruct_fortran_test.h"
 #endif
 
-int optionK, optionB, optionC, optionU0, optionF;
+HYPRE_Int optionK, optionB, optionC, optionU0, optionF;
 
 /* Diffusion coefficient */
 double K(double x, double y)
@@ -192,52 +192,52 @@ double F(double x, double y)
    }
 }
 
-int main (int argc, char *argv[])
+HYPRE_Int main (HYPRE_Int argc, char *argv[])
 {
-   int i, j, k;
+   HYPRE_Int i, j, k;
 
-   int myid, num_procs;
+   HYPRE_Int myid, num_procs;
 
-   int n, N, pi, pj;
+   HYPRE_Int n, N, pi, pj;
    double h, h2;
-   int ilower[2], iupper[2];
+   HYPRE_Int ilower[2], iupper[2];
 
-   int solver_id;
-   int n_pre, n_post;
-   int rap, relax, skip, sym;
-   int time_index;
+   HYPRE_Int solver_id;
+   HYPRE_Int n_pre, n_post;
+   HYPRE_Int rap, relax, skip, sym;
+   HYPRE_Int time_index;
 
-   int object_type;
+   HYPRE_Int object_type;
 
-   int num_iterations;
+   HYPRE_Int num_iterations;
    double final_res_norm;
 
-   int print_solution;
+   HYPRE_Int print_solution;
 
    /* We are using struct solvers for this example */
 #ifdef HYPRE_FORTRAN
-   long int grid;
-   long int stencil;
-   long int graph;
-   long int A;
-   long int b;
-   long int x;
+   hypre_F90_Obj grid;
+   hypre_F90_Obj stencil;
+   hypre_F90_Obj graph;
+   hypre_F90_Obj A;
+   hypre_F90_Obj b;
+   hypre_F90_Obj x;
 
-   long int solver;
-   long int precond;
-   int      precond_id;
+   hypre_F90_Obj solver;
+   hypre_F90_Obj precond;
+   HYPRE_Int      precond_id;
 
-   long int long_temp_COMM;
-   int      temp_COMM;
+   hypre_F90_Obj long_temp_COMM;
+   HYPRE_Int      temp_COMM;
 
-   int      zero = 0;
-   int      one = 1;
-   int      two = 2;
-   int      three = 3;
-   int      five = 5;
-   int      fifty = 50;
-   int      twohundred = 200;
-   int      fivehundred = 500;
+   HYPRE_Int      zero = 0;
+   HYPRE_Int      one = 1;
+   HYPRE_Int      two = 2;
+   HYPRE_Int      three = 3;
+   HYPRE_Int      five = 5;
+   HYPRE_Int      fifty = 50;
+   HYPRE_Int      twohundred = 200;
+   HYPRE_Int      fivehundred = 500;
 
    double   zerodot = 0.;
    double   tol = 1.e-6;
@@ -254,9 +254,9 @@ int main (int argc, char *argv[])
 #endif
 
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Init(&argc, &argv);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
    /* Set default parameters */
    n         = 33;
@@ -277,8 +277,8 @@ int main (int argc, char *argv[])
 
    /* Parse command line */
    {
-      int arg_index = 0;
-      int print_usage = 0;
+      HYPRE_Int arg_index = 0;
+      HYPRE_Int print_usage = 0;
 
       while (arg_index < argc)
       {
@@ -361,47 +361,47 @@ int main (int argc, char *argv[])
 
       if ((print_usage) && (myid == 0))
       {
-         printf("\n");
-         printf("Usage: %s [<options>]\n", argv[0]);
-         printf("\n");
-         printf("  -n  <n>             : problem size per processor (default: 8)\n");
-         printf("  -K  <K>             : choice for the diffusion coefficient (default: 1.0)\n");
-         printf("  -B  <B>             : choice for the convection vector (default: 0.0)\n");
-         printf("  -C  <C>             : choice for the reaction coefficient (default: 0.0)\n");
-         printf("  -U0 <U0>            : choice for the boundary condition (default: 0.0)\n");
-         printf("  -F  <F>             : choice for the right-hand side (default: 1.0) \n");
-         printf("  -solver <ID>        : solver ID\n");
-         printf("                        0  - SMG \n");
-         printf("                        1  - PFMG\n");
-         printf("                        10 - CG with SMG precond (default)\n");
-         printf("                        11 - CG with PFMG precond\n");
-         printf("                        17 - CG with 2-step Jacobi\n");
-         printf("                        18 - CG with diagonal scaling\n");
-         printf("                        19 - CG\n");
-         printf("                        30 - GMRES with SMG precond\n");
-         printf("                        31 - GMRES with PFMG precond\n");
-         printf("                        37 - GMRES with 2-step Jacobi\n");
-         printf("                        38 - GMRES with diagonal scaling\n");
-         printf("                        39 - GMRES\n");
-         printf("  -v <n_pre> <n_post> : number of pre and post relaxations\n");
-         printf("  -rap <r>            : coarse grid operator type\n");
-         printf("                        0 - Galerkin (default)\n");
-         printf("                        1 - non-Galerkin ParFlow operators\n");
-         printf("                        2 - Galerkin, general operators\n");
-         printf("  -relax <r>          : relaxation type\n");
-         printf("                        0 - Jacobi\n");
-         printf("                        1 - Weighted Jacobi (default)\n");
-         printf("                        2 - R/B Gauss-Seidel\n");
-         printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
-         printf("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
-         printf("  -sym <s>            : symmetric storage (1) or not (0)\n");
-         printf("  -print_solution     : print the solution vector\n");
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Usage: %s [<options>]\n", argv[0]);
+         hypre_printf("\n");
+         hypre_printf("  -n  <n>             : problem size per processor (default: 8)\n");
+         hypre_printf("  -K  <K>             : choice for the diffusion coefficient (default: 1.0)\n");
+         hypre_printf("  -B  <B>             : choice for the convection vector (default: 0.0)\n");
+         hypre_printf("  -C  <C>             : choice for the reaction coefficient (default: 0.0)\n");
+         hypre_printf("  -U0 <U0>            : choice for the boundary condition (default: 0.0)\n");
+         hypre_printf("  -F  <F>             : choice for the right-hand side (default: 1.0) \n");
+         hypre_printf("  -solver <ID>        : solver ID\n");
+         hypre_printf("                        0  - SMG \n");
+         hypre_printf("                        1  - PFMG\n");
+         hypre_printf("                        10 - CG with SMG precond (default)\n");
+         hypre_printf("                        11 - CG with PFMG precond\n");
+         hypre_printf("                        17 - CG with 2-step Jacobi\n");
+         hypre_printf("                        18 - CG with diagonal scaling\n");
+         hypre_printf("                        19 - CG\n");
+         hypre_printf("                        30 - GMRES with SMG precond\n");
+         hypre_printf("                        31 - GMRES with PFMG precond\n");
+         hypre_printf("                        37 - GMRES with 2-step Jacobi\n");
+         hypre_printf("                        38 - GMRES with diagonal scaling\n");
+         hypre_printf("                        39 - GMRES\n");
+         hypre_printf("  -v <n_pre> <n_post> : number of pre and post relaxations\n");
+         hypre_printf("  -rap <r>            : coarse grid operator type\n");
+         hypre_printf("                        0 - Galerkin (default)\n");
+         hypre_printf("                        1 - non-Galerkin ParFlow operators\n");
+         hypre_printf("                        2 - Galerkin, general operators\n");
+         hypre_printf("  -relax <r>          : relaxation type\n");
+         hypre_printf("                        0 - Jacobi\n");
+         hypre_printf("                        1 - Weighted Jacobi (default)\n");
+         hypre_printf("                        2 - R/B Gauss-Seidel\n");
+         hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
+         hypre_printf("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
+         hypre_printf("  -sym <s>            : symmetric storage (1) or not (0)\n");
+         hypre_printf("  -print_solution     : print the solution vector\n");
+         hypre_printf("\n");
       }
 
       if (print_usage)
       {
-         MPI_Finalize();
+         hypre_MPI_Finalize();
          return (0);
       }
    }
@@ -428,19 +428,19 @@ int main (int argc, char *argv[])
 
    /* 1. Set up a 2D grid */
    {
-      int ndim = 2;
-      int nparts = 1;
-      int nvars = 1;
-      int part = 0;
-      int i;
+      HYPRE_Int ndim = 2;
+      HYPRE_Int nparts = 1;
+      HYPRE_Int nvars = 1;
+      HYPRE_Int part = 0;
+      HYPRE_Int i;
 
       /* Create an empty 2D grid object */
 #ifdef HYPRE_FORTRAN
-      temp_COMM = (int) MPI_COMM_WORLD;
-      long_temp_COMM = (long int) MPI_COMM_WORLD;
+      temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
+      long_temp_COMM = (hypre_F90_Obj) hypre_MPI_COMM_WORLD;
       HYPRE_SStructGridCreate(&temp_COMM, &ndim, &nparts, &grid);
 #else
-      HYPRE_SStructGridCreate(MPI_COMM_WORLD, ndim, nparts, &grid);
+      HYPRE_SStructGridCreate(hypre_MPI_COMM_WORLD, ndim, nparts, &grid);
 #endif
 
       /* Add a new box to the grid */
@@ -453,7 +453,7 @@ int main (int argc, char *argv[])
       /* Set the variable type for each part */
       {
 #ifdef HYPRE_FORTRAN
-         long int vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
+         hypre_F90_Obj vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 #else
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 #endif
@@ -477,13 +477,13 @@ int main (int argc, char *argv[])
 
    /* 2. Define the discretization stencil */
    {
-      int ndim = 2;
-      int var = 0;
+      HYPRE_Int ndim = 2;
+      HYPRE_Int var = 0;
 
       if (sym == 0)
       {
          /* Define the geometry of the stencil */
-         int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
 
          /* Create an empty 2D, 5-pt stencil object */
 #ifdef HYPRE_FORTRAN
@@ -503,7 +503,7 @@ int main (int argc, char *argv[])
       else /* Symmetric storage */
       {
          /* Define the geometry of the stencil */
-         int offsets[3][2] = {{0,0}, {1,0}, {0,1}};
+         HYPRE_Int offsets[3][2] = {{0,0}, {1,0}, {0,1}};
 
          /* Create an empty 2D, 3-pt stencil object */
 #ifdef HYPRE_FORTRAN
@@ -525,14 +525,14 @@ int main (int argc, char *argv[])
    /* 3. Set up the Graph  - this determines the non-zero structure
       of the matrix */
    {
-      int var = 0;
-      int part = 0;
+      HYPRE_Int var = 0;
+      HYPRE_Int part = 0;
 
       /* Create the graph object */
 #ifdef HYPRE_FORTRAN
       HYPRE_SStructGraphCreate(&temp_COMM, &grid, &graph);
 #else
-      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+      HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
 #endif
 
       /* Now we need to tell the graph which stencil to use for each
@@ -559,16 +559,16 @@ int main (int argc, char *argv[])
       double *values;
 
       /* We have one part and one variable. */
-      int part = 0;
-      int var = 0;
+      HYPRE_Int part = 0;
+      HYPRE_Int var = 0;
 
       /* Create an empty vector object */
 #ifdef HYPRE_FORTRAN
       HYPRE_SStructVectorCreate(&temp_COMM, &grid, &b);
       HYPRE_SStructVectorCreate(&temp_COMM, &grid, &x);
 #else
-      HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
-      HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
+      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &b);
+      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
 #endif
 
       /* Set the object type (by default HYPRE_SSTRUCT). This determines the
@@ -624,14 +624,14 @@ int main (int argc, char *argv[])
    /* 4. Set up a SStruct Matrix */
    {
       /* We have one part and one variable. */
-      int part = 0;
-      int var = 0;
+      HYPRE_Int part = 0;
+      HYPRE_Int var = 0;
 
       /* Create an empty matrix object */
 #ifdef HYPRE_FORTRAN
       HYPRE_SStructMatrixCreate(&temp_COMM, &graph, &A);
 #else
-      HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
+      HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 #endif
 
       /* Use symmetric storage? The function below is for symmetric stencil entries
@@ -662,7 +662,7 @@ int main (int argc, char *argv[])
          at every node. We will modify the boundary nodes later. */
       if (sym == 0)
       {
-         int stencil_indices[5] = {0, 1, 2, 3, 4}; /* labels correspond
+         HYPRE_Int stencil_indices[5] = {0, 1, 2, 3, 4}; /* labels correspond
                                                       to the offsets */
          double *values;
 
@@ -701,7 +701,7 @@ int main (int argc, char *argv[])
       }
       else /* Symmetric storage */
       {
-         int stencil_indices[3] = {0, 1, 2};
+         HYPRE_Int stencil_indices[3] = {0, 1, 2};
          double *values;
 
          values = calloc(3*(n*n), sizeof(double));
@@ -735,17 +735,17 @@ int main (int argc, char *argv[])
          reaching ouside of the domain boundary. We must modify the matrix
          stencil and the corresponding rhs entries. */
    {
-      int bc_ilower[2];
-      int bc_iupper[2];
+      HYPRE_Int bc_ilower[2];
+      HYPRE_Int bc_iupper[2];
 
-      int stencil_indices[5] = {0, 1, 2, 3, 4};
+      HYPRE_Int stencil_indices[5] = {0, 1, 2, 3, 4};
       double *values, *bvalues;
 
-      int nentries;
+      HYPRE_Int nentries;
 
       /* We have one part and one variable. */
-      int part = 0;
-      int var = 0;
+      HYPRE_Int part = 0;
+      HYPRE_Int var = 0;
 
       if (sym == 0)
          nentries = 5;
@@ -1105,9 +1105,9 @@ int main (int argc, char *argv[])
    /* 6. Set up and use a solver */
    {
 #ifdef HYPRE_FORTRAN
-      long int sA;
-      long int sb;
-      long int sx;
+      hypre_F90_Obj sA;
+      hypre_F90_Obj sb;
+      hypre_F90_Obj sx;
 #else
       HYPRE_StructMatrix    sA;
       HYPRE_StructVector    sb;
@@ -1146,7 +1146,7 @@ int main (int argc, char *argv[])
          HYPRE_StructSMGSetLogging(&solver, &one);
          HYPRE_StructSMGSetup(&solver, &sA, &sb, &sx);
 #else
-         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
+         HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_StructSMGSetMemoryUse(solver, 0);
          HYPRE_StructSMGSetMaxIter(solver, 50);
          HYPRE_StructSMGSetTol(solver, 1.0e-06);
@@ -1160,7 +1160,7 @@ int main (int argc, char *argv[])
 
          /* Finalize current timing */
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -1177,7 +1177,7 @@ int main (int argc, char *argv[])
          hypre_EndTiming(time_index);
          /* Finalize current timing */
 
-         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+         hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -1214,7 +1214,7 @@ int main (int argc, char *argv[])
          HYPRE_StructPFMGSetLogging(&solver, &one);
          HYPRE_StructPFMGSetup(&solver, &sA, &sb, &sx);
 #else
-         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
+         HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_StructPFMGSetMaxIter(solver, 50);
          HYPRE_StructPFMGSetTol(solver, 1.0e-06);
          HYPRE_StructPFMGSetRelChange(solver, 0);
@@ -1230,7 +1230,7 @@ int main (int argc, char *argv[])
 
          /* Finalize current timing */
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -1247,7 +1247,7 @@ int main (int argc, char *argv[])
 
          /* Finalize current timing */
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+         hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -1277,7 +1277,7 @@ int main (int argc, char *argv[])
          HYPRE_StructPCGSetRelChange(&solver, &zero );
          HYPRE_StructPCGSetPrintLevel(&solver, &two );
 #else
-         HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
+         HYPRE_StructPCGCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_StructPCGSetMaxIter(solver, 200 );
          HYPRE_StructPCGSetTol(solver, 1.0e-06 );
          HYPRE_StructPCGSetTwoNorm(solver, 1 );
@@ -1301,7 +1301,7 @@ int main (int argc, char *argv[])
             precond_id = 0;
             HYPRE_StructPCGSetPrecond(&solver, &precond_id, &precond);
 #else
-            HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+            HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_StructSMGSetMemoryUse(precond, 0);
             HYPRE_StructSMGSetMaxIter(precond, 1);
             HYPRE_StructSMGSetTol(precond, 0.0);
@@ -1335,7 +1335,7 @@ int main (int argc, char *argv[])
             precond_id = 1;
             HYPRE_StructPCGSetPrecond(&solver, &precond_id, &precond);
 #else
-            HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
+            HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_StructPFMGSetMaxIter(precond, 1);
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
@@ -1364,7 +1364,7 @@ int main (int argc, char *argv[])
             precond_id = 7;
             HYPRE_StructPCGSetPrecond(&solver, &precond_id, &precond);
 #else
-            HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
+            HYPRE_StructJacobiCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_StructJacobiSetMaxIter(precond, 2);
             HYPRE_StructJacobiSetTol(precond, 0.0);
             HYPRE_StructJacobiSetZeroGuess(precond);
@@ -1398,7 +1398,7 @@ int main (int argc, char *argv[])
 #endif
 
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -1413,7 +1413,7 @@ int main (int argc, char *argv[])
 #endif
 
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+         hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -1463,7 +1463,7 @@ int main (int argc, char *argv[])
 #ifdef HYPRE_FORTRAN
          HYPRE_StructGMRESCreate(&temp_COMM, &solver);
 #else
-         HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &solver);
+         HYPRE_StructGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
 #endif
 
          /* Note that GMRES can be used with all the interfaces - not
@@ -1504,7 +1504,7 @@ int main (int argc, char *argv[])
             precond_id = 0;
             HYPRE_StructGMRESSetPrecond(&solver, &precond_id, &precond);
 #else
-            HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+            HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_StructSMGSetMemoryUse(precond, 0);
             HYPRE_StructSMGSetMaxIter(precond, 1);
             HYPRE_StructSMGSetTol(precond, 0.0);
@@ -1538,7 +1538,7 @@ int main (int argc, char *argv[])
             precond_id = 1;
             HYPRE_StructGMRESSetPrecond(&solver, &precond_id, &precond);
 #else
-            HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
+            HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_StructPFMGSetMaxIter(precond, 1);
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
@@ -1567,7 +1567,7 @@ int main (int argc, char *argv[])
             precond_id = 7;
             HYPRE_StructGMRESSetPrecond(&solver, &precond_id, &precond);
 #else
-            HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
+            HYPRE_StructJacobiCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_StructJacobiSetMaxIter(precond, 2);
             HYPRE_StructJacobiSetTol(precond, 0.0);
             HYPRE_StructJacobiSetZeroGuess(precond);
@@ -1601,7 +1601,7 @@ int main (int argc, char *argv[])
 #endif
 
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -1616,7 +1616,7 @@ int main (int argc, char *argv[])
 #endif
 
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+         hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -1669,10 +1669,10 @@ int main (int argc, char *argv[])
 
    if (myid == 0)
    {
-      printf("\n");
-      printf("Iterations = %d\n", num_iterations);
-      printf("Final Relative Residual Norm = %e\n", final_res_norm);
-      printf("\n");
+      hypre_printf("\n");
+      hypre_printf("Iterations = %d\n", num_iterations);
+      hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+      hypre_printf("\n");
    }
 
    /* Free memory */
@@ -1693,7 +1693,7 @@ int main (int argc, char *argv[])
 #endif
 
    /* Finalize MPI */
-   MPI_Finalize();
+   hypre_MPI_Finalize();
 
    return (0);
 }

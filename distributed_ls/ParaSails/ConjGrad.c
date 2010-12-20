@@ -25,38 +25,38 @@
 #include "Matrix.h"
 #include "ParaSails.h"
 
-double hypre_F90_NAME_BLAS(ddot, DDOT)(int *, double *, int *, double *, int *);
-int hypre_F90_NAME_BLAS(dcopy, DCOPY)(int *, double *, int *, double *, int *);
-int hypre_F90_NAME_BLAS(dscal, DSCAL)(int *, double *, double *, int *);
-int hypre_F90_NAME_BLAS(daxpy, DAXPY)(int *, double *, double *, int *, double *, int *);
+double hypre_F90_NAME_BLAS(ddot, DDOT)(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(dcopy, DCOPY)(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(dscal, DSCAL)(HYPRE_Int *, double *, double *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(daxpy, DAXPY)(HYPRE_Int *, double *, double *, HYPRE_Int *, double *, HYPRE_Int *);
 
-static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
+static double InnerProd(HYPRE_Int n, double *x, double *y, MPI_Comm comm)
 {
     double local_result, result;
 
-    int one = 1;
+    HYPRE_Int one = 1;
     local_result = hypre_F90_NAME_BLAS(ddot, DDOT)(&n, x, &one, y, &one);
 
-    MPI_Allreduce(&local_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm);
+    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
 
     return result;
 }
 
-static void CopyVector(int n, double *x, double *y)
+static void CopyVector(HYPRE_Int n, double *x, double *y)
 {
-    int one = 1;
+    HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(dcopy, DCOPY)(&n, x, &one, y, &one);
 }
 
-static void ScaleVector(int n, double alpha, double *x)
+static void ScaleVector(HYPRE_Int n, double alpha, double *x)
 {
-    int one = 1;
+    HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(dscal, DSCAL)(&n, &alpha, x, &one);
 }
 
-static void Axpy(int n, double alpha, double *x, double *y)
+static void Axpy(HYPRE_Int n, double alpha, double *x, double *y)
 {
-    int one = 1;
+    HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(daxpy, DAXPY)(&n, &alpha, x, &one, y, &one);
 }
 
@@ -69,20 +69,20 @@ static void Axpy(int n, double alpha, double *x, double *y)
  *--------------------------------------------------------------------------*/
 
 void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
-   double tol, int max_iter)
+   double tol, HYPRE_Int max_iter)
 {
    double *p, *s, *r;
    double alpha, beta;
    double gamma, gamma_old;
    double bi_prod, i_prod, eps;
-   int i = 0;
-   int mype;
+   HYPRE_Int i = 0;
+   HYPRE_Int mype;
 
    /* local problem size */
-   int n = mat->end_row - mat->beg_row + 1;
+   HYPRE_Int n = mat->end_row - mat->beg_row + 1;
 
    MPI_Comm comm = mat->comm;
-   MPI_Comm_rank(comm, &mype);
+   hypre_MPI_Comm_rank(comm, &mype);
 
    /* compute square of absolute stopping threshold  */
    /* bi_prod = <b,b> */
@@ -147,7 +147,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
 
 #ifdef PARASAILS_CG_PRINT
       if (mype == 0 && i % 100 == 0)
-         printf("Iter (%d): rel. resid. norm: %e\n", i, sqrt(i_prod/bi_prod));
+         hypre_printf("Iter (%d): rel. resid. norm: %e\n", i, sqrt(i_prod/bi_prod));
 #endif
 
       /* check for convergence */
@@ -158,7 +158,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
       if (i >= 1000 && i_prod/bi_prod > 0.01)
       {
          if (mype == 0)
-            printf("Aborting solve due to slow or no convergence.\n");
+            hypre_printf("Aborting solve due to slow or no convergence.\n");
          break;
       }
  
@@ -182,5 +182,5 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
    free(r);
 
    if (mype == 0)
-      printf("Iter (%4d): computed rrn    : %e\n", i, sqrt(i_prod/bi_prod));
+      hypre_printf("Iter (%4d): computed rrn    : %e\n", i, sqrt(i_prod/bi_prod));
 }

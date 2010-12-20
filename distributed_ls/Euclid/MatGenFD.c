@@ -32,17 +32,17 @@ static bool isThreeD;
 #define BACK(a)   a[6]
 #define RHS(a)    a[7]
 
-static void setBoundary_private(int node, int *cval, double *aval, int len,
-                 double *rhs, double bc, double coeff, double ctr, int nabor);
-static void generateStriped(MatGenFD mg, int *rp, int *cval, 
+static void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, double *aval, HYPRE_Int len,
+                 double *rhs, double bc, double coeff, double ctr, HYPRE_Int nabor);
+static void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, 
                                     double *aval, Mat_dh A, Vec_dh b);
-static void generateBlocked(MatGenFD mg, int *rp, int *cval, double *aval, 
+static void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, 
                                                          Mat_dh A, Vec_dh b);
-static void getstencil(MatGenFD g, int ix, int iy, int iz);
+static void getstencil(MatGenFD g, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz);
 
 #if 0
-static void fdaddbc(int nx, int ny, int nz, int *rp, int *cval, 
-             int *diag, double *aval, double *rhs, double h, MatGenFD mg);
+static void fdaddbc(HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Int *rp, HYPRE_Int *cval, 
+             HYPRE_Int *diag, double *aval, double *rhs, double h, MatGenFD mg);
 #endif
 
 #undef __FUNC__
@@ -118,7 +118,7 @@ void MatGenFD_Destroy(MatGenFD mg)
 
 #undef __FUNC__
 #define __FUNC__ "MatGenFD_Run"
-void MatGenFD_Run(MatGenFD mg, int id, int np, Mat_dh *AOut, Vec_dh *rhsOut)
+void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh *rhsOut)
 {
 /* What this function does:
  *   0. creates return objects (A and rhs)
@@ -132,8 +132,8 @@ void MatGenFD_Run(MatGenFD mg, int id, int np, Mat_dh *AOut, Vec_dh *rhsOut)
   Mat_dh A;
   Vec_dh rhs;
   bool threeD = mg->threeD;
-  int nnz;
-  int m = mg->m; /* local unknowns */
+  HYPRE_Int nnz;
+  HYPRE_Int m = mg->m; /* local unknowns */
   bool debug = false, striped;
 
   if (mg->debug && logFile != NULL) debug = true;
@@ -150,10 +150,10 @@ void MatGenFD_Run(MatGenFD mg, int id, int np, Mat_dh *AOut, Vec_dh *rhsOut)
   */
   if (! Parser_dhHasSwitch(parser_dh, "-noChecks")) {
     if (!striped) {
-      int npTest = mg->px*mg->py;
+      HYPRE_Int npTest = mg->px*mg->py;
       if (threeD) npTest *= mg->pz;
       if (npTest != np) {
-        sprintf(msgBuf_dh, "numbers don't match: np_dh = %i, px*py*pz = %i", np, npTest);
+        hypre_sprintf(msgBuf_dh, "numbers don't match: np_dh = %i, px*py*pz = %i", np, npTest);
         SET_V_ERROR(msgBuf_dh);
       }
     }
@@ -172,12 +172,12 @@ void MatGenFD_Run(MatGenFD mg, int id, int np, Mat_dh *AOut, Vec_dh *rhsOut)
   mg->hh = 1.0/(mg->px*mg->cc - 1);
   
   if (debug) {
-    sprintf(msgBuf_dh, "cc (local grid dimension) = %i", mg->cc);
+    hypre_sprintf(msgBuf_dh, "cc (local grid dimension) = %i", mg->cc);
     SET_INFO(msgBuf_dh);
-    if (threeD) { sprintf(msgBuf_dh, "threeD = true"); }
-    else            { sprintf(msgBuf_dh, "threeD = false"); }
+    if (threeD) { hypre_sprintf(msgBuf_dh, "threeD = true"); }
+    else            { hypre_sprintf(msgBuf_dh, "threeD = false"); }
     SET_INFO(msgBuf_dh);
-    sprintf(msgBuf_dh, "np= %i  id= %i", np, id);
+    hypre_sprintf(msgBuf_dh, "np= %i  id= %i", np, id);
     SET_INFO(msgBuf_dh);
   }
 
@@ -187,9 +187,9 @@ void MatGenFD_Run(MatGenFD mg, int id, int np, Mat_dh *AOut, Vec_dh *rhsOut)
 
   /* 2. allocate storage */
   if (mg->allocateMem) {
-    A->rp = (int*)MALLOC_DH((m+1)*sizeof(int)); CHECK_V_ERROR;
+    A->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     A->rp[0] = 0;  
-    A->cval = (int*)MALLOC_DH(nnz*sizeof(int)); CHECK_V_ERROR
+    A->cval = (HYPRE_Int*)MALLOC_DH(nnz*sizeof(HYPRE_Int)); CHECK_V_ERROR
     A->aval = (double*)MALLOC_DH(nnz*sizeof(double)); CHECK_V_ERROR;
     /* rhs->vals = (double*)MALLOC_DH(m*sizeof(double)); CHECK_V_ERROR; */
   }
@@ -220,19 +220,19 @@ void MatGenFD_Run(MatGenFD mg, int id, int np, Mat_dh *AOut, Vec_dh *rhsOut)
 
 #undef __FUNC__
 #define __FUNC__ "generateStriped"
-void generateStriped(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Vec_dh b)
+void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, Mat_dh A, Vec_dh b)
 {
   START_FUNC_DH
-  int mGlobal;
-  int m = mg->m;
-  int beg_row, end_row;
-  int i, j, k, row;
+  HYPRE_Int mGlobal;
+  HYPRE_Int m = mg->m;
+  HYPRE_Int beg_row, end_row;
+  HYPRE_Int i, j, k, row;
   bool threeD = mg->threeD;
-  int idx = 0;
+  HYPRE_Int idx = 0;
   double *stencil = mg->stencil;
   bool debug = false;
-  int plane, nodeRemainder;
-  int naborx1, naborx2, nabory1, nabory2;
+  HYPRE_Int plane, nodeRemainder;
+  HYPRE_Int naborx1, naborx2, nabory1, nabory2;
   double *rhs;
 
   bool applyBdry = true;
@@ -243,7 +243,7 @@ void generateStriped(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
   double bcy2 = mg->bcY2;
   /* double bcz1 = mg->bcZ1; */
   /* double bcz2 = mg->bcZ2; */
-  int nx, ny;
+  HYPRE_Int nx, ny;
 
   printf_dh("@@@ using striped partitioning\n");
 
@@ -273,11 +273,11 @@ void generateStriped(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
   plane = m*m;
 
   if (debug) {
-    fprintf(logFile, "generateStriped: beg_row= %i; end_row= %i; m= %i\n", beg_row+1, end_row+1, m);
+    hypre_fprintf(logFile, "generateStriped: beg_row= %i; end_row= %i; m= %i\n", beg_row+1, end_row+1, m);
   }
 
   for (row = beg_row; row<end_row; ++row) {
-        int localRow = row-beg_row;
+        HYPRE_Int localRow = row-beg_row;
 
         /* compute current node's position in grid */
         k = (row / plane);      
@@ -286,7 +286,7 @@ void generateStriped(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
         i = nodeRemainder % m;
 
         if (debug) {
-          fprintf(logFile, "row= %i  x= %i  y= %i  z= %i\n", row+1, i,j,k);
+          hypre_fprintf(logFile, "row= %i  x= %i  y= %i  z= %i\n", row+1, i,j,k);
         }
 
         /* compute column values and rhs entry for the current node */
@@ -343,11 +343,11 @@ void generateStriped(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
 
        /* apply boundary conditions; only for 2D! */
        if (!threeD && applyBdry) {
-         int offset = rp[localRow-1];
-         int len = rp[localRow] - rp[localRow-1];
+         HYPRE_Int offset = rp[localRow-1];
+         HYPRE_Int len = rp[localRow] - rp[localRow-1];
          double ctr, coeff;
 
-/* fprintf(logFile, "globalRow = %i; naborx2 = %i\n", row+1, row); */
+/* hypre_fprintf(logFile, "globalRow = %i; naborx2 = %i\n", row+1, row); */
 
          if (i == 0) {         /* if x1 */
            coeff = mg->A(mg->a, i+hhalf,j,k);
@@ -384,12 +384,12 @@ void generateStriped(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
    nz, ny, nz  -  local grid dimensions, wrt 0
    P, Q        -  subdomain grid dimensions in x and y directions
 */
-int rownum(const bool threeD, const int x, const int y, const int z, 
-   const int nx, const int ny, const int nz, int P, int Q)
+HYPRE_Int rownum(const bool threeD, const HYPRE_Int x, const HYPRE_Int y, const HYPRE_Int z, 
+   const HYPRE_Int nx, const HYPRE_Int ny, const HYPRE_Int nz, HYPRE_Int P, HYPRE_Int Q)
 {
-   int p, q, r;
-   int lowerx, lowery, lowerz;
-   int id, startrow;
+   HYPRE_Int p, q, r;
+   HYPRE_Int lowerx, lowery, lowerz;
+   HYPRE_Int id, startrow;
 
 
    /* compute x,y,z coordinates of subdomain to which
@@ -400,8 +400,8 @@ int rownum(const bool threeD, const int x, const int y, const int z,
    r = z/nz;
 
 /*
-if (myid_dh == 0) printf("nx= %i  ny= %i  nz= %i\n", nx, ny, nz);
-if (myid_dh == 0) printf("x= %i y= %i z= %i  threeD= %i  p= %i q= %i r= %i\n",
+if (myid_dh == 0) hypre_printf("nx= %i  ny= %i  nz= %i\n", nx, ny, nz);
+if (myid_dh == 0) hypre_printf("x= %i y= %i z= %i  threeD= %i  p= %i q= %i r= %i\n",
               x,y,z,threeD, p,q,r);
 */
 
@@ -414,7 +414,7 @@ if (myid_dh == 0) printf("x= %i y= %i z= %i  threeD= %i  p= %i q= %i r= %i\n",
      id = q*P+p;
    }
 
-/*  if (myid_dh == 0) printf(" id= %i\n", id);
+/*  if (myid_dh == 0) hypre_printf(" id= %i\n", id);
 */
 
    /* smallest row in the subdomain */
@@ -434,9 +434,9 @@ if (myid_dh == 0) printf("x= %i y= %i z= %i  threeD= %i  p= %i q= %i r= %i\n",
 
 
 
-void getstencil(MatGenFD g, int ix, int iy, int iz)
+void getstencil(MatGenFD g, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz)
 {
-  int k; 
+  HYPRE_Int k; 
   double h = g->hh;
   double hhalf = h*0.5;
   double x = h*ix;
@@ -652,23 +652,23 @@ double box_2(double coeff, double x, double y, double z)
 
 #undef __FUNC__
 #define __FUNC__ "generateBlocked"
-void generateBlocked(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Vec_dh b)
+void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, Mat_dh A, Vec_dh b)
 {
   START_FUNC_DH
   bool applyBdry = true;
   double *stencil = mg->stencil;
-  int id = mg->id;
+  HYPRE_Int id = mg->id;
   bool threeD = mg->threeD;
-  int px = mg->px, py = mg->py, pz = mg->pz; /* processor grid dimensions */
-  int p, q, r; /* this proc's position in processor grid */
-  int cc = mg->cc; /* local grid dimension (grid of unknowns) */
-  int nx = cc, ny = cc, nz = cc;
-  int lowerx, upperx, lowery, uppery, lowerz, upperz;
-  int startRow;
-  int x, y, z;
+  HYPRE_Int px = mg->px, py = mg->py, pz = mg->pz; /* processor grid dimensions */
+  HYPRE_Int p, q, r; /* this proc's position in processor grid */
+  HYPRE_Int cc = mg->cc; /* local grid dimension (grid of unknowns) */
+  HYPRE_Int nx = cc, ny = cc, nz = cc;
+  HYPRE_Int lowerx, upperx, lowery, uppery, lowerz, upperz;
+  HYPRE_Int startRow;
+  HYPRE_Int x, y, z;
   bool debug = false;
-  int idx = 0, localRow = 0; /* nabor; */
-  int naborx1, naborx2, nabory1, nabory2, naborz1, naborz2;
+  HYPRE_Int idx = 0, localRow = 0; /* nabor; */
+  HYPRE_Int naborx1, naborx2, nabory1, nabory2, naborz1, naborz2;
   double *rhs;
 
   double hhalf = 0.5 * mg->hh;
@@ -691,7 +691,7 @@ void generateBlocked(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
   r = ( id - p - px*q)/( px*py );
 
   if (debug) {
-    sprintf(msgBuf_dh, "this proc's position in subdomain grid: p= %i  q= %i  r= %i", p,q,r);
+    hypre_sprintf(msgBuf_dh, "this proc's position in subdomain grid: p= %i  q= %i  r= %i", p,q,r);
     SET_INFO(msgBuf_dh);
   }
 
@@ -706,11 +706,11 @@ void generateBlocked(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
    upperz = lowerz + nz;
 
   if (debug) {
-    sprintf(msgBuf_dh, "local grid parameters: lowerx= %i  upperx= %i", lowerx, upperx);
+    hypre_sprintf(msgBuf_dh, "local grid parameters: lowerx= %i  upperx= %i", lowerx, upperx);
     SET_INFO(msgBuf_dh);
-    sprintf(msgBuf_dh, "local grid parameters: lowery= %i  uppery= %i", lowery, uppery);
+    hypre_sprintf(msgBuf_dh, "local grid parameters: lowery= %i  uppery= %i", lowery, uppery);
     SET_INFO(msgBuf_dh);
-    sprintf(msgBuf_dh, "local grid parameters: lowerz= %i  upperz= %i", lowerz, upperz);
+    hypre_sprintf(msgBuf_dh, "local grid parameters: lowerz= %i  upperz= %i", lowerz, upperz);
     SET_INFO(msgBuf_dh);
   }
 
@@ -722,7 +722,7 @@ void generateBlocked(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
       for (x=lowerx; x<upperx; x++) {
 
         if (debug) {
-          fprintf(logFile, "row= %i  x= %i  y= %i  z= %i\n", localRow+startRow+1, x, y, z);
+          hypre_fprintf(logFile, "row= %i  x= %i  y= %i  z= %i\n", localRow+startRow+1, x, y, z);
         }
 
         /* compute row values and rhs, at the current node */
@@ -749,12 +749,12 @@ void generateBlocked(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
           naborx1 = rownum(threeD, x-1,y,z,nx,ny,nz,px,py);
           cval[idx]   = naborx1;
           aval[idx++] = WEST(stencil);
-/*fprintf(logFile, "--- row: %i;  naborx1= %i\n", localRow+startRow+1, 1+naborx1);
+/*hypre_fprintf(logFile, "--- row: %i;  naborx1= %i\n", localRow+startRow+1, 1+naborx1);
 */
         }
 /*
 else {
-fprintf(logFile, "--- row: %i;  x >= nx*px-1; naborx1 has old value: %i\n", localRow+startRow+1,1+naborx1);
+hypre_fprintf(logFile, "--- row: %i;  x >= nx*px-1; naborx1 has old value: %i\n", localRow+startRow+1,1+naborx1);
 }
 */
 
@@ -771,7 +771,7 @@ fprintf(logFile, "--- row: %i;  x >= nx*px-1; naborx1 has old value: %i\n", loca
         }
 /*
 else {
-fprintf(logFile, "--- row: %i;  x >= nx*px-1; nobors2 has old value: %i\n", localRow+startRow,1+naborx2);
+hypre_fprintf(logFile, "--- row: %i;  x >= nx*px-1; nobors2 has old value: %i\n", localRow+startRow,1+naborx2);
 }
 */
 
@@ -799,12 +799,12 @@ fprintf(logFile, "--- row: %i;  x >= nx*px-1; nobors2 has old value: %i\n", loca
 
        /* apply boundary conditions; only for 2D! */
        if (!threeD && applyBdry) {
-         int globalRow = localRow+startRow-1;
-         int offset = rp[localRow-1];
-         int len = rp[localRow] - rp[localRow-1];
+         HYPRE_Int globalRow = localRow+startRow-1;
+         HYPRE_Int offset = rp[localRow-1];
+         HYPRE_Int len = rp[localRow] - rp[localRow-1];
          double ctr, coeff;
 
-/* fprintf(logFile, "globalRow = %i; naborx2 = %i\n", globalRow+1, naborx2+1); */
+/* hypre_fprintf(logFile, "globalRow = %i; naborx2 = %i\n", globalRow+1, naborx2+1); */
 
          if (x == 0) {         /* if x1 */
            coeff = mg->A(mg->a, x+hhalf,y,z);
@@ -849,11 +849,11 @@ fprintf(logFile, "--- row: %i;  x >= nx*px-1; nobors2 has old value: %i\n", loca
 
 #undef __FUNC__
 #define __FUNC__ "setBoundary_private"
-void setBoundary_private(int node, int *cval, double *aval, int len,
-                               double *rhs, double bc, double coeff, double ctr, int nabor)
+void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, double *aval, HYPRE_Int len,
+                               double *rhs, double bc, double coeff, double ctr, HYPRE_Int nabor)
 {
   START_FUNC_DH
-  int i;
+  HYPRE_Int i;
 
   /* case 1: Dirichlet Boundary condition  */
   if (bc >= 0) {
@@ -870,7 +870,7 @@ void setBoundary_private(int node, int *cval, double *aval, int len,
 
   /* case 2: neuman */
   else {
-/* fprintf(logFile, "node= %i  nabor= %i  coeff= %g\n", node+1, nabor+1, coeff); */
+/* hypre_fprintf(logFile, "node= %i  nabor= %i  coeff= %g\n", node+1, nabor+1, coeff); */
     /* adjust row values */
     for (i=0; i<len; ++i) {
       /* adjust diagonal */

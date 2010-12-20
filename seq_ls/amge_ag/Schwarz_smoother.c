@@ -17,34 +17,34 @@
 
 #include "headers.h" 
 
-int hypre_ComputeSchwarzSmoother(int *i_domain_dof,
-				 int *j_domain_dof,
-				 int num_domains,
+HYPRE_Int hypre_ComputeSchwarzSmoother(HYPRE_Int *i_domain_dof,
+				 HYPRE_Int *j_domain_dof,
+				 HYPRE_Int num_domains,
 
 				 hypre_CSRMatrix *A,
 
 				 double **domain_matrixinverse_pointer)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j,k, j_loc, k_loc;
+  HYPRE_Int i,j,k, j_loc, k_loc;
 
   double *domain_matrixinverse;
 
-  int *i_dof_dof =  hypre_CSRMatrixI(A);
-  int *j_dof_dof =  hypre_CSRMatrixJ(A);
+  HYPRE_Int *i_dof_dof =  hypre_CSRMatrixI(A);
+  HYPRE_Int *j_dof_dof =  hypre_CSRMatrixJ(A);
   double *a_dof_dof =  hypre_CSRMatrixData(A);
   
-  int num_dofs = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int num_dofs = hypre_CSRMatrixNumRows(A);
 	
   double *matrix, *matrixinverse;
 
-  int max_matrix_size, matrix_size, matrix_size_counter = 0;
+  HYPRE_Int max_matrix_size, matrix_size, matrix_size_counter = 0;
 
-  int *i_global_to_local;
+  HYPRE_Int *i_global_to_local;
 
-  int local_dof_counter;
+  HYPRE_Int local_dof_counter;
 
 
   max_matrix_size = 0;
@@ -64,7 +64,7 @@ int hypre_ComputeSchwarzSmoother(int *i_domain_dof,
   domain_matrixinverse = hypre_CTAlloc(double, matrix_size_counter);
 
 
-  i_global_to_local = hypre_CTAlloc(int, num_dofs);
+  i_global_to_local = hypre_CTAlloc(HYPRE_Int, num_dofs);
   for (i=0; i < num_dofs; i++)
     i_global_to_local[i] = -1;
 
@@ -110,7 +110,7 @@ int hypre_ComputeSchwarzSmoother(int *i_domain_dof,
       ierr = matinv(matrixinverse, matrix, matrix_size);
       if (ierr < 0)
 	{
-	  printf("ERROR: non--positive definite local (subdomain) matrix; \n");
+	  hypre_printf("ERROR: non--positive definite local (subdomain) matrix; \n");
 	  return ierr;
 	}
 
@@ -146,29 +146,29 @@ int hypre_ComputeSchwarzSmoother(int *i_domain_dof,
   return ierr;
 }
   
-int hypre_SchwarzSolve(double *x,
+HYPRE_Int hypre_SchwarzSolve(double *x,
 		       double *rhs,
 		       double *aux,
 
-		       int *i_dof_dof,
-		       int *j_dof_dof,
+		       HYPRE_Int *i_dof_dof,
+		       HYPRE_Int *j_dof_dof,
 		       double *a_dof_dof,
 
-		       int *i_domain_dof,
-		       int *j_domain_dof,
-		       int num_domains,
+		       HYPRE_Int *i_domain_dof,
+		       HYPRE_Int *j_domain_dof,
+		       HYPRE_Int num_domains,
 
 		       double *domain_matrixinverse,
 
-		       int num_dofs)
+		       HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j,k, j_loc, k_loc;
+  HYPRE_Int i,j,k, j_loc, k_loc;
 
 
-  int matrix_size, matrix_size_counter = 0;
+  HYPRE_Int matrix_size, matrix_size_counter = 0;
 
 
   /* initiate:      ----------------------------------------------- */

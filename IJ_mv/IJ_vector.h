@@ -30,19 +30,19 @@ typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
-   int 		*partitioning;      /* Indicates partitioning over tasks */
+   HYPRE_Int 		*partitioning;      /* Indicates partitioning over tasks */
 
-   int           object_type;       /* Indicates the type of "local storage" */
+   HYPRE_Int           object_type;       /* Indicates the type of "local storage" */
 
    void         *object;            /* Structure for storing local portion */
 
    void         *translator;        /* Structure for storing off processor
 				       information */
 
-   int         global_first_row;    /* these for data items are necessary */
-   int         global_num_rows;     /*   to be able to avoid using the global */
+   HYPRE_Int         global_first_row;    /* these for data items are necessary */
+   HYPRE_Int         global_num_rows;     /*   to be able to avoid using the global */
                                     /*    global partition */ 
-   int	       print_level; 
+   HYPRE_Int	       print_level; 
    
 
 

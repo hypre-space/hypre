@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dormlq_(char *side, char *trans, integer *m, integer *n, 
+/* Subroutine */ HYPRE_Int dormlq_(char *side, char *trans, integer *m, integer *n, 
 	integer *k, doublereal *a, integer *lda, doublereal *tau, doublereal *
 	c__, integer *ldc, doublereal *work, integer *lwork, integer *info)
 {
@@ -112,23 +112,23 @@
 	    i__5;
     char ch__1[2];
     /* Builtin functions   
-       Subroutine */ int s_cat(char *, char **, integer *, integer *, ftnlen);
+       Subroutine */ HYPRE_Int s_cat(char *, char **, integer *, integer *, ftnlen);
     /* Local variables */
     static logical left;
     static integer i__;
     static doublereal t[4160]	/* was [65][64] */;
     extern logical lsame_(char *, char *);
     static integer nbmin, iinfo, i1, i2, i3;
-    extern /* Subroutine */ int dorml2_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dorml2_(char *, char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static integer ib, ic, jc, nb, mi, ni;
-    extern /* Subroutine */ int dlarfb_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int dlarfb_(char *, char *, char *, char *, 
 	    integer *, integer *, integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer nq, nw;
-    extern /* Subroutine */ int dlarft_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlarft_(char *, char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);

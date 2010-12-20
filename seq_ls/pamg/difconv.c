@@ -21,32 +21,32 @@
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_GenerateDifConv( int      nx,
-                       int      ny,
-                       int      nz, 
-                       int      P,
-                       int      Q,
-                       int      R,
+hypre_GenerateDifConv( HYPRE_Int      nx,
+                       HYPRE_Int      ny,
+                       HYPRE_Int      nz, 
+                       HYPRE_Int      P,
+                       HYPRE_Int      Q,
+                       HYPRE_Int      R,
                        double  *value )
 {
    hypre_CSRMatrix *A;
 
-   int    *A_i;
-   int    *A_j;
+   HYPRE_Int    *A_i;
+   HYPRE_Int    *A_j;
    double *A_data;
 
-   int *global_part;
-   int ix, iy, iz;
-   int p, q, r;
-   int cnt;
-   int num_rows; 
-   int row_index;
+   HYPRE_Int *global_part;
+   HYPRE_Int ix, iy, iz;
+   HYPRE_Int p, q, r;
+   HYPRE_Int cnt;
+   HYPRE_Int num_rows; 
+   HYPRE_Int row_index;
 
-   int nx_size, ny_size, nz_size;
+   HYPRE_Int nx_size, ny_size, nz_size;
 
-   int *nx_part;
-   int *ny_part;
-   int *nz_part;
+   HYPRE_Int *nx_part;
+   HYPRE_Int *ny_part;
+   HYPRE_Int *nz_part;
 
    num_rows = nx*ny*nz;
 
@@ -54,7 +54,7 @@ hypre_GenerateDifConv( int      nx,
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(int,P*Q*R+1);
+   global_part = hypre_CTAlloc(HYPRE_Int,P*Q*R+1);
 
    global_part[0] = 0;
    cnt = 1;
@@ -73,7 +73,7 @@ hypre_GenerateDifConv( int      nx,
       }
    }
 
-   A_i = hypre_CTAlloc(int, num_rows+1);
+   A_i = hypre_CTAlloc(HYPRE_Int, num_rows+1);
 
    cnt = 1;
    A_i[0] = 0;
@@ -153,7 +153,7 @@ hypre_GenerateDifConv( int      nx,
       }
    }
 
-   A_j = hypre_CTAlloc(int, A_i[num_rows]);
+   A_j = hypre_CTAlloc(HYPRE_Int, A_i[num_rows]);
    A_data = hypre_CTAlloc(double, A_i[num_rows]);
 
    row_index = 0;

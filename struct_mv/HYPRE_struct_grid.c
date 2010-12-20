@@ -24,12 +24,12 @@
  * HYPRE_StructGridCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructGridCreate( MPI_Comm          comm,
-                        int               dim,
+                        HYPRE_Int               dim,
                         HYPRE_StructGrid *grid )
 {
-   int ierr;
+   HYPRE_Int ierr;
 
    ierr = hypre_StructGridCreate(comm, dim, grid);
 
@@ -40,7 +40,7 @@ HYPRE_StructGridCreate( MPI_Comm          comm,
  * HYPRE_StructGridDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructGridDestroy( HYPRE_StructGrid grid )
 {
    return ( hypre_StructGridDestroy(grid) );
@@ -50,15 +50,15 @@ HYPRE_StructGridDestroy( HYPRE_StructGrid grid )
  * HYPRE_StructGridSetExtents
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructGridSetExtents( HYPRE_StructGrid  grid,
-                            int              *ilower,
-                            int              *iupper )
+                            HYPRE_Int              *ilower,
+                            HYPRE_Int              *iupper )
 {
    hypre_Index  new_ilower;
    hypre_Index  new_iupper;
 
-   int          d;
+   HYPRE_Int          d;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);
@@ -75,13 +75,13 @@ HYPRE_StructGridSetExtents( HYPRE_StructGrid  grid,
  * HYPRE_SetStructGridPeriodicity
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
-                             int              *periodic )
+                             HYPRE_Int              *periodic )
 {
    hypre_Index  new_periodic;
 
-   int          d;
+   HYPRE_Int          d;
 
    hypre_ClearIndex(new_periodic);
    for (d = 0; d < hypre_StructGridDim(grid); d++)
@@ -96,7 +96,7 @@ HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
  * HYPRE_StructGridAssemble
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
 {
 
@@ -110,8 +110,8 @@ HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
  * to set the numghost array inside the struct_grid_struct using an internal
  * function. This is just a wrapper.
  *--------------------------------------------------------------------------*/
-int
-HYPRE_StructGridSetNumGhost( HYPRE_StructGrid grid, int *num_ghost )
+HYPRE_Int
+HYPRE_StructGridSetNumGhost( HYPRE_StructGrid grid, HYPRE_Int *num_ghost )
 {
   return ( hypre_StructGridSetNumGhost(grid, num_ghost) );
 }

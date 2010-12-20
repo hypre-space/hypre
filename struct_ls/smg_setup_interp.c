@@ -28,18 +28,18 @@
 hypre_StructMatrix *
 hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
                          hypre_StructGrid   *cgrid,
-                         int                 cdir  )
+                         HYPRE_Int                 cdir  )
 {
    hypre_StructMatrix   *PT;
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   int                   stencil_size;
-   int                   stencil_dim;
+   HYPRE_Int                   stencil_size;
+   HYPRE_Int                   stencil_dim;
                        
-   int                   num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int                   num_ghost[] = {1, 1, 1, 1, 1, 1};
                        
-   int                   i;
+   HYPRE_Int                   i;
 
    /* set up stencil */
    stencil_size = 2;
@@ -82,13 +82,13 @@ hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
  *    solution info.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetupInterpOp( void               *relax_data,
                         hypre_StructMatrix *A,
                         hypre_StructVector *b,
                         hypre_StructVector *x,
                         hypre_StructMatrix *PT,
-                        int                 cdir,
+                        HYPRE_Int                 cdir,
                         hypre_Index         cindex,
                         hypre_Index         findex,
                         hypre_Index         stride    )
@@ -97,20 +97,20 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 
    hypre_StructStencil  *A_stencil;
    hypre_Index          *A_stencil_shape;
-   int                   A_stencil_size;
+   HYPRE_Int                   A_stencil_size;
    hypre_StructStencil  *PT_stencil;
    hypre_Index          *PT_stencil_shape;
-   int                   PT_stencil_size;
+   HYPRE_Int                   PT_stencil_size;
 
-   int                  *stencil_indices;
-   int                   num_stencil_indices;
+   HYPRE_Int                  *stencil_indices;
+   HYPRE_Int                   num_stencil_indices;
 
    hypre_StructGrid     *fgrid;
 
    hypre_StructStencil  *compute_pkg_stencil;
    hypre_Index          *compute_pkg_stencil_shape;
-   int                   compute_pkg_stencil_size = 1;
-   int                   compute_pkg_stencil_dim = 1;
+   HYPRE_Int                   compute_pkg_stencil_size = 1;
+   HYPRE_Int                   compute_pkg_stencil_dim = 1;
    hypre_ComputePkg     *compute_pkg;
    hypre_ComputeInfo    *compute_info;
  
@@ -124,19 +124,19 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    hypre_Box            *x_data_box;
    double               *PTp;
    double               *xp;
-   int                   PTi;
-   int                   xi;
+   HYPRE_Int                   PTi;
+   HYPRE_Int                   xi;
 
    hypre_Index           loop_size;
    hypre_Index           start;
    hypre_Index           startc;
    hypre_Index           stridec;
                       
-   int                   si, sj, d;
-   int                   compute_i, i, j;
-   int                   loopi, loopj, loopk;
+   HYPRE_Int                   si, sj, d;
+   HYPRE_Int                   compute_i, i, j;
+   HYPRE_Int                   loopi, loopj, loopk;
                         
-   int                   ierr = 0;
+   HYPRE_Int                   ierr = 0;
 
    /*--------------------------------------------------------
     * Initialize some things
@@ -174,7 +174,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
        * coefficient being computed (same direction for P^T).
        *-----------------------------------------------------*/
 
-      stencil_indices = hypre_TAlloc(int, A_stencil_size);
+      stencil_indices = hypre_TAlloc(HYPRE_Int, A_stencil_size);
       num_stencil_indices = 0;
       for (sj = 0; sj < A_stencil_size; sj++)
       {

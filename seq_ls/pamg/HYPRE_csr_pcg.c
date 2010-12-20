@@ -26,7 +26,7 @@
  * HYPRE_CSRPCGCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGCreate( HYPRE_Solver *solver )
 {
    /* The function names with a CG in them are in
@@ -53,7 +53,7 @@ HYPRE_CSRPCGCreate( HYPRE_Solver *solver )
  * HYPRE_CSRPCGDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_CSRPCGDestroy( HYPRE_Solver solver )
 {
    return( hypre_PCGDestroy( (void *) solver ) );
@@ -63,7 +63,7 @@ HYPRE_CSRPCGDestroy( HYPRE_Solver solver )
  * HYPRE_CSRPCGSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_CSRPCGSetup( HYPRE_Solver solver,
                       HYPRE_CSRMatrix A,
                       HYPRE_Vector b,
@@ -78,7 +78,7 @@ HYPRE_CSRPCGSetup( HYPRE_Solver solver,
  * HYPRE_CSRPCGSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_CSRPCGSolve( HYPRE_Solver solver,
                       HYPRE_CSRMatrix A,
                       HYPRE_Vector b,
@@ -93,7 +93,7 @@ HYPRE_CSRPCGSolve( HYPRE_Solver solver,
  * HYPRE_CSRPCGSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGSetTol( HYPRE_Solver solver,
                        double             tol    )
 {
@@ -104,9 +104,9 @@ HYPRE_CSRPCGSetTol( HYPRE_Solver solver,
  * HYPRE_CSRPCGSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGSetMaxIter( HYPRE_Solver solver,
-                           int                max_iter )
+                           HYPRE_Int                max_iter )
 {
    return( HYPRE_PCGSetMaxIter( solver, max_iter ) );
 }
@@ -118,9 +118,9 @@ HYPRE_CSRPCGSetMaxIter( HYPRE_Solver solver,
 /* not supported by krylov/pcg.c.  was supported by old cg.c.  TO DO:
  decide whether this has any functionality. If so, add the parameter and
  implement this function.  If not, delete this function.
-int
+HYPRE_Int
 HYPRE_CSRPCGSetStopCrit( HYPRE_Solver solver,
-                           int          stop_crit )
+                           HYPRE_Int          stop_crit )
 {
    return( hypre_PCGSetStopCrit( (void *) solver, stop_crit ) );
 }
@@ -130,9 +130,9 @@ HYPRE_CSRPCGSetStopCrit( HYPRE_Solver solver,
  * HYPRE_CSRPCGSetTwoNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGSetTwoNorm( HYPRE_Solver solver,
-                           int                two_norm )
+                           HYPRE_Int                two_norm )
 {
    return( HYPRE_PCGSetTwoNorm( solver, two_norm ) );
 }
@@ -141,9 +141,9 @@ HYPRE_CSRPCGSetTwoNorm( HYPRE_Solver solver,
  * HYPRE_CSRPCGSetRelChange
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGSetRelChange( HYPRE_Solver solver,
-                             int                rel_change )
+                             HYPRE_Int                rel_change )
 {
    return( HYPRE_PCGSetRelChange( solver, rel_change ) );
 }
@@ -152,13 +152,13 @@ HYPRE_CSRPCGSetRelChange( HYPRE_Solver solver,
  * HYPRE_CSRPCGSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGSetPrecond( HYPRE_Solver  solver,
-                           int (*precond)      (HYPRE_Solver sol,
+                           HYPRE_Int (*precond)      (HYPRE_Solver sol,
 						HYPRE_CSRMatrix matrix,
 						HYPRE_Vector b,
 						HYPRE_Vector x),
-                           int (*precond_setup)(HYPRE_Solver sol,
+                           HYPRE_Int (*precond_setup)(HYPRE_Solver sol,
 						HYPRE_CSRMatrix matrix,
 						HYPRE_Vector b,
 						HYPRE_Vector x),
@@ -174,7 +174,7 @@ HYPRE_CSRPCGSetPrecond( HYPRE_Solver  solver,
  * HYPRE_CSRPCGGetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGGetPrecond( HYPRE_Solver  solver,
                            HYPRE_Solver *precond_data_ptr )
 {
@@ -185,9 +185,9 @@ HYPRE_CSRPCGGetPrecond( HYPRE_Solver  solver,
  * HYPRE_CSRPCGSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGSetLogging( HYPRE_Solver solver,
-                           int                logging )
+                           HYPRE_Int                logging )
 {
    return( HYPRE_PCGSetLogging( solver, logging ) );
 }
@@ -196,9 +196,9 @@ HYPRE_CSRPCGSetLogging( HYPRE_Solver solver,
  * HYPRE_CSRPCGGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGGetNumIterations( HYPRE_Solver  solver,
-                                 int                *num_iterations )
+                                 HYPRE_Int                *num_iterations )
 {
    return( HYPRE_PCGGetNumIterations( solver, num_iterations ) );
 }
@@ -207,7 +207,7 @@ HYPRE_CSRPCGGetNumIterations( HYPRE_Solver  solver,
  * HYPRE_CSRPCGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                              double             *norm   )
 {
@@ -218,7 +218,7 @@ HYPRE_CSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
  * HYPRE_CSRDiagScaleSetup
  *--------------------------------------------------------------------------*/
  
-int 
+HYPRE_Int 
 HYPRE_CSRDiagScaleSetup( HYPRE_Solver solver,
                             HYPRE_CSRMatrix A,
                             HYPRE_Vector y,
@@ -231,7 +231,7 @@ HYPRE_CSRDiagScaleSetup( HYPRE_Solver solver,
  * HYPRE_CSRDiagScale
  *--------------------------------------------------------------------------*/
  
-int 
+HYPRE_Int 
 HYPRE_CSRDiagScale( HYPRE_Solver solver,
                        HYPRE_CSRMatrix HA,
                        HYPRE_Vector Hy,
@@ -243,9 +243,9 @@ HYPRE_CSRDiagScale( HYPRE_Solver solver,
    double *x_data = hypre_VectorData(x);
    double *y_data = hypre_VectorData(y);
    double *A_data = hypre_CSRMatrixData(A);
-   int *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int *A_i = hypre_CSRMatrixI(A);
 
-   int i, ierr = 0;
+   HYPRE_Int i, ierr = 0;
 
    for (i=0; i < hypre_VectorSize(x); i++)
    {

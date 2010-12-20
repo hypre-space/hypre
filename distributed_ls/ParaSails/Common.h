@@ -51,9 +51,9 @@
 
 #define PARASAILS_EXIT              \
 {                                   \
-   fprintf(stderr, "Exiting...\n"); \
+   hypre_fprintf(stderr, "Exiting...\n"); \
    fflush(NULL);                    \
-   MPI_Abort(MPI_COMM_WORLD, -1);   \
+   hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);   \
 }
 
 #endif /* _COMMON_H */

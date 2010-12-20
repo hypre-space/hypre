@@ -116,8 +116,8 @@
   typedef long timer ;
 #else
 # define cleartimer(tmr) (tmr = 0.0)
-# define starttimer(tmr) (tmr -= MPI_Wtime())
-# define stoptimer(tmr)  (tmr += MPI_Wtime())
+# define starttimer(tmr) (tmr -= hypre_MPI_Wtime())
+# define stoptimer(tmr)  (tmr += hypre_MPI_Wtime())
 # define gettimer(tmr)   (tmr)
   typedef double timer ;
 #endif

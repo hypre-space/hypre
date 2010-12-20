@@ -10,22 +10,20 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
+#include "_hypre_utilities.h"
 
 /******************************************************************************
  *
  *
  *****************************************************************************/
 
-int hypre_SStructKrylovCopyVector( void *x, void *y );
+HYPRE_Int hypre_SStructKrylovCopyVector( void *x, void *y );
 
 /*--------------------------------------------------------------------------
  * hypre_SStructKrylovIdentitySetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovIdentitySetup( void *vdata,
                            void *A,
                            void *b,
@@ -39,7 +37,7 @@ hypre_SStructKrylovIdentitySetup( void *vdata,
  * hypre_SStructKrylovIdentity
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovIdentity( void *vdata,
                       void *A,
                       void *b,

@@ -25,7 +25,7 @@ void *BlockJacobiICPcKspInitialize( void *in_ptr )
    KSP         ksp;
 
    BJData     *BJ_data;
-   int         i, ierr, flg, size, first_row, last_row;
+   HYPRE_Int         i, ierr, flg, size, first_row, last_row;
 
 
 
@@ -34,7 +34,7 @@ void *BlockJacobiICPcKspInitialize( void *in_ptr )
 
    /* Create SLES context and set operators */
    sles = (SLES *) ctalloc( SLES, 1);
-   ierr = SLESCreate(MPI_COMM_WORLD,sles); CHKERRA(ierr);
+   ierr = SLESCreate(hypre_MPI_COMM_WORLD,sles); CHKERRA(ierr);
    BJDataSles_ptr(BJ_data) = sles;
 
    /* Set KSP to be GMRES */
@@ -77,7 +77,7 @@ void *BlockJacobiICPcKspInitialize( void *in_ptr )
 
 }
 
-int BlockJacobiICPcKspFinalize (void *data )
+HYPRE_Int BlockJacobiICPcKspFinalize (void *data )
 {
   BJData      *BJ_data = data;
 

@@ -37,14 +37,14 @@
   @see hypre_AMGIndepSet */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
                        double          *measure_array, 
                        double           cconst)
 {
-   int     S_num_nodes = hypre_CSRMatrixNumRows(S);
-   int     i;
-   int     ierr = 0;
+   HYPRE_Int     S_num_nodes = hypre_CSRMatrixNumRows(S);
+   HYPRE_Int     i;
+   HYPRE_Int     ierr = 0;
 
    hypre_SeedRand(2747);
    for (i = 0; i < S_num_nodes; i++)
@@ -93,21 +93,21 @@ hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
   @see hypre_InitAMGIndepSet */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_AMGIndepSet( hypre_CSRMatrix *S,
                    double          *measure_array,
                    double           cconst,
-                   int             *graph_array,
-                   int              graph_array_size,
-                   int             *IS_marker        )
+                   HYPRE_Int             *graph_array,
+                   HYPRE_Int              graph_array_size,
+                   HYPRE_Int             *IS_marker        )
 {
-   int    *S_i         = hypre_CSRMatrixI(S);
-   int    *S_j         = hypre_CSRMatrixJ(S);
+   HYPRE_Int    *S_i         = hypre_CSRMatrixI(S);
+   HYPRE_Int    *S_j         = hypre_CSRMatrixJ(S);
    double *S_data      = hypre_CSRMatrixData(S);
          
-   int     i, j, ig, jS;
+   HYPRE_Int     i, j, ig, jS;
 
-   int     ierr = 0;
+   HYPRE_Int     ierr = 0;
 
    /*-------------------------------------------------------
     * Initialize IS_marker by putting all nodes in

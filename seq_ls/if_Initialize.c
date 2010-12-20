@@ -26,7 +26,7 @@ void  *incfact_initialize( port )
 void  *port;
 {
    INCFACTData    *incfact_data;
-   int             i;
+   HYPRE_Int             i;
 
 
    /* allocate space for structure */

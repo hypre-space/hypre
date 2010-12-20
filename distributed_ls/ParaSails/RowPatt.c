@@ -35,19 +35,19 @@
  * resize - local function for automatically increasing the size of RowPatt
  *--------------------------------------------------------------------------*/
 
-static void resize(RowPatt *p, int newlen)
+static void resize(RowPatt *p, HYPRE_Int newlen)
 {
-    int oldlen, i;
+    HYPRE_Int oldlen, i;
 
 #ifdef PARASAILS_DEBUG
-    printf("RowPatt resize %d\n", newlen);
+    hypre_printf("RowPatt resize %d\n", newlen);
 #endif
 
     oldlen = p->maxlen;
     p->maxlen = newlen;
 
-    p->ind  = (int *) realloc(p->ind,  p->maxlen * sizeof(int));
-    p->mark = (int *) realloc(p->mark, p->maxlen * sizeof(int));
+    p->ind  = (HYPRE_Int *) realloc(p->ind,  p->maxlen * sizeof(HYPRE_Int));
+    p->mark = (HYPRE_Int *) realloc(p->mark, p->maxlen * sizeof(HYPRE_Int));
 
     /* initialize the new portion of the mark array */
     for (i=oldlen; i<p->maxlen; i++)
@@ -59,16 +59,16 @@ static void resize(RowPatt *p, int newlen)
  * of "maxlen" nonzeros.
  *--------------------------------------------------------------------------*/
 
-RowPatt *RowPattCreate(int maxlen)
+RowPatt *RowPattCreate(HYPRE_Int maxlen)
 {
-    int i;
+    HYPRE_Int i;
     RowPatt *p = (RowPatt *) malloc(sizeof(RowPatt));
 
     p->maxlen   = maxlen;
     p->len      = 0;
     p->prev_len = 0;
-    p->ind      = (int *) malloc(maxlen * sizeof(int));
-    p->mark     = (int *) malloc(maxlen * sizeof(int));
+    p->ind      = (HYPRE_Int *) malloc(maxlen * sizeof(HYPRE_Int));
+    p->mark     = (HYPRE_Int *) malloc(maxlen * sizeof(HYPRE_Int));
     p->buffer   = NULL;
     p->buflen   = 0;
 
@@ -96,7 +96,7 @@ void RowPattDestroy(RowPatt *p)
 
 void RowPattReset(RowPatt *p)
 {
-    int i;
+    HYPRE_Int i;
 
     for (i=0; i<p->len; i++)
         p->mark[p->ind[i]] = -1;
@@ -109,9 +109,9 @@ void RowPattReset(RowPatt *p)
  * RowPattMerge - Merge the "len" nonzeros in array "ind" with pattern "p".
  *--------------------------------------------------------------------------*/
 
-void RowPattMerge(RowPatt *p, int len, int *ind)
+void RowPattMerge(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind)
 {
-    int i;
+    HYPRE_Int i;
 
     for (i=0; i<len; i++)
     {
@@ -135,9 +135,9 @@ void RowPattMerge(RowPatt *p, int len, int *ind)
  * that are less than "beg" or greater than "end".
  *--------------------------------------------------------------------------*/
 
-void RowPattMergeExt(RowPatt *p, int len, int *ind, int num_loc)
+void RowPattMergeExt(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Int num_loc)
 {
-    int i;
+    HYPRE_Int i;
 
     for (i=0; i<len; i++)
     {
@@ -165,9 +165,9 @@ void RowPattMergeExt(RowPatt *p, int len, int *ind, int num_loc)
  * call to RowPattGet or RowPattPrevLevel.
  *--------------------------------------------------------------------------*/
 
-void RowPattGet(RowPatt *p, int *lenp, int **indp)
+void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp)
 {
-    int len;
+    HYPRE_Int len;
 
     len = p->len;
 
@@ -175,10 +175,10 @@ void RowPattGet(RowPatt *p, int *lenp, int **indp)
     {
 	free(p->buffer);
 	p->buflen = len + 100;
-	p->buffer = (int *) malloc(p->buflen * sizeof(int));
+	p->buffer = (HYPRE_Int *) malloc(p->buflen * sizeof(HYPRE_Int));
     }
 
-    memcpy(p->buffer, p->ind, len*sizeof(int));
+    memcpy(p->buffer, p->ind, len*sizeof(HYPRE_Int));
 
     *lenp = len;
     *indp = p->buffer;
@@ -193,9 +193,9 @@ void RowPattGet(RowPatt *p, int *lenp, int **indp)
  * call to RowPattGet or RowPattPrevLevel.
  *--------------------------------------------------------------------------*/
 
-void RowPattPrevLevel(RowPatt *p, int *lenp, int **indp)
+void RowPattPrevLevel(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp)
 {
-    int len;
+    HYPRE_Int len;
 
     len = p->len - p->prev_len;
 
@@ -203,10 +203,10 @@ void RowPattPrevLevel(RowPatt *p, int *lenp, int **indp)
     {
 	free(p->buffer);
 	p->buflen = len + 100;
-	p->buffer = (int *) malloc(p->buflen * sizeof(int));
+	p->buffer = (HYPRE_Int *) malloc(p->buflen * sizeof(HYPRE_Int));
     }
 
-    memcpy(p->buffer, &p->ind[p->prev_len], len*sizeof(int));
+    memcpy(p->buffer, &p->ind[p->prev_len], len*sizeof(HYPRE_Int));
 
     *lenp = len;
     *indp = p->buffer;

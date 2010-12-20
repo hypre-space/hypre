@@ -42,8 +42,8 @@ hypre_StructInnerProd(  hypre_StructVector *x,
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
                    
-   int              xi;
-   int              yi;
+   HYPRE_Int              xi;
+   HYPRE_Int              yi;
                    
    double          *xp;
    double          *yp;
@@ -54,10 +54,10 @@ hypre_StructInnerProd(  hypre_StructVector *x,
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
                    
-   int              i;
-   int              loopi, loopj, loopk;
+   HYPRE_Int              i;
+   HYPRE_Int              loopi, loopj, loopk;
 #ifdef HYPRE_USE_PTHREADS
-   int              threadid = hypre_GetThreadID();
+   HYPRE_Int              threadid = hypre_GetThreadID();
 #endif
 
    local_result = 0.0;
@@ -110,8 +110,8 @@ hypre_StructInnerProd(  hypre_StructVector *x,
 #endif
 
 
-   MPI_Allreduce(&process_result, &final_innerprod_result, 1,
-                 MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
+   hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
+                 hypre_MPI_DOUBLE, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
 
 #ifdef HYPRE_USE_PTHREADS

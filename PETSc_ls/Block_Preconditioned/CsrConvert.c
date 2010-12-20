@@ -17,17 +17,17 @@
 #include "BlockJacobiAmgPcKsp.h"
 
 
-int CsrGen_to_CsrDiagFirst( Matrix *A, int **diag_loc_ret )
+HYPRE_Int CsrGen_to_CsrDiagFirst( Matrix *A, HYPRE_Int **diag_loc_ret )
      /* Converts CSR matrix, using AMG structure definition,
         from general to one in which the diagonal is first in each row.
         Information is stored for later restoral. */
 {
-   int i, j, k, itemp;
-   int *diag_loc;
+   HYPRE_Int i, j, k, itemp;
+   HYPRE_Int *diag_loc;
    double dtemp;
 
    /* allocate space for storing information for recovery */
-   diag_loc = ctalloc( int, MatrixSize( A ) );
+   diag_loc = ctalloc( HYPRE_Int, MatrixSize( A ) );
 
    /* Variable i loops over the rows */
    for (i=1; i <= MatrixSize( A ); i++) {
@@ -63,12 +63,12 @@ int CsrGen_to_CsrDiagFirst( Matrix *A, int **diag_loc_ret )
 }
 
 
-int CsrDiagFirst_backto_CsrGen( Matrix *A, int *diag_loc )
+HYPRE_Int CsrDiagFirst_backto_CsrGen( Matrix *A, HYPRE_Int *diag_loc )
      /* Converts CSR matrix, using AMG structure definition,
         from general to one in which the diagonal is first in each row.
         Information is stored for later restoral. */
 {
-   int i, j, itemp;
+   HYPRE_Int i, j, itemp;
    double dtemp;
 
    /* Variable i loops over the rows */

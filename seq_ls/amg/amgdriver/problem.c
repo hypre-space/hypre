@@ -34,26 +34,26 @@ char     *file_name;
 
    FILE     *fp;
 
-   int      num_variables;
+   HYPRE_Int      num_variables;
 
    hypre_Matrix  *A;
    hypre_Vector  *f;
    hypre_Vector  *u;
 
-   int      num_unknowns;
-   int      num_points;
+   HYPRE_Int      num_unknowns;
+   HYPRE_Int      num_points;
 
-   int     *iu;
-   int     *ip;
-   int     *iv;
+   HYPRE_Int     *iu;
+   HYPRE_Int     *ip;
+   HYPRE_Int     *iv;
 
    char     temp_file_name[256];
    FILE    *temp_fp;
-   int      flag;
+   HYPRE_Int      flag;
    double  *data;
    double   temp_d;
 
-   int      i, j, k;
+   HYPRE_Int      i, j, k;
 
 
    /*----------------------------------------------------------
@@ -72,42 +72,42 @@ char     *file_name;
     * num_variables
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%d", &num_variables);
+   hypre_fscanf(fp, "%d", &num_variables);
 
    /*----------------------------------------------------------
     * A
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%s", temp_file_name);
+   hypre_fscanf(fp, "%s", temp_file_name);
    A = ReadYSMP(temp_file_name);
 
    if (hypre_MatrixSize(A) != num_variables)
    {
-      printf("hypre_Matrix is of incompatible size\n");
+      hypre_printf("hypre_Matrix is of incompatible size\n");
       exit(1);
    }
 
-   sprintf(ProblemAInput(problem), "%s", temp_file_name);
+   hypre_sprintf(ProblemAInput(problem), "%s", temp_file_name);
 
    /*----------------------------------------------------------
     * f
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%d", &flag);
+   hypre_fscanf(fp, "%d", &flag);
    ProblemFFlag(problem) = flag;
 
    if (flag == 0)
    {
-      fscanf(fp, "%s", temp_file_name);
+      hypre_fscanf(fp, "%s", temp_file_name);
       f = ReadVec(temp_file_name);
 
       if (hypre_VectorSize(f) != num_variables)
       {
-	 printf("Right hand side is of incompatible\n");
+	 hypre_printf("Right hand side is of incompatible\n");
 	 exit(1);
       }
 
-      sprintf(ProblemFInput(problem), "%s", temp_file_name);
+      hypre_sprintf(ProblemFInput(problem), "%s", temp_file_name);
    }
    else
    {
@@ -115,11 +115,11 @@ char     *file_name;
 
       if (flag == 1)
       {
-	 fscanf(fp, "%le", &temp_d);
+	 hypre_fscanf(fp, "%le", &temp_d);
 	 for (i = 0; i < num_variables; i++)
 	    data[i] = temp_d;
 
-	 sprintf(ProblemFInput(problem), "%e", temp_d);
+	 hypre_sprintf(ProblemFInput(problem), "%e", temp_d);
       }
       else if (flag == 2)
       {
@@ -134,21 +134,21 @@ char     *file_name;
     * u
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%d", &flag);
+   hypre_fscanf(fp, "%d", &flag);
    ProblemUFlag(problem) = flag;
 
    if (flag == 0)
    {
-      fscanf(fp, "%s", temp_file_name);
+      hypre_fscanf(fp, "%s", temp_file_name);
       u = ReadVec(temp_file_name);
 
       if (hypre_VectorSize(u) != num_variables)
       {
-	 printf("Initial guess is of incompatible size\n");
+	 hypre_printf("Initial guess is of incompatible size\n");
 	 exit(1);
       }
 
-      sprintf(ProblemUInput(problem), "%s", temp_file_name);
+      hypre_sprintf(ProblemUInput(problem), "%s", temp_file_name);
    }
    else
    {
@@ -156,11 +156,11 @@ char     *file_name;
 
       if (flag == 1)
       {
-	 fscanf(fp, "%le", &temp_d);
+	 hypre_fscanf(fp, "%le", &temp_d);
 	 for (i = 0; i < num_variables; i++)
 	    data[i] = temp_d;
 
-	 sprintf(ProblemUInput(problem), "%e", temp_d);
+	 hypre_sprintf(ProblemUInput(problem), "%e", temp_d);
       }
       else if (flag == 2)
       {
@@ -175,34 +175,34 @@ char     *file_name;
     * num_unknowns, num_points
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%d%d", &num_unknowns, &num_points);
+   hypre_fscanf(fp, "%d%d", &num_unknowns, &num_points);
 
    /*----------------------------------------------------------
     * iu, ip, iv
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%d", &flag);
+   hypre_fscanf(fp, "%d", &flag);
    ProblemIUPVFlag(problem) = flag;
 
    if (flag == 0)
    {
-      iu = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
-      ip = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
-      iv = hypre_CTAlloc(int, hypre_NDIMP(num_points+1));
+      iu = hypre_CTAlloc(HYPRE_Int, hypre_NDIMU(num_variables));
+      ip = hypre_CTAlloc(HYPRE_Int, hypre_NDIMU(num_variables));
+      iv = hypre_CTAlloc(HYPRE_Int, hypre_NDIMP(num_points+1));
 
-      fscanf(fp, "%s", temp_file_name);
+      hypre_fscanf(fp, "%s", temp_file_name);
       temp_fp = fopen(temp_file_name, "r");
 
       for (j = 0; j < num_variables; j++)
-	 fscanf(temp_fp, "%d", &iu[j]);
+	 hypre_fscanf(temp_fp, "%d", &iu[j]);
       for (j = 0; j < num_variables; j++)
-	 fscanf(temp_fp, "%d", &ip[j]);
+	 hypre_fscanf(temp_fp, "%d", &ip[j]);
       for (j = 0; j < num_points+1; j++)
-	 fscanf(temp_fp, "%d", &iv[j]);
+	 hypre_fscanf(temp_fp, "%d", &iv[j]);
 
       fclose(temp_fp);
 
-      sprintf(ProblemIUPVInput(problem), "%s", temp_file_name);
+      hypre_sprintf(ProblemIUPVInput(problem), "%s", temp_file_name);
    }
    else
    {
@@ -264,7 +264,7 @@ Problem *problem;
 {
    FILE    *fp;
 
-   int      flag;
+   HYPRE_Int      flag;
    char     temp_file_name[256];
    double   temp_d;
 
@@ -274,20 +274,20 @@ Problem *problem;
     *----------------------------------------------------------*/
    
    fp = fopen(file_name, "a");
-   fprintf(fp, "\nPROBLEM INFORMATION: \n\n");
+   hypre_fprintf(fp, "\nPROBLEM INFORMATION: \n\n");
   
    /*----------------------------------------------------------
     * num_variables
     *----------------------------------------------------------*/
 
-   fprintf(fp, "    Number of variables: %d \n", ProblemNumVariables(problem));
+   hypre_fprintf(fp, "    Number of variables: %d \n", ProblemNumVariables(problem));
   
    /*----------------------------------------------------------
     * A
     *----------------------------------------------------------*/
 
-   sscanf(ProblemAInput(problem), "%s", temp_file_name); 
-   fprintf(fp, "    Input matrix file: %s \n", temp_file_name);
+   hypre_sscanf(ProblemAInput(problem), "%s", temp_file_name); 
+   hypre_fprintf(fp, "    Input matrix file: %s \n", temp_file_name);
 
    /*----------------------------------------------------------
     * f
@@ -296,17 +296,17 @@ Problem *problem;
    flag = ProblemFFlag(problem);
    if (flag == 0)
    {
-      sscanf(ProblemFInput(problem), "%s", temp_file_name); 
-      fprintf(fp, "    Right-hand side file name: %s \n", temp_file_name);
+      hypre_sscanf(ProblemFInput(problem), "%s", temp_file_name); 
+      hypre_fprintf(fp, "    Right-hand side file name: %s \n", temp_file_name);
    }
    else if (flag == 1)
    {
-      sscanf(ProblemFInput(problem), "%le", &temp_d);   
-      fprintf(fp, "    Right-hand side constant with value: %e \n", temp_d);
+      hypre_sscanf(ProblemFInput(problem), "%le", &temp_d);   
+      hypre_fprintf(fp, "    Right-hand side constant with value: %e \n", temp_d);
    }
    else if (flag == 2)
    {
-      fprintf(fp, "    Right-hand side is random vector. \n");
+      hypre_fprintf(fp, "    Right-hand side is random vector. \n");
    }
 
    /*----------------------------------------------------------
@@ -316,26 +316,26 @@ Problem *problem;
    flag = ProblemUFlag(problem);
    if (flag == 0)
    {
-      sscanf(ProblemUInput(problem), "%s", temp_file_name); 
-      fprintf(fp, "    Initial guess file name: %s \n", temp_file_name);
+      hypre_sscanf(ProblemUInput(problem), "%s", temp_file_name); 
+      hypre_fprintf(fp, "    Initial guess file name: %s \n", temp_file_name);
    }
    else if (flag == 1)
    {
-      sscanf(ProblemUInput(problem), "%le", &temp_d);   
-      fprintf(fp, "    Initial guess constant with value: %e \n", temp_d);
+      hypre_sscanf(ProblemUInput(problem), "%le", &temp_d);   
+      hypre_fprintf(fp, "    Initial guess constant with value: %e \n", temp_d);
    }
    else if (flag == 2)
    {
-      fprintf(fp, "    Initial guess is random vector. \n");
+      hypre_fprintf(fp, "    Initial guess is random vector. \n");
    }
 
    /*----------------------------------------------------------
     * num_unknowns, num_points
     *----------------------------------------------------------*/
 
-   fprintf(fp, "    Number of unknown functions: %d \n",
+   hypre_fprintf(fp, "    Number of unknown functions: %d \n",
 	   ProblemNumUnknowns(problem));
-   fprintf(fp, "    Number of unknown points: %d \n",
+   hypre_fprintf(fp, "    Number of unknown points: %d \n",
 	   ProblemNumPoints(problem));
 
    /*----------------------------------------------------------
@@ -345,12 +345,12 @@ Problem *problem;
    flag = ProblemIUPVFlag(problem);
    if (flag == 0)
    { 
-      sscanf(ProblemIUPVInput(problem), "%s", temp_file_name); 
-      fprintf(fp, "    iu, iv, ip read from file: %s \n", temp_file_name);
+      hypre_sscanf(ProblemIUPVInput(problem), "%s", temp_file_name); 
+      hypre_fprintf(fp, "    iu, iv, ip read from file: %s \n", temp_file_name);
    }
    else
    {
-      fprintf(fp, "    Pointers iu, iv, ip defined in standard way. \n");
+      hypre_fprintf(fp, "    Pointers iu, iv, ip defined in standard way. \n");
    }
 
  

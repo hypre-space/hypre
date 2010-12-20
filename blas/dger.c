@@ -1,7 +1,7 @@
 #include "hypre_blas.h"
 #include "f2c.h"
 
-/* Subroutine */ int dger_(integer *m, integer *n, doublereal *alpha, 
+/* Subroutine */ HYPRE_Int dger_(integer *m, integer *n, doublereal *alpha, 
 	doublereal *x, integer *incx, doublereal *y, integer *incy, 
 	doublereal *a, integer *lda)
 {
@@ -11,7 +11,7 @@
     static integer info;
     static doublereal temp;
     static integer i__, j, ix, jy, kx;
-    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 /*  Purpose   
     =======   

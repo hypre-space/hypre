@@ -23,16 +23,16 @@
 /* for multivectors, length should be the (global) length of a single vector.
  Thus each of the vectors of the multivector will get the same data distribution. */
 
-int
-hypre_GeneratePartitioning(int length, int num_procs, int **part_ptr)
+HYPRE_Int
+hypre_GeneratePartitioning(HYPRE_Int length, HYPRE_Int num_procs, HYPRE_Int **part_ptr)
 {
-   int ierr = 0;
-   int *part;
-   int size, rest;
-   int i;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int *part;
+   HYPRE_Int size, rest;
+   HYPRE_Int i;
 
 
-   part = hypre_CTAlloc(int, num_procs+1);
+   part = hypre_CTAlloc(HYPRE_Int, num_procs+1);
    size = length / num_procs;
    rest = length - size*num_procs;
    part[0] = 0;
@@ -52,16 +52,16 @@ hypre_GeneratePartitioning(int length, int num_procs, int **part_ptr)
    the portion of the partition belonging to the individual process - 
    to do this it requires the processor id as well AHB 6/05*/
 
-int
-hypre_GenerateLocalPartitioning(int length, int num_procs, int myid, int **part_ptr)
+HYPRE_Int
+hypre_GenerateLocalPartitioning(HYPRE_Int length, HYPRE_Int num_procs, HYPRE_Int myid, HYPRE_Int **part_ptr)
 {
 
 
-   int ierr = 0;
-   int *part;
-   int size, rest;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int *part;
+   HYPRE_Int size, rest;
 
-   part = hypre_CTAlloc(int, 2);
+   part = hypre_CTAlloc(HYPRE_Int, 2);
    size = length /num_procs;
    rest = length - size*num_procs;
 

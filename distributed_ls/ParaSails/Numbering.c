@@ -47,12 +47,12 @@
  * are contiguous.  This is required by the mat-vec routine.
  *--------------------------------------------------------------------------*/
 
-Numbering *NumberingCreate(Matrix *mat, int size)
+Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 {
     Numbering *numb = (Numbering *) malloc(sizeof(Numbering));
-    int row, i, len, *ind;
+    HYPRE_Int row, i, len, *ind;
     double *val;
-    int num_external = 0;
+    HYPRE_Int num_external = 0;
 
     numb->size    = size;
     numb->beg_row = mat->beg_row;
@@ -60,7 +60,7 @@ Numbering *NumberingCreate(Matrix *mat, int size)
     numb->num_loc = mat->end_row - mat->beg_row + 1;
     numb->num_ind = mat->end_row - mat->beg_row + 1;
 
-    numb->local_to_global = (int *) malloc((numb->num_loc+size) * sizeof(int));
+    numb->local_to_global = (HYPRE_Int *) malloc((numb->num_loc+size) * sizeof(HYPRE_Int));
     numb->hash            = HashCreate(2*size+1);
 
     /* Set up the local part of local_to_global */
@@ -85,9 +85,9 @@ Numbering *NumberingCreate(Matrix *mat, int size)
 
 		        /* allocate more space for numbering */
 		        numb->size *= 2;
-		        numb->local_to_global = (int *) 
+		        numb->local_to_global = (HYPRE_Int *) 
 			    realloc(numb->local_to_global, 
-			    (numb->num_loc+numb->size)*sizeof(int));
+			    (numb->num_loc+numb->size)*sizeof(HYPRE_Int));
                         new = HashCreate(2*numb->size+1);
 		        HashRehash(numb->hash, new);
 		        HashDestroy(numb->hash);
@@ -133,9 +133,9 @@ Numbering *NumberingCreateCopy(Numbering *orig)
     numb->num_ind = orig->num_ind;
 
     numb->local_to_global = 
-        (int *) malloc((numb->num_loc+numb->size) * sizeof(int));
+        (HYPRE_Int *) malloc((numb->num_loc+numb->size) * sizeof(HYPRE_Int));
     memcpy(numb->local_to_global, orig->local_to_global, 
-         numb->num_ind*sizeof(int));
+         numb->num_ind*sizeof(HYPRE_Int));
 
     numb->hash = HashCreate(2*numb->size+1);
     HashRehash(orig->hash, numb->hash);
@@ -160,9 +160,9 @@ void NumberingDestroy(Numbering *numb)
  * numbering.  May be done in place.
  *--------------------------------------------------------------------------*/
 
-void NumberingLocalToGlobal(Numbering *numb, int len, int *local, int *global)
+void NumberingLocalToGlobal(Numbering *numb, HYPRE_Int len, HYPRE_Int *local, HYPRE_Int *global)
 {
-    int i;
+    HYPRE_Int i;
 
     for (i=0; i<len; i++)
         global[i] = numb->local_to_global[local[i]];
@@ -174,9 +174,9 @@ void NumberingLocalToGlobal(Numbering *numb, int len, int *local, int *global)
  * to the numbering object.  May be done in place.
  *--------------------------------------------------------------------------*/
 
-void NumberingGlobalToLocal(Numbering *numb, int len, int *global, int *local)
+void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_Int *global, HYPRE_Int *local)
 {
-    int i, l;
+    HYPRE_Int i, l;
 
     for (i=0; i<len; i++)
     {
@@ -193,11 +193,11 @@ void NumberingGlobalToLocal(Numbering *numb, int len, int *global, int *local)
 		    /* allocate more space for numbering */
 		    numb->size *= 2;
 #ifdef PARASAILS_DEBUG
-		    printf("Numbering resize %d\n", numb->size);
+		    hypre_printf("Numbering resize %d\n", numb->size);
 #endif
-		    numb->local_to_global = (int *) 
+		    numb->local_to_global = (HYPRE_Int *) 
 			realloc(numb->local_to_global, 
-			(numb->num_loc+numb->size)*sizeof(int));
+			(numb->num_loc+numb->size)*sizeof(HYPRE_Int));
                     new = HashCreate(2*numb->size+1);
 		    HashRehash(numb->hash, new);
 		    HashDestroy(numb->hash);

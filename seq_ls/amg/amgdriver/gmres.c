@@ -28,7 +28,7 @@
  * SPGMRATimes
  *--------------------------------------------------------------------------*/
 
-int       SPGMRATimes(A_data_arg, v_arg, z_arg)
+HYPRE_Int       SPGMRATimes(A_data_arg, v_arg, z_arg)
 void     *A_data_arg;
 N_Vector  v_arg;
 N_Vector  z_arg;
@@ -53,14 +53,14 @@ N_Vector  z_arg;
  * SPGMRPSolve
  *--------------------------------------------------------------------------*/
 
-int       SPGMRPSolve(P_data_arg, r_arg,  z_arg, lr_arg)
+HYPRE_Int       SPGMRPSolve(P_data_arg, r_arg,  z_arg, lr_arg)
 void     *P_data_arg;
 N_Vector  r_arg;
 N_Vector  z_arg;
-int       lr_arg;
+HYPRE_Int       lr_arg;
 {
    SPGMRPData  *P_data = P_data_arg;
-   int        (*precond)()   = (P_data -> precond);
+   HYPRE_Int        (*precond)()   = (P_data -> precond);
    void        *precond_data = (P_data -> precond_data);
    hypre_Vector  *s                = (P_data -> s);
    hypre_Vector  *r                = (P_data -> r);
@@ -98,7 +98,7 @@ void    *data_arg;
 {
    GMRESData *gmres_data   = data_arg;
 
-   int        max_restarts = GMRESDataMaxRestarts(gmres_data);
+   HYPRE_Int        max_restarts = GMRESDataMaxRestarts(gmres_data);
 
    void      *A_data       = GMRESDataAData(gmres_data);
    void      *P_data       = GMRESDataPData(gmres_data);
@@ -110,8 +110,8 @@ void    *data_arg;
    real       delta;
    real       norm, rel_norm, b_norm;
 
-   int        nli;
-   int        nps;
+   HYPRE_Int        nli;
+   HYPRE_Int        nps;
 
    /* logging variables */
    FILE      *log_fp;
@@ -137,7 +137,7 @@ void    *data_arg;
    rel_norm = b_norm ? (norm / b_norm) : 0;
 
 #if 1
-   printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+   hypre_printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
 	  nli, norm, rel_norm);
 #endif
 
@@ -147,12 +147,12 @@ void    *data_arg;
 
    log_fp = fopen(GlobalsLogFileName, "a");
 
-   fprintf(log_fp, "\nGMRES INFO:\n\n");
+   hypre_fprintf(log_fp, "\nGMRES INFO:\n\n");
 
-   fprintf(log_fp, "Iters       ||r||_2    ||r||_2/||b||_2\n");
-   fprintf(log_fp, "-----    ------------    ------------\n");
+   hypre_fprintf(log_fp, "Iters       ||r||_2    ||r||_2/||b||_2\n");
+   hypre_fprintf(log_fp, "-----    ------------    ------------\n");
    
-   fprintf(log_fp, "% 5d    %e    %e\n", nli, norm, rel_norm);
+   hypre_fprintf(log_fp, "% 5d    %e    %e\n", nli, norm, rel_norm);
    
    fclose(log_fp);
 }
@@ -163,7 +163,7 @@ void    *data_arg;
 
 void      GMRESSetup(A, precond, precond_data, data)
 hypre_Matrix   *A;
-int     (*precond)();
+HYPRE_Int     (*precond)();
 void     *precond_data;
 void     *data;
 {
@@ -171,7 +171,7 @@ void     *data;
 
    SPGMRPData *P_data;
 
-   int         size;
+   HYPRE_Int         size;
    double     *darray;
 
 

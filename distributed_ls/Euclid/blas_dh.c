@@ -17,11 +17,11 @@
 
 #undef __FUNC__
 #define __FUNC__ "matvec_euclid_seq"
-void matvec_euclid_seq(int n, int *rp, int *cval, double *aval, double *x, double *y)
+void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, double *x, double *y)
 {
   START_FUNC_DH
-  int i, j;
-  int from, to, col;
+  HYPRE_Int i, j;
+  HYPRE_Int from, to, col;
   double sum;
  
   if (np_dh > 1) SET_V_ERROR("only for sequential case!\n");
@@ -51,10 +51,10 @@ void matvec_euclid_seq(int n, int *rp, int *cval, double *aval, double *x, doubl
 
 #undef __FUNC__
 #define __FUNC__ "Axpy"
-void Axpy(int n, double alpha, double *x, double *y)
+void Axpy(HYPRE_Int n, double alpha, double *x, double *y)
 {
   START_FUNC_DH
-  int i;
+  HYPRE_Int i;
 
 #ifdef USING_OPENMP_DH
 #pragma omp parallel for schedule(static) firstprivate(alpha, x, y) \
@@ -69,10 +69,10 @@ void Axpy(int n, double alpha, double *x, double *y)
 
 #undef __FUNC__
 #define __FUNC__ "CopyVec"
-void CopyVec(int n, double *xIN, double *yOUT)
+void CopyVec(HYPRE_Int n, double *xIN, double *yOUT)
 {
   START_FUNC_DH
-  int i;
+  HYPRE_Int i;
 
 #ifdef USING_OPENMP_DH
 #pragma omp parallel for schedule(static) firstprivate(yOUT, xIN) \
@@ -87,10 +87,10 @@ void CopyVec(int n, double *xIN, double *yOUT)
 
 #undef __FUNC__
 #define __FUNC__ "ScaleVec"
-void ScaleVec(int n, double alpha, double *x)
+void ScaleVec(HYPRE_Int n, double alpha, double *x)
 {
   START_FUNC_DH
-  int i;
+  HYPRE_Int i;
 
 #ifdef USING_OPENMP_DH
 #pragma omp parallel for schedule(static) firstprivate(alpha, x) \
@@ -104,12 +104,12 @@ void ScaleVec(int n, double alpha, double *x)
 
 #undef __FUNC__
 #define __FUNC__ "InnerProd"
-double InnerProd(int n, double *x, double *y)
+double InnerProd(HYPRE_Int n, double *x, double *y)
 {
   START_FUNC_DH
   double result, local_result = 0.0;
 
-  int i;
+  HYPRE_Int i;
 
 #ifdef USING_OPENMP_DH
 #pragma omp parallel for schedule(static) firstprivate(x, y) \
@@ -121,7 +121,7 @@ double InnerProd(int n, double *x, double *y)
     }
 
     if (np_dh > 1) {
-      MPI_Allreduce(&local_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm_dh);
+      hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm_dh);
     } else {
       result = local_result;
     }
@@ -131,11 +131,11 @@ double InnerProd(int n, double *x, double *y)
 
 #undef __FUNC__
 #define __FUNC__ "Norm2"
-double Norm2(int n, double *x)
+double Norm2(HYPRE_Int n, double *x)
 {
   START_FUNC_DH
   double result, local_result = 0.0;
-  int i;
+  HYPRE_Int i;
 
 #ifdef USING_OPENMP_DH
 #pragma omp parallel for schedule(static) firstprivate(x) \
@@ -147,7 +147,7 @@ double Norm2(int n, double *x)
   }
 
   if (np_dh > 1) {
-    MPI_Allreduce(&local_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm_dh);
+    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm_dh);
   } else {
     result = local_result;
   }

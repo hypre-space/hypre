@@ -31,14 +31,14 @@
  * of layers around a box considered to be "adjacent", typically 1.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoxArraySubtractAdjacentBoxArray( hypre_BoxArray *boxes1,
                                         hypre_BoxArray *boxes2,
-                                        hypre_Box *box, int thick )
+                                        hypre_Box *box, HYPRE_Int thick )
 {
-   int ierr = 0;
-   int i;
-   int numexp[6];
+   HYPRE_Int ierr = 0;
+   HYPRE_Int i;
+   HYPRE_Int numexp[6];
    hypre_Box *box2e;
    hypre_Box *boxe = hypre_BoxDuplicate( box );
    hypre_BoxArray *boxes2e = hypre_BoxArrayDuplicate( boxes2 );
@@ -67,14 +67,14 @@ hypre_BoxArraySubtractAdjacentBoxArray( hypre_BoxArray *boxes1,
  * of layers around a box considered to be "adjacent", typically 1.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoxArraySubtractAdjacentBoxArrayD( hypre_BoxArray *boxes1,
                                         hypre_BoxArray *boxes2,
-                                        hypre_Box *box, int ds, int thick )
+                                        hypre_Box *box, HYPRE_Int ds, HYPRE_Int thick )
 {
-   int ierr = 0;
-   int i;
-   int numexp[6];
+   HYPRE_Int ierr = 0;
+   HYPRE_Int i;
+   HYPRE_Int numexp[6];
    hypre_Box *box2e;
    hypre_Box *boxe = hypre_BoxDuplicate( box );
    hypre_BoxArray *boxes2e = hypre_BoxArrayDuplicate( boxes2 );
@@ -108,13 +108,13 @@ hypre_BoxArraySubtractAdjacentBoxArrayD( hypre_BoxArray *boxes1,
  * The second input argument is a list of all neighbor boxes.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoxBoundaryDNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
-                      hypre_BoxArray *boundary, int ds, int thick )
+                      hypre_BoxArray *boundary, HYPRE_Int ds, HYPRE_Int thick )
 {
-   int i;
-   int numexp[6];
-   int ierr = 0;
+   HYPRE_Int i;
+   HYPRE_Int numexp[6];
+   HYPRE_Int ierr = 0;
    hypre_Box *boxe = hypre_BoxDuplicate( box );
    for ( i=0; i<6; ++i ) numexp[i] = 0;
    numexp[ds] = -thick;
@@ -163,12 +163,12 @@ hypre_BoxBoundaryDNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
  * The last argument has 6 values to denote the boundary thickness in each direction.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoxBoundaryNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
-                    hypre_BoxArray *boundary, int* thickness )
+                    hypre_BoxArray *boundary, HYPRE_Int* thickness )
 {
-   int ds;
-   int ierr = 0;
+   HYPRE_Int ds;
+   HYPRE_Int ierr = 0;
    hypre_BoxArray *boundary_d;
 
    /* We'll find the physical boundary in one direction at a time.
@@ -197,7 +197,7 @@ hypre_BoxBoundaryNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
  * of whether the computed boundary will consist of ghost zones.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoxBoundaryG( hypre_Box *box, hypre_StructGrid *g,
                     hypre_BoxArray *boundary )
 {
@@ -206,7 +206,7 @@ hypre_BoxBoundaryG( hypre_Box *box, hypre_StructGrid *g,
 
    hypre_BoxManager *boxman;
    hypre_BoxArray   *neighbor_boxes = NULL;
-   int              *thickness = hypre_StructGridNumGhost(g);
+   HYPRE_Int              *thickness = hypre_StructGridNumGhost(g);
  
    /* neighbor_boxes are this processor's neighbors, not this box's
       neighbors.  But it's likely to be cheaper to use them all in the
@@ -238,15 +238,15 @@ hypre_BoxBoundaryG( hypre_Box *box, hypre_StructGrid *g,
  * The boundary thickness is set to 1.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoxBoundaryDG( hypre_Box *box, hypre_StructGrid *g,
                      hypre_BoxArray *boundarym, hypre_BoxArray *boundaryp,
-                     int d )
+                     HYPRE_Int d )
 {
    hypre_BoxManager *boxman;
    hypre_BoxArray *neighbor_boxes = NULL;
-   int i;
-   int thickness[6];
+   HYPRE_Int i;
+   HYPRE_Int thickness[6];
 
    /* neighbor_boxes are this processor's neighbors, not this box's
       neighbors.  But it's likely to be cheaper to use them all in the

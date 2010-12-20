@@ -20,7 +20,7 @@
  * hypre_AMGBuildCoarseOperator
  *--------------------------------------------------------------------------*/
 
-int hypre_AMGBuildCoarseOperator(RT, A, P, RAP_ptr) 
+HYPRE_Int hypre_AMGBuildCoarseOperator(RT, A, P, RAP_ptr) 
 
 hypre_CSRMatrix  *RT;
 hypre_CSRMatrix  *A;
@@ -31,38 +31,38 @@ hypre_CSRMatrix **RAP_ptr;
    hypre_CSRMatrix    *RAP;
    
    double          *A_data;
-   int             *A_i;
-   int             *A_j;
+   HYPRE_Int             *A_i;
+   HYPRE_Int             *A_j;
 
    double          *P_data;
-   int             *P_i;
-   int             *P_j;
+   HYPRE_Int             *P_i;
+   HYPRE_Int             *P_j;
 
    double          *RAP_data;
-   int             *RAP_i;
-   int             *RAP_j;
+   HYPRE_Int             *RAP_i;
+   HYPRE_Int             *RAP_j;
 
-   int              RAP_size;
+   HYPRE_Int              RAP_size;
    
    hypre_CSRMatrix    *R;
    
    double          *R_data;
-   int             *R_i;
-   int             *R_j;
+   HYPRE_Int             *R_i;
+   HYPRE_Int             *R_j;
 
-   int             *P_marker;
-   int             *A_marker;
+   HYPRE_Int             *P_marker;
+   HYPRE_Int             *A_marker;
 
-   int              n_coarse;
-   int              n_fine;
+   HYPRE_Int              n_coarse;
+   HYPRE_Int              n_fine;
    
-   int              ic, i;
-   int              i1, i2, i3;
-   int              jj1, jj2, jj3;
+   HYPRE_Int              ic, i;
+   HYPRE_Int              i1, i2, i3;
+   HYPRE_Int              jj1, jj2, jj3;
    
-   int              jj_counter;
-   int              jj_row_begining;
-   int              start_indexing = 0; /* start indexing for RAP_data at 0 */
+   HYPRE_Int              jj_counter;
+   HYPRE_Int              jj_row_begining;
+   HYPRE_Int              start_indexing = 0; /* start indexing for RAP_data at 0 */
 
    double           r_entry;
    double           r_a_product;
@@ -100,9 +100,9 @@ hypre_CSRMatrix **RAP_ptr;
     *  Allocate RAP_i and marker arrays.
     *-----------------------------------------------------------------------*/
 
-   RAP_i    = hypre_CTAlloc(int, n_coarse+1);
-   P_marker = hypre_CTAlloc(int, n_coarse);
-   A_marker = hypre_CTAlloc(int, n_fine);
+   RAP_i    = hypre_CTAlloc(HYPRE_Int, n_coarse+1);
+   P_marker = hypre_CTAlloc(HYPRE_Int, n_coarse);
+   A_marker = hypre_CTAlloc(HYPRE_Int, n_fine);
 
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of RAP and set up RAP_i
@@ -207,7 +207,7 @@ hypre_CSRMatrix **RAP_ptr;
 
    RAP_size = jj_counter;
    RAP_data = hypre_CTAlloc(double, RAP_size);
-   RAP_j    = hypre_CTAlloc(int, RAP_size);
+   RAP_j    = hypre_CTAlloc(HYPRE_Int, RAP_size);
 
    /*-----------------------------------------------------------------------
     *  Second Pass: Fill in RAP_data and RAP_j.

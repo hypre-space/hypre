@@ -35,21 +35,21 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    hypre_Box                 *intersect_box, boxman_entry_box;
 
    hypre_BoxManEntry        **boxman_entries;
-   int                        nboxman_entries;
+   HYPRE_Int                        nboxman_entries;
 
    hypre_BoxArrayArray       *send_boxes;
-   int                      **send_processes;
-   int                      **send_remote_boxnums;
+   HYPRE_Int                      **send_processes;
+   HYPRE_Int                      **send_remote_boxnums;
 
    hypre_Index                ilower, iupper, index;
 
-   int                        myproc, proc;
+   HYPRE_Int                        myproc, proc;
 
-   int                        cnt;
-   int                        i, j;
+   HYPRE_Int                        cnt;
+   HYPRE_Int                        i, j;
 
    hypre_ClearIndex(index); 
-   MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm_rank(comm, &myproc);
 
    sendinfo_data= hypre_CTAlloc(hypre_SStructSendInfoData, 1);
 
@@ -66,8 +66,8 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    grid_boxes   = hypre_StructGridBoxes(fgrid);
 
    send_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
-   send_processes= hypre_CTAlloc(int *, hypre_BoxArraySize(grid_boxes));
-   send_remote_boxnums= hypre_CTAlloc(int *, hypre_BoxArraySize(grid_boxes));
+   send_processes= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
+   send_remote_boxnums= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
 
    hypre_ForBoxI(i, grid_boxes)
    {
@@ -96,8 +96,8 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
              cnt++;
           }
        }
-       send_processes[i]     = hypre_CTAlloc(int, cnt);
-       send_remote_boxnums[i]= hypre_CTAlloc(int, cnt);
+       send_processes[i]     = hypre_CTAlloc(HYPRE_Int, cnt);
+       send_remote_boxnums[i]= hypre_CTAlloc(HYPRE_Int, cnt);
 
        cnt= 0;
        for (j= 0; j< nboxman_entries; j++)
@@ -135,11 +135,11 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
 /*--------------------------------------------------------------------------
  * hypre_SStructSendInfoDataDestroy
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_SStructSendInfoDataDestroy(hypre_SStructSendInfoData *sendinfo_data)
 {
-   int ierr = 0;
-   int i;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int i;
 
    if (sendinfo_data)
    {

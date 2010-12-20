@@ -27,24 +27,24 @@
  * hypre_CSRBlockMatrixMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRBlockMatrixMatvec(double alpha, hypre_CSRBlockMatrix *A,
                            hypre_Vector *x, double beta, hypre_Vector *y)
 {
    double     *A_data   = hypre_CSRBlockMatrixData(A);
-   int        *A_i      = hypre_CSRBlockMatrixI(A);
-   int        *A_j      = hypre_CSRBlockMatrixJ(A);
-   int         num_rows = hypre_CSRBlockMatrixNumRows(A);
-   int         num_cols = hypre_CSRBlockMatrixNumCols(A);
-   int         blk_size = hypre_CSRBlockMatrixBlockSize(A);
+   HYPRE_Int        *A_i      = hypre_CSRBlockMatrixI(A);
+   HYPRE_Int        *A_j      = hypre_CSRBlockMatrixJ(A);
+   HYPRE_Int         num_rows = hypre_CSRBlockMatrixNumRows(A);
+   HYPRE_Int         num_cols = hypre_CSRBlockMatrixNumCols(A);
+   HYPRE_Int         blk_size = hypre_CSRBlockMatrixBlockSize(A);
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
-   int         x_size = hypre_VectorSize(x);
-   int         y_size = hypre_VectorSize(y);
+   HYPRE_Int         x_size = hypre_VectorSize(x);
+   HYPRE_Int         y_size = hypre_VectorSize(y);
 
-   int         i, b1, b2, jj, bnnz=blk_size*blk_size;
-   int         ierr = 0;
+   HYPRE_Int         i, b1, b2, jj, bnnz=blk_size*blk_size;
+   HYPRE_Int         ierr = 0;
    double      temp;
 
    /*---------------------------------------------------------------------
@@ -144,7 +144,7 @@ hypre_CSRBlockMatrixMatvec(double alpha, hypre_CSRBlockMatrix *A,
  *   From Van Henson's modification of hypre_CSRMatrixMatvec.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRBlockMatrixMatvecT( double               alpha,
                              hypre_CSRBlockMatrix *A,
                              hypre_Vector         *x,
@@ -152,24 +152,24 @@ hypre_CSRBlockMatrixMatvecT( double               alpha,
                              hypre_Vector          *y     )
 {
    double     *A_data    = hypre_CSRBlockMatrixData(A);
-   int        *A_i       = hypre_CSRBlockMatrixI(A);
-   int        *A_j       = hypre_CSRBlockMatrixJ(A);
-   int         num_rows  = hypre_CSRBlockMatrixNumRows(A);
-   int         num_cols  = hypre_CSRBlockMatrixNumCols(A);
+   HYPRE_Int        *A_i       = hypre_CSRBlockMatrixI(A);
+   HYPRE_Int        *A_j       = hypre_CSRBlockMatrixJ(A);
+   HYPRE_Int         num_rows  = hypre_CSRBlockMatrixNumRows(A);
+   HYPRE_Int         num_cols  = hypre_CSRBlockMatrixNumCols(A);
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
-   int         x_size = hypre_VectorSize(x);
-   int         y_size = hypre_VectorSize(y);
+   HYPRE_Int         x_size = hypre_VectorSize(x);
+   HYPRE_Int         y_size = hypre_VectorSize(y);
 
    double      temp;
    
-   int         i, j, jj;
-   int         ierr  = 0;
-   int         b1, b2;
+   HYPRE_Int         i, j, jj;
+   HYPRE_Int         ierr  = 0;
+   HYPRE_Int         b1, b2;
    
-   int         blk_size = hypre_CSRBlockMatrixBlockSize(A);
-   int         bnnz=blk_size*blk_size;
+   HYPRE_Int         blk_size = hypre_CSRBlockMatrixBlockSize(A);
+   HYPRE_Int         bnnz=blk_size*blk_size;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if

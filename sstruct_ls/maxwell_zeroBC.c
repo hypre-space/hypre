@@ -15,12 +15,12 @@
 
 #include "headers.h"
 
-int
+HYPRE_Int
 hypre_ParVectorZeroBCValues(hypre_ParVector *v,
-                            int             *rows,
-                            int              nrows)
+                            HYPRE_Int             *rows,
+                            HYPRE_Int              nrows)
 {
-   int   ierr= 0;
+   HYPRE_Int   ierr= 0;
 
    hypre_Vector *v_local = hypre_ParVectorLocalVector(v);
 
@@ -29,15 +29,15 @@ hypre_ParVectorZeroBCValues(hypre_ParVector *v,
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SeqVectorZeroBCValues(hypre_Vector *v,
-                            int          *rows,
-                            int           nrows)
+                            HYPRE_Int          *rows,
+                            HYPRE_Int           nrows)
 {
    double  *vector_data = hypre_VectorData(v);
-   int      i;
+   HYPRE_Int      i;
                                                                                                     
-   int      ierr  = 0;
+   HYPRE_Int      ierr  = 0;
                                                                                                     
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"

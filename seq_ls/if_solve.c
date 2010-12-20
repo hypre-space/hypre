@@ -19,15 +19,15 @@
 /* Include C interface to ksp_driver */
 #include "incfactt_facsol_f.h"
 
-int incfact_solve ( void *input_data, double *x, double *b )
+HYPRE_Int incfact_solve ( void *input_data, double *x, double *b )
 {
    INCFACTData    *incfact_data = input_data;
-   int            n, nnz, ierr_solver, ierr_input;
+   HYPRE_Int            n, nnz, ierr_solver, ierr_input;
    double        *b_copy;
    Matrix        *A, *preconditioner;
-   int            i, ierr_incfactt;
-   int            lenpmx;
-   int            scale, reorder;
+   HYPRE_Int            i, ierr_incfactt;
+   HYPRE_Int            lenpmx;
+   HYPRE_Int            scale, reorder;
 
 
 
@@ -137,7 +137,7 @@ int incfact_solve ( void *input_data, double *x, double *b )
 
   if( ierr_input != 0 ) 
   {
-    printf("Input error to KSP, error %d\n", ierr_input);
+    hypre_printf("Input error to KSP, error %d\n", ierr_input);
     return(ierr_input);
   }
 
@@ -145,7 +145,7 @@ int incfact_solve ( void *input_data, double *x, double *b )
   {
     if( ierr_solver != -1 ) 
     { 
-      printf("Warning: Nonzero error code in KSP, error %d\n", ierr_solver);
+      hypre_printf("Warning: Nonzero error code in KSP, error %d\n", ierr_solver);
       return(0);
     } else
     {

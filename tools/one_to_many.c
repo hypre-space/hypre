@@ -19,37 +19,37 @@
 /*----------------------------------------------------------------------
  *    Read matrix and vector files from disk.
  *----------------------------------------------------------------------*/
-int
-main( int   argc,
+HYPRE_Int
+main( HYPRE_Int   argc,
       char *argv[] )
 {
-   int                 matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
+   HYPRE_Int                 matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
 
    hypre_StructMatrix   *matrix_root, **sub_matrices;
 
    hypre_StructGrid     **sub_grids, *grid_root;
    hypre_BoxArray       *boxes, *boxes_2;
    hypre_Box            *box;
-   int                 dim;
+   HYPRE_Int                 dim;
 
    hypre_StructStencil  *stencil, **stencils;
    hypre_Index          *stencil_shape, **stencil_shapes;
    hypre_Index           ilower, iupper;
-   int                 stencil_size;
+   HYPRE_Int                 stencil_size;
 
    hypre_BoxArray       *data_space, *data_space_2;
 
    FILE               *file, *file_root;
-   int                 sub_i, sub_j, sub_k; 
+   HYPRE_Int                 sub_i, sub_j, sub_k; 
                             /* Number of subdivisions to use for i,j,k */
-   int                 num_files; /* Total number of files to write out */
-   int                 i, j, k, ii, i_file, idummy;
-   int                 num_values, num_values_2;
-   int                 imin, jmin, kmin, imax, jmax, kmax;
-   int                 del_i, del_j, del_k;
+   HYPRE_Int                 num_files; /* Total number of files to write out */
+   HYPRE_Int                 i, j, k, ii, i_file, idummy;
+   HYPRE_Int                 num_values, num_values_2;
+   HYPRE_Int                 imin, jmin, kmin, imax, jmax, kmax;
+   HYPRE_Int                 del_i, del_j, del_k;
 
-   int                 myid, num_procs;
-   int                 symmetric;
+   HYPRE_Int                 myid, num_procs;
+   HYPRE_Int                 symmetric;
 
    char  filename_root[255]; /* Filename root */
    char  filename[256]    ;
@@ -59,10 +59,10 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
+   hypre_MPI_Init(&argc, &argv);
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
@@ -74,25 +74,25 @@ main( int   argc,
       several different files */
    if (argc > 4)
      {
-       sprintf(filename_root, argv[1]);
+       hypre_sprintf(filename_root, argv[1]);
        sub_i = atoi(argv[2]);
        sub_j = atoi(argv[3]);
        sub_k = atoi(argv[4]);
      }
    else
      {
-       printf("Illegal input.  Usage:\n\n");
-       printf("     mpirun -np 1 one_to_many filename sub_i sub_j sub_k\n\n");
-       printf("     where filename = file containing matrix to subdivide,\n");
-       printf("           sub_i = number of subdivisions in i,\n");
-       printf("           sub_j = number of subdivisions in j, and\n");
-       printf("           sub_k = number of subdivisions in i.\n");
-       printf("The number of files written is sub_i*sub_j*sub_k.\n");
+       hypre_printf("Illegal input.  Usage:\n\n");
+       hypre_printf("     mpirun -np 1 one_to_many filename sub_i sub_j sub_k\n\n");
+       hypre_printf("     where filename = file containing matrix to subdivide,\n");
+       hypre_printf("           sub_i = number of subdivisions in i,\n");
+       hypre_printf("           sub_j = number of subdivisions in j, and\n");
+       hypre_printf("           sub_k = number of subdivisions in i.\n");
+       hypre_printf("The number of files written is sub_i*sub_j*sub_k.\n");
        exit(1);
      }
    /* sub_i = 2; sub_j = 2; sub_k = 1; */
    /* set filename_root to zin_matrix for the moment */
-   /* sprintf(filename_root, "zin_matrix_test"); */
+   /* hypre_sprintf(filename_root, "zin_matrix_test"); */
 
    /* set number of files to write output to*/
    num_files = sub_i*sub_j*sub_k;
@@ -100,7 +100,7 @@ main( int   argc,
    /* open root file */
    if ((file_root = fopen(filename_root, "r")) == NULL)
      {
-       printf("Error: can't open input file %s\n", filename_root);
+       hypre_printf("Error: can't open input file %s\n", filename_root);
        exit(1);
      }
    /*-----------------------------------------------------------
@@ -108,22 +108,22 @@ main( int   argc,
     * for the root file.
     *-----------------------------------------------------------*/
 
-   fscanf(file_root, "StructMatrix\n");
+   hypre_fscanf(file_root, "StructMatrix\n");
 
-   fscanf(file_root, "\nSymmetric: %d\n", &symmetric);
+   hypre_fscanf(file_root, "\nSymmetric: %d\n", &symmetric);
 
    /* read grid info */
-   fscanf(file_root, "\nGrid:\n");
-   grid_root = hypre_ReadStructGrid(MPI_COMM_WORLD, file_root);
+   hypre_fscanf(file_root, "\nGrid:\n");
+   grid_root = hypre_ReadStructGrid(hypre_MPI_COMM_WORLD, file_root);
 
    /* read stencil info */
-   fscanf(file_root, "\nStencil:\n");
+   hypre_fscanf(file_root, "\nStencil:\n");
    dim = hypre_StructGridDim(grid_root);
-   fscanf(file_root, "%d\n", &stencil_size);
+   hypre_fscanf(file_root, "%d\n", &stencil_size);
    stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
      {
-       fscanf(file_root, "%d: %d %d %d\n", &idummy,
+       hypre_fscanf(file_root, "%d: %d %d %d\n", &idummy,
 	      &hypre_IndexX(stencil_shape[i]),
 	      &hypre_IndexY(stencil_shape[i]),
 	      &hypre_IndexZ(stencil_shape[i]));
@@ -134,7 +134,7 @@ main( int   argc,
     * Initialize the matrix
     *----------------------------------------*/
 
-   matrix_root = hypre_NewStructMatrix(MPI_COMM_WORLD, grid_root, stencil);
+   matrix_root = hypre_NewStructMatrix(hypre_MPI_COMM_WORLD, grid_root, stencil);
    hypre_StructMatrixSymmetric(matrix_root) = symmetric;
    hypre_SetStructMatrixNumGhost(matrix_root, matrix_num_ghost);
    hypre_InitializeStructMatrix(matrix_root);
@@ -147,7 +147,7 @@ main( int   argc,
    data_space = hypre_StructMatrixDataSpace(matrix_root);
    num_values = hypre_StructMatrixNumValues(matrix_root);
  
-   fscanf(file_root, "\nData:\n");
+   hypre_fscanf(file_root, "\nData:\n");
    hypre_ReadBoxArrayData(file_root, boxes, data_space, num_values,
                         hypre_StructMatrixData(matrix_root));
    hypre_AssembleStructMatrix(matrix_root);
@@ -182,17 +182,17 @@ main( int   argc,
    del_k = (kmax - kmin + 1)/sub_k;
    if (del_i < 1)
      {
-       printf("Error: too many subdivisions in i, sub_i = %d\n", sub_i);
+       hypre_printf("Error: too many subdivisions in i, sub_i = %d\n", sub_i);
        exit(1);
      }
    if (del_j < 1)
      {
-       printf("Error: too many subdivisions in j, sub_j = %d\n", sub_j);
+       hypre_printf("Error: too many subdivisions in j, sub_j = %d\n", sub_j);
        exit(1);
      }
    if (del_k < 1)
      {
-       printf("Error: too many subdivisions in k, sub_k = %d\n", sub_k);
+       hypre_printf("Error: too many subdivisions in k, sub_k = %d\n", sub_k);
        exit(1);
      }
    i_file = -1;
@@ -203,7 +203,7 @@ main( int   argc,
 	   for (i = 0; i < sub_i; i++)
 	     {
 	       i_file += 1;
-	       sub_grids[i_file] = hypre_NewStructGrid(MPI_COMM_WORLD, dim);
+	       sub_grids[i_file] = hypre_NewStructGrid(hypre_MPI_COMM_WORLD, dim);
 	       stencil_shapes[i_file] = hypre_CTAlloc(hypre_Index, stencil_size);
 	       for (ii = 0; ii < stencil_size; ii++)
 		 {
@@ -250,7 +250,7 @@ main( int   argc,
 	       hypre_AssembleStructGrid(sub_grids[i_file]);
 
 	       sub_matrices[i_file] = 
-		 hypre_NewStructMatrix(MPI_COMM_WORLD, sub_grids[i_file],
+		 hypre_NewStructMatrix(hypre_MPI_COMM_WORLD, sub_grids[i_file],
 				     stencils[i_file]); 
 	       hypre_StructMatrixSymmetric(sub_matrices[i_file]) = symmetric;
 	       hypre_SetStructMatrixNumGhost(sub_matrices[i_file], 
@@ -279,33 +279,33 @@ main( int   argc,
    /* Write the Symmtric, Grid and Stencil information to the output files */
    for (i_file = 0; i_file < num_files; i_file++)
      {
-       sprintf(filename, "%s.%05d", filename_root, i_file);
+       hypre_sprintf(filename, "%s.%05d", filename_root, i_file);
        if ((file = fopen(filename, "w")) == NULL)
 	 {
-	   printf("Error: can't open output file %s\n", filename);
+	   hypre_printf("Error: can't open output file %s\n", filename);
 	   exit(1);
 	 }
-       fprintf(file, "StructMatrix\n");
+       hypre_fprintf(file, "StructMatrix\n");
 
-       fprintf(file, "\nSymmetric: %d\n", symmetric);
+       hypre_fprintf(file, "\nSymmetric: %d\n", symmetric);
 
        /* write grid info */
-       fprintf(file, "\nGrid:\n");
+       hypre_fprintf(file, "\nGrid:\n");
        hypre_PrintStructGrid(file, sub_grids[i_file]);
 
        /* write stencil info */
-       fprintf(file, "\nStencil:\n");
-       fprintf(file, "%d\n", stencil_size);
+       hypre_fprintf(file, "\nStencil:\n");
+       hypre_fprintf(file, "%d\n", stencil_size);
        for (i = 0; i < stencil_size; i++)
 	 {
-	   fprintf(file, "%d: %d %d %d\n", i,
+	   hypre_fprintf(file, "%d: %d %d %d\n", i,
 		  hypre_IndexX(stencil_shape[i]),
 		  hypre_IndexY(stencil_shape[i]),
 		  hypre_IndexZ(stencil_shape[i]));
 	 }
 
        /* write data info */
-       fprintf(file, "\nData:\n");
+       hypre_fprintf(file, "\nData:\n");
        boxes_2      = hypre_StructGridBoxes(sub_grids[i_file]);
        data_space_2 = hypre_StructMatrixDataSpace(sub_matrices[i_file]);
        num_values_2 = hypre_StructMatrixNumValues(sub_matrices[i_file]);
@@ -337,7 +337,7 @@ main( int   argc,
    hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
-   MPI_Finalize();
+   hypre_MPI_Finalize();
 
    return 0;
 }

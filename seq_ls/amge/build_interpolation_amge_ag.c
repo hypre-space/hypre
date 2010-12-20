@@ -37,130 +37,130 @@
  ****************************************************************************/
 #include "headers.h" 
 
-int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
+HYPRE_Int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
-				   int **i_coarseelement_coarsedof_pointer,
-				   int **j_coarseelement_coarsedof_pointer,
+				   HYPRE_Int **i_coarseelement_coarsedof_pointer,
+				   HYPRE_Int **j_coarseelement_coarsedof_pointer,
 
 
-				   int **i_coarseelement_coarsechord_pointer,
-				   int **j_coarseelement_coarsechord_pointer,
+				   HYPRE_Int **i_coarseelement_coarsechord_pointer,
+				   HYPRE_Int **j_coarseelement_coarsechord_pointer,
 				   double **a_coarseelement_coarsechord_pointer,
 
-				   int **i_coarsechord_coarsedof_pointer, 
-				   int **j_coarsechord_coarsedof_pointer,
+				   HYPRE_Int **i_coarsechord_coarsedof_pointer, 
+				   HYPRE_Int **j_coarsechord_coarsedof_pointer,
 
-				   int *num_coarsechords_pointer,
+				   HYPRE_Int *num_coarsechords_pointer,
 
-				   int **i_dof_coarsedof_pointer,
-				   int **j_dof_coarsedof_pointer,
+				   HYPRE_Int **i_dof_coarsedof_pointer,
+				   HYPRE_Int **j_dof_coarsedof_pointer,
 
-				   int *num_coarsedofs_pointer,
+				   HYPRE_Int *num_coarsedofs_pointer,
 
-				   int *i_element_dof, int *j_element_dof,
-				   int *i_dof_element, int *j_dof_element,
+				   HYPRE_Int *i_element_dof, HYPRE_Int *j_element_dof,
+				   HYPRE_Int *i_dof_element, HYPRE_Int *j_dof_element,
 
-				   int *i_element_chord,
-				   int *j_element_chord,
+				   HYPRE_Int *i_element_chord,
+				   HYPRE_Int *j_element_chord,
 				   double *a_element_chord,
 
 
-				   int *i_AEface_dof, int *j_AEface_dof,
-				   int *i_dof_AEface, int *j_dof_AEface,
+				   HYPRE_Int *i_AEface_dof, HYPRE_Int *j_AEface_dof,
+				   HYPRE_Int *i_dof_AEface, HYPRE_Int *j_dof_AEface,
 
-				   int *i_AE_element, int *j_AE_element,
+				   HYPRE_Int *i_AE_element, HYPRE_Int *j_AE_element,
 
 
-				   int *i_chord_dof, int *j_chord_dof,
+				   HYPRE_Int *i_chord_dof, HYPRE_Int *j_chord_dof,
 
 				   /* double tolerance,  */
 
-				   int num_chords,
+				   HYPRE_Int num_chords,
 
-				   int num_AEs, 
-				   int num_AEfaces, 
+				   HYPRE_Int num_AEs, 
+				   HYPRE_Int num_AEfaces, 
 
-				   int num_elements, 
-				   int num_dofs)
+				   HYPRE_Int num_elements, 
+				   HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
-  int i,j,k,l;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k,l;
 
-  int matz = 1;
-  int i_loc, j_loc, k_loc, l_loc;
+  HYPRE_Int matz = 1;
+  HYPRE_Int i_loc, j_loc, k_loc, l_loc;
 
-  int chord, i_dof, j_dof, i_coarsedof, j_coarsedof;
+  HYPRE_Int chord, i_dof, j_dof, i_coarsedof, j_coarsedof;
   
   
 
-  int *i_AEface_element, *j_AEface_element;
-  int *i_AEface_dof_dof, *j_AEface_dof_dof;
+  HYPRE_Int *i_AEface_element, *j_AEface_element;
+  HYPRE_Int *i_AEface_dof_dof, *j_AEface_dof_dof;
 
 
-  int *i_AE_dof, *j_AE_dof;
+  HYPRE_Int *i_AE_dof, *j_AE_dof;
   
-  int *i_dof_coarsedof, *j_dof_coarsedof;
-  int num_coarsedofs;
+  HYPRE_Int *i_dof_coarsedof, *j_dof_coarsedof;
+  HYPRE_Int num_coarsedofs;
 
-  int *i_AE_coarsedof, *j_AE_coarsedof;
-  int *i_AE_coarsedof_coarsedof;
+  HYPRE_Int *i_AE_coarsedof, *j_AE_coarsedof;
+  HYPRE_Int *i_AE_coarsedof_coarsedof;
   double *AE_coarsedof_coarsedof;
-  int AE_coarsedof_coarsedof_counter;
+  HYPRE_Int AE_coarsedof_coarsedof_counter;
   
   
-  int *i_domain_element, *j_domain_element;
-  int *i_domain_chord, *j_domain_chord;
+  HYPRE_Int *i_domain_element, *j_domain_element;
+  HYPRE_Int *i_domain_chord, *j_domain_chord;
   double *a_domain_chord;
 
-  int *i_AE_chord, *j_AE_chord;
+  HYPRE_Int *i_AE_chord, *j_AE_chord;
   double *a_AE_chord;
 
-  int *i_domain_dof, *j_domain_dof;
-  int *i_subdomain_dof, *j_subdomain_dof;
-  int *i_dof_subdomain, *j_dof_subdomain;
-  int *i_Schur_dof_dof;
+  HYPRE_Int *i_domain_dof, *j_domain_dof;
+  HYPRE_Int *i_subdomain_dof, *j_subdomain_dof;
+  HYPRE_Int *i_dof_subdomain, *j_dof_subdomain;
+  HYPRE_Int *i_Schur_dof_dof;
   double *a_Schur_dof_dof, *P_coeff;
 
   hypre_CSRMatrix  *P;
 
-  int *i_dof_neighbor_coarsedof, *j_dof_neighbor_coarsedof;
-  int *i_dof_neighbor_coarsedof_0;
+  HYPRE_Int *i_dof_neighbor_coarsedof, *j_dof_neighbor_coarsedof;
+  HYPRE_Int *i_dof_neighbor_coarsedof_0;
 
-  int *i_coarseelement_coarsechord, *j_coarseelement_coarsechord;
+  HYPRE_Int *i_coarseelement_coarsechord, *j_coarseelement_coarsechord;
   double *a_coarseelement_coarsechord;
 
-  int *i_coarsechord_coarsedof, *j_coarsechord_coarsedof;
-  int num_coarsechords;
+  HYPRE_Int *i_coarsechord_coarsedof, *j_coarsechord_coarsedof;
+  HYPRE_Int num_coarsechords;
 
-  int AE_coarsedof_counter;
+  HYPRE_Int AE_coarsedof_counter;
   
-  int num_domains;
+  HYPRE_Int num_domains;
 
-  int domain_counter, domain_element_counter, subdomain_dof_counter;
+  HYPRE_Int domain_counter, domain_element_counter, subdomain_dof_counter;
 
-  int *i_local_to_global;
-  int *i_global_to_local;
+  HYPRE_Int *i_local_to_global;
+  HYPRE_Int *i_global_to_local;
     
-  int max_local_dof_counter = 0, local_dof_counter, 
+  HYPRE_Int max_local_dof_counter = 0, local_dof_counter, 
     max_local_coarsedof_counter =0, local_coarsedof_counter;
 
-  int local_boundary_coarsedof_counter, int_dof_counter;
+  HYPRE_Int local_boundary_coarsedof_counter, int_dof_counter;
 
   double *AE, *QE, *W, *Aux1, *Aux2;
   
 
-  int subdomain_coarsedof_counter, 
+  HYPRE_Int subdomain_coarsedof_counter, 
     dof_neighbor_coarsedof_counter, coarsedof_counter, dof_coarsedof_counter;
 
   double  row_sum;
 
 
-  int *i_dof_index;
+  HYPRE_Int *i_dof_index;
   
   double *P_boundary;
 
-  int *i_boundary, *i_boundary_to_local, 
+  HYPRE_Int *i_boundary, *i_boundary_to_local, 
     *i_int, *i_interior_to_local;
   double tolerance = 0.001;
 
@@ -176,7 +176,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
 
   num_domains = num_AEs + num_AEfaces;
-  i_subdomain_dof = hypre_CTAlloc(int, num_domains+1);
+  i_subdomain_dof = hypre_CTAlloc(HYPRE_Int, num_domains+1);
   
 
   subdomain_dof_counter = 0;
@@ -203,7 +203,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   i_subdomain_dof[domain_counter] = subdomain_dof_counter;
 
-  j_subdomain_dof = hypre_CTAlloc(int, subdomain_dof_counter);
+  j_subdomain_dof = hypre_CTAlloc(HYPRE_Int, subdomain_dof_counter);
 
 
   subdomain_dof_counter = 0;
@@ -249,7 +249,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 			       num_domains, num_dofs, num_elements);
   
 
-  printf("-------------- Assembling domain matrices: ----------------------\n");
+  hypre_printf("-------------- Assembling domain matrices: ----------------------\n");
 
   /*
   for (i=0; i < num_elements; i++)
@@ -259,7 +259,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	  i_dof = j_chord_dof[i_chord_dof[chord]];
 	  j_dof = j_chord_dof[i_chord_dof[chord]+1];
 
-	  if (i_dof == j_dof) printf("diagonal entry %d: %e\n", i_dof,
+	  if (i_dof == j_dof) hypre_printf("diagonal entry %d: %e\n", i_dof,
 				     a_element_chord[j]);
 	}
 	*/
@@ -283,7 +283,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 					     num_chords,
 					     num_dofs);
 
-  printf("END assembling domain matrices: --------------------------------\n");
+  hypre_printf("END assembling domain matrices: --------------------------------\n");
 
 
   ierr = matrix_matrix_product(&i_domain_dof, &j_domain_dof,
@@ -298,7 +298,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
 
   /*
-  i_dof_index = hypre_CTAlloc(int, num_dofs);
+  i_dof_index = hypre_CTAlloc(HYPRE_Int, num_dofs);
   
 
   for (i=0; i < num_domains; i++)
@@ -307,24 +307,24 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   for (i=0; i < num_domains; i++)
     {
 
-      printf("\n domain: %d ====================================\n", i);
+      hypre_printf("\n domain: %d ====================================\n", i);
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	{
-	  printf("%d ", j_domain_dof[j]);
+	  hypre_printf("%d ", j_domain_dof[j]);
 	  i_dof_index[j_domain_dof[j]] = 0;
 	}
-      printf("\n subdomain: %d ====================================\n", i);
+      hypre_printf("\n subdomain: %d ====================================\n", i);
 
 
 
       for (j=i_subdomain_dof[i]; j < i_subdomain_dof[i+1]; j++)
 	{
-	  printf("%d ", j_subdomain_dof[j]);	  
+	  hypre_printf("%d ", j_subdomain_dof[j]);	  
 	  if (i_dof_index[j_subdomain_dof[j]] < 0)
-	    printf("\nsubdomain %d contains entry %d not in domain %d\n",
+	    hypre_printf("\nsubdomain %d contains entry %d not in domain %d\n",
 		   i, j_subdomain_dof[j], i);
 	}
-      printf("\n\n");
+      hypre_printf("\n\n");
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	i_dof_index[j_domain_dof[j]] = -1;
 
@@ -334,7 +334,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   */
 
 
-  printf("----------------------Computing neighborhood Schur complements: ------\n");
+  hypre_printf("----------------------Computing neighborhood Schur complements: ------\n");
   ierr =  hypre_AMGeSchurComplement(i_domain_chord,
 				    j_domain_chord,
 				    a_domain_chord,
@@ -349,7 +349,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 			      
 				    num_domains, num_chords, num_dofs);
 
-  printf("END computing neighborhood Schur complements: ---------------------\n");
+  hypre_printf("END computing neighborhood Schur complements: ---------------------\n");
 
   hypre_TFree(i_domain_dof);
   hypre_TFree(j_domain_dof);
@@ -377,15 +377,15 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   Aux1=hypre_CTAlloc(double, max_local_dof_counter);
   Aux2=hypre_CTAlloc(double, max_local_dof_counter);
 
-  i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
-  i_global_to_local = hypre_CTAlloc(int, num_dofs);
+  i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
+  i_global_to_local = hypre_CTAlloc(HYPRE_Int, num_dofs);
 
 
-  i_dof_neighbor_coarsedof = hypre_CTAlloc(int, num_dofs+1);
+  i_dof_neighbor_coarsedof = hypre_CTAlloc(HYPRE_Int, num_dofs+1);
   for (i=0; i < num_dofs+1; i++)
     i_dof_neighbor_coarsedof[i] = 0;
   
-  i_dof_index = hypre_CTAlloc(int, num_dofs);
+  i_dof_index = hypre_CTAlloc(HYPRE_Int, num_dofs);
   for (i=0; i < num_dofs; i++)
     i_dof_index[i] = -1;
   
@@ -422,11 +422,11 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	    Aux1, Aux2, &ierr);
 
       /*
-      printf("end eigenpair computations: ------------------------------\n");
+      hypre_printf("end eigenpair computations: ------------------------------\n");
       for (i_loc=0; i_loc < local_dof_counter; i_loc++)
-	 printf("%e ", W[i_loc]);
+	 hypre_printf("%e ", W[i_loc]);
        
-      printf("\n\n");
+      hypre_printf("\n\n");
       
       */       
 
@@ -490,7 +490,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
       }
     else
       if (i_dof_subdomain[i+1]>1+i_dof_subdomain[i])
-	printf("ERROR: dof %d belongs to %d subdomains;\n", i,
+	hypre_printf("ERROR: dof %d belongs to %d subdomains;\n", i,
 	       i_dof_subdomain[i+1]-i_dof_subdomain[i]);
 
   
@@ -499,7 +499,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
       /* coarsedof if it belongs to > 1 AEface: ------------------------------- */
       if (i_dof_AEface[j_AEface_dof[j]+1] > i_dof_AEface[j_AEface_dof[j]]+1)
 	if (i_dof_index[j_AEface_dof[j]] < 0)
-	  printf("ERROR: dof %d belonging > 1  AEface but not coarse !\n", 
+	  hypre_printf("ERROR: dof %d belonging > 1  AEface but not coarse !\n", 
 		 j_AEface_dof[j]);
   
 
@@ -554,17 +554,17 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   /* store i_dof_neighbor_coarsedof[i] in i_dof_neighbor_coarsedof_0[i]; */
 
-  i_dof_neighbor_coarsedof_0 = hypre_CTAlloc(int, num_dofs+1);    
+  i_dof_neighbor_coarsedof_0 = hypre_CTAlloc(HYPRE_Int, num_dofs+1);    
   for (i=0; i < num_dofs+1; i++)
     i_dof_neighbor_coarsedof_0[i] = i_dof_neighbor_coarsedof[i];
 
   if (i_dof_neighbor_coarsedof[num_dofs] != dof_neighbor_coarsedof_counter)
-    printf("ERROR: dof_neighbor_coarsedof_counter: %d, %d\n",
+    hypre_printf("ERROR: dof_neighbor_coarsedof_counter: %d, %d\n",
 	   dof_neighbor_coarsedof_counter, 
 	   i_dof_neighbor_coarsedof[num_dofs]);
 
 
-  j_dof_neighbor_coarsedof = hypre_CTAlloc(int, dof_neighbor_coarsedof_counter);
+  j_dof_neighbor_coarsedof = hypre_CTAlloc(HYPRE_Int, dof_neighbor_coarsedof_counter);
   P_coeff = hypre_CTAlloc(double, dof_neighbor_coarsedof_counter);
 
 
@@ -572,13 +572,13 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   num_coarsedofs = coarsedof_counter;
   *num_coarsedofs_pointer = num_coarsedofs;
 
-  i_dof_coarsedof = hypre_CTAlloc(int, num_dofs+1);
-  j_dof_coarsedof = hypre_CTAlloc(int, num_coarsedofs);
+  i_dof_coarsedof = hypre_CTAlloc(HYPRE_Int, num_dofs+1);
+  j_dof_coarsedof = hypre_CTAlloc(HYPRE_Int, num_coarsedofs);
 
-  printf("====================== num_coarsedofs: %d ======================\n",
+  hypre_printf("====================== num_coarsedofs: %d ======================\n",
 	 num_coarsedofs);
 
-  printf("\n\n =========== COMPUTE P_coeff: Ist PHASE ========================\n");
+  hypre_printf("\n\n =========== COMPUTE P_coeff: Ist PHASE ========================\n");
 
   dof_coarsedof_counter = 0;
   for (i=0; i < num_dofs; i++)
@@ -595,7 +595,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	  i_dof_neighbor_coarsedof[i]++;
 
 	  /*
-	  printf("coarsedof: %d, i_dof_index[%d]: %d\n", 
+	  hypre_printf("coarsedof: %d, i_dof_index[%d]: %d\n", 
 		 dof_coarsedof_counter, i, i_dof_index[i]);
 		 */
 	  j_dof_coarsedof[dof_coarsedof_counter] = dof_coarsedof_counter;
@@ -643,7 +643,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	  if (j_loc < subdomain_coarsedof_counter)
 	    {
 	      /*
-	      printf("coarsedof: %d, i_dof_index[%d]: %d\n", dof_coarsedof_counter,
+	      hypre_printf("coarsedof: %d, i_dof_index[%d]: %d\n", dof_coarsedof_counter,
 		     i, i_dof_index[i]); */
 
 	      j_dof_coarsedof[dof_coarsedof_counter] = dof_coarsedof_counter;
@@ -664,7 +664,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   *i_dof_coarsedof_pointer = i_dof_coarsedof;
   *j_dof_coarsedof_pointer = j_dof_coarsedof;
-  printf("\n\n =========== END Ist PHASE ===================================\n");
+  hypre_printf("\n\n =========== END Ist PHASE ===================================\n");
 
   hypre_TFree(i_local_to_global);
 
@@ -676,7 +676,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	max_local_dof_counter = local_dof_counter;
     }
 
-  i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
+  i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
   for (i=0; i < num_dofs; i++)
     i_global_to_local[i] = -1;
@@ -688,8 +688,8 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   hypre_TFree(Aux2);
 
 
-  printf("-------------- Assembling AE matrices: ----------------------\n");
-  printf(" num_elements: %d, num_chords: %d, num_dofs: %d. num_AEs: %d\n",
+  hypre_printf("-------------- Assembling AE matrices: ----------------------\n");
+  hypre_printf(" num_elements: %d, num_chords: %d, num_dofs: %d. num_AEs: %d\n",
 	 num_elements,  num_chords, num_dofs, num_AEs);
   
   ierr=hypre_AMGeDomainElementSparseAssemble(i_AE_element, 
@@ -711,10 +711,10 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 					     num_chords,
 					     num_dofs);
 
-  printf("END assembling AE matrices: --------------------------------\n");
+  hypre_printf("END assembling AE matrices: --------------------------------\n");
 
 
-  printf("\n\n =========== COMPUTE P_coeff: IInd PHASE ========================\n");
+  hypre_printf("\n\n =========== COMPUTE P_coeff: IInd PHASE ========================\n");
 
   AE = hypre_CTAlloc(double, max_local_dof_counter
 		     *max_local_dof_counter);
@@ -728,10 +728,10 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   P_boundary = hypre_CTAlloc(double, max_local_dof_counter
 		     *max_local_dof_counter);
 
-  i_boundary = hypre_CTAlloc(int, max_local_dof_counter);
-  i_boundary_to_local = hypre_CTAlloc(int, max_local_dof_counter);
-  i_int = hypre_CTAlloc(int, max_local_dof_counter);
-  i_interior_to_local = hypre_CTAlloc(int, max_local_dof_counter);
+  i_boundary = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
+  i_boundary_to_local = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
+  i_int = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
+  i_interior_to_local = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
   for (i=0; i < num_dofs; i++)
     i_global_to_local[i] = -1;
@@ -804,11 +804,11 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	{
 	  ierr = mat_inv(Aux2, Aux1, int_dof_counter); 
 	  if (ierr < 0)
-	    printf("ierr_mat_inv: %d\n", ierr);
+	    hypre_printf("ierr_mat_inv: %d\n", ierr);
 	}
 
       /* here we compute: -------------------------------------------------------
-	 -[q_+, ..., q_m]*[q_+, ..., q_m]^T * Aux2 * A_{int, boundary} * P_boundary
+	 -[q_+, ..., q_m]*[q_+, ..., q_m]^T * Aux2 * A_{HYPRE_Int, boundary} * P_boundary
 	 ----------------------------------------------------------------------- */
 
 
@@ -825,11 +825,11 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 		{
 		  j_loc = i_global_to_local[j_dof_neighbor_coarsedof[l]];
 		  if (j_loc < 0 || i_boundary[j_loc] < 0)
-		    printf("wrong j_dof_neighbor_coarsedof: %d, %d\n",
+		    hypre_printf("wrong j_dof_neighbor_coarsedof: %d, %d\n",
 			   j_loc, i_boundary[j_loc]);
 
 		  P_boundary[i_loc+j_loc*local_dof_counter] = P_coeff[l];
-		  /* printf("boundary interpolation coeff: %e\n", P_coeff[l]); */
+		  /* hypre_printf("boundary interpolation coeff: %e\n", P_coeff[l]); */
 		}
 	    }
 	}
@@ -850,14 +850,14 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
       
 
       if (i_subdomain_dof[i+1]-i_subdomain_dof[i] != int_dof_counter)
-	printf("ERROR: AE[%d] has wrong interior # dofs: %d, %d\n",
+	hypre_printf("ERROR: AE[%d] has wrong interior # dofs: %d, %d\n",
 	       i, i_subdomain_dof[i+1]-i_subdomain_dof[i], int_dof_counter);
 
       for (j=i_subdomain_dof[i]; j < i_subdomain_dof[i+1]; j++)
 	{
 	  j_loc=i_global_to_local[j_subdomain_dof[j]];
 	  if (i_int[j_loc] < 0)
-	    printf("wrong interior dof: %d, i_int: %d\n", j_loc, i_int[j_loc]);
+	    hypre_printf("wrong interior dof: %d, i_int: %d\n", j_loc, i_int[j_loc]);
 
 	  for (l_loc=0; l_loc < local_dof_counter; l_loc++)
 	    if (i_boundary[l_loc] >= 0)
@@ -946,7 +946,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   /* restore i_dof_neighbor_coarsedof: -------------------------------- */
   for (i=num_dofs; i>0; i--)
     if (i_dof_neighbor_coarsedof[i-1]!=i_dof_neighbor_coarsedof_0[i])
-      printf("WRONG i_dof_neighbor_coarsedof[%d] indexing: %d, %d\n",
+      hypre_printf("WRONG i_dof_neighbor_coarsedof[%d] indexing: %d, %d\n",
 	     i, i_dof_neighbor_coarsedof[i-1], i_dof_neighbor_coarsedof_0[i]);
 
   hypre_TFree(i_dof_neighbor_coarsedof);
@@ -967,8 +967,8 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
       if (i_dof_coarsedof[j_AE_dof[j]+1] > i_dof_coarsedof[j_AE_dof[j]])
 	AE_coarsedof_counter++;
 
-  i_AE_coarsedof = hypre_CTAlloc(int, num_AEs+1);
-  j_AE_coarsedof = hypre_CTAlloc(int, AE_coarsedof_counter);
+  i_AE_coarsedof = hypre_CTAlloc(HYPRE_Int, num_AEs+1);
+  j_AE_coarsedof = hypre_CTAlloc(HYPRE_Int, AE_coarsedof_counter);
 
   AE_coarsedof_counter = 0;
   for (i=0; i < num_AEs; i++)
@@ -989,13 +989,13 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   *i_coarseelement_coarsedof_pointer = i_AE_coarsedof;
   *j_coarseelement_coarsedof_pointer = j_AE_coarsedof;
   
-  printf("END coarseelement_coarsedof computation: ----------------------------\n");
+  hypre_printf("END coarseelement_coarsedof computation: ----------------------------\n");
   
 
   /* compute coarse element matrices: ----------------------------------------- */
 
 
-  i_AE_coarsedof_coarsedof = hypre_CTAlloc(int, num_AEs+1);
+  i_AE_coarsedof_coarsedof = hypre_CTAlloc(HYPRE_Int, num_AEs+1);
   
   AE_coarsedof_coarsedof_counter = 0;
   for (i=0; i < num_AEs; i++)
@@ -1022,7 +1022,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	max_local_coarsedof_counter = local_coarsedof_counter;
     }
 
-  i_local_to_global = hypre_CTAlloc(int, max_local_coarsedof_counter);
+  i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_coarsedof_counter);
 
   for (i=0; i < num_coarsedofs; i++)
     i_global_to_local[i] = -1;
@@ -1067,7 +1067,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	  i_dof = j_chord_dof[i_chord_dof[chord]];
 	  j_dof = j_chord_dof[i_chord_dof[chord]+1];
 
-	  /* if (i_dof == j_dof) printf("diagonal entry %d: %e\n", i_dof,
+	  /* if (i_dof == j_dof) hypre_printf("diagonal entry %d: %e\n", i_dof,
 				     a_AE_chord[j]); */
 	  
 	  for (k=i_dof_neighbor_coarsedof[i_dof];
@@ -1075,14 +1075,14 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	    {
 	      i_coarsedof = j_dof_neighbor_coarsedof[k];
 	      i_loc = i_global_to_local[i_coarsedof];
-	      if (i_loc < 0) printf("wrong index !!!!!!!!!!!!!!!!!!!!!!!! \n");
+	      if (i_loc < 0) hypre_printf("wrong index !!!!!!!!!!!!!!!!!!!!!!!! \n");
 	      
 	      for (l=i_dof_neighbor_coarsedof[j_dof];
 		   l<i_dof_neighbor_coarsedof[j_dof+1]; l++)
 		{
 		  j_coarsedof = j_dof_neighbor_coarsedof[l]; 
 		  j_loc = i_global_to_local[j_coarsedof];
-		  if (j_loc < 0) printf("wrong index !!!!!!!!!!!!!!!!!!!!!!!! \n");
+		  if (j_loc < 0) hypre_printf("wrong index !!!!!!!!!!!!!!!!!!!!!!!! \n");
 		  AE_coarsedof_coarsedof[i_AE_coarsedof_coarsedof[i]
 		    +j_loc + local_coarsedof_counter * i_loc]+=
 		    P_coeff[k] * a_AE_chord[j] * P_coeff[l];
@@ -1102,24 +1102,24 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 	rs_(&local_coarsedof_counter, &local_coarsedof_counter, 
 	    AE, W, &matz, QE, Aux1, Aux2, &ierr);
 
-      printf("end coarse element matrix eigenpair computations: ---------------\n");
+      hypre_printf("end coarse element matrix eigenpair computations: ---------------\n");
       for (i_loc=0; i_loc < local_coarsedof_counter; i_loc++)
-	 printf("%e ", W[i_loc]);
+	 hypre_printf("%e ", W[i_loc]);
        
-      printf("\n\n");
+      hypre_printf("\n\n");
       
        
       /*
-      printf("\n\n NEW COARSE ELEMENT MATRIX: ======================\n");
+      hypre_printf("\n\n NEW COARSE ELEMENT MATRIX: ======================\n");
       
       for (i_loc=0; i_loc < local_coarsedof_counter; i_loc++)
 	{
-	  printf("\n");
+	  hypre_printf("\n");
 	  for (j_loc=0; j_loc < local_coarsedof_counter; j_loc++) 
-	    if (j_loc==i_loc) printf("%e ",
+	    if (j_loc==i_loc) hypre_printf("%e ",
 		   AE_coarsedof_coarsedof[i_AE_coarsedof_coarsedof[i]
 					 +j_loc + local_coarsedof_counter * i_loc]);
-      	  printf("\n");
+      	  hypre_printf("\n");
 
 	}
 	*/
@@ -1134,18 +1134,18 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   hypre_TFree(i_AE_chord);
   hypre_TFree(j_AE_chord);
   hypre_TFree(a_AE_chord);
-  printf("END coarseelement_matrix computation: -------------------------------\n");
+  hypre_printf("END coarseelement_matrix computation: -------------------------------\n");
 
   /*      
-  printf("num_AEs: %d, num_coarsedofs: %d\n", num_AEs, num_coarsedofs);
+  hypre_printf("num_AEs: %d, num_coarsedofs: %d\n", num_AEs, num_coarsedofs);
   for (i=0; i < num_AEs; i++)
     {
-      printf("coarseelement: %d\n", i);
+      hypre_printf("coarseelement: %d\n", i);
       
       for (j=i_AE_coarsedof[i]; j < i_AE_coarsedof[i+1]; j++)
-	printf("%d ", j_AE_coarsedof[j]);
+	hypre_printf("%d ", j_AE_coarsedof[j]);
 
-      printf("\n");
+      hypre_printf("\n");
       
     }
     */
@@ -1164,7 +1164,7 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 				    num_AEs, num_coarsedofs);
 
 
-  printf("END storing coarseelement_matrices in element_chord format: ---------\n");
+  hypre_printf("END storing coarseelement_matrices in element_chord format: ---------\n");
 
   *i_coarseelement_coarsechord_pointer = i_coarseelement_coarsechord;
   *j_coarseelement_coarsechord_pointer = j_coarseelement_coarsechord;
@@ -1197,9 +1197,9 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   hypre_TFree(Aux1);
   hypre_TFree(Aux2);
 
-  printf("\n===============================================================\n");
-  printf("END Build Interpolation Matrix: ierr: %d ======================\n", ierr);
-  printf("===============================================================\n");
+  hypre_printf("\n===============================================================\n");
+  hypre_printf("END Build Interpolation Matrix: ierr: %d ======================\n", ierr);
+  hypre_printf("===============================================================\n");
 
 
   return ierr;
@@ -1209,9 +1209,9 @@ int hypre_AMGeAGBuildInterpolation(hypre_CSRMatrix     **P_pointer,
  mat_inv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (generally non--symmetric);
  -----------------------------------------------------------------------------*/
       
-int mat_inv(double *x, double *a, int k)
+HYPRE_Int mat_inv(double *x, double *a, HYPRE_Int k)
 {
-  int i,j,l, ierr =0;
+  HYPRE_Int i,j,l, ierr =0;
   double *b;
 
   if (k > 0)
@@ -1226,22 +1226,22 @@ int mat_inv(double *x, double *a, int k)
       if (a[i+i*k] <= 1.e-20)
 	{
 	  ierr = -1; 
-	  printf("size: %d, diagonal entry: %d, %e\n", k, i, a[i+i*k]);
+	  hypre_printf("size: %d, diagonal entry: %d, %e\n", k, i, a[i+i*k]);
 	    /*	  
-	    printf("mat_inv: ==========================================\n");
+	    hypre_printf("mat_inv: ==========================================\n");
 
 
-            printf("indefinite singular matrix in *** mat_inv ***:\n");
-            printf("i:%d;  diagonal entry: %e\n", i, a[i+k*i]);
+            hypre_printf("indefinite singular matrix in *** mat_inv ***:\n");
+            hypre_printf("i:%d;  diagonal entry: %e\n", i, a[i+k*i]);
 
 
 	    for (l=0; l < k; l++)
 	      {
-		printf("\n");
+		hypre_printf("\n");
 		for (j=0; j < k; j++)
-		  printf("%f ", b[j+k*l]);
+		  hypre_printf("%f ", b[j+k*l]);
 
-		printf("\n");
+		hypre_printf("\n");
 	      }
 
 	    return ierr;
@@ -1296,9 +1296,9 @@ int mat_inv(double *x, double *a, int k)
     {
       for (j=0; j < k; j++)
 	  if (x[j+k*i] != x[i+k*j])
-	    printf("\n non_symmetry: %f %f", x[j+k*i], x[i+k*j] );
+	    hypre_printf("\n non_symmetry: %f %f", x[j+k*i], x[i+k*j] );
     }
-  printf("\n");
+  hypre_printf("\n");
 
    -----------------------------------------------------------------*/
 

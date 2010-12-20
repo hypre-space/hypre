@@ -25,7 +25,7 @@
  * hypre_SStructStencilRef
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructStencilRef( hypre_SStructStencil  *stencil,
                          hypre_SStructStencil **stencil_ref )
 {

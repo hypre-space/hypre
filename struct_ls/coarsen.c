@@ -13,7 +13,7 @@
 #define TIME_DEBUG 0
 
 #if TIME_DEBUG
-static int s_coarsen_num = 0;
+static HYPRE_Int s_coarsen_num = 0;
 #endif
 
 
@@ -24,7 +24,7 @@ static int s_coarsen_num = 0;
 #if DEBUG
 char       filename[255];
 FILE      *file;
-static int debug_count = 0;
+static HYPRE_Int debug_count = 0;
 #endif
 
 /*--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ static int debug_count = 0;
  * do not stand for "F-pt index" and "C-pt index".
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructMapFineToCoarse( hypre_Index findex,
                              hypre_Index index,
                              hypre_Index stride,
@@ -57,7 +57,7 @@ hypre_StructMapFineToCoarse( hypre_Index findex,
  * do not stand for "F-pt index" and "C-pt index".
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructMapCoarseToFine( hypre_Index cindex,
                              hypre_Index index,
                              hypre_Index stride,
@@ -101,17 +101,17 @@ hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,\
  *   4. We do not need a separate version for the assumed partition case
  *
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_StructCoarsen( hypre_StructGrid  *fgrid,
                      hypre_Index        index,
                      hypre_Index        stride,
-                     int                prune,
+                     HYPRE_Int                prune,
                      hypre_StructGrid **cgrid_ptr )
 {
    hypre_StructGrid *cgrid;
 
    MPI_Comm          comm;
-   int               dim;
+   HYPRE_Int               dim;
 
    hypre_BoxArray   *my_boxes;
 
@@ -122,15 +122,15 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_Box        *new_box;
    hypre_Box        *bounding_box;
 
-   int               i, j, myid, count;
-   int               info_size, max_nentries;
-   int               num_entries;
-   int              *fids, *cids;
+   HYPRE_Int               i, j, myid, count;
+   HYPRE_Int               info_size, max_nentries;
+   HYPRE_Int               num_entries;
+   HYPRE_Int              *fids, *cids;
    hypre_Index       new_dist;
    hypre_IndexRef    max_distance;
-   int               proc, id;
-   int               coarsen_factor, known;
-   int               num, last_proc;
+   HYPRE_Int               proc, id;
+   HYPRE_Int               coarsen_factor, known;
+   HYPRE_Int               num, last_proc;
 #if 0
    hypre_StructAssumedPart *fap = NULL, *cap = NULL;
 #endif
@@ -142,9 +142,9 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    void               *entry_info = NULL;
  
 #if TIME_DEBUG  
-   int tindex;
+   HYPRE_Int tindex;
    char new_title[80];
-   sprintf(new_title,"Coarsen.%d",s_coarsen_num);
+   hypre_sprintf(new_title,"Coarsen.%d",s_coarsen_num);
    tindex = hypre_InitializeTiming(new_title);
    s_coarsen_num++;
 
@@ -159,14 +159,14 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    max_distance = hypre_StructGridMaxDistance(fgrid);
    
    /* initial */
-   MPI_Comm_rank(comm, &myid );
+   hypre_MPI_Comm_rank(comm, &myid );
 
    /* create new coarse grid */
    hypre_StructGridCreate(comm, dim, &cgrid);
 
    /* coarsen my boxes and create the coarse grid ids (same as fgrid) */
    my_boxes = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(fgrid));
-   cids = hypre_TAlloc(int,  hypre_BoxArraySize(my_boxes));
+   cids = hypre_TAlloc(HYPRE_Int,  hypre_BoxArraySize(my_boxes));
    for (i = 0; i < hypre_BoxArraySize(my_boxes); i++)
    {
       box = hypre_BoxArrayBox(my_boxes, i);
@@ -373,25 +373,25 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
  *
  *--------------------------------------------------------------------------*/
 
-int
-hypre_Merge( int   **arrays,
-             int    *sizes,
-             int     size,
-             int   **mergei_ptr,
-             int   **mergej_ptr )
+HYPRE_Int
+hypre_Merge( HYPRE_Int   **arrays,
+             HYPRE_Int    *sizes,
+             HYPRE_Int     size,
+             HYPRE_Int   **mergei_ptr,
+             HYPRE_Int   **mergej_ptr )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
-   int  *mergei;
-   int  *mergej;
+   HYPRE_Int  *mergei;
+   HYPRE_Int  *mergej;
 
-   int   num, i;
-   int   lastval;
+   HYPRE_Int   num, i;
+   HYPRE_Int   lastval;
 
    struct linkstruct
    {
-      int  i;
-      int  j;
+      HYPRE_Int  i;
+      HYPRE_Int  j;
       struct linkstruct  *next;
 
    } *list, *first, *link, *next;
@@ -401,8 +401,8 @@ hypre_Merge( int   **arrays,
    {
       num += sizes[i];
    }
-   mergei = hypre_TAlloc(int, num+1);
-   mergej = hypre_TAlloc(int, num+1);
+   mergei = hypre_TAlloc(HYPRE_Int, num+1);
+   mergej = hypre_TAlloc(HYPRE_Int, num+1);
 
    if (num > 0)
    {

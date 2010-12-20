@@ -15,14 +15,14 @@
 
 typedef struct
 {
-   int                   length;
-   int                   row_start;
-   int                   row_end;
-   int                   storage_length;
-   int                   *proc_list;
-   int		         *row_start_list;
-   int                   *row_end_list;  
-  int                    *sort_index;
+   HYPRE_Int                   length;
+   HYPRE_Int                   row_start;
+   HYPRE_Int                   row_end;
+   HYPRE_Int                   storage_length;
+   HYPRE_Int                   *proc_list;
+   HYPRE_Int		         *row_start_list;
+   HYPRE_Int                   *row_end_list;  
+  HYPRE_Int                    *sort_index;
 } hypre_IJAssumedPart;
 
 

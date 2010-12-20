@@ -29,12 +29,12 @@
 
 void      hypre_NAME_C_FOR_FORTRAN(amg_solve)(Solve_err_flag, u_data, f_data,
 					n, tol, data)
-int      *Solve_err_flag;
+HYPRE_Int      *Solve_err_flag;
 double   *u_data;
 double   *f_data;
-int      *n;
+HYPRE_Int      *n;
 double   *tol;
-int      *data;
+HYPRE_Int      *data;
 {
    hypre_Vector   *u;
    hypre_Vector   *f;

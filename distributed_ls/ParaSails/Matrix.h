@@ -30,47 +30,47 @@ typedef struct
 {
     MPI_Comm comm;
 
-    int      beg_row;
-    int      end_row;
-    int     *beg_rows;
-    int     *end_rows;
+    HYPRE_Int      beg_row;
+    HYPRE_Int      end_row;
+    HYPRE_Int     *beg_rows;
+    HYPRE_Int     *end_rows;
 
     Mem     *mem;
 
-    int     *lens;
-    int    **inds;
+    HYPRE_Int     *lens;
+    HYPRE_Int    **inds;
     double **vals;
 
-    int     num_recv;
-    int     num_send;
+    HYPRE_Int     num_recv;
+    HYPRE_Int     num_send;
 
-    int     sendlen;
-    int     recvlen;
+    HYPRE_Int     sendlen;
+    HYPRE_Int     recvlen;
 
-    int    *sendind;
+    HYPRE_Int    *sendind;
     double *sendbuf;
     double *recvbuf;
 
-    MPI_Request *recv_req;
-    MPI_Request *send_req;
-    MPI_Request *recv_req2;
-    MPI_Request *send_req2;
-    MPI_Status  *statuses;
+    hypre_MPI_Request *recv_req;
+    hypre_MPI_Request *send_req;
+    hypre_MPI_Request *recv_req2;
+    hypre_MPI_Request *send_req2;
+    hypre_MPI_Status  *statuses;
 
     struct numbering *numb;
 }
 Matrix;
 
-Matrix *MatrixCreate(MPI_Comm comm, int beg_row, int end_row);
-Matrix *MatrixCreateLocal(int beg_row, int end_row);
+Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row);
+Matrix *MatrixCreateLocal(HYPRE_Int beg_row, HYPRE_Int end_row);
 void MatrixDestroy(Matrix *mat);
-void MatrixSetRow(Matrix *mat, int row, int len, int *ind, double *val);
-void MatrixGetRow(Matrix *mat, int row, int *lenp, int **indp, double **valp);
-int  MatrixRowPe(Matrix *mat, int row);
+void MatrixSetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int len, HYPRE_Int *ind, double *val);
+void MatrixGetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int *lenp, HYPRE_Int **indp, double **valp);
+HYPRE_Int  MatrixRowPe(Matrix *mat, HYPRE_Int row);
 void MatrixPrint(Matrix *mat, char *filename);
 void MatrixRead(Matrix *mat, char *filename);
 void RhsRead(double *rhs, Matrix *mat, char *filename);
-int  MatrixNnz(Matrix *mat);
+HYPRE_Int  MatrixNnz(Matrix *mat);
 
 void MatrixComplete(Matrix *mat);
 void MatrixMatvec(Matrix *mat, double *x, double *y);

@@ -28,7 +28,7 @@
  * WJacobi
  *--------------------------------------------------------------------------*/
 
-int    	 WJacobi(x, b, tol, data)
+HYPRE_Int    	 WJacobi(x, b, tol, data)
 hypre_Vector 	*x;
 hypre_Vector 	*b;
 double 	 tol;
@@ -37,22 +37,22 @@ void    *data;
    WJacobiData    *wjacobi_data = data;
 
    double          weight   = WJacobiDataWeight(wjacobi_data);
-   int         	   max_iter = WJacobiDataMaxIter(wjacobi_data);
+   HYPRE_Int         	   max_iter = WJacobiDataMaxIter(wjacobi_data);
 
    hypre_Matrix         *A        = WJacobiDataA(wjacobi_data);
    hypre_Vector      	  *t        = WJacobiDataT(wjacobi_data);
 
    double         *a  = hypre_MatrixData(A);
-   int            *ia = hypre_MatrixIA(A);
-   int            *ja = hypre_MatrixJA(A);
-   int             n  = hypre_MatrixSize(A);
+   HYPRE_Int            *ia = hypre_MatrixIA(A);
+   HYPRE_Int            *ja = hypre_MatrixJA(A);
+   HYPRE_Int             n  = hypre_MatrixSize(A);
 	          
    double         *xp = hypre_VectorData(x);
    double         *bp = hypre_VectorData(b);
    double         *tp = hypre_VectorData(t);
 	          
-   int             i, j, jj;
-   int             iter = 0;
+   HYPRE_Int             i, j, jj;
+   HYPRE_Int             iter = 0;
 
 
    /*-----------------------------------------------------------------------
@@ -98,7 +98,7 @@ void     *data;
    WJacobiData  *wjacobi_data = data;
 
    double   *darray;
-   int       size;
+   HYPRE_Int       size;
 
 
    WJacobiDataA(wjacobi_data) = A;

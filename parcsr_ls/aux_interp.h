@@ -14,23 +14,23 @@
 
 
 void
-hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
-			int *p_num_recvs, int **p_recv_procs,
-			int **p_recv_vec_starts, int *p_num_sends,
-			int **p_send_procs, int **p_send_map_starts,
-			int **p_send_map_elmts, int **p_node_add);
+hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, HYPRE_Int newoff, HYPRE_Int *found,
+			HYPRE_Int *p_num_recvs, HYPRE_Int **p_recv_procs,
+			HYPRE_Int **p_recv_vec_starts, HYPRE_Int *p_num_sends,
+			HYPRE_Int **p_send_procs, HYPRE_Int **p_send_map_starts,
+			HYPRE_Int **p_send_map_elmts, HYPRE_Int **p_node_add);
 
-void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, int *IN_marker, 
-		      int *node_add, int num_cols_A_offd, 
-		      int full_off_procNodes, int num_procs,
-		      int *OUT_marker);
+void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int *IN_marker, 
+		      HYPRE_Int *node_add, HYPRE_Int num_cols_A_offd, 
+		      HYPRE_Int full_off_procNodes, HYPRE_Int num_procs,
+		      HYPRE_Int *OUT_marker);
 
-int hypre_ssort(int *data, int n);
-int index_of_minimum(int *data, int n);
-void swap_int(int *data, int a, int b);
-int new_offd_nodes(int **found, int A_ext_rows, int *A_ext_i, int *A_ext_j, 
-		   int num_cols_A_offd, int *col_map_offd, int col_1, 
-		   int col_n, int *Sop_i, int *Sop_j,
-		   int *CF_marker, hypre_ParCSRCommPkg *comm_pkg);
-void initialize_vecs(int diag_n, int offd_n, int *diag_ftc, int *offd_ftc, 
-		     int *diag_pm, int *offd_pm, int *tmp_CF);
+HYPRE_Int hypre_ssort(HYPRE_Int *data, HYPRE_Int n);
+HYPRE_Int index_of_minimum(HYPRE_Int *data, HYPRE_Int n);
+void swap_int(HYPRE_Int *data, HYPRE_Int a, HYPRE_Int b);
+HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int A_ext_rows, HYPRE_Int *A_ext_i, HYPRE_Int *A_ext_j, 
+		   HYPRE_Int num_cols_A_offd, HYPRE_Int *col_map_offd, HYPRE_Int col_1, 
+		   HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j,
+		   HYPRE_Int *CF_marker, hypre_ParCSRCommPkg *comm_pkg);
+void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_Int *offd_ftc, 
+		     HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF);

@@ -16,7 +16,7 @@ static integer c__3 = 3;
 static integer c__4 = 4;
 static integer c__11 = 11;
 
-/* Subroutine */ int dlasq2_(integer *n, doublereal *z__, integer *info)
+/* Subroutine */ HYPRE_Int dlasq2_(integer *n, doublereal *z__, integer *info)
 {
     /* System generated locals */
     integer i__1, i__2, i__3;
@@ -38,16 +38,16 @@ static integer c__11 = 11;
     static integer nfail;
     static doublereal desig, trace, sigma;
     static integer iinfo, i0, i4, n0;
-    extern /* Subroutine */ int dlasq3_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dlasq3_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     integer *, integer *, integer *, logical *);
     extern doublereal dlamch_(char *);
     static integer pp, iwhila, iwhilb;
     static doublereal oldemn, safmin;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ int dlasrt_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dlasrt_(char *, integer *, doublereal *, 
 	    integer *);
     static doublereal eps, tol;
     static integer ipn4;

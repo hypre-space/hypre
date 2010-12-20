@@ -21,17 +21,17 @@
 
 
 
-int ReadMPIVec( Vec *x, char *file_name )
+HYPRE_Int ReadMPIVec( Vec *x, char *file_name )
 {
   FILE       *fp;
-  int         ierr=0, i, j;
+  HYPRE_Int         ierr=0, i, j;
   Scalar      read_Scalar;
-   int        size, nprocs, myrows, mb, me, first_row, last_row, ja_indx;
+   HYPRE_Int        size, nprocs, myrows, mb, me, first_row, last_row, ja_indx;
    
 
 
-   MPI_Comm_rank( MPI_COMM_WORLD, &me);
-   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   hypre_MPI_Comm_rank( hypre_MPI_COMM_WORLD, &me);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nprocs);
 
    fp = fopen(file_name, "r");
 
@@ -40,9 +40,9 @@ int ReadMPIVec( Vec *x, char *file_name )
    }
 
    /* read in junk line */
-   fscanf(fp, "%*[^\n]\n");
+   hypre_fscanf(fp, "%*[^\n]\n");
 
-   fscanf(fp, "%d", &size);
+   hypre_fscanf(fp, "%d", &size);
 
    myrows = (size-1)/nprocs+1; mb = myrows;
    if( (nprocs-1) == me) {
@@ -53,12 +53,12 @@ int ReadMPIVec( Vec *x, char *file_name )
    first_row = me*mb; last_row = first_row+myrows-1;
 
    /* Allocate the vector structure */
-   ierr = VecCreateMPI( MPI_COMM_WORLD, myrows, size, x );
+   ierr = VecCreateMPI( hypre_MPI_COMM_WORLD, myrows, size, x );
 
    /* Go through elements and add them one at a time */
    ja_indx = 0;
    for (j = 0; j < size; j++) {
-         fscanf(fp, "%le", &read_Scalar);
+         hypre_fscanf(fp, "%le", &read_Scalar);
          if( (j>=first_row)&&(j<=last_row) ) {
             ierr=VecSetValues( *x, 1, &j, &read_Scalar, INSERT_VALUES );
             CHKERRA(ierr);

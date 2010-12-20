@@ -25,15 +25,15 @@
  *--------------------------------------------------------------------------*/
 
 hypre_StructStencil *
-hypre_StructStencilCreate( int           dim,
-                           int           size,
+hypre_StructStencilCreate( HYPRE_Int           dim,
+                           HYPRE_Int           size,
                            hypre_Index  *shape )
 {
    hypre_StructStencil   *stencil;
 
-   int                    abs_offset;
-   int                    max_offset;
-   int                    s, d;
+   HYPRE_Int                    abs_offset;
+   HYPRE_Int                    max_offset;
+   HYPRE_Int                    s, d;
 
    stencil = hypre_TAlloc(hypre_StructStencil, 1);
 
@@ -74,10 +74,10 @@ hypre_StructStencilRef( hypre_StructStencil *stencil )
  * hypre_StructStencilDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructStencilDestroy( hypre_StructStencil *stencil )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    if (stencil)
    {
@@ -98,13 +98,13 @@ hypre_StructStencilDestroy( hypre_StructStencil *stencil )
  *    If the element is not found, a -1 is returned.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructStencilElementRank( hypre_StructStencil *stencil,
                                 hypre_Index          stencil_element )
 {
    hypre_Index  *stencil_shape;
-   int           rank;
-   int           i;
+   HYPRE_Int           rank;
+   HYPRE_Int           i;
 
    rank = -1;
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -132,23 +132,23 @@ hypre_StructStencilElementRank( hypre_StructStencil *stencil,
  *    transpose element of an element that is not a "symmetric element".
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
                                hypre_StructStencil **symm_stencil_ptr,
-                               int                 **symm_elements_ptr )
+                               HYPRE_Int                 **symm_elements_ptr )
 {
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
-   int                   stencil_size  = hypre_StructStencilSize(stencil); 
+   HYPRE_Int                   stencil_size  = hypre_StructStencilSize(stencil); 
 
    hypre_StructStencil  *symm_stencil;
    hypre_Index          *symm_stencil_shape;
-   int                   symm_stencil_size;
-   int                  *symm_elements;
+   HYPRE_Int                   symm_stencil_size;
+   HYPRE_Int                  *symm_elements;
 
-   int                   no_symmetric_stencil_element;
-   int                   i, j, d;
+   HYPRE_Int                   no_symmetric_stencil_element;
+   HYPRE_Int                   i, j, d;
                        
-   int                   ierr = 0;
+   HYPRE_Int                   ierr = 0;
 
    /*------------------------------------------------------
     * Copy stencil elements into `symm_stencil_shape'
@@ -164,7 +164,7 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
     * Create symmetric stencil elements and `symm_elements'
     *------------------------------------------------------*/
 
-   symm_elements = hypre_CTAlloc(int, 2*stencil_size);
+   symm_elements = hypre_CTAlloc(HYPRE_Int, 2*stencil_size);
    for (i = 0; i < 2*stencil_size; i++)
       symm_elements[i] = -1;
 

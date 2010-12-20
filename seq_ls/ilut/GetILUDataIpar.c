@@ -20,7 +20,7 @@
  * GetILUDataIpar
  *--------------------------------------------------------------------------*/
 
-int *GetILUDataIpar( void * data )
+HYPRE_Int *GetILUDataIpar( void * data )
      /* Returns a pointer to the beginning of the integer vector that holds
         integer parameters (many optional) to the incomplete factorization
         and solve codes.

@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dsytrd_(char *uplo, integer *n, doublereal *a, integer *
+/* Subroutine */ HYPRE_Int dsytrd_(char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *d__, doublereal *e, doublereal *tau, doublereal *
 	work, integer *lwork, integer *info)
 {
@@ -144,12 +144,12 @@
     extern logical lsame_(char *, char *);
     static integer nbmin, iinfo;
     static logical upper;
-    extern /* Subroutine */ int dsytd2_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dsytd2_(char *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, doublereal *, integer *), dsyr2k_(char *, char *, integer *, integer *, doublereal 
 	    *, doublereal *, integer *, doublereal *, integer *, doublereal *,
 	     doublereal *, integer *);
     static integer nb, kk, nx;
-    extern /* Subroutine */ int dlatrd_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlatrd_(char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, doublereal *,
 	     integer *), xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 

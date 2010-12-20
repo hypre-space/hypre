@@ -27,8 +27,8 @@
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_SStructKrylovCAlloc( int count,
-                    int elt_size )
+hypre_SStructKrylovCAlloc( HYPRE_Int count,
+                    HYPRE_Int elt_size )
 {
    return( hypre_CAlloc( count, elt_size ) );
 }
@@ -37,10 +37,10 @@ hypre_SStructKrylovCAlloc( int count,
  * hypre_SStructKrylovFree
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovFree( char *ptr )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_Free( ptr );
 
@@ -56,17 +56,17 @@ hypre_SStructKrylovCreateVector( void *vvector )
 {
    hypre_SStructVector  *vector = vvector;
    hypre_SStructVector  *new_vector;
-   int                   object_type;
+   HYPRE_Int                   object_type;
 
-   int                   nparts= hypre_SStructVectorNParts(vector);
+   HYPRE_Int                   nparts= hypre_SStructVectorNParts(vector);
    hypre_SStructPVector *pvector;
    hypre_StructVector   *svector;
    hypre_SStructPVector *new_pvector;
    hypre_StructVector   *new_svector;
-   int                  *num_ghost;
+   HYPRE_Int                  *num_ghost;
    
-   int    part;
-   int    nvars, var;
+   HYPRE_Int    part;
+   HYPRE_Int    nvars, var;
 
    object_type= hypre_SStructVectorObjectType(vector);
 
@@ -105,23 +105,23 @@ hypre_SStructKrylovCreateVector( void *vvector )
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SStructKrylovCreateVectorArray(int n, void *vvector )
+hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 {
    hypre_SStructVector  *vector = vvector;
    hypre_SStructVector  **new_vector;
-   int                   object_type;
+   HYPRE_Int                   object_type;
 
-   int                   nparts= hypre_SStructVectorNParts(vector);
+   HYPRE_Int                   nparts= hypre_SStructVectorNParts(vector);
    hypre_SStructPVector *pvector;
    hypre_StructVector   *svector;
    hypre_SStructPVector *new_pvector;
    hypre_StructVector   *new_svector;
-   int                  *num_ghost;
+   HYPRE_Int                  *num_ghost;
    
-   int    part;
-   int    nvars, var;
+   HYPRE_Int    part;
+   HYPRE_Int    nvars, var;
 
-   int i;
+   HYPRE_Int i;
 
    object_type= hypre_SStructVectorObjectType(vector);
 
@@ -163,7 +163,7 @@ hypre_SStructKrylovCreateVectorArray(int n, void *vvector )
  * hypre_SStructKrylovDestroyVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovDestroyVector( void *vvector )
 {
    hypre_SStructVector *vector = vvector;
@@ -193,7 +193,7 @@ hypre_SStructKrylovMatvecCreate( void   *A,
  * hypre_SStructKrylovMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovMatvec( void   *matvec_data,
                     double  alpha,
                     void   *A,
@@ -212,7 +212,7 @@ hypre_SStructKrylovMatvec( void   *matvec_data,
  * hypre_SStructKrylovMatvecDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovMatvecDestroy( void *matvec_data )
 {
    return ( hypre_SStructMatvecDestroy( matvec_data ) );
@@ -239,7 +239,7 @@ hypre_SStructKrylovInnerProd( void *x,
  * hypre_SStructKrylovCopyVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovCopyVector( void *x, 
                         void *y )
 {
@@ -251,7 +251,7 @@ hypre_SStructKrylovCopyVector( void *x,
  * hypre_SStructKrylovClearVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovClearVector( void *x )
 {
    return ( hypre_SStructVectorSetConstantValues( (hypre_SStructVector *) x,
@@ -262,7 +262,7 @@ hypre_SStructKrylovClearVector( void *x )
  * hypre_SStructKrylovScaleVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovScaleVector( double  alpha,
                          void   *x )
 {
@@ -273,7 +273,7 @@ hypre_SStructKrylovScaleVector( double  alpha,
  * hypre_SStructKrylovAxpy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovAxpy( double alpha,
                   void   *x,
                   void   *y )
@@ -286,14 +286,14 @@ hypre_SStructKrylovAxpy( double alpha,
  * hypre_SStructKrylovCommInfo
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovCommInfo( void  *A,
-                      int   *my_id,
-                      int   *num_procs )
+                      HYPRE_Int   *my_id,
+                      HYPRE_Int   *num_procs )
 {
    MPI_Comm comm = hypre_SStructMatrixComm((hypre_SStructMatrix *) A);
-   MPI_Comm_size(comm,num_procs);
-   MPI_Comm_rank(comm,my_id);
+   hypre_MPI_Comm_size(comm,num_procs);
+   hypre_MPI_Comm_rank(comm,my_id);
    return 0;
 }
 

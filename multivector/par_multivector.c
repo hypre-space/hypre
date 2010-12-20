@@ -34,19 +34,19 @@
  *--------------------------------------------------------------------------*/
 
 hypre_ParMultiVector  *
-hypre_ParMultiVectorCreate(MPI_Comm comm, int global_size, int *partitioning,
-                           int num_vectors)
+hypre_ParMultiVectorCreate(MPI_Comm comm, HYPRE_Int global_size, HYPRE_Int *partitioning,
+                           HYPRE_Int num_vectors)
 {
    hypre_ParMultiVector *vector;
-   int num_procs, my_id;
+   HYPRE_Int num_procs, my_id;
    
    vector = hypre_CTAlloc(hypre_ParMultiVector, 1);
    
-   MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
    
    if (! partitioning)
    {
-      MPI_Comm_size(comm, &num_procs);
+      hypre_MPI_Comm_size(comm, &num_procs);
       hypre_GeneratePartitioning(global_size, num_procs, &partitioning);
    }
    
@@ -71,7 +71,7 @@ hypre_ParMultiVectorCreate(MPI_Comm comm, int global_size, int *partitioning,
  * hypre_ParMultiVectorDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_ParMultiVectorDestroy( hypre_ParMultiVector *pm_vector )
 {
    if (NULL!=pm_vector)
@@ -91,10 +91,10 @@ hypre_ParMultiVectorDestroy( hypre_ParMultiVector *pm_vector )
  * hypre_ParMultiVectorInitialize
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_ParMultiVectorInitialize( hypre_ParMultiVector *pm_vector )
 {
-   int  ierr;
+   HYPRE_Int  ierr;
 
    ierr = hypre_SeqMultivectorInitialize(
                                hypre_ParMultiVectorLocalVector(pm_vector));
@@ -106,11 +106,11 @@ hypre_ParMultiVectorInitialize( hypre_ParMultiVector *pm_vector )
  * hypre_ParMultiVectorSetDataOwner
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_ParMultiVectorSetDataOwner( hypre_ParMultiVector *pm_vector,
-                                  int           owns_data   )
+                                  HYPRE_Int           owns_data   )
 {
-   int    ierr=0;
+   HYPRE_Int    ierr=0;
 
    hypre_ParMultiVectorOwnsData(pm_vector) = owns_data;
 
@@ -121,9 +121,9 @@ hypre_ParMultiVectorSetDataOwner( hypre_ParMultiVector *pm_vector,
  * hypre_ParMultiVectorSetPartitioningOwner
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_ParMultiVectorSetPartitioningOwner( hypre_ParMultiVector *pm_vector,
-                             	          int owns_partitioning)
+                             	          HYPRE_Int owns_partitioning)
 {
    hypre_ParMultiVectorOwnsPartitioning(pm_vector) = owns_partitioning;
    return 0;
@@ -133,8 +133,8 @@ hypre_ParMultiVectorSetPartitioningOwner( hypre_ParMultiVector *pm_vector,
  * hypre_ParMultiVectorSetMask
  *--------------------------------------------------------------------------*/
 
-int 
-hypre_ParMultiVectorSetMask( hypre_ParMultiVector *pm_vector, int *mask)
+HYPRE_Int 
+hypre_ParMultiVectorSetMask( hypre_ParMultiVector *pm_vector, HYPRE_Int *mask)
 {
 
    return hypre_SeqMultivectorSetMask(pm_vector->local_vector, mask);
@@ -144,7 +144,7 @@ hypre_ParMultiVectorSetMask( hypre_ParMultiVector *pm_vector, int *mask)
  * hypre_ParMultiVectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParMultiVectorSetConstantValues( hypre_ParMultiVector *v,
                                        double               value )
 {
@@ -157,14 +157,14 @@ hypre_ParMultiVectorSetConstantValues( hypre_ParMultiVector *v,
  * hypre_ParMultiVectorSetRandomValues
  *--------------------------------------------------------------------------*/
 
-int
-hypre_ParMultiVectorSetRandomValues( hypre_ParMultiVector *v, int  seed)
+HYPRE_Int
+hypre_ParMultiVectorSetRandomValues( hypre_ParMultiVector *v, HYPRE_Int  seed)
 {
-   int my_id;
+   HYPRE_Int my_id;
    hypre_Multivector *v_local = hypre_ParMultiVectorLocalVector(v);
 
    MPI_Comm 	comm = hypre_ParMultiVectorComm(v);
-   MPI_Comm_rank(comm,&my_id); 
+   hypre_MPI_Comm_rank(comm,&my_id); 
 
    seed *= (my_id+1);
            
@@ -175,7 +175,7 @@ hypre_ParMultiVectorSetRandomValues( hypre_ParMultiVector *v, int  seed)
  * hypre_ParMultiVectorCopy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParMultiVectorCopy(hypre_ParMultiVector *x, hypre_ParMultiVector *y)
 {
    hypre_Multivector *x_local = hypre_ParMultiVectorLocalVector(x);
@@ -185,7 +185,7 @@ hypre_ParMultiVectorCopy(hypre_ParMultiVector *x, hypre_ParMultiVector *y)
 }
 
 
-int
+HYPRE_Int
 hypre_ParMultiVectorCopyWithoutMask(hypre_ParMultiVector *x, hypre_ParMultiVector *y)
 {
    return hypre_SeqMultivectorCopyWithoutMask(x->local_vector, y->local_vector);
@@ -195,7 +195,7 @@ hypre_ParMultiVectorCopyWithoutMask(hypre_ParMultiVector *x, hypre_ParMultiVecto
  * hypre_ParMultiVectorScale
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParMultiVectorScale(double alpha, hypre_ParMultiVector *y)
 {
    return 1 ; /* hypre_SeqMultivectorScale( alpha, y_local, NULL); */
@@ -206,7 +206,7 @@ hypre_ParMultiVectorScale(double alpha, hypre_ParMultiVector *y)
  * hypre_ParMultiVectorMultiScale
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParMultiVectorMultiScale(double *alpha, hypre_ParMultiVector *y)
 {
    return 1; /* hypre_SeqMultivectorMultiScale(alpha, y_local, NULL); */
@@ -218,7 +218,7 @@ hypre_ParMultiVectorMultiScale(double *alpha, hypre_ParMultiVector *y)
  * hypre_ParMultiVectorAxpy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParMultiVectorAxpy(double alpha, hypre_ParMultiVector *x,
                          hypre_ParMultiVector *y)
 {
@@ -233,8 +233,8 @@ hypre_ParMultiVectorAxpy(double alpha, hypre_ParMultiVector *x,
  * hypre_ParMultiVectorByDiag
  *--------------------------------------------------------------------------*/
 
-int
-hypre_ParMultiVectorByDiag(hypre_ParMultiVector *x, int *mask, int n,
+HYPRE_Int
+hypre_ParMultiVectorByDiag(hypre_ParMultiVector *x, HYPRE_Int *mask, HYPRE_Int n,
                            double *alpha, hypre_ParMultiVector *y)
 {
    return hypre_SeqMultivectorByDiag(x->local_vector, mask, n, alpha, 
@@ -245,22 +245,22 @@ hypre_ParMultiVectorByDiag(hypre_ParMultiVector *x, int *mask, int n,
  * hypre_ParMultiVectorInnerProd
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
                               double *results, double *workspace )
 {
    MPI_Comm           comm;
-   int                count;
-   int                ierr;
+   HYPRE_Int                count;
+   HYPRE_Int                ierr;
 /*
- *    int                myid;
- *    int                i
+ *    HYPRE_Int                myid;
+ *    HYPRE_Int                i
  */
 
    /* assuming "results" and "workspace" are arrays of size ("n_active_x" by "n_active_y")
       n_active_x is the number of active vectors in multivector x 
       the product "x^T * y" will be stored in "results" column-wise; workspace will be used for
-      computation of local matrices; maybe MPI_IN_PLACE functionality will be added later */
+      computation of local matrices; maybe hypre_MPI_IN_PLACE functionality will be added later */
       
    hypre_SeqMultivectorInnerProd(x->local_vector, y->local_vector, workspace);
    
@@ -268,16 +268,16 @@ hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
    count = (x->local_vector->num_active_vectors) * 
            (y->local_vector->num_active_vectors);
    
-   ierr = MPI_Allreduce(workspace, results, count, MPI_DOUBLE, MPI_SUM, comm);
-   hypre_assert (ierr == MPI_SUCCESS);
+   ierr = hypre_MPI_Allreduce(workspace, results, count, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
+   hypre_assert (ierr == hypre_MPI_SUCCESS);
 
 /* debug */
 
 /*
- *    MPI_Comm_rank(comm, &myid);
+ *    hypre_MPI_Comm_rank(comm, &myid);
  *    if (myid==0)
  *       for (i=0; i<count; i++)
- *          printf("%22.14e\n",results[i])
+ *          hypre_printf("%22.14e\n",results[i])
  */
 
 /* ------------ */
@@ -289,33 +289,33 @@ hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
  * hypre_ParMultiVectorInnerProdDiag
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParMultiVectorInnerProdDiag(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
                                   double *diagResults, double *workspace )
 {
-   int   count;
-   int   ierr;
+   HYPRE_Int   count;
+   HYPRE_Int   ierr;
    
    hypre_SeqMultivectorInnerProdDiag(x->local_vector, y->local_vector, workspace);
    
    count = x->local_vector->num_active_vectors;
-   ierr = MPI_Allreduce(workspace, diagResults, count, MPI_DOUBLE, MPI_SUM, x->comm);
-   hypre_assert (ierr == MPI_SUCCESS);
+   ierr = hypre_MPI_Allreduce(workspace, diagResults, count, hypre_MPI_DOUBLE, hypre_MPI_SUM, x->comm);
+   hypre_assert (ierr == hypre_MPI_SUCCESS);
    
    return 0;
 }
 
-int
-hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, int rGHeight, int rHeight, 
-                             int rWidth, double* rVal, hypre_ParMultiVector * y)
+HYPRE_Int
+hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+                             HYPRE_Int rWidth, double* rVal, hypre_ParMultiVector * y)
 {
    return hypre_SeqMultivectorByMatrix(x->local_vector, rGHeight, rHeight,
                                         rWidth, rVal, y->local_vector);
 }
 
-int
-hypre_ParMultiVectorXapy(hypre_ParMultiVector *x, int rGHeight, int rHeight, 
-                         int rWidth, double* rVal, hypre_ParMultiVector * y)
+HYPRE_Int
+hypre_ParMultiVectorXapy(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+                         HYPRE_Int rWidth, double* rVal, hypre_ParMultiVector * y)
 {
    return hypre_SeqMultivectorXapy(x->local_vector, rGHeight, rHeight,
                                     rWidth, rVal, y->local_vector);
@@ -323,16 +323,16 @@ hypre_ParMultiVectorXapy(hypre_ParMultiVector *x, int rGHeight, int rHeight,
 
 /* temporary function; allows to do "matvec" and preconditioner in 
    vector-by-vector fashion */
-int
+HYPRE_Int
 hypre_ParMultiVectorEval(void (*f)( void*, void*, void* ), void* par,
                            hypre_ParMultiVector * x, hypre_ParMultiVector * y)
 {
    hypre_ParVector  *temp_x, *temp_y;
-   int i;
-   int num_active_vectors;
-   int *x_active_indices, *y_active_indices;
+   HYPRE_Int i;
+   HYPRE_Int num_active_vectors;
+   HYPRE_Int *x_active_indices, *y_active_indices;
    double * x_data, *y_data;
-   int size;
+   HYPRE_Int size;
    
    hypre_assert(x->local_vector->num_active_vectors == y->local_vector->num_active_vectors);
    hypre_assert(x->local_vector->size == y->local_vector->size);
@@ -382,20 +382,20 @@ hypre_ParMultiVector *
 hypre_ParMultiVectorTempRead(MPI_Comm comm, const char *fileName)
         /* ***** temporary implementation ****** */
 {
-   int i, n, id;
+   HYPRE_Int i, n, id;
    double * dest;
    double * src;
-   int count;
-   int retcode;
+   HYPRE_Int count;
+   HYPRE_Int retcode;
    char temp_string[128];
    hypre_ParMultiVector * x;
    hypre_ParVector * temp_vec;
      
    /* calculate the number of files */
-   MPI_Comm_rank( comm, &id );
+   hypre_MPI_Comm_rank( comm, &id );
    n = 0;
    do {
-     sprintf( temp_string, "test -f %s.%d.%d", fileName, n, id ); 
+     hypre_sprintf( temp_string, "test -f %s.%d.%d", fileName, n, id ); 
      if (!(retcode=system(temp_string))) /* zero retcode mean file exists */
        n++;
    } while (!retcode);
@@ -404,7 +404,7 @@ hypre_ParMultiVectorTempRead(MPI_Comm comm, const char *fileName)
 
    /* now read the first vector using hypre_ParVectorRead into temp_vec */
 
-   sprintf(temp_string,"%s.%d",fileName,0);
+   hypre_sprintf(temp_string,"%s.%d",fileName,0);
    temp_vec = hypre_ParVectorRead(comm, temp_string);
 
    /* this vector WON'T own partitioning */
@@ -437,7 +437,7 @@ hypre_ParMultiVectorTempRead(MPI_Comm comm, const char *fileName)
    /* read the data to new current vector, if there are more vectors to read */   
       if (i<n-1)
       {
-         sprintf(temp_string,"%s.%d",fileName,i+1);
+         hypre_sprintf(temp_string,"%s.%d",fileName,i+1);
          temp_vec = hypre_ParVectorRead(comm, temp_string);
          
       }
@@ -446,10 +446,10 @@ hypre_ParMultiVectorTempRead(MPI_Comm comm, const char *fileName)
    return x; 
 }
 
-int 
+HYPRE_Int 
 hypre_ParMultiVectorTempPrint(hypre_ParMultiVector *vector, const char *fileName)
 {
-   int i, ierr;
+   HYPRE_Int i, ierr;
    char fullName[128];
    hypre_ParVector * temp_vec;
   
@@ -465,7 +465,7 @@ hypre_ParMultiVectorTempPrint(hypre_ParMultiVector *vector, const char *fileName
    ierr = 0;
    for ( i = 0; i < vector->local_vector->num_vectors; i++ ) 
    {
-     sprintf( fullName, "%s.%d", fileName, i ); 
+     hypre_sprintf( fullName, "%s.%d", fileName, i ); 
    
      temp_vec->local_vector->data=vector->local_vector->data + i * 
                                      vector->local_vector->size;

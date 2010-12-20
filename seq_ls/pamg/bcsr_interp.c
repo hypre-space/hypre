@@ -24,45 +24,45 @@
  *****************************************************************************/
 
 hypre_BCSRMatrix*
-hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, int* CF_marker,
-			    hypre_CSRMatrix* S, int coarse_size) {
+hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, HYPRE_Int* CF_marker,
+			    hypre_CSRMatrix* S, HYPRE_Int coarse_size) {
   hypre_BCSRMatrixBlock** A_blocks;
-  int* A_i;
-  int* A_j;
+  HYPRE_Int* A_i;
+  HYPRE_Int* A_j;
 
-  int* S_i;
-  int* S_j;
+  HYPRE_Int* S_i;
+  HYPRE_Int* S_j;
 
   hypre_BCSRMatrix* P; 
 
   hypre_BCSRMatrixBlock** P_blocks;
-  int* P_i;
-  int* P_j;
+  HYPRE_Int* P_i;
+  HYPRE_Int* P_j;
 
-  int P_size;
+  HYPRE_Int P_size;
    
-  int* P_marker;
+  HYPRE_Int* P_marker;
 
-  int jj_counter;
-  int jj_begin_row;
-  int jj_end_row;
+  HYPRE_Int jj_counter;
+  HYPRE_Int jj_begin_row;
+  HYPRE_Int jj_end_row;
 
-  int start_indexing = 0; /* start indexing for P_blocks at 0 */
+  HYPRE_Int start_indexing = 0; /* start indexing for P_blocks at 0 */
 
-  int n_fine;
-  int n_coarse;
+  HYPRE_Int n_fine;
+  HYPRE_Int n_coarse;
 
-  int strong_f_marker;
+  HYPRE_Int strong_f_marker;
 
-  int *fine_to_coarse;
-  int coarse_counter;
+  HYPRE_Int *fine_to_coarse;
+  HYPRE_Int coarse_counter;
 
-  int i, i1, i2;
-  int jj, jj1;
-/*   int sgn; */
+  HYPRE_Int i, i1, i2;
+  HYPRE_Int jj, jj1;
+/*   HYPRE_Int sgn; */
 
-  int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
-  int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(A);
+  HYPRE_Int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
+  HYPRE_Int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(A);
    
   hypre_BCSRMatrixBlock* diagonal;
   hypre_BCSRMatrixBlock* sum;
@@ -98,7 +98,7 @@ hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, int* CF_marker,
 
   coarse_counter = 0;
 
-  fine_to_coarse = hypre_CTAlloc(int, n_fine);
+  fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
 
   jj_counter = start_indexing;
       
@@ -150,7 +150,7 @@ hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, int* CF_marker,
   P_j = hypre_BCSRMatrixJ(P);
   P_blocks = hypre_BCSRMatrixBlocks(P);
 
-  P_marker = hypre_CTAlloc(int, n_fine);
+  P_marker = hypre_CTAlloc(HYPRE_Int, n_fine);
 
   /*-----------------------------------------------------------------------
    *  Second Pass: Define interpolation and fill in P_blocks, P_i, and P_j.
@@ -346,45 +346,45 @@ hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, int* CF_marker,
  *****************************************************************************/
 
 hypre_BCSRMatrix*
-hypre_BCSRMatrixBuildInterpD(hypre_BCSRMatrix* A, int* CF_marker,
-			    hypre_CSRMatrix* S, int coarse_size) {
+hypre_BCSRMatrixBuildInterpD(hypre_BCSRMatrix* A, HYPRE_Int* CF_marker,
+			    hypre_CSRMatrix* S, HYPRE_Int coarse_size) {
   hypre_BCSRMatrixBlock** A_blocks;
-  int* A_i;
-  int* A_j;
+  HYPRE_Int* A_i;
+  HYPRE_Int* A_j;
 
-  int* S_i;
-  int* S_j;
+  HYPRE_Int* S_i;
+  HYPRE_Int* S_j;
 
   hypre_BCSRMatrix* P; 
 
   hypre_BCSRMatrixBlock** P_blocks;
-  int* P_i;
-  int* P_j;
+  HYPRE_Int* P_i;
+  HYPRE_Int* P_j;
 
-  int P_size;
+  HYPRE_Int P_size;
    
-  int* P_marker;
+  HYPRE_Int* P_marker;
 
-  int jj_counter;
-  int jj_begin_row;
-  int jj_end_row;
+  HYPRE_Int jj_counter;
+  HYPRE_Int jj_begin_row;
+  HYPRE_Int jj_end_row;
 
-  int start_indexing = 0; /* start indexing for P_blocks at 0 */
+  HYPRE_Int start_indexing = 0; /* start indexing for P_blocks at 0 */
 
-  int n_fine;
-  int n_coarse;
+  HYPRE_Int n_fine;
+  HYPRE_Int n_coarse;
 
-  int strong_f_marker;
+  HYPRE_Int strong_f_marker;
 
-  int *fine_to_coarse;
-  int coarse_counter;
+  HYPRE_Int *fine_to_coarse;
+  HYPRE_Int coarse_counter;
 
-  int i, i1, i2;
-  int jj, jj1;
-/*   int sgn; */
+  HYPRE_Int i, i1, i2;
+  HYPRE_Int jj, jj1;
+/*   HYPRE_Int sgn; */
 
-  int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
-  int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(A);
+  HYPRE_Int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
+  HYPRE_Int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(A);
    
   hypre_BCSRMatrixBlock* diagonal;
   hypre_BCSRMatrixBlock* sum;
@@ -421,7 +421,7 @@ hypre_BCSRMatrixBuildInterpD(hypre_BCSRMatrix* A, int* CF_marker,
 
   coarse_counter = 0;
 
-  fine_to_coarse = hypre_CTAlloc(int, n_fine);
+  fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
 
   jj_counter = start_indexing;
       
@@ -473,7 +473,7 @@ hypre_BCSRMatrixBuildInterpD(hypre_BCSRMatrix* A, int* CF_marker,
   P_j = hypre_BCSRMatrixJ(P);
   P_blocks = hypre_BCSRMatrixBlocks(P);
 
-  P_marker = hypre_CTAlloc(int, n_fine);
+  P_marker = hypre_CTAlloc(HYPRE_Int, n_fine);
 
   /*-----------------------------------------------------------------------
    *  Second Pass: Define interpolation and fill in P_blocks, P_i, and P_j.

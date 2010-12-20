@@ -1,25 +1,25 @@
 #include <stdio.h>
 
-int 
-transpose_matrix_create(  int **i_face_element_pointer,
-			  int **j_face_element_pointer,
+HYPRE_Int 
+transpose_matrix_create(  HYPRE_Int **i_face_element_pointer,
+			  HYPRE_Int **j_face_element_pointer,
 
-			  int *i_element_face, int *j_element_face,
+			  HYPRE_Int *i_element_face, HYPRE_Int *j_element_face,
 
-			  int num_elements, int num_faces)
+			  HYPRE_Int num_elements, HYPRE_Int num_faces)
 
 {
   FILE *f;
-  int ierr =0, i, j;
+  HYPRE_Int ierr =0, i, j;
 
-  int *i_face_element, *j_face_element;
+  HYPRE_Int *i_face_element, *j_face_element;
 
   /* ======================================================================
      first create face_element graph: -------------------------------------
      ====================================================================== */
 
-  i_face_element = (int *) malloc((num_faces+1) * sizeof(int));
-  j_face_element = (int *) malloc(i_element_face[num_elements] * sizeof(int));
+  i_face_element = (HYPRE_Int *) malloc((num_faces+1) * sizeof(HYPRE_Int));
+  j_face_element = (HYPRE_Int *) malloc(i_element_face[num_elements] * sizeof(HYPRE_Int));
 
 
   for (i=0; i < num_faces; i++)
@@ -46,7 +46,7 @@ transpose_matrix_create(  int **i_face_element_pointer,
 
   i_face_element[0] = 0;
 
-  /* printf("end building face--element graph: ++++++++++++++++++\n"); */
+  /* hypre_printf("end building face--element graph: ++++++++++++++++++\n"); */
 
   /* END building face_element graph; ================================ */
 

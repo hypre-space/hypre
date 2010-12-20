@@ -29,7 +29,7 @@
 hypre_BoxArray *
 hypre_GrowBoxByStencil( hypre_Box           *box,
                         hypre_StructStencil *stencil,
-                        int                  transpose )
+                        HYPRE_Int                  transpose )
 {
    hypre_BoxArray   *grow_box_array;
                   
@@ -38,7 +38,7 @@ hypre_GrowBoxByStencil( hypre_Box           *box,
 
    hypre_Index      *stencil_shape;
 
-   int               s, d;
+   HYPRE_Int               s, d;
 
    stencil_shape = hypre_StructStencilShape(stencil);
 
@@ -80,11 +80,11 @@ hypre_GrowBoxByStencil( hypre_Box           *box,
 hypre_BoxArrayArray *
 hypre_GrowBoxArrayByStencil( hypre_BoxArray      *box_array,
                              hypre_StructStencil *stencil,
-                             int                  transpose )
+                             HYPRE_Int                  transpose )
 {
    hypre_BoxArrayArray     *grow_box_array_array;
 
-   int                      i;
+   HYPRE_Int                      i;
 
    grow_box_array_array =
       hypre_BoxArrayArrayCreate(hypre_BoxArraySize(box_array));

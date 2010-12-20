@@ -56,17 +56,17 @@ hypre_NAME_FORTRAN_FOR_C(setup)(&Setup_err_flag,\
 			  hypre_AMGDataLogFileName(amg_data),\
 			  strlen(hypre_AMGDataLogFileName(amg_data)))
 
-void hypre_NAME_FORTRAN_FOR_C(setup)(int *, int *, int *,
-			       double *, int *, double *, int *,
-			       int *, int *, int *, int *, int *,
-			       double *, int *, int *,
-			       int *, int *, int *, int *,
-			       double *, int *, int *,
-			       int *, int *, int *,
-			       int *, int *, int *, int *,
+void hypre_NAME_FORTRAN_FOR_C(setup)(HYPRE_Int *, HYPRE_Int *, HYPRE_Int *,
+			       double *, HYPRE_Int *, double *, HYPRE_Int *,
+			       HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *,
+			       double *, HYPRE_Int *, HYPRE_Int *,
+			       HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *,
+			       double *, HYPRE_Int *, HYPRE_Int *,
+			       HYPRE_Int *, HYPRE_Int *, HYPRE_Int *,
+			       HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *,
 			       char *, long);
 
 
 /* idec */
-void hypre_NAME_FORTRAN_FOR_C(idec)(int *, int *, int *, int *);
+void hypre_NAME_FORTRAN_FOR_C(idec)(HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
 

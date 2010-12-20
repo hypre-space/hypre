@@ -27,7 +27,7 @@
  * Relax
  *--------------------------------------------------------------------------*/
 
-int    	 hypre_AMGRelax(u,f,A,ICG,IV,
+HYPRE_Int    	 hypre_AMGRelax(u,f,A,ICG,IV,
                    min_point,max_point,point_type,relax_type,
                    D_mat, S_vec)
 hypre_Vector 	     *u;
@@ -35,30 +35,30 @@ hypre_Vector 	     *f;
 hypre_Matrix       *A;
 hypre_VectorInt    *ICG;
 hypre_VectorInt    *IV;
-int          min_point;
-int          max_point;
-int          point_type;
-int          relax_type;
+HYPRE_Int          min_point;
+HYPRE_Int          max_point;
+HYPRE_Int          point_type;
+HYPRE_Int          relax_type;
 double       *D_mat;
 double       *S_vec;
 {
    double         *a  = hypre_MatrixData(A);
-   int            *ia = hypre_MatrixIA(A);
-   int            *ja = hypre_MatrixJA(A);
-   int             n  = hypre_MatrixSize(A);
+   HYPRE_Int            *ia = hypre_MatrixIA(A);
+   HYPRE_Int            *ja = hypre_MatrixJA(A);
+   HYPRE_Int             n  = hypre_MatrixSize(A);
 	          
    double         *up = hypre_VectorData(u);
    double         *fp = hypre_VectorData(f);
-   int            *icg = hypre_VectorIntData(ICG);
-   int            *iv = hypre_VectorIntData(IV);
+   HYPRE_Int            *icg = hypre_VectorIntData(ICG);
+   HYPRE_Int            *iv = hypre_VectorIntData(IV);
    double          res;
 	          
-   int             i, idx, i_start, i_start_next, i_end;
-   int             j, jj, j_low, j_high, nn;
-   int             C_point_flag, F_point_flag;
-   int             column;
-   int             num_vars;
-   int             relax_error = 0;
+   HYPRE_Int             i, idx, i_start, i_start_next, i_end;
+   HYPRE_Int             j, jj, j_low, j_high, nn;
+   HYPRE_Int             C_point_flag, F_point_flag;
+   HYPRE_Int             column;
+   HYPRE_Int             num_vars;
+   HYPRE_Int             relax_error = 0;
 
    double         *A_mat;
    double         *x_vec;
@@ -216,13 +216,13 @@ double       *S_vec;
  *
  *------------------------------------------------------------------------ */
 
-int gselim(A,x,n)
+HYPRE_Int gselim(A,x,n)
 double *A;
 double *x;
-int n;
+HYPRE_Int n;
 {
-   int    err_flag = 0;
-   int    j,k,m;
+   HYPRE_Int    err_flag = 0;
+   HYPRE_Int    j,k,m;
    double factor;
    
    if (n==1)                           /* A is 1x1 */  

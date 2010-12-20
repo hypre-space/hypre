@@ -16,7 +16,7 @@
 #include "umalloc_local.h"
 
 
-void *_uget_fn(Heap_t usrheap, size_t *length, int *clean)
+void *_uget_fn(Heap_t usrheap, size_t *length, HYPRE_Int *clean)
 {
    void *p;
  
@@ -35,6 +35,6 @@ void _urelease_fn(Heap_t usrheap, void *p, size_t size)
 }
 #else
 /* this is used only to eliminate compiler warnings */
-int umalloc_empty;
+double umalloc_empty;
 #endif
 

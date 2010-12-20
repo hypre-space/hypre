@@ -57,8 +57,8 @@ void  HYPRE_AMGPrintTiming(double time_ticks, double cpu_ticks)
 {
 
   
-   printf(" wall clock time = %f seconds\n", time_ticks/AMG_TICKS_PER_SEC);
-   printf(" CPU clock time  = %f seconds\n", cpu_ticks/AMG_CPU_TICKS_PER_SEC);
+   hypre_printf(" wall clock time = %f seconds\n", time_ticks/AMG_TICKS_PER_SEC);
+   hypre_printf(" CPU clock time  = %f seconds\n", cpu_ticks/AMG_CPU_TICKS_PER_SEC);
 
 }
 

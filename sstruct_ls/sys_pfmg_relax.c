@@ -27,7 +27,7 @@
 typedef struct
 {
    void                   *relax_data;
-   int                     relax_type;
+   HYPRE_Int                     relax_type;
    double                  jacobi_weight;
 
 } hypre_SysPFMGRelaxData;
@@ -52,11 +52,11 @@ hypre_SysPFMGRelaxCreate( MPI_Comm  comm )
  * hypre_SysPFMGRelaxDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelaxDestroy( void *sys_pfmg_relax_vdata )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
-   int                     ierr = 0;
+   HYPRE_Int                     ierr = 0;
 
    if (sys_pfmg_relax_data)
    {
@@ -71,14 +71,14 @@ hypre_SysPFMGRelaxDestroy( void *sys_pfmg_relax_vdata )
  * hypre_SysPFMGRelax
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelax( void                 *sys_pfmg_relax_vdata,
                     hypre_SStructPMatrix *A,
                     hypre_SStructPVector *b,
                     hypre_SStructPVector *x                )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
-   int                     ierr = 0;
+   HYPRE_Int                     ierr = 0;
 
    ierr = hypre_NodeRelax((sys_pfmg_relax_data -> relax_data), A, b, x);
 
@@ -89,7 +89,7 @@ hypre_SysPFMGRelax( void                 *sys_pfmg_relax_vdata,
  * hypre_SysPFMGRelaxSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelaxSetup( void                 *sys_pfmg_relax_vdata,
                          hypre_SStructPMatrix *A,
                          hypre_SStructPVector *b,
@@ -97,10 +97,10 @@ hypre_SysPFMGRelaxSetup( void                 *sys_pfmg_relax_vdata,
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
    void                   *relax_data       = (sys_pfmg_relax_data -> relax_data);
-   int                     relax_type       = (sys_pfmg_relax_data -> relax_type);
+   HYPRE_Int                     relax_type       = (sys_pfmg_relax_data -> relax_type);
    double                  jacobi_weight    = (sys_pfmg_relax_data -> jacobi_weight);
 
-   int                     ierr = 0;
+   HYPRE_Int                     ierr = 0;
   
    if (relax_type == 1)
    {
@@ -116,13 +116,13 @@ hypre_SysPFMGRelaxSetup( void                 *sys_pfmg_relax_vdata,
  * hypre_SysPFMGRelaxSetType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
-                           int    relax_type       )
+                           HYPRE_Int    relax_type       )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
    void                   *relax_data = (sys_pfmg_relax_data -> relax_data);
-   int                     ierr = 0;
+   HYPRE_Int                     ierr = 0;
 
    (sys_pfmg_relax_data -> relax_type) = relax_type;
 
@@ -174,7 +174,7 @@ hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
 /*--------------------------------------------------------------------------
  * hypre_SysPFMGRelaxSetPreRelax
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_SysPFMGRelaxSetJacobiWeight(void  *sys_pfmg_relax_vdata,
                                   double weight)
 {
@@ -189,13 +189,13 @@ hypre_SysPFMGRelaxSetJacobiWeight(void  *sys_pfmg_relax_vdata,
  * hypre_SysPFMGRelaxSetPreRelax
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelaxSetPreRelax( void  *sys_pfmg_relax_vdata )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
    void                   *relax_data = (sys_pfmg_relax_data -> relax_data);
-   int                     relax_type = (sys_pfmg_relax_data -> relax_type);
-   int                     ierr = 0;
+   HYPRE_Int                     relax_type = (sys_pfmg_relax_data -> relax_type);
+   HYPRE_Int                     ierr = 0;
 
    switch(relax_type)
    {
@@ -218,13 +218,13 @@ hypre_SysPFMGRelaxSetPreRelax( void  *sys_pfmg_relax_vdata )
  * hypre_SysPFMGRelaxSetPostRelax
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelaxSetPostRelax( void  *sys_pfmg_relax_vdata )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
    void                   *relax_data = (sys_pfmg_relax_data -> relax_data);
-   int                     relax_type = (sys_pfmg_relax_data -> relax_type);
-   int                     ierr = 0;
+   HYPRE_Int                     relax_type = (sys_pfmg_relax_data -> relax_type);
+   HYPRE_Int                     ierr = 0;
 
    switch(relax_type)
    {
@@ -247,12 +247,12 @@ hypre_SysPFMGRelaxSetPostRelax( void  *sys_pfmg_relax_vdata )
  * hypre_SysPFMGRelaxSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelaxSetTol( void   *sys_pfmg_relax_vdata,
                           double  tol              )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
-   int                     ierr = 0;
+   HYPRE_Int                     ierr = 0;
 
    ierr = hypre_NodeRelaxSetTol((sys_pfmg_relax_data -> relax_data), tol);
 
@@ -263,12 +263,12 @@ hypre_SysPFMGRelaxSetTol( void   *sys_pfmg_relax_vdata,
  * hypre_SysPFMGRelaxSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelaxSetMaxIter( void  *sys_pfmg_relax_vdata,
-                              int    max_iter         )
+                              HYPRE_Int    max_iter         )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
-   int                     ierr = 0;
+   HYPRE_Int                     ierr = 0;
 
    ierr = hypre_NodeRelaxSetMaxIter((sys_pfmg_relax_data -> relax_data),
                                      max_iter);
@@ -280,12 +280,12 @@ hypre_SysPFMGRelaxSetMaxIter( void  *sys_pfmg_relax_vdata,
  * hypre_SysPFMGRelaxSetZeroGuess
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelaxSetZeroGuess( void  *sys_pfmg_relax_vdata,
-                                int    zero_guess       )
+                                HYPRE_Int    zero_guess       )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
-   int                  ierr = 0;
+   HYPRE_Int                  ierr = 0;
 
    ierr = hypre_NodeRelaxSetZeroGuess((sys_pfmg_relax_data -> relax_data),
                                        zero_guess);
@@ -297,12 +297,12 @@ hypre_SysPFMGRelaxSetZeroGuess( void  *sys_pfmg_relax_vdata,
  * hypre_SysPFMGRelaxSetTempVec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGRelaxSetTempVec( void               *sys_pfmg_relax_vdata,
                               hypre_SStructPVector *t                )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
-   int                  ierr = 0;
+   HYPRE_Int                  ierr = 0;
 
    ierr = hypre_NodeRelaxSetTempVec((sys_pfmg_relax_data -> relax_data), t);
 

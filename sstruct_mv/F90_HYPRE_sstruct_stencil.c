@@ -26,14 +26,14 @@
 
 void
 hypre_F90_IFACE(hypre_sstructstencilcreate, HYPRE_SSTRUCTSTENCILCREATE)
-   (int      *ndim,
-    int      *size,
-    long int *stencil_ptr,
-    int      *ierr)
+   (HYPRE_Int      *ndim,
+    HYPRE_Int      *size,
+    hypre_F90_Obj *stencil_ptr,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructStencilCreate(
-                     (int)                   *ndim,
-                     (int)                   *size,
+   *ierr = (HYPRE_Int) (HYPRE_SStructStencilCreate(
+                     (HYPRE_Int)                   *ndim,
+                     (HYPRE_Int)                   *size,
                      (HYPRE_SStructStencil *) stencil_ptr ) );
 }
 
@@ -43,10 +43,10 @@ hypre_F90_IFACE(hypre_sstructstencilcreate, HYPRE_SSTRUCTSTENCILCREATE)
 
 void
 hypre_F90_IFACE(hypre_sstructstencildestroy, HYPRE_SSTRUCTSTENCILDESTROY)
-   (long int *stencil,
-    int      *ierr)
+   (hypre_F90_Obj *stencil,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructStencilDestroy(
+   *ierr = (HYPRE_Int) (HYPRE_SStructStencilDestroy(
                      (HYPRE_SStructStencil) *stencil ) );
 }
 
@@ -56,15 +56,15 @@ hypre_F90_IFACE(hypre_sstructstencildestroy, HYPRE_SSTRUCTSTENCILDESTROY)
 
 void
 hypre_F90_IFACE(hypre_sstructstencilsetentry, HYPRE_SSTRUCTSTENCILSETENTRY)
-   (long int *stencil,
-    int      *entry,
-    int      *offset,
-    int      *var,
-    int      *ierr)
+   (hypre_F90_Obj *stencil,
+    HYPRE_Int      *entry,
+    HYPRE_Int      *offset,
+    HYPRE_Int      *var,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructStencilSetEntry(
+   *ierr = (HYPRE_Int) (HYPRE_SStructStencilSetEntry(
                      (HYPRE_SStructStencil) *stencil,
-                     (int)                  *entry,
-                     (int *)                 offset,
-                     (int)                  *var ) );
+                     (HYPRE_Int)                  *entry,
+                     (HYPRE_Int *)                 offset,
+                     (HYPRE_Int)                  *var ) );
 }

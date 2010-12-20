@@ -34,11 +34,11 @@ extern "C" {
 
 struct double_linked_list
 {
-       int                        data;
+       HYPRE_Int                        data;
        struct double_linked_list *next_elt;
        struct double_linked_list *prev_elt;
-       int                        head;
-       int                        tail;
+       HYPRE_Int                        head;
+       HYPRE_Int                        tail;
 };
 
 typedef struct double_linked_list hypre_ListElement;

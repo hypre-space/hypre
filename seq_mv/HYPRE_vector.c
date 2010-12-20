@@ -26,7 +26,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Vector
-HYPRE_VectorCreate( int size )
+HYPRE_VectorCreate( HYPRE_Int size )
 {
    return ( (HYPRE_Vector) hypre_SeqVectorCreate(size) );
 }
@@ -35,7 +35,7 @@ HYPRE_VectorCreate( int size )
  * HYPRE_VectorDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_VectorDestroy( HYPRE_Vector vector )
 {
    return ( hypre_SeqVectorDestroy( (hypre_Vector *) vector ) );
@@ -45,7 +45,7 @@ HYPRE_VectorDestroy( HYPRE_Vector vector )
  * HYPRE_VectorInitialize
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_VectorInitialize( HYPRE_Vector vector )
 {
    return ( hypre_SeqVectorInitialize( (hypre_Vector *) vector ) );
@@ -55,7 +55,7 @@ HYPRE_VectorInitialize( HYPRE_Vector vector )
  * HYPRE_VectorPrint
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_VectorPrint( HYPRE_Vector  vector,
                    char         *file_name )
 {

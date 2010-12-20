@@ -17,26 +17,26 @@ char malloc_logpath_memory[256];
  *
  *--------------------------------------------------------------------------*/
  
-int
-main( int   argc,
+HYPRE_Int
+main( HYPRE_Int   argc,
       char *argv[] )
 {
-   int                 dim;          /* dimension of the problem */
-   int                 symmetric;    /* =1 for symmetric matrix storage */
-   int                 nx, ny, nz;   /* Number of points in x and y */
-   int                 stencil_size; /* size of the stencil */
+   HYPRE_Int                 dim;          /* dimension of the problem */
+   HYPRE_Int                 symmetric;    /* =1 for symmetric matrix storage */
+   HYPRE_Int                 nx, ny, nz;   /* Number of points in x and y */
+   HYPRE_Int                 stencil_size; /* size of the stencil */
    double              del_x, del_y, del_z; /* Delta x,y,z spacings */
    double              xlength, ylength, zlength; /* Lengths of x,y,z grids */
    double              data[7]; /* array to hold coefficients */
-   int                 stencil_shape[4][3];
+   HYPRE_Int                 stencil_shape[4][3];
    FILE               *file;
-   int                 ix, jy, kz, i, j;
+   HYPRE_Int                 ix, jy, kz, i, j;
 
    char  filename[256]; /* Filename */
                      
    if (argc > 7)
      {
-       sprintf(filename, argv[1]);
+       hypre_sprintf(filename, argv[1]);
        nx = atoi(argv[2]);
        ny = atoi(argv[3]);
        nz = atoi(argv[4]);
@@ -46,19 +46,19 @@ main( int   argc,
      }
    else
      {
-       printf("Illegal input.\nUsage:\n\n");
-       printf("  create_3d_laplacian filename nx ny nz xlength ylength zlength\n\n");
-       printf("  where filename = output file containing matrix,\n");
-       printf("        nx = number of pts in x direction,\n");
-       printf("        ny = number of pts in y direction,\n");
-       printf("        nz = number of pts in z direction,\n");
-       printf("        xlength = total length in x, and\n");
-       printf("        ylength = total length in y.\n");
-       printf("        zlength = total length in z.\n\n");
-       printf("The matrix generated is for the 3-d Laplacian on a\n");
-       printf("(0,xlength) x (0,ylength) x (0,zlength) box using a 7-pt stencil\n");
-       printf("with delta_x = xlength/nx, delta_y = ylength/ny, \n");
-       printf("and delta_z = zlength/nz.\n");
+       hypre_printf("Illegal input.\nUsage:\n\n");
+       hypre_printf("  create_3d_laplacian filename nx ny nz xlength ylength zlength\n\n");
+       hypre_printf("  where filename = output file containing matrix,\n");
+       hypre_printf("        nx = number of pts in x direction,\n");
+       hypre_printf("        ny = number of pts in y direction,\n");
+       hypre_printf("        nz = number of pts in z direction,\n");
+       hypre_printf("        xlength = total length in x, and\n");
+       hypre_printf("        ylength = total length in y.\n");
+       hypre_printf("        zlength = total length in z.\n\n");
+       hypre_printf("The matrix generated is for the 3-d Laplacian on a\n");
+       hypre_printf("(0,xlength) x (0,ylength) x (0,zlength) box using a 7-pt stencil\n");
+       hypre_printf("with delta_x = xlength/nx, delta_y = ylength/ny, \n");
+       hypre_printf("and delta_z = zlength/nz.\n");
        exit(1);
      }
 
@@ -67,12 +67,12 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    /* set filename_root to zin_matrix for the moment */
-   /* sprintf(filename, "three_d_laplacian_input"); */
+   /* hypre_sprintf(filename, "three_d_laplacian_input"); */
 
    /* open file */
    if ((file = fopen(filename, "w")) == NULL)
      {
-       printf("Error: can't open input file %s\n", filename);
+       hypre_printf("Error: can't open input file %s\n", filename);
        exit(1);
      }
    /*--------------------------------------------------------------
@@ -101,28 +101,28 @@ main( int   argc,
     * Write out the matrix Symmetric, Grid and Stencil information.
     *--------------------------------------------------------------*/
 
-   fprintf(file, "StructMatrix\n");
+   hypre_fprintf(file, "StructMatrix\n");
 
-   fprintf(file, "\nSymmetric: %d\n", symmetric);
+   hypre_fprintf(file, "\nSymmetric: %d\n", symmetric);
 
    /* write grid info */
-   fprintf(file, "\nGrid:\n");
-   fprintf(file, "%d\n", dim);
-   fprintf(file, "%d\n", 1);
-   fprintf(file, "0:  (%d, %d, %d)  x  (%d, %d, %d)\n",0,0,0,
+   hypre_fprintf(file, "\nGrid:\n");
+   hypre_fprintf(file, "%d\n", dim);
+   hypre_fprintf(file, "%d\n", 1);
+   hypre_fprintf(file, "0:  (%d, %d, %d)  x  (%d, %d, %d)\n",0,0,0,
 	   nx-1,ny-1,nz-1);
 
    /* write stencil info */
-   fprintf(file, "\nStencil:\n");
-   fprintf(file, "%d\n", stencil_size);
+   hypre_fprintf(file, "\nStencil:\n");
+   hypre_fprintf(file, "%d\n", stencil_size);
    for (i = 0;  i < stencil_size; i++)
    {
-      fprintf(file, "%d: %d %d %d\n", i,
+      hypre_fprintf(file, "%d: %d %d %d\n", i,
              stencil_shape[i][0],stencil_shape[i][1],stencil_shape[i][2]);
    }
 
    /* write matrix data values */
-   fprintf(file, "\nData:\n");
+   hypre_fprintf(file, "\nData:\n");
    for (kz = 0; kz < nz; kz++)
      {
        for (jy = 0; jy < ny; jy++)
@@ -131,7 +131,7 @@ main( int   argc,
 	     {
 	       for (j = 0; j < stencil_size; j++)
 		 {
-		   fprintf(file, "0: (%d, %d, %d; %d) %e\n",
+		   hypre_fprintf(file, "0: (%d, %d, %d; %d) %e\n",
 			   ix,jy,kz,j,data[j]);
 		 }
 	     }

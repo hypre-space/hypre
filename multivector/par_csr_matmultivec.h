@@ -28,12 +28,12 @@
 extern "C" {
 #endif
 
-int hypre_ParCSRMatrixMatMultiVec(double, hypre_ParCSRMatrix*,
+HYPRE_Int hypre_ParCSRMatrixMatMultiVec(double, hypre_ParCSRMatrix*,
                                   hypre_ParMultiVector*,
                                   double, hypre_ParMultiVector*);
 
 
-int hypre_ParCSRMatrixMatMultiVecT(double, hypre_ParCSRMatrix*,
+HYPRE_Int hypre_ParCSRMatrixMatMultiVecT(double, hypre_ParCSRMatrix*,
                                   hypre_ParMultiVector*,
                                   double, hypre_ParMultiVector*);
 

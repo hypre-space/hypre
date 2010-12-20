@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dsygv_(integer *itype, char *jobz, char *uplo, integer *
+/* Subroutine */ HYPRE_Int dsygv_(integer *itype, char *jobz, char *uplo, integer *
 	n, doublereal *a, integer *lda, doublereal *b, integer *ldb, 
 	doublereal *w, doublereal *work, integer *lwork, integer *info)
 {
@@ -118,22 +118,22 @@
     /* Local variables */
     static integer neig;
     extern logical lsame_(char *, char *);
-    extern /* Subroutine */ int dtrmm_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int dtrmm_(char *, char *, char *, char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static char trans[1];
-    extern /* Subroutine */ int dtrsm_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int dtrsm_(char *, char *, char *, char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ int dsyev_(char *, char *, integer *, doublereal *
+    extern /* Subroutine */ HYPRE_Int dsyev_(char *, char *, integer *, doublereal *
 	    , integer *, doublereal *, doublereal *, integer *, integer *);
     static logical wantz;
     static integer nb;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ int dpotrf_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dpotrf_(char *, integer *, doublereal *, 
 	    integer *, integer *), dsygst_(integer *, char *, integer 
 	    *, doublereal *, integer *, doublereal *, integer *, integer *);
     static integer lwkopt;

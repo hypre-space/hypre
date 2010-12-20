@@ -31,24 +31,24 @@ typedef struct
    MPI_Comm              comm;
                       
    double                tol;
-   int                   max_iter;
-   int                   rel_change;
-   int                   zero_guess;
-   int                   max_levels;  /* max_level <= 0 means no limit */
+   HYPRE_Int                   max_iter;
+   HYPRE_Int                   rel_change;
+   HYPRE_Int                   zero_guess;
+   HYPRE_Int                   max_levels;  /* max_level <= 0 means no limit */
                       
-   int                   relax_type;     /* type of relaxation to use */
+   HYPRE_Int                   relax_type;     /* type of relaxation to use */
    double                jacobi_weight;  /* weighted jacobi weight */
-   int                   usr_jacobi_weight; /* indicator flag for user weight */
+   HYPRE_Int                   usr_jacobi_weight; /* indicator flag for user weight */
                                                                                                                                      
-   int                   num_pre_relax;  /* number of pre relaxation sweeps */
-   int                   num_post_relax; /* number of post relaxation sweeps */
-   int                   skip_relax;     /* flag to allow skipping relaxation */
+   HYPRE_Int                   num_pre_relax;  /* number of pre relaxation sweeps */
+   HYPRE_Int                   num_post_relax; /* number of post relaxation sweeps */
+   HYPRE_Int                   skip_relax;     /* flag to allow skipping relaxation */
    double                dxyz[3];     /* parameters used to determine cdir */
 
-   int                   num_levels;
+   HYPRE_Int                   num_levels;
                       
-   int                  *cdir_l;  /* coarsening directions */
-   int                  *active_l;  /* flags to relax on level l*/
+   HYPRE_Int                  *cdir_l;  /* coarsening directions */
+   HYPRE_Int                  *active_l;  /* flags to relax on level l*/
 
    hypre_SStructPGrid    **grid_l;
    hypre_SStructPGrid    **P_grid_l;
@@ -71,12 +71,12 @@ typedef struct
    void                **interp_data_l;
 
    /* log info (always logged) */
-   int                   num_iterations;
-   int                   time_index;
-   int                   print_level;
+   HYPRE_Int                   num_iterations;
+   HYPRE_Int                   time_index;
+   HYPRE_Int                   print_level;
 
    /* additional log info (logged when `logging' > 0) */
-   int                   logging;
+   HYPRE_Int                   logging;
    double               *norms;
    double               *rel_norms;
 

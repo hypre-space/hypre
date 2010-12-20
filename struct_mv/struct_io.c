@@ -29,27 +29,27 @@
  * hypre_PrintBoxArrayData
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_PrintBoxArrayData( FILE            *file,
                          hypre_BoxArray  *box_array,
                          hypre_BoxArray  *data_space,
-                         int              num_values,
+                         HYPRE_Int              num_values,
                          double          *data       )
 {
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
-   int              data_box_volume;
-   int              datai;
+   HYPRE_Int              data_box_volume;
+   HYPRE_Int              datai;
                    
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   int              i, j;
-   int              loopi, loopj, loopk;
+   HYPRE_Int              i, j;
+   HYPRE_Int              loopi, loopj, loopk;
 
    /*----------------------------------------
     * Print data
@@ -75,7 +75,7 @@ hypre_PrintBoxArrayData( FILE            *file,
             {
                for (j = 0; j < num_values; j++)
                {
-		  fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
+		  hypre_fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
                           i,
                           hypre_IndexX(start) + loopi,
                           hypre_IndexY(start) + loopj,
@@ -98,29 +98,29 @@ hypre_PrintBoxArrayData( FILE            *file,
  * unlie hypre_PrintBoxArrayData (there is no j loop in hypre_PrintCCBoxArrayData)
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_PrintCCVDBoxArrayData( FILE            *file,
                              hypre_BoxArray  *box_array,
                              hypre_BoxArray  *data_space,
-                             int              num_values,
-                             int              center_rank,
-                             int              stencil_size,
-                             int             *symm_elements,
+                             HYPRE_Int              num_values,
+                             HYPRE_Int              center_rank,
+                             HYPRE_Int              stencil_size,
+                             HYPRE_Int             *symm_elements,
                              double          *data       )
 {
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
-   int              data_box_volume, datai;
+   HYPRE_Int              data_box_volume, datai;
                    
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   int              i, j;
-   int              loopi, loopj, loopk;
+   HYPRE_Int              i, j;
+   HYPRE_Int              loopi, loopj, loopk;
 
    /*----------------------------------------
     * Print data
@@ -133,7 +133,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
    {
       if (symm_elements[j] < 0 && j!=center_rank )
       {
-         fprintf( file, "*: (*, *, *; %d) %.14e\n",
+         hypre_fprintf( file, "*: (*, *, *; %d) %.14e\n",
                   j, data[0] );
       }
       ++data;
@@ -157,7 +157,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop1For(loopi, loopj, loopk, datai)
             {
-               fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
+               hypre_fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
                        i,
                        hypre_IndexX(start) + loopi,
                        hypre_IndexY(start) + loopj,
@@ -177,22 +177,22 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
  * same as hypre_PrintBoxArrayData but for constant coefficients
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_PrintCCBoxArrayData( FILE            *file,
                          hypre_BoxArray  *box_array,
                          hypre_BoxArray  *data_space,
-                         int              num_values,
+                         HYPRE_Int              num_values,
                          double          *data       )
 {
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    hypre_Box       *box;
                    
-   int              datai;
+   HYPRE_Int              datai;
                    
    hypre_IndexRef   start;
                    
-   int              i, j;
+   HYPRE_Int              i, j;
 
    /*----------------------------------------
     * Print data
@@ -208,7 +208,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
 
          for (j = 0; j < num_values; j++)
          {
-         fprintf( file, "*: (*, *, *; %d) %.14e\n",
+         hypre_fprintf( file, "*: (*, *, *; %d) %.14e\n",
                   j, data[datai + j] );
          }
 
@@ -222,27 +222,27 @@ hypre_PrintCCBoxArrayData( FILE            *file,
  * hypre_ReadBoxArrayData  (for non-constant coefficients)
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ReadBoxArrayData( FILE            *file,
                         hypre_BoxArray  *box_array,
                         hypre_BoxArray  *data_space,
-                        int              num_values,
+                        HYPRE_Int              num_values,
                         double          *data       )
 {
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
-   int              data_box_volume;
-   int              datai;
+   HYPRE_Int              data_box_volume;
+   HYPRE_Int              datai;
                    
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   int              i, j, idummy;
-   int              loopi, loopj, loopk;
+   HYPRE_Int              i, j, idummy;
+   HYPRE_Int              loopi, loopj, loopk;
 
    /*----------------------------------------
     * Read data
@@ -268,7 +268,7 @@ hypre_ReadBoxArrayData( FILE            *file,
             {
                for (j = 0; j < num_values; j++)
                {
-                  fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
+                  hypre_fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
                          &idummy,
                          &idummy,
                          &idummy,
@@ -290,29 +290,29 @@ hypre_ReadBoxArrayData( FILE            *file,
  * hypre_ReadBoxArrayData_CC  (for when there are some constant coefficients)
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ReadBoxArrayData_CC( FILE            *file,
                            hypre_BoxArray  *box_array,
                            hypre_BoxArray  *data_space,
-                           int              stencil_size,
-                           int              real_stencil_size,
-                           int              constant_coefficient,
+                           HYPRE_Int              stencil_size,
+                           HYPRE_Int              real_stencil_size,
+                           HYPRE_Int              constant_coefficient,
                            double          *data       )
 {
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
-   int              data_box_volume, constant_stencil_size;
-   int              datai;
+   HYPRE_Int              data_box_volume, constant_stencil_size;
+   HYPRE_Int              datai;
                    
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   int              i, j, idummy;
-   int              loopi, loopj, loopk;
+   HYPRE_Int              i, j, idummy;
+   HYPRE_Int              loopi, loopj, loopk;
 
    /*----------------------------------------
     * Read data
@@ -338,7 +338,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
             excluding ones which are redundant due to symmetry.*/
          for (j=0; j <constant_stencil_size; j++)
          {
-            fscanf(file, "*: (*, *, *; %d) %le\n",
+            hypre_fscanf(file, "*: (*, *, *; %d) %le\n",
                    &idummy,
                    &data[j]);
          }
@@ -354,7 +354,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
 #include "hypre_box_smp_forloop.h"
             hypre_BoxLoop1For(loopi, loopj, loopk, datai)
                {
-                  fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
+                  hypre_fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
                          &idummy,
                          &idummy,
                          &idummy,

@@ -1,32 +1,32 @@
 #include <stdio.h>
 
-int 
-matrix_matrix_t_product(  int **i_element_element_pointer, 
-			  int **j_element_element_pointer,
+HYPRE_Int 
+matrix_matrix_t_product(  HYPRE_Int **i_element_element_pointer, 
+			  HYPRE_Int **j_element_element_pointer,
 
-			  int *i_element_face, int *j_element_face,
+			  HYPRE_Int *i_element_face, HYPRE_Int *j_element_face,
 
-			  int num_elements, int num_faces)
+			  HYPRE_Int num_elements, HYPRE_Int num_faces)
 
 {
   FILE *f;
-  int ierr =0, i, j, k, l, m;
+  HYPRE_Int ierr =0, i, j, k, l, m;
 
-  int i_element_on_local_list, i_element_on_list;
-  int local_element_element_counter = 0, element_element_counter = 0;
-  int *j_local_element_element;
+  HYPRE_Int i_element_on_local_list, i_element_on_list;
+  HYPRE_Int local_element_element_counter = 0, element_element_counter = 0;
+  HYPRE_Int *j_local_element_element;
 
   
-  int *i_element_element, *j_element_element;
-  int *i_face_element,    *j_face_element;
+  HYPRE_Int *i_element_element, *j_element_element;
+  HYPRE_Int *i_face_element,    *j_face_element;
 
 
   /* ======================================================================
      first create face_element graph: -------------------------------------
      ====================================================================== */
 
-  i_face_element = (int *) malloc((num_faces+1) * sizeof(int));
-  j_face_element = (int *) malloc(i_element_face[num_elements] * sizeof(int));
+  i_face_element = (HYPRE_Int *) malloc((num_faces+1) * sizeof(HYPRE_Int));
+  j_face_element = (HYPRE_Int *) malloc(i_element_face[num_elements] * sizeof(HYPRE_Int));
 
 
   for (i=0; i < num_faces; i++)
@@ -53,19 +53,19 @@ matrix_matrix_t_product(  int **i_element_element_pointer,
 
   i_face_element[0] = 0;
 
-  /* printf("end building face--element graph: ++++++++++++++++++\n"); */
+  /* hypre_printf("end building face--element graph: ++++++++++++++++++\n"); */
 
   /* END building face_element graph; ================================ */
 
 
-  /* printf("============= create element_element graph=============\n"); */
+  /* hypre_printf("============= create element_element graph=============\n"); */
 
-  /* printf("by multiplying element_face and face_element graphs; ==\n"); */
+  /* hypre_printf("by multiplying element_face and face_element graphs; ==\n"); */
 
 
-  j_local_element_element = (int *) malloc((num_elements+1) * sizeof(int));
+  j_local_element_element = (HYPRE_Int *) malloc((num_elements+1) * sizeof(HYPRE_Int));
 
-  i_element_element = (int *) malloc((num_elements+1) * sizeof(int));
+  i_element_element = (HYPRE_Int *) malloc((num_elements+1) * sizeof(HYPRE_Int));
 
   for (i=0; i < num_elements+1; i++)
     i_element_element[i] = 0;
@@ -81,7 +81,7 @@ matrix_matrix_t_product(  int **i_element_element_pointer,
 	    {
 	      /* element i  and element j_face_element[l] are connected */
 	    
-	      /* printf("element %d  and element %d are connected;\n",
+	      /* hypre_printf("element %d  and element %d are connected;\n",
 		     i, j_face_element[l]); */
 
 	      i_element_on_local_list = -1;
@@ -112,8 +112,8 @@ matrix_matrix_t_product(  int **i_element_element_pointer,
 
   i_element_element[0] = 0;
 
-  j_element_element = (int *) malloc(i_element_element[num_elements]
-				     * sizeof(int));
+  j_element_element = (HYPRE_Int *) malloc(i_element_element[num_elements]
+				     * sizeof(HYPRE_Int));
 
   /* fill--in the actual j_element_element array: --------------------- */
 
@@ -140,7 +140,7 @@ matrix_matrix_t_product(  int **i_element_element_pointer,
 		  if (element_element_counter >= 
 		      i_element_element[num_elements])
 		    {
-		      printf("error in j_elemenet_element size: %d \n",
+		      hypre_printf("error in j_elemenet_element size: %d \n",
 			     element_element_counter);
 		      break;
 		    }
@@ -170,21 +170,21 @@ matrix_matrix_t_product(  int **i_element_element_pointer,
   f = fopen("element_element", "w");
   for (i=0; i < num_elements; i++)
     {   
-      printf("\nelement: %d has elements:\n", i);  
+      hypre_printf("\nelement: %d has elements:\n", i);  
       for (j=i_element_element[i]; j < i_element_element[i+1]; j++)
 	{
-	  printf("%d ", j_element_element[j]);
-	  fprintf(f, "%d %d\n", i, j_element_element[j]);
+	  hypre_printf("%d ", j_element_element[j]);
+	  hypre_fprintf(f, "%d %d\n", i, j_element_element[j]);
 	}
 	  
-      printf("\n"); 
+      hypre_printf("\n"); 
     }
 
   fclose(f);
 
 
 
-  printf("end element_element computation: ++++++++++++++++++++++++ \n"); 
+  hypre_printf("end element_element computation: ++++++++++++++++++++++++ \n"); 
   ====================================================================== */
 
   return ierr;

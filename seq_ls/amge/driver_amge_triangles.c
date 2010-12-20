@@ -5,28 +5,28 @@
  *      for testing unstructured matrix topology interface (csr storage)
  *--------------------------------------------------------------------------*/
  
-main( int   argc,
+main( HYPRE_Int   argc,
       char *argv[] )
 {
   FILE *f;
 
-  int ierr;
-  int i,j,k,l,m;
+  HYPRE_Int ierr;
+  HYPRE_Int i,j,k,l,m;
 
-  int level;            /* number of actual levels used in V--cycle: */
+  HYPRE_Int level;            /* number of actual levels used in V--cycle: */
 
 
-  int num_elements, num_nodes, num_dofs;
+  HYPRE_Int num_elements, num_nodes, num_dofs;
 
-  int Max_level = 25; 
+  HYPRE_Int Max_level = 25; 
 
-  int max_level;
+  HYPRE_Int max_level;
 
   /* nested dissection ILU(1) smoother: ---------------------------------- */
   /* internal format: ---------------------------------------------------- */
 
-  int **i_ILUdof_to_dof;
-  int **i_ILUdof_ILUdof_t, **j_ILUdof_ILUdof_t,
+  HYPRE_Int **i_ILUdof_to_dof;
+  HYPRE_Int **i_ILUdof_ILUdof_t, **j_ILUdof_ILUdof_t,
     **i_ILUdof_ILUdof, **j_ILUdof_ILUdof;
   double **LD_data, **U_data;
 
@@ -39,64 +39,64 @@ main( int   argc,
 
 
   /* Dirichlet boundary conditions information: -------------------------- */
-  int *i_node_on_boundary;
-  int *i_dof_on_boundary;
+  HYPRE_Int *i_node_on_boundary;
+  HYPRE_Int *i_dof_on_boundary;
 
   /* auxiliary arrays for enforcing Dirichlet boundary conditions: -------- */
-  int *i_dof_dof_a, *j_dof_dof_a;
+  HYPRE_Int *i_dof_dof_a, *j_dof_dof_a;
   double *a_dof_dof;
 
 
   /* coarsenode information and coarsenode neighborhood information; ----- */
-  int **i_node_coarsenode, **j_node_coarsenode;
-  int **i_node_neighbor_coarsenode, **j_node_neighbor_coarsenode;
+  HYPRE_Int **i_node_coarsenode, **j_node_coarsenode;
+  HYPRE_Int **i_node_neighbor_coarsenode, **j_node_neighbor_coarsenode;
 
 
   /* dimensions of nodes, elements, dofs: -------------------------------- */
-  int *Num_nodes, *Num_elements, *Num_dofs;
+  HYPRE_Int *Num_nodes, *Num_elements, *Num_dofs;
 
   /* initial graphs: element_node, boundarysurface_node: ------------------ */
-  int *i_element_node_0, *j_element_node_0;
+  HYPRE_Int *i_element_node_0, *j_element_node_0;
 
   /* not used: num_boundarysurfaces = 0; ---------------------------------- */
-  int *i_boundarysurface_node, *j_boundarysurface_node;
-  int num_boundarysurfaces;
+  HYPRE_Int *i_boundarysurface_node, *j_boundarysurface_node;
+  HYPRE_Int num_boundarysurfaces;
 
 
   /* nested dissection blocks: -------------------------------------------- */
-  int **i_block_node, **j_block_node;
-  int *Num_blocks;
+  HYPRE_Int **i_block_node, **j_block_node;
+  HYPRE_Int *Num_blocks;
 
 
   /* PDEsystem information: ----------------------------------------------- */
-  int system_size;
+  HYPRE_Int system_size;
 
 
-  int num_functions;
+  HYPRE_Int num_functions;
 
 
-  int *i_dof_node_0, *j_dof_node_0;
-  int *i_node_dof_0, *j_node_dof_0;
+  HYPRE_Int *i_dof_node_0, *j_dof_node_0;
+  HYPRE_Int *i_node_dof_0, *j_node_dof_0;
 
-  int *i_element_dof_0, *j_element_dof_0;
+  HYPRE_Int *i_element_dof_0, *j_element_dof_0;
   double *element_data;
 
 
-  int **i_node_dof, **j_node_dof;
+  HYPRE_Int **i_node_dof, **j_node_dof;
 
 
   /* element matrices information: ---------------------------------------- */
-  int *i_element_chord_0, *j_element_chord_0;
+  HYPRE_Int *i_element_chord_0, *j_element_chord_0;
   double *a_element_chord_0;
 
-  int *i_chord_dof_0, *j_chord_dof_0;
-  int *Num_chords;
+  HYPRE_Int *i_chord_dof_0, *j_chord_dof_0;
+  HYPRE_Int *Num_chords;
 
   /* ---------------------------------------------------------------------- */
 
 
   /* counters: ------------------------------------------------------------ */  
-  int dof_coarsedof_counter, dof_neighbor_coarsedof_counter;
+  HYPRE_Int dof_coarsedof_counter, dof_neighbor_coarsedof_counter;
 
 
   /* node coordinates: ---------------------------------------------------- */  
@@ -109,9 +109,9 @@ main( int   argc,
 
   double *x, *rhs, *r, *v, **w, **d,
     *aux, *v_coarse, *w_coarse, *d_coarse, *v_fine, *w_fine, *d_fine;
-  int max_iter = 1000;
-  int coarse_level; 
-  int nu = 2;  
+  HYPRE_Int max_iter = 1000;
+  HYPRE_Int coarse_level; 
+  HYPRE_Int nu = 2;  
 
   double reduction_factor;
 
@@ -120,17 +120,17 @@ main( int   argc,
   /*-----------------------------------------------------------
    * Set defaults
    *-----------------------------------------------------------*/
-  int  arg_index;
-  int time_index;
-  int  print_usage;
+  HYPRE_Int  arg_index;
+  HYPRE_Int time_index;
+  HYPRE_Int  print_usage;
   char  *element_node_file = NULL, 
     *element_matrix_file = NULL, *coordinates_file=NULL,
     *node_on_boundary_file=NULL;
  
-  int element_node_file_type = 0;
-  int element_matrix_file_type = 0;
-  int coordinates_file_type = 0;
-  int node_on_boundary_file_type = 0;
+  HYPRE_Int element_node_file_type = 0;
+  HYPRE_Int element_matrix_file_type = 0;
+  HYPRE_Int coordinates_file_type = 0;
+  HYPRE_Int node_on_boundary_file_type = 0;
 
 
 
@@ -164,7 +164,7 @@ main( int   argc,
 
 
 	  element_node_file = argv[arg_index];
-	  printf("Element_node graph from file: %s\n", element_node_file);
+	  hypre_printf("Element_node graph from file: %s\n", element_node_file);
 	}
       else if ( strcmp(argv[arg_index], "-elmmat") == 0 )
 	{
@@ -173,7 +173,7 @@ main( int   argc,
 
 
 	  element_matrix_file = argv[arg_index];
-	  printf("Element matrices from file: %s\n", element_matrix_file);
+	  hypre_printf("Element matrices from file: %s\n", element_matrix_file);
 	}
       else if ( strcmp(argv[arg_index], "-bc") == 0 )
 	{
@@ -182,7 +182,7 @@ main( int   argc,
 
 
 	  node_on_boundary_file = argv[arg_index];
-	  printf("Dirichlet b.c. nodes from file: %s\n", node_on_boundary_file);
+	  hypre_printf("Dirichlet b.c. nodes from file: %s\n", node_on_boundary_file);
 	}
       else if ( strcmp(argv[arg_index], "-graphics") == 0 )
 	{
@@ -191,7 +191,7 @@ main( int   argc,
 
 
 	  coordinates_file = argv[arg_index];
-	  printf("Node coordinates from file: %s\n", coordinates_file);
+	  hypre_printf("Node coordinates from file: %s\n", coordinates_file);
 	}
       else if ( strcmp(argv[arg_index], "-help") == 0 )
 	{
@@ -205,13 +205,13 @@ main( int   argc,
 
 
   if (element_node_file)
-    printf("element_node from file: %s\n", element_node_file);
+    hypre_printf("element_node from file: %s\n", element_node_file);
   if (element_matrix_file)
-    printf("Element matrices from file: %s\n", element_matrix_file);
+    hypre_printf("Element matrices from file: %s\n", element_matrix_file);
   if (coordinates_file)
-    printf("Node coordinates from file: %s\n", coordinates_file);
+    hypre_printf("Node coordinates from file: %s\n", coordinates_file);
   if (node_on_boundary_file)
-    printf("Dirichlet b.c. nodes from file: %s\n", node_on_boundary_file);
+    hypre_printf("Dirichlet b.c. nodes from file: %s\n", node_on_boundary_file);
 
 
 
@@ -221,17 +221,17 @@ main( int   argc,
  
   if (print_usage)
    {
-      printf("\n");
-      printf("Usage: %s [<options>]\n", argv[0]);
-      printf("\n");
-      printf("  -fromfile <filename>   : build graph element_node from file\n");
-      printf("\n");
-      printf("  -elmmat   <filename>   : read fine-grid element matrices from file\n");
-      printf("\n");
-      printf("  -graphics <filename>   : read x_coord, y_coord from file\n");
-      printf("\n");
-      printf("  -bc       <filename>   : Dirichlet b.c. nodes from file\n");
-      printf("\n");
+      hypre_printf("\n");
+      hypre_printf("Usage: %s [<options>]\n", argv[0]);
+      hypre_printf("\n");
+      hypre_printf("  -fromfile <filename>   : build graph element_node from file\n");
+      hypre_printf("\n");
+      hypre_printf("  -elmmat   <filename>   : read fine-grid element matrices from file\n");
+      hypre_printf("\n");
+      hypre_printf("  -graphics <filename>   : read x_coord, y_coord from file\n");
+      hypre_printf("\n");
+      hypre_printf("  -bc       <filename>   : Dirichlet b.c. nodes from file\n");
+      hypre_printf("\n");
 
       exit(1);
    }
@@ -240,12 +240,12 @@ main( int   argc,
    *------------------------------------------------------------------------*/
 
 
-  Num_chords =  hypre_CTAlloc(int, Max_level);
-  Num_elements =  hypre_CTAlloc(int, Max_level);
-  Num_nodes =  hypre_CTAlloc(int, Max_level);
-  Num_dofs =  hypre_CTAlloc(int, Max_level);
+  Num_chords =  hypre_CTAlloc(HYPRE_Int, Max_level);
+  Num_elements =  hypre_CTAlloc(HYPRE_Int, Max_level);
+  Num_nodes =  hypre_CTAlloc(HYPRE_Int, Max_level);
+  Num_dofs =  hypre_CTAlloc(HYPRE_Int, Max_level);
 
-  Num_blocks = hypre_CTAlloc(int, Max_level);
+  Num_blocks = hypre_CTAlloc(HYPRE_Int, Max_level);
 
   for (l=0; l < Max_level; l++)
     {
@@ -313,7 +313,7 @@ main( int   argc,
 
   max_level = level;
 
-  printf("END AMGeMatrixTopologySetup; =================================\n");
+  hypre_printf("END AMGeMatrixTopologySetup; =================================\n");
 
 
 
@@ -336,7 +336,7 @@ main( int   argc,
 				   Num_elements,
 				   Num_nodes);
 
-  printf("END AMGeCoarsenodeSetup; =================================\n");
+  hypre_printf("END AMGeCoarsenodeSetup; =================================\n");
 
   
 
@@ -393,7 +393,7 @@ main( int   argc,
 			      element_matrix_file);
 
 
-  printf("store element matrices in element_chord format: ----------------\n");
+  hypre_printf("store element matrices in element_chord format: ----------------\n");
 
   ierr = hypre_AMGeElementMatrixDof(i_element_dof_0, j_element_dof_0,
 
@@ -465,7 +465,7 @@ main( int   argc,
   hypre_TFree(i_dof_node_0);
   hypre_TFree(j_dof_node_0);
 
-  printf("END AMGeInterpolationSetup; =================================\n");
+  hypre_printf("END AMGeInterpolationSetup; =================================\n");
 
 
   ierr = hypre_AMGeSmootherSetup(&i_ILUdof_to_dof,
@@ -491,7 +491,7 @@ main( int   argc,
 				 Num_nodes,
 				 Num_dofs); 
 
-  printf("END AMGeSmootherSetup; =================================\n");
+  hypre_printf("END AMGeSmootherSetup; =================================\n");
 
   hypre_TFree(i_node_dof_0);
   hypre_TFree(j_node_dof_0);
@@ -567,9 +567,9 @@ main( int   argc,
 
   for (l=0; l < level; l++)
     {
-      printf("\n\n=======================================================\n");
-      printf("             Testing level[%d] PCG solve:                  \n",l);
-      printf("===========================================================\n");
+      hypre_printf("\n\n=======================================================\n");
+      hypre_printf("             Testing level[%d] PCG solve:                  \n",l);
+      hypre_printf("===========================================================\n");
  
       for (i=0; i < Num_dofs[l]; i++)
 	x[i] = 0.e0;
@@ -618,15 +618,15 @@ main( int   argc,
 			  Num_dofs[l]);
 
 
-      printf("\n\n=======================================================\n");
-      printf("             END test PCG solve:                           \n");
-      printf("===========================================================\n");
+      hypre_printf("\n\n=======================================================\n");
+      hypre_printf("             END test PCG solve:                           \n");
+      hypre_printf("===========================================================\n");
  
     }
 
-  printf("\n\n===============================================================\n");
-  printf(" ------- V_cycle & nested dissection ILU(1) smoothing: --------\n");
-  printf("================================================================\n");
+  hypre_printf("\n\n===============================================================\n");
+  hypre_printf(" ------- V_cycle & nested dissection ILU(1) smoothing: --------\n");
+  hypre_printf("================================================================\n");
 
   num_dofs = Num_dofs[0];
 
@@ -672,8 +672,8 @@ main( int   argc,
   for (l=0; l < level+1; l++)
     if (Num_dofs[l] > 0)
       {
-	printf("\n------------ level: %d --------------\n", l);
-	printf("num_dofs: %d, num_elements: %d, nnz: %d\n",
+	hypre_printf("\n------------ level: %d --------------\n", l);
+	hypre_printf("num_dofs: %d, num_elements: %d, nnz: %d\n",
 	       Num_dofs[l], Num_elements[l], Num_chords[l]);
       }
 

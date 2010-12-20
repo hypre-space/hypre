@@ -17,7 +17,7 @@
 #include "BlockJacobiPcKsp.h"
 
 
-int BlockJacobiICPcKspSolve( void *data, Mat A, Vec x, Vec b )
+HYPRE_Int BlockJacobiICPcKspSolve( void *data, Mat A, Vec x, Vec b )
      /* Uses IC as an approximate linear system solver on each
         processor as the block solver in BlockJacobi Preconditioner */
 {
@@ -25,7 +25,7 @@ int BlockJacobiICPcKspSolve( void *data, Mat A, Vec x, Vec b )
 
   BJData   *bj_data;
   SLES     *sles_ptr;  
-  int       flg, its;
+  HYPRE_Int       flg, its;
 
 
   bj_data = (BJData *) data;
@@ -34,13 +34,13 @@ int BlockJacobiICPcKspSolve( void *data, Mat A, Vec x, Vec b )
 
   /* Call Petsc solver */
 #if 0
-  printf("about to call slessolve\n");
+  hypre_printf("about to call slessolve\n");
 #endif
 
   flg = SLESSolve(*sles_ptr,b,x,&its); CHKERRA(flg);
 
 #if 0
-  PetscPrintf(MPI_COMM_WORLD, "iterations = %d\n",its);
+  PetscPrintf(hypre_MPI_COMM_WORLD, "iterations = %d\n",its);
 #endif
 
 

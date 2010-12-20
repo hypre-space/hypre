@@ -34,52 +34,52 @@
   ====================================================================== */
 
 
-int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
-				     int *i_node_element, int *j_node_element,
-				     int *i_element_element, 
-				     int *j_element_element,
+HYPRE_Int create_maximal_intersection_sets(HYPRE_Int *i_element_node, HYPRE_Int *j_element_node,
+				     HYPRE_Int *i_node_element, HYPRE_Int *j_node_element,
+				     HYPRE_Int *i_element_element, 
+				     HYPRE_Int *j_element_element,
 
 
-				     int *i_element_boundary_surface,
-				     int *j_element_boundary_surface,
+				     HYPRE_Int *i_element_boundary_surface,
+				     HYPRE_Int *j_element_boundary_surface,
 
-				     int *i_boundary_surface_node,  
-				     int *j_boundary_surface_node,
-				     int num_boundary_surfaces, 
+				     HYPRE_Int *i_boundary_surface_node,  
+				     HYPRE_Int *j_boundary_surface_node,
+				     HYPRE_Int num_boundary_surfaces, 
 
-				     int num_elements, int num_nodes,
+				     HYPRE_Int num_elements, HYPRE_Int num_nodes,
 
-				     int **i_face_element_pointer, 
-				     int **j_face_element_pointer,
+				     HYPRE_Int **i_face_element_pointer, 
+				     HYPRE_Int **j_face_element_pointer,
 
-				     int **i_face_node_pointer, 
-				     int **j_face_node_pointer,
+				     HYPRE_Int **i_face_node_pointer, 
+				     HYPRE_Int **j_face_node_pointer,
 
-				     int *num_faces_pointer)
+				     HYPRE_Int *num_faces_pointer)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j,k,l,m,n;
+  HYPRE_Int i,j,k,l,m,n;
 
-  int *bit_vec;
+  HYPRE_Int *bit_vec;
 
-  int num_local_faces = 0, num_local_boundary_faces = 0, 
+  HYPRE_Int num_local_faces = 0, num_local_boundary_faces = 0, 
     num_local_true_faces = 0;
-  int max_num_nodes_on_face = 0;
+  HYPRE_Int max_num_nodes_on_face = 0;
 
-  int face_counter = 0, face_node_counter = 0, face_element_counter = 0;
+  HYPRE_Int face_counter = 0, face_node_counter = 0, face_element_counter = 0;
 
-  int local_face_counter, local_face_node_counter;
+  HYPRE_Int local_face_counter, local_face_node_counter;
 
 
-  int *i_face_element, *j_face_element;
-  int *i_face_node, *j_face_node;
+  HYPRE_Int *i_face_element, *j_face_element;
+  HYPRE_Int *i_face_node, *j_face_node;
 
-  int *i_local_face_node, *j_local_face_node;
-  int *i_local_face_index;
+  HYPRE_Int *i_local_face_node, *j_local_face_node;
+  HYPRE_Int *i_local_face_index;
 
-  int *local_element_num;
+  HYPRE_Int *local_element_num;
 
 
 
@@ -104,16 +104,16 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 
   num_local_faces += num_local_boundary_faces;
 
-  i_local_face_node = (int *) malloc((num_local_faces+1) * sizeof(int));
+  i_local_face_node = (HYPRE_Int *) malloc((num_local_faces+1) * sizeof(HYPRE_Int));
 
-  j_local_face_node = (int *) malloc(max_num_nodes_on_face *
-				     num_local_faces * sizeof(int));
+  j_local_face_node = (HYPRE_Int *) malloc(max_num_nodes_on_face *
+				     num_local_faces * sizeof(HYPRE_Int));
 
-  i_local_face_index = (int *) malloc(num_local_faces * sizeof(int));
+  i_local_face_index = (HYPRE_Int *) malloc(num_local_faces * sizeof(HYPRE_Int));
 
-  bit_vec = (int *) malloc(num_nodes * sizeof(int));
+  bit_vec = (HYPRE_Int *) malloc(num_nodes * sizeof(HYPRE_Int));
 
-  local_element_num = (int *) malloc(num_local_faces * sizeof(int));
+  local_element_num = (HYPRE_Int *) malloc(num_local_faces * sizeof(HYPRE_Int));
 
 
   for (i=0; i < num_nodes; i++)
@@ -156,17 +156,17 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 	      if (local_face_node_counter - 
 		  i_local_face_node[local_face_counter-1] > 3) 
 		{
-		  printf("elements %d and %d are identical\n", 
+		  hypre_printf("elements %d and %d are identical\n", 
 			 i, j_element_element[j]);
 		  for (k=i_element_node[i]; k < i_element_node[i+1]; k++)
-		    printf("%d ", j_element_node[k]);
+		    hypre_printf("%d ", j_element_node[k]);
 
-		  printf("\n");
+		  hypre_printf("\n");
 		  for (k = i_element_node[j_element_element[j]]; 
 		       k < i_element_node[j_element_element[j]+1]; k++)
-		    printf("%d ", j_element_node[k]);
+		    hypre_printf("%d ", j_element_node[k]);
 
-		  printf("\n");
+		  hypre_printf("\n");
 		}
 		-------------------------------------------------------*/
 
@@ -214,7 +214,7 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 	}    
 
       /*--------------------------------------------------------------------
-      printf("element %d: %d local intersection sets found\n", i,
+      hypre_printf("element %d: %d local intersection sets found\n", i,
 	     local_face_counter);
         --------------------------------------------------------------------*/
 
@@ -260,7 +260,7 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 	    /*     if (i_local_face_index[k] == -1)   */
 	    {
 	      /*-------------------------------------------------------------
-	      printf("put local true face %d on the global list of faces:\n",
+	      hypre_printf("put local true face %d on the global list of faces:\n",
 		     face_counter);
 		------------------------------------------------------------*/
 
@@ -288,7 +288,7 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 
 	      /*-------------------------------------------------------------
 	      if (i_local_face_node[k+1] - i_local_face_node[k] != 3)
-		printf("a face has num of nodes: %d\n", 
+		hypre_printf("a face has num of nodes: %d\n", 
 		       i_local_face_node[k+1] - i_local_face_node[k]);
 	        ------------------------------------------------------------*/
 	      for (m=i_local_face_node[k]; m < i_local_face_node[k+1]; m++)
@@ -300,19 +300,19 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 	}
 
       /*---------------------------------------------------------------------
-      printf("num_faces found for element %d: %d\n", i, num_local_true_faces);
+      hypre_printf("num_faces found for element %d: %d\n", i, num_local_true_faces);
         ---------------------------------------------------------------------*/
 	     
     }
 
-  /* printf("=============== face_counter:%d ============\n", face_counter); */
+  /* hypre_printf("=============== face_counter:%d ============\n", face_counter); */
 
 
-  i_face_node = (int *) malloc((face_counter+1) * sizeof(int));
-  j_face_node = (int *) malloc(face_node_counter * sizeof(int));
+  i_face_node = (HYPRE_Int *) malloc((face_counter+1) * sizeof(HYPRE_Int));
+  j_face_node = (HYPRE_Int *) malloc(face_node_counter * sizeof(HYPRE_Int));
 
-  i_face_element = (int *) malloc((face_counter+1) * sizeof(int));
-  j_face_element = (int *) malloc(face_element_counter * sizeof(int));
+  i_face_element = (HYPRE_Int *) malloc((face_counter+1) * sizeof(HYPRE_Int));
+  j_face_element = (HYPRE_Int *) malloc(face_element_counter * sizeof(HYPRE_Int));
   
 
   face_counter = 0; 
@@ -353,17 +353,17 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 	      if (local_face_node_counter - 
 		  i_local_face_node[local_face_counter-1] > 3) 
 		{
-		  printf("elements %d and %d are identical\n", 
+		  hypre_printf("elements %d and %d are identical\n", 
 			 i, j_element_element[j]);
 		  for (k=i_element_node[i]; k < i_element_node[i+1]; k++)
-		    printf("%d ", j_element_node[k]);
+		    hypre_printf("%d ", j_element_node[k]);
 
-		  printf("\n");
+		  hypre_printf("\n");
 		  for (k = i_element_node[j_element_element[j]]; 
 		       k < i_element_node[j_element_element[j]+1]; k++)
-		    printf("%d ", j_element_node[k]);
+		    hypre_printf("%d ", j_element_node[k]);
 
-		  printf("\n");
+		  hypre_printf("\n");
 		}
 		--------------------------------------------------------*/
 
@@ -412,7 +412,7 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 	}
 
       /*--------------------------------------------------------------------
-      printf("element %d: %d local intersection sets found\n", i,
+      hypre_printf("element %d: %d local intersection sets found\n", i,
 	     local_face_counter);
         --------------------------------------------------------------------*/
 
@@ -458,7 +458,7 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 	    /*     if (i_local_face_index[k] == -1)   */
 	    {
 	      /*-------------------------------------------------------------
-	      printf("put local true face %d on the global list of faces:\n",
+	      hypre_printf("put local true face %d on the global list of faces:\n",
 		     face_counter);
 		------------------------------------------------------------*/
 
@@ -480,7 +480,7 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 
 	      /* ---------------------------------------------------------
 	      if (i_local_face_node[k+1] - i_local_face_node[k] != 3)
-		printf("a face has num of nodes: %d\n", 
+		hypre_printf("a face has num of nodes: %d\n", 
 		       i_local_face_node[k+1] - i_local_face_node[k]);
 
 	       ---------------------------------------------------------*/
@@ -493,12 +493,12 @@ int create_maximal_intersection_sets(int *i_element_node, int *j_element_node,
 	}
 
       /*---------------------------------------------------------------------
-      printf("num_faces found for element %d: %d\n", i, num_local_true_faces);
+      hypre_printf("num_faces found for element %d: %d\n", i, num_local_true_faces);
         ---------------------------------------------------------------------*/
 	     
     }
 
-  /* printf("=============== face_counter:%d ============\n", face_counter); */
+  /* hypre_printf("=============== face_counter:%d ============\n", face_counter); */
 
 
   num_faces_pointer[0] = face_counter;

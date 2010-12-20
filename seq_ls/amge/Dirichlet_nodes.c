@@ -8,17 +8,17 @@ void main()
 {
   FILE *f;
 
-  int i;
+  HYPRE_Int i;
 
-  int num_nodes, num_elements;
-  int *i_node_on_boundary;
+  HYPRE_Int num_nodes, num_elements;
+  HYPRE_Int *i_node_on_boundary;
 
   double *x_coord, *y_coord;
   double eps = 1.e-4;
 
 
   f = fopen("element_node", "r");
-  fscanf(f, "%d %d", &num_elements, &num_nodes);
+  hypre_fscanf(f, "%d %d", &num_elements, &num_nodes);
 
   fclose(f);
  
@@ -29,11 +29,11 @@ void main()
   f = fopen("coordinates", "r");
 
   for( i = 0; i < num_nodes; i++ )
-    fscanf(f, "%le %le\n", &x_coord[i], &y_coord[i]);
+    hypre_fscanf(f, "%le %le\n", &x_coord[i], &y_coord[i]);
 
   fclose(f);
 
-  i_node_on_boundary = (int *) malloc(num_nodes * sizeof(int));
+  i_node_on_boundary = (HYPRE_Int *) malloc(num_nodes * sizeof(HYPRE_Int));
   for (i=0; i<num_nodes; i++)
     i_node_on_boundary[i] = -1;
 
@@ -45,7 +45,7 @@ void main()
   f = fopen("node_on_boundary", "w");
 
   for (i=0; i<num_nodes; i++)
-    fprintf(f, "%d\n", i_node_on_boundary[i]);
+    hypre_fprintf(f, "%d\n", i_node_on_boundary[i]);
 
   fclose(f);
 

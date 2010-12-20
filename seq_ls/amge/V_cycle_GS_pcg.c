@@ -27,7 +27,7 @@
  ****************************************************************************/
 
 
-int hypre_VcycleGSpcg(double *x, double *rhs,
+HYPRE_Int hypre_VcycleGSpcg(double *x, double *rhs,
 		      double **v_cycle, double **w_cycle,
 
 		      double *reduction_factor_pointer,
@@ -38,25 +38,25 @@ int hypre_VcycleGSpcg(double *x, double *rhs,
 		      hypre_CSRMatrix **P,
 
 		      double *v_fine, double *w_fine, 
-		      double *v, double *w, double *d, int max_iter, 
+		      double *v, double *w, double *d, HYPRE_Int max_iter, 
 		       
 		      double *v_coarse, double *w_coarse, double *d_coarse, 
 
-		      int nu, 
-		      int level, int coarse_level, 
-		      int *Ndofs)
+		      HYPRE_Int nu, 
+		      HYPRE_Int level, HYPRE_Int coarse_level, 
+		      HYPRE_Int *Ndofs)
 
 {
-  int ierr=0, i, j;
+  HYPRE_Int ierr=0, i, j;
   float delta0, delta_old, delta, asfac, arfac, eps = 1.e-12;
   
-  int iter=0;
+  HYPRE_Int iter=0;
   float tau, alpha, beta;
   float delta_x;
 
-  int num_dofs = Ndofs[0];
-  int *i_dof_dof = hypre_CSRMatrixI(Matrix[0]);
-  int *j_dof_dof = hypre_CSRMatrixJ(Matrix[0]);
+  HYPRE_Int num_dofs = Ndofs[0];
+  HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(Matrix[0]);
+  HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(Matrix[0]);
   double *sparse_matrix = hypre_CSRMatrixData(Matrix[0]);
 
 
@@ -158,7 +158,7 @@ int hypre_VcycleGSpcg(double *x, double *rhs,
     delta0+= w[i] * d[i];
 
   if (max_iter > 999)
-    printf("hypre_VcycleGSpcg: delta0: %e\n", delta0); 
+    hypre_printf("hypre_VcycleGSpcg: delta0: %e\n", delta0); 
 
   delta_old = delta0;
 
@@ -181,7 +181,7 @@ loop:
 
       if (tau <= 0.e0) 
 	{
-	  printf("indefinite matrix: %e\n", tau);
+	  hypre_printf("indefinite matrix: %e\n", tau);
 	  /*	  return -1;                               */
 	}
 
@@ -225,7 +225,7 @@ loop:
   iter++;
 
   if (max_iter > 999)
-    printf("              hypre_VcycleGSpcg_iteration: %d;  residual_delta: %e,   arfac: %e\n", iter, sqrt(delta), sqrt(beta));	 
+    hypre_printf("              hypre_VcycleGSpcg_iteration: %d;  residual_delta: %e,   arfac: %e\n", iter, sqrt(delta), sqrt(beta));	 
 
   delta_old = delta;
 
@@ -240,8 +240,8 @@ loop:
   if (max_iter > 999)
     {
       /*==================================================================*/
-      printf("hypre_VcycleGSpcg: delta0: %e; delta: %e\n", delta0, delta);
-      printf("hypre_VcycleGSpcg: iterations: %d; reduction factors: %e, %e\n", iter, asfac, arfac);
+      hypre_printf("hypre_VcycleGSpcg: delta0: %e; delta: %e\n", delta0, delta);
+      hypre_printf("hypre_VcycleGSpcg: iterations: %d; reduction factors: %e, %e\n", iter, asfac, arfac);
       /*==================================================================*/
     }
  

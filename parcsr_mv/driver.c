@@ -19,20 +19,20 @@
  * Test driver for unstructured matrix interface 
  *--------------------------------------------------------------------------*/
  
-int
-main( int   argc,
+HYPRE_Int
+main( HYPRE_Int   argc,
       char *argv[] )
 {
    hypre_ParVector   *vector1;
    hypre_ParVector   *vector2;
    hypre_ParVector   *tmp_vector;
 
-   int          num_procs, my_id;
-   int	 	global_size = 20;
-   int		local_size;
-   int		first_index;
-   int 		i;
-   int 		*partitioning;
+   HYPRE_Int          num_procs, my_id;
+   HYPRE_Int	 	global_size = 20;
+   HYPRE_Int		local_size;
+   HYPRE_Int		first_index;
+   HYPRE_Int 		i;
+   HYPRE_Int 		*partitioning;
    double	prod;
    double 	*data, *data2;
    hypre_Vector *vector; 
@@ -40,15 +40,15 @@ main( int   argc,
    hypre_Vector *local_vector2;
  
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
+   hypre_MPI_Init(&argc, &argv);
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &my_id );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id );
 
-   printf(" my_id: %d num_procs: %d\n", my_id, num_procs);
+   hypre_printf(" my_id: %d num_procs: %d\n", my_id, num_procs);
  
    partitioning = NULL;
-   vector1 = hypre_ParVectorCreate(MPI_COMM_WORLD,global_size,partitioning);
+   vector1 = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_size,partitioning);
    partitioning = hypre_ParVectorPartitioning(vector1);
    hypre_ParVectorInitialize(vector1);
    local_vector = hypre_ParVectorLocalVector(vector1);
@@ -67,13 +67,13 @@ main( int   argc,
    for (i=0; i < global_size; i++)
 	data2[i] = i+1;
 
-/*   partitioning = hypre_CTAlloc(int,4);
+/*   partitioning = hypre_CTAlloc(HYPRE_Int,4);
    partitioning[0] = 0;
    partitioning[1] = 10;
    partitioning[2] = 10;
    partitioning[3] = 20;
 */
-   vector2 = hypre_VectorToParVector(MPI_COMM_WORLD,local_vector2,partitioning);
+   vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD,local_vector2,partitioning);
    hypre_ParVectorSetPartitioningOwner(vector2,0);
 
    hypre_ParVectorPrint(vector2, "Convert");
@@ -84,9 +84,9 @@ main( int   argc,
     * Copy the vector into tmp_vector
     *-----------------------------------------------------------*/
 
-   tmp_vector = hypre_ParVectorRead(MPI_COMM_WORLD, "Convert");
+   tmp_vector = hypre_ParVectorRead(hypre_MPI_COMM_WORLD, "Convert");
 /*
-   tmp_vector = hypre_ParVectorCreate(MPI_COMM_WORLD,global_size,partitioning);
+   tmp_vector = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_size,partitioning);
    hypre_ParVectorSetPartitioningOwner(tmp_vector,0);
    hypre_ParVectorInitialize(tmp_vector);
    hypre_ParVectorCopy(vector1, tmp_vector);
@@ -115,7 +115,7 @@ main( int   argc,
 
    prod = hypre_ParVectorInnerProd(vector1, tmp_vector);
 
-   printf (" prod: %8.2f \n", prod);
+   hypre_printf (" prod: %8.2f \n", prod);
 
    /*-----------------------------------------------------------
     * Finalize things
@@ -128,7 +128,7 @@ main( int   argc,
    if (vector) hypre_SeqVectorDestroy(vector); 
 
    /* Finalize MPI */
-   MPI_Finalize();
+   hypre_MPI_Finalize();
 
    return 0;
 }

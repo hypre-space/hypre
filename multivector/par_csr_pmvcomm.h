@@ -31,8 +31,8 @@ typedef struct
    hypre_ParCSRCommPkg  *comm_pkg;
    void 	        *send_data;
    void 	        *recv_data;
-   int                  num_requests;
-   MPI_Request          *requests;
+   HYPRE_Int                  num_requests;
+   hypre_MPI_Request          *requests;
 
 } hypre_ParCSRCommMultiHandle;
 
@@ -48,14 +48,14 @@ typedef struct
 #define hypre_ParCSRCommMultiHandleRequest(comm_handle, i)  (comm_handle -> requests[i])
 
 hypre_ParCSRCommMultiHandle *
-hypre_ParCSRCommMultiHandleCreate ( int 	          job,
+hypre_ParCSRCommMultiHandleCreate ( HYPRE_Int 	          job,
 			            hypre_ParCSRCommPkg   *comm_pkg,
                                     void                  *send_data, 
                                     void                  *recv_data, 
-				    int                   nvecs       );
+				    HYPRE_Int                   nvecs       );
 
 
-int
+HYPRE_Int
 hypre_ParCSRCommMultiHandleDestroy(hypre_ParCSRCommMultiHandle *comm_handle);
 
 #ifdef __cplusplus

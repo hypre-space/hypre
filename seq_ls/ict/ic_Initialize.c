@@ -26,7 +26,7 @@ void  *ic_initialize( port )
 void  *port;
 {
    ICData    *ic_data;
-   int             i;
+   HYPRE_Int             i;
 
 
    /* allocate space for structure */

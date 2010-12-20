@@ -31,7 +31,7 @@
 
 typedef struct
 {
-   int     nvars;
+   HYPRE_Int     nvars;
    void ***smatvec_data;
 
 } hypre_SStructPMatvecData;
@@ -40,7 +40,7 @@ typedef struct
  * hypre_SStructPMatvecCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
 {
    hypre_SStructPMatvecData *pmatvec_data;
@@ -55,17 +55,17 @@ hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
  * hypre_SStructPMatvecSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
                            hypre_SStructPMatrix *pA,
                            hypre_SStructPVector *px )
 {
    hypre_SStructPMatvecData   *pmatvec_data = pmatvec_vdata;
-   int                         nvars;
+   HYPRE_Int                         nvars;
    void                     ***smatvec_data;
    hypre_StructMatrix         *sA;
    hypre_StructVector         *sx;
-   int                         vi, vj;
+   HYPRE_Int                         vi, vj;
 
    nvars = hypre_SStructPMatrixNVars(pA);
    smatvec_data = hypre_TAlloc(void **, nvars);
@@ -94,7 +94,7 @@ hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
  * hypre_SStructPMatvecCompute
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
                              double                alpha,
                              hypre_SStructPMatrix *pA,
@@ -103,7 +103,7 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
                              hypre_SStructPVector *py )
 {
    hypre_SStructPMatvecData   *pmatvec_data = pmatvec_vdata;
-   int                         nvars        = (pmatvec_data -> nvars);
+   HYPRE_Int                         nvars        = (pmatvec_data -> nvars);
    void                     ***smatvec_data = (pmatvec_data -> smatvec_data);
 
    void                       *sdata;
@@ -111,7 +111,7 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
    hypre_StructVector         *sx;
    hypre_StructVector         *sy;
 
-   int                        vi, vj;
+   HYPRE_Int                        vi, vj;
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -150,13 +150,13 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
  * hypre_SStructPMatvecDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
 {
    hypre_SStructPMatvecData   *pmatvec_data = pmatvec_vdata;
-   int                         nvars;
+   HYPRE_Int                         nvars;
    void                     ***smatvec_data;
-   int                         vi, vj;
+   HYPRE_Int                         vi, vj;
 
    if (pmatvec_data)
    {
@@ -184,7 +184,7 @@ hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
  * hypre_SStructPMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPMatvec( double                alpha,
                       hypre_SStructPMatrix *pA,
                       hypre_SStructPVector *px,
@@ -211,7 +211,7 @@ hypre_SStructPMatvec( double                alpha,
 
 typedef struct
 {
-   int    nparts;
+   HYPRE_Int    nparts;
    void **pmatvec_data;
 
 } hypre_SStructMatvecData;
@@ -220,7 +220,7 @@ typedef struct
  * hypre_SStructMatvecCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructMatvecCreate( void **matvec_vdata_ptr )
 {
    hypre_SStructMatvecData *matvec_data;
@@ -235,17 +235,17 @@ hypre_SStructMatvecCreate( void **matvec_vdata_ptr )
  * hypre_SStructMatvecSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructMatvecSetup( void                *matvec_vdata,
                           hypre_SStructMatrix *A,
                           hypre_SStructVector *x )
 {
    hypre_SStructMatvecData  *matvec_data = matvec_vdata;
-   int                       nparts;
+   HYPRE_Int                       nparts;
    void                    **pmatvec_data;
    hypre_SStructPMatrix     *pA;
    hypre_SStructPVector     *px;
-   int                       part;
+   HYPRE_Int                       part;
 
    nparts = hypre_SStructMatrixNParts(A);
    pmatvec_data = hypre_TAlloc(void *, nparts);
@@ -266,7 +266,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
  * hypre_SStructMatvecCompute
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructMatvecCompute( void                *matvec_vdata,
                             double               alpha,
                             hypre_SStructMatrix *A,
@@ -275,7 +275,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
                             hypre_SStructVector *y )
 {
    hypre_SStructMatvecData  *matvec_data  = matvec_vdata;
-   int                       nparts       = (matvec_data -> nparts);
+   HYPRE_Int                       nparts       = (matvec_data -> nparts);
    void                    **pmatvec_data = (matvec_data -> pmatvec_data);
 
    void                     *pdata;
@@ -287,9 +287,9 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
    hypre_ParVector          *parx;
    hypre_ParVector          *pary;
 
-   int                       part;
-   int                       x_object_type= hypre_SStructVectorObjectType(x);
-   int                       A_object_type= hypre_SStructMatrixObjectType(A);
+   HYPRE_Int                       part;
+   HYPRE_Int                       x_object_type= hypre_SStructVectorObjectType(x);
+   HYPRE_Int                       A_object_type= hypre_SStructMatrixObjectType(A);
 
    if (x_object_type != A_object_type)
    {
@@ -356,13 +356,13 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
  * hypre_SStructMatvecDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructMatvecDestroy( void *matvec_vdata )
 {
    hypre_SStructMatvecData  *matvec_data = matvec_vdata;
-   int                       nparts;
+   HYPRE_Int                       nparts;
    void                    **pmatvec_data;
-   int                       part;
+   HYPRE_Int                       part;
 
    if (matvec_data)
    {
@@ -383,7 +383,7 @@ hypre_SStructMatvecDestroy( void *matvec_vdata )
  * hypre_SStructMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructMatvec( double               alpha,
                      hypre_SStructMatrix *A,
                      hypre_SStructVector *x,

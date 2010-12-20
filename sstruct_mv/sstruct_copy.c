@@ -25,12 +25,12 @@
  * hypre_SStructPCopy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPCopy( hypre_SStructPVector *px,
                     hypre_SStructPVector *py )
 {
-   int nvars = hypre_SStructPVectorNVars(px);
-   int var;
+   HYPRE_Int nvars = hypre_SStructPVectorNVars(px);
+   HYPRE_Int var;
 
    for (var = 0; var < nvars; var++)
    {
@@ -46,14 +46,14 @@ hypre_SStructPCopy( hypre_SStructPVector *px,
  * pgrid. For each box of an sgrid, an array of subboxes are copied.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPartialPCopy( hypre_SStructPVector *px,
                            hypre_SStructPVector *py,
                            hypre_BoxArrayArray **array_boxes )
 {
-   int nvars = hypre_SStructPVectorNVars(px);
+   HYPRE_Int nvars = hypre_SStructPVectorNVars(px);
    hypre_BoxArrayArray  *boxes;
-   int var;
+   HYPRE_Int var;
 
    for (var = 0; var < nvars; var++)
    {
@@ -70,15 +70,15 @@ hypre_SStructPartialPCopy( hypre_SStructPVector *px,
  * hypre_SStructCopy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructCopy( hypre_SStructVector *x,
                    hypre_SStructVector *y )
 {
-   int nparts = hypre_SStructVectorNParts(x);
-   int part;
+   HYPRE_Int nparts = hypre_SStructVectorNParts(x);
+   HYPRE_Int part;
 
-   int x_object_type= hypre_SStructVectorObjectType(x);
-   int y_object_type= hypre_SStructVectorObjectType(y);
+   HYPRE_Int x_object_type= hypre_SStructVectorObjectType(x);
+   HYPRE_Int y_object_type= hypre_SStructVectorObjectType(y);
 
    if (x_object_type != y_object_type)
    {

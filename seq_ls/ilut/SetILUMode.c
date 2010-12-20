@@ -19,7 +19,7 @@
  *--------------------------------------------------------------------------*/
 
 
-int SetILUMode( void * data, int mode )
+HYPRE_Int SetILUMode( void * data, HYPRE_Int mode )
      /* Mode =1: a copy of the input matrix will be made and into the 
         factorization routine because the
         original should not be overwritten.  

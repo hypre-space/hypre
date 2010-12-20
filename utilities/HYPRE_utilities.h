@@ -40,20 +40,25 @@ extern "C" {
  */
 #define HYPRE_Version() "HYPRE_RELEASE_NAME  $Date$ Compiled: " __DATE__ " " __TIME__
 
-#ifdef HYPRE_USE_PTHREADS
-#ifndef hypre_MAX_THREADS
-#define hypre_MAX_THREADS 128
-#endif
+/*--------------------------------------------------------------------------
+ * Big int stuff
+ *--------------------------------------------------------------------------*/
+
+#ifdef HYPRE_BIGINT
+typedef long long int HYPRE_Int;
+#define HYPRE_MPI_INT MPI_LONG_LONG_INT
+#else 
+typedef int HYPRE_Int;
+#define HYPRE_MPI_INT MPI_INT
 #endif
 
 /*--------------------------------------------------------------------------
- * Structures
+ * Sequential MPI stuff
  *--------------------------------------------------------------------------*/
 
 #ifdef HYPRE_SEQUENTIAL
-typedef int MPI_Comm;
+typedef HYPRE_Int MPI_Comm;
 #endif
-
 
 /*--------------------------------------------------------------------------
  * HYPRE error codes
@@ -65,37 +70,35 @@ typedef int MPI_Comm;
 /* bits 4-8 are reserved for the index of the argument error */
 #define HYPRE_ERROR_CONV          256   /* method did not converge as expected */
 
-
 /*--------------------------------------------------------------------------
  * HYPRE error user functions
  *--------------------------------------------------------------------------*/
 
 /* Return the current hypre error flag */
-int HYPRE_GetError();
+HYPRE_Int HYPRE_GetError();
 
 /* Check if the given error flag contains the given error code */
-int HYPRE_CheckError(int hypre_ierr, int hypre_error_code);
+HYPRE_Int HYPRE_CheckError(HYPRE_Int hypre_ierr, HYPRE_Int hypre_error_code);
 
 /* Return the index of the argument (counting from 1) where
    argument error (HYPRE_ERROR_ARG) has occured */
-int HYPRE_GetErrorArg();
+HYPRE_Int HYPRE_GetErrorArg();
 
 /* Describe the given error flag in the given string */
-void HYPRE_DescribeError(int hypre_ierr, char *descr);
+void HYPRE_DescribeError(HYPRE_Int hypre_ierr, char *descr);
 
 /* Clears the hypre error flag */
-int HYPRE_ClearAllErrors();
+HYPRE_Int HYPRE_ClearAllErrors();
 
 /* Clears the given error code from the hypre error flag */
-int HYPRE_ClearError(int hypre_error_code);
+HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
 
 /*--------------------------------------------------------------------------
  * HYPRE AP user functions
  *--------------------------------------------------------------------------*/
 
-
 /*Checks whether the AP is on */
-int HYPRE_AssumedPartitionCheck();
+HYPRE_Int HYPRE_AssumedPartitionCheck();
 
 
 #ifdef __cplusplus

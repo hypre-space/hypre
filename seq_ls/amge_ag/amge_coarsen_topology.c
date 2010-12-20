@@ -24,28 +24,28 @@
  *        agglomeration based on complexity measure;
  ****************************************************************************/
 
-int hypre_CoarsenAMGeMatrixTopology(hypre_AMGeMatrixTopology *A_crs,
+HYPRE_Int hypre_CoarsenAMGeMatrixTopology(hypre_AMGeMatrixTopology *A_crs,
 
 				    
 				    hypre_AMGeMatrixTopology *A,
 
-				    int *i_face_to_prefer_weight,
-				    int *i_face_weight)
+				    HYPRE_Int *i_face_to_prefer_weight,
+				    HYPRE_Int *i_face_weight)
 
 {
-  int ierr = 0;
-  int i,j,k,l,m;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k,l,m;
 
-  int num_elements, num_faces, num_boundarysurfaces;
+  HYPRE_Int num_elements, num_faces, num_boundarysurfaces;
   /* hypre_AMGeMatrixTopology *A_crs; */
 
-  int *i_element_face, *j_element_face;
-  int *i_face_face, *j_face_face;
-  int *i_boundarysurface_face, *j_boundarysurface_face;
+  HYPRE_Int *i_element_face, *j_element_face;
+  HYPRE_Int *i_face_face, *j_face_face;
+  HYPRE_Int *i_boundarysurface_face, *j_boundarysurface_face;
 
 
 
-  int num_nodes;
+  HYPRE_Int num_nodes;
 
 
   /*------------------------------------------------------------------------
@@ -54,12 +54,12 @@ int hypre_CoarsenAMGeMatrixTopology(hypre_AMGeMatrixTopology *A_crs,
    *        AE_AEface, AEface_AEface, boundarysurface_AEface;
    *------------------------------------------------------------------------*/
 
-  int num_AEs, num_AEfaces;
-  int *i_AE_AEface, *j_AE_AEface;
+  HYPRE_Int num_AEs, num_AEfaces;
+  HYPRE_Int *i_AE_AEface, *j_AE_AEface;
   
-  int *i_AEface_AEface, *j_AEface_AEface;
+  HYPRE_Int *i_AEface_AEface, *j_AEface_AEface;
 
-  int *i_boundarysurface_AEface, *j_boundarysurface_AEface;
+  HYPRE_Int *i_boundarysurface_AEface, *j_boundarysurface_AEface;
 
   /*------------------------------------------------------------------------
    * temporary arrays:
@@ -67,32 +67,32 @@ int hypre_CoarsenAMGeMatrixTopology(hypre_AMGeMatrixTopology *A_crs,
    *        AE_element, AE_face, ... 
    *------------------------------------------------------------------------*/
   
-  int *i_AE_AE, *j_AE_AE;
-  int *i_AE_element, *j_AE_element;
-  int *i_AE_face, *j_AE_face;
+  HYPRE_Int *i_AE_AE, *j_AE_AE;
+  HYPRE_Int *i_AE_element, *j_AE_element;
+  HYPRE_Int *i_AE_face, *j_AE_face;
 
-  int *i_face_AE, *j_face_AE;
+  HYPRE_Int *i_face_AE, *j_face_AE;
 
-  int *i_AEface_AE, *j_AEface_AE;
-  int *i_AEface_face, *j_AEface_face;
-  int *i_face_AEface, *j_face_AEface;
-  int *i_face_face_AEface, *j_face_face_AEface;
+  HYPRE_Int *i_AEface_AE, *j_AEface_AE;
+  HYPRE_Int *i_AEface_face, *j_AEface_face;
+  HYPRE_Int *i_face_AEface, *j_face_AEface;
+  HYPRE_Int *i_face_face_AEface, *j_face_face_AEface;
 
-  int *i_AEface_node, *j_AEface_node;
-
-
-  int *i_boundarysurface_AE, *j_boundarysurface_AE;
-  int *i_AE_boundarysurface, *j_AE_boundarysurface;
-
-  int *i_node_face, *j_node_face;
-  int *i_node_element, *j_node_element;
-  int *i_element_element, *j_element_element;
+  HYPRE_Int *i_AEface_node, *j_AEface_node;
 
 
-  int *i_face_node, *j_face_node;
-  int *i_face_element, *j_face_element;
+  HYPRE_Int *i_boundarysurface_AE, *j_boundarysurface_AE;
+  HYPRE_Int *i_AE_boundarysurface, *j_AE_boundarysurface;
 
-  int *w_face_face;
+  HYPRE_Int *i_node_face, *j_node_face;
+  HYPRE_Int *i_node_element, *j_node_element;
+  HYPRE_Int *i_element_element, *j_element_element;
+
+
+  HYPRE_Int *i_face_node, *j_face_node;
+  HYPRE_Int *i_face_element, *j_face_element;
+
+  HYPRE_Int *w_face_face;
 
 
   /* A_crs = hypre_CTAlloc(hypre_AMGeMatrixTopology, 1); */
@@ -144,7 +144,7 @@ int hypre_CoarsenAMGeMatrixTopology(hypre_AMGeMatrixTopology *A_crs,
 
   /* if two faces share a common element w = 2 -------------------------*/
   
-  w_face_face = hypre_CTAlloc(int, i_face_face[num_faces]);
+  w_face_face = hypre_CTAlloc(HYPRE_Int, i_face_face[num_faces]);
 
   for (i=0; i<num_faces; i++)
     for (j=i_face_face[i]; j< i_face_face[i+1]; j++)
@@ -170,8 +170,8 @@ int hypre_CoarsenAMGeMatrixTopology(hypre_AMGeMatrixTopology *A_crs,
       if (j_face_face[j] == i) w_face_face[j] = 0;
 
 
-  i_AE_element = hypre_CTAlloc(int, num_elements +1);
-  j_AE_element = hypre_CTAlloc(int, num_elements);
+  i_AE_element = hypre_CTAlloc(HYPRE_Int, num_elements +1);
+  j_AE_element = hypre_CTAlloc(HYPRE_Int, num_elements);
 
 
 
@@ -191,8 +191,8 @@ int hypre_CoarsenAMGeMatrixTopology(hypre_AMGeMatrixTopology *A_crs,
 			       &num_AEs);
 
   /*
-  printf("num_AEs: %d\n\n", num_AEs);
-  printf("END agglomeration step: -----------------------------------\n");
+  hypre_printf("num_AEs: %d\n\n", num_AEs);
+  hypre_printf("END agglomeration step: -----------------------------------\n");
   */
 
   ierr = matrix_matrix_product(&i_AE_face, &j_AE_face,

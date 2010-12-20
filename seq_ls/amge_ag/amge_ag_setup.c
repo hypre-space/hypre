@@ -26,106 +26,106 @@
  ****************************************************************************/
 
 
-int hypre_AMGeAGSetup(hypre_CSRMatrix ***P_pointer,
+HYPRE_Int hypre_AMGeAGSetup(hypre_CSRMatrix ***P_pointer,
 
 		      hypre_CSRMatrix ***Matrix_pointer,
 
 		      hypre_AMGeMatrixTopology ***A_pointer,
 
 
-		      int *level_pointer,
+		      HYPRE_Int *level_pointer,
 
 		      /* ------ fine-grid element matrices ----- */
-		      int *i_element_chord_0,
-		      int *j_element_chord_0,
+		      HYPRE_Int *i_element_chord_0,
+		      HYPRE_Int *j_element_chord_0,
 		      double *a_element_chord_0,
 
-		      int *i_chord_dof_0,
-		      int *j_chord_dof_0,
+		      HYPRE_Int *i_chord_dof_0,
+		      HYPRE_Int *j_chord_dof_0,
 
-		      int *i_element_dof_0,
-		      int *j_element_dof_0,
+		      HYPRE_Int *i_element_dof_0,
+		      HYPRE_Int *j_element_dof_0,
 
 		      /* nnz: of the assembled matrices -------*/
-		      int *Num_chords,
+		      HYPRE_Int *Num_chords,
 
 
 		      /* --------- Dirichlet b.c. ----------- */
-		      int *i_dof_on_boundary, 
+		      HYPRE_Int *i_dof_on_boundary, 
 
 		      /* --------------------------------------- */
 
-		      int *Num_elements,
-		      int *Num_dofs,
+		      HYPRE_Int *Num_elements,
+		      HYPRE_Int *Num_dofs,
 
-		      int Max_level)
+		      HYPRE_Int Max_level)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j, l;
+  HYPRE_Int i,j, l;
 
 
-  int *i_dof_dof_a, *j_dof_dof_a;
+  HYPRE_Int *i_dof_dof_a, *j_dof_dof_a;
   double *a_dof_dof;
 
 
 
   hypre_CSRMatrix **Matrix, **P;
 
-  int level;
+  HYPRE_Int level;
 
-  int num_faces;
-  int *i_AE_element, *j_AE_element;
-  int num_AEs;
+  HYPRE_Int num_faces;
+  HYPRE_Int *i_AE_element, *j_AE_element;
+  HYPRE_Int num_AEs;
 
-  int *i_face_dof;
-  int *j_face_dof;
+  HYPRE_Int *i_face_dof;
+  HYPRE_Int *j_face_dof;
 
-  int *i_AEface_dof, *j_AEface_dof;
-  int *i_dof_AEface, *j_dof_AEface;
-  int num_AEfaces;
+  HYPRE_Int *i_AEface_dof, *j_AEface_dof;
+  HYPRE_Int *i_dof_AEface, *j_dof_AEface;
+  HYPRE_Int num_AEfaces;
 
-  int *i_face_to_prefer_weight, *i_face_weight;
+  HYPRE_Int *i_face_to_prefer_weight, *i_face_weight;
   hypre_AMGeMatrixTopology **A;
 
-  int *i_boundarysurface_dof=NULL, *j_boundarysurface_dof=NULL;
-  int num_boundarysurfaces = 0;
+  HYPRE_Int *i_boundarysurface_dof=NULL, *j_boundarysurface_dof=NULL;
+  HYPRE_Int num_boundarysurfaces = 0;
 
 
-  int **i_chord_dof, **j_chord_dof;
-  int **i_element_dof, **j_element_dof;
-  int **i_element_chord, **j_element_chord;
+  HYPRE_Int **i_chord_dof, **j_chord_dof;
+  HYPRE_Int **i_element_dof, **j_element_dof;
+  HYPRE_Int **i_element_chord, **j_element_chord;
   double **a_element_chord;
 
-  int **i_dof_coarsedof, **j_dof_coarsedof;
+  HYPRE_Int **i_dof_coarsedof, **j_dof_coarsedof;
 
-  int *i_dof_element, *j_dof_element;
+  HYPRE_Int *i_dof_element, *j_dof_element;
 
-  int   face_dof_counter;
+  HYPRE_Int   face_dof_counter;
 
-  i_chord_dof = hypre_CTAlloc(int*, Max_level+1);
-  j_chord_dof = hypre_CTAlloc(int*, Max_level+1);
+  i_chord_dof = hypre_CTAlloc(HYPRE_Int*, Max_level+1);
+  j_chord_dof = hypre_CTAlloc(HYPRE_Int*, Max_level+1);
 
   i_chord_dof[0] = i_chord_dof_0;
   j_chord_dof[0] = j_chord_dof_0;
 
-  i_element_dof = hypre_CTAlloc(int*, Max_level+1);
-  j_element_dof = hypre_CTAlloc(int*, Max_level+1);
+  i_element_dof = hypre_CTAlloc(HYPRE_Int*, Max_level+1);
+  j_element_dof = hypre_CTAlloc(HYPRE_Int*, Max_level+1);
 
   i_element_dof[0] = i_element_dof_0;
   j_element_dof[0] = j_element_dof_0;
 
-  i_element_chord = hypre_CTAlloc(int*, Max_level+1);
-  j_element_chord = hypre_CTAlloc(int*, Max_level+1);
+  i_element_chord = hypre_CTAlloc(HYPRE_Int*, Max_level+1);
+  j_element_chord = hypre_CTAlloc(HYPRE_Int*, Max_level+1);
   a_element_chord = hypre_CTAlloc(double*, Max_level+1);
 
   i_element_chord[0] = i_element_chord_0;
   j_element_chord[0] = j_element_chord_0;
   a_element_chord[0] = a_element_chord_0;
 
-  i_dof_coarsedof = hypre_CTAlloc(int*, Max_level);
-  j_dof_coarsedof = hypre_CTAlloc(int*, Max_level);
+  i_dof_coarsedof = hypre_CTAlloc(HYPRE_Int*, Max_level);
+  j_dof_coarsedof = hypre_CTAlloc(HYPRE_Int*, Max_level);
 
 
 
@@ -160,9 +160,9 @@ int hypre_AMGeAGSetup(hypre_CSRMatrix ***P_pointer,
 				  Num_chords[0],
 				  Num_dofs[0]);
 
-  printf("nnz[0]: %d\n", hypre_CSRMatrixI(Matrix[0])[Num_dofs[0]]);
+  hypre_printf("nnz[0]: %d\n", hypre_CSRMatrixI(Matrix[0])[Num_dofs[0]]);
   /* impose Dirichlet boundary conditions: -----------------*/
-  printf("imposing Dirichlet boundary conditions:====================\n");
+  hypre_printf("imposing Dirichlet boundary conditions:====================\n");
 
   i_dof_dof_a = hypre_CSRMatrixI(Matrix[0]);
   j_dof_dof_a = hypre_CSRMatrixJ(Matrix[0]);
@@ -180,8 +180,8 @@ int hypre_AMGeAGSetup(hypre_CSRMatrix ***P_pointer,
 
   num_faces = hypre_AMGeMatrixTopologyNumFaces(A[0]);
 
-  i_face_to_prefer_weight = hypre_CTAlloc(int, num_faces);
-  i_face_weight = hypre_CTAlloc(int, num_faces);
+  i_face_to_prefer_weight = hypre_CTAlloc(HYPRE_Int, num_faces);
+  i_face_weight = hypre_CTAlloc(HYPRE_Int, num_faces);
 
   level = 0;
 
@@ -198,7 +198,7 @@ interpolation_step:
 
   num_AEs = hypre_AMGeMatrixTopologyNumElements(A[level+1]);
   Num_elements[level+1] = num_AEs;
-  printf("level %d num_AEs: %d\n\n\n", level+1, num_AEs);
+  hypre_printf("level %d num_AEs: %d\n\n\n", level+1, num_AEs);
 
   i_element_dof[level] = hypre_AMGeMatrixTopologyIElementNode(A[level]);
   j_element_dof[level] = hypre_AMGeMatrixTopologyJElementNode(A[level]);
@@ -288,17 +288,17 @@ interpolation_step:
     j_element_dof[level+1];
   hypre_AMGeMatrixTopologyNumNodes(A[level+1]) = Num_dofs[level+1];
 
-  printf("num_dofs[%d]: %d, num_faces: %d\n", level+1, Num_dofs[level+1],
+  hypre_printf("num_dofs[%d]: %d, num_faces: %d\n", level+1, Num_dofs[level+1],
 	 num_AEfaces);
 
   /*
   for (i=0; i < Num_dofs[level]; i++)
     for (j=i_dof_coarsedof[level][i]; j<i_dof_coarsedof[level][i+1]; j++)
-      printf("dof: %d, coarsedof: %d\n", i, j_dof_coarsedof[level][j]);
+      hypre_printf("dof: %d, coarsedof: %d\n", i, j_dof_coarsedof[level][j]);
       */
 
 
-  i_face_dof = hypre_CTAlloc(int, num_AEfaces+1);
+  i_face_dof = hypre_CTAlloc(HYPRE_Int, num_AEfaces+1);
   face_dof_counter = 0;
   for (i=0; i < num_AEfaces; i++)
     for (j=i_AEface_dof[i]; j < i_AEface_dof[i+1]; j++)
@@ -306,9 +306,9 @@ interpolation_step:
 	  i_dof_coarsedof[level][j_AEface_dof[j]])
 	face_dof_counter++;
 
-  printf("face_dof_counter: %d\n", face_dof_counter);
-  j_face_dof = (int *) malloc(face_dof_counter * sizeof(int));
-  printf("end allocating memory for j_face_dof\n");
+  hypre_printf("face_dof_counter: %d\n", face_dof_counter);
+  j_face_dof = (HYPRE_Int *) malloc(face_dof_counter * sizeof(HYPRE_Int));
+  hypre_printf("end allocating memory for j_face_dof\n");
 
   face_dof_counter = 0;
   for (i=0; i < num_AEfaces; i++)
@@ -321,7 +321,7 @@ interpolation_step:
 	    j_face_dof[face_dof_counter] = 
 	      j_dof_coarsedof[level][i_dof_coarsedof[level][j_AEface_dof[j]]];
 	    face_dof_counter++;
-	    printf("face_dof_counter: %d\n", face_dof_counter);
+	    hypre_printf("face_dof_counter: %d\n", face_dof_counter);
 	  }
     }
   i_face_dof[num_AEfaces] = face_dof_counter;
@@ -337,7 +337,7 @@ interpolation_step:
 			       Num_dofs[level+1]);
 			       */
 
-  printf("END face_dof[%d] computation: num_faces: %d, num_dofs: %d \n", 
+  hypre_printf("END face_dof[%d] computation: num_faces: %d, num_dofs: %d \n", 
 	 level+1, num_AEfaces, Num_dofs[level+1]);
 
   hypre_TFree(hypre_AMGeMatrixTopologyIFaceNode(A[level+1]));
@@ -349,17 +349,17 @@ interpolation_step:
 
 
 
-  printf("END building Interpolation [%d]: -----------------------\n", level);
+  hypre_printf("END building Interpolation [%d]: -----------------------\n", level);
 
-  printf("\nB U I L D I N G  level[%d]  S T I F F N E S S   M A T R I X\n", 
+  hypre_printf("\nB U I L D I N G  level[%d]  S T I F F N E S S   M A T R I X\n", 
 	 level+1);
-  printf("\n  ==================         R A P       ===================\n");
+  hypre_printf("\n  ==================         R A P       ===================\n");
 
 
   ierr = hypre_AMGeRAP(&Matrix[level+1], Matrix[level], P[level]);
-  printf("END building coarse matrix; -----------------------------------\n");
+  hypre_printf("END building coarse matrix; -----------------------------------\n");
 
-  printf("nnz[%d]: %d\n", level+1, 
+  hypre_printf("nnz[%d]: %d\n", level+1, 
 	 hypre_CSRMatrixI(Matrix[level+1])[Num_dofs[level+1]]);
 
 
@@ -368,9 +368,9 @@ interpolation_step:
     goto interpolation_step;
 
 
-  printf("\n==============================================================\n");
-  printf("number of grids: from 0 to %d\n\n\n", level);
-  printf("==============================================================\n\n");
+  hypre_printf("\n==============================================================\n");
+  hypre_printf("number of grids: from 0 to %d\n\n\n", level);
+  hypre_printf("==============================================================\n\n");
 
 
   hypre_TFree(i_face_to_prefer_weight);

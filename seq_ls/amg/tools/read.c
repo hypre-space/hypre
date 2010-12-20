@@ -35,11 +35,11 @@ char     *file_name;
    FILE    *fp;
 
    double  *data;
-   int     *ia;
-   int     *ja;
-   int      size;
+   HYPRE_Int     *ia;
+   HYPRE_Int     *ja;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -48,19 +48,19 @@ char     *file_name;
 
    fp = fopen(file_name, "r");
 
-   fscanf(fp, "%d", &size);
+   hypre_fscanf(fp, "%d", &size);
 
-   ia = hypre_TAlloc(int, hypre_NDIMU(size+1));
+   ia = hypre_TAlloc(HYPRE_Int, hypre_NDIMU(size+1));
    for (j = 0; j < size+1; j++)
-      fscanf(fp, "%d", &ia[j]);
+      hypre_fscanf(fp, "%d", &ia[j]);
 
-   ja = hypre_TAlloc(int, hypre_NDIMA(ia[size]-1));
+   ja = hypre_TAlloc(HYPRE_Int, hypre_NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
-      fscanf(fp, "%d", &ja[j]);
+      hypre_fscanf(fp, "%d", &ja[j]);
 
    data = hypre_TAlloc(double, hypre_NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
-      fscanf(fp, "%le", &data[j]);
+      hypre_fscanf(fp, "%le", &data[j]);
 
    fclose(fp);
 
@@ -85,9 +85,9 @@ char     *file_name;
    FILE    *fp;
 
    double  *data;
-   int      size;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -96,11 +96,11 @@ char     *file_name;
 
    fp = fopen(file_name, "r");
 
-   fscanf(fp, "%d", &size);
+   hypre_fscanf(fp, "%d", &size);
 
    data = hypre_TAlloc(double, hypre_NDIMU(size));
    for (j = 0; j < size; j++)
-      fscanf(fp, "%le", &data[j]);
+      hypre_fscanf(fp, "%le", &data[j]);
 
    fclose(fp);
 

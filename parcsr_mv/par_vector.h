@@ -32,15 +32,15 @@ typedef struct
 {
    MPI_Comm	 comm;
 
-   int      	 global_size;
-   int      	 first_index;
-   int           last_index;
-   int      	*partitioning;
+   HYPRE_Int      	 global_size;
+   HYPRE_Int      	 first_index;
+   HYPRE_Int           last_index;
+   HYPRE_Int      	*partitioning;
    hypre_Vector	*local_vector; 
 
    /* Does the Vector create/destroy `data'? */
-   int      	 owns_data;
-   int      	 owns_partitioning;
+   HYPRE_Int      	 owns_data;
+   HYPRE_Int      	 owns_partitioning;
 
    hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
                                               is used (compile-time option) AND this partition

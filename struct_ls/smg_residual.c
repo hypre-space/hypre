@@ -37,8 +37,8 @@ typedef struct
    hypre_BoxArray      *base_points;
    hypre_ComputePkg    *compute_pkg;
 
-   int                  time_index;
-   int                  flops;
+   HYPRE_Int                  time_index;
+   HYPRE_Int                  flops;
 
 } hypre_SMGResidualData;
 
@@ -66,14 +66,14 @@ hypre_SMGResidualCreate( )
  * hypre_SMGResidualSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGResidualSetup( void               *residual_vdata,
                         hypre_StructMatrix *A,
                         hypre_StructVector *x,
                         hypre_StructVector *b,
                         hypre_StructVector *r              )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SMGResidualData  *residual_data = residual_vdata;
 
@@ -130,14 +130,14 @@ hypre_SMGResidualSetup( void               *residual_vdata,
  * hypre_SMGResidual
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGResidual( void               *residual_vdata,
                    hypre_StructMatrix *A,
                    hypre_StructVector *x,
                    hypre_StructVector *b,
                    hypre_StructVector *r              )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SMGResidualData  *residual_data = residual_vdata;
 
@@ -156,10 +156,10 @@ hypre_SMGResidual( void               *residual_vdata,
    hypre_Box              *b_data_box;
    hypre_Box              *r_data_box;
                        
-   int                     Ai;
-   int                     xi;
-   int                     bi;
-   int                     ri;
+   HYPRE_Int                     Ai;
+   HYPRE_Int                     xi;
+   HYPRE_Int                     bi;
+   HYPRE_Int                     ri;
                          
    double                 *Ap;
    double                 *xp;
@@ -171,10 +171,10 @@ hypre_SMGResidual( void               *residual_vdata,
                        
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
-   int                     stencil_size;
+   HYPRE_Int                     stencil_size;
 
-   int                     compute_i, i, j, si;
-   int                     loopi, loopj, loopk;
+   HYPRE_Int                     compute_i, i, j, si;
+   HYPRE_Int                     loopi, loopj, loopk;
 
    hypre_BeginTiming(residual_data -> time_index);
 
@@ -295,14 +295,14 @@ hypre_SMGResidual( void               *residual_vdata,
  * hypre_SMGResidualSetBase
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_SMGResidualSetBase( void        *residual_vdata,
                           hypre_Index  base_index,
                           hypre_Index  base_stride )
 {
    hypre_SMGResidualData *residual_data = residual_vdata;
-   int                    d;
-   int                    ierr = 0;
+   HYPRE_Int                    d;
+   HYPRE_Int                    ierr = 0;
  
    for (d = 0; d < 3; d++)
    {
@@ -319,10 +319,10 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
  * hypre_SMGResidualDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGResidualDestroy( void *residual_vdata )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SMGResidualData *residual_data = residual_vdata;
 

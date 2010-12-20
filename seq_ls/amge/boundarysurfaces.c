@@ -23,33 +23,33 @@
 
 
 
-int hypre_AMGeCreateBoundarysurfaces(int **i_boundarysurface_node_pointer,
-				     int **j_boundarysurface_node_pointer,
+HYPRE_Int hypre_AMGeCreateBoundarysurfaces(HYPRE_Int **i_boundarysurface_node_pointer,
+				     HYPRE_Int **j_boundarysurface_node_pointer,
 
-				     int *num_boundarysurfaces_pointer,
+				     HYPRE_Int *num_boundarysurfaces_pointer,
 
-				     int *i_element_node,
-				     int *j_element_node,
+				     HYPRE_Int *i_element_node,
+				     HYPRE_Int *j_element_node,
 
-				     int num_elements, 
-				     int num_nodes)
+				     HYPRE_Int num_elements, 
+				     HYPRE_Int num_nodes)
 
 {
 
-  int ierr = 0;
-  int i,j,k,l;
-  int *i_node_node, *j_node_node; 
-  int *i_node_element, *j_node_element;
-  int *i_boundarysurface_node, *j_boundarysurface_node;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k,l;
+  HYPRE_Int *i_node_node, *j_node_node; 
+  HYPRE_Int *i_node_element, *j_node_element;
+  HYPRE_Int *i_boundarysurface_node, *j_boundarysurface_node;
 
-  int *i_levelset_node, *j_levelset_node;
-  int *i_node_index;
-  int num_levelsets;
-  int level_0, level_1;
+  HYPRE_Int *i_levelset_node, *j_levelset_node;
+  HYPRE_Int *i_node_index;
+  HYPRE_Int num_levelsets;
+  HYPRE_Int level_0, level_1;
 
-  int levelset_node_counter;
-  int num_boundarysurfaces;
-  int boundarysurface_node_counter;
+  HYPRE_Int levelset_node_counter;
+  HYPRE_Int num_boundarysurfaces;
+  HYPRE_Int boundarysurface_node_counter;
 
   ierr = transpose_matrix_create(&i_node_element,
 				 &j_node_element,
@@ -70,10 +70,10 @@ int hypre_AMGeCreateBoundarysurfaces(int **i_boundarysurface_node_pointer,
    hypre_TFree(j_node_element);
   
 
-  i_levelset_node = hypre_CTAlloc(int, num_nodes+1);
-  j_levelset_node = hypre_CTAlloc(int, num_nodes);
+  i_levelset_node = hypre_CTAlloc(HYPRE_Int, num_nodes+1);
+  j_levelset_node = hypre_CTAlloc(HYPRE_Int, num_nodes);
 
-  i_node_index = hypre_CTAlloc(int, num_nodes);
+  i_node_index = hypre_CTAlloc(HYPRE_Int, num_nodes);
   for (i=0; i < num_nodes; i++)
     i_node_index[i] = 0;
 
@@ -116,7 +116,7 @@ new_level:
   num_levelsets--;
   level_0 = num_levelsets;
 
-  printf("num_levelsets: %d\n", num_levelsets);
+  hypre_printf("num_levelsets: %d\n", num_levelsets);
 
   num_levelsets = 0;
   levelset_node_counter = 0;
@@ -173,8 +173,8 @@ new_level_again:
 
 
 
-  i_boundarysurface_node = hypre_CTAlloc(int, 3);
-  j_boundarysurface_node = hypre_CTAlloc(int, 
+  i_boundarysurface_node = hypre_CTAlloc(HYPRE_Int, 3);
+  j_boundarysurface_node = hypre_CTAlloc(HYPRE_Int, 
 					 i_levelset_node[1]-i_levelset_node[0]
 					 +i_levelset_node[level_1+1]
 					 -i_levelset_node[level_1]);
@@ -196,14 +196,14 @@ new_level_again:
   i_boundarysurface_node[num_boundarysurfaces] = 
     boundarysurface_node_counter;
 
-  printf("GRAPH boundarysurfaces: =================================\n");
+  hypre_printf("GRAPH boundarysurfaces: =================================\n");
   for (i=0; i < num_boundarysurfaces; i++)
     {
-      printf("boundarysurface %d contains nodes: \n", i);
+      hypre_printf("boundarysurface %d contains nodes: \n", i);
       for (j=i_boundarysurface_node[i]; j < i_boundarysurface_node[i+1]; j++)
-	printf("%d ", j_boundarysurface_node[j]);
+	hypre_printf("%d ", j_boundarysurface_node[j]);
       
-      printf("\n");
+      hypre_printf("\n");
     }
 
   *num_boundarysurfaces_pointer = num_boundarysurfaces;

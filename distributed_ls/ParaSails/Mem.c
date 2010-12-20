@@ -68,7 +68,7 @@ Mem *MemCreate()
 
 void MemDestroy(Mem *m)
 {
-    int i;
+    HYPRE_Int i;
 
     /* Free all blocks of memory */
     for (i=0; i<m->num_blocks; i++)
@@ -84,9 +84,9 @@ void MemDestroy(Mem *m)
  * 3) memory exhausted.
  *--------------------------------------------------------------------------*/
 
-char *MemAlloc(Mem *m, int size)
+char *MemAlloc(Mem *m, HYPRE_Int size)
 {
-    int req;
+    HYPRE_Int req;
     char *p;
 
     /* Align on 16-byte boundary */
@@ -97,7 +97,7 @@ char *MemAlloc(Mem *m, int size)
         /* Allocate a new block */
         if (m->num_blocks+1 > MEM_MAXBLOCKS)
         {
-	    printf("MemAlloc: max number of blocks %d exceeded.\n",
+	    hypre_printf("MemAlloc: max number of blocks %d exceeded.\n",
 	        MEM_MAXBLOCKS);
 	    PARASAILS_EXIT;
         }
@@ -109,7 +109,7 @@ char *MemAlloc(Mem *m, int size)
 
         if (m->avail == NULL)
         {
-	    printf("MemAlloc: request for %d bytes failed.\n", req);
+	    hypre_printf("MemAlloc: request for %d bytes failed.\n", req);
 	    PARASAILS_EXIT;
         }
 
@@ -137,15 +137,15 @@ char *MemAlloc(Mem *m, int size)
 
 void MemStat(Mem *m, FILE *stream, char *msg)
 {
-    fprintf(stream, "****** Mem: %s ******\n", msg);
-    fprintf(stream, "num_blocks : %d\n", m->num_blocks);
-    fprintf(stream, "num_over   : %d\n", m->num_over);
-    fprintf(stream, "total_bytes: %ld\n", m->total_bytes);
-    fprintf(stream, "bytes_alloc: %ld\n", m->bytes_alloc);
+    hypre_fprintf(stream, "****** Mem: %s ******\n", msg);
+    hypre_fprintf(stream, "num_blocks : %d\n", m->num_blocks);
+    hypre_fprintf(stream, "num_over   : %d\n", m->num_over);
+    hypre_fprintf(stream, "total_bytes: %ld\n", m->total_bytes);
+    hypre_fprintf(stream, "bytes_alloc: %ld\n", m->bytes_alloc);
     if (m->bytes_alloc != 0)
-        fprintf(stream, "efficiency : %f\n", m->total_bytes / 
+        hypre_fprintf(stream, "efficiency : %f\n", m->total_bytes / 
 	    (double) m->bytes_alloc);
-    fprintf(stream, "*********************\n");
+    hypre_fprintf(stream, "*********************\n");
     fflush(stream);
 }
 

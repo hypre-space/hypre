@@ -33,11 +33,11 @@ typedef struct {
 typedef struct {
 
 /* these pointers should point to 2 functions providing standard lapack  functionality */
-   int   (*dpotrf) (char *uplo, int *n, double *a, int *
-        lda, int *info);
-   int   (*dsygv) (int *itype, char *jobz, char *uplo, int *
-        n, double *a, int *lda, double *b, int *ldb,
-        double *w, double *work, int *lwork, int *info);
+   HYPRE_Int   (*dpotrf) (char *uplo, HYPRE_Int *n, double *a, HYPRE_Int *
+        lda, HYPRE_Int *info);
+   HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
+        n, double *a, HYPRE_Int *lda, double *b, HYPRE_Int *ldb,
+        double *w, double *work, HYPRE_Int *lwork, HYPRE_Int *info);
 
 } lobpcg_BLASLAPACKFunctions;
 
@@ -45,7 +45,7 @@ typedef struct {
 extern "C" {
 #endif
 
-int
+HYPRE_Int
 lobpcg_solve( mv_MultiVectorPtr blockVectorX,
 	      void* operatorAData,
 	      void (*operatorA)( void*, void*, void* ),
@@ -56,9 +56,9 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
 	      mv_MultiVectorPtr blockVectorY,
               lobpcg_BLASLAPACKFunctions blap_fn,
 	      lobpcg_Tolerance tolerance,
-	      int maxIterations,
-	      int verbosityLevel,
-	      int* iterationNumber,
+	      HYPRE_Int maxIterations,
+	      HYPRE_Int verbosityLevel,
+	      HYPRE_Int* iterationNumber,
 
 /* eigenvalues; "lambda_values" should point to array  containing <blocksize> doubles where <blocksi
 ze> is the width of multivector "blockVectorX" */
@@ -71,7 +71,7 @@ argument; If you don't need eigenvalues history, provide NULL in this entry */
               double * lambdaHistory_values,
 
 /* global height of the matrix (stored in fotran-style)  specified by previous argument */
-              int lambdaHistory_gh,
+              HYPRE_Int lambdaHistory_gh,
 
 /* residual norms; argument should point to array of <blocksize> doubles */
               double * residualNorms_values,
@@ -84,7 +84,7 @@ argument If you don't need residual norms history, provide NULL in this entry */
               double * residualNormsHistory_values ,
 
 /* global height of the matrix (stored in fotran-style)  specified by previous argument */
-              int residualNormsHistory_gh
+              HYPRE_Int residualNormsHistory_gh
 
 );
 

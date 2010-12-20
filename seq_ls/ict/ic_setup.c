@@ -52,12 +52,12 @@
 /* Include C interface to cg_driver */
 #include "ict_facsol_f.h"
 
-int ic_setup ( void *input_data, Matrix *IC_A )
+HYPRE_Int ic_setup ( void *input_data, Matrix *IC_A )
 {
    ICData *ic_data = input_data;
-   int         i, ierr_ict, ierr_cg, ierr_input;
+   HYPRE_Int         i, ierr_ict, ierr_cg, ierr_input;
    double     *IC_b, *IC_x;
-   int         n, nnz, lenpmx;
+   HYPRE_Int         n, nnz, lenpmx;
    Matrix     *IC_A_copy=NULL;
    Matrix     *FACTOR_A;
 
@@ -71,8 +71,8 @@ int ic_setup ( void *input_data, Matrix *IC_A )
    if( ICDataMode(ic_data) == 1 ) 
    {
 #ifdef ICFact
-     printf("Incomplete Cholesky code currently needs to overwrite the input matrix.\n");
-     printf("Please see ic_setup.c for an explanation. Terminating...\n");
+     hypre_printf("Incomplete Cholesky code currently needs to overwrite the input matrix.\n");
+     hypre_printf("Please see ic_setup.c for an explanation. Terminating...\n");
      return(-1);
 #elif defined ILUFact
      /* Make temporary copy input matrix */
@@ -80,11 +80,11 @@ int ic_setup ( void *input_data, Matrix *IC_A )
    
      MatrixSize(IC_A_copy) = MatrixSize(IC_A);
 
-     MatrixIA(IC_A_copy) = ctalloc( int, MatrixSize(IC_A)+1 );
+     MatrixIA(IC_A_copy) = ctalloc( HYPRE_Int, MatrixSize(IC_A)+1 );
      for ( i=0; i < MatrixSize(IC_A)+1; i++) 
        MatrixIA(IC_A_copy)[i] = MatrixIA(IC_A)[i];
 
-     MatrixJA(IC_A_copy) = ctalloc( int, MatrixNNZ(IC_A) );
+     MatrixJA(IC_A_copy) = ctalloc( HYPRE_Int, MatrixNNZ(IC_A) );
 
      MatrixData(IC_A_copy) = ctalloc( double, MatrixNNZ(IC_A) );
      for ( i=0; i < MatrixNNZ(IC_A); i++) 
@@ -111,7 +111,7 @@ int ic_setup ( void *input_data, Matrix *IC_A )
 
    if( ierr_input != 0 ) 
    {
-     printf("Error when converting matrix from csr to symmetric, error %d\n", ierr_input);
+     hypre_printf("Error when converting matrix from csr to symmetric, error %d\n", ierr_input);
 
      if (IC_A_copy) FreeMatrix(IC_A_copy);
 
@@ -126,8 +126,8 @@ int ic_setup ( void *input_data, Matrix *IC_A )
 
    if( (ICDataIpar(ic_data)[0] != 0) )
    {
-      ICDataPerm(ic_data) = ctalloc( int, MatrixSize(FACTOR_A) );
-      ICDataInversePerm(ic_data) = ctalloc( int, MatrixSize(FACTOR_A) );
+      ICDataPerm(ic_data) = ctalloc( HYPRE_Int, MatrixSize(FACTOR_A) );
+      ICDataInversePerm(ic_data) = ctalloc( HYPRE_Int, MatrixSize(FACTOR_A) );
    }
 
 #ifdef ILUFact
@@ -150,7 +150,7 @@ int ic_setup ( void *input_data, Matrix *IC_A )
    ICDataLIwork(ic_data) = 3*MatrixSize(FACTOR_A) +
                                      2*n*ICDataIpar(ic_data)[5];
 #endif
-   ICDataIwork(ic_data) = ctalloc(int, ICDataLIwork(ic_data) );
+   ICDataIwork(ic_data) = ctalloc(HYPRE_Int, ICDataLIwork(ic_data) );
 
 #ifdef ILUFact
    ICDataLRwork(ic_data) = (MatrixSize(FACTOR_A)+3)*(ICDataIpar(ic_data)[6]+3)
@@ -175,13 +175,13 @@ int ic_setup ( void *input_data, Matrix *IC_A )
    ICDataLenpmx(ic_data) = lenpmx;
 
 #ifdef ILUFact
-   MatrixIA(ICDataPreconditioner(ic_data)) = ctalloc( int, MatrixSize(FACTOR_A)+1);
+   MatrixIA(ICDataPreconditioner(ic_data)) = ctalloc( HYPRE_Int, MatrixSize(FACTOR_A)+1);
 #endif
-   MatrixJA(ICDataPreconditioner(ic_data)) = ctalloc( int, 
+   MatrixJA(ICDataPreconditioner(ic_data)) = ctalloc( HYPRE_Int, 
            lenpmx );
    if( MatrixJA(ICDataPreconditioner(ic_data)) == NULL ) 
    {
-     printf("Allocation of worcgace in IC_setup failed\n");
+     hypre_printf("Allocation of worcgace in IC_setup failed\n");
      return(-10);
    }
 
@@ -189,7 +189,7 @@ int ic_setup ( void *input_data, Matrix *IC_A )
            lenpmx );
    if( MatrixData(ICDataPreconditioner(ic_data)) == NULL ) 
    {
-     printf("Allocation of worcgace in IC_setup failed\n");
+     hypre_printf("Allocation of worcgace in IC_setup failed\n");
      return(-11);
    }
 
@@ -230,18 +230,18 @@ int ic_setup ( void *input_data, Matrix *IC_A )
 
 #if 0
    for(i = 0; i < n; i ++ ) {
-     printf("Perm(%d) = %d\n",i, ICDataPerm(ic_data)[i] ); }
+     hypre_printf("Perm(%d) = %d\n",i, ICDataPerm(ic_data)[i] ); }
 #endif
 
   if( ierr_input != 0 ) 
   {
-    printf("Input error to ICT, error %d\n", ierr_input);
+    hypre_printf("Input error to ICT, error %d\n", ierr_input);
     return(ierr_input);
   }
 
   if( ierr_ict != 0 ) 
   {
-    printf("Computational error in ICT, error %d\n", ierr_ict);
+    hypre_printf("Computational error in ICT, error %d\n", ierr_ict);
     return(ierr_ict);
   }
 

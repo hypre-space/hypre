@@ -13,7 +13,7 @@ static integer c__1 = 1;
 static integer c__2 = 2;
 static integer c__0 = 0;
 
-/* Subroutine */ int dlasq1_(integer *n, doublereal *d__, doublereal *e, 
+/* Subroutine */ HYPRE_Int dlasq1_(integer *n, doublereal *d__, doublereal *e, 
 	doublereal *work, integer *info)
 {
     /* System generated locals */
@@ -24,22 +24,22 @@ static integer c__0 = 0;
     double sqrt(doublereal);
 
     /* Local variables */
-    extern /* Subroutine */ int dlas2_(doublereal *, doublereal *, doublereal 
+    extern /* Subroutine */ HYPRE_Int dlas2_(doublereal *, doublereal *, doublereal 
 	    *, doublereal *, doublereal *);
     static integer i__;
     static doublereal scale;
     static integer iinfo;
     static doublereal sigmn;
-    extern /* Subroutine */ int dcopy_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dcopy_(integer *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static doublereal sigmx;
-    extern /* Subroutine */ int dlasq2_(integer *, doublereal *, integer *);
+    extern /* Subroutine */ HYPRE_Int dlasq2_(integer *, doublereal *, integer *);
     extern doublereal dlamch_(char *);
-    extern /* Subroutine */ int dlascl_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlascl_(char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal safmin;
-    extern /* Subroutine */ int xerbla_(char *, integer *), dlasrt_(
+    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *), dlasrt_(
 	    char *, integer *, doublereal *, integer *);
     static doublereal eps;
 

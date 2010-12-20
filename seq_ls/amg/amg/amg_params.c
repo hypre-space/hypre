@@ -28,7 +28,7 @@
  *--------------------------------------------------------------------------*/
 
 void      HYPRE_AMGSetLevMax(levmax, data)
-int       levmax;
+HYPRE_Int       levmax;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -37,7 +37,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetNCG(ncg, data)
-int       ncg;
+HYPRE_Int       ncg;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -55,7 +55,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetNWT(nwt, data)
-int       nwt;
+HYPRE_Int       nwt;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -73,7 +73,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetNSTR(nstr, data)
-int       nstr;
+HYPRE_Int       nstr;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -87,7 +87,7 @@ void     *data;
  *--------------------------------------------------------------------------*/
 
 void      HYPRE_AMGSetNCyc(ncyc, data)
-int       ncyc;
+HYPRE_Int       ncyc;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -96,7 +96,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetMU(mu, data)
-int      *mu;
+HYPRE_Int      *mu;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -106,7 +106,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetNTRLX(ntrlx, data)
-int      *ntrlx;
+HYPRE_Int      *ntrlx;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -116,7 +116,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetIPRLX(iprlx, data)
-int      *iprlx;
+HYPRE_Int      *iprlx;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -131,7 +131,7 @@ void     *data;
  *--------------------------------------------------------------------------*/
 
 void      HYPRE_AMGSetLogging(ioutdat, log_file_name, data)
-int       ioutdat;
+HYPRE_Int       ioutdat;
 char     *log_file_name;
 void     *data;
 {
@@ -143,9 +143,9 @@ void     *data;
    if (ioutdat > 0)
    {
       if (*log_file_name == 0)  
-         sprintf(hypre_AMGDataLogFileName(amg_data), "%s", "amg.out.log");
+         hypre_sprintf(hypre_AMGDataLogFileName(amg_data), "%s", "amg.out.log");
       else
-         sprintf(hypre_AMGDataLogFileName(amg_data), "%s", log_file_name); 
+         hypre_sprintf(hypre_AMGDataLogFileName(amg_data), "%s", log_file_name); 
        
    fp = fopen(hypre_AMGDataLogFileName(amg_data),"w");
    fclose(fp);
@@ -158,7 +158,7 @@ void     *data;
  *--------------------------------------------------------------------------*/
 
 void      HYPRE_AMGSetNumUnknowns(num_unknowns, data)
-int       num_unknowns;  
+HYPRE_Int       num_unknowns;  
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -167,7 +167,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetNumPoints(num_points, data)
-int       num_points;    
+HYPRE_Int       num_points;    
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -176,7 +176,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetIU(iu, data)
-int      *iu;            
+HYPRE_Int      *iu;            
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -186,7 +186,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetIP(ip, data)
-int      *ip;            
+HYPRE_Int      *ip;            
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -196,7 +196,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetIV(iv, data)
-int      *iv;            
+HYPRE_Int      *iv;            
 void     *data;
 {
    hypre_AMGData  *amg_data = data;

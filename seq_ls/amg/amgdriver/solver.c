@@ -33,37 +33,37 @@ char     *file_name;
    Solver  *solver;
 
    /* pcg params */
-   int      pcg_max_iter;
-   int      pcg_two_norm;
+   HYPRE_Int      pcg_max_iter;
+   HYPRE_Int      pcg_two_norm;
 
    /* gmres params */
-   int      gmres_max_krylov;
-   int      gmres_max_restarts;
+   HYPRE_Int      gmres_max_krylov;
+   HYPRE_Int      gmres_max_restarts;
 
    /* wjacobi params */
    double   wjacobi_weight;
-   int      wjacobi_max_iter;
+   HYPRE_Int      wjacobi_max_iter;
 
    /* amg setup params */
-   int      amg_levmax;
-   int      amg_ncg;
+   HYPRE_Int      amg_levmax;
+   HYPRE_Int      amg_ncg;
    double   amg_ecg;
-   int      amg_nwt;
+   HYPRE_Int      amg_nwt;
    double   amg_ewt;
-   int      amg_nstr;
+   HYPRE_Int      amg_nstr;
 
    /* amg solve params */
-   int      amg_ncyc;
-   int     *amg_mu;
-   int     *amg_ntrlx;
-   int     *amg_iprlx;
+   HYPRE_Int      amg_ncyc;
+   HYPRE_Int     *amg_mu;
+   HYPRE_Int     *amg_ntrlx;
+   HYPRE_Int     *amg_iprlx;
 
 
    /* amg output params */
-   int      amg_ioutdat;
+   HYPRE_Int      amg_ioutdat;
 
    FILE    *fp;
-   int      i;
+   HYPRE_Int      i;
 
 
    /*----------------------------------------------------------
@@ -82,15 +82,15 @@ char     *file_name;
     * Generic solver input
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%d", &SolverType(solver));
-   fscanf(fp, "%le", &SolverStopTolerance(solver));
+   hypre_fscanf(fp, "%d", &SolverType(solver));
+   hypre_fscanf(fp, "%le", &SolverStopTolerance(solver));
 
    /*----------------------------------------------------------
     * PCG input
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%d", &pcg_max_iter);
-   fscanf(fp, "%d", &pcg_two_norm);
+   hypre_fscanf(fp, "%d", &pcg_max_iter);
+   hypre_fscanf(fp, "%d", &pcg_two_norm);
 
    SolverPCGMaxIter(solver) = pcg_max_iter;
    SolverPCGTwoNorm(solver) = pcg_two_norm;
@@ -99,8 +99,8 @@ char     *file_name;
     * GMRES input
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%d", &gmres_max_krylov);
-   fscanf(fp, "%d", &gmres_max_restarts);
+   hypre_fscanf(fp, "%d", &gmres_max_krylov);
+   hypre_fscanf(fp, "%d", &gmres_max_restarts);
 
    SolverGMRESMaxKrylov(solver)   = gmres_max_krylov;
    SolverGMRESMaxRestarts(solver) = gmres_max_restarts;
@@ -109,8 +109,8 @@ char     *file_name;
     * Weighted Jacobi input
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%le", &wjacobi_weight);
-   fscanf(fp, "%d",  &wjacobi_max_iter);
+   hypre_fscanf(fp, "%le", &wjacobi_weight);
+   hypre_fscanf(fp, "%d",  &wjacobi_max_iter);
 
    SolverWJacobiWeight(solver)  = wjacobi_weight;
    SolverWJacobiMaxIter(solver) = wjacobi_max_iter;
@@ -119,24 +119,24 @@ char     *file_name;
     * AMG input
     *----------------------------------------------------------*/
 
-   fscanf(fp, "%d",  &amg_levmax);
-   fscanf(fp, "%d",  &amg_ncg);
-   fscanf(fp, "%le", &amg_ecg);
-   fscanf(fp, "%d",  &amg_nwt);
-   fscanf(fp, "%le", &amg_ewt);
-   fscanf(fp, "%d",  &amg_nstr);
+   hypre_fscanf(fp, "%d",  &amg_levmax);
+   hypre_fscanf(fp, "%d",  &amg_ncg);
+   hypre_fscanf(fp, "%le", &amg_ecg);
+   hypre_fscanf(fp, "%d",  &amg_nwt);
+   hypre_fscanf(fp, "%le", &amg_ewt);
+   hypre_fscanf(fp, "%d",  &amg_nstr);
    
-   fscanf(fp, "%d", &amg_ncyc);
-   amg_mu = hypre_CTAlloc(int, amg_levmax);
+   hypre_fscanf(fp, "%d", &amg_ncyc);
+   amg_mu = hypre_CTAlloc(HYPRE_Int, amg_levmax);
    for (i = 0; i < amg_levmax; i++)
-      fscanf(fp, "%d", &amg_mu[i]);
-   amg_ntrlx = hypre_CTAlloc(int, 4);
+      hypre_fscanf(fp, "%d", &amg_mu[i]);
+   amg_ntrlx = hypre_CTAlloc(HYPRE_Int, 4);
    for (i = 0; i < 4; i++)
-      fscanf(fp, "%d", &amg_ntrlx[i]);
-   amg_iprlx = hypre_CTAlloc(int, 4);
+      hypre_fscanf(fp, "%d", &amg_ntrlx[i]);
+   amg_iprlx = hypre_CTAlloc(HYPRE_Int, 4);
    for (i = 0; i < 4; i++)
-      fscanf(fp, "%d", &amg_iprlx[i]);
-   fscanf(fp, "%d", &amg_ioutdat);
+      hypre_fscanf(fp, "%d", &amg_iprlx[i]);
+   hypre_fscanf(fp, "%d", &amg_ioutdat);
 
    /*----------------------------------------------------------
     * Set the solver structure
@@ -193,40 +193,40 @@ Solver  *solver;
 {
    FILE    *fp;
 
-   int      type;
+   HYPRE_Int      type;
 
    double   stop_tolerance;
 
    /* pcg params */
-   int      pcg_max_iter;
-   int      pcg_two_norm;
+   HYPRE_Int      pcg_max_iter;
+   HYPRE_Int      pcg_two_norm;
 
    /* gmres params */
-   int      gmres_max_krylov;
-   int      gmres_max_restarts;
+   HYPRE_Int      gmres_max_krylov;
+   HYPRE_Int      gmres_max_restarts;
 
    /* wjacobi params */
    double   wjacobi_weight;
-   int      wjacobi_max_iter;
+   HYPRE_Int      wjacobi_max_iter;
 
    /* amg setup params */
-   int      amg_levmax;
-   int      amg_ncg;
+   HYPRE_Int      amg_levmax;
+   HYPRE_Int      amg_ncg;
    double   amg_ecg;
-   int      amg_nwt;
+   HYPRE_Int      amg_nwt;
    double   amg_ewt;
-   int      amg_nstr;
+   HYPRE_Int      amg_nstr;
 
    /* amg solve params */
-   int      amg_ncyc;
-   int     *amg_mu;
-   int     *amg_ntrlx;
-   int     *amg_iprlx;
+   HYPRE_Int      amg_ncyc;
+   HYPRE_Int     *amg_mu;
+   HYPRE_Int     *amg_ntrlx;
+   HYPRE_Int     *amg_iprlx;
 
    /* amg output params */
-   int      amg_ioutdat;
+   HYPRE_Int      amg_ioutdat;
 
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -269,32 +269,32 @@ Solver  *solver;
     * Solver type
     *----------------------------------------------------------*/
 
-   fprintf(fp,"\nSOLVER PARAMETERS:\n\n");
-   fprintf(fp, "  Solver Type:  %d - ", type);
+   hypre_fprintf(fp,"\nSOLVER PARAMETERS:\n\n");
+   hypre_fprintf(fp, "  Solver Type:  %d - ", type);
 
    if (type == SOLVER_AMG)
    {
-      fprintf(fp, "AMG \n\n");
+      hypre_fprintf(fp, "AMG \n\n");
    }
    else if (type == SOLVER_Jacobi)
    {
-      fprintf(fp, "Jacobi \n\n");
+      hypre_fprintf(fp, "Jacobi \n\n");
    }
    else if (type == SOLVER_AMG_PCG)
    {
-      fprintf(fp, "AMG PCG \n\n");
+      hypre_fprintf(fp, "AMG PCG \n\n");
    }
    else if (type == SOLVER_Jacobi_PCG)
    {
-      fprintf(fp, "Jacobi PCG \n\n");
+      hypre_fprintf(fp, "Jacobi PCG \n\n");
    }
    else if (type == SOLVER_AMG_GMRES)
    {
-      fprintf(fp, "AMG GMRES \n\n");
+      hypre_fprintf(fp, "AMG GMRES \n\n");
    }
    else if (type == SOLVER_Jacobi_GMRES)
    {
-      fprintf(fp, "Jacobi GMRES \n\n");
+      hypre_fprintf(fp, "Jacobi GMRES \n\n");
    }
 
    /*----------------------------------------------------------
@@ -303,10 +303,10 @@ Solver  *solver;
 
    if (type == SOLVER_AMG_PCG || type == SOLVER_Jacobi_PCG)
    {
-       fprintf(fp, "  Preconditioned Conjugate Gradient Parameters:\n");
-       fprintf(fp, "    Solver Stop Tolerance:  %e \n", stop_tolerance);
-       fprintf(fp, "    Maximum Iterations: %d \n", pcg_max_iter);
-       fprintf(fp, "    Two Norm Flag: %d \n\n", pcg_two_norm);
+       hypre_fprintf(fp, "  Preconditioned Conjugate Gradient Parameters:\n");
+       hypre_fprintf(fp, "    Solver Stop Tolerance:  %e \n", stop_tolerance);
+       hypre_fprintf(fp, "    Maximum Iterations: %d \n", pcg_max_iter);
+       hypre_fprintf(fp, "    Two Norm Flag: %d \n\n", pcg_two_norm);
    }
 
    /*----------------------------------------------------------
@@ -315,10 +315,10 @@ Solver  *solver;
 
    if (type == SOLVER_AMG_GMRES || type == SOLVER_Jacobi_GMRES)
    {
-       fprintf(fp, "  Generalized Minimum Residual Parameters:\n");
-       fprintf(fp, "    Solver Stop Tolerance:  %e \n", stop_tolerance);
-       fprintf(fp, "    Maximum Krylov Dimension: %d \n", gmres_max_krylov);
-       fprintf(fp, "    Max Number of Restarts: %d \n\n", gmres_max_restarts);
+       hypre_fprintf(fp, "  Generalized Minimum Residual Parameters:\n");
+       hypre_fprintf(fp, "    Solver Stop Tolerance:  %e \n", stop_tolerance);
+       hypre_fprintf(fp, "    Maximum Krylov Dimension: %d \n", gmres_max_krylov);
+       hypre_fprintf(fp, "    Max Number of Restarts: %d \n\n", gmres_max_restarts);
    }
 
    /*----------------------------------------------------------
@@ -329,9 +329,9 @@ Solver  *solver;
        type == SOLVER_Jacobi_PCG ||
        type == SOLVER_Jacobi_GMRES)
    {
-      fprintf(fp, "  Jacobi Parameters:\n");
-      fprintf(fp, "    Weight for Relaxation: %f \n", wjacobi_weight);
-      fprintf(fp, "    Maximum Iterations: %d \n\n", wjacobi_max_iter);
+      hypre_fprintf(fp, "  Jacobi Parameters:\n");
+      hypre_fprintf(fp, "    Weight for Relaxation: %f \n", wjacobi_weight);
+      hypre_fprintf(fp, "    Maximum Iterations: %d \n\n", wjacobi_max_iter);
    }
 
    /*----------------------------------------------------------
@@ -342,28 +342,28 @@ Solver  *solver;
        type == SOLVER_AMG_PCG ||
        type == SOLVER_AMG_GMRES)
    {
-      fprintf(fp, "  AMG Parameters:\n");
-      fprintf(fp, "    Maximum number of levels:            %d \n",
+      hypre_fprintf(fp, "  AMG Parameters:\n");
+      hypre_fprintf(fp, "    Maximum number of levels:            %d \n",
 	      amg_levmax);
-      fprintf(fp, "    Coarsening controls (ncg, ecg):      %d   %f \n",
+      hypre_fprintf(fp, "    Coarsening controls (ncg, ecg):      %d   %f \n",
 	      amg_ncg, amg_ecg);
-      fprintf(fp, "    Interpolation controls (nwt, ewt):   %d   %f \n",
+      hypre_fprintf(fp, "    Interpolation controls (nwt, ewt):   %d   %f \n",
 	      amg_nwt, amg_ewt);
-      fprintf(fp, "    Strong connection definition (nstr): %d \n", amg_nstr);
-      fprintf(fp, "    Number and type of cycles (ncyc):    %d \n", amg_ncyc);
-      fprintf(fp, "    Stopping Tolerance                   %e \n",
+      hypre_fprintf(fp, "    Strong connection definition (nstr): %d \n", amg_nstr);
+      hypre_fprintf(fp, "    Number and type of cycles (ncyc):    %d \n", amg_ncyc);
+      hypre_fprintf(fp, "    Stopping Tolerance                   %e \n",
                    stop_tolerance); 
-      fprintf(fp, "    W-cycling parameter (mu): ");
+      hypre_fprintf(fp, "    W-cycling parameter (mu): ");
       for (j = 0; j < amg_levmax; j++)
-	 fprintf(fp, "%d ", amg_mu[j]);
-      fprintf(fp, "\n");
-      fprintf(fp, "    Relaxation Parameters:\n");
-      fprintf(fp, "       ntr(f,d,u,c): %d  %d  %d  %d \n",
+	 hypre_fprintf(fp, "%d ", amg_mu[j]);
+      hypre_fprintf(fp, "\n");
+      hypre_fprintf(fp, "    Relaxation Parameters:\n");
+      hypre_fprintf(fp, "       ntr(f,d,u,c): %d  %d  %d  %d \n",
 	      amg_ntrlx[0], amg_ntrlx[1], amg_ntrlx[2], amg_ntrlx[3]);
-      fprintf(fp, "       ipr(f,d,u,c): %d  %d  %d  %d \n",
+      hypre_fprintf(fp, "       ipr(f,d,u,c): %d  %d  %d  %d \n",
 	      amg_iprlx[0], amg_iprlx[1], amg_iprlx[2], amg_iprlx[3]);
  
-      fprintf(fp, "    Output flag (ioutdat): %d \n", amg_ioutdat);
+      hypre_fprintf(fp, "    Output flag (ioutdat): %d \n", amg_ioutdat);
 
    }
 

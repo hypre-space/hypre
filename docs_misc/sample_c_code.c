@@ -50,16 +50,16 @@ Matvec( double  alpha,
         Vector *y     )
 {
    double     *a  = MatrixData(A);  /* element values for matrix A */
-   int        *ia = MatrixIA(A);    /* pointer to start of each row */
-   int        *ja = MatrixJA(A);    /* column values for matrix elements */
-   int         n  = MatrixSize(A);  /* size of matrix */
+   HYPRE_Int        *ia = MatrixIA(A);    /* pointer to start of each row */
+   HYPRE_Int        *ja = MatrixJA(A);    /* column values for matrix elements */
+   HYPRE_Int         n  = MatrixSize(A);  /* size of matrix */
 
    double     *xp = VectorData(x);
    double     *yp = VectorData(y);
 
    double      temp;
 
-   int         i, j, jj;
+   HYPRE_Int         i, j, jj;
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation 

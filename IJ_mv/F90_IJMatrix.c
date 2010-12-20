@@ -29,11 +29,11 @@
 
 void 
 hypre_F90_IFACE(hypre_ijmatrixsetobject, HYPRE_IJMATRIXSETOBJECT)(
-                                                     long int *matrix,
-                                                     long int *object,
-                                                     int      *ierr    )
+                                                     hypre_F90_Obj *matrix,
+                                                     hypre_F90_Obj *object,
+                                                     HYPRE_Int      *ierr    )
 {
-   *ierr = (int) ( hypre_IJMatrixSetObject( (HYPRE_IJMatrix) *matrix,
+   *ierr = (HYPRE_Int) ( hypre_IJMatrixSetObject( (HYPRE_IJMatrix) *matrix,
                                             (void *)         *object  ) );
 }
 

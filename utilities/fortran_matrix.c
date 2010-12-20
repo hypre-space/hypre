@@ -245,7 +245,7 @@ utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx ) {
 }
 
 void 
-utilities_FortranMatrixCopy( utilities_FortranMatrix* src, int t, 
+utilities_FortranMatrixCopy( utilities_FortranMatrix* src, HYPRE_Int t, 
 				  utilities_FortranMatrix* dest ) {
 
   long i, j, h, w;
@@ -278,8 +278,8 @@ utilities_FortranMatrixCopy( utilities_FortranMatrix* src, int t,
 }
 
 void 
-utilities_FortranMatrixIndexCopy( int* index, 
-				       utilities_FortranMatrix* src, int t, 
+utilities_FortranMatrixIndexCopy( HYPRE_Int* index, 
+				       utilities_FortranMatrix* src, HYPRE_Int t, 
 				       utilities_FortranMatrix* dest ) {
 
   long i, j, h, w;
@@ -475,8 +475,8 @@ utilities_FortranMatrixMultiplyD( utilities_FortranMatrix* mtx,
 }
 
 void 
-utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA, 
-				      utilities_FortranMatrix* mtxB, int tB,
+utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, HYPRE_Int tA, 
+				      utilities_FortranMatrix* mtxB, HYPRE_Int tB,
 				      utilities_FortranMatrix* mtxC ) {
   long h, w;
   long i, j, k, l;
@@ -695,7 +695,7 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u ) {
 
 }
 
-int
+HYPRE_Int
 utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] ) {
 
   long i, j, h, w, jump;
@@ -710,14 +710,14 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] ) {
   h = mtx->height;
   w = mtx->width;
   
-  fprintf(fp,"%ld\n",h);
-  fprintf(fp,"%ld\n",w);
+  hypre_fprintf(fp,"%ld\n",h);
+  hypre_fprintf(fp,"%ld\n",w);
   
   jump = mtx->globalHeight - h;
 	
   for ( j = 0, p = mtx->value; j < w; j++ ) {
     for ( i = 0; i < h; i++, p++ )
-      fprintf(fp,"%.14e\n",*p);
+      hypre_fprintf(fp,"%.14e\n",*p);
     p += jump;
   }
 

@@ -28,29 +28,29 @@
 #define MATVEC_WORDS      4  /* total words sent to other procs. */
 
 struct _mat_dh {
-  int m, n;    /* dimensions of local rectangular submatrix;
+  HYPRE_Int m, n;    /* dimensions of local rectangular submatrix;
                 * the global matrix is n by n.
                 */
-  int beg_row;   /* global number of 1st locally owned row */
-  int bs;        /* block size */
+  HYPRE_Int beg_row;   /* global number of 1st locally owned row */
+  HYPRE_Int bs;        /* block size */
 
   /* sparse row-oriented storage for locally owned submatrix */
-  int *rp;       
-  int *len;   /* length of each row; only used for MPI triangular solves */
-  int *cval;
-  int *fill;
-  int *diag;
+  HYPRE_Int *rp;       
+  HYPRE_Int *len;   /* length of each row; only used for MPI triangular solves */
+  HYPRE_Int *cval;
+  HYPRE_Int *fill;
+  HYPRE_Int *diag;
   double *aval;
   bool owner;  /* for MPI triangular solves */
 
   /* working space for getRow */
-  int len_private;
-  int rowCheckedOut;
-  int *cval_private;
+  HYPRE_Int len_private;
+  HYPRE_Int rowCheckedOut;
+  HYPRE_Int *cval_private;
   double *aval_private;
 
   /* row permutations to increase positive definiteness */
-  int *row_perm;
+  HYPRE_Int *row_perm;
 
   /* for timing matvecs in experimental studies */
   double time[MAT_DH_BINS];
@@ -59,17 +59,17 @@ struct _mat_dh {
   bool matvec_timing;
 
   /* used for MatVecs */
-  int          num_recv; 
-  int          num_send;   /* used in destructor */
-  MPI_Request  *recv_req;
-  MPI_Request  *send_req; 
+  HYPRE_Int          num_recv; 
+  HYPRE_Int          num_send;   /* used in destructor */
+  hypre_MPI_Request  *recv_req;
+  hypre_MPI_Request  *send_req; 
   double       *recvbuf, *sendbuf;  
-  int          *sendind;
-  int          sendlen;               
-  int          recvlen;               
+  HYPRE_Int          *sendind;
+  HYPRE_Int          sendlen;               
+  HYPRE_Int          recvlen;               
   bool         matvecIsSetup;
   Numbering_dh numb;
-  MPI_Status   *status;  
+  hypre_MPI_Status   *status;  
 
   bool debug;
 };
@@ -103,7 +103,7 @@ extern void Mat_dhMatVec_uni_omp(Mat_dh mat, double *lhs, double *rhs);
   /* OpenMP/single primary task version */
 
 
-extern int Mat_dhReadNz(Mat_dh mat);
+extern HYPRE_Int Mat_dhReadNz(Mat_dh mat);
 
   /* for next five, SubdomainGraph_dh() may be NULL; if not null,
      caller must ensure it has been properly initialized;
@@ -122,11 +122,11 @@ extern void Mat_dhPrintTriples(Mat_dh mat, SubdomainGraph_dh sg, char *filename)
 extern void Mat_dhPrintBIN(Mat_dh mat, SubdomainGraph_dh sg, char *filename);
 
 extern void Mat_dhReadCSR(Mat_dh *mat, char *filename);
-extern void Mat_dhReadTriples(Mat_dh *mat, int ignore, char *filename);
+extern void Mat_dhReadTriples(Mat_dh *mat, HYPRE_Int ignore, char *filename);
 extern void Mat_dhReadBIN(Mat_dh *mat, char *filename);
 
 
-extern void Mat_dhPermute(Mat_dh Ain, int *pIN, Mat_dh *Bout);
+extern void Mat_dhPermute(Mat_dh Ain, HYPRE_Int *pIN, Mat_dh *Bout);
   /* for single cpu only! */
 
 extern void Mat_dhFixDiags(Mat_dh A);
@@ -137,12 +137,12 @@ extern void Mat_dhFixDiags(Mat_dh A);
 
 extern void Mat_dhPrintDiags(Mat_dh A, FILE *fp);
 
-extern void Mat_dhGetRow(Mat_dh B, int globalRow, int *len, int **ind, double **val);
-extern void Mat_dhRestoreRow(Mat_dh B, int row, int *len, int **ind, double **val);
+extern void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, double **val);
+extern void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val);
 
   /* partition matrix into "k" blocks.  User must free storage. */
-extern void Mat_dhPartition(Mat_dh mat, int k, int **beg_rowOUT, 
-                            int **row_countOUT, int **n2oOUT, int **o2nOUT);
+extern void Mat_dhPartition(Mat_dh mat, HYPRE_Int k, HYPRE_Int **beg_rowOUT, 
+                            HYPRE_Int **row_countOUT, HYPRE_Int **n2oOUT, HYPRE_Int **o2nOUT);
 
 
 
@@ -153,8 +153,8 @@ extern void Mat_dhReduceTiming(Mat_dh mat);
 
 extern void Mat_dhRowPermute(Mat_dh);
 
-extern void dldperm(int job, int n, int nnz, int colptr[], int adjncy[],
-                double nzval[], int *perm, double u[], double v[]);
+extern void dldperm(HYPRE_Int job, HYPRE_Int n, HYPRE_Int nnz, HYPRE_Int colptr[], HYPRE_Int adjncy[],
+                double nzval[], HYPRE_Int *perm, double u[], double v[]);
 
 
 #endif

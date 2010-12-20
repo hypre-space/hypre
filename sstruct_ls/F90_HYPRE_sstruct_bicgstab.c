@@ -29,11 +29,11 @@
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabcreate, HYPRE_SSTRUCTBICGSTABCREATE)
-                                                          (int      *comm,
-                                                           long int *solver,
-                                                           int      *ierr)
+                                                          (HYPRE_Int      *comm,
+                                                           hypre_F90_Obj *solver,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABCreate( (MPI_Comm)              *comm,
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABCreate( (MPI_Comm)              *comm,
                                                (HYPRE_SStructSolver *)  solver )) ;
 }
 
@@ -43,10 +43,10 @@ hypre_F90_IFACE(hypre_sstructbicgstabcreate, HYPRE_SSTRUCTBICGSTABCREATE)
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabdestroy, HYPRE_SSTRUCTBICGSTABDESTROY)
-                                                          (long int *solver,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABDestroy( (HYPRE_SStructSolver) *solver ));
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABDestroy( (HYPRE_SStructSolver) *solver ));
 }
 
 /*--------------------------------------------------------------------------
@@ -55,13 +55,13 @@ hypre_F90_IFACE(hypre_sstructbicgstabdestroy, HYPRE_SSTRUCTBICGSTABDESTROY)
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsetup, HYPRE_SSTRUCTBICGSTABSETUP)
-                                                          (long int *solver,
-                                                           long int *A,
-                                                           long int *b,
-                                                           long int *x,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           hypre_F90_Obj *A,
+                                                           hypre_F90_Obj *b,
+                                                           hypre_F90_Obj *x,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABSetup( (HYPRE_SStructSolver) *solver,
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABSetup( (HYPRE_SStructSolver) *solver,
                                               (HYPRE_SStructMatrix) *A,
                                               (HYPRE_SStructVector) *b,
                                               (HYPRE_SStructVector) *x ));
@@ -73,13 +73,13 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetup, HYPRE_SSTRUCTBICGSTABSETUP)
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsolve, HYPRE_SSTRUCTBICGSTABSOLVE)
-                                                          (long int *solver,
-                                                           long int *A,
-                                                           long int *b,
-                                                           long int *x,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           hypre_F90_Obj *A,
+                                                           hypre_F90_Obj *b,
+                                                           hypre_F90_Obj *x,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABSolve( (HYPRE_SStructSolver) *solver,
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABSolve( (HYPRE_SStructSolver) *solver,
                                               (HYPRE_SStructMatrix) *A,
                                               (HYPRE_SStructVector) *b,
                                               (HYPRE_SStructVector) *x ));
@@ -91,11 +91,11 @@ hypre_F90_IFACE(hypre_sstructbicgstabsolve, HYPRE_SSTRUCTBICGSTABSOLVE)
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsettol, HYPRE_SSTRUCTBICGSTABSETTOL)
-                                                          (long int *solver,
+                                                          (hypre_F90_Obj *solver,
                                                            double   *tol,
-                                                           int      *ierr)
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABSetTol( (HYPRE_SStructSolver) *solver,
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABSetTol( (HYPRE_SStructSolver) *solver,
                                                (double)              *tol ));
 }
 /*--------------------------------------------------------------------------
@@ -104,11 +104,11 @@ hypre_F90_IFACE(hypre_sstructbicgstabsettol, HYPRE_SSTRUCTBICGSTABSETTOL)
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsetabsolutetol, HYPRE_SSTRUCTBICGSTABSETABSOLUTETOL)
-                                                          (long int *solver,
+                                                          (hypre_F90_Obj *solver,
                                                            double   *tol,
-                                                           int      *ierr)
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABSetAbsoluteTol( (HYPRE_SStructSolver) *solver,
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABSetAbsoluteTol( (HYPRE_SStructSolver) *solver,
                                                (double)              *tol ));
 }
 
@@ -118,12 +118,12 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetabsolutetol, HYPRE_SSTRUCTBICGSTABSETABS
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsetminiter, HYPRE_SSTRUCTBICGSTABSETMINITER)
-                                                          (long int *solver,
-                                                           int      *min_iter,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           HYPRE_Int      *min_iter,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABSetMinIter( (HYPRE_SStructSolver) *solver,
-                                                   (int)                 *min_iter ));
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABSetMinIter( (HYPRE_SStructSolver) *solver,
+                                                   (HYPRE_Int)                 *min_iter ));
 }
 
 /*--------------------------------------------------------------------------
@@ -132,12 +132,12 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetminiter, HYPRE_SSTRUCTBICGSTABSETMINITER
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsetmaxiter, HYPRE_SSTRUCTBICGSTABSETMAXITER)
-                                                          (long int *solver,
-                                                           int      *max_iter,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           HYPRE_Int      *max_iter,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABSetMaxIter( (HYPRE_SStructSolver) *solver,
-                                                   (int)                 *max_iter ));
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABSetMaxIter( (HYPRE_SStructSolver) *solver,
+                                                   (HYPRE_Int)                 *max_iter ));
 }
 
 /*--------------------------------------------------------------------------
@@ -146,12 +146,12 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetmaxiter, HYPRE_SSTRUCTBICGSTABSETMAXITER
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsetstopcri, HYPRE_SSTRUCTBICGSTABSETSTOPCRI)
-                                                          (long int *solver,
-                                                           int      *stop_crit,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           HYPRE_Int      *stop_crit,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABSetStopCrit( (HYPRE_SStructSolver) *solver,
-                                                    (int)                 *stop_crit ));
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABSetStopCrit( (HYPRE_SStructSolver) *solver,
+                                                    (HYPRE_Int)                 *stop_crit ));
 }
 
 /*--------------------------------------------------------------------------
@@ -160,10 +160,10 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetstopcri, HYPRE_SSTRUCTBICGSTABSETSTOPCRI
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsetprecond, HYPRE_SSTRUCTBICGSTABSETPRECOND)
-                                                     (long int *solver,
-                                                      int      *precond_id,
-                                                      long int *precond_solver,
-                                                      int      *ierr)
+                                                     (hypre_F90_Obj *solver,
+                                                      HYPRE_Int      *precond_id,
+                                                      hypre_F90_Obj *precond_solver,
+                                                      HYPRE_Int      *ierr)
 /*------------------------------------------
  *    precond_id flags mean:
  *    2 - setup a split-solver preconditioner
@@ -175,7 +175,7 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetprecond, HYPRE_SSTRUCTBICGSTABSETPRECOND
 {
    if(*precond_id == 2)
       {
-       *ierr = (int)
+       *ierr = (HYPRE_Int)
                (HYPRE_SStructBiCGSTABSetPrecond( (HYPRE_SStructSolver)    *solver,
                                              HYPRE_SStructSplitSolve,
                                              HYPRE_SStructSplitSetup,
@@ -184,7 +184,7 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetprecond, HYPRE_SSTRUCTBICGSTABSETPRECOND
 
    else if(*precond_id == 3)
       {
-       *ierr = (int)
+       *ierr = (HYPRE_Int)
                (HYPRE_SStructBiCGSTABSetPrecond( (HYPRE_SStructSolver)    *solver,
                                              HYPRE_SStructSysPFMGSolve,
                                              HYPRE_SStructSysPFMGSetup,
@@ -193,7 +193,7 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetprecond, HYPRE_SSTRUCTBICGSTABSETPRECOND
 
    else if(*precond_id == 8)
       {
-       *ierr = (int)
+       *ierr = (HYPRE_Int)
                (HYPRE_SStructBiCGSTABSetPrecond( (HYPRE_SStructSolver)    *solver,
                                              HYPRE_SStructDiagScale,
                                              HYPRE_SStructDiagScaleSetup,
@@ -217,12 +217,12 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetprecond, HYPRE_SSTRUCTBICGSTABSETPRECOND
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsetlogging, HYPRE_SSTRUCTBICGSTABSETLOGGING)
-                                                          (long int *solver,
-                                                           int      *logging,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           HYPRE_Int      *logging,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABSetLogging( (HYPRE_SStructSolver) *solver,
-                                                   (int)                 *logging ));
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABSetLogging( (HYPRE_SStructSolver) *solver,
+                                                   (HYPRE_Int)                 *logging ));
 }
 
 /*--------------------------------------------------------------------------
@@ -231,12 +231,12 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetlogging, HYPRE_SSTRUCTBICGSTABSETLOGGING
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsetprintle, HYPRE_SSTRUCTBICGSTABSETPRINTLE)
-                                                          (long int *solver,
-                                                           int      *print_level,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           HYPRE_Int      *print_level,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABSetPrintLevel( (HYPRE_SStructSolver) *solver,
-                                                      (int)                 *print_level ));
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABSetPrintLevel( (HYPRE_SStructSolver) *solver,
+                                                      (HYPRE_Int)                 *print_level ));
 }
 
 /*--------------------------------------------------------------------------
@@ -245,12 +245,12 @@ hypre_F90_IFACE(hypre_sstructbicgstabsetprintle, HYPRE_SSTRUCTBICGSTABSETPRINTLE
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabgetnumiter, HYPRE_SSTRUCTBICGSTABGETNUMITER)
-                                                          (long int *solver,
-                                                           int      *num_iterations,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           HYPRE_Int      *num_iterations,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABGetNumIterations( (HYPRE_SStructSolver) *solver,
-                                                         (int *)                num_iterations ) );
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABGetNumIterations( (HYPRE_SStructSolver) *solver,
+                                                         (HYPRE_Int *)                num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -259,11 +259,11 @@ hypre_F90_IFACE(hypre_sstructbicgstabgetnumiter, HYPRE_SSTRUCTBICGSTABGETNUMITER
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabgetfinalre, HYPRE_SSTRUCTBICGSTABGETFINALRE)
-                                                          (long int *solver,
+                                                          (hypre_F90_Obj *solver,
                                                            double   *norm,
-                                                           int      *ierr)
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( (HYPRE_SStructSolver) *solver,
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( (HYPRE_SStructSolver) *solver,
                                                                      (double *)             norm ));
 }
 
@@ -273,10 +273,10 @@ hypre_F90_IFACE(hypre_sstructbicgstabgetfinalre, HYPRE_SSTRUCTBICGSTABGETFINALRE
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabgetresidua, HYPRE_SSTRUCTBICGSTABGETRESIDUA)
-                                                          (long int *solver,
-                                                           long int *residual,
-                                                           int      *ierr)
+                                                          (hypre_F90_Obj *solver,
+                                                           hypre_F90_Obj *residual,
+                                                           HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructBiCGSTABGetResidual( (HYPRE_SStructSolver) *solver,
+   *ierr = (HYPRE_Int) (HYPRE_SStructBiCGSTABGetResidual( (HYPRE_SStructSolver) *solver,
                                                     (void *)              *residual));
 }

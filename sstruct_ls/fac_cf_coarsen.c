@@ -18,7 +18,7 @@
 
 #define MapStencilRank(stencil, rank) \
 {\
-   int ii,jj,kk;\
+   HYPRE_Int ii,jj,kk;\
    ii = hypre_IndexX(stencil);\
    jj = hypre_IndexY(stencil);\
    kk = hypre_IndexZ(stencil);\
@@ -33,7 +33,7 @@
 
 #define InverseMapStencilRank(rank, stencil) \
 {\
-   int ij,ii,jj,kk;\
+   HYPRE_Int ij,ii,jj,kk;\
    ij = (rank%9);\
    ii = (ij%3);\
    jj = (ij-ii)/3;\
@@ -50,7 +50,7 @@
 
 #define AbsStencilShape(stencil, abs_shape) \
 {\
-   int ii,jj,kk;\
+   HYPRE_Int ii,jj,kk;\
    ii = hypre_IndexX(stencil);\
    jj = hypre_IndexY(stencil);\
    kk = hypre_IndexZ(stencil);\
@@ -69,38 +69,38 @@
  * ASSUMING ONLY LIKE-VARIABLES COUPLE THROUGH CF CONNECTIONS.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                      hypre_SStructMatrix  *   fac_A,
                      hypre_Index              refine_factors,
-                     int                      level ) 
+                     HYPRE_Int                      level ) 
 
 {
    MPI_Comm                comm       = hypre_SStructMatrixComm(A);
    hypre_SStructGraph     *graph      = hypre_SStructMatrixGraph(A);
-   int                     graph_type = hypre_SStructGraphObjectType(graph);
+   HYPRE_Int                     graph_type = hypre_SStructGraphObjectType(graph);
    hypre_SStructGrid      *grid       = hypre_SStructGraphGrid(graph);
-   int                     nUventries = hypre_SStructGraphNUVEntries(graph);
+   HYPRE_Int                     nUventries = hypre_SStructGraphNUVEntries(graph);
    HYPRE_IJMatrix          ij_A       = hypre_SStructMatrixIJMatrix(A);
-   int                     matrix_type= hypre_SStructMatrixObjectType(A);
-   int                     ndim       = hypre_SStructMatrixNDim(A);
+   HYPRE_Int                     matrix_type= hypre_SStructMatrixObjectType(A);
+   HYPRE_Int                     ndim       = hypre_SStructMatrixNDim(A);
 
    hypre_SStructPMatrix   *A_pmatrix;
    hypre_StructMatrix     *smatrix_var;
    hypre_StructStencil    *stencils;
-   int                     stencil_size;
+   HYPRE_Int                     stencil_size;
    hypre_Index             stencil_shape_i;
    hypre_Index             loop_size;
    hypre_Box               refined_box;
    double                **a_ptrs;
    hypre_Box              *A_dbox;
 
-   int                     part_crse= level-1;
-   int                     part_fine= level;
+   HYPRE_Int                     part_crse= level-1;
+   HYPRE_Int                     part_fine= level;
  
    hypre_BoxManager       *fboxman;
    hypre_BoxManEntry     **boxman_entries, *boxman_entry;
-   int                     nboxman_entries;
+   HYPRE_Int                     nboxman_entries;
    hypre_Box               boxman_entry_box;
 
    hypre_BoxArrayArray  ***fgrid_cinterface_extents;
@@ -115,36 +115,36 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    hypre_BoxArray         *cinterface_array;
    hypre_Box              *fgrid_cinterface;
 
-   int                     centre;
+   HYPRE_Int                     centre;
 
-   int                     ci, fi, boxi;
-   int                     max_stencil_size= 27;
-   int                     false= 0;
-   int                     true = 1;
-   int                     found;
-   int                    *stencil_ranks, *rank_stencils;
-   int                     rank, startrank;
+   HYPRE_Int                     ci, fi, boxi;
+   HYPRE_Int                     max_stencil_size= 27;
+   HYPRE_Int                     false= 0;
+   HYPRE_Int                     true = 1;
+   HYPRE_Int                     found;
+   HYPRE_Int                    *stencil_ranks, *rank_stencils;
+   HYPRE_Int                     rank, startrank;
    double                 *vals;
 
-   int                     i, j, iA;
-   int                     loopi, loopj, loopk;
-   int                     nvars, var1; 
+   HYPRE_Int                     i, j, iA;
+   HYPRE_Int                     loopi, loopj, loopk;
+   HYPRE_Int                     nvars, var1; 
 
    hypre_Index             zero_index;
    hypre_Index             index1, index2;
    hypre_Index             index_temp;
 
    hypre_SStructUVEntry   *Uventry;
-   int                     nUentries, cnt1;
-   int                     box_array_size;
+   HYPRE_Int                     nUentries, cnt1;
+   HYPRE_Int                     box_array_size;
 
-   int                    *ncols, *rows, *cols;
+   HYPRE_Int                    *ncols, *rows, *cols;
    
-   int                    *temp1, *temp2;
+   HYPRE_Int                    *temp1, *temp2;
 
-   int                     myid;
+   HYPRE_Int                     myid;
 
-   MPI_Comm_rank(comm, &myid);
+   hypre_MPI_Comm_rank(comm, &myid);
    hypre_SetIndex(zero_index, 0, 0, 0);
    
    /*--------------------------------------------------------------------------
@@ -279,8 +279,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
             * These are needed in collapsing the unstructured connections to
             * a stencil connection.
             *------------------------------------------------------------------*/
-           stencil_ranks= hypre_TAlloc(int, stencil_size);
-           rank_stencils= hypre_TAlloc(int, max_stencil_size);
+           stencil_ranks= hypre_TAlloc(HYPRE_Int, stencil_size);
+           rank_stencils= hypre_TAlloc(HYPRE_Int, max_stencil_size);
            for (i= 0; i< max_stencil_size; i++)
            {
               rank_stencils[i]= -1;
@@ -389,7 +389,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                * extract only the connections to level part_fine and the
                                * correct variable.
                                *-----------------------------------------------------------*/
-                               temp1= hypre_CTAlloc(int, nUentries);
+                               temp1= hypre_CTAlloc(HYPRE_Int, nUentries);
                                cnt1= 0;
                                for (i=0; i< nUentries; i++)
                                {
@@ -400,10 +400,10 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                   }
                                }
 
-                               ncols= hypre_TAlloc(int, cnt1);
-                               rows = hypre_TAlloc(int, cnt1);
-                               cols = hypre_TAlloc(int, cnt1);
-                               temp2= hypre_TAlloc(int, cnt1);
+                               ncols= hypre_TAlloc(HYPRE_Int, cnt1);
+                               rows = hypre_TAlloc(HYPRE_Int, cnt1);
+                               cols = hypre_TAlloc(HYPRE_Int, cnt1);
+                               temp2= hypre_TAlloc(HYPRE_Int, cnt1);
                                vals = hypre_CTAlloc(double, cnt1);
 
                                for (i= 0; i< cnt1; i++)

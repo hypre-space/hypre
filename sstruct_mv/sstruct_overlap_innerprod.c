@@ -22,15 +22,15 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPOverlapInnerProd( hypre_SStructPVector *px,
                                 hypre_SStructPVector *py,
                                 double               *presult_ptr )
 {
-   int    nvars = hypre_SStructPVectorNVars(px);
+   HYPRE_Int    nvars = hypre_SStructPVectorNVars(px);
    double presult;
    double sresult;
-   int    var;
+   HYPRE_Int    var;
 
    presult = 0.0;
    for (var = 0; var < nvars; var++)
@@ -48,15 +48,15 @@ hypre_SStructPOverlapInnerProd( hypre_SStructPVector *px,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructOverlapInnerProd( hypre_SStructVector *x,
                                hypre_SStructVector *y,
                                double              *result_ptr )
 {
-   int    nparts = hypre_SStructVectorNParts(x);
+   HYPRE_Int    nparts = hypre_SStructVectorNParts(x);
    double result;
    double presult;
-   int    part;
+   HYPRE_Int    part;
 
    result = 0.0;
    for (part = 0; part < nparts; part++)

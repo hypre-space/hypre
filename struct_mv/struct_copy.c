@@ -25,17 +25,17 @@
  * hypre_StructCopy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructCopy( hypre_StructVector *x,
                   hypre_StructVector *y     )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
                    
-   int              xi;
-   int              yi;
+   HYPRE_Int              xi;
+   HYPRE_Int              yi;
                    
    double          *xp;
    double          *yp;
@@ -46,8 +46,8 @@ hypre_StructCopy( hypre_StructVector *x,
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
                    
-   int              i;
-   int              loopi, loopj, loopk;
+   HYPRE_Int              i;
+   HYPRE_Int              loopi, loopj, loopk;
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
@@ -86,18 +86,18 @@ hypre_StructCopy( hypre_StructVector *x,
  * of subboxes (i.e., a boxarray for each box of x) are copied.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructPartialCopy( hypre_StructVector  *x,
                          hypre_StructVector  *y,    
                          hypre_BoxArrayArray *array_boxes )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
 
-   int              xi;
-   int              yi;
+   HYPRE_Int              xi;
+   HYPRE_Int              yi;
 
    double          *xp;
    double          *yp;
@@ -108,8 +108,8 @@ hypre_StructPartialCopy( hypre_StructVector  *x,
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
 
-   int              i, j ;
-   int              loopi, loopj, loopk;
+   HYPRE_Int              i, j ;
+   HYPRE_Int              loopi, loopj, loopk;
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 

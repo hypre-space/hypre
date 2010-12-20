@@ -20,12 +20,12 @@
 
 struct _factor_dh {
   /* dimensions of local rectangular submatrix; global matrix is n*n */
-  int m, n;    
+  HYPRE_Int m, n;    
 
-  int id;          /* this subdomain's id after reordering */
-  int beg_row;     /* global number of 1st locally owned row */
-  int first_bdry;  /* local number of first boundary row */
-  int bdry_count;  /* m - first_boundary */
+  HYPRE_Int id;          /* this subdomain's id after reordering */
+  HYPRE_Int beg_row;     /* global number of 1st locally owned row */
+  HYPRE_Int first_bdry;  /* local number of first boundary row */
+  HYPRE_Int bdry_count;  /* m - first_boundary */
 
   /* if true, factorization was block jacobi, in which case all
      column indices are zero-based; else, they are global.
@@ -33,16 +33,16 @@ struct _factor_dh {
   bool blockJacobi;
 
   /* sparse row-oriented storage for locally owned submatrix */
-  int *rp;       
-  int *cval;
+  HYPRE_Int *rp;       
+  HYPRE_Int *cval;
   REAL_DH *aval;
-  int *fill;
-  int *diag;
-  int alloc; /* currently allocated length of cval, aval, and fill arrays */
+  HYPRE_Int *fill;
+  HYPRE_Int *diag;
+  HYPRE_Int alloc; /* currently allocated length of cval, aval, and fill arrays */
 
   /* used for PILU solves (Apply) */
-  int          num_recvLo, num_recvHi;
-  int          num_sendLo, num_sendHi;  /* used in destructor */
+  HYPRE_Int          num_recvLo, num_recvHi;
+  HYPRE_Int          num_sendLo, num_sendHi;  /* used in destructor */
   double       *work_y_lo;  /* recv values from lower nabors; also used as
                                work vector when solving Ly=b for y.
                             */
@@ -50,15 +50,15 @@ struct _factor_dh {
                                work vector when solving Ux=y for x.
                             */
   double       *sendbufLo, *sendbufHi;
-  int          *sendindLo, *sendindHi;
-  int          sendlenLo, sendlenHi;
+  HYPRE_Int          *sendindLo, *sendindHi;
+  HYPRE_Int          sendlenLo, sendlenHi;
   bool         solveIsSetup;
   Numbering_dh numbSolve;
 
-  MPI_Request  recv_reqLo[MAX_MPI_TASKS], recv_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
-  MPI_Request  send_reqLo[MAX_MPI_TASKS], send_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
-  MPI_Request  requests[MAX_MPI_TASKS];
-  MPI_Status   status[MAX_MPI_TASKS];  
+  hypre_MPI_Request  recv_reqLo[MAX_MPI_TASKS], recv_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
+  hypre_MPI_Request  send_reqLo[MAX_MPI_TASKS], send_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
+  hypre_MPI_Request  requests[MAX_MPI_TASKS];
+  hypre_MPI_Status   status[MAX_MPI_TASKS];  
 
   bool debug;
 };
@@ -69,9 +69,9 @@ extern void Factor_dhDestroy(Factor_dh mat);
 extern void Factor_dhTranspose(Factor_dh matIN, Factor_dh *matOUT);
 
 extern void Factor_dhInit(void *A, bool fillFlag, bool avalFlag,
-                          double rho, int id, int beg_rowP, Factor_dh *F);
+                          double rho, HYPRE_Int id, HYPRE_Int beg_rowP, Factor_dh *F);
 
-extern void Factor_dhReallocate(Factor_dh F, int used, int additional);
+extern void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additional);
   /* ensures fill, cval, and aval arrays can accomodate
      at least "c" additional entrie
    */
@@ -88,7 +88,7 @@ extern double Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx);
 extern double Factor_dhMaxValue(Factor_dh mat);
 extern double Factor_dhMaxPivotInverse(Factor_dh mat);
 
-extern int Factor_dhReadNz(Factor_dh mat);
+extern HYPRE_Int Factor_dhReadNz(Factor_dh mat);
 extern void Factor_dhPrintTriples(Factor_dh mat, char *filename);
 
 extern void Factor_dhPrintGraph(Factor_dh mat, char *filename);

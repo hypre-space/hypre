@@ -31,31 +31,31 @@
  *--------------------------------------------------------------------*/
 
 
-int 
-hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows, 
-                        hypre_IJAssumedPart *part, int myid)
+HYPRE_Int 
+hypre_LocateAssummedPartition(HYPRE_Int row_start, HYPRE_Int row_end, HYPRE_Int global_num_rows, 
+                        hypre_IJAssumedPart *part, HYPRE_Int myid)
 {  
 
-   int       i;
+   HYPRE_Int       i;
 
-   int       *contact_list;
-   int        contact_list_length, contact_list_storage;
+   HYPRE_Int       *contact_list;
+   HYPRE_Int        contact_list_length, contact_list_storage;
    
-   int        contact_row_start[2], contact_row_end[2], contact_ranges;
-   int        owner_start, owner_end;
-   int        tmp_row_start, tmp_row_end, complete;
+   HYPRE_Int        contact_row_start[2], contact_row_end[2], contact_ranges;
+   HYPRE_Int        owner_start, owner_end;
+   HYPRE_Int        tmp_row_start, tmp_row_end, complete;
 
-   int        locate_row_start[2], locate_ranges;
+   HYPRE_Int        locate_row_start[2], locate_ranges;
 
-   int        locate_row_count, rows_found;  
+   HYPRE_Int        locate_row_count, rows_found;  
  
-   int        tmp_range[2];
-   int       *si, *sortme;   
+   HYPRE_Int        tmp_range[2];
+   HYPRE_Int       *si, *sortme;   
 
-   const int  flag1 = 17;  
+   const HYPRE_Int  flag1 = 17;  
 
-   MPI_Request  *requests;
-   MPI_Status   status0, *statuses;
+   hypre_MPI_Request  *requests;
+   hypre_MPI_Status   status0, *statuses;
 
 
 
@@ -116,7 +116,7 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
      
    contact_list_length = 0;
    contact_list_storage = 5; 
-   contact_list = hypre_TAlloc(int, contact_list_storage*3); /*each contact needs 3 ints */
+   contact_list = hypre_TAlloc(HYPRE_Int, contact_list_storage*3); /*each contact needs 3 ints */
 
    for (i=0; i<contact_ranges; i++)
    {
@@ -134,7 +134,7 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
          {
             /*allocate more space*/
             contact_list_storage += 5;
-            contact_list = hypre_TReAlloc(contact_list, int, (contact_list_storage*3));
+            contact_list = hypre_TReAlloc(contact_list, HYPRE_Int, (contact_list_storage*3));
          }
          CONTACT(contact_list_length, 0) = owner_start;   /*proc #*/
          CONTACT(contact_list_length, 1) = contact_row_start[i];  /* start row */
@@ -164,7 +164,7 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
             {
                /*allocate more space*/
                contact_list_storage += 5;
-               contact_list = hypre_TReAlloc(contact_list, int, (contact_list_storage*3));
+               contact_list = hypre_TReAlloc(contact_list, HYPRE_Int, (contact_list_storage*3));
             }
 
 
@@ -177,14 +177,14 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
       }
    }
 
-   requests = hypre_CTAlloc(MPI_Request, contact_list_length);
-   statuses = hypre_CTAlloc(MPI_Status, contact_list_length);
+   requests = hypre_CTAlloc(hypre_MPI_Request, contact_list_length);
+   statuses = hypre_CTAlloc(hypre_MPI_Status, contact_list_length);
 
    /*send out messages */
    for (i=0; i< contact_list_length; i++) 
    {
-      MPI_Isend(&CONTACT(i,1) ,2, MPI_INT, CONTACT(i,0), flag1 , 
-                 MPI_COMM_WORLD, &requests[i]);
+      hypre_MPI_Isend(&CONTACT(i,1) ,2, HYPRE_MPI_INT, CONTACT(i,0), flag1 , 
+                 hypre_MPI_COMM_WORLD, &requests[i]);
    }
 
    /*-----------------------------------------------------------
@@ -263,21 +263,21 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
 
    while (rows_found != locate_row_count) {
   
-      MPI_Recv( tmp_range, 2 , MPI_INT, MPI_ANY_SOURCE, 
-                flag1 , MPI_COMM_WORLD, &status0);
+      hypre_MPI_Recv( tmp_range, 2 , HYPRE_MPI_INT, hypre_MPI_ANY_SOURCE, 
+                flag1 , hypre_MPI_COMM_WORLD, &status0);
      
       if (part->length==part->storage_length)
       {
 	part->storage_length+=10;
-        part->proc_list = hypre_TReAlloc(part->proc_list, int, part->storage_length);
-        part->row_start_list =   hypre_TReAlloc(part->row_start_list, int, part->storage_length);
-        part->row_end_list =   hypre_TReAlloc(part->row_end_list, int, part->storage_length);
+        part->proc_list = hypre_TReAlloc(part->proc_list, HYPRE_Int, part->storage_length);
+        part->row_start_list =   hypre_TReAlloc(part->row_start_list, HYPRE_Int, part->storage_length);
+        part->row_end_list =   hypre_TReAlloc(part->row_end_list, HYPRE_Int, part->storage_length);
 
       }
       part->row_start_list[part->length] = tmp_range[0];
       part->row_end_list[part->length] = tmp_range[1]; 
 
-      part->proc_list[part->length] = status0.MPI_SOURCE;
+      part->proc_list[part->length] = status0.hypre_MPI_SOURCE;
       rows_found += tmp_range[1]- tmp_range[0] + 1;
       
       part->length++;
@@ -285,8 +285,8 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
 
    /*In case the partition of the assumed partition is longish, 
      we would like to know the sorted order */
-   si= hypre_CTAlloc(int, part->length); 
-   sortme = hypre_CTAlloc(int, part->length); 
+   si= hypre_CTAlloc(HYPRE_Int, part->length); 
+   sortme = hypre_CTAlloc(HYPRE_Int, part->length); 
 
    for (i=0; i<part->length; i++) 
    {
@@ -297,7 +297,7 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
    part->sort_index = si;
 
   /*free the requests */
-   MPI_Waitall(contact_list_length, requests, 
+   hypre_MPI_Waitall(contact_list_length, requests, 
                     statuses);
 
    
@@ -323,14 +323,14 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
  *--------------------------------------------------------------------*/
 
 
-int
+HYPRE_Int
 hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix) 
 {
 
 
-   int global_num_cols;
-   int myid;
-   int  row_start=0, row_end=0, col_start = 0, col_end = 0;
+   HYPRE_Int global_num_cols;
+   HYPRE_Int myid;
+   HYPRE_Int  row_start=0, row_end=0, col_start = 0, col_end = 0;
 
    MPI_Comm   comm;
    
@@ -343,7 +343,7 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
    hypre_ParCSRMatrixGetLocalRange( matrix,
                                     &row_start, &row_end ,
                                     &col_start, &col_end );
-   MPI_Comm_rank(comm, &myid );
+   hypre_MPI_Comm_rank(comm, &myid );
 
    /* allocate space */
    apart = hypre_CTAlloc(hypre_IJAssumedPart, 1);
@@ -357,9 +357,9 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
     apart->length = 0;
     /*room for 10 owners of the assumed partition*/ 
     apart->storage_length = 10; /*need to be >=1 */ 
-    apart->proc_list = hypre_TAlloc(int, apart->storage_length);
-    apart->row_start_list =   hypre_TAlloc(int, apart->storage_length);
-    apart->row_end_list =   hypre_TAlloc(int, apart->storage_length);
+    apart->proc_list = hypre_TAlloc(HYPRE_Int, apart->storage_length);
+    apart->row_start_list =   hypre_TAlloc(HYPRE_Int, apart->storage_length);
+    apart->row_end_list =   hypre_TAlloc(HYPRE_Int, apart->storage_length);
 
 
     /* now we want to reconcile our actual partition with the assumed partition */
@@ -376,7 +376,7 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
 /*--------------------------------------------------------------------
  * hypre_ParCSRMatrixDestroyAssumedPartition
  *--------------------------------------------------------------------*/
-int 
+HYPRE_Int 
 hypre_ParCSRMatrixDestroyAssumedPartition(hypre_ParCSRMatrix *matrix )
 {
 
@@ -406,15 +406,15 @@ hypre_ParCSRMatrixDestroyAssumedPartition(hypre_ParCSRMatrix *matrix )
  *--------------------------------------------------------------------*/
 
 
-int
-hypre_GetAssumedPartitionProcFromRow( int row, int global_num_rows, int *proc_id)
+HYPRE_Int
+hypre_GetAssumedPartitionProcFromRow( HYPRE_Int row, HYPRE_Int global_num_rows, HYPRE_Int *proc_id)
 {
 
-   int     num_procs;
-   int     size, switch_row, extra;
+   HYPRE_Int     num_procs;
+   HYPRE_Int     size, switch_row, extra;
    
   
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
  
    /* j = floor[(row*p/N]  - this overflows*/
    /* *proc_id = (row*num_procs)/global_num_rows;*/
@@ -448,16 +448,16 @@ hypre_GetAssumedPartitionProcFromRow( int row, int global_num_rows, int *proc_id
  *--------------------------------------------------------------------*/
 
 
-int
-hypre_GetAssumedPartitionRowRange( int proc_id, int global_num_rows, 
-                             int *row_start, int* row_end) 
+HYPRE_Int
+hypre_GetAssumedPartitionRowRange( HYPRE_Int proc_id, HYPRE_Int global_num_rows, 
+                             HYPRE_Int *row_start, HYPRE_Int* row_end) 
 {
 
-   int    num_procs;
-   int    size, extra;
+   HYPRE_Int    num_procs;
+   HYPRE_Int    size, extra;
    
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
 
 
   /* this may look non-intuitive, but we have to be very careful that
@@ -493,14 +493,14 @@ hypre_GetAssumedPartitionRowRange( int proc_id, int global_num_rows,
  *--------------------------------------------------------------------*/
 
 
-int
+HYPRE_Int
 hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector) 
 {
 
 
-   int global_num;
-   int myid;
-   int  start=0, end=0;
+   HYPRE_Int global_num;
+   HYPRE_Int myid;
+   HYPRE_Int  start=0, end=0;
 
    MPI_Comm   comm;
    
@@ -513,7 +513,7 @@ hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector)
    start =  hypre_ParVectorFirstIndex(vector);
    end = hypre_ParVectorLastIndex(vector);
    
-   MPI_Comm_rank(comm, &myid );
+   hypre_MPI_Comm_rank(comm, &myid );
 
    /* allocate space */
    apart = hypre_CTAlloc(hypre_IJAssumedPart, 1);
@@ -527,9 +527,9 @@ hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector)
     apart->length = 0;
     /*room for 10 owners of the assumed partition*/ 
     apart->storage_length = 10; /*need to be >=1 */ 
-    apart->proc_list = hypre_TAlloc(int, apart->storage_length);
-    apart->row_start_list =   hypre_TAlloc(int, apart->storage_length);
-    apart->row_end_list =   hypre_TAlloc(int, apart->storage_length);
+    apart->proc_list = hypre_TAlloc(HYPRE_Int, apart->storage_length);
+    apart->row_start_list =   hypre_TAlloc(HYPRE_Int, apart->storage_length);
+    apart->row_end_list =   hypre_TAlloc(HYPRE_Int, apart->storage_length);
 
 
     /* now we want to reconcile our actual partition with the assumed partition */
@@ -546,7 +546,7 @@ hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector)
 /*--------------------------------------------------------------------
  * hypre_ParVectorDestroyAssumedPartition
  *--------------------------------------------------------------------*/
-int 
+HYPRE_Int 
 hypre_ParVectorDestroyAssumedPartition(hypre_ParVector *vector )
 {
 

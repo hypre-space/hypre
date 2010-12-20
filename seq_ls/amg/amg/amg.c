@@ -34,27 +34,27 @@ void  *port_data;
    FILE     *fp;
 
    /* setup params */
-   int      levmax;
-   int      ncg;
+   HYPRE_Int      levmax;
+   HYPRE_Int      ncg;
    double   ecg;
-   int      nwt;
+   HYPRE_Int      nwt;
    double   ewt;
-   int      nstr;
+   HYPRE_Int      nstr;
 
    /* solve params */
-   int      ncyc;
-   int     *mu;
-   int     *ntrlx;
-   int     *iprlx;
+   HYPRE_Int      ncyc;
+   HYPRE_Int     *mu;
+   HYPRE_Int     *ntrlx;
+   HYPRE_Int     *iprlx;
 
    /* output params */
-   int      ioutdat;
-   int      cycle_op_count;
+   HYPRE_Int      ioutdat;
+   HYPRE_Int      cycle_op_count;
 
    /* log file name */
    char    *log_file_name;
 
-   int      i;
+   HYPRE_Int      i;
 
 
    /*-----------------------------------------------------------------------
@@ -71,15 +71,15 @@ void  *port_data;
 
    /* solve params */
    ncyc  = 1020;
-   mu = hypre_CTAlloc(int, levmax);
+   mu = hypre_CTAlloc(HYPRE_Int, levmax);
    for (i = 0; i < levmax; i++)
       mu[i] = 1;
-   ntrlx = hypre_CTAlloc(int, 4);
+   ntrlx = hypre_CTAlloc(HYPRE_Int, 4);
    ntrlx[0] = 133;
    ntrlx[1] = 133;
    ntrlx[2] = 133;
    ntrlx[3] = 19;
-   iprlx = hypre_CTAlloc(int, 4);
+   iprlx = hypre_CTAlloc(HYPRE_Int, 4);
    iprlx[0] = 31;
    iprlx[1] = 31;
    iprlx[2] = 13;

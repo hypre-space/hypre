@@ -34,22 +34,22 @@
 /*---------------------------------------------------------------------
  * local functions
  *---------------------------------------------------------------------*/
-int setupFEProblem(LLNL_FEI_Impl *feiPtr);
-int readFERhs(int nElems, int elemNNodes, double *rhs);
-int readFEMatrix(int *nElemsOut, int *elemNNodesOut, int ***elemConnOut,
-           double ****elemStiffOut, int *startRowOut, int *endRowOut);
-int readFEMBC(int *nBCsOut, int **BCEqnOut, double ***alphaOut, 
+HYPRE_Int setupFEProblem(LLNL_FEI_Impl *feiPtr);
+HYPRE_Int readFERhs(HYPRE_Int nElems, HYPRE_Int elemNNodes, double *rhs);
+HYPRE_Int readFEMatrix(HYPRE_Int *nElemsOut, HYPRE_Int *elemNNodesOut, HYPRE_Int ***elemConnOut,
+           double ****elemStiffOut, HYPRE_Int *startRowOut, HYPRE_Int *endRowOut);
+HYPRE_Int readFEMBC(HYPRE_Int *nBCsOut, HYPRE_Int **BCEqnOut, double ***alphaOut, 
            double ***betaOut, double ***gammaOut);
-int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
-           int *partition, int *nSharedOut, int **sharedIDsOut, 
-           int **sharedLengsOut, int ***sharedProcsOut);
+HYPRE_Int composeSharedNodes(HYPRE_Int nElems, HYPRE_Int elemNNodes, HYPRE_Int **elemConn,
+           HYPRE_Int *partition, HYPRE_Int *nSharedOut, HYPRE_Int **sharedIDsOut, 
+           HYPRE_Int **sharedLengsOut, HYPRE_Int ***sharedProcsOut);
 
 /*---------------------------------------------------------------------
  * main 
  *---------------------------------------------------------------------*/
-int main(int argc, char *argv[])
+HYPRE_Int main(HYPRE_Int argc, char *argv[])
 {
-   int  nprocs, mypid, printUsage, argIndex, solverID=0, nParams, i, status;
+   HYPRE_Int  nprocs, mypid, printUsage, argIndex, solverID=0, nParams, i, status;
    char **paramStrings;
    LLNL_FEI_Impl *feiPtr;
 
@@ -57,9 +57,9 @@ int main(int argc, char *argv[])
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
-   MPI_Init(&argc, &argv);
-   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   hypre_MPI_Init(&argc, &argv);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nprocs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mypid);
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -83,15 +83,15 @@ int main(int argc, char *argv[])
 
    if ((printUsage) && (mypid == 0))
    {
-      printf("\n");
-      printf("Usage: %s [<options>]\n", argv[0]);
-      printf("\n");
-      printf("  -solver <ID>           : solver ID\n");
-      printf("       0=DS-PCG      1=ParaSails-PCG \n");
-      printf("       2=AMG-PCG     3=AMGSA-PCG \n");
-      printf("       4=DS-GMRES    5=AMG-GMRES \n");
-      printf("       6=AMGSA-GMRES 7=LLNL_FEI-CGDiag \n");
-      printf("\n");
+      hypre_printf("\n");
+      hypre_printf("Usage: %s [<options>]\n", argv[0]);
+      hypre_printf("\n");
+      hypre_printf("  -solver <ID>           : solver ID\n");
+      hypre_printf("       0=DS-PCG      1=ParaSails-PCG \n");
+      hypre_printf("       2=AMG-PCG     3=AMGSA-PCG \n");
+      hypre_printf("       4=DS-GMRES    5=AMG-GMRES \n");
+      hypre_printf("       6=AMGSA-GMRES 7=LLNL_FEI-CGDiag \n");
+      hypre_printf("\n");
       exit(1);
    }
 
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     * instantiate the finite element interface
     *-----------------------------------------------------------*/
 
-   feiPtr = new LLNL_FEI_Impl(MPI_COMM_WORLD);
+   feiPtr = new LLNL_FEI_Impl(hypre_MPI_COMM_WORLD);
    nParams = 18;
    paramStrings = new char*[nParams];
    for (i = 0; i < nParams; i++) paramStrings[i] = new char[100];
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     *-----------------------------------------------------------*/
 
    delete feiPtr;
-   MPI_Finalize();
+   hypre_MPI_Finalize();
 
    return (0);
 }
@@ -177,21 +177,21 @@ int main(int argc, char *argv[])
 /***************************************************************************
  * set up the finite element problem
  *--------------------------------------------------------------------------*/
-int setupFEProblem(LLNL_FEI_Impl *feiPtr)
+HYPRE_Int setupFEProblem(LLNL_FEI_Impl *feiPtr)
 {
-   int    nprocs, mypid, nElems, elemNNodes, **elemConn, startRow, endRow;
-   int    *partition, *iArray, i, j, nBCs, *BCEqn, nFields, *fieldSizes; 
-   int    *fieldIDs, elemBlkID, elemDOF, elemFormat, interleave;
-   int    *nodeNFields, **nodeFieldIDs, nShared, *sharedIDs, *sharedLengs;
-   int    **sharedProcs;
+   HYPRE_Int    nprocs, mypid, nElems, elemNNodes, **elemConn, startRow, endRow;
+   HYPRE_Int    *partition, *iArray, i, j, nBCs, *BCEqn, nFields, *fieldSizes; 
+   HYPRE_Int    *fieldIDs, elemBlkID, elemDOF, elemFormat, interleave;
+   HYPRE_Int    *nodeNFields, **nodeFieldIDs, nShared, *sharedIDs, *sharedLengs;
+   HYPRE_Int    **sharedProcs;
    double ***elemStiff, **alpha, **beta, **gamma, *elemLoad;
 
    /*-----------------------------------------------------------
     * Initialize parallel machine information
     *-----------------------------------------------------------*/
 
-   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nprocs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mypid);
 
    /*-----------------------------------------------------------
     * read finite element connectivities and stiffness matrices
@@ -205,11 +205,11 @@ int setupFEProblem(LLNL_FEI_Impl *feiPtr)
     * create a processor partition table
     *-----------------------------------------------------------*/
 
-   partition = new int[nprocs];
-   iArray = new int[nprocs];
+   partition = new HYPRE_Int[nprocs];
+   iArray = new HYPRE_Int[nprocs];
    for (i = 0; i < nprocs; i++) iArray[i] = 0;
    iArray[mypid] = endRow - startRow + 1;
-   MPI_Allreduce(iArray,partition,nprocs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+   hypre_MPI_Allreduce(iArray,partition,nprocs,HYPRE_MPI_INT,hypre_MPI_SUM,hypre_MPI_COMM_WORLD);
    for (i = 1; i < nprocs; i++) partition[i] += partition[i-1];
    delete [] iArray;
 
@@ -224,20 +224,20 @@ int setupFEProblem(LLNL_FEI_Impl *feiPtr)
     *-----------------------------------------------------------*/
 
    nFields = 1;
-   fieldSizes = new int[1];
+   fieldSizes = new HYPRE_Int[1];
    fieldSizes[0] = 1;
-   fieldIDs = new int[1];
+   fieldIDs = new HYPRE_Int[1];
    fieldIDs[0] = 0;
    elemBlkID = 0;
    elemDOF = 0;
    elemFormat = 0;
    interleave = 0;
-   nodeNFields = new int[elemNNodes];
+   nodeNFields = new HYPRE_Int[elemNNodes];
    for (i = 0; i < elemNNodes; i++) nodeNFields[i] = 1; 
-   nodeFieldIDs = new int*[elemNNodes];
+   nodeFieldIDs = new HYPRE_Int*[elemNNodes];
    for (i = 0; i < elemNNodes; i++) 
    {
-      nodeFieldIDs[i] = new int[1]; 
+      nodeFieldIDs[i] = new HYPRE_Int[1]; 
       nodeFieldIDs[i][0] = 0;
    }
 
@@ -307,36 +307,36 @@ int setupFEProblem(LLNL_FEI_Impl *feiPtr)
 /***************************************************************************
  * read finite element matrices
  *--------------------------------------------------------------------------*/
-int readFEMatrix(int *nElemsOut, int *elemNNodesOut, int ***elemConnOut,
-                 double ****elemStiffOut, int *startRowOut, int *endRowOut)
+HYPRE_Int readFEMatrix(HYPRE_Int *nElemsOut, HYPRE_Int *elemNNodesOut, HYPRE_Int ***elemConnOut,
+                 double ****elemStiffOut, HYPRE_Int *startRowOut, HYPRE_Int *endRowOut)
 {
-   int    mypid, nElems, elemNNodes, startRow, endRow, **elemConn, i, j, k;
+   HYPRE_Int    mypid, nElems, elemNNodes, startRow, endRow, **elemConn, i, j, k;
    double ***elemStiff;
    char   *paramString;
    FILE   *fp;
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mypid);
    paramString = new char[100];
-   sprintf(paramString, "SFEI.%d", mypid);
+   hypre_sprintf(paramString, "SFEI.%d", mypid);
    fp = fopen(paramString, "r");
    if (fp == NULL)
    {
-      printf("%3d : feiTest ERROR - sfei file does not exist.\n",mypid);
+      hypre_printf("%3d : feiTest ERROR - sfei file does not exist.\n",mypid);
       exit(1);
    }
-   fscanf(fp,"%d %d %d %d", &nElems, &elemNNodes, &startRow, &endRow);
-   elemConn = new int*[nElems];
+   hypre_fscanf(fp,"%d %d %d %d", &nElems, &elemNNodes, &startRow, &endRow);
+   elemConn = new HYPRE_Int*[nElems];
    elemStiff = new double**[nElems];
    for (i = 0; i < nElems; i++) 
    {
-      elemConn[i] = new int[elemNNodes];
+      elemConn[i] = new HYPRE_Int[elemNNodes];
       elemStiff[i] = new double*[elemNNodes];
-      for (j = 0; j < elemNNodes; j++) fscanf(fp,"%d", &(elemConn[i][j]));
+      for (j = 0; j < elemNNodes; j++) hypre_fscanf(fp,"%d", &(elemConn[i][j]));
       for (j = 0; j < elemNNodes; j++) 
       {
          elemStiff[i][j] = new double[elemNNodes];
          for (k = 0; k < elemNNodes; k++) 
-            fscanf(fp,"%lg", &(elemStiff[i][j][k]));
+            hypre_fscanf(fp,"%lg", &(elemStiff[i][j][k]));
       }
    }
    fclose(fp);
@@ -353,23 +353,23 @@ int readFEMatrix(int *nElemsOut, int *elemNNodesOut, int ***elemConnOut,
 /***************************************************************************
  * read finite element right hand sides
  *--------------------------------------------------------------------------*/
-int readFERhs(int nElems, int elemNNodes, double *elemLoad)
+HYPRE_Int readFERhs(HYPRE_Int nElems, HYPRE_Int elemNNodes, double *elemLoad)
 {
-   int    mypid, length, i;
+   HYPRE_Int    mypid, length, i;
    char   *paramString;
    FILE   *fp;
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mypid);
    paramString = new char[100];
-   sprintf(paramString, "RHS.%d", mypid);
+   hypre_sprintf(paramString, "RHS.%d", mypid);
    fp = fopen(paramString, "r");
    if (fp == NULL)
    {
-      printf("%3d : feiTest ERROR - rhs file does not exist.\n",mypid);
+      hypre_printf("%3d : feiTest ERROR - rhs file does not exist.\n",mypid);
       exit(1);
    }
    length = nElems * elemNNodes;
-   for (i = 0; i < length; i++) fscanf(fp,"%lg",&(elemLoad[i]));
+   for (i = 0; i < length; i++) hypre_fscanf(fp,"%lg",&(elemLoad[i]));
    fclose(fp);
    delete [] paramString;
    return 0;
@@ -378,25 +378,25 @@ int readFERhs(int nElems, int elemNNodes, double *elemLoad)
 /***************************************************************************
  * read BC from file
  *--------------------------------------------------------------------------*/
-int readFEMBC(int *nBCsOut, int **BCEqnOut, double ***alphaOut, 
+HYPRE_Int readFEMBC(HYPRE_Int *nBCsOut, HYPRE_Int **BCEqnOut, double ***alphaOut, 
               double ***betaOut, double ***gammaOut)
 {
-   int    mypid, nBCs=0, *BCEqn, i;
+   HYPRE_Int    mypid, nBCs=0, *BCEqn, i;
    double **alpha, **beta, **gamma;
    char   *paramString;
    FILE   *fp;
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mypid);
    paramString = new char[100];
-   sprintf(paramString, "BC.%d", mypid);
+   hypre_sprintf(paramString, "BC.%d", mypid);
    fp = fopen(paramString, "r");
    if (fp == NULL)
    {
-      printf("%3d : feiTest ERROR - BC file does not exist.\n",mypid);
+      hypre_printf("%3d : feiTest ERROR - BC file does not exist.\n",mypid);
       exit(1);
    }
-   fscanf(fp,"%d", &nBCs);
-   BCEqn = new int[nBCs];
+   hypre_fscanf(fp,"%d", &nBCs);
+   BCEqn = new HYPRE_Int[nBCs];
    alpha = new double*[nBCs];
    beta  = new double*[nBCs];
    gamma = new double*[nBCs];
@@ -407,7 +407,7 @@ int readFEMBC(int *nBCsOut, int **BCEqnOut, double ***alphaOut,
       gamma[i] = new double[1];
    }
    for (i = 0; i < nBCs; i++) 
-      fscanf(fp,"%d %lg %lg %lg",&(BCEqn[i]),&(alpha[i][0]),
+      hypre_fscanf(fp,"%d %lg %lg %lg",&(BCEqn[i]),&(alpha[i][0]),
              &(beta[i][0]),&(gamma[i][0]));
    fclose(fp);
    delete [] paramString;
@@ -423,20 +423,20 @@ int readFEMBC(int *nBCsOut, int **BCEqnOut, double ***alphaOut,
  * compose shared node list
  *--------------------------------------------------------------------------*/
 
-int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
-                       int *partition, int *nSharedOut, int **sharedIDsOut, 
-                       int **sharedLengsOut, int ***sharedProcsOut)
+HYPRE_Int composeSharedNodes(HYPRE_Int nElems, HYPRE_Int elemNNodes, HYPRE_Int **elemConn,
+                       HYPRE_Int *partition, HYPRE_Int *nSharedOut, HYPRE_Int **sharedIDsOut, 
+                       HYPRE_Int **sharedLengsOut, HYPRE_Int ***sharedProcsOut)
 {
-   int nShared, i, j, index, startRow, endRow, mypid, nprocs, ncnt;
-   int *sharedIDs, *iArray1, *iArray2, **iRecvBufs, **iSendBufs;
-   int nRecvs, *recvProcs, *recvLengs, nSends, *sendProcs, *sendLengs;
-   MPI_Request *mpiRequests;
-   MPI_Status  mpiStatus;
+   HYPRE_Int nShared, i, j, index, startRow, endRow, mypid, nprocs, ncnt;
+   HYPRE_Int *sharedIDs, *iArray1, *iArray2, **iRecvBufs, **iSendBufs;
+   HYPRE_Int nRecvs, *recvProcs, *recvLengs, nSends, *sendProcs, *sendLengs;
+   hypre_MPI_Request *mpiRequests;
+   hypre_MPI_Status  mpiStatus;
 
    /* --- get machine and matrix information --- */
 
-   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nprocs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mypid);
    if (mypid == 0) startRow = 0;
    else            startRow = partition[mypid-1];
    endRow = partition[mypid] - 1;
@@ -458,7 +458,7 @@ int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
    if (nShared <= 0) sharedIDs = NULL;
    else
    {
-      sharedIDs = new int[nShared];
+      sharedIDs = new HYPRE_Int[nShared];
       nShared = 0;
       for (i = 0; i < nElems; i++)
       {
@@ -481,8 +481,8 @@ int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
 
    /* --- tabulate recv processors and send processors --- */
 
-   iArray1 = new int[nprocs];
-   iArray2 = new int[nprocs];
+   iArray1 = new HYPRE_Int[nprocs];
+   iArray2 = new HYPRE_Int[nprocs];
    for (i = 0; i < nprocs; i++) iArray1[i] = 0;
    for (i = 0; i < nShared; i++)
    {
@@ -490,7 +490,7 @@ int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
          if (sharedIDs[i] < partition[j]) break;
       if (j != mypid) iArray1[j] = 1;
    } 
-   MPI_Allreduce(iArray1,iArray2,nprocs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+   hypre_MPI_Allreduce(iArray1,iArray2,nprocs,HYPRE_MPI_INT,hypre_MPI_SUM,hypre_MPI_COMM_WORLD);
    for (i = 0; i < nprocs; i++) iArray1[i] = 0;
    for (i = 0; i < nShared; i++)
    {
@@ -504,8 +504,8 @@ int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
       if (iArray1[i] != 0) nSends++;
    if (nSends > 0)
    {
-      sendLengs = new int[nSends];
-      sendProcs = new int[nSends];
+      sendLengs = new HYPRE_Int[nSends];
+      sendProcs = new HYPRE_Int[nSends];
       nSends = 0;
       for (i = 0; i < nprocs; i++)
       {
@@ -519,36 +519,36 @@ int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
    nRecvs = iArray2[mypid];
    if (nRecvs > 0)
    {
-      recvLengs = new int[nRecvs];
-      recvProcs = new int[nRecvs];
-      mpiRequests = new MPI_Request[nRecvs];
+      recvLengs = new HYPRE_Int[nRecvs];
+      recvProcs = new HYPRE_Int[nRecvs];
+      mpiRequests = new hypre_MPI_Request[nRecvs];
    }
 
    for (i = 0; i < nRecvs; i++)
-      MPI_Irecv(&(recvLengs[i]), 1, MPI_INT, MPI_ANY_SOURCE, 12233, 
-                MPI_COMM_WORLD, &(mpiRequests[i]));
+      hypre_MPI_Irecv(&(recvLengs[i]), 1, HYPRE_MPI_INT, hypre_MPI_ANY_SOURCE, 12233, 
+                hypre_MPI_COMM_WORLD, &(mpiRequests[i]));
    for (i = 0; i < nSends; i++)
-      MPI_Send(&(sendLengs[i]), 1, MPI_INT, sendProcs[i], 12233, 
-                MPI_COMM_WORLD);
+      hypre_MPI_Send(&(sendLengs[i]), 1, HYPRE_MPI_INT, sendProcs[i], 12233, 
+                hypre_MPI_COMM_WORLD);
    for (i = 0; i < nRecvs; i++)
    {
-      MPI_Wait(&(mpiRequests[i]), &mpiStatus);
-      recvProcs[i] = mpiStatus.MPI_SOURCE;
+      hypre_MPI_Wait(&(mpiRequests[i]), &mpiStatus);
+      recvProcs[i] = mpiStatus.hypre_MPI_SOURCE;
    }
 
    /* get the shared nodes */
 
-   if (nRecvs > 0) iRecvBufs = new int*[nRecvs];
+   if (nRecvs > 0) iRecvBufs = new HYPRE_Int*[nRecvs];
    for (i = 0; i < nRecvs; i++)
    {
-      iRecvBufs[i] = new int[recvLengs[i]];
-      MPI_Irecv(iRecvBufs[i], recvLengs[i], MPI_INT, recvProcs[i], 12234, 
-                MPI_COMM_WORLD, &(mpiRequests[i]));
+      iRecvBufs[i] = new HYPRE_Int[recvLengs[i]];
+      hypre_MPI_Irecv(iRecvBufs[i], recvLengs[i], HYPRE_MPI_INT, recvProcs[i], 12234, 
+                hypre_MPI_COMM_WORLD, &(mpiRequests[i]));
    }
-   if (nSends > 0) iSendBufs = new int*[nSends];
+   if (nSends > 0) iSendBufs = new HYPRE_Int*[nSends];
    for (i = 0; i < nSends; i++)
    {
-      iSendBufs[i] = new int[sendLengs[i]];
+      iSendBufs[i] = new HYPRE_Int[sendLengs[i]];
       sendLengs[i] = 0;
    }
    for (i = 0; i < nShared; i++)
@@ -558,19 +558,19 @@ int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
       iSendBufs[j][sendLengs[j]++] = sharedIDs[i];
    }
    for (i = 0; i < nSends; i++)
-      MPI_Send(iSendBufs[i],sendLengs[i],MPI_INT,sendProcs[i],12234,
-               MPI_COMM_WORLD);
-   for (i = 0; i < nRecvs; i++) MPI_Wait(&(mpiRequests[i]), &mpiStatus);
+      hypre_MPI_Send(iSendBufs[i],sendLengs[i],HYPRE_MPI_INT,sendProcs[i],12234,
+               hypre_MPI_COMM_WORLD);
+   for (i = 0; i < nRecvs; i++) hypre_MPI_Wait(&(mpiRequests[i]), &mpiStatus);
 
    /* --- finally construct the shared information --- */
 
    ncnt = nShared;
    for (i = 0; i < nRecvs; i++) ncnt += recvLengs[i];
    (*nSharedOut) = ncnt;
-   (*sharedIDsOut) = new int[ncnt];
-   (*sharedLengsOut) = new int[ncnt];
-   (*sharedProcsOut) = new int*[ncnt];
-   for (i = 0; i < ncnt; i++) (*sharedProcsOut)[i] = new int[2];
+   (*sharedIDsOut) = new HYPRE_Int[ncnt];
+   (*sharedLengsOut) = new HYPRE_Int[ncnt];
+   (*sharedProcsOut) = new HYPRE_Int*[ncnt];
+   for (i = 0; i < ncnt; i++) (*sharedProcsOut)[i] = new HYPRE_Int[2];
    for (i = 0; i < nShared; i++)
    {
       (*sharedIDsOut)[i] = sharedIDs[i];

@@ -2,7 +2,7 @@
 #include "hypre_blas.h"
 #include "f2c.h"
 
-/* Subroutine */ int dtrmv_(char *uplo, char *trans, char *diag, integer *n, 
+/* Subroutine */ HYPRE_Int dtrmv_(char *uplo, char *trans, char *diag, integer *n, 
 	doublereal *a, integer *lda, doublereal *x, integer *incx)
 {
     /* System generated locals */
@@ -13,7 +13,7 @@
     static integer i__, j;
     extern logical hypre_lsame_(char *, char *);
     static integer ix, jx, kx;
-    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
     static logical nounit;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 /*  Purpose   

@@ -23,16 +23,16 @@
  * Data is double precision data.
  *--------------------------------------------------------------------------*/
  
-int hypre_DoubleQuickSplit(double *values, int *indices, 
-                           int list_length, int NumberKept )
+HYPRE_Int hypre_DoubleQuickSplit(double *values, HYPRE_Int *indices, 
+                           HYPRE_Int list_length, HYPRE_Int NumberKept )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    double interchange_value;
    double abskey;
-   int interchange_index;
-   int first, last;
-   int mid, j;
-   int done;
+   HYPRE_Int interchange_index;
+   HYPRE_Int first, last;
+   HYPRE_Int mid, j;
+   HYPRE_Int done;
 
    first = 0;
    last = list_length-1;

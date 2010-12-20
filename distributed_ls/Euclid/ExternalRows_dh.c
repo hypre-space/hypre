@@ -37,7 +37,7 @@ void ExternalRows_dhCreate(ExternalRows_dh *er)
     SET_V_ERROR("MAX_MPI_TASKS is too small; change, then recompile!");
   }
 
-  { int i;
+  { HYPRE_Int i;
     for (i=0; i<MAX_MPI_TASKS; ++i) {
       tmp->rcv_row_lengths[i] = NULL;
       tmp->rcv_row_numbers[i] = NULL;
@@ -64,7 +64,7 @@ void ExternalRows_dhCreate(ExternalRows_dh *er)
 void ExternalRows_dhDestroy(ExternalRows_dh er)
 {
   START_FUNC_DH
-  int i;
+  HYPRE_Int i;
 
   for (i=0; i<MAX_MPI_TASKS; ++i) {
     if (er->rcv_row_lengths[i] != NULL) {
@@ -107,8 +107,8 @@ void ExternalRows_dhInit(ExternalRows_dh er, Euclid_dh ctx)
 
 #undef __FUNC__
 #define __FUNC__ "ExternalRows_dhGetRow"
-void ExternalRows_dhGetRow(ExternalRows_dh er, int globalRow,
-                            int *len, int **cval, int **fill, REAL_DH **aval)
+void ExternalRows_dhGetRow(ExternalRows_dh er, HYPRE_Int globalRow,
+                            HYPRE_Int *len, HYPRE_Int **cval, HYPRE_Int **fill, REAL_DH **aval)
 {
   START_FUNC_DH
   if (er->rowLookup == NULL) {
@@ -185,50 +185,50 @@ void ExternalRows_dhRecvRows(ExternalRows_dh er)
 void rcv_ext_storage_private(ExternalRows_dh er)
 {
   START_FUNC_DH
-  int i; 
-  int loCount = er->sg->loCount, *loNabors = er->sg->loNabors;
-  int *rcv_row_counts = er->rcv_row_counts;
-  int *rcv_nz_counts = er->rcv_nz_counts;
-  int **lengths = er->rcv_row_lengths, **numbers = er->rcv_row_numbers;
+  HYPRE_Int i; 
+  HYPRE_Int loCount = er->sg->loCount, *loNabors = er->sg->loNabors;
+  HYPRE_Int *rcv_row_counts = er->rcv_row_counts;
+  HYPRE_Int *rcv_nz_counts = er->rcv_nz_counts;
+  HYPRE_Int **lengths = er->rcv_row_lengths, **numbers = er->rcv_row_numbers;
   bool debug = false;
 
   if (logFile != NULL && er->debug) debug = true;
 
   /* get number of rows, and total nonzeros, that each lo-nabor will send */
   for (i=0; i<loCount; ++i) {
-    int nabor = loNabors[i];
-    MPI_Irecv(rcv_row_counts+i, 1, MPI_INT, nabor, ROW_CT_TAG, comm_dh, er->req1+i);
-    MPI_Irecv(rcv_nz_counts+i,  1, MPI_INT, nabor, NZ_CT_TAG,  comm_dh, er->req2+i);
+    HYPRE_Int nabor = loNabors[i];
+    hypre_MPI_Irecv(rcv_row_counts+i, 1, HYPRE_MPI_INT, nabor, ROW_CT_TAG, comm_dh, er->req1+i);
+    hypre_MPI_Irecv(rcv_nz_counts+i,  1, HYPRE_MPI_INT, nabor, NZ_CT_TAG,  comm_dh, er->req2+i);
   }    
-  MPI_Waitall(loCount, er->req1, er->status);
-  MPI_Waitall(loCount, er->req2, er->status);
+  hypre_MPI_Waitall(loCount, er->req1, er->status);
+  hypre_MPI_Waitall(loCount, er->req2, er->status);
 
   if (debug) {
-    fprintf(logFile, "\nEXR rcv_ext_storage_private:: <nabor,rowCount,nzCount>\nEXR ");
+    hypre_fprintf(logFile, "\nEXR rcv_ext_storage_private:: <nabor,rowCount,nzCount>\nEXR ");
     for (i=0; i<loCount; ++i) {
-      fprintf(logFile, "<%i,%i,%i> ", loNabors[i], rcv_row_counts[i], rcv_nz_counts[i]);
+      hypre_fprintf(logFile, "<%i,%i,%i> ", loNabors[i], rcv_row_counts[i], rcv_nz_counts[i]);
     }
   }
 
   /* get lengths and global number of each row to be received */
   for (i=0; i<loCount; ++i) {
-    int nz = rcv_nz_counts[i];
-    int nabor = loNabors[i];
-    lengths[i] =  (int*)MALLOC_DH(nz*sizeof(int)); CHECK_V_ERROR;
-    numbers[i] =  (int*)MALLOC_DH(nz*sizeof(int)); CHECK_V_ERROR;
-    MPI_Irecv(lengths[i], nz, MPI_INT, nabor, ROW_LENGTH_TAG, comm_dh, er->req1+i);
-    MPI_Irecv(numbers[i], nz, MPI_INT, nabor, ROW_NUMBER_TAG, comm_dh, er->req2+i);
+    HYPRE_Int nz = rcv_nz_counts[i];
+    HYPRE_Int nabor = loNabors[i];
+    lengths[i] =  (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    numbers[i] =  (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    hypre_MPI_Irecv(lengths[i], nz, HYPRE_MPI_INT, nabor, ROW_LENGTH_TAG, comm_dh, er->req1+i);
+    hypre_MPI_Irecv(numbers[i], nz, HYPRE_MPI_INT, nabor, ROW_NUMBER_TAG, comm_dh, er->req2+i);
   }
-  MPI_Waitall(loCount, er->req1, er->status);
-  MPI_Waitall(loCount, er->req2, er->status);
+  hypre_MPI_Waitall(loCount, er->req1, er->status);
+  hypre_MPI_Waitall(loCount, er->req2, er->status);
 
   if (debug) {
-    int j, nz;
+    HYPRE_Int j, nz;
     for (i=0; i<loCount; ++i) { 
-      fprintf(logFile, "\nEXR rows <number,length> to be received from P_%i\nEXR ", loNabors[i]);
+      hypre_fprintf(logFile, "\nEXR rows <number,length> to be received from P_%i\nEXR ", loNabors[i]);
       nz = rcv_row_counts[i];
-      for (j=0; j<nz; ++j) fprintf(logFile, "<%i,%i> ", numbers[i][j], lengths[i][j]);
-      fprintf(logFile, "\n");
+      for (j=0; j<nz; ++j) hypre_fprintf(logFile, "<%i,%i> ", numbers[i][j], lengths[i][j]);
+      hypre_fprintf(logFile, "\n");
     }
   }
 
@@ -241,16 +241,16 @@ void rcv_ext_storage_private(ExternalRows_dh er)
 void allocate_ext_row_storage_private(ExternalRows_dh er)
 {
   START_FUNC_DH
-  int i, nz = 0;
-  int loCount = er->sg->loCount;
-  int *rcv_nz_counts = er->rcv_nz_counts;
+  HYPRE_Int i, nz = 0;
+  HYPRE_Int loCount = er->sg->loCount;
+  HYPRE_Int *rcv_nz_counts = er->rcv_nz_counts;
 
   /* count total number of nonzeros to be received */
   for (i=0; i<loCount; ++i) nz += rcv_nz_counts[i];
 
   /* allocate buffers */
-  er->cvalExt = (int*)MALLOC_DH(nz*sizeof(int)); CHECK_V_ERROR;
-  er->fillExt = (int*)MALLOC_DH(nz*sizeof(int)); CHECK_V_ERROR;
+  er->cvalExt = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  er->fillExt = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   er->avalExt = (REAL_DH*)MALLOC_DH(nz*sizeof(REAL_DH)); CHECK_V_ERROR;
   END_FUNC_DH
 }
@@ -260,15 +260,15 @@ void allocate_ext_row_storage_private(ExternalRows_dh er)
 void build_hash_table_private(ExternalRows_dh er)
 {
   START_FUNC_DH
-  int loCount = er->sg->loCount;
-  int i, j, offset, rowCt = 0;
+  HYPRE_Int loCount = er->sg->loCount;
+  HYPRE_Int i, j, offset, rowCt = 0;
   Hash_dh table;
   HashData record;
-  int *extRowCval = er->cvalExt, *extRowFill = er->fillExt;
+  HYPRE_Int *extRowCval = er->cvalExt, *extRowFill = er->fillExt;
   REAL_DH *extRowAval = er->avalExt;
-  int *rcv_row_counts = er->rcv_row_counts;
-  int **rcv_row_numbers = er->rcv_row_numbers;
-  int **rcv_row_lengths = er->rcv_row_lengths;
+  HYPRE_Int *rcv_row_counts = er->rcv_row_counts;
+  HYPRE_Int **rcv_row_numbers = er->rcv_row_numbers;
+  HYPRE_Int **rcv_row_lengths = er->rcv_row_lengths;
 
   /* count total number of rows to be received */
   for (i=0; i<loCount; ++i) rowCt += rcv_row_counts[i];
@@ -282,14 +282,14 @@ void build_hash_table_private(ExternalRows_dh er)
   for (i=0; i<loCount; ++i) { 
 
     /* number of rows to be received from nabor(i) */
-    int rowCount = rcv_row_counts[i]; 
+    HYPRE_Int rowCount = rcv_row_counts[i]; 
 
     /* loop over rows to be received from nabor(i) */
     for (j=0; j<rowCount; ++j) { 
 
       /* insert a record to locate row(j) in the hash table */
-      int row = rcv_row_numbers[i][j];
-      int rowLength = rcv_row_lengths[i][j];
+      HYPRE_Int row = rcv_row_numbers[i][j];
+      HYPRE_Int rowLength = rcv_row_lengths[i][j];
       record.iData     = rowLength;
       record.iDataPtr  = extRowCval + offset;
       record.iDataPtr2 = extRowFill + offset;
@@ -306,10 +306,10 @@ void build_hash_table_private(ExternalRows_dh er)
 void rcv_external_rows_private(ExternalRows_dh er)
 {
   START_FUNC_DH
-  int *rcv_nz_counts = er->rcv_nz_counts;
-  int i, loCount = er->sg->loCount, *loNabors = er->sg->loNabors;
-  int nabor, nz = 0, offset = 0;
-  int *extRowCval = er->cvalExt, *extRowFill = er->fillExt;
+  HYPRE_Int *rcv_nz_counts = er->rcv_nz_counts;
+  HYPRE_Int i, loCount = er->sg->loCount, *loNabors = er->sg->loNabors;
+  HYPRE_Int nabor, nz = 0, offset = 0;
+  HYPRE_Int *extRowCval = er->cvalExt, *extRowFill = er->fillExt;
   double *extRowAval = er->avalExt;
 
   /* start receives of external rows */
@@ -317,16 +317,16 @@ void rcv_external_rows_private(ExternalRows_dh er)
   for (i=0; i<loCount; ++i) {
     nabor = loNabors[i];
     nz = rcv_nz_counts[i];
-    MPI_Irecv(extRowCval+offset, nz, MPI_INT,    nabor, CVAL_TAG, comm_dh, er->req1+i);
-    MPI_Irecv(extRowFill+offset, nz, MPI_INT,    nabor, FILL_TAG, comm_dh, er->req2+i);
-    MPI_Irecv(extRowAval+offset, nz, MPI_DOUBLE, nabor, AVAL_TAG, comm_dh, er->req3+i);
+    hypre_MPI_Irecv(extRowCval+offset, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, comm_dh, er->req1+i);
+    hypre_MPI_Irecv(extRowFill+offset, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, comm_dh, er->req2+i);
+    hypre_MPI_Irecv(extRowAval+offset, nz, hypre_MPI_DOUBLE, nabor, AVAL_TAG, comm_dh, er->req3+i);
     offset += nz;
   }
 
   /* wait for external rows to arrive */
-  MPI_Waitall(loCount, er->req1, er->status);
-  MPI_Waitall(loCount, er->req2, er->status);
-  MPI_Waitall(loCount, er->req3, er->status);
+  hypre_MPI_Waitall(loCount, er->req1, er->status);
+  hypre_MPI_Waitall(loCount, er->req2, er->status);
+  hypre_MPI_Waitall(loCount, er->req3, er->status);
   END_FUNC_DH
 }
 
@@ -337,50 +337,50 @@ void print_received_rows_private(ExternalRows_dh er)
 {
   START_FUNC_DH
   bool noValues = (Parser_dhHasSwitch(parser_dh, "-noValues"));
-  int i, j, k, rwCt, idx = 0, nabor;
-  int loCount = er->sg->loCount, *loNabors = er->sg->loNabors;
-  int n = er->F->n;
+  HYPRE_Int i, j, k, rwCt, idx = 0, nabor;
+  HYPRE_Int loCount = er->sg->loCount, *loNabors = er->sg->loNabors;
+  HYPRE_Int n = er->F->n;
 
-  fprintf(logFile, "\nEXR ================= received rows, printed from buffers ==============\n");
+  hypre_fprintf(logFile, "\nEXR ================= received rows, printed from buffers ==============\n");
 
   /* loop over nabors from whom we received rows */
   for (i=0; i<loCount; ++i) {
     rwCt = er->rcv_row_counts[i];
     nabor = loNabors[i];
-    fprintf(logFile, "\nEXR Rows received from P_%i:\n", nabor);
+    hypre_fprintf(logFile, "\nEXR Rows received from P_%i:\n", nabor);
 
     /* loop over each row to be received from this nabor */
     for (j=0; j<rwCt; ++j) {  
-      int rowNum = er->rcv_row_numbers[i][j];  
-      int rowLen  = er->rcv_row_lengths[i][j];
-      fprintf(logFile, "EXR %i :: ", 1+rowNum);
+      HYPRE_Int rowNum = er->rcv_row_numbers[i][j];  
+      HYPRE_Int rowLen  = er->rcv_row_lengths[i][j];
+      hypre_fprintf(logFile, "EXR %i :: ", 1+rowNum);
       for (k=0; k<rowLen; ++k) {
         if (noValues) {
-          fprintf(logFile, "%i,%i ; ", er->cvalExt[idx], er->fillExt[idx]);
+          hypre_fprintf(logFile, "%i,%i ; ", er->cvalExt[idx], er->fillExt[idx]);
         } else {
-          fprintf(logFile, "%i,%i,%g ; ", er->cvalExt[idx], er->fillExt[idx], er->avalExt[idx]);
+          hypre_fprintf(logFile, "%i,%i,%g ; ", er->cvalExt[idx], er->fillExt[idx], er->avalExt[idx]);
         }
         ++idx;
       }
-      fprintf(logFile, "\n");
+      hypre_fprintf(logFile, "\n");
     }
   }
 
-  fprintf(logFile, "\nEXR =============== received rows, printed from hash table =============\n");
+  hypre_fprintf(logFile, "\nEXR =============== received rows, printed from hash table =============\n");
   for (i=0; i<n; ++i) {
-    int len, *cval, *fill;
+    HYPRE_Int len, *cval, *fill;
     REAL_DH *aval;
     ExternalRows_dhGetRow(er, i, &len, &cval, &fill, &aval); CHECK_V_ERROR;
     if (len > 0) {
-      fprintf(logFile, "EXR %i :: ", i+1);
+      hypre_fprintf(logFile, "EXR %i :: ", i+1);
       for (j=0; j<len; ++j) {
         if (noValues) {
-          fprintf(logFile, "%i,%i ; ", cval[j], fill[j]);
+          hypre_fprintf(logFile, "%i,%i ; ", cval[j], fill[j]);
         } else {
-          fprintf(logFile, "%i,%i,%g ; ", cval[j], fill[j], aval[j]);
+          hypre_fprintf(logFile, "%i,%i,%g ; ", cval[j], fill[j], aval[j]);
         }
       }
-      fprintf(logFile, "\n");
+      hypre_fprintf(logFile, "\n");
     }
   }
 
@@ -420,41 +420,41 @@ void ExternalRows_dhSendRows(ExternalRows_dh er)
 void send_ext_storage_private(ExternalRows_dh er)
 {
   START_FUNC_DH
-  int nz, i, j;
-  int *nzCounts, *nzNumbers;
-  int hiCount = er->sg->hiCount, *hiNabors = er->sg->hiNabors;
-  int *rp = er->F->rp, *diag = er->F->diag;
-  int m = er->F->m;
-  int beg_row = er->F->beg_row;
-  int rowCount = er->F->bdry_count;  /* number of boundary rows */
-  int first_bdry = er->F->first_bdry; 
+  HYPRE_Int nz, i, j;
+  HYPRE_Int *nzCounts, *nzNumbers;
+  HYPRE_Int hiCount = er->sg->hiCount, *hiNabors = er->sg->hiNabors;
+  HYPRE_Int *rp = er->F->rp, *diag = er->F->diag;
+  HYPRE_Int m = er->F->m;
+  HYPRE_Int beg_row = er->F->beg_row;
+  HYPRE_Int rowCount = er->F->bdry_count;  /* number of boundary rows */
+  HYPRE_Int first_bdry = er->F->first_bdry; 
   bool debug = false;
 
   if (logFile != NULL && er->debug) debug = true;
 
   /* allocate storage to hold nz counts for each row */
-  nzCounts =  er->my_row_counts = (int*)MALLOC_DH(rowCount*sizeof(int)); CHECK_V_ERROR;
-  nzNumbers =  er->my_row_numbers = (int*)MALLOC_DH(rowCount*sizeof(int)); CHECK_V_ERROR;
+  nzCounts =  er->my_row_counts = (HYPRE_Int*)MALLOC_DH(rowCount*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  nzNumbers =  er->my_row_numbers = (HYPRE_Int*)MALLOC_DH(rowCount*sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   /* count nonzeros in upper triangular portion of each boundary row */
   nz = 0;
   for (i=first_bdry, j=0; i<m; ++i, ++j) {
-    int tmp = (rp[i+1] - diag[i]);
+    HYPRE_Int tmp = (rp[i+1] - diag[i]);
     nz += tmp;
     nzCounts[j] = tmp;
   }
   er->nzSend = nz;
 
   if (debug) {
-    fprintf(logFile, "EXR send_ext_storage_private:: rowCount = %i\n", rowCount);
-    fprintf(logFile, "EXR send_ext_storage_private:: nz Count = %i\n", nz);
+    hypre_fprintf(logFile, "EXR send_ext_storage_private:: rowCount = %i\n", rowCount);
+    hypre_fprintf(logFile, "EXR send_ext_storage_private:: nz Count = %i\n", nz);
   }
 
   /* send  number of rows, and total nonzeros, to higher ordered nabors */
   for (i=0; i<hiCount; ++i) {
-    int nabor = hiNabors[i];
-    MPI_Isend(&rowCount, 1, MPI_INT, nabor, ROW_CT_TAG, comm_dh, er->req1+i);
-    MPI_Isend(&nz,       1, MPI_INT, nabor, NZ_CT_TAG,  comm_dh, er->req2+i);
+    HYPRE_Int nabor = hiNabors[i];
+    hypre_MPI_Isend(&rowCount, 1, HYPRE_MPI_INT, nabor, ROW_CT_TAG, comm_dh, er->req1+i);
+    hypre_MPI_Isend(&nz,       1, HYPRE_MPI_INT, nabor, NZ_CT_TAG,  comm_dh, er->req2+i);
   }    
 
   /* set up array for global row numbers */
@@ -468,9 +468,9 @@ void send_ext_storage_private(ExternalRows_dh er)
      row structures and values.
    */
   for (i=0; i<hiCount; ++i) {
-    int nabor = hiNabors[i];
-    MPI_Isend(nzNumbers, rowCount, MPI_INT, nabor, ROW_NUMBER_TAG, comm_dh, er->req3+i);
-    MPI_Isend(nzCounts,  rowCount, MPI_INT, nabor, ROW_LENGTH_TAG, comm_dh, er->req4+i);
+    HYPRE_Int nabor = hiNabors[i];
+    hypre_MPI_Isend(nzNumbers, rowCount, HYPRE_MPI_INT, nabor, ROW_NUMBER_TAG, comm_dh, er->req3+i);
+    hypre_MPI_Isend(nzCounts,  rowCount, HYPRE_MPI_INT, nabor, ROW_LENGTH_TAG, comm_dh, er->req4+i);
   }
 
   END_FUNC_DH
@@ -482,64 +482,64 @@ void send_ext_storage_private(ExternalRows_dh er)
 void send_external_rows_private(ExternalRows_dh er)
 {
   START_FUNC_DH
-  int i, j, hiCount = er->sg->hiCount, *hiNabors = er->sg->hiNabors;
-  int offset, nz = er->nzSend;
-  int *cvalSend, *fillSend; 
+  HYPRE_Int i, j, hiCount = er->sg->hiCount, *hiNabors = er->sg->hiNabors;
+  HYPRE_Int offset, nz = er->nzSend;
+  HYPRE_Int *cvalSend, *fillSend; 
   REAL_DH *avalSend; 
-  int *cval = er->F->cval, *fill = er->F->fill;
-  int m = er->F->m;
-  int *rp = er->F->rp, *diag = er->F->diag;
-  int first_bdry = er->F->first_bdry;
+  HYPRE_Int *cval = er->F->cval, *fill = er->F->fill;
+  HYPRE_Int m = er->F->m;
+  HYPRE_Int *rp = er->F->rp, *diag = er->F->diag;
+  HYPRE_Int first_bdry = er->F->first_bdry;
   REAL_DH *aval = er->F->aval;
   bool debug = false;
 
   if (logFile != NULL && er->debug) debug = true;
 
   /* allocate buffers to hold upper triangular portion of boundary rows */
-  cvalSend = er->cvalSend = (int*)MALLOC_DH(nz*sizeof(int)); CHECK_V_ERROR;
-  fillSend = er->fillSend = (int*)MALLOC_DH(nz*sizeof(int)); CHECK_V_ERROR;
+  cvalSend = er->cvalSend = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  fillSend = er->fillSend = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   avalSend = er->avalSend = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
 
-  /* copy upper triangular portion of boundary rows int send buffers */
+  /* copy upper triangular portion of boundary rows HYPRE_Int send buffers */
   offset = 0;
   for (i=first_bdry, j=0; i<m; ++i, ++j) {
-    int tmp = (rp[i+1] - diag[i]);
+    HYPRE_Int tmp = (rp[i+1] - diag[i]);
 
-    memcpy(cvalSend+offset, cval+diag[i], tmp*sizeof(int));
-    memcpy(fillSend+offset, fill+diag[i], tmp*sizeof(int));
+    memcpy(cvalSend+offset, cval+diag[i], tmp*sizeof(HYPRE_Int));
+    memcpy(fillSend+offset, fill+diag[i], tmp*sizeof(HYPRE_Int));
     memcpy(avalSend+offset, aval+diag[i], tmp*sizeof(double));
     offset += tmp;
   }
 
   if (debug) {
-    int beg_row = er->F->beg_row;
-    int idx = 0;
+    HYPRE_Int beg_row = er->F->beg_row;
+    HYPRE_Int idx = 0;
     bool noValues = (Parser_dhHasSwitch(parser_dh, "-noValues"));
 
-    fprintf(logFile, "\nEXR ======================= send buffers ======================\n");
+    hypre_fprintf(logFile, "\nEXR ======================= send buffers ======================\n");
 
     for (i=first_bdry, j=0; i<m; ++i, ++j) {
-      int tmp = (rp[i+1] - diag[i]);
-      fprintf(logFile, "EXR %i :: ", i+beg_row);
+      HYPRE_Int tmp = (rp[i+1] - diag[i]);
+      hypre_fprintf(logFile, "EXR %i :: ", i+beg_row);
 
       for (j=0; j<tmp; ++j) {
         if (noValues) {
-          fprintf(logFile, "%i,%i ; ", cvalSend[idx], fillSend[idx]);
+          hypre_fprintf(logFile, "%i,%i ; ", cvalSend[idx], fillSend[idx]);
         } else {
-          fprintf(logFile, "%i,%i,%g ; ", cvalSend[idx], fillSend[idx], avalSend[idx]);
+          hypre_fprintf(logFile, "%i,%i,%g ; ", cvalSend[idx], fillSend[idx], avalSend[idx]);
         }
         ++idx;
       }
-      fprintf(logFile, "\n");
+      hypre_fprintf(logFile, "\n");
     }
   }
 
   /* start sends to higher-ordred nabors */
   for (i=0; i<hiCount; ++i) {
-    int nabor = hiNabors[i];
-    MPI_Isend(cvalSend, nz, MPI_INT,    nabor, CVAL_TAG, comm_dh, er->cval_req+i);
-    MPI_Isend(fillSend, nz, MPI_INT,    nabor, FILL_TAG, comm_dh, er->fill_req+i); 
-    MPI_Isend(avalSend, nz, MPI_DOUBLE, nabor, AVAL_TAG, comm_dh, er->aval_req+i);
+    HYPRE_Int nabor = hiNabors[i];
+    hypre_MPI_Isend(cvalSend, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, comm_dh, er->cval_req+i);
+    hypre_MPI_Isend(fillSend, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, comm_dh, er->fill_req+i); 
+    hypre_MPI_Isend(avalSend, nz, hypre_MPI_DOUBLE, nabor, AVAL_TAG, comm_dh, er->aval_req+i);
   }
   END_FUNC_DH
 }
@@ -550,17 +550,17 @@ void send_external_rows_private(ExternalRows_dh er)
 void waitfor_sends_private(ExternalRows_dh er)
 {
   START_FUNC_DH
-  MPI_Status *status = er->status;
-  int hiCount = er->sg->hiCount;
+  hypre_MPI_Status *status = er->status;
+  HYPRE_Int hiCount = er->sg->hiCount;
 
   if (hiCount) {
-    MPI_Waitall(hiCount, er->req1, status);
-    MPI_Waitall(hiCount, er->req2, status);
-    MPI_Waitall(hiCount, er->req3, status);
-    MPI_Waitall(hiCount, er->req4, status);
-    MPI_Waitall(hiCount, er->cval_req, status);
-    MPI_Waitall(hiCount, er->fill_req, status);
-    MPI_Waitall(hiCount, er->aval_req, status);
+    hypre_MPI_Waitall(hiCount, er->req1, status);
+    hypre_MPI_Waitall(hiCount, er->req2, status);
+    hypre_MPI_Waitall(hiCount, er->req3, status);
+    hypre_MPI_Waitall(hiCount, er->req4, status);
+    hypre_MPI_Waitall(hiCount, er->cval_req, status);
+    hypre_MPI_Waitall(hiCount, er->fill_req, status);
+    hypre_MPI_Waitall(hiCount, er->aval_req, status);
   }
   END_FUNC_DH
 }

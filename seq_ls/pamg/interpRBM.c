@@ -26,74 +26,74 @@
 
 
 
-int
+HYPRE_Int
 hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
-                         int                 *CF_marker,
+                         HYPRE_Int                 *CF_marker,
                          hypre_CSRMatrix     *S,
-                         int                 *dof_func,
-                         int                 num_functions,
-                         int                 **coarse_dof_func_ptr,
+                         HYPRE_Int                 *dof_func,
+                         HYPRE_Int                 num_functions,
+                         HYPRE_Int                 **coarse_dof_func_ptr,
                          hypre_CSRMatrix     **P_ptr )
 {
 
 
   hypre_CSRMatrix    *P; 
-  int                *coarse_dof_func;
+  HYPRE_Int                *coarse_dof_func;
 
 
   double *Prolong_coeff;
-  int *i_dof_neighbor_coarsedof;
-  int *j_dof_neighbor_coarsedof;
+  HYPRE_Int *i_dof_neighbor_coarsedof;
+  HYPRE_Int *j_dof_neighbor_coarsedof;
 
 
 
-  int *S_i    = hypre_CSRMatrixI(S);
-  int *S_j    = hypre_CSRMatrixJ(S);
+  HYPRE_Int *S_i    = hypre_CSRMatrixI(S);
+  HYPRE_Int *S_j    = hypre_CSRMatrixJ(S);
 
 
 
-  int *i_dof_dof = hypre_CSRMatrixI(A);
-  int *j_dof_dof = hypre_CSRMatrixJ(A);
+  HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(A);
+  HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(A);
   double *a_dof_dof = hypre_CSRMatrixData(A);
 
 
-  int *i_ext_int, *j_ext_int;
+  HYPRE_Int *i_ext_int, *j_ext_int;
 
-  int ext_int_counter;
+  HYPRE_Int ext_int_counter;
                          
-  int *fine_to_coarse;
+  HYPRE_Int *fine_to_coarse;
 
 
 
-  int num_dofs = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int num_dofs = hypre_CSRMatrixNumRows(A);
 
 
-  int ierr = 0;
-  int i, j, k, l_loc, i_loc, j_loc;
-  int i_dof, j_dof;
-  int *i_local_to_global;
-  int *i_global_to_local;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i, j, k, l_loc, i_loc, j_loc;
+  HYPRE_Int i_dof, j_dof;
+  HYPRE_Int *i_local_to_global;
+  HYPRE_Int *i_global_to_local;
 
 
-/*  int i_dof_on_list =-1; */
+/*  HYPRE_Int i_dof_on_list =-1; */
 
 
-  int local_dof_counter, max_local_dof_counter=0; 
-  int fine_node_counter, coarse_node_counter;
+  HYPRE_Int local_dof_counter, max_local_dof_counter=0; 
+  HYPRE_Int fine_node_counter, coarse_node_counter;
 
 
 
-  int dof_neighbor_coarsedof_counter = 0, coarsedof_counter = 0,
+  HYPRE_Int dof_neighbor_coarsedof_counter = 0, coarsedof_counter = 0,
     dof_counter = 0;
 
 
 
-  int *i_fine, *i_coarse;
+  HYPRE_Int *i_fine, *i_coarse;
 
 
-  int *i_int;
+  HYPRE_Int *i_int;
 
-  int *i_fine_to_global, *i_coarse_to_global;
+  HYPRE_Int *i_fine_to_global, *i_coarse_to_global;
 
 
   double *AE;
@@ -156,8 +156,8 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
 
 
-  i_dof_neighbor_coarsedof = hypre_CTAlloc(int, num_dofs+1);
-  j_dof_neighbor_coarsedof = hypre_CTAlloc(int, 
+  i_dof_neighbor_coarsedof = hypre_CTAlloc(HYPRE_Int, num_dofs+1);
+  j_dof_neighbor_coarsedof = hypre_CTAlloc(HYPRE_Int, 
                                            dof_neighbor_coarsedof_counter);
 
 
@@ -208,7 +208,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   i_dof_neighbor_coarsedof[num_dofs] = dof_neighbor_coarsedof_counter;
 
 
-  i_global_to_local = hypre_CTAlloc(int, num_dofs); 
+  i_global_to_local = hypre_CTAlloc(HYPRE_Int, num_dofs); 
 
 
   for (i_dof =0; i_dof < num_dofs; i_dof++)
@@ -248,26 +248,26 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
     }
 
 
-  i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
+  i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
   AE = hypre_CTAlloc(double, max_local_dof_counter *
 		     max_local_dof_counter);
 
   
-  i_fine = hypre_CTAlloc(int, max_local_dof_counter);
-  i_coarse = hypre_CTAlloc(int, max_local_dof_counter);
+  i_fine = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
+  i_coarse = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
-  i_fine_to_global = hypre_CTAlloc(int, max_local_dof_counter);
+  i_fine_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
 
-  i_coarse_to_global = hypre_CTAlloc(int, max_local_dof_counter);
+  i_coarse_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
   
-  i_int = hypre_CTAlloc(int, max_local_dof_counter);
+  i_int = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
   P_ext_int = hypre_CTAlloc(double, max_local_dof_counter *
 			    max_local_dof_counter);
@@ -280,8 +280,8 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
       */
 
-  i_ext_int = hypre_CTAlloc(int, max_local_dof_counter+1);
-  j_ext_int = hypre_CTAlloc(int, max_local_dof_counter *
+  i_ext_int = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter+1);
+  j_ext_int = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter *
 			    max_local_dof_counter);
   
 
@@ -352,7 +352,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
 
           /* ============================================================
-          printf("fine nodes: %d;  coarse nodes: %d\n", fine_node_counter,
+          hypre_printf("fine nodes: %d;  coarse nodes: %d\n", fine_node_counter,
                  coarse_node_counter);
 	   =========================================================== */
 
@@ -360,7 +360,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
           if (fine_node_counter+coarse_node_counter != dof_counter)
             {
-              printf("error in build_Prolong: %d + %d = %d\n",
+              hypre_printf("error in build_Prolong: %d + %d = %d\n",
                      fine_node_counter, coarse_node_counter, 
                      dof_counter);
               return -1;
@@ -370,7 +370,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
 
 	  /*
-	  printf("local_dof_counter: %d, dof_counter: %d\n",
+	  hypre_printf("local_dof_counter: %d, dof_counter: %d\n",
 		 local_dof_counter, dof_counter); */
 
 	  ext_int_counter = 0;
@@ -500,15 +500,15 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   /*-----------------------------------------------------------------
   for (i_dof =0; i_dof < num_dofs; i_dof++)
     {
-      printf("\ndof %d: has coefficients:\n", i_dof);
+      hypre_printf("\ndof %d: has coefficients:\n", i_dof);
       coeff_sum = 0.0;
       for (i = i_dof_neighbor_coarsedof[i_dof]; 
            i < i_dof_neighbor_coarsedof[i_dof+1]; i++)
         {
-          printf(" %f ", Prolong_coeff[i]);
+          hypre_printf(" %f ", Prolong_coeff[i]);
           coeff_sum=coeff_sum+Prolong_coeff[i];
         }
-      printf("\n coeff_sum: %f \n\n", coeff_sum);
+      hypre_printf("\n coeff_sum: %f \n\n", coeff_sum);
     }
   -----------------------------------------------------------------*/
 
@@ -554,7 +554,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
    if (num_functions > 1)
      {
-       coarse_dof_func = hypre_CTAlloc(int, coarsedof_counter);
+       coarse_dof_func = hypre_CTAlloc(HYPRE_Int, coarsedof_counter);
 
        coarsedof_counter=0;
        for (i=0; i < num_dofs; i++)
@@ -602,12 +602,12 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
  row_mat_rectmat_prod:    A1[i_row][0:n-1] <---  -A2[i_row][0:m-1]
                                                 * A3[0:m-1][0:n-1];
 ---------------------------------------------------------------------*/
-int row_mat_rectmat_prod(double *a1,
+HYPRE_Int row_mat_rectmat_prod(double *a1,
                          double *a2,
                          double *a3,
-                         int i_row, int m, int n)
+                         HYPRE_Int i_row, HYPRE_Int m, HYPRE_Int n)
 {
-  int i,l, ierr =0;
+  HYPRE_Int i,l, ierr =0;
 
 
 
@@ -626,9 +626,9 @@ int row_mat_rectmat_prod(double *a1,
  matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
       
-int matinv(double *x, double *a, int k)
+HYPRE_Int matinv(double *x, double *a, HYPRE_Int k)
 {
-  int i,j,l, ierr =0;
+  HYPRE_Int i,j,l, ierr =0;
 
 
 
@@ -639,8 +639,8 @@ int matinv(double *x, double *a, int k)
 	  if (i < k-1)
 	    {
 	      /*********
-	      printf("indefinite singular matrix in *** matinv ***:\n");
-	      printf("i:%d;  diagonal entry: %e\n", i, a[i+k*i]);
+	      hypre_printf("indefinite singular matrix in *** matinv ***:\n");
+	      hypre_printf("i:%d;  diagonal entry: %e\n", i, a[i+k*i]);
 	      */
 	      ierr = -1;
 	    }

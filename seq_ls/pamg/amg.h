@@ -25,37 +25,37 @@ typedef struct
 {
 
    /* setup params */
-   int      max_levels;
+   HYPRE_Int      max_levels;
    double   strong_threshold;
    double   A_trunc_factor;
    double   P_trunc_factor;
-   int      A_max_elmts;
-   int      P_max_elmts;
-   int      coarsen_type;
-   int      agg_coarsen_type;
-   int      interp_type;
-   int      agg_interp_type;
-   int      agg_levels;
-   int      num_relax_steps;  
-   int      num_jacs;
-   int use_block_flag;
+   HYPRE_Int      A_max_elmts;
+   HYPRE_Int      P_max_elmts;
+   HYPRE_Int      coarsen_type;
+   HYPRE_Int      agg_coarsen_type;
+   HYPRE_Int      interp_type;
+   HYPRE_Int      agg_interp_type;
+   HYPRE_Int      agg_levels;
+   HYPRE_Int      num_relax_steps;  
+   HYPRE_Int      num_jacs;
+   HYPRE_Int use_block_flag;
 
    /* solve params */
-   int      max_iter;
-   int      cycle_type;    
-   int     *num_grid_sweeps;  
-   int     *grid_relax_type;   
-   int    **grid_relax_points; 
+   HYPRE_Int      max_iter;
+   HYPRE_Int      cycle_type;    
+   HYPRE_Int     *num_grid_sweeps;  
+   HYPRE_Int     *grid_relax_type;   
+   HYPRE_Int    **grid_relax_points; 
    double  *relax_weight;
    double   tol;
    /* problem data */
    hypre_CSRMatrix  *A;
-   int      num_variables;
-   int      num_functions;
-   int      num_points;
-   int     *dof_func;
-   int     *dof_point;
-   int     *point_dof_map;           
+   HYPRE_Int      num_variables;
+   HYPRE_Int      num_functions;
+   HYPRE_Int      num_points;
+   HYPRE_Int     *dof_func;
+   HYPRE_Int     *dof_point;
+   HYPRE_Int     *point_dof_map;           
 
    /* data generated in the setup phase */
    hypre_CSRMatrix **A_array;
@@ -64,25 +64,25 @@ typedef struct
    hypre_Vector    **U_array;
    hypre_CSRMatrix **P_array;
    hypre_BCSRMatrix **PB_array;
-   int             **CF_marker_array;
-   int             **dof_func_array;
-   int             **dof_point_array;
-   int             **point_dof_map_array;
-   int               num_levels;
-   int      	    *schwarz_option;
-   int      	    *num_domains;
-   int     	   **i_domain_dof;
-   int     	   **j_domain_dof;
+   HYPRE_Int             **CF_marker_array;
+   HYPRE_Int             **dof_func_array;
+   HYPRE_Int             **dof_point_array;
+   HYPRE_Int             **point_dof_map_array;
+   HYPRE_Int               num_levels;
+   HYPRE_Int      	    *schwarz_option;
+   HYPRE_Int      	    *num_domains;
+   HYPRE_Int     	   **i_domain_dof;
+   HYPRE_Int     	   **j_domain_dof;
    double  	   **domain_matrixinverse;
-   int		     mode;
+   HYPRE_Int		     mode;
 
    /* data generated in the solve phase */
    hypre_Vector   *Vtemp;
    double   *vtmp;
-   int       cycle_op_count;                                                   
+   HYPRE_Int       cycle_op_count;                                                   
 
    /* output params */
-   int      ioutdat;
+   HYPRE_Int      ioutdat;
    char     log_file_name[256];
 
 } hypre_AMGData;

@@ -84,7 +84,7 @@ void Euclid_dhCreate(Euclid_dh *ctxOUT)
   ctx->logging = 0;
   ctx->printStats = (Parser_dhHasSwitch(parser_dh, "-printStats"));
 
-  { int i;
+  { HYPRE_Int i;
     for (i=0; i<TIMING_BINS; ++i) ctx->timing[i] = 0.0;
     for (i=0; i<STATS_BINS; ++i) ctx->stats[i] = 0.0;
   }
@@ -134,7 +134,7 @@ void Euclid_dhDestroy(Euclid_dh ctx)
 void Euclid_dhSetup(Euclid_dh ctx)
 {
   START_FUNC_DH
-  int m, n, beg_row;
+  HYPRE_Int m, n, beg_row;
   double t1;
   bool isSetup = ctx->isSetup;
   bool bj = false;
@@ -151,14 +151,14 @@ void Euclid_dhSetup(Euclid_dh ctx)
   /*----------------------------------------------------
    * zero array for statistical reporting
    *----------------------------------------------------*/
-  { int i;
+  { HYPRE_Int i;
     for (i=0; i<STATS_BINS; ++i) ctx->stats[i] = 0.0;
   }
 
   /*----------------------------------------------------
    * internal timing
    *----------------------------------------------------*/
-  ctx->timing[SOLVE_START_T] = MPI_Wtime();
+  ctx->timing[SOLVE_START_T] = hypre_MPI_Wtime();
   /* sum timing from last linear solve cycle, if any */
   ctx->timing[TOTAL_SOLVE_T] += ctx->timing[TOTAL_SOLVE_TEMP_T];
   ctx->timing[TOTAL_SOLVE_TEMP_T] = 0.0;
@@ -179,7 +179,7 @@ void Euclid_dhSetup(Euclid_dh ctx)
     printf_dh("setting up linear system; global rows: %i  local rows: %i (on P_0)\n", n,m);
   }
 
-  sprintf(msgBuf_dh, "localRow= %i;  globalRows= %i;  beg_row= %i", m, n, beg_row);
+  hypre_sprintf(msgBuf_dh, "localRow= %i;  globalRows= %i;  beg_row= %i", m, n, beg_row);
   SET_INFO(msgBuf_dh);
 
   bj = Parser_dhHasSwitch(parser_dh, "-bj");
@@ -191,8 +191,8 @@ void Euclid_dhSetup(Euclid_dh ctx)
    * subdomain graph cannot change (user's responsibility?)
    *------------------------------------------------------------------------*/
   if (ctx->sg == NULL) {
-    int blocks = np_dh;
-    t1 = MPI_Wtime();
+    HYPRE_Int blocks = np_dh;
+    t1 = hypre_MPI_Wtime();
     if (np_dh == 1) {
       Parser_dhReadInt(parser_dh, "-blocks", &blocks); CHECK_V_ERROR;
       SubdomainGraph_dhCreate(&(ctx->sg)); CHECK_V_ERROR;
@@ -201,7 +201,7 @@ void Euclid_dhSetup(Euclid_dh ctx)
       SubdomainGraph_dhCreate(&(ctx->sg)); CHECK_V_ERROR;
       SubdomainGraph_dhInit(ctx->sg, -1, bj, ctx->A); CHECK_V_ERROR;
     }
-    ctx->timing[SUB_GRAPH_T] += (MPI_Wtime() - t1);
+    ctx->timing[SUB_GRAPH_T] += (hypre_MPI_Wtime() - t1);
   }
 
 
@@ -230,7 +230,7 @@ void Euclid_dhSetup(Euclid_dh ctx)
   if (ctx->scale == NULL) {
     ctx->scale = (REAL_DH*)MALLOC_DH(m*sizeof(REAL_DH)); CHECK_V_ERROR;
   }
-  { int i; for (i=0; i<m; ++i) ctx->scale[i] = 1.0; }
+  { HYPRE_Int i; for (i=0; i<m; ++i) ctx->scale[i] = 1.0; }
 
   /*------------------------------------------------------------------ 
    * allocate work vectors; used in factorization and triangular solves;
@@ -246,9 +246,9 @@ void Euclid_dhSetup(Euclid_dh ctx)
    * perform the incomplete factorization (this should be, at least
    * for higher level ILUK, the most time-intensive portion of setup)
    *-----------------------------------------------------------------*/
-  t1 = MPI_Wtime();    
+  t1 = hypre_MPI_Wtime();    
   factor_private(ctx); CHECK_V_ERROR;
-  ctx->timing[FACTOR_T] += (MPI_Wtime() - t1);
+  ctx->timing[FACTOR_T] += (hypre_MPI_Wtime() - t1);
 
   /*-------------------------------------------------------------- 
    * invert diagonals, for faster triangular solves
@@ -267,9 +267,9 @@ void Euclid_dhSetup(Euclid_dh ctx)
    */
   if (Parser_dhHasSwitch(parser_dh, "-computeRho") || np_dh == 1) {
    if (strcmp(ctx->algo_par, "none")) { 
-     t1 = MPI_Wtime();
+     t1 = hypre_MPI_Wtime();
      compute_rho_private(ctx); CHECK_V_ERROR;  
-     ctx->timing[COMPUTE_RHO_T] += (MPI_Wtime() - t1);
+     ctx->timing[COMPUTE_RHO_T] += (hypre_MPI_Wtime() - t1);
    }
  }
 
@@ -280,9 +280,9 @@ void Euclid_dhSetup(Euclid_dh ctx)
    *--------------------------------------------------------------*/
 
   if (! strcmp(ctx->algo_par, "pilu")  &&  np_dh > 1) { 
-    t1 = MPI_Wtime();
+    t1 = hypre_MPI_Wtime();
     Factor_dhSolveSetup(ctx->F, ctx->sg); CHECK_V_ERROR;
-    ctx->timing[SOLVE_SETUP_T] += (MPI_Wtime() - t1);
+    ctx->timing[SOLVE_SETUP_T] += (hypre_MPI_Wtime() - t1);
   }
 
 END_OF_FUNCTION: ;
@@ -290,7 +290,7 @@ END_OF_FUNCTION: ;
   /*-------------------------------------------------------
    * internal timing
    *-------------------------------------------------------*/
-  ctx->timing[SETUP_T] += (MPI_Wtime() - ctx->timing[SOLVE_START_T]);
+  ctx->timing[SETUP_T] += (hypre_MPI_Wtime() - ctx->timing[SOLVE_START_T]);
   ctx->setupCount += 1;  
 
   ctx->isSetup = true;
@@ -379,11 +379,11 @@ void invert_diagonals_private(Euclid_dh ctx)
 {
   START_FUNC_DH
   REAL_DH *aval = ctx->F->aval;
-  int *diag = ctx->F->diag;
+  HYPRE_Int *diag = ctx->F->diag;
   if (aval == NULL || diag == NULL) {
     SET_INFO("can't invert diags; either F->aval or F->diag is NULL");
   } else {
-    int i, m = ctx->F->m;
+    HYPRE_Int i, m = ctx->F->m;
     for (i=0; i<m; ++i) {
         aval[diag[i]] = 1.0/aval[diag[i]]; 
     }
@@ -400,7 +400,7 @@ void compute_rho_private(Euclid_dh ctx)
   START_FUNC_DH
   if (ctx->F != NULL) {
     double bufLocal[3], bufGlobal[3];
-    int m = ctx->m;
+    HYPRE_Int m = ctx->m;
 
     ctx->stats[NZF_STATS] = (double)ctx->F->rp[m];
     bufLocal[0] = ctx->stats[NZA_STATS];      /* nzA */
@@ -412,7 +412,7 @@ void compute_rho_private(Euclid_dh ctx)
       bufGlobal[1] = bufLocal[1];
       bufGlobal[2] = bufLocal[2];
     } else {
-      MPI_Reduce(bufLocal, bufGlobal, 3, MPI_DOUBLE, MPI_SUM, 0, comm_dh);
+      hypre_MPI_Reduce(bufLocal, bufGlobal, 3, hypre_MPI_DOUBLE, hypre_MPI_SUM, 0, comm_dh);
     }
 
     if (myid_dh == 0) {
@@ -450,8 +450,8 @@ void factor_private(Euclid_dh ctx)
   /*-------------------------------------------------------------
    * Initialize object to hold factor.
    *-------------------------------------------------------------*/
-  { int br = 0;
-    int id = np_dh;
+  { HYPRE_Int br = 0;
+    HYPRE_Int id = np_dh;
     if (ctx->sg != NULL) {
       br = ctx->sg->beg_rowP[myid_dh];
       id = ctx->sg->o2n_sub[myid_dh];
@@ -497,7 +497,7 @@ void factor_private(Euclid_dh ctx)
 
     /* all other factorization methods */
     else {
-        sprintf(msgBuf_dh, "factorization method: %s is not implemented", 
+        hypre_sprintf(msgBuf_dh, "factorization method: %s is not implemented", 
                                                                 ctx->algo_ilu);
         SET_V_ERROR(msgBuf_dh);
     }
@@ -531,7 +531,7 @@ void factor_private(Euclid_dh ctx)
 
 /*
 if (Parser_dhHasSwitch(parser_dh, "-test")) {
-       printf("[%i] Euclid_dh :: TESTING ilu_seq\n", myid_dh);
+       hypre_printf("[%i] Euclid_dh :: TESTING ilu_seq\n", myid_dh);
        iluk_seq(ctx); CHECK_V_ERROR; 
 } else {
        iluk_mpi_pilu(ctx); CHECK_V_ERROR; 
@@ -574,7 +574,7 @@ if (Parser_dhHasSwitch(parser_dh, "-test")) {
 
     /* all other factorization methods */
     else {
-        sprintf(msgBuf_dh, "factorization method: %s is not implemented", 
+        hypre_sprintf(msgBuf_dh, "factorization method: %s is not implemented", 
                                                                 ctx->algo_ilu);
         SET_V_ERROR(msgBuf_dh);
     }
@@ -593,12 +593,12 @@ void discard_indices_private(Euclid_dh ctx)
 {
   START_FUNC_DH
 #if 0
-  int *rp = ctx->F->rp, *cval = ctx->F->cval;
+  HYPRE_Int *rp = ctx->F->rp, *cval = ctx->F->cval;
   double *aval = ctx->F->aval;
-  int m = F->m, *nabors = ctx->nabors, nc = ctx->naborCount;
-  int i, j, k, idx, count = 0, start_of_row;
-  int beg_row = ctx->beg_row, end_row = beg_row + m;
-  int *diag = ctx->F->diag;
+  HYPRE_Int m = F->m, *nabors = ctx->nabors, nc = ctx->naborCount;
+  HYPRE_Int i, j, k, idx, count = 0, start_of_row;
+  HYPRE_Int beg_row = ctx->beg_row, end_row = beg_row + m;
+  HYPRE_Int *diag = ctx->F->diag;
 
   /* if col is not locally owned, and doesn't belong to a
    * nabor in the (original) subdomain graph, we need to discard
@@ -607,10 +607,10 @@ void discard_indices_private(Euclid_dh ctx)
    */
   for (i=0; i<m; ++i) {
     for (j=rp[i]; j<rp[i+1]; ++j) {
-      int col = cval[j];
+      HYPRE_Int col = cval[j];
       if (col < beg_row  || col >= end_row) {
         bool flag = true;
-        int owner = find_owner_private_mpi(ctx, col); CHECK_V_ERROR;
+        HYPRE_Int owner = find_owner_private_mpi(ctx, col); CHECK_V_ERROR;
 
         for (k=0; k<nc; ++k) {
           if (nabors[k] == owner) {
@@ -627,7 +627,7 @@ void discard_indices_private(Euclid_dh ctx)
     }
   }
 
-  sprintf(msgBuf_dh, "deleting %i indices that would alter the subdomain graph", count);
+  hypre_sprintf(msgBuf_dh, "deleting %i indices that would alter the subdomain graph", count);
   SET_INFO(msgBuf_dh);
 
   /* Second, perform the actual deletion */
@@ -635,7 +635,7 @@ void discard_indices_private(Euclid_dh ctx)
   start_of_row = 0;
   for (i=0; i<m; ++i) {
     for (j=start_of_row; j<rp[i+1]; ++j) {
-      int    col = cval[j];
+      HYPRE_Int    col = cval[j];
       double val = aval[j];
       if (col != -1) { 
         cval[idx] = col;
@@ -663,10 +663,10 @@ void discard_indices_private(Euclid_dh ctx)
 
 #undef __FUNC__
 #define __FUNC__ "Euclid_dhSolve"
-void Euclid_dhSolve(Euclid_dh ctx, Vec_dh x, Vec_dh b, int *its)
+void Euclid_dhSolve(Euclid_dh ctx, Vec_dh x, Vec_dh b, HYPRE_Int *its)
 {
   START_FUNC_DH
-  int itsOUT;
+  HYPRE_Int itsOUT;
   Mat_dh A = (Mat_dh)ctx->A;
 
   if (! strcmp(ctx->krylovMethod, "cg")) {
@@ -674,7 +674,7 @@ void Euclid_dhSolve(Euclid_dh ctx, Vec_dh x, Vec_dh b, int *its)
   } else if (! strcmp(ctx->krylovMethod, "bicgstab")) {
     bicgstab_euclid(A, ctx, x->vals, b->vals, &itsOUT); ERRCHKA;
   } else {
-    sprintf(msgBuf_dh, "unknown krylov solver: %s", ctx->krylovMethod);
+    hypre_sprintf(msgBuf_dh, "unknown krylov solver: %s", ctx->krylovMethod);
     SET_V_ERROR(msgBuf_dh);
   }
   *its = itsOUT;
@@ -687,7 +687,7 @@ void Euclid_dhPrintStats(Euclid_dh ctx, FILE *fp)
 {
   START_FUNC_DH
   double *timing;
-  int nz;
+  HYPRE_Int nz;
 
   nz = Factor_dhReadNz(ctx->F); CHECK_V_ERROR;
   timing = ctx->timing;
@@ -761,7 +761,7 @@ void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *f
   double apply_per_it;
   /* double nzUsedRatio; */
   double perIt;
-  int blocks = np_dh;
+  HYPRE_Int blocks = np_dh;
 
   if (np_dh == 1) blocks = ctx->sg->blocks;
 
@@ -847,7 +847,7 @@ void Euclid_dhPrintStatsShorter(Euclid_dh ctx, FILE *fp)
   START_FUNC_DH
   double *stats = ctx->stats;
 
-  int    its           = ctx->its;
+  HYPRE_Int    its           = ctx->its;
   double rho           = ctx->rho_final;
   double nzUsedRatio   = stats[NZA_RATIO_STATS];
 
@@ -865,7 +865,7 @@ void Euclid_dhPrintStatsShorter(Euclid_dh ctx, FILE *fp)
 void Euclid_dhPrintScaling(Euclid_dh ctx, FILE *fp)
 {
   START_FUNC_DH
-  int i, m = ctx->m;
+  HYPRE_Int i, m = ctx->m;
 
   if (m > 10) m = 10;
 
@@ -873,9 +873,9 @@ void Euclid_dhPrintScaling(Euclid_dh ctx, FILE *fp)
     SET_V_ERROR("ctx->scale is NULL; was Euclid_dhSetup() called?");
   }
 
-  fprintf(fp, "\n---------- 1st %i row scaling values:\n", m);
+  hypre_fprintf(fp, "\n---------- 1st %i row scaling values:\n", m);
   for (i=0; i<m; ++i) {
-    fprintf(fp, "   %i  %g  \n", i+1, ctx->scale[i]);
+    hypre_fprintf(fp, "   %i  %g  \n", i+1, ctx->scale[i]);
   }
   END_FUNC_DH
 }
@@ -890,7 +890,7 @@ void reduce_timings_private(Euclid_dh ctx)
     double bufOUT[TIMING_BINS];
 
     memcpy(bufOUT, ctx->timing, TIMING_BINS*sizeof(double));
-    MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, MPI_DOUBLE, MPI_MAX, 0, comm_dh);
+    hypre_MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
   }
 
   ctx->timingsWereReduced = true;
@@ -903,7 +903,7 @@ void Euclid_dhPrintHypreReport(Euclid_dh ctx, FILE *fp)
 {
   START_FUNC_DH
   double *timing;
-  int nz;
+  HYPRE_Int nz;
 
   nz = Factor_dhReadNz(ctx->F); CHECK_V_ERROR;
   timing = ctx->timing;
@@ -916,7 +916,7 @@ void Euclid_dhPrintHypreReport(Euclid_dh ctx, FILE *fp)
 
  if (myid_dh == 0) {
 
-  fprintf(fp, "@@@@@@@@@@@@@@@@@@@@@@ Euclid statistical report (start)\n");
+  hypre_fprintf(fp, "@@@@@@@@@@@@@@@@@@@@@@ Euclid statistical report (start)\n");
   fprintf_dh(fp, "\nruntime parameters\n");
   fprintf_dh(fp, "------------------\n");
   fprintf_dh(fp, "   setups:                 %i\n", ctx->setupCount);
@@ -955,7 +955,7 @@ void Euclid_dhPrintHypreReport(Euclid_dh ctx, FILE *fp)
     SubdomainGraph_dhPrintRatios(ctx->sg, fp); CHECK_V_ERROR;
   }
 
-  fprintf(fp, "@@@@@@@@@@@@@@@@@@@@@@ Euclid statistical report (end)\n");
+  hypre_fprintf(fp, "@@@@@@@@@@@@@@@@@@@@@@ Euclid statistical report (end)\n");
 
  }
 
@@ -972,12 +972,12 @@ void Euclid_dhPrintTestData(Euclid_dh ctx, FILE *fp)
      Possibly "tri solves" may change . . .
   */
   if (myid_dh == 0) {
-    fprintf(fp, "   setups:                 %i\n", ctx->setupCount);
-    fprintf(fp, "   tri solves:             %i\n", ctx->its);
-    fprintf(fp, "   parallelization method: %s\n", ctx->algo_par);
-    fprintf(fp, "   factorization method:   %s\n", ctx->algo_ilu);
-    fprintf(fp, "   level:                  %i\n", ctx->level);
-    fprintf(fp, "   row scaling:            %i\n", ctx->isScaled);
+    hypre_fprintf(fp, "   setups:                 %i\n", ctx->setupCount);
+    hypre_fprintf(fp, "   tri solves:             %i\n", ctx->its);
+    hypre_fprintf(fp, "   parallelization method: %s\n", ctx->algo_par);
+    hypre_fprintf(fp, "   factorization method:   %s\n", ctx->algo_ilu);
+    hypre_fprintf(fp, "   level:                  %i\n", ctx->level);
+    hypre_fprintf(fp, "   row scaling:            %i\n", ctx->isScaled);
   }
   SubdomainGraph_dhPrintRatios(ctx->sg, fp); CHECK_V_ERROR;
   END_FUNC_DH

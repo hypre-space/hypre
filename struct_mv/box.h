@@ -32,8 +32,8 @@
  *   replication.
  *--------------------------------------------------------------------------*/
 
-typedef int  hypre_Index[3];
-typedef int *hypre_IndexRef;
+typedef HYPRE_Int  hypre_Index[3];
+typedef HYPRE_Int *hypre_IndexRef;
 
 /*--------------------------------------------------------------------------
  * hypre_Box:
@@ -54,8 +54,8 @@ typedef struct hypre_Box_struct
 typedef struct hypre_BoxArray_struct
 {
    hypre_Box  *boxes;         /* Array of boxes */
-   int         size;          /* Size of box array */
-   int         alloc_size;    /* Size of currently alloced space */
+   HYPRE_Int         size;          /* Size of box array */
+   HYPRE_Int         alloc_size;    /* Size of currently alloced space */
 
 } hypre_BoxArray;
 
@@ -69,7 +69,7 @@ typedef struct hypre_BoxArray_struct
 typedef struct hypre_BoxArrayArray_struct
 {
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
-   int               size;          /* Size of box array array */
+   HYPRE_Int               size;          /* Size of box array array */
 
 } hypre_BoxArrayArray;
 
@@ -110,7 +110,7 @@ typedef struct hypre_BoxArrayArray_struct
 
 #define hypre_CopyToCleanIndex(in_index, ndim, out_index) \
 {\
-   int d;\
+   HYPRE_Int d;\
    for (d = 0; d < ndim; d++)\
    {\
       hypre_IndexD(out_index, d) = hypre_IndexD(in_index, d);\
@@ -265,21 +265,21 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 #ifndef HYPRE_USE_PTHREADS
 
 #define hypre_BoxLoopDeclareS(dbox, stride, sx, sy, sz) \
-int  sx = (hypre_IndexX(stride));\
-int  sy = (hypre_IndexY(stride)*hypre_BoxSizeX(dbox));\
-int  sz = (hypre_IndexZ(stride)*\
+HYPRE_Int  sx = (hypre_IndexX(stride));\
+HYPRE_Int  sy = (hypre_IndexY(stride)*hypre_BoxSizeX(dbox));\
+HYPRE_Int  sz = (hypre_IndexZ(stride)*\
            hypre_BoxSizeX(dbox)*hypre_BoxSizeY(dbox))
 
 #define hypre_BoxLoopDeclareN(loop_size) \
-int  hypre__nx = hypre_IndexX(loop_size);\
-int  hypre__ny = hypre_IndexY(loop_size);\
-int  hypre__nz = hypre_IndexZ(loop_size);\
-int  hypre__mx = hypre__nx;\
-int  hypre__my = hypre__ny;\
-int  hypre__mz = hypre__nz;\
-int  hypre__dir, hypre__max;\
-int  hypre__div, hypre__mod;\
-int  hypre__block, hypre__num_blocks;\
+HYPRE_Int  hypre__nx = hypre_IndexX(loop_size);\
+HYPRE_Int  hypre__ny = hypre_IndexY(loop_size);\
+HYPRE_Int  hypre__nz = hypre_IndexZ(loop_size);\
+HYPRE_Int  hypre__mx = hypre__nx;\
+HYPRE_Int  hypre__my = hypre__ny;\
+HYPRE_Int  hypre__mz = hypre__nz;\
+HYPRE_Int  hypre__dir, hypre__max;\
+HYPRE_Int  hypre__div, hypre__mod;\
+HYPRE_Int  hypre__block, hypre__num_blocks;\
 hypre__dir = 0;\
 hypre__max = hypre__nx;\
 if (hypre__ny > hypre__max)\
@@ -362,7 +362,7 @@ if (hypre__num_blocks > 1)\
 #define hypre_BoxLoop1Begin(loop_size,\
 			    dbox1, start1, stride1, i1)\
 {\
-   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   HYPRE_Int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
    hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
    hypre_BoxLoopDeclareN(loop_size);
 
@@ -394,8 +394,8 @@ if (hypre__num_blocks > 1)\
 			    dbox1, start1, stride1, i1,\
 			    dbox2, start2, stride2, i2)\
 {\
-   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
-   int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
+   HYPRE_Int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   HYPRE_Int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
    hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
    hypre_BoxLoopDeclareS(dbox2, stride2, hypre__sx2, hypre__sy2, hypre__sz2);\
    hypre_BoxLoopDeclareN(loop_size);
@@ -469,8 +469,8 @@ if (hypre__num_blocks > 1)\
 			    dbox1, start1, i1,\
 			    dbox2, start2, i2)\
 {\
-   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
-   int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
+   HYPRE_Int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   HYPRE_Int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
    hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
    hypre_BoxLoopDeclareS(dbox2, stride1, hypre__sx2, hypre__sy2, hypre__sz2);\
    hypre_BoxLoopDeclareN(loop_size);
@@ -510,9 +510,9 @@ if (hypre__num_blocks > 1)\
 			    dbox2, start2, stride2, i2,\
                             dbox3, start3, stride3, i3)\
 {\
-   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
-   int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
-   int  hypre__i3start = hypre_BoxIndexRank(dbox3, start3);\
+   HYPRE_Int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   HYPRE_Int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
+   HYPRE_Int  hypre__i3start = hypre_BoxIndexRank(dbox3, start3);\
    hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
    hypre_BoxLoopDeclareS(dbox2, stride2, hypre__sx2, hypre__sy2, hypre__sz2);\
    hypre_BoxLoopDeclareS(dbox3, stride3, hypre__sx3, hypre__sy3, hypre__sz3);\
@@ -556,10 +556,10 @@ if (hypre__num_blocks > 1)\
                             dbox3, start3, stride3, i3,\
                             dbox4, start4, stride4, i4)\
 {\
-   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
-   int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
-   int  hypre__i3start = hypre_BoxIndexRank(dbox3, start3);\
-   int  hypre__i4start = hypre_BoxIndexRank(dbox4, start4);\
+   HYPRE_Int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   HYPRE_Int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
+   HYPRE_Int  hypre__i3start = hypre_BoxIndexRank(dbox3, start3);\
+   HYPRE_Int  hypre__i4start = hypre_BoxIndexRank(dbox4, start4);\
    hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
    hypre_BoxLoopDeclareS(dbox2, stride2, hypre__sx2, hypre__sy2, hypre__sz2);\
    hypre_BoxLoopDeclareS(dbox3, stride3, hypre__sx3, hypre__sy3, hypre__sz3);\

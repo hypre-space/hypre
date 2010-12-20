@@ -84,15 +84,15 @@ void Parser_dhUpdateFromFile(Parser_dh p, char *filename)
   FILE *fp;
 
   if ((fp = fopen(filename, "r")) == NULL) {
-    sprintf(msgBuf_dh, "can't open >>%s<< for reading", filename);
+    hypre_sprintf(msgBuf_dh, "can't open >>%s<< for reading", filename);
     SET_INFO(msgBuf_dh);
   } else {
-    sprintf(msgBuf_dh, "updating parser from file: >>%s<<", filename);
+    hypre_sprintf(msgBuf_dh, "updating parser from file: >>%s<<", filename);
     SET_INFO(msgBuf_dh);
     while (!feof(fp)) {
       if (fgets(line, 80, fp) == NULL) break;
       if (line[0] != '#') { 
-        if (sscanf(line, "%s %s", name, value) != 2) break;
+        if (hypre_sscanf(line, "%s %s", name, value) != 2) break;
         Parser_dhInsert(p, name, value);   
       }
     }
@@ -103,10 +103,10 @@ void Parser_dhUpdateFromFile(Parser_dh p, char *filename)
 
 #undef __FUNC__
 #define __FUNC__ "Parser_dhInit"
-void Parser_dhInit(Parser_dh p, int argc, char *argv[])
+void Parser_dhInit(Parser_dh p, HYPRE_Int argc, char *argv[])
 {
   START_FUNC_DH_2
-  int j;
+  HYPRE_Int j;
 
   /* read option names and values from default database */
 /*  Parser_dhUpdateFromFile(p, MASTER_OPTIONS_LIST); CHECK_V_ERROR;
@@ -128,7 +128,7 @@ void Parser_dhInit(Parser_dh p, int argc, char *argv[])
 
   /* update from command-line options and values */
   {
-  int i = 0;
+  HYPRE_Int i = 0;
   while (i < argc) {
     if (argv[i][0] == '-') {
       char value[] = { "1" };  /* option's default value */
@@ -180,7 +180,7 @@ bool Parser_dhHasSwitch(Parser_dh p, char* s)
  */
 #undef __FUNC__
 #define __FUNC__ "Parser_dhReadInt"
-bool Parser_dhReadInt(Parser_dh p, char* in, int* out)
+bool Parser_dhReadInt(Parser_dh p, char* in, HYPRE_Int* out)
 {
   START_FUNC_DH_2
   bool has_switch = false;
@@ -239,18 +239,18 @@ void Parser_dhPrint(Parser_dh p, FILE *fp, bool allPrint)
   if (fp == NULL) SET_V_ERROR("fp == NULL");
 
   if (myid_dh == 0 || allPrint) {
-    fprintf(fp, "------------------------ registered options:\n");
+    hypre_fprintf(fp, "------------------------ registered options:\n");
     if (ptr == NULL) {
-      fprintf(fp, "Parser object is invalid; nothing to print!\n");
+      hypre_fprintf(fp, "Parser object is invalid; nothing to print!\n");
     } else {
       ptr = ptr->next;
       while (ptr != NULL) {
-        fprintf(fp, "   %s  %s\n", ptr->name, ptr->value);
+        hypre_fprintf(fp, "   %s  %s\n", ptr->name, ptr->value);
         fflush(fp);
         ptr = ptr->next;
       } 
     } 
-    fprintf(fp, "\n");
+    hypre_fprintf(fp, "\n");
     fflush(fp);
   }
   END_FUNC_DH_2
@@ -262,13 +262,13 @@ void Parser_dhInsert(Parser_dh p, char *option, char *value)
 {
   START_FUNC_DH_2
   OptionsNode *node;
-  int length;
+  HYPRE_Int length;
 
   if (p == NULL) goto PARSER_NOT_INITED;
 
   /* if option is already in the list, update its value */
   if (find(p, option,&node)) {
-    int length2 = strlen(node->value)+1;
+    HYPRE_Int length2 = strlen(node->value)+1;
     length = strlen(value)+1;
     if (length2 < length) {
       FREE_DH(node->value);

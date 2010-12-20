@@ -36,11 +36,11 @@ char     *file_name;
    FILE    *fp;
  
    double  *data;
-   int     *ia;
-   int     *ja;
-   int      size;
+   HYPRE_Int     *ia;
+   HYPRE_Int     *ja;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
  
  
    /*----------------------------------------------------------
@@ -50,21 +50,21 @@ char     *file_name;
    fp = fopen(file_name, "r");
  
     /* read in junk line */
-    fscanf(fp, "%*[^\n]\n");
+    hypre_fscanf(fp, "%*[^\n]\n");
 
-   fscanf(fp, "%d", &size);
+   hypre_fscanf(fp, "%d", &size);
  
-   ia = hypre_CTAlloc(int, hypre_NDIMU(size+1));
+   ia = hypre_CTAlloc(HYPRE_Int, hypre_NDIMU(size+1));
    for (j = 0; j < size+1; j++)
-      fscanf(fp, "%d", &ia[j]);
+      hypre_fscanf(fp, "%d", &ia[j]);
  
-   ja = hypre_CTAlloc(int, hypre_NDIMA(ia[size]-1));
+   ja = hypre_CTAlloc(HYPRE_Int, hypre_NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
-      fscanf(fp, "%d", &ja[j]);
+      hypre_fscanf(fp, "%d", &ja[j]);
  
    data = hypre_CTAlloc(double, hypre_NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
-      fscanf(fp, "%le", &data[j]);
+      hypre_fscanf(fp, "%le", &data[j]);
  
    fclose(fp);
  
@@ -81,8 +81,8 @@ char     *file_name;
  *  Program kills the junk line `1 1' in old-style ysmp  files
  *--------------------------------------------------------------------------*/
 
-int   main(argc, argv)
-int   argc;
+HYPRE_Int   main(argc, argv)
+HYPRE_Int   argc;
 char *argv[];
 {
    char    *run_name;
@@ -100,14 +100,14 @@ char *argv[];
 
    if (argc < 2)
    {
-      fprintf(stderr, "Usage:  kill_ones  <ysmp file name>\n");
+      hypre_fprintf(stderr, "Usage:  kill_ones  <ysmp file name>\n");
       exit(1);
    }
 
    run_name = argv[1];
 
-   sprintf(file_name_old, "%s", run_name);
-   sprintf(file_name_new, "%s.new", run_name);
+   hypre_sprintf(file_name_old, "%s", run_name);
+   hypre_sprintf(file_name_new, "%s.new", run_name);
 
    A = RYSMP(file_name_old);
    hypre_WriteYSMP(file_name_new,A);

@@ -43,7 +43,7 @@ cat >> $INTERNAL_HEADER <<@
 extern "C" {
 #endif
 
-typedef struct { int prev; int next; } Link;
+typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 @
 

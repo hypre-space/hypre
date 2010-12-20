@@ -29,18 +29,18 @@
 
 typedef struct
 {
-    int  size;  /* size of hash table */
-    int  num;   /* number of entries in hash table */
-    int *keys;  /* list of keys, used for rehashing */
-    int *table; /* the hash table storing the keys */
-    int *data;  /* data associated with each entry in the table */
+    HYPRE_Int  size;  /* size of hash table */
+    HYPRE_Int  num;   /* number of entries in hash table */
+    HYPRE_Int *keys;  /* list of keys, used for rehashing */
+    HYPRE_Int *table; /* the hash table storing the keys */
+    HYPRE_Int *data;  /* data associated with each entry in the table */
 }
 Hash;
 
-Hash *HashCreate(int size);
+Hash *HashCreate(HYPRE_Int size);
 void  HashDestroy(Hash *h);
-int   HashLookup(Hash *h, int key);
-void  HashInsert(Hash *h, int key, int data);
+HYPRE_Int   HashLookup(Hash *h, HYPRE_Int key);
+void  HashInsert(Hash *h, HYPRE_Int key, HYPRE_Int data);
 void  HashRehash(Hash *old, Hash *);
 void  HashReset(Hash *h);
 void  HashPrint(Hash *h);

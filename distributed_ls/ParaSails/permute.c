@@ -21,20 +21,20 @@
 
 #define MM_MAX_LINE_LENGTH 80
 
-int permute(FILE *permfile, FILE *infile, FILE *outfile)
+HYPRE_Int permute(FILE *permfile, FILE *infile, FILE *outfile)
 {
     char line[MM_MAX_LINE_LENGTH];
-    int ret;
-    int M, N, nnz;
+    HYPRE_Int ret;
+    HYPRE_Int M, N, nnz;
 
-    int *old2new, *new2old;
-    int row;
+    HYPRE_Int *old2new, *new2old;
+    HYPRE_Int row;
 
-    int *ptr, *ind;
+    HYPRE_Int *ptr, *ind;
     double *val;
-    int i, j;
+    HYPRE_Int i, j;
 
-    int oldrow, k;
+    HYPRE_Int oldrow, k;
 
     /* skip the comment section */
     do 
@@ -44,20 +44,20 @@ int permute(FILE *permfile, FILE *infile, FILE *outfile)
     }
     while (line[0] == '%');
 
-    sscanf(line, "%d %d %d", &M, &N, &nnz);
+    hypre_sscanf(line, "%d %d %d", &M, &N, &nnz);
 
-    printf("%d %d %d\n", M, N, nnz);
+    hypre_printf("%d %d %d\n", M, N, nnz);
 
     /* allocate space for whole matrix */
-    ptr = (int *)    malloc((M+1) * sizeof(int));
-    ind = (int *)    malloc(nnz * sizeof(int));
+    ptr = (HYPRE_Int *)    malloc((M+1) * sizeof(HYPRE_Int));
+    ind = (HYPRE_Int *)    malloc(nnz * sizeof(HYPRE_Int));
     val = (double *) malloc(nnz * sizeof(double));
     
     /* read the entire matrix */
     k = 0;
     ptr[0] = 0;
     oldrow = 1; /* input row numbers are 1-based */
-    ret = fscanf(infile, "%d %d %lf", &row, &ind[k], &val[k]);
+    ret = hypre_fscanf(infile, "%d %d %lf", &row, &ind[k], &val[k]);
     while (ret != EOF)
     {
         if (row != oldrow)
@@ -68,29 +68,29 @@ int permute(FILE *permfile, FILE *infile, FILE *outfile)
 	}
 
 	k++;
-        ret = fscanf(infile, "%d %d %lf", &row, &ind[k], &val[k]);
+        ret = hypre_fscanf(infile, "%d %d %lf", &row, &ind[k], &val[k]);
     }
     /* set end of last row */
     ptr[M] = k;
 
     /* allocate space for permutation vectors */
-    new2old = (int *) malloc(M * sizeof(int));
-    old2new = (int *) malloc(M * sizeof(int));
+    new2old = (HYPRE_Int *) malloc(M * sizeof(HYPRE_Int));
+    old2new = (HYPRE_Int *) malloc(M * sizeof(HYPRE_Int));
 
     /* read the new2old permutation vector, 0-based */
     for (i=0; i<M; i++)
-        ret = fscanf(permfile, "%d", &new2old[i]);
+        ret = hypre_fscanf(permfile, "%d", &new2old[i]);
 
     /* construct the original ordering, 0-based */
     for (i=0; i<M; i++)
         old2new[new2old[i]] = i;
 
     /* print out the matrix to the output file with the correct permutation */
-    fprintf(outfile, "%d %d %d\n", M, M, nnz);
+    hypre_fprintf(outfile, "%d %d %d\n", M, M, nnz);
     for (i=0; i<M; i++)
     {
         for (j=ptr[new2old[i]]; j<ptr[new2old[i]+1]; j++)
-            fprintf(outfile, "%d %d %.15e\n", i+1, old2new[ind[j]-1]+1, val[j]);
+            hypre_fprintf(outfile, "%d %d %.15e\n", i+1, old2new[ind[j]-1]+1, val[j]);
     }
 
     free(ptr);
@@ -102,16 +102,16 @@ int permute(FILE *permfile, FILE *infile, FILE *outfile)
     return 0;
 }
 
-main(int argc, char *argv[])
+main(HYPRE_Int argc, char *argv[])
 {
-    int ret;
+    HYPRE_Int ret;
     FILE *permfile = fopen(argv[1], "r");
     FILE *infile   = fopen(argv[2], "r");
     FILE *outfile  = fopen(argv[3], "w");
 
     ret = permute(permfile, infile, outfile);
     if (ret)
-	printf("Permutation failed\n");
+	hypre_printf("Permutation failed\n");
 
     fclose(permfile);
     fclose(infile);

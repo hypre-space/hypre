@@ -21,9 +21,9 @@
  * indices of the refinement patches.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
-                        int                  *plevels,
+                        HYPRE_Int                  *plevels,
                         hypre_Index          *rfactors )
 {
    hypre_SStructGrid     *grid =  hypre_SStructVectorGrid(b); 
@@ -35,29 +35,29 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
 
    hypre_BoxManager      *fboxman;
    hypre_BoxManEntry    **boxman_entries;
-   int                    nboxman_entries;
+   HYPRE_Int                    nboxman_entries;
 
    hypre_Box              scaled_box;
    hypre_Box              intersect_box;
 
-   int                    npart=  hypre_SStructVectorNParts(b);
-   int                    ndim =  hypre_SStructVectorNDim(b);
+   HYPRE_Int                    npart=  hypre_SStructVectorNParts(b);
+   HYPRE_Int                    ndim =  hypre_SStructVectorNDim(b);
 
-   int                   *levels;
+   HYPRE_Int                   *levels;
 
    hypre_Index           *refine_factors;
    hypre_Index            temp_index, ilower, iupper;
   
-   int                    level;
-   int                    nvars, var;
+   HYPRE_Int                    level;
+   HYPRE_Int                    nvars, var;
 
-   int                    part, ci, rem, i, j, intersect_size;
+   HYPRE_Int                    part, ci, rem, i, j, intersect_size;
 
    double                *values1;
  
-   int                    ierr = 0;
+   HYPRE_Int                    ierr = 0;
 
-   levels        = hypre_CTAlloc(int, npart);
+   levels        = hypre_CTAlloc(HYPRE_Int, npart);
    refine_factors= hypre_CTAlloc(hypre_Index, npart);
    for (part= 0; part< npart; part++)
    {
@@ -163,14 +163,14 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
  * indices of the refinement patches between two levels.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
-                        int                   part_crse,
+                        HYPRE_Int                   part_crse,
                         hypre_Index           rfactors )
 {
    hypre_SStructGraph    *graph=  hypre_SStructMatrixGraph(A);
    hypre_SStructGrid     *grid =  hypre_SStructGraphGrid(graph); 
-   int                    ndim =  hypre_SStructMatrixNDim(A);
+   HYPRE_Int                    ndim =  hypre_SStructMatrixNDim(A);
 
    hypre_SStructPGrid    *p_cgrid;
 
@@ -180,24 +180,24 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
 
    hypre_BoxManager      *fboxman;
    hypre_BoxManEntry    **boxman_entries;
-   int                    nboxman_entries;
+   HYPRE_Int                    nboxman_entries;
 
    hypre_Box              scaled_box;
    hypre_Box              intersect_box;
 
    hypre_SStructStencil  *stencils;
-   int                    stencil_size;
+   HYPRE_Int                    stencil_size;
 
    hypre_Index           *stencil_shape;
    hypre_Index            temp_index, ilower, iupper;
   
-   int                    nvars, var;
+   HYPRE_Int                    nvars, var;
 
-   int                    ci, i, j, rem, intersect_size, rank;
+   HYPRE_Int                    ci, i, j, rem, intersect_size, rank;
 
    double                *values1, *values2;
  
-   int                    ierr = 0;
+   HYPRE_Int                    ierr = 0;
 
    p_cgrid= hypre_SStructGridPGrid(grid, part_crse);
    nvars  = hypre_SStructPGridNVars(p_cgrid);

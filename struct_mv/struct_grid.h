@@ -29,28 +29,28 @@ typedef struct hypre_StructGrid_struct
 {
    MPI_Comm             comm;
                       
-   int                  dim;          /* Number of grid dimensions */
+   HYPRE_Int                  dim;          /* Number of grid dimensions */
                       
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
-   int                 *ids;          /* Unique IDs for boxes */
+   HYPRE_Int                 *ids;          /* Unique IDs for boxes */
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
 
-   int                  local_size;   /* Number of grid points locally */
-   int                  global_size;  /* Total number of grid points */
+   HYPRE_Int                  local_size;   /* Number of grid points locally */
+   HYPRE_Int                  global_size;  /* Total number of grid points */
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
-   int                  num_periods;  /* number of box set periods */
+   HYPRE_Int                  num_periods;  /* number of box set periods */
    
    hypre_Index         *pshifts;      /* shifts of periodicity */
 
 
-   int                  ref_count;
+   HYPRE_Int                  ref_count;
 
 
-   int                 ghlocal_size;   /* Number of vars in box including ghosts */
-   int                 num_ghost[6];   /* ghost layer size for each box  */  
+   HYPRE_Int                 ghlocal_size;   /* Number of vars in box including ghosts */
+   HYPRE_Int                 num_ghost[6];   /* ghost layer size for each box  */  
 
    hypre_BoxManager   *box_man;
    

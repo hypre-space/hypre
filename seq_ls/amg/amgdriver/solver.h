@@ -43,38 +43,38 @@
 
 typedef struct
 {
-   int      type;
+   HYPRE_Int      type;
 
    double   stop_tolerance;
 
    /* pcg params */
-   int      pcg_max_iter;
-   int      pcg_two_norm;
+   HYPRE_Int      pcg_max_iter;
+   HYPRE_Int      pcg_two_norm;
 
    /* gmres params */
-   int      gmres_max_krylov;
-   int      gmres_max_restarts;
+   HYPRE_Int      gmres_max_krylov;
+   HYPRE_Int      gmres_max_restarts;
 
    /* wjacobi params */
    double   wjacobi_weight;
-   int      wjacobi_max_iter;
+   HYPRE_Int      wjacobi_max_iter;
 
    /* amg setup params */
-   int      amg_levmax;
-   int      amg_ncg;
+   HYPRE_Int      amg_levmax;
+   HYPRE_Int      amg_ncg;
    double   amg_ecg;
-   int      amg_nwt;
+   HYPRE_Int      amg_nwt;
    double   amg_ewt;
-   int      amg_nstr;
+   HYPRE_Int      amg_nstr;
 
    /* amg solve params */
-   int      amg_ncyc;
-   int     *amg_mu;
-   int     *amg_ntrlx;
-   int     *amg_iprlx;
+   HYPRE_Int      amg_ncyc;
+   HYPRE_Int     *amg_mu;
+   HYPRE_Int     *amg_ntrlx;
+   HYPRE_Int     *amg_iprlx;
 
    /* amg output params */
-   int      amg_ioutdat;
+   HYPRE_Int      amg_ioutdat;
 
 } Solver;
 

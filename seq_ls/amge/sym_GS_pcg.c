@@ -1,23 +1,23 @@
 #include "headers.h" 
 
-int 
+HYPRE_Int 
 hypre_sym_GS_pcg(double *x, double *rhs,
 		 double *sparse_matrix, 
 
-		 int *i_dof_dof, int *j_dof_dof,
+		 HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 		
 		 double *v, double *w, double *d, 
 		
-		 int max_iter, 
+		 HYPRE_Int max_iter, 
 		
-		 int num_dofs)
+		 HYPRE_Int num_dofs)
 
 {
 
-  int ierr=0, i, j;
+  HYPRE_Int ierr=0, i, j;
   float delta0, delta_old, delta, asfac, arfac, eps = 1.e-12;
   
-  int iter=0;
+  HYPRE_Int iter=0;
   float tau, alpha, beta;
   float delta_x;
 
@@ -69,7 +69,7 @@ hypre_sym_GS_pcg(double *x, double *rhs,
     delta0+= w[i] * d[i];
 
   if (max_iter > 999) 
-    printf("cg_coarse_delta0: %e\n", delta0); 
+    hypre_printf("cg_coarse_delta0: %e\n", delta0); 
 
   delta_old = delta0;
 
@@ -92,7 +92,7 @@ loop:
 
       if (tau <= 0.e0) 
 	{
-	  printf("indefinite matrix in cg_iter_coarse: %e\n", tau);
+	  hypre_printf("indefinite matrix in cg_iter_coarse: %e\n", tau);
 	  /*	  return -1;                               */
 	}
 
@@ -102,7 +102,7 @@ loop:
 
   iter++;
   if (max_iter > 999) 
-    printf("sym_GS_pcg_iteration: %d;  residual_delta: %e\n", iter, delta_old);
+    hypre_printf("sym_GS_pcg_iteration: %d;  residual_delta: %e\n", iter, delta_old);
 
   for (i=0; i<num_dofs; i++)
     w[i] -= alpha * v[i];
@@ -137,19 +137,19 @@ loop:
       asfac = sqrt(beta);
       arfac = exp(log(delta/delta0)/(2*iter));
 
-      printf("sym_GS_pcg_arfac: %e; sym_GS_pcg_asfac : %e\n", 
+      hypre_printf("sym_GS_pcg_arfac: %e; sym_GS_pcg_asfac : %e\n", 
 	     arfac, asfac); 
     }
 
   return ierr;
 
 }
-int GS_forw(double *x, double *rhs,
-	    double *sparse_matrix, int *i_dof_dof, int *j_dof_dof,
-	    int num_dofs)
+HYPRE_Int GS_forw(double *x, double *rhs,
+	    double *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
+	    HYPRE_Int num_dofs)
 
 {
-  int ierr = 0, i,j;
+  HYPRE_Int ierr = 0, i,j;
   double aux;
   double diag;
 
@@ -169,12 +169,12 @@ int GS_forw(double *x, double *rhs,
 
 }     
 
-int GS_back(double *x, double *rhs,
-	    double *sparse_matrix, int *i_dof_dof, int *j_dof_dof,
-	    int num_dofs)
+HYPRE_Int GS_back(double *x, double *rhs,
+	    double *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
+	    HYPRE_Int num_dofs)
 
 {
-  int ierr = 0,i,j;
+  HYPRE_Int ierr = 0,i,j;
   double aux, diag;
 
   for (i=num_dofs-1; i >= 0; i--)

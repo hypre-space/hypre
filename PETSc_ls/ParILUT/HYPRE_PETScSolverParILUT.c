@@ -27,7 +27,7 @@ HYPRE_PETScSolverParILUT  HYPRE_NewPETScSolverParILUT(
 {
 
    hypre_PETScSolverParILUT     *solver;
-   int            ierr;
+   HYPRE_Int            ierr;
 
    /* Allocate structure for holding solver data */
    solver = (hypre_PETScSolverParILUT *) 
@@ -55,10 +55,10 @@ HYPRE_PETScSolverParILUT  HYPRE_NewPETScSolverParILUT(
  * HYPRE_FreePETScSolverParILUT
  *--------------------------------------------------------------------------*/
 
-int HYPRE_FreePETScSolverParILUT ( 
+HYPRE_Int HYPRE_FreePETScSolverParILUT ( 
                   HYPRE_PETScSolverParILUT in_ptr )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
 
    hypre_PETScSolverParILUT *solver = 
       (hypre_PETScSolverParILUT *) in_ptr;
@@ -80,10 +80,10 @@ int HYPRE_FreePETScSolverParILUT (
  * HYPRE_PETScSolverParILUTInitialize
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScSolverParILUTInitialize ( 
+HYPRE_Int HYPRE_PETScSolverParILUTInitialize ( 
                   HYPRE_PETScSolverParILUT in_ptr )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    hypre_PETScSolverParILUT *solver = 
       (hypre_PETScSolverParILUT *) in_ptr;
 
@@ -97,11 +97,11 @@ int HYPRE_PETScSolverParILUTInitialize (
  * HYPRE_PETScSolverParILUTSetSles
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScSolverParILUTSetSystemSles( 
+HYPRE_Int HYPRE_PETScSolverParILUTSetSystemSles( 
                   HYPRE_PETScSolverParILUT in_ptr,
                   SLES Sles)
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
   hypre_PETScSolverParILUT *solver = 
       (hypre_PETScSolverParILUT *) in_ptr;
 
@@ -113,11 +113,11 @@ int HYPRE_PETScSolverParILUTSetSystemSles(
  * HYPRE_PETScSolverParILUTSetSystemMatrix
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScSolverParILUTSetSystemMatrix( 
+HYPRE_Int HYPRE_PETScSolverParILUTSetSystemMatrix( 
                   HYPRE_PETScSolverParILUT in_ptr,
                   Mat matrix )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
   hypre_PETScSolverParILUT *solver = 
       (hypre_PETScSolverParILUT *) in_ptr;
 
@@ -129,11 +129,11 @@ int HYPRE_PETScSolverParILUTSetSystemMatrix(
  * HYPRE_PETScSolverParILUTSetPreconditionerMatrix
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScSolverParILUTSetPreconditionerMatrix( 
+HYPRE_Int HYPRE_PETScSolverParILUTSetPreconditionerMatrix( 
                   HYPRE_PETScSolverParILUT in_ptr,
                   Mat matrix )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
   hypre_PETScSolverParILUT *solver = 
       (hypre_PETScSolverParILUT *) in_ptr;
 
@@ -175,11 +175,11 @@ Mat
  * HYPRE_PETScSolverParILUTSetFactorRowSize
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScSolverParILUTSetFactorRowSize( 
+HYPRE_Int HYPRE_PETScSolverParILUTSetFactorRowSize( 
                   HYPRE_PETScSolverParILUT in_ptr,
-                  int size )
+                  HYPRE_Int size )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
   hypre_PETScSolverParILUT *solver = 
       (hypre_PETScSolverParILUT *) in_ptr;
   HYPRE_PETScMatPilutSolver distributed_solver =
@@ -194,11 +194,11 @@ int HYPRE_PETScSolverParILUTSetFactorRowSize(
  * HYPRE_PETScSolverParILUTSetDropTolerance
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScSolverParILUTSetDropTolerance( 
+HYPRE_Int HYPRE_PETScSolverParILUTSetDropTolerance( 
                   HYPRE_PETScSolverParILUT in_ptr,
                   double tol )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
   hypre_PETScSolverParILUT *solver = 
       (hypre_PETScSolverParILUT *) in_ptr;
   HYPRE_PETScMatPilutSolver distributed_solver =
@@ -219,10 +219,10 @@ int HYPRE_PETScSolverParILUTSetDropTolerance(
  * HYPRE_PETScSolverParILUTSolve
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScSolverParILUTSolve( HYPRE_PETScSolverParILUT in_ptr,
+HYPRE_Int HYPRE_PETScSolverParILUTSolve( HYPRE_PETScSolverParILUT in_ptr,
                                            Vec x, Vec b )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_PETScSolverParILUT *solver = 
       (hypre_PETScSolverParILUT *) in_ptr;

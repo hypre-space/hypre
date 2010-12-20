@@ -35,32 +35,32 @@
 typedef struct
 {
 
-  int num_elements;
-  int num_faces;
-  int num_nodes;
+  HYPRE_Int num_elements;
+  HYPRE_Int num_faces;
+  HYPRE_Int num_nodes;
 
-  int num_boundarysurfaces;
+  HYPRE_Int num_boundarysurfaces;
 
-  int *i_AE_element;
-  int *j_AE_element;
+  HYPRE_Int *i_AE_element;
+  HYPRE_Int *j_AE_element;
 
-  int *i_element_node;
-  int *j_element_node;
+  HYPRE_Int *i_element_node;
+  HYPRE_Int *j_element_node;
 
-  int *i_element_face;
-  int *j_element_face;
+  HYPRE_Int *i_element_face;
+  HYPRE_Int *j_element_face;
 
-  int *i_face_node;
-  int *j_face_node;
+  HYPRE_Int *i_face_node;
+  HYPRE_Int *j_face_node;
 
-  int *i_face_face;
-  int *j_face_face;
+  HYPRE_Int *i_face_face;
+  HYPRE_Int *j_face_face;
   
-  int *i_face_element;
-  int *j_face_element;
+  HYPRE_Int *i_face_element;
+  HYPRE_Int *j_face_element;
 
-  int *i_boundarysurface_face;
-  int *j_boundarysurface_face;
+  HYPRE_Int *i_boundarysurface_face;
+  HYPRE_Int *j_boundarysurface_face;
 
 
 } hypre_AMGeMatrixTopology;

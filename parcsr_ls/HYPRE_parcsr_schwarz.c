@@ -25,7 +25,7 @@
  * HYPRE_SchwarzCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SchwarzCreate( HYPRE_Solver *solver)
 {
    *solver = (HYPRE_Solver) hypre_SchwarzCreate( ) ;
@@ -37,7 +37,7 @@ HYPRE_SchwarzCreate( HYPRE_Solver *solver)
  * HYPRE_SchwarzDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SchwarzDestroy( HYPRE_Solver solver )
 {
    return( hypre_SchwarzDestroy( (void *) solver ) );
@@ -47,7 +47,7 @@ HYPRE_SchwarzDestroy( HYPRE_Solver solver )
  * HYPRE_SchwarzSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SchwarzSetup(HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector b,
@@ -63,7 +63,7 @@ HYPRE_SchwarzSetup(HYPRE_Solver solver,
  * HYPRE_SchwarzSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SchwarzSolve( HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector b,
@@ -77,9 +77,9 @@ HYPRE_SchwarzSolve( HYPRE_Solver solver,
                               (hypre_ParVector *) x ) );
 }
 
-int
+HYPRE_Int
 HYPRE_SchwarzSetVariant( HYPRE_Solver solver,
-                         int          variant )
+                         HYPRE_Int          variant )
 {
    return( hypre_SchwarzSetVariant( (void *) solver, variant ) );
 }
@@ -88,8 +88,8 @@ HYPRE_SchwarzSetVariant( HYPRE_Solver solver,
  * HYPRE_SchwarzSetOverlap
  *--------------------------------------------------------------------------*/
 
-int
-HYPRE_SchwarzSetOverlap( HYPRE_Solver solver, int overlap)
+HYPRE_Int
+HYPRE_SchwarzSetOverlap( HYPRE_Solver solver, HYPRE_Int overlap)
 {
    return( hypre_SchwarzSetOverlap( (void *) solver, overlap ) );
 }
@@ -98,9 +98,9 @@ HYPRE_SchwarzSetOverlap( HYPRE_Solver solver, int overlap)
  * HYPRE_SchwarzSetDomainType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SchwarzSetDomainType( HYPRE_Solver solver,
-                              int          domain_type  )
+                              HYPRE_Int          domain_type  )
 {
    return( hypre_SchwarzSetDomainType( (void *) solver, domain_type ) );
 }
@@ -109,7 +109,7 @@ HYPRE_SchwarzSetDomainType( HYPRE_Solver solver,
  * HYPRE_SchwarzSetDomainStructure
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SchwarzSetDomainStructure( HYPRE_Solver solver,
                                  HYPRE_CSRMatrix domain_structure  )
 {
@@ -121,9 +121,9 @@ HYPRE_SchwarzSetDomainStructure( HYPRE_Solver solver,
  * HYPRE_SchwarzSetNumFunctions
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SchwarzSetNumFunctions( HYPRE_Solver  solver,
-                              int          num_functions  )
+                              HYPRE_Int          num_functions  )
 {
    return( hypre_SchwarzSetNumFunctions( (void *) solver, num_functions ) );
 }
@@ -132,9 +132,9 @@ HYPRE_SchwarzSetNumFunctions( HYPRE_Solver  solver,
  * HYPRE_SchwarzSetNonSymm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SchwarzSetNonSymm( HYPRE_Solver  solver,
-                                int          use_nonsymm  )
+                                HYPRE_Int          use_nonsymm  )
 {
    return( hypre_SchwarzSetNonSymm( (void *) solver, use_nonsymm ));
 }
@@ -143,7 +143,7 @@ HYPRE_SchwarzSetNonSymm( HYPRE_Solver  solver,
  * HYPRE_SchwarzSetRelaxWeight
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SchwarzSetRelaxWeight( HYPRE_Solver  solver,
                                 double relax_weight)
 {
@@ -154,9 +154,9 @@ HYPRE_SchwarzSetRelaxWeight( HYPRE_Solver  solver,
  * HYPRE_SchwarzSetDofFunc
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SchwarzSetDofFunc( HYPRE_Solver  solver,
-                              int          *dof_func  )
+                              HYPRE_Int          *dof_func  )
 {
    return( hypre_SchwarzSetDofFunc( (void *) solver, dof_func ) );
 }

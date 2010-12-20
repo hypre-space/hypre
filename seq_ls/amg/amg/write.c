@@ -34,11 +34,11 @@ hypre_Matrix  *matrix;
    FILE    *fp;
 
    double  *data;
-   int     *ia;
-   int     *ja;
-   int      size;
+   HYPRE_Int     *ia;
+   HYPRE_Int     *ja;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -52,16 +52,16 @@ hypre_Matrix  *matrix;
 
    fp = fopen(file_name, "w");
 
-   fprintf(fp, "%d\n", size);
+   hypre_fprintf(fp, "%d\n", size);
 
    for (j = 0; j < size+1; j++)
-      fprintf(fp, "%d\n", ia[j]);
+      hypre_fprintf(fp, "%d\n", ia[j]);
 
    for (j = 0; j < ia[size]-1; j++)
-      fprintf(fp, "%d\n", ja[j]);
+      hypre_fprintf(fp, "%d\n", ja[j]);
 
    for (j = 0; j < ia[size]-1; j++)
-      fprintf(fp, "%le\n", data[j]);
+      hypre_fprintf(fp, "%le\n", data[j]);
 
    fclose(fp);
 
@@ -79,9 +79,9 @@ hypre_Vector  *vector;
    FILE    *fp;
 
    double  *data;
-   int      size;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -93,10 +93,10 @@ hypre_Vector  *vector;
 
    fp = fopen(file_name, "w");
 
-   fprintf(fp, "%d\n", size);
+   hypre_fprintf(fp, "%d\n", size);
 
    for (j = 0; j < size; j++)
-      fprintf(fp, "%le\n", data[j]);
+      hypre_fprintf(fp, "%le\n", data[j]);
 
    fclose(fp);
 
@@ -114,10 +114,10 @@ hypre_VectorInt  *vector;
 {
    FILE    *fp;
 
-   int     *data;
-   int      size;
+   HYPRE_Int     *data;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -129,10 +129,10 @@ hypre_VectorInt  *vector;
 
    fp = fopen(file_name, "w");
 
-   fprintf(fp, "%d\n", size);
+   hypre_fprintf(fp, "%d\n", size);
 
    for (j = 0; j < size; j++)
-      fprintf(fp, "%d\n", data[j]);
+      hypre_fprintf(fp, "%d\n", data[j]);
 
    fclose(fp);
 
@@ -154,21 +154,21 @@ void    *data;
    hypre_AMGData  *amg_data = data;
 
 
-   int      type;
+   HYPRE_Int      type;
 
    /* amg setup params */
-   int      amg_levmax;
-   int      amg_ncg;
+   HYPRE_Int      amg_levmax;
+   HYPRE_Int      amg_ncg;
    double   amg_ecg;
-   int      amg_nwt;
+   HYPRE_Int      amg_nwt;
    double   amg_ewt;
-   int      amg_nstr;
+   HYPRE_Int      amg_nstr;
 
 
    /* amg output params */
-   int      amg_ioutdat;
+   HYPRE_Int      amg_ioutdat;
 
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -194,23 +194,23 @@ void    *data;
    { 
       fp = fopen(file_name, "a");
 
-      fprintf(fp,"\n AMG SETUP PARAMETERS:\n\n");  
+      hypre_fprintf(fp,"\n AMG SETUP PARAMETERS:\n\n");  
    
    /*----------------------------------------------------------
     * AMG info
     *----------------------------------------------------------*/
 
 
-      fprintf(fp, "  AMG Parameters:\n");
-      fprintf(fp, "    Maximum number of levels:            %d \n",
+      hypre_fprintf(fp, "  AMG Parameters:\n");
+      hypre_fprintf(fp, "    Maximum number of levels:            %d \n",
 	      amg_levmax);
-      fprintf(fp, "    Coarsening controls (ncg, ecg):      %d   %f \n",
+      hypre_fprintf(fp, "    Coarsening controls (ncg, ecg):      %d   %f \n",
 	      amg_ncg, amg_ecg);
-      fprintf(fp, "    Interpolation controls (nwt, ewt):   %d   %f \n",
+      hypre_fprintf(fp, "    Interpolation controls (nwt, ewt):   %d   %f \n",
 	      amg_nwt, amg_ewt);
-      fprintf(fp, "    Strong connection definition (nstr): %d \n", 
+      hypre_fprintf(fp, "    Strong connection definition (nstr): %d \n", 
               amg_nstr); 
-      fprintf(fp, "    Output flag (ioutdat): %d \n", amg_ioutdat);
+      hypre_fprintf(fp, "    Output flag (ioutdat): %d \n", amg_ioutdat);
 
    /*----------------------------------------------------------
     * Close the output file
@@ -238,22 +238,22 @@ double   tol;
    hypre_AMGData  *amg_data = data;
 
 
-   int      type;
+   HYPRE_Int      type;
 
    double   stop_tolerance;
 
  
    /* amg solve params */
-   int      amg_ncyc;
-   int      amg_levmax;
-   int     *amg_mu;
-   int     *amg_ntrlx;
-   int     *amg_iprlx;
+   HYPRE_Int      amg_ncyc;
+   HYPRE_Int      amg_levmax;
+   HYPRE_Int     *amg_mu;
+   HYPRE_Int     *amg_ntrlx;
+   HYPRE_Int     *amg_iprlx;
 
    /* amg output params */
-   int      amg_ioutdat;
+   HYPRE_Int      amg_ioutdat;
 
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -281,28 +281,28 @@ double   tol;
    { 
       fp = fopen(file_name, "a");
 
-      fprintf(fp,"\nAMG SOLVER PARAMETERS:\n\n");
-      fprintf(fp, "  Solver Type: ");
-      fprintf(fp, "AMG \n\n");
+      hypre_fprintf(fp,"\nAMG SOLVER PARAMETERS:\n\n");
+      hypre_fprintf(fp, "  Solver Type: ");
+      hypre_fprintf(fp, "AMG \n\n");
   
    
    /*----------------------------------------------------------
     * AMG info
     *----------------------------------------------------------*/
 
-      fprintf(fp, "    Number and type of cycles (ncyc):    %d \n", amg_ncyc);
-      fprintf(fp, "    Stopping Tolerance:                  %e \n",
+      hypre_fprintf(fp, "    Number and type of cycles (ncyc):    %d \n", amg_ncyc);
+      hypre_fprintf(fp, "    Stopping Tolerance:                  %e \n",
                    stop_tolerance); 
-      fprintf(fp, "    W-cycling parameter (mu): ");
+      hypre_fprintf(fp, "    W-cycling parameter (mu): ");
       for (j = 0; j < amg_levmax; j++)
-	 fprintf(fp, "%d ", amg_mu[j]);
-      fprintf(fp, "\n");
-      fprintf(fp, "    Relaxation Parameters:\n");
-      fprintf(fp, "       ntr(f,d,u,c): %d  %d  %d  %d \n",
+	 hypre_fprintf(fp, "%d ", amg_mu[j]);
+      hypre_fprintf(fp, "\n");
+      hypre_fprintf(fp, "    Relaxation Parameters:\n");
+      hypre_fprintf(fp, "       ntr(f,d,u,c): %d  %d  %d  %d \n",
 	      amg_ntrlx[0], amg_ntrlx[1], amg_ntrlx[2], amg_ntrlx[3]);
-      fprintf(fp, "       ipr(f,d,u,c): %d  %d  %d  %d \n",
+      hypre_fprintf(fp, "       ipr(f,d,u,c): %d  %d  %d  %d \n",
 	      amg_iprlx[0], amg_iprlx[1], amg_iprlx[2], amg_iprlx[3]);
-      fprintf(fp, "    Output flag (ioutdat): %d \n", amg_ioutdat);
+      hypre_fprintf(fp, "    Output flag (ioutdat): %d \n", amg_ioutdat);
 
    /*----------------------------------------------------------
     * Close the output file

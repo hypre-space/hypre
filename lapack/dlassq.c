@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dlassq_(integer *n, doublereal *x, integer *incx, 
+/* Subroutine */ HYPRE_Int dlassq_(integer *n, doublereal *x, integer *incx, 
 	doublereal *scale, doublereal *sumsq)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   

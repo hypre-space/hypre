@@ -44,10 +44,10 @@
  * arrays.
  *--------------------------------------------------------------------------*/
 
-PrunedRows *PrunedRowsCreate(Matrix *mat, int size, DiagScale *diag_scale, 
+PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale, 
   double thresh)
 {
-    int row, len, *ind, count, j, *data;
+    HYPRE_Int row, len, *ind, count, j, *data;
     double *val, temp;
 
     PrunedRows *p = (PrunedRows *) malloc(sizeof(PrunedRows));
@@ -55,8 +55,8 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, int size, DiagScale *diag_scale,
     p->mem  = MemCreate();
     p->size = MAX(size, mat->end_row - mat->beg_row + 1);
 
-    p->len = (int *)  malloc(p->size * sizeof(int));
-    p->ind = (int **) malloc(p->size * sizeof(int *));
+    p->len = (HYPRE_Int *)  malloc(p->size * sizeof(HYPRE_Int));
+    p->ind = (HYPRE_Int **) malloc(p->size * sizeof(HYPRE_Int *));
 
     /* Prune and store the rows on the local processor */
 
@@ -73,7 +73,7 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, int size, DiagScale *diag_scale,
                 count++;
         }
 
-        p->ind[row] = (int *) MemAlloc(p->mem, count*sizeof(int));
+        p->ind[row] = (HYPRE_Int *) MemAlloc(p->mem, count*sizeof(HYPRE_Int));
         p->len[row] = count;
 
         data = p->ind[row];
@@ -107,9 +107,9 @@ void PrunedRowsDestroy(PrunedRows *p)
  * pruned rows object "p".  The indices may span several rows.
  *--------------------------------------------------------------------------*/
 
-int *PrunedRowsAlloc(PrunedRows *p, int len)
+HYPRE_Int *PrunedRowsAlloc(PrunedRows *p, HYPRE_Int len)
 {
-    return (int *) MemAlloc(p->mem, len*sizeof(int));
+    return (HYPRE_Int *) MemAlloc(p->mem, len*sizeof(HYPRE_Int));
 }
 
 /*--------------------------------------------------------------------------
@@ -118,16 +118,16 @@ int *PrunedRowsAlloc(PrunedRows *p, int len)
  * this interface; the local pruned rows are put using the create function.
  *--------------------------------------------------------------------------*/
 
-void PrunedRowsPut(PrunedRows *p, int index, int len, int *ind)
+void PrunedRowsPut(PrunedRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind)
 {
     if (index >= p->size)
     {
 	p->size = index*2;
 #ifdef PARASAILS_DEBUG
-	printf("StoredRows resize %d\n", p->size);
+	hypre_printf("StoredRows resize %d\n", p->size);
 #endif
-	p->len = (int *)  realloc(p->len, p->size * sizeof(int));
-	p->ind = (int **) realloc(p->ind, p->size * sizeof(int *));
+	p->len = (HYPRE_Int *)  realloc(p->len, p->size * sizeof(HYPRE_Int));
+	p->ind = (HYPRE_Int **) realloc(p->ind, p->size * sizeof(HYPRE_Int *));
     }
 
     p->len[index] = len;
@@ -139,7 +139,7 @@ void PrunedRowsPut(PrunedRows *p, int index, int len, int *ind)
  * "lenp" and "indp" in the pruned rows object "p".
  *--------------------------------------------------------------------------*/
 
-void PrunedRowsGet(PrunedRows *p, int index, int *lenp, int **indp)
+void PrunedRowsGet(PrunedRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp)
 {
     *lenp = p->len[index];
     *indp = p->ind[index];

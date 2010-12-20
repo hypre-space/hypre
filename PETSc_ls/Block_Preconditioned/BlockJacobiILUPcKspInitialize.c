@@ -25,7 +25,7 @@ void *BlockJacobiILUPcKspInitialize( void *in_ptr )
    KSP         ksp;
 
    BJData     *BJ_data;
-   int         i, ierr, flg, size, first_row, last_row;
+   HYPRE_Int         i, ierr, flg, size, first_row, last_row;
 
 
 
@@ -47,7 +47,7 @@ void *BlockJacobiILUPcKspInitialize( void *in_ptr )
 
 }
 
-int BlockJacobiILUPcKspFinalize (void *data )
+HYPRE_Int BlockJacobiILUPcKspFinalize (void *data )
 {
   BJData      *BJ_data = data;
 

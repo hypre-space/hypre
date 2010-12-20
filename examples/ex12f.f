@@ -3,9 +3,9 @@ c     Example 12
 c     
 c     Interface:    Semi-Structured interface (SStruct)
 c     
-c     Compile with: make ex12 (may need to edit HYPRE_DIR in Makefile)
+c     Compile with: make ex12f (may need to edit HYPRE_DIR in Makefile)
 c  
-c     Sample runs:  mpirun -np 2 ex12
+c     Sample runs:  mpirun -np 2 ex12f
 c  
 c     Description: The grid layout is the same as ex1, but with nodal
 c     unknowns. The solver is PCG preconditioned with either PFMG or

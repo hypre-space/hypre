@@ -25,7 +25,7 @@
  * Static variables
  *--------------------------------------------------------------------------*/
 
-static int Seed = 13579;
+static HYPRE_Int Seed = 13579;
 
 #define M 1048576
 #define L 1027
@@ -39,7 +39,7 @@ static int Seed = 13579;
  *--------------------------------------------------------------------------*/
 
 void  hypre_SeedRand(seed)
-int   seed;
+HYPRE_Int   seed;
 {
    Seed = (2*seed - 1) % M;
 }

@@ -28,29 +28,29 @@
  *        hypre_CSRMatrix A;
  ****************************************************************************/
 #include "headers.h" 
-int hypre_AMGeMatrixAssemble(hypre_CSRMatrix     **A_pointer,
+HYPRE_Int hypre_AMGeMatrixAssemble(hypre_CSRMatrix     **A_pointer,
 
-			     int *i_element_chord,
-			     int *j_element_chord,
+			     HYPRE_Int *i_element_chord,
+			     HYPRE_Int *j_element_chord,
 			     double *a_element_chord,
 
-			     int *i_chord_dof, 
-			     int *j_chord_dof,
+			     HYPRE_Int *i_chord_dof, 
+			     HYPRE_Int *j_chord_dof,
 
-			     int num_elements, 
-			     int num_chords,
-			     int num_dofs)
+			     HYPRE_Int num_elements, 
+			     HYPRE_Int num_chords,
+			     HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
-  int i,j;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j;
 
   hypre_CSRMatrix     *A;
 
-  int *i_dof_dof, *j_dof_dof;
-  int dof_counter, dof_dof_counter;
+  HYPRE_Int *i_dof_dof, *j_dof_dof;
+  HYPRE_Int dof_counter, dof_dof_counter;
   
-  int *i_chord_element, *j_chord_element;
+  HYPRE_Int *i_chord_element, *j_chord_element;
   double *a_chord_element;
   double *chord_data;
 
@@ -65,8 +65,8 @@ int hypre_AMGeMatrixAssemble(hypre_CSRMatrix     **A_pointer,
       chord_data[j_element_chord[j]]+= a_element_chord[j];
 
 
-  i_dof_dof = hypre_CTAlloc(int, num_dofs+1);
-  j_dof_dof = hypre_CTAlloc(int, num_chords);
+  i_dof_dof = hypre_CTAlloc(HYPRE_Int, num_dofs+1);
+  j_dof_dof = hypre_CTAlloc(HYPRE_Int, num_chords);
 
   dof_dof_counter = 0;
   dof_counter = -1;
@@ -85,10 +85,10 @@ int hypre_AMGeMatrixAssemble(hypre_CSRMatrix     **A_pointer,
   i_dof_dof[num_dofs] = dof_dof_counter;
 
   /*
-  printf("assembled matrix: ============================================\n");
+  hypre_printf("assembled matrix: ============================================\n");
   for (i=0; i < num_dofs; i++)
     for (j=i_dof_dof[i]; j < i_dof_dof[i+1]; j++)
-      printf("entry(%d,%d): %e\n", i, j_dof_dof[j], chord_data[j]);
+      hypre_printf("entry(%d,%d): %e\n", i, j_dof_dof[j], chord_data[j]);
 	  
       */
 

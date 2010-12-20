@@ -26,7 +26,7 @@
  * HYPRE_SStructBiCGSTABCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABCreate( MPI_Comm             comm,
                           HYPRE_SStructSolver *solver )
 {
@@ -50,7 +50,7 @@ HYPRE_SStructBiCGSTABCreate( MPI_Comm             comm,
  * HYPRE_SStructBiCGSTABDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructBiCGSTABDestroy( HYPRE_SStructSolver solver )
 {
    return( hypre_BiCGSTABDestroy( (void *) solver ) );
@@ -60,7 +60,7 @@ HYPRE_SStructBiCGSTABDestroy( HYPRE_SStructSolver solver )
  * HYPRE_SStructBiCGSTABSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructBiCGSTABSetup( HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
                          HYPRE_SStructVector b,
@@ -76,7 +76,7 @@ HYPRE_SStructBiCGSTABSetup( HYPRE_SStructSolver solver,
  * HYPRE_SStructBiCGSTABSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructBiCGSTABSolve( HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
                          HYPRE_SStructVector b,
@@ -92,7 +92,7 @@ HYPRE_SStructBiCGSTABSolve( HYPRE_SStructSolver solver,
  * HYPRE_SStructBiCGSTABSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABSetTol( HYPRE_SStructSolver solver,
                           double              tol )
 {
@@ -102,7 +102,7 @@ HYPRE_SStructBiCGSTABSetTol( HYPRE_SStructSolver solver,
  * HYPRE_SStructBiCGSTABSetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABSetAbsoluteTol( HYPRE_SStructSolver solver,
                           double              tol )
 {
@@ -113,9 +113,9 @@ HYPRE_SStructBiCGSTABSetAbsoluteTol( HYPRE_SStructSolver solver,
  * HYPRE_SStructBiCGSTABSetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABSetMinIter( HYPRE_SStructSolver solver,
-                              int                 min_iter )
+                              HYPRE_Int                 min_iter )
 {
    return( HYPRE_BiCGSTABSetMinIter( (HYPRE_Solver) solver, min_iter ) );
 }
@@ -124,9 +124,9 @@ HYPRE_SStructBiCGSTABSetMinIter( HYPRE_SStructSolver solver,
  * HYPRE_SStructBiCGSTABSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABSetMaxIter( HYPRE_SStructSolver solver,
-                              int                 max_iter )
+                              HYPRE_Int                 max_iter )
 {
    return( HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -135,9 +135,9 @@ HYPRE_SStructBiCGSTABSetMaxIter( HYPRE_SStructSolver solver,
  * HYPRE_SStructBiCGSTABSetStopCrit
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABSetStopCrit( HYPRE_SStructSolver solver,
-                               int                 stop_crit )
+                               HYPRE_Int                 stop_crit )
 {
    return( HYPRE_BiCGSTABSetStopCrit( (HYPRE_Solver) solver, stop_crit ) );
 }
@@ -146,7 +146,7 @@ HYPRE_SStructBiCGSTABSetStopCrit( HYPRE_SStructSolver solver,
  * HYPRE_SStructBiCGSTABSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABSetPrecond( HYPRE_SStructSolver          solver,
                               HYPRE_PtrToSStructSolverFcn  precond,
                               HYPRE_PtrToSStructSolverFcn  precond_setup,
@@ -162,9 +162,9 @@ HYPRE_SStructBiCGSTABSetPrecond( HYPRE_SStructSolver          solver,
  * HYPRE_SStructBiCGSTABSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABSetLogging( HYPRE_SStructSolver solver,
-                              int                 logging )
+                              HYPRE_Int                 logging )
 {
    return( HYPRE_BiCGSTABSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -173,9 +173,9 @@ HYPRE_SStructBiCGSTABSetLogging( HYPRE_SStructSolver solver,
  * HYPRE_SStructBiCGSTABSetPrintLevel
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABSetPrintLevel( HYPRE_SStructSolver solver,
-                              int                 print_level )
+                              HYPRE_Int                 print_level )
 {
    return( HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
 }
@@ -184,9 +184,9 @@ HYPRE_SStructBiCGSTABSetPrintLevel( HYPRE_SStructSolver solver,
  * HYPRE_SStructBiCGSTABGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABGetNumIterations( HYPRE_SStructSolver  solver,
-                                    int                 *num_iterations )
+                                    HYPRE_Int                 *num_iterations )
 {
    return( HYPRE_BiCGSTABGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }
@@ -195,7 +195,7 @@ HYPRE_SStructBiCGSTABGetNumIterations( HYPRE_SStructSolver  solver,
  * HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
                                                 double              *norm )
 {
@@ -206,7 +206,7 @@ HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
  * HYPRE_SStructBiCGSTABGetResidual
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructBiCGSTABGetResidual( HYPRE_SStructSolver  solver,
                                   void 			**residual)
 {

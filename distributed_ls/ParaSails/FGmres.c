@@ -25,38 +25,38 @@
 #include "Matrix.h"
 #include "ParaSails.h"
 
-double hypre_F90_NAME_BLAS(ddot, DDOT)(int *, double *, int *, double *, int *);
-int hypre_F90_NAME_BLAS(dcopy, DCOPY)(int *, double *, int *, double *, int *);
-int hypre_F90_NAME_BLAS(dscal, DSCAL)(int *, double *, double *, int *);
-int hypre_F90_NAME_BLAS(daxpy, DAXPY)(int *, double *, double *, int *, double *, int *);
+double hypre_F90_NAME_BLAS(ddot, DDOT)(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(dcopy, DCOPY)(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(dscal, DSCAL)(HYPRE_Int *, double *, double *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(daxpy, DAXPY)(HYPRE_Int *, double *, double *, HYPRE_Int *, double *, HYPRE_Int *);
 
-static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
+static double InnerProd(HYPRE_Int n, double *x, double *y, MPI_Comm comm)
 {
     double local_result, result;
 
-    int one = 1;
+    HYPRE_Int one = 1;
     local_result = hypre_F90_NAME_BLAS(ddot, DDOT)(&n, x, &one, y, &one);
 
-    MPI_Allreduce(&local_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm);
+    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
 
     return result;
 }
 
-static void CopyVector(int n, double *x, double *y)
+static void CopyVector(HYPRE_Int n, double *x, double *y)
 {
-    int one = 1;
+    HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(dcopy, DCOPY)(&n, x, &one, y, &one);
 }
 
-static void ScaleVector(int n, double alpha, double *x)
+static void ScaleVector(HYPRE_Int n, double alpha, double *x)
 {
-    int one = 1;
+    HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(dscal, DSCAL)(&n, &alpha, x, &one);
 }
 
-static void Axpy(int n, double alpha, double *x, double *y)
+static void Axpy(HYPRE_Int n, double alpha, double *x, double *y)
 {
-    int one = 1;
+    HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(daxpy, DAXPY)(&n, &alpha, x, &one, y, &one);
 }
 
@@ -90,19 +90,19 @@ static void ApplyPlaneRotation(double *dx, double *dy, double cs, double sn)
 }
 
 void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
-  int dim, double tol, int max_iter)
+  HYPRE_Int dim, double tol, HYPRE_Int max_iter)
 {
-    int mype;
-    int iter;
+    HYPRE_Int mype;
+    HYPRE_Int iter;
     double rel_resid;
 
     double *H  = (double *) malloc(dim*(dim+1) * sizeof(double));
 
     /* local problem size */
-    int n = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int n = mat->end_row - mat->beg_row + 1;
 
-    int m1 = dim+1; /* used inside H macro */
-    int i, j, k;
+    HYPRE_Int m1 = dim+1; /* used inside H macro */
+    HYPRE_Int i, j, k;
     double beta, resid0;
 
     double *s  = (double *) malloc((dim+1) * sizeof(double));
@@ -113,7 +113,7 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
     double *W  = (double *) malloc(n*dim * sizeof(double));
 
     MPI_Comm comm = mat->comm;
-    MPI_Comm_rank(comm, &mype);
+    hypre_MPI_Comm_rank(comm, &mype);
 
     iter = 0;
     do
@@ -166,7 +166,7 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
             rel_resid = ABS(s[i+1]) / resid0;
 #ifdef PARASAILS_CG_PRINT
             if (mype == 0 && iter % 10 == 0)
-               printf("Iter (%d): rel. resid. norm: %e\n", iter, rel_resid);
+               hypre_printf("Iter (%d): rel. resid. norm: %e\n", iter, rel_resid);
 #endif
             if (rel_resid <= tol)
                 break;
@@ -197,7 +197,7 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
     rel_resid = beta / resid0;
 
     if (mype == 0)
-        printf("Iter (%d): computed rrn    : %e\n", iter, rel_resid);
+        hypre_printf("Iter (%d): computed rrn    : %e\n", iter, rel_resid);
 
     free(H);
     free(s);

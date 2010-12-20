@@ -34,7 +34,7 @@
 double time_getWallclockSeconds(void)
 {
 #ifdef TIMER_USE_MPI
-   return(MPI_Wtime());
+   return(hypre_MPI_Wtime());
 #else
 #ifdef WIN32
    clock_t cl=clock();

@@ -18,13 +18,13 @@
 
 #include "euclid_common.h"
 
-extern void shellSort_int(const int n, int *x);
-extern void shellSort_float(int n, double *v);
+extern void shellSort_int(const HYPRE_Int n, HYPRE_Int *x);
+extern void shellSort_float(HYPRE_Int n, double *v);
 
 /*
-extern void shellSort_int_int(const int n, int *x, int *y);
-extern void shellSort_int_float(int n, int *x, double *v);
-extern void shellSort_int_int_float(int n, int *x, int *y, double *v);
+extern void shellSort_int_int(const HYPRE_Int n, HYPRE_Int *x, HYPRE_Int *y);
+extern void shellSort_int_float(HYPRE_Int n, HYPRE_Int *x, double *v);
+extern void shellSort_int_int_float(HYPRE_Int n, HYPRE_Int *x, HYPRE_Int *y, double *v);
 */
 
 #endif

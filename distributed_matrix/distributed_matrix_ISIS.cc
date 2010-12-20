@@ -28,7 +28,7 @@ extern "C" {
 
 typedef struct
 {
-    int *ind;
+    HYPRE_Int *ind;
     double *val;
 } 
 RowBuf;
@@ -40,7 +40,7 @@ RowBuf;
 
   /* matrix must be set before calling this function*/
 
-int 
+HYPRE_Int 
 hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
 {
 #ifdef ISIS_AVAILABLE
@@ -48,8 +48,8 @@ hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
 
    const Map& map = mat->getMap();
 
-   int num_rows = mat->getMap().n();
-   int num_cols = mat->getMap().n();
+   HYPRE_Int num_rows = mat->getMap().n();
+   HYPRE_Int num_cols = mat->getMap().n();
    
    hypre_DistributedMatrixM(dm) = num_rows;
    hypre_DistributedMatrixN(dm) = num_cols;
@@ -57,7 +57,7 @@ hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
    /* allocate space for row buffers */
 
    RowBuf *rowbuf = new RowBuf;
-   rowbuf->ind = new int[num_cols];
+   rowbuf->ind = new HYPRE_Int[num_cols];
    rowbuf->val = new double[num_cols];
 
    dm->auxiliary_data = (void *) rowbuf;
@@ -70,7 +70,7 @@ hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
  * hypre_FreeDistributedMatrixISIS
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_FreeDistributedMatrixISIS( hypre_DistributedMatrix *dm)
 {
 #ifdef ISIS_AVAILABLE
@@ -88,7 +88,7 @@ hypre_FreeDistributedMatrixISIS( hypre_DistributedMatrix *dm)
  * hypre_PrintDistributedMatrixISIS
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_PrintDistributedMatrixISIS( hypre_DistributedMatrix *matrix )
 {
 #ifdef ISIS_AVAILABLE
@@ -102,10 +102,10 @@ hypre_PrintDistributedMatrixISIS( hypre_DistributedMatrix *matrix )
  * hypre_GetDistributedMatrixLocalRangeISIS
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm,
-                             int *start,
-                             int *end )
+                             HYPRE_Int *start,
+                             HYPRE_Int *end )
 {
 #ifdef ISIS_AVAILABLE
    RowMatrix *mat = (RowMatrix *) hypre_DistributedMatrixLocalStorage(dm);
@@ -125,17 +125,17 @@ hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm,
 /* semantics: buffers returned will be overwritten on next call to 
 // this get function */
 
-int 
+HYPRE_Int 
 hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
-                             int row,
-                             int *size,
-                             int **col_ind,
+                             HYPRE_Int row,
+                             HYPRE_Int *size,
+                             HYPRE_Int **col_ind,
                              double **values )
 {
 #ifdef ISIS_AVAILABLE
    RowMatrix *mat = (RowMatrix *) hypre_DistributedMatrixLocalStorage(dm);
    RowBuf *rowbuf;
-   int i, temp;
+   HYPRE_Int i, temp;
 
    rowbuf = (RowBuf *) dm->auxiliary_data;
 
@@ -144,8 +144,8 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
 #if 0
    // add diagonal element if necessary
    {
-       int *p;
-       int found = 0;
+       HYPRE_Int *p;
+       HYPRE_Int found = 0;
 
        for (i=0, p=rowbuf->ind; i<temp; i++, p++)
        {
@@ -165,7 +165,7 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
    // set pointers to local buffers
    if (col_ind != NULL)
    {
-       int *p;
+       HYPRE_Int *p;
 
        *size = temp;
        *col_ind = rowbuf->ind;
@@ -190,11 +190,11 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
  * hypre_RestoreDistributedMatrixRowISIS
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_RestoreDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
-                             int row,
-                             int *size,
-                             int **col_ind,
+                             HYPRE_Int row,
+                             HYPRE_Int *size,
+                             HYPRE_Int **col_ind,
                              double **values )
 {
   /* does nothing, since we use local buffers */

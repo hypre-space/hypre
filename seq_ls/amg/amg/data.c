@@ -31,18 +31,18 @@ hypre_AMGData   *hypre_AMGNewData(levmax, ncg, ecg, nwt, ewt, nstr,
 		       ncyc, mu, ntrlx, iprlx,
 		       ioutdat, cycle_op_count,
 		       log_file_name)
-int     levmax;
-int     ncg;
+HYPRE_Int     levmax;
+HYPRE_Int     ncg;
 double  ecg;
-int     nwt;
+HYPRE_Int     nwt;
 double  ewt;
-int     nstr;
-int     ncyc;
-int    *mu;
-int    *ntrlx;
-int    *iprlx;
-int     ioutdat;
-int     cycle_op_count;
+HYPRE_Int     nstr;
+HYPRE_Int     ncyc;
+HYPRE_Int    *mu;
+HYPRE_Int    *ntrlx;
+HYPRE_Int    *iprlx;
+HYPRE_Int     ioutdat;
+HYPRE_Int     cycle_op_count;
 char   *log_file_name;
 {
    hypre_AMGData  *amg_data;
@@ -64,7 +64,7 @@ char   *log_file_name;
    hypre_AMGDataIOutDat(amg_data) = ioutdat;
    hypre_AMGDataCycleOpCount(amg_data) = cycle_op_count;
 
-   sprintf(hypre_AMGDataLogFileName(amg_data), "%s", log_file_name); 
+   hypre_sprintf(hypre_AMGDataLogFileName(amg_data), "%s", log_file_name); 
 
    return amg_data;
 }

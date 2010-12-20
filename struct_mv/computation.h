@@ -50,7 +50,7 @@ typedef struct hypre_ComputePkg_struct
 
    hypre_StructGrid      *grid;
    hypre_BoxArray        *data_space;
-   int                    num_values;
+   HYPRE_Int                    num_values;
 
 } hypre_ComputePkg;
 

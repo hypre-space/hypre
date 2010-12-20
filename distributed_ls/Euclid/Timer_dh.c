@@ -34,9 +34,9 @@ void Timer_dhCreate(Timer_dh *t)
 #endif
 
 #if defined(EUCLID_TIMING)
-  sprintf(msgBuf_dh, "using EUCLID_TIMING; _SC_CLK_TCK = %i", (int)tmp->sc_clk_tck);
+  hypre_sprintf(msgBuf_dh, "using EUCLID_TIMING; _SC_CLK_TCK = %i", (HYPRE_Int)tmp->sc_clk_tck);
   SET_INFO(msgBuf_dh);
-#elif defined(MPI_TIMING) 
+#elif defined(hypre_MPI_TIMING) 
   SET_INFO("using MPI timing")
 #else
   SET_INFO("using JUNK timing")
@@ -86,7 +86,7 @@ double Timer_dhReadWall(Timer_dh t)
 {
   START_FUNC_DH
   double retval = 0.0;
-  long int sc_clk_tck = t->sc_clk_tck;
+  hypre_longint sc_clk_tck = t->sc_clk_tck;
   if (t->isRunning) t->end_wall = times(&(t->end_cpu));
   retval = (double)(t->end_wall - t->begin_wall) / (double)sc_clk_tck;
   END_FUNC_VAL(retval)
@@ -98,7 +98,7 @@ double Timer_dhReadCPU(Timer_dh t)
 {
   START_FUNC_DH
   double retval;
-  long int sc_clk_tck = t->sc_clk_tck;
+  hypre_longint sc_clk_tck = t->sc_clk_tck;
   if (t->isRunning) t->end_wall = times(&(t->end_cpu));
   retval = (double)(t->end_cpu.tms_utime - t->begin_cpu.tms_utime
           + t->end_cpu.tms_stime -  t->begin_cpu.tms_stime
@@ -120,18 +120,18 @@ double Timer_dhReadUsage(Timer_dh t)
 }
 
 /*-------------------------------------------------------------------------------
- * Parallel timing functions; these use MPI_Wtime() to record 
+ * Parallel timing functions; these use hypre_MPI_Wtime() to record 
  * wall-clock time only.
  *-------------------------------------------------------------------------------*/
 
-#elif defined(MPI_TIMING)
+#elif defined(hypre_MPI_TIMING)
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhStart"
 void Timer_dhStart(Timer_dh t)
 {
   START_FUNC_DH
-  t->begin_wall = MPI_Wtime();
+  t->begin_wall = hypre_MPI_Wtime();
   t->isRunning = true;
   END_FUNC_DH
 }
@@ -141,7 +141,7 @@ void Timer_dhStart(Timer_dh t)
 void Timer_dhStop(Timer_dh t)
 {
   START_FUNC_DH
-  t->end_wall = MPI_Wtime();
+  t->end_wall = hypre_MPI_Wtime();
   t->isRunning = false;
   END_FUNC_DH
 }
@@ -152,7 +152,7 @@ double Timer_dhReadWall(Timer_dh t)
 {
   START_FUNC_DH
   double retval;
-  if (t->isRunning) t->end_wall = MPI_Wtime();
+  if (t->isRunning) t->end_wall = hypre_MPI_Wtime();
   retval = t->end_wall - t->begin_wall;
   END_FUNC_VAL(retval)
 }

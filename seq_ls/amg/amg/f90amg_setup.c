@@ -28,12 +28,12 @@
  *--------------------------------------------------------------------------*/
 
 void     hypre_NAME_C_FOR_FORTRAN(amg_setup)(Setup_err_flag, a_data, ia, ja, n, data)
-int     *Setup_err_flag;
+HYPRE_Int     *Setup_err_flag;
 double  *a_data;
-int     *ia;
-int     *ja;
-int     *n;
-int     *data;
+HYPRE_Int     *ia;
+HYPRE_Int     *ja;
+HYPRE_Int     *n;
+HYPRE_Int     *data;
 {
    hypre_Matrix  *A;
 

@@ -22,7 +22,7 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructGraphRef( hypre_SStructGraph  *graph,
                        hypre_SStructGraph **graph_ref )
 {
@@ -38,18 +38,18 @@ hypre_SStructGraphRef( hypre_SStructGraph  *graph,
  * 9/09 AB - modified to use the box manager
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructGraphFindUVEntry( hypre_SStructGraph    *graph,
-                               int                    part,
+                               HYPRE_Int                    part,
                                hypre_Index            index,
-                               int                    var,
+                               HYPRE_Int                    var,
                                hypre_SStructUVEntry **Uventry_ptr )
 {
    hypre_SStructUVEntry **Uventries = hypre_SStructGraphUVEntries(graph);
    hypre_SStructGrid     *grid      = hypre_SStructGraphGrid(graph);
-   int                   type       = hypre_SStructGraphObjectType(graph);
+   HYPRE_Int                   type       = hypre_SStructGraphObjectType(graph);
    hypre_BoxManEntry     *boxman_entry;
-   int                    rank;
+   HYPRE_Int                    rank;
 
 
    
@@ -81,21 +81,21 @@ hypre_SStructGraphFindUVEntry( hypre_SStructGraph    *graph,
  * 9/09 AB - modified to use the box manager
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
-                               int                    part,
-                               int                    var,
-                               int                    proc,
-                               int                    endpt,
-                               int                    boxi)
+                               HYPRE_Int                    part,
+                               HYPRE_Int                    var,
+                               HYPRE_Int                    proc,
+                               HYPRE_Int                    endpt,
+                               HYPRE_Int                    boxi)
 {
    hypre_SStructGrid     *grid      = hypre_SStructGraphGrid(graph);
-   int                    type      = hypre_SStructGraphObjectType(graph);
+   HYPRE_Int                    type      = hypre_SStructGraphObjectType(graph);
    hypre_BoxManager      *boxman;
    hypre_BoxManEntry     *boxman_entry;
    hypre_StructGrid      *sgrid;
    hypre_Box             *box;
-   int                    rank;
+   HYPRE_Int                    rank;
 
    /* Should we be checking the neighbor box manager also ?*/
 
@@ -137,18 +137,18 @@ hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
  *      endpt= 1   end of boxes
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructGraphFindSGridEndpts(hypre_SStructGraph    *graph,
-                                  int                    part,
-                                  int                    var,
-                                  int                    proc,
-                                  int                    endpt,
-                                  int                   *endpts)
+                                  HYPRE_Int                    part,
+                                  HYPRE_Int                    var,
+                                  HYPRE_Int                    proc,
+                                  HYPRE_Int                    endpt,
+                                  HYPRE_Int                   *endpts)
 {
    hypre_SStructGrid     *grid      = hypre_SStructGraphGrid(graph);
    hypre_StructGrid      *sgrid;
    hypre_BoxArray        *boxes;
-   int                    i;
+   HYPRE_Int                    i;
 
    sgrid= hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), var);
    boxes= hypre_StructGridBoxes(sgrid);

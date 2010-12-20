@@ -26,12 +26,12 @@
 
 void
 hypre_F90_IFACE(hypre_sstructvectorcreate, HYPRE_SSTRUCTVECTORCREATE)
-   (int      *comm,
-    long int *grid,
-    long int *vector_ptr,
-    int      *ierr)
+   (HYPRE_Int      *comm,
+    hypre_F90_Obj *grid,
+    hypre_F90_Obj *vector_ptr,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorCreate(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorCreate(
                      (MPI_Comm)             *comm,
                      (HYPRE_SStructGrid)    *grid,
                      (HYPRE_SStructVector *) vector_ptr ) );
@@ -43,10 +43,10 @@ hypre_F90_IFACE(hypre_sstructvectorcreate, HYPRE_SSTRUCTVECTORCREATE)
 
 void
 hypre_F90_IFACE(hypre_sstructvectordestroy, HYPRE_SSTRUCTVECTORDESTROY)
-   (long int *vector,
-    int      *ierr)
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorDestroy(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorDestroy(
                      (HYPRE_SStructVector) *vector ) );
 }
 
@@ -56,10 +56,10 @@ hypre_F90_IFACE(hypre_sstructvectordestroy, HYPRE_SSTRUCTVECTORDESTROY)
 
 void
 hypre_F90_IFACE(hypre_sstructvectorinitialize, HYPRE_SSTRUCTVECTORINITIALIZE)
-   (long int *vector,
-    int      *ierr)
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorInitialize(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorInitialize(
                      (HYPRE_SStructVector) *vector ));
 }
 
@@ -69,18 +69,18 @@ hypre_F90_IFACE(hypre_sstructvectorinitialize, HYPRE_SSTRUCTVECTORINITIALIZE)
 
 void
 hypre_F90_IFACE(hypre_sstructvectorsetvalues, HYPRE_SSTRUCTVECTORSETVALUES)
-   (long int *vector,
-    int      *part,
-    int      *index,
-    int      *var,
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *part,
+    HYPRE_Int      *index,
+    HYPRE_Int      *var,
     double   *value,
-    int      *ierr)
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorSetValues(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorSetValues(
                      (HYPRE_SStructVector) *vector,
-                     (int)                 *part,
-                     (int *)                index,
-                     (int)                 *var,
+                     (HYPRE_Int)                 *part,
+                     (HYPRE_Int *)                index,
+                     (HYPRE_Int)                 *var,
                      (double *)             value ) );
 }
 
@@ -90,18 +90,18 @@ hypre_F90_IFACE(hypre_sstructvectorsetvalues, HYPRE_SSTRUCTVECTORSETVALUES)
 
 void
 hypre_F90_IFACE(hypre_sstructvectoraddtovalues, HYPRE_SSTRUCTVECTORADDTOVALUES)
-   (long int *vector,
-    int      *part,
-    int      *index,
-    int      *var,
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *part,
+    HYPRE_Int      *index,
+    HYPRE_Int      *var,
     double   *value,
-    int      *ierr)
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorAddToValues(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorAddToValues(
                      (HYPRE_SStructVector) *vector,
-                     (int)                 *part,
-                     (int *)                index,
-                     (int)                 *var,
+                     (HYPRE_Int)                 *part,
+                     (HYPRE_Int *)                index,
+                     (HYPRE_Int)                 *var,
                      (double *)             value ) );
 }
 
@@ -111,18 +111,18 @@ hypre_F90_IFACE(hypre_sstructvectoraddtovalues, HYPRE_SSTRUCTVECTORADDTOVALUES)
 
 void
 hypre_F90_IFACE(hypre_sstructvectorgetvalues, HYPRE_SSTRUCTVECTORGETVALUES)
-   (long int *vector,
-    int      *part,
-    int      *index,
-    int      *var,
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *part,
+    HYPRE_Int      *index,
+    HYPRE_Int      *var,
     double   *value,
-    int      *ierr)
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorGetValues(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorGetValues(
                      (HYPRE_SStructVector) *vector,
-                     (int)                 *part,
-                     (int *)                index,
-                     (int)                 *var,
+                     (HYPRE_Int)                 *part,
+                     (HYPRE_Int *)                index,
+                     (HYPRE_Int)                 *var,
                      (double *)             value ));
 }
 
@@ -132,20 +132,20 @@ hypre_F90_IFACE(hypre_sstructvectorgetvalues, HYPRE_SSTRUCTVECTORGETVALUES)
 
 void
 hypre_F90_IFACE(hypre_sstructvectorsetboxvalues, HYPRE_SSTRUCTVECTORSETBOXVALUES)
-   (long int *vector,
-    int      *part,
-    int      *ilower,
-    int      *iupper,
-    int      *var,
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *part,
+    HYPRE_Int      *ilower,
+    HYPRE_Int      *iupper,
+    HYPRE_Int      *var,
     double   *values,
-    int      *ierr)
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorSetBoxValues(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorSetBoxValues(
                      (HYPRE_SStructVector) *vector,
-                     (int)                 *part,
-                     (int *)                ilower,
-                     (int *)                iupper,
-                     (int)                 *var,
+                     (HYPRE_Int)                 *part,
+                     (HYPRE_Int *)                ilower,
+                     (HYPRE_Int *)                iupper,
+                     (HYPRE_Int)                 *var,
                      (double *)             values ) );
 }
 
@@ -155,20 +155,20 @@ hypre_F90_IFACE(hypre_sstructvectorsetboxvalues, HYPRE_SSTRUCTVECTORSETBOXVALUES
 
 void
 hypre_F90_IFACE(hypre_sstructvectoraddtoboxvalu, HYPRE_SSTRUCTVECTORADDTOBOXVALU)
-   (long int *vector,
-    int      *part,
-    int      *ilower,
-    int      *iupper,
-    int      *var,
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *part,
+    HYPRE_Int      *ilower,
+    HYPRE_Int      *iupper,
+    HYPRE_Int      *var,
     double   *values,
-    int      *ierr)
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorAddToBoxValues(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorAddToBoxValues(
                      (HYPRE_SStructVector) *vector,
-                     (int)                 *part,
-                     (int *)                ilower,
-                     (int *)                iupper,
-                     (int)                 *var,
+                     (HYPRE_Int)                 *part,
+                     (HYPRE_Int *)                ilower,
+                     (HYPRE_Int *)                iupper,
+                     (HYPRE_Int)                 *var,
                      (double *)             values ) );
 }
 
@@ -178,20 +178,20 @@ hypre_F90_IFACE(hypre_sstructvectoraddtoboxvalu, HYPRE_SSTRUCTVECTORADDTOBOXVALU
 
 void
 hypre_F90_IFACE(hypre_sstructvectorgetboxvalues, HYPRE_SSTRUCTVECTORGETBOXVALUES)
-   (long int *vector,
-    int      *part,
-    int      *ilower,
-    int      *iupper,
-    int      *var,
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *part,
+    HYPRE_Int      *ilower,
+    HYPRE_Int      *iupper,
+    HYPRE_Int      *var,
     double   *values,
-    int      *ierr)
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorGetBoxValues(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorGetBoxValues(
                      (HYPRE_SStructVector ) *vector,
-                     (int)                  *part,
-                     (int *)                 ilower,
-                     (int *)                 iupper,
-                     (int)                  *var,
+                     (HYPRE_Int)                  *part,
+                     (HYPRE_Int *)                 ilower,
+                     (HYPRE_Int *)                 iupper,
+                     (HYPRE_Int)                  *var,
                      (double *)              values ) );
 }
 
@@ -201,10 +201,10 @@ hypre_F90_IFACE(hypre_sstructvectorgetboxvalues, HYPRE_SSTRUCTVECTORGETBOXVALUES
 
 void
 hypre_F90_IFACE(hypre_sstructvectorassemble, HYPRE_SSTRUCTVECTORASSEMBLE)
-   (long int *vector,
-    int      *ierr)
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorAssemble(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorAssemble(
                      (HYPRE_SStructVector) *vector ));
 }
 
@@ -214,10 +214,10 @@ hypre_F90_IFACE(hypre_sstructvectorassemble, HYPRE_SSTRUCTVECTORASSEMBLE)
 
 void
 hypre_F90_IFACE(hypre_sstructvectorgather, HYPRE_SSTRUCTVECTORGATHER)
-   (long int *vector,
-    int      *ierr)
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorGather(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorGather(
                      (HYPRE_SStructVector) *vector ));
 }
 
@@ -227,11 +227,11 @@ hypre_F90_IFACE(hypre_sstructvectorgather, HYPRE_SSTRUCTVECTORGATHER)
 
 void
 hypre_F90_IFACE(hypre_sstructvectorsetconstantv, HYPRE_SSTRUCTVECTORSETCONSTANTV)
-   (long int *vector,
+   (hypre_F90_Obj *vector,
     double   *value,
-    int      *ierr)
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorSetConstantValues(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorSetConstantValues(
                      (HYPRE_SStructVector) *vector,
                      (double)              *value));
 }
@@ -242,13 +242,13 @@ hypre_F90_IFACE(hypre_sstructvectorsetconstantv, HYPRE_SSTRUCTVECTORSETCONSTANTV
 
 void
 hypre_F90_IFACE(hypre_sstructvectorsetobjecttyp, HYPRE_SSTRUCTVECTORSETOBJECTTYP)
-   (long int *vector,
-    int      *type,
-    int      *ierr)
+   (hypre_F90_Obj *vector,
+    HYPRE_Int      *type,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorSetObjectType(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorSetObjectType(
                      (HYPRE_SStructVector) *vector,
-                     (int)                 *type ));
+                     (HYPRE_Int)                 *type ));
 }
 
 /*--------------------------------------------------------------------------
@@ -257,11 +257,11 @@ hypre_F90_IFACE(hypre_sstructvectorsetobjecttyp, HYPRE_SSTRUCTVECTORSETOBJECTTYP
 
 void
 hypre_F90_IFACE(hypre_sstructvectorgetobject, HYPRE_SSTRUCTVECTORGETOBJECT)
-   (long int *vector,
-    long int *object,
-    int      *ierr)
+   (hypre_F90_Obj *vector,
+    hypre_F90_Obj *object,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorGetObject(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorGetObject(
                      (HYPRE_SStructVector) *vector,
                      (void **)              object ));
 }
@@ -273,14 +273,14 @@ hypre_F90_IFACE(hypre_sstructvectorgetobject, HYPRE_SSTRUCTVECTORGETOBJECT)
 void
 hypre_F90_IFACE(hypre_sstructvectorprint, HYPRE_SSTRUCTVECTORPRINT)
    (const char *filename,
-    long int   *vector,
-    int        *all,
-    int        *ierr)
+    hypre_F90_Obj *vector,
+    HYPRE_Int        *all,
+    HYPRE_Int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorPrint(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorPrint(
                      (const char * )        filename,
                      (HYPRE_SStructVector) *vector,
-                     (int)                 *all ) );
+                     (HYPRE_Int)                 *all ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -289,11 +289,11 @@ hypre_F90_IFACE(hypre_sstructvectorprint, HYPRE_SSTRUCTVECTORPRINT)
 
 void
 hypre_F90_IFACE(hypre_sstructvectorcopy, HYPRE_SSTRUCTVECTORCOPY)
-   (long int   *x,
-    long int   *y,
-    int        *ierr)
+   (hypre_F90_Obj *x,
+    hypre_F90_Obj *y,
+    HYPRE_Int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorCopy(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorCopy(
                      (HYPRE_SStructVector) *x,
                      (HYPRE_SStructVector) *y ) );
 }
@@ -305,10 +305,10 @@ hypre_F90_IFACE(hypre_sstructvectorcopy, HYPRE_SSTRUCTVECTORCOPY)
 void
 hypre_F90_IFACE(hypre_sstructvectorscale, HYPRE_SSTRUCTVECTORSCALE)
    (double   *alpha,
-    long int *y,
-    int      *ierr)
+    hypre_F90_Obj *y,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructVectorScale(
+   *ierr = (HYPRE_Int) (HYPRE_SStructVectorScale(
                      (double)              *alpha,
                      (HYPRE_SStructVector) *y ) );
 }
@@ -319,12 +319,12 @@ hypre_F90_IFACE(hypre_sstructvectorscale, HYPRE_SSTRUCTVECTORSCALE)
 
 void
 hypre_F90_IFACE(hypre_sstructinnerprod, HYPRE_SSTRUCTINNERPROD)
-   (long int   *x,
-    long int   *y,
+   (hypre_F90_Obj *x,
+    hypre_F90_Obj *y,
     double     *result,
-    int        *ierr)
+    HYPRE_Int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructInnerProd(
+   *ierr = (HYPRE_Int) (HYPRE_SStructInnerProd(
                      (HYPRE_SStructVector) *x,
                      (HYPRE_SStructVector) *y,
                      (double *)             result ) );
@@ -337,11 +337,11 @@ hypre_F90_IFACE(hypre_sstructinnerprod, HYPRE_SSTRUCTINNERPROD)
 void
 hypre_F90_IFACE(hypre_sstructaxpy, HYPRE_SSTRUCTAXPY)
    (double   *alpha,
-    long int *x,
-    long int *y,
-    int      *ierr)
+    hypre_F90_Obj *x,
+    hypre_F90_Obj *y,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructAxpy(
+   *ierr = (HYPRE_Int) (HYPRE_SStructAxpy(
                      (double)              *alpha,
                      (HYPRE_SStructVector) *x,
                      (HYPRE_SStructVector) *y ) );

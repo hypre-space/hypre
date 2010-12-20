@@ -57,7 +57,7 @@ void *hypre_BlockTridiagCreate()
  * hypre_BoomerAMGDestroy
  *--------------------------------------------------------------------------*/
 
-int hypre_BlockTridiagDestroy(void *data)
+HYPRE_Int hypre_BlockTridiagDestroy(void *data)
 {
    hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
 
@@ -124,12 +124,12 @@ int hypre_BlockTridiagDestroy(void *data)
  * Routines to setup the preconditioner
  *--------------------------------------------------------------------------*/
 
-int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
+HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
                             hypre_ParVector *b, hypre_ParVector *x) 
 {
-   int                i, j, *index_set1, print_level, nsweeps, relax_type;
-   int                nrows, nrows1, nrows2, start1, start2, *index_set2;
-   int                count, ierr;
+   HYPRE_Int                i, j, *index_set1, print_level, nsweeps, relax_type;
+   HYPRE_Int                nrows, nrows1, nrows2, start1, start2, *index_set2;
+   HYPRE_Int                count, ierr;
    double             threshold;
    hypre_ParCSRMatrix **submatrices;
    HYPRE_Solver       precon1;
@@ -144,7 +144,7 @@ int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    nrows1 = index_set1[0];
    nrows  = hypre_ParCSRMatrixNumRows(A);
    nrows2 = nrows - nrows1;
-   b_data->index_set2 = hypre_CTAlloc(int, nrows2+1);
+   b_data->index_set2 = hypre_CTAlloc(HYPRE_Int, nrows2+1);
    index_set2 = b_data->index_set2;
    index_set2[0] = nrows2;
    count = 1;
@@ -238,10 +238,10 @@ int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
  * Routines to solve the preconditioner
  *--------------------------------------------------------------------------*/
 
-int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
+HYPRE_Int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
                             hypre_ParVector *b, hypre_ParVector *x) 
 {
-   int                i, ind, nrows1, nrows2, *index_set1, *index_set2;
+   HYPRE_Int                i, ind, nrows1, nrows2, *index_set1, *index_set2;
    double             *ffv, *uuv, *f1v, *f2v, *u1v, *u2v;
    HYPRE_ParCSRMatrix A21, A11, A22;
    hypre_ParVector    *F1, *U1, *F2, *U2;
@@ -302,13 +302,13 @@ int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
  * Routines to set the index set for block 1
  *--------------------------------------------------------------------------*/
 
-int hypre_BlockTridiagSetIndexSet(void *data, int n, int *inds)
+HYPRE_Int hypre_BlockTridiagSetIndexSet(void *data, HYPRE_Int n, HYPRE_Int *inds)
 {
-   int i, ierr=0, *indices;
+   HYPRE_Int i, ierr=0, *indices;
    hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
 
    if (n <= 0 || inds == NULL) ierr = 1;
-   b_data->index_set1 = hypre_CTAlloc(int, n+1);
+   b_data->index_set1 = hypre_CTAlloc(HYPRE_Int, n+1);
    indices = b_data->index_set1;
    indices[0] = n;
    for (i = 0; i < n; i++) indices[i+1] = inds[i];
@@ -319,7 +319,7 @@ int hypre_BlockTridiagSetIndexSet(void *data, int n, int *inds)
  * Routines to set the strength threshold for AMG
  *--------------------------------------------------------------------------*/
 
-int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, double thresh)
+HYPRE_Int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, double thresh)
 {
    hypre_BlockTridiagData *b_data = data;
    b_data->threshold = thresh;
@@ -330,7 +330,7 @@ int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, double thresh)
  * Routines to set the number of relaxation sweeps for AMG
  *--------------------------------------------------------------------------*/
 
-int hypre_BlockTridiagSetAMGNumSweeps(void *data, int nsweeps)
+HYPRE_Int hypre_BlockTridiagSetAMGNumSweeps(void *data, HYPRE_Int nsweeps)
 {
    hypre_BlockTridiagData *b_data = data;
    b_data->num_sweeps = nsweeps;
@@ -341,7 +341,7 @@ int hypre_BlockTridiagSetAMGNumSweeps(void *data, int nsweeps)
  * Routines to set the relaxation method for AMG
  *--------------------------------------------------------------------------*/
 
-int hypre_BlockTridiagSetAMGRelaxType(void *data, int relax_type)
+HYPRE_Int hypre_BlockTridiagSetAMGRelaxType(void *data, HYPRE_Int relax_type)
 {
    hypre_BlockTridiagData *b_data = data;
    b_data->relax_type = relax_type;
@@ -352,7 +352,7 @@ int hypre_BlockTridiagSetAMGRelaxType(void *data, int relax_type)
  * Routines to set the print level
  *--------------------------------------------------------------------------*/
 
-int hypre_BlockTridiagSetPrintLevel(void *data, int print_level)
+HYPRE_Int hypre_BlockTridiagSetPrintLevel(void *data, HYPRE_Int print_level)
 {
    hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
    b_data->print_level = print_level;

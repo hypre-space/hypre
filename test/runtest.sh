@@ -537,6 +537,7 @@ CleanUp $TestDirNames $ExecFileNames
 
 # Filter misleading error messages
 cat > runtest.filters <<EOF
+hypre_MPI_Init
 job [0-9]* queued and waiting for resources
 job [0-9]* has been allocated resources
 SLURMINFO: Job [0-9]* is pending allocation of resources.

@@ -29,7 +29,7 @@
 
 hypre_Vector  *hypre_NewVector(data, size)
 double  *data;
-int      size;
+HYPRE_Int      size;
 {
    hypre_Vector     *new;
 
@@ -61,8 +61,8 @@ hypre_Vector  *vector;
  *--------------------------------------------------------------------------*/
 
 hypre_VectorInt  *hypre_NewVectorInt(data, size)
-int     *data;
-int      size;
+HYPRE_Int     *data;
+HYPRE_Int      size;
 {
    hypre_VectorInt     *new;
 
@@ -99,9 +99,9 @@ hypre_Vector *v;
 double  value;
 {
    double     *vp = hypre_VectorData(v);
-   int         n  = hypre_VectorSize(v);
+   HYPRE_Int         n  = hypre_VectorSize(v);
 
-   int         i;
+   HYPRE_Int         i;
 
 
    for (i = 0; i < n; i++)
@@ -116,9 +116,9 @@ void    hypre_InitVectorRandom(v)
 hypre_Vector *v;
 {
    double     *vp = hypre_VectorData(v);
-   int         n  = hypre_VectorSize(v);
+   HYPRE_Int         n  = hypre_VectorSize(v);
 
-   int         i;
+   HYPRE_Int         i;
 
 
    for (i = 0; i < n; i++)
@@ -135,9 +135,9 @@ hypre_Vector  *y;
 {
    double     *xp = hypre_VectorData(x);
    double     *yp = hypre_VectorData(y);
-   int         n  = hypre_VectorSize(x);
+   HYPRE_Int         n  = hypre_VectorSize(x);
 
-   int         i;
+   HYPRE_Int         i;
 
 
    for (i = 0; i < n; i++)
@@ -153,9 +153,9 @@ double   alpha;
 hypre_Vector  *y;
 {
    double     *yp = hypre_VectorData(y);
-   int         n  = hypre_VectorSize(y);
+   HYPRE_Int         n  = hypre_VectorSize(y);
 
-   int         i;
+   HYPRE_Int         i;
 
 
    for (i = 0; i < n; i++)
@@ -173,9 +173,9 @@ hypre_Vector  *y;
 {
    double     *xp = hypre_VectorData(x);
    double     *yp = hypre_VectorData(y);
-   int         n  = hypre_VectorSize(x);
+   HYPRE_Int         n  = hypre_VectorSize(x);
 
-   int         i;
+   HYPRE_Int         i;
 
 
    for (i = 0; i < n; i++)
@@ -192,9 +192,9 @@ hypre_Vector  *y;
 {
    double     *xp = hypre_VectorData(x);
    double     *yp = hypre_VectorData(y);
-   int         n  = hypre_VectorSize(x);
+   HYPRE_Int         n  = hypre_VectorSize(x);
 
-   int         i;
+   HYPRE_Int         i;
 
    double      result = 0.0;
 

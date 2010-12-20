@@ -25,7 +25,7 @@
  * HYPRE_ParCSRCGNRCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    hypre_CGNRFunctions * cgnr_functions =
@@ -50,7 +50,7 @@ HYPRE_ParCSRCGNRCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRCGNRDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRCGNRDestroy( HYPRE_Solver solver )
 {
    return( hypre_CGNRDestroy( (void *) solver ) );
@@ -60,7 +60,7 @@ HYPRE_ParCSRCGNRDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRCGNRSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRCGNRSetup( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -76,7 +76,7 @@ HYPRE_ParCSRCGNRSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRCGNRSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRCGNRSolve( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -92,7 +92,7 @@ HYPRE_ParCSRCGNRSolve( HYPRE_Solver solver,
  * HYPRE_ParCSRCGNRSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
@@ -103,9 +103,9 @@ HYPRE_ParCSRCGNRSetTol( HYPRE_Solver solver,
  * HYPRE_ParCSRCGNRSetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRSetMinIter( HYPRE_Solver solver,
-                             int                min_iter )
+                             HYPRE_Int                min_iter )
 {
    return( HYPRE_CGNRSetMinIter( solver, min_iter ) );
 }
@@ -114,9 +114,9 @@ HYPRE_ParCSRCGNRSetMinIter( HYPRE_Solver solver,
  * HYPRE_ParCSRCGNRSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRSetMaxIter( HYPRE_Solver solver,
-                             int                max_iter )
+                             HYPRE_Int                max_iter )
 {
    return( HYPRE_CGNRSetMaxIter( solver, max_iter ) );
 }
@@ -125,9 +125,9 @@ HYPRE_ParCSRCGNRSetMaxIter( HYPRE_Solver solver,
  * HYPRE_ParCSRCGNRSetStopCrit
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRSetStopCrit( HYPRE_Solver solver,
-                             int                stop_crit )
+                             HYPRE_Int                stop_crit )
 {
    return( HYPRE_CGNRSetStopCrit( solver, stop_crit ) );
 }
@@ -136,7 +136,7 @@ HYPRE_ParCSRCGNRSetStopCrit( HYPRE_Solver solver,
  * HYPRE_ParCSRCGNRSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRSetPrecond( HYPRE_Solver         solver,
                             HYPRE_PtrToParSolverFcn precond,
                             HYPRE_PtrToParSolverFcn precondT,
@@ -154,7 +154,7 @@ HYPRE_ParCSRCGNRSetPrecond( HYPRE_Solver         solver,
  * HYPRE_ParCSRCGNRGetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRGetPrecond( HYPRE_Solver   solver,
                             HYPRE_Solver  *precond_data_ptr )
 {
@@ -165,9 +165,9 @@ HYPRE_ParCSRCGNRGetPrecond( HYPRE_Solver   solver,
  * HYPRE_ParCSRCGNRSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRSetLogging( HYPRE_Solver solver,
-                             int logging)
+                             HYPRE_Int logging)
 {
    return( HYPRE_CGNRSetLogging( solver, logging ) );
 }
@@ -176,9 +176,9 @@ HYPRE_ParCSRCGNRSetLogging( HYPRE_Solver solver,
  * HYPRE_ParCSRCGNRGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRGetNumIterations( HYPRE_Solver  solver,
-                                   int                *num_iterations )
+                                   HYPRE_Int                *num_iterations )
 {
    return( HYPRE_CGNRGetNumIterations( solver, num_iterations ) );
 }
@@ -187,7 +187,7 @@ HYPRE_ParCSRCGNRGetNumIterations( HYPRE_Solver  solver,
  * HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {

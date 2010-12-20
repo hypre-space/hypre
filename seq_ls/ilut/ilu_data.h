@@ -28,22 +28,22 @@
 typedef struct
 {
 
-  int             mode;
+  HYPRE_Int             mode;
   Matrix         *A;
-  int             ipar[20];
+  HYPRE_Int             ipar[20];
   double          rpar[20];
   Matrix         *preconditioner;
-  int             lenpmx;
-  int            *perm;
-  int            *inverse_perm;
+  HYPRE_Int             lenpmx;
+  HYPRE_Int            *perm;
+  HYPRE_Int            *inverse_perm;
   double         *rscale;
 #ifdef ILUFact
   double         *cscale;
 #endif
-  int            *iwork;
-  int             l_iwork;
+  HYPRE_Int            *iwork;
+  HYPRE_Int             l_iwork;
   double         *rwork;
-  int             l_rwork;
+  HYPRE_Int             l_rwork;
   
 } ILUData;
 

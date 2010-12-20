@@ -23,7 +23,7 @@ extern void Parser_dhDestroy(Parser_dh p);
 
 extern bool Parser_dhHasSwitch(Parser_dh p, char *in);
 extern bool Parser_dhReadString(Parser_dh p, char *in, char **out);
-extern bool Parser_dhReadInt(Parser_dh p, char *in, int *out);
+extern bool Parser_dhReadInt(Parser_dh p, char *in, HYPRE_Int *out);
 extern bool Parser_dhReadDouble(Parser_dh p, char *in, double *out);
   /* if the flag (char *in) is found, these four return 
      true and set "out" accordingly.  If not found, they return 
@@ -42,7 +42,7 @@ extern void Parser_dhInsert(Parser_dh p, char *name, char *value);
 
 extern void Parser_dhUpdateFromFile(Parser_dh p, char *name);
 
-extern void Parser_dhInit(Parser_dh p, int argc, char *argv[]);
+extern void Parser_dhInit(Parser_dh p, HYPRE_Int argc, char *argv[]);
   /* Init enters <flag,value> pairs in its internal database in
      the following order:
 

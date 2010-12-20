@@ -18,17 +18,17 @@
 #include "headers.h"
 
          
-int
-hypre_AMGTruncation(hypre_CSRMatrix *A, double trunc_factor, int max_elmts)
+HYPRE_Int
+hypre_AMGTruncation(hypre_CSRMatrix *A, double trunc_factor, HYPRE_Int max_elmts)
 {
-   int ierr = 0;
-   int *A_i = hypre_CSRMatrixI(A);
-   int *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Int ierr = 0;
+   HYPRE_Int *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int *A_j = hypre_CSRMatrixJ(A);
    double *A_data = hypre_CSRMatrixData(A);
    double max_coef, row_sum, scale;
-   int i, j, start;
-   int num_variables = hypre_CSRMatrixNumRows(A);
-   int now_checking, num_lost, next_open;
+   HYPRE_Int i, j, start;
+   HYPRE_Int num_variables = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int now_checking, num_lost, next_open;
 
    if (trunc_factor > 0)
    {
@@ -134,12 +134,12 @@ hypre_AMGTruncation(hypre_CSRMatrix *A, double trunc_factor, int max_elmts)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void swap3(int     *v,
+void swap3(HYPRE_Int     *v,
            double  *w,
-           int      i,
-           int      j )
+           HYPRE_Int      i,
+           HYPRE_Int      j )
 {
-   int temp;
+   HYPRE_Int temp;
    double temp2;
 
    temp = v[i];
@@ -152,12 +152,12 @@ void swap3(int     *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void qsort2( int *v,
+void qsort2( HYPRE_Int *v,
 	     double *w,
-             int  left,
-             int  right )
+             HYPRE_Int  left,
+             HYPRE_Int  right )
 {
-   int i, last;
+   HYPRE_Int i, last;
 
    if (left >= right)
       return;

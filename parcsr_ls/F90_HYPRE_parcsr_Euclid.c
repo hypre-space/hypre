@@ -28,9 +28,9 @@
 
 void 
 hypre_F90_IFACE(hypre_euclidcreate, HYPRE_EUCLIDCREATE)
-               (int *comm, long int *solver, int *ierr)
+               (HYPRE_Int *comm, hypre_F90_Obj *solver, HYPRE_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidCreate( (MPI_Comm)      *comm,
+   *ierr = (HYPRE_Int) HYPRE_EuclidCreate( (MPI_Comm)      *comm,
                                      (HYPRE_Solver *) solver );
 }
 
@@ -40,9 +40,9 @@ hypre_F90_IFACE(hypre_euclidcreate, HYPRE_EUCLIDCREATE)
 
 void 
 hypre_F90_IFACE(hypre_eucliddestroy, HYPRE_EUCLIDDESTROY)
-               (long int *solver, int *ierr)
+               (hypre_F90_Obj *solver, HYPRE_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidDestroy( (HYPRE_Solver) *solver );
+   *ierr = (HYPRE_Int) HYPRE_EuclidDestroy( (HYPRE_Solver) *solver );
 }
 
 /*--------------------------------------------------------------------------
@@ -51,9 +51,9 @@ hypre_F90_IFACE(hypre_eucliddestroy, HYPRE_EUCLIDDESTROY)
 
 void 
 hypre_F90_IFACE(hypre_euclidsetup, HYPRE_EUCLIDSETUP)
-               (long int *solver, long int *A, long int *b, long int *x, int *ierr)
+               (hypre_F90_Obj *solver, hypre_F90_Obj *A, hypre_F90_Obj *b, hypre_F90_Obj *x, HYPRE_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidSetup( (HYPRE_Solver)       *solver,
+   *ierr = (HYPRE_Int) HYPRE_EuclidSetup( (HYPRE_Solver)       *solver,
                                     (HYPRE_ParCSRMatrix) *A,
                                     (HYPRE_ParVector)    *b,
                                     (HYPRE_ParVector)    *x   );
@@ -65,9 +65,9 @@ hypre_F90_IFACE(hypre_euclidsetup, HYPRE_EUCLIDSETUP)
 
 void 
 hypre_F90_IFACE(hypre_euclidsolve, HYPRE_EUCLIDSOLVE)
-               (long int *solver, long int *A, long int *b, long int *x, int *ierr)
+               (hypre_F90_Obj *solver, hypre_F90_Obj *A, hypre_F90_Obj *b, hypre_F90_Obj *x, HYPRE_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidSolve( (HYPRE_Solver)       *solver,
+   *ierr = (HYPRE_Int) HYPRE_EuclidSolve( (HYPRE_Solver)       *solver,
                                     (HYPRE_ParCSRMatrix) *A,
                                     (HYPRE_ParVector)    *b,
                                     (HYPRE_ParVector)    *x  );
@@ -79,10 +79,10 @@ hypre_F90_IFACE(hypre_euclidsolve, HYPRE_EUCLIDSOLVE)
 
 void 
 hypre_F90_IFACE(hypre_euclidsetparams, HYPRE_EUCLIDSETPARAMS)
-               (long int *solver, int *argc, char **argv, int *ierr)
+               (hypre_F90_Obj *solver, HYPRE_Int *argc, char **argv, HYPRE_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidSetParams( (HYPRE_Solver) *solver, 
-                                        (int)          *argc,
+   *ierr = (HYPRE_Int) HYPRE_EuclidSetParams( (HYPRE_Solver) *solver, 
+                                        (HYPRE_Int)          *argc,
                                         (char **)       argv );
 }
 
@@ -92,9 +92,9 @@ hypre_F90_IFACE(hypre_euclidsetparams, HYPRE_EUCLIDSETPARAMS)
 
 void 
 hypre_F90_IFACE(hypre_euclidsetparamsfromfile, HYPRE_EUCLIDSETPARAMSFROMFILE)
-               (long int *solver, char *filename, int *ierr)
+               (hypre_F90_Obj *solver, char *filename, HYPRE_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidSetParamsFromFile( (HYPRE_Solver) *solver, 
+   *ierr = (HYPRE_Int) HYPRE_EuclidSetParamsFromFile( (HYPRE_Solver) *solver, 
                                                 (char *)        filename );
 }
 /*--------------------------------------------------------------------------
@@ -103,12 +103,12 @@ hypre_F90_IFACE(hypre_euclidsetparamsfromfile, HYPRE_EUCLIDSETPARAMSFROMFILE)
 
 void
 hypre_F90_IFACE(hypre_euclidsetlevel, HYPRE_EUCLIDSETLEVEL)(
-   long int *solver,
-   int      *eu_level,
-   int      *ierr     )
+   hypre_F90_Obj *solver,
+   HYPRE_Int      *eu_level,
+   HYPRE_Int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_EuclidSetLevel( (HYPRE_Solver) *solver,
-                                         (int)          *eu_level ) );
+   *ierr = (HYPRE_Int) ( HYPRE_EuclidSetLevel( (HYPRE_Solver) *solver,
+                                         (HYPRE_Int)          *eu_level ) );
 }
 
 
@@ -118,12 +118,12 @@ hypre_F90_IFACE(hypre_euclidsetlevel, HYPRE_EUCLIDSETLEVEL)(
 
 void
 hypre_F90_IFACE(hypre_euclidsetbj, HYPRE_EUCLIDSETBJ)(
-   long int *solver,
-   int      *bj,
-   int      *ierr     )
+   hypre_F90_Obj *solver,
+   HYPRE_Int      *bj,
+   HYPRE_Int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_EuclidSetBJ( (HYPRE_Solver) *solver,
-                                         (int)          *bj ) );
+   *ierr = (HYPRE_Int) ( HYPRE_EuclidSetBJ( (HYPRE_Solver) *solver,
+                                         (HYPRE_Int)          *bj ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -132,10 +132,10 @@ hypre_F90_IFACE(hypre_euclidsetbj, HYPRE_EUCLIDSETBJ)(
 
 void
 hypre_F90_IFACE(hypre_euclidsetsparsea, HYPRE_EUCLIDSETSPARSEA)(
-   long int *solver,
+   hypre_F90_Obj *solver,
    double   *spa,
-   int      *ierr     )
+   HYPRE_Int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_EuclidSetSparseA( (HYPRE_Solver) *solver,
+   *ierr = (HYPRE_Int) ( HYPRE_EuclidSetSparseA( (HYPRE_Solver) *solver,
                                            (double)          *spa ) );
 }

@@ -35,10 +35,10 @@
 
 #include "headers.h" 
 
-int hypre_AMGeElmMatRead(double **element_data_pointer, 
-			 int *i_element_dof,
-			 int *j_element_dof,
-			 int num_elements,
+HYPRE_Int hypre_AMGeElmMatRead(double **element_data_pointer, 
+			 HYPRE_Int *i_element_dof,
+			 HYPRE_Int *j_element_dof,
+			 HYPRE_Int num_elements,
 
 			 char *element_matrix_file)
 
@@ -48,11 +48,11 @@ int hypre_AMGeElmMatRead(double **element_data_pointer,
   FILE *g;
 
 
-  int ierr = 0;
-  int i,j,k, entry;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k, entry;
 
   double *element_data;
-  int num_entries = 0;
+  HYPRE_Int num_entries = 0;
 
   for (i=0; i < num_elements; i++)
     num_entries+= (i_element_dof[i+1]-i_element_dof[i]) *
@@ -70,16 +70,16 @@ int hypre_AMGeElmMatRead(double **element_data_pointer,
 	{
 	  for (k=i_element_dof[i]; k< i_element_dof[i+1]; k++)
 	    {
-	      fscanf(f, "%le", &element_data[entry]);
-	      /* fprintf(g, "%e ", element_data[entry]); */
+	      hypre_fscanf(f, "%le", &element_data[entry]);
+	      /* hypre_fprintf(g, "%e ", element_data[entry]); */
 	      entry++;
 	    }
-	  /* fprintf(g, "\n"); */
-	  fscanf(f, "\n");
+	  /* hypre_fprintf(g, "\n"); */
+	  hypre_fscanf(f, "\n");
 	}
       
-      /* fprintf(g, "\n"); */
-      fscanf(f, "\n"); 
+      /* hypre_fprintf(g, "\n"); */
+      hypre_fscanf(f, "\n"); 
     }
 
   fclose(f);

@@ -36,13 +36,13 @@ void hypre_errexit( char *f_str, ...)
 {
   va_list argp;
 
-  /*fprintf(stdout,"[%3d]", mype);*/
+  /*hypre_fprintf(stdout,"[%3d]", mype);*/
 
   va_start(argp, f_str);
   vfprintf(stdout, f_str, argp);
   va_end(argp);
 
-  fprintf(stdout,"\n");
+  hypre_fprintf(stdout,"\n");
   fflush(stdout);
 
   abort();
@@ -53,27 +53,27 @@ void hypre_errexit( char *f_str, ...)
 * This makes life easier by aborting all threads together, and printing
 * some diagnostic with the PE.
 **************************************************************************/
-void hypre_my_abort( int inSignal, hypre_PilutSolverGlobals *globals )
+void hypre_my_abort( HYPRE_Int inSignal, hypre_PilutSolverGlobals *globals )
 {
-  printf( "PE %d caught sig %d\n", mype, inSignal );
+  hypre_printf( "PE %d caught sig %d\n", mype, inSignal );
   fflush(stdout);
-  MPI_Abort( pilut_comm, inSignal );
+  hypre_MPI_Abort( pilut_comm, inSignal );
 }
 
 
 /*************************************************************************
 * The following function allocates an array of ints
 **************************************************************************/
-int *hypre_idx_malloc(int n, char *msg)
+HYPRE_Int *hypre_idx_malloc(HYPRE_Int n, char *msg)
 {
-  int *ptr;
+  HYPRE_Int *ptr;
 
   if (n == 0)
     return NULL;
 
-  ptr = (int *)malloc(sizeof(int)*n);
+  ptr = (HYPRE_Int *)malloc(sizeof(HYPRE_Int)*n);
   if (ptr == NULL) {
-    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(int));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Int));
   }
 
   return ptr;
@@ -84,17 +84,17 @@ int *hypre_idx_malloc(int n, char *msg)
 /*************************************************************************
 * The follwoing function allocates an array of ints and initializes
 **************************************************************************/
-int *hypre_idx_malloc_init(int n, int ival, char *msg)
+HYPRE_Int *hypre_idx_malloc_init(HYPRE_Int n, HYPRE_Int ival, char *msg)
 {
-  int *ptr;
-  int i;
+  HYPRE_Int *ptr;
+  HYPRE_Int i;
 
   if (n == 0)
     return NULL;
 
-  ptr = (int *)malloc(sizeof(int)*n);
+  ptr = (HYPRE_Int *)malloc(sizeof(HYPRE_Int)*n);
   if (ptr == NULL) {
-    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(int));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Int));
   }
 
   for (i=0; i<n; i++)
@@ -107,7 +107,7 @@ int *hypre_idx_malloc_init(int n, int ival, char *msg)
 /*************************************************************************
 * The following function allocates an array of floats
 **************************************************************************/
-double *hypre_fp_malloc(int n, char *msg)
+double *hypre_fp_malloc(HYPRE_Int n, char *msg)
 {
   double *ptr;
 
@@ -127,10 +127,10 @@ double *hypre_fp_malloc(int n, char *msg)
 /*************************************************************************
 * The follwoing function allocates an array of floats and initializes
 **************************************************************************/
-double *hypre_fp_malloc_init(int n, double ival, char *msg)
+double *hypre_fp_malloc_init(HYPRE_Int n, double ival, char *msg)
 {
   double *ptr;
-  int i;
+  HYPRE_Int i;
 
   if (n == 0)
     return NULL;
@@ -151,7 +151,7 @@ double *hypre_fp_malloc_init(int n, double ival, char *msg)
 /*************************************************************************
 * This function is my wrapper around malloc.
 **************************************************************************/
-void *hypre_mymalloc(int nbytes, char *msg)
+void *hypre_mymalloc(HYPRE_Int nbytes, char *msg)
 {
   void *ptr;
 
@@ -194,19 +194,19 @@ void hypre_free_multi(void *ptr1,...)
 #endif        
 
 /*************************************************************************
-* The following function copies an int (int) array
+* The following function copies an HYPRE_Int (HYPRE_Int) array
 **************************************************************************/
-void hypre_memcpy_int( int *dest, const int *src, size_t n )
+void hypre_memcpy_int( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 {
-  if (dest) memcpy(dest, src, n*sizeof(int));
+  if (dest) memcpy(dest, src, n*sizeof(HYPRE_Int));
 }
 
 /*************************************************************************
-* The following function copies an int (int) array
+* The following function copies an HYPRE_Int (HYPRE_Int) array
 **************************************************************************/
-void hypre_memcpy_idx( int *dest, const int *src, size_t n )
+void hypre_memcpy_idx( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 {
-  if (dest) memcpy(dest, src, n*sizeof(int));
+  if (dest) memcpy(dest, src, n*sizeof(HYPRE_Int));
 }
 
 /*************************************************************************
@@ -216,7 +216,7 @@ void hypre_memcpy_idx( int *dest, const int *src, size_t n )
 **************************************************************************/
 void hypre_memcpy_fp( double *dest, const double *src, size_t n )
 {
-  int i;
+  HYPRE_Int i;
 
   /*SCOPY(&n, src, &inc, dest, &inc);*/
   for (i=0; i<n; i++) dest[i] = src[i];

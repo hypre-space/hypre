@@ -64,15 +64,15 @@
  * HYPRE_PETScSolverParILUTSetup
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScSolverParILUTSetup( HYPRE_PETScSolverParILUT in_ptr,
+HYPRE_Int HYPRE_PETScSolverParILUTSetup( HYPRE_PETScSolverParILUT in_ptr,
                             Vec x, Vec b )
 {
    hypre_PETScSolverParILUT *solver = 
       (hypre_PETScSolverParILUT *) in_ptr;
 
-   int         nlocal, its, first, lens;
+   HYPRE_Int         nlocal, its, first, lens;
    Scalar      zero = 0.0, one = 1.0, norm;
-   int        *rowdist, count, nprocs, myproc, start, end, n;
+   HYPRE_Int        *rowdist, count, nprocs, myproc, start, end, n;
 
    MPI_Comm comm = hypre_PETScSolverParILUTComm(solver);
   
@@ -86,7 +86,7 @@ int HYPRE_PETScSolverParILUTSetup( HYPRE_PETScSolverParILUT in_ptr,
                              we can re-use info in the preconditioner */
    MatType     MatTypeName; /* used to check that matrix is correct type */
 
-   int         i, ierr=0;
+   HYPRE_Int         i, ierr=0;
 
 
    sles = hypre_PETScSolverParILUTSles( solver );
@@ -98,9 +98,9 @@ int HYPRE_PETScSolverParILUTSetup( HYPRE_PETScSolverParILUT in_ptr,
    {
      if( !SystemMatrix )
      {
-       printf(
+       hypre_printf(
         "HYPRE_PETScSolverParILUTSetup: you must call either SetSLES or ");
-       printf("SetSystemMatrix before Setup\n");
+       hypre_printf("SetSystemMatrix before Setup\n");
        ierr = -1; CHKERRA( ierr );
      }
      else
@@ -235,7 +235,7 @@ int HYPRE_PETScSolverParILUTSetup( HYPRE_PETScSolverParILUT in_ptr,
      
      if ( ierr != 0 )
      {
-       printf("Error returned by HYPRE_PETScMatPilutSolverSetup = %d\n",ierr);
+       hypre_printf("Error returned by HYPRE_PETScMatPilutSolverSetup = %d\n",ierr);
 
        return( ierr );
      }

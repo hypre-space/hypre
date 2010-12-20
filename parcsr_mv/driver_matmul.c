@@ -19,8 +19,8 @@
  * Test driver for unstructured matrix interface 
  *--------------------------------------------------------------------------*/
  
-int
-main( int   argc,
+HYPRE_Int
+main( HYPRE_Int   argc,
       char *argv[] )
 {
    hypre_ParCSRMatrix     *A;
@@ -28,29 +28,29 @@ main( int   argc,
    hypre_ParCSRMatrix     *C;
    hypre_CSRMatrix *As;
    hypre_CSRMatrix *Bs;
-   int *row_starts, *col_starts;
-   int num_procs, my_id;
+   HYPRE_Int *row_starts, *col_starts;
+   HYPRE_Int num_procs, my_id;
 
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
+   hypre_MPI_Init(&argc, &argv);
 
-   MPI_Comm_size(MPI_COMM_WORLD,&num_procs);
-   MPI_Comm_rank(MPI_COMM_WORLD,&my_id);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD,&num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD,&my_id);
    row_starts = NULL;
    col_starts = NULL;
 
    if (my_id == 0)
    {
    	As = hypre_CSRMatrixRead("inpr");
-   	printf(" read input A\n");
+   	hypre_printf(" read input A\n");
    	Bs = hypre_CSRMatrixRead("input");
-   	printf(" read input B\n");
+   	hypre_printf(" read input B\n");
    }
-   A = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, As, row_starts,
+   A = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, As, row_starts,
 	col_starts);
    row_starts = hypre_ParCSRMatrixRowStarts(A);
    col_starts = hypre_ParCSRMatrixColStarts(A);
-   B = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, Bs, col_starts,
+   B = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, Bs, col_starts,
 	row_starts);
    hypre_ParCSRMatrixSetRowStartsOwner(B,0);
    hypre_ParCSRMatrixSetColStartsOwner(B,0);
@@ -68,7 +68,7 @@ main( int   argc,
    hypre_ParCSRMatrixDestroy(B);
    hypre_ParCSRMatrixDestroy(C);
 
-   MPI_Finalize();
+   hypre_MPI_Finalize();
 
    return 0;
 }

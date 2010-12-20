@@ -106,41 +106,41 @@
  *      Coarsening routine
  *
  **************************************************************/
-int
+HYPRE_Int
 hypre_AMGCoarsen( hypre_CSRMatrix    *A,
                   double              strength_threshold,
                   hypre_CSRMatrix    *S,
-                  int               **CF_marker_ptr,
-                  int                *coarse_size_ptr     )
+                  HYPRE_Int               **CF_marker_ptr,
+                  HYPRE_Int                *coarse_size_ptr     )
 {
-   int              num_variables = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A);
 /*
-    int             *A_i           = hypre_CSRMatrixI(A);
-    int             *A_j           = hypre_CSRMatrixJ(A);
+    HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
+    HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
     double          *A_data        = hypre_CSRMatrixData(A);
 */                
-   int             *S_i;
-   int             *S_j;
+   HYPRE_Int             *S_i;
+   HYPRE_Int             *S_j;
    double          *S_data;
                  
-   int             *CF_marker;
-   int              coarse_size;
+   HYPRE_Int             *CF_marker;
+   HYPRE_Int              coarse_size;
 
    double          *measure_array;
-   int             *graph_array;
-   int              graph_size;
+   HYPRE_Int             *graph_array;
+   HYPRE_Int              graph_size;
 
 /*  double           diag, row_scale;
-    int              jS; */
+    HYPRE_Int              jS; */
 
-   int              i, j, k, jS, kS, ig;
+   HYPRE_Int              i, j, k, jS, kS, ig;
 
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
 #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 #endif
 
    S_i           = hypre_CSRMatrixI(S);
@@ -176,7 +176,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   graph_array   = hypre_CTAlloc(int, num_variables);
+   graph_array   = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    /* intialize measure array and graph array */
    for (i = 0; i < num_variables; i++)
@@ -188,7 +188,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
     * Initialize the C/F marker array
     *---------------------------------------------------*/
 
-   CF_marker = hypre_CTAlloc(int, num_variables);
+   CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    /*---------------------------------------------------
     * Loop until all points are either fine or coarse.
@@ -244,24 +244,24 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
 
 #if 0 /* debugging */
       /* print out measures */
-      sprintf(filename, "coarsen.out.measures.%04d", iter);
+      hypre_sprintf(filename, "coarsen.out.measures.%04d", iter);
       fp = fopen(filename, "w");
       for (i = 0; i < num_variables; i++)
       {
-         fprintf(fp, "%f\n", measure_array[i]);
+         hypre_fprintf(fp, "%f\n", measure_array[i]);
       }
       fclose(fp);
 
       /* print out strength matrix */
-      sprintf(filename, "coarsen.out.strength.%04d", iter);
+      hypre_sprintf(filename, "coarsen.out.strength.%04d", iter);
       hypre_CSRMatrixPrint(S, filename);
 
       /* print out C/F marker */
-      sprintf(filename, "coarsen.out.CF.%04d", iter);
+      hypre_sprintf(filename, "coarsen.out.CF.%04d", iter);
       fp = fopen(filename, "w");
       for (i = 0; i < num_variables; i++)
       {
-         fprintf(fp, "%d\n", CF_marker[i]);
+         hypre_fprintf(fp, "%d\n", CF_marker[i]);
       }
       fclose(fp);
 
@@ -410,57 +410,57 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
 /* Ruge's coarsening algorithm 						    */
 /*==========================================================================*/
 
-int
+HYPRE_Int
 hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
                       double              strength_threshold,
                       hypre_CSRMatrix    *S,
-                      int               **CF_marker_ptr,
-                      int                *coarse_size_ptr     )
+                      HYPRE_Int               **CF_marker_ptr,
+                      HYPRE_Int                *coarse_size_ptr     )
 {
 
-   int              num_variables = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A);
 
 /*
-    int             *A_i           = hypre_CSRMatrixI(A);
-    int             *A_j           = hypre_CSRMatrixJ(A);
+    HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
+    HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
     double          *A_data        = hypre_CSRMatrixData(A);
 */
                   
-   int             *S_i;
-   int             *S_j;
+   HYPRE_Int             *S_i;
+   HYPRE_Int             *S_j;
                  
    hypre_CSRMatrix *ST;
-   int             *ST_i;
-   int             *ST_j;
+   HYPRE_Int             *ST_i;
+   HYPRE_Int             *ST_j;
                  
-   int             *CF_marker;
-   int              coarse_size;
+   HYPRE_Int             *CF_marker;
+   HYPRE_Int              coarse_size;
 
-   int             *measure_array;
-   int             *graph_array;
-   int             *graph_ptr;
-   int              graph_size;
+   HYPRE_Int             *measure_array;
+   HYPRE_Int             *graph_array;
+   HYPRE_Int             *graph_ptr;
+   HYPRE_Int              graph_size;
 
 /*   double           diag, row_scale;
 
-    int              jA, jS;
+    HYPRE_Int              jA, jS;
 */
 
-   int              measure, max_measure;
-   int              i, j, ig;
-   int		    ic, ji, jj, jl, index;
-   int		    ci_tilde = -1;
-   int		    ci_tilde_mark = -1;
-   int		    set_empty = 1;
-   int		    C_i_nonempty = 0;
-   int		    num_strong;
+   HYPRE_Int              measure, max_measure;
+   HYPRE_Int              i, j, ig;
+   HYPRE_Int		    ic, ji, jj, jl, index;
+   HYPRE_Int		    ci_tilde = -1;
+   HYPRE_Int		    ci_tilde_mark = -1;
+   HYPRE_Int		    set_empty = 1;
+   HYPRE_Int		    C_i_nonempty = 0;
+   HYPRE_Int		    num_strong;
 
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
 #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 #endif
 
    S_i = hypre_CSRMatrixI(S);
@@ -469,10 +469,10 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
    num_strong = S_i[num_variables];
    ST = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);
 
-   ST_i = hypre_CTAlloc(int,num_variables+1);
+   ST_i = hypre_CTAlloc(HYPRE_Int,num_variables+1);
    hypre_CSRMatrixI(ST) = ST_i;
 
-   ST_j = hypre_CTAlloc(int,num_strong);
+   ST_j = hypre_CTAlloc(HYPRE_Int,num_strong);
    hypre_CSRMatrixJ(ST) = ST_j;
 
    hypre_CSRMatrixNumNonzeros(ST) = num_strong;
@@ -516,7 +516,7 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
     *
     *----------------------------------------------------------*/
 
-   measure_array = hypre_CTAlloc(int, num_variables);
+   measure_array = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -528,8 +528,8 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   graph_array = hypre_CTAlloc(int, num_variables);
-   graph_ptr   = hypre_CTAlloc(int, num_variables);
+   graph_array = hypre_CTAlloc(HYPRE_Int, num_variables);
+   graph_ptr   = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -541,7 +541,7 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
     * Initialize the C/F marker array
     *---------------------------------------------------*/
 
-   CF_marker = hypre_CTAlloc(int, num_variables);
+   CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
    for (i = 0; i < num_variables; i++)
    {
       CF_marker[i] = 0;
@@ -699,57 +699,57 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
  *
  ***************************************************************************/
 
-int
+HYPRE_Int
 hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 			 double              strength_threshold,
 			 hypre_CSRMatrix    *S,
-			 int               **CF_marker_ptr,
-			 int                *coarse_size_ptr     )
+			 HYPRE_Int               **CF_marker_ptr,
+			 HYPRE_Int                *coarse_size_ptr     )
 {
-   int              num_variables = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A);
 
 /*
-    int             *A_i           = hypre_CSRMatrixI(A);
-    int             *A_j           = hypre_CSRMatrixJ(A);
+    HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
+    HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
     double          *A_data        = hypre_CSRMatrixData(A);
 */
 
                   
-   int             *S_i;
-   int             *S_j;
+   HYPRE_Int             *S_i;
+   HYPRE_Int             *S_j;
                  
    hypre_CSRMatrix *ST;
-   int             *ST_i;
-   int             *ST_j;
+   HYPRE_Int             *ST_i;
+   HYPRE_Int             *ST_j;
                  
-   int             *CF_marker;
-   int              coarse_size;
+   HYPRE_Int             *CF_marker;
+   HYPRE_Int              coarse_size;
 
-   int             *measure_array;
-   int             *graph_array;
+   HYPRE_Int             *measure_array;
+   HYPRE_Int             *graph_array;
 /*
     double           diag, row_scale;
-    int              jA, jS;
+    HYPRE_Int              jA, jS;
 */
 
-   int              measure;
-   int              i, j, k;
-   int		    ji, jj, index;
-   int		    ci_tilde = -1;
-   int		    ci_tilde_mark = -1;
-   int		    set_empty = 1;
-   int		    C_i_nonempty = 0;
-   int		    num_strong;
+   HYPRE_Int              measure;
+   HYPRE_Int              i, j, k;
+   HYPRE_Int		    ji, jj, index;
+   HYPRE_Int		    ci_tilde = -1;
+   HYPRE_Int		    ci_tilde_mark = -1;
+   HYPRE_Int		    set_empty = 1;
+   HYPRE_Int		    C_i_nonempty = 0;
+   HYPRE_Int		    num_strong;
 
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    hypre_LinkList LoL_head;
    hypre_LinkList LoL_tail;
 
-   int *lists, *where;
-   int  new_meas;
-   int  num_left;
-   int  nabor, nabor_two;
+   HYPRE_Int *lists, *where;
+   HYPRE_Int  new_meas;
+   HYPRE_Int  num_left;
+   HYPRE_Int  nabor, nabor_two;
 
    /*-------------------------------------------------------
     * Initialize the C/F marker, LoL_head, LoL_tail  arrays
@@ -758,11 +758,11 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 
    LoL_head = NULL;
    LoL_tail = NULL;
-   lists = hypre_CTAlloc(int, num_variables);
-   where = hypre_CTAlloc(int, num_variables);
+   lists = hypre_CTAlloc(HYPRE_Int, num_variables);
+   where = hypre_CTAlloc(HYPRE_Int, num_variables);
 
 
-   CF_marker = hypre_CTAlloc(int, num_variables);
+   CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
    for (j = 0; j < num_variables; j++)
    {
       CF_marker[j] = UNDECIDED;
@@ -774,10 +774,10 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
    num_strong = S_i[num_variables];
    ST = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);
 
-   ST_i = hypre_CTAlloc(int,num_variables+1);
+   ST_i = hypre_CTAlloc(HYPRE_Int,num_variables+1);
    hypre_CSRMatrixI(ST) = ST_i;
 
-   ST_j = hypre_CTAlloc(int,num_strong);
+   ST_j = hypre_CTAlloc(HYPRE_Int,num_strong);
    hypre_CSRMatrixJ(ST) = ST_j;
 
    hypre_CSRMatrixNumNonzeros(ST) = num_strong;
@@ -821,7 +821,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
     *
     *----------------------------------------------------------*/
 
-   measure_array = hypre_CTAlloc(int, num_variables);
+   measure_array = hypre_CTAlloc(HYPRE_Int, num_variables);
    for (j = 0; j < num_variables; j++) 
    {    
       measure_array[j] = ST_i[j+1]-ST_i[j];
@@ -839,7 +839,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
       }
       else
       {
-         if (measure < 0) printf("negative measure!\n");
+         if (measure < 0) hypre_printf("negative measure!\n");
          CF_marker[j] = FPOINT;
 	 for (k = S_i[j]; k < S_i[j+1]; k++)
 	 {
@@ -962,7 +962,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 #endif
 
    hypre_TFree(lists);
@@ -977,7 +977,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   graph_array = hypre_CTAlloc(int, num_variables);
+   graph_array = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -1068,50 +1068,50 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
  *           without a common C point)
  *
  **************************************************************/
-int
+HYPRE_Int
 hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
                   double              strength_threshold,
                   hypre_CSRMatrix    *S,
                   /*hypre_CSRMatrix   **S_ptr,*/
-                  int               **CF_marker_ptr,
-                  int                *coarse_size_ptr     )
+                  HYPRE_Int               **CF_marker_ptr,
+                  HYPRE_Int                *coarse_size_ptr     )
 {
-   int              num_variables = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A);
 
 /*
-    int             *A_i           = hypre_CSRMatrixI(A);
-    int             *A_j           = hypre_CSRMatrixJ(A);
+    HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
+    HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
     double          *A_data        = hypre_CSRMatrixData(A);
 */
 
                   
-   int             *S_i;
-   int             *S_j;
+   HYPRE_Int             *S_i;
+   HYPRE_Int             *S_j;
    double          *S_data;
                  
-   int             *CF_marker;
-   int              coarse_size;
+   HYPRE_Int             *CF_marker;
+   HYPRE_Int              coarse_size;
 
    double          *measure_array;
-   int             *graph_array;
-   int              graph_size;
+   HYPRE_Int             *graph_array;
+   HYPRE_Int              graph_size;
 /*
     double           diag, row_scale;
-    int              i, j, k, jA, jS, kS, ig;
+    HYPRE_Int              i, j, k, jA, jS, kS, ig;
 */
-   int              i, j, jS, ig;
-   int              jjS;
+   HYPRE_Int              i, j, jS, ig;
+   HYPRE_Int              jjS;
 
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    #if 0  
    char  filename[256];
    FILE *fp;
    #endif
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 
-   printf("\n");
-   printf("wLJP coarsening...\n");
+   hypre_printf("\n");
+   hypre_printf("wLJP coarsening...\n");
 
    /*--------------------------------------------------------------
     * Compute a CSR strength matrix, S.
@@ -1252,7 +1252,7 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   graph_array   = hypre_CTAlloc(int, num_variables);
+   graph_array   = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    /* intialize measure array and graph array */
    for (i = 0; i < num_variables; i++)
@@ -1264,7 +1264,7 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
     * Initialize the C/F marker array
     *---------------------------------------------------*/
 
-   CF_marker = hypre_CTAlloc(int, num_variables);
+   CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    /*---------------------------------------------------
     * Loop until all points are either fine or coarse.
@@ -1286,24 +1286,24 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
      
 #if 0 /* debugging */
      /* print out measures */
-     sprintf(filename, "coarsen.out.measures.%04d", iter);
+     hypre_sprintf(filename, "coarsen.out.measures.%04d", iter);
      fp = fopen(filename, "w");
      for (i = 0; i < num_variables; i++)
        {
-         fprintf(fp, "%f\n", measure_array[i]);
+         hypre_fprintf(fp, "%f\n", measure_array[i]);
        }
      fclose(fp);
      
      /* print out strength matrix */
-     sprintf(filename, "coarsen.out.strength.%04d", iter);
+     hypre_sprintf(filename, "coarsen.out.strength.%04d", iter);
      hypre_CSRMatrixPrint(S, filename);
      
      /* print out C/F marker */
-     sprintf(filename, "coarsen.out.CF.%04d", iter);
+     hypre_sprintf(filename, "coarsen.out.CF.%04d", iter);
      fp = fopen(filename, "w");
      for (i = 0; i < num_variables; i++)
        {
-         fprintf(fp, "%d\n", CF_marker[i]);
+         hypre_fprintf(fp, "%d\n", CF_marker[i]);
        }
      fclose(fp);
      
@@ -1312,9 +1312,9 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
      
      if(graph_size == 0) break;
 
-     printf("*** wLJP iteration %d\n",iter);
-     printf("graph_size remaining %d\n",graph_size);
-     printf("coarse_size selected %d\n",coarse_size);
+     hypre_printf("*** wLJP iteration %d\n",iter);
+     hypre_printf("graph_size remaining %d\n",graph_size);
+     hypre_printf("coarse_size selected %d\n",coarse_size);
      
      /*------------------------------------------------
       * Pick an independent set of points with
@@ -1322,18 +1322,18 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
       *------------------------------------------------*/
      
      /*     for (i = 0; i < num_variables; i++) {
-       printf("CF_marker[i] %d\n",CF_marker[i]);
-       printf("measure_array[i] %e\n",measure_array[i]);
+       hypre_printf("CF_marker[i] %d\n",CF_marker[i]);
+       hypre_printf("measure_array[i] %e\n",measure_array[i]);
      } 
-     printf("CALL \n");*/
+     hypre_printf("CALL \n");*/
 
      hypre_AMGIndepSet(S, measure_array, 1.0,
 		       graph_array, graph_size, CF_marker);
      
      /*    for (ig = 0; ig < graph_size; ig++) {
        i = graph_array[ig];
-       printf("CF_marker[i] %d\n",CF_marker[i]);
-       printf("measure_array[i] %e\n",measure_array[i]);
+       hypre_printf("CF_marker[i] %d\n",CF_marker[i]);
+       hypre_printf("measure_array[i] %e\n",measure_array[i]);
        } */
 
      /*------------------------------------------------
@@ -1450,9 +1450,9 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
 
    } /* end while */
 
-   printf("*** wLJP iteration %d\n",iter);
-   printf("graph_size remaining %d\n",graph_size);
-   printf("coarse_size selected %d\n",coarse_size);
+   hypre_printf("*** wLJP iteration %d\n",iter);
+   hypre_printf("graph_size remaining %d\n",graph_size);
+   hypre_printf("coarse_size selected %d\n",coarse_size);
 
    /*---------------------------------------------------
     * Clean up and return
@@ -1471,58 +1471,58 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
 /* Ruge's coarsening algorithm modified: only one pass			    */
 /*==========================================================================*/
 
-int
+HYPRE_Int
 hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
                       double              strength_threshold,
                       /*hypre_CSRMatrix   **S_ptr,*/
                       hypre_CSRMatrix    *S,
-                      int               **CF_marker_ptr,
-                      int                *coarse_size_ptr     )
+                      HYPRE_Int               **CF_marker_ptr,
+                      HYPRE_Int                *coarse_size_ptr     )
 {
 
-   int             *A_i           = hypre_CSRMatrixI(A);
+   HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
 /*
-    int             *A_j           = hypre_CSRMatrixJ(A);
+    HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
     double          *A_data        = hypre_CSRMatrixData(A);
 */
 
-   int              num_variables = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A);
                   
    /*hypre_CSRMatrix *S;*/
-   int             *S_i;
-   int             *S_j;
+   HYPRE_Int             *S_i;
+   HYPRE_Int             *S_j;
                  
    hypre_CSRMatrix *ST;
-   int             *ST_i;
-   int             *ST_j;
+   HYPRE_Int             *ST_i;
+   HYPRE_Int             *ST_j;
                  
-   int             *CF_marker;
-   int              coarse_size;
+   HYPRE_Int             *CF_marker;
+   HYPRE_Int              coarse_size;
 
-   int             *measure_array;
-   int             *graph_array;
-   int             *graph_ptr;
-   int              graph_size;
+   HYPRE_Int             *measure_array;
+   HYPRE_Int             *graph_array;
+   HYPRE_Int             *graph_ptr;
+   HYPRE_Int              graph_size;
 /*
    double           diag, row_scale;
-    int              i, j, jA, jS, ig;
+    HYPRE_Int              i, j, jA, jS, ig;
 */
-   int              measure, max_measure;
-   int              i, j, jS, ig;
-   int		    ic, ji, jj, jl, index;
-   int		    num_strong;
+   HYPRE_Int              measure, max_measure;
+   HYPRE_Int              i, j, jS, ig;
+   HYPRE_Int		    ic, ji, jj, jl, index;
+   HYPRE_Int		    num_strong;
 /*
-    int                    ci_tilde = -1;
-    int                    ci_tilde_mark = -1;
-    int                    set_empty = 1;
-    int                    C_i_nonempty = 0;
+    HYPRE_Int                    ci_tilde = -1;
+    HYPRE_Int                    ci_tilde_mark = -1;
+    HYPRE_Int                    set_empty = 1;
+    HYPRE_Int                    C_i_nonempty = 0;
 */
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
    #endif 
 
    /*--------------------------------------------------------------
@@ -1545,13 +1545,13 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
    S_i = hypre_CSRMatrixI(S);
    S_j = hypre_CSRMatrixJ(S);
 
-   /*S_i = hypre_CTAlloc(int,num_variables+1);
+   /*S_i = hypre_CTAlloc(HYPRE_Int,num_variables+1);
    hypre_CSRMatrixI(S) = S_i;*/
 
-   ST_i = hypre_CTAlloc(int,num_variables+1);
+   ST_i = hypre_CTAlloc(HYPRE_Int,num_variables+1);
    hypre_CSRMatrixI(ST) = ST_i;
 
-   ST_j = hypre_CTAlloc(int,A_i[num_variables]);
+   ST_j = hypre_CTAlloc(HYPRE_Int,A_i[num_variables]);
    hypre_CSRMatrixJ(ST) = ST_j;
 
    /* give S same nonzero structure as A, store in ST*/
@@ -1611,7 +1611,7 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
       }
    }
 
-   S_j = hypre_CTAlloc(int,num_strong);
+   S_j = hypre_CTAlloc(HYPRE_Int,num_strong);
    hypre_CSRMatrixJ(S) = S_j;*/
 
    /*--------------------------------------------------------------
@@ -1681,7 +1681,7 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
     *
     *----------------------------------------------------------*/
 
-   measure_array = hypre_CTAlloc(int, num_variables);
+   measure_array = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -1693,8 +1693,8 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   graph_array = hypre_CTAlloc(int, num_variables);
-   graph_ptr   = hypre_CTAlloc(int, num_variables);
+   graph_array = hypre_CTAlloc(HYPRE_Int, num_variables);
+   graph_ptr   = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -1706,7 +1706,7 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
     * Initialize the C/F marker array
     *---------------------------------------------------*/
 
-   CF_marker = hypre_CTAlloc(int, num_variables);
+   CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
    for (i = 0; i < num_variables; i++)
    {
       CF_marker[i] = 0;

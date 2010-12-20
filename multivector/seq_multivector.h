@@ -34,12 +34,12 @@ extern "C" {
 typedef struct
 {
    double  *data;
-   int      size;
-   int      owns_data;
-   int      num_vectors;  /* the above "size" is size of one vector */
+   HYPRE_Int      size;
+   HYPRE_Int      owns_data;
+   HYPRE_Int      num_vectors;  /* the above "size" is size of one vector */
    
-   int      num_active_vectors;
-   int     *active_indices;   /* indices of active vectors; 0-based notation */
+   HYPRE_Int      num_active_vectors;
+   HYPRE_Int     *active_indices;   /* indices of active vectors; 0-based notation */
        
 } hypre_Multivector;
 
@@ -52,40 +52,40 @@ typedef struct
 #define hypre_MultivectorOwnsData(vector)  ((vector) -> owns_data)
 #define hypre_MultivectorNumVectors(vector) ((vector) -> num_vectors)
 
-hypre_Multivector * hypre_SeqMultivectorCreate(int size, int num_vectors);
+hypre_Multivector * hypre_SeqMultivectorCreate(HYPRE_Int size, HYPRE_Int num_vectors);
 hypre_Multivector *hypre_SeqMultivectorRead(char *file_name);
 
-int hypre_SeqMultivectorDestroy(hypre_Multivector *vector);
-int hypre_SeqMultivectorInitialize(hypre_Multivector *vector);
-int hypre_SeqMultivectorSetDataOwner(hypre_Multivector *vector , int owns_data);
-int hypre_SeqMultivectorPrint(hypre_Multivector *vector , char *file_name);
-int hypre_SeqMultivectorSetConstantValues(hypre_Multivector *v,double value);
-int hypre_SeqMultivectorSetRandomValues(hypre_Multivector *v , int seed);
-int hypre_SeqMultivectorCopy(hypre_Multivector *x , hypre_Multivector *y);
-int hypre_SeqMultivectorScale(double alpha , hypre_Multivector *y, int *mask);
-int hypre_SeqMultivectorAxpy(double alpha , hypre_Multivector *x , 
+HYPRE_Int hypre_SeqMultivectorDestroy(hypre_Multivector *vector);
+HYPRE_Int hypre_SeqMultivectorInitialize(hypre_Multivector *vector);
+HYPRE_Int hypre_SeqMultivectorSetDataOwner(hypre_Multivector *vector , HYPRE_Int owns_data);
+HYPRE_Int hypre_SeqMultivectorPrint(hypre_Multivector *vector , char *file_name);
+HYPRE_Int hypre_SeqMultivectorSetConstantValues(hypre_Multivector *v,double value);
+HYPRE_Int hypre_SeqMultivectorSetRandomValues(hypre_Multivector *v , HYPRE_Int seed);
+HYPRE_Int hypre_SeqMultivectorCopy(hypre_Multivector *x , hypre_Multivector *y);
+HYPRE_Int hypre_SeqMultivectorScale(double alpha , hypre_Multivector *y, HYPRE_Int *mask);
+HYPRE_Int hypre_SeqMultivectorAxpy(double alpha , hypre_Multivector *x , 
                              hypre_Multivector *y);
-int hypre_SeqMultivectorInnerProd(hypre_Multivector *x , hypre_Multivector *y,
+HYPRE_Int hypre_SeqMultivectorInnerProd(hypre_Multivector *x , hypre_Multivector *y,
                                   double *results);
-int hypre_SeqMultivectorMultiScale(double *alpha, hypre_Multivector *v, 
-                                   int *mask);
-int hypre_SeqMultivectorByDiag(hypre_Multivector *x, int *mask, int n,
+HYPRE_Int hypre_SeqMultivectorMultiScale(double *alpha, hypre_Multivector *v, 
+                                   HYPRE_Int *mask);
+HYPRE_Int hypre_SeqMultivectorByDiag(hypre_Multivector *x, HYPRE_Int *mask, HYPRE_Int n,
                                double *alpha, hypre_Multivector *y);
 
-int hypre_SeqMultivectorInnerProdDiag(hypre_Multivector *x, 
+HYPRE_Int hypre_SeqMultivectorInnerProdDiag(hypre_Multivector *x, 
                                       hypre_Multivector *y, 
                                       double *diagResults );
 
-int hypre_SeqMultivectorSetMask(hypre_Multivector *mvector, int * mask);
+HYPRE_Int hypre_SeqMultivectorSetMask(hypre_Multivector *mvector, HYPRE_Int * mask);
 
-int hypre_SeqMultivectorCopyWithoutMask(hypre_Multivector *x ,
+HYPRE_Int hypre_SeqMultivectorCopyWithoutMask(hypre_Multivector *x ,
                                         hypre_Multivector *y);
 
-int hypre_SeqMultivectorByMatrix(hypre_Multivector *x, int rGHeight, int rHeight, 
-                                 int rWidth, double* rVal, hypre_Multivector *y);
+HYPRE_Int hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+                                 HYPRE_Int rWidth, double* rVal, hypre_Multivector *y);
 
-int hypre_SeqMultivectorXapy (hypre_Multivector *x, int rGHeight, int rHeight, 
-                              int rWidth, double* rVal, hypre_Multivector *y);
+HYPRE_Int hypre_SeqMultivectorXapy (hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+                              HYPRE_Int rWidth, double* rVal, hypre_Multivector *y);
 
 #ifdef __cplusplus
 }

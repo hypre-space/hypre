@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dorgtr_(char *uplo, integer *n, doublereal *a, integer *
+/* Subroutine */ HYPRE_Int dorgtr_(char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *tau, doublereal *work, integer *lwork, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -81,10 +81,10 @@
     static integer iinfo;
     static logical upper;
     static integer nb;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ int dorgql_(integer *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dorgql_(integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    integer *), dorgqr_(integer *, integer *, integer *, doublereal *,
 	     integer *, doublereal *, doublereal *, integer *, integer *);

@@ -28,7 +28,7 @@ HYPRE_PETScMatPilutSolver  HYPRE_NewPETScMatPilutSolver(
 {
 
    hypre_PETScMatPilutSolver     *solver;
-   int            ierr;
+   HYPRE_Int            ierr;
 
    /* Allocate structure for holding solver data */
    solver = (hypre_PETScMatPilutSolver *) 
@@ -53,10 +53,10 @@ HYPRE_PETScMatPilutSolver  HYPRE_NewPETScMatPilutSolver(
  * HYPRE_FreePETScMatPilutSolver
  *--------------------------------------------------------------------------*/
 
-int HYPRE_FreePETScMatPilutSolver ( 
+HYPRE_Int HYPRE_FreePETScMatPilutSolver ( 
                   HYPRE_PETScMatPilutSolver in_ptr )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
 
    hypre_PETScMatPilutSolver *solver = 
       (hypre_PETScMatPilutSolver *) in_ptr;
@@ -79,12 +79,12 @@ int HYPRE_FreePETScMatPilutSolver (
  * HYPRE_PETScMatPilutSolverInitialize
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScMatPilutSolverInitialize ( 
+HYPRE_Int HYPRE_PETScMatPilutSolverInitialize ( 
                   HYPRE_PETScMatPilutSolver in_ptr )
 {
    hypre_PETScMatPilutSolver *solver = 
       (hypre_PETScMatPilutSolver *) in_ptr;
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    HYPRE_DistributedMatrixPilutSolverInitialize( 
      hypre_PETScMatPilutSolverDistributedSolver ( solver ) );
@@ -96,11 +96,11 @@ int HYPRE_PETScMatPilutSolverInitialize (
  * HYPRE_PETScMatPilutSolverSetMatrix
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScMatPilutSolverSetMatrix( 
+HYPRE_Int HYPRE_PETScMatPilutSolverSetMatrix( 
                   HYPRE_PETScMatPilutSolver in_ptr,
                   Mat matrix )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
   hypre_PETScMatPilutSolver *solver = 
       (hypre_PETScMatPilutSolver *) in_ptr;
 
@@ -127,11 +127,11 @@ Mat
  * HYPRE_PETScMatPilutSolverSetFactorRowSize
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScMatPilutSolverSetFactorRowSize( 
+HYPRE_Int HYPRE_PETScMatPilutSolverSetFactorRowSize( 
                   HYPRE_PETScMatPilutSolver in_ptr,
-                  int size )
+                  HYPRE_Int size )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
   hypre_PETScMatPilutSolver *solver = 
       (hypre_PETScMatPilutSolver *) in_ptr;
   HYPRE_DistributedMatrixPilutSolver distributed_solver =
@@ -146,11 +146,11 @@ int HYPRE_PETScMatPilutSolverSetFactorRowSize(
  * HYPRE_PETScMatPilutSolverSetDropTolerance
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScMatPilutSolverSetDropTolerance( 
+HYPRE_Int HYPRE_PETScMatPilutSolverSetDropTolerance( 
                   HYPRE_PETScMatPilutSolver in_ptr,
                   double tol )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
   hypre_PETScMatPilutSolver *solver = 
       (hypre_PETScMatPilutSolver *) in_ptr;
   HYPRE_DistributedMatrixPilutSolver distributed_solver =
@@ -165,11 +165,11 @@ int HYPRE_PETScMatPilutSolverSetDropTolerance(
  * HYPRE_PETScMatPilutSolverSetMaxIts
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScMatPilutSolverSetMaxIts( 
+HYPRE_Int HYPRE_PETScMatPilutSolverSetMaxIts( 
                   HYPRE_PETScMatPilutSolver in_ptr,
-                  int its )
+                  HYPRE_Int its )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
   hypre_PETScMatPilutSolver *solver = 
       (hypre_PETScMatPilutSolver *) in_ptr;
   HYPRE_DistributedMatrixPilutSolver distributed_solver =
@@ -184,10 +184,10 @@ int HYPRE_PETScMatPilutSolverSetMaxIts(
  * HYPRE_PETScMatPilutSolverSetup
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScMatPilutSolverSetup( HYPRE_PETScMatPilutSolver in_ptr,
+HYPRE_Int HYPRE_PETScMatPilutSolverSetup( HYPRE_PETScMatPilutSolver in_ptr,
                             Vec x, Vec b )
 {
-  int ierr=0;
+  HYPRE_Int ierr=0;
 
   hypre_PETScMatPilutSolver *solver = 
       (hypre_PETScMatPilutSolver *) in_ptr;
@@ -228,10 +228,10 @@ int HYPRE_PETScMatPilutSolverSetup( HYPRE_PETScMatPilutSolver in_ptr,
  *   order than HYPRE_PETScMatPilutSolverSolve. Just a wrapper to the latter.
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScMatPilutSolverApply( HYPRE_PETScMatPilutSolver in_ptr,
+HYPRE_Int HYPRE_PETScMatPilutSolverApply( HYPRE_PETScMatPilutSolver in_ptr,
                                            Vec b, Vec x )
 {
-   int ierr=0;
+   HYPRE_Int ierr=0;
    ierr = HYPRE_PETScMatPilutSolverSolve(
        in_ptr, x, b );
 
@@ -242,10 +242,10 @@ int HYPRE_PETScMatPilutSolverApply( HYPRE_PETScMatPilutSolver in_ptr,
  * HYPRE_PETScMatPilutSolverSolve
  *--------------------------------------------------------------------------*/
 
-int HYPRE_PETScMatPilutSolverSolve( HYPRE_PETScMatPilutSolver in_ptr,
+HYPRE_Int HYPRE_PETScMatPilutSolverSolve( HYPRE_PETScMatPilutSolver in_ptr,
                                            Vec x, Vec b )
 {
-   int ierr=0, size;
+   HYPRE_Int ierr=0, size;
    double    *x_vals, *b_vals;
 
    hypre_PETScMatPilutSolver *solver = 

@@ -45,32 +45,32 @@
  *      Creates strength matrix
  *
  **************************************************************/
-int
+HYPRE_Int
 hypre_AMGCreateS( hypre_CSRMatrix    *A,
                   double              strength_threshold,
-                  int		      mode,
-                  int		     *dof_func,
+                  HYPRE_Int		      mode,
+                  HYPRE_Int		     *dof_func,
                   hypre_CSRMatrix   **S_ptr              )
 {
-   int             *A_i           = hypre_CSRMatrixI(A);
-   int             *A_j           = hypre_CSRMatrixJ(A);
+   HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
+   HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
    double          *A_data        = hypre_CSRMatrixData(A);
-   int              num_variables = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A);
                   
    hypre_CSRMatrix *S;
-   int             *S_i;
-   int             *S_j;
+   HYPRE_Int             *S_i;
+   HYPRE_Int             *S_j;
    double          *S_data;
                  
    double           diag, row_scale;
-   int              i, jA, jS;
+   HYPRE_Int              i, jA, jS;
 
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
 #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 #endif
 
    /*--------------------------------------------------------------
@@ -221,19 +221,19 @@ hypre_AMGCreateS( hypre_CSRMatrix    *A,
    return (ierr);
 }
 
-int
+HYPRE_Int
 hypre_AMGCompressS( hypre_CSRMatrix    *S,
-                    int		      num_path)
+                    HYPRE_Int		      num_path)
 {
-   int *S_i = hypre_CSRMatrixI(S);
-   int *S_j = hypre_CSRMatrixJ(S);
+   HYPRE_Int *S_i = hypre_CSRMatrixI(S);
+   HYPRE_Int *S_j = hypre_CSRMatrixJ(S);
    double *S_data = hypre_CSRMatrixData(S);
    
    double dnum_path = (double) num_path;
    double dat;
-   int num_rows = hypre_CSRMatrixNumRows(S); 
-   int i, j;
-   int col, cnt;
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(S); 
+   HYPRE_Int i, j;
+   HYPRE_Int col, cnt;
 
    cnt = 0;
    for (i=0; i < num_rows; i++)
@@ -261,30 +261,30 @@ hypre_AMGCompressS( hypre_CSRMatrix    *S,
 }
 
 
-int
-hypre_AMGCreate2ndS( hypre_CSRMatrix *A, int n_coarse,
-              int *CF_marker, int num_paths, hypre_CSRMatrix **S_ptr)
+HYPRE_Int
+hypre_AMGCreate2ndS( hypre_CSRMatrix *A, HYPRE_Int n_coarse,
+              HYPRE_Int *CF_marker, HYPRE_Int num_paths, hypre_CSRMatrix **S_ptr)
 {
    double     *A_data   = hypre_CSRMatrixData(A);
-   int        *A_i      = hypre_CSRMatrixI(A);
-   int        *A_j      = hypre_CSRMatrixJ(A);
-   int         nrows_A  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    hypre_CSRMatrix *S;
    double     *S_data;
-   int	      *S_i;
-   int        *S_j;
+   HYPRE_Int	      *S_i;
+   HYPRE_Int        *S_j;
 
-   int         ia, ib, ic, ja, jb, num_nonzeros=0;
-   int	       row_start, cnt, S_cnt;
-   int	       i, j, jcol, col;
+   HYPRE_Int         ia, ib, ic, ja, jb, num_nonzeros=0;
+   HYPRE_Int	       row_start, cnt, S_cnt;
+   HYPRE_Int	       i, j, jcol, col;
    double      a_entry, b_entry, d_num_paths;
-   int         *B_marker;
-   int         *fine_to_coarse;
+   HYPRE_Int         *B_marker;
+   HYPRE_Int         *fine_to_coarse;
 
 
-   B_marker = hypre_CTAlloc(int, nrows_A);
-   S_i = hypre_CTAlloc(int, n_coarse+1);
-   fine_to_coarse = hypre_CTAlloc(int, nrows_A);
+   B_marker = hypre_CTAlloc(HYPRE_Int, nrows_A);
+   S_i = hypre_CTAlloc(HYPRE_Int, n_coarse+1);
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, nrows_A);
    d_num_paths = (double) num_paths;
 
    for (ib = 0; ib < nrows_A; ib++)
@@ -409,10 +409,10 @@ hypre_AMGCreate2ndS( hypre_CSRMatrix *A, int n_coarse,
    return 0;
 }
 
-int
-hypre_AMGCorrectCFMarker(int *CF_marker, int num_var, int *new_CF_marker)
+HYPRE_Int
+hypre_AMGCorrectCFMarker(HYPRE_Int *CF_marker, HYPRE_Int num_var, HYPRE_Int *new_CF_marker)
 {
-   int i, cnt;
+   HYPRE_Int i, cnt;
 
    cnt = 0;
    for (i=0; i < num_var; i++)

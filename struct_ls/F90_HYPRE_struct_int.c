@@ -23,11 +23,11 @@
 
 void
 hypre_F90_IFACE(hypre_structvectorsetrandomvalu, HYPRE_STRUCTVECTORSETRANDOMVALU)
-               (long int *vector, int *seed, int *ierr)
+               (hypre_F90_Obj *vector, HYPRE_Int *seed, HYPRE_Int *ierr)
 
 {
-   *ierr = (int) ( hypre_StructVectorSetRandomValues( (hypre_StructVector *) vector,
-                                                      (int)                 *seed ));
+   *ierr = (HYPRE_Int) ( hypre_StructVectorSetRandomValues( (hypre_StructVector *) vector,
+                                                      (HYPRE_Int)                 *seed ));
 }
 
 
@@ -37,11 +37,11 @@ hypre_F90_IFACE(hypre_structvectorsetrandomvalu, HYPRE_STRUCTVECTORSETRANDOMVALU
 
 void
 hypre_F90_IFACE(hypre_structsetrandomvalues, HYPRE_STRUCTSETRANDOMVALUES)
-               (long int *vector, int *seed, int *ierr)
+               (hypre_F90_Obj *vector, HYPRE_Int *seed, HYPRE_Int *ierr)
 
 {
-   *ierr = (int) ( hypre_StructSetRandomValues( (hypre_StructVector *) vector,
-                                                (int)                 *seed ));
+   *ierr = (HYPRE_Int) ( hypre_StructSetRandomValues( (hypre_StructVector *) vector,
+                                                (HYPRE_Int)                 *seed ));
 }
 
 /*--------------------------------------------------------------------------
@@ -50,10 +50,10 @@ hypre_F90_IFACE(hypre_structsetrandomvalues, HYPRE_STRUCTSETRANDOMVALUES)
 
 void
 hypre_F90_IFACE(hypre_structsetupinterpreter, HYPRE_STRUCTSETUPINTERPRETER)
-               (long int *i, int *ierr)
+               (hypre_F90_Obj *i, HYPRE_Int *ierr)
 
 {
-   *ierr = (int) ( HYPRE_StructSetupInterpreter( (mv_InterfaceInterpreter *) i ));
+   *ierr = (HYPRE_Int) ( HYPRE_StructSetupInterpreter( (mv_InterfaceInterpreter *) i ));
 }
 
 /*--------------------------------------------------------------------------
@@ -62,8 +62,8 @@ hypre_F90_IFACE(hypre_structsetupinterpreter, HYPRE_STRUCTSETUPINTERPRETER)
 
 void
 hypre_F90_IFACE(hypre_structsetupmatvec, HYPRE_STRUCTSETUPMATVEC)
-               (long int *mv, int *ierr)
+               (hypre_F90_Obj *mv, HYPRE_Int *ierr)
 
 {
-   *ierr = (int) ( HYPRE_StructSetupMatvec( (HYPRE_MatvecFunctions *) mv));
+   *ierr = (HYPRE_Int) ( HYPRE_StructSetupMatvec( (HYPRE_MatvecFunctions *) mv));
 }

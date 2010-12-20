@@ -25,10 +25,10 @@
  * HYPRE_ParVectorCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParVectorCreate( MPI_Comm comm,
-                       int      global_size, 
-                       int     *partitioning,
+                       HYPRE_Int      global_size, 
+                       HYPRE_Int     *partitioning,
 		       HYPRE_ParVector *vector )
 {
    *vector = (HYPRE_ParVector) hypre_ParVectorCreate(comm, global_size,
@@ -42,11 +42,11 @@ HYPRE_ParVectorCreate( MPI_Comm comm,
  * HYPRE_ParMultiVectorCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParMultiVectorCreate( MPI_Comm comm,
-                            int      global_size, 
-                            int     *partitioning,
-                            int      number_vectors,
+                            HYPRE_Int      global_size, 
+                            HYPRE_Int     *partitioning,
+                            HYPRE_Int      number_vectors,
                             HYPRE_ParVector *vector )
 {
    *vector = (HYPRE_ParVector) hypre_ParMultiVectorCreate
@@ -61,7 +61,7 @@ HYPRE_ParMultiVectorCreate( MPI_Comm comm,
  * HYPRE_ParVectorDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParVectorDestroy( HYPRE_ParVector vector )
 {
    return ( hypre_ParVectorDestroy( (hypre_ParVector *) vector ) );
@@ -71,7 +71,7 @@ HYPRE_ParVectorDestroy( HYPRE_ParVector vector )
  * HYPRE_ParVectorInitialize
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParVectorInitialize( HYPRE_ParVector vector )
 {
    return ( hypre_ParVectorInitialize( (hypre_ParVector *) vector ) );
@@ -81,7 +81,7 @@ HYPRE_ParVectorInitialize( HYPRE_ParVector vector )
  * HYPRE_ParVectorRead
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParVectorRead( MPI_Comm         comm,
                      const char      *file_name, 
 		     HYPRE_ParVector *vector)
@@ -95,7 +95,7 @@ HYPRE_ParVectorRead( MPI_Comm         comm,
  * HYPRE_ParVectorPrint
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParVectorPrint( HYPRE_ParVector  vector,
                       const char      *file_name )
 {
@@ -107,7 +107,7 @@ HYPRE_ParVectorPrint( HYPRE_ParVector  vector,
  * HYPRE_ParVectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParVectorSetConstantValues( HYPRE_ParVector  vector,
                       		  double	   value )
 {
@@ -119,9 +119,9 @@ HYPRE_ParVectorSetConstantValues( HYPRE_ParVector  vector,
  * HYPRE_ParVectorSetRandomValues
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParVectorSetRandomValues( HYPRE_ParVector  vector,
-                      		int	         seed  )
+                      		HYPRE_Int	         seed  )
 {
    return ( hypre_ParVectorSetRandomValues( (hypre_ParVector *) vector,
                                   seed ) );
@@ -131,7 +131,7 @@ HYPRE_ParVectorSetRandomValues( HYPRE_ParVector  vector,
  * HYPRE_ParVectorCopy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParVectorCopy( HYPRE_ParVector x, HYPRE_ParVector y)
 {
    return ( hypre_ParVectorCopy( (hypre_ParVector *) x,
@@ -152,7 +152,7 @@ HYPRE_ParVectorCloneShallow( HYPRE_ParVector x )
  * HYPRE_ParVectorScale
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParVectorScale( double value, HYPRE_ParVector x)
 {
    return ( hypre_ParVectorScale( value, (hypre_ParVector *) x) );
@@ -161,7 +161,7 @@ HYPRE_ParVectorScale( double value, HYPRE_ParVector x)
 /*--------------------------------------------------------------------------
  * HYPRE_ParVectorAxpy
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 HYPRE_ParVectorAxpy( double        alpha,
                      HYPRE_ParVector x,
                      HYPRE_ParVector y     )
@@ -173,7 +173,7 @@ HYPRE_ParVectorAxpy( double        alpha,
  * HYPRE_ParVectorInnerProd
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, double *prod)
 {
    if (!x) 
@@ -197,8 +197,8 @@ HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, double *prod)
  * HYPRE_VectorToParVector
  *--------------------------------------------------------------------------*/
 
-int
-HYPRE_VectorToParVector( MPI_Comm comm, HYPRE_Vector b, int *partitioning,
+HYPRE_Int
+HYPRE_VectorToParVector( MPI_Comm comm, HYPRE_Vector b, HYPRE_Int *partitioning,
 			 HYPRE_ParVector *vector)
 {
    *vector = (HYPRE_ParVector) hypre_VectorToParVector (comm, 

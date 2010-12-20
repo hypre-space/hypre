@@ -20,17 +20,17 @@
 #include <signal.h>
 
 extern void sigRegister_dh();
-extern void sigHandler_dh(int sig);
+extern void sigHandler_dh(hypre_int sig);
 
 /* 
   list of signals the Euclid will handle
 */
 #ifdef WIN32
-int euclid_signals_len = 2;
-int euclid_signals[] = { SIGSEGV, SIGFPE };
+hypre_int euclid_signals_len = 2;
+hypre_int euclid_signals[] = { SIGSEGV, SIGFPE };
 #else
-int euclid_signals_len = 3;
-int euclid_signals[] = { SIGSEGV, SIGFPE, SIGBUS };
+hypre_int euclid_signals_len = 3;
+hypre_int euclid_signals[] = { SIGSEGV, SIGFPE, SIGBUS };
 #endif
 
 /* 

@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dsytd2_(char *uplo, integer *n, doublereal *a, integer *
+/* Subroutine */ HYPRE_Int dsytd2_(char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *d__, doublereal *e, doublereal *tau, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -127,16 +127,16 @@
     extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static doublereal taui;
-    extern /* Subroutine */ int dsyr2_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dsyr2_(char *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer i__;
     static doublereal alpha;
     extern logical lsame_(char *, char *);
-    extern /* Subroutine */ int daxpy_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int daxpy_(integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ int dsymv_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dsymv_(char *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    doublereal *, integer *), dlarfg_(integer *, doublereal *,
 	     doublereal *, integer *, doublereal *), xerbla_(char *, integer *

@@ -27,28 +27,28 @@
 
 
 
-int hypre_ILUsolve(double *x,
+HYPRE_Int hypre_ILUsolve(double *x,
 
-		   int *i_ILUdof_to_dof,
+		   HYPRE_Int *i_ILUdof_to_dof,
 		   
-		   int *i_ILUdof_ILUdof,
-		   int *j_ILUdof_ILUdof,
+		   HYPRE_Int *i_ILUdof_ILUdof,
+		   HYPRE_Int *j_ILUdof_ILUdof,
 		   double *LD_data,
 
-		   int *i_ILUdof_ILUdof_t,
-		   int *j_ILUdof_ILUdof_t,
+		   HYPRE_Int *i_ILUdof_ILUdof_t,
+		   HYPRE_Int *j_ILUdof_ILUdof_t,
 		   double *U_data,
 
 		   double *rhs,
 
-		   int num_dofs)
+		   HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j;
+  HYPRE_Int i,j;
 
-  int i_dof;
+  HYPRE_Int i_dof;
 
 
   /* initiate: -----------------------------------------------*/
@@ -82,24 +82,24 @@ int hypre_ILUsolve(double *x,
   return ierr;
 
 }
-int hypre_LDsolve(double *x,
+HYPRE_Int hypre_LDsolve(double *x,
 
-		   int *i_ILUdof_to_dof,
+		   HYPRE_Int *i_ILUdof_to_dof,
 		   
-		   int *i_ILUdof_ILUdof,
-		   int *j_ILUdof_ILUdof,
+		   HYPRE_Int *i_ILUdof_ILUdof,
+		   HYPRE_Int *j_ILUdof_ILUdof,
 		   double *LD_data,
 
 		   double *rhs,
 
-		   int num_dofs)
+		   HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j;
+  HYPRE_Int i,j;
 
-  int i_dof;
+  HYPRE_Int i_dof;
 
 
   /* initiate: -----------------------------------------------*/
@@ -122,24 +122,24 @@ int hypre_LDsolve(double *x,
   return ierr;
 
 }
-int hypre_Dsolve(double *x,
+HYPRE_Int hypre_Dsolve(double *x,
 
-		 int *i_ILUdof_to_dof,
+		 HYPRE_Int *i_ILUdof_to_dof,
 		   
-		 int *i_ILUdof_ILUdof,
-		 int *j_ILUdof_ILUdof,
+		 HYPRE_Int *i_ILUdof_ILUdof,
+		 HYPRE_Int *j_ILUdof_ILUdof,
 		 double *LD_data,
 
 		 double *rhs,
 
-		 int num_dofs)
+		 HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j;
+  HYPRE_Int i,j;
 
-  int i_dof;
+  HYPRE_Int i_dof;
 
 
   for (i=0; i < num_dofs; i++)
@@ -149,23 +149,23 @@ int hypre_Dsolve(double *x,
   return ierr;
 
 }
-int hypre_Usolve(double *x,
+HYPRE_Int hypre_Usolve(double *x,
 
-		 int *i_ILUdof_to_dof,
-		 int *i_ILUdof_ILUdof_t,
-		 int *j_ILUdof_ILUdof_t,
+		 HYPRE_Int *i_ILUdof_to_dof,
+		 HYPRE_Int *i_ILUdof_ILUdof_t,
+		 HYPRE_Int *j_ILUdof_ILUdof_t,
 		 double *U_data,
 
 		 double *rhs,
 
-		 int num_dofs)
+		 HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j;
+  HYPRE_Int i,j;
 
-  int i_dof;
+  HYPRE_Int i_dof;
 
 
   /* initiate: -----------------------------------------------*/

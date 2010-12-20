@@ -24,43 +24,43 @@
  ****************************************************************************/
 
 
-int hypre_AMGeAGSchwarzSmootherSetup(int ***i_domain_dof_pointer,
-				     int ***j_domain_dof_pointer,
+HYPRE_Int hypre_AMGeAGSchwarzSmootherSetup(HYPRE_Int ***i_domain_dof_pointer,
+				     HYPRE_Int ***j_domain_dof_pointer,
 				     double ***domain_matrixinverse_pointer,
 				   
 				     hypre_AMGeMatrixTopology **A,
 
 				     hypre_CSRMatrix **Matrix,
 
-				     int *level_pointer,
+				     HYPRE_Int *level_pointer,
 
 
-				     int *Num_elements, 
+				     HYPRE_Int *Num_elements, 
 
-				     int *Num_dofs)
+				     HYPRE_Int *Num_dofs)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j,l;
-  int level = level_pointer[0];
-  int **i_domain_dof, **j_domain_dof;
+  HYPRE_Int i,j,l;
+  HYPRE_Int level = level_pointer[0];
+  HYPRE_Int **i_domain_dof, **j_domain_dof;
   double **domain_matrixinverse;
 
-  int *i_AE_node, *j_AE_node;
+  HYPRE_Int *i_AE_node, *j_AE_node;
 
-  int *i_AE_element, *j_AE_element;
-  int *i_element_node, *j_element_node;
+  HYPRE_Int *i_AE_element, *j_AE_element;
+  HYPRE_Int *i_element_node, *j_element_node;
 			     
 
-  i_domain_dof = hypre_CTAlloc(int*, level);
-  j_domain_dof = hypre_CTAlloc(int*, level);
+  i_domain_dof = hypre_CTAlloc(HYPRE_Int*, level);
+  j_domain_dof = hypre_CTAlloc(HYPRE_Int*, level);
   domain_matrixinverse = hypre_CTAlloc(double*, level);
 
 
   l=0;
 factorization_step:
-  printf("\n\nC O M P U T I N G  level[%d] SCHWARZ  S M O O T H E R\n",l);
+  hypre_printf("\n\nC O M P U T I N G  level[%d] SCHWARZ  S M O O T H E R\n",l);
 
   i_element_node = hypre_AMGeMatrixTopologyIElementNode(A[l]);
   j_element_node = hypre_AMGeMatrixTopologyJElementNode(A[l]);

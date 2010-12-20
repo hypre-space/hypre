@@ -25,7 +25,7 @@
  * HYPRE_StructJacobiCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructJacobiCreate( MPI_Comm            comm,
                           HYPRE_StructSolver *solver )
 {
@@ -38,7 +38,7 @@ HYPRE_StructJacobiCreate( MPI_Comm            comm,
  * HYPRE_StructJacobiDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_StructJacobiDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_JacobiDestroy( (void *) solver ) );
@@ -48,7 +48,7 @@ HYPRE_StructJacobiDestroy( HYPRE_StructSolver solver )
  * HYPRE_StructJacobiSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_StructJacobiSetup( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -64,7 +64,7 @@ HYPRE_StructJacobiSetup( HYPRE_StructSolver solver,
  * HYPRE_StructJacobiSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_StructJacobiSolve( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -80,7 +80,7 @@ HYPRE_StructJacobiSolve( HYPRE_StructSolver solver,
  * HYPRE_StructJacobiSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructJacobiSetTol( HYPRE_StructSolver solver,
                           double             tol    )
 {
@@ -91,7 +91,7 @@ HYPRE_StructJacobiSetTol( HYPRE_StructSolver solver,
  * HYPRE_StructJacobiGetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructJacobiGetTol( HYPRE_StructSolver solver,
                           double           * tol    )
 {
@@ -102,9 +102,9 @@ HYPRE_StructJacobiGetTol( HYPRE_StructSolver solver,
  * HYPRE_StructJacobiSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructJacobiSetMaxIter( HYPRE_StructSolver solver,
-                              int                max_iter  )
+                              HYPRE_Int                max_iter  )
 {
    return( hypre_JacobiSetMaxIter( (void *) solver, max_iter ) );
 }
@@ -113,9 +113,9 @@ HYPRE_StructJacobiSetMaxIter( HYPRE_StructSolver solver,
  * HYPRE_StructJacobiGetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructJacobiGetMaxIter( HYPRE_StructSolver solver,
-                              int              * max_iter  )
+                              HYPRE_Int              * max_iter  )
 {
    return( hypre_JacobiGetMaxIter( (void *) solver, max_iter ) );
 }
@@ -124,7 +124,7 @@ HYPRE_StructJacobiGetMaxIter( HYPRE_StructSolver solver,
  * HYPRE_StructJacobiSetZeroGuess
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 HYPRE_StructJacobiSetZeroGuess( HYPRE_StructSolver solver )
 {
    return( hypre_JacobiSetZeroGuess( (void *) solver, 1 ) );
@@ -134,9 +134,9 @@ HYPRE_StructJacobiSetZeroGuess( HYPRE_StructSolver solver )
  * HYPRE_StructJacobiGetZeroGuess
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 HYPRE_StructJacobiGetZeroGuess( HYPRE_StructSolver solver,
-                                int * zeroguess )
+                                HYPRE_Int * zeroguess )
 {
    return( hypre_JacobiGetZeroGuess( (void *) solver, zeroguess ) );
 }
@@ -145,7 +145,7 @@ HYPRE_StructJacobiGetZeroGuess( HYPRE_StructSolver solver,
  * HYPRE_StructJacobiSetNonZeroGuess
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 HYPRE_StructJacobiSetNonZeroGuess( HYPRE_StructSolver solver )
 {
    return( hypre_JacobiSetZeroGuess( (void *) solver, 0 ) );
@@ -161,9 +161,9 @@ HYPRE_StructJacobiSetNonZeroGuess( HYPRE_StructSolver solver )
  * HYPRE_StructJacobiGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
-                                    int                *num_iterations )
+                                    HYPRE_Int                *num_iterations )
 {
    return( hypre_JacobiGetNumIterations( (void *) solver, num_iterations ) );
 }
@@ -172,7 +172,7 @@ HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
  * HYPRE_StructJacobiGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructJacobiGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                                 double             *norm   )
 {

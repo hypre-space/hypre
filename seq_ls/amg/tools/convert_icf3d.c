@@ -25,8 +25,8 @@
  * Convert icf3d data to AMG data
  *--------------------------------------------------------------------------*/
 
-int   main(argc, argv)
-int   argc;
+HYPRE_Int   main(argc, argv)
+HYPRE_Int   argc;
 char *argv[];
 {
    char    *run_name;
@@ -34,23 +34,23 @@ char *argv[];
    char     file_name[255];
    FILE    *fp;
 
-   long int ft;
+   hypre_longint ft;
 
    double  *S_data;
-   int     *S_ia;
-   int     *S_ja;
+   HYPRE_Int     *S_ia;
+   HYPRE_Int     *S_ja;
    double  *A_data;
-   int     *A_ia;
-   int     *A_ja;
+   HYPRE_Int     *A_ia;
+   HYPRE_Int     *A_ja;
    hypre_Matrix  *A;
 
    double  *x;
    double  *y;
    double  *z;
 
-   int     *iarray;
+   HYPRE_Int     *iarray;
    
-   int      n, m, i, j, ii, jj;
+   HYPRE_Int      n, m, i, j, ii, jj;
 
 
 
@@ -60,7 +60,7 @@ char *argv[];
 
    if (argc < 2)
    {
-      fprintf(stderr, "Usage:  convert_icf3d <run name>\n");
+      hypre_fprintf(stderr, "Usage:  convert_icf3d <run name>\n");
       exit(1);
    }
 
@@ -70,22 +70,22 @@ char *argv[];
     * Read in the icf3d data
     *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.raw.mat", run_name);
+   hypre_sprintf(file_name, "%s.raw.mat", run_name);
 
    fp = fopen(file_name, "r");
 
-   fscanf(fp, "%d", &n);
+   hypre_fscanf(fp, "%d", &n);
 
    /* save current file position */
    ft = ftell(fp);
 
    /* compute symmetric S_ia */
-   S_ia = hypre_TAlloc(int, (n+1));
+   S_ia = hypre_TAlloc(HYPRE_Int, (n+1));
    S_ia[0] = 0;
    m = 1;
    for (i = 0; i < n;)
    {
-      fscanf(fp, "%d", &j);
+      hypre_fscanf(fp, "%d", &j);
       if (j == i)
       {
 	 S_ia[i+1] = m;
@@ -98,12 +98,12 @@ char *argv[];
    fseek(fp, ft, 0);
 
    /* read in symmetric S_ja (put diagonal at beginning of row) */
-   S_ja = hypre_TAlloc(int, S_ia[n]);
+   S_ja = hypre_TAlloc(HYPRE_Int, S_ia[n]);
    for (i = 0; i < n; i++)
    {
       for (j = (S_ia[i]+1); j < S_ia[i+1]; j++)
-	 fscanf(fp, "%d", &S_ja[j]);
-      fscanf(fp, "%d", &S_ja[S_ia[i]]);
+	 hypre_fscanf(fp, "%d", &S_ja[j]);
+      hypre_fscanf(fp, "%d", &S_ja[S_ia[i]]);
    }
 
    /* read in symmetric S_data (put diagonal at beginning of row) */
@@ -111,8 +111,8 @@ char *argv[];
    for (i = 0; i < n; i++)
    {
       for (j = (S_ia[i]+1); j < S_ia[i+1]; j++)
-	 fscanf(fp, "%le", &S_data[j]);
-      fscanf(fp, "%le", &S_data[S_ia[i]]);
+	 hypre_fscanf(fp, "%le", &S_data[j]);
+      hypre_fscanf(fp, "%le", &S_data[S_ia[i]]);
    }
 
    /* read in x, y, z coordinates */
@@ -120,7 +120,7 @@ char *argv[];
    y = hypre_TAlloc(double, n);
    z = hypre_TAlloc(double, n);
    for (i = 0; i < n; i++)
-      fscanf(fp, "%*d%le%le%le", &x[i], &y[i], &z[i]);
+      hypre_fscanf(fp, "%*d%le%le%le", &x[i], &y[i], &z[i]);
 
    fclose(fp);
 
@@ -128,16 +128,16 @@ char *argv[];
     * Write out the x, y, z data
     *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.in.xyz", run_name);
+   hypre_sprintf(file_name, "%s.in.xyz", run_name);
 
    fp = fopen(file_name, "w");
 
    for (i = 0; i < n; i++)
-      fprintf(fp, "%le\n", x[i]);
+      hypre_fprintf(fp, "%le\n", x[i]);
    for (i = 0; i < n; i++)
-      fprintf(fp, "%le\n", y[i]);
+      hypre_fprintf(fp, "%le\n", y[i]);
    for (i = 0; i < n; i++)
-      fprintf(fp, "%le\n", z[i]);
+      hypre_fprintf(fp, "%le\n", z[i]);
 
    fclose(fp);
 
@@ -150,7 +150,7 @@ char *argv[];
     *-------------------------------------------------------*/
 
    /* compute number of additional row elements in A */
-   iarray = hypre_TAlloc(int, n);
+   iarray = hypre_TAlloc(HYPRE_Int, n);
    for (i = 0; i < n; i++)
       iarray[i] = 0;
    for (i = 0; i < n; i++)
@@ -160,7 +160,7 @@ char *argv[];
    }
 
    /* compute A_ia */
-   A_ia = hypre_TAlloc(int, (n+1));
+   A_ia = hypre_TAlloc(HYPRE_Int, (n+1));
    m = 0;
    for (i = 0; i < n; i++)
    {
@@ -170,7 +170,7 @@ char *argv[];
    A_ia[n] = S_ia[n] + m;
 
    /* copy S_ja and S_data into A_ja and A_data */
-   A_ja = hypre_TAlloc(int, A_ia[n]);
+   A_ja = hypre_TAlloc(HYPRE_Int, A_ia[n]);
    A_data = hypre_TAlloc(double, A_ia[n]);
    for (i = 0; i < n; i++)
    {
@@ -211,7 +211,7 @@ char *argv[];
     * Write out the matrix data
     *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.in.ysmp", run_name);
+   hypre_sprintf(file_name, "%s.in.ysmp", run_name);
    hypre_WriteYSMP(file_name, A);
 
    return 0;

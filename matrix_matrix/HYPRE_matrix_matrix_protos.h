@@ -18,9 +18,9 @@
 
 #ifdef PETSC_AVAILABLE
 /* HYPRE_ConvertPETScMatrixToDistributedMatrix.c */
-int HYPRE_ConvertPETScMatrixToDistributedMatrix (Mat PETSc_matrix , HYPRE_DistributedMatrix *DistributedMatrix );
+HYPRE_Int HYPRE_ConvertPETScMatrixToDistributedMatrix (Mat PETSc_matrix , HYPRE_DistributedMatrix *DistributedMatrix );
 #endif
 
 /* HYPRE_ConvertParCSRMatrixToDistributedMatrix.c */
-int HYPRE_ConvertParCSRMatrixToDistributedMatrix (HYPRE_ParCSRMatrix parcsr_matrix , HYPRE_DistributedMatrix *DistributedMatrix );
+HYPRE_Int HYPRE_ConvertParCSRMatrixToDistributedMatrix (HYPRE_ParCSRMatrix parcsr_matrix , HYPRE_DistributedMatrix *DistributedMatrix );
 

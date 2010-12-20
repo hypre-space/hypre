@@ -40,17 +40,17 @@
  * "size" should be prime, if possible.
  *--------------------------------------------------------------------------*/
 
-Hash *HashCreate(int size)
+Hash *HashCreate(HYPRE_Int size)
 {
-    int i, *p;
+    HYPRE_Int i, *p;
 
     Hash *h = (Hash *) malloc(sizeof(Hash));
 
     h->size  = size;
     h->num   = 0;
-    h->keys  = (int *) malloc(size * sizeof(int));
-    h->table = (int *) malloc(size * sizeof(int));
-    h->data  = (int *) malloc(size * sizeof(int));
+    h->keys  = (HYPRE_Int *) malloc(size * sizeof(HYPRE_Int));
+    h->table = (HYPRE_Int *) malloc(size * sizeof(HYPRE_Int));
+    h->data  = (HYPRE_Int *) malloc(size * sizeof(HYPRE_Int));
 
     /* Initialize the table to empty */
     p = h->table;
@@ -77,13 +77,13 @@ void HashDestroy(Hash *h)
  * associated with the key, or return HASH_NOTFOUND.
  *--------------------------------------------------------------------------*/
 
-int HashLookup(Hash *h, int key)
+HYPRE_Int HashLookup(Hash *h, HYPRE_Int key)
 {
-    int loc;
+    HYPRE_Int loc;
 
     /* loc = key % h->size; */
     double keyd = key * 0.6180339887;
-    loc = (int) (h->size * (keyd - (int) keyd));
+    loc = (HYPRE_Int) (h->size * (keyd - (HYPRE_Int) keyd));
 
     while (h->table[loc] != key)
     {
@@ -101,13 +101,13 @@ int HashLookup(Hash *h, int key)
  * If the key is already in the hash table, the data item is replaced.
  *--------------------------------------------------------------------------*/
 
-void HashInsert(Hash *h, int key, int data)
+void HashInsert(Hash *h, HYPRE_Int key, HYPRE_Int data)
 {
-    int loc;
+    HYPRE_Int loc;
 
     /* loc = key % h->size; */
     double keyd = (double) key * 0.6180339887;
-    loc = (int) ((double) h->size * (keyd - (int) keyd));
+    loc = (HYPRE_Int) ((double) h->size * (keyd - (HYPRE_Int) keyd));
 
     while (h->table[loc] != key)
     {
@@ -133,7 +133,7 @@ void HashInsert(Hash *h, int key, int data)
 
 void HashRehash(Hash *old, Hash *new)
 {
-    int i, data;
+    HYPRE_Int i, data;
 
     for (i=0; i<old->num; i++)
     {
@@ -148,7 +148,7 @@ void HashRehash(Hash *old, Hash *new)
 
 void HashReset(Hash *h)
 {
-    int i, *p;
+    HYPRE_Int i, *p;
 
     h->num = 0;
     p = h->table;
@@ -162,18 +162,18 @@ void HashReset(Hash *h)
 
 void HashPrint(Hash *h)
 {
-    int i, j, *p;
-    int lines = h->size/38;
+    HYPRE_Int i, j, *p;
+    HYPRE_Int lines = h->size/38;
 
-    printf("Hash size: %d\n", h->size);
+    hypre_printf("Hash size: %d\n", h->size);
 
     p = h->table;
     for (i=0; i<lines; i++)
     {
 	for (j=0; j<38; j++)
-	    printf("%d ", ((*p++ == HASH_EMPTY) ? 0 : 1));
-	    /*printf("%d ", *p++);*/
-	printf("\n");
+	    hypre_printf("%d ", ((*p++ == HASH_EMPTY) ? 0 : 1));
+	    /*hypre_printf("%d ", *p++);*/
+	hypre_printf("\n");
     }
 }
 

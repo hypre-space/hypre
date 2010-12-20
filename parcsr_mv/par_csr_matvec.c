@@ -26,7 +26,7 @@
  * hypre_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParCSRMatrixMatvec( double           alpha,
               	 hypre_ParCSRMatrix *A,
                  hypre_ParVector    *x,
@@ -39,19 +39,19 @@ hypre_ParCSRMatrixMatvec( double           alpha,
    hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
    hypre_Vector         *x_local  = hypre_ParVectorLocalVector(x);   
    hypre_Vector         *y_local  = hypre_ParVectorLocalVector(y);   
-   int         num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   int         num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+   HYPRE_Int         num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int         num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
 
    hypre_Vector      *x_tmp;
-   int        x_size = hypre_ParVectorGlobalSize(x);
-   int        y_size = hypre_ParVectorGlobalSize(y);
-   int        num_vectors = hypre_VectorNumVectors(x_local);
-   int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
-   int        ierr = 0;
-   int	      num_sends, i, j, jv, index, start;
+   HYPRE_Int        x_size = hypre_ParVectorGlobalSize(x);
+   HYPRE_Int        y_size = hypre_ParVectorGlobalSize(y);
+   HYPRE_Int        num_vectors = hypre_VectorNumVectors(x_local);
+   HYPRE_Int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
+   HYPRE_Int        ierr = 0;
+   HYPRE_Int	      num_sends, i, j, jv, index, start;
 
-   int        vecstride = hypre_VectorVectorStride( x_local );
-   int        idxstride = hypre_VectorIndexStride( x_local );
+   HYPRE_Int        vecstride = hypre_VectorVectorStride( x_local );
+   HYPRE_Int        idxstride = hypre_VectorIndexStride( x_local );
 
    double     *x_tmp_data, **x_buf_data;
    double     *x_local_data = hypre_VectorData(x_local);
@@ -173,7 +173,7 @@ hypre_ParCSRMatrixMatvec( double           alpha,
  *
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParCSRMatrixMatvecT( double           alpha,
                   hypre_ParCSRMatrix *A,
                   hypre_ParVector    *x,
@@ -187,21 +187,21 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
    hypre_Vector *y_tmp;
-   int           vecstride = hypre_VectorVectorStride( y_local );
-   int           idxstride = hypre_VectorIndexStride( y_local );
+   HYPRE_Int           vecstride = hypre_VectorVectorStride( y_local );
+   HYPRE_Int           idxstride = hypre_VectorIndexStride( y_local );
    double       *y_tmp_data, **y_buf_data;
    double       *y_local_data = hypre_VectorData(y_local);
 
-   int         num_rows  = hypre_ParCSRMatrixGlobalNumRows(A);
-   int         num_cols  = hypre_ParCSRMatrixGlobalNumCols(A);
-   int	       num_cols_offd = hypre_CSRMatrixNumCols(offd);
-   int         x_size = hypre_ParVectorGlobalSize(x);
-   int         y_size = hypre_ParVectorGlobalSize(y);
-   int         num_vectors = hypre_VectorNumVectors(y_local);
+   HYPRE_Int         num_rows  = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int         num_cols  = hypre_ParCSRMatrixGlobalNumCols(A);
+   HYPRE_Int	       num_cols_offd = hypre_CSRMatrixNumCols(offd);
+   HYPRE_Int         x_size = hypre_ParVectorGlobalSize(x);
+   HYPRE_Int         y_size = hypre_ParVectorGlobalSize(y);
+   HYPRE_Int         num_vectors = hypre_VectorNumVectors(y_local);
 
-   int         i, j, jv, index, start, num_sends;
+   HYPRE_Int         i, j, jv, index, start, num_sends;
 
-   int         ierr  = 0;
+   HYPRE_Int         ierr  = 0;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
@@ -311,14 +311,14 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
  * hypre_ParCSRMatrixMatvec_FF
  *--------------------------------------------------------------------------*/
                                                                                                               
-int
+HYPRE_Int
 hypre_ParCSRMatrixMatvec_FF( double           alpha,
                  hypre_ParCSRMatrix *A,
                  hypre_ParVector    *x,
                  double           beta,
                  hypre_ParVector    *y,
-                 int                *CF_marker,
-                 int fpt )
+                 HYPRE_Int                *CF_marker,
+                 HYPRE_Int fpt )
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommHandle       *comm_handle;
@@ -327,17 +327,17 @@ hypre_ParCSRMatrixMatvec_FF( double           alpha,
    hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
    hypre_Vector         *x_local  = hypre_ParVectorLocalVector(x);
    hypre_Vector         *y_local  = hypre_ParVectorLocalVector(y);
-   int         num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   int         num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+   HYPRE_Int         num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int         num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
                                                                                                               
    hypre_Vector      *x_tmp;
-   int        x_size = hypre_ParVectorGlobalSize(x);
-   int        y_size = hypre_ParVectorGlobalSize(y);
-   int        num_cols_offd = hypre_CSRMatrixNumCols(offd);
-   int        ierr = 0;
-   int        num_sends, i, j, index, start, num_procs;
-   int        *int_buf_data = NULL;
-   int        *CF_marker_offd = NULL;
+   HYPRE_Int        x_size = hypre_ParVectorGlobalSize(x);
+   HYPRE_Int        y_size = hypre_ParVectorGlobalSize(y);
+   HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(offd);
+   HYPRE_Int        ierr = 0;
+   HYPRE_Int        num_sends, i, j, index, start, num_procs;
+   HYPRE_Int        *int_buf_data = NULL;
+   HYPRE_Int        *CF_marker_offd = NULL;
                                                                                                               
                                                                                                               
    double     *x_tmp_data = NULL;
@@ -354,7 +354,7 @@ hypre_ParCSRMatrixMatvec_FF( double           alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
                                                                                                               
-   MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_size(comm,&num_procs);
                                                                                                               
    if (num_cols != x_size)
               ierr = 11;
@@ -407,9 +407,9 @@ hypre_ParCSRMatrixMatvec_FF( double           alpha,
       comm_handle = NULL;
                                                                                                               
       if (num_sends)
-         int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart
+         int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart
                                     (comm_pkg, num_sends));
-      if (num_cols_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      if (num_cols_offd) CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {

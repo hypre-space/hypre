@@ -30,7 +30,7 @@
 typedef struct
 {
    void               *matrix;
-   int               (*ColMap)(int, void *);
+   HYPRE_Int               (*ColMap)(HYPRE_Int, void *);
    void               *MapData;
 
 } hypre_MappedMatrix;

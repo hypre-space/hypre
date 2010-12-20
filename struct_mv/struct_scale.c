@@ -24,15 +24,15 @@
  * hypre_StructScale
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructScale( double              alpha,
                    hypre_StructVector *y     )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_Box       *y_data_box;
                    
-   int              yi;
+   HYPRE_Int              yi;
    double          *yp;
                    
    hypre_BoxArray  *boxes;
@@ -41,8 +41,8 @@ hypre_StructScale( double              alpha,
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
                    
-   int              i;
-   int              loopi, loopj, loopk;
+   HYPRE_Int              i;
+   HYPRE_Int              loopi, loopj, loopk;
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 

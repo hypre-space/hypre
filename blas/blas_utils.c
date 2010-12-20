@@ -104,7 +104,7 @@ e
 #include <stdio.h>
 #include "f2c.h"
 
-/* Subroutine */ int hypre_xerbla_(char *srname, integer *info)
+/* Subroutine */ HYPRE_Int hypre_xerbla_(char *srname, integer *info)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -136,7 +136,7 @@ e
    ===================================================================== 
 */
 
-    printf("** On entry to %6s, parameter number %2i had an illegal value\n",
+    hypre_printf("** On entry to %6s, parameter number %2i had an illegal value\n",
 		srname, *info);
 
 /*     End of XERBLA */

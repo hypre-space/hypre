@@ -34,11 +34,11 @@ hypre_Matrix  *matrix;
    FILE    *fp;
 
    double  *data;
-   int     *ia;
-   int     *ja;
-   int      size;
+   HYPRE_Int     *ia;
+   HYPRE_Int     *ja;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -52,16 +52,16 @@ hypre_Matrix  *matrix;
 
    fp = fopen(file_name, "w");
 
-   fprintf(fp, "%d\n", size);
+   hypre_fprintf(fp, "%d\n", size);
 
    for (j = 0; j < size+1; j++)
-      fprintf(fp, "%d\n", ia[j]);
+      hypre_fprintf(fp, "%d\n", ia[j]);
 
    for (j = 0; j < ia[size]-1; j++)
-      fprintf(fp, "%d\n", ja[j]);
+      hypre_fprintf(fp, "%d\n", ja[j]);
 
    for (j = 0; j < ia[size]-1; j++)
-      fprintf(fp, "%le\n", data[j]);
+      hypre_fprintf(fp, "%le\n", data[j]);
 
    fclose(fp);
 
@@ -79,9 +79,9 @@ hypre_Vector  *vector;
    FILE    *fp;
 
    double  *data;
-   int      size;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
 
 
    /*----------------------------------------------------------
@@ -93,10 +93,10 @@ hypre_Vector  *vector;
 
    fp = fopen(file_name, "w");
 
-   fprintf(fp, "%d\n", size);
+   hypre_fprintf(fp, "%d\n", size);
 
    for (j = 0; j < size; j++)
-      fprintf(fp, "%le\n", data[j]);
+      hypre_fprintf(fp, "%le\n", data[j]);
 
    fclose(fp);
 

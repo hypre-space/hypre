@@ -20,40 +20,40 @@
 
 
 
-int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx, double vcy, double vcz, int mtx_entry, double *values);
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, double vcx, double vcy, double vcz, HYPRE_Int mtx_entry, double *values);
 
-int
-main( int   argc,
+HYPRE_Int
+main( HYPRE_Int   argc,
       char *argv[] )
 {
-   int                 arg_index;
-/*   int                 time_index; */
-   int                 print_usage;
-   int                 build_matrix_type;
-   int                 build_matrix_arg_index;
-   int                 build_rhs_type;
-   int                 build_rhs_arg_index;
-   int                 build_funcs_type;
-   int                 build_funcs_arg_index;
-   int                *dof_func;
-   int                 interp_type;
-   int                 solver_id;
-   int                 relax_default;
-   int                 coarsen_type;
-   int                 max_levels;
-   int                 num_functions, num_fun;
-   int                 num_relax_steps;
-   int                 mode = 0;
-   int use_block_flag;
+   HYPRE_Int                 arg_index;
+/*   HYPRE_Int                 time_index; */
+   HYPRE_Int                 print_usage;
+   HYPRE_Int                 build_matrix_type;
+   HYPRE_Int                 build_matrix_arg_index;
+   HYPRE_Int                 build_rhs_type;
+   HYPRE_Int                 build_rhs_arg_index;
+   HYPRE_Int                 build_funcs_type;
+   HYPRE_Int                 build_funcs_arg_index;
+   HYPRE_Int                *dof_func;
+   HYPRE_Int                 interp_type;
+   HYPRE_Int                 solver_id;
+   HYPRE_Int                 relax_default;
+   HYPRE_Int                 coarsen_type;
+   HYPRE_Int                 max_levels;
+   HYPRE_Int                 num_functions, num_fun;
+   HYPRE_Int                 num_relax_steps;
+   HYPRE_Int                 mode = 0;
+   HYPRE_Int use_block_flag;
    double	       norm;
    double	       tol;
-   int                 i, j, k;
-   int                 k_dim;
-   int		       ierr = 0;
-   int		       agg_levels = 0;
-   int		       agg_coarsen_type;
-   int		       agg_interp_type;
-   int		       num_jacs = 1;
+   HYPRE_Int                 i, j, k;
+   HYPRE_Int                 k_dim;
+   HYPRE_Int		       ierr = 0;
+   HYPRE_Int		       agg_levels = 0;
+   HYPRE_Int		       agg_coarsen_type;
+   HYPRE_Int		       agg_interp_type;
+   HYPRE_Int		       num_jacs = 1;
 
 #if 0
    hypre_ParCSRMatrix *A;
@@ -68,31 +68,31 @@ main( int   argc,
    HYPRE_Solver        pcg_solver;
    HYPRE_Solver        pcg_precond;
 
-/*   int                 num_procs, myid;   */
+/*   HYPRE_Int                 num_procs, myid;   */
 
 #if 0
-   int 		      *global_part;
+   HYPRE_Int 		      *global_part;
 #endif
 
       double   strong_threshold;
       double   A_trunc_factor = 0;
       double   P_trunc_factor = 0;
-      int      A_max_elmts = 0;
-      int      P_max_elmts = 0;
-      int      cycle_type;
-      int      ioutdat = 1;
-      int      print_level = 3;
-      int      num_iterations;  
-      int      num_sweep;  
-      int     *num_grid_sweeps;  
-      int     *grid_relax_type;   
-      int    **grid_relax_points; 
+      HYPRE_Int      A_max_elmts = 0;
+      HYPRE_Int      P_max_elmts = 0;
+      HYPRE_Int      cycle_type;
+      HYPRE_Int      ioutdat = 1;
+      HYPRE_Int      print_level = 3;
+      HYPRE_Int      num_iterations;  
+      HYPRE_Int      num_sweep;  
+      HYPRE_Int     *num_grid_sweeps;  
+      HYPRE_Int     *grid_relax_type;   
+      HYPRE_Int    **grid_relax_points; 
       double  *relax_weight;
       double   final_res_norm;
-      int     *schwarz_option;
-      int      schwarz_lev;
-      int      print_matrix = 0;
-      int      system_vcoef = 0;
+      HYPRE_Int     *schwarz_option;
+      HYPRE_Int      schwarz_lev;
+      HYPRE_Int      print_matrix = 0;
+      HYPRE_Int      system_vcoef = 0;
       
 
    /*-----------------------------------------------------------
@@ -102,11 +102,11 @@ main( int   argc,
    dof_func = NULL;
 
    /* Initialize MPI */
-   /* MPI_Init(&argc, &argv); */
+   /* hypre_MPI_Init(&argc, &argv); */
 
 #if 0 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 #endif
 
 /*   num_procs = 1; 
@@ -376,59 +376,59 @@ main( int   argc,
  
    if (print_usage)
    {
-      printf("\n");
-      printf("Usage: %s [<options>]\n", argv[0]);
-      printf("\n");
-      printf("  -fromfile <filename>   : build matrix from file\n");
-      printf("\n");
-      printf("  -laplacian (default)   : build laplacian 7pt operator\n");
-      printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
-      printf("  -stencil <infile>      : build general stencil operator\n");
-      printf("  -9pt                   : build laplacian 9pt operator\n");
-      printf("  -27pt                  : build laplacian 27pt operator\n");
-      printf("  -difconv               : build 7pt diffusion-convection\n");
-      printf("  -agg <numlev>          : defines no. levels of aggr. coars. and interp.\n");
-      printf("  -a1                    : use A1 coarsening (agg.)\n");
-      printf("  -a2                    : use A2 coarsening (agg.)\n");
-      printf("  -cljp1                 : use CLJP1 coarsening (agg.)\n");
-      printf("  -cljp2                 : use CLJP2 coarsening (agg.)\n");
-      printf("  -wLJP                  : use wLJP coarsening (agg.)\n");
-      printf("  -wLJP2                 : use wLJP coarsening applied twice (agg.)\n");
-      printf("  -ruge1p                : use classical coarsening with only one pass\n");
-      printf("  -mp                    : use multipass interpolation (agg.)\n");
-      printf("  -jac                   : use multipass interpolation with Jacobi iteration(agg.)\n");
-      printf("  -nj <njac>             : defines no. of its of Jacobi interpolation\n");
-      printf("  -ruge                  : use classical coarsening \n");
-      printf("  -rugeL                 : use classical coarsening \n");
-      printf("                           (more efficient version) \n");
-      printf("  -cr                    : use coarsening based on compatible relaxation\n");
-      printf("  -nrlx <nx>             : no. relaxation step for cr coarsening\n");
-      printf("  -rbm                   : use rigid body motion interpolation \n");
-      printf("  -rlx <rlxtype>         : rlxtype = 0 Jacobi relaxation \n");
-      printf("                                     1 Gauss-Seidel relaxation \n");
-      printf("  -w <rlxweight>         : defines relaxation weight for Jacobi\n");
-      printf("  -schwarz <numlev>      : defines number of levels of Schwarz used \n");
-      printf("  -ns <val>              : Use <val> sweeps on each level\n");
-      printf("                           (default C/F down, F/C up, F/C fine\n");
-      printf("  -mu <val>              : sets cycle type, 1=V, 2=W, etc\n");
-      printf("  -th <threshold>        : defines threshold for coarsenings\n");
-      printf("  -Atr <truncfactor>     : defines operator truncation factor\n");
-      printf("  -Amx <max_elmts>       : defines max coeffs per row in operator\n");
-      printf("  -Pmx <max_elmts>       : defines max coeffs per row in interpolation\n");
-      printf("  -Ptr <truncfactor>     : defines interpolation truncation factor\n");
-      printf("  -maxlev <ml>           : defines max. no. of levels\n");
-      printf("  -n <nx> <ny> <nz>      : problem size per processor\n");
-      printf("  -P <Px> <Py> <Pz>      : processor topology\n");
-      printf("  -c <cx> <cy> <cz>      : diffusion coefficients\n");
-      printf("  -a <ax> <ay> <az>      : convection coefficients\n");
-      printf("  -nf <val>              : set number of functions for systems AMG\n");
+      hypre_printf("\n");
+      hypre_printf("Usage: %s [<options>]\n", argv[0]);
+      hypre_printf("\n");
+      hypre_printf("  -fromfile <filename>   : build matrix from file\n");
+      hypre_printf("\n");
+      hypre_printf("  -laplacian (default)   : build laplacian 7pt operator\n");
+      hypre_printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
+      hypre_printf("  -stencil <infile>      : build general stencil operator\n");
+      hypre_printf("  -9pt                   : build laplacian 9pt operator\n");
+      hypre_printf("  -27pt                  : build laplacian 27pt operator\n");
+      hypre_printf("  -difconv               : build 7pt diffusion-convection\n");
+      hypre_printf("  -agg <numlev>          : defines no. levels of aggr. coars. and interp.\n");
+      hypre_printf("  -a1                    : use A1 coarsening (agg.)\n");
+      hypre_printf("  -a2                    : use A2 coarsening (agg.)\n");
+      hypre_printf("  -cljp1                 : use CLJP1 coarsening (agg.)\n");
+      hypre_printf("  -cljp2                 : use CLJP2 coarsening (agg.)\n");
+      hypre_printf("  -wLJP                  : use wLJP coarsening (agg.)\n");
+      hypre_printf("  -wLJP2                 : use wLJP coarsening applied twice (agg.)\n");
+      hypre_printf("  -ruge1p                : use classical coarsening with only one pass\n");
+      hypre_printf("  -mp                    : use multipass interpolation (agg.)\n");
+      hypre_printf("  -jac                   : use multipass interpolation with Jacobi iteration(agg.)\n");
+      hypre_printf("  -nj <njac>             : defines no. of its of Jacobi interpolation\n");
+      hypre_printf("  -ruge                  : use classical coarsening \n");
+      hypre_printf("  -rugeL                 : use classical coarsening \n");
+      hypre_printf("                           (more efficient version) \n");
+      hypre_printf("  -cr                    : use coarsening based on compatible relaxation\n");
+      hypre_printf("  -nrlx <nx>             : no. relaxation step for cr coarsening\n");
+      hypre_printf("  -rbm                   : use rigid body motion interpolation \n");
+      hypre_printf("  -rlx <rlxtype>         : rlxtype = 0 Jacobi relaxation \n");
+      hypre_printf("                                     1 Gauss-Seidel relaxation \n");
+      hypre_printf("  -w <rlxweight>         : defines relaxation weight for Jacobi\n");
+      hypre_printf("  -schwarz <numlev>      : defines number of levels of Schwarz used \n");
+      hypre_printf("  -ns <val>              : Use <val> sweeps on each level\n");
+      hypre_printf("                           (default C/F down, F/C up, F/C fine\n");
+      hypre_printf("  -mu <val>              : sets cycle type, 1=V, 2=W, etc\n");
+      hypre_printf("  -th <threshold>        : defines threshold for coarsenings\n");
+      hypre_printf("  -Atr <truncfactor>     : defines operator truncation factor\n");
+      hypre_printf("  -Amx <max_elmts>       : defines max coeffs per row in operator\n");
+      hypre_printf("  -Pmx <max_elmts>       : defines max coeffs per row in interpolation\n");
+      hypre_printf("  -Ptr <truncfactor>     : defines interpolation truncation factor\n");
+      hypre_printf("  -maxlev <ml>           : defines max. no. of levels\n");
+      hypre_printf("  -n <nx> <ny> <nz>      : problem size per processor\n");
+      hypre_printf("  -P <Px> <Py> <Pz>      : processor topology\n");
+      hypre_printf("  -c <cx> <cy> <cz>      : diffusion coefficients\n");
+      hypre_printf("  -a <ax> <ay> <az>      : convection coefficients\n");
+      hypre_printf("  -nf <val>              : set number of functions for systems AMG\n");
 
-      printf("\n");
-      printf("  -solver <ID>           : solver ID\n");
-      printf("      0=AMG, 1=AMG-CG, 2=CG, 3=AMG-GMRES, 4=GMRES\n");
-      printf("\n");
-      printf("  -print                 : print out the system matrix\n");
-      printf("\n");
+      hypre_printf("\n");
+      hypre_printf("  -solver <ID>           : solver ID\n");
+      hypre_printf("      0=AMG, 1=AMG-CG, 2=CG, 3=AMG-GMRES, 4=GMRES\n");
+      hypre_printf("\n");
+      hypre_printf("  -print                 : print out the system matrix\n");
+      hypre_printf("\n");
       exit(1);
    }
 
@@ -441,8 +441,8 @@ main( int   argc,
     *-----------------------------------------------------------*/
  
   
-      printf("Running with these driver parameters:\n");
-      printf("  solver ID    = %d\n", solver_id);
+      hypre_printf("Running with these driver parameters:\n");
+      hypre_printf("  solver ID    = %d\n", solver_id);
  
 
    /*-----------------------------------------------------------
@@ -541,8 +541,8 @@ main( int   argc,
    }
    else /* if (num_functions > 1) */ 
    {
-      printf("\n Number of unknown functions = %d\n\n",num_functions);
-      dof_func = hypre_CTAlloc(int,hypre_CSRMatrixNumRows(A));
+      hypre_printf("\n Number of unknown functions = %d\n\n",num_functions);
+      dof_func = hypre_CTAlloc(HYPRE_Int,hypre_CSRMatrixNumRows(A));
  
       for (j = 0; j < hypre_CSRMatrixNumRows(A)/num_functions; j++)
       {
@@ -558,11 +558,11 @@ main( int   argc,
       cycle_type       = 1;
       num_sweep = 1;
 
-      num_grid_sweeps = hypre_CTAlloc(int,4);
-      grid_relax_type = hypre_CTAlloc(int,4);
-      grid_relax_points = hypre_CTAlloc(int *,4);
+      num_grid_sweeps = hypre_CTAlloc(HYPRE_Int,4);
+      grid_relax_type = hypre_CTAlloc(HYPRE_Int,4);
+      grid_relax_points = hypre_CTAlloc(HYPRE_Int *,4);
       relax_weight = hypre_CTAlloc(double,max_levels);
-      schwarz_option = hypre_CTAlloc(int,max_levels);
+      schwarz_option = hypre_CTAlloc(HYPRE_Int,max_levels);
       for (i=0; i < max_levels; i++)
       {
 	 relax_weight[i] = 1.0;
@@ -654,7 +654,7 @@ main( int   argc,
       /* fine grid */
      num_grid_sweeps[0] = 2*num_sweep;
       grid_relax_type[0] = relax_default; 
-      grid_relax_points[0] = hypre_CTAlloc(int, 2*num_sweep); 
+      grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
 	grid_relax_points[0][i] = 1;
@@ -664,7 +664,7 @@ main( int   argc,
       /* down cycle */
       num_grid_sweeps[1] = 2*num_sweep;
       grid_relax_type[1] = relax_default; 
-      grid_relax_points[1] = hypre_CTAlloc(int, 2*num_sweep); 
+      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
 	grid_relax_points[1][i] = 1;
@@ -674,7 +674,7 @@ main( int   argc,
       /* up cycle */
       num_grid_sweeps[2] = 2*num_sweep;
       grid_relax_type[2] = relax_default; 
-      grid_relax_points[2] = hypre_CTAlloc(int, 2*num_sweep); 
+      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
 	grid_relax_points[2][i] = -1;
@@ -685,7 +685,7 @@ main( int   argc,
       /* coarsest grid */
       num_grid_sweeps[3] = 1;
       grid_relax_type[3] = 9;
-      grid_relax_points[3] = hypre_CTAlloc(int, 20);
+      grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, 20);
       for (i=0; i < 20; i++) grid_relax_points[3][i] = 0;
    }
 
@@ -725,7 +725,7 @@ main( int   argc,
       HYPRE_AMGSetup(amg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
       /* hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming(); 
  
@@ -736,7 +736,7 @@ main( int   argc,
 			(HYPRE_Vector) x);
 
       /* hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming(); */
  
@@ -762,7 +762,7 @@ main( int   argc,
       if (solver_id == 1)
       {
 	 /* use AMG as preconditioner */
-	 printf ("Solver: AMG-PCG\n");
+	 hypre_printf ("Solver: AMG-PCG\n");
          pcg_precond = HYPRE_AMGInitialize();
          HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_AMGSetAggCoarsenType(pcg_precond, agg_coarsen_type);
@@ -796,7 +796,7 @@ main( int   argc,
       else if (solver_id == 2)
       {
 	 /* use diagonal scaling as preconditioner */
-	 printf ("Solver: DS-PCG\n");
+	 hypre_printf ("Solver: DS-PCG\n");
 	 pcg_precond = NULL;
 	 HYPRE_PCGSetPrecond( pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_CSRDiagScale,
                               (HYPRE_PtrToSolverFcn) HYPRE_CSRDiagScaleSetup,
@@ -806,7 +806,7 @@ main( int   argc,
       HYPRE_PCGSetup( pcg_solver, (HYPRE_Matrix) A, (HYPRE_Vector) b, 
                       (HYPRE_Vector) x);
       /* hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
  
@@ -817,7 +817,7 @@ main( int   argc,
 			(HYPRE_Vector) x);
 
       /* hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming(); */
 
@@ -831,10 +831,10 @@ main( int   argc,
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-         printf("\n");
-         printf("Iterations = %d\n", num_iterations);
-         printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
    }
 
    /*-----------------------------------------------------
@@ -855,7 +855,7 @@ main( int   argc,
       if (solver_id == 3)
       {
 	 /* use AMG as preconditioner */
-	 printf ("Solver: AMG-GMRES\n");
+	 hypre_printf ("Solver: AMG-GMRES\n");
          pcg_precond = HYPRE_AMGInitialize();
          HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_AMGSetAggCoarsenType(pcg_precond, agg_coarsen_type);
@@ -888,7 +888,7 @@ main( int   argc,
       else if (solver_id == 2)
       {
 	 /* use diagonal scaling as preconditioner */
-	 printf ("Solver: DS-GMRES\n");
+	 hypre_printf ("Solver: DS-GMRES\n");
 	 pcg_precond = NULL;
 	 HYPRE_GMRESSetPrecond( pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_CSRDiagScale,
 				(HYPRE_PtrToSolverFcn) HYPRE_CSRDiagScaleSetup,
@@ -898,7 +898,7 @@ main( int   argc,
       HYPRE_GMRESSetup( pcg_solver, (HYPRE_Matrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
       /* hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
  
@@ -909,7 +909,7 @@ main( int   argc,
 			(HYPRE_Vector) x);
 
       /* hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming(); */
 
@@ -923,10 +923,10 @@ main( int   argc,
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-         printf("\n");
-         printf("Iterations = %d\n", num_iterations);
-         printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
    }
 
 #if 1
@@ -953,7 +953,7 @@ main( int   argc,
    hypre_FinalizeMemoryDebug();
 */
    /* Finalize MPI */
-   /* MPI_Finalize(); */
+   /* hypre_MPI_Finalize(); */
 #if 0
 #endif
 
@@ -965,28 +965,28 @@ main( int   argc,
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
 
-int
-BuildFromFile( int               argc,
+HYPRE_Int
+BuildFromFile( HYPRE_Int               argc,
                char             *argv[],
-               int               arg_index,
+               HYPRE_Int               arg_index,
                hypre_CSRMatrix **A_ptr     )
 {
    char               *filename;
 
 #if 0
    hypre_ParCSRMatrix *A;
-   int 		      *global_part;
+   HYPRE_Int 		      *global_part;
 #endif
    hypre_CSRMatrix    *A;
 
-   int                 myid;
+   HYPRE_Int                 myid;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
 #if 0 
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 #endif
 
    myid = 0;
@@ -1001,7 +1001,7 @@ BuildFromFile( int               argc,
    }
    else
    {
-      printf("Error: No filename specified \n");
+      hypre_printf("Error: No filename specified \n");
       exit(1);
    }
 
@@ -1011,7 +1011,7 @@ BuildFromFile( int               argc,
  
    if (myid == 0)
    {
-      printf("  Operator FromFile: %s\n", filename);
+      hypre_printf("  Operator FromFile: %s\n", filename);
    }
 
    /*-----------------------------------------------------------
@@ -1034,16 +1034,16 @@ BuildFromFile( int               argc,
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
 
-int
-BuildLaplacian( int               argc,
+HYPRE_Int
+BuildLaplacian( HYPRE_Int               argc,
                 char             *argv[],
-                int               arg_index,
+                HYPRE_Int               arg_index,
                 hypre_CSRMatrix **A_ptr     )
 {
-   int                 nx, ny, nz;
-   int                 P, Q, R;
+   HYPRE_Int                 nx, ny, nz;
+   HYPRE_Int                 P, Q, R;
    double              cx, cy, cz;
-   int                 num_fun = 1;
+   HYPRE_Int                 num_fun = 1;
    double             *values;
    double             *mtrx;
   
@@ -1051,14 +1051,14 @@ BuildLaplacian( int               argc,
 
 #if 0
    hypre_ParCSRMatrix *A;
-   int 		      *global_part;
-   int                 p, q, r;
+   HYPRE_Int 		      *global_part;
+   HYPRE_Int                 p, q, r;
 #endif
    hypre_CSRMatrix    *A;
 
-   int                 num_procs, myid;
+   HYPRE_Int                 num_procs, myid;
 
-   int                 system_vcoef = 0;
+   HYPRE_Int                 system_vcoef = 0;
    
 
 
@@ -1067,8 +1067,8 @@ BuildLaplacian( int               argc,
     *-----------------------------------------------------------*/
 
 #if 0 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 #endif
 
    num_procs = 1;
@@ -1139,7 +1139,7 @@ BuildLaplacian( int               argc,
 /*
    if ((P*Q*R) != num_procs)
    {
-      printf("Error: Invalid number of processors or processor topology \n");
+      hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
    }
 */
@@ -1149,11 +1149,11 @@ BuildLaplacian( int               argc,
  
    if (myid == 0)
    {
-      printf("  Laplacian:\n");
-      printf("  Laplacian:   num_fun = %d\n", num_fun);
-      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
-      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
-      printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
+      hypre_printf("  Laplacian:\n");
+      hypre_printf("  Laplacian:   num_fun = %d\n", num_fun);
+      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+      hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
    }
 
    /*-----------------------------------------------------------
@@ -1190,7 +1190,7 @@ BuildLaplacian( int               argc,
    p = myid % P;
    q = (( myid - p)/P) % Q;
    r = ( myid - p - P*q)/( P*Q );
-   A = hypre_GenerateLaplacian(MPI_COMM_WORLD,
+   A = hypre_GenerateLaplacian(hypre_MPI_COMM_WORLD,
                                nx, ny, nz, P, Q, R, p, q, r,
                                values, &global_part);
 #endif
@@ -1335,13 +1335,13 @@ BuildLaplacian( int               argc,
  * Build matrix with general stencil.
  *----------------------------------------------------------------------*/
 
-int
-BuildStencilMatrix( int               argc,
+HYPRE_Int
+BuildStencilMatrix( HYPRE_Int               argc,
                     char             *argv[],
-                    int               arg_index,
+                    HYPRE_Int               arg_index,
                     hypre_CSRMatrix **A_ptr )
 {
-   int                 nx, ny, nz;
+   HYPRE_Int                 nx, ny, nz;
    char               *filename;
    hypre_CSRMatrix    *A;
 
@@ -1379,8 +1379,8 @@ BuildStencilMatrix( int               argc,
     * Print driver parameters
     *-----------------------------------------------------------*/
  
-   printf("  Stencil Matrix:\n");
-   printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+   hypre_printf("  Stencil Matrix:\n");
+   hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
 
    /*-----------------------------------------------------------
     * Generate the matrix 
@@ -1398,23 +1398,23 @@ BuildStencilMatrix( int               argc,
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
 
-int
-BuildLaplacian9pt( int               argc,
+HYPRE_Int
+BuildLaplacian9pt( HYPRE_Int               argc,
                    char             *argv[],
-                   int               arg_index,
+                   HYPRE_Int               arg_index,
                    hypre_CSRMatrix **A_ptr     )
 {
-   int                 nx, ny;
-   int                 P, Q;
+   HYPRE_Int                 nx, ny;
+   HYPRE_Int                 P, Q;
 
 #if 0
    hypre_ParCSRMatrix *A;
-   int 		      *global_part;
-   int                 p, q;
+   HYPRE_Int 		      *global_part;
+   HYPRE_Int                 p, q;
 #endif
    hypre_CSRMatrix    *A;
 
-   int                 num_procs, myid;
+   HYPRE_Int                 num_procs, myid;
    double             *values;
 
    /*-----------------------------------------------------------
@@ -1422,8 +1422,8 @@ BuildLaplacian9pt( int               argc,
     *-----------------------------------------------------------*/
 
 #if 0 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 #endif
 
    num_procs = 1;
@@ -1469,7 +1469,7 @@ BuildLaplacian9pt( int               argc,
 /*
    if ((P*Q) != num_procs)
    {
-      printf("Error: Invalid number of processors or processor topology \n");
+      hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
    }
 */
@@ -1479,9 +1479,9 @@ BuildLaplacian9pt( int               argc,
  
    if (myid == 0)
    {
-      printf("  Laplacian:\n");
-      printf("    (nx, ny) = (%d, %d)\n", nx, ny);
-      printf("    (Px, Py) = (%d, %d)\n", P,  Q);
+      hypre_printf("  Laplacian:\n");
+      hypre_printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      hypre_printf("    (Px, Py) = (%d, %d)\n", P,  Q);
    }
 
    /*-----------------------------------------------------------
@@ -1515,7 +1515,7 @@ BuildLaplacian9pt( int               argc,
 #if 0   
    p = myid % P;
    q = ( myid - p)/P;
-   A = hypre_GenerateLaplacian9pt(MPI_COMM_WORLD,
+   A = hypre_GenerateLaplacian9pt(hypre_MPI_COMM_WORLD,
                                nx, ny, P, Q, p, q,
                                values, &global_part);
 #endif
@@ -1536,23 +1536,23 @@ BuildLaplacian9pt( int               argc,
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
 
-int
-BuildLaplacian27pt(int               argc,
+HYPRE_Int
+BuildLaplacian27pt(HYPRE_Int               argc,
                    char             *argv[],
-                   int               arg_index,
+                   HYPRE_Int               arg_index,
                    hypre_CSRMatrix **A_ptr     )
 {
-   int                 nx, ny, nz;
-   int                 P, Q, R;
+   HYPRE_Int                 nx, ny, nz;
+   HYPRE_Int                 P, Q, R;
 
 #if 0
    hypre_ParCSRMatrix *A;
-   int 		      *global_part;
-   int                 p, q, r;
+   HYPRE_Int 		      *global_part;
+   HYPRE_Int                 p, q, r;
 #endif
    hypre_CSRMatrix    *A;
 
-   int                 num_procs, myid;
+   HYPRE_Int                 num_procs, myid;
    double             *values;
 
    /*-----------------------------------------------------------
@@ -1565,8 +1565,8 @@ BuildLaplacian27pt(int               argc,
 
    /* compute p,q,r from P,Q, R and myid */
 #if 0 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    p = myid % P;
    q = ( myid - p)/P;
 
@@ -1619,9 +1619,9 @@ BuildLaplacian27pt(int               argc,
  
    if (myid == 0)
    {
-      printf("  27pt_Laplacian:\n");
-      printf("    (nx, ny) = (%d, %d, %d)\n", nx, ny, nz);
-      printf("    (Px, Py) = (%d, %d, %d)\n", P,  Q, R);
+      hypre_printf("  27pt_Laplacian:\n");
+      hypre_printf("    (nx, ny) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (Px, Py) = (%d, %d, %d)\n", P,  Q, R);
    }
 
    /*-----------------------------------------------------------
@@ -1663,26 +1663,26 @@ BuildLaplacian27pt(int               argc,
  *
  *----------------------------------------------------------------------*/
 
-int
-BuildDifConv(   int               argc,
+HYPRE_Int
+BuildDifConv(   HYPRE_Int               argc,
                 char             *argv[],
-                int               arg_index,
+                HYPRE_Int               arg_index,
                 hypre_CSRMatrix **A_ptr     )
 {
-   int                 nx, ny, nz;
-   int                 P, Q, R;
+   HYPRE_Int                 nx, ny, nz;
+   HYPRE_Int                 P, Q, R;
    double              cx, cy, cz;
    double              ax, ay, az;
    double              hinx,hiny,hinz;
 
 #if 0
    hypre_ParCSRMatrix *A;
-   int 		      *global_part;
-   int                 p, q, r;
+   HYPRE_Int 		      *global_part;
+   HYPRE_Int                 p, q, r;
 #endif
    hypre_CSRMatrix    *A;
 
-   int                 num_procs, myid;
+   HYPRE_Int                 num_procs, myid;
    double             *values;
 
    /*-----------------------------------------------------------
@@ -1695,8 +1695,8 @@ BuildDifConv(   int               argc,
 
    /* compute p,q,r from P,Q,R and myid */
 #if 0 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    p = myid % P;
    q = (( myid - p)/P) % Q;
    r = ( myid - p - P*q)/( P*Q );
@@ -1775,7 +1775,7 @@ BuildDifConv(   int               argc,
 /*
    if ((P*Q*R) != num_procs)
    {
-      printf("Error: Invalid number of processors or processor topology \n");
+      hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
    }
 */
@@ -1785,12 +1785,12 @@ BuildDifConv(   int               argc,
  
    if (myid == 0)
    {
-      printf("  Convection-Diffusion: \n");
-      printf("    -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f\n");
-      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
-      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
-      printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
-      printf("    (ax, ay, az) = (%f, %f, %f)\n", ax, ay, az);
+      hypre_printf("  Convection-Diffusion: \n");
+      hypre_printf("    -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f\n");
+      hypre_printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+      hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
+      hypre_printf("    (ax, ay, az) = (%f, %f, %f)\n", ax, ay, az);
    }
 
 
@@ -1839,10 +1839,10 @@ BuildDifConv(   int               argc,
  *
  *********************************************************************/
 
-int
-BuildRhsFromFile( int                  argc,
+HYPRE_Int
+BuildRhsFromFile( HYPRE_Int                  argc,
                   char                *argv[],
-                  int                  arg_index,
+                  HYPRE_Int                  arg_index,
                   hypre_CSRMatrix  *A,
                   hypre_Vector    **b_ptr     )
 {
@@ -1860,7 +1860,7 @@ BuildRhsFromFile( int                  argc,
    }
    else
    {
-      printf("Error: No filename specified \n");
+      hypre_printf("Error: No filename specified \n");
       exit(1);
    }
  
@@ -1868,7 +1868,7 @@ BuildRhsFromFile( int                  argc,
     * Print driver parameters
     *-----------------------------------------------------------*/
  
-   printf("  Rhs FromFile: %s\n", filename);
+   hypre_printf("  Rhs FromFile: %s\n", filename);
  
    /*-----------------------------------------------------------
     * Generate the matrix 
@@ -1888,20 +1888,20 @@ BuildRhsFromFile( int                  argc,
  *
  *********************************************************************/
 
-int
-BuildFuncsFromFile( int                  argc,
+HYPRE_Int
+BuildFuncsFromFile( HYPRE_Int                  argc,
                     char                *argv[],
-                    int                  arg_index,
-                    int                 **dof_func_ptr     )
+                    HYPRE_Int                  arg_index,
+                    HYPRE_Int                 **dof_func_ptr     )
 {
    char               *filename;
 
    FILE    *fp;
 
-   int     *dof_func;
-   int      size;
+   HYPRE_Int     *dof_func;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
 
 
  
@@ -1915,7 +1915,7 @@ BuildFuncsFromFile( int                  argc,
    }
    else
    {
-      printf("Error: No filename specified \n");
+      hypre_printf("Error: No filename specified \n");
       exit(1);
    }
  
@@ -1923,7 +1923,7 @@ BuildFuncsFromFile( int                  argc,
     * Print driver parameters
     *-----------------------------------------------------------*/
  
-   printf("\n  FuncsFromFile: %s\n", filename);
+   hypre_printf("\n  FuncsFromFile: %s\n", filename);
  
    /*-----------------------------------------------------------
     * Generate the matrix 
@@ -1935,12 +1935,12 @@ BuildFuncsFromFile( int                  argc,
 
    fp = fopen(filename, "r");
 
-   fscanf(fp, "%d", &size);
-   dof_func = hypre_CTAlloc(int, size);
+   hypre_fscanf(fp, "%d", &size);
+   dof_func = hypre_CTAlloc(HYPRE_Int, size);
 
    for (j = 0; j < size; j++)
    {
-      fscanf(fp, "%d", &dof_func[j]);
+      hypre_fscanf(fp, "%d", &dof_func[j]);
    }
 
    fclose(fp);
@@ -1953,12 +1953,12 @@ BuildFuncsFromFile( int                  argc,
 /**************************************************************************/
 
 
-int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx, 
-                      double vcy, double vcz, int mtx_entry, double *values)
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, double vcx, 
+                      double vcy, double vcz, HYPRE_Int mtx_entry, double *values)
 {
 
 
-   int sz = num_fun*num_fun;
+   HYPRE_Int sz = num_fun*num_fun;
 
    values[1*sz + mtx_entry] = -vcx;
    values[2*sz + mtx_entry] = -vcy;

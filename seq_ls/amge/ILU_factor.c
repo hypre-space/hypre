@@ -30,68 +30,68 @@
  * returns -1 if factorization fails (i.e., 0 or negative diagonal pivot);
  ****************************************************************************/
 
-int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
-		    /* int **i_dof_to_ILUdof_pointer, */
+HYPRE_Int hypre_ILUfactor(HYPRE_Int **i_ILUdof_to_dof_pointer,
+		    /* HYPRE_Int **i_dof_to_ILUdof_pointer, */
 
-		    int **i_ILUdof_ILUdof_pointer,
-		    int **j_ILUdof_ILUdof_pointer,
+		    HYPRE_Int **i_ILUdof_ILUdof_pointer,
+		    HYPRE_Int **j_ILUdof_ILUdof_pointer,
 		    double **LD_data,
 
-		    int **i_ILUdof_ILUdof_t_pointer,
-		    int **j_ILUdof_ILUdof_t_pointer,
+		    HYPRE_Int **i_ILUdof_ILUdof_t_pointer,
+		    HYPRE_Int **j_ILUdof_ILUdof_t_pointer,
 		    double **U_data,
 
 		    hypre_CSRMatrix *A,
 
-		    int *i_node_dof, int *j_node_dof,
+		    HYPRE_Int *i_node_dof, HYPRE_Int *j_node_dof,
 
-		    int *i_block_node, int *j_block_node,
-		    int num_blocks, 
+		    HYPRE_Int *i_block_node, HYPRE_Int *j_block_node,
+		    HYPRE_Int num_blocks, 
 				    
-		    int num_dofs,
-		    int num_nodes)
+		    HYPRE_Int num_dofs,
+		    HYPRE_Int num_nodes)
 
 {
 
-  int ierr = 0;
-  int i, j, k, l;
-  int i_dof;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i, j, k, l;
+  HYPRE_Int i_dof;
 
-  int j1, j2;
+  HYPRE_Int j1, j2;
 
-  int *i_block_dof, *j_block_dof;
-  int *i_ILUdof_ILUdof, *j_ILUdof_ILUdof;
+  HYPRE_Int *i_block_dof, *j_block_dof;
+  HYPRE_Int *i_ILUdof_ILUdof, *j_ILUdof_ILUdof;
 
-  int *i_dof_to_ILUdof, *i_ILUdof_to_dof;
+  HYPRE_Int *i_dof_to_ILUdof, *i_ILUdof_to_dof;
 
-  int *i_dof_dof_0, *j_dof_dof_0;
-  int *i_dof_dof, *j_dof_dof;
+  HYPRE_Int *i_dof_dof_0, *j_dof_dof_0;
+  HYPRE_Int *i_dof_dof, *j_dof_dof;
   double *a_dof_dof;
 
-  int *i_dof_index;
+  HYPRE_Int *i_dof_index;
 
-  int *i_a = hypre_CSRMatrixI(A);
-  int *j_a = hypre_CSRMatrixJ(A);
+  HYPRE_Int *i_a = hypre_CSRMatrixI(A);
+  HYPRE_Int *j_a = hypre_CSRMatrixJ(A);
   double *a_data = hypre_CSRMatrixData(A);
 
   double *b_dof_dof;
   double *b_dof_dof_t;
 
-  int *i_ILUdof_ILUdof_t, *j_ILUdof_ILUdof_t;
+  HYPRE_Int *i_ILUdof_ILUdof_t, *j_ILUdof_ILUdof_t;
 
-  int ILUdof_ILUdof_counter = 0, ILUdof_ILUdof_t_counter=0;
+  HYPRE_Int ILUdof_ILUdof_counter = 0, ILUdof_ILUdof_t_counter=0;
 
-  int i_dof_to_ILUdof_counter;
+  HYPRE_Int i_dof_to_ILUdof_counter;
 
   double diag, diagonal, entry, row_sum;
 
-  int *dof_on_list;
+  HYPRE_Int *dof_on_list;
 
   double *aux;
 
-  dof_on_list = hypre_CTAlloc(int, num_dofs);
-  i_dof_to_ILUdof = hypre_CTAlloc(int, num_dofs);
-  i_ILUdof_to_dof = hypre_CTAlloc(int, num_dofs);
+  dof_on_list = hypre_CTAlloc(HYPRE_Int, num_dofs);
+  i_dof_to_ILUdof = hypre_CTAlloc(HYPRE_Int, num_dofs);
+  i_ILUdof_to_dof = hypre_CTAlloc(HYPRE_Int, num_dofs);
 
   ierr = matrix_matrix_product(&i_block_dof, &j_block_dof,
 
@@ -159,7 +159,7 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
   */
 
 
-  /*  i_dof_index = hypre_CTAlloc(int, num_dofs); */
+  /*  i_dof_index = hypre_CTAlloc(HYPRE_Int, num_dofs); */
   i_dof_index = j_block_dof;
 
   for (i=0; i< num_dofs; i++)
@@ -199,13 +199,13 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 
      ================================================================== */
 
-  i_ILUdof_ILUdof = hypre_CTAlloc(int, num_dofs+1);
-  j_ILUdof_ILUdof = hypre_CTAlloc(int, (i_dof_dof[num_dofs]+num_dofs)/2);
+  i_ILUdof_ILUdof = hypre_CTAlloc(HYPRE_Int, num_dofs+1);
+  j_ILUdof_ILUdof = hypre_CTAlloc(HYPRE_Int, (i_dof_dof[num_dofs]+num_dofs)/2);
   b_dof_dof = hypre_CTAlloc(double, (i_dof_dof[num_dofs]+num_dofs)/2);
 
 
-  i_ILUdof_ILUdof_t =  hypre_CTAlloc(int, num_dofs+1);
-  j_ILUdof_ILUdof_t = hypre_CTAlloc(int, (i_dof_dof[num_dofs]-num_dofs)/2);
+  i_ILUdof_ILUdof_t =  hypre_CTAlloc(HYPRE_Int, num_dofs+1);
+  j_ILUdof_ILUdof_t = hypre_CTAlloc(HYPRE_Int, (i_dof_dof[num_dofs]-num_dofs)/2);
   b_dof_dof_t = hypre_CTAlloc(double, (i_dof_dof[num_dofs]-num_dofs)/2);
 
 
@@ -265,8 +265,8 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 
   if (ILUdof_ILUdof_counter+ILUdof_ILUdof_t_counter != i_dof_dof[num_dofs])
     {
-      printf("ERROR in extracting lower/upper triangular parts: *******\n");
-      printf("lower_triang nnz: %d, upper_triang nnz: %d, total nnz: %d\n",
+      hypre_printf("ERROR in extracting lower/upper triangular parts: *******\n");
+      hypre_printf("lower_triang nnz: %d, upper_triang nnz: %d, total nnz: %d\n",
 	     ILUdof_ILUdof_counter, ILUdof_ILUdof_t_counter, 
 	     i_dof_dof[num_dofs]);
     }
@@ -294,7 +294,7 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
 
       if (diagonal <= 0.e0)
 	{
-	  printf("failure of ILU: non--positive diagonal entry: %e-----\n",
+	  hypre_printf("failure of ILU: non--positive diagonal entry: %e-----\n",
 		 diagonal);
 	  return -1; 
 	}
@@ -404,9 +404,9 @@ int hypre_ILUfactor(int **i_ILUdof_to_dof_pointer,
   *U_data = b_dof_dof_t;
 
   /*
-  printf("\n\n=======================================================\n\n");
-  printf("                 E N D  ILU(1) FACTORIZATION:                \n");
-  printf("\n\n=======================================================\n\n");
+  hypre_printf("\n\n=======================================================\n\n");
+  hypre_printf("                 E N D  ILU(1) FACTORIZATION:                \n");
+  hypre_printf("\n\n=======================================================\n\n");
   */
 
   return ierr;

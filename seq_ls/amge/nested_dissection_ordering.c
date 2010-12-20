@@ -34,25 +34,25 @@
  *
  ****************************************************************************/
 
-int AMGeNestedDissectionOrdering(int *i_node_level,
-				 int num_nodes, 
-				 int level, 
+HYPRE_Int AMGeNestedDissectionOrdering(HYPRE_Int *i_node_level,
+				 HYPRE_Int num_nodes, 
+				 HYPRE_Int level, 
 
-				 int **j_node_level_pointer,
+				 HYPRE_Int **j_node_level_pointer,
 
-				 int **i_level_node_pointer, 
-				 int **j_level_node_pointer, 
+				 HYPRE_Int **i_level_node_pointer, 
+				 HYPRE_Int **j_level_node_pointer, 
 
-				 int *num_levels_pointer)
+				 HYPRE_Int *num_levels_pointer)
 {
-  int ierr = 0;
-  int i,j,k,l;  
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k,l;  
 
-  int *j_node_level, *i_level_node, *j_level_node;
+  HYPRE_Int *j_node_level, *i_level_node, *j_level_node;
 
-  int min_level, max_level;
+  HYPRE_Int min_level, max_level;
 
-  j_node_level = hypre_CTAlloc(int, num_nodes);
+  j_node_level = hypre_CTAlloc(HYPRE_Int, num_nodes);
 
   max_level = 0;
   min_level = level;
@@ -66,7 +66,7 @@ int AMGeNestedDissectionOrdering(int *i_node_level,
 
     }
 
-  printf("level: %d, max_level: %d, min_level: %d\n", level, max_level,
+  hypre_printf("level: %d, max_level: %d, min_level: %d\n", level, max_level,
 	 min_level);
 
   for (i=0; i < num_nodes; i++)
@@ -91,23 +91,23 @@ int AMGeNestedDissectionOrdering(int *i_node_level,
   *j_node_level_pointer = j_node_level; 
 
 
-  printf("\n==============================================================\n");
-  printf("\n     n e s t e d   d i s s e c t i o n   o r d e r i n g:     \n");
-  printf("\n==============================================================\n");
+  hypre_printf("\n==============================================================\n");
+  hypre_printf("\n     n e s t e d   d i s s e c t i o n   o r d e r i n g:     \n");
+  hypre_printf("\n==============================================================\n");
 
 
   for (l=0; l < max_level-min_level+1; l++)
     {
-      printf("level: %d contains %d nodes: \n", l, 
+      hypre_printf("level: %d contains %d nodes: \n", l, 
 	     i_level_node[l+1]-i_level_node[l]);
       /*
       for (k=i_level_node[l]; k < i_level_node[l+1]; k++)
-	printf(" %d, ", j_level_node[k]);
+	hypre_printf(" %d, ", j_level_node[k]);
 	*/
-      printf("\n\n");
+      hypre_printf("\n\n");
     }
-  printf("\n==============================================================\n");
-  printf("num_nodes %d and num_nodes counted: %d\n\n\n",
+  hypre_printf("\n==============================================================\n");
+  hypre_printf("num_nodes %d and num_nodes counted: %d\n\n\n",
 	 num_nodes, i_level_node[max_level-min_level+1]);
 
 

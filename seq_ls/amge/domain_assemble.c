@@ -17,32 +17,32 @@
 
 #include "headers.h" 
 
-int hypre_AMGeDomainElementSparseAssemble(int *i_domain_element,
-					  int *j_domain_element,
-					  int num_domains,
+HYPRE_Int hypre_AMGeDomainElementSparseAssemble(HYPRE_Int *i_domain_element,
+					  HYPRE_Int *j_domain_element,
+					  HYPRE_Int num_domains,
 
-					  int *i_element_chord,
-					  int *j_element_chord,
+					  HYPRE_Int *i_element_chord,
+					  HYPRE_Int *j_element_chord,
 					  double *a_element_chord,
 
-					  int *i_chord_dof, int *j_chord_dof,
+					  HYPRE_Int *i_chord_dof, HYPRE_Int *j_chord_dof,
 
-					  int **i_domain_chord_pointer, 
-					  int **j_domain_chord_pointer,
+					  HYPRE_Int **i_domain_chord_pointer, 
+					  HYPRE_Int **j_domain_chord_pointer,
 					  double **a_domain_chord_pointer,
 
-					  int num_elements, int num_chords,
-					  int num_dofs)
+					  HYPRE_Int num_elements, HYPRE_Int num_chords,
+					  HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
-  int i,j,k,l;
-  int *i_domain_chord, *j_domain_chord;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k,l;
+  HYPRE_Int *i_domain_chord, *j_domain_chord;
   double *a_domain_chord;
 
-  int *i_chord_domain_index;
+  HYPRE_Int *i_chord_domain_index;
 
-  i_chord_domain_index =  hypre_CTAlloc(int, num_chords);
+  i_chord_domain_index =  hypre_CTAlloc(HYPRE_Int, num_chords);
   
   ierr = matrix_matrix_product(&i_domain_chord,
 			       &j_domain_chord,
@@ -94,23 +94,23 @@ int hypre_AMGeDomainElementSparseAssemble(int *i_domain_element,
 
   /*
 
-  printf("assembled domain sparse matrices: \n");
+  hypre_printf("assembled domain sparse matrices: \n");
   for (i=0; i < num_domains; i++)
     {
       if (i_domain_chord[i+1] > i_domain_chord[i])
 	{
 
-	  printf("domain %d: num_nonzero_entries: %d \n", i,
+	  hypre_printf("domain %d: num_nonzero_entries: %d \n", i,
 		 i_domain_chord[i+1] - i_domain_chord[i]);
 
 	  for (l=i_domain_chord[i]; l < i_domain_chord[i+1]; l++)
 	    {
 	      k = j_domain_chord[l];
 	      if (j_chord_dof[i_chord_dof[k]] == j_chord_dof[i_chord_dof[k]+1])
-		printf("(%d,%d): %e\n", j_chord_dof[i_chord_dof[k]],
+		hypre_printf("(%d,%d): %e\n", j_chord_dof[i_chord_dof[k]],
 		       j_chord_dof[i_chord_dof[k]+1], a_domain_chord[l]);
 	    }
-	  printf("==================================================\n\n");
+	  hypre_printf("==================================================\n\n");
 	}
     }
   

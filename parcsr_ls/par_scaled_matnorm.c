@@ -25,23 +25,23 @@
  * hypre_ParCSRMatrixScaledNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
 {
    hypre_ParCSRCommHandle	*comm_handle;
    hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    MPI_Comm		 comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
-   int			*diag_i = hypre_CSRMatrixI(diag);
-   int			*diag_j = hypre_CSRMatrixJ(diag);
+   HYPRE_Int			*diag_i = hypre_CSRMatrixI(diag);
+   HYPRE_Int			*diag_j = hypre_CSRMatrixJ(diag);
    double		*diag_data = hypre_CSRMatrixData(diag);
    hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
-   int			*offd_i = hypre_CSRMatrixI(offd);
-   int			*offd_j = hypre_CSRMatrixJ(offd);
+   HYPRE_Int			*offd_i = hypre_CSRMatrixI(offd);
+   HYPRE_Int			*offd_j = hypre_CSRMatrixJ(offd);
    double		*offd_data = hypre_CSRMatrixData(offd);
-   int         		 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   int	                *row_starts = hypre_ParCSRMatrixRowStarts(A);
-   int			 num_rows = hypre_CSRMatrixNumRows(diag);
+   HYPRE_Int         		 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int	                *row_starts = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int			 num_rows = hypre_CSRMatrixNumRows(diag);
 
    hypre_ParVector      *dinvsqrt;
    double		*dis_data;
@@ -50,8 +50,8 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
    hypre_Vector         *sum;
    double		*sum_data;
   
-   int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
-   int	      num_sends, i, j, index, start;
+   HYPRE_Int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
+   HYPRE_Int	      num_sends, i, j, index, start;
 
    double     *d_buf_data;
    double      mat_norm, max_row_sum;
@@ -124,7 +124,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
 	 max_row_sum = sum_data[i];
    }	
 
-   MPI_Allreduce(&max_row_sum, &mat_norm, 1, MPI_DOUBLE, MPI_MAX, comm);
+   hypre_MPI_Allreduce(&max_row_sum, &mat_norm, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
 
    hypre_ParVectorDestroy(dinvsqrt);
    hypre_SeqVectorDestroy(sum);

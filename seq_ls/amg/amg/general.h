@@ -45,7 +45,7 @@
 #endif
 
 #ifndef round
-#define round(x)  ( ((x) < 0.0) ? ((int)(x - 0.5)) : ((int)(x + 0.5)) )
+#define round(x)  ( ((x) < 0.0) ? ((HYPRE_Int)(x - 0.5)) : ((HYPRE_Int)(x + 0.5)) )
 #endif
 
 
@@ -54,10 +54,10 @@
  *--------------------------------------------------------------------------*/
 
 #define hypre_TAlloc(type, count) \
-((count) ? (type *) malloc((unsigned int)(sizeof(type) * (count))) : NULL)
+((count) ? (type *) malloc((size_t)(sizeof(type) * (count))) : NULL)
 
 #define hypre_CTAlloc(type, count) \
-((count) ? (type *) calloc((unsigned int)(count), (unsigned int)sizeof(type)) : NULL)
+((count) ? (type *) calloc((size_t)(count), (size_t)sizeof(type)) : NULL)
 
 /* note: the `else' is required to guarantee termination of the `if' */
 #define hypre_TFree(ptr) if (ptr) free(ptr); else

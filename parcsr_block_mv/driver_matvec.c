@@ -20,13 +20,13 @@
 #include "../krylov/krylov.h"
 #include "par_csr_block_matrix.h"
  
-extern int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr);
+extern HYPRE_Int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr);
 
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface 
  *--------------------------------------------------------------------------*/
  
-int main( int   argc, char *argv[] )
+HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
 {
    hypre_ParCSRMatrix      *par_matrix, *g_matrix, **submatrices;
    hypre_CSRMatrix         *A_diag, *A_offd;
@@ -38,26 +38,26 @@ int main( int   argc, char *argv[] )
    hypre_ParVector     *x;
    hypre_ParVector     *y;
    HYPRE_Solver        gmres_solver, precon;
-   int                 *diag_i, *diag_j, *offd_i, *offd_j;
-   int                 *diag_i2, *diag_j2, *offd_i2, *offd_j2;
+   HYPRE_Int                 *diag_i, *diag_j, *offd_i, *offd_j;
+   HYPRE_Int                 *diag_i2, *diag_j2, *offd_i2, *offd_j2;
    double              *diag_d, *diag_d2, *offd_d, *offd_d2;
-   int		       mypid, local_size, nprocs;
-   int		       global_num_rows, global_num_cols, num_cols_offd;
-   int		       num_nonzeros_diag, num_nonzeros_offd, *colMap;
-   int 		       ii, jj, kk, row, col, nnz, *indices, *colMap2;
+   HYPRE_Int		       mypid, local_size, nprocs;
+   HYPRE_Int		       global_num_rows, global_num_cols, num_cols_offd;
+   HYPRE_Int		       num_nonzeros_diag, num_nonzeros_offd, *colMap;
+   HYPRE_Int 		       ii, jj, kk, row, col, nnz, *indices, *colMap2;
    double 	       *data, ddata, *y_data;
-   int 		       *row_starts, *col_starts, *rstarts, *cstarts;
-   int 		       *row_starts2, *col_starts2;
-   int                 block_size=2, bnnz=4, *index_set;
+   HYPRE_Int 		       *row_starts, *col_starts, *rstarts, *cstarts;
+   HYPRE_Int 		       *row_starts2, *col_starts2;
+   HYPRE_Int                 block_size=2, bnnz=4, *index_set;
    FILE                *fp;
 
    /* --------------------------------------------- */
    /* Initialize MPI                                */
    /* --------------------------------------------- */
 
-   MPI_Init(&argc, &argv);
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   hypre_MPI_Init(&argc, &argv);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mypid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nprocs);
 
    /* build and fetch matrix */
    MyBuildParLaplacian9pt((HYPRE_ParCSRMatrix *) &par_matrix);
@@ -75,19 +75,19 @@ int main( int   argc, char *argv[] )
    /* build vector and apply matvec                 */
    /* --------------------------------------------- */
 
-   x = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_cols,col_starts);
+   x = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_cols,col_starts);
    hypre_ParVectorSetPartitioningOwner(x,0);
    hypre_ParVectorInitialize(x);
    x_local = hypre_ParVectorLocalVector(x);
    data    = hypre_VectorData(x_local);
    local_size = col_starts[mypid+1] - col_starts[mypid];
    for (ii = 0; ii < local_size; ii++) data[ii] = 1.0;
-   y = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_rows,row_starts);
+   y = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_rows,row_starts);
    hypre_ParVectorSetPartitioningOwner(y,0);
    hypre_ParVectorInitialize(y);
    hypre_ParCSRMatrixMatvec (1.0, par_matrix, x, 0.0, y);
    ddata = hypre_ParVectorInnerProd(y, y);
-   if (mypid == 0) printf("y inner product = %e\n", ddata);
+   if (mypid == 0) hypre_printf("y inner product = %e\n", ddata);
    hypre_ParVectorDestroy(x);
    hypre_ParVectorDestroy(y);
 
@@ -95,17 +95,17 @@ int main( int   argc, char *argv[] )
    /* build block matrix                            */
    /* --------------------------------------------- */
 
-   rstarts = hypre_CTAlloc(int, nprocs+1);
+   rstarts = hypre_CTAlloc(HYPRE_Int, nprocs+1);
    for (ii = 0; ii <= nprocs; ii++) rstarts[ii] = row_starts[ii];
-   cstarts = hypre_CTAlloc(int, nprocs+1);
+   cstarts = hypre_CTAlloc(HYPRE_Int, nprocs+1);
    for (ii = 0; ii <= nprocs; ii++) cstarts[ii] = col_starts[ii];
 
-   par_blk_matrix = hypre_ParCSRBlockMatrixCreate(MPI_COMM_WORLD,block_size,
+   par_blk_matrix = hypre_ParCSRBlockMatrixCreate(hypre_MPI_COMM_WORLD,block_size,
                           global_num_rows, global_num_cols, rstarts,
                           cstarts, num_cols_offd, num_nonzeros_diag,
                           num_nonzeros_offd);
    colMap  = hypre_ParCSRMatrixColMapOffd(par_matrix);
-   if (num_cols_offd > 0) colMap2 = hypre_CTAlloc(int, num_cols_offd);
+   if (num_cols_offd > 0) colMap2 = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
    else                   colMap2 = NULL;
    for (ii = 0; ii < num_cols_offd; ii++) colMap2[ii] = colMap[ii];
    hypre_ParCSRBlockMatrixColMapOffd(par_blk_matrix) = colMap2;
@@ -113,8 +113,8 @@ int main( int   argc, char *argv[] )
    diag_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(par_matrix));
    diag_d = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(par_matrix));
    diag = hypre_ParCSRBlockMatrixDiag(par_blk_matrix);
-   diag_i2 = hypre_CTAlloc(int, local_size+1);
-   diag_j2 = hypre_CTAlloc(int, num_nonzeros_diag);
+   diag_i2 = hypre_CTAlloc(HYPRE_Int, local_size+1);
+   diag_j2 = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag);
    diag_d2 = hypre_CTAlloc(double, num_nonzeros_diag*bnnz);
    for (ii = 0; ii <= local_size; ii++) diag_i2[ii] = diag_i[ii];
    for (ii = 0; ii < num_nonzeros_diag; ii++) diag_j2[ii] = diag_j[ii];
@@ -137,12 +137,12 @@ int main( int   argc, char *argv[] )
    offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix));
    offd_d = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(par_matrix));
    offd   = hypre_ParCSRBlockMatrixOffd(par_blk_matrix);
-   offd_i2 = hypre_CTAlloc(int, local_size+1);
+   offd_i2 = hypre_CTAlloc(HYPRE_Int, local_size+1);
    for (ii = 0; ii <= local_size; ii++) offd_i2[ii] = offd_i[ii];
    hypre_CSRBlockMatrixI(offd) = offd_i2;
    if (num_cols_offd)
    {
-      offd_j2 = hypre_CTAlloc(int, num_nonzeros_offd);
+      offd_j2 = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);
       for (ii = 0; ii < num_nonzeros_offd; ii++) offd_j2[ii] = offd_j[ii];
       hypre_CSRBlockMatrixJ(offd) = offd_j2;
       offd_d2 = hypre_CTAlloc(double, num_nonzeros_offd*bnnz);
@@ -169,25 +169,25 @@ int main( int   argc, char *argv[] )
    /* build block matrix transpose                  */
    /* --------------------------------------------- */
 
-   rstarts = hypre_CTAlloc(int, nprocs+1);
+   rstarts = hypre_CTAlloc(HYPRE_Int, nprocs+1);
    for (ii = 0; ii <= nprocs; ii++) rstarts[ii] = row_starts[ii];
-   cstarts = hypre_CTAlloc(int, nprocs+1);
+   cstarts = hypre_CTAlloc(HYPRE_Int, nprocs+1);
    for (ii = 0; ii <= nprocs; ii++) cstarts[ii] = col_starts[ii];
 
-   par_blk_matrixT = hypre_ParCSRBlockMatrixCreate(MPI_COMM_WORLD,block_size,
+   par_blk_matrixT = hypre_ParCSRBlockMatrixCreate(hypre_MPI_COMM_WORLD,block_size,
                           global_num_rows, global_num_cols, rstarts,
                           cstarts, num_cols_offd, num_nonzeros_diag,
                           num_nonzeros_offd);
    colMap  = hypre_ParCSRMatrixColMapOffd(par_matrix);
-   colMap2 = hypre_CTAlloc(int, num_cols_offd);
+   colMap2 = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
    for (ii = 0; ii < num_cols_offd; ii++) colMap2[ii] = colMap[ii];
    hypre_ParCSRBlockMatrixColMapOffd(par_blk_matrixT) = colMap2;
    diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(par_matrix));
    diag_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(par_matrix));
    diag_d = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(par_matrix));
    diag = hypre_ParCSRBlockMatrixDiag(par_blk_matrixT);
-   diag_i2 = hypre_CTAlloc(int, local_size+1);
-   diag_j2 = hypre_CTAlloc(int, num_nonzeros_diag);
+   diag_i2 = hypre_CTAlloc(HYPRE_Int, local_size+1);
+   diag_j2 = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag);
    diag_d2 = hypre_CTAlloc(double, num_nonzeros_diag*bnnz);
    for (ii = 0; ii <= local_size; ii++) diag_i2[ii] = diag_i[ii];
    for (ii = 0; ii < num_nonzeros_diag; ii++) diag_j2[ii] = diag_j[ii];
@@ -210,12 +210,12 @@ int main( int   argc, char *argv[] )
    offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix));
    offd_d = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(par_matrix));
    offd   = hypre_ParCSRBlockMatrixOffd(par_blk_matrixT);
-   offd_i2 = hypre_CTAlloc(int, local_size+1);
+   offd_i2 = hypre_CTAlloc(HYPRE_Int, local_size+1);
    for (ii = 0; ii <= local_size; ii++) offd_i2[ii] = offd_i[ii];
    hypre_CSRBlockMatrixI(offd) = offd_i2;
    if (num_cols_offd)
    {
-      offd_j2 = hypre_CTAlloc(int, num_nonzeros_offd);
+      offd_j2 = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);
       for (ii = 0; ii < num_nonzeros_offd; ii++) offd_j2[ii] = offd_j[ii];
       hypre_CSRBlockMatrixJ(offd) = offd_j2;
       offd_d2 = hypre_CTAlloc(double, num_nonzeros_offd*bnnz);
@@ -242,20 +242,20 @@ int main( int   argc, char *argv[] )
    /* block matvec                                  */
    /* --------------------------------------------- */
 
-   col_starts2 = hypre_CTAlloc(int, nprocs+1);
+   col_starts2 = hypre_CTAlloc(HYPRE_Int, nprocs+1);
    for (ii = 0; ii <= nprocs; ii++)
       col_starts2[ii] = col_starts[ii] * block_size;
-   x = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_cols*block_size,
+   x = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_cols*block_size,
                              col_starts2);
    hypre_ParVectorInitialize(x);
    x_local = hypre_ParVectorLocalVector(x);
    data = hypre_VectorData(x_local);
    local_size = col_starts2[mypid+1] - col_starts2[mypid];
    for (ii=0; ii < local_size; ii++) data[ii] = 1.0;
-   row_starts2 = hypre_CTAlloc(int, nprocs+1);
+   row_starts2 = hypre_CTAlloc(HYPRE_Int, nprocs+1);
    for (ii = 0; ii <= nprocs; ii++)
       row_starts2[ii] = row_starts[ii] * block_size;
-   y = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_rows*block_size,
+   y = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_rows*block_size,
                              row_starts2);
    hypre_ParVectorSetPartitioningOwner(y,0);
    hypre_ParVectorInitialize(y);
@@ -264,16 +264,16 @@ int main( int   argc, char *argv[] )
 
    hypre_BlockMatvecCommPkgCreate(par_blk_matrix);
    ddata = hypre_ParVectorInnerProd(x, x);
-   if (mypid == 0) printf("block x inner product = %e\n", ddata);
+   if (mypid == 0) hypre_printf("block x inner product = %e\n", ddata);
    hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrix, x, 0.0, y);
    ddata = hypre_ParVectorInnerProd(y, y);
-   if (mypid == 0) printf("block y inner product = %e\n", ddata);
+   if (mypid == 0) hypre_printf("block y inner product = %e\n", ddata);
 
    /* --------------------------------------------- */
    /* RAP                                           */
    /* --------------------------------------------- */
 
-   printf("Verifying RAP\n");
+   hypre_printf("Verifying RAP\n");
    hypre_ParCSRBlockMatrixRAP(par_blk_matrix, par_blk_matrix,
                               par_blk_matrix, &rap_matrix);
    for (ii = 0; ii < local_size; ii++) data[ii] = 1.0;
@@ -281,12 +281,12 @@ int main( int   argc, char *argv[] )
    hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrix, y, 0.0, x);
    hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrixT, x, 0.0, y);
    ddata = hypre_ParVectorInnerProd(y, y);
-   if (mypid == 0) printf("(1) A^2 block inner product = %e\n", ddata);
+   if (mypid == 0) hypre_printf("(1) A^2 block inner product = %e\n", ddata);
    for (ii = 0; ii < local_size; ii++) data[ii] = 1.0;
    hypre_ParCSRBlockMatrixMatvec (1.0, rap_matrix, x, 0.0, y);
    ddata = hypre_ParVectorInnerProd(y, y);
-   if (mypid == 0) printf("(2) A^2 block inner product = %e\n", ddata);
-   if (mypid == 0) printf("(1) and (2) should be equal.\n");
+   if (mypid == 0) hypre_printf("(2) A^2 block inner product = %e\n", ddata);
+   if (mypid == 0) hypre_printf("(1) and (2) should be equal.\n");
 
 #if 0
    /* --------------------------------------------- */
@@ -298,19 +298,19 @@ int main( int   argc, char *argv[] )
    diag_d = hypre_CSRBlockMatrixData(A_diag);
    for (ii = 0; ii < hypre_ParCSRMatrixNumRows(par_matrix); ii++) 
       for (jj = diag_i[ii]; jj < diag_i[ii+1]; jj++) 
-         printf("A %4d %4d = %e\n",ii,diag_j[jj],diag_d[jj]);
+         hypre_printf("A %4d %4d = %e\n",ii,diag_j[jj],diag_d[jj]);
 
    diag = hypre_ParCSRBlockMatrixDiag(rap_matrix);
    diag_i = hypre_CSRBlockMatrixI(diag);
    diag_j = hypre_CSRBlockMatrixJ(diag);
    diag_d = hypre_CSRBlockMatrixData(diag);
-   printf("RAP block size = %d\n",hypre_ParCSRBlockMatrixBlockSize(rap_matrix));
-   printf("RAP num rows   = %d\n",hypre_ParCSRBlockMatrixNumRows(rap_matrix));
+   hypre_printf("RAP block size = %d\n",hypre_ParCSRBlockMatrixBlockSize(rap_matrix));
+   hypre_printf("RAP num rows   = %d\n",hypre_ParCSRBlockMatrixNumRows(rap_matrix));
    for (ii = 0; ii < hypre_ParCSRBlockMatrixNumRows(rap_matrix); ii++) 
       for (row = 0; row < block_size; row++) 
          for (jj = diag_i[ii]; jj < diag_i[ii+1]; jj++) 
             for (col = 0; col < block_size; col++) 
-               printf("RAP %4d %4d = %e\n",ii*block_size+row,
+               hypre_printf("RAP %4d %4d = %e\n",ii*block_size+row,
                    diag_j[jj]*block_size+col,diag_d[(jj+row)*block_size+col]);
    offd = hypre_ParCSRBlockMatrixOffd(rap_matrix);
    offd_i = hypre_CSRBlockMatrixI(offd);
@@ -322,7 +322,7 @@ int main( int   argc, char *argv[] )
          for (row = 0; row < block_size; row++) 
             for (jj = offd_i[ii]; jj < offd_i[ii+1]; jj++) 
                for (col = 0; col < block_size; col++) 
-                  printf("RAPOFFD %4d %4d = %e\n",ii*block_size+row,
+                  hypre_printf("RAPOFFD %4d %4d = %e\n",ii*block_size+row,
                      offd_j[jj]*block_size+col,offd_d[(jj+row)*block_size+col]);
    }
 #endif
@@ -341,16 +341,16 @@ int main( int   argc, char *argv[] )
    if (nprocs == 1)
    {
       fp = fopen("Amat_ee", "r");
-      fscanf(fp, "%d %d", &global_num_rows, &num_nonzeros_diag);
-      diag_i = (int *) malloc((global_num_rows+1) * sizeof(int));
-      diag_j = (int *) malloc(num_nonzeros_diag * sizeof(int));
+      hypre_fscanf(fp, "%d %d", &global_num_rows, &num_nonzeros_diag);
+      diag_i = (HYPRE_Int *) malloc((global_num_rows+1) * sizeof(HYPRE_Int));
+      diag_j = (HYPRE_Int *) malloc(num_nonzeros_diag * sizeof(HYPRE_Int));
       diag_d = (double *) malloc(num_nonzeros_diag * sizeof(double));
       row = 0;
       nnz = 0;
       diag_i[0] = 0;
       for (ii = 0; ii < num_nonzeros_diag; ii++)
       {
-         fscanf(fp, "%d %d %lg", &jj, &col, &ddata);
+         hypre_fscanf(fp, "%d %d %lg", &jj, &col, &ddata);
          if ((jj-1) != row)
          {
             row++;
@@ -361,15 +361,15 @@ int main( int   argc, char *argv[] )
       }
       diag_i[global_num_rows] = nnz;
       fclose(fp);
-      printf("nrows = %d, nnz = %d\n", row+1, nnz);
+      hypre_printf("nrows = %d, nnz = %d\n", row+1, nnz);
 
-      row_starts = (int *) malloc(2 * sizeof(int));
-      col_starts = (int *) malloc(2 * sizeof(int));
+      row_starts = (HYPRE_Int *) malloc(2 * sizeof(HYPRE_Int));
+      col_starts = (HYPRE_Int *) malloc(2 * sizeof(HYPRE_Int));
       row_starts[0] = col_starts[0] = 0;
       row_starts[1] = col_starts[1] = global_num_rows;
       num_cols_offd = 0;
       num_nonzeros_offd = 0;
-      par_matrix = hypre_ParCSRMatrixCreate(MPI_COMM_WORLD,global_num_rows, 
+      par_matrix = hypre_ParCSRMatrixCreate(hypre_MPI_COMM_WORLD,global_num_rows, 
                       global_num_rows, row_starts, col_starts, num_cols_offd, 
                       num_nonzeros_diag, num_nonzeros_offd);
       A_diag = hypre_ParCSRMatrixDiag(par_matrix);
@@ -382,17 +382,17 @@ int main( int   argc, char *argv[] )
       /* --------------------------------------------- */
 
       fp = fopen("Gmat", "r");
-      fscanf(fp, "%d %d %d", &global_num_rows, &global_num_cols, 
+      hypre_fscanf(fp, "%d %d %d", &global_num_rows, &global_num_cols, 
              &num_nonzeros_diag);
-      diag_i = (int *) malloc((global_num_rows+1) * sizeof(int));
-      diag_j = (int *) malloc(num_nonzeros_diag * sizeof(int));
+      diag_i = (HYPRE_Int *) malloc((global_num_rows+1) * sizeof(HYPRE_Int));
+      diag_j = (HYPRE_Int *) malloc(num_nonzeros_diag * sizeof(HYPRE_Int));
       diag_d = (double *) malloc(num_nonzeros_diag * sizeof(double));
       row = 0;
       nnz = 0;
       diag_i[0] = 0;
       for (ii = 0; ii < num_nonzeros_diag; ii++)
       {
-         fscanf(fp, "%d %d %lg", &jj, &col, &ddata);
+         hypre_fscanf(fp, "%d %d %lg", &jj, &col, &ddata);
          if ((jj-1) != row)
          {
             row++;
@@ -404,14 +404,14 @@ int main( int   argc, char *argv[] )
       diag_i[global_num_rows] = nnz;
       fclose(fp);
 
-      row_starts = (int *) malloc(2 * sizeof(int));
-      col_starts = (int *) malloc(2 * sizeof(int));
+      row_starts = (HYPRE_Int *) malloc(2 * sizeof(HYPRE_Int));
+      col_starts = (HYPRE_Int *) malloc(2 * sizeof(HYPRE_Int));
       row_starts[0] = col_starts[0] = 0;
       row_starts[1] = global_num_rows;
       col_starts[1] = global_num_cols;
       num_cols_offd = 0;
       num_nonzeros_offd = 0;
-      g_matrix = hypre_ParCSRMatrixCreate(MPI_COMM_WORLD,global_num_rows, 
+      g_matrix = hypre_ParCSRMatrixCreate(hypre_MPI_COMM_WORLD,global_num_rows, 
                       global_num_cols, row_starts, col_starts, num_cols_offd, 
                       num_nonzeros_diag, num_nonzeros_offd);
       A_diag = hypre_ParCSRMatrixDiag(g_matrix);
@@ -437,7 +437,7 @@ int main( int   argc, char *argv[] )
       MyBuildParLaplacian9pt((HYPRE_ParCSRMatrix *) &par_matrix);
       row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
       col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
-      HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &gmres_solver);
+      HYPRE_ParCSRGMRESCreate(hypre_MPI_COMM_WORLD, &gmres_solver);
       HYPRE_GMRESSetKDim(gmres_solver, 10);
       HYPRE_GMRESSetMaxIter(gmres_solver, 1000);
       HYPRE_GMRESSetTol(gmres_solver, 1.0e-6);
@@ -447,7 +447,7 @@ int main( int   argc, char *argv[] )
       HYPRE_BlockTridiagSetPrintLevel(precon,0);
       HYPRE_BlockTridiagSetAMGNumSweeps(precon,1);
       local_size = col_starts[mypid+1] - col_starts[mypid];
-      index_set = hypre_CTAlloc(int, local_size+1);
+      index_set = hypre_CTAlloc(HYPRE_Int, local_size+1);
       jj = 0;
       /* for (ii = 0; ii < local_size/2; ii++) index_set[jj++] = ii * 2; */
       for (ii = 0; ii < local_size/2; ii++) index_set[jj++] = ii;
@@ -456,17 +456,17 @@ int main( int   argc, char *argv[] )
                          (HYPRE_PtrToSolverFcn) HYPRE_BlockTridiagSolve,
                          (HYPRE_PtrToSolverFcn) HYPRE_BlockTridiagSetup,
                          precon);
-      col_starts2 = hypre_CTAlloc(int, nprocs+1);
+      col_starts2 = hypre_CTAlloc(HYPRE_Int, nprocs+1);
       for (ii = 0; ii <= nprocs; ii++) col_starts2[ii] = col_starts[ii];
-      x = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_cols,col_starts2);
+      x = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_cols,col_starts2);
       hypre_ParVectorInitialize(x);
       x_local = hypre_ParVectorLocalVector(x);
       local_size = col_starts2[mypid+1] - col_starts2[mypid];
       data = hypre_VectorData(x_local);
       for (ii=0; ii < local_size; ii++) data[ii] = 0.0;
-      row_starts2 = hypre_CTAlloc(int, nprocs+1);
+      row_starts2 = hypre_CTAlloc(HYPRE_Int, nprocs+1);
       for (ii = 0; ii <= nprocs; ii++) row_starts2[ii] = row_starts[ii];
-      y = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_rows,row_starts2);
+      y = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_rows,row_starts2);
       hypre_ParVectorInitialize(y);
       y_local = hypre_ParVectorLocalVector(y);
       data = hypre_VectorData(y_local);
@@ -483,7 +483,7 @@ int main( int   argc, char *argv[] )
    }
 
    /* Finalize MPI */
-   MPI_Finalize();
+   hypre_MPI_Finalize();
    return 0;
 }
 
@@ -492,21 +492,21 @@ int main( int   argc, char *argv[] )
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
                                                                                        
-int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr)
+HYPRE_Int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr)
 {
-   int                 nx, ny;
-   int                 P, Q;
+   HYPRE_Int                 nx, ny;
+   HYPRE_Int                 P, Q;
    HYPRE_ParCSRMatrix  A;
-   int                 num_procs, myid;
-   int                 p, q;
+   HYPRE_Int                 num_procs, myid;
+   HYPRE_Int                 p, q;
    double             *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -524,9 +524,9 @@ int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr)
 
    if (myid == 0)
    {
-      printf("  Laplacian 9pt:\n");
-      printf("    (nx, ny) = (%d, %d)\n", nx, ny);
-      printf("    (Px, Py) = (%d, %d)\n\n", P,  Q);
+      hypre_printf("  Laplacian 9pt:\n");
+      hypre_printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      hypre_printf("    (Px, Py) = (%d, %d)\n\n", P,  Q);
    }
 
    /*-----------------------------------------------------------
@@ -546,7 +546,7 @@ int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr)
    if (nx > 1) values[0] += 2.0;
    if (ny > 1) values[0] += 2.0;
    if (nx > 1 && ny > 1) values[0] += 4.0;
-   A = (HYPRE_ParCSRMatrix) GenerateLaplacian9pt(MPI_COMM_WORLD,
+   A = (HYPRE_ParCSRMatrix) GenerateLaplacian9pt(hypre_MPI_COMM_WORLD,
                                   nx, ny, P, Q, p, q, values);
    hypre_TFree(values);
    *A_ptr = A;

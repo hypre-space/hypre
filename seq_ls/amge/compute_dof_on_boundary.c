@@ -1,17 +1,17 @@
 /*-------------------------------------------------------------------------*/
 
-int compute_dof_on_boundary(int **i_dof_on_boundary_pointer, 
-			    int *i_node_on_boundary,
-			    int num_nodes, int system_size)
+HYPRE_Int compute_dof_on_boundary(HYPRE_Int **i_dof_on_boundary_pointer, 
+			    HYPRE_Int *i_node_on_boundary,
+			    HYPRE_Int num_nodes, HYPRE_Int system_size)
 
 {
-  int ierr = 0, i,j;
-  int num_dofs = system_size *num_nodes;
-  int dof_counter = 0;
+  HYPRE_Int ierr = 0, i,j;
+  HYPRE_Int num_dofs = system_size *num_nodes;
+  HYPRE_Int dof_counter = 0;
 
-  int *i_dof_on_boundary;
+  HYPRE_Int *i_dof_on_boundary;
 
-  i_dof_on_boundary = (int *) malloc(num_dofs * sizeof(int));
+  i_dof_on_boundary = (HYPRE_Int *) malloc(num_dofs * sizeof(HYPRE_Int));
 
   for (i=0; i<num_nodes; i++)
     {

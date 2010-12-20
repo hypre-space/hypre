@@ -25,18 +25,18 @@ typedef struct
 {
    MPI_Comm               comm;
 
-   int                    num_sends;
-   int                   *send_procs;
-   int			 *send_map_starts;
-   int			 *send_map_elmts;
+   HYPRE_Int                    num_sends;
+   HYPRE_Int                   *send_procs;
+   HYPRE_Int			 *send_map_starts;
+   HYPRE_Int			 *send_map_elmts;
 
-   int                    num_recvs;
-   int                   *recv_procs;
-   int                   *recv_vec_starts;
+   HYPRE_Int                    num_recvs;
+   HYPRE_Int                   *recv_procs;
+   HYPRE_Int                   *recv_vec_starts;
 
    /* remote communication information */
-   MPI_Datatype          *send_mpi_types;
-   MPI_Datatype          *recv_mpi_types;
+   hypre_MPI_Datatype          *send_mpi_types;
+   hypre_MPI_Datatype          *recv_mpi_types;
 
 } hypre_ParCSRCommPkg;
 
@@ -50,8 +50,8 @@ typedef struct
    void 	  *send_data;
    void 	  *recv_data;
 
-   int             num_requests;
-   MPI_Request    *requests;
+   HYPRE_Int             num_requests;
+   hypre_MPI_Request    *requests;
 
 } hypre_ParCSRCommHandle;
 

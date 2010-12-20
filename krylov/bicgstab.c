@@ -30,18 +30,18 @@
 hypre_BiCGSTABFunctions *
 hypre_BiCGSTABFunctionsCreate(
    void *(*CreateVector)( void *vvector ),
-   int (*DestroyVector)( void *vvector ),
+   HYPRE_Int (*DestroyVector)( void *vvector ),
    void *(*MatvecCreate)( void *A , void *x ),
-   int (*Matvec)( void *matvec_data , double alpha , void *A , void *x , double beta , void *y ),
-   int (*MatvecDestroy)( void *matvec_data ),
+   HYPRE_Int (*Matvec)( void *matvec_data , double alpha , void *A , void *x , double beta , void *y ),
+   HYPRE_Int (*MatvecDestroy)( void *matvec_data ),
    double (*InnerProd)( void *x , void *y ),
-   int (*CopyVector)( void *x , void *y ),
-   int (*ClearVector)( void *x ),
-   int (*ScaleVector)( double alpha , void *x ),
-   int (*Axpy)( double alpha , void *x , void *y ),
-   int (*CommInfo)( void *A , int *my_id , int *num_procs ),
-   int (*PrecondSetup)(  void *vdata, void *A, void *b, void *x ),
-   int (*Precond)( void *vdata, void *A, void *b, void *x )
+   HYPRE_Int (*CopyVector)( void *x , void *y ),
+   HYPRE_Int (*ClearVector)( void *x ),
+   HYPRE_Int (*ScaleVector)( double alpha , void *x ),
+   HYPRE_Int (*Axpy)( double alpha , void *x , void *y ),
+   HYPRE_Int (*CommInfo)( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs ),
+   HYPRE_Int (*PrecondSetup)(  void *vdata, void *A, void *b, void *x ),
+   HYPRE_Int (*Precond)( void *vdata, void *A, void *b, void *x )
    )
 {
    hypre_BiCGSTABFunctions * bicgstab_functions;
@@ -104,7 +104,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
  * hypre_BiCGSTABDestroy
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABDestroy( void *bicgstab_vdata )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
@@ -136,7 +136,7 @@ hypre_BiCGSTABDestroy( void *bicgstab_vdata )
  * hypre_BiCGSTABSetup
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetup( void *bicgstab_vdata,
                   void *A,
                   void *b,
@@ -145,8 +145,8 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
    hypre_BiCGSTABData *bicgstab_data     = bicgstab_vdata;
    hypre_BiCGSTABFunctions *bicgstab_functions = bicgstab_data->functions;
 
-   int            max_iter         = (bicgstab_data -> max_iter);
-   int          (*precond_setup)() = (bicgstab_functions -> precond_setup);
+   HYPRE_Int            max_iter         = (bicgstab_data -> max_iter);
+   HYPRE_Int          (*precond_setup)() = (bicgstab_functions -> precond_setup);
    void          *precond_data     = (bicgstab_data -> precond_data);
  
    (bicgstab_data -> A) = A;
@@ -198,7 +198,7 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
  * hypre_BiCGSTABSolve
  *-------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BiCGSTABSolve(void  *bicgstab_vdata,
                  void  *A,
                  void  *b,
@@ -207,9 +207,9 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    hypre_BiCGSTABData  *bicgstab_data   = bicgstab_vdata;
    hypre_BiCGSTABFunctions *bicgstab_functions = bicgstab_data->functions;
 
-   int               min_iter     = (bicgstab_data -> min_iter);
-   int 		     max_iter     = (bicgstab_data -> max_iter);
-   int 		     stop_crit    = (bicgstab_data -> stop_crit);
+   HYPRE_Int               min_iter     = (bicgstab_data -> min_iter);
+   HYPRE_Int 		     max_iter     = (bicgstab_data -> max_iter);
+   HYPRE_Int 		     stop_crit    = (bicgstab_data -> stop_crit);
    double 	     r_tol     = (bicgstab_data -> tol);
    double 	     cf_tol       = (bicgstab_data -> cf_tol);
    void             *matvec_data  = (bicgstab_data -> matvec_data);
@@ -224,19 +224,19 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    void             *p            = (bicgstab_data -> p);
    void             *q            = (bicgstab_data -> q);
 
-   int 	           (*precond)()   = (bicgstab_functions -> precond);
-   int 	            *precond_data = (bicgstab_data -> precond_data);
+   HYPRE_Int 	           (*precond)()   = (bicgstab_functions -> precond);
+   HYPRE_Int 	            *precond_data = (bicgstab_data -> precond_data);
 
    /* logging variables */
-   int             logging        = (bicgstab_data -> logging);
-   int             print_level    = (bicgstab_data -> print_level);
+   HYPRE_Int             logging        = (bicgstab_data -> logging);
+   HYPRE_Int             print_level    = (bicgstab_data -> print_level);
    double         *norms          = (bicgstab_data -> norms);
 /*   char           *log_file_name  = (bicgstab_data -> log_file_name);
      FILE           *fp; */
    
-   int        ierr = 0;
-   int        iter; 
-   int        my_id, num_procs;
+   HYPRE_Int        ierr = 0;
+   HYPRE_Int        iter; 
+   HYPRE_Int        my_id, num_procs;
    double     alpha, beta, gamma, epsilon, temp, res, r_norm, b_norm;
    double     epsmac = 1.e-128; 
    double     ieee_check = 0.;
@@ -279,11 +279,11 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0 || print_level > 0)
       {
-        printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-        printf("ERROR -- hypre_BiCGSTABSolve: INFs and/or NaNs detected in input.\n");
-        printf("User probably placed non-numerics in supplied b.\n");
-        printf("Returning error flag += 101.  Program not terminated.\n");
-        printf("ERROR detected by Hypre ...  END\n\n\n");
+        hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+        hypre_printf("ERROR -- hypre_BiCGSTABSolve: INFs and/or NaNs detected in input.\n");
+        hypre_printf("User probably placed non-numerics in supplied b.\n");
+        hypre_printf("Returning error flag += 101.  Program not terminated.\n");
+        hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
       return hypre_error_flag;
@@ -305,11 +305,11 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0 || print_level > 0)
       {
-        printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-        printf("ERROR -- hypre_BiCGSTABSolve: INFs and/or NaNs detected in input.\n");
-        printf("User probably placed non-numerics in supplied A or x_0.\n");
-        printf("Returning error flag += 101.  Program not terminated.\n");
-        printf("ERROR detected by Hypre ...  END\n\n\n");
+        hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+        hypre_printf("ERROR -- hypre_BiCGSTABSolve: INFs and/or NaNs detected in input.\n");
+        hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
+        hypre_printf("Returning error flag += 101.  Program not terminated.\n");
+        hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
       }
 
       hypre_error(HYPRE_ERROR_GENERIC);
@@ -321,10 +321,10 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       norms[0] = r_norm;
       if (print_level > 0 && my_id == 0)
       {
-  	 printf("L2 norm of b: %e\n", b_norm);
+  	 hypre_printf("L2 norm of b: %e\n", b_norm);
          if (b_norm == 0.0)
-            printf("Rel_resid_norm actually contains the residual norm\n");
-         printf("Initial L2 norm of residual: %e\n", r_norm);
+            hypre_printf("Rel_resid_norm actually contains the residual norm\n");
+         hypre_printf("Initial L2 norm of residual: %e\n", r_norm);
       }
    }
    iter = 0;
@@ -368,14 +368,14 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    if (print_level > 0 && my_id == 0)
    {
       if (b_norm > 0.0)
-         {printf("=============================================\n\n");
-          printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
-          printf("-----    ------------    ---------- ------------\n");
+         {hypre_printf("=============================================\n\n");
+          hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
+          hypre_printf("-----    ------------    ---------- ------------\n");
       }
       else
-         {printf("=============================================\n\n");
-          printf("Iters     resid.norm     conv.rate\n");
-          printf("-----    ------------    ----------\n");
+         {hypre_printf("=============================================\n\n");
+          hypre_printf("Iters     resid.norm     conv.rate\n");
+          hypre_printf("-----    ------------    ----------\n");
       
       }
    }
@@ -402,8 +402,8 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
            {
               if (print_level > 0 && my_id == 0)
               {
-                 printf("\n\n");
-                 printf("Final L2 norm of residual: %e\n\n", r_norm);
+                 hypre_printf("\n\n");
+                 hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
               }
               (bicgstab_data -> converged) = 1;
               break;
@@ -431,7 +431,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
            weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
            weight   = 1.0 - weight;
 #if 0
-           printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
+           hypre_printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
                 i, cf_ave_1, cf_ave_0, weight );
 #endif
            if (weight * cf_ave_1 > cf_tol) break;
@@ -447,7 +447,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	   alpha = res/temp;
 	else
 	{
-	   printf("BiCGSTAB broke down!! divide by near zero\n");
+	   hypre_printf("BiCGSTAB broke down!! divide by near zero\n");
 	   return(1);
 	}
 	(*(bicgstab_functions->Axpy))(alpha,v,x);
@@ -463,7 +463,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
            beta = 1.0/res;
 	else
 	{
-	   printf("BiCGSTAB broke down!! res=0 \n");
+	   hypre_printf("BiCGSTAB broke down!! res=0 \n");
 	   return(2);
 	}
         res = (*(bicgstab_functions->InnerProd))(r0,r);
@@ -473,7 +473,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
            (*(bicgstab_functions->ScaleVector))((beta*alpha/gamma),p);
 	else
 	{
-	   printf("BiCGSTAB broke down!! gamma=0 \n");
+	   hypre_printf("BiCGSTAB broke down!! gamma=0 \n");
 	   return(3);
 	}
 	(*(bicgstab_functions->Axpy))(1.0,r,p);
@@ -487,10 +487,10 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
         if (print_level > 0 && my_id == 0)
 	{
            if (b_norm > 0.0)
-              printf("% 5d    %e    %f   %e\n", iter, norms[iter],
+              hypre_printf("% 5d    %e    %f   %e\n", iter, norms[iter],
 			norms[iter]/norms[iter-1], norms[iter]/b_norm);
            else
-              printf("% 5d    %e    %f\n", iter, norms[iter],
+              hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
 		norms[iter]/norms[iter-1]);
 	}
    }
@@ -511,7 +511,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
  * hypre_BiCGSTABSetTol
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetTol( void   *bicgstab_vdata,
                    double  tol       )
 {
@@ -525,7 +525,7 @@ hypre_BiCGSTABSetTol( void   *bicgstab_vdata,
  * hypre_BiCGSTABSetAbsoluteTol
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetAbsoluteTol( void   *bicgstab_vdata,
                    double  a_tol       )
 {
@@ -540,7 +540,7 @@ hypre_BiCGSTABSetAbsoluteTol( void   *bicgstab_vdata,
  * hypre_BiCGSTABSetConvergenceFactorTol
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetConvergenceFactorTol( void   *bicgstab_vdata,
                    double  cf_tol       )
 {
@@ -555,9 +555,9 @@ hypre_BiCGSTABSetConvergenceFactorTol( void   *bicgstab_vdata,
  * hypre_BiCGSTABSetMinIter
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetMinIter( void *bicgstab_vdata,
-                       int   min_iter  )
+                       HYPRE_Int   min_iter  )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
  
@@ -570,9 +570,9 @@ hypre_BiCGSTABSetMinIter( void *bicgstab_vdata,
  * hypre_BiCGSTABSetMaxIter
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetMaxIter( void *bicgstab_vdata,
-                       int   max_iter  )
+                       HYPRE_Int   max_iter  )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
  
@@ -585,9 +585,9 @@ hypre_BiCGSTABSetMaxIter( void *bicgstab_vdata,
  * hypre_BiCGSTABSetStopCrit
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetStopCrit( void   *bicgstab_vdata,
-                        int  stop_crit       )
+                        HYPRE_Int  stop_crit       )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
  
@@ -600,10 +600,10 @@ hypre_BiCGSTABSetStopCrit( void   *bicgstab_vdata,
  * hypre_BiCGSTABSetPrecond
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetPrecond( void  *bicgstab_vdata,
-                       int  (*precond)(),
-                       int  (*precond_setup)(),
+                       HYPRE_Int  (*precond)(),
+                       HYPRE_Int  (*precond_setup)(),
                        void  *precond_data )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
@@ -621,7 +621,7 @@ hypre_BiCGSTABSetPrecond( void  *bicgstab_vdata,
  * hypre_BiCGSTABGetPrecond
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABGetPrecond( void         *bicgstab_vdata,
                        HYPRE_Solver *precond_data_ptr )
 {
@@ -636,9 +636,9 @@ hypre_BiCGSTABGetPrecond( void         *bicgstab_vdata,
  * hypre_BiCGSTABSetLogging
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetLogging( void *bicgstab_vdata,
-                       int   logging)
+                       HYPRE_Int   logging)
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
  
@@ -651,9 +651,9 @@ hypre_BiCGSTABSetLogging( void *bicgstab_vdata,
  * hypre_BiCGSTABSetPrintLevel
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABSetPrintLevel( void *bicgstab_vdata,
-                       int   print_level)
+                       HYPRE_Int   print_level)
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
  
@@ -666,9 +666,9 @@ hypre_BiCGSTABSetPrintLevel( void *bicgstab_vdata,
  * hypre_BiCGSTABGetConverged
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABGetConverged( void *bicgstab_vdata,
-                             int  *converged )
+                             HYPRE_Int  *converged )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
  
@@ -681,9 +681,9 @@ hypre_BiCGSTABGetConverged( void *bicgstab_vdata,
  * hypre_BiCGSTABGetNumIterations
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABGetNumIterations( void *bicgstab_vdata,
-                             int  *num_iterations )
+                             HYPRE_Int  *num_iterations )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
  
@@ -696,7 +696,7 @@ hypre_BiCGSTABGetNumIterations( void *bicgstab_vdata,
  * hypre_BiCGSTABGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABGetFinalRelativeResidualNorm( void   *bicgstab_vdata,
                                          double *relative_residual_norm )
 {
@@ -711,7 +711,7 @@ hypre_BiCGSTABGetFinalRelativeResidualNorm( void   *bicgstab_vdata,
  * hypre_BiCGSTABGetResidual
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_BiCGSTABGetResidual( void   *bicgstab_vdata,
                            void **residual )
 {

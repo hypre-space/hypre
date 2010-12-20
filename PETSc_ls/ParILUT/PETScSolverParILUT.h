@@ -58,7 +58,7 @@ typedef struct
 
   /* Linear solver structure from Petsc */
   SLES            Sles;
-  int             SlesOwner; /* Keeps track of whether library or user allocated
+  HYPRE_Int             SlesOwner; /* Keeps track of whether library or user allocated
                                 SLES for freeing purposes */
 
   /* Petsc Matrix that defines the system to be solved */
@@ -71,7 +71,7 @@ typedef struct
   HYPRE_PETScMatPilutSolver PETScMatPilutSolver;
 
   /* Diagnostic information */
-  int             number_of_iterations;
+  HYPRE_Int             number_of_iterations;
 
 } hypre_PETScSolverParILUT;
 

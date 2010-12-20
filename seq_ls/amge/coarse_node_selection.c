@@ -26,36 +26,36 @@
  *
  ****************************************************************************/
 
-int hypre_AMGeCoarseNodeSelection(int *i_AEface_node, int *j_AEface_node,
-				  int *i_AE_node, int *j_AE_node, 
-				  int *i_node_AE, int *j_node_AE,
+HYPRE_Int hypre_AMGeCoarseNodeSelection(HYPRE_Int *i_AEface_node, HYPRE_Int *j_AEface_node,
+				  HYPRE_Int *i_AE_node, HYPRE_Int *j_AE_node, 
+				  HYPRE_Int *i_node_AE, HYPRE_Int *j_node_AE,
 
-				  int num_AEfaces, int num_nodes,
+				  HYPRE_Int num_AEfaces, HYPRE_Int num_nodes,
 
-				  int **i_node_coarsenode_neighbor_pointer,
-				  int **j_node_coarsenode_neighbor_pointer,
+				  HYPRE_Int **i_node_coarsenode_neighbor_pointer,
+				  HYPRE_Int **j_node_coarsenode_neighbor_pointer,
 
-				  int **i_node_coarsenode_pointer,
-				  int **j_node_coarsenode_pointer,
+				  HYPRE_Int **i_node_coarsenode_pointer,
+				  HYPRE_Int **j_node_coarsenode_pointer,
 
-				  int *num_coarsenodes)
+				  HYPRE_Int *num_coarsenodes)
 
 {
 
-  int ierr = 0;
-  int i,j,k;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k;
 
  
-  int *i_node_coarsenode, *j_node_coarsenode;
-  int *i_node_coarsenode_neighbor, *j_node_coarsenode_neighbor;
+  HYPRE_Int *i_node_coarsenode, *j_node_coarsenode;
+  HYPRE_Int *i_node_coarsenode_neighbor, *j_node_coarsenode_neighbor;
 
 
-  int *i_node_index;
-  int coarsenode_counter, node_coarsenode_neighbor_counter;
+  HYPRE_Int *i_node_index;
+  HYPRE_Int coarsenode_counter, node_coarsenode_neighbor_counter;
   
 
 
-  i_node_coarsenode = hypre_CTAlloc(int, num_nodes+1);
+  i_node_coarsenode = hypre_CTAlloc(HYPRE_Int, num_nodes+1);
   for (i=0; i < num_nodes+1; i++)
     i_node_coarsenode[i] = 0;
 
@@ -70,7 +70,7 @@ int hypre_AMGeCoarseNodeSelection(int *i_AEface_node, int *j_AEface_node,
       coarsenode_counter++;
 
 
-  j_node_coarsenode = hypre_CTAlloc(int, coarsenode_counter);
+  j_node_coarsenode = hypre_CTAlloc(HYPRE_Int, coarsenode_counter);
 
   coarsenode_counter = 0;
   for (i=0; i < num_nodes; i++)
@@ -94,7 +94,7 @@ int hypre_AMGeCoarseNodeSelection(int *i_AEface_node, int *j_AEface_node,
   i_node_coarsenode[0] = 0;
 
 
-  i_node_index = hypre_CTAlloc(int, num_nodes+1);
+  i_node_index = hypre_CTAlloc(HYPRE_Int, num_nodes+1);
 
   for (i=0; i < num_nodes; i++)
     i_node_index[i] = 0;
@@ -131,11 +131,11 @@ int hypre_AMGeCoarseNodeSelection(int *i_AEface_node, int *j_AEface_node,
 	}
     
 
-  j_node_coarsenode_neighbor = hypre_CTAlloc(int,  
+  j_node_coarsenode_neighbor = hypre_CTAlloc(HYPRE_Int,  
 					     node_coarsenode_neighbor_counter);
 
 
-  i_node_coarsenode_neighbor = hypre_CTAlloc(int, num_nodes+1);
+  i_node_coarsenode_neighbor = hypre_CTAlloc(HYPRE_Int, num_nodes+1);
 	
   node_coarsenode_neighbor_counter = 0;
   for (i=0; i < num_nodes; i++)
@@ -194,22 +194,22 @@ int hypre_AMGeCoarseNodeSelection(int *i_AEface_node, int *j_AEface_node,
 
   /*
 
-  printf("============ begin coarse node neighbors =======================\n");
+  hypre_printf("============ begin coarse node neighbors =======================\n");
   for (i=0; i < num_nodes; i++)
     {
       if (i_node_coarsenode[i+1] == i_node_coarsenode[i])
-	printf("fine node %d has coarse neighbors:\n", i);
+	hypre_printf("fine node %d has coarse neighbors:\n", i);
       else
-	printf("coarse node[%d]:%d has coarse neighbors:\n", i,
+	hypre_printf("coarse node[%d]:%d has coarse neighbors:\n", i,
 	       j_node_coarsenode[i_node_coarsenode[i]]);
       for (j = i_node_coarsenode_neighbor[i]; 
 	   j < i_node_coarsenode_neighbor[i+1]; j++)
-	printf("%d ", j_node_coarsenode_neighbor[j]);
+	hypre_printf("%d ", j_node_coarsenode_neighbor[j]);
 
-      printf("\n");
+      hypre_printf("\n");
     }
 	   
-  printf("============ end coarse node neighbors ========================\n");
+  hypre_printf("============ end coarse node neighbors ========================\n");
 
   */
 

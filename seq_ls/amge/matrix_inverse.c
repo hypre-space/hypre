@@ -1,16 +1,16 @@
 #include "headers.h" 
 
-int matrix_inverse(double *X,
+HYPRE_Int matrix_inverse(double *X,
 
 		   double *A,
 
-		   int n)
+		   HYPRE_Int n)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j,k;
-  int matz = 1;
+  HYPRE_Int i,j,k;
+  HYPRE_Int matz = 1;
 
   double *W, *Aux1, *Aux2;
   double *Q; 

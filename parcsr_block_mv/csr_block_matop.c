@@ -31,40 +31,40 @@ hypre_CSRBlockMatrix *
 hypre_CSRBlockMatrixAdd(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
 {
    double     *A_data   = hypre_CSRMatrixData(A);
-   int        *A_i      = hypre_CSRMatrixI(A);
-   int        *A_j      = hypre_CSRMatrixJ(A);
-   int         nrows_A  = hypre_CSRMatrixNumRows(A);
-   int         ncols_A  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
    double     *B_data   = hypre_CSRMatrixData(B);
-   int        *B_i      = hypre_CSRMatrixI(B);
-   int        *B_j      = hypre_CSRMatrixJ(B);
-   int         nrows_B  = hypre_CSRMatrixNumRows(B);
-   int         ncols_B  = hypre_CSRMatrixNumCols(B);
+   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
+   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
+   HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
+   HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
    hypre_CSRMatrix *C;
    double     *C_data;
-   int	      *C_i;
-   int        *C_j;
+   HYPRE_Int	      *C_i;
+   HYPRE_Int        *C_j;
 
-   int         block_size  = hypre_CSRBlockMatrixBlockSize(A); 
-   int         block_sizeB = hypre_CSRBlockMatrixBlockSize(B); 
-   int         ia, ib, ic, ii, jcol, num_nonzeros, bnnz;
-   int	       pos;
-   int         *marker;
+   HYPRE_Int         block_size  = hypre_CSRBlockMatrixBlockSize(A); 
+   HYPRE_Int         block_sizeB = hypre_CSRBlockMatrixBlockSize(B); 
+   HYPRE_Int         ia, ib, ic, ii, jcol, num_nonzeros, bnnz;
+   HYPRE_Int	       pos;
+   HYPRE_Int         *marker;
 
    if (nrows_A != nrows_B || ncols_A != ncols_B)
    {
-      printf("Warning! incompatible matrix dimensions!\n");
+      hypre_printf("Warning! incompatible matrix dimensions!\n");
       return NULL;
    }
    if (block_size != block_sizeB)
    {
-      printf("Warning! incompatible matrix block size!\n");
+      hypre_printf("Warning! incompatible matrix block size!\n");
       return NULL;
    }
 
    bnnz = block_size * block_size;
-   marker = hypre_CTAlloc(int, ncols_A);
-   C_i = hypre_CTAlloc(int, nrows_A+1);
+   marker = hypre_CTAlloc(HYPRE_Int, ncols_A);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
 
    for (ia = 0; ia < ncols_A; ia++) marker[ia] = -1;
 
@@ -144,41 +144,41 @@ hypre_CSRBlockMatrix *
 hypre_CSRBlockMatrixMultiply(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
 {
    double     *A_data   = hypre_CSRMatrixData(A);
-   int        *A_i      = hypre_CSRMatrixI(A);
-   int        *A_j      = hypre_CSRMatrixJ(A);
-   int         nrows_A  = hypre_CSRMatrixNumRows(A);
-   int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   int         block_size  = hypre_CSRBlockMatrixBlockSize(A); 
+   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         block_size  = hypre_CSRBlockMatrixBlockSize(A); 
    double     *B_data   = hypre_CSRMatrixData(B);
-   int        *B_i      = hypre_CSRMatrixI(B);
-   int        *B_j      = hypre_CSRMatrixJ(B);
-   int         nrows_B  = hypre_CSRMatrixNumRows(B);
-   int         ncols_B  = hypre_CSRMatrixNumCols(B);
-   int         block_sizeB = hypre_CSRBlockMatrixBlockSize(B); 
+   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
+   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
+   HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
+   HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
+   HYPRE_Int         block_sizeB = hypre_CSRBlockMatrixBlockSize(B); 
    hypre_CSRMatrix *C;
    double     *C_data;
-   int	      *C_i;
-   int        *C_j;
+   HYPRE_Int	      *C_i;
+   HYPRE_Int        *C_j;
 
-   int         ia, ib, ic, ja, jb, num_nonzeros=0, bnnz;
-   int	       row_start, counter;
+   HYPRE_Int         ia, ib, ic, ja, jb, num_nonzeros=0, bnnz;
+   HYPRE_Int	       row_start, counter;
    double      *a_entries, *b_entries, *c_entries, dzero=0.0, done=1.0;
-   int         *B_marker;
+   HYPRE_Int         *B_marker;
 
    if (ncols_A != nrows_B)
    {
-      printf("Warning! incompatible matrix dimensions!\n");
+      hypre_printf("Warning! incompatible matrix dimensions!\n");
       return NULL;
    }
    if (block_size != block_sizeB)
    {
-      printf("Warning! incompatible matrix block size!\n");
+      hypre_printf("Warning! incompatible matrix block size!\n");
       return NULL;
    }
 
    bnnz = block_size * block_size;
-   B_marker = hypre_CTAlloc(int, ncols_B);
-   C_i = hypre_CTAlloc(int, nrows_A+1);
+   B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
 
    for (ib = 0; ib < ncols_B; ib++) B_marker[ib] = -1;
 

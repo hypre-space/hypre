@@ -28,28 +28,28 @@ void CheckIfFileExists(char *file)
    FILE *test;
    if (!(test = fopen(file,"r")))
    {
-      MPI_Finalize();
-      printf("Can't find the input file \"%s\"\n",file);
+      hypre_MPI_Finalize();
+      hypre_printf("Can't find the input file \"%s\"\n",file);
       exit(1);
    }
    fclose(test);
 }
 
-int main (int argc, char *argv[])
+hypre_int main (hypre_int argc, char *argv[])
 {
-   int num_procs, myid;
-   int time_index;
+   HYPRE_Int num_procs, myid;
+   HYPRE_Int time_index;
 
-   int solver_id;
-   int maxit, cycle_type, rlx_type, rlx_sweeps, dim;
+   HYPRE_Int solver_id;
+   HYPRE_Int maxit, cycle_type, rlx_type, rlx_sweeps, dim;
    double rlx_weight, rlx_omega;
-   int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_agg_npaths, amg_interp_type, amg_Pmax;
-   int h1_method, singular_problem, coordinates;
+   HYPRE_Int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_agg_npaths, amg_interp_type, amg_Pmax;
+   HYPRE_Int h1_method, singular_problem, coordinates;
    double tol, theta;
    double rtol;
-   int rr;
-   int zero_cond;
-   int blockSize;
+   HYPRE_Int rr;
+   HYPRE_Int zero_cond;
+   HYPRE_Int blockSize;
    HYPRE_Solver solver, precond;
 
    HYPRE_ParCSRMatrix A, G, Aalpha=0, Abeta=0, M=0;
@@ -60,9 +60,9 @@ int main (int argc, char *argv[])
    HYPRE_ParVector interior_nodes;
 
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   hypre_MPI_Init(&argc, &argv);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    /* Set defaults */
    solver_id = 3;
@@ -89,8 +89,8 @@ int main (int argc, char *argv[])
 
    /* Parse command line */
    {
-      int arg_index = 0;
-      int print_usage = 0;
+      HYPRE_Int arg_index = 0;
+      HYPRE_Int print_usage = 0;
 
       while (arg_index < argc)
       {
@@ -225,46 +225,46 @@ int main (int argc, char *argv[])
 
       if ((print_usage) && (myid == 0))
       {
-         printf("\n");
-         printf("Usage: mpirun -np <np> %s [<options>]\n", argv[0]);
-         printf("\n");
-         printf("  Hypre solvers options:                                       \n");
-         printf("    -solver <ID>         : solver ID                           \n");
-         printf("                           0  - AMG                            \n");
-         printf("                           1  - AMG-PCG                        \n");
-         printf("                           2  - AMS                            \n");
-         printf("                           3  - AMS-PCG (default)              \n");
-         printf("                           4  - DS-PCG                         \n");
-         printf("                           5  - AME eigensolver                \n");
-         printf("    -maxit <num>         : maximum number of iterations (100)  \n");
-         printf("    -tol <num>           : convergence tolerance (1e-6)        \n");
-         printf("\n");
-         printf("  AMS solver options:                                          \n");
-         printf("    -dim <num>           : space dimension                     \n");
-         printf("    -type <num>          : 3-level cycle type (0-8, 11-14)     \n");
-         printf("    -theta <num>         : BoomerAMG threshold (0.25)          \n");
-         printf("    -ctype <num>         : BoomerAMG coarsening type           \n");
-         printf("    -agg <num>           : Levels of BoomerAMG agg. coarsening \n");
-         printf("    -aggnp <num>         : Number of paths in agg. coarsening  \n");
-         printf("    -amgrlx <num>        : BoomerAMG relaxation type           \n");
-         printf("    -itype <num>         : BoomerAMG interpolation type        \n");
-         printf("    -pmax <num>          : BoomerAMG interpolation truncation  \n");
-         printf("    -rlx <num>           : relaxation type                     \n");
-         printf("    -rlxn <num>          : number of relaxation sweeps         \n");
-         printf("    -rlxw <num>          : damping parameter (usually <=1)     \n");
-         printf("    -rlxo <num>          : SOR parameter (usuallyin (0,2))     \n");
-         printf("    -coord               : use coordinate vectors              \n");
-         printf("    -h1                  : use block-diag Poisson solves       \n");
-         printf("    -sing                : curl-curl only (singular) problem   \n");
-         printf("\n");
-         printf("  AME eigensolver options:                                     \n");
-         printf("    -bsize<num>          : number of eigenvalues to compute    \n");
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Usage: mpirun -np <np> %s [<options>]\n", argv[0]);
+         hypre_printf("\n");
+         hypre_printf("  Hypre solvers options:                                       \n");
+         hypre_printf("    -solver <ID>         : solver ID                           \n");
+         hypre_printf("                           0  - AMG                            \n");
+         hypre_printf("                           1  - AMG-PCG                        \n");
+         hypre_printf("                           2  - AMS                            \n");
+         hypre_printf("                           3  - AMS-PCG (default)              \n");
+         hypre_printf("                           4  - DS-PCG                         \n");
+         hypre_printf("                           5  - AME eigensolver                \n");
+         hypre_printf("    -maxit <num>         : maximum number of iterations (100)  \n");
+         hypre_printf("    -tol <num>           : convergence tolerance (1e-6)        \n");
+         hypre_printf("\n");
+         hypre_printf("  AMS solver options:                                          \n");
+         hypre_printf("    -dim <num>           : space dimension                     \n");
+         hypre_printf("    -type <num>          : 3-level cycle type (0-8, 11-14)     \n");
+         hypre_printf("    -theta <num>         : BoomerAMG threshold (0.25)          \n");
+         hypre_printf("    -ctype <num>         : BoomerAMG coarsening type           \n");
+         hypre_printf("    -agg <num>           : Levels of BoomerAMG agg. coarsening \n");
+         hypre_printf("    -aggnp <num>         : Number of paths in agg. coarsening  \n");
+         hypre_printf("    -amgrlx <num>        : BoomerAMG relaxation type           \n");
+         hypre_printf("    -itype <num>         : BoomerAMG interpolation type        \n");
+         hypre_printf("    -pmax <num>          : BoomerAMG interpolation truncation  \n");
+         hypre_printf("    -rlx <num>           : relaxation type                     \n");
+         hypre_printf("    -rlxn <num>          : number of relaxation sweeps         \n");
+         hypre_printf("    -rlxw <num>          : damping parameter (usually <=1)     \n");
+         hypre_printf("    -rlxo <num>          : SOR parameter (usuallyin (0,2))     \n");
+         hypre_printf("    -coord               : use coordinate vectors              \n");
+         hypre_printf("    -h1                  : use block-diag Poisson solves       \n");
+         hypre_printf("    -sing                : curl-curl only (singular) problem   \n");
+         hypre_printf("\n");
+         hypre_printf("  AME eigensolver options:                                     \n");
+         hypre_printf("    -bsize<num>          : number of eigenvalues to compute    \n");
+         hypre_printf("\n");
       }
 
       if (print_usage)
       {
-         MPI_Finalize();
+         hypre_MPI_Finalize();
          return (0);
       }
    }
@@ -274,10 +274,10 @@ int main (int argc, char *argv[])
    CheckIfFileExists("aFEM.b.0");
    CheckIfFileExists("aFEM.G.D.0");
 
-   HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.A", &A);
-   HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.x0", &x0);
-   HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.b", &b);
-   HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.G", &G);
+   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.A", &A);
+   HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.x0", &x0);
+   HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.b", &b);
+   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.G", &G);
 
    /* Vectors Gx, Gy and Gz */
    if (!coordinates)
@@ -285,10 +285,10 @@ int main (int argc, char *argv[])
       CheckIfFileExists("aFEM.Gx.0");
       CheckIfFileExists("aFEM.Gy.0");
       CheckIfFileExists("aFEM.Gz.0");
-      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gx", &Gx);
-      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gy", &Gy);
+      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.Gx", &Gx);
+      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.Gy", &Gy);
       if (dim == 3)
-         HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.Gz", &Gz);
+         HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.Gz", &Gz);
    }
 
    /* Vectors x, y and z */
@@ -297,37 +297,37 @@ int main (int argc, char *argv[])
       CheckIfFileExists("aFEM.x.0");
       CheckIfFileExists("aFEM.y.0");
       CheckIfFileExists("aFEM.z.0");
-      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.x", &x);
-      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.y", &y);
+      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.x", &x);
+      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.y", &y);
       if (dim == 3)
-         HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.z", &z);
+         HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.z", &z);
    }
 
    /* Poisson matrices */
    if (h1_method)
    {
       CheckIfFileExists("aFEM.Aalpha.D.0");
-      HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Aalpha", &Aalpha);
+      HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.Aalpha", &Aalpha);
       CheckIfFileExists("aFEM.Abeta.D.0");
-      HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Abeta", &Abeta);
+      HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.Abeta", &Abeta);
    }
 
    if (zero_cond)
    {
       CheckIfFileExists("aFEM.inodes.0");
-      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.inodes", &interior_nodes);
+      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.inodes", &interior_nodes);
    }
 
    if (!myid)
-      printf("Problem size: %d\n\n",
+      hypre_printf("Problem size: %d\n\n",
              hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix*)A));
 
-   MPI_Barrier(MPI_COMM_WORLD);
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
    /* AMG */
    if (solver_id == 0)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Start timing */
@@ -351,7 +351,7 @@ int main (int argc, char *argv[])
 
       /* Finalize setup timing */
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -364,7 +364,7 @@ int main (int argc, char *argv[])
 
       /* Finalize solve timing */
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -373,10 +373,10 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
       if (myid == 0)
       {
-         printf("\n");
-         printf("Iterations = %d\n", num_iterations);
-         printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
       }
 
       /* Destroy solver */
@@ -428,7 +428,7 @@ int main (int argc, char *argv[])
 
       /* Finalize setup timing */
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -441,7 +441,7 @@ int main (int argc, char *argv[])
 
       /* Finalize solve timing */
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -452,7 +452,7 @@ int main (int argc, char *argv[])
    /* PCG solvers */
    else if (solver_id == 1 || solver_id == 3 || solver_id == 4)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Start timing */
@@ -465,7 +465,7 @@ int main (int argc, char *argv[])
       hypre_BeginTiming(time_index);
 
       /* Create solver */
-      HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_ParCSRPCGCreate(hypre_MPI_COMM_WORLD, &solver);
 
       /* Set some parameters (See Reference Manual for more parameters) */
       HYPRE_PCGSetMaxIter(solver, maxit); /* max iterations */
@@ -558,7 +558,7 @@ int main (int argc, char *argv[])
 
       /* Finalize setup timing */
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -576,7 +576,7 @@ int main (int argc, char *argv[])
 
       /* Finalize solve timing */
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -585,10 +585,10 @@ int main (int argc, char *argv[])
       HYPRE_PCGGetFinalRelativeResidualNorm(solver, &final_res_norm);
       if (myid == 0)
       {
-         printf("\n");
-         printf("Iterations = %d\n", num_iterations);
-         printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
       }
 
       /* Destroy solver and preconditioner */
@@ -602,7 +602,7 @@ int main (int argc, char *argv[])
    if (solver_id == 5)
    {
       CheckIfFileExists("aFEM.M.D.0");
-      HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.M", &M);
+      HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.M", &M);
 
       time_index = hypre_InitializeTiming("AME Setup");
       hypre_BeginTiming(time_index);
@@ -663,7 +663,7 @@ int main (int argc, char *argv[])
 
       /* Finalize setup timing */
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -675,7 +675,7 @@ int main (int argc, char *argv[])
 
       /* Finalize solve timing */
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -709,10 +709,10 @@ int main (int argc, char *argv[])
    if (zero_cond)
       HYPRE_ParVectorDestroy(interior_nodes);
 
-   MPI_Finalize();
+   hypre_MPI_Finalize();
 
    if (HYPRE_GetError() && !myid)
-      fprintf(stderr,"hypre_error_flag = %d\n", HYPRE_GetError());
+      hypre_fprintf(stderr,"hypre_error_flag = %d\n", HYPRE_GetError());
 
    return 0;
 }

@@ -52,7 +52,7 @@ mv -f debug.??? $output_dir
 # Test babel build (only if 'babel-runtime' directory is present)
 if [ -d $src_dir/babel-runtime ]; then
    opt="--with-babel"
-   output_subdir="build--with-babel"
+   output_subdir="$output_dir/build--with-babel"
    mkdir -p $output_subdir
    ./test.sh configure.sh $src_dir $opt
    mv -f configure.??? $output_subdir
@@ -91,11 +91,28 @@ done
 ./test.sh examples.sh $src_dir/examples
 mv -f examples.??? $output_dir
 
+# Run tests with --enable-bigint configured
+opt="--enable-bigint --enable-debug"
+output_subdir="$output_dir/run--enable-bigint"
+mkdir -p $output_subdir
+./test.sh configure.sh $src_dir $opt
+mv -f configure.??? $output_subdir
+./test.sh make.sh $src_dir test
+mv -f make.??? $output_subdir
+./test.sh run.sh $src_dir
+mv -f run.??? $output_subdir
+
 # Test documentation build (only if 'docs_misc' directory is present)
 if [ -d $src_dir/docs_misc ]; then
    ./test.sh docs.sh $src_dir
    mv -f docs.??? $output_dir
 fi
+
+# Check for 'int' and 'MPI_'
+./test.sh check-int.sh $src_dir
+mv -f check-int.??? $output_dir
+./test.sh check-mpi.sh $src_dir
+mv -f check-mpi.??? $output_dir
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

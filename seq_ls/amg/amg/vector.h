@@ -31,7 +31,7 @@
 typedef struct
 {
    double  *data;
-   int      size;
+   HYPRE_Int      size;
 
 } hypre_Vector;
 
@@ -45,8 +45,8 @@ typedef struct
 
 typedef struct
 {
-   int     *data;
-   int      size;
+   HYPRE_Int     *data;
+   HYPRE_Int      size;
 
 } hypre_VectorInt;
 

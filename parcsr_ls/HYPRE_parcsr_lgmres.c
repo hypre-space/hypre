@@ -25,7 +25,7 @@
  * HYPRE_ParCSRLGMRESCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    hypre_LGMRESFunctions * lgmres_functions =
@@ -50,7 +50,7 @@ HYPRE_ParCSRLGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRLGMRESDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRLGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_LGMRESDestroy( (void *) solver ) );
@@ -60,7 +60,7 @@ HYPRE_ParCSRLGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRLGMRESSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRLGMRESSetup( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -76,7 +76,7 @@ HYPRE_ParCSRLGMRESSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRLGMRESSolve( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -92,9 +92,9 @@ HYPRE_ParCSRLGMRESSolve( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSetKDim
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetKDim( HYPRE_Solver solver,
-                          int             k_dim    )
+                          HYPRE_Int             k_dim    )
 {
    return( HYPRE_LGMRESSetKDim( solver, k_dim ) );
 }
@@ -103,9 +103,9 @@ HYPRE_ParCSRLGMRESSetKDim( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSetAugDim
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetAugDim( HYPRE_Solver solver,
-                          int             aug_dim    )
+                          HYPRE_Int             aug_dim    )
 {
    return( HYPRE_LGMRESSetAugDim( solver, aug_dim ) );
 }
@@ -116,7 +116,7 @@ HYPRE_ParCSRLGMRESSetAugDim( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
@@ -126,7 +126,7 @@ HYPRE_ParCSRLGMRESSetTol( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetAbsoluteTol( HYPRE_Solver solver,
                          double             a_tol    )
 {
@@ -136,9 +136,9 @@ HYPRE_ParCSRLGMRESSetAbsoluteTol( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetMinIter( HYPRE_Solver solver,
-                             int          min_iter )
+                             HYPRE_Int          min_iter )
 {
    return( HYPRE_LGMRESSetMinIter( solver, min_iter ) );
 }
@@ -147,9 +147,9 @@ HYPRE_ParCSRLGMRESSetMinIter( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetMaxIter( HYPRE_Solver solver,
-                             int          max_iter )
+                             HYPRE_Int          max_iter )
 {
    return( HYPRE_LGMRESSetMaxIter( solver, max_iter ) );
 }
@@ -159,7 +159,7 @@ HYPRE_ParCSRLGMRESSetMaxIter( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetPrecond( HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  precond,
                              HYPRE_PtrToParSolverFcn  precond_setup,
@@ -175,7 +175,7 @@ HYPRE_ParCSRLGMRESSetPrecond( HYPRE_Solver          solver,
  * HYPRE_ParCSRLGMRESGetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESGetPrecond( HYPRE_Solver  solver,
                              HYPRE_Solver *precond_data_ptr )
 {
@@ -186,9 +186,9 @@ HYPRE_ParCSRLGMRESGetPrecond( HYPRE_Solver  solver,
  * HYPRE_ParCSRLGMRESSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetLogging( HYPRE_Solver solver,
-                             int logging)
+                             HYPRE_Int logging)
 {
    return( HYPRE_LGMRESSetLogging( solver, logging ) );
 }
@@ -197,9 +197,9 @@ HYPRE_ParCSRLGMRESSetLogging( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESSetPrintLevel
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESSetPrintLevel( HYPRE_Solver solver,
-                             int print_level)
+                             HYPRE_Int print_level)
 {
    return( HYPRE_LGMRESSetPrintLevel( solver, print_level ) );
 }
@@ -208,9 +208,9 @@ HYPRE_ParCSRLGMRESSetPrintLevel( HYPRE_Solver solver,
  * HYPRE_ParCSRLGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESGetNumIterations( HYPRE_Solver  solver,
-                                   int                *num_iterations )
+                                   HYPRE_Int                *num_iterations )
 {
    return( HYPRE_LGMRESGetNumIterations( solver, num_iterations ) );
 }
@@ -219,7 +219,7 @@ HYPRE_ParCSRLGMRESGetNumIterations( HYPRE_Solver  solver,
  * HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {

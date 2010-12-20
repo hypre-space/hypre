@@ -45,14 +45,14 @@
 
 
 
-/* --------------------------- MPI_MODE ------------------------ */
+/* --------------------------- hypre_MPI_MODE ------------------------ */
 
-#elif defined(MPI_MODE)
+#elif defined(hypre_MPI_MODE)
 
 #define  INITIALIZE_DH(argc, argv, help) \
-            MPI_Init(&argc,&argv);  \
-            comm_dh = MPI_COMM_WORLD;    \
-            MPI_Errhandler_set(comm_dh, MPI_ERRORS_RETURN); \
+            hypre_MPI_Init(&argc,&argv);  \
+            comm_dh = hypre_MPI_COMM_WORLD;    \
+            hypre_MPI_Errhandler_set(comm_dh, hypre_MPI_ERRORS_RETURN); \
             EuclidInitialize(argc, argv, help); \
             dh_StartFunc(__FUNC__, __FILE__, __LINE__, 1); \
             {
@@ -62,18 +62,18 @@
             } \
             dh_EndFunc(__FUNC__, 1); \
             EuclidFinalize(); \
-            MPI_Finalize(); 
+            hypre_MPI_Finalize(); 
 
 /* --------------------------- SEQUENTIAL_MODE ------------------------ */
 
-/* for now, this is identical to MPI_MODE */
+/* for now, this is identical to hypre_MPI_MODE */
 
 #else
 
 #define  INITIALIZE_DH(argc, argv, help) \
-            MPI_Init(&argc,&argv);  \
-            comm_dh = MPI_COMM_WORLD;    \
-            MPI_Errhandler_set(comm_dh, MPI_ERRORS_RETURN); \
+            hypre_MPI_Init(&argc,&argv);  \
+            comm_dh = hypre_MPI_COMM_WORLD;    \
+            hypre_MPI_Errhandler_set(comm_dh, hypre_MPI_ERRORS_RETURN); \
             EuclidInitialize(argc, argv, help); \
             dh_StartFunc(__FUNC__, __FILE__, __LINE__, 1); \
             {
@@ -83,7 +83,7 @@
             } \
             dh_EndFunc(__FUNC__, 1); \
             EuclidFinalize(); \
-            MPI_Finalize(); 
+            hypre_MPI_Finalize(); 
 
 #endif
 

@@ -18,26 +18,26 @@
 
 
 
-int ReadMPIAIJ_ILU( Mat *A, char *file_name, int *n )
+HYPRE_Int ReadMPIAIJ_ILU( Mat *A, char *file_name, HYPRE_Int *n )
 {
    FILE       *fp;
-   int         ierr, i, j;
+   HYPRE_Int         ierr, i, j;
    Scalar      *data, read_Scalar;
-   int        *ia;
-   int        *ja;
-   int        size, nprocs, myrows, mb, me, first_row, last_row;
-   int        dnz, onz, read_int, ja_indx;
+   HYPRE_Int        *ia;
+   HYPRE_Int        *ja;
+   HYPRE_Int        size, nprocs, myrows, mb, me, first_row, last_row;
+   HYPRE_Int        dnz, onz, read_int, ja_indx;
    
 
 
-   MPI_Comm_rank( MPI_COMM_WORLD, &me);
-   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   hypre_MPI_Comm_rank( hypre_MPI_COMM_WORLD, &me);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nprocs);
 
    fp = fopen(file_name, "r");
    /* read in junk line */
-   fscanf(fp, "%*[^\n]\n");
+   hypre_fscanf(fp, "%*[^\n]\n");
 
-   fscanf(fp, "%d", &size);
+   hypre_fscanf(fp, "%d", &size);
    *n = size;
 
    myrows = (size-1)/nprocs+1; mb = myrows;
@@ -50,19 +50,19 @@ int ReadMPIAIJ_ILU( Mat *A, char *file_name, int *n )
 
    dnz = 0; onz = 0;
 
-   ia = ctalloc(int, size+1);
+   ia = ctalloc(HYPRE_Int, size+1);
    for (j = 0; j < size+1; j++) {
-      fscanf(fp, "%d", &read_int);
+      hypre_fscanf(fp, "%d", &read_int);
       ia[j] = read_int-1;
    }
 
 
-   ja = ctalloc(int, ia[last_row+1]-ia[first_row]);
+   ja = ctalloc(HYPRE_Int, ia[last_row+1]-ia[first_row]);
    ja_indx = 0;
 
    for (j = 0; j < size; j++) {
       for (i = ia[j]; i < ia[j+1]; i++) {
-         fscanf(fp, "%d", &read_int);
+         hypre_fscanf(fp, "%d", &read_int);
          if( (j>=first_row)&&(j<=last_row) ) {
             ja[ja_indx++] = read_int-1;
 	    if( (i>=first_row)&&(i<=last_row) ) {
@@ -79,7 +79,7 @@ int ReadMPIAIJ_ILU( Mat *A, char *file_name, int *n )
 
    for (j = 0; j < size; j++) {
       for (i = ia[j]; i < ia[j+1]; i++) {
-         fscanf(fp, "%le", &read_Scalar);
+         hypre_fscanf(fp, "%le", &read_Scalar);
          if( (j>=first_row)&&(j<=last_row) ) {
             data[ja_indx++] = read_Scalar;
          }
@@ -100,7 +100,7 @@ int ReadMPIAIJ_ILU( Mat *A, char *file_name, int *n )
    ierr = OptionsSetValue( "-mat_aij_oneindex", PETSC_NULL ); CHKERRA(ierr);
 
 
-   ierr = MatCreateMPIAIJ(MPI_COMM_WORLD,myrows, myrows,
+   ierr = MatCreateMPIAIJ(hypre_MPI_COMM_WORLD,myrows, myrows,
          size,size,NDIMA(dnz)/myrows+1,PETSC_NULL,0,PETSC_NULL,&(*A) ); CHKERRA(ierr);
 
 

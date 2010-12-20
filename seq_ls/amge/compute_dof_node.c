@@ -2,20 +2,20 @@
 
 /*-------------------------------------------------------------------------*/
 
-int compute_dof_node(int **i_dof_node_pointer, int **j_dof_node_pointer,
-		     int num_nodes, int system_size,
-		     int *num_dofs_pointer)
+HYPRE_Int compute_dof_node(HYPRE_Int **i_dof_node_pointer, HYPRE_Int **j_dof_node_pointer,
+		     HYPRE_Int num_nodes, HYPRE_Int system_size,
+		     HYPRE_Int *num_dofs_pointer)
 
 {
-  int ierr = 0, i,j, k;
-  int num_dofs = system_size *num_nodes;
+  HYPRE_Int ierr = 0, i,j, k;
+  HYPRE_Int num_dofs = system_size *num_nodes;
   
-  int *i_dof_node, *j_dof_node;
+  HYPRE_Int *i_dof_node, *j_dof_node;
 
-  int dof_counter = 0, dof_node_counter=0;
+  HYPRE_Int dof_counter = 0, dof_node_counter=0;
 
-  i_dof_node = hypre_CTAlloc(int, num_dofs+1);
-  j_dof_node = hypre_CTAlloc(int, num_dofs);
+  i_dof_node = hypre_CTAlloc(HYPRE_Int, num_dofs+1);
+  j_dof_node = hypre_CTAlloc(HYPRE_Int, num_dofs);
 
   for (i=0; i<num_nodes; i++)
     {

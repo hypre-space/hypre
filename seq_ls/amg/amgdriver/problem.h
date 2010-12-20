@@ -30,26 +30,26 @@
 
 typedef struct
 {
-   int      num_variables;
+   HYPRE_Int      num_variables;
 
    hypre_Matrix  *A;
    char     A_input[256];
 
    hypre_Vector  *f;
-   int      f_flag;
+   HYPRE_Int      f_flag;
    char     f_input[256];
 
    hypre_Vector  *u;
-   int      u_flag;
+   HYPRE_Int      u_flag;
    char     u_input[256];
 
-   int      num_unknowns;
-   int      num_points;
+   HYPRE_Int      num_unknowns;
+   HYPRE_Int      num_points;
 
-   int     *iu;
-   int     *ip;
-   int     *iv;
-   int      iupv_flag;
+   HYPRE_Int     *iu;
+   HYPRE_Int     *ip;
+   HYPRE_Int     *iv;
+   HYPRE_Int      iupv_flag;
    char     iupv_input[256];
 
 } Problem;

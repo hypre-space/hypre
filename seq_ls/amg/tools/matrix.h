@@ -31,9 +31,9 @@
 typedef struct
 {
    double  *data;
-   int     *ia;
-   int     *ja;
-   int      size;
+   HYPRE_Int     *ia;
+   HYPRE_Int     *ja;
+   HYPRE_Int      size;
 
 } hypre_Matrix;
 
@@ -58,7 +58,7 @@ typedef struct
 
 
 /* matrix.c */
-hypre_Matrix *hypre_NewMatrix P((double *data , int *ia , int *ja , int size ));
+hypre_Matrix *hypre_NewMatrix P((double *data , HYPRE_Int *ia , HYPRE_Int *ja , HYPRE_Int size ));
 void hypre_FreeMatrix P((hypre_Matrix *matrix ));
 
 #undef P

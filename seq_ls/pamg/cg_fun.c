@@ -27,8 +27,8 @@
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_CGCAlloc( int count,
-                 int elt_size )
+hypre_CGCAlloc( HYPRE_Int count,
+                 HYPRE_Int elt_size )
 {
    return( hypre_CAlloc( count, elt_size ) );
 }
@@ -37,10 +37,10 @@ hypre_CGCAlloc( int count,
  * hypre_CGFree
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGFree( char *ptr )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_Free( ptr );
 
@@ -68,11 +68,11 @@ hypre_CGCreateVector( void *vvector )
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_CGCreateVectorArray(int n, void *vvector )
+hypre_CGCreateVectorArray(HYPRE_Int n, void *vvector )
 {
    hypre_Vector *vector = vvector;
    hypre_Vector **new_vector;
-   int i;
+   HYPRE_Int i;
 
    new_vector = hypre_CTAlloc(hypre_Vector*,n);
    for (i=0; i < n; i++)
@@ -88,7 +88,7 @@ hypre_CGCreateVectorArray(int n, void *vvector )
  * hypre_CGDestroyVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGDestroyVector( void *vvector )
 {
    hypre_Vector *vector = vvector;
@@ -115,7 +115,7 @@ hypre_CGMatvecCreate( void   *A,
  * hypre_CGMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGMatvec( void   *matvec_data,
                  double  alpha,
                  void   *A,
@@ -134,7 +134,7 @@ hypre_CGMatvec( void   *matvec_data,
  * hypre_CGMatvecT
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGMatvecT(void   *matvec_data,
                  double  alpha,
                  void   *A,
@@ -153,7 +153,7 @@ hypre_CGMatvecT(void   *matvec_data,
  * hypre_CGMatvecDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGMatvecDestroy( void *matvec_data )
 {
    return 0;
@@ -176,7 +176,7 @@ hypre_CGInnerProd( void *x,
  * hypre_CGCopyVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGCopyVector( void *x, 
                      void *y )
 {
@@ -188,7 +188,7 @@ hypre_CGCopyVector( void *x,
  * hypre_CGClearVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGClearVector( void *x )
 {
    return ( hypre_SeqVectorSetConstantValues( (hypre_Vector *) x, 0.0 ) );
@@ -198,7 +198,7 @@ hypre_CGClearVector( void *x )
  * hypre_CGScaleVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGScaleVector( double  alpha,
                       void   *x     )
 {
@@ -209,7 +209,7 @@ hypre_CGScaleVector( double  alpha,
  * hypre_CGAxpy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGAxpy( double alpha,
                void   *x,
                void   *y )
@@ -222,8 +222,8 @@ hypre_CGAxpy( double alpha,
  * hypre_CGCommInfo
  *--------------------------------------------------------------------------*/
 
-int
-hypre_CGCommInfo( void   *A, int *my_id, int *num_procs)
+HYPRE_Int
+hypre_CGCommInfo( void   *A, HYPRE_Int *my_id, HYPRE_Int *num_procs)
 {
    *num_procs = 1;
    *my_id = 0;
@@ -234,7 +234,7 @@ hypre_CGCommInfo( void   *A, int *my_id, int *num_procs)
  * hypre_CGIdentitySetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGIdentitySetup( void *vdata,
                         void *A,
                         void *b,
@@ -248,7 +248,7 @@ hypre_CGIdentitySetup( void *vdata,
  * hypre_CGIdentity
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CGIdentity( void *vdata,
                    void *A,
                    void *b,

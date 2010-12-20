@@ -47,12 +47,12 @@ typedef struct
 {
 
   Matrix         *A;         /* Local matrix to serve as preconditioner */
-  int             A_is_true; /* 1 if A is not modified, or is replaced,
+  HYPRE_Int             A_is_true; /* 1 if A is not modified, or is replaced,
                                 between setup and solve */
 
   /* Linear solver structure from Petsc */
   SLES           *sles_ptr;
-  int             SlesOwner; /* Keeps track of whether library or user allocated
+  HYPRE_Int             SlesOwner; /* Keeps track of whether library or user allocated
                                 SLES for freeing purposes */
 
   /* Petsc Matrix that defines the system to be solved */

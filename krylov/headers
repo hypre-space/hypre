@@ -37,7 +37,7 @@ cat >> $INTERNAL_HEADER <<@
 
 #define hypre_CTAllocF(type, count, funcs) \
 ( (type *)(*(funcs->CAlloc))\
-((unsigned int)(count), (unsigned int)sizeof(type)) )
+((size_t)(count), (size_t)sizeof(type)) )
 
 #define hypre_TFreeF( ptr, funcs ) \
 ( (*(funcs->Free))((char *)ptr), ptr = NULL )

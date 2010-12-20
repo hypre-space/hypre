@@ -112,6 +112,6 @@ distclean: clean
 #################################################################
 
 dlamch.o : dlamch.c ${LAPACK_HEADERS}
-	${CC} ${SHARED_COMPILE_FLAG} -c dlamch.c
+	${CC} ${SHARED_COMPILE_FLAG} ${C_COMPILE_FLAGS} -c dlamch.c
 
 ${OBJS}: ${LAPACK_HEADERS}

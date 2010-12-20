@@ -7,7 +7,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ int dcopy_(n, dx, incx, dy, incy)
+/* Subroutine */ HYPRE_Int dcopy_(n, dx, incx, dy, incy)
 integer *n;
 doublereal *dx;
 integer *incx;

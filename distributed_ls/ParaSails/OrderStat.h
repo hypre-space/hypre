@@ -22,7 +22,9 @@
 #ifndef _ORDERSTAT_H
 #define _ORDERSTAT_H
 
-double randomized_select(double *a, int p, int r, int i);
-void shell_sort(const int n, int x[]);
+#include "_hypre_utilities.h"
+
+double randomized_select(double *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int i);
+void shell_sort(const HYPRE_Int n, HYPRE_Int x[]);
 
 #endif /* _ORDERSTAT_H */

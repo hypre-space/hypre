@@ -64,7 +64,7 @@ doublereal dlamch_(char *cmach)
     static doublereal rmin, rmax, t, rmach;
     extern logical lsame_(char *, char *);
     static doublereal small, sfmin;
-    extern /* Subroutine */ int dlamc2_(integer *, integer *, logical *, 
+    extern /* Subroutine */ HYPRE_Int dlamc2_(integer *, integer *, logical *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *);
     static integer it;
     static doublereal rnd, eps;
@@ -131,7 +131,7 @@ nding
 
 #include "f2c.h"
 
-/* Subroutine */ int dlamc1_(integer *beta, integer *t, logical *rnd, logical 
+/* Subroutine */ HYPRE_Int dlamc1_(integer *beta, integer *t, logical *rnd, logical 
 	*ieee1)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -252,7 +252,7 @@ L20:
 /* +       END WHILE   
 
           Now compute the base.  a and c  are neighbouring floating po
-int   
+HYPRE_Int   
           numbers  in the  interval  ( beta**t, beta**( t + 1 ) )  and
  so   
           their difference is beta. Adding 0.25 to c is to ensure that
@@ -344,7 +344,7 @@ L30:
 
 #include "f2c.h"
 
-/* Subroutine */ int dlamc2_(integer *beta, integer *t, logical *rnd, 
+/* Subroutine */ HYPRE_Int dlamc2_(integer *beta, integer *t, logical *rnd, 
 	doublereal *eps, integer *emin, doublereal *rmin, integer *emax, 
 	doublereal *rmax)
 {
@@ -432,11 +432,11 @@ L30:
     static doublereal small;
     static integer gpmin;
     static doublereal third, lrmin, lrmax, sixth;
-    extern /* Subroutine */ int dlamc1_(integer *, integer *, logical *, 
+    extern /* Subroutine */ HYPRE_Int dlamc1_(integer *, integer *, logical *, 
 	    logical *);
     extern doublereal dlamc3_(doublereal *, doublereal *);
     static logical lieee1;
-    extern /* Subroutine */ int dlamc4_(integer *, doublereal *, integer *), 
+    extern /* Subroutine */ HYPRE_Int dlamc4_(integer *, doublereal *, integer *), 
 	    dlamc5_(integer *, integer *, integer *, logical *, integer *, 
 	    doublereal *);
     static integer lt, ngnmin, ngpmin;
@@ -593,12 +593,12 @@ w;
    Comment out this if block if EMIN is ok */
 	if (iwarn) {
 	    first = TRUE_;
-	    printf("\n\n WARNING. The value EMIN may be incorrect:- ");
-	    printf("EMIN = %8i\n",(int)lemin);
-	    printf("If, after inspection, the value EMIN looks acceptable");
-            printf("please comment out \n the IF block as marked within the"); 
-            printf("code of routine DLAMC2, \n otherwise supply EMIN"); 
-            printf("explicitly.\n");
+	    hypre_printf("\n\n WARNING. The value EMIN may be incorrect:- ");
+	    hypre_printf("EMIN = %8i\n",(HYPRE_Int)lemin);
+	    hypre_printf("If, after inspection, the value EMIN looks acceptable");
+            hypre_printf("please comment out \n the IF block as marked within the"); 
+            hypre_printf("code of routine DLAMC2, \n otherwise supply EMIN"); 
+            hypre_printf("explicitly.\n");
 	}
 /* **   
 
@@ -690,7 +690,7 @@ doublereal dlamc3_(doublereal *a, doublereal *b)
 
 #include "f2c.h"
 
-/* Subroutine */ int dlamc4_(integer *emin, doublereal *start, integer *base)
+/* Subroutine */ HYPRE_Int dlamc4_(integer *emin, doublereal *start, integer *base)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -781,7 +781,7 @@ L10:
 
 #include "f2c.h"
 
-/* Subroutine */ int dlamc5_(integer *beta, integer *p, integer *emin, 
+/* Subroutine */ HYPRE_Int dlamc5_(integer *beta, integer *p, integer *emin, 
 	logical *ieee, integer *emax, doublereal *rmax)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   

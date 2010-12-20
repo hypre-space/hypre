@@ -25,8 +25,8 @@
  * Convert ale3d data to AMG data
  *--------------------------------------------------------------------------*/
 
-int   main(argc, argv)
-int   argc;
+HYPRE_Int   main(argc, argv)
+HYPRE_Int   argc;
 char *argv[];
 {
    char    *run_name;
@@ -34,24 +34,24 @@ char *argv[];
    char     file_name[255];
    FILE    *fp;
 
-   long int ft;
-   int      idum;
-   int      jdiag;
+   hypre_longint ft;
+   HYPRE_Int      idum;
+   HYPRE_Int      jdiag;
    double   adum;
    double   atemp;
-   int      ctemp;
-   int      ret;
+   HYPRE_Int      ctemp;
+   HYPRE_Int      ret;
 
    double  *S_data;
-   int     *S_ia;
-   int     *S_ja;
+   HYPRE_Int     *S_ia;
+   HYPRE_Int     *S_ja;
    hypre_Matrix  *A;
 
    double  *x;
    double  *y;
    double  *z;
    
-   int      n, m, i, j;
+   HYPRE_Int      n, m, i, j;
 
 
 
@@ -61,7 +61,7 @@ char *argv[];
 
    if (argc < 2)
    {
-      fprintf(stderr, "Usage:  convert_ale3d <run name>\n");
+      hypre_fprintf(stderr, "Usage:  convert_ale3d <run name>\n");
       exit(1);
    }
 
@@ -71,23 +71,23 @@ char *argv[];
     * Read in the ale3d data
     *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.raw.mat", run_name);
+   hypre_sprintf(file_name, "%s.raw.mat", run_name);
 
    fp = fopen(file_name, "r");
 
-   fscanf(fp, "%d", &n);
+   hypre_fscanf(fp, "%d", &n);
 
    /* save current file position */
    ft = ftell(fp);
 
    /* compute S_ia */
-   S_ia = hypre_TAlloc(int, (n+1));
+   S_ia = hypre_TAlloc(HYPRE_Int, (n+1));
 
    m = 1;
    i = 0;
    while (m < n+1)
    {
-      fscanf(fp, "%d%d%le", &j,&idum,&adum);
+      hypre_fscanf(fp, "%d%d%le", &j,&idum,&adum);
       i++;
       if (j == m)
       {
@@ -98,7 +98,7 @@ char *argv[];
    }
    do
    { 
-       ret = fscanf(fp, "%d%d%le", &j,&idum,&adum);
+       ret = hypre_fscanf(fp, "%d%d%le", &j,&idum,&adum);
        i++;
    } while (ret != EOF);
    S_ia[m-1] = i;
@@ -107,13 +107,13 @@ char *argv[];
    fseek(fp, ft, 0);
 
    /* read in column info, S_ja, and values S_data */
-   S_ja = hypre_TAlloc(int, S_ia[n]);
+   S_ja = hypre_TAlloc(HYPRE_Int, S_ia[n]);
    S_data = hypre_TAlloc(double, S_ia[n]);
  
   
    for (i = 0; i < S_ia[n]; i++)
    {
-       fscanf(fp, "%d%d%le", &j,&S_ja[i],&S_data[i]);
+       hypre_fscanf(fp, "%d%d%le", &j,&S_ja[i],&S_data[i]);
    }
  
    /* place diagonal first on each row */
@@ -145,7 +145,7 @@ char *argv[];
     * Write out the matrix data
     *-------------------------------------------------------*/
 
-   sprintf(file_name, "%s.in.ysmp", run_name);
+   hypre_sprintf(file_name, "%s.in.ysmp", run_name);
    hypre_WriteYSMP(file_name, A);
 
    return 0;

@@ -15,10 +15,10 @@
 
 typedef struct
 {
-   int       row;
+   HYPRE_Int       row;
                                                                                                                                     
-   int       ncols;
-   int      *cols;
+   HYPRE_Int       ncols;
+   HYPRE_Int      *cols;
    double   *data;
                                                                                                                                     
 } hypre_MaxwellOffProcRow;

@@ -24,13 +24,13 @@
 
 typedef struct {
   hypre_BCSRMatrixBlock** blocks;
-  int* i;
-  int* j;
-  int num_block_rows;
-  int num_block_cols;
-  int num_nonzero_blocks;
-  int num_rows_per_block;
-  int num_cols_per_block;
+  HYPRE_Int* i;
+  HYPRE_Int* j;
+  HYPRE_Int num_block_rows;
+  HYPRE_Int num_block_cols;
+  HYPRE_Int num_nonzero_blocks;
+  HYPRE_Int num_rows_per_block;
+  HYPRE_Int num_cols_per_block;
 } hypre_BCSRMatrix;
 
 /*****************************************************************************
@@ -58,25 +58,25 @@ typedef struct {
  *****************************************************************************/
 
 hypre_BCSRMatrix*
-hypre_BCSRMatrixCreate(int num_block_rows, int num_block_cols,
-		       int num_nonzero_blocks,
-		       int num_rows_per_block, int num_cols_per_block);
+hypre_BCSRMatrixCreate(HYPRE_Int num_block_rows, HYPRE_Int num_block_cols,
+		       HYPRE_Int num_nonzero_blocks,
+		       HYPRE_Int num_rows_per_block, HYPRE_Int num_cols_per_block);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDestroy(hypre_BCSRMatrix* A);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixInitialise(hypre_BCSRMatrix* A);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixPrint(hypre_BCSRMatrix* A, char* file_name);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixTranspose(hypre_BCSRMatrix* A, hypre_BCSRMatrix** AT);
 
 hypre_BCSRMatrix*
 hypre_BCSRMatrixFromCSRMatrix(hypre_CSRMatrix* A,
-			      int num_rows_per_block, int num_cols_per_block);
+			      HYPRE_Int num_rows_per_block, HYPRE_Int num_cols_per_block);
 
 hypre_CSRMatrix*
 hypre_BCSRMatrixToCSRMatrix(hypre_BCSRMatrix* B);
@@ -91,14 +91,14 @@ hypre_BCSRMatrixCompress(hypre_BCSRMatrix* A);
  *****************************************************************************/
 
 hypre_BCSRMatrix*
-hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, int* CF_marker,
-			    hypre_CSRMatrix* S, int coarse_size);
+hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, HYPRE_Int* CF_marker,
+			    hypre_CSRMatrix* S, HYPRE_Int coarse_size);
 
 hypre_BCSRMatrix*
-hypre_BCSRMatrixBuildInterpD(hypre_BCSRMatrix* A, int* CF_marker,
-			     hypre_CSRMatrix* S, int coarse_size);
+hypre_BCSRMatrixBuildInterpD(hypre_BCSRMatrix* A, HYPRE_Int* CF_marker,
+			     hypre_CSRMatrix* S, HYPRE_Int coarse_size);
 
-int
+HYPRE_Int
 hypre_BCSRMatrixBuildCoarseOperator(hypre_BCSRMatrix* RT,
 				    hypre_BCSRMatrix* A,
 				    hypre_BCSRMatrix* P,

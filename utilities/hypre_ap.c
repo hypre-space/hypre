@@ -6,7 +6,7 @@
 
 
 /* returns 1 if the assumed partition is in use */
-int HYPRE_AssumedPartitionCheck()
+HYPRE_Int HYPRE_AssumedPartitionCheck()
 {
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    return 1;

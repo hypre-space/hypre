@@ -24,68 +24,68 @@
  *
  ****************************************************************************/
 
-int hypre_AMGeCoarsenodeSetup(hypre_AMGeMatrixTopology **A,
-			      int *level_pointer,
+HYPRE_Int hypre_AMGeCoarsenodeSetup(hypre_AMGeMatrixTopology **A,
+			      HYPRE_Int *level_pointer,
 
-			      int ***i_node_neighbor_coarsenode_pointer,
-			      int ***j_node_neighbor_coarsenode_pointer,
+			      HYPRE_Int ***i_node_neighbor_coarsenode_pointer,
+			      HYPRE_Int ***j_node_neighbor_coarsenode_pointer,
 
-			      int ***i_node_coarsenode_pointer,
-			      int ***j_node_coarsenode_pointer,
+			      HYPRE_Int ***i_node_coarsenode_pointer,
+			      HYPRE_Int ***j_node_coarsenode_pointer,
 
-			      int ***i_block_node_pointer,
-			      int ***j_block_node_pointer,
+			      HYPRE_Int ***i_block_node_pointer,
+			      HYPRE_Int ***j_block_node_pointer,
 
-			      int *Num_blocks,
-			      int *Num_elements,
-			      int *Num_nodes)
+			      HYPRE_Int *Num_blocks,
+			      HYPRE_Int *Num_elements,
+			      HYPRE_Int *Num_nodes)
 
 
 
 {
 
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j,k,l; 
+  HYPRE_Int i,j,k,l; 
 
-  int min_block, max_block;
+  HYPRE_Int min_block, max_block;
 
-  int level = level_pointer[0];
-
-
-  int **i_node_block, **j_node_block;
-  int **i_block_node, **j_block_node;
-
-  int **i_node_coarsenode, **j_node_coarsenode;
-  int **i_node_neighbor_coarsenode, **j_node_neighbor_coarsenode;
+  HYPRE_Int level = level_pointer[0];
 
 
-  int *i_element_node, *j_element_node;
-  int *i_face_node, *j_face_node;
-  int *i_AE_element, *j_AE_element;
+  HYPRE_Int **i_node_block, **j_node_block;
+  HYPRE_Int **i_block_node, **j_block_node;
 
-  int *i_AEface_node, *j_AEface_node;
-  int *i_AE_node, *j_AE_node;
-  int *i_node_AE, *j_node_AE;
+  HYPRE_Int **i_node_coarsenode, **j_node_coarsenode;
+  HYPRE_Int **i_node_neighbor_coarsenode, **j_node_neighbor_coarsenode;
 
 
-  int *i_node_index;
+  HYPRE_Int *i_element_node, *j_element_node;
+  HYPRE_Int *i_face_node, *j_face_node;
+  HYPRE_Int *i_AE_element, *j_AE_element;
+
+  HYPRE_Int *i_AEface_node, *j_AEface_node;
+  HYPRE_Int *i_AE_node, *j_AE_node;
+  HYPRE_Int *i_node_AE, *j_node_AE;
 
 
-  int num_nodes, num_elements, num_faces, num_AEs, num_AEfaces;
-  int num_coarsenodes;
+  HYPRE_Int *i_node_index;
 
 
-  i_node_coarsenode = hypre_CTAlloc(int*, level_pointer[0]);
-  j_node_coarsenode = hypre_CTAlloc(int*, level_pointer[0]);
+  HYPRE_Int num_nodes, num_elements, num_faces, num_AEs, num_AEfaces;
+  HYPRE_Int num_coarsenodes;
 
-  i_node_neighbor_coarsenode = hypre_CTAlloc(int*, level_pointer[0]);
-  j_node_neighbor_coarsenode = hypre_CTAlloc(int*, level_pointer[0]);
 
-  i_node_block = hypre_CTAlloc(int*, level_pointer[0]+1);
-  j_node_block = hypre_CTAlloc(int*, level_pointer[0]+1);
-  i_block_node = hypre_CTAlloc(int*, level_pointer[0]+1);
-  j_block_node = hypre_CTAlloc(int*, level_pointer[0]+1);
+  i_node_coarsenode = hypre_CTAlloc(HYPRE_Int*, level_pointer[0]);
+  j_node_coarsenode = hypre_CTAlloc(HYPRE_Int*, level_pointer[0]);
+
+  i_node_neighbor_coarsenode = hypre_CTAlloc(HYPRE_Int*, level_pointer[0]);
+  j_node_neighbor_coarsenode = hypre_CTAlloc(HYPRE_Int*, level_pointer[0]);
+
+  i_node_block = hypre_CTAlloc(HYPRE_Int*, level_pointer[0]+1);
+  j_node_block = hypre_CTAlloc(HYPRE_Int*, level_pointer[0]+1);
+  i_block_node = hypre_CTAlloc(HYPRE_Int*, level_pointer[0]+1);
+  j_block_node = hypre_CTAlloc(HYPRE_Int*, level_pointer[0]+1);
 
 
 
@@ -93,7 +93,7 @@ int hypre_AMGeCoarsenodeSetup(hypre_AMGeMatrixTopology **A,
   /* we here change to local grid ordering: --------------------------------------*/
 
 
-  i_node_index = hypre_CTAlloc(int, Num_nodes[0]);
+  i_node_index = hypre_CTAlloc(HYPRE_Int, Num_nodes[0]);
 
   l = 0;
 coarsen_grid:
@@ -143,7 +143,7 @@ coarsen_grid:
 				       &j_node_coarsenode[l],
 
 				       &num_coarsenodes);
-  printf("level %d num_AEfaces %d, num_coarsenodes: %d \n", l, num_AEfaces,
+  hypre_printf("level %d num_AEfaces %d, num_coarsenodes: %d \n", l, num_AEfaces,
 	 num_coarsenodes);
 
 
@@ -152,7 +152,7 @@ coarsen_grid:
 
   hypre_AMGeMatrixTopologyNumNodes(A[l+1]) = num_coarsenodes;
 
-  i_node_block[l] = hypre_CTAlloc(int, num_nodes+1);
+  i_node_block[l] = hypre_CTAlloc(HYPRE_Int, num_nodes+1);
 
   for (i=0; i < num_nodes; i++)
     i_node_block[l][i] = 0;
@@ -217,7 +217,7 @@ coarsen_grid:
     }
 
 
-   j_node_block[l] = hypre_CTAlloc(int, num_nodes);
+   j_node_block[l] = hypre_CTAlloc(HYPRE_Int, num_nodes);
 
    max_block = 0;
    min_block = level;
@@ -232,7 +232,7 @@ coarsen_grid:
      }
 
    /*
-   printf("num_levels: %d, max_block: %d, min_block: %d\n", level-l, max_block,
+   hypre_printf("num_levels: %d, max_block: %d, min_block: %d\n", level-l, max_block,
 	  min_block);
 	  */
    for (i=0; i < num_nodes; i++)
@@ -255,25 +255,25 @@ coarsen_grid:
 
 
    /*
-   printf("\n================================================================\n");
-   printf("\n level[%d]  n e s t e d   d i s s e c t i o n   o r d e r i n g:\n",l);
-   printf("\n================================================================\n");
+   hypre_printf("\n================================================================\n");
+   hypre_printf("\n level[%d]  n e s t e d   d i s s e c t i o n   o r d e r i n g:\n",l);
+   hypre_printf("\n================================================================\n");
 
 
    for (k=0; k < max_block-min_block+1; k++)
      {
-       printf("block: %d contains %d nodes: \n", k, 
+       hypre_printf("block: %d contains %d nodes: \n", k, 
 	      i_block_node[l][k+1]-i_block_node[l][k]);
 
        for (m=i_block_node[l][k]; m < i_block_node[l][k+1]; m++)
-	 printf(" %d, ", j_block_node[l][m]);
+	 hypre_printf(" %d, ", j_block_node[l][m]);
 
-       printf("\n\n");
+       hypre_printf("\n\n");
      }
-   printf("\n================================================================\n");
+   hypre_printf("\n================================================================\n");
 
 
-   printf("num_nodes %d and num_nodes counted: %d\n\n\n",
+   hypre_printf("num_nodes %d and num_nodes counted: %d\n\n\n",
 	  num_nodes, i_block_node[l][max_block-min_block+1]);
 
 	  */

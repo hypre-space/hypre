@@ -22,12 +22,12 @@
 
 #undef __FUNC__
 #define __FUNC__ "bicgstab_euclid"
-void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, int *itsOUT)
+void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *itsOUT)
 {
   START_FUNC_DH
-  int its, m = ctx->m;
+  HYPRE_Int its, m = ctx->m;
   bool monitor;
-  int maxIts = ctx->maxIts;
+  HYPRE_Int maxIts = ctx->maxIts;
   double atol = ctx->atol, rtol = ctx->rtol;
 
   /* scalars */
@@ -140,7 +140,7 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, int *itsOUT)
 
     /* monitor convergence */
     if (monitor && myid_dh == 0) {
-      fprintf(stderr, "[it = %i] %e\n", its, sqrt(r_iprod/b_iprod));
+      hypre_fprintf(stderr, "[it = %i] %e\n", its, sqrt(r_iprod/b_iprod));
     }
 
     /* prepare for next iteration */
@@ -169,14 +169,14 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, int *itsOUT)
 
 #undef __FUNC__
 #define __FUNC__ "cg_euclid"
-void cg_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, int *itsOUT)
+void cg_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *itsOUT)
 {
   START_FUNC_DH
-  int its, m = A->m;
+  HYPRE_Int its, m = A->m;
   double *p, *r, *s;
   double alpha, beta, gamma, gamma_old, eps, bi_prod, i_prod;
   bool monitor;
-  int maxIts = ctx->maxIts;
+  HYPRE_Int maxIts = ctx->maxIts;
   /* double atol = ctx->atol */
   double  rtol = ctx->rtol;
 
@@ -231,7 +231,7 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, int *itsOUT)
     i_prod = InnerProd(m, r, r); CHECK_V_ERROR;
 
     if (monitor && myid_dh == 0) {
-      fprintf(stderr, "iter = %i  rel. resid. norm: %e\n", its, sqrt(i_prod/bi_prod));
+      hypre_fprintf(stderr, "iter = %i  rel. resid. norm: %e\n", its, sqrt(i_prod/bi_prod));
     }
 
     /* check for convergence */

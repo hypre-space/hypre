@@ -26,12 +26,12 @@
 
 void
 hypre_F90_IFACE(hypre_sstructgraphcreate, HYPRE_SSTRUCTGRAPHCREATE)
-   (int       *comm,
-    long int  *grid,
-    long int  *graph_ptr,
-    int       *ierr)
+   (HYPRE_Int       *comm,
+    hypre_F90_Obj *grid,
+    hypre_F90_Obj *graph_ptr,
+    HYPRE_Int       *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGraphCreate(
+   *ierr = (HYPRE_Int) (HYPRE_SStructGraphCreate(
                      (MPI_Comm)            *comm,
                      (HYPRE_SStructGrid)   *grid,
                      (HYPRE_SStructGraph *) graph_ptr ) );
@@ -43,10 +43,10 @@ hypre_F90_IFACE(hypre_sstructgraphcreate, HYPRE_SSTRUCTGRAPHCREATE)
 
 void
 hypre_F90_IFACE(hypre_sstructgraphdestroy, HYPRE_SSTRUCTGRAPHDESTROY)
-   (long int *graph,
-    int       *ierr)
+   (hypre_F90_Obj *graph,
+    HYPRE_Int       *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGraphDestroy(
+   *ierr = (HYPRE_Int) (HYPRE_SStructGraphDestroy(
                      (HYPRE_SStructGraph) *graph ) );
 }
 
@@ -56,11 +56,11 @@ hypre_F90_IFACE(hypre_sstructgraphdestroy, HYPRE_SSTRUCTGRAPHDESTROY)
 
 void
 hypre_F90_IFACE(hypre_sstructgraphsetdomaingrid, HYPRE_SSTRUCTGRAPHSETDOMAINGRID)
-   (long int *graph,
-    long int *domain_grid,
-    int      *ierr)
+   (hypre_F90_Obj *graph,
+    hypre_F90_Obj *domain_grid,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGraphSetDomainGrid(
+   *ierr = (HYPRE_Int) (HYPRE_SStructGraphSetDomainGrid(
                      (HYPRE_SStructGraph) *graph,
                      (HYPRE_SStructGrid)  *domain_grid ) );
 }
@@ -71,16 +71,16 @@ hypre_F90_IFACE(hypre_sstructgraphsetdomaingrid, HYPRE_SSTRUCTGRAPHSETDOMAINGRID
 
 void
 hypre_F90_IFACE(hypre_sstructgraphsetstencil, HYPRE_SSTRUCTGRAPHSETSTENCIL)
-   (long int *graph,
-    int      *part,
-    int      *var,
-    long int *stencil,
-    int      *ierr)
+   (hypre_F90_Obj *graph,
+    HYPRE_Int      *part,
+    HYPRE_Int      *var,
+    hypre_F90_Obj *stencil,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGraphSetStencil(
+   *ierr = (HYPRE_Int) (HYPRE_SStructGraphSetStencil(
                      (HYPRE_SStructGraph)   *graph,
-                     (int)                  *part,
-                     (int)                  *var,
+                     (HYPRE_Int)                  *part,
+                     (HYPRE_Int)                  *var,
                      (HYPRE_SStructStencil) *stencil ) );
 }
 
@@ -90,13 +90,13 @@ hypre_F90_IFACE(hypre_sstructgraphsetstencil, HYPRE_SSTRUCTGRAPHSETSTENCIL)
 
 void
 hypre_F90_IFACE(hypre_sstructgraphsetfem, HYPRE_SSTRUCTGRAPHSETFEM)
-   (long int *graph,
-    int      *part,
-    int      *ierr)
+   (hypre_F90_Obj *graph,
+    HYPRE_Int      *part,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGraphSetFEM(
+   *ierr = (HYPRE_Int) (HYPRE_SStructGraphSetFEM(
                      (HYPRE_SStructGraph) *graph,
-                     (int)                *part ) );
+                     (HYPRE_Int)                *part ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -105,17 +105,17 @@ hypre_F90_IFACE(hypre_sstructgraphsetfem, HYPRE_SSTRUCTGRAPHSETFEM)
 
 void
 hypre_F90_IFACE(hypre_sstructgraphsetfemsparsity, HYPRE_SSTRUCTGRAPHSETFEMSPARSITY)
-   (long int *graph,
-    int      *part,
-    int      *nsparse,
-    int      *sparsity,
-    int      *ierr)
+   (hypre_F90_Obj *graph,
+    HYPRE_Int      *part,
+    HYPRE_Int      *nsparse,
+    HYPRE_Int      *sparsity,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGraphSetFEMSparsity(
+   *ierr = (HYPRE_Int) (HYPRE_SStructGraphSetFEMSparsity(
                      (HYPRE_SStructGraph) *graph,
-                     (int)                *part,
-                     (int)                *nsparse,
-                     (int *)               sparsity ) );
+                     (HYPRE_Int)                *part,
+                     (HYPRE_Int)                *nsparse,
+                     (HYPRE_Int *)               sparsity ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -125,23 +125,23 @@ hypre_F90_IFACE(hypre_sstructgraphsetfemsparsity, HYPRE_SSTRUCTGRAPHSETFEMSPARSI
 
 void
 hypre_F90_IFACE(hypre_sstructgraphaddentries, HYPRE_SSTRUCTGRAPHADDENTRIES)
-   (long int *graph,
-    int      *part,
-    int      *index,
-    int      *var,
-    int      *to_part,
-    int      *to_index,
-    int      *to_var,
-    int      *ierr)
+   (hypre_F90_Obj *graph,
+    HYPRE_Int      *part,
+    HYPRE_Int      *index,
+    HYPRE_Int      *var,
+    HYPRE_Int      *to_part,
+    HYPRE_Int      *to_index,
+    HYPRE_Int      *to_var,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGraphAddEntries(
+   *ierr = (HYPRE_Int) (HYPRE_SStructGraphAddEntries(
                      (HYPRE_SStructGraph)  *graph,
-                     (int)                 *part,
-                     (int *)                index,
-                     (int)                 *var,
-                     (int)                 *to_part,
-                     (int *)                to_index,
-                     (int)                 *to_var ) );
+                     (HYPRE_Int)                 *part,
+                     (HYPRE_Int *)                index,
+                     (HYPRE_Int)                 *var,
+                     (HYPRE_Int)                 *to_part,
+                     (HYPRE_Int *)                to_index,
+                     (HYPRE_Int)                 *to_var ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -150,10 +150,10 @@ hypre_F90_IFACE(hypre_sstructgraphaddentries, HYPRE_SSTRUCTGRAPHADDENTRIES)
 
 void
 hypre_F90_IFACE(hypre_sstructgraphassemble, HYPRE_SSTRUCTGRAPHASSEMBLE)
-   (long int *graph,
-    int       *ierr)
+   (hypre_F90_Obj *graph,
+    HYPRE_Int       *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGraphAssemble(
+   *ierr = (HYPRE_Int) (HYPRE_SStructGraphAssemble(
                      (HYPRE_SStructGraph) *graph ) );
 }
 
@@ -163,11 +163,11 @@ hypre_F90_IFACE(hypre_sstructgraphassemble, HYPRE_SSTRUCTGRAPHASSEMBLE)
 
 void
 hypre_F90_IFACE(hypre_sstructgraphsetobjecttype, HYPRE_SSTRUCTGRAPHSETOBJECTTYPE)
-   (long int *graph,
-    int      *type,
-    int      *ierr)
+   (hypre_F90_Obj *graph,
+    HYPRE_Int      *type,
+    HYPRE_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGraphSetObjectType(
+   *ierr = (HYPRE_Int) (HYPRE_SStructGraphSetObjectType(
                      (HYPRE_SStructGraph) *graph,
-                     (int)                *type ) );
+                     (HYPRE_Int)                *type ) );
 }

@@ -30,8 +30,8 @@
 #define		THRESH		1	/* threshold for insertion */
 #define		MTHRESH		6	/* threshold for median */
 
-static void siqst(int *, int *);
-static void sdqst(int *, int *);
+static void siqst(HYPRE_Int *, HYPRE_Int *);
+static void sdqst(HYPRE_Int *, HYPRE_Int *);
 
 
 /*
@@ -41,15 +41,15 @@ static void sdqst(int *, int *);
  * It's not...
  */
 
-void hypre_sincsort_fast(int n, int *base)
+void hypre_sincsort_fast(HYPRE_Int n, HYPRE_Int *base)
 {
-  register int *i;
-  register int *j;
-  register int *lo;
-  register int *hi;
-  register int *min;
-  register int c;
-  int *max;
+  register HYPRE_Int *i;
+  register HYPRE_Int *j;
+  register HYPRE_Int *lo;
+  register HYPRE_Int *hi;
+  register HYPRE_Int *min;
+  register HYPRE_Int c;
+  HYPRE_Int *max;
 
   if (n <= 1)
     return;
@@ -113,16 +113,16 @@ void hypre_sincsort_fast(int n, int *base)
  * (And there are only three places where this is done).
  */
 
-static void siqst(int *base, int *max)
+static void siqst(HYPRE_Int *base, HYPRE_Int *max)
 {
-  register int *i;
-  register int *j;
-  register int *jj;
-  register int *mid;
-  register int c;
-  int *tmp;
-  int lo;
-  int hi;
+  register HYPRE_Int *i;
+  register HYPRE_Int *j;
+  register HYPRE_Int *jj;
+  register HYPRE_Int *mid;
+  register HYPRE_Int c;
+  HYPRE_Int *tmp;
+  HYPRE_Int lo;
+  HYPRE_Int hi;
 
   lo = max - base;		/* number of elements as shorts */
   do {
@@ -203,17 +203,17 @@ swap:
 
 
 /*************************************************************************
-* A decreasing sort of int ints 
+* A decreasing sort of HYPRE_Int ints 
 **************************************************************************/
-void hypre_sdecsort_fast(int n, int *base)
+void hypre_sdecsort_fast(HYPRE_Int n, HYPRE_Int *base)
 {
-  register int *i;
-  register int *j;
-  register int *lo;
-  register int *hi;
-  register int *min;
-  register int c;
-  int *max;
+  register HYPRE_Int *i;
+  register HYPRE_Int *j;
+  register HYPRE_Int *lo;
+  register HYPRE_Int *hi;
+  register HYPRE_Int *min;
+  register HYPRE_Int c;
+  HYPRE_Int *max;
 
   if (n <= 1)
     return;
@@ -262,16 +262,16 @@ void hypre_sdecsort_fast(int n, int *base)
 
 
 
-static void sdqst(int *base, int *max)
+static void sdqst(HYPRE_Int *base, HYPRE_Int *max)
 {
-  register int *i;
-  register int *j;
-  register int *jj;
-  register int *mid;
-  register int c;
-  int *tmp;
-  int lo;
-  int hi;
+  register HYPRE_Int *i;
+  register HYPRE_Int *j;
+  register HYPRE_Int *jj;
+  register HYPRE_Int *mid;
+  register HYPRE_Int c;
+  HYPRE_Int *tmp;
+  HYPRE_Int lo;
+  HYPRE_Int hi;
 
   lo = max - base;		/* number of elements as shorts */
   do {

@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dlaswp_(integer *n, doublereal *a, integer *lda, integer 
+/* Subroutine */ HYPRE_Int dlaswp_(integer *n, doublereal *a, integer *lda, integer 
 	*k1, integer *k2, integer *ipiv, integer *incx)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   

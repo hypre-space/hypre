@@ -15,34 +15,34 @@
 #include "fortran.h"
 
 void
-hypre_F90_IFACE(hypre_geterror, HYPRE_GETERROR)(int *result)
+hypre_F90_IFACE(hypre_geterror, HYPRE_GETERROR)(HYPRE_Int *result)
 {
-   *result = (int) HYPRE_GetError();
+   *result = (HYPRE_Int) HYPRE_GetError();
 }
 
 void
-hypre_F90_IFACE(hypre_checkerror, HYPRE_CHECKERROR)(int *ierr,
-                                                    int *hypre_error_code,
-                                                    int *result)
+hypre_F90_IFACE(hypre_checkerror, HYPRE_CHECKERROR)(HYPRE_Int *ierr,
+                                                    HYPRE_Int *hypre_error_code,
+                                                    HYPRE_Int *result)
 {
-   *result = (int) HYPRE_CheckError(*ierr, *hypre_error_code);
+   *result = (HYPRE_Int) HYPRE_CheckError(*ierr, *hypre_error_code);
 }
 
 void
-hypre_F90_IFACE(hypre_geterrorarg, HYPRE_GETERRORARG)(int *result)
+hypre_F90_IFACE(hypre_geterrorarg, HYPRE_GETERRORARG)(HYPRE_Int *result)
 {
-   *result = (int) HYPRE_GetErrorArg();
+   *result = (HYPRE_Int) HYPRE_GetErrorArg();
 }
 
 void
-hypre_F90_IFACE(hypre_clearallerrors, HYPRE_CLEARALLERRORS)(int *result)
+hypre_F90_IFACE(hypre_clearallerrors, HYPRE_CLEARALLERRORS)(HYPRE_Int *result)
 {
    *result = HYPRE_ClearAllErrors();
 }
 
 void
-hypre_F90_IFACE(hypre_clearerror, HYPRE_CLEARERROR)(int *hypre_error_code,
-                                                    int *result)
+hypre_F90_IFACE(hypre_clearerror, HYPRE_CLEARERROR)(HYPRE_Int *hypre_error_code,
+                                                    HYPRE_Int *result)
 {
-   *result = (int) HYPRE_ClearError(*hypre_error_code);
+   *result = (HYPRE_Int) HYPRE_ClearError(*hypre_error_code);
 }

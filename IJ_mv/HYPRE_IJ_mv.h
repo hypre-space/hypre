@@ -72,11 +72,11 @@ typedef struct hypre_IJMatrix_struct *HYPRE_IJMatrix;
  *
  * Collective.
  **/
-int HYPRE_IJMatrixCreate(MPI_Comm        comm,
-                         int             ilower,
-                         int             iupper,
-                         int             jlower,
-                         int             jupper,
+HYPRE_Int HYPRE_IJMatrixCreate(MPI_Comm        comm,
+                         HYPRE_Int             ilower,
+                         HYPRE_Int             iupper,
+                         HYPRE_Int             jlower,
+                         HYPRE_Int             jupper,
                          HYPRE_IJMatrix *matrix);
 
 /**
@@ -88,14 +88,14 @@ int HYPRE_IJMatrixCreate(MPI_Comm        comm,
  * references to the object.  The object will then be destroyed when
  * all internal reference counts go to zero.
  **/
-int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
+HYPRE_Int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
 
 /**
  * Prepare a matrix object for setting coefficient values.  This
  * routine will also re-initialize an already assembled matrix,
  * allowing users to modify coefficient values.
  **/
-int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
+HYPRE_Int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
 /**
  * Sets values for {\tt nrows} rows or partial rows of the matrix.  
@@ -116,11 +116,11 @@ int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
  * Not collective.
  *
  **/
-int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
-                            int             nrows,
-                            int            *ncols,
-                            const int      *rows,
-                            const int      *cols,
+HYPRE_Int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
+                            HYPRE_Int             nrows,
+                            HYPRE_Int            *ncols,
+                            const HYPRE_Int      *rows,
+                            const HYPRE_Int      *cols,
                             const double   *values);
 
 /**
@@ -133,38 +133,38 @@ int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
  * Not collective.
  *
  **/
-int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix  matrix,
-                              int             nrows,
-                              int            *ncols,
-                              const int      *rows,
-                              const int      *cols,
+HYPRE_Int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix  matrix,
+                              HYPRE_Int             nrows,
+                              HYPRE_Int            *ncols,
+                              const HYPRE_Int      *rows,
+                              const HYPRE_Int      *cols,
                               const double   *values);
 
 /**
  * Finalize the construction of the matrix before using.
  **/
-int HYPRE_IJMatrixAssemble(HYPRE_IJMatrix matrix);
+HYPRE_Int HYPRE_IJMatrixAssemble(HYPRE_IJMatrix matrix);
 
 /**
  * Gets number of nonzeros elements for {\tt nrows} rows specified in {\tt rows}
  * and returns them in {\tt ncols}, which needs to be allocated by the
  * user.
  **/
-int HYPRE_IJMatrixGetRowCounts(HYPRE_IJMatrix  matrix,
-                               int             nrows,
-                               int            *rows,
-                               int            *ncols);
+HYPRE_Int HYPRE_IJMatrixGetRowCounts(HYPRE_IJMatrix  matrix,
+                               HYPRE_Int             nrows,
+                               HYPRE_Int            *rows,
+                               HYPRE_Int            *ncols);
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the matrix.  
  * Usage details are
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.
  **/
-int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
-                            int             nrows,
-                            int            *ncols,
-                            int            *rows,
-                            int            *cols,
+HYPRE_Int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
+                            HYPRE_Int             nrows,
+                            HYPRE_Int            *ncols,
+                            HYPRE_Int            *rows,
+                            HYPRE_Int            *cols,
                             double         *values);
 
 /**
@@ -175,31 +175,31 @@ int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
  *
  * @see HYPRE_IJMatrixGetObject
  **/
-int HYPRE_IJMatrixSetObjectType(HYPRE_IJMatrix matrix,
-                                int            type);
+HYPRE_Int HYPRE_IJMatrixSetObjectType(HYPRE_IJMatrix matrix,
+                                HYPRE_Int            type);
 
 /**
  * Get the storage type of the constructed matrix object.
  **/
-int HYPRE_IJMatrixGetObjectType(HYPRE_IJMatrix  matrix,
-                                int            *type);
+HYPRE_Int HYPRE_IJMatrixGetObjectType(HYPRE_IJMatrix  matrix,
+                                HYPRE_Int            *type);
 
 /**
  * Gets range of rows owned by this processor and range
  * of column partitioning for this processor.
  **/
-int HYPRE_IJMatrixGetLocalRange(HYPRE_IJMatrix  matrix,
-                                int            *ilower,
-                                int            *iupper,
-                                int            *jlower,
-                                int            *jupper);
+HYPRE_Int HYPRE_IJMatrixGetLocalRange(HYPRE_IJMatrix  matrix,
+                                HYPRE_Int            *ilower,
+                                HYPRE_Int            *iupper,
+                                HYPRE_Int            *jlower,
+                                HYPRE_Int            *jupper);
 
 /**
  * Get a reference to the constructed matrix object.
  *
  * @see HYPRE_IJMatrixSetObjectType
  **/
-int HYPRE_IJMatrixGetObject(HYPRE_IJMatrix   matrix,
+HYPRE_Int HYPRE_IJMatrixGetObject(HYPRE_IJMatrix   matrix,
                             void           **object);
 
 /**
@@ -210,8 +210,8 @@ int HYPRE_IJMatrixGetObject(HYPRE_IJMatrix   matrix,
  *
  * Not collective.
  **/
-int HYPRE_IJMatrixSetRowSizes(HYPRE_IJMatrix  matrix,
-                              const int      *sizes);
+HYPRE_Int HYPRE_IJMatrixSetRowSizes(HYPRE_IJMatrix  matrix,
+                              const HYPRE_Int      *sizes);
 
 /**
  * (Optional) Set the max number of nonzeros to expect in each row of
@@ -225,9 +225,9 @@ int HYPRE_IJMatrixSetRowSizes(HYPRE_IJMatrix  matrix,
  *
  * Not collective.
  **/
-int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix  matrix,
-                                   const int      *diag_sizes,
-                                   const int      *offdiag_sizes);
+HYPRE_Int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix  matrix,
+                                   const HYPRE_Int      *diag_sizes,
+                                   const HYPRE_Int      *offdiag_sizes);
 
 /**
  * (Optional) Sets the maximum number of elements that are expected to be set
@@ -237,29 +237,29 @@ int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix  matrix,
  *
  * Not collective.
  **/
-int HYPRE_IJMatrixSetMaxOffProcElmts(HYPRE_IJMatrix  matrix,
-                                     int max_off_proc_elmts);
+HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts(HYPRE_IJMatrix  matrix,
+                                     HYPRE_Int max_off_proc_elmts);
 
 /**
  * (Optional) Sets the print level, if the user wants to print
  * error messages. The default is 0, i.e. no error messages are printed.
  *
  **/
-int HYPRE_IJMatrixSetPrintLevel(HYPRE_IJMatrix  matrix,
-                               int      print_level);
+HYPRE_Int HYPRE_IJMatrixSetPrintLevel(HYPRE_IJMatrix  matrix,
+                               HYPRE_Int      print_level);
 
 /**
  * Read the matrix from file.  This is mainly for debugging purposes.
  **/
-int HYPRE_IJMatrixRead(const char     *filename,
+HYPRE_Int HYPRE_IJMatrixRead(const char     *filename,
 		       MPI_Comm        comm,
-		       int             type,
+		       HYPRE_Int             type,
 		       HYPRE_IJMatrix *matrix);
 
 /**
  * Print the matrix to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
+HYPRE_Int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
                         const char     *filename);
 
 /*@}*/
@@ -289,9 +289,9 @@ typedef struct hypre_IJVector_struct *HYPRE_IJVector;
  *
  * Collective.
  **/
-int HYPRE_IJVectorCreate(MPI_Comm        comm,
-                         int             jlower,
-                         int             jupper,
+HYPRE_Int HYPRE_IJVectorCreate(MPI_Comm        comm,
+                         HYPRE_Int             jlower,
+                         HYPRE_Int             jupper,
                          HYPRE_IJVector *vector);
 
 /**
@@ -303,14 +303,14 @@ int HYPRE_IJVectorCreate(MPI_Comm        comm,
  * references to the object.  The object will then be destroyed when
  * all internal reference counts go to zero.
  **/
-int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
+HYPRE_Int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
 
 /**
  * Prepare a vector object for setting coefficient values.  This
  * routine will also re-initialize an already assembled vector,
  * allowing users to modify coefficient values.
  **/
-int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
+HYPRE_Int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
 
 /**
  * (Optional) Sets the maximum number of elements that are expected to be set
@@ -320,8 +320,8 @@ int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
  *
  * Not collective.
  **/
-int HYPRE_IJVectorSetMaxOffProcElmts(HYPRE_IJVector  vector,
-                                     int max_off_proc_elmts);
+HYPRE_Int HYPRE_IJVectorSetMaxOffProcElmts(HYPRE_IJVector  vector,
+                                     HYPRE_Int max_off_proc_elmts);
 
 /**
  * Sets values in vector.  The arrays {\tt values} and {\tt indices}
@@ -336,9 +336,9 @@ int HYPRE_IJVectorSetMaxOffProcElmts(HYPRE_IJVector  vector,
  *
  * Not collective.
  **/
-int HYPRE_IJVectorSetValues(HYPRE_IJVector  vector,
-                            int             nvalues,
-                            const int      *indices,
+HYPRE_Int HYPRE_IJVectorSetValues(HYPRE_IJVector  vector,
+                            HYPRE_Int             nvalues,
+                            const HYPRE_Int      *indices,
                             const double   *values);
 
 /**
@@ -350,15 +350,15 @@ int HYPRE_IJVectorSetValues(HYPRE_IJVector  vector,
  *
  * Not collective.
  **/
-int HYPRE_IJVectorAddToValues(HYPRE_IJVector  vector,
-                              int             nvalues,
-                              const int      *indices,
+HYPRE_Int HYPRE_IJVectorAddToValues(HYPRE_IJVector  vector,
+                              HYPRE_Int             nvalues,
+                              const HYPRE_Int      *indices,
                               const double   *values);
 
 /**
  * Finalize the construction of the vector before using.
  **/
-int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
+HYPRE_Int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
 
 /**
  * Gets values in vector.  Usage details are analogous to
@@ -366,9 +366,9 @@ int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
  *
  * Not collective.
  **/
-int HYPRE_IJVectorGetValues(HYPRE_IJVector  vector,
-                            int             nvalues,
-                            const int      *indices,
+HYPRE_Int HYPRE_IJVectorGetValues(HYPRE_IJVector  vector,
+                            HYPRE_Int             nvalues,
+                            const HYPRE_Int      *indices,
                             double         *values);
 
 /**
@@ -379,28 +379,28 @@ int HYPRE_IJVectorGetValues(HYPRE_IJVector  vector,
  *
  * @see HYPRE_IJVectorGetObject
  **/
-int HYPRE_IJVectorSetObjectType(HYPRE_IJVector vector,
-                                int            type);
+HYPRE_Int HYPRE_IJVectorSetObjectType(HYPRE_IJVector vector,
+                                HYPRE_Int            type);
 
 /**
  * Get the storage type of the constructed vector object.
  **/
-int HYPRE_IJVectorGetObjectType(HYPRE_IJVector  vector,
-                                int            *type);
+HYPRE_Int HYPRE_IJVectorGetObjectType(HYPRE_IJVector  vector,
+                                HYPRE_Int            *type);
 
 /**
  * Returns range of the part of the vector owned by this processor.
  **/
-int HYPRE_IJVectorGetLocalRange(HYPRE_IJVector  vector,
-                                int            *jlower,
-                                int            *jupper);
+HYPRE_Int HYPRE_IJVectorGetLocalRange(HYPRE_IJVector  vector,
+                                HYPRE_Int            *jlower,
+                                HYPRE_Int            *jupper);
 
 /**
  * Get a reference to the constructed vector object.
  *
  * @see HYPRE_IJVectorSetObjectType
  **/
-int HYPRE_IJVectorGetObject(HYPRE_IJVector   vector,
+HYPRE_Int HYPRE_IJVectorGetObject(HYPRE_IJVector   vector,
                             void           **object);
 
 /**
@@ -408,21 +408,21 @@ int HYPRE_IJVectorGetObject(HYPRE_IJVector   vector,
  * error messages. The default is 0, i.e. no error messages are printed.
  *
  **/
-int HYPRE_IJVectorSetPrintLevel(HYPRE_IJVector  vector,
-                               int      print_level);
+HYPRE_Int HYPRE_IJVectorSetPrintLevel(HYPRE_IJVector  vector,
+                               HYPRE_Int      print_level);
 
 /**
  * Read the vector from file.  This is mainly for debugging purposes.
  **/
-int HYPRE_IJVectorRead(const char     *filename,
+HYPRE_Int HYPRE_IJVectorRead(const char     *filename,
 		       MPI_Comm        comm,
-		       int             type,
+		       HYPRE_Int             type,
                        HYPRE_IJVector *vector);
 
 /**
  * Print the vector to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
+HYPRE_Int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
                         const char     *filename);
 
 /*@}*/

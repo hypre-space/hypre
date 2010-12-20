@@ -34,10 +34,10 @@ char  *run_name;
 {
    globals = hypre_CTAlloc(Globals, 1);
 
-   sprintf(GlobalsRunName,     "%s",     run_name);
-   sprintf(GlobalsInFileName,  "%s.in",  run_name);
-   sprintf(GlobalsOutFileName, "%s.out", run_name);
-   sprintf(GlobalsLogFileName, "%s.log", GlobalsOutFileName);
+   hypre_sprintf(GlobalsRunName,     "%s",     run_name);
+   hypre_sprintf(GlobalsInFileName,  "%s.in",  run_name);
+   hypre_sprintf(GlobalsOutFileName, "%s.out", run_name);
+   hypre_sprintf(GlobalsLogFileName, "%s.log", GlobalsOutFileName);
 }
 
 

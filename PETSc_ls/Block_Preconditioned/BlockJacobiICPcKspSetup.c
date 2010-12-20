@@ -24,10 +24,10 @@
 #include "ic_protos.h"
 
 
-int BlockJacobiICPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
+HYPRE_Int BlockJacobiICPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
      /* Sets up data for IC from Petsc matrix */
 {
-   int         nlocal, its, first, lens;
+   HYPRE_Int         nlocal, its, first, lens;
    Scalar      zero = 0.0, one = 1.0;
   
    SLES       *sles, *subsles;
@@ -38,7 +38,7 @@ int BlockJacobiICPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
    void       *ic_data;
    BJData     *BJ_data;
    Matrix     *IC_A;
-   int         i, ierr, flg, size, first_row, last_row;
+   HYPRE_Int         i, ierr, flg, size, first_row, last_row;
 
    Mat         local_pmat;
    /* variables for dereferencing Petsc matrix */
@@ -70,7 +70,7 @@ int BlockJacobiICPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
    } else
    {
      ierr = 1;
-     PetscPrintf( MPI_COMM_WORLD, 
+     PetscPrintf( hypre_MPI_COMM_WORLD, 
        "Preconditioner must be Block Jacobi or Additive Schwarz\n");
      CHKERRA(ierr);
      return(PETSC_NULL);
@@ -148,7 +148,7 @@ int BlockJacobiICPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
 
    if ( ierr != 0 )
    {
-     printf("Error returned by ic_setup = %d\n",ierr);
+     hypre_printf("Error returned by ic_setup = %d\n",ierr);
      exit(ierr);
    }
 

@@ -30,12 +30,12 @@ typedef struct
 {
    MPI_Comm               comm;
   
-   int                   *plevels;
+   HYPRE_Int                   *plevels;
    hypre_Index           *prefinements;
 
-   int                    max_levels;
-   int                   *level_to_part;
-   int                   *part_to_level;
+   HYPRE_Int                    max_levels;
+   HYPRE_Int                   *level_to_part;
+   HYPRE_Int                   *part_to_level;
    hypre_Index           *refine_factors;       /* refine_factors[level] */
 
    hypre_SStructGrid    **grid_level;
@@ -58,25 +58,25 @@ typedef struct
    void                 **restrict_data_level;
    void                 **interp_data_level;
 
-   int                    csolver_type;
+   HYPRE_Int                    csolver_type;
    HYPRE_SStructSolver    csolver;
    HYPRE_SStructSolver    cprecond;
 
    double                 tol;
-   int                    max_cycles;
-   int                    zero_guess;
-   int                    relax_type;
+   HYPRE_Int                    max_cycles;
+   HYPRE_Int                    zero_guess;
+   HYPRE_Int                    relax_type;
    double                 jacobi_weight;  /* weighted jacobi weight */
-   int                    usr_jacobi_weight; /* indicator flag for user weight */
+   HYPRE_Int                    usr_jacobi_weight; /* indicator flag for user weight */
 
-   int                    num_pre_smooth;
-   int                    num_post_smooth;
+   HYPRE_Int                    num_pre_smooth;
+   HYPRE_Int                    num_post_smooth;
 
    /* log info (always logged) */
-   int                    num_iterations;
-   int                    time_index;
-   int                    rel_change;
-   int                    logging;
+   HYPRE_Int                    num_iterations;
+   HYPRE_Int                    time_index;
+   HYPRE_Int                    rel_change;
+   HYPRE_Int                    logging;
    double                *norms;
    double                *rel_norms;
 

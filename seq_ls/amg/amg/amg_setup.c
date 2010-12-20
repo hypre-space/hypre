@@ -19,65 +19,65 @@
  * HYPRE_AMGSetup
  *--------------------------------------------------------------------------*/
 
-int      HYPRE_AMGSetup(A, data)
+HYPRE_Int      HYPRE_AMGSetup(A, data)
 hypre_Matrix  *A;
 void    *data;
 {
    hypre_AMGData  *amg_data = data;
 
-   int      num_variables;
-   int      num_unknowns;
-   int      num_points;
-   int     *iu;
-   int     *ip;
-   int     *iv;
+   HYPRE_Int      num_variables;
+   HYPRE_Int      num_unknowns;
+   HYPRE_Int      num_points;
+   HYPRE_Int     *iu;
+   HYPRE_Int     *ip;
+   HYPRE_Int     *iv;
    
-   int      num_levels;
-   int      ndimu;
-   int      ndimp;
-   int      ndima;
-   int      ndimb;
+   HYPRE_Int      num_levels;
+   HYPRE_Int      ndimu;
+   HYPRE_Int      ndimp;
+   HYPRE_Int      ndima;
+   HYPRE_Int      ndimb;
    hypre_Matrix  *P;
-   int     *icdep;
-   int     *imin;
-   int     *imax;
-   int     *ipmn;
-   int     *ipmx;
-   int     *icg;
-   int     *ifg;
+   HYPRE_Int     *icdep;
+   HYPRE_Int     *imin;
+   HYPRE_Int     *imax;
+   HYPRE_Int     *ipmn;
+   HYPRE_Int     *ipmx;
+   HYPRE_Int     *icg;
+   HYPRE_Int     *ifg;
    hypre_Matrix **A_array;
    hypre_Matrix **P_array;
    hypre_VectorInt **IU_array;
    hypre_VectorInt **IP_array;
    hypre_VectorInt **IV_array;
    hypre_VectorInt **ICG_array;
-   int     *leva;
-   int     *levb;
-   int     *levv;
-   int     *levp;
-   int     *levpi;
-   int     *levi;
-   int     *numa;
-   int     *numb;
-   int     *numv;
-   int     *nump;
+   HYPRE_Int     *leva;
+   HYPRE_Int     *levb;
+   HYPRE_Int     *levv;
+   HYPRE_Int     *levp;
+   HYPRE_Int     *levpi;
+   HYPRE_Int     *levi;
+   HYPRE_Int     *numa;
+   HYPRE_Int     *numb;
+   HYPRE_Int     *numv;
+   HYPRE_Int     *nump;
    
    double  *a;
-   int     *ia;
-   int     *ja; 
+   HYPRE_Int     *ia;
+   HYPRE_Int     *ja; 
    
    double  *b;
-   int     *ib;
-   int     *jb;
+   HYPRE_Int     *ib;
+   HYPRE_Int     *jb;
    
-   int      i, j, k;
-   int      decr;
+   HYPRE_Int      i, j, k;
+   HYPRE_Int      decr;
 
    double  *vtmp;
    hypre_Vector  *Vtemp;
 
    char     fnam[255];
-   int Setup_err_flag;
+   HYPRE_Int Setup_err_flag;
    
    
    /*----------------------------------------------------------
@@ -100,7 +100,7 @@ void    *data;
    {
       if ((num_variables % num_unknowns) != 0)
       {
-	 printf("Incompatible number of unknowns\n");
+	 hypre_printf("Incompatible number of unknowns\n");
 	 exit(1);
       }
 
@@ -113,14 +113,14 @@ void    *data;
 /*****************
       if ((num_unknowns*num_points) != num_variables)
       {
-	 printf("Incompatible number of unknowns and points\n");
+	 hypre_printf("Incompatible number of unknowns and points\n");
 	 exit(1);
       }
 *****************/
 
-      iu = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
-      ip = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
-      iv = hypre_CTAlloc(int, hypre_NDIMP(num_points+1));
+      iu = hypre_CTAlloc(HYPRE_Int, hypre_NDIMU(num_variables));
+      ip = hypre_CTAlloc(HYPRE_Int, hypre_NDIMU(num_variables));
+      iv = hypre_CTAlloc(HYPRE_Int, hypre_NDIMP(num_points+1));
 
       k = 0;
       for (i = 1; i <= num_points; i++)
@@ -159,17 +159,17 @@ void    *data;
    ndimb = hypre_NDIMB(hypre_MatrixIA(A)[num_variables]-1);
 
    b  = hypre_CTAlloc(double, ndimb);
-   ib = hypre_CTAlloc(int, ndimu);
-   jb = hypre_CTAlloc(int, ndimb);
+   ib = hypre_CTAlloc(HYPRE_Int, ndimu);
+   jb = hypre_CTAlloc(HYPRE_Int, ndimb);
    P  = hypre_NewMatrix(b, ib, jb, num_variables);
    
-   icdep = hypre_CTAlloc(int, num_levels*num_levels);
-   imin  = hypre_CTAlloc(int, num_levels);
-   imax  = hypre_CTAlloc(int, num_levels);
-   ipmn  = hypre_CTAlloc(int, num_levels);
-   ipmx  = hypre_CTAlloc(int, num_levels);
-   icg   = hypre_CTAlloc(int, ndimu);
-   ifg   = hypre_CTAlloc(int, ndimu);
+   icdep = hypre_CTAlloc(HYPRE_Int, num_levels*num_levels);
+   imin  = hypre_CTAlloc(HYPRE_Int, num_levels);
+   imax  = hypre_CTAlloc(HYPRE_Int, num_levels);
+   ipmn  = hypre_CTAlloc(HYPRE_Int, num_levels);
+   ipmx  = hypre_CTAlloc(HYPRE_Int, num_levels);
+   icg   = hypre_CTAlloc(HYPRE_Int, ndimu);
+   ifg   = hypre_CTAlloc(HYPRE_Int, ndimu);
    vtmp  = hypre_CTAlloc(double, num_variables);
    Vtemp = hypre_NewVector(vtmp,num_variables);
    
@@ -224,16 +224,16 @@ void    *data;
     * Create `lev' and `num' arrays
     *----------------------------------------------------------*/
    
-   leva       = hypre_CTAlloc(int, num_levels);
-   levb       = hypre_CTAlloc(int, num_levels);
-   levv       = hypre_CTAlloc(int, num_levels);
-   levp       = hypre_CTAlloc(int, num_levels);
-   levpi      = hypre_CTAlloc(int, num_levels);
-   levi       = hypre_CTAlloc(int, num_levels);
-   numa       = hypre_CTAlloc(int, num_levels);
-   numb       = hypre_CTAlloc(int, num_levels);
-   numv       = hypre_CTAlloc(int, num_levels);
-   nump       = hypre_CTAlloc(int, num_levels);
+   leva       = hypre_CTAlloc(HYPRE_Int, num_levels);
+   levb       = hypre_CTAlloc(HYPRE_Int, num_levels);
+   levv       = hypre_CTAlloc(HYPRE_Int, num_levels);
+   levp       = hypre_CTAlloc(HYPRE_Int, num_levels);
+   levpi      = hypre_CTAlloc(HYPRE_Int, num_levels);
+   levi       = hypre_CTAlloc(HYPRE_Int, num_levels);
+   numa       = hypre_CTAlloc(HYPRE_Int, num_levels);
+   numb       = hypre_CTAlloc(HYPRE_Int, num_levels);
+   numv       = hypre_CTAlloc(HYPRE_Int, num_levels);
+   nump       = hypre_CTAlloc(HYPRE_Int, num_levels);
    for (j = 0; j < num_levels; j++)
    {
       leva[j]  = ia[imin[j]-1];
@@ -456,7 +456,7 @@ void    *data;
    {
       for (j = 0; j < num_levels; j++)
       {
-         sprintf(fnam,"A_%d.ysmp",j);
+         hypre_sprintf(fnam,"A_%d.ysmp",j);
          hypre_WriteYSMP(fnam, A_array[j]);
       }
     }
@@ -466,7 +466,7 @@ void    *data;
    {
       for (j=0; j < num_levels-1; j++)
       {
-         sprintf(fnam,"P_%d.ysmp",j);
+         hypre_sprintf(fnam,"P_%d.ysmp",j);
          hypre_WriteYSMP(fnam, P_array[j]);
       }
    }
@@ -475,7 +475,7 @@ void    *data;
    {
       for (j=0; j < num_levels-1; j++)
       {
-         sprintf(fnam,"ICG_%d.vec",j);
+         hypre_sprintf(fnam,"ICG_%d.vec",j);
          hypre_WriteVecInt(fnam, ICG_array[j]);
       }
    }

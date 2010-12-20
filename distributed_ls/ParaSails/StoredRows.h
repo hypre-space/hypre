@@ -31,23 +31,23 @@ typedef struct
     Matrix   *mat;   /* the matrix corresponding to the rows stored here */
     Mem      *mem;   /* storage for arrays, indices, and values */
 
-    int      size;
-    int      num_loc;
+    HYPRE_Int      size;
+    HYPRE_Int      num_loc;
 
-    int     *len;
-    int    **ind;
+    HYPRE_Int     *len;
+    HYPRE_Int    **ind;
     double **val;
 
-    int      count;
+    HYPRE_Int      count;
 }
 StoredRows;
 
-StoredRows *StoredRowsCreate(Matrix *mat, int size);
+StoredRows *StoredRowsCreate(Matrix *mat, HYPRE_Int size);
 void    StoredRowsDestroy(StoredRows *p);
-int    *StoredRowsAllocInd(StoredRows *p, int len);
-double *StoredRowsAllocVal(StoredRows *p, int len);
-void    StoredRowsPut(StoredRows *p, int index, int len, int *ind, double *val);
-void    StoredRowsGet(StoredRows *p, int index, int *lenp, int **indp, 
+HYPRE_Int    *StoredRowsAllocInd(StoredRows *p, HYPRE_Int len);
+double *StoredRowsAllocVal(StoredRows *p, HYPRE_Int len);
+void    StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind, double *val);
+void    StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp, 
           double **valp);
 
 #endif /* _STOREDROWS_H */

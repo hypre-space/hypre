@@ -22,10 +22,10 @@
 
 typedef struct 
 {
-   int                   size;
+   HYPRE_Int                   size;
 
    hypre_BoxArrayArray  *recv_boxes;
-   int                 **recv_procs;
+   HYPRE_Int                 **recv_procs;
 
 } hypre_SStructRecvInfoData;
 

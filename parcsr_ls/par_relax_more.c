@@ -10,7 +10,7 @@
 #include "headers.h"
 #include "float.h"
 
-int hypre_LINPACKcgtql1(int*,double *,double *,int *);
+HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,double *,double *,HYPRE_Int *);
 
 /******************************************************************************
  *
@@ -19,8 +19,8 @@ int hypre_LINPACKcgtql1(int*,double *,double *,int *);
  *****************************************************************************/
 
 
-int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
-                               int scale, /* scale by diagonal?*/
+HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                               HYPRE_Int scale, /* scale by diagonal?*/
                                double *max_eig)
 {
                               
@@ -30,12 +30,12 @@ int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
    double temp;
    double diag_value;
 
-   int   pos_diag, neg_diag;
-   int   start_row, end_row;
-   int   row_length;
-   int *col_ind;
-   int   j;
-   int i;
+   HYPRE_Int   pos_diag, neg_diag;
+   HYPRE_Int   start_row, end_row;
+   HYPRE_Int   row_length;
+   HYPRE_Int *col_ind;
+   HYPRE_Int   j;
+   HYPRE_Int i;
    
 
    /* estimate with the inf-norm of A - should be ok for SPD matrices */
@@ -75,7 +75,7 @@ int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
    }
 
    /* get max across procs */
-   MPI_Allreduce(&max_norm, &temp, 1, MPI_DOUBLE, MPI_MAX, hypre_ParCSRMatrixComm(A)); 
+   hypre_MPI_Allreduce(&max_norm, &temp, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A)); 
    max_norm = temp;
 
    /* from Charles */
@@ -96,14 +96,14 @@ int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
   scale means get eig est of  (D^{-1/2} A D^{-1/2} 
 ******************************************************************************/
 
-int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax with */
-                                 int scale, /* scale by diagonal?*/
-                                 int max_iter,
+HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                                 HYPRE_Int scale, /* scale by diagonal?*/
+                                 HYPRE_Int max_iter,
                                  double *max_eig, 
                                  double *min_eig)
 {
 
-   int i, j, err;
+   HYPRE_Int i, j, err;
   
    hypre_ParVector    *p;
    hypre_ParVector    *s;
@@ -125,15 +125,15 @@ int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax with 
    
    double *s_data, *p_data, *ds_data, *u_data;
 
-   int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
 
 
    /* check the size of A - don't iterate more than the size */
-   int size = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int size = hypre_ParCSRMatrixGlobalNumRows(A);
    
    if (size < max_iter)
       max_iter = size;
@@ -300,8 +300,8 @@ int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax with 
     
     lambda_max = tridiag[i-1];
     lambda_min = tridiag[0];
-    /* printf("linpack max eig est = %g\n", lambda_max);*/
-    /* printf("linpack min eig est = %g\n", lambda_min);*/
+    /* hypre_printf("linpack max eig est = %g\n", lambda_max);*/
+    /* hypre_printf("linpack min eig est = %g\n", lambda_min);*/
   
 
     hypre_ParVectorDestroy(r);
@@ -342,14 +342,14 @@ means half, and .1 means 10percent)
 
 *******************************************************************************/
 
-int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
+HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */
                             double max_eig,      
                             double min_eig,     
                             double fraction,   
-                            int order,            /* polynomial order */
-                            int scale,            /* scale by diagonal?*/
-                            int variant,           
+                            HYPRE_Int order,            /* polynomial order */
+                            HYPRE_Int scale,            /* scale by diagonal?*/
+                            HYPRE_Int variant,           
                             hypre_ParVector *u,   /* initial/updated approximation */
                             hypre_ParVector *v    /* temporary vector */,
                             hypre_ParVector *r    /*another temp vector */  )
@@ -358,7 +358,7 @@ int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
    
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
 
    double *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
    double *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
@@ -371,8 +371,8 @@ int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
    double den;
    double upper_bound, lower_bound;
    
-   int i, j;
-   int num_rows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int i, j;
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
  
    double coefs[5];
    double mult;
@@ -380,7 +380,7 @@ int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
    
    double tmp_d;
 
-   int cheby_order;
+   HYPRE_Int cheby_order;
 
    double *ds_data, *tmp_data;
    double  diag;
@@ -644,17 +644,17 @@ int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
  * hypre_BoomerAMGRelax_FCFJacobi
  *--------------------------------------------------------------------------*/
 
-int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
+HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
                                     hypre_ParVector    *f,
-                                    int                *cf_marker,
+                                    HYPRE_Int                *cf_marker,
                                     double              relax_weight,
                                     hypre_ParVector    *u,
                                     hypre_ParVector    *Vtemp)
 {
    
-   int i;
-   int relax_points[3];
-   int relax_type = 0;
+   HYPRE_Int i;
+   HYPRE_Int relax_points[3];
+   HYPRE_Int relax_type = 0;
  
    hypre_ParVector    *Ztemp = NULL;
    
@@ -703,11 +703,11 @@ int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
  *
  *--------------------------------------------------------------------------*/
 
-int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
+HYPRE_Int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
                              hypre_ParCSRMatrix *A,
                              hypre_ParVector    *f,
                              hypre_ParVector    *u,
-                             int num_its)
+                             HYPRE_Int num_its)
 {
   
    HYPRE_PCGSetMaxIter(solver, num_its); /* max iterations */
@@ -715,17 +715,17 @@ int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
 
 #if 0   
    {
-      int myid;
-      int num_iterations;
+      HYPRE_Int myid;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
-      MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
       HYPRE_PCGGetNumIterations(solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm(solver, &final_res_norm);
       if (myid ==0)
       {
-         printf("            -----CG PCG Iterations = %d\n", num_iterations);
-         printf("            -----CG PCG Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("            -----CG PCG Iterations = %d\n", num_iterations);
+         hypre_printf("            -----CG PCG Final Relative Residual Norm = %e\n", final_res_norm);
       }
     }
 #endif   
@@ -751,21 +751,21 @@ int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
 double hypre_LINPACKcgpthy(double*,double*);
 
 
-int hypre_LINPACKcgtql1(int *n,double *d,double *e,int *ierr)
+HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int *n,double *d,double *e,HYPRE_Int *ierr)
 {
     /* System generated locals */
-    int  i__1,i__2;
+    HYPRE_Int  i__1,i__2;
     double d__1,d__2,c_b10 = 1.0;
 
     /* Local variables */
      double c,f,g,h;
-     int  i,j,l,m;
+     HYPRE_Int  i,j,l,m;
      double p,r,s,c2,c3 = 0.0;
-     int  l1,l2;
+     HYPRE_Int  l1,l2;
      double s2 = 0.0;
-     int  ii;
+     HYPRE_Int  ii;
      double dl1,el1;
-     int  mml;
+     HYPRE_Int  mml;
      double tst1,tst2;
 
 /*     THIS SUBROUTINE IS A TRANSLATION OF THE ALGOL PROCEDURE TQL1, */
@@ -988,10 +988,10 @@ L20:
   u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 
  *--------------------------------------------------------------------------*/
 
-int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
+HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                                   hypre_ParVector    *f,
-                                  int                *cf_marker,
-                                  int                 relax_points,
+                                  HYPRE_Int                *cf_marker,
+                                  HYPRE_Int                 relax_points,
                                   double              relax_weight,
                                   double             *l1_norms,
                                   hypre_ParVector    *u,
@@ -1003,17 +1003,17 @@ int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
     double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
-    int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
-    int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
+    HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+    HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
     hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-    int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
+    HYPRE_Int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
     double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
-    int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
+    HYPRE_Int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
     hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
     hypre_ParCSRCommHandle *comm_handle;
     
-    int             n       = hypre_CSRMatrixNumRows(A_diag);
-    int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+    HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
+    HYPRE_Int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
     
     hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
     double         *u_data  = hypre_VectorData(u_local);
@@ -1026,18 +1026,18 @@ int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     double 	   *Vext_data;
     double 	   *v_buf_data;
     
-    int            i, j;
-    int            ii, jj;
-    int		   num_sends;
-    int		   index, start;
-    int		   num_procs, my_id ;
+    HYPRE_Int            i, j;
+    HYPRE_Int            ii, jj;
+    HYPRE_Int		   num_sends;
+    HYPRE_Int		   index, start;
+    HYPRE_Int		   num_procs, my_id ;
     
     double         zero = 0.0;
     double	   res;
 
 
-    MPI_Comm_size(comm,&num_procs);  
-    MPI_Comm_rank(comm,&my_id);  
+    hypre_MPI_Comm_size(comm,&num_procs);  
+    hypre_MPI_Comm_rank(comm,&my_id);  
 
     if (num_procs > 1)
     {

@@ -32,8 +32,8 @@ TimeLog_dh  tlog_dh = NULL;     /* internal timing  functionality */
 Mem_dh      mem_dh = NULL;      /* memory management */
 FILE        *logFile = NULL;
 char        msgBuf_dh[MSG_BUF_SIZE_DH]; /* for internal use */
-int         np_dh = 1;     /* number of processors and subdomains */
-int         myid_dh = 0;   /* rank of this processor (and subdomain) */
+HYPRE_Int         np_dh = 1;     /* number of processors and subdomains */
+HYPRE_Int         myid_dh = 0;   /* rank of this processor (and subdomain) */
 MPI_Comm    comm_dh = 0;
 
 
@@ -43,7 +43,7 @@ MPI_Comm    comm_dh = 0;
    * when compiled with the debugging (-g) option.
    */
 FILE *logFile;
-void openLogfile_dh(int argc, char *argv[]);
+void openLogfile_dh(HYPRE_Int argc, char *argv[]);
 void closeLogfile_dh();
 bool logInfoToStderr  = false;
 bool logInfoToFile    = true;
@@ -51,7 +51,7 @@ bool logFuncsToStderr = false;
 bool logFuncsToFile   = false;
 
 bool ignoreMe = true;
-int  ref_counter = 0;
+HYPRE_Int  ref_counter = 0;
 
 
 /*-------------------------------------------------------------------------
@@ -63,15 +63,15 @@ int  ref_counter = 0;
 #define MAX_STACK_SIZE 20
 
 static  char errMsg_private[MAX_STACK_SIZE][MAX_MSG_SIZE];
-static  int errCount_private = 0;
+static  HYPRE_Int errCount_private = 0;
 
 static  char calling_stack[MAX_STACK_SIZE][MAX_MSG_SIZE];
-/* static  int  priority_private[MAX_STACK_SIZE]; */
-static  int calling_stack_count = 0;
+/* static  HYPRE_Int  priority_private[MAX_STACK_SIZE]; */
+static  HYPRE_Int calling_stack_count = 0;
 
 /* static  char errMsg[MAX_MSG_SIZE];    */
 
-void  openLogfile_dh(int argc, char *argv[])
+void  openLogfile_dh(HYPRE_Int argc, char *argv[])
 {
   char buf[1024];
 
@@ -81,15 +81,15 @@ void  openLogfile_dh(int argc, char *argv[])
   if (logFile != NULL) return; 
 
   /* set default logging filename */
-  sprintf(buf, "logFile");
+  hypre_sprintf(buf, "logFile");
 
   /* set user supplied logging filename, if one was specified */
   if (argc && argv != NULL) {
-    int j;
+    HYPRE_Int j;
     for (j=1; j<argc; ++j) {
       if (strcmp(argv[j],"-logFile") == 0) { 
         if (j+1 < argc) {
-          sprintf(buf, "%s", argv[j+1]);
+          hypre_sprintf(buf, "%s", argv[j+1]);
           break;
         }
       }
@@ -99,11 +99,11 @@ void  openLogfile_dh(int argc, char *argv[])
   /* attempt to open logfile, unless the user entered "-logFile none" */
   if (strcmp(buf, "none")) {
     char a[5];
-    sprintf(a, ".%i", myid_dh);
+    hypre_sprintf(a, ".%i", myid_dh);
     strcat(buf, a);
 
     if ((logFile = fopen(buf, "w")) == NULL ) {
-      fprintf(stderr, "can't open >%s< for writing; continuing anyway\n", buf);
+      hypre_fprintf(stderr, "can't open >%s< for writing; continuing anyway\n", buf);
     }
   } 
 }
@@ -112,21 +112,21 @@ void  closeLogfile_dh()
 {
   if (logFile != NULL) {
     if (fclose(logFile)) {
-      fprintf(stderr, "Error closing logFile\n");
+      hypre_fprintf(stderr, "Error closing logFile\n");
     }
     logFile = NULL;
   }
 }
 
-void  setInfo_dh(char *msg, char *function, char *file, int line)
+void  setInfo_dh(char *msg, char *function, char *file, HYPRE_Int line)
 {
   if (logInfoToFile && logFile != NULL) {
-    fprintf(logFile, "INFO: %s;\n       function= %s  file=%s  line=%i\n", 
+    hypre_fprintf(logFile, "INFO: %s;\n       function= %s  file=%s  line=%i\n", 
                                           msg, function, file, line);
     fflush(logFile);
   }
   if (logInfoToStderr) {
-    fprintf(stderr, "INFO: %s;\n       function= %s  file=%s  line=%i\n", 
+    hypre_fprintf(stderr, "INFO: %s;\n       function= %s  file=%s  line=%i\n", 
                                           msg, function, file, line);
   }
 }
@@ -135,49 +135,49 @@ void  setInfo_dh(char *msg, char *function, char *file, int line)
  *  Error handling stuph follows
  *----------------------------------------------------------------------*/
 
-void dh_StartFunc(char *function, char *file, int line, int priority)
+void dh_StartFunc(char *function, char *file, HYPRE_Int line, HYPRE_Int priority)
 {
   if (priority == 1) {
-    sprintf(calling_stack[calling_stack_count], 
+    hypre_sprintf(calling_stack[calling_stack_count], 
           "[%i]   %s  file= %s  line= %i", myid_dh, function, file, line);
     /* priority_private[calling_stack_count] = priority; */
     ++calling_stack_count;
 
     if (calling_stack_count == MAX_STACK_SIZE) {
-      fprintf(stderr, "_____________ dh_StartFunc: OVERFLOW _____________________\n");
+      hypre_fprintf(stderr, "_____________ dh_StartFunc: OVERFLOW _____________________\n");
       if (logFile != NULL) {
-        fprintf(logFile, "_____________ dh_StartFunc: OVERFLOW _____________________\n");
+        hypre_fprintf(logFile, "_____________ dh_StartFunc: OVERFLOW _____________________\n");
       }
       --calling_stack_count;
     }
   }
 }
 
-void dh_EndFunc(char *function, int priority)
+void dh_EndFunc(char *function, HYPRE_Int priority)
 {
   if (priority == 1) {
     --calling_stack_count;
 
     if (calling_stack_count < 0) {
       calling_stack_count = 0;
-      fprintf(stderr, "_____________ dh_EndFunc: UNDERFLOW _____________________\n");
+      hypre_fprintf(stderr, "_____________ dh_EndFunc: UNDERFLOW _____________________\n");
       if (logFile != NULL) {
-        fprintf(logFile, "_____________ dh_EndFunc: UNDERFLOW _____________________\n");
+        hypre_fprintf(logFile, "_____________ dh_EndFunc: UNDERFLOW _____________________\n");
       }
     }
   }
 }
 
 
-void  setError_dh(char *msg, char *function, char *file, int line)
+void  setError_dh(char *msg, char *function, char *file, HYPRE_Int line)
 {
   errFlag_dh = true;
   if (! strcmp(msg, "")) {
-    sprintf(errMsg_private[errCount_private], 
+    hypre_sprintf(errMsg_private[errCount_private], 
         "[%i] called from: %s  file= %s  line= %i", 
                                         myid_dh, function, file, line);
   } else {
-    sprintf(errMsg_private[errCount_private], 
+    hypre_sprintf(errMsg_private[errCount_private], 
         "[%i] ERROR: %s\n       %s  file= %s  line= %i\n", 
                                            myid_dh, msg, function, file, line);
   }
@@ -193,26 +193,26 @@ void  setError_dh(char *msg, char *function, char *file, int line)
 void  printErrorMsg(FILE *fp)
 {
   if (! errFlag_dh) {
-    fprintf(fp, "errFlag_dh is not set; nothing to print!\n");
+    hypre_fprintf(fp, "errFlag_dh is not set; nothing to print!\n");
     fflush(fp);
   } else {
-    int i;
-    fprintf(fp, "\n============= error stack trace ====================\n");
+    HYPRE_Int i;
+    hypre_fprintf(fp, "\n============= error stack trace ====================\n");
     for (i=0; i<errCount_private; ++i) {
-      fprintf(fp, "%s\n", errMsg_private[i]);
+      hypre_fprintf(fp, "%s\n", errMsg_private[i]);
     }
-    fprintf(fp, "\n");
+    hypre_fprintf(fp, "\n");
     fflush(fp);
   }
 }
 
 void  printFunctionStack(FILE *fp)
 {
-  int i;
+  HYPRE_Int i;
   for (i=0; i<calling_stack_count; ++i) {
-    fprintf(fp, "%s\n", calling_stack[i]);
+    hypre_fprintf(fp, "%s\n", calling_stack[i]);
   }
-  fprintf(fp, "\n");
+  hypre_fprintf(fp, "\n");
   fflush(fp);
 }
 
@@ -223,11 +223,11 @@ void  printFunctionStack(FILE *fp)
 
 #define MAX_ERROR_SPACES   200
 static char spaces[MAX_ERROR_SPACES];
-static int nesting = 0;
+static HYPRE_Int nesting = 0;
 static bool initSpaces = true;
 #define INDENT_DH 3
 
-void Error_dhStartFunc(char *function, char *file, int line)
+void Error_dhStartFunc(char *function, char *file, HYPRE_Int line)
 {
   if (initSpaces) {
     memset(spaces, ' ', MAX_ERROR_SPACES*sizeof(char));
@@ -245,11 +245,11 @@ void Error_dhStartFunc(char *function, char *file, int line)
   spaces[INDENT_DH*nesting] = '\0';
 
   if (logFuncsToStderr) {
-    fprintf(stderr, "%s(%i) %s  [file= %s  line= %i]\n", 
+    hypre_fprintf(stderr, "%s(%i) %s  [file= %s  line= %i]\n", 
                             spaces, nesting, function, file, line);
   }
   if (logFuncsToFile && logFile != NULL) {
-    fprintf(logFile, "%s(%i) %s  [file= %s  line= %i]\n", 
+    hypre_fprintf(logFile, "%s(%i) %s  [file= %s  line= %i]\n", 
                             spaces, nesting, function, file, line);
     fflush(logFile);
   }
@@ -277,11 +277,11 @@ bool EuclidIsInitialized()
 
 #undef __FUNC__
 #define __FUNC__ "EuclidInitialize"
-void EuclidInitialize(int argc, char *argv[], char *help)
+void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help)
 {
   if (! EuclidIsActive) {
-    MPI_Comm_size(comm_dh, &np_dh);
-    MPI_Comm_rank(comm_dh, &myid_dh);
+    hypre_MPI_Comm_size(comm_dh, &np_dh);
+    hypre_MPI_Comm_rank(comm_dh, &myid_dh);
     openLogfile_dh(argc, argv); 
     if (mem_dh == NULL) { Mem_dhCreate(&mem_dh); CHECK_V_ERROR; }
     if (tlog_dh == NULL) { TimeLog_dhCreate(&tlog_dh); CHECK_V_ERROR; }
@@ -291,7 +291,7 @@ void EuclidInitialize(int argc, char *argv[], char *help)
       sigRegister_dh(); CHECK_V_ERROR;
     }
     if (Parser_dhHasSwitch(parser_dh, "-help")) {
-      if (myid_dh == 0) printf("%s\n\n", help);
+      if (myid_dh == 0) hypre_printf("%s\n\n", help);
       EUCLID_EXIT;
     }
     if (Parser_dhHasSwitch(parser_dh, "-logFuncsToFile")) { 
@@ -341,7 +341,7 @@ void printf_dh(char *fmt, ...)
   va_start(args, fmt);
   vsprintf(buf, fmt, args);
   if (myid_dh == 0) {
-    fprintf(stdout, "%s", buf);
+    hypre_fprintf(stdout, "%s", buf);
   }
   va_end(args);
   END_FUNC_DH
@@ -358,7 +358,7 @@ void fprintf_dh(FILE *fp, char *fmt, ...)
   va_start(args, fmt);
   vsprintf(buf, fmt, args);
   if (myid_dh == 0) {
-    fprintf(fp, "%s", buf);
+    hypre_fprintf(fp, "%s", buf);
   }
   va_end(args);
   END_FUNC_DH
@@ -367,12 +367,12 @@ void fprintf_dh(FILE *fp, char *fmt, ...)
 
 #undef __FUNC__
 #define __FUNC__ "echoInvocation_dh"
-void echoInvocation_dh(MPI_Comm comm, char *prefix, int argc, char *argv[])
+void echoInvocation_dh(MPI_Comm comm, char *prefix, HYPRE_Int argc, char *argv[])
 {
   START_FUNC_DH
-  int i, id;
+  HYPRE_Int i, id;
 
-  MPI_Comm_rank(comm, &id);
+  hypre_MPI_Comm_rank(comm, &id);
 
   if (prefix != NULL) {
     printf_dh("\n%s ", prefix);

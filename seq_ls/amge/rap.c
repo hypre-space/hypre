@@ -23,26 +23,26 @@
 
 #include "headers.h"  
 
-int hypre_AMGeRAP(hypre_CSRMatrix **A_crs_pointer,
+HYPRE_Int hypre_AMGeRAP(hypre_CSRMatrix **A_crs_pointer,
 		  hypre_CSRMatrix *A, 
 		  hypre_CSRMatrix *P)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j,k,l,m,n,p;
+  HYPRE_Int i,j,k,l,m,n,p;
   hypre_CSRMatrix *A_crs;
 
-  int *i_dof_dof_b, *j_dof_dof_b;
+  HYPRE_Int *i_dof_dof_b, *j_dof_dof_b;
 
-  int *i_dof_dof_c, *j_dof_dof_c;
-  int *i_dof_dof_c_t, *j_dof_dof_c_t;
+  HYPRE_Int *i_dof_dof_c, *j_dof_dof_c;
+  HYPRE_Int *i_dof_dof_c_t, *j_dof_dof_c_t;
 
-  int *i_dof_dof[2], *j_dof_dof[2];
+  HYPRE_Int *i_dof_dof[2], *j_dof_dof[2];
 
   double *b, *c_dof_dof, *c_t_dof_dof, *sparse_matrix[2];
 
-  int Ndofs[2];
+  HYPRE_Int Ndofs[2];
 
   Ndofs[0] =  hypre_CSRMatrixNumRows(P);
   Ndofs[1] =  hypre_CSRMatrixNumCols(P);
@@ -136,7 +136,7 @@ int hypre_AMGeRAP(hypre_CSRMatrix **A_crs_pointer,
   A_crs = hypre_CSRMatrixCreate(Ndofs[1], Ndofs[1],
 			    i_dof_dof[1][Ndofs[1]]);
 
-  /* printf("coarse matrix nnz: %d\n", i_dof_dof[1][Ndofs[1]]); */
+  /* hypre_printf("coarse matrix nnz: %d\n", i_dof_dof[1][Ndofs[1]]); */
 
   hypre_CSRMatrixData(A_crs) = sparse_matrix[1];
   hypre_CSRMatrixI(A_crs) = i_dof_dof[1];
@@ -149,31 +149,31 @@ int hypre_AMGeRAP(hypre_CSRMatrix **A_crs_pointer,
 
 }
 
-int 
-transpose_matrix_create_with_data(  int **i_face_element_pointer,
-				    int **j_face_element_pointer,
+HYPRE_Int 
+transpose_matrix_create_with_data(  HYPRE_Int **i_face_element_pointer,
+				    HYPRE_Int **j_face_element_pointer,
 				    double **data_face_element_pointer,
 
-				    int *i_element_face, 
-				    int *j_element_face,
+				    HYPRE_Int *i_element_face, 
+				    HYPRE_Int *j_element_face,
 				    double *data_element_face,
 
-				    int num_elements, 
-				    int num_faces)
+				    HYPRE_Int num_elements, 
+				    HYPRE_Int num_faces)
 
 {
   FILE *f;
-  int ierr =0, i, j;
+  HYPRE_Int ierr =0, i, j;
 
-  int *i_face_element, *j_face_element;
+  HYPRE_Int *i_face_element, *j_face_element;
   double *data_face_element;
 
   /* ======================================================================
      first create face_element graph: -------------------------------------
      ====================================================================== */
 
-  i_face_element  = (int *) malloc((num_faces+1) * sizeof(int));
-  j_face_element  = (int *) malloc(i_element_face[num_elements] * sizeof(int));
+  i_face_element  = (HYPRE_Int *) malloc((num_faces+1) * sizeof(HYPRE_Int));
+  j_face_element  = (HYPRE_Int *) malloc(i_element_face[num_elements] * sizeof(HYPRE_Int));
   data_face_element= (double *) malloc(i_element_face[num_elements] 
 				      * sizeof(double));
 
@@ -203,7 +203,7 @@ transpose_matrix_create_with_data(  int **i_face_element_pointer,
 
   i_face_element[0] = 0;
 
-  /* printf("end building face--element graph: ++++++++++++++++++\n"); */
+  /* hypre_printf("end building face--element graph: ++++++++++++++++++\n"); */
 
   /* END building face_element graph; ================================ */
 
@@ -214,39 +214,39 @@ transpose_matrix_create_with_data(  int **i_face_element_pointer,
   return ierr;
 
 }
-int 
-matrix_matrix_product_with_data(    int **i_element_edge_pointer, 
-				    int **j_element_edge_pointer,
+HYPRE_Int 
+matrix_matrix_product_with_data(    HYPRE_Int **i_element_edge_pointer, 
+				    HYPRE_Int **j_element_edge_pointer,
 				    double **data_element_edge_pointer,
 
-				    int *i_element_face, 
-				    int *j_element_face,
+				    HYPRE_Int *i_element_face, 
+				    HYPRE_Int *j_element_face,
 				    double *data_element_face,
 
-				    int *i_face_edge, 
-				    int *j_face_edge,
+				    HYPRE_Int *i_face_edge, 
+				    HYPRE_Int *j_face_edge,
 				    double *data_face_edge,
 
-				    int num_elements, 
-				    int num_faces, 
-				    int num_edges)
+				    HYPRE_Int num_elements, 
+				    HYPRE_Int num_faces, 
+				    HYPRE_Int num_edges)
 
 {
   FILE *f;
-  int ierr =0, i, j, k, l, m;
+  HYPRE_Int ierr =0, i, j, k, l, m;
 
-  int i_edge_on_local_list, i_edge_on_list;
-  int local_element_edge_counter = 0, element_edge_counter = 0;
-  int *j_local_element_edge;
+  HYPRE_Int i_edge_on_local_list, i_edge_on_list;
+  HYPRE_Int local_element_edge_counter = 0, element_edge_counter = 0;
+  HYPRE_Int *j_local_element_edge;
 
   
-  int *i_element_edge, *j_element_edge;
+  HYPRE_Int *i_element_edge, *j_element_edge;
   double *data_element_edge;
 
 
-  j_local_element_edge = (int *) malloc((num_edges+1) * sizeof(int));
+  j_local_element_edge = (HYPRE_Int *) malloc((num_edges+1) * sizeof(HYPRE_Int));
 
-  i_element_edge = (int *) malloc((num_elements+1) * sizeof(int));
+  i_element_edge = (HYPRE_Int *) malloc((num_elements+1) * sizeof(HYPRE_Int));
 
   for (i=0; i < num_elements+1; i++)
     i_element_edge[i] = 0;
@@ -262,7 +262,7 @@ matrix_matrix_product_with_data(    int **i_element_edge_pointer,
 	    {
 	      /* element i  and edge j_face_edge[l] are connected */
 	    
-	      /* printf("element %d  contains edge %d;\n",
+	      /* hypre_printf("element %d  contains edge %d;\n",
 		     i, j_face_edge[l]);  */
 
 	      i_edge_on_local_list = -1;
@@ -294,8 +294,8 @@ matrix_matrix_product_with_data(    int **i_element_edge_pointer,
 
   i_element_edge[0] = 0;
 
-  j_element_edge = (int *) malloc(i_element_edge[num_elements]
-				     * sizeof(int));
+  j_element_edge = (HYPRE_Int *) malloc(i_element_edge[num_elements]
+				     * sizeof(HYPRE_Int));
   data_element_edge = (double *) malloc(i_element_edge[num_elements]
 					* sizeof(double));
 
@@ -330,7 +330,7 @@ matrix_matrix_product_with_data(    int **i_element_edge_pointer,
 		  if (element_edge_counter >= 
 		      i_element_edge[num_elements])
 		    {
-		      printf("error in j_element_edge size: %d \n",
+		      hypre_printf("error in j_element_edge size: %d \n",
 			     element_edge_counter);
 		      break;
 		    }
@@ -364,20 +364,20 @@ matrix_matrix_product_with_data(    int **i_element_edge_pointer,
   f = fopen("element_edge", "w");
   for (i=0; i < num_elements; i++)
     {   
-      printf("\nelement: %d has edges:\n", i);  
+      hypre_printf("\nelement: %d has edges:\n", i);  
       for (j=i_element_edge[i]; j < i_element_edge[i+1]; j++)
 	{
-	  printf("%d ", j_element_edge[j]); 
-	  fprintf(f, "%d %d\n", i, j_element_edge[j]);
+	  hypre_printf("%d ", j_element_edge[j]); 
+	  hypre_fprintf(f, "%d %d\n", i, j_element_edge[j]);
 	}
 	  
-      printf("\n"); 
+      hypre_printf("\n"); 
     }
 
   fclose(f);
 
 
-  /* printf("end element_edge computation: ++++++++++++++++++++++++ \n");*/
+  /* hypre_printf("end element_edge computation: ++++++++++++++++++++++++ \n");*/
 
   *i_element_edge_pointer = i_element_edge;
   *j_element_edge_pointer = j_element_edge;

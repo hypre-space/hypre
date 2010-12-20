@@ -21,44 +21,44 @@
 #include "headers.h"  
 
 
-int hypre_AMGe2dGraphics(hypre_AMGeMatrixTopology **A,
-			 int level,
+HYPRE_Int hypre_AMGe2dGraphics(hypre_AMGeMatrixTopology **A,
+			 HYPRE_Int level,
 
-			 int *i_element_node_0, 
-			 int *j_element_node_0,
+			 HYPRE_Int *i_element_node_0, 
+			 HYPRE_Int *j_element_node_0,
 
-			 int *Num_elements,
+			 HYPRE_Int *Num_elements,
 
 			 char *coordinates)
 
 {
 
   FILE *f;
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
   
-  int i,j,k,l,m;
+  HYPRE_Int i,j,k,l,m;
 
-  int num_nodes, num_faces;
+  HYPRE_Int num_nodes, num_faces;
 
-  int *i_element_face, *j_element_face;
-  int *i_AE_element, *j_AE_element;
-  int *i_element_element, *j_element_element;
+  HYPRE_Int *i_element_face, *j_element_face;
+  HYPRE_Int *i_AE_element, *j_AE_element;
+  HYPRE_Int *i_element_element, *j_element_element;
   
   /* visualization arrays: -------------------------------------------------*/
   float *red, *blue, *green;
-  int num_colors, i_color, max_color, facesize, no_color;
+  HYPRE_Int num_colors, i_color, max_color, facesize, no_color;
   float *x1, *y1;
 
-  int i_color_to_choose;
+  HYPRE_Int i_color_to_choose;
 
   double *x_coord, *y_coord;
 
-  int *i_AE_color;
-  int *i_element_element_0 = hypre_AMGeMatrixTopologyIAEElement(A[0]);
-  int *j_element_element_0 = hypre_AMGeMatrixTopologyJAEElement(A[0]);
+  HYPRE_Int *i_AE_color;
+  HYPRE_Int *i_element_element_0 = hypre_AMGeMatrixTopologyIAEElement(A[0]);
+  HYPRE_Int *j_element_element_0 = hypre_AMGeMatrixTopologyJAEElement(A[0]);
 
-  int num_elements_0;
-  int *i_AE_element_0, *j_AE_element_0;
+  HYPRE_Int num_elements_0;
+  HYPRE_Int *i_AE_element_0, *j_AE_element_0;
 
   /*------------------------------------------------------------------------
    * initializing
@@ -133,20 +133,20 @@ int hypre_AMGe2dGraphics(hypre_AMGeMatrixTopology **A,
 
   f = fopen(coordinates, "r");
   for( i = 0; i < num_nodes; i++ )
-    fscanf(f, "%le %le\n", &x_coord[i], &y_coord[i]);
+    hypre_fscanf(f, "%le %le\n", &x_coord[i], &y_coord[i]);
 
 
   fclose(f);
 
 
-  i_AE_color = hypre_CTAlloc(int, Num_elements[0]+1);
+  i_AE_color = hypre_CTAlloc(HYPRE_Int, Num_elements[0]+1);
 
 
   for (l=0; l < level+1; l++)
     {
 
       Num_elements[l] = hypre_AMGeMatrixTopologyNumElements(A[l]);
-      /* printf("level %d, num_elements: %d\n", l, Num_elements[l]); */
+      /* hypre_printf("level %d, num_elements: %d\n", l, Num_elements[l]); */
 
 
       i_element_face = hypre_AMGeMatrixTopologyIElementFace(A[l]);
@@ -261,7 +261,7 @@ int hypre_AMGe2dGraphics(hypre_AMGeMatrixTopology **A,
 
     }
 
-  printf("end displaying: ====================================\n\n");
+  hypre_printf("end displaying: ====================================\n\n");
 
 
   hypre_TFree(i_AE_color);

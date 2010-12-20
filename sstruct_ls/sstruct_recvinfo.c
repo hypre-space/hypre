@@ -35,22 +35,22 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    hypre_Box                 *intersect_box, boxman_entry_box;
 
    hypre_BoxManEntry        **boxman_entries;
-   int                        nboxman_entries;
+   HYPRE_Int                        nboxman_entries;
 
    hypre_BoxArrayArray       *recv_boxes;
-   int                      **recv_processes;
+   HYPRE_Int                      **recv_processes;
 
    hypre_Index                ilower, iupper, index1, index2;
 
-   int                        myproc, proc;
+   HYPRE_Int                        myproc, proc;
 
-   int                        cnt;
-   int                        i, j;
+   HYPRE_Int                        cnt;
+   HYPRE_Int                        i, j;
 
    hypre_ClearIndex(index1); 
    hypre_SetIndex(index2, rfactor[0]-1, rfactor[1]-1, rfactor[2]-1);
 
-   MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm_rank(comm, &myproc);
 
    recvinfo_data= hypre_CTAlloc(hypre_SStructRecvInfoData, 1);
 
@@ -67,7 +67,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    grid_boxes   = hypre_StructGridBoxes(cgrid);
 
    recv_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
-   recv_processes= hypre_CTAlloc(int *, hypre_BoxArraySize(grid_boxes));
+   recv_processes= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
 
    hypre_ForBoxI(i, grid_boxes)
    {
@@ -90,7 +90,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
              cnt++;
           }
        }
-       recv_processes[i]     = hypre_CTAlloc(int, cnt);
+       recv_processes[i]     = hypre_CTAlloc(HYPRE_Int, cnt);
 
        cnt= 0;
        for (j= 0; j< nboxman_entries; j++)
@@ -129,11 +129,11 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
 /*--------------------------------------------------------------------------
  * hypre_SStructRecvInfoDataDestroy
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_SStructRecvInfoDataDestroy(hypre_SStructRecvInfoData *recvinfo_data)
 {
-   int ierr = 0;
-   int i;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int i;
 
    if (recvinfo_data)
    {

@@ -55,10 +55,10 @@
  * hypre_OutOfMemory
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_OutOfMemory( size_t size )
 {
-   printf("Out of memory trying to allocate %d bytes\n", (int) size);
+   hypre_printf("Out of memory trying to allocate %d bytes\n", (HYPRE_Int) size);
    fflush(stdout);
 
    hypre_error(HYPRE_ERROR_MEMORY);
@@ -78,7 +78,7 @@ hypre_MAlloc( size_t size )
    if (size > 0)
    {
 #ifdef HYPRE_USE_UMALLOC
-      int threadid = hypre_GetThreadID();
+      HYPRE_Int threadid = hypre_GetThreadID();
 
       ptr = _umalloc_(size);
 #else
@@ -114,7 +114,7 @@ hypre_CAlloc( size_t count,
    if (size > 0)
    {
 #ifdef HYPRE_USE_UMALLOC
-      int threadid = hypre_GetThreadID();
+      HYPRE_Int threadid = hypre_GetThreadID();
 
       ptr = _ucalloc_(count, elt_size);
 #else
@@ -155,7 +155,7 @@ hypre_ReAlloc( char   *ptr,
    }
    else
    {
-      int threadid = hypre_GetThreadID();
+      HYPRE_Int threadid = hypre_GetThreadID();
       ptr = _urealloc_(ptr, size);
    }
 #else
@@ -189,7 +189,7 @@ hypre_Free( char *ptr )
    if (ptr)
    {
 #ifdef HYPRE_USE_UMALLOC
-      int threadid = hypre_GetThreadID();
+      HYPRE_Int threadid = hypre_GetThreadID();
 
       _ufree_(ptr);
 #else
@@ -218,8 +218,8 @@ char *
 hypre_SharedMAlloc( size_t size )
 {
    char *ptr;
-   int unthreaded = pthread_equal(initial_thread, pthread_self());
-   int I_call_malloc = unthreaded ||
+   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
+   HYPRE_Int I_call_malloc = unthreaded ||
                        pthread_equal(hypre_thread[0],pthread_self());
 
    if (I_call_malloc) {
@@ -242,8 +242,8 @@ hypre_SharedCAlloc( size_t count,
                     size_t elt_size )
 {
    char *ptr;
-   int unthreaded = pthread_equal(initial_thread, pthread_self());
-   int I_call_calloc = unthreaded ||
+   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
+   HYPRE_Int I_call_calloc = unthreaded ||
                        pthread_equal(hypre_thread[0],pthread_self());
 
    if (I_call_calloc) {
@@ -265,8 +265,8 @@ char *
 hypre_SharedReAlloc( char   *ptr,
                      size_t  size )
 {
-   int unthreaded = pthread_equal(initial_thread, pthread_self());
-   int I_call_realloc = unthreaded ||
+   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
+   HYPRE_Int I_call_realloc = unthreaded ||
                        pthread_equal(hypre_thread[0],pthread_self());
 
    if (I_call_realloc) {
@@ -287,8 +287,8 @@ hypre_SharedReAlloc( char   *ptr,
 void
 hypre_SharedFree( char *ptr )
 {
-   int unthreaded = pthread_equal(initial_thread, pthread_self());
-   int I_call_free = unthreaded ||
+   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
+   HYPRE_Int I_call_free = unthreaded ||
                      pthread_equal(hypre_thread[0],pthread_self());
 
    hypre_barrier(&talloc_mtx, unthreaded);
@@ -305,8 +305,8 @@ hypre_SharedFree( char *ptr )
 double *
 hypre_IncrementSharedDataPtr( double *ptr, size_t size )
 {
-   int unthreaded = pthread_equal(initial_thread, pthread_self());
-   int I_increment = unthreaded ||
+   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
+   HYPRE_Int I_increment = unthreaded ||
                      pthread_equal(hypre_thread[0],pthread_self());
 
    if (I_increment) {

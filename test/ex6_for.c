@@ -43,33 +43,33 @@
 #include "hypre_sstruct_fortran_test.h"
 #endif
 
-int main (int argc, char *argv[])
+HYPRE_Int main (HYPRE_Int argc, char *argv[])
 {
-   int myid, num_procs;
+   HYPRE_Int myid, num_procs;
 
    /* We are using struct solvers for this example */
 #ifdef HYPRE_FORTRAN
-   long int     grid;
-   long int     graph;
-   long int     stencil;
-   long int     A;
-   long int     b;
-   long int     x;
+   hypre_F90_Obj     grid;
+   hypre_F90_Obj     graph;
+   hypre_F90_Obj     stencil;
+   hypre_F90_Obj     A;
+   hypre_F90_Obj     b;
+   hypre_F90_Obj     x;
 
-   long int     solver;
-   long int     precond;
+   hypre_F90_Obj     solver;
+   hypre_F90_Obj     precond;
 
-   long int     long_temp_COMM;
-   int          temp_COMM;
+   hypre_F90_Obj     long_temp_COMM;
+   HYPRE_Int          temp_COMM;
 
-   int          precond_id;
+   HYPRE_Int          precond_id;
 
-   int          hypre_var_cell = HYPRE_SSTRUCT_VARIABLE_CELL;
+   HYPRE_Int          hypre_var_cell = HYPRE_SSTRUCT_VARIABLE_CELL;
 
-   int          one = 1;
-   int          two = 2;
-   int          five = 5;
-   int          fifty = 50;
+   HYPRE_Int          one = 1;
+   HYPRE_Int          two = 2;
+   HYPRE_Int          five = 5;
+   HYPRE_Int          fifty = 50;
 
    double       tol = 1.e-6;
    double       zerodot = 0.;
@@ -85,38 +85,38 @@ int main (int argc, char *argv[])
    HYPRE_StructSolver precond;
 #endif
 
-   int object_type;
+   HYPRE_Int object_type;
 
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Init(&argc, &argv);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
    if (num_procs != 2)
    {
-      if (myid ==0) printf("Must run with 2 processors!\n");
-      MPI_Finalize();
+      if (myid ==0) hypre_printf("Must run with 2 processors!\n");
+      hypre_MPI_Finalize();
 
       return(0);
    }
 #ifdef HYPRE_FORTRAN
-      temp_COMM = (int) MPI_COMM_WORLD;
-      long_temp_COMM = (long int) MPI_COMM_WORLD;
+      temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
+      long_temp_COMM = (hypre_F90_Obj) hypre_MPI_COMM_WORLD;
 #endif
 
    /* 1. Set up the 2D grid.  This gives the index space in each part.
       Here we only use one part and one variable. (So the part id is 0
       and the variable id is 0) */
    {
-      int ndim = 2;
-      int nparts = 1;
-      int part = 0;
+      HYPRE_Int ndim = 2;
+      HYPRE_Int nparts = 1;
+      HYPRE_Int part = 0;
 
       /* Create an empty 2D grid object */
 #ifdef HYPRE_FORTRAN
       HYPRE_SStructGridCreate(&temp_COMM, &ndim, &nparts, &grid);
 #else
-      HYPRE_SStructGridCreate(MPI_COMM_WORLD, ndim, nparts, &grid);
+      HYPRE_SStructGridCreate(hypre_MPI_COMM_WORLD, ndim, nparts, &grid);
 #endif
 
       /* Set the extents of the grid - each processor sets its grid
@@ -128,8 +128,8 @@ int main (int argc, char *argv[])
       {
          /* Add a new box to the grid */
          {
-            int ilower[2] = {-3, 1};
-            int iupper[2] = {-1, 2};
+            HYPRE_Int ilower[2] = {-3, 1};
+            HYPRE_Int iupper[2] = {-1, 2};
 
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructGridSetExtents(&grid, &part, &ilower[0], &iupper[0]);
@@ -140,8 +140,8 @@ int main (int argc, char *argv[])
 
          /* Add a new box to the grid */
          {
-            int ilower[2] = {0, 1};
-            int iupper[2] = {2, 4};
+            HYPRE_Int ilower[2] = {0, 1};
+            HYPRE_Int iupper[2] = {2, 4};
 
 
 #ifdef HYPRE_FORTRAN
@@ -157,8 +157,8 @@ int main (int argc, char *argv[])
       {
          /* Add a new box to the grid */
          {
-            int ilower[2] = {3, 1};
-            int iupper[2] = {6, 4};
+            HYPRE_Int ilower[2] = {3, 1};
+            HYPRE_Int iupper[2] = {6, 4};
 
 
 #ifdef HYPRE_FORTRAN
@@ -171,11 +171,11 @@ int main (int argc, char *argv[])
 
       /* Set the variable type and number of variables on each part. */
       {
-         int i;
-         int nvars = 1;
+         HYPRE_Int i;
+         HYPRE_Int nvars = 1;
 
 #ifdef HYPRE_FORTRAN
-         long int vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
+         hypre_F90_Obj vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 #else
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 #endif
@@ -211,9 +211,9 @@ int main (int argc, char *argv[])
       /* Define the geometry of the stencil. Each represents a
          relative offset (in the index space). */
       {
-         int entry;
-         int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
-         int var = 0;
+         HYPRE_Int entry;
+         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int var = 0;
 
          /* Assign numerical values to the offsets so that we can
             easily refer to them  - the last argument indicates the
@@ -232,15 +232,15 @@ int main (int argc, char *argv[])
    /* 3. Set up the Graph  - this determines the non-zero structure
       of the matrix and allows non-stencil relationships between the parts */
    {
-      int var = 0;
-      int part = 0;
+      HYPRE_Int var = 0;
+      HYPRE_Int part = 0;
 
       /* Create the graph object */
 
 #ifdef HYPRE_FORTRAN
       HYPRE_SStructGraphCreate(&temp_COMM, &grid, &graph);
 #else
-      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+      HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
 #endif
 
       /* Now we need to tell the graph which stencil to use for each
@@ -267,16 +267,16 @@ int main (int argc, char *argv[])
 
    /* 4. Set up a SStruct Matrix */
    {
-      int i,j;
-      int part = 0;
-      int var = 0;
+      HYPRE_Int i,j;
+      HYPRE_Int part = 0;
+      HYPRE_Int var = 0;
 
       /* Create the empty matrix object */
 
 #ifdef HYPRE_FORTRAN
       HYPRE_SStructMatrixCreate(&temp_COMM, &graph, &A);
 #else
-      HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
+      HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 #endif
 
       /* Set the object type (by default HYPRE_SSTRUCT). This determines the
@@ -312,14 +312,14 @@ int main (int argc, char *argv[])
             over all the gridpoints in my first box (account for boundary
             grid points later) */
          {
-            int ilower[2] = {-3, 1};
-            int iupper[2] = {-1, 2};
+            HYPRE_Int ilower[2] = {-3, 1};
+            HYPRE_Int iupper[2] = {-1, 2};
 
-            int nentries = 5;
-            int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
+            HYPRE_Int nentries = 5;
+            HYPRE_Int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
             double values[30];
 
-            int stencil_indices[5];
+            HYPRE_Int stencil_indices[5];
             for (j = 0; j < nentries; j++) /* label the stencil indices -
                                               these correspond to the offsets
                                               defined above */
@@ -347,14 +347,14 @@ int main (int argc, char *argv[])
          /* Set the matrix coefficients for some set of stencil entries
             over the gridpoints in my second box */
          {
-            int ilower[2] = {0, 1};
-            int iupper[2] = {2, 4};
+            HYPRE_Int ilower[2] = {0, 1};
+            HYPRE_Int iupper[2] = {2, 4};
 
-            int nentries = 5;
-            int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
+            HYPRE_Int nentries = 5;
+            HYPRE_Int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
             double values[60];
 
-            int stencil_indices[5];
+            HYPRE_Int stencil_indices[5];
             for (j = 0; j < nentries; j++)
                stencil_indices[j] = j;
 
@@ -382,14 +382,14 @@ int main (int argc, char *argv[])
          /* Set the matrix coefficients for some set of stencil entries
             over the gridpoints in my box */
          {
-            int ilower[2] = {3, 1};
-            int iupper[2] = {6, 4};
+            HYPRE_Int ilower[2] = {3, 1};
+            HYPRE_Int iupper[2] = {6, 4};
 
-            int nentries = 5;
-            int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
+            HYPRE_Int nentries = 5;
+            HYPRE_Int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
             double values[80];
 
-            int stencil_indices[5];
+            HYPRE_Int stencil_indices[5];
             for (j = 0; j < nentries; j++)
                stencil_indices[j] = j;
 
@@ -417,7 +417,7 @@ int main (int argc, char *argv[])
          boundary to 0 */
       if (myid == 0)
       {
-         int maxnvalues = 6;
+         HYPRE_Int maxnvalues = 6;
          double values[6];
 
          for (i = 0; i < maxnvalues; i++)
@@ -425,10 +425,10 @@ int main (int argc, char *argv[])
 
          {
             /* Values below our first AND second box */
-            int ilower[2] = {-3, 1};
-            int iupper[2] = { 2, 1};
+            HYPRE_Int ilower[2] = {-3, 1};
+            HYPRE_Int iupper[2] = { 2, 1};
 
-            int stencil_indices[1] = {3};
+            HYPRE_Int stencil_indices[1] = {3};
 
 
 #ifdef HYPRE_FORTRAN
@@ -444,10 +444,10 @@ int main (int argc, char *argv[])
 
          {
             /* Values to the left of our first box */
-            int ilower[2] = {-3, 1};
-            int iupper[2] = {-3, 2};
+            HYPRE_Int ilower[2] = {-3, 1};
+            HYPRE_Int iupper[2] = {-3, 2};
 
-            int stencil_indices[1] = {1};
+            HYPRE_Int stencil_indices[1] = {1};
 
 
 #ifdef HYPRE_FORTRAN
@@ -463,10 +463,10 @@ int main (int argc, char *argv[])
 
          {
             /* Values above our first box */
-            int ilower[2] = {-3, 2};
-            int iupper[2] = {-1, 2};
+            HYPRE_Int ilower[2] = {-3, 2};
+            HYPRE_Int iupper[2] = {-1, 2};
 
-            int stencil_indices[1] = {4};
+            HYPRE_Int stencil_indices[1] = {4};
 
 
 #ifdef HYPRE_FORTRAN
@@ -483,10 +483,10 @@ int main (int argc, char *argv[])
          {
             /* Values to the left of our second box (that do not border the
                first box). */
-            int ilower[2] = { 0, 3};
-            int iupper[2] = { 0, 4};
+            HYPRE_Int ilower[2] = { 0, 3};
+            HYPRE_Int iupper[2] = { 0, 4};
 
-            int stencil_indices[1] = {1};
+            HYPRE_Int stencil_indices[1] = {1};
 
 
 #ifdef HYPRE_FORTRAN
@@ -502,10 +502,10 @@ int main (int argc, char *argv[])
 
          {
             /* Values above our second box */
-            int ilower[2] = { 0, 4};
-            int iupper[2] = { 2, 4};
+            HYPRE_Int ilower[2] = { 0, 4};
+            HYPRE_Int iupper[2] = { 2, 4};
 
-            int stencil_indices[1] = {4};
+            HYPRE_Int stencil_indices[1] = {4};
 
 
 #ifdef HYPRE_FORTRAN
@@ -521,17 +521,17 @@ int main (int argc, char *argv[])
       }
       else if (myid == 1)
       {
-         int maxnvalues = 4;
+         HYPRE_Int maxnvalues = 4;
          double values[4];
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
 
          {
             /* Values below our box */
-            int ilower[2] = { 3, 1};
-            int iupper[2] = { 6, 1};
+            HYPRE_Int ilower[2] = { 3, 1};
+            HYPRE_Int iupper[2] = { 6, 1};
 
-            int stencil_indices[1] = {3};
+            HYPRE_Int stencil_indices[1] = {3};
 
 
 #ifdef HYPRE_FORTRAN
@@ -547,10 +547,10 @@ int main (int argc, char *argv[])
 
          {
             /* Values to the right of our box */
-            int ilower[2] = { 6, 1};
-            int iupper[2] = { 6, 4};
+            HYPRE_Int ilower[2] = { 6, 1};
+            HYPRE_Int iupper[2] = { 6, 4};
 
-            int stencil_indices[1] = {2};
+            HYPRE_Int stencil_indices[1] = {2};
 
 
 #ifdef HYPRE_FORTRAN
@@ -566,10 +566,10 @@ int main (int argc, char *argv[])
 
          {
             /* Values above our box */
-            int ilower[2] = { 3, 4};
-            int iupper[2] = { 6, 4};
+            HYPRE_Int ilower[2] = { 3, 4};
+            HYPRE_Int iupper[2] = { 6, 4};
 
-            int stencil_indices[1] = {4};
+            HYPRE_Int stencil_indices[1] = {4};
 
 
 #ifdef HYPRE_FORTRAN
@@ -597,11 +597,11 @@ int main (int argc, char *argv[])
 
    /* 5. Set up SStruct Vectors for b and x */
    {
-      int i;
+      HYPRE_Int i;
 
       /* We have one part and one variable. */
-      int part = 0;
-      int var = 0;
+      HYPRE_Int part = 0;
+      HYPRE_Int var = 0;
 
       /* Create an empty vector object */
 
@@ -609,8 +609,8 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorCreate(&temp_COMM, &grid, &b);
       HYPRE_SStructVectorCreate(&temp_COMM, &grid, &x);
 #else
-      HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
-      HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
+      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &b);
+      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
 #endif
 
       /* As with the matrix,  set the object type for the vectors
@@ -639,10 +639,10 @@ int main (int argc, char *argv[])
       {
          /* Set the vector coefficients over the gridpoints in my first box */
          {
-            int ilower[2] = {-3, 1};
-            int iupper[2] = {-1, 2};
+            HYPRE_Int ilower[2] = {-3, 1};
+            HYPRE_Int iupper[2] = {-1, 2};
 
-            int nvalues = 6;  /* 6 grid points */
+            HYPRE_Int nvalues = 6;  /* 6 grid points */
             double values[6];
 
             for (i = 0; i < nvalues; i ++)
@@ -666,10 +666,10 @@ int main (int argc, char *argv[])
 
          /* Set the vector coefficients over the gridpoints in my second box */
          {
-            int ilower[2] = { 0, 1};
-            int iupper[2] = { 2, 4};
+            HYPRE_Int ilower[2] = { 0, 1};
+            HYPRE_Int iupper[2] = { 2, 4};
 
-            int nvalues = 12; /* 12 grid points */
+            HYPRE_Int nvalues = 12; /* 12 grid points */
             double values[12];
 
             for (i = 0; i < nvalues; i ++)
@@ -695,10 +695,10 @@ int main (int argc, char *argv[])
       {
          /* Set the vector coefficients over the gridpoints in my box */
          {
-            int ilower[2] = { 3, 1};
-            int iupper[2] = { 6, 4};
+            HYPRE_Int ilower[2] = { 3, 1};
+            HYPRE_Int iupper[2] = { 6, 4};
 
-            int nvalues = 16; /* 16 grid points */
+            HYPRE_Int nvalues = 16; /* 16 grid points */
             double values[16];
 
             for (i = 0; i < nvalues; i ++)
@@ -739,9 +739,9 @@ int main (int argc, char *argv[])
    {
 
 #ifdef HYPRE_FORTRAN
-      long int sA;
-      long int sb;
-      long int sx;
+      hypre_F90_Obj sA;
+      hypre_F90_Obj sb;
+      hypre_F90_Obj sx;
 #else
       HYPRE_StructMatrix sA;
       HYPRE_StructVector sb;
@@ -766,7 +766,7 @@ int main (int argc, char *argv[])
 #ifdef HYPRE_FORTRAN
       HYPRE_StructPCGCreate(&temp_COMM, &solver);
 #else
-      HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_StructPCGCreate(hypre_MPI_COMM_WORLD, &solver);
 #endif
 
       /* Set PCG parameters */
@@ -786,7 +786,7 @@ int main (int argc, char *argv[])
 #ifdef HYPRE_FORTRAN
       HYPRE_StructSMGCreate(&temp_COMM, &precond);
 #else
-      HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+      HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &precond);
 #endif
 
       /* Set SMG parameters */
@@ -845,7 +845,7 @@ int main (int argc, char *argv[])
 #endif
 
    /* Finalize MPI */
-   MPI_Finalize();
+   hypre_MPI_Finalize();
 
    return (0);
 }

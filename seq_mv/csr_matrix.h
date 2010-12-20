@@ -32,18 +32,18 @@
 typedef struct
 {
    double  *data;
-   int     *i;
-   int     *j;
-   int      num_rows;
-   int      num_cols;
-   int      num_nonzeros;
+   HYPRE_Int     *i;
+   HYPRE_Int     *j;
+   HYPRE_Int      num_rows;
+   HYPRE_Int      num_cols;
+   HYPRE_Int      num_nonzeros;
 
   /* for compressing rows in matrix multiplication  */
-   int     *rownnz;
-   int      num_rownnz;
+   HYPRE_Int     *rownnz;
+   HYPRE_Int      num_rownnz;
 
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
-   int      owns_data;
+   HYPRE_Int      owns_data;
 
 } hypre_CSRMatrix;
 
@@ -69,12 +69,12 @@ typedef struct
 
 typedef struct
 {
-   int    *i;
-   int    *j;
-   int     num_rows;
-   int     num_cols;
-   int     num_nonzeros;
-   int     owns_data;
+   HYPRE_Int    *i;
+   HYPRE_Int    *j;
+   HYPRE_Int     num_rows;
+   HYPRE_Int     num_cols;
+   HYPRE_Int     num_nonzeros;
+   HYPRE_Int     owns_data;
 
 } hypre_CSRBooleanMatrix;
 

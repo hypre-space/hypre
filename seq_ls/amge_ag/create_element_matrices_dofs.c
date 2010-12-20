@@ -29,48 +29,48 @@
 
 #include "headers.h" 
 
-int hypre_AMGeElementMatrixDof(int *i_element_dof, int *j_element_dof,
+HYPRE_Int hypre_AMGeElementMatrixDof(HYPRE_Int *i_element_dof, HYPRE_Int *j_element_dof,
 
 
 			       double *element_data,
 
-			       int **i_element_chord_pointer,
-			       int **j_element_chord_pointer,
+			       HYPRE_Int **i_element_chord_pointer,
+			       HYPRE_Int **j_element_chord_pointer,
 			       double **a_element_chord_pointer,
 
-			       int **i_chord_dof_pointer, 
-			       int **j_chord_dof_pointer,
+			       HYPRE_Int **i_chord_dof_pointer, 
+			       HYPRE_Int **j_chord_dof_pointer,
 
-			       int *num_chords_pointer,
+			       HYPRE_Int *num_chords_pointer,
 
-			       int num_elements, int num_dofs)
+			       HYPRE_Int num_elements, HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-  int i,j,k,l;
-  int k_dof, l_dof;
+  HYPRE_Int i,j,k,l;
+  HYPRE_Int k_dof, l_dof;
 
 
-  int *i_dof_element, *j_dof_element;
+  HYPRE_Int *i_dof_element, *j_dof_element;
 
-  int *i_dof_chord, *j_dof_chord;
+  HYPRE_Int *i_dof_chord, *j_dof_chord;
 
-  int *i_element_chord, *j_element_chord;
+  HYPRE_Int *i_element_chord, *j_element_chord;
   double *a_element_chord;
 
-  int *i_chord_dof, *j_chord_dof;
+  HYPRE_Int *i_chord_dof, *j_chord_dof;
 
-  int *i_dof_dof, *j_dof_dof;
+  HYPRE_Int *i_dof_dof, *j_dof_dof;
 
-  int chord_counter, chord_dof_counter,
+  HYPRE_Int chord_counter, chord_dof_counter,
     element_chord_counter;
 
-  int end_chord, chord;
+  HYPRE_Int end_chord, chord;
 
 
-  printf("num_elements: %d, num_dofs: %d\n", num_elements, num_dofs);
-  i_element_chord = hypre_CTAlloc(int, num_elements+1);
+  hypre_printf("num_elements: %d, num_dofs: %d\n", num_elements, num_dofs);
+  i_element_chord = hypre_CTAlloc(HYPRE_Int, num_elements+1);
 
   ierr = transpose_matrix_create(&i_dof_element, &j_dof_element,
 				 i_element_dof, j_element_dof,
@@ -86,8 +86,8 @@ int hypre_AMGeElementMatrixDof(int *i_element_dof, int *j_element_dof,
   hypre_TFree(i_dof_element);
   hypre_TFree(j_dof_element);
 
-  i_chord_dof = hypre_CTAlloc(int, i_dof_dof[num_dofs]+1);
-  j_chord_dof = hypre_CTAlloc(int, 2*i_dof_dof[num_dofs]);
+  i_chord_dof = hypre_CTAlloc(HYPRE_Int, i_dof_dof[num_dofs]+1);
+  j_chord_dof = hypre_CTAlloc(HYPRE_Int, 2*i_dof_dof[num_dofs]);
 
   chord_counter = 0;
   chord_dof_counter= 0;
@@ -122,7 +122,7 @@ int hypre_AMGeElementMatrixDof(int *i_element_dof, int *j_element_dof,
 
   *i_element_chord_pointer = i_element_chord;
 
-  j_element_chord = hypre_CTAlloc(int, element_chord_counter); 
+  j_element_chord = hypre_CTAlloc(HYPRE_Int, element_chord_counter); 
 
   ierr = transpose_matrix_create(&i_dof_chord, &j_dof_chord,
 				 i_chord_dof, j_chord_dof,
@@ -152,7 +152,7 @@ int hypre_AMGeElementMatrixDof(int *i_element_dof, int *j_element_dof,
 
 	      if (end_chord == -1)
 		{
-		  printf("chord with no end: ************************\n");
+		  hypre_printf("chord with no end: ************************\n");
 		  return -1;
 		}
 	      
@@ -180,10 +180,10 @@ int hypre_AMGeElementMatrixDof(int *i_element_dof, int *j_element_dof,
   *a_element_chord_pointer = element_data;
 
   /* |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| 
-  printf("element matrices in element_chord format: \n");
+  hypre_printf("element matrices in element_chord format: \n");
   for (i=0; i < num_elements; i++)
     {
-      printf("element %d: num_entries^2: %d \n", i,
+      hypre_printf("element %d: num_entries^2: %d \n", i,
 	     i_element_chord[i+1] - i_element_chord[i]);
 
       for (l=i_element_chord[i]; l < i_element_chord[i+1]; l++)
@@ -191,10 +191,10 @@ int hypre_AMGeElementMatrixDof(int *i_element_dof, int *j_element_dof,
 	  k = j_element_chord[l];
 
 	    if (j_chord_dof[i_chord_dof[k]] == j_chord_dof[i_chord_dof[k]+1])
-	      printf("(%d,%d): %e\n", j_chord_dof[i_chord_dof[k]],
+	      hypre_printf("(%d,%d): %e\n", j_chord_dof[i_chord_dof[k]],
 		   j_chord_dof[i_chord_dof[k]+1], element_data[l]);
 	}
-      printf("==================================================\n\n");
+      hypre_printf("==================================================\n\n");
     }
 
     |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */
