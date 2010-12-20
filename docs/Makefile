@@ -126,6 +126,8 @@ HYPRE_ref_manual.pdf: version.tex vref_manual.tex
 
 vref_manual.tex: vref_manual.dxx
 	doc++ -t -o vref_manual.tex vref_manual.dxx
+	mv vref_manual.tex vref_manual.tmp
+	sed 's/HYPRE\\_Int\([^a-zA-Z_0-9]\)/int\1/g' vref_manual.tmp > vref_manual.tex
 
 vref_manual.dxx: ref_manual.dxx
 	@ \
