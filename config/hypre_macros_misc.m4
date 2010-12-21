@@ -113,12 +113,14 @@ then
         CFLAGS="-O3"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
+          LDFLAGS="$LDFLAGS -openmp"
         fi
         ;;
       pgcc|mpipgcc)
         CFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
+          LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
       KCC|mpiKCC)
@@ -133,6 +135,7 @@ then
             CFLAGS="-fast"
             if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -omp"
+              LDFLAGS="$LDFLAGS -omp"
             fi
             ;;
           hppa*-hp-hpux*)
@@ -142,6 +145,7 @@ then
             CFLAGS="-Ofast -64 -OPT:Olimit=0"
             if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -mp"
+              LDFLAGS="$LDCFLAGS -mp"
             fi
             ;;
           mips-sgi-irix*)
@@ -154,12 +158,14 @@ then
             CFLAGS="-O3 -qstrict"
             if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -qsmp=omp"
+              LDFLAGS="$LDFLAGS -qsmp=omp"
             fi
             ;;
           *)
             CFLAGS="-O"
             if test "$hypre_using_openmp" = "yes" ; then
                CFLAGS="$CFLAGS -openmp"
+               LDFLAGS="$LDFLAGS -openmp"
             fi
             ;;
         esac
@@ -325,12 +331,14 @@ then
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
+          LDFLAGS="$LDFLAGS -openmp"
         fi
         ;;
       pgcc|mpipgcc)
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
+          LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
       cc|mpcc|mpiicc|mpxlc|xlc)
@@ -342,6 +350,7 @@ then
             CFLAGS="-g"
             if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -omp"
+              LDFLAGS="$LDFLAGS -omp"
             fi
             ;;
           hppa*-hp-hpux*)
@@ -351,6 +360,7 @@ then
             CFLAGS="-g -64 -OPT:Olimit=0"
             if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -mp"
+              LDFLAGS="$LDFLAGS -mp"
             fi
             ;;
           mips-sgi-irix*)
@@ -363,12 +373,14 @@ then
             CFLAGS="-g -qstrict"
             if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -qsmp=omp"
+              LDFLAGS="$LDFLAGS -qsmp=omp"
             fi
             ;;
           *)
             CFLAGS="-g"
             if test "$hypre_using_openmp" = "yes" ; then
                CFLAGS="$CFLAGS -openmp"
+               LDFLAGS="$LDFLAGS -openmp"
             fi
             ;;
         esac
