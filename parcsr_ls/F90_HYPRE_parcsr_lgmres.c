@@ -27,7 +27,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrlgmrescreate, HYPRE_PARCSRLGMRESCREATE)( HYPRE_Int      *comm,
+hypre_F90_IFACE(hypre_parcsrlgmrescreate, HYPRE_PARCSRLGMRESCREATE)( hypre_F90_Comm *comm,
                                           hypre_F90_Obj *solver,
                                           HYPRE_Int      *ierr    )
 

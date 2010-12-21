@@ -26,7 +26,7 @@
 
 void
 hypre_F90_IFACE(hypre_sstructgraphcreate, HYPRE_SSTRUCTGRAPHCREATE)
-   (HYPRE_Int       *comm,
+   (hypre_F90_Comm *comm,
     hypre_F90_Obj *grid,
     hypre_F90_Obj *graph_ptr,
     HYPRE_Int       *ierr)

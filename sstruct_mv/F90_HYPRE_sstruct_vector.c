@@ -26,7 +26,7 @@
 
 void
 hypre_F90_IFACE(hypre_sstructvectorcreate, HYPRE_SSTRUCTVECTORCREATE)
-   (HYPRE_Int      *comm,
+   (hypre_F90_Comm *comm,
     hypre_F90_Obj *grid,
     hypre_F90_Obj *vector_ptr,
     HYPRE_Int      *ierr)

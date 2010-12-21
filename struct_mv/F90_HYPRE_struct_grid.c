@@ -25,7 +25,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structgridcreate, HYPRE_STRUCTGRIDCREATE)( HYPRE_Int      *comm,
+hypre_F90_IFACE(hypre_structgridcreate, HYPRE_STRUCTGRIDCREATE)( hypre_F90_Comm *comm,
                                          HYPRE_Int      *dim,
                                          hypre_F90_Obj *grid,
                                          HYPRE_Int      *ierr )

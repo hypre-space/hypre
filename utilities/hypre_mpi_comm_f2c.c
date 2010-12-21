@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 #include <HYPRE_config.h>
 #include "fortran.h"
 #ifndef HYPRE_SEQUENTIAL
@@ -22,23 +20,12 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_mpi_comm_f2c, HYPRE_MPI_COMM_F2C)(HYPRE_Int *c_comm,
-                                                        HYPRE_Int *f_comm,
-                                                        HYPRE_Int *ierr)
+hypre_F90_IFACE(hypre_mpi_comm_f2c, HYPRE_MPI_COMM_F2C)
+   (hypre_F90_Comm *c_comm,
+    hypre_F90_Comm *f_comm,
+    hypre_F90_Int  *ierr)
 {
-#ifdef HYPRE_HAVE_MPI_COMM_F2C
-
-   *c_comm = (HYPRE_Int)hypre_MPI_Comm_f2c(*f_comm);
-
-   if (sizeof(MPI_Comm) > sizeof(HYPRE_Int))
-      *ierr = 1;
-   else
-      *ierr = 0;
-
-#else
-
-   *c_comm = *f_comm;
+   *c_comm = (hypre_F90_Int) hypre_MPI_Comm_f2c(
+      hypre_F90_PassComm(f_comm) );
    *ierr = 0;
-
-#endif
 }

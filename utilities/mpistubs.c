@@ -12,11 +12,28 @@
 
 #include "_hypre_utilities.h"
 
-#ifdef HYPRE_SEQUENTIAL
+/******************************************************************************
+ * This routine is the same in both the sequential and normal cases
+ *
+ * The 'comm' argument for MPI_Comm_f2c is MPI_Fint, which is always the size of
+ * a Fortran integer and hence usually the size of hypre_int.
+ *****************************************************************************/
+
+hypre_MPI_Comm
+hypre_MPI_Comm_f2c( hypre_int comm )
+{
+#ifdef HYPRE_HAVE_MPI_COMM_F2C
+   return (hypre_MPI_Comm) MPI_Comm_f2c(comm);
+#else
+   return (hypre_MPI_Comm) comm;
+#endif
+}
 
 /******************************************************************************
  * MPI stubs to generate serial codes without mpi
  *****************************************************************************/
+
+#ifdef HYPRE_SEQUENTIAL
 
 HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
@@ -548,11 +565,11 @@ hypre_MPI_Type_free( hypre_MPI_Datatype *datatype )
    return(0);
 }
 
-#else
-
 /******************************************************************************
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
  *****************************************************************************/
+
+#else
 
 HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,

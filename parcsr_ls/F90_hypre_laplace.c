@@ -28,7 +28,7 @@
 
 void
 hypre_F90_IFACE(hypre_generatelaplacian, HYPRE_GENERATELAPLACIAN)
-                                  ( HYPRE_Int      *comm,
+                                  ( hypre_F90_Comm *comm,
                                     HYPRE_Int      *nx,
                                     HYPRE_Int      *ny,
                                     HYPRE_Int      *nz,

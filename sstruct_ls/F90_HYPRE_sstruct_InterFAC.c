@@ -31,7 +31,7 @@
 
 void
 hypre_F90_IFACE(hypre_sstructfaccreate, HYPRE_SSTRUCTFACCREATE)
-               (HYPRE_Int *comm, hypre_F90_Obj *solver, HYPRE_Int *ierr)
+               (hypre_F90_Comm *comm, hypre_F90_Obj *solver, HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) ( HYPRE_SStructFACCreate( (MPI_Comm)             *comm,
                                            (HYPRE_SStructSolver *) solver ));

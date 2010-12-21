@@ -28,7 +28,7 @@
 
 void 
 hypre_F90_IFACE(hypre_euclidcreate, HYPRE_EUCLIDCREATE)
-               (HYPRE_Int *comm, hypre_F90_Obj *solver, HYPRE_Int *ierr)
+               (hypre_F90_Comm *comm, hypre_F90_Obj *solver, HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) HYPRE_EuclidCreate( (MPI_Comm)      *comm,
                                      (HYPRE_Solver *) solver );

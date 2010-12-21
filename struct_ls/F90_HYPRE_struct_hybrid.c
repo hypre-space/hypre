@@ -22,7 +22,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structhybridcreate, HYPRE_STRUCTHYBRIDCREATE)( HYPRE_Int      *comm,
+hypre_F90_IFACE(hypre_structhybridcreate, HYPRE_STRUCTHYBRIDCREATE)( hypre_F90_Comm *comm,
                                                hypre_F90_Obj *solver,
                                                HYPRE_Int      *ierr   )
 {

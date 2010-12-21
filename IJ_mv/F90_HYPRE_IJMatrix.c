@@ -28,7 +28,7 @@
 
 void
 hypre_F90_IFACE(hypre_ijmatrixcreate, HYPRE_IJMATRIXCREATE)
-                                    ( HYPRE_Int *comm,
+                                    ( hypre_F90_Comm *comm,
                                       HYPRE_Int      *ilower,
                                       HYPRE_Int      *iupper,
                                       HYPRE_Int      *jlower,
@@ -282,7 +282,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetmaxoffprocelmt, HYPRE_IJMATRIXSETMAXOFFPROCELMT
 void 
 hypre_F90_IFACE(hypre_ijmatrixread, HYPRE_IJMATRIXREAD)(
                                                      char     *filename,
-                                                     HYPRE_Int *comm,
+                                                     hypre_F90_Comm *comm,
                                                      HYPRE_Int      *object_type,
                                                      hypre_F90_Obj *matrix,
                                                      HYPRE_Int      *ierr      )

@@ -28,7 +28,7 @@
 
 void
 hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)(
-                                                    HYPRE_Int      *comm,
+                                                    hypre_F90_Comm *comm,
                                                     HYPRE_Int      *jlower,
                                                     HYPRE_Int      *jupper,
                                                     hypre_F90_Obj *vector,
@@ -209,7 +209,7 @@ hypre_F90_IFACE(hypre_ijvectorgetobject, HYPRE_IJVECTORGETOBJECT)(
 
 void
 hypre_F90_IFACE(hypre_ijvectorread, HYPRE_IJVECTORREAD)( char     *filename,
-                                                         HYPRE_Int *comm,
+                                                         hypre_F90_Comm *comm,
                                                          HYPRE_Int      *object_type,
                                                          hypre_F90_Obj *vector,
                                                          HYPRE_Int      *ierr      )

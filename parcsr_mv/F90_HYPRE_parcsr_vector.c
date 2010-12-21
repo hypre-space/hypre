@@ -27,7 +27,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parvectorcreate, HYPRE_PARVECTORCREATE)( HYPRE_Int      *comm,
+hypre_F90_IFACE(hypre_parvectorcreate, HYPRE_PARVECTORCREATE)( hypre_F90_Comm *comm,
                                      HYPRE_Int      *global_size,
                                      hypre_F90_Obj *partitioning,
                                      hypre_F90_Obj *vector,
@@ -47,7 +47,7 @@ hypre_F90_IFACE(hypre_parvectorcreate, HYPRE_PARVECTORCREATE)( HYPRE_Int      *c
 
 void
 hypre_F90_IFACE(hypre_parmultivectorcreate, HYPRE_PARMULTIVECTORCREATE)
-                                   ( HYPRE_Int      *comm,
+                                   ( hypre_F90_Comm *comm,
                                      HYPRE_Int      *global_size,
                                      hypre_F90_Obj *partitioning,
                                      HYPRE_Int      *number_vectors,
@@ -90,7 +90,7 @@ hypre_F90_IFACE(hypre_parvectorinitialize, HYPRE_PARVECTORINITIALIZE)( hypre_F90
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parvectorread, HYPRE_PARVECTORREAD)( HYPRE_Int      *comm,
+hypre_F90_IFACE(hypre_parvectorread, HYPRE_PARVECTORREAD)( hypre_F90_Comm *comm,
                                       hypre_F90_Obj *vector,
                                       char     *file_name,
                                       HYPRE_Int      *ierr       )

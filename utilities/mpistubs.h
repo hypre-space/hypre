@@ -77,6 +77,7 @@ extern "C" {
 #define MPI_Barrier         hypre_MPI_Barrier          
 #define MPI_Comm_create     hypre_MPI_Comm_create      
 #define MPI_Comm_dup        hypre_MPI_Comm_dup         
+#define MPI_Comm_f2c        hypre_MPI_Comm_f2c
 #define MPI_Comm_group      hypre_MPI_Comm_group       
 #define MPI_Comm_size       hypre_MPI_Comm_size        
 #define MPI_Comm_rank       hypre_MPI_Comm_rank        
@@ -214,6 +215,7 @@ double hypre_MPI_Wtick( void );
 HYPRE_Int hypre_MPI_Barrier( hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Comm_create( hypre_MPI_Comm comm , hypre_MPI_Group group , hypre_MPI_Comm *newcomm );
 HYPRE_Int hypre_MPI_Comm_dup( hypre_MPI_Comm comm , hypre_MPI_Comm *newcomm );
+hypre_MPI_Comm hypre_MPI_Comm_f2c( hypre_int comm );
 HYPRE_Int hypre_MPI_Comm_size( hypre_MPI_Comm comm , HYPRE_Int *size );
 HYPRE_Int hypre_MPI_Comm_rank( hypre_MPI_Comm comm , HYPRE_Int *rank );
 HYPRE_Int hypre_MPI_Comm_free( hypre_MPI_Comm *comm );

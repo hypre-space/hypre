@@ -29,7 +29,7 @@
 
 void
 hypre_F90_IFACE(hypre_sstructbicgstabcreate, HYPRE_SSTRUCTBICGSTABCREATE)
-                                                          (HYPRE_Int      *comm,
+                                                          (hypre_F90_Comm *comm,
                                                            hypre_F90_Obj *solver,
                                                            HYPRE_Int      *ierr)
 {

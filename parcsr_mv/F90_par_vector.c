@@ -138,7 +138,7 @@ hypre_F90_IFACE(hypre_parinnerprod, HYPRE_PARINNERPROD)( hypre_F90_Obj *x,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)( HYPRE_Int      *comm,
+hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)( hypre_F90_Comm *comm,
                                           hypre_F90_Obj *vector,
                                           HYPRE_Int      *vec_starts,
                                           hypre_F90_Obj *par_vector,

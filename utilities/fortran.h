@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Fortran <-> C interface macros
@@ -27,7 +25,7 @@
 #ifndef HYPRE_FORT_HEADER
 #define HYPRE_FORT_HEADER
 
-#include "HYPRE_utilities.h"
+#include "_hypre_utilities.h"
 
 /*-------------------------------------------------------
  * Define specific name mangling macros to be used below
@@ -114,9 +112,12 @@
 
 /*-------------------------------------------------------
  * Define interface argument types and macros
+ *
+ * A Fortran communicator is always the size of an integer
+ * and hence usually the size of hypre_int.
  *-------------------------------------------------------*/
 
-typedef HYPRE_Int  hypre_F90_Comm;
+typedef hypre_int  hypre_F90_Comm;
 typedef HYPRE_Int  hypre_F90_Int;
 typedef HYPRE_Int  hypre_F90_IntArray;
 typedef double     hypre_F90_Dbl;

@@ -57,7 +57,7 @@ hypre_F90_IFACE(hypre_parprintvector, HYPRE_PARPRINTVECTOR)
 
 void
 hypre_F90_IFACE(hypre_parreadvector, HYPRE_PARREADVECTOR)
-               (HYPRE_Int *comm, char *file, HYPRE_Int *ierr)
+               (hypre_F90_Comm *comm, char *file, HYPRE_Int *ierr)
 {
    *ierr = 0;
 
@@ -94,7 +94,7 @@ hypre_F90_IFACE(hypre_parcsrmultivectorprint, HYPRE_PARCSRMULTIVECTORPRINT)
 
 void
 hypre_F90_IFACE(hypre_parcsrmultivectorread, HYPRE_PARCSRMULTIVECTORREAD)
-               (HYPRE_Int *comm, hypre_F90_Obj *ii, char *file, HYPRE_Int *ierr)
+               (hypre_F90_Comm *comm, hypre_F90_Obj *ii, char *file, HYPRE_Int *ierr)
 {
    *ierr = 0;
 

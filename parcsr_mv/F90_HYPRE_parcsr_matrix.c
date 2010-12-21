@@ -27,7 +27,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixcreate, HYPRE_PARCSRMATRIXCREATE)( HYPRE_Int      *comm,
+hypre_F90_IFACE(hypre_parcsrmatrixcreate, HYPRE_PARCSRMATRIXCREATE)( hypre_F90_Comm *comm,
                                         HYPRE_Int      *global_num_rows,
                                         HYPRE_Int      *global_num_cols,
                                         HYPRE_Int      *row_starts,
@@ -78,7 +78,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixinitialize, HYPRE_PARCSRMATRIXINITIALIZE)( hyp
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixread, HYPRE_PARCSRMATRIXREAD)( HYPRE_Int      *comm,
+hypre_F90_IFACE(hypre_parcsrmatrixread, HYPRE_PARCSRMATRIXREAD)( hypre_F90_Comm *comm,
                                          char     *file_name,
                                          hypre_F90_Obj *matrix,
                                          HYPRE_Int      *ierr       )
@@ -120,7 +120,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixprint, HYPRE_PARCSRMATRIXPRINT)( hypre_F90_Obj
 
 void 
 hypre_F90_IFACE(hypre_parcsrmatrixgetcomm, HYPRE_PARCSRMATRIXGETCOMM)( hypre_F90_Obj *matrix,
-                                            HYPRE_Int      *comm,
+                                            hypre_F90_Comm *comm,
                                             HYPRE_Int      *ierr    )
 {
    *ierr = (HYPRE_Int) ( HYPRE_ParCSRMatrixGetComm( (HYPRE_ParCSRMatrix) *matrix,
@@ -256,7 +256,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixrestorerow, HYPRE_PARCSRMATRIXRESTOREROW)( hyp
 
 void
 hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix, HYPRE_CSRMATRIXTOPARCSRMATRIX)
-                                          (HYPRE_Int      *comm,
+                                          (hypre_F90_Comm *comm,
                                            hypre_F90_Obj *A_CSR,
                                            HYPRE_Int      *row_partitioning,  
                                            HYPRE_Int      *col_partitioning,  
@@ -277,7 +277,7 @@ hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix, HYPRE_CSRMATRIXTOPARCSRMATRIX)
 
 void
 hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix_withnewpartitioning, HYPRE_CSRMATRIXTOPARCSRMATRIX_WITHNEWPARTITIONING)
-                                          (HYPRE_Int      *comm,
+                                          (hypre_F90_Comm *comm,
                                            hypre_F90_Obj *A_CSR,
                                            hypre_F90_Obj *matrix,
                                            HYPRE_Int      *ierr   )
