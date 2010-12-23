@@ -30,14 +30,14 @@ typedef struct
    MPI_Comm                comm;
                        
    double                  tol;                /* not yet used */
-   HYPRE_Int                     max_iter;
-   HYPRE_Int                     rel_change;         /* not yet used */
-   HYPRE_Int                     zero_guess;
+   HYPRE_Int               max_iter;
+   HYPRE_Int               rel_change;         /* not yet used */
+   HYPRE_Int               zero_guess;
    double                  weight;
                          
-   HYPRE_Int                     num_nodesets;
-   HYPRE_Int                    *nodeset_sizes;
-   HYPRE_Int                    *nodeset_ranks;
+   HYPRE_Int               num_nodesets;
+   HYPRE_Int              *nodeset_sizes;
+   HYPRE_Int              *nodeset_ranks;
    hypre_Index            *nodeset_strides;
    hypre_Index           **nodeset_indices;
                        
@@ -47,7 +47,7 @@ typedef struct
 
    hypre_SStructPVector   *t;
 
-   HYPRE_Int                   **diag_rank;
+   HYPRE_Int             **diag_rank;
 
    /* defines sends and recieves for each struct_vector */
    hypre_ComputePkg     ***svec_compute_pkgs;
@@ -68,9 +68,9 @@ typedef struct
 
 
    /* log info (always logged) */
-   HYPRE_Int                     num_iterations;
-   HYPRE_Int                     time_index;
-   HYPRE_Int                     flops;
+   HYPRE_Int               num_iterations;
+   HYPRE_Int               time_index;
+   HYPRE_Int               flops;
 
 } hypre_NodeRelaxData;
 
@@ -130,9 +130,9 @@ HYPRE_Int
 hypre_NodeRelaxDestroy( void *relax_vdata )
 {
    hypre_NodeRelaxData  *relax_data = relax_vdata;
-   HYPRE_Int                   i,vi;
-   HYPRE_Int                   ierr = 0;
-   HYPRE_Int                   nvars;
+   HYPRE_Int             i,vi;
+   HYPRE_Int             ierr = 0;
+   HYPRE_Int             nvars;
 
    if (relax_data)
    {
@@ -192,12 +192,12 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 {
    hypre_NodeRelaxData   *relax_data = relax_vdata;
 
-   HYPRE_Int                    num_nodesets    = (relax_data -> num_nodesets);
-   HYPRE_Int                   *nodeset_sizes   = (relax_data -> nodeset_sizes);
+   HYPRE_Int              num_nodesets    = (relax_data -> num_nodesets);
+   HYPRE_Int             *nodeset_sizes   = (relax_data -> nodeset_sizes);
    hypre_Index           *nodeset_strides = (relax_data -> nodeset_strides);
    hypre_Index          **nodeset_indices = (relax_data -> nodeset_indices);
    hypre_SStructPVector  *t;
-   HYPRE_Int                  **diag_rank;
+   HYPRE_Int            **diag_rank;
    double               **A_loc;
    double                *x_loc;
    double              ***Ap;
@@ -218,33 +218,33 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
    hypre_StructStencil   *sstencil;
    hypre_Index           *sstencil_shape;
-   HYPRE_Int                    sstencil_size;
+   HYPRE_Int              sstencil_size;
 
    hypre_StructStencil   *sstencil_union;
    hypre_Index           *sstencil_union_shape;
-   HYPRE_Int                    sstencil_union_count;
+   HYPRE_Int              sstencil_union_count;
 
    hypre_BoxArrayArray   *orig_indt_boxes;
    hypre_BoxArrayArray   *orig_dept_boxes;
    hypre_BoxArrayArray   *box_aa;
    hypre_BoxArray        *box_a;
    hypre_Box             *box;
-   HYPRE_Int                    box_aa_size;
-   HYPRE_Int                    box_a_size;
+   HYPRE_Int              box_aa_size;
+   HYPRE_Int              box_a_size;
    hypre_BoxArrayArray   *new_box_aa;
    hypre_BoxArray        *new_box_a;
    hypre_Box             *new_box;
 
    double                 scale;
-   HYPRE_Int                    frac;
+   HYPRE_Int              frac;
 
-   HYPRE_Int                    i, j, k, p, m, s, compute_i;
+   HYPRE_Int              i, j, k, p, m, s, compute_i;
 
-   HYPRE_Int                    vi, vj;
-   HYPRE_Int                    nvars;
-   HYPRE_Int                    dim;
+   HYPRE_Int              vi, vj;
+   HYPRE_Int              nvars;
+   HYPRE_Int              dim;
 
-   HYPRE_Int                    ierr = 0;
+   HYPRE_Int              ierr = 0;
                        
    /*----------------------------------------------------------
     * Set up the temp vector
@@ -554,14 +554,14 @@ hypre_NodeRelax(  void               *relax_vdata,
 {
    hypre_NodeRelaxData   *relax_data = relax_vdata;
 
-   HYPRE_Int                    max_iter         = (relax_data -> max_iter);
-   HYPRE_Int                    zero_guess       = (relax_data -> zero_guess);
+   HYPRE_Int              max_iter         = (relax_data -> max_iter);
+   HYPRE_Int              zero_guess       = (relax_data -> zero_guess);
    double                 weight           = (relax_data -> weight);
-   HYPRE_Int                    num_nodesets     = (relax_data -> num_nodesets);
-   HYPRE_Int                   *nodeset_ranks    = (relax_data -> nodeset_ranks);
+   HYPRE_Int              num_nodesets     = (relax_data -> num_nodesets);
+   HYPRE_Int             *nodeset_ranks    = (relax_data -> nodeset_ranks);
    hypre_Index           *nodeset_strides  = (relax_data -> nodeset_strides);
    hypre_SStructPVector  *t                = (relax_data -> t);
-   HYPRE_Int                  **diag_rank        = (relax_data -> diag_rank);
+   HYPRE_Int            **diag_rank        = (relax_data -> diag_rank);
    hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
    hypre_ComputePkg    ***svec_compute_pkgs= (relax_data ->
                                                svec_compute_pkgs);
@@ -579,10 +579,10 @@ hypre_NodeRelax(  void               *relax_vdata,
    hypre_Box             *x_data_box;
    hypre_Box             *t_data_box;
                         
-   HYPRE_Int                    Ai;
-   HYPRE_Int                    bi;
-   HYPRE_Int                    xi;
-   HYPRE_Int                    ti;
+   HYPRE_Int              Ai;
+   HYPRE_Int              bi;
+   HYPRE_Int              xi;
+   HYPRE_Int              ti;
                         
    double               **A_loc = (relax_data -> A_loc);
    double                *x_loc = (relax_data -> x_loc);
@@ -601,16 +601,16 @@ hypre_NodeRelax(  void               *relax_vdata,
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   HYPRE_Int                    stencil_size;
+   HYPRE_Int              stencil_size;
                         
-   HYPRE_Int                    iter, p, compute_i, i, j, si;
-   HYPRE_Int                    loopi, loopj, loopk;
-   HYPRE_Int                    nodeset;
+   HYPRE_Int              iter, p, compute_i, i, j, si;
+   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              nodeset;
 
-   HYPRE_Int                    nvars;
-   HYPRE_Int                    vi, vj;
+   HYPRE_Int              nvars;
+   HYPRE_Int              vi, vj;
 
-   HYPRE_Int                    ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
@@ -992,7 +992,7 @@ hypre_NodeRelaxSetTol( void   *relax_vdata,
                        double  tol         )
 {
    hypre_NodeRelaxData *relax_data = relax_vdata;
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            ierr = 0;
 
    (relax_data -> tol) = tol;
 
@@ -1008,7 +1008,7 @@ hypre_NodeRelaxSetMaxIter( void *relax_vdata,
                            HYPRE_Int   max_iter    )
 {
    hypre_NodeRelaxData *relax_data = relax_vdata;
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            ierr = 0;
 
    (relax_data -> max_iter) = max_iter;
 
@@ -1024,7 +1024,7 @@ hypre_NodeRelaxSetZeroGuess( void *relax_vdata,
                              HYPRE_Int   zero_guess  )
 {
    hypre_NodeRelaxData *relax_data = relax_vdata;
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            ierr = 0;
 
    (relax_data -> zero_guess) = zero_guess;
 
@@ -1040,7 +1040,7 @@ hypre_NodeRelaxSetWeight( void    *relax_vdata,
                           double   weight      )
 {
    hypre_NodeRelaxData *relax_data = relax_vdata;
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            ierr = 0;
 
    (relax_data -> weight) = weight;
 
@@ -1056,8 +1056,8 @@ hypre_NodeRelaxSetNumNodesets( void *relax_vdata,
                                HYPRE_Int   num_nodesets )
 {
    hypre_NodeRelaxData *relax_data = relax_vdata;
-   HYPRE_Int                  i;
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            i;
+   HYPRE_Int            ierr = 0;
 
    /* free up old nodeset memory */
    for (i = 0; i < (relax_data -> num_nodesets); i++)
@@ -1092,14 +1092,14 @@ hypre_NodeRelaxSetNumNodesets( void *relax_vdata,
 
 HYPRE_Int
 hypre_NodeRelaxSetNodeset( void        *relax_vdata,
-                           HYPRE_Int          nodeset,
-                           HYPRE_Int          nodeset_size,
+                           HYPRE_Int    nodeset,
+                           HYPRE_Int    nodeset_size,
                            hypre_Index  nodeset_stride,
                            hypre_Index *nodeset_indices )
 {
    hypre_NodeRelaxData *relax_data = relax_vdata;
-   HYPRE_Int                  i;
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            i;
+   HYPRE_Int            ierr = 0;
 
    /* free up old nodeset memory */
    hypre_TFree(relax_data -> nodeset_indices[nodeset]);
@@ -1130,7 +1130,7 @@ hypre_NodeRelaxSetNodesetRank( void *relax_vdata,
                                HYPRE_Int   nodeset_rank )
 {
    hypre_NodeRelaxData *relax_data = relax_vdata;
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            ierr = 0;
 
    (relax_data -> nodeset_ranks[nodeset]) = nodeset_rank;
 
@@ -1146,7 +1146,7 @@ hypre_NodeRelaxSetTempVec( void                 *relax_vdata,
                            hypre_SStructPVector *t           )
 {
    hypre_NodeRelaxData  *relax_data = relax_vdata;
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    hypre_SStructPVectorDestroy(relax_data -> t);
    hypre_SStructPVectorRef(t, &(relax_data -> t));

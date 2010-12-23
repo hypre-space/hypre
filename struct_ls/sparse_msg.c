@@ -165,7 +165,7 @@ hypre_SparseMSGSetTol( void   *smsg_vdata,
                        double  tol        )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> tol) = tol;
  
@@ -181,7 +181,7 @@ hypre_SparseMSGSetMaxIter( void *smsg_vdata,
                            HYPRE_Int   max_iter   )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> max_iter) = max_iter;
  
@@ -198,7 +198,7 @@ hypre_SparseMSGSetJump(  void *smsg_vdata,
 
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            ierr = 0;
 
    (smsg_data -> jump) = jump;
 
@@ -214,7 +214,7 @@ hypre_SparseMSGSetRelChange( void *smsg_vdata,
                              HYPRE_Int   rel_change )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> rel_change) = rel_change;
  
@@ -230,7 +230,7 @@ hypre_SparseMSGSetZeroGuess( void *smsg_vdata,
                              HYPRE_Int   zero_guess )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> zero_guess) = zero_guess;
  
@@ -246,7 +246,7 @@ hypre_SparseMSGSetRelaxType( void *smsg_vdata,
                              HYPRE_Int   relax_type )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> relax_type) = relax_type;
  
@@ -277,7 +277,7 @@ hypre_SparseMSGSetNumPreRelax( void *smsg_vdata,
                                HYPRE_Int   num_pre_relax )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> num_pre_relax) = num_pre_relax;
  
@@ -293,7 +293,7 @@ hypre_SparseMSGSetNumPostRelax( void *smsg_vdata,
                                 HYPRE_Int   num_post_relax )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> num_post_relax) = num_post_relax;
  
@@ -309,7 +309,7 @@ hypre_SparseMSGSetNumFineRelax( void *smsg_vdata,
                                 HYPRE_Int   num_fine_relax )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> num_fine_relax) = num_fine_relax;
  
@@ -325,7 +325,7 @@ hypre_SparseMSGSetLogging( void *smsg_vdata,
                            HYPRE_Int   logging    )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> logging) = logging;
  
@@ -341,7 +341,7 @@ hypre_SparseMSGSetPrintLevel( void *smsg_vdata,
                            HYPRE_Int   print_level    )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
  
    (smsg_data -> print_level) = print_level;
  
@@ -357,7 +357,7 @@ hypre_SparseMSGGetNumIterations( void *smsg_vdata,
                                  HYPRE_Int  *num_iterations )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
 
    *num_iterations = (smsg_data -> num_iterations);
 
@@ -373,11 +373,11 @@ hypre_SparseMSGPrintLogging( void *smsg_vdata,
                              HYPRE_Int   myid       )
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
-   HYPRE_Int             ierr = 0;
-   HYPRE_Int             i;
-   HYPRE_Int             num_iterations  = (smsg_data -> num_iterations);
-   HYPRE_Int             logging   = (smsg_data -> logging);
-   HYPRE_Int           print_level = (smsg_data -> print_level);
+   HYPRE_Int       ierr = 0;
+   HYPRE_Int       i;
+   HYPRE_Int       num_iterations  = (smsg_data -> num_iterations);
+   HYPRE_Int       logging   = (smsg_data -> logging);
+   HYPRE_Int     print_level = (smsg_data -> print_level);
    double         *norms     = (smsg_data -> norms);
    double         *rel_norms = (smsg_data -> rel_norms);
 
@@ -409,12 +409,12 @@ hypre_SparseMSGGetFinalRelativeResidualNorm( void   *smsg_vdata,
 {
    hypre_SparseMSGData *smsg_data = smsg_vdata;
 
-   HYPRE_Int             max_iter        = (smsg_data -> max_iter);
-   HYPRE_Int             num_iterations  = (smsg_data -> num_iterations);
-   HYPRE_Int             logging         = (smsg_data -> logging);
+   HYPRE_Int       max_iter        = (smsg_data -> max_iter);
+   HYPRE_Int       num_iterations  = (smsg_data -> num_iterations);
+   HYPRE_Int       logging         = (smsg_data -> logging);
    double         *rel_norms       = (smsg_data -> rel_norms);
             
-   HYPRE_Int             ierr = 0;
+   HYPRE_Int       ierr = 0;
 
    
    if (logging > 0)

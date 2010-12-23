@@ -37,8 +37,8 @@ typedef struct
    hypre_BoxArray      *base_points;
    hypre_ComputePkg    *compute_pkg;
 
-   HYPRE_Int                  time_index;
-   HYPRE_Int                  flops;
+   HYPRE_Int            time_index;
+   HYPRE_Int            flops;
 
 } hypre_SMGResidualData;
 
@@ -159,10 +159,10 @@ hypre_SMGResidual( void               *residual_vdata,
    hypre_Box              *b_data_box;
    hypre_Box              *r_data_box;
                        
-   HYPRE_Int                     Ai;
-   HYPRE_Int                     xi;
-   HYPRE_Int                     bi;
-   HYPRE_Int                     ri;
+   HYPRE_Int               Ai;
+   HYPRE_Int               xi;
+   HYPRE_Int               bi;
+   HYPRE_Int               ri;
                          
    double                 *Ap0;
    double                 *xp0;
@@ -174,10 +174,10 @@ hypre_SMGResidual( void               *residual_vdata,
                        
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
-   HYPRE_Int                     stencil_size;
+   HYPRE_Int               stencil_size;
 
-   HYPRE_Int                     compute_i, i, j, si;
-   HYPRE_Int                     loopi, loopj, loopk;
+   HYPRE_Int               compute_i, i, j, si;
+   HYPRE_Int               loopi, loopj, loopk;
 
    double            *Ap1, *Ap2;
    double            *Ap3, *Ap4;
@@ -884,8 +884,8 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
                           hypre_Index  base_stride )
 {
    hypre_SMGResidualData *residual_data = residual_vdata;
-   HYPRE_Int                    d;
-   HYPRE_Int                    ierr = 0;
+   HYPRE_Int              d;
+   HYPRE_Int              ierr = 0;
  
    for (d = 0; d < 3; d++)
    {

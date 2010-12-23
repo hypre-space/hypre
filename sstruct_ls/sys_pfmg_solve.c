@@ -40,12 +40,12 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    hypre_SStructPVector *x;
 
    double                tol             = (sys_pfmg_data -> tol);
-   HYPRE_Int                   max_iter        = (sys_pfmg_data -> max_iter);
-   HYPRE_Int                   rel_change      = (sys_pfmg_data -> rel_change);
-   HYPRE_Int                   zero_guess      = (sys_pfmg_data -> zero_guess);
-   HYPRE_Int                   num_pre_relax   = (sys_pfmg_data -> num_pre_relax);
-   HYPRE_Int                   num_post_relax  = (sys_pfmg_data -> num_post_relax);
-   HYPRE_Int                   num_levels      = (sys_pfmg_data -> num_levels);
+   HYPRE_Int             max_iter        = (sys_pfmg_data -> max_iter);
+   HYPRE_Int             rel_change      = (sys_pfmg_data -> rel_change);
+   HYPRE_Int             zero_guess      = (sys_pfmg_data -> zero_guess);
+   HYPRE_Int             num_pre_relax   = (sys_pfmg_data -> num_pre_relax);
+   HYPRE_Int             num_post_relax  = (sys_pfmg_data -> num_post_relax);
+   HYPRE_Int             num_levels      = (sys_pfmg_data -> num_levels);
    hypre_SStructPMatrix  **A_l           = (sys_pfmg_data -> A_l);
    hypre_SStructPMatrix  **P_l           = (sys_pfmg_data -> P_l);
    hypre_SStructPMatrix  **RT_l          = (sys_pfmg_data -> RT_l);
@@ -57,17 +57,17 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    void                **matvec_data_l   = (sys_pfmg_data -> matvec_data_l);
    void                **restrict_data_l = (sys_pfmg_data -> restrict_data_l);
    void                **interp_data_l   = (sys_pfmg_data -> interp_data_l);
-   HYPRE_Int                   logging         = (sys_pfmg_data -> logging);
+   HYPRE_Int             logging         = (sys_pfmg_data -> logging);
    double               *norms           = (sys_pfmg_data -> norms);
    double               *rel_norms       = (sys_pfmg_data -> rel_norms);
-   HYPRE_Int                  *active_l        = (sys_pfmg_data -> active_l);
+   HYPRE_Int            *active_l        = (sys_pfmg_data -> active_l);
 
    double                b_dot_b, r_dot_r, eps;
    double                e_dot_e, x_dot_x;
                     
-   HYPRE_Int                   i, l;
+   HYPRE_Int             i, l;
                     
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif

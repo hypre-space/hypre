@@ -66,12 +66,12 @@ hypre_SMGSolve( void               *smg_vdata,
    hypre_SMGData        *smg_data = smg_vdata;
 
    double                tol             = (smg_data -> tol);
-   HYPRE_Int                   max_iter        = (smg_data -> max_iter);
-   HYPRE_Int                   rel_change      = (smg_data -> rel_change);
-   HYPRE_Int                   zero_guess      = (smg_data -> zero_guess);
-   HYPRE_Int                   num_levels      = (smg_data -> num_levels);
-   HYPRE_Int                   num_pre_relax   = (smg_data -> num_pre_relax);
-   HYPRE_Int                   num_post_relax  = (smg_data -> num_post_relax);
+   HYPRE_Int             max_iter        = (smg_data -> max_iter);
+   HYPRE_Int             rel_change      = (smg_data -> rel_change);
+   HYPRE_Int             zero_guess      = (smg_data -> zero_guess);
+   HYPRE_Int             num_levels      = (smg_data -> num_levels);
+   HYPRE_Int             num_pre_relax   = (smg_data -> num_pre_relax);
+   HYPRE_Int             num_post_relax  = (smg_data -> num_post_relax);
    hypre_IndexRef        base_index      = (smg_data -> base_index);
    hypre_IndexRef        base_stride     = (smg_data -> base_stride);
    hypre_StructMatrix  **A_l             = (smg_data -> A_l);
@@ -85,16 +85,16 @@ hypre_SMGSolve( void               *smg_vdata,
    void                **residual_data_l = (smg_data -> residual_data_l);
    void                **restrict_data_l = (smg_data -> restrict_data_l);
    void                **interp_data_l   = (smg_data -> interp_data_l);
-   HYPRE_Int                   logging         = (smg_data -> logging);
+   HYPRE_Int             logging         = (smg_data -> logging);
    double               *norms           = (smg_data -> norms);
    double               *rel_norms       = (smg_data -> rel_norms);
 
    double                b_dot_b, r_dot_r, eps;
    double                e_dot_e, x_dot_x;
                     
-   HYPRE_Int                   i, l;
+   HYPRE_Int             i, l;
                     
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif

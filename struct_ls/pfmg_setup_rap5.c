@@ -40,19 +40,19 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
                            hypre_StructMatrix *A,
                            hypre_StructMatrix *P,
                            hypre_StructGrid   *coarse_grid,
-                           HYPRE_Int                 cdir        )
+                           HYPRE_Int           cdir        )
 {
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;
    hypre_StructStencil   *RAP_stencil;
-   HYPRE_Int                    RAP_stencil_size;
-   HYPRE_Int                    RAP_stencil_dim;
-   HYPRE_Int                    RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int              RAP_stencil_size;
+   HYPRE_Int              RAP_stencil_dim;
+   HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
 
    hypre_Index            index_temp;
-   HYPRE_Int                    j, i;
-   HYPRE_Int                    stencil_rank;
+   HYPRE_Int              j, i;
+   HYPRE_Int              stencil_rank;
  
    RAP_stencil_dim = 2;
 
@@ -159,22 +159,22 @@ HYPRE_Int
 hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                           hypre_StructMatrix *P,
                           hypre_StructMatrix *R,
-                          HYPRE_Int                 cdir,
+                          HYPRE_Int           cdir,
                           hypre_Index         cindex,
                           hypre_Index         cstride,
                           hypre_StructMatrix *RAP     )
 {
    hypre_StructGrid     *fgrid;
    hypre_BoxArray       *fgrid_boxes;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
 
-   HYPRE_Int                   constant_coefficient;
-   HYPRE_Int                   fi, ci;
+   HYPRE_Int             constant_coefficient;
+   HYPRE_Int             fi, ci;
 
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    fgrid = hypre_StructMatrixGrid(A);
    fgrid_boxes = hypre_StructGridBoxes(fgrid);
@@ -246,7 +246,7 @@ hypre_PFMGBuildCoarseOp5_onebox_CC0(
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -258,18 +258,18 @@ hypre_PFMGBuildCoarseOp5_onebox_CC0(
    hypre_StructGrid     *fgrid;
    hypre_BoxArray       *fgrid_boxes;
    hypre_Box            *fgrid_box;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
    hypre_Box            *cgrid_box;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
    hypre_Index           fstart;
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int                   loopi, loopj, loopk;
+   HYPRE_Int             loopi, loopj, loopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
@@ -279,14 +279,14 @@ hypre_PFMGBuildCoarseOp5_onebox_CC0(
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_ce, *rap_cn;
    double                west, east;
-   HYPRE_Int                   iA, iAm1, iAp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iPm1, iPp1;
+   HYPRE_Int             iA, iAm1, iAp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iPm1, iPp1;
                       
-   HYPRE_Int                   yOffsetA; 
-   HYPRE_Int                   yOffsetP; 
+   HYPRE_Int             yOffsetA; 
+   HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    /*hypre_printf("2d 0\n");*/
    stridef = cstride;
@@ -460,7 +460,7 @@ hypre_PFMGBuildCoarseOp5_onebox_CC1(
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -472,11 +472,11 @@ hypre_PFMGBuildCoarseOp5_onebox_CC1(
    hypre_StructGrid     *fgrid;
    hypre_BoxArray       *fgrid_boxes;
    hypre_Box            *fgrid_box;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
    hypre_Box            *cgrid_box;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
    hypre_Index           fstart;
@@ -491,14 +491,14 @@ hypre_PFMGBuildCoarseOp5_onebox_CC1(
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_ce, *rap_cn;
    double                west, east;
-   HYPRE_Int                   iA, iAm1, iAp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iPm1, iPp1;
+   HYPRE_Int             iA, iAm1, iAp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iPm1, iPp1;
                       
-   HYPRE_Int                   yOffsetA; 
-   HYPRE_Int                   yOffsetP; 
+   HYPRE_Int             yOffsetA; 
+   HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    /*hypre_printf("2d 1\n");*/
    stridef = cstride;
@@ -663,7 +663,7 @@ hypre_PFMGBuildCoarseOp5_onebox_CC2(
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -675,19 +675,19 @@ hypre_PFMGBuildCoarseOp5_onebox_CC2(
    hypre_StructGrid     *fgrid;
    hypre_BoxArray       *fgrid_boxes;
    hypre_Box            *fgrid_box;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
    hypre_Box            *cgrid_box;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
    hypre_Index           fstart;
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int                   loopi, loopj, loopk;
-   HYPRE_Int                   fbi, floopi, floopj, floopk;
+   HYPRE_Int             loopi, loopj, loopk;
+   HYPRE_Int             fbi, floopi, floopj, floopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
@@ -706,14 +706,14 @@ hypre_PFMGBuildCoarseOp5_onebox_CC2(
    double                west, east, north, south;
    double                diag, diagcorr, diagm, diagp;
 
-   HYPRE_Int                   iA, iAm1, iAp1, iA_offd;
-   HYPRE_Int                   iAc;
+   HYPRE_Int             iA, iAm1, iAp1, iA_offd;
+   HYPRE_Int             iAc;
                       
-   HYPRE_Int                   yOffsetA; 
-   HYPRE_Int                   yOffsetP; 
+   HYPRE_Int             yOffsetA; 
+   HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int                   ierr = 0;
-   HYPRE_Int                   bdy;
+   HYPRE_Int             ierr = 0;
+   HYPRE_Int             bdy;
 
    /*hypre_printf("2d 2\n");*/
    stridef = cstride;

@@ -28,8 +28,8 @@ hypre_FacLocalRelax(void                 *relax_vdata,
                     hypre_SStructPMatrix *A,
                     hypre_SStructPVector *x,
                     hypre_SStructPVector *b,
-                    HYPRE_Int                   num_relax,
-                    HYPRE_Int                  *zero_guess)
+                    HYPRE_Int             num_relax,
+                    HYPRE_Int            *zero_guess)
 {
    hypre_SysPFMGRelaxSetPreRelax(relax_vdata);
    hypre_SysPFMGRelaxSetMaxIter(relax_vdata, num_relax);

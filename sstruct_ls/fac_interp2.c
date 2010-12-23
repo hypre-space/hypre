@@ -27,16 +27,16 @@
  *--------------------------------------------------------------------------*/
 typedef struct
 {
-   HYPRE_Int                   nvars;
-   HYPRE_Int                   ndim;
+   HYPRE_Int             nvars;
+   HYPRE_Int             ndim;
    hypre_Index           stride;
 
    hypre_SStructPVector *recv_cvectors;
-   HYPRE_Int                 **recv_boxnum_map;   /* mapping between the boxes of the
+   HYPRE_Int           **recv_boxnum_map;   /* mapping between the boxes of the
                                                recv_grid and the given grid */
    hypre_BoxArrayArray **identity_arrayboxes;
    hypre_BoxArrayArray **ownboxes;
-   HYPRE_Int                ***own_cboxnums;
+   HYPRE_Int          ***own_cboxnums;
 
    hypre_CommPkg       **interlevel_comm;
    hypre_CommPkg       **gnodes_comm_pkg;
@@ -51,7 +51,7 @@ typedef struct
 HYPRE_Int
 hypre_FacSemiInterpCreate2( void **fac_interp_vdata_ptr )
 {
-   HYPRE_Int                       ierr= 0;
+   HYPRE_Int                 ierr= 0;
    hypre_FacSemiInterpData2  *fac_interp_data;
 
    fac_interp_data = hypre_CTAlloc(hypre_FacSemiInterpData2, 1);
@@ -66,10 +66,10 @@ hypre_FacSemiInterpCreate2( void **fac_interp_vdata_ptr )
 HYPRE_Int
 hypre_FacSemiInterpDestroy2( void *fac_interp_vdata)
 {
-   HYPRE_Int                       ierr = 0;
+   HYPRE_Int                 ierr = 0;
 
    hypre_FacSemiInterpData2 *fac_interp_data = fac_interp_vdata;
-   HYPRE_Int                       i, j, size;
+   HYPRE_Int                 i, j, size;
 
    if (fac_interp_data)
    {
@@ -123,11 +123,11 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                            hypre_SStructPVector *ec,
                            hypre_Index           rfactors)
 {
-   HYPRE_Int                       ierr = 0;
+   HYPRE_Int                 ierr = 0;
 
    hypre_FacSemiInterpData2 *fac_interp_data = fac_interp_vdata;
-   HYPRE_Int                       part_fine= 1;
-   HYPRE_Int                       part_crse= 0;
+   HYPRE_Int                 part_fine= 1;
+   HYPRE_Int                 part_crse= 0;
 
    hypre_CommPkg           **gnodes_comm_pkg;
    hypre_CommPkg           **interlevel_comm;
@@ -135,7 +135,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
    hypre_SStructPVector     *recv_cvectors;
    hypre_SStructPGrid       *recv_cgrid;
-   HYPRE_Int                     **recv_boxnum_map;
+   HYPRE_Int               **recv_boxnum_map;
    hypre_SStructGrid        *temp_grid;
 
    hypre_SStructPGrid       *pgrid;
@@ -147,33 +147,33 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    hypre_BoxArrayArray     **ownboxes;
 
    hypre_BoxArrayArray     **send_boxes, *send_rboxes;
-   HYPRE_Int                    ***send_processes;
-   HYPRE_Int                    ***send_remote_boxnums;
+   HYPRE_Int              ***send_processes;
+   HYPRE_Int              ***send_remote_boxnums;
 
    hypre_BoxArrayArray     **recv_boxes, *recv_rboxes;
-   HYPRE_Int                    ***recv_processes;
-   HYPRE_Int                    ***recv_remote_boxnums;
+   HYPRE_Int              ***recv_processes;
+   HYPRE_Int              ***recv_remote_boxnums;
 
    hypre_BoxArray           *boxarray;
    hypre_BoxArray           *tmp_boxarray, *intersect_boxes;
    hypre_Box                 box, scaled_box;
-   HYPRE_Int                    ***own_cboxnums;
+   HYPRE_Int              ***own_cboxnums;
 
    hypre_BoxManager         *boxman1;
    hypre_BoxManEntry       **boxman_entries;
-   HYPRE_Int                       nboxman_entries;
+   HYPRE_Int                 nboxman_entries;
 
-   HYPRE_Int                       nvars= hypre_SStructPVectorNVars(ef);
-   HYPRE_Int                       vars;
+   HYPRE_Int                 nvars= hypre_SStructPVectorNVars(ef);
+   HYPRE_Int                 vars;
 
    hypre_Index               zero_index, index;
    hypre_Index               ilower, iupper;
-   HYPRE_Int                      *num_ghost;
+   HYPRE_Int                *num_ghost;
 
-   HYPRE_Int                       ndim, i, j, k, fi, ci;
-   HYPRE_Int                       cnt1, cnt2;
-   HYPRE_Int                       proc, myproc, tot_procs;
-   HYPRE_Int                       num_values;
+   HYPRE_Int                 ndim, i, j, k, fi, ci;
+   HYPRE_Int                 cnt1, cnt2;
+   HYPRE_Int                 proc, myproc, tot_procs;
+   HYPRE_Int                 num_values;
 
    double                  **weights;
    double                    refine_factors_2recp[3];
@@ -666,9 +666,9 @@ hypre_FAC_IdentityInterp2(void                 *  fac_interp_vdata,
    hypre_FacSemiInterpData2 *interp_data= fac_interp_vdata;
    hypre_BoxArrayArray     **identity_boxes= interp_data-> identity_arrayboxes; 
 
-   HYPRE_Int                     part_crse= 0;
+   HYPRE_Int               part_crse= 0;
 
-   HYPRE_Int                     ierr     = 0;
+   HYPRE_Int               ierr     = 0;
 
   /*-----------------------------------------------------------------------
    * Compute e at coarse points (injection).
@@ -698,11 +698,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_CommPkg          **comm_pkg       = interp_data-> gnodes_comm_pkg;
    hypre_CommPkg          **interlevel_comm= interp_data-> interlevel_comm;
    hypre_SStructPVector    *recv_cvectors  = interp_data-> recv_cvectors;
-   HYPRE_Int                    **recv_boxnum_map= interp_data-> recv_boxnum_map;
+   HYPRE_Int              **recv_boxnum_map= interp_data-> recv_boxnum_map;
    hypre_BoxArrayArray    **ownboxes       = interp_data-> ownboxes;
-   HYPRE_Int                   ***own_cboxnums   = interp_data-> own_cboxnums;
+   HYPRE_Int             ***own_cboxnums   = interp_data-> own_cboxnums;
    double                 **weights        = interp_data-> weights;
-   HYPRE_Int                      ndim           = interp_data-> ndim;
+   HYPRE_Int                ndim           = interp_data-> ndim;
 
    hypre_CommHandle       *comm_handle;
 
@@ -716,8 +716,8 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_BoxArrayArray    *own_cboxes;
    hypre_BoxArray         *own_abox;
    hypre_Box              *ownbox;
-   HYPRE_Int                   **var_boxnums;
-   HYPRE_Int                    *cboxnums;
+   HYPRE_Int             **var_boxnums;
+   HYPRE_Int              *cboxnums;
   
    hypre_Box              *xc_dbox;
    hypre_Box              *e_dbox;
@@ -729,8 +729,8 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_StructVector     *e_var;
    hypre_StructVector     *recv_var;
 
-   HYPRE_Int                     xci;
-   HYPRE_Int                     ei;
+   HYPRE_Int               xci;
+   HYPRE_Int               ei;
 
    double               ***xcp;
    double               ***ep;
@@ -744,17 +744,17 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_Index             intersect_size;
    hypre_Index             zero_index, temp_index1, temp_index2;
 
-   HYPRE_Int                     fi, bi;
-   HYPRE_Int                     loopi, loopj, loopk;
-   HYPRE_Int                     nvars, var;
+   HYPRE_Int               fi, bi;
+   HYPRE_Int               loopi, loopj, loopk;
+   HYPRE_Int               nvars, var;
 
-   HYPRE_Int                     i, j, k, offset_ip1, offset_jp1, offset_kp1;
-   HYPRE_Int                     ishift, jshift, kshift;
-   HYPRE_Int                     ptr_ishift, ptr_jshift, ptr_kshift;
-   HYPRE_Int                     imax, jmax, kmax;
-   HYPRE_Int                     jsize, ksize;
+   HYPRE_Int               i, j, k, offset_ip1, offset_jp1, offset_kp1;
+   HYPRE_Int               ishift, jshift, kshift;
+   HYPRE_Int               ptr_ishift, ptr_jshift, ptr_kshift;
+   HYPRE_Int               imax, jmax, kmax;
+   HYPRE_Int               jsize, ksize;
 
-   HYPRE_Int                     part_fine= 1;
+   HYPRE_Int               part_fine= 1;
 
    double                  xweight1, xweight2;
    double                  yweight1, yweight2;

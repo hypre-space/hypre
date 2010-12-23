@@ -27,19 +27,19 @@
 hypre_SStructPMatrix *
 hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
                              hypre_SStructPGrid   *cgrid,
-                             HYPRE_Int                   cdir  )
+                             HYPRE_Int             cdir  )
 {
    hypre_SStructPMatrix  *P;
 
    hypre_Index           *stencil_shape;
-   HYPRE_Int                    stencil_size;
+   HYPRE_Int              stencil_size;
                        
-   HYPRE_Int                    ndim;
+   HYPRE_Int              ndim;
 
-   HYPRE_Int                    nvars;
+   HYPRE_Int              nvars;
    hypre_SStructStencil **P_stencils;
 
-   HYPRE_Int                    i,s;
+   HYPRE_Int              i,s;
 
    /* set up stencil_shape */
    stencil_size = 2;
@@ -81,17 +81,17 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
 
 HYPRE_Int
 hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *A,
-                            HYPRE_Int                   cdir,
+                            HYPRE_Int             cdir,
                             hypre_Index           findex,
                             hypre_Index           stride,
                             hypre_SStructPMatrix *P      )
 {
-   HYPRE_Int                    nvars;
+   HYPRE_Int              nvars;
    hypre_StructMatrix    *A_s;
    hypre_StructMatrix    *P_s;
-   HYPRE_Int                    vi;
+   HYPRE_Int              vi;
 
-   HYPRE_Int                    ierr;
+   HYPRE_Int              ierr;
 
    nvars = hypre_SStructPMatrixNVars(A);
 

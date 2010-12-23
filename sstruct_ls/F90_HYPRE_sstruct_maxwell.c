@@ -316,7 +316,7 @@ hypre_F90_IFACE(hypre_sstructmaxwellgetfinalrel, HYPRE_SSTRUCTMAXWELLGETFINALREL
 void
 hypre_F90_IFACE(hypre_sstructmaxwellphysbdy, HYPRE_SSTRUCTMAXWELLPHYSBDY) 
                                                 (hypre_F90_Obj *grid_l, 
-                                                 HYPRE_Int       *num_levels,
+                                                 HYPRE_Int *num_levels,
                                                  HYPRE_Int      (*rfactors)[3],
                                                  HYPRE_Int      (***BdryRanks_ptr),
                                                  HYPRE_Int      (**BdryRanksCnt_ptr),

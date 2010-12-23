@@ -33,16 +33,16 @@ typedef HYPRE_Int hypre_SStructVariable;
 typedef struct
 {
    HYPRE_SStructVariable  type;
-   HYPRE_Int                    rank;     /* local rank */
-   HYPRE_Int                    proc;
+   HYPRE_Int              rank;     /* local rank */
+   HYPRE_Int              proc;
 
 } hypre_SStructUVar;
 
 typedef struct
 {
-   HYPRE_Int                    part;
+   HYPRE_Int              part;
    hypre_Index            cell;
-   HYPRE_Int                    nuvars;
+   HYPRE_Int              nuvars;
    hypre_SStructUVar     *uvars;
 
 } hypre_SStructUCVar;
@@ -50,8 +50,8 @@ typedef struct
 typedef struct
 {
    MPI_Comm                comm;             /* TODO: use different comms */
-   HYPRE_Int                     ndim;
-   HYPRE_Int                     nvars;            /* number of variables */
+   HYPRE_Int               ndim;
+   HYPRE_Int               nvars;            /* number of variables */
    HYPRE_SStructVariable  *vartypes;         /* types of variables */
    hypre_StructGrid       *sgrids[8];        /* struct grids for each vartype */
    hypre_BoxArray         *iboxarrays[8];    /* interface boxes */
@@ -59,22 +59,22 @@ typedef struct
    hypre_BoxArray         *pneighbors;
    hypre_Index            *pnbor_offsets;
 
-   HYPRE_Int                     local_size;       /* Number of variables locally */
-   HYPRE_Int                     global_size;      /* Total number of variables */
+   HYPRE_Int               local_size;       /* Number of variables locally */
+   HYPRE_Int               global_size;      /* Total number of variables */
 
    hypre_Index             periodic;         /* Indicates if pgrid is periodic */
 
   /* GEC0902 additions for ghost expansion of boxes */
 
-   HYPRE_Int                     ghlocal_size;     /* Number of vars including ghosts */
+   HYPRE_Int               ghlocal_size;     /* Number of vars including ghosts */
                            
-   HYPRE_Int                     cell_sgrid_done;  /* =1 implies cell grid already assembled */
+   HYPRE_Int               cell_sgrid_done;  /* =1 implies cell grid already assembled */
 } hypre_SStructPGrid;
 
 typedef struct
 {
    hypre_Box    box;
-   HYPRE_Int          part;
+   HYPRE_Int    part;
    hypre_Index  ilower; /* box ilower, but on the neighbor index-space */
    hypre_Index  coord;  /* lives on local index-space */
    hypre_Index  dir;    /* lives on local index-space */
@@ -97,13 +97,13 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Int          type;
-   HYPRE_Int          offset;   /* minimum offset for this box */
-   HYPRE_Int          ghoffset; /* minimum offset ghost for this box */
-   HYPRE_Int          proc;      /* redundant with the proc in the entry, but
+   HYPRE_Int    type;
+   HYPRE_Int    offset;   /* minimum offset for this box */
+   HYPRE_Int    ghoffset; /* minimum offset ghost for this box */
+   HYPRE_Int    proc;      /* redundant with the proc in the entry, but
                               makes some coding easier */
-   HYPRE_Int          boxnum;   /* this is different from the entry id */ 
-   HYPRE_Int          part;     /* part the box lives on */
+   HYPRE_Int    boxnum;   /* this is different from the entry id */ 
+   HYPRE_Int    part;     /* part the box lives on */
    hypre_Index  ilower;   /* box ilower, but on the neighbor index-space */
    hypre_Index  coord;    /* lives on local index-space */
    hypre_Index  dir;      /* lives on local index-space */
@@ -115,56 +115,56 @@ typedef struct
 typedef struct
 {
    hypre_CommInfo  *comm_info;
-   HYPRE_Int              send_part;
-   HYPRE_Int              recv_part;
-   HYPRE_Int              send_var;
-   HYPRE_Int              recv_var;
+   HYPRE_Int        send_part;
+   HYPRE_Int        recv_part;
+   HYPRE_Int        send_var;
+   HYPRE_Int        recv_var;
    
 } hypre_SStructCommInfo;
 
 typedef struct hypre_SStructGrid_struct
 {
    MPI_Comm                   comm;
-   HYPRE_Int                        ndim;
-   HYPRE_Int                        nparts;
+   HYPRE_Int                  ndim;
+   HYPRE_Int                  nparts;
                           
    /* s-variable info */  
    hypre_SStructPGrid       **pgrids;
                           
    /* neighbor info */    
-   HYPRE_Int                       *nneighbors;
+   HYPRE_Int                 *nneighbors;
    hypre_SStructNeighbor    **neighbors;
    hypre_Index              **nbor_offsets;
-   HYPRE_Int                      **nvneighbors;
+   HYPRE_Int                **nvneighbors;
    hypre_SStructNeighbor   ***vneighbors;
    hypre_SStructCommInfo    **vnbor_comm_info; /* for updating shared data */
-   HYPRE_Int                        vnbor_ncomms;
+   HYPRE_Int                  vnbor_ncomms;
 
    /* u-variables info: During construction, array entries are consecutive.
     * After 'Assemble', entries are referenced via local cell rank. */
-   HYPRE_Int                        nucvars;
+   HYPRE_Int                  nucvars;
    hypre_SStructUCVar       **ucvars;
 
    /* info for fem-based user input (for each part) */
-   HYPRE_Int                       *fem_nvars;
-   HYPRE_Int                      **fem_vars;
+   HYPRE_Int                 *fem_nvars;
+   HYPRE_Int                **fem_vars;
    hypre_Index              **fem_offsets;
 
    /* info for mapping (part, index, var) --> rank */
    hypre_BoxManager        ***boxmans;      /* manager for each part, var */
    hypre_BoxManager        ***nbor_boxmans; /* manager for each part, var */
 
-   HYPRE_Int                        start_rank;
+   HYPRE_Int                  start_rank;
 
-   HYPRE_Int                        local_size;  /* Number of variables locally */
-   HYPRE_Int                        global_size; /* Total number of variables */
+   HYPRE_Int                  local_size;  /* Number of variables locally */
+   HYPRE_Int                  global_size; /* Total number of variables */
                               
-   HYPRE_Int                        ref_count;
+   HYPRE_Int                  ref_count;
 
  /* GEC0902 additions for ghost expansion of boxes */
 
-   HYPRE_Int                     ghlocal_size;  /* GEC0902 Number of vars including ghosts */
-   HYPRE_Int                     ghstart_rank;  /* GEC0902 start rank including ghosts  */
+   HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
+   HYPRE_Int               ghstart_rank;  /* GEC0902 start rank including ghosts  */
 
 } hypre_SStructGrid;
 

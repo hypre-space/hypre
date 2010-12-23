@@ -22,7 +22,7 @@ hypre_MaxwellOffProcRow *
 hypre_MaxwellOffProcRowCreate(HYPRE_Int ncols)
 {
    hypre_MaxwellOffProcRow  *OffProcRow;
-   HYPRE_Int                      *cols;
+   HYPRE_Int                *cols;
    double                   *data;
 
    OffProcRow= hypre_CTAlloc(hypre_MaxwellOffProcRow, 1);
@@ -44,7 +44,7 @@ HYPRE_Int
 hypre_MaxwellOffProcRowDestroy(void *OffProcRow_vdata)
 {
    hypre_MaxwellOffProcRow  *OffProcRow= OffProcRow_vdata;
-   HYPRE_Int                       ierr= 0;
+   HYPRE_Int                 ierr= 0;
                                                                                                                                       
    if (OffProcRow)
    {
@@ -92,16 +92,16 @@ hypre_MaxwellOffProcRowDestroy(void *OffProcRow_vdata)
 HYPRE_Int
 hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                                           hypre_ParCSRMatrix   *A,
-                                          HYPRE_Int                  *num_offprocrows_ptr,
+                                          HYPRE_Int            *num_offprocrows_ptr,
                                           hypre_MaxwellOffProcRow ***OffProcRows_ptr)
 {
    MPI_Comm             A_comm= hypre_ParCSRMatrixComm(A);
    MPI_Comm          grid_comm= hypre_SStructGridComm(grid);
 
-   HYPRE_Int             matrix_type= HYPRE_PARCSR;
+   HYPRE_Int       matrix_type= HYPRE_PARCSR;
 
-   HYPRE_Int                  nparts= hypre_SStructGridNParts(grid);
-   HYPRE_Int                  ndim  = hypre_SStructGridNDim(grid);
+   HYPRE_Int            nparts= hypre_SStructGridNParts(grid);
+   HYPRE_Int            ndim  = hypre_SStructGridNDim(grid);
 
    hypre_SStructGrid     *cell_ssgrid;
 
@@ -111,44 +111,44 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    hypre_Box             *box, *cellbox, vbox, boxman_entry_box;
 
    hypre_Index            loop_size, start;
-   HYPRE_Int                    loopi, loopj, loopk;
-   HYPRE_Int                    start_rank, end_rank, rank; 
+   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              start_rank, end_rank, rank; 
 
-   HYPRE_Int                    i, j, k, m, n, t, part, var, nvars;
+   HYPRE_Int              i, j, k, m, n, t, part, var, nvars;
 
    HYPRE_SStructVariable *vartypes;
-   HYPRE_Int                    nbdry_slabs;
+   HYPRE_Int              nbdry_slabs;
    hypre_BoxArray        *recv_slabs, *send_slabs;
    hypre_Index            varoffset;
 
    hypre_BoxManager     **boxmans, *cell_boxman;
    hypre_BoxManEntry    **boxman_entries, *entry;
-   HYPRE_Int                    nboxman_entries;
+   HYPRE_Int              nboxman_entries;
 
    hypre_Index            ishift, jshift, kshift, zero_index;
    hypre_Index            ilower, iupper, index;
 
-   HYPRE_Int                    proc, nprocs, myproc;
-   HYPRE_Int                   *SendToProcs, *RecvFromProcs;
-   HYPRE_Int                  **send_RowsNcols;       /* buffer for rows & ncols */
-   HYPRE_Int                   *send_RowsNcols_alloc; 
-   HYPRE_Int                   *send_ColsData_alloc;
-   HYPRE_Int                   *tot_nsendRowsNcols, *tot_sendColsData;
+   HYPRE_Int              proc, nprocs, myproc;
+   HYPRE_Int             *SendToProcs, *RecvFromProcs;
+   HYPRE_Int            **send_RowsNcols;       /* buffer for rows & ncols */
+   HYPRE_Int             *send_RowsNcols_alloc; 
+   HYPRE_Int             *send_ColsData_alloc;
+   HYPRE_Int             *tot_nsendRowsNcols, *tot_sendColsData;
    double               **vals;  /* buffer for cols & data */
 
-   HYPRE_Int                   *col_inds;
+   HYPRE_Int             *col_inds;
    double                *values;
 
    hypre_MPI_Request           *requests;
    hypre_MPI_Status            *status;
-   HYPRE_Int                  **rbuffer_RowsNcols;
+   HYPRE_Int            **rbuffer_RowsNcols;
    double               **rbuffer_ColsData;
-   HYPRE_Int                    num_sends, num_recvs;
+   HYPRE_Int              num_sends, num_recvs;
 
    hypre_MaxwellOffProcRow **OffProcRows;
-   HYPRE_Int                      *starts;
+   HYPRE_Int                *starts;
 
-   HYPRE_Int                    ierr= 0;
+   HYPRE_Int              ierr= 0;
 
    hypre_MPI_Comm_rank(A_comm, &myproc);
    hypre_MPI_Comm_size(grid_comm, &nprocs);

@@ -31,7 +31,7 @@ typedef struct
    hypre_Index         stride;
    hypre_Index         strideR;
 
-   HYPRE_Int                 time_index;
+   HYPRE_Int           time_index;
 
 } hypre_SparseMSGRestrictData;
 
@@ -73,7 +73,7 @@ hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
-   HYPRE_Int                     ierr = 0;
+   HYPRE_Int               ierr = 0;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -122,10 +122,10 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    hypre_IndexRef          strideR;
 
    hypre_StructGrid       *fgrid;
-   HYPRE_Int                    *fgrid_ids;
+   HYPRE_Int              *fgrid_ids;
    hypre_StructGrid       *cgrid;
    hypre_BoxArray         *cgrid_boxes;
-   HYPRE_Int                    *cgrid_ids;
+   HYPRE_Int              *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
                        
@@ -137,9 +137,9 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    hypre_Box              *r_dbox;
    hypre_Box              *rc_dbox;
                        
-   HYPRE_Int                     Ri;
-   HYPRE_Int                     ri;
-   HYPRE_Int                     rci;
+   HYPRE_Int               Ri;
+   HYPRE_Int               ri;
+   HYPRE_Int               rci;
                          
    double                 *Rp0, *Rp1;
    double                 *rp, *rp0, *rp1;
@@ -154,8 +154,8 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
-   HYPRE_Int                     compute_i, fi, ci, j;
-   HYPRE_Int                     loopi, loopj, loopk;
+   HYPRE_Int               compute_i, fi, ci, j;
+   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things.

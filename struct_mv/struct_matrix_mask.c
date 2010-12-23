@@ -38,22 +38,22 @@
 
 hypre_StructMatrix *
 hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
-                              HYPRE_Int                 num_stencil_indices,
-                              HYPRE_Int                *stencil_indices     )
+                              HYPRE_Int           num_stencil_indices,
+                              HYPRE_Int          *stencil_indices     )
 {
    hypre_StructMatrix   *mask;
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   HYPRE_Int                   stencil_size;
+   HYPRE_Int             stencil_size;
    hypre_Index          *mask_stencil_shape;
-   HYPRE_Int                   mask_stencil_size;
+   HYPRE_Int             mask_stencil_size;
 
    hypre_BoxArray       *data_space;
-   HYPRE_Int                 **data_indices;
-   HYPRE_Int                 **mask_data_indices;
+   HYPRE_Int           **data_indices;
+   HYPRE_Int           **mask_data_indices;
 
-   HYPRE_Int                   i, j;
+   HYPRE_Int             i, j;
 
    stencil       = hypre_StructMatrixStencil(matrix);
    stencil_shape = hypre_StructStencilShape(stencil);

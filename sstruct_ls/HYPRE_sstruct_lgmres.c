@@ -95,7 +95,7 @@ HYPRE_SStructLGMRESSolve( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetKDim( HYPRE_SStructSolver solver,
-                           HYPRE_Int                 k_dim )
+                           HYPRE_Int           k_dim )
 {
    return( HYPRE_LGMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
 }
@@ -105,7 +105,7 @@ HYPRE_SStructLGMRESSetKDim( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetAugDim( HYPRE_SStructSolver solver,
-                           HYPRE_Int                 aug_dim )
+                           HYPRE_Int           aug_dim )
 {
    return( HYPRE_LGMRESSetAugDim( (HYPRE_Solver) solver, aug_dim ) );
 }
@@ -136,7 +136,7 @@ HYPRE_SStructLGMRESSetAbsoluteTol( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetMinIter( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 min_iter )
+                              HYPRE_Int           min_iter )
 {
    return( HYPRE_LGMRESSetMinIter( (HYPRE_Solver) solver, min_iter ) );
 }
@@ -147,7 +147,7 @@ HYPRE_SStructLGMRESSetMinIter( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetMaxIter( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 max_iter )
+                              HYPRE_Int           max_iter )
 {
    return( HYPRE_LGMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -174,7 +174,7 @@ HYPRE_SStructLGMRESSetPrecond( HYPRE_SStructSolver          solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetLogging( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 logging )
+                              HYPRE_Int           logging )
 {
    return( HYPRE_LGMRESSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -185,7 +185,7 @@ HYPRE_SStructLGMRESSetLogging( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetPrintLevel( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 level )
+                              HYPRE_Int           level )
 {
    return( HYPRE_LGMRESSetPrintLevel( (HYPRE_Solver) solver, level ) );
 }
@@ -196,7 +196,7 @@ HYPRE_SStructLGMRESSetPrintLevel( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESGetNumIterations( HYPRE_SStructSolver  solver,
-                                    HYPRE_Int                 *num_iterations )
+                                    HYPRE_Int           *num_iterations )
 {
    return( HYPRE_LGMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }

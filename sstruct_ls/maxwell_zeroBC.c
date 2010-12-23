@@ -17,8 +17,8 @@
 
 HYPRE_Int
 hypre_ParVectorZeroBCValues(hypre_ParVector *v,
-                            HYPRE_Int             *rows,
-                            HYPRE_Int              nrows)
+                            HYPRE_Int       *rows,
+                            HYPRE_Int        nrows)
 {
    HYPRE_Int   ierr= 0;
 
@@ -31,8 +31,8 @@ hypre_ParVectorZeroBCValues(hypre_ParVector *v,
 
 HYPRE_Int
 hypre_SeqVectorZeroBCValues(hypre_Vector *v,
-                            HYPRE_Int          *rows,
-                            HYPRE_Int           nrows)
+                            HYPRE_Int    *rows,
+                            HYPRE_Int     nrows)
 {
    double  *vector_data = hypre_VectorData(v);
    HYPRE_Int      i;

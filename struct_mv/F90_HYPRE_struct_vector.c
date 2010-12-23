@@ -283,8 +283,8 @@ hypre_F90_IFACE(hypre_destroycommpkg, HYPRE_DESTROYCOMMPKG)( hypre_F90_Obj *comm
 void
 hypre_F90_IFACE(hypre_structvectorprint, HYPRE_STRUCTVECTORPRINT)(
    hypre_F90_Obj *vector,
-   HYPRE_Int       *all,
-   HYPRE_Int       *ierr )
+   HYPRE_Int *all,
+   HYPRE_Int *ierr )
 {
    *ierr = (HYPRE_Int)
       ( HYPRE_StructVectorPrint("HYPRE_StructVector.out",

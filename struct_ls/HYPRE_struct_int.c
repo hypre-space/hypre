@@ -24,7 +24,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 
    hypre_Box          *v_data_box;
                     
-   HYPRE_Int                 vi;
+   HYPRE_Int           vi;
    double             *vp;
 
    hypre_BoxArray     *boxes;
@@ -33,8 +33,8 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_IndexRef      start;
    hypre_Index         unit_stride;
 
-   HYPRE_Int                 i;
-   HYPRE_Int                 loopi, loopj, loopk;
+   HYPRE_Int           i;
+   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients

@@ -80,8 +80,8 @@ hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
                        hypre_Index      stride    )
 {
    hypre_Box  *box;
-   HYPRE_Int         i;
-   HYPRE_Int         ierr = 0;
+   HYPRE_Int   i;
+   HYPRE_Int   ierr = 0;
 
    hypre_ForBoxI(i, box_array)
       {
@@ -106,8 +106,8 @@ hypre_ProjectBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
 {
    hypre_BoxArray  *box_array;
    hypre_Box       *box;
-   HYPRE_Int              i, j;
-   HYPRE_Int              ierr = 0;
+   HYPRE_Int        i, j;
+   HYPRE_Int        ierr = 0;
 
    hypre_ForBoxArrayI(i, box_array_array)
       {

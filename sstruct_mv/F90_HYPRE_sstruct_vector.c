@@ -274,8 +274,8 @@ void
 hypre_F90_IFACE(hypre_sstructvectorprint, HYPRE_SSTRUCTVECTORPRINT)
    (const char *filename,
     hypre_F90_Obj *vector,
-    HYPRE_Int        *all,
-    HYPRE_Int        *ierr)
+    HYPRE_Int  *all,
+    HYPRE_Int  *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructVectorPrint(
                      (const char * )        filename,
@@ -291,7 +291,7 @@ void
 hypre_F90_IFACE(hypre_sstructvectorcopy, HYPRE_SSTRUCTVECTORCOPY)
    (hypre_F90_Obj *x,
     hypre_F90_Obj *y,
-    HYPRE_Int        *ierr)
+    HYPRE_Int  *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructVectorCopy(
                      (HYPRE_SStructVector) *x,
@@ -322,7 +322,7 @@ hypre_F90_IFACE(hypre_sstructinnerprod, HYPRE_SSTRUCTINNERPROD)
    (hypre_F90_Obj *x,
     hypre_F90_Obj *y,
     double     *result,
-    HYPRE_Int        *ierr)
+    HYPRE_Int  *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructInnerProd(
                      (HYPRE_SStructVector) *x,

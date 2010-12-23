@@ -49,8 +49,8 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
 
    hypre_BoxArray      *overlap_boxes;
                    
-   HYPRE_Int                  xi;
-   HYPRE_Int                  yi;
+   HYPRE_Int            xi;
+   HYPRE_Int            yi;
                    
    double              *xp;
    double              *yp;
@@ -61,7 +61,7 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
    hypre_StructGrid    *grid= hypre_StructVectorGrid(y);
    hypre_BoxManager    *boxman = hypre_StructGridBoxMan(grid);
    hypre_BoxArray      *neighbor_boxes;
-   HYPRE_Int                 *neighbors_procs= NULL;
+   HYPRE_Int           *neighbors_procs= NULL;
    hypre_BoxArray      *selected_nboxes;
    hypre_BoxArray      *tmp_box_array, *tmp2_box_array;
 
@@ -69,12 +69,12 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
    hypre_IndexRef       start;
    hypre_Index          unit_stride;
                    
-   HYPRE_Int                  i, j;
-   HYPRE_Int                  myid;
-   HYPRE_Int                  boxarray_size;
-   HYPRE_Int                  loopi, loopj, loopk;
+   HYPRE_Int            i, j;
+   HYPRE_Int            myid;
+   HYPRE_Int            boxarray_size;
+   HYPRE_Int            loopi, loopj, loopk;
 #ifdef HYPRE_USE_PTHREADS
-   HYPRE_Int                  threadid = hypre_GetThreadID();
+   HYPRE_Int            threadid = hypre_GetThreadID();
 #endif
 
    

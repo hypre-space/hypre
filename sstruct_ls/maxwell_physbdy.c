@@ -38,19 +38,19 @@
 
 HYPRE_Int 
 hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
-                       HYPRE_Int                      num_levels,
+                       HYPRE_Int                num_levels,
                        hypre_Index              rfactors,
-                       HYPRE_Int                   ***BdryRanksl_ptr, 
-                       HYPRE_Int                    **BdryRanksCntsl_ptr )
+                       HYPRE_Int             ***BdryRanksl_ptr, 
+                       HYPRE_Int              **BdryRanksCntsl_ptr )
 {
 
    MPI_Comm                comm= (grid_l[0]-> comm);
 
-   HYPRE_Int                   **BdryRanks_l;
-   HYPRE_Int                    *BdryRanksCnts_l;
+   HYPRE_Int             **BdryRanks_l;
+   HYPRE_Int              *BdryRanksCnts_l;
 
-   HYPRE_Int                    *npts;
-   HYPRE_Int                    *ranks, *upper_rank, *lower_rank;
+   HYPRE_Int              *npts;
+   HYPRE_Int              *ranks, *upper_rank, *lower_rank;
    hypre_BoxManEntry      *boxman_entry;
 
    hypre_SStructGrid      *grid;
@@ -68,26 +68,26 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    hypre_Box              *box, *contract_fbox, rbox;
    hypre_Box               intersect;
 
-   HYPRE_Int                   **cbox_mapping, **fbox_mapping;
-   HYPRE_Int                   **boxes_with_bdry;
+   HYPRE_Int             **cbox_mapping, **fbox_mapping;
+   HYPRE_Int             **boxes_with_bdry;
 
-   HYPRE_Int                     ndim, nvars;
-   HYPRE_Int                     nboxes, nfboxes;
-   HYPRE_Int                     boxi;
+   HYPRE_Int               ndim, nvars;
+   HYPRE_Int               nboxes, nfboxes;
+   HYPRE_Int               boxi;
    
    hypre_Index             zero_shift, upper_shift, lower_shift;
    hypre_Index             loop_size, start, index;
-   HYPRE_Int                     loopi, loopj, loopk;
+   HYPRE_Int               loopi, loopj, loopk;
 
-   HYPRE_Int                     i, j, k, l, m, n, p;
-   HYPRE_Int                     d;
-   HYPRE_Int                     cnt;
+   HYPRE_Int               i, j, k, l, m, n, p;
+   HYPRE_Int               d;
+   HYPRE_Int               cnt;
 
-   HYPRE_Int                     part= 0;  /* NOTE, ASSUMING ONE PART */
-   HYPRE_Int                     matrix_type= HYPRE_PARCSR;
-   HYPRE_Int                     myproc;
+   HYPRE_Int               part= 0;  /* NOTE, ASSUMING ONE PART */
+   HYPRE_Int               matrix_type= HYPRE_PARCSR;
+   HYPRE_Int               myproc;
 
-   HYPRE_Int                     ierr= 0;
+   HYPRE_Int               ierr= 0;
 
    hypre_MPI_Comm_rank(comm, &myproc);
 
@@ -584,8 +584,8 @@ HYPRE_Int
 hypre_Maxwell_VarBdy( hypre_SStructPGrid       *pgrid,
                       hypre_BoxArrayArray     **bdry )
 {
-   HYPRE_Int                    ierr = 0;
-   HYPRE_Int                    nvars= hypre_SStructPGridNVars(pgrid);
+   HYPRE_Int              ierr = 0;
+   HYPRE_Int              nvars= hypre_SStructPGridNVars(pgrid);
 
    hypre_BoxArrayArray   *cell_bdry= bdry[0];
    hypre_BoxArray        *box_array, *box_array2;
@@ -595,8 +595,8 @@ hypre_Maxwell_VarBdy( hypre_SStructPGrid       *pgrid,
    hypre_Index            varoffset, ishift, jshift, kshift;
    hypre_Index            lower, upper;
 
-   HYPRE_Int                    ndim = hypre_SStructPGridNDim(pgrid);
-   HYPRE_Int                    i, k, t;
+   HYPRE_Int              ndim = hypre_SStructPGridNDim(pgrid);
+   HYPRE_Int              i, k, t;
 
    hypre_SetIndex(ishift, 1, 0, 0);
    hypre_SetIndex(jshift, 0, 1, 0);

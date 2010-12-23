@@ -55,14 +55,14 @@ extern "C" {
 
 typedef struct 
 {
-   HYPRE_Int                   size;
+   HYPRE_Int             size;
 
    hypre_BoxArrayArray  *own_boxes;    /* size of fgrid */
-   HYPRE_Int                 **own_cboxnums; /* local cbox number- each fbox
+   HYPRE_Int           **own_cboxnums; /* local cbox number- each fbox
                                           leads to an array of cboxes */
 
    hypre_BoxArrayArray  *own_composite_cboxes;  /* size of cgrid */
-   HYPRE_Int                   own_composite_size;
+   HYPRE_Int             own_composite_size;
 } hypre_SStructOwnInfoData;
 
 
@@ -104,10 +104,10 @@ typedef struct
 
 typedef struct 
 {
-   HYPRE_Int                   size;
+   HYPRE_Int             size;
 
    hypre_BoxArrayArray  *recv_boxes;
-   HYPRE_Int                 **recv_procs;
+   HYPRE_Int           **recv_procs;
 
 } hypre_SStructRecvInfoData;
 
@@ -136,11 +136,11 @@ typedef struct
 
 typedef struct 
 {
-   HYPRE_Int                   size;
+   HYPRE_Int             size;
 
    hypre_BoxArrayArray  *send_boxes;
-   HYPRE_Int                 **send_procs;
-   HYPRE_Int                 **send_remote_boxnums;
+   HYPRE_Int           **send_procs;
+   HYPRE_Int           **send_remote_boxnums;
 
 } hypre_SStructSendInfoData;
 
@@ -204,15 +204,15 @@ typedef struct
    MPI_Comm                comm;
                       
    double                  tol;
-   HYPRE_Int                     max_iter;
-   HYPRE_Int                     rel_change;
-   HYPRE_Int                     zero_guess;
-   HYPRE_Int                     ndim;
+   HYPRE_Int               max_iter;
+   HYPRE_Int               rel_change;
+   HYPRE_Int               zero_guess;
+   HYPRE_Int               ndim;
                       
-   HYPRE_Int                     num_pre_relax;  /* number of pre relaxation sweeps */
-   HYPRE_Int                     num_post_relax; /* number of post relaxation sweeps */
+   HYPRE_Int               num_pre_relax;  /* number of pre relaxation sweeps */
+   HYPRE_Int               num_post_relax; /* number of post relaxation sweeps */
 
-   HYPRE_Int                     constant_coef;
+   HYPRE_Int               constant_coef;
    
    hypre_Index            *rfactor;
 
@@ -239,18 +239,18 @@ typedef struct
    hypre_ParVector       **en_l;
    hypre_ParVector       **nVtemp_l;
    hypre_ParVector       **nVtemp2_l;
-   HYPRE_Int                   **nCF_marker_l;
+   HYPRE_Int             **nCF_marker_l;
    double                 *nrelax_weight;
    double                 *nomega;
-   HYPRE_Int                     nrelax_type;
-   HYPRE_Int                     node_numlevels;
+   HYPRE_Int               nrelax_type;
+   HYPRE_Int               node_numlevels;
 
    hypre_ParCSRMatrix     *Tgrad;
    hypre_ParCSRMatrix     *T_transpose;
 
    /* edge data structure. These will have grids. */
-   HYPRE_Int                     edge_maxlevels;  
-   HYPRE_Int                     edge_numlevels;  
+   HYPRE_Int               edge_maxlevels;  
+   HYPRE_Int               edge_numlevels;  
    hypre_ParCSRMatrix    **Aee_l;
    hypre_ParVector       **be_l;
    hypre_ParVector       **xe_l;
@@ -258,27 +258,27 @@ typedef struct
    hypre_ParVector       **ee_l;
    hypre_ParVector       **eVtemp_l;
    hypre_ParVector       **eVtemp2_l;
-   HYPRE_Int                   **eCF_marker_l;
+   HYPRE_Int             **eCF_marker_l;
    double                 *erelax_weight;
    double                 *eomega;
-   HYPRE_Int                     erelax_type;
+   HYPRE_Int               erelax_type;
 
    /* edge data structure. These will have no grid. */
    hypre_IJMatrix        **Pe_l;
    hypre_IJMatrix        **ReT_l;
-   HYPRE_Int                   **BdryRanks_l;
-   HYPRE_Int                    *BdryRanksCnts_l;
+   HYPRE_Int             **BdryRanks_l;
+   HYPRE_Int              *BdryRanksCnts_l;
 
    /* edge-node data structure. These will have grids. */
-   HYPRE_Int                     en_numlevels;
+   HYPRE_Int               en_numlevels;
 
    /* log info (always logged) */
-   HYPRE_Int                     num_iterations;
-   HYPRE_Int                     time_index;
+   HYPRE_Int               num_iterations;
+   HYPRE_Int               time_index;
 
    /* additional log info (logged when `logging' > 0) */
-   HYPRE_Int                     print_level;
-   HYPRE_Int                     logging;
+   HYPRE_Int               print_level;
+   HYPRE_Int               logging;
    double                 *norms;
    double                 *rel_norms;
 
@@ -302,9 +302,9 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Int       row;
+   HYPRE_Int row;
                                                                                                                                     
-   HYPRE_Int       ncols;
+   HYPRE_Int ncols;
    HYPRE_Int      *cols;
    double   *data;
                                                                                                                                     

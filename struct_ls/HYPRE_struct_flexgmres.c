@@ -208,7 +208,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetMaxIter( HYPRE_StructSolver solver,
-                           HYPRE_Int                max_iter )
+                           HYPRE_Int          max_iter )
 {
    return( HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -232,7 +232,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetKDim( HYPRE_StructSolver solver,
-                           HYPRE_Int                k_dim )
+                           HYPRE_Int          k_dim )
 {
    return( HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
 }
@@ -291,7 +291,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetLogging( HYPRE_StructSolver solver,
-                           HYPRE_Int                logging )
+                           HYPRE_Int          logging )
 {
    return( HYPRE_FlexGMRESSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -316,7 +316,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetPrintLevel( HYPRE_StructSolver solver,
-                           HYPRE_Int                print_level )
+                           HYPRE_Int          print_level )
 {
    return( HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
 }
@@ -340,7 +340,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructFlexGMRESGetNumIterations( HYPRE_StructSolver  solver,
-                                 HYPRE_Int                *num_iterations )
+                                 HYPRE_Int          *num_iterations )
 {
    return( HYPRE_FlexGMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }

@@ -46,7 +46,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
                                 hypre_ParCSRMatrix       * EDGE_idof,
                                 hypre_ParCSRMatrix       * ELEM_FACE,
                                 hypre_ParCSRMatrix       * ELEM_EDGE,
-                                HYPRE_Int                        num_OffProcRows,
+                                HYPRE_Int                  num_OffProcRows,
                                 hypre_MaxwellOffProcRow ** OffProcRows,
                                 hypre_IJMatrix           * IJ_dof_DOF)
 {

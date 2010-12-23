@@ -26,7 +26,7 @@
 
 typedef struct
 {
-   HYPRE_Int                 nvars;
+   HYPRE_Int           nvars;
    void              **srestrict_data;
 } hypre_SysSemiRestrictData;
 
@@ -37,7 +37,7 @@ typedef struct
 HYPRE_Int
 hypre_SysSemiRestrictCreate( void **sys_restrict_vdata_ptr) 
 {
-   HYPRE_Int                        ierr = 0;
+   HYPRE_Int                  ierr = 0;
    hypre_SysSemiRestrictData *sys_restrict_data;
 
    sys_restrict_data = hypre_CTAlloc(hypre_SysSemiRestrictData, 1);
@@ -53,25 +53,25 @@ hypre_SysSemiRestrictCreate( void **sys_restrict_vdata_ptr)
 HYPRE_Int
 hypre_SysSemiRestrictSetup( void                 *sys_restrict_vdata,
                             hypre_SStructPMatrix *R,
-                            HYPRE_Int                   R_stored_as_transpose,
+                            HYPRE_Int             R_stored_as_transpose,
                             hypre_SStructPVector *r,
                             hypre_SStructPVector *rc,
                             hypre_Index           cindex,
                             hypre_Index           findex,
                             hypre_Index           stride                )
 {
-   HYPRE_Int                      ierr = 0;
+   HYPRE_Int                ierr = 0;
 
    hypre_SysSemiRestrictData  *sys_restrict_data = sys_restrict_vdata;
    void                      **srestrict_data;
 
-   HYPRE_Int                         nvars;
+   HYPRE_Int                   nvars;
 
    hypre_StructMatrix         *R_s;
    hypre_StructVector         *rc_s;
    hypre_StructVector         *r_s;
 
-   HYPRE_Int                         vi;
+   HYPRE_Int                   vi;
 
    nvars = hypre_SStructPMatrixNVars(R);
    srestrict_data = hypre_CTAlloc(void *, nvars);
@@ -103,19 +103,19 @@ hypre_SysSemiRestrict( void                 *sys_restrict_vdata,
                        hypre_SStructPVector *r,
                        hypre_SStructPVector *rc             )
 {
-   HYPRE_Int                         ierr = 0;
+   HYPRE_Int                   ierr = 0;
   
    hypre_SysSemiRestrictData  *sys_restrict_data = sys_restrict_vdata;
    void                      **srestrict_data
                                 = (sys_restrict_data -> srestrict_data);
-   HYPRE_Int                         nvars = (sys_restrict_data -> nvars);
+   HYPRE_Int                   nvars = (sys_restrict_data -> nvars);
 
    void                       *sdata;
    hypre_StructMatrix         *R_s;
    hypre_StructVector         *rc_s;
    hypre_StructVector         *r_s;
 
-   HYPRE_Int                         vi;
+   HYPRE_Int                   vi;
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -137,13 +137,13 @@ hypre_SysSemiRestrict( void                 *sys_restrict_vdata,
 HYPRE_Int
 hypre_SysSemiRestrictDestroy( void *sys_restrict_vdata )
 {
-   HYPRE_Int                     ierr = 0;
+   HYPRE_Int               ierr = 0;
 
    hypre_SysSemiRestrictData *sys_restrict_data = sys_restrict_vdata;
 
-   HYPRE_Int                     nvars;
+   HYPRE_Int               nvars;
    void                  **srestrict_data;
-   HYPRE_Int                     vi;
+   HYPRE_Int               vi;
 
    if (sys_restrict_data)
    {

@@ -268,11 +268,11 @@ hypre_F90_IFACE(hypre_sstructgridsetnumghost, HYPRE_SSTRUCTGRIDSETNUMGHOST)
 void
 hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
    (hypre_F90_Obj *grid,
-    HYPRE_Int        *part,
-    HYPRE_Int        *var,
-    HYPRE_Int        *nvars,
-    HYPRE_Int        *vartype,
-    HYPRE_Int        *ierr)
+    HYPRE_Int  *part,
+    HYPRE_Int  *var,
+    HYPRE_Int  *nvars,
+    HYPRE_Int  *vartype,
+    HYPRE_Int  *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructGridSetVariable(
                      (HYPRE_SStructGrid)      *grid,
@@ -291,11 +291,11 @@ hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
 void
 hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
    (hypre_F90_Obj *grid,
-    HYPRE_Int        *part,
-    HYPRE_Int        *index,
-    HYPRE_Int        *var,
-    HYPRE_Int        *vartype,
-    HYPRE_Int        *ierr)
+    HYPRE_Int  *part,
+    HYPRE_Int  *index,
+    HYPRE_Int  *var,
+    HYPRE_Int  *vartype,
+    HYPRE_Int  *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructGridAddVariable(
                      (HYPRE_SStructGrid)      *grid,

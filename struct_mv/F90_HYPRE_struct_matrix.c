@@ -282,8 +282,8 @@ hypre_F90_IFACE(hypre_structmatrixsetconstanten, HYPRE_STRUCTMATRIXSETCONSTANTEN
 void
 hypre_F90_IFACE(hypre_structmatrixprint, HYPRE_STRUCTMATRIXPRINT)(
    hypre_F90_Obj *matrix,
-   HYPRE_Int       *all,
-   HYPRE_Int       *ierr )
+   HYPRE_Int *all,
+   HYPRE_Int *ierr )
 {
    *ierr = (HYPRE_Int)
       ( HYPRE_StructMatrixPrint("HYPRE_StructMatrix.out",

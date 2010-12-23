@@ -68,7 +68,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                     hypre_SStructMatrix  *   fac_A,
                     hypre_SStructPMatrix *   A_crse,
                     hypre_Index              refine_factors,
-                    HYPRE_Int                      level ) 
+                    HYPRE_Int                level ) 
 
 {
    hypre_Box               fine_box;
@@ -77,25 +77,25 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    MPI_Comm                comm       = hypre_SStructMatrixComm(A);
 
    hypre_SStructGraph     *graph      = hypre_SStructMatrixGraph(A);
-   HYPRE_Int                     graph_type = hypre_SStructGraphObjectType(graph);
+   HYPRE_Int               graph_type = hypre_SStructGraphObjectType(graph);
    hypre_SStructGrid      *grid       = hypre_SStructGraphGrid(graph);
    HYPRE_IJMatrix          ij_A       = hypre_SStructMatrixIJMatrix(A);
-   HYPRE_Int                     matrix_type= hypre_SStructMatrixObjectType(A);
-   HYPRE_Int                     ndim       = hypre_SStructMatrixNDim(A);
+   HYPRE_Int               matrix_type= hypre_SStructMatrixObjectType(A);
+   HYPRE_Int               ndim       = hypre_SStructMatrixNDim(A);
 
    hypre_SStructPMatrix   *A_pmatrix  = hypre_SStructMatrixPMatrix(fac_A, level);
 
    hypre_StructMatrix     *smatrix_var;
    hypre_StructStencil    *stencils, *stencils_last;
-   HYPRE_Int                     stencil_size, stencil_last_size;
+   HYPRE_Int               stencil_size, stencil_last_size;
    hypre_Index             stencil_shape_i, stencil_last_shape_i;
    hypre_Index             loop_size;
    hypre_Box               loop_box;
    double                **a_ptrs;
    hypre_Box              *A_dbox;
 
-   HYPRE_Int                     part_crse= level-1;
-   HYPRE_Int                     part_fine= level;
+   HYPRE_Int               part_crse= level-1;
+   HYPRE_Int               part_fine= level;
  
    hypre_StructMatrix     *crse_smatrix;
    double                 *crse_ptr;
@@ -115,87 +115,87 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_BoxArray       ***fgrid_crse_extents;
    hypre_BoxArray       ***fbox_interior;
    hypre_BoxArrayArray  ***fbox_bdy;
-   HYPRE_Int                  ***interior_fboxi;
-   HYPRE_Int                  ***bdy_fboxi;
-   HYPRE_Int                  ***cboxi_fboxes;
-   HYPRE_Int                   **cboxi_fcnt;
+   HYPRE_Int            ***interior_fboxi;
+   HYPRE_Int            ***bdy_fboxi;
+   HYPRE_Int            ***cboxi_fboxes;
+   HYPRE_Int             **cboxi_fcnt;
 
    hypre_BoxArray         *fbox_interior_ci, *fbox_bdy_ci_fi;
    hypre_BoxArrayArray    *fbox_bdy_ci;
-   HYPRE_Int                    *interior_fboxi_ci;
-   HYPRE_Int                    *bdy_fboxi_ci;
+   HYPRE_Int              *interior_fboxi_ci;
+   HYPRE_Int              *bdy_fboxi_ci;
 
-   HYPRE_Int                     centre;
+   HYPRE_Int               centre;
 
    hypre_BoxArray         *data_space;
 
-   HYPRE_Int                     ci, fi, arrayi;
-   HYPRE_Int                     max_stencil_size= 27;
-   HYPRE_Int                     true = 1;
-   HYPRE_Int                     false= 0;
-   HYPRE_Int                     found, sort;
-   HYPRE_Int                     stencil_marker;
-   HYPRE_Int                    *stencil_ranks, *rank_stencils;
-   HYPRE_Int                    *stencil_contrib_cnt;
-   HYPRE_Int                   **stencil_contrib_i;
+   HYPRE_Int               ci, fi, arrayi;
+   HYPRE_Int               max_stencil_size= 27;
+   HYPRE_Int               true = 1;
+   HYPRE_Int               false= 0;
+   HYPRE_Int               found, sort;
+   HYPRE_Int               stencil_marker;
+   HYPRE_Int              *stencil_ranks, *rank_stencils;
+   HYPRE_Int              *stencil_contrib_cnt;
+   HYPRE_Int             **stencil_contrib_i;
    double                **weight_contrib_i;
    double                  weights[4]= {1.0, 0.25, 0.125, 0.0625};
    double                  sum;
-   HYPRE_Int                     abs_stencil_shape;
+   HYPRE_Int               abs_stencil_shape;
    hypre_Box             **shift_box;
    hypre_Box               coarse_cell_box;
-   HYPRE_Int                     volume_coarse_cell_box;
-   HYPRE_Int                    *volume_shift_box;
-   HYPRE_Int                     max_contribut_size, stencil_i, rank;
-   HYPRE_Int                     startrank;
+   HYPRE_Int               volume_coarse_cell_box;
+   HYPRE_Int              *volume_shift_box;
+   HYPRE_Int               max_contribut_size, stencil_i, rank;
+   HYPRE_Int               startrank;
    double                 *vals, *vals2;
 
-   HYPRE_Int                     i, j, k, l, m, n, ll, kk, jj;
-   HYPRE_Int                     loopi, loopj, loopk;
-   HYPRE_Int                     nvars, var1, var2, var2_start; 
-   HYPRE_Int                     iA, iAc, iA_shift_z, iA_shift_zy, iA_shift_zyx;
+   HYPRE_Int               i, j, k, l, m, n, ll, kk, jj;
+   HYPRE_Int               loopi, loopj, loopk;
+   HYPRE_Int               nvars, var1, var2, var2_start; 
+   HYPRE_Int               iA, iAc, iA_shift_z, iA_shift_zy, iA_shift_zyx;
 
    hypre_Index             zero_index;
    hypre_Index             index1, index2;
    hypre_Index             index_temp;
 
-   HYPRE_Int                   **box_graph_indices;
-   HYPRE_Int                    *box_graph_cnts;
-   HYPRE_Int                    *box_ranks, *box_ranks_cnt, *box_to_ranks_cnt;
-   HYPRE_Int                    *cdata_space_ranks, *box_starts, *box_ends;
-   HYPRE_Int                    *box_connections;
-   HYPRE_Int                   **coarse_contrib_Uv;
-   HYPRE_Int                    *fine_interface_ranks;
-   HYPRE_Int                     nUventries= hypre_SStructGraphNUVEntries(graph);
-   HYPRE_Int                    *iUventries  = hypre_SStructGraphIUVEntries(graph);
+   HYPRE_Int             **box_graph_indices;
+   HYPRE_Int              *box_graph_cnts;
+   HYPRE_Int              *box_ranks, *box_ranks_cnt, *box_to_ranks_cnt;
+   HYPRE_Int              *cdata_space_ranks, *box_starts, *box_ends;
+   HYPRE_Int              *box_connections;
+   HYPRE_Int             **coarse_contrib_Uv;
+   HYPRE_Int              *fine_interface_ranks;
+   HYPRE_Int               nUventries= hypre_SStructGraphNUVEntries(graph);
+   HYPRE_Int              *iUventries  = hypre_SStructGraphIUVEntries(graph);
    hypre_SStructUVEntry  **Uventries   = hypre_SStructGraphUVEntries(graph);
    hypre_SStructUVEntry   *Uventry;
-   HYPRE_Int                     nUentries, cnt1, cnt2;
+   HYPRE_Int               nUentries, cnt1, cnt2;
    hypre_Index             index, *cindex, *Uv_cindex;
-   HYPRE_Int                     box_array_size, cbox_array_size;
+   HYPRE_Int               box_array_size, cbox_array_size;
 
-   HYPRE_Int                     nrows, to_rank;
-   HYPRE_Int                    *ncols, *rows, *cols;
-   HYPRE_Int                   **interface_max_stencil_ranks;
-   HYPRE_Int                   **interface_max_stencil_cnt;
-   HYPRE_Int                   **interface_rank_stencils;
-   HYPRE_Int                   **interface_stencil_ranks;
-   HYPRE_Int                    *coarse_stencil_cnt;
+   HYPRE_Int               nrows, to_rank;
+   HYPRE_Int              *ncols, *rows, *cols;
+   HYPRE_Int             **interface_max_stencil_ranks;
+   HYPRE_Int             **interface_max_stencil_cnt;
+   HYPRE_Int             **interface_rank_stencils;
+   HYPRE_Int             **interface_stencil_ranks;
+   HYPRE_Int              *coarse_stencil_cnt;
    double                 *stencil_vals;
-   HYPRE_Int                    *common_rank_stencils, *common_stencil_ranks;
-   HYPRE_Int                    *common_stencil_i;
+   HYPRE_Int              *common_rank_stencils, *common_stencil_ranks;
+   HYPRE_Int              *common_stencil_i;
    hypre_BoxManEntry      *boxman_entry;
 
-   HYPRE_Int                    *temp1, *temp2;
+   HYPRE_Int              *temp1, *temp2;
    double                 *temp3;
    double                  sum_contrib, scaling;
 
-   HYPRE_Int                   **OffsetA;
+   HYPRE_Int             **OffsetA;
 
-   HYPRE_Int                    *parents;
-   HYPRE_Int                    *parents_cnodes;
+   HYPRE_Int              *parents;
+   HYPRE_Int              *parents_cnodes;
 
-   HYPRE_Int                     myid;
+   HYPRE_Int               myid;
 
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_SetIndex(zero_index, 0, 0, 0);

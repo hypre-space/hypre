@@ -33,12 +33,12 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_ParVector       *f_edge;
    hypre_ParVector       *u_edge;
 
-   HYPRE_Int                    max_iter     = maxwell_data-> max_iter;
+   HYPRE_Int              max_iter     = maxwell_data-> max_iter;
    double                 tol          = maxwell_data-> tol;
-   HYPRE_Int                    rel_change   = maxwell_data-> rel_change;
-   HYPRE_Int                    zero_guess   = maxwell_data-> zero_guess;
-   HYPRE_Int                    npre_relax   = maxwell_data-> num_pre_relax;
-   HYPRE_Int                    npost_relax  = maxwell_data-> num_post_relax;
+   HYPRE_Int              rel_change   = maxwell_data-> rel_change;
+   HYPRE_Int              zero_guess   = maxwell_data-> zero_guess;
+   HYPRE_Int              npre_relax   = maxwell_data-> num_pre_relax;
+   HYPRE_Int              npost_relax  = maxwell_data-> num_post_relax;
 
    hypre_ParCSRMatrix   **Ann_l        = maxwell_data-> Ann_l;
    hypre_ParCSRMatrix   **Pn_l         = maxwell_data-> Pn_l;
@@ -49,17 +49,17 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_ParVector      **en_l         = maxwell_data-> en_l;
    hypre_ParVector      **nVtemp_l     = maxwell_data-> nVtemp_l;
    hypre_ParVector      **nVtemp2_l    = maxwell_data-> nVtemp2_l;
-   HYPRE_Int                  **nCF_marker_l = maxwell_data-> nCF_marker_l;
+   HYPRE_Int            **nCF_marker_l = maxwell_data-> nCF_marker_l;
    double                *nrelax_weight= maxwell_data-> nrelax_weight;
    double                *nomega       = maxwell_data-> nomega;
-   HYPRE_Int                    nrelax_type  = maxwell_data-> nrelax_type;
-   HYPRE_Int                    node_numlevs = maxwell_data-> node_numlevels;
+   HYPRE_Int              nrelax_type  = maxwell_data-> nrelax_type;
+   HYPRE_Int              node_numlevs = maxwell_data-> node_numlevels;
 
    hypre_ParCSRMatrix    *Tgrad        = maxwell_data-> Tgrad;
    hypre_ParCSRMatrix    *T_transpose  = maxwell_data-> T_transpose;
 
    hypre_ParCSRMatrix   **Aen_l        = maxwell_data-> Aen_l;
-   HYPRE_Int                    en_numlevs   = maxwell_data-> en_numlevels;
+   HYPRE_Int              en_numlevs   = maxwell_data-> en_numlevels;
 
    hypre_ParCSRMatrix   **Aee_l        = maxwell_data-> Aee_l;
    hypre_IJMatrix       **Pe_l         = maxwell_data-> Pe_l;
@@ -70,29 +70,29 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_ParVector      **ee_l         = maxwell_data-> ee_l;
    hypre_ParVector      **eVtemp_l     = maxwell_data-> eVtemp_l;
    hypre_ParVector      **eVtemp2_l    = maxwell_data-> eVtemp2_l;
-   HYPRE_Int                  **eCF_marker_l = maxwell_data-> eCF_marker_l;
+   HYPRE_Int            **eCF_marker_l = maxwell_data-> eCF_marker_l;
    double                *erelax_weight= maxwell_data-> erelax_weight;
    double                *eomega       = maxwell_data-> eomega;
-   HYPRE_Int                    erelax_type  = maxwell_data-> erelax_type;
-   HYPRE_Int                    edge_numlevs = maxwell_data-> edge_numlevels;
+   HYPRE_Int              erelax_type  = maxwell_data-> erelax_type;
+   HYPRE_Int              edge_numlevs = maxwell_data-> edge_numlevels;
 
-   HYPRE_Int                  **BdryRanks_l  = maxwell_data-> BdryRanks_l;
-   HYPRE_Int                   *BdryRanksCnts_l= maxwell_data-> BdryRanksCnts_l;
+   HYPRE_Int            **BdryRanks_l  = maxwell_data-> BdryRanks_l;
+   HYPRE_Int             *BdryRanksCnts_l= maxwell_data-> BdryRanksCnts_l;
 
-   HYPRE_Int                    logging     = maxwell_data-> logging;
+   HYPRE_Int              logging     = maxwell_data-> logging;
    double                *norms       = maxwell_data-> norms;
    double                *rel_norms   = maxwell_data-> rel_norms;
 
-   HYPRE_Int                    Solve_err_flag;
-   HYPRE_Int                    relax_local, cycle_param;
+   HYPRE_Int              Solve_err_flag;
+   HYPRE_Int              relax_local, cycle_param;
 
    double                 b_dot_b, r_dot_r, eps;
    double                 e_dot_e, x_dot_x;
 
-   HYPRE_Int                    i, j;
-   HYPRE_Int                    level;
+   HYPRE_Int              i, j;
+   HYPRE_Int              level;
 
-   HYPRE_Int                    ierr= 0;
+   HYPRE_Int              ierr= 0;
 
 
    /* added for the relaxation routines */

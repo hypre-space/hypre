@@ -22,7 +22,7 @@ HYPRE_Int
 hypre_CreatePTopology(void **PTopology_vdata_ptr)
 {
     hypre_PTopology   *PTopology;
-    HYPRE_Int                ierr= 0;
+    HYPRE_Int          ierr= 0;
 
     PTopology= hypre_CTAlloc(hypre_PTopology, 1);
 
@@ -42,7 +42,7 @@ HYPRE_Int
 hypre_DestroyPTopology(void *PTopology_vdata)
 {
    hypre_PTopology       *PTopology= PTopology_vdata;
-   HYPRE_Int                    ierr     = 0;
+   HYPRE_Int              ierr     = 0;
 
    if (PTopology)
    {
@@ -95,68 +95,68 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
    hypre_BoxArray       **contract_fedgeBoxes;
    hypre_Index          **Edge_cstarts, **upper_shifts, **lower_shifts;
-   HYPRE_Int                  **cfbox_mapping, **fcbox_mapping;
+   HYPRE_Int            **cfbox_mapping, **fcbox_mapping;
 
    hypre_BoxManEntry     *entry;
-   HYPRE_Int                    rank, rank2;
-   HYPRE_Int                    start_rank1; 
+   HYPRE_Int              rank, rank2;
+   HYPRE_Int              start_rank1; 
 
-   HYPRE_Int                    nFaces, nEdges, nElements, nedges;
-   HYPRE_Int                    nxFaces, nyFaces, nzFaces, nxEdges, nyEdges, nzEdges;
-   HYPRE_Int                    n_xFace_iedges, n_yFace_iedges, n_zFace_iedges;
-   HYPRE_Int                    n_Cell_iedges;
+   HYPRE_Int              nFaces, nEdges, nElements, nedges;
+   HYPRE_Int              nxFaces, nyFaces, nzFaces, nxEdges, nyEdges, nzEdges;
+   HYPRE_Int              n_xFace_iedges, n_yFace_iedges, n_zFace_iedges;
+   HYPRE_Int              n_Cell_iedges;
 
-   HYPRE_Int                    nElements_iedges, nFaces_iedges, nEdges_iedges;
-   HYPRE_Int                    nElements_Faces, nElements_Edges, nEdges_edges;
+   HYPRE_Int              nElements_iedges, nFaces_iedges, nEdges_iedges;
+   HYPRE_Int              nElements_Faces, nElements_Edges, nEdges_edges;
 
-   HYPRE_Int                   *iFace, *iEdge, *iElement, *iedgeEdge;
-   HYPRE_Int                   *jFace_edge, *jEdge_iedge, *jElement_edge;
-   HYPRE_Int                   *jElement_Face, *jElement_Edge, *jedge_Edge;
+   HYPRE_Int             *iFace, *iEdge, *iElement, *iedgeEdge;
+   HYPRE_Int             *jFace_edge, *jEdge_iedge, *jElement_edge;
+   HYPRE_Int             *jElement_Face, *jElement_Edge, *jedge_Edge;
 
    double                *vals_ElementEdge, *vals_ElementFace, *vals_edgeEdge, *vals_Faceedge;
    double                *vals_Elementedge, *vals_Edgeiedge;
-   HYPRE_Int                   *ncols_Elementedge, *ncols_Edgeiedge, *ncols_edgeEdge, *ncols_Faceedge;
-   HYPRE_Int                   *ncols_ElementFace, *ncols_ElementEdge;
-   HYPRE_Int                   *bdryedge_location;
+   HYPRE_Int             *ncols_Elementedge, *ncols_Edgeiedge, *ncols_edgeEdge, *ncols_Faceedge;
+   HYPRE_Int             *ncols_ElementFace, *ncols_ElementEdge;
+   HYPRE_Int             *bdryedge_location;
    double                 fCedge_ratio;
    double                *stencil_vals, *upper, *lower, *diag, *face_w1, *face_w2;
-   HYPRE_Int                   *off_proc_flag;
+   HYPRE_Int             *off_proc_flag;
 
    hypre_Index            cindex;
    hypre_Index            findex;
    hypre_Index            var_index, cell_index, *boxoffset, *suboffset;
    hypre_Index            loop_size, start, cstart, stride, low_index, hi_index;
    hypre_Index            ishift, jshift, kshift, zero_index, one_index;
-   HYPRE_Int                    loopi, loopj, loopk;
-   HYPRE_Int                    n_boxoffsets, component_stride;
+   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              n_boxoffsets, component_stride;
 
-   HYPRE_Int                    nparts= hypre_SStructGridNParts(fgrid_element);
-   HYPRE_Int                    ndim  = hypre_SStructGridNDim(fgrid_element);
+   HYPRE_Int              nparts= hypre_SStructGridNParts(fgrid_element);
+   HYPRE_Int              ndim  = hypre_SStructGridNDim(fgrid_element);
 
    HYPRE_SStructVariable *vartypes, *Edge_vartypes, *Face_vartypes;
    hypre_Index           *varoffsets;
-   HYPRE_Int                   *vartype_map;
-   HYPRE_Int                    matrix_type= HYPRE_PARCSR;
+   HYPRE_Int             *vartype_map;
+   HYPRE_Int              matrix_type= HYPRE_PARCSR;
 
-   HYPRE_Int                    nvars, Face_nvars, Edge_nvars, part, var, box, fboxi;
-   HYPRE_Int                    tot_vars= 8;
+   HYPRE_Int              nvars, Face_nvars, Edge_nvars, part, var, box, fboxi;
+   HYPRE_Int              tot_vars= 8;
 
-   HYPRE_Int                    t, i, j, k, l, m, n, p, r;
+   HYPRE_Int              t, i, j, k, l, m, n, p, r;
 
-   HYPRE_Int                    ilower, iupper;
-   HYPRE_Int                    jlower, jupper;
-   HYPRE_Int                  **flower_ranks, **fupper_ranks;
-   HYPRE_Int                  **clower_ranks, **cupper_ranks;
+   HYPRE_Int              ilower, iupper;
+   HYPRE_Int              jlower, jupper;
+   HYPRE_Int            **flower_ranks, **fupper_ranks;
+   HYPRE_Int            **clower_ranks, **cupper_ranks;
                                                                                                                   
-   HYPRE_Int                 ***n_CtoVbox, ****CtoVboxnums;
-   HYPRE_Int                   *num_vboxes, **vboxnums;
+   HYPRE_Int           ***n_CtoVbox, ****CtoVboxnums;
+   HYPRE_Int             *num_vboxes, **vboxnums;
 
-   HYPRE_Int                    size1;
-   HYPRE_Int                    true = 1;
-   HYPRE_Int                    false= 0;
-   HYPRE_Int                    row_in;
+   HYPRE_Int              size1;
+   HYPRE_Int              true = 1;
+   HYPRE_Int              false= 0;
+   HYPRE_Int              row_in;
 
-   HYPRE_Int                    myproc;
+   HYPRE_Int              myproc;
 
    hypre_MPI_Comm_rank(comm, &myproc);
    hypre_SetIndex(ishift, 1, 0, 0);
@@ -5254,36 +5254,36 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 HYPRE_Int
 hypre_CollapseStencilToStencil(hypre_ParCSRMatrix     *Aee,
                                hypre_SStructGrid      *grid,
-                               HYPRE_Int                     part,
-                               HYPRE_Int                     var,
+                               HYPRE_Int               part,
+                               HYPRE_Int               var,
                                hypre_Index             pt_location,
-                               HYPRE_Int                     collapse_dir,
-                               HYPRE_Int                     new_stencil_dir,
+                               HYPRE_Int               collapse_dir,
+                               HYPRE_Int               new_stencil_dir,
                                double                **collapsed_vals_ptr)
 {
-   HYPRE_Int                      ierr= 0;
+   HYPRE_Int                ierr= 0;
 
-   HYPRE_Int                      matrix_type= HYPRE_PARCSR;
-   HYPRE_Int                      start_rank = hypre_ParCSRMatrixFirstRowIndex(Aee);
-   HYPRE_Int                      end_rank   = hypre_ParCSRMatrixLastRowIndex(Aee);
+   HYPRE_Int                matrix_type= HYPRE_PARCSR;
+   HYPRE_Int                start_rank = hypre_ParCSRMatrixFirstRowIndex(Aee);
+   HYPRE_Int                end_rank   = hypre_ParCSRMatrixLastRowIndex(Aee);
 
    hypre_BoxManEntry       *entry;
 
-   HYPRE_Int                     *ranks;
-   HYPRE_Int                     *marker;     /* marker to record the rank groups */
-   HYPRE_Int                      max_ranksize= 9;
+   HYPRE_Int               *ranks;
+   HYPRE_Int               *marker;     /* marker to record the rank groups */
+   HYPRE_Int                max_ranksize= 9;
 
    double                  *collapsed_vals;
 
    hypre_Index              index1, index2, zero_index;
 
-   HYPRE_Int                      size, *col_inds, *col_inds2;
+   HYPRE_Int                size, *col_inds, *col_inds2;
    double                  *values;
-   HYPRE_Int                      rank, row_rank, *swap_inds;
+   HYPRE_Int                rank, row_rank, *swap_inds;
 
-   HYPRE_Int                      i, j, m, centre, found;
-   HYPRE_Int                      getrow_ierr;
-   HYPRE_Int                      cnt;
+   HYPRE_Int                i, j, m, centre, found;
+   HYPRE_Int                getrow_ierr;
+   HYPRE_Int                cnt;
 
     hypre_SetIndex(zero_index,0,0,0);
 
@@ -5401,11 +5401,11 @@ hypre_TriDiagSolve(double     *diag,
                    double     *upper,
                    double     *lower,
                    double     *rhs,
-                   HYPRE_Int         size)
+                   HYPRE_Int   size)
 {
-   HYPRE_Int             ierr= 0;
+   HYPRE_Int       ierr= 0;
 
-   HYPRE_Int             i, size1;
+   HYPRE_Int       i, size1;
    double         *copy_diag; 
    double          multiplier;
 

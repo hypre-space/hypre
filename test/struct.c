@@ -56,7 +56,7 @@ HYPRE_Int  AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 
 HYPRE_Int AddValuesVector( hypre_StructGrid  *gridvector,
                      hypre_StructVector *zvector,
-                     HYPRE_Int                *period, 
+                     HYPRE_Int          *period, 
                      double             value  )  ;
 
 /*--------------------------------------------------------------------------
@@ -72,21 +72,21 @@ hypre_int
 main( hypre_int argc,
       char *argv[] )
 {
-   HYPRE_Int                 arg_index;
-   HYPRE_Int                 print_usage;
-   HYPRE_Int                 nx, ny, nz;
-   HYPRE_Int                 P, Q, R;
-   HYPRE_Int                 bx, by, bz;
-   HYPRE_Int                 px, py, pz;
+   HYPRE_Int           arg_index;
+   HYPRE_Int           print_usage;
+   HYPRE_Int           nx, ny, nz;
+   HYPRE_Int           P, Q, R;
+   HYPRE_Int           bx, by, bz;
+   HYPRE_Int           px, py, pz;
    double              cx, cy, cz;
    double              conx, cony, conz;
-   HYPRE_Int                 solver_id;
-   HYPRE_Int                 solver_type;
+   HYPRE_Int           solver_id;
+   HYPRE_Int           solver_type;
 
    /*double              dxyz[3];*/
 
-   HYPRE_Int                 A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int                 v_num_ghost[3] = {0,0,0};
+   HYPRE_Int           A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int           v_num_ghost[3] = {0,0,0};
                      
    HYPRE_StructMatrix  A;
    HYPRE_StructVector  b;
@@ -94,56 +94,56 @@ main( hypre_int argc,
 
    HYPRE_StructSolver  solver;
    HYPRE_StructSolver  precond;
-   HYPRE_Int                 num_iterations;
-   HYPRE_Int                 time_index;
+   HYPRE_Int           num_iterations;
+   HYPRE_Int           time_index;
    double              final_res_norm;
    double              cf_tol;
 
-   HYPRE_Int                 num_procs, myid;
+   HYPRE_Int           num_procs, myid;
 
-   HYPRE_Int                 p, q, r;
-   HYPRE_Int                 dim;
-   HYPRE_Int                 n_pre, n_post;
-   HYPRE_Int                 nblocks ;
-   HYPRE_Int                 skip;
-   HYPRE_Int                 sym;
-   HYPRE_Int                 rap;
-   HYPRE_Int                 relax;
+   HYPRE_Int           p, q, r;
+   HYPRE_Int           dim;
+   HYPRE_Int           n_pre, n_post;
+   HYPRE_Int           nblocks ;
+   HYPRE_Int           skip;
+   HYPRE_Int           sym;
+   HYPRE_Int           rap;
+   HYPRE_Int           relax;
    double              jacobi_weight;
-   HYPRE_Int                 usr_jacobi_weight;
-   HYPRE_Int                 jump;
-   HYPRE_Int                 rep, reps;
+   HYPRE_Int           usr_jacobi_weight;
+   HYPRE_Int           jump;
+   HYPRE_Int           rep, reps;
 
-   HYPRE_Int               **iupper;
-   HYPRE_Int               **ilower;
+   HYPRE_Int         **iupper;
+   HYPRE_Int         **ilower;
 
-   HYPRE_Int                 istart[3];
-   HYPRE_Int                 periodic[3];
-   HYPRE_Int               **offsets;
-   HYPRE_Int                 constant_coefficient = 0;
-   HYPRE_Int                *stencil_entries;
-   HYPRE_Int                 stencil_size;
-   HYPRE_Int                 diag_rank;
+   HYPRE_Int           istart[3];
+   HYPRE_Int           periodic[3];
+   HYPRE_Int         **offsets;
+   HYPRE_Int           constant_coefficient = 0;
+   HYPRE_Int          *stencil_entries;
+   HYPRE_Int           stencil_size;
+   HYPRE_Int           diag_rank;
    hypre_Index         diag_index;
 
    HYPRE_StructGrid    grid;
    HYPRE_StructGrid    readgrid;
    HYPRE_StructStencil stencil;
 
-   HYPRE_Int                 i, s;
-   HYPRE_Int                 ix, iy, iz, ib;
+   HYPRE_Int           i, s;
+   HYPRE_Int           ix, iy, iz, ib;
 
-   HYPRE_Int                 read_fromfile_param;
-   HYPRE_Int                 read_fromfile_index;
-   HYPRE_Int                 read_rhsfromfile_param;
-   HYPRE_Int                 read_rhsfromfile_index;
-   HYPRE_Int                 read_x0fromfile_param;
-   HYPRE_Int                 read_x0fromfile_index;
-   HYPRE_Int                 periodx0[3] = {0,0,0};
-   HYPRE_Int                *readperiodic;
-   HYPRE_Int                 sum;
+   HYPRE_Int           read_fromfile_param;
+   HYPRE_Int           read_fromfile_index;
+   HYPRE_Int           read_rhsfromfile_param;
+   HYPRE_Int           read_rhsfromfile_index;
+   HYPRE_Int           read_x0fromfile_param;
+   HYPRE_Int           read_x0fromfile_index;
+   HYPRE_Int           periodx0[3] = {0,0,0};
+   HYPRE_Int          *readperiodic;
+   HYPRE_Int           sum;
 
-   HYPRE_Int                 print_system = 0;
+   HYPRE_Int           print_system = 0;
 
    /* begin lobpcg */
    
@@ -2866,18 +2866,18 @@ main( hypre_int argc,
 HYPRE_Int
 AddValuesVector( hypre_StructGrid  *gridvector,
                  hypre_StructVector *zvector,
-                 HYPRE_Int                *period, 
+                 HYPRE_Int          *period, 
                  double             value  )
 {
 /* #include  "_hypre_struct_mv.h" */
  HYPRE_Int ierr = 0;
  hypre_BoxArray     *gridboxes;
- HYPRE_Int                i,ib;
+ HYPRE_Int          i,ib;
  hypre_IndexRef     ilower;
  hypre_IndexRef     iupper;
  hypre_Box          *box;
  double             *values;
- HYPRE_Int                volume,dim;
+ HYPRE_Int          volume,dim;
 
  gridboxes =  hypre_StructGridBoxes(gridvector);
  dim       =  hypre_StructGridDim(gridvector);
@@ -2941,7 +2941,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 
   HYPRE_Int ierr=0;
   hypre_BoxArray     *gridboxes;
-  HYPRE_Int                 i,s,bi;
+  HYPRE_Int           i,s,bi;
   hypre_IndexRef      ilower;
   hypre_IndexRef      iupper;
   hypre_Box          *box;
@@ -2950,10 +2950,10 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
   double              north,south;
   double              top,bottom;
   double              center;
-  HYPRE_Int                 volume,dim,sym;
-  HYPRE_Int                *stencil_indices;
-  HYPRE_Int                 stencil_size;
-  HYPRE_Int                 constant_coefficient;
+  HYPRE_Int           volume,dim,sym;
+  HYPRE_Int          *stencil_indices;
+  HYPRE_Int           stencil_size;
+  HYPRE_Int           constant_coefficient;
 
   gridboxes =  hypre_StructGridBoxes(gridmatrix);
   dim       =  hypre_StructGridDim(gridmatrix);
@@ -3277,18 +3277,18 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
 
   HYPRE_Int ierr=0;
   hypre_BoxArray    *gridboxes;
-  HYPRE_Int                size,i,j,d,ib;
-  HYPRE_Int              **ilower;
-  HYPRE_Int              **iupper;
-  HYPRE_Int               *vol;
-  HYPRE_Int               *istart, *iend;
+  HYPRE_Int          size,i,j,d,ib;
+  HYPRE_Int        **ilower;
+  HYPRE_Int        **iupper;
+  HYPRE_Int         *vol;
+  HYPRE_Int         *istart, *iend;
   hypre_Box         *box;
   hypre_Box         *dummybox;
   hypre_Box         *boundingbox;
   double            *values;
-  HYPRE_Int                volume, dim;
-  HYPRE_Int               *stencil_indices;
-  HYPRE_Int                constant_coefficient;
+  HYPRE_Int          volume, dim;
+  HYPRE_Int         *stencil_indices;
+  HYPRE_Int          constant_coefficient;
 
   gridboxes       = hypre_StructGridBoxes(gridmatrix);
   boundingbox     = hypre_StructGridBoundingBox(gridmatrix);

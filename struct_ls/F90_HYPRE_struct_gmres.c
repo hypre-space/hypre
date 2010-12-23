@@ -83,8 +83,8 @@ hypre_F90_IFACE(hypre_structgmressolve, HYPRE_STRUCTGMRESSOLVE)( hypre_F90_Obj *
 void
 hypre_F90_IFACE(hypre_structgmressetkdim, HYPRE_STRUCTGMRESSETKDIM)
                                                        (hypre_F90_Obj *solver,
-                                                        HYPRE_Int       *k_dim,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *k_dim,
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_StructGMRESSetKDim( (HYPRE_StructSolver) *solver,
                                              (HYPRE_Int)                 *k_dim ));

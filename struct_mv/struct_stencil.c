@@ -25,15 +25,15 @@
  *--------------------------------------------------------------------------*/
 
 hypre_StructStencil *
-hypre_StructStencilCreate( HYPRE_Int           dim,
-                           HYPRE_Int           size,
+hypre_StructStencilCreate( HYPRE_Int     dim,
+                           HYPRE_Int     size,
                            hypre_Index  *shape )
 {
    hypre_StructStencil   *stencil;
 
-   HYPRE_Int                    abs_offset;
-   HYPRE_Int                    max_offset;
-   HYPRE_Int                    s, d;
+   HYPRE_Int              abs_offset;
+   HYPRE_Int              max_offset;
+   HYPRE_Int              s, d;
 
    stencil = hypre_TAlloc(hypre_StructStencil, 1);
 
@@ -103,8 +103,8 @@ hypre_StructStencilElementRank( hypre_StructStencil *stencil,
                                 hypre_Index          stencil_element )
 {
    hypre_Index  *stencil_shape;
-   HYPRE_Int           rank;
-   HYPRE_Int           i;
+   HYPRE_Int     rank;
+   HYPRE_Int     i;
 
    rank = -1;
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -135,20 +135,20 @@ hypre_StructStencilElementRank( hypre_StructStencil *stencil,
 HYPRE_Int
 hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
                                hypre_StructStencil **symm_stencil_ptr,
-                               HYPRE_Int                 **symm_elements_ptr )
+                               HYPRE_Int           **symm_elements_ptr )
 {
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int                   stencil_size  = hypre_StructStencilSize(stencil); 
+   HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil); 
 
    hypre_StructStencil  *symm_stencil;
    hypre_Index          *symm_stencil_shape;
-   HYPRE_Int                   symm_stencil_size;
-   HYPRE_Int                  *symm_elements;
+   HYPRE_Int             symm_stencil_size;
+   HYPRE_Int            *symm_elements;
 
-   HYPRE_Int                   no_symmetric_stencil_element;
-   HYPRE_Int                   i, j, d;
+   HYPRE_Int             no_symmetric_stencil_element;
+   HYPRE_Int             i, j, d;
                        
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    /*------------------------------------------------------
     * Copy stencil elements into `symm_stencil_shape'

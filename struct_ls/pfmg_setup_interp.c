@@ -28,20 +28,20 @@
 hypre_StructMatrix *
 hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
                           hypre_StructGrid   *cgrid,
-                          HYPRE_Int                 cdir,
-                          HYPRE_Int                 rap_type )
+                          HYPRE_Int           cdir,
+                          HYPRE_Int           rap_type )
 {
    hypre_StructMatrix   *P;
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   HYPRE_Int                   stencil_size;
-   HYPRE_Int                   stencil_dim;
+   HYPRE_Int             stencil_size;
+   HYPRE_Int             stencil_dim;
                        
-   HYPRE_Int                   num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
                        
-   HYPRE_Int                   i;
-   HYPRE_Int                   constant_coefficient;
+   HYPRE_Int             i;
+   HYPRE_Int             constant_coefficient;
 
    /* set up stencil */
    stencil_size = 2;
@@ -90,11 +90,11 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
 
 HYPRE_Int
 hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
-                         HYPRE_Int                 cdir,
+                         HYPRE_Int           cdir,
                          hypre_Index         findex,
                          hypre_Index         stride,
                          hypre_StructMatrix *P,
-                         HYPRE_Int                 rap_type )
+                         HYPRE_Int           rap_type )
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -103,26 +103,26 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    hypre_Box             *P_dbox;
                         
    double                *Pp0, *Pp1;
-   HYPRE_Int                    constant_coefficient;
+   HYPRE_Int              constant_coefficient;
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   HYPRE_Int                    stencil_size;
+   HYPRE_Int              stencil_size;
    hypre_StructStencil   *P_stencil;
    hypre_Index           *P_stencil_shape;
                         
-   HYPRE_Int                    Pstenc0, Pstenc1;
+   HYPRE_Int              Pstenc0, Pstenc1;
                         
    hypre_Index            loop_size;
    hypre_Index            start;
    hypre_IndexRef         startc;
    hypre_Index            stridec;
                         
-   HYPRE_Int                    i, si;
+   HYPRE_Int              i, si;
 
-   HYPRE_Int                    si0, si1;
-   HYPRE_Int                    mrk0, mrk1;
-   HYPRE_Int                    d;
+   HYPRE_Int              si0, si1;
+   HYPRE_Int              mrk0, mrk1;
+   HYPRE_Int              d;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -229,35 +229,35 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
 HYPRE_Int
 hypre_PFMGSetupInterpOp_CC0
-( HYPRE_Int                 i, /* box index */
+( HYPRE_Int           i, /* box index */
   hypre_StructMatrix *A,
   hypre_Box          *A_dbox,
-  HYPRE_Int                 cdir,
+  HYPRE_Int           cdir,
   hypre_Index         stride,
   hypre_Index         stridec,
   hypre_Index         start,
   hypre_IndexRef      startc,
   hypre_Index         loop_size,
   hypre_Box          *P_dbox,
-  HYPRE_Int                 Pstenc0,
-  HYPRE_Int                 Pstenc1,
+  HYPRE_Int           Pstenc0,
+  HYPRE_Int           Pstenc1,
   double             *Pp0,
   double             *Pp1,
-  HYPRE_Int                 rap_type,
-  HYPRE_Int                 si0,
-  HYPRE_Int                 si1 )
+  HYPRE_Int           rap_type,
+  HYPRE_Int           si0,
+  HYPRE_Int           si1 )
 {
-   HYPRE_Int                    si;
-   HYPRE_Int                    Ai, Pi;
+   HYPRE_Int              si;
+   HYPRE_Int              Ai, Pi;
    double                *Ap;
    double                 center;
-   HYPRE_Int                    Astenc;
-   HYPRE_Int                    loopi, loopj, loopk;
-   HYPRE_Int                    mrk0, mrk1;
+   HYPRE_Int              Astenc;
+   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              mrk0, mrk1;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int                    stencil_size = hypre_StructStencilSize(stencil);
-   HYPRE_Int                    warning_cnt= 0;
+   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int              warning_cnt= 0;
 
    hypre_BoxLoop2Begin(loop_size,
                        A_dbox, start, stride, Ai,
@@ -329,34 +329,34 @@ hypre_PFMGSetupInterpOp_CC0
 
 HYPRE_Int
 hypre_PFMGSetupInterpOp_CC1
-( HYPRE_Int                 i, /* box index, doesn't matter */
+( HYPRE_Int           i, /* box index, doesn't matter */
   hypre_StructMatrix *A,
   hypre_Box          *A_dbox,
-  HYPRE_Int                 cdir,
+  HYPRE_Int           cdir,
   hypre_Index         stride,
   hypre_Index         stridec,
   hypre_Index         start,
   hypre_IndexRef      startc,
   hypre_Index         loop_size,
   hypre_Box          *P_dbox,
-  HYPRE_Int                 Pstenc0,
-  HYPRE_Int                 Pstenc1,
+  HYPRE_Int           Pstenc0,
+  HYPRE_Int           Pstenc1,
   double             *Pp0,
   double             *Pp1,
-  HYPRE_Int                 rap_type,
-  HYPRE_Int                 si0,
-  HYPRE_Int                 si1 )
+  HYPRE_Int           rap_type,
+  HYPRE_Int           si0,
+  HYPRE_Int           si1 )
 {
-   HYPRE_Int                    si;
-   HYPRE_Int                    Ai, Pi;
+   HYPRE_Int              si;
+   HYPRE_Int              Ai, Pi;
    double                *Ap;
    double                 center;
-   HYPRE_Int                    Astenc;
-   HYPRE_Int                    mrk0, mrk1;
+   HYPRE_Int              Astenc;
+   HYPRE_Int              mrk0, mrk1;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int                    stencil_size = hypre_StructStencilSize(stencil);
-   HYPRE_Int                    warning_cnt= 0;
+   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int              warning_cnt= 0;
 
    Ai = hypre_CCBoxIndexRank(A_dbox,start );
    Pi = hypre_CCBoxIndexRank(P_dbox,startc);
@@ -426,39 +426,39 @@ hypre_PFMGSetupInterpOp_CC1
 
 HYPRE_Int
 hypre_PFMGSetupInterpOp_CC2
-( HYPRE_Int                 i, /* box index */
+( HYPRE_Int           i, /* box index */
   hypre_StructMatrix *A,
   hypre_Box          *A_dbox,
-  HYPRE_Int                 cdir,
+  HYPRE_Int           cdir,
   hypre_Index         stride,
   hypre_Index         stridec,
   hypre_Index         start,
   hypre_IndexRef      startc,
   hypre_Index         loop_size,
   hypre_Box          *P_dbox,
-  HYPRE_Int                 Pstenc0,
-  HYPRE_Int                 Pstenc1,
+  HYPRE_Int           Pstenc0,
+  HYPRE_Int           Pstenc1,
   double             *Pp0,
   double             *Pp1,
-  HYPRE_Int                 rap_type,
-  HYPRE_Int                 si0,
-  HYPRE_Int                 si1 )
+  HYPRE_Int           rap_type,
+  HYPRE_Int           si0,
+  HYPRE_Int           si1 )
 {
-   HYPRE_Int                    si;
-   HYPRE_Int                    Ai;
-   HYPRE_Int                    Pi;
+   HYPRE_Int              si;
+   HYPRE_Int              Ai;
+   HYPRE_Int              Pi;
    double                *Ap;
    double                 P0, P1;
    double                 center, center_offd;
-   HYPRE_Int                    Astenc;
-   HYPRE_Int                    loopi, loopj, loopk;
-   HYPRE_Int                    mrk0, mrk1, mrk0_offd, mrk1_offd;
+   HYPRE_Int              Astenc;
+   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              mrk0, mrk1, mrk0_offd, mrk1_offd;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int                    stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    hypre_Index            diag_index;
-   HYPRE_Int                    diag_rank;
-   HYPRE_Int                    warning_cnt= 0;
+   HYPRE_Int              diag_rank;
+   HYPRE_Int              warning_cnt= 0;
 
    hypre_SetIndex(diag_index, 0, 0, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);

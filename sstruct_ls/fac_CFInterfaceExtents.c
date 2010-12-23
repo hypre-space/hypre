@@ -45,11 +45,11 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    hypre_Box             *box;
 
    hypre_Index            stencil_shape, cstart, zero_index, neg_index;
-   HYPRE_Int                    stencil_size;
-   HYPRE_Int                    abs_stencil;
+   HYPRE_Int              stencil_size;
+   HYPRE_Int              abs_stencil;
 
-   HYPRE_Int                    ndim= hypre_StructStencilDim(stencils);
-   HYPRE_Int                    i, j;
+   HYPRE_Int              ndim= hypre_StructStencilDim(stencils);
+   HYPRE_Int              i, j;
     
    hypre_ClearIndex(zero_index);
    hypre_ClearIndex(neg_index);
@@ -143,13 +143,13 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
    hypre_Box             *cfine_box;
 
    hypre_Index            stencil_shape, zero_index, neg_index;
-   HYPRE_Int                    stencil_size;
-   HYPRE_Int                    abs_stencil;
+   HYPRE_Int              stencil_size;
+   HYPRE_Int              abs_stencil;
 
-   HYPRE_Int                    ndim= hypre_StructStencilDim(stencils);
+   HYPRE_Int              ndim= hypre_StructStencilDim(stencils);
 
-   HYPRE_Int                    i;
-   HYPRE_Int                    ierr= 0;
+   HYPRE_Int              i;
+   HYPRE_Int              ierr= 0;
     
    hypre_ClearIndex(zero_index);
    hypre_ClearIndex(neg_index);

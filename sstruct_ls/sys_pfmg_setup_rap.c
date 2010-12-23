@@ -29,11 +29,11 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
                           hypre_SStructPMatrix *A,
                           hypre_SStructPMatrix *P,
                           hypre_SStructPGrid   *coarse_grid,
-                          HYPRE_Int                   cdir        )
+                          HYPRE_Int             cdir        )
 {
    hypre_SStructPMatrix    *RAP;
-   HYPRE_Int                      ndim;
-   HYPRE_Int                      nvars;
+   HYPRE_Int                ndim;
+   HYPRE_Int                nvars;
    hypre_SStructVariable    vartype;
 
    hypre_SStructStencil **RAP_stencils;
@@ -47,18 +47,18 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
 
    hypre_StructStencil   *sstencil;
    hypre_Index           *shape;
-   HYPRE_Int                    s;
-   HYPRE_Int                   *sstencil_sizes;
+   HYPRE_Int              s;
+   HYPRE_Int             *sstencil_sizes;
 
-   HYPRE_Int                    stencil_size;
+   HYPRE_Int              stencil_size;
 
    hypre_StructGrid      *cgrid;
 
-   HYPRE_Int                    vi,vj;
+   HYPRE_Int              vi,vj;
 
-   HYPRE_Int                    sten_cntr;
+   HYPRE_Int              sten_cntr;
 
-   HYPRE_Int                    P_stored_as_transpose = 0;
+   HYPRE_Int              P_stored_as_transpose = 0;
 
    ndim = hypre_StructStencilDim(hypre_SStructPMatrixSStencil(A, 0, 0));
    nvars = hypre_SStructPMatrixNVars(A);
@@ -141,15 +141,15 @@ HYPRE_Int
 hypre_SysPFMGSetupRAPOp( hypre_SStructPMatrix *R,
                          hypre_SStructPMatrix *A,
                          hypre_SStructPMatrix *P,
-                         HYPRE_Int                   cdir,
+                         HYPRE_Int             cdir,
                          hypre_Index           cindex,
                          hypre_Index           cstride,
                          hypre_SStructPMatrix *Ac      )
 {
    HYPRE_Int ierr = 0;
  
-   HYPRE_Int                     nvars;
-   HYPRE_Int                     vi,vj;
+   HYPRE_Int               nvars;
+   HYPRE_Int               vi,vj;
 
    hypre_StructMatrix    *R_s;
    hypre_StructMatrix    *A_s;
@@ -157,7 +157,7 @@ hypre_SysPFMGSetupRAPOp( hypre_SStructPMatrix *R,
 
    hypre_StructMatrix    *Ac_s;
 
-   HYPRE_Int                    P_stored_as_transpose = 0;
+   HYPRE_Int              P_stored_as_transpose = 0;
 
    nvars = hypre_SStructPMatrixNVars(A);
 

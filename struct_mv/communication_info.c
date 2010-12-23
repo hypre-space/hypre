@@ -26,13 +26,13 @@
 HYPRE_Int
 hypre_CommInfoCreate( hypre_BoxArrayArray  *send_boxes,
                       hypre_BoxArrayArray  *recv_boxes,
-                      HYPRE_Int                 **send_procs,
-                      HYPRE_Int                 **recv_procs,
-                      HYPRE_Int                 **send_rboxnums,
-                      HYPRE_Int                 **recv_rboxnums,
+                      HYPRE_Int           **send_procs,
+                      HYPRE_Int           **recv_procs,
+                      HYPRE_Int           **send_rboxnums,
+                      HYPRE_Int           **recv_rboxnums,
                       hypre_BoxArrayArray  *send_rboxes,
                       hypre_BoxArrayArray  *recv_rboxes,
-                      HYPRE_Int                   boxes_match,
+                      HYPRE_Int             boxes_match,
                       hypre_CommInfo      **comm_info_ptr )
 {
    hypre_CommInfo  *comm_info;
@@ -68,11 +68,11 @@ hypre_CommInfoCreate( hypre_BoxArrayArray  *send_boxes,
 
 HYPRE_Int
 hypre_CommInfoSetTransforms( hypre_CommInfo  *comm_info,
-                             HYPRE_Int              num_transforms,
+                             HYPRE_Int        num_transforms,
                              hypre_Index     *coords,
                              hypre_Index     *dirs,
-                             HYPRE_Int            **send_transforms,
-                             HYPRE_Int            **recv_transforms )
+                             HYPRE_Int      **send_transforms,
+                             HYPRE_Int      **recv_transforms )
 {
    hypre_CommInfoNumTransforms(comm_info)  = num_transforms;
    hypre_CommInfoCoords(comm_info)         = coords;
@@ -88,7 +88,7 @@ hypre_CommInfoSetTransforms( hypre_CommInfo  *comm_info,
 
 HYPRE_Int
 hypre_CommInfoGetTransforms( hypre_CommInfo  *comm_info,
-                             HYPRE_Int             *num_transforms,
+                             HYPRE_Int       *num_transforms,
                              hypre_Index    **coords,
                              hypre_Index    **dirs )
 {
@@ -137,10 +137,10 @@ hypre_CommInfoProjectRecv( hypre_CommInfo  *comm_info,
 HYPRE_Int
 hypre_CommInfoDestroy( hypre_CommInfo  *comm_info )
 {
-   HYPRE_Int                 **processes;
-   HYPRE_Int                 **rboxnums;
-   HYPRE_Int                 **transforms;
-   HYPRE_Int                   i, size;
+   HYPRE_Int           **processes;
+   HYPRE_Int           **rboxnums;
+   HYPRE_Int           **transforms;
+   HYPRE_Int             i, size;
 
    size = hypre_BoxArrayArraySize(hypre_CommInfoSendBoxes(comm_info));
    hypre_BoxArrayArrayDestroy(hypre_CommInfoSendBoxes(comm_info));
@@ -308,23 +308,23 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                                  hypre_CommInfo       **comm_info_ptr )
 {
 
-   HYPRE_Int                    i,j,k, d, m, s;   
+   HYPRE_Int              i,j,k, d, m, s;   
 
 
    hypre_BoxArrayArray   *send_boxes;
    hypre_BoxArrayArray   *recv_boxes;
 
-   HYPRE_Int                  **send_procs;
-   HYPRE_Int                  **recv_procs;
-   HYPRE_Int                  **send_rboxnums;
-   HYPRE_Int                  **recv_rboxnums;
+   HYPRE_Int            **send_procs;
+   HYPRE_Int            **recv_procs;
+   HYPRE_Int            **send_rboxnums;
+   HYPRE_Int            **recv_rboxnums;
    hypre_BoxArrayArray   *send_rboxes;
    hypre_BoxArrayArray   *recv_rboxes;
 
    hypre_BoxArray        *local_boxes;
-   HYPRE_Int                    num_boxes;
+   HYPRE_Int              num_boxes;
 
-   HYPRE_Int                   *local_ids;
+   HYPRE_Int             *local_ids;
 
    hypre_BoxManager      *boxman;
                        
@@ -339,19 +339,19 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_Box             *int_box;
    hypre_Box             *periodic_box;
    
-   HYPRE_Int                    stencil_grid[3][3][3];
-   HYPRE_Int                    grow[3][2];
+   HYPRE_Int              stencil_grid[3][3][3];
+   HYPRE_Int              grow[3][2];
                        
    hypre_BoxManEntry    **entries;
    hypre_BoxManEntry     *entry;
    
-   HYPRE_Int                    num_entries;
+   HYPRE_Int              num_entries;
    hypre_BoxArray        *neighbor_boxes = NULL;
-   HYPRE_Int                   *neighbor_procs = NULL;
-   HYPRE_Int                   *neighbor_ids = NULL;
-   HYPRE_Int                   *neighbor_shifts = NULL;
-   HYPRE_Int                    neighbor_count;
-   HYPRE_Int                    neighbor_alloc;
+   HYPRE_Int             *neighbor_procs = NULL;
+   HYPRE_Int             *neighbor_ids = NULL;
+   HYPRE_Int             *neighbor_shifts = NULL;
+   HYPRE_Int              neighbor_count;
+   HYPRE_Int              neighbor_alloc;
    
 
    hypre_Index            ilower, iupper;
@@ -362,14 +362,14 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                        
    hypre_Box            **cboxes;
    hypre_Box             *cboxes_mem;
-   HYPRE_Int                   *cboxes_neighbor_location;
-   HYPRE_Int                    num_cboxes, cbox_alloc;
+   HYPRE_Int             *cboxes_neighbor_location;
+   HYPRE_Int              num_cboxes, cbox_alloc;
                        
-   HYPRE_Int                    istart[3], istop[3];
-   HYPRE_Int                    sgindex[3];               
+   HYPRE_Int              istart[3], istop[3];
+   HYPRE_Int              sgindex[3];               
 
-   HYPRE_Int                    num_periods, loc, box_id, id, proc_id;
-   HYPRE_Int                    myid;
+   HYPRE_Int              num_periods, loc, box_id, id, proc_id;
+   HYPRE_Int              myid;
    
    MPI_Comm               comm;
    
@@ -816,12 +816,12 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 
 HYPRE_Int
 hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
-                                  HYPRE_Int                   *num_ghost,
+                                  HYPRE_Int             *num_ghost,
                                   hypre_CommInfo       **comm_info_ptr )
 {
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   HYPRE_Int                   startstop[6], ii[3], i, d, size;
+   HYPRE_Int             startstop[6], ii[3], i, d, size;
 
    stencil_shape = hypre_CTAlloc(hypre_Index, 27);
    for (i = 0; i < 6; i++)
@@ -871,16 +871,16 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
 {
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
-   HYPRE_Int                    **send_procs;
-   HYPRE_Int                    **recv_procs;
-   HYPRE_Int                    **send_rboxnums;
-   HYPRE_Int                    **recv_rboxnums;
+   HYPRE_Int              **send_procs;
+   HYPRE_Int              **recv_procs;
+   HYPRE_Int              **send_rboxnums;
+   HYPRE_Int              **recv_rboxnums;
    hypre_BoxArrayArray     *send_rboxes;
    hypre_BoxArrayArray     *recv_rboxes;
 
    hypre_BoxArrayArray     *comm_boxes;
-   HYPRE_Int                    **comm_procs;
-   HYPRE_Int                    **comm_boxnums;
+   HYPRE_Int              **comm_procs;
+   HYPRE_Int              **comm_boxnums;
    hypre_BoxArray          *comm_box_array;
    hypre_Box               *comm_box;
 
@@ -890,14 +890,14 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
    hypre_BoxArray          *local_boxes;
    hypre_BoxArray          *remote_boxes;
    hypre_BoxArray          *remote_all_boxes;
-   HYPRE_Int                     *remote_all_procs;
-   HYPRE_Int                     *remote_all_boxnums;
-   HYPRE_Int                      remote_first_local;
+   HYPRE_Int               *remote_all_procs;
+   HYPRE_Int               *remote_all_boxnums;
+   HYPRE_Int                remote_first_local;
 
    hypre_Box               *local_box;
    hypre_Box               *remote_box;
 
-   HYPRE_Int                      i, j, k, r;
+   HYPRE_Int                i, j, k, r;
 
    /*------------------------------------------------------
     * Set up communication info

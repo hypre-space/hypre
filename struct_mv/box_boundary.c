@@ -206,7 +206,7 @@ hypre_BoxBoundaryG( hypre_Box *box, hypre_StructGrid *g,
 
    hypre_BoxManager *boxman;
    hypre_BoxArray   *neighbor_boxes = NULL;
-   HYPRE_Int              *thickness = hypre_StructGridNumGhost(g);
+   HYPRE_Int        *thickness = hypre_StructGridNumGhost(g);
  
    /* neighbor_boxes are this processor's neighbors, not this box's
       neighbors.  But it's likely to be cheaper to use them all in the

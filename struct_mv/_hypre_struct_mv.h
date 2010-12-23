@@ -77,8 +77,8 @@ typedef struct hypre_Box_struct
 typedef struct hypre_BoxArray_struct
 {
    hypre_Box  *boxes;         /* Array of boxes */
-   HYPRE_Int         size;          /* Size of box array */
-   HYPRE_Int         alloc_size;    /* Size of currently alloced space */
+   HYPRE_Int   size;          /* Size of box array */
+   HYPRE_Int   alloc_size;    /* Size of currently alloced space */
 
 } hypre_BoxArray;
 
@@ -92,7 +92,7 @@ typedef struct hypre_BoxArray_struct
 typedef struct hypre_BoxArrayArray_struct
 {
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
-   HYPRE_Int               size;          /* Size of box array array */
+   HYPRE_Int         size;          /* Size of box array array */
 
 } hypre_BoxArrayArray;
 
@@ -1061,17 +1061,17 @@ typedef struct
 {
    /* the entries will be the same for all procs */  
    hypre_BoxArray      *regions;
-   HYPRE_Int                 num_regions;      
-   HYPRE_Int                 *proc_partitions;
+   HYPRE_Int           num_regions;      
+   HYPRE_Int           *proc_partitions;
    hypre_Index         *divisions;
    /* these entries are specific to each proc */
    hypre_BoxArray      *my_partition;
    hypre_BoxArray      *my_partition_boxes;
-   HYPRE_Int                 *my_partition_proc_ids;
-   HYPRE_Int                 *my_partition_boxnums;
-   HYPRE_Int                 my_partition_ids_size;   
-   HYPRE_Int                 my_partition_ids_alloc;
-   HYPRE_Int                 my_partition_num_distinct_procs;
+   HYPRE_Int           *my_partition_proc_ids;
+   HYPRE_Int           *my_partition_boxnums;
+   HYPRE_Int           my_partition_ids_size;   
+   HYPRE_Int           my_partition_ids_alloc;
+   HYPRE_Int           my_partition_num_distinct_procs;
     
 } hypre_StructAssumedPart;
 
@@ -1148,11 +1148,11 @@ typedef struct
 
    MPI_Comm            comm;
 
-   HYPRE_Int                 max_nentries;  /* storage in entries allocated to this 
+   HYPRE_Int           max_nentries;  /* storage in entries allocated to this 
                                          amount */
 
     
-   HYPRE_Int                 is_gather_called; /* boolean to indicate  whether GatherEntries
+   HYPRE_Int           is_gather_called; /* boolean to indicate  whether GatherEntries
                                             function has been called  (prior to 
                                             assemble) - may not want this (can tell
                                             by the size of gather_regions array) */
@@ -1163,56 +1163,56 @@ typedef struct
                                           deleted after the assemble */
    
 
-   HYPRE_Int                 all_global_known; /* Boolean to say that every
+   HYPRE_Int           all_global_known; /* Boolean to say that every
                                             processor already has all
                                             of the global data for
                                             this manager (this could be
                                             acessed by a coarsening routine, 
                                             for example) */
    
-   HYPRE_Int                 is_entries_sort;     /* Boolean to say that entries were 
+   HYPRE_Int           is_entries_sort;     /* Boolean to say that entries were 
                                             added in sorted order (id, proc)
                                             (this could be
                                             acessed by a coarsening routine, 
                                             for example) */
 
 
-   HYPRE_Int                 entry_info_size;  /* in bytes, the (max) size of the info 
+   HYPRE_Int           entry_info_size;  /* in bytes, the (max) size of the info 
                                             object for the entries */ 
 
-   HYPRE_Int                 is_assembled;        /* flag to indicate if the box manager has been 
+   HYPRE_Int           is_assembled;        /* flag to indicate if the box manager has been 
                                             assembled (use to control whether or not
                                             functions can be used prior to assemble)*/
    
 
    /* storing the entries */
-   HYPRE_Int                 nentries;     /* number of entries stored */
+   HYPRE_Int           nentries;     /* number of entries stored */
    hypre_BoxManEntry  *entries;      /* These are the actual box manager entries - these
                                       are sorted by (proc, id) at the end of the assemble)*/  
 
-   HYPRE_Int                *procs_sort;    /* the sorted procs corresponding to entries */
-   HYPRE_Int                *ids_sort;      /* sorted ids corresponding to the entries */
+   HYPRE_Int          *procs_sort;    /* the sorted procs corresponding to entries */
+   HYPRE_Int          *ids_sort;      /* sorted ids corresponding to the entries */
  
-   HYPRE_Int                num_procs_sort; /* number of distinct procs in *entries */
-   HYPRE_Int                *procs_sort_offsets;  /* offsets for procs into the 
+   HYPRE_Int          num_procs_sort; /* number of distinct procs in *entries */
+   HYPRE_Int          *procs_sort_offsets;  /* offsets for procs into the 
                                              *entry_sort array */
-   HYPRE_Int                first_local;      /* position of local infomation in entries*/  
-   HYPRE_Int                local_proc_offset;  /*position of local information in offsets */
+   HYPRE_Int          first_local;      /* position of local infomation in entries*/  
+   HYPRE_Int          local_proc_offset;  /*position of local information in offsets */
 
    /* here is the table  that organizes the entries spatially (by index)*/
    hypre_BoxManEntry **index_table; /* this points into 'entries' array  
                                             and corresponds to the index arays*/
 
-   HYPRE_Int                *indexes[3]; /* here we have the x,y,z indexes (ordered) 
+   HYPRE_Int          *indexes[3]; /* here we have the x,y,z indexes (ordered) 
                                       for the imin and imax
                                       of each box in the entries array*/
-   HYPRE_Int                 size[3];    /* how many indexes we have in each direction 
+   HYPRE_Int           size[3];    /* how many indexes we have in each direction 
                                       - x,y,z */ 
 
-   HYPRE_Int                 last_index[3]; /* the last index used in the indexes map */
+   HYPRE_Int           last_index[3]; /* the last index used in the indexes map */
 
-   HYPRE_Int                 num_my_entries; /* number of entries with proc_id = myid */
-   HYPRE_Int                 *my_ids;        /* an array of ids corresponding to my entries */ 
+   HYPRE_Int           num_my_entries; /* number of entries with proc_id = myid */
+   HYPRE_Int           *my_ids;        /* an array of ids corresponding to my entries */ 
    hypre_BoxManEntry   **my_entries;   /* points into *entries that are mine & corresponds to
                                           my_ids array.  This is destroyed in the assemble */
    
@@ -1222,17 +1222,17 @@ typedef struct
 
    hypre_StructAssumedPart *assumed_partition; /* the assumed partition object  - for now this is only
                                                   used during the assemble (where it is created)*/
-   HYPRE_Int                 dim;           /* problem dimension (known in the grid) */
+   HYPRE_Int           dim;           /* problem dimension (known in the grid) */
 
    hypre_Box           *bounding_box;  /* bounding box - from associated grid */
    
 
-   HYPRE_Int                 next_id; /* counter to indicate the next id 
+   HYPRE_Int           next_id; /* counter to indicate the next id 
                                    that would be unique (regardless of proc id) */  
 
    /* ghost stuff  */
 
-   HYPRE_Int                num_ghost[6]; 
+   HYPRE_Int          num_ghost[6]; 
 
 
 
@@ -1341,28 +1341,28 @@ typedef struct hypre_StructGrid_struct
 {
    MPI_Comm             comm;
                       
-   HYPRE_Int                  dim;          /* Number of grid dimensions */
+   HYPRE_Int            dim;          /* Number of grid dimensions */
                       
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
-   HYPRE_Int                 *ids;          /* Unique IDs for boxes */
+   HYPRE_Int           *ids;          /* Unique IDs for boxes */
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
 
-   HYPRE_Int                  local_size;   /* Number of grid points locally */
-   HYPRE_Int                  global_size;  /* Total number of grid points */
+   HYPRE_Int            local_size;   /* Number of grid points locally */
+   HYPRE_Int            global_size;  /* Total number of grid points */
 
    hypre_Index          periodic;     /* Indicates if grid is periodic */
-   HYPRE_Int                  num_periods;  /* number of box set periods */
+   HYPRE_Int            num_periods;  /* number of box set periods */
    
    hypre_Index         *pshifts;      /* shifts of periodicity */
 
 
-   HYPRE_Int                  ref_count;
+   HYPRE_Int            ref_count;
 
 
-   HYPRE_Int                 ghlocal_size;   /* Number of vars in box including ghosts */
-   HYPRE_Int                 num_ghost[6];   /* ghost layer size for each box  */  
+   HYPRE_Int           ghlocal_size;   /* Number of vars in box including ghosts */
+   HYPRE_Int           num_ghost[6];   /* ghost layer size for each box  */  
 
    hypre_BoxManager   *box_man;
    
@@ -1437,12 +1437,12 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
 typedef struct hypre_StructStencil_struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
-   HYPRE_Int            size;    /* Number of stencil coefficients */
-   HYPRE_Int            max_offset;
+   HYPRE_Int      size;    /* Number of stencil coefficients */
+   HYPRE_Int      max_offset;
                 
-   HYPRE_Int            dim;     /* Number of dimensions */
+   HYPRE_Int      dim;     /* Number of dimensions */
 
-   HYPRE_Int            ref_count;
+   HYPRE_Int      ref_count;
 
 } hypre_StructStencil;
 
@@ -1493,23 +1493,23 @@ typedef struct hypre_CommInfo_struct
 {
    hypre_BoxArrayArray   *send_boxes;
    hypre_Index            send_stride;
-   HYPRE_Int                  **send_processes;
-   HYPRE_Int                  **send_rboxnums;
+   HYPRE_Int            **send_processes;
+   HYPRE_Int            **send_rboxnums;
    hypre_BoxArrayArray   *send_rboxes;  /* send_boxes, some with periodic shift */
 
    hypre_BoxArrayArray   *recv_boxes;
    hypre_Index            recv_stride;
-   HYPRE_Int                  **recv_processes;
-   HYPRE_Int                  **recv_rboxnums;
+   HYPRE_Int            **recv_processes;
+   HYPRE_Int            **recv_rboxnums;
    hypre_BoxArrayArray   *recv_rboxes;  /* recv_boxes, some with periodic shift */
 
-   HYPRE_Int                    num_transforms;  /* may be 0    = identity transform */
+   HYPRE_Int              num_transforms;  /* may be 0    = identity transform */
    hypre_Index           *coords;          /* may be NULL = identity transform */
    hypre_Index           *dirs;            /* may be NULL = identity transform */
-   HYPRE_Int                  **send_transforms; /* may be NULL = identity transform */
-   HYPRE_Int                  **recv_transforms; /* may be NULL = identity transform */
+   HYPRE_Int            **send_transforms; /* may be NULL = identity transform */
+   HYPRE_Int            **recv_transforms; /* may be NULL = identity transform */
 
-   HYPRE_Int                    boxes_match;  /* true (>0) if each send box has a
+   HYPRE_Int              boxes_match;  /* true (>0) if each send box has a
                                          * matching box on the recv processor */
 
 } hypre_CommInfo;
@@ -1534,13 +1534,13 @@ typedef struct hypre_CommEntryType_struct
 
 typedef struct hypre_CommType_struct
 {
-   HYPRE_Int                   proc;
-   HYPRE_Int                   bufsize;     /* message buffer size (in doubles) */
-   HYPRE_Int                   num_entries;
+   HYPRE_Int             proc;
+   HYPRE_Int             bufsize;     /* message buffer size (in doubles) */
+   HYPRE_Int             num_entries;
    hypre_CommEntryType  *entries;
 
    /* this is only needed until first send buffer prefix is packed */
-   HYPRE_Int                  *rem_boxnums; /* entry remote box numbers */
+   HYPRE_Int            *rem_boxnums; /* entry remote box numbers */
    hypre_Box            *rem_boxes;   /* entry remote boxes */
 
 } hypre_CommType;
@@ -1554,31 +1554,31 @@ typedef struct hypre_CommPkg_struct
 {
    MPI_Comm          comm;
 
-   HYPRE_Int               first_comm; /* is this the first communication? */
+   HYPRE_Int         first_comm; /* is this the first communication? */
                    
-   HYPRE_Int               num_values;
+   HYPRE_Int         num_values;
    hypre_Index       send_stride;
    hypre_Index       recv_stride;
-   HYPRE_Int               send_bufsize; /* total send buffer size (in doubles) */
-   HYPRE_Int               recv_bufsize; /* total recv buffer size (in doubles) */
+   HYPRE_Int         send_bufsize; /* total send buffer size (in doubles) */
+   HYPRE_Int         recv_bufsize; /* total recv buffer size (in doubles) */
 
-   HYPRE_Int               num_sends;
-   HYPRE_Int               num_recvs;
+   HYPRE_Int         num_sends;
+   HYPRE_Int         num_recvs;
    hypre_CommType   *send_types;
    hypre_CommType   *recv_types;
 
    hypre_CommType   *copy_from_type;
    hypre_CommType   *copy_to_type;
 
-   HYPRE_Int               num_orders;
-   HYPRE_Int             **orders;            /* num_orders x num_values */
+   HYPRE_Int         num_orders;
+   HYPRE_Int       **orders;            /* num_orders x num_values */
 
-   HYPRE_Int              *recv_data_offsets; /* offsets into recv data (by box) */
+   HYPRE_Int        *recv_data_offsets; /* offsets into recv data (by box) */
    hypre_BoxArray   *recv_data_space;   /* recv data dimensions (by box) */
 
    hypre_Index       identity_coord;
    hypre_Index       identity_dir;
-   HYPRE_Int              *identity_order;
+   HYPRE_Int        *identity_order;
 
 } hypre_CommPkg;
 
@@ -1592,7 +1592,7 @@ typedef struct hypre_CommHandle_struct
    double         *send_data;
    double         *recv_data;
 
-   HYPRE_Int             num_requests;
+   HYPRE_Int       num_requests;
    hypre_MPI_Request    *requests;
    hypre_MPI_Status     *status;
 
@@ -1600,7 +1600,7 @@ typedef struct hypre_CommHandle_struct
    double        **recv_buffers;
 
    /* set = 0, add = 1 */
-   HYPRE_Int             action;
+   HYPRE_Int       action;
 
 } hypre_CommHandle;
 
@@ -1754,7 +1754,7 @@ typedef struct hypre_ComputePkg_struct
 
    hypre_StructGrid      *grid;
    hypre_BoxArray        *data_space;
-   HYPRE_Int                    num_values;
+   HYPRE_Int              num_values;
 
 } hypre_ComputePkg;
 
@@ -1818,32 +1818,32 @@ typedef struct hypre_StructMatrix_struct
    hypre_StructGrid     *grid;
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
-   HYPRE_Int                   num_values;   /* Number of "stored" coefficients */
+   HYPRE_Int             num_values;   /* Number of "stored" coefficients */
 
    hypre_BoxArray       *data_space;
 
    double               *data;         /* Pointer to matrix data */
-   HYPRE_Int                   data_alloced; /* Boolean used for freeing data */
-   HYPRE_Int                   data_size;    /* Size of matrix data */
-   HYPRE_Int                 **data_indices; /* num-boxes by stencil-size array
+   HYPRE_Int             data_alloced; /* Boolean used for freeing data */
+   HYPRE_Int             data_size;    /* Size of matrix data */
+   HYPRE_Int           **data_indices; /* num-boxes by stencil-size array
                                           of indices into the data array.
                                           data_indices[b][s] is the starting
                                           index of matrix data corresponding
                                           to box b and stencil coefficient s */
-   HYPRE_Int                   constant_coefficient;  /* normally 0; set to 1 for
+   HYPRE_Int             constant_coefficient;  /* normally 0; set to 1 for
                                                    constant coefficient matrices
                                                    or 2 for constant coefficient
                                                    with variable diagonal */
                       
-   HYPRE_Int                   symmetric;    /* Is the matrix symmetric */
-   HYPRE_Int                  *symm_elements;/* Which elements are "symmetric" */
-   HYPRE_Int                   num_ghost[6]; /* Num ghost layers in each direction */
+   HYPRE_Int             symmetric;    /* Is the matrix symmetric */
+   HYPRE_Int            *symm_elements;/* Which elements are "symmetric" */
+   HYPRE_Int             num_ghost[6]; /* Num ghost layers in each direction */
                       
-   HYPRE_Int                   global_size;  /* Total number of nonzero coeffs */
+   HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
 
    hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
-   HYPRE_Int                   ref_count;
+   HYPRE_Int             ref_count;
 
 } hypre_StructMatrix;
 
@@ -1920,19 +1920,19 @@ typedef struct hypre_StructVector_struct
    hypre_BoxArray       *data_space;
 
    double               *data;         /* Pointer to vector data */
-   HYPRE_Int                   data_alloced; /* Boolean used for freeing data */
-   HYPRE_Int                   data_size;    /* Size of vector data */
-   HYPRE_Int                  *data_indices; /* num-boxes array of indices into
+   HYPRE_Int             data_alloced; /* Boolean used for freeing data */
+   HYPRE_Int             data_size;    /* Size of vector data */
+   HYPRE_Int            *data_indices; /* num-boxes array of indices into
                                           the data array.  data_indices[b]
                                           is the starting index of vector
                                           data corresponding to box b. */
                       
-   HYPRE_Int                   num_ghost[6]; /* Num ghost layers in each direction */
-   HYPRE_Int                   bghost_not_clear; /* Are boundary ghosts clear? */
+   HYPRE_Int             num_ghost[6]; /* Num ghost layers in each direction */
+   HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
                       
-   HYPRE_Int                   global_size;  /* Total number coefficients */
+   HYPRE_Int             global_size;  /* Total number coefficients */
 
-   HYPRE_Int                   ref_count;
+   HYPRE_Int             ref_count;
 
 } hypre_StructVector;
 

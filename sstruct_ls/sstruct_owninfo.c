@@ -62,7 +62,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
    hypre_SStructOwnInfoData *owninfo_data;
 
    MPI_Comm                  comm= hypre_SStructVectorComm(fgrid);
-   HYPRE_Int                       ndim= hypre_StructGridDim(fgrid);
+   HYPRE_Int                 ndim= hypre_StructGridDim(fgrid);
 
    hypre_BoxArray           *grid_boxes;
    hypre_BoxArray           *intersect_boxes;
@@ -72,19 +72,19 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
    hypre_Box                 boxman_entry_box;
 
    hypre_BoxManEntry       **boxman_entries;
-   HYPRE_Int                       nboxman_entries;
+   HYPRE_Int                 nboxman_entries;
 
    hypre_BoxArrayArray      *own_boxes;
-   HYPRE_Int                     **own_cboxnums;
+   HYPRE_Int               **own_cboxnums;
 
    hypre_BoxArrayArray      *own_composite_cboxes;
 
    hypre_Index               ilower, iupper, index;
 
-   HYPRE_Int                       myproc, proc;
+   HYPRE_Int                 myproc, proc;
 
-   HYPRE_Int                       cnt;
-   HYPRE_Int                       i, j, k, mod;
+   HYPRE_Int                 cnt;
+   HYPRE_Int                 i, j, k, mod;
 
    hypre_ClearIndex(index); 
    hypre_MPI_Comm_rank(comm, &myproc);

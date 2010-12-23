@@ -81,14 +81,14 @@ HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSMGSetMemoryUse( HYPRE_StructSolver solver,
-                             HYPRE_Int                memory_use )
+                             HYPRE_Int          memory_use )
 {
    return( hypre_SMGSetMemoryUse( (void *) solver, memory_use ) );
 }
 
 HYPRE_Int
 HYPRE_StructSMGGetMemoryUse( HYPRE_StructSolver solver,
-                             HYPRE_Int              * memory_use )
+                             HYPRE_Int        * memory_use )
 {
    return( hypre_SMGGetMemoryUse( (void *) solver, memory_use ) );
 }
@@ -117,14 +117,14 @@ HYPRE_StructSMGGetTol( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSMGSetMaxIter( HYPRE_StructSolver solver,
-                           HYPRE_Int                max_iter  )
+                           HYPRE_Int          max_iter  )
 {
    return( hypre_SMGSetMaxIter( (void *) solver, max_iter ) );
 }
 
 HYPRE_Int
 HYPRE_StructSMGGetMaxIter( HYPRE_StructSolver solver,
-                           HYPRE_Int              * max_iter  )
+                           HYPRE_Int        * max_iter  )
 {
    return( hypre_SMGGetMaxIter( (void *) solver, max_iter ) );
 }
@@ -135,14 +135,14 @@ HYPRE_StructSMGGetMaxIter( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSMGSetRelChange( HYPRE_StructSolver solver,
-                             HYPRE_Int                rel_change  )
+                             HYPRE_Int          rel_change  )
 {
    return( hypre_SMGSetRelChange( (void *) solver, rel_change ) );
 }
 
 HYPRE_Int
 HYPRE_StructSMGGetRelChange( HYPRE_StructSolver solver,
-                             HYPRE_Int              * rel_change  )
+                             HYPRE_Int        * rel_change  )
 {
    return( hypre_SMGGetRelChange( (void *) solver, rel_change ) );
 }
@@ -182,14 +182,14 @@ HYPRE_StructSMGSetNonZeroGuess( HYPRE_StructSolver solver )
 
 HYPRE_Int
 HYPRE_StructSMGSetNumPreRelax( HYPRE_StructSolver solver,
-                               HYPRE_Int                num_pre_relax )
+                               HYPRE_Int          num_pre_relax )
 {
    return( hypre_SMGSetNumPreRelax( (void *) solver, num_pre_relax) );
 }
 
 HYPRE_Int
 HYPRE_StructSMGGetNumPreRelax( HYPRE_StructSolver solver,
-                               HYPRE_Int              * num_pre_relax )
+                               HYPRE_Int        * num_pre_relax )
 {
    return( hypre_SMGGetNumPreRelax( (void *) solver, num_pre_relax) );
 }
@@ -200,14 +200,14 @@ HYPRE_StructSMGGetNumPreRelax( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSMGSetNumPostRelax( HYPRE_StructSolver solver,
-                                HYPRE_Int                num_post_relax )
+                                HYPRE_Int          num_post_relax )
 {
    return( hypre_SMGSetNumPostRelax( (void *) solver, num_post_relax) );
 }
 
 HYPRE_Int
 HYPRE_StructSMGGetNumPostRelax( HYPRE_StructSolver solver,
-                                HYPRE_Int              * num_post_relax )
+                                HYPRE_Int        * num_post_relax )
 {
    return( hypre_SMGGetNumPostRelax( (void *) solver, num_post_relax) );
 }
@@ -218,14 +218,14 @@ HYPRE_StructSMGGetNumPostRelax( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSMGSetLogging( HYPRE_StructSolver solver,
-                           HYPRE_Int                logging )
+                           HYPRE_Int          logging )
 {
    return( hypre_SMGSetLogging( (void *) solver, logging) );
 }
 
 HYPRE_Int
 HYPRE_StructSMGGetLogging( HYPRE_StructSolver solver,
-                           HYPRE_Int              * logging )
+                           HYPRE_Int        * logging )
 {
    return( hypre_SMGGetLogging( (void *) solver, logging) );
 }
@@ -236,7 +236,7 @@ HYPRE_StructSMGGetLogging( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSMGSetPrintLevel( HYPRE_StructSolver solver,
-                           HYPRE_Int        print_level )
+                           HYPRE_Int  print_level )
 {
    return( hypre_SMGSetPrintLevel( (void *) solver, print_level) );
 }
@@ -254,7 +254,7 @@ HYPRE_StructSMGGetPrintLevel( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSMGGetNumIterations( HYPRE_StructSolver  solver,
-                                 HYPRE_Int                *num_iterations )
+                                 HYPRE_Int          *num_iterations )
 {
    return( hypre_SMGGetNumIterations( (void *) solver, num_iterations ) );
 }

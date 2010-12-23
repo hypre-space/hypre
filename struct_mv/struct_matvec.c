@@ -115,7 +115,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_BoxArrayArray     *compute_box_aa;
    hypre_Box               *y_data_box;
                           
-   HYPRE_Int                      yi;
+   HYPRE_Int                yi;
                           
    double                  *xp;
    double                  *yp;
@@ -126,11 +126,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_IndexRef           start;
    hypre_IndexRef           stride;
                           
-   HYPRE_Int                      constant_coefficient;
+   HYPRE_Int                constant_coefficient;
 
    double                   temp;
-   HYPRE_Int                      compute_i, i;
-   HYPRE_Int                      loopi, loopj, loopk;
+   HYPRE_Int                compute_i, i;
+   HYPRE_Int                loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -306,15 +306,15 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
    double                  *Ap4;
    double                  *Ap5;
    double                  *Ap6;
-   HYPRE_Int                      xoff0;
-   HYPRE_Int                      xoff1;
-   HYPRE_Int                      xoff2;
-   HYPRE_Int                      xoff3;
-   HYPRE_Int                      xoff4;
-   HYPRE_Int                      xoff5;
-   HYPRE_Int                      xoff6;
-   HYPRE_Int                      Ai;
-   HYPRE_Int                      xi;
+   HYPRE_Int                xoff0;
+   HYPRE_Int                xoff1;
+   HYPRE_Int                xoff2;
+   HYPRE_Int                xoff3;
+   HYPRE_Int                xoff4;
+   HYPRE_Int                xoff5;
+   HYPRE_Int                xoff6;
+   HYPRE_Int                Ai;
+   HYPRE_Int                xi;
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
@@ -322,16 +322,16 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
    hypre_Box               *x_data_box;
    hypre_StructStencil     *stencil;
    hypre_Index             *stencil_shape;
-   HYPRE_Int                      stencil_size;
+   HYPRE_Int                stencil_size;
                           
    hypre_Box               *y_data_box;
    double                  *xp;
    double                  *yp;
-   HYPRE_Int                      depth;
+   HYPRE_Int                depth;
    hypre_Index              loop_size;
-   HYPRE_Int                      loopi, loopj, loopk;
+   HYPRE_Int                loopi, loopj, loopk;
    hypre_IndexRef           start;
-   HYPRE_Int                      yi;
+   HYPRE_Int                yi;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -641,15 +641,15 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
    double                  AAp4;
    double                  AAp5;
    double                  AAp6;
-   HYPRE_Int                      xoff0;
-   HYPRE_Int                      xoff1;
-   HYPRE_Int                      xoff2;
-   HYPRE_Int                      xoff3;
-   HYPRE_Int                      xoff4;
-   HYPRE_Int                      xoff5;
-   HYPRE_Int                      xoff6;
-   HYPRE_Int                      Ai;
-   HYPRE_Int                      xi;
+   HYPRE_Int                xoff0;
+   HYPRE_Int                xoff1;
+   HYPRE_Int                xoff2;
+   HYPRE_Int                xoff3;
+   HYPRE_Int                xoff4;
+   HYPRE_Int                xoff5;
+   HYPRE_Int                xoff6;
+   HYPRE_Int                Ai;
+   HYPRE_Int                xi;
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
@@ -657,16 +657,16 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
    hypre_Box               *x_data_box;
    hypre_StructStencil     *stencil;
    hypre_Index             *stencil_shape;
-   HYPRE_Int                      stencil_size;
+   HYPRE_Int                stencil_size;
                           
    hypre_Box               *y_data_box;
    double                  *xp;
    double                  *yp;
-   HYPRE_Int                      depth;
+   HYPRE_Int                depth;
    hypre_Index              loop_size;
-   HYPRE_Int                      loopi, loopj, loopk;
+   HYPRE_Int                loopi, loopj, loopk;
    hypre_IndexRef           start;
-   HYPRE_Int                      yi;
+   HYPRE_Int                yi;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -979,17 +979,17 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
    double                  AAp4;
    double                  AAp5;
    double                  AAp6;
-   HYPRE_Int                      xoff0;
-   HYPRE_Int                      xoff1;
-   HYPRE_Int                      xoff2;
-   HYPRE_Int                      xoff3;
-   HYPRE_Int                      xoff4;
-   HYPRE_Int                      xoff5;
-   HYPRE_Int                      xoff6;
-   HYPRE_Int                      si_center, center_rank;
+   HYPRE_Int                xoff0;
+   HYPRE_Int                xoff1;
+   HYPRE_Int                xoff2;
+   HYPRE_Int                xoff3;
+   HYPRE_Int                xoff4;
+   HYPRE_Int                xoff5;
+   HYPRE_Int                xoff6;
+   HYPRE_Int                si_center, center_rank;
    hypre_Index              center_index;
-   HYPRE_Int                      Ai, Ai_CC;
-   HYPRE_Int                      xi;
+   HYPRE_Int                Ai, Ai_CC;
+   HYPRE_Int                xi;
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
@@ -997,16 +997,16 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
    hypre_Box               *x_data_box;
    hypre_StructStencil     *stencil;
    hypre_Index             *stencil_shape;
-   HYPRE_Int                      stencil_size;
+   HYPRE_Int                stencil_size;
                           
    hypre_Box               *y_data_box;
    double                  *xp;
    double                  *yp;
-   HYPRE_Int                      depth;
+   HYPRE_Int                depth;
    hypre_Index              loop_size;
-   HYPRE_Int                      loopi, loopj, loopk;
+   HYPRE_Int                loopi, loopj, loopk;
    hypre_IndexRef           start;
-   HYPRE_Int                      yi;
+   HYPRE_Int                yi;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);

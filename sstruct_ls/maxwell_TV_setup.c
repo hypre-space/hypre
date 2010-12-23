@@ -45,7 +45,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParCSRMatrix    *T_transpose;
    hypre_ParCSRMatrix    *transpose;
    hypre_ParCSRMatrix    *parcsr_mat;
-   HYPRE_Int                    size, *col_inds;
+   HYPRE_Int              size, *col_inds;
    double                *values;
 
    hypre_ParVector       *parvector_x;
@@ -64,11 +64,11 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParVector      **en_l;
    hypre_ParVector      **nVtemp_l;
    hypre_ParVector      **nVtemp2_l;
-   HYPRE_Int                  **nCF_marker_l;
+   HYPRE_Int            **nCF_marker_l;
    double                *nrelax_weight;
    double                *nomega;
-   HYPRE_Int                    nrelax_type;
-   HYPRE_Int                    node_numlevels;
+   HYPRE_Int              nrelax_type;
+   HYPRE_Int              node_numlevels;
 
    hypre_ParCSRMatrix   **Aee_l;
    hypre_IJMatrix       **Pe_l; 
@@ -81,29 +81,29 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParVector      **eVtemp2_l;
    double                *erelax_weight;
    double                *eomega;
-   HYPRE_Int                  **eCF_marker_l;
-   HYPRE_Int                    erelax_type;
+   HYPRE_Int            **eCF_marker_l;
+   HYPRE_Int              erelax_type;
 
   /* objects needed to fine the edge relaxation parameters */
-   HYPRE_Int                    relax_type;
-   /*HYPRE_Int                   *relax_types;
+   HYPRE_Int              relax_type;
+   /*HYPRE_Int             *relax_types;
    void                  *e_amg_vdata;
    hypre_ParAMGData      *e_amgData;
-   HYPRE_Int                    numCGSweeps= 10;
-   HYPRE_Int                  **amg_CF_marker;
+   HYPRE_Int              numCGSweeps= 10;
+   HYPRE_Int            **amg_CF_marker;
    hypre_ParCSRMatrix   **A_array;*/
 
 
    hypre_SStructGrid     *node_grid;
    hypre_SStructGraph    *node_graph;
 
-   HYPRE_Int                   *coarsen;
+   HYPRE_Int             *coarsen;
    hypre_SStructGrid    **egrid_l;
    hypre_SStructGrid     *edge_grid, *face_grid, *cell_grid;
    hypre_SStructGrid    **topological_edge, **topological_face, **topological_cell;
 
-   HYPRE_Int                  **BdryRanks_l;
-   HYPRE_Int                   *BdryRanksCnts_l;
+   HYPRE_Int            **BdryRanks_l;
+   HYPRE_Int             *BdryRanksCnts_l;
 
    hypre_SStructPGrid    *pgrid;
    hypre_StructGrid      *sgrid;
@@ -116,40 +116,40 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_SStructStencil **Ann_stencils;
 
    hypre_MaxwellOffProcRow **OffProcRows;
-   HYPRE_Int                       num_OffProcRows;
+   HYPRE_Int                 num_OffProcRows;
 
    hypre_Index            rfactor;
    hypre_Index            index, cindex, shape, loop_size, start;
-   HYPRE_Int                    stencil_size;
-   HYPRE_Int                    loopi, loopj, loopk;
-   HYPRE_Int                    matrix_type= HYPRE_PARCSR;
+   HYPRE_Int              stencil_size;
+   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              matrix_type= HYPRE_PARCSR;
 
-   HYPRE_Int                    ndim = hypre_SStructMatrixNDim(Aee_in); 
-   HYPRE_Int                    nparts, part, vars, nboxes, lev_nboxes;
+   HYPRE_Int              ndim = hypre_SStructMatrixNDim(Aee_in); 
+   HYPRE_Int              nparts, part, vars, nboxes, lev_nboxes;
 
-   HYPRE_Int                    nrows, rank, start_rank;
-   HYPRE_Int                   *flag, *flag2, *inode, *ncols, *jnode;
+   HYPRE_Int              nrows, rank, start_rank;
+   HYPRE_Int             *flag, *flag2, *inode, *ncols, *jnode;
    double                *vals;
 
-   HYPRE_Int                    i, j, k, l, m;
+   HYPRE_Int              i, j, k, l, m;
 
    hypre_BoxManager      *node_boxman;
    hypre_BoxManEntry     *entry;
-   HYPRE_Int                    kstart, kend;
-   HYPRE_Int                    ilower, iupper;
-   HYPRE_Int                    jlower, jupper;
-   HYPRE_Int                    myproc;
+   HYPRE_Int              kstart, kend;
+   HYPRE_Int              ilower, iupper;
+   HYPRE_Int              jlower, jupper;
+   HYPRE_Int              myproc;
 
-   HYPRE_Int                    first_local_row, last_local_row;
-   HYPRE_Int                    first_local_col, last_local_col;
+   HYPRE_Int              first_local_row, last_local_row;
+   HYPRE_Int              first_local_col, last_local_col;
 
-   HYPRE_Int                    edge_maxlevels, edge_numlevels, en_numlevels;
+   HYPRE_Int              edge_maxlevels, edge_numlevels, en_numlevels;
 
-   HYPRE_Int                    constant_coef=  maxwell_TV_data -> constant_coef;
-   HYPRE_Int                    true = 1;
-   HYPRE_Int                    false= 0;
+   HYPRE_Int              constant_coef=  maxwell_TV_data -> constant_coef;
+   HYPRE_Int              true = 1;
+   HYPRE_Int              false= 0;
 
-   HYPRE_Int                    ierr = 0;
+   HYPRE_Int              ierr = 0;
 #if DEBUG
    /*char                  filename[255];*/
 #endif
@@ -1361,9 +1361,9 @@ HYPRE_Int
 hypre_CoarsenPGrid( hypre_SStructGrid  *fgrid,
                     hypre_Index         index,
                     hypre_Index         stride,
-                    HYPRE_Int                 part,
+                    HYPRE_Int           part,
                     hypre_SStructGrid  *cgrid,
-                    HYPRE_Int                *nboxes)
+                    HYPRE_Int          *nboxes)
 {
    HYPRE_Int ierr = 0;
                                                                                                              
@@ -1373,7 +1373,7 @@ hypre_CoarsenPGrid( hypre_SStructGrid  *fgrid,
    hypre_BoxArray     *boxes;
    hypre_Box          *box, *contract_box;
                                                                                                              
-   HYPRE_Int                 i;
+   HYPRE_Int           i;
 
    /*-----------------------------------------
     * Set the coarse sgrid
@@ -1432,11 +1432,11 @@ hypre_BoxContraction( hypre_Box           *box,
    hypre_Box           *shifted_box;
    hypre_Box            intersect_box;
 
-   HYPRE_Int                  ndim= hypre_StructGridDim(sgrid);
+   HYPRE_Int            ndim= hypre_StructGridDim(sgrid);
 
    hypre_Index          remainder, box_width;
-   HYPRE_Int                  i, j, k, p;
-   HYPRE_Int                  npos, nneg;
+   HYPRE_Int            i, j, k, p;
+   HYPRE_Int            npos, nneg;
 
 
    /* get the boxes out of the box manager - use these as the neighbor boxes */

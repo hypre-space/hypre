@@ -56,34 +56,34 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
                        hypre_StructMatrix *A,
                        hypre_StructMatrix *P,
                        hypre_StructGrid   *coarse_grid,
-                       HYPRE_Int                 cdir,
-                       HYPRE_Int                 P_stored_as_transpose )
+                       HYPRE_Int           cdir,
+                       HYPRE_Int           P_stored_as_transpose )
 {
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;
    hypre_StructStencil   *RAP_stencil;
-   HYPRE_Int                    RAP_stencil_size;
-   HYPRE_Int                    dim;
-   HYPRE_Int                    RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int              RAP_stencil_size;
+   HYPRE_Int              dim;
+   HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
 
-   HYPRE_Int                   *not_cdirs;
+   HYPRE_Int             *not_cdirs;
    hypre_StructStencil   *A_stencil;
-   HYPRE_Int                    A_stencil_size;
+   HYPRE_Int              A_stencil_size;
    hypre_Index           *A_stencil_shape;
 
    hypre_Index            indexR;
    hypre_Index            indexRA;
    hypre_Index            indexRAP;
-   HYPRE_Int                    Rloop, Aloop;
+   HYPRE_Int              Rloop, Aloop;
 
-   HYPRE_Int                    j, i;
-   HYPRE_Int                    d;
-   HYPRE_Int                    stencil_rank;
+   HYPRE_Int              j, i;
+   HYPRE_Int              d;
+   HYPRE_Int              stencil_rank;
 
-   HYPRE_Int                   *RAP_marker;
-   HYPRE_Int                    RAP_marker_size;
-   HYPRE_Int                    RAP_marker_rank;
+   HYPRE_Int             *RAP_marker;
+   HYPRE_Int              RAP_marker_size;
+   HYPRE_Int              RAP_marker_rank;
 
    A_stencil = hypre_StructMatrixStencil(A);
    dim = hypre_StructStencilDim(A_stencil);
@@ -291,25 +291,25 @@ HYPRE_Int
 hypre_SemiBuildRAP( hypre_StructMatrix *A,
                     hypre_StructMatrix *P,
                     hypre_StructMatrix *R,
-                    HYPRE_Int                 cdir,
+                    HYPRE_Int           cdir,
                     hypre_Index         cindex,
                     hypre_Index         cstride,
-                    HYPRE_Int                 P_stored_as_transpose,
+                    HYPRE_Int           P_stored_as_transpose,
                     hypre_StructMatrix *RAP     )
 {
 
    hypre_Index           index;
 
    hypre_StructStencil  *coarse_stencil;
-   HYPRE_Int                   coarse_stencil_size;
+   HYPRE_Int             coarse_stencil_size;
    hypre_Index          *coarse_stencil_shape;
-   HYPRE_Int                  *coarse_symm_elements;
+   HYPRE_Int            *coarse_symm_elements;
 
    hypre_StructGrid     *fgrid;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
@@ -317,8 +317,8 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int                   fi, ci;
-   HYPRE_Int                   loopi, loopj, loopk;
+   HYPRE_Int             fi, ci;
+   HYPRE_Int             loopi, loopj, loopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
@@ -332,24 +332,24 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
    double               *rap_ptrS, *rap_ptrU, *rap_ptrD;
 
-   HYPRE_Int                   symm_path_multiplier;
+   HYPRE_Int             symm_path_multiplier;
 
-   HYPRE_Int                   iA, iAp;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iPp;
-   HYPRE_Int                   iR;
+   HYPRE_Int             iA, iAp;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iPp;
+   HYPRE_Int             iR;
                         
-   HYPRE_Int                   COffsetA; 
-   HYPRE_Int                   COffsetP; 
-   HYPRE_Int                   AOffsetP; 
+   HYPRE_Int             COffsetA; 
+   HYPRE_Int             COffsetP; 
+   HYPRE_Int             AOffsetP; 
 
-   HYPRE_Int                   RAPloop;
-   HYPRE_Int                   diag;
-   HYPRE_Int                   dim;
-   HYPRE_Int                   d;
+   HYPRE_Int             RAPloop;
+   HYPRE_Int             diag;
+   HYPRE_Int             dim;
+   HYPRE_Int             d;
                      
    double                zero = 0.0;
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    coarse_stencil = hypre_StructMatrixStencil(RAP);
    coarse_stencil_size = hypre_StructStencilSize(coarse_stencil);

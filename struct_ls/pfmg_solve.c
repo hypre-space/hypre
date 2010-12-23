@@ -49,12 +49,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    hypre_PFMGData       *pfmg_data = pfmg_vdata;
 
    double                tol             = (pfmg_data -> tol);
-   HYPRE_Int                   max_iter        = (pfmg_data -> max_iter);
-   HYPRE_Int                   rel_change      = (pfmg_data -> rel_change);
-   HYPRE_Int                   zero_guess      = (pfmg_data -> zero_guess);
-   HYPRE_Int                   num_pre_relax   = (pfmg_data -> num_pre_relax);
-   HYPRE_Int                   num_post_relax  = (pfmg_data -> num_post_relax);
-   HYPRE_Int                   num_levels      = (pfmg_data -> num_levels);
+   HYPRE_Int             max_iter        = (pfmg_data -> max_iter);
+   HYPRE_Int             rel_change      = (pfmg_data -> rel_change);
+   HYPRE_Int             zero_guess      = (pfmg_data -> zero_guess);
+   HYPRE_Int             num_pre_relax   = (pfmg_data -> num_pre_relax);
+   HYPRE_Int             num_post_relax  = (pfmg_data -> num_post_relax);
+   HYPRE_Int             num_levels      = (pfmg_data -> num_levels);
    hypre_StructMatrix  **A_l             = (pfmg_data -> A_l);
    hypre_StructMatrix  **P_l             = (pfmg_data -> P_l);
    hypre_StructMatrix  **RT_l            = (pfmg_data -> RT_l);
@@ -66,18 +66,18 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    void                **matvec_data_l   = (pfmg_data -> matvec_data_l);
    void                **restrict_data_l = (pfmg_data -> restrict_data_l);
    void                **interp_data_l   = (pfmg_data -> interp_data_l);
-   HYPRE_Int                   logging         = (pfmg_data -> logging);
+   HYPRE_Int             logging         = (pfmg_data -> logging);
    double               *norms           = (pfmg_data -> norms);
    double               *rel_norms       = (pfmg_data -> rel_norms);
-   HYPRE_Int                  *active_l        = (pfmg_data -> active_l);
+   HYPRE_Int            *active_l        = (pfmg_data -> active_l);
 
    double                b_dot_b, r_dot_r, eps;
    double                e_dot_e, x_dot_x;
                     
-   HYPRE_Int                   i, l;
-   HYPRE_Int                   constant_coefficient;
+   HYPRE_Int             i, l;
+   HYPRE_Int             constant_coefficient;
 
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif

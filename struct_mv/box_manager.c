@@ -644,9 +644,9 @@ HYPRE_Int hypre_BoxManAddEntry( hypre_BoxManager *manager , hypre_Index imin ,
                           void *info )
 
 {
-   HYPRE_Int                 myid;
-   HYPRE_Int                 nentries = hypre_BoxManNEntries(manager);
-   HYPRE_Int                 info_size = hypre_BoxManEntryInfoSize(manager);
+   HYPRE_Int           myid;
+   HYPRE_Int           nentries = hypre_BoxManNEntries(manager);
+   HYPRE_Int           info_size = hypre_BoxManEntryInfoSize(manager);
 
    hypre_BoxManEntry  *entries  = hypre_BoxManEntries(manager);
    hypre_BoxManEntry  *entry;
@@ -654,11 +654,11 @@ HYPRE_Int hypre_BoxManAddEntry( hypre_BoxManager *manager , hypre_Index imin ,
    hypre_IndexRef      entry_imin;
    hypre_IndexRef      entry_imax;
  
-   HYPRE_Int                 d;
-   HYPRE_Int                 *num_ghost = hypre_BoxManNumGhost(manager);  
-   HYPRE_Int                 volume;
+   HYPRE_Int           d;
+   HYPRE_Int           *num_ghost = hypre_BoxManNumGhost(manager);  
+   HYPRE_Int           volume;
    
-   HYPRE_Int                 id;
+   HYPRE_Int           id;
    
 
    hypre_Box           *box;
@@ -959,7 +959,7 @@ HYPRE_Int hypre_BoxManGetAllEntriesBoxes( hypre_BoxManager *manager,
 
    hypre_BoxManEntry entry;
    
-   HYPRE_Int                i, nentries;
+   HYPRE_Int          i, nentries;
    hypre_Index       ilower, iupper;
 
    hypre_BoxManEntry  *boxman_entries  = hypre_BoxManEntries(manager);
@@ -1010,7 +1010,7 @@ HYPRE_Int hypre_BoxManGetLocalEntriesBoxes( hypre_BoxManager *manager,
 
    hypre_BoxManEntry entry;
    
-   HYPRE_Int                i;
+   HYPRE_Int          i;
 
    hypre_Index        ilower, iupper;
 
@@ -1059,14 +1059,14 @@ HYPRE_Int hypre_BoxManGetLocalEntriesBoxes( hypre_BoxManager *manager,
  *--------------------------------------------------------------------------*/
 HYPRE_Int hypre_BoxManGetAllEntriesBoxesProc( hypre_BoxManager *manager,
                                         hypre_BoxArray *boxes,
-                                        HYPRE_Int            *procs)
+                                        HYPRE_Int      *procs)
                                                                                                                                                 
 {
                                                                                                                                                 
                                                                                                                                                 
    hypre_BoxManEntry entry;
                                                                                                                                                 
-   HYPRE_Int                i, nentries;
+   HYPRE_Int          i, nentries;
    hypre_Index        ilower, iupper;
                                                                                                                                                 
    hypre_BoxManEntry  *boxman_entries  = hypre_BoxManEntries(manager);

@@ -26,7 +26,7 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
                                     hypre_SStructRecvInfoData *recvinfo,
                                     hypre_BoxArray            *send_data_space,
                                     hypre_BoxArray            *recv_data_space,
-                                    HYPRE_Int                        num_values,
+                                    HYPRE_Int                  num_values,
                                     MPI_Comm                   comm,
                                     hypre_CommPkg            **comm_pkg_ptr )
 {
@@ -34,18 +34,18 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
    hypre_CommPkg          *comm_pkg;
 
    hypre_BoxArrayArray    *sendboxes;
-   HYPRE_Int                   **sprocesses;
+   HYPRE_Int             **sprocesses;
    hypre_BoxArrayArray    *send_rboxes;
-   HYPRE_Int                   **send_rboxnums;
+   HYPRE_Int             **send_rboxnums;
 
    hypre_BoxArrayArray    *recvboxes;
-   HYPRE_Int                   **rprocesses;
-   HYPRE_Int                   **recv_rboxnums;
+   HYPRE_Int             **rprocesses;
+   HYPRE_Int             **recv_rboxnums;
 
    hypre_BoxArray         *boxarray;
 
-   HYPRE_Int                     i, j;
-   HYPRE_Int                     ierr = 0;
+   HYPRE_Int               i, j;
+   HYPRE_Int               ierr = 0;
 
    /*------------------------------------------------------------------------
     *  The communication info is copied from sendinfo & recvinfo.

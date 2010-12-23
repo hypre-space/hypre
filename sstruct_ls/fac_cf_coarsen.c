@@ -73,34 +73,34 @@ HYPRE_Int
 hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                      hypre_SStructMatrix  *   fac_A,
                      hypre_Index              refine_factors,
-                     HYPRE_Int                      level ) 
+                     HYPRE_Int                level ) 
 
 {
    MPI_Comm                comm       = hypre_SStructMatrixComm(A);
    hypre_SStructGraph     *graph      = hypre_SStructMatrixGraph(A);
-   HYPRE_Int                     graph_type = hypre_SStructGraphObjectType(graph);
+   HYPRE_Int               graph_type = hypre_SStructGraphObjectType(graph);
    hypre_SStructGrid      *grid       = hypre_SStructGraphGrid(graph);
-   HYPRE_Int                     nUventries = hypre_SStructGraphNUVEntries(graph);
+   HYPRE_Int               nUventries = hypre_SStructGraphNUVEntries(graph);
    HYPRE_IJMatrix          ij_A       = hypre_SStructMatrixIJMatrix(A);
-   HYPRE_Int                     matrix_type= hypre_SStructMatrixObjectType(A);
-   HYPRE_Int                     ndim       = hypre_SStructMatrixNDim(A);
+   HYPRE_Int               matrix_type= hypre_SStructMatrixObjectType(A);
+   HYPRE_Int               ndim       = hypre_SStructMatrixNDim(A);
 
    hypre_SStructPMatrix   *A_pmatrix;
    hypre_StructMatrix     *smatrix_var;
    hypre_StructStencil    *stencils;
-   HYPRE_Int                     stencil_size;
+   HYPRE_Int               stencil_size;
    hypre_Index             stencil_shape_i;
    hypre_Index             loop_size;
    hypre_Box               refined_box;
    double                **a_ptrs;
    hypre_Box              *A_dbox;
 
-   HYPRE_Int                     part_crse= level-1;
-   HYPRE_Int                     part_fine= level;
+   HYPRE_Int               part_crse= level-1;
+   HYPRE_Int               part_fine= level;
  
    hypre_BoxManager       *fboxman;
    hypre_BoxManEntry     **boxman_entries, *boxman_entry;
-   HYPRE_Int                     nboxman_entries;
+   HYPRE_Int               nboxman_entries;
    hypre_Box               boxman_entry_box;
 
    hypre_BoxArrayArray  ***fgrid_cinterface_extents;
@@ -115,34 +115,34 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    hypre_BoxArray         *cinterface_array;
    hypre_Box              *fgrid_cinterface;
 
-   HYPRE_Int                     centre;
+   HYPRE_Int               centre;
 
-   HYPRE_Int                     ci, fi, boxi;
-   HYPRE_Int                     max_stencil_size= 27;
-   HYPRE_Int                     false= 0;
-   HYPRE_Int                     true = 1;
-   HYPRE_Int                     found;
-   HYPRE_Int                    *stencil_ranks, *rank_stencils;
-   HYPRE_Int                     rank, startrank;
+   HYPRE_Int               ci, fi, boxi;
+   HYPRE_Int               max_stencil_size= 27;
+   HYPRE_Int               false= 0;
+   HYPRE_Int               true = 1;
+   HYPRE_Int               found;
+   HYPRE_Int              *stencil_ranks, *rank_stencils;
+   HYPRE_Int               rank, startrank;
    double                 *vals;
 
-   HYPRE_Int                     i, j, iA;
-   HYPRE_Int                     loopi, loopj, loopk;
-   HYPRE_Int                     nvars, var1; 
+   HYPRE_Int               i, j, iA;
+   HYPRE_Int               loopi, loopj, loopk;
+   HYPRE_Int               nvars, var1; 
 
    hypre_Index             zero_index;
    hypre_Index             index1, index2;
    hypre_Index             index_temp;
 
    hypre_SStructUVEntry   *Uventry;
-   HYPRE_Int                     nUentries, cnt1;
-   HYPRE_Int                     box_array_size;
+   HYPRE_Int               nUentries, cnt1;
+   HYPRE_Int               box_array_size;
 
-   HYPRE_Int                    *ncols, *rows, *cols;
+   HYPRE_Int              *ncols, *rows, *cols;
    
-   HYPRE_Int                    *temp1, *temp2;
+   HYPRE_Int              *temp1, *temp2;
 
-   HYPRE_Int                     myid;
+   HYPRE_Int               myid;
 
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_SetIndex(zero_index, 0, 0, 0);

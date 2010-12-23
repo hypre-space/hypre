@@ -23,16 +23,16 @@
 
 HYPRE_Int
 hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
-                            HYPRE_Int                *num_grids,
-                            HYPRE_Int                 lx,
-                            HYPRE_Int                 ly,
-                            HYPRE_Int                 lz,
-                            HYPRE_Int                 jump,
+                            HYPRE_Int          *num_grids,
+                            HYPRE_Int           lx,
+                            HYPRE_Int           ly,
+                            HYPRE_Int           lz,
+                            HYPRE_Int           jump,
                             hypre_StructVector *visitx,
                             hypre_StructVector *visity,
                             hypre_StructVector *visitz    )
 {
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -40,8 +40,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Box             *A_dbox;
    hypre_Box             *v_dbox;
                         
-   HYPRE_Int                    Ai;
-   HYPRE_Int                    vi;
+   HYPRE_Int              Ai;
+   HYPRE_Int              vi;
                         
    double                *Ap;
    double                *vxp;
@@ -54,9 +54,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   HYPRE_Int                    stencil_size;
+   HYPRE_Int              stencil_size;
                         
-   HYPRE_Int                    Astenc;
+   HYPRE_Int              Astenc;
                         
    hypre_Index            loop_size;
    hypre_Index            cindex;
@@ -65,8 +65,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Index            stride;
    hypre_Index            stridev;
                         
-   HYPRE_Int                    i, si, dir, k, l;
-   HYPRE_Int                    loopi, loopj, loopk;
+   HYPRE_Int              i, si, dir, k, l;
+   HYPRE_Int              loopi, loopj, loopk;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -217,12 +217,12 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 HYPRE_Int
 hypre_SparseMSGFilter( hypre_StructVector *visit,
                        hypre_StructVector *e,
-                       HYPRE_Int                 lx,
-                       HYPRE_Int                 ly,
-                       HYPRE_Int                 lz,
-                       HYPRE_Int                 jump  )
+                       HYPRE_Int           lx,
+                       HYPRE_Int           ly,
+                       HYPRE_Int           lz,
+                       HYPRE_Int           jump  )
 {
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -230,8 +230,8 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
    hypre_Box             *e_dbox;
    hypre_Box             *v_dbox;
                         
-   HYPRE_Int                    ei;
-   HYPRE_Int                    vi;
+   HYPRE_Int              ei;
+   HYPRE_Int              vi;
                         
    double                *ep;
    double                *vp;
@@ -243,8 +243,8 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
    hypre_Index            stride;
    hypre_Index            stridev;
                         
-   HYPRE_Int                    i, k, l;
-   HYPRE_Int                    loopi, loopj, loopk;
+   HYPRE_Int              i, k, l;
+   HYPRE_Int              loopi, loopj, loopk;
 
    /*-----------------------------------------------------
     * Compute encoding digit and strides
@@ -311,16 +311,16 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
 
 HYPRE_Int
 hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
-                            HYPRE_Int                *num_grids,
-                            HYPRE_Int                 lx,
-                            HYPRE_Int                 ly,
-                            HYPRE_Int                 lz,
-                            HYPRE_Int                 jump,
+                            HYPRE_Int          *num_grids,
+                            HYPRE_Int           lx,
+                            HYPRE_Int           ly,
+                            HYPRE_Int           lz,
+                            HYPRE_Int           jump,
                             hypre_StructVector *visitx,
                             hypre_StructVector *visity,
                             hypre_StructVector *visitz    )
 {
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -328,8 +328,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Box             *A_dbox;
    hypre_Box             *v_dbox;
                         
-   HYPRE_Int                    Ai;
-   HYPRE_Int                    vi;
+   HYPRE_Int              Ai;
+   HYPRE_Int              vi;
                         
    double                *Ap;
    double                *vxp;
@@ -341,9 +341,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   HYPRE_Int                    stencil_size;
+   HYPRE_Int              stencil_size;
                         
-   HYPRE_Int                    Astenc;
+   HYPRE_Int              Astenc;
                         
    hypre_Index            loop_size;
    hypre_Index            cindex;
@@ -352,8 +352,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Index            stride;
    hypre_Index            stridev;
                         
-   HYPRE_Int                    i, si;
-   HYPRE_Int                    loopi, loopj, loopk;
+   HYPRE_Int              i, si;
+   HYPRE_Int              loopi, loopj, loopk;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -462,12 +462,12 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 HYPRE_Int
 hypre_SparseMSGFilter( hypre_StructVector *visit,
                        hypre_StructVector *e,
-                       HYPRE_Int                 lx,
-                       HYPRE_Int                 ly,
-                       HYPRE_Int                 lz,
-                       HYPRE_Int                 jump  )
+                       HYPRE_Int           lx,
+                       HYPRE_Int           ly,
+                       HYPRE_Int           lz,
+                       HYPRE_Int           jump  )
 {
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -475,8 +475,8 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
    hypre_Box             *e_dbox;
    hypre_Box             *v_dbox;
                         
-   HYPRE_Int                    ei;
-   HYPRE_Int                    vi;
+   HYPRE_Int              ei;
+   HYPRE_Int              vi;
                         
    double                *ep;
    double                *vp;
@@ -488,8 +488,8 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
    hypre_Index            stride;
    hypre_Index            stridev;
                         
-   HYPRE_Int                    i;
-   HYPRE_Int                    loopi, loopj, loopk;
+   HYPRE_Int              i;
+   HYPRE_Int              loopi, loopj, loopk;
 
    /*-----------------------------------------------------
     * Compute encoding digit and strides

@@ -29,7 +29,7 @@ hypre_F90_IFACE(hypre_sstructgraphcreate, HYPRE_SSTRUCTGRAPHCREATE)
    (hypre_F90_Comm *comm,
     hypre_F90_Obj *grid,
     hypre_F90_Obj *graph_ptr,
-    HYPRE_Int       *ierr)
+    HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructGraphCreate(
                      (MPI_Comm)            *comm,
@@ -44,7 +44,7 @@ hypre_F90_IFACE(hypre_sstructgraphcreate, HYPRE_SSTRUCTGRAPHCREATE)
 void
 hypre_F90_IFACE(hypre_sstructgraphdestroy, HYPRE_SSTRUCTGRAPHDESTROY)
    (hypre_F90_Obj *graph,
-    HYPRE_Int       *ierr)
+    HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructGraphDestroy(
                      (HYPRE_SStructGraph) *graph ) );
@@ -151,7 +151,7 @@ hypre_F90_IFACE(hypre_sstructgraphaddentries, HYPRE_SSTRUCTGRAPHADDENTRIES)
 void
 hypre_F90_IFACE(hypre_sstructgraphassemble, HYPRE_SSTRUCTGRAPHASSEMBLE)
    (hypre_F90_Obj *graph,
-    HYPRE_Int       *ierr)
+    HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructGraphAssemble(
                      (HYPRE_SStructGraph) *graph ) );

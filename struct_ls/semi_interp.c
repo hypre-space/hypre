@@ -27,13 +27,13 @@
 typedef struct
 {
    hypre_StructMatrix *P;
-   HYPRE_Int                 P_stored_as_transpose;
+   HYPRE_Int           P_stored_as_transpose;
    hypre_ComputePkg   *compute_pkg;
    hypre_Index         cindex;
    hypre_Index         findex;
    hypre_Index         stride;
 
-   HYPRE_Int                 time_index;
+   HYPRE_Int           time_index;
 
 } hypre_SemiInterpData;
 
@@ -59,7 +59,7 @@ hypre_SemiInterpCreate( )
 HYPRE_Int
 hypre_SemiInterpSetup( void               *interp_vdata,
                        hypre_StructMatrix *P,
-                       HYPRE_Int                 P_stored_as_transpose,
+                       HYPRE_Int           P_stored_as_transpose,
                        hypre_StructVector *xc,
                        hypre_StructVector *e,
                        hypre_Index         cindex,
@@ -74,7 +74,7 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
-   HYPRE_Int                     ierr = 0;
+   HYPRE_Int               ierr = 0;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -118,17 +118,17 @@ hypre_SemiInterp( void               *interp_vdata,
 
    hypre_SemiInterpData   *interp_data = interp_vdata;
 
-   HYPRE_Int                     P_stored_as_transpose;
+   HYPRE_Int               P_stored_as_transpose;
    hypre_ComputePkg       *compute_pkg;
    hypre_IndexRef          cindex;
    hypre_IndexRef          findex;
    hypre_IndexRef          stride;
 
    hypre_StructGrid       *fgrid;
-   HYPRE_Int                    *fgrid_ids;
+   HYPRE_Int              *fgrid_ids;
    hypre_StructGrid       *cgrid;
    hypre_BoxArray         *cgrid_boxes;
-   HYPRE_Int                    *cgrid_ids;
+   HYPRE_Int              *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
                        
@@ -140,10 +140,10 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_Box              *xc_dbox;
    hypre_Box              *e_dbox;
                        
-   HYPRE_Int                     Pi;
-   HYPRE_Int                     xci;
-   HYPRE_Int                     ei;
-   HYPRE_Int                     constant_coefficient;
+   HYPRE_Int               Pi;
+   HYPRE_Int               xci;
+   HYPRE_Int               ei;
+   HYPRE_Int               constant_coefficient;
                          
    double                 *Pp0, *Pp1;
    double                 *xcp;
@@ -157,8 +157,8 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
-   HYPRE_Int                     compute_i, fi, ci, j;
-   HYPRE_Int                     loopi, loopj, loopk;
+   HYPRE_Int               compute_i, fi, ci, j;
+   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things

@@ -56,17 +56,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    MPI_Comm              comm = (pfmg_data -> comm);
                      
-   HYPRE_Int                   relax_type =       (pfmg_data -> relax_type);
-   HYPRE_Int                   usr_jacobi_weight= (pfmg_data -> usr_jacobi_weight);
+   HYPRE_Int             relax_type =       (pfmg_data -> relax_type);
+   HYPRE_Int             usr_jacobi_weight= (pfmg_data -> usr_jacobi_weight);
    double                jacobi_weight    = (pfmg_data -> jacobi_weight);
-   HYPRE_Int                   skip_relax =       (pfmg_data -> skip_relax);
+   HYPRE_Int             skip_relax =       (pfmg_data -> skip_relax);
    double               *dxyz       =       (pfmg_data -> dxyz);
-   HYPRE_Int                   rap_type;
+   HYPRE_Int             rap_type;
                      
-   HYPRE_Int                   max_iter;
-   HYPRE_Int                   max_levels;
+   HYPRE_Int             max_iter;
+   HYPRE_Int             max_levels;
                       
-   HYPRE_Int                   num_levels;
+   HYPRE_Int             num_levels;
                      
    hypre_Index           cindex;
    hypre_Index           findex;
@@ -74,13 +74,13 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    hypre_Index           coarsen;
 
-   HYPRE_Int                  *cdir_l;
-   HYPRE_Int                  *active_l;
+   HYPRE_Int            *cdir_l;
+   HYPRE_Int            *active_l;
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
                     
    double               *data;
-   HYPRE_Int                   data_size = 0;
+   HYPRE_Int             data_size = 0;
    double               *relax_weights;
    double               *mean, *deviation;
    double                alpha, beta;
@@ -102,19 +102,19 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    void                **interp_data_l;
 
    hypre_StructGrid     *grid;
-   HYPRE_Int                   dim;
+   HYPRE_Int             dim;
 
    hypre_Box            *cbox;
 
    double                min_dxyz;
-   HYPRE_Int                   cdir, periodic, cmaxsize;
-   HYPRE_Int                   d, l;
-   HYPRE_Int                   dxyz_flag;
+   HYPRE_Int             cdir, periodic, cmaxsize;
+   HYPRE_Int             d, l;
+   HYPRE_Int             dxyz_flag;
                        
-   HYPRE_Int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int                   x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -608,7 +608,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                         
    hypre_Box             *A_dbox;
                         
-   HYPRE_Int                    Ai;
+   HYPRE_Int              Ai;
                         
    double                *Ap;
    double                 cxyz[3];
@@ -616,24 +616,24 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    double                 tcxyz[3];
    double                 cxyz_max;
 
-   HYPRE_Int                    tot_size; 
+   HYPRE_Int              tot_size; 
 
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   HYPRE_Int                    stencil_size;
+   HYPRE_Int              stencil_size;
 
-   HYPRE_Int                    constant_coefficient;
+   HYPRE_Int              constant_coefficient;
                         
-   HYPRE_Int                    Astenc;
+   HYPRE_Int              Astenc;
                         
    hypre_Index            loop_size;
    hypre_IndexRef         start;
    hypre_Index            stride;
                         
-   HYPRE_Int                    i, si, d;
-   HYPRE_Int                    loopi, loopj, loopk;
+   HYPRE_Int              i, si, d;
+   HYPRE_Int              loopi, loopj, loopk;
 
-   HYPRE_Int                    ierr = 0;
+   HYPRE_Int              ierr = 0;
    double                 cx, cy, cz;
    double                 sqcx, sqcy, sqcz;
 
@@ -874,16 +874,16 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 
    double                *Ap;
    hypre_Box             *A_dbox;
-   HYPRE_Int                    Ai;
+   HYPRE_Int              Ai;
 
-   HYPRE_Int                    i;
-   HYPRE_Int                    loopi, loopj, loopk;
+   HYPRE_Int              i;
+   HYPRE_Int              loopi, loopj, loopk;
 
    hypre_Index            diag_index;
    double                 diag_product = 1.0;
-   HYPRE_Int                    zero_diag = 0;
+   HYPRE_Int              zero_diag = 0;
 
-   HYPRE_Int                    constant_coefficient; 
+   HYPRE_Int              constant_coefficient; 
 
    /*----------------------------------------------------------
     * Initialize some things

@@ -43,7 +43,7 @@
 
 typedef struct
 {
-   HYPRE_Int                   nvars;
+   HYPRE_Int             nvars;
    hypre_Index           stride;
 
    hypre_SStructPVector *fgrid_cvectors;     /* the grid of this vector may not
@@ -52,7 +52,7 @@ typedef struct
    hypre_BoxArrayArray **fullwgt_ownboxes;
    hypre_BoxArrayArray **fullwgt_sendboxes;
 
-   HYPRE_Int                ***own_cboxnums;       /* local crs boxnums of ownboxes */
+   HYPRE_Int          ***own_cboxnums;       /* local crs boxnums of ownboxes */
 
    hypre_CommPkg       **interlevel_comm;
 /*   hypre_CommPkg       **intralevel_comm;*/ /* may need to build an intra comm so
@@ -68,7 +68,7 @@ typedef struct
 HYPRE_Int
 hypre_FacSemiRestrictCreate2( void **fac_restrict_vdata_ptr)
 {
-   HYPRE_Int                         ierr = 0;
+   HYPRE_Int                   ierr = 0;
    hypre_FacSemiRestrictData2 *fac_restrict_data;
 
    fac_restrict_data       = hypre_CTAlloc(hypre_FacSemiRestrictData2, 1);
@@ -98,12 +98,12 @@ hypre_FacSemiRestrictCreate2( void **fac_restrict_vdata_ptr)
 HYPRE_Int
 hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                              hypre_SStructVector  *r,
-                             HYPRE_Int                   part_crse,
-                             HYPRE_Int                   part_fine,
+                             HYPRE_Int             part_crse,
+                             HYPRE_Int             part_fine,
                              hypre_SStructPVector *rc,
                              hypre_Index           rfactors )
 {
-   HYPRE_Int                       ierr = 0;
+   HYPRE_Int                 ierr = 0;
 
    hypre_FacSemiRestrictData2 *fac_restrict_data = fac_restrict_vdata;
    MPI_Comm                    comm= hypre_SStructPVectorComm(rc);
@@ -121,30 +121,30 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    hypre_BoxArrayArray       **fullwgt_sendboxes;
    hypre_BoxArray             *boxarray;
    hypre_BoxArray             *tmp_boxarray, *intersect_boxes;
-   HYPRE_Int                      ***own_cboxnums;
+   HYPRE_Int                ***own_cboxnums;
 
    hypre_BoxArrayArray       **send_boxes, *send_rboxes;
-   HYPRE_Int                      ***send_processes;
-   HYPRE_Int                      ***send_remote_boxnums;
+   HYPRE_Int                ***send_processes;
+   HYPRE_Int                ***send_remote_boxnums;
 
    hypre_BoxArrayArray       **recv_boxes, *recv_rboxes;
-   HYPRE_Int                      ***recv_processes;
-   HYPRE_Int                      ***recv_remote_boxnums;
+   HYPRE_Int                ***recv_processes;
+   HYPRE_Int                ***recv_remote_boxnums;
 
    hypre_BoxManager           *boxman;
    hypre_BoxManEntry         **boxman_entries;
-   HYPRE_Int                         nboxman_entries;
+   HYPRE_Int                   nboxman_entries;
 
    hypre_Box                   box, scaled_box;
 
    hypre_Index                 zero_index, index, ilower, iupper;
-   HYPRE_Int                         ndim= hypre_SStructVectorNDim(r);
-   HYPRE_Int                         myproc, proc;
-   HYPRE_Int                         nvars, vars;
-   HYPRE_Int                         num_values;
+   HYPRE_Int                   ndim= hypre_SStructVectorNDim(r);
+   HYPRE_Int                   myproc, proc;
+   HYPRE_Int                   nvars, vars;
+   HYPRE_Int                   num_values;
 
-   HYPRE_Int                         i, cnt1, cnt2;
-   HYPRE_Int                         fi, ci;
+   HYPRE_Int                   i, cnt1, cnt2;
+   HYPRE_Int                   fi, ci;
 
    hypre_MPI_Comm_rank(comm, &myproc);
    hypre_ClearIndex(zero_index);
@@ -485,11 +485,11 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_SStructPVector   *fgrid_cvectors     = restrict_data->fgrid_cvectors;
    hypre_BoxArrayArray   **identity_arrayboxes= restrict_data->identity_arrayboxes;
    hypre_BoxArrayArray   **fullwgt_ownboxes   = restrict_data->fullwgt_ownboxes;
-   HYPRE_Int                  ***own_cboxnums       = restrict_data->own_cboxnums;
+   HYPRE_Int            ***own_cboxnums       = restrict_data->own_cboxnums;
    hypre_CommPkg         **interlevel_comm= restrict_data-> interlevel_comm;
    hypre_CommHandle       *comm_handle;
 
-   HYPRE_Int                     ndim           =  hypre_SStructVectorNDim(xf);
+   HYPRE_Int               ndim           =  hypre_SStructVectorNDim(xf);
 
    hypre_BoxArrayArray    *arrayarray_ownboxes;
 
@@ -503,7 +503,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_Box              *cgrid_box;
    hypre_BoxArray         *own_boxes;
    hypre_Box              *own_box;
-   HYPRE_Int                    *boxnums;
+   HYPRE_Int              *boxnums;
 
    hypre_Box              *xc_temp_dbox;
    hypre_Box              *xf_dbox;
@@ -512,8 +512,8 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_StructVector     *xc_var;
    hypre_StructVector     *xf_var;
 
-   HYPRE_Int                     xci;
-   HYPRE_Int                     xfi;
+   HYPRE_Int               xci;
+   HYPRE_Int               xfi;
 
    double               ***xfp;
    double               ***xcp;
@@ -526,21 +526,21 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_Index             rfactors;
    hypre_Index             temp_index1, temp_index2;
 
-   HYPRE_Int                     fi, ci;
-   HYPRE_Int                     loopi, loopj, loopk;
-   HYPRE_Int                     nvars, var;
-   HYPRE_Int                     volume_crse_cell;
+   HYPRE_Int               fi, ci;
+   HYPRE_Int               loopi, loopj, loopk;
+   HYPRE_Int               nvars, var;
+   HYPRE_Int               volume_crse_cell;
 
-   HYPRE_Int                     i, j, k;
-   HYPRE_Int                     imax, jmax, kmax;
-   HYPRE_Int                     icell, jcell, kcell, ijkcell;
+   HYPRE_Int               i, j, k;
+   HYPRE_Int               imax, jmax, kmax;
+   HYPRE_Int               icell, jcell, kcell, ijkcell;
 
    double                 *sum;
    double                  scaling;
 
-   HYPRE_Int                     part_crse= 0;
-   HYPRE_Int                     part_fine= 1;
-   HYPRE_Int                     num_coarse_cells;
+   HYPRE_Int               part_crse= 0;
+   HYPRE_Int               part_fine= 1;
+   HYPRE_Int               num_coarse_cells;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -896,10 +896,10 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
 HYPRE_Int
 hypre_FacSemiRestrictDestroy2( void *fac_restrict_vdata )
 {
-   HYPRE_Int                         ierr = 0;
+   HYPRE_Int                   ierr = 0;
    hypre_FacSemiRestrictData2 *fac_restrict_data = fac_restrict_vdata;
-   HYPRE_Int                         nvars= (fac_restrict_data-> nvars); 
-   HYPRE_Int                         i, j;
+   HYPRE_Int                   nvars= (fac_restrict_data-> nvars); 
+   HYPRE_Int                   i, j;
 
 
    if (fac_restrict_data)

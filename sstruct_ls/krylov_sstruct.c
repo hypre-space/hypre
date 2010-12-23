@@ -56,14 +56,14 @@ hypre_SStructKrylovCreateVector( void *vvector )
 {
    hypre_SStructVector  *vector = vvector;
    hypre_SStructVector  *new_vector;
-   HYPRE_Int                   object_type;
+   HYPRE_Int             object_type;
 
-   HYPRE_Int                   nparts= hypre_SStructVectorNParts(vector);
+   HYPRE_Int             nparts= hypre_SStructVectorNParts(vector);
    hypre_SStructPVector *pvector;
    hypre_StructVector   *svector;
    hypre_SStructPVector *new_pvector;
    hypre_StructVector   *new_svector;
-   HYPRE_Int                  *num_ghost;
+   HYPRE_Int            *num_ghost;
    
    HYPRE_Int    part;
    HYPRE_Int    nvars, var;
@@ -109,14 +109,14 @@ hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 {
    hypre_SStructVector  *vector = vvector;
    hypre_SStructVector  **new_vector;
-   HYPRE_Int                   object_type;
+   HYPRE_Int             object_type;
 
-   HYPRE_Int                   nparts= hypre_SStructVectorNParts(vector);
+   HYPRE_Int             nparts= hypre_SStructVectorNParts(vector);
    hypre_SStructPVector *pvector;
    hypre_StructVector   *svector;
    hypre_SStructPVector *new_pvector;
    hypre_StructVector   *new_svector;
-   HYPRE_Int                  *num_ghost;
+   HYPRE_Int            *num_ghost;
    
    HYPRE_Int    part;
    HYPRE_Int    nvars, var;

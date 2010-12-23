@@ -31,54 +31,54 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
    hypre_BoxArray       **contract_fedgeBoxes;
    hypre_Index          **Edge_cstarts, **upper_shifts, **lower_shifts;
-   HYPRE_Int                  **cfbox_mapping, **fcbox_mapping;
+   HYPRE_Int            **cfbox_mapping, **fcbox_mapping;
 
    hypre_BoxManEntry     *entry;
-   HYPRE_Int                    rank, rank2;
-   HYPRE_Int                    start_rank1, start_rank2; 
+   HYPRE_Int              rank, rank2;
+   HYPRE_Int              start_rank1, start_rank2; 
 
-   HYPRE_Int                    nedges;
+   HYPRE_Int              nedges;
 
-   HYPRE_Int                   *iedgeEdge;
-   HYPRE_Int                   *jedge_Edge;
+   HYPRE_Int             *iedgeEdge;
+   HYPRE_Int             *jedge_Edge;
 
    double                *vals_edgeEdge;
    double                 fCedge_ratio;
-   HYPRE_Int                   *ncols_edgeEdge;
+   HYPRE_Int             *ncols_edgeEdge;
 
    hypre_Index            cindex;
    hypre_Index            findex;
    hypre_Index            var_index, *boxoffset, *suboffset;
    hypre_Index            loop_size, start, cstart, stride, hi_index;
    hypre_Index            ishift, jshift, kshift, zero_index, one_index;
-   HYPRE_Int                    loopi, loopj, loopk;
-   HYPRE_Int                    n_boxoffsets, component_stride;
+   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              n_boxoffsets, component_stride;
 
-   HYPRE_Int                    nparts= hypre_SStructGridNParts(fgrid_edge);
-   HYPRE_Int                    ndim  = hypre_SStructGridNDim(fgrid_edge);
+   HYPRE_Int              nparts= hypre_SStructGridNParts(fgrid_edge);
+   HYPRE_Int              ndim  = hypre_SStructGridNDim(fgrid_edge);
 
    HYPRE_SStructVariable *vartypes, *Edge_vartypes;
    hypre_Index           *varoffsets;
-   HYPRE_Int                   *vartype_map;
-   HYPRE_Int                    matrix_type= HYPRE_PARCSR;
+   HYPRE_Int             *vartype_map;
+   HYPRE_Int              matrix_type= HYPRE_PARCSR;
 
-   HYPRE_Int                    nvars, Edge_nvars, part, var;
-   HYPRE_Int                    tot_vars= 8;
+   HYPRE_Int              nvars, Edge_nvars, part, var;
+   HYPRE_Int              tot_vars= 8;
 
-   HYPRE_Int                    t, i, j, k, l, m, n, p, r, size;
+   HYPRE_Int              t, i, j, k, l, m, n, p, r, size;
 
-   HYPRE_Int                    ilower, iupper;
-   HYPRE_Int                    jlower, jupper;
-   HYPRE_Int                  **lower_ranks, **upper_ranks;
+   HYPRE_Int              ilower, iupper;
+   HYPRE_Int              jlower, jupper;
+   HYPRE_Int            **lower_ranks, **upper_ranks;
 
-   HYPRE_Int                 ***n_CtoVbox, ****CtoVboxnums;
-   HYPRE_Int                   *num_vboxes, **vboxnums;
+   HYPRE_Int           ***n_CtoVbox, ****CtoVboxnums;
+   HYPRE_Int             *num_vboxes, **vboxnums;
 
-   HYPRE_Int                    true = 1;
-   HYPRE_Int                    false= 0;
-   HYPRE_Int                    row_in;
+   HYPRE_Int              true = 1;
+   HYPRE_Int              false= 0;
+   HYPRE_Int              row_in;
 
-   HYPRE_Int                    myproc;
+   HYPRE_Int              myproc;
 
    hypre_MPI_Comm_rank(comm, &myproc);
    hypre_SetIndex(ishift, 1, 0, 0);

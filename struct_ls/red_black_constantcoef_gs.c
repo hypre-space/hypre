@@ -32,10 +32,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 {
    hypre_RedBlackGSData  *relax_data = relax_vdata;
 
-   HYPRE_Int                    max_iter    = (relax_data -> max_iter);
-   HYPRE_Int                    zero_guess  = (relax_data -> zero_guess);
-   HYPRE_Int                    rb_start    = (relax_data -> rb_start);
-   HYPRE_Int                    diag_rank   = (relax_data -> diag_rank);
+   HYPRE_Int              max_iter    = (relax_data -> max_iter);
+   HYPRE_Int              zero_guess  = (relax_data -> zero_guess);
+   HYPRE_Int              rb_start    = (relax_data -> rb_start);
+   HYPRE_Int              diag_rank   = (relax_data -> diag_rank);
    hypre_ComputePkg      *compute_pkg = (relax_data -> compute_pkg);
 
    hypre_CommHandle      *comm_handle;
@@ -48,10 +48,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    hypre_Box             *b_dbox;
    hypre_Box             *x_dbox;
                         
-   HYPRE_Int                    Ai, Astart, Ani, Anj;
-   HYPRE_Int                    bi, bstart, bni, bnj;
-   HYPRE_Int                    xi, xstart, xni, xnj;
-   HYPRE_Int                    xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
+   HYPRE_Int              Ai, Astart, Ani, Anj;
+   HYPRE_Int              bi, bstart, bni, bnj;
+   HYPRE_Int              xi, xstart, xni, xnj;
+   HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
                         
    double                *Ap;
    double                *App;
@@ -59,7 +59,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    double                *xp;
 
    /* constant coefficient */
-   HYPRE_Int                    constant_coeff= hypre_StructMatrixConstantCoefficient(A);
+   HYPRE_Int              constant_coeff= hypre_StructMatrixConstantCoefficient(A);
    double                 App0, App1, App2, App3, App4, App5, AApd;
                         
    hypre_IndexRef         start;
@@ -67,14 +67,14 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   HYPRE_Int                    stencil_size;
-   HYPRE_Int                    offd[6];
+   HYPRE_Int              stencil_size;
+   HYPRE_Int              offd[6];
                         
-   HYPRE_Int                    iter, rb, redblack;
-   HYPRE_Int                    compute_i, i, j, ii, jj, kk;
-   HYPRE_Int                    ni, nj, nk;
+   HYPRE_Int              iter, rb, redblack;
+   HYPRE_Int              compute_i, i, j, ii, jj, kk;
+   HYPRE_Int              ni, nj, nk;
 
-   HYPRE_Int                    ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases

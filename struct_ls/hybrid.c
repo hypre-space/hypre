@@ -31,28 +31,28 @@ typedef struct
    double                tol;
    double                cf_tol;
    double                pcg_atolf;
-   HYPRE_Int                   dscg_max_its;
-   HYPRE_Int                   pcg_max_its;
-   HYPRE_Int                   two_norm;
-   HYPRE_Int                   stop_crit;
-   HYPRE_Int                   rel_change;
-   HYPRE_Int                   k_dim;
+   HYPRE_Int             dscg_max_its;
+   HYPRE_Int             pcg_max_its;
+   HYPRE_Int             two_norm;
+   HYPRE_Int             stop_crit;
+   HYPRE_Int             rel_change;
+   HYPRE_Int             k_dim;
    HYPRE_Int 			 solver_type;
 
-   HYPRE_Int                   pcg_default;              /* boolean */
-   HYPRE_Int                 (*pcg_precond_solve)();
-   HYPRE_Int                 (*pcg_precond_setup)();
+   HYPRE_Int             pcg_default;              /* boolean */
+   HYPRE_Int           (*pcg_precond_solve)();
+   HYPRE_Int           (*pcg_precond_setup)();
    void                 *pcg_precond;
 
    /* log info (always logged) */
-   HYPRE_Int                   dscg_num_its;
-   HYPRE_Int                   pcg_num_its;
+   HYPRE_Int             dscg_num_its;
+   HYPRE_Int             pcg_num_its;
    double                final_rel_res_norm;
-   HYPRE_Int                   time_index;
+   HYPRE_Int             time_index;
 
-   HYPRE_Int                 print_level;
+   HYPRE_Int           print_level;
    /* additional information (place-holder currently used to print norms) */
-   HYPRE_Int                   logging;
+   HYPRE_Int             logging;
 
 } hypre_HybridData;
 
@@ -122,7 +122,7 @@ hypre_HybridSetTol( void   *hybrid_vdata,
                     double  tol       )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> tol) = tol;
 
@@ -138,7 +138,7 @@ hypre_HybridSetConvergenceTol( void   *hybrid_vdata,
                                double  cf_tol       )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> cf_tol) = cf_tol;
 
@@ -154,7 +154,7 @@ hypre_HybridSetDSCGMaxIter( void   *hybrid_vdata,
                             HYPRE_Int     dscg_max_its )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> dscg_max_its) = dscg_max_its;
 
@@ -170,7 +170,7 @@ hypre_HybridSetPCGMaxIter( void   *hybrid_vdata,
                            HYPRE_Int     pcg_max_its  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> pcg_max_its) = pcg_max_its;
 
@@ -186,7 +186,7 @@ hypre_HybridSetPCGAbsoluteTolFactor( void   *hybrid_vdata,
                                      double  pcg_atolf  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> pcg_atolf) = pcg_atolf;
 
@@ -202,7 +202,7 @@ hypre_HybridSetTwoNorm( void *hybrid_vdata,
                         HYPRE_Int   two_norm  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> two_norm) = two_norm;
 
@@ -218,7 +218,7 @@ hypre_HybridSetStopCrit( void *hybrid_vdata,
                         HYPRE_Int   stop_crit  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> stop_crit) = stop_crit;
 
@@ -234,7 +234,7 @@ hypre_HybridSetRelChange( void *hybrid_vdata,
                           HYPRE_Int   rel_change  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> rel_change) = rel_change;
 
@@ -250,7 +250,7 @@ hypre_HybridSetSolverType( void *hybrid_vdata,
                           HYPRE_Int   solver_type  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> solver_type) = solver_type;
 
@@ -266,7 +266,7 @@ hypre_HybridSetKDim( void *hybrid_vdata,
                           HYPRE_Int   k_dim  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> k_dim) = k_dim;
 
@@ -284,7 +284,7 @@ hypre_HybridSetPrecond( void  *pcg_vdata,
                         void  *pcg_precond          )
 {
    hypre_HybridData *pcg_data = pcg_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
  
    (pcg_data -> pcg_default)       = 0;
    (pcg_data -> pcg_precond_solve) = pcg_precond_solve;
@@ -303,7 +303,7 @@ hypre_HybridSetLogging( void *hybrid_vdata,
                         HYPRE_Int   logging  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> logging) = logging;
 
@@ -319,7 +319,7 @@ hypre_HybridSetPrintLevel( void *hybrid_vdata,
                         HYPRE_Int   print_level  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> print_level) = print_level;
 
@@ -335,7 +335,7 @@ hypre_HybridGetNumIterations( void   *hybrid_vdata,
                               HYPRE_Int    *num_its      )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    *num_its = (hybrid_data -> dscg_num_its) + (hybrid_data -> pcg_num_its);
 
@@ -351,7 +351,7 @@ hypre_HybridGetDSCGNumIterations( void   *hybrid_vdata,
                                   HYPRE_Int    *dscg_num_its )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    *dscg_num_its = (hybrid_data -> dscg_num_its);
 
@@ -367,7 +367,7 @@ hypre_HybridGetPCGNumIterations( void   *hybrid_vdata,
                                  HYPRE_Int    *pcg_num_its  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    *pcg_num_its = (hybrid_data -> pcg_num_its);
 
@@ -383,7 +383,7 @@ hypre_HybridGetFinalRelativeResidualNorm( void   *hybrid_vdata,
                                           double *final_rel_res_norm )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    *final_rel_res_norm = (hybrid_data -> final_rel_res_norm);
 
@@ -429,19 +429,19 @@ hypre_HybridSolve( void               *hybrid_vdata,
    double             tol            = (hybrid_data -> tol);
    double             cf_tol         = (hybrid_data -> cf_tol);
    double             pcg_atolf      = (hybrid_data -> pcg_atolf);
-   HYPRE_Int                dscg_max_its   = (hybrid_data -> dscg_max_its);
-   HYPRE_Int                pcg_max_its    = (hybrid_data -> pcg_max_its);
-   HYPRE_Int                two_norm       = (hybrid_data -> two_norm);
-   HYPRE_Int                stop_crit      = (hybrid_data -> stop_crit);
-   HYPRE_Int                rel_change     = (hybrid_data -> rel_change);
-   HYPRE_Int                logging        = (hybrid_data -> logging);
-   HYPRE_Int                print_level    = (hybrid_data -> print_level);
-   HYPRE_Int                solver_type    = (hybrid_data -> solver_type);
-   HYPRE_Int                k_dim          = (hybrid_data -> k_dim);
+   HYPRE_Int          dscg_max_its   = (hybrid_data -> dscg_max_its);
+   HYPRE_Int          pcg_max_its    = (hybrid_data -> pcg_max_its);
+   HYPRE_Int          two_norm       = (hybrid_data -> two_norm);
+   HYPRE_Int          stop_crit      = (hybrid_data -> stop_crit);
+   HYPRE_Int          rel_change     = (hybrid_data -> rel_change);
+   HYPRE_Int          logging        = (hybrid_data -> logging);
+   HYPRE_Int          print_level    = (hybrid_data -> print_level);
+   HYPRE_Int          solver_type    = (hybrid_data -> solver_type);
+   HYPRE_Int          k_dim          = (hybrid_data -> k_dim);
   
-   HYPRE_Int                pcg_default    = (hybrid_data -> pcg_default);
-   HYPRE_Int              (*pcg_precond_solve)();
-   HYPRE_Int              (*pcg_precond_setup)();
+   HYPRE_Int          pcg_default    = (hybrid_data -> pcg_default);
+   HYPRE_Int        (*pcg_precond_solve)();
+   HYPRE_Int        (*pcg_precond_setup)();
    void              *pcg_precond;
 
    void              *pcg_solver;
@@ -449,14 +449,14 @@ hypre_HybridSolve( void               *hybrid_vdata,
    hypre_GMRESFunctions * gmres_functions;
    hypre_BiCGSTABFunctions * bicgstab_functions;
 
-   HYPRE_Int                dscg_num_its;
-   HYPRE_Int                pcg_num_its;
-   HYPRE_Int                converged;
+   HYPRE_Int          dscg_num_its;
+   HYPRE_Int          pcg_num_its;
+   HYPRE_Int          converged;
 
    double             res_norm;
-   HYPRE_Int                myid;
+   HYPRE_Int          myid;
 
-   HYPRE_Int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
 
    if (solver_type == 1)

@@ -31,20 +31,20 @@ typedef struct
    MPI_Comm              comm;
                       
    double                tol;
-   HYPRE_Int                   max_iter;
-   HYPRE_Int                   rel_change;
-   HYPRE_Int                   zero_guess;
-   HYPRE_Int                   jump;
+   HYPRE_Int             max_iter;
+   HYPRE_Int             rel_change;
+   HYPRE_Int             zero_guess;
+   HYPRE_Int             jump;
 
-   HYPRE_Int                   relax_type;     /* type of relaxation to use */
+   HYPRE_Int             relax_type;     /* type of relaxation to use */
    double                jacobi_weight;  /* weighted jacobi weight */
-   HYPRE_Int                   usr_jacobi_weight; /* indicator flag for user weight */
+   HYPRE_Int             usr_jacobi_weight; /* indicator flag for user weight */
 
-   HYPRE_Int                   num_pre_relax;  /* number of pre relaxation sweeps */
-   HYPRE_Int                   num_post_relax; /* number of post relaxation sweeps */
-   HYPRE_Int                   num_fine_relax; /* number of fine relaxation sweeps */
+   HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
+   HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
+   HYPRE_Int             num_fine_relax; /* number of fine relaxation sweeps */
 
-   HYPRE_Int                   num_grids[3];   /* number of grids in each dim */
+   HYPRE_Int             num_grids[3];   /* number of grids in each dim */
    HYPRE_Int    		 num_all_grids;
    HYPRE_Int    		 num_levels;
                       
@@ -72,7 +72,7 @@ typedef struct
    hypre_StructVector  **visitx_array;
    hypre_StructVector  **visity_array;
    hypre_StructVector  **visitz_array;
-   HYPRE_Int                  *grid_on;
+   HYPRE_Int            *grid_on;
 
    void                **relax_array;
    void                **matvec_array;
@@ -84,12 +84,12 @@ typedef struct
    void                **interpz_array;
 
    /* log info (always logged) */
-   HYPRE_Int                   num_iterations;
-   HYPRE_Int                   time_index;
-   HYPRE_Int                   print_level;
+   HYPRE_Int             num_iterations;
+   HYPRE_Int             time_index;
+   HYPRE_Int             print_level;
 
    /* additional log info (logged when `logging' > 0) */
-   HYPRE_Int                   logging;
+   HYPRE_Int             logging;
    double               *norms;
    double               *rel_norms;
 

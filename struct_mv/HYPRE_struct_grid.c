@@ -26,7 +26,7 @@
 
 HYPRE_Int
 HYPRE_StructGridCreate( MPI_Comm          comm,
-                        HYPRE_Int               dim,
+                        HYPRE_Int         dim,
                         HYPRE_StructGrid *grid )
 {
    HYPRE_Int ierr;
@@ -52,13 +52,13 @@ HYPRE_StructGridDestroy( HYPRE_StructGrid grid )
 
 HYPRE_Int
 HYPRE_StructGridSetExtents( HYPRE_StructGrid  grid,
-                            HYPRE_Int              *ilower,
-                            HYPRE_Int              *iupper )
+                            HYPRE_Int        *ilower,
+                            HYPRE_Int        *iupper )
 {
    hypre_Index  new_ilower;
    hypre_Index  new_iupper;
 
-   HYPRE_Int          d;
+   HYPRE_Int    d;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);
@@ -77,11 +77,11 @@ HYPRE_StructGridSetExtents( HYPRE_StructGrid  grid,
 
 HYPRE_Int
 HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
-                             HYPRE_Int              *periodic )
+                             HYPRE_Int        *periodic )
 {
    hypre_Index  new_periodic;
 
-   HYPRE_Int          d;
+   HYPRE_Int    d;
 
    hypre_ClearIndex(new_periodic);
    for (d = 0; d < hypre_StructGridDim(grid); d++)

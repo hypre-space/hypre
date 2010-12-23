@@ -28,7 +28,7 @@
 hypre_StructMatrix *
 hypre_SMGCreateRestrictOp( hypre_StructMatrix *A,
                            hypre_StructGrid   *cgrid,
-                           HYPRE_Int                 cdir  )
+                           HYPRE_Int           cdir  )
 {
    hypre_StructMatrix *R = NULL;
 
@@ -43,7 +43,7 @@ HYPRE_Int
 hypre_SMGSetupRestrictOp( hypre_StructMatrix *A,
                           hypre_StructMatrix *R,
                           hypre_StructVector *temp_vec,
-                          HYPRE_Int                 cdir,
+                          HYPRE_Int           cdir,
                           hypre_Index         cindex,
                           hypre_Index         cstride  )
 {

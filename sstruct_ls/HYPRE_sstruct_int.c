@@ -23,9 +23,9 @@ HYPRE_Int
 hypre_SStructPVectorSetRandomValues( hypre_SStructPVector *pvector, HYPRE_Int seed )
 {
    HYPRE_Int ierr = 0;
-   HYPRE_Int                 nvars = hypre_SStructPVectorNVars(pvector);
+   HYPRE_Int           nvars = hypre_SStructPVectorNVars(pvector);
    hypre_StructVector *svector;
-   HYPRE_Int                 var;
+   HYPRE_Int           var;
 
    srand( seed );
 
@@ -43,9 +43,9 @@ HYPRE_Int
 hypre_SStructVectorSetRandomValues( hypre_SStructVector *vector, HYPRE_Int seed )
 {
    HYPRE_Int ierr = 0;
-   HYPRE_Int                   nparts = hypre_SStructVectorNParts(vector);
+   HYPRE_Int             nparts = hypre_SStructVectorNParts(vector);
    hypre_SStructPVector *pvector;
-   HYPRE_Int                   part;
+   HYPRE_Int             part;
 
    srand( seed );
 

@@ -108,7 +108,7 @@ HYPRE_SStructPCGSetAbsoluteTol( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructPCGSetMaxIter( HYPRE_SStructSolver solver,
-                            HYPRE_Int                 max_iter )
+                            HYPRE_Int           max_iter )
 {
    return( HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -118,7 +118,7 @@ HYPRE_SStructPCGSetMaxIter( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructPCGSetTwoNorm( HYPRE_SStructSolver solver,
-                            HYPRE_Int                 two_norm )
+                            HYPRE_Int           two_norm )
 {
    return( HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, two_norm ) );
 }
@@ -128,7 +128,7 @@ HYPRE_SStructPCGSetTwoNorm( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructPCGSetRelChange( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 rel_change )
+                              HYPRE_Int           rel_change )
 {
    return( HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, rel_change ) );
 }
@@ -153,7 +153,7 @@ HYPRE_SStructPCGSetPrecond( HYPRE_SStructSolver          solver,
 
 HYPRE_Int
 HYPRE_SStructPCGSetLogging( HYPRE_SStructSolver solver,
-                            HYPRE_Int                 logging )
+                            HYPRE_Int           logging )
 {
    return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -164,7 +164,7 @@ HYPRE_SStructPCGSetLogging( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructPCGSetPrintLevel( HYPRE_SStructSolver solver,
-                            HYPRE_Int                 level )
+                            HYPRE_Int           level )
 {
    return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, level ) );
 }
@@ -174,7 +174,7 @@ HYPRE_SStructPCGSetPrintLevel( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructPCGGetNumIterations( HYPRE_SStructSolver  solver,
-                                  HYPRE_Int                 *num_iterations )
+                                  HYPRE_Int           *num_iterations )
 {
    return( HYPRE_PCGGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }
@@ -224,7 +224,7 @@ HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
 {
    HYPRE_Int ierr = 0;
 
-   HYPRE_Int                      nparts= hypre_SStructMatrixNParts(A);
+   HYPRE_Int                nparts= hypre_SStructMatrixNParts(A);
 
    hypre_SStructPMatrix    *pA;
    hypre_SStructPVector    *px;

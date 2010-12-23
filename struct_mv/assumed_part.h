@@ -32,17 +32,17 @@ typedef struct
 {
    /* the entries will be the same for all procs */  
    hypre_BoxArray      *regions;
-   HYPRE_Int                 num_regions;      
-   HYPRE_Int                 *proc_partitions;
+   HYPRE_Int           num_regions;      
+   HYPRE_Int           *proc_partitions;
    hypre_Index         *divisions;
    /* these entries are specific to each proc */
    hypre_BoxArray      *my_partition;
    hypre_BoxArray      *my_partition_boxes;
-   HYPRE_Int                 *my_partition_proc_ids;
-   HYPRE_Int                 *my_partition_boxnums;
-   HYPRE_Int                 my_partition_ids_size;   
-   HYPRE_Int                 my_partition_ids_alloc;
-   HYPRE_Int                 my_partition_num_distinct_procs;
+   HYPRE_Int           *my_partition_proc_ids;
+   HYPRE_Int           *my_partition_boxnums;
+   HYPRE_Int           my_partition_ids_size;   
+   HYPRE_Int           my_partition_ids_alloc;
+   HYPRE_Int           my_partition_num_distinct_procs;
     
 } hypre_StructAssumedPart;
 

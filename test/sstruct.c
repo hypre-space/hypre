@@ -93,92 +93,92 @@ typedef HYPRE_Int ProblemIndex[9];
 typedef struct
 {
    /* for GridSetExtents */
-   HYPRE_Int                    nboxes;
+   HYPRE_Int              nboxes;
    ProblemIndex          *ilowers;
    ProblemIndex          *iuppers;
-   HYPRE_Int                   *boxsizes;
-   HYPRE_Int                    max_boxsize;
+   HYPRE_Int             *boxsizes;
+   HYPRE_Int              max_boxsize;
 
    /* for GridSetVariables */
-   HYPRE_Int                    nvars;
+   HYPRE_Int              nvars;
    HYPRE_SStructVariable *vartypes;
 
    /* for GridAddVariables */
-   HYPRE_Int                    add_nvars;
+   HYPRE_Int              add_nvars;
    ProblemIndex          *add_indexes;
    HYPRE_SStructVariable *add_vartypes;
 
    /* for GridSetNeighborPart and GridSetSharedPart */
-   HYPRE_Int                    glue_nboxes;
-   HYPRE_Int                   *glue_shared;
+   HYPRE_Int              glue_nboxes;
+   HYPRE_Int             *glue_shared;
    ProblemIndex          *glue_ilowers;
    ProblemIndex          *glue_iuppers;
    Index                 *glue_offsets;
-   HYPRE_Int                   *glue_nbor_parts;
+   HYPRE_Int             *glue_nbor_parts;
    ProblemIndex          *glue_nbor_ilowers;
    ProblemIndex          *glue_nbor_iuppers;
    Index                 *glue_nbor_offsets;
    Index                 *glue_index_maps;
    Index                 *glue_index_dirs;
-   HYPRE_Int                   *glue_primaries;
+   HYPRE_Int             *glue_primaries;
 
    /* for GraphSetStencil */
-   HYPRE_Int                   *stencil_num;
+   HYPRE_Int             *stencil_num;
 
    /* for GraphAddEntries */
-   HYPRE_Int                    graph_nboxes;
+   HYPRE_Int              graph_nboxes;
    ProblemIndex          *graph_ilowers;
    ProblemIndex          *graph_iuppers;
    Index                 *graph_strides;
-   HYPRE_Int                   *graph_vars;
-   HYPRE_Int                   *graph_to_parts;
+   HYPRE_Int             *graph_vars;
+   HYPRE_Int             *graph_to_parts;
    ProblemIndex          *graph_to_ilowers;
    ProblemIndex          *graph_to_iuppers;
    Index                 *graph_to_strides;
-   HYPRE_Int                   *graph_to_vars;
+   HYPRE_Int             *graph_to_vars;
    Index                 *graph_index_maps;
    Index                 *graph_index_signs;
-   HYPRE_Int                   *graph_entries;
+   HYPRE_Int             *graph_entries;
    double                *graph_values;
-   HYPRE_Int                   *graph_boxsizes;
+   HYPRE_Int             *graph_boxsizes;
 
    /* MatrixSetValues */
-   HYPRE_Int                    matset_nboxes;
+   HYPRE_Int              matset_nboxes;
    ProblemIndex          *matset_ilowers;
    ProblemIndex          *matset_iuppers;
    Index                 *matset_strides;
-   HYPRE_Int                   *matset_vars;
-   HYPRE_Int                   *matset_entries;
+   HYPRE_Int             *matset_vars;
+   HYPRE_Int             *matset_entries;
    double                *matset_values;
 
    /* MatrixAddToValues */
-   HYPRE_Int                    matadd_nboxes;
+   HYPRE_Int              matadd_nboxes;
    ProblemIndex          *matadd_ilowers;
    ProblemIndex          *matadd_iuppers;
-   HYPRE_Int                   *matadd_vars;
-   HYPRE_Int                   *matadd_nentries;
-   HYPRE_Int                  **matadd_entries;
+   HYPRE_Int             *matadd_vars;
+   HYPRE_Int             *matadd_nentries;
+   HYPRE_Int            **matadd_entries;
    double               **matadd_values;
 
    /* FEMMatrixAddToValues */
-   HYPRE_Int                    fem_matadd_nboxes;
+   HYPRE_Int              fem_matadd_nboxes;
    ProblemIndex          *fem_matadd_ilowers;
    ProblemIndex          *fem_matadd_iuppers;
-   HYPRE_Int                   *fem_matadd_nrows;
-   HYPRE_Int                  **fem_matadd_rows;
-   HYPRE_Int                   *fem_matadd_ncols;
-   HYPRE_Int                  **fem_matadd_cols;
+   HYPRE_Int             *fem_matadd_nrows;
+   HYPRE_Int            **fem_matadd_rows;
+   HYPRE_Int             *fem_matadd_ncols;
+   HYPRE_Int            **fem_matadd_cols;
    double               **fem_matadd_values;
 
    /* RhsAddToValues */
-   HYPRE_Int                    rhsadd_nboxes;
+   HYPRE_Int              rhsadd_nboxes;
    ProblemIndex          *rhsadd_ilowers;
    ProblemIndex          *rhsadd_iuppers;
-   HYPRE_Int                   *rhsadd_vars;
+   HYPRE_Int             *rhsadd_vars;
    double                *rhsadd_values;
 
    /* FEMRhsAddToValues */
-   HYPRE_Int                    fem_rhsadd_nboxes;
+   HYPRE_Int              fem_rhsadd_nboxes;
    ProblemIndex          *fem_rhsadd_ilowers;
    ProblemIndex          *fem_rhsadd_iuppers;
    double               **fem_rhsadd_values;
@@ -189,46 +189,46 @@ typedef struct
  
 typedef struct
 {
-   HYPRE_Int              ndim;
-   HYPRE_Int              nparts;
+   HYPRE_Int        ndim;
+   HYPRE_Int        nparts;
    ProblemPartData *pdata;
-   HYPRE_Int              max_boxsize;
+   HYPRE_Int        max_boxsize;
 
-   HYPRE_Int              nstencils;
-   HYPRE_Int             *stencil_sizes;
+   HYPRE_Int        nstencils;
+   HYPRE_Int       *stencil_sizes;
    Index          **stencil_offsets;
-   HYPRE_Int            **stencil_vars;
+   HYPRE_Int      **stencil_vars;
    double         **stencil_values;
 
-   HYPRE_Int              rhs_true;
+   HYPRE_Int        rhs_true;
    double           rhs_value;
 
-   HYPRE_Int              fem_nvars;
+   HYPRE_Int        fem_nvars;
    Index           *fem_offsets;
-   HYPRE_Int             *fem_vars;
+   HYPRE_Int       *fem_vars;
    double         **fem_values_full;
-   HYPRE_Int            **fem_ivalues_full;
-   HYPRE_Int             *fem_ordering; /* same info as vars/offsets */
-   HYPRE_Int              fem_nsparse;  /* number of nonzeros in values_full */
-   HYPRE_Int             *fem_sparsity; /* nonzeros in values_full */
+   HYPRE_Int      **fem_ivalues_full;
+   HYPRE_Int       *fem_ordering; /* same info as vars/offsets */
+   HYPRE_Int        fem_nsparse;  /* number of nonzeros in values_full */
+   HYPRE_Int       *fem_sparsity; /* nonzeros in values_full */
    double          *fem_values;   /* nonzero values in values_full */
 
-   HYPRE_Int              fem_rhs_true;
+   HYPRE_Int        fem_rhs_true;
    double          *fem_rhs_values;
 
-   HYPRE_Int              symmetric_num;
-   HYPRE_Int             *symmetric_parts;
-   HYPRE_Int             *symmetric_vars;
-   HYPRE_Int             *symmetric_to_vars;
-   HYPRE_Int             *symmetric_booleans;
+   HYPRE_Int        symmetric_num;
+   HYPRE_Int       *symmetric_parts;
+   HYPRE_Int       *symmetric_vars;
+   HYPRE_Int       *symmetric_to_vars;
+   HYPRE_Int       *symmetric_booleans;
 
-   HYPRE_Int              ns_symmetric;
+   HYPRE_Int        ns_symmetric;
 
-   HYPRE_Int              npools;
-   HYPRE_Int             *pools;   /* array of size nparts */
-   HYPRE_Int              ndists;  /* number of (pool) distributions */
-   HYPRE_Int             *dist_npools;
-   HYPRE_Int            **dist_pools;
+   HYPRE_Int        npools;
+   HYPRE_Int       *pools;   /* array of size nparts */
+   HYPRE_Int        ndists;  /* number of (pool) distributions */
+   HYPRE_Int       *dist_npools;
+   HYPRE_Int      **dist_pools;
 
 } ProblemData;
  
@@ -330,7 +330,7 @@ SScanDblArray( char   *sdata_ptr,
 HYPRE_Int
 SScanProblemIndex( char          *sdata_ptr,
                    char         **sdata_ptr_ptr,
-                   HYPRE_Int            ndim,
+                   HYPRE_Int      ndim,
                    ProblemIndex   index )
 {
    HYPRE_Int  i;
@@ -406,20 +406,20 @@ ReadData( char         *filename,
    ProblemData        data;
    ProblemPartData    pdata;
 
-   HYPRE_Int                myid;
+   HYPRE_Int          myid;
    FILE              *file;
 
    char              *sdata = NULL;
    char              *sdata_line;
    char              *sdata_ptr;
-   HYPRE_Int                sdata_size;
-   HYPRE_Int                size;
-   HYPRE_Int                memchunk = 10000;
-   HYPRE_Int                maxline  = 250;
+   HYPRE_Int          sdata_size;
+   HYPRE_Int          size;
+   HYPRE_Int          memchunk = 10000;
+   HYPRE_Int          maxline  = 250;
 
    char               key[250];
 
-   HYPRE_Int                part, var, s, entry, i, j, k, il, iu;
+   HYPRE_Int          part, var, s, entry, i, j, k, il, iu;
 
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
@@ -1162,20 +1162,20 @@ IntersectBoxes( ProblemIndex ilower1,
 
 HYPRE_Int
 DistributeData( ProblemData   global_data,
-                HYPRE_Int           pooldist,
+                HYPRE_Int     pooldist,
                 Index        *refine,
                 Index        *distribute,
                 Index        *block,
-                HYPRE_Int           num_procs,
-                HYPRE_Int           myid,
+                HYPRE_Int     num_procs,
+                HYPRE_Int     myid,
                 ProblemData  *data_ptr )
 {
    ProblemData      data = global_data;
    ProblemPartData  pdata;
-   HYPRE_Int             *pool_procs;
-   HYPRE_Int              np, pid;
-   HYPRE_Int              pool, part, box, b, p, q, r, i, d;
-   HYPRE_Int              dmap, sign, size;
+   HYPRE_Int       *pool_procs;
+   HYPRE_Int        np, pid;
+   HYPRE_Int        pool, part, box, b, p, q, r, i, d;
+   HYPRE_Int        dmap, sign, size;
    Index            m, mmap, n;
    ProblemIndex     ilower, iupper, int_ilower, int_iupper;
 
@@ -1901,7 +1901,7 @@ HYPRE_Int
 DestroyData( ProblemData   data )
 {
    ProblemPartData  pdata;
-   HYPRE_Int              part, box, s, i;
+   HYPRE_Int        part, box, s, i;
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -2089,8 +2089,8 @@ SetCosineVector(   double  scale,
                    Index   iupper,
                    double *values)
 {
-   HYPRE_Int          i, j, k;
-   HYPRE_Int          count = 0;
+   HYPRE_Int    i, j, k;
+   HYPRE_Int    count = 0;
 
    for (k = ilower[2]; k <= iupper[2]; k++)
    {
@@ -2269,15 +2269,15 @@ main( hypre_int argc,
    ProblemData           global_data;
    ProblemData           data;
    ProblemPartData       pdata;
-   HYPRE_Int                   nparts;
-   HYPRE_Int                   pooldist;
-   HYPRE_Int                  *parts;
+   HYPRE_Int             nparts;
+   HYPRE_Int             pooldist;
+   HYPRE_Int            *parts;
    Index                *refine;
    Index                *distribute;
    Index                *block;
-   HYPRE_Int                   solver_id, object_type;
-   HYPRE_Int                   print_system;
-   HYPRE_Int                   cosine;
+   HYPRE_Int             solver_id, object_type;
+   HYPRE_Int             print_system;
+   HYPRE_Int             cosine;
    double                scale;
                         
    HYPRE_SStructGrid     grid, G_grid;
@@ -2305,27 +2305,27 @@ main( hypre_int argc,
    Index                 index, to_index;
    double               *values;
 
-   HYPRE_Int                   num_iterations;
+   HYPRE_Int             num_iterations;
    double                final_res_norm;
                          
-   HYPRE_Int                   num_procs, myid;
-   HYPRE_Int                   time_index;
+   HYPRE_Int             num_procs, myid;
+   HYPRE_Int             time_index;
 
-   HYPRE_Int                   n_pre, n_post;
-   HYPRE_Int                   skip;
-   HYPRE_Int                   sym;
-   HYPRE_Int                   rap;
-   HYPRE_Int                   relax;
+   HYPRE_Int             n_pre, n_post;
+   HYPRE_Int             skip;
+   HYPRE_Int             sym;
+   HYPRE_Int             rap;
+   HYPRE_Int             relax;
    double                jacobi_weight;
-   HYPRE_Int                   usr_jacobi_weight;
-   HYPRE_Int                   jump;
-   HYPRE_Int                   solver_type;
+   HYPRE_Int             usr_jacobi_weight;
+   HYPRE_Int             jump;
+   HYPRE_Int             solver_type;
 
    double                cf_tol;
 
-   HYPRE_Int                   arg_index, part, var, box, s, entry, i, j, k, size;
-   HYPRE_Int                   row, col;
-   HYPRE_Int                   gradient_matrix;
+   HYPRE_Int             arg_index, part, var, box, s, entry, i, j, k, size;
+   HYPRE_Int             row, col;
+   HYPRE_Int             gradient_matrix;
                         
    /* begin lobpcg */
 

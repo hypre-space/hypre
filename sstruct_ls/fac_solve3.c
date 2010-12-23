@@ -47,21 +47,21 @@ hypre_FACSolve3( void                 *fac_vdata,
    void                    *matvec_data        =(fac_data-> matvec_data);
    HYPRE_SStructSolver      csolver            =(fac_data-> csolver);
 
-   HYPRE_Int                      max_level          =(fac_data-> max_levels);
-   HYPRE_Int                     *levels             =(fac_data-> level_to_part);
-   HYPRE_Int                      max_cycles         =(fac_data-> max_cycles);
-   HYPRE_Int                      rel_change         =(fac_data-> rel_change);
-   HYPRE_Int                      zero_guess         =(fac_data-> zero_guess);
-   HYPRE_Int                      num_pre_smooth     =(fac_data-> num_pre_smooth);
-   HYPRE_Int                      num_post_smooth    =(fac_data-> num_post_smooth);
-   HYPRE_Int                      csolver_type       =(fac_data-> csolver_type);
-   HYPRE_Int                      logging            =(fac_data-> logging);
+   HYPRE_Int                max_level          =(fac_data-> max_levels);
+   HYPRE_Int               *levels             =(fac_data-> level_to_part);
+   HYPRE_Int                max_cycles         =(fac_data-> max_cycles);
+   HYPRE_Int                rel_change         =(fac_data-> rel_change);
+   HYPRE_Int                zero_guess         =(fac_data-> zero_guess);
+   HYPRE_Int                num_pre_smooth     =(fac_data-> num_pre_smooth);
+   HYPRE_Int                num_post_smooth    =(fac_data-> num_post_smooth);
+   HYPRE_Int                csolver_type       =(fac_data-> csolver_type);
+   HYPRE_Int                logging            =(fac_data-> logging);
    double                  *norms              =(fac_data-> norms);
    double                  *rel_norms          =(fac_data-> rel_norms);
    double                   tol                =(fac_data-> tol);
 
-   HYPRE_Int                      part_crse= 0;
-   HYPRE_Int                      part_fine= 1;
+   HYPRE_Int                part_crse= 0;
+   HYPRE_Int                part_fine= 1;
 
    hypre_SStructPMatrix    *pA;
    hypre_SStructPVector    *px;
@@ -73,8 +73,8 @@ hypre_FACSolve3( void                 *fac_vdata,
    double                   b_dot_b, r_dot_r, eps;
    double                   e_dot_e, e_dot_e_l, x_dot_x;
                     
-   HYPRE_Int                      level, i;
-   HYPRE_Int                      ierr = 0;
+   HYPRE_Int                level, i;
+   HYPRE_Int                ierr = 0;
   
    grid= hypre_SStructGraphGrid( hypre_SStructMatrixGraph(A_in) );
 

@@ -48,7 +48,7 @@ hypre_BoxSetExtents( hypre_Box  *box,
                      hypre_Index imin,
                      hypre_Index imax )
 {
-   HYPRE_Int        ierr = 0;
+   HYPRE_Int  ierr = 0;
 
    hypre_CopyIndex(imin, hypre_BoxIMin(box));
    hypre_CopyIndex(imax, hypre_BoxIMax(box));
@@ -80,7 +80,7 @@ hypre_BoxArrayCreate( HYPRE_Int size )
 
 HYPRE_Int
 hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
-                       HYPRE_Int              size      )
+                       HYPRE_Int        size      )
 {
    HYPRE_Int  ierr  = 0;
    HYPRE_Int  alloc_size;
@@ -111,7 +111,7 @@ hypre_BoxArrayArray *
 hypre_BoxArrayArrayCreate( HYPRE_Int size )
 {
    hypre_BoxArrayArray  *box_array_array;
-   HYPRE_Int                   i;
+   HYPRE_Int             i;
  
    box_array_array = hypre_CTAlloc(hypre_BoxArrayArray, 1);
  
@@ -215,7 +215,7 @@ hypre_BoxArrayDuplicate( hypre_BoxArray *box_array )
 {
    hypre_BoxArray  *new_box_array;
 
-   HYPRE_Int              i;
+   HYPRE_Int        i;
 
    new_box_array = hypre_BoxArrayCreate(hypre_BoxArraySize(box_array));
    hypre_ForBoxI(i, box_array)
@@ -237,10 +237,10 @@ hypre_BoxArrayArrayDuplicate( hypre_BoxArrayArray *box_array_array )
 {
    hypre_BoxArrayArray  *new_box_array_array;
    hypre_BoxArray      **new_box_arrays;
-   HYPRE_Int                   new_size;
+   HYPRE_Int             new_size;
  
    hypre_BoxArray      **box_arrays;
-   HYPRE_Int                   i;
+   HYPRE_Int             i;
  
    new_size = hypre_BoxArrayArraySize(box_array_array);
    new_box_array_array = hypre_BoxArrayArrayCreate(new_size);
@@ -286,7 +286,7 @@ hypre_AppendBox( hypre_Box      *box,
 
 HYPRE_Int 
 hypre_DeleteBox( hypre_BoxArray *box_array,
-                 HYPRE_Int             index     )
+                 HYPRE_Int       index     )
 {
    HYPRE_Int  ierr  = 0;
    HYPRE_Int  i;
@@ -376,7 +376,7 @@ hypre_BoxGetStrideSize( hypre_Box   *box,
 HYPRE_Int 
 hypre_BoxGetStrideVolume( hypre_Box   *box,
                           hypre_Index  stride,
-                          HYPRE_Int         *volume_ptr   )
+                          HYPRE_Int   *volume_ptr   )
 {
    HYPRE_Int  volume = 1;
    HYPRE_Int  d, s;
@@ -408,7 +408,7 @@ hypre_BoxGetStrideVolume( hypre_Box   *box,
 
 HYPRE_Int
 hypre_BoxExpand( hypre_Box   *box,
-                 HYPRE_Int         *numexp)
+                 HYPRE_Int   *numexp)
 { 
   HYPRE_Int   ierr = 0;
   HYPRE_Int  *imin = hypre_BoxIMin(box);
@@ -482,8 +482,8 @@ hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
 HYPRE_Int
 hypre_MaxIndexPosition(hypre_Index index, HYPRE_Int *position)
 {
-   HYPRE_Int        ierr = 0;
-   HYPRE_Int        i, value;
+   HYPRE_Int  ierr = 0;
+   HYPRE_Int  i, value;
 
    value = hypre_IndexD(index, 0);
    *position = 0;
@@ -508,8 +508,8 @@ hypre_MaxIndexPosition(hypre_Index index, HYPRE_Int *position)
 HYPRE_Int
 hypre_MinIndexPosition(hypre_Index index, HYPRE_Int *position)
 {
-   HYPRE_Int        ierr = 0;
-   HYPRE_Int        i, value;
+   HYPRE_Int  ierr = 0;
+   HYPRE_Int  i, value;
 
    value = hypre_IndexD(index, 0);
    *position = 0;
@@ -533,7 +533,7 @@ hypre_MinIndexPosition(hypre_Index index, HYPRE_Int *position)
 
 HYPRE_Int
 hypre_BoxExpandConstant( hypre_Box   *box,
-                         HYPRE_Int         expand)
+                         HYPRE_Int   expand)
 { 
   HYPRE_Int   ierr = 0;
   HYPRE_Int  *imin = hypre_BoxIMin(box);
@@ -556,7 +556,7 @@ hypre_BoxExpandConstant( hypre_Box   *box,
 
 HYPRE_Int
 hypre_BoxExpandConstantDim( hypre_Box   *box,
-                         HYPRE_Int         *expand)
+                         HYPRE_Int   *expand)
 { 
   HYPRE_Int   ierr = 0;
   HYPRE_Int  *imin = hypre_BoxIMin(box);

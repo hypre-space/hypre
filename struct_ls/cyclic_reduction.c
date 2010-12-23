@@ -61,9 +61,9 @@ typedef struct
 {
    MPI_Comm              comm;
                       
-   HYPRE_Int                   num_levels;
+   HYPRE_Int             num_levels;
                       
-   HYPRE_Int                   cdir;         /* coarsening direction */
+   HYPRE_Int             cdir;         /* coarsening direction */
    hypre_Index           base_index;
    hypre_Index           base_stride;
 
@@ -79,8 +79,8 @@ typedef struct
    hypre_ComputePkg    **down_compute_pkg_l;
    hypre_ComputePkg    **up_compute_pkg_l;
 
-   HYPRE_Int                   time_index;
-   HYPRE_Int                   solve_flops;
+   HYPRE_Int             time_index;
+   HYPRE_Int             solve_flops;
 
 } hypre_CyclicReductionData;
 
@@ -117,18 +117,18 @@ hypre_CyclicReductionCreate( MPI_Comm  comm )
 hypre_StructMatrix *
 hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
                             hypre_StructGrid   *coarse_grid,
-                            HYPRE_Int                 cdir        )
+                            HYPRE_Int           cdir        )
 {
    hypre_StructMatrix    *Ac;
 
    hypre_Index           *Ac_stencil_shape;
    hypre_StructStencil   *Ac_stencil;
-   HYPRE_Int                    Ac_stencil_size;
-   HYPRE_Int                    Ac_stencil_dim;
-   HYPRE_Int                    Ac_num_ghost[] = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int              Ac_stencil_size;
+   HYPRE_Int              Ac_stencil_dim;
+   HYPRE_Int              Ac_num_ghost[] = {0, 0, 0, 0, 0, 0};
                        
-   HYPRE_Int                    i;
-   HYPRE_Int                    stencil_rank;
+   HYPRE_Int              i;
+   HYPRE_Int              stencil_rank;
  
    Ac_stencil_dim = 1;
 
@@ -223,10 +223,10 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
    hypre_Index             index;
 
    hypre_StructGrid       *fgrid;
-   HYPRE_Int                    *fgrid_ids;
+   HYPRE_Int              *fgrid_ids;
    hypre_StructGrid       *cgrid;
    hypre_BoxArray         *cgrid_boxes;
-   HYPRE_Int                    *cgrid_ids;
+   HYPRE_Int              *cgrid_ids;
    hypre_Box              *cgrid_box;
    hypre_IndexRef          cstart;
    hypre_Index             stridec;
@@ -234,8 +234,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
    hypre_IndexRef          stridef;
    hypre_Index             loop_size;
 
-   HYPRE_Int                     fi, ci;
-   HYPRE_Int                     loopi, loopj, loopk;
+   HYPRE_Int               fi, ci;
+   HYPRE_Int               loopi, loopj, loopk;
 
    hypre_Box              *A_dbox;
    hypre_Box              *Ac_dbox;
@@ -243,12 +243,12 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
    double                 *a_cc, *a_cw, *a_ce;
    double                 *ac_cc, *ac_cw, *ac_ce;
                     
-   HYPRE_Int                     iA, iAm1, iAp1;
-   HYPRE_Int                     iAc;
+   HYPRE_Int               iA, iAm1, iAp1;
+   HYPRE_Int               iAc;
                          
-   HYPRE_Int                     xOffsetA; 
+   HYPRE_Int               xOffsetA; 
                          
-   HYPRE_Int                     ierr = 0;
+   HYPRE_Int               ierr = 0;
 
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -487,16 +487,16 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_CyclicReductionData *cyc_red_data = cyc_red_vdata;
 
    MPI_Comm                comm        = (cyc_red_data -> comm);
-   HYPRE_Int                     cdir        = (cyc_red_data -> cdir);
+   HYPRE_Int               cdir        = (cyc_red_data -> cdir);
    hypre_IndexRef          base_index  = (cyc_red_data -> base_index);
    hypre_IndexRef          base_stride = (cyc_red_data -> base_stride);
 
-   HYPRE_Int                     num_levels;
+   HYPRE_Int               num_levels;
    hypre_StructGrid      **grid_l;
    hypre_BoxArray         *base_points;
    hypre_BoxArray        **fine_points_l;
    double                 *data;
-   HYPRE_Int                     data_size = 0;
+   HYPRE_Int               data_size = 0;
    hypre_StructMatrix    **A_l;
    hypre_StructVector    **x_l;
    hypre_ComputePkg      **down_compute_pkg_l;
@@ -511,12 +511,12 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
    hypre_Box              *cbox;
                     
-   HYPRE_Int                     l;
-   HYPRE_Int                     flop_divisor;
+   HYPRE_Int               l;
+   HYPRE_Int               flop_divisor;
                          
-   HYPRE_Int                     x_num_ghost[] = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int               x_num_ghost[] = {0, 0, 0, 0, 0, 0};
                          
-   HYPRE_Int                     ierr = 0;
+   HYPRE_Int               ierr = 0;
 
    /*-----------------------------------------------------
     * Set up coarse grids
@@ -746,8 +746,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 {
    hypre_CyclicReductionData *cyc_red_data = cyc_red_vdata;
 
-   HYPRE_Int                   num_levels      = (cyc_red_data -> num_levels);
-   HYPRE_Int                   cdir            = (cyc_red_data -> cdir);
+   HYPRE_Int             num_levels      = (cyc_red_data -> num_levels);
+   HYPRE_Int             cdir            = (cyc_red_data -> cdir);
    hypre_IndexRef        base_index      = (cyc_red_data -> base_index);
    hypre_IndexRef        base_stride     = (cyc_red_data -> base_stride);
    hypre_BoxArray       *base_points     = (cyc_red_data -> base_points);
@@ -760,10 +760,10 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       (cyc_red_data -> up_compute_pkg_l);
                     
    hypre_StructGrid     *fgrid;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
 
    hypre_CommHandle     *comm_handle;
                      
@@ -781,10 +781,10 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    double               *bp;
    double               *xcp;
                        
-   HYPRE_Int                   Ai;
-   HYPRE_Int                   xi;
-   HYPRE_Int                   bi;
-   HYPRE_Int                   xci;
+   HYPRE_Int             Ai;
+   HYPRE_Int             xi;
+   HYPRE_Int             bi;
+   HYPRE_Int             xci;
                      
    hypre_Index           cindex;
    hypre_Index           stride;
@@ -795,10 +795,10 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    hypre_Index           startc;
    hypre_Index           stridec;
                      
-   HYPRE_Int                   compute_i, fi, ci, j, l;
-   HYPRE_Int                   loopi, loopj, loopk;
+   HYPRE_Int             compute_i, fi, ci, j, l;
+   HYPRE_Int             loopi, loopj, loopk;
                       
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    hypre_BeginTiming(cyc_red_data -> time_index);
 
@@ -1185,8 +1185,8 @@ hypre_CyclicReductionSetBase( void        *cyc_red_vdata,
                               hypre_Index  base_stride )
 {
    hypre_CyclicReductionData *cyc_red_data = cyc_red_vdata;
-   HYPRE_Int                      d;
-   HYPRE_Int                      ierr = 0;
+   HYPRE_Int                d;
+   HYPRE_Int                ierr = 0;
  
    for (d = 0; d < 3; d++)
    {

@@ -95,7 +95,7 @@ HYPRE_SStructFlexGMRESSolve( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetKDim( HYPRE_SStructSolver solver,
-                           HYPRE_Int                 k_dim )
+                           HYPRE_Int           k_dim )
 {
    return( HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
 }
@@ -127,7 +127,7 @@ HYPRE_SStructFlexGMRESSetAbsoluteTol( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetMinIter( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 min_iter )
+                              HYPRE_Int           min_iter )
 {
    return( HYPRE_FlexGMRESSetMinIter( (HYPRE_Solver) solver, min_iter ) );
 }
@@ -138,7 +138,7 @@ HYPRE_SStructFlexGMRESSetMinIter( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetMaxIter( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 max_iter )
+                              HYPRE_Int           max_iter )
 {
    return( HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -166,7 +166,7 @@ HYPRE_SStructFlexGMRESSetPrecond( HYPRE_SStructSolver          solver,
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetLogging( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 logging )
+                              HYPRE_Int           logging )
 {
    return( HYPRE_FlexGMRESSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -177,7 +177,7 @@ HYPRE_SStructFlexGMRESSetLogging( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetPrintLevel( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 level )
+                              HYPRE_Int           level )
 {
    return( HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver) solver, level ) );
 }
@@ -188,7 +188,7 @@ HYPRE_SStructFlexGMRESSetPrintLevel( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESGetNumIterations( HYPRE_SStructSolver  solver,
-                                    HYPRE_Int                 *num_iterations )
+                                    HYPRE_Int           *num_iterations )
 {
    return( HYPRE_FlexGMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }

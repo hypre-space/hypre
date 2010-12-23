@@ -44,19 +44,19 @@ hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R,
                         hypre_StructMatrix *A,
                         hypre_StructMatrix *P,
                         hypre_StructGrid   *coarse_grid,
-                        HYPRE_Int                 cdir        )
+                        HYPRE_Int           cdir        )
 {
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;
    hypre_StructStencil   *RAP_stencil;
-   HYPRE_Int                    RAP_stencil_size;
-   HYPRE_Int                    RAP_stencil_dim;
-   HYPRE_Int                    RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int              RAP_stencil_size;
+   HYPRE_Int              RAP_stencil_dim;
+   HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
 
    hypre_Index            index_temp;
-   HYPRE_Int                    j, i;
-   HYPRE_Int                    stencil_rank;
+   HYPRE_Int              j, i;
+   HYPRE_Int              stencil_rank;
  
    RAP_stencil_dim = 2;
 
@@ -168,24 +168,24 @@ HYPRE_Int
 hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
                         hypre_StructMatrix *P,
                         hypre_StructMatrix *R,
-                        HYPRE_Int                 cdir,
+                        HYPRE_Int           cdir,
                         hypre_Index         cindex,
                         hypre_Index         cstride,
                         hypre_StructMatrix *RAP     )
 {
    hypre_StructStencil  *fine_stencil;
-   HYPRE_Int                   fine_stencil_size;
+   HYPRE_Int             fine_stencil_size;
 
    hypre_StructGrid     *fgrid;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
 
-   HYPRE_Int                   constant_coefficient;
-   HYPRE_Int                   constant_coefficient_A;
-   HYPRE_Int                   fi, ci;
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             constant_coefficient;
+   HYPRE_Int             constant_coefficient_A;
+   HYPRE_Int             fi, ci;
+   HYPRE_Int             ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
@@ -282,12 +282,12 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
 /* for fine stencil size 5, constant coefficient 0 */
 HYPRE_Int
 hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
-   HYPRE_Int                   ci,
-   HYPRE_Int                   fi,
+   HYPRE_Int             ci,
+   HYPRE_Int             fi,
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -298,16 +298,16 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
    hypre_Index           fstart;
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int                   constant_coefficient_A;
+   HYPRE_Int             constant_coefficient_A;
 
-   HYPRE_Int                   loopi, loopj, loopk;
+   HYPRE_Int             loopi, loopj, loopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
@@ -324,17 +324,17 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_csw, *rap_cse;
 
-   HYPRE_Int                   iA, iAm1, iAp1;
-   HYPRE_Int                   iA_offd, iA_offdm1, iA_offdp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iP1;
-   HYPRE_Int                   iR;
+   HYPRE_Int             iA, iAm1, iAp1;
+   HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iP1;
+   HYPRE_Int             iR;
                       
-   HYPRE_Int                   yOffsetA, yOffsetA_diag, yOffsetA_offd; 
-   HYPRE_Int                   xOffsetP; 
-   HYPRE_Int                   yOffsetP; 
+   HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd; 
+   HYPRE_Int             xOffsetP; 
+   HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -594,12 +594,12 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
 /* for fine stencil size 5, constant coefficient 1 */
 HYPRE_Int
 hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
-   HYPRE_Int                   ci,
-   HYPRE_Int                   fi,
+   HYPRE_Int             ci,
+   HYPRE_Int             fi,
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -610,7 +610,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
@@ -630,15 +630,15 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_csw, *rap_cse;
 
-   HYPRE_Int                   iA, iAm1, iAp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iP1;
-   HYPRE_Int                   iR;
-   HYPRE_Int                   yOffsetA; 
-   HYPRE_Int                   xOffsetP; 
-   HYPRE_Int                   yOffsetP; 
+   HYPRE_Int             iA, iAm1, iAp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iP1;
+   HYPRE_Int             iR;
+   HYPRE_Int             yOffsetA; 
+   HYPRE_Int             xOffsetP; 
+   HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -827,12 +827,12 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
 /* for fine stencil size 9, constant coefficient 0 */
 HYPRE_Int
 hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
-   HYPRE_Int                   ci,
-   HYPRE_Int                   fi,
+   HYPRE_Int             ci,
+   HYPRE_Int             fi,
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -843,7 +843,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
@@ -851,9 +851,9 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int                   constant_coefficient_A;
+   HYPRE_Int             constant_coefficient_A;
 
-   HYPRE_Int                   loopi, loopj, loopk;
+   HYPRE_Int             loopi, loopj, loopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
@@ -873,17 +873,17 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_csw, *rap_cse;
 
-   HYPRE_Int                   iA, iAm1, iAp1;
-   HYPRE_Int                   iA_offd, iA_offdm1, iA_offdp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iP1;
-   HYPRE_Int                   iR;
+   HYPRE_Int             iA, iAm1, iAp1;
+   HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iP1;
+   HYPRE_Int             iR;
                       
-   HYPRE_Int                   yOffsetA, yOffsetA_diag, yOffsetA_offd; 
-   HYPRE_Int                   xOffsetP; 
-   HYPRE_Int                   yOffsetP; 
+   HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd; 
+   HYPRE_Int             xOffsetP; 
+   HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -1187,12 +1187,12 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
 /* for fine stencil size 9, constant coefficient 1 */
 HYPRE_Int
 hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
-   HYPRE_Int                   ci,
-   HYPRE_Int                   fi,
+   HYPRE_Int             ci,
+   HYPRE_Int             fi,
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -1203,7 +1203,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
@@ -1223,15 +1223,15 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_csw, *rap_cse;
 
-   HYPRE_Int                   iA, iAm1, iAp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iP1;
-   HYPRE_Int                   iR;
-   HYPRE_Int                   yOffsetA; 
-   HYPRE_Int                   xOffsetP; 
-   HYPRE_Int                   yOffsetP; 
+   HYPRE_Int             iA, iAm1, iAp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iP1;
+   HYPRE_Int             iR;
+   HYPRE_Int             yOffsetA; 
+   HYPRE_Int             xOffsetP; 
+   HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -1456,24 +1456,24 @@ HYPRE_Int
 hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
                           hypre_StructMatrix *P,
                           hypre_StructMatrix *R,
-                          HYPRE_Int                 cdir,
+                          HYPRE_Int           cdir,
                           hypre_Index         cindex,
                           hypre_Index         cstride,
                           hypre_StructMatrix *RAP     )
 {
 
    hypre_StructStencil  *fine_stencil;
-   HYPRE_Int                   fine_stencil_size;
+   HYPRE_Int             fine_stencil_size;
                         
    hypre_StructGrid     *fgrid;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
-   HYPRE_Int                   fi, ci;
-   HYPRE_Int                   constant_coefficient;
-   HYPRE_Int                   constant_coefficient_A;
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int            *cgrid_ids;
+   HYPRE_Int             fi, ci;
+   HYPRE_Int             constant_coefficient;
+   HYPRE_Int             constant_coefficient_A;
+   HYPRE_Int             ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
@@ -1571,12 +1571,12 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
 /* for fine stencil size 5, constant coefficient 0 */
 HYPRE_Int
 hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
-   HYPRE_Int                   ci,
-   HYPRE_Int                   fi,
+   HYPRE_Int             ci,
+   HYPRE_Int             fi,
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -1594,8 +1594,8 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int                   loopi, loopj, loopk;
-   HYPRE_Int                   constant_coefficient_A;
+   HYPRE_Int             loopi, loopj, loopk;
+   HYPRE_Int             constant_coefficient_A;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
@@ -1611,15 +1611,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    double               *rap_ce, *rap_cn;
    double               *rap_cnw, *rap_cne;
 
-   HYPRE_Int                   iA, iAm1, iAp1, iA_offd, iA_offdm1, iA_offdp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iP1;
-   HYPRE_Int                   iR;
-   HYPRE_Int                   yOffsetA, yOffsetA_diag, yOffsetA_offd;
-   HYPRE_Int                   xOffsetP;
-   HYPRE_Int                   yOffsetP;
+   HYPRE_Int             iA, iAm1, iAp1, iA_offd, iA_offdm1, iA_offdp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iP1;
+   HYPRE_Int             iR;
+   HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
                      
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    /*hypre_printf("nosym 5.0\n");*/
    stridef = cstride;
@@ -1853,12 +1853,12 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
 /* for fine stencil size 5, constant coefficient 1 */
 HYPRE_Int
 hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
-   HYPRE_Int                   ci,
-   HYPRE_Int                   fi,
+   HYPRE_Int             ci,
+   HYPRE_Int             fi,
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -1886,15 +1886,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
    double               *rap_ce, *rap_cn;
    double               *rap_cnw, *rap_cne;
 
-   HYPRE_Int                   iA, iAm1, iAp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iP1;
-   HYPRE_Int                   iR;
-   HYPRE_Int                   yOffsetA;
-   HYPRE_Int                   xOffsetP;
-   HYPRE_Int                   yOffsetP;
+   HYPRE_Int             iA, iAm1, iAp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iP1;
+   HYPRE_Int             iR;
+   HYPRE_Int             yOffsetA;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
                      
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    /* hypre_printf("nosym 5.1\n");*/
    stridef = cstride;
@@ -2066,12 +2066,12 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
 /* for fine stencil size 9, constant coefficient 0 */
 HYPRE_Int
 hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
-   HYPRE_Int                   ci,
-   HYPRE_Int                   fi,
+   HYPRE_Int             ci,
+   HYPRE_Int             fi,
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -2089,8 +2089,8 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int                   loopi, loopj, loopk;
-   HYPRE_Int                   constant_coefficient_A;
+   HYPRE_Int             loopi, loopj, loopk;
+   HYPRE_Int             constant_coefficient_A;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
@@ -2108,15 +2108,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    double               *rap_ce, *rap_cn;
    double               *rap_cnw, *rap_cne;
 
-   HYPRE_Int                   iA, iAm1, iAp1, iA_offd, iA_offdm1, iA_offdp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iP1;
-   HYPRE_Int                   iR;
-   HYPRE_Int                   yOffsetA, yOffsetA_diag, yOffsetA_offd;
-   HYPRE_Int                   xOffsetP;
-   HYPRE_Int                   yOffsetP;
+   HYPRE_Int             iA, iAm1, iAp1, iA_offd, iA_offdm1, iA_offdp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iP1;
+   HYPRE_Int             iR;
+   HYPRE_Int             yOffsetA, yOffsetA_diag, yOffsetA_offd;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
                      
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    /*hypre_printf("nosym 9.0\n");*/
    stridef = cstride;
@@ -2401,12 +2401,12 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
 /* for fine stencil size 9, constant coefficient 1 */
 HYPRE_Int
 hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
-   HYPRE_Int                   ci,
-   HYPRE_Int                   fi,
+   HYPRE_Int             ci,
+   HYPRE_Int             fi,
    hypre_StructMatrix *A,
    hypre_StructMatrix *P,
    hypre_StructMatrix *R,
-   HYPRE_Int                 cdir,
+   HYPRE_Int           cdir,
    hypre_Index         cindex,
    hypre_Index         cstride,
    hypre_StructMatrix *RAP     )
@@ -2435,15 +2435,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
    double               *rap_ce, *rap_cn;
    double               *rap_cnw, *rap_cne;
 
-   HYPRE_Int                   iA, iAm1, iAp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iP1;
-   HYPRE_Int                   iR;
-   HYPRE_Int                   yOffsetA;
-   HYPRE_Int                   xOffsetP;
-   HYPRE_Int                   yOffsetP;
+   HYPRE_Int             iA, iAm1, iAp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iP1;
+   HYPRE_Int             iR;
+   HYPRE_Int             yOffsetA;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
                      
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    /*hypre_printf("nosym 9.1\n");*/
    stridef = cstride;

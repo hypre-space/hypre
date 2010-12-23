@@ -44,7 +44,7 @@ hypre_F90_IFACE(hypre_sstructlgmrescreate, HYPRE_SSTRUCTLGMRESCREATE)
 void
 hypre_F90_IFACE(hypre_sstructlgmresdestroy, HYPRE_SSTRUCTLGMRESDESTROY)
                                                        (hypre_F90_Obj *solver,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESDestroy( (HYPRE_SStructSolver) *solver ));
 }
@@ -59,7 +59,7 @@ hypre_F90_IFACE(hypre_sstructlgmressetup, HYPRE_SSTRUCTLGMRESSETUP)
                                                         hypre_F90_Obj *A,
                                                         hypre_F90_Obj *b,
                                                         hypre_F90_Obj *x,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSetup( (HYPRE_SStructSolver) *solver,
                                            (HYPRE_SStructMatrix) *A,
@@ -77,7 +77,7 @@ hypre_F90_IFACE(hypre_sstructlgmressolve, HYPRE_SSTRUCTLGMRESSOLVE)
                                                         hypre_F90_Obj *A,
                                                         hypre_F90_Obj *b,
                                                         hypre_F90_Obj *x,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSolve( (HYPRE_SStructSolver) *solver,
                                            (HYPRE_SStructMatrix) *A,
@@ -92,8 +92,8 @@ hypre_F90_IFACE(hypre_sstructlgmressolve, HYPRE_SSTRUCTLGMRESSOLVE)
 void
 hypre_F90_IFACE(hypre_sstructlgmressetkdim, HYPRE_SSTRUCTLGMRESSETKDIM)
                                                        (hypre_F90_Obj *solver,
-                                                        HYPRE_Int       *k_dim,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *k_dim,
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSetKDim( (HYPRE_SStructSolver) *solver,
                                              (HYPRE_Int)                 *k_dim ));
@@ -105,8 +105,8 @@ hypre_F90_IFACE(hypre_sstructlgmressetkdim, HYPRE_SSTRUCTLGMRESSETKDIM)
 void
 hypre_F90_IFACE(hypre_sstructlgmressetaugdim, HYPRE_SSTRUCTLGMRESSETAUGDIM)
                                                        (hypre_F90_Obj *solver,
-                                                        HYPRE_Int       *aug_dim,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *aug_dim,
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSetAugDim( (HYPRE_SStructSolver) *solver,
                                              (HYPRE_Int)                 *aug_dim ));
@@ -119,7 +119,7 @@ void
 hypre_F90_IFACE(hypre_sstructlgmressettol, HYPRE_SSTRUCTLGMRESSETTOL)
                                                        (hypre_F90_Obj *solver,
                                                         double    *tol,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSetTol( (HYPRE_SStructSolver) *solver,
                                             (double)              *tol ) );
@@ -132,7 +132,7 @@ void
 hypre_F90_IFACE(hypre_sstructlgmressetabsolutetol, HYPRE_SSTRUCTLGMRESSETABSOLUTETOL)
                                                        (hypre_F90_Obj *solver,
                                                         double    *tol,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSetAbsoluteTol( (HYPRE_SStructSolver) *solver,
                                             (double)              *tol ) );
@@ -144,8 +144,8 @@ hypre_F90_IFACE(hypre_sstructlgmressetabsolutetol, HYPRE_SSTRUCTLGMRESSETABSOLUT
 void
 hypre_F90_IFACE(hypre_sstructlgmressetminiter, HYPRE_SSTRUCTLGMRESSETMINITER)
                                                        (hypre_F90_Obj *solver,
-                                                        HYPRE_Int       *min_iter,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *min_iter,
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSetMinIter( (HYPRE_SStructSolver) *solver,
                                                 (HYPRE_Int)                 *min_iter ) );
@@ -158,8 +158,8 @@ hypre_F90_IFACE(hypre_sstructlgmressetminiter, HYPRE_SSTRUCTLGMRESSETMINITER)
 void
 hypre_F90_IFACE(hypre_sstructlgmressetmaxiter, HYPRE_SSTRUCTLGMRESSETMAXITER)
                                                        (hypre_F90_Obj *solver,
-                                                        HYPRE_Int       *max_iter,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *max_iter,
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSetMaxIter( (HYPRE_SStructSolver) *solver,
                                                 (HYPRE_Int)                 *max_iter ) );
@@ -231,8 +231,8 @@ hypre_F90_IFACE(hypre_sstructlgmressetprecond, HYPRE_SSTRUCTLGMRESSETPRECOND)
 void
 hypre_F90_IFACE(hypre_sstructlgmressetlogging, HYPRE_SSTRUCTLGMRESSETLOGGING)
                                                        (hypre_F90_Obj *solver,
-                                                        HYPRE_Int       *logging,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *logging,
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSetLogging( (HYPRE_SStructSolver) *solver,
                                                 (HYPRE_Int)                 *logging ) );
@@ -245,8 +245,8 @@ hypre_F90_IFACE(hypre_sstructlgmressetlogging, HYPRE_SSTRUCTLGMRESSETLOGGING)
 void
 hypre_F90_IFACE(hypre_sstructlgmressetprintlevel, HYPRE_SSTRUCTLGMRESSETPRINTLEVEL)
                                                        (hypre_F90_Obj *solver,
-                                                        HYPRE_Int       *level,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *level,
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESSetPrintLevel( (HYPRE_SStructSolver) *solver,
                                                    (HYPRE_Int)                 *level ) );
@@ -259,8 +259,8 @@ hypre_F90_IFACE(hypre_sstructlgmressetprintlevel, HYPRE_SSTRUCTLGMRESSETPRINTLEV
 void
 hypre_F90_IFACE(hypre_sstructlgmresgetnumiterati, HYPRE_SSTRUCTLGMRESGETNUMITERATI)
                                                        (hypre_F90_Obj *solver,
-                                                        HYPRE_Int       *num_iterations,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *num_iterations,
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESGetNumIterations( (HYPRE_SStructSolver) *solver,
                                                       (HYPRE_Int *)                num_iterations ) );
@@ -274,7 +274,7 @@ void
 hypre_F90_IFACE(hypre_sstructlgmresgetfinalrelat, HYPRE_SSTRUCTLGMRESGETFINALRELAT)
                                                        (hypre_F90_Obj *solver,
                                                         double    *norm,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESGetFinalRelativeResidualNorm( (HYPRE_SStructSolver) *solver,
                                                                   (double *)             norm ) );
@@ -288,7 +288,7 @@ void
 hypre_F90_IFACE(hypre_sstructlgmresgetresidual, HYPRE_SSTRUCTLGMRESGETRESIDUAL)
                                                        (hypre_F90_Obj *solver,
                                                         hypre_F90_Obj *residual,
-                                                        HYPRE_Int       *ierr)
+                                                        HYPRE_Int *ierr)
 {
    *ierr = (HYPRE_Int) (HYPRE_SStructLGMRESGetResidual( (HYPRE_SStructSolver) *solver,
                                                  (void *)              *residual ) );

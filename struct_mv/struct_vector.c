@@ -29,7 +29,7 @@ hypre_StructVectorCreate( MPI_Comm          comm,
 {
    hypre_StructVector  *vector;
 
-   HYPRE_Int                  i;
+   HYPRE_Int            i;
 
    vector = hypre_CTAlloc(hypre_StructVector, 1);
 
@@ -92,17 +92,17 @@ hypre_StructVectorInitializeShell( hypre_StructVector *vector )
 {
    hypre_StructGrid     *grid;
 
-   HYPRE_Int                  *num_ghost;
+   HYPRE_Int            *num_ghost;
  
    hypre_BoxArray       *data_space;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
    hypre_Box            *data_box;
 
-   HYPRE_Int                  *data_indices;
-   HYPRE_Int                   data_size;
+   HYPRE_Int            *data_indices;
+   HYPRE_Int             data_size;
                      
-   HYPRE_Int                   i, d;
+   HYPRE_Int             i, d;
  
    /*-----------------------------------------------------------------------
     * Set up data_space
@@ -210,16 +210,16 @@ HYPRE_Int
 hypre_StructVectorSetValues( hypre_StructVector *vector,
                              hypre_Index         grid_index,
                              double             *values,
-                             HYPRE_Int                 action,
-                             HYPRE_Int                 boxnum,
-                             HYPRE_Int                 outside    )
+                             HYPRE_Int           action,
+                             HYPRE_Int           boxnum,
+                             HYPRE_Int           outside    )
 {
    hypre_BoxArray     *grid_boxes;
    hypre_Box          *grid_box;
 
    double             *vecp;
 
-   HYPRE_Int                 i, istart, istop;
+   HYPRE_Int           i, istart, istop;
 
    if (outside > 0)
    {
@@ -288,9 +288,9 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
                                 hypre_Box          *set_box,
                                 hypre_Box          *value_box,
                                 double             *values,
-                                HYPRE_Int                 action,
-                                HYPRE_Int                 boxnum,
-                                HYPRE_Int                 outside )
+                                HYPRE_Int           action,
+                                HYPRE_Int           boxnum,
+                                HYPRE_Int           outside )
 {
    hypre_BoxArray     *grid_boxes;
    hypre_Box          *grid_box;
@@ -300,18 +300,18 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
    hypre_Box          *data_box;
    hypre_IndexRef      data_start;
    hypre_Index         data_stride;
-   HYPRE_Int                 datai;
+   HYPRE_Int           datai;
    double             *datap;
 
    hypre_Box          *dval_box;
    hypre_Index         dval_start;
    hypre_Index         dval_stride;
-   HYPRE_Int                 dvali;
+   HYPRE_Int           dvali;
 
    hypre_Index         loop_size;
 
-   HYPRE_Int                 i, istart, istop;
-   HYPRE_Int                 loopi, loopj, loopk;
+   HYPRE_Int           i, istart, istop;
+   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -421,15 +421,15 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 HYPRE_Int 
 hypre_StructVectorClearValues( hypre_StructVector *vector,
                                hypre_Index         grid_index,
-                               HYPRE_Int                 boxnum,
-                               HYPRE_Int                 outside    )
+                               HYPRE_Int           boxnum,
+                               HYPRE_Int           outside    )
 {
    hypre_BoxArray     *grid_boxes;
    hypre_Box          *grid_box;
 
    double             *vecp;
 
-   HYPRE_Int                 i, istart, istop;
+   HYPRE_Int           i, istart, istop;
 
    if (outside > 0)
    {
@@ -478,8 +478,8 @@ hypre_StructVectorClearValues( hypre_StructVector *vector,
 HYPRE_Int 
 hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
                                   hypre_Box          *clear_box,
-                                  HYPRE_Int                 boxnum,
-                                  HYPRE_Int                 outside )
+                                  HYPRE_Int           boxnum,
+                                  HYPRE_Int           outside )
 {
    hypre_BoxArray     *grid_boxes;
    hypre_Box          *grid_box;
@@ -489,13 +489,13 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
    hypre_Box          *data_box;
    hypre_IndexRef      data_start;
    hypre_Index         data_stride;
-   HYPRE_Int                 datai;
+   HYPRE_Int           datai;
    double             *datap;
 
    hypre_Index         loop_size;
 
-   HYPRE_Int                 i, istart, istop;
-   HYPRE_Int                 loopi, loopj, loopk;
+   HYPRE_Int           i, istart, istop;
+   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -568,7 +568,7 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
  
 HYPRE_Int
 hypre_StructVectorSetNumGhost( hypre_StructVector *vector,
-                               HYPRE_Int                *num_ghost )
+                               HYPRE_Int          *num_ghost )
 {
    HYPRE_Int  i;
  
@@ -601,7 +601,7 @@ hypre_StructVectorCopy( hypre_StructVector *x,
 {
    hypre_Box          *x_data_box;
                     
-   HYPRE_Int                 vi;
+   HYPRE_Int           vi;
    double             *xp, *yp;
 
    hypre_BoxArray     *boxes;
@@ -610,8 +610,8 @@ hypre_StructVectorCopy( hypre_StructVector *x,
    hypre_IndexRef      start;
    hypre_Index         unit_stride;
 
-   HYPRE_Int                 i;
-   HYPRE_Int                 loopi, loopj, loopk;
+   HYPRE_Int           i;
+   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -655,7 +655,7 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
 {
    hypre_Box          *v_data_box;
                     
-   HYPRE_Int                 vi;
+   HYPRE_Int           vi;
    double             *vp;
 
    hypre_BoxArray     *boxes;
@@ -664,8 +664,8 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
    hypre_IndexRef      start;
    hypre_Index         unit_stride;
 
-   HYPRE_Int                 i;
-   HYPRE_Int                 loopi, loopj, loopk;
+   HYPRE_Int           i;
+   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -709,7 +709,7 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
 {
    hypre_Box          *v_data_box;
                     
-   HYPRE_Int                 vi;
+   HYPRE_Int           vi;
    double             *vp;
 
    hypre_BoxArray     *boxes;
@@ -718,8 +718,8 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
    hypre_IndexRef      start;
    hypre_Index         unit_stride;
 
-   HYPRE_Int                 b, i, j, k;
-   HYPRE_Int                 loopi, loopj, loopk;
+   HYPRE_Int           b, i, j, k;
+   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -767,7 +767,7 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 {
    hypre_Box          *v_data_box;
                     
-   HYPRE_Int                 vi;
+   HYPRE_Int           vi;
    double             *vp;
 
    hypre_BoxArray     *boxes;
@@ -778,8 +778,8 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
    hypre_IndexRef      start;
    hypre_Index         unit_stride;
 
-   HYPRE_Int                 i, j;
-   HYPRE_Int                 loopi, loopj, loopk;
+   HYPRE_Int           i, j;
+   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -826,9 +826,9 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 
 HYPRE_Int 
 hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
-                                         HYPRE_Int           force )
+                                         HYPRE_Int     force )
 {
-   HYPRE_Int                 vi;
+   HYPRE_Int           vi;
    double             *vp;
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
@@ -842,8 +842,8 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
    hypre_BoxArray     *array_of_box;
    hypre_BoxArray     *work_boxarray;
       
-   HYPRE_Int                 i, i2;
-   HYPRE_Int                 loopi, loopj, loopk;
+   HYPRE_Int           i, i2;
+   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -905,7 +905,7 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
 HYPRE_Int 
 hypre_StructVectorScaleValues( hypre_StructVector *vector, double factor )
 {
-   HYPRE_Int               datai;
+   HYPRE_Int         datai;
    double           *data;
 
    hypre_Index       imin;
@@ -913,7 +913,7 @@ hypre_StructVectorScaleValues( hypre_StructVector *vector, double factor )
    hypre_Box        *box;
    hypre_Index       loop_size;
 
-   HYPRE_Int               loopi, loopj, loopk;
+   HYPRE_Int         loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -947,7 +947,7 @@ hypre_StructVectorScaleValues( hypre_StructVector *vector, double factor )
 HYPRE_Int 
 hypre_StructVectorClearAllValues( hypre_StructVector *vector )
 {
-   HYPRE_Int               datai;
+   HYPRE_Int         datai;
    double           *data;
 
    hypre_Index       imin;
@@ -955,7 +955,7 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
    hypre_Box        *box;
    hypre_Index       loop_size;
 
-   HYPRE_Int               loopi, loopj, loopk;
+   HYPRE_Int         loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -1040,7 +1040,7 @@ hypre_StructVectorMigrate( hypre_CommPkg      *comm_pkg,
 HYPRE_Int
 hypre_StructVectorPrint( const char         *filename,
                          hypre_StructVector *vector,
-                         HYPRE_Int                 all      )
+                         HYPRE_Int           all      )
 {
    FILE              *file;
    char               new_filename[255];
@@ -1050,7 +1050,7 @@ hypre_StructVectorPrint( const char         *filename,
 
    hypre_BoxArray    *data_space;
 
-   HYPRE_Int                myid;
+   HYPRE_Int          myid;
 
    /*----------------------------------------
     * Open file
@@ -1108,7 +1108,7 @@ hypre_StructVectorPrint( const char         *filename,
 hypre_StructVector *
 hypre_StructVectorRead( MPI_Comm    comm,
                         const char *filename,
-                        HYPRE_Int        *num_ghost )
+                        HYPRE_Int  *num_ghost )
 {
    FILE                 *file;
    char                  new_filename[255];
@@ -1120,7 +1120,7 @@ hypre_StructVectorRead( MPI_Comm    comm,
 
    hypre_BoxArray       *data_space;
 
-   HYPRE_Int                   myid;
+   HYPRE_Int             myid;
  
    /*----------------------------------------
     * Open file
@@ -1201,7 +1201,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
    A hypre_Index corresponding to max_index is put in max_xyz_index.
    We assume that there is only one box to deal with. */
 {
-   HYPRE_Int               datai;
+   HYPRE_Int         datai;
    double           *data;
 
    hypre_Index       imin;
@@ -1210,7 +1210,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
    hypre_Index       loop_size;
    hypre_Index       unit_stride;
 
-   HYPRE_Int               loopi, loopj, loopk, i;
+   HYPRE_Int         loopi, loopj, loopk, i;
    double maxvalue;
    HYPRE_Int maxindex;
 

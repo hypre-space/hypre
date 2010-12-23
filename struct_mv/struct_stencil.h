@@ -28,12 +28,12 @@
 typedef struct hypre_StructStencil_struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
-   HYPRE_Int            size;    /* Number of stencil coefficients */
-   HYPRE_Int            max_offset;
+   HYPRE_Int      size;    /* Number of stencil coefficients */
+   HYPRE_Int      max_offset;
                 
-   HYPRE_Int            dim;     /* Number of dimensions */
+   HYPRE_Int      dim;     /* Number of dimensions */
 
-   HYPRE_Int            ref_count;
+   HYPRE_Int      ref_count;
 
 } hypre_StructStencil;
 

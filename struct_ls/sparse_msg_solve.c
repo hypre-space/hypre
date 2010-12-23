@@ -35,16 +35,16 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
    hypre_SparseMSGData  *smsg_data = smsg_vdata;
 
    double                tol                 = (smsg_data -> tol);
-   HYPRE_Int                   max_iter            = (smsg_data -> max_iter);
-   HYPRE_Int                   rel_change          = (smsg_data -> rel_change);
-   HYPRE_Int                   zero_guess          = (smsg_data -> zero_guess);
-   HYPRE_Int                   jump                = (smsg_data -> jump);
-   HYPRE_Int                   num_pre_relax       = (smsg_data -> num_pre_relax);
-   HYPRE_Int                   num_post_relax      = (smsg_data -> num_post_relax);
-   HYPRE_Int                   num_fine_relax      = (smsg_data -> num_fine_relax);
-   HYPRE_Int                  *num_grids           = (smsg_data -> num_grids);
-   HYPRE_Int                   num_all_grids       = (smsg_data -> num_all_grids);
-   HYPRE_Int                   num_levels          = (smsg_data -> num_levels);
+   HYPRE_Int             max_iter            = (smsg_data -> max_iter);
+   HYPRE_Int             rel_change          = (smsg_data -> rel_change);
+   HYPRE_Int             zero_guess          = (smsg_data -> zero_guess);
+   HYPRE_Int             jump                = (smsg_data -> jump);
+   HYPRE_Int             num_pre_relax       = (smsg_data -> num_pre_relax);
+   HYPRE_Int             num_post_relax      = (smsg_data -> num_post_relax);
+   HYPRE_Int             num_fine_relax      = (smsg_data -> num_fine_relax);
+   HYPRE_Int            *num_grids           = (smsg_data -> num_grids);
+   HYPRE_Int             num_all_grids       = (smsg_data -> num_all_grids);
+   HYPRE_Int             num_levels          = (smsg_data -> num_levels);
    hypre_StructMatrix  **A_array             = (smsg_data -> A_array);
    hypre_StructMatrix  **Px_array            = (smsg_data -> Px_array);
    hypre_StructMatrix  **Py_array            = (smsg_data -> Py_array);
@@ -60,7 +60,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
    hypre_StructVector  **visitx_array        = (smsg_data -> visitx_array);
    hypre_StructVector  **visity_array        = (smsg_data -> visity_array);
    hypre_StructVector  **visitz_array        = (smsg_data -> visitz_array);
-   HYPRE_Int                  *grid_on             = (smsg_data -> grid_on);
+   HYPRE_Int            *grid_on             = (smsg_data -> grid_on);
    void                **relax_array         = (smsg_data -> relax_array);
    void                **matvec_array        = (smsg_data -> matvec_array);
    void                **restrictx_array     = (smsg_data -> restrictx_array);
@@ -69,19 +69,19 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
    void                **interpx_array       = (smsg_data -> interpx_array);
    void                **interpy_array       = (smsg_data -> interpy_array);
    void                **interpz_array       = (smsg_data -> interpz_array);
-   HYPRE_Int                   logging             = (smsg_data -> logging);
+   HYPRE_Int             logging             = (smsg_data -> logging);
    double               *norms               = (smsg_data -> norms);
    double               *rel_norms           = (smsg_data -> rel_norms);
 
-   HYPRE_Int                  *restrict_count;
+   HYPRE_Int            *restrict_count;
 
    double                b_dot_b, r_dot_r, eps;
    double                e_dot_e, x_dot_x;
                     
-   HYPRE_Int                   i, l, lx, ly, lz;
-   HYPRE_Int                   lymin, lymax, lzmin, lzmax;
-   HYPRE_Int                   fi, ci;                              
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             i, l, lx, ly, lz;
+   HYPRE_Int             lymin, lymax, lzmin, lzmax;
+   HYPRE_Int             fi, ci;                              
+   HYPRE_Int             ierr = 0;
 
 #if DEBUG
    char                  filename[255];

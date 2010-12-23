@@ -29,9 +29,9 @@
 typedef struct hypre_SStructStencil_struct
 {
    hypre_StructStencil  *sstencil;
-   HYPRE_Int                  *vars;
+   HYPRE_Int            *vars;
 
-   HYPRE_Int                   ref_count;
+   HYPRE_Int             ref_count;
 
 } hypre_SStructStencil;
 

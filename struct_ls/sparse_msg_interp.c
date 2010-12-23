@@ -32,7 +32,7 @@ typedef struct
    hypre_Index         stride;
    hypre_Index         strideP;
 
-   HYPRE_Int                 time_index;
+   HYPRE_Int           time_index;
 
 } hypre_SparseMSGInterpData;
 
@@ -73,7 +73,7 @@ hypre_SparseMSGInterpSetup( void               *interp_vdata,
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
-   HYPRE_Int                     ierr = 0;
+   HYPRE_Int               ierr = 0;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -124,10 +124,10 @@ hypre_SparseMSGInterp( void               *interp_vdata,
    hypre_IndexRef          strideP;
 
    hypre_StructGrid       *fgrid;
-   HYPRE_Int                    *fgrid_ids;
+   HYPRE_Int              *fgrid_ids;
    hypre_StructGrid       *cgrid;
    hypre_BoxArray         *cgrid_boxes;
-   HYPRE_Int                    *cgrid_ids;
+   HYPRE_Int              *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
                        
@@ -139,9 +139,9 @@ hypre_SparseMSGInterp( void               *interp_vdata,
    hypre_Box              *xc_dbox;
    hypre_Box              *e_dbox;
                        
-   HYPRE_Int                     Pi;
-   HYPRE_Int                     xci;
-   HYPRE_Int                     ei;
+   HYPRE_Int               Pi;
+   HYPRE_Int               xci;
+   HYPRE_Int               ei;
                          
    double                 *Pp0, *Pp1;
    double                 *xcp;
@@ -156,8 +156,8 @@ hypre_SparseMSGInterp( void               *interp_vdata,
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
-   HYPRE_Int                     compute_i, fi, ci, j;
-   HYPRE_Int                     loopi, loopj, loopk;
+   HYPRE_Int               compute_i, fi, ci, j;
+   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things

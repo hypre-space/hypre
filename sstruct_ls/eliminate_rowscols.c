@@ -32,8 +32,8 @@ HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
    HYPRE_Int ncols_to_eliminate;
    HYPRE_Int *cols_to_eliminate;
 
-   HYPRE_Int             myproc;
-   HYPRE_Int             ibeg;
+   HYPRE_Int       myproc;
+   HYPRE_Int       ibeg;
 
    hypre_MPI_Comm_rank(comm, &myproc);
    ibeg= 0;
@@ -129,17 +129,17 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
    MPI_Comm          comm      = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix  *Adiag     = hypre_ParCSRMatrixDiag(A);
 
-   HYPRE_Int               i, j;
-   HYPRE_Int               irow, ibeg, iend;
+   HYPRE_Int         i, j;
+   HYPRE_Int         irow, ibeg, iend;
 
-   HYPRE_Int               nnz       = hypre_CSRMatrixNumNonzeros(Adiag);
-   HYPRE_Int              *Ai        = hypre_CSRMatrixI(Adiag);
-   HYPRE_Int              *Aj        = hypre_CSRMatrixJ(Adiag);
+   HYPRE_Int         nnz       = hypre_CSRMatrixNumNonzeros(Adiag);
+   HYPRE_Int        *Ai        = hypre_CSRMatrixI(Adiag);
+   HYPRE_Int        *Aj        = hypre_CSRMatrixJ(Adiag);
    double           *Adata     = hypre_CSRMatrixData(Adiag);
 
-   HYPRE_Int              *local_rows;
+   HYPRE_Int        *local_rows;
   
-   HYPRE_Int               myproc;
+   HYPRE_Int         myproc;
 
    hypre_MPI_Comm_rank(comm, &myproc);
    ibeg= 0;
@@ -187,7 +187,7 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
    MPI_Comm         comm      = hypre_ParCSRMatrixComm(A);
 
    hypre_CSRMatrix *Aoffd     = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int             *Ai        = hypre_CSRMatrixI(Aoffd);
+   HYPRE_Int       *Ai        = hypre_CSRMatrixI(Aoffd);
 
    double          *Adata     = hypre_CSRMatrixData(Aoffd);
 

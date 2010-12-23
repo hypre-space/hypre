@@ -25,7 +25,7 @@
 #if DEBU
 char       filename[255];
 FILE      *file;
-HYPRE_Int        my_rank;
+HYPRE_Int  my_rank;
 #endif
 
 static HYPRE_Int time_index = 0;
@@ -36,11 +36,11 @@ static HYPRE_Int time_index = 0;
 
 HYPRE_Int
 hypre_StructGridCreate( MPI_Comm           comm,
-                        HYPRE_Int                dim,
+                        HYPRE_Int          dim,
                         hypre_StructGrid **grid_ptr)
 {
    hypre_StructGrid    *grid;
-   HYPRE_Int                 i;
+   HYPRE_Int           i;
 
    grid = hypre_TAlloc(hypre_StructGrid, 1);
 
@@ -274,13 +274,13 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 
    /*  initialize info from the grid */
    MPI_Comm             comm         = hypre_StructGridComm(grid);
-   HYPRE_Int                  dim          = hypre_StructGridDim(grid);
+   HYPRE_Int            dim          = hypre_StructGridDim(grid);
    hypre_BoxArray      *local_boxes  = hypre_StructGridBoxes(grid);
    hypre_IndexRef       max_distance = hypre_StructGridMaxDistance(grid);
    hypre_Box           *bounding_box = hypre_StructGridBoundingBox(grid);
    hypre_IndexRef       periodic     = hypre_StructGridPeriodic(grid);
    hypre_BoxManager    *boxman       = hypre_StructGridBoxMan(grid); 
-   HYPRE_Int                  *numghost    = hypre_StructGridNumGhost(grid);
+   HYPRE_Int            *numghost    = hypre_StructGridNumGhost(grid);
 
    
    if (!time_index)
@@ -589,29 +589,29 @@ HYPRE_Int
 hypre_GatherAllBoxes(MPI_Comm         comm,
                      hypre_BoxArray  *boxes,
                      hypre_BoxArray **all_boxes_ptr,
-                     HYPRE_Int            **all_procs_ptr,
-                     HYPRE_Int             *first_local_ptr)
+                     HYPRE_Int      **all_procs_ptr,
+                     HYPRE_Int       *first_local_ptr)
 {
    hypre_BoxArray    *all_boxes;
-   HYPRE_Int               *all_procs;
-   HYPRE_Int                first_local;
-   HYPRE_Int                all_boxes_size;
+   HYPRE_Int         *all_procs;
+   HYPRE_Int          first_local;
+   HYPRE_Int          all_boxes_size;
 
    hypre_Box         *box;
    hypre_Index        imin;
    hypre_Index        imax;
                      
-   HYPRE_Int                num_all_procs, my_rank;
+   HYPRE_Int          num_all_procs, my_rank;
                      
-   HYPRE_Int               *sendbuf;
-   HYPRE_Int                sendcount;
-   HYPRE_Int               *recvbuf;
-   HYPRE_Int               *recvcounts;
-   HYPRE_Int               *displs;
-   HYPRE_Int                recvbuf_size;
+   HYPRE_Int         *sendbuf;
+   HYPRE_Int          sendcount;
+   HYPRE_Int         *recvbuf;
+   HYPRE_Int         *recvcounts;
+   HYPRE_Int         *displs;
+   HYPRE_Int          recvbuf_size;
                      
-   HYPRE_Int                i, p, b, d;
-   HYPRE_Int                ierr = 0;
+   HYPRE_Int          i, p, b, d;
+   HYPRE_Int          ierr = 0;
 
    /*-----------------------------------------------------
     * Accumulate the box info
@@ -719,13 +719,13 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
 
 HYPRE_Int
 hypre_ComputeBoxnums(hypre_BoxArray *boxes,
-                     HYPRE_Int            *procs,
-                     HYPRE_Int           **boxnums_ptr)
+                     HYPRE_Int      *procs,
+                     HYPRE_Int     **boxnums_ptr)
 {
 
-   HYPRE_Int               *boxnums;
-   HYPRE_Int                num_boxes;
-   HYPRE_Int                p, b, boxnum;
+   HYPRE_Int         *boxnums;
+   HYPRE_Int          num_boxes;
+   HYPRE_Int          p, b, boxnum;
 
    /*-----------------------------------------------------
     *-----------------------------------------------------*/
@@ -763,7 +763,7 @@ hypre_StructGridPrint( FILE             *file,
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
 
-   HYPRE_Int              i;
+   HYPRE_Int        i;
 
    hypre_fprintf(file, "%d\n", hypre_StructGridDim(grid));
 
@@ -804,10 +804,10 @@ hypre_StructGridRead( MPI_Comm           comm,
    hypre_Index       ilower;
    hypre_Index       iupper;
 
-   HYPRE_Int               dim;
-   HYPRE_Int               num_boxes;
+   HYPRE_Int         dim;
+   HYPRE_Int         num_boxes;
                
-   HYPRE_Int               i, idummy;
+   HYPRE_Int         i, idummy;
 
    hypre_fscanf(file, "%d\n", &dim);
    hypre_StructGridCreate(comm, dim, &grid);

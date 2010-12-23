@@ -34,7 +34,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
 
    HYPRE_Int ierr = 0;
 
-   HYPRE_Int                    nvars    = hypre_SStructPGridNVars(pgrid);
+   HYPRE_Int              nvars    = hypre_SStructPGridNVars(pgrid);
 
    hypre_BoxArrayArray   *cellgrid_bdry;
    hypre_BoxArrayArray ***bdry;
@@ -42,14 +42,14 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
    hypre_BoxArray        *cell_boxes;
    hypre_Box             *box, *bdy_box, *shifted_box;
 
-   HYPRE_Int                    ndim     = hypre_SStructPGridNDim(pgrid);
+   HYPRE_Int              ndim     = hypre_SStructPGridNDim(pgrid);
 
    HYPRE_SStructVariable *vartypes = hypre_SStructPGridVarTypes(pgrid);
    hypre_Index            varoffset, ishift, jshift, kshift;
    hypre_Index            lower, upper;
 
-   HYPRE_Int                   *flag;
-   HYPRE_Int                    i, j, k, t, nboxes, bdy;
+   HYPRE_Int             *flag;
+   HYPRE_Int              i, j, k, t, nboxes, bdy;
 
    hypre_SetIndex(ishift, 1, 0, 0);
    hypre_SetIndex(jshift, 0, 1, 0);

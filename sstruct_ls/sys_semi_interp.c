@@ -26,7 +26,7 @@
 
 typedef struct
 {
-   HYPRE_Int                 nvars;
+   HYPRE_Int           nvars;
    void              **sinterp_data;
 } hypre_SysSemiInterpData;
 
@@ -37,7 +37,7 @@ typedef struct
 HYPRE_Int
 hypre_SysSemiInterpCreate( void **sys_interp_vdata_ptr )
 {
-   HYPRE_Int                      ierr = 0;
+   HYPRE_Int                ierr = 0;
    hypre_SysSemiInterpData *sys_interp_data;
 
    sys_interp_data = hypre_CTAlloc(hypre_SysSemiInterpData, 1);
@@ -53,25 +53,25 @@ hypre_SysSemiInterpCreate( void **sys_interp_vdata_ptr )
 HYPRE_Int
 hypre_SysSemiInterpSetup( void                 *sys_interp_vdata,
                           hypre_SStructPMatrix *P,
-                          HYPRE_Int                   P_stored_as_transpose,
+                          HYPRE_Int             P_stored_as_transpose,
                           hypre_SStructPVector *xc,
                           hypre_SStructPVector *e,
                           hypre_Index           cindex,
                           hypre_Index           findex,
                           hypre_Index           stride       )
 {
-   HYPRE_Int                      ierr = 0;
+   HYPRE_Int                ierr = 0;
 
    hypre_SysSemiInterpData  *sys_interp_data = sys_interp_vdata;
    void                    **sinterp_data;
 
-   HYPRE_Int                       nvars;
+   HYPRE_Int                 nvars;
 
    hypre_StructMatrix       *P_s;
    hypre_StructVector       *xc_s;
    hypre_StructVector       *e_s;
 
-   HYPRE_Int                       vi;
+   HYPRE_Int                 vi;
 
    nvars = hypre_SStructPMatrixNVars(P);
    sinterp_data = hypre_CTAlloc(void *, nvars);
@@ -102,18 +102,18 @@ hypre_SysSemiInterp( void                 *sys_interp_vdata,
                      hypre_SStructPVector *xc,
                      hypre_SStructPVector *e            )
 {
-   HYPRE_Int                       ierr = 0;
+   HYPRE_Int                 ierr = 0;
    
    hypre_SysSemiInterpData  *sys_interp_data = sys_interp_vdata;
    void                    **sinterp_data = (sys_interp_data -> sinterp_data);
-   HYPRE_Int                       nvars = (sys_interp_data -> nvars);
+   HYPRE_Int                 nvars = (sys_interp_data -> nvars);
 
    void                     *sdata;
    hypre_StructMatrix       *P_s;
    hypre_StructVector       *xc_s;
    hypre_StructVector       *e_s;
 
-   HYPRE_Int                       vi;
+   HYPRE_Int                 vi;
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -134,13 +134,13 @@ hypre_SysSemiInterp( void                 *sys_interp_vdata,
 HYPRE_Int
 hypre_SysSemiInterpDestroy( void *sys_interp_vdata )
 {
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    hypre_SysSemiInterpData *sys_interp_data = sys_interp_vdata;
 
-   HYPRE_Int                   nvars;
+   HYPRE_Int             nvars;
    void                **sinterp_data;
-   HYPRE_Int                   vi;
+   HYPRE_Int             vi;
 
    if (sys_interp_data)
    {

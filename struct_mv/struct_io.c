@@ -33,23 +33,23 @@ HYPRE_Int
 hypre_PrintBoxArrayData( FILE            *file,
                          hypre_BoxArray  *box_array,
                          hypre_BoxArray  *data_space,
-                         HYPRE_Int              num_values,
+                         HYPRE_Int        num_values,
                          double          *data       )
 {
-   HYPRE_Int              ierr = 0;
+   HYPRE_Int        ierr = 0;
 
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
-   HYPRE_Int              data_box_volume;
-   HYPRE_Int              datai;
+   HYPRE_Int        data_box_volume;
+   HYPRE_Int        datai;
                    
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   HYPRE_Int              i, j;
-   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int        i, j;
+   HYPRE_Int        loopi, loopj, loopk;
 
    /*----------------------------------------
     * Print data
@@ -102,25 +102,25 @@ HYPRE_Int
 hypre_PrintCCVDBoxArrayData( FILE            *file,
                              hypre_BoxArray  *box_array,
                              hypre_BoxArray  *data_space,
-                             HYPRE_Int              num_values,
-                             HYPRE_Int              center_rank,
-                             HYPRE_Int              stencil_size,
-                             HYPRE_Int             *symm_elements,
+                             HYPRE_Int        num_values,
+                             HYPRE_Int        center_rank,
+                             HYPRE_Int        stencil_size,
+                             HYPRE_Int       *symm_elements,
                              double          *data       )
 {
-   HYPRE_Int              ierr = 0;
+   HYPRE_Int        ierr = 0;
 
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
-   HYPRE_Int              data_box_volume, datai;
+   HYPRE_Int        data_box_volume, datai;
                    
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   HYPRE_Int              i, j;
-   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int        i, j;
+   HYPRE_Int        loopi, loopj, loopk;
 
    /*----------------------------------------
     * Print data
@@ -181,18 +181,18 @@ HYPRE_Int
 hypre_PrintCCBoxArrayData( FILE            *file,
                          hypre_BoxArray  *box_array,
                          hypre_BoxArray  *data_space,
-                         HYPRE_Int              num_values,
+                         HYPRE_Int        num_values,
                          double          *data       )
 {
-   HYPRE_Int              ierr = 0;
+   HYPRE_Int        ierr = 0;
 
    hypre_Box       *box;
                    
-   HYPRE_Int              datai;
+   HYPRE_Int        datai;
                    
    hypre_IndexRef   start;
                    
-   HYPRE_Int              i, j;
+   HYPRE_Int        i, j;
 
    /*----------------------------------------
     * Print data
@@ -226,23 +226,23 @@ HYPRE_Int
 hypre_ReadBoxArrayData( FILE            *file,
                         hypre_BoxArray  *box_array,
                         hypre_BoxArray  *data_space,
-                        HYPRE_Int              num_values,
+                        HYPRE_Int        num_values,
                         double          *data       )
 {
-   HYPRE_Int              ierr = 0;
+   HYPRE_Int        ierr = 0;
 
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
-   HYPRE_Int              data_box_volume;
-   HYPRE_Int              datai;
+   HYPRE_Int        data_box_volume;
+   HYPRE_Int        datai;
                    
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   HYPRE_Int              i, j, idummy;
-   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int        i, j, idummy;
+   HYPRE_Int        loopi, loopj, loopk;
 
    /*----------------------------------------
     * Read data
@@ -294,25 +294,25 @@ HYPRE_Int
 hypre_ReadBoxArrayData_CC( FILE            *file,
                            hypre_BoxArray  *box_array,
                            hypre_BoxArray  *data_space,
-                           HYPRE_Int              stencil_size,
-                           HYPRE_Int              real_stencil_size,
-                           HYPRE_Int              constant_coefficient,
+                           HYPRE_Int        stencil_size,
+                           HYPRE_Int        real_stencil_size,
+                           HYPRE_Int        constant_coefficient,
                            double          *data       )
 {
-   HYPRE_Int              ierr = 0;
+   HYPRE_Int        ierr = 0;
 
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
-   HYPRE_Int              data_box_volume, constant_stencil_size;
-   HYPRE_Int              datai;
+   HYPRE_Int        data_box_volume, constant_stencil_size;
+   HYPRE_Int        datai;
                    
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   HYPRE_Int              i, j, idummy;
-   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int        i, j, idummy;
+   HYPRE_Int        loopi, loopj, loopk;
 
    /*----------------------------------------
     * Read data

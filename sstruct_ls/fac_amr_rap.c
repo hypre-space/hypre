@@ -34,18 +34,18 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
 {
 
    MPI_Comm                     comm         = hypre_SStructMatrixComm(A);
-   HYPRE_Int                          ndim         = hypre_SStructMatrixNDim(A);
-   HYPRE_Int                          nparts       = hypre_SStructMatrixNParts(A);
+   HYPRE_Int                    ndim         = hypre_SStructMatrixNDim(A);
+   HYPRE_Int                    nparts       = hypre_SStructMatrixNParts(A);
    hypre_SStructGraph          *graph        = hypre_SStructMatrixGraph(A);
    HYPRE_IJMatrix               ij_A         = hypre_SStructMatrixIJMatrix(A);
-   HYPRE_Int                          matrix_type  = hypre_SStructMatrixObjectType(A);
+   HYPRE_Int                    matrix_type  = hypre_SStructMatrixObjectType(A);
 
    hypre_SStructGrid           *grid         = hypre_SStructGraphGrid(graph);
-   HYPRE_Int                          nUventries   = hypre_SStructGraphNUVEntries(graph);
-   HYPRE_Int                         *iUventries   = hypre_SStructGraphIUVEntries(graph);
+   HYPRE_Int                    nUventries   = hypre_SStructGraphNUVEntries(graph);
+   HYPRE_Int                   *iUventries   = hypre_SStructGraphIUVEntries(graph);
    hypre_SStructUVEntry       **Uventries    = hypre_SStructGraphUVEntries(graph);
    hypre_SStructUVEntry        *Uventry;
-   HYPRE_Int                          nUentries;
+   HYPRE_Int                    nUentries;
 
    hypre_CommPkg               *amrA_comm_pkg;
    hypre_CommHandle            *comm_handle;
@@ -73,26 +73,26 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_SStructSendInfoData   *sendinfo;
    hypre_BoxArrayArray         *own_composite_cboxes, *own_boxes;
    hypre_BoxArray              *own_composite_cbox;
-   HYPRE_Int                        **own_cboxnums;
+   HYPRE_Int                  **own_cboxnums;
 
    hypre_BoxManager            *fboxman, *cboxman;
    hypre_BoxManEntry           *boxman_entry;
    hypre_Index                  ilower;
 
    double                      *values;
-   HYPRE_Int                         *ncols, *rows, *cols, tot_cols;
+   HYPRE_Int                   *ncols, *rows, *cols, tot_cols;
 
    hypre_SStructStencil        *stencils;
    hypre_Index                  stencil_shape, loop_size;
-   HYPRE_Int                          stencil_size, *stencil_vars;
+   HYPRE_Int                    stencil_size, *stencil_vars;
 
    hypre_Index                  index, stride, zero_index;
-   HYPRE_Int                          nvars, var1, var2, part, cbox;
-   HYPRE_Int                          i, j, k, size;
-   HYPRE_Int                          loopi, loopj, loopk, iA, iAc;
+   HYPRE_Int                    nvars, var1, var2, part, cbox;
+   HYPRE_Int                    i, j, k, size;
+   HYPRE_Int                    loopi, loopj, loopk, iA, iAc;
 
-   HYPRE_Int                          myid;
-   HYPRE_Int                          ierr= 0;
+   HYPRE_Int                    myid;
+   HYPRE_Int                    ierr= 0;
 
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_ClearIndex(zero_index);

@@ -62,13 +62,13 @@ HYPRE_StructVectorInitialize( HYPRE_StructVector vector )
 
 HYPRE_Int 
 HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
-                             HYPRE_Int                *grid_index,
+                             HYPRE_Int          *grid_index,
                              double              values )
 {
    hypre_Index  new_grid_index;
                 
-   HYPRE_Int          d;
-   HYPRE_Int          ierr = 0;
+   HYPRE_Int    d;
+   HYPRE_Int    ierr = 0;
 
    hypre_ClearIndex(new_grid_index);
    for (d = 0; d < hypre_StructGridDim(hypre_StructVectorGrid(vector)); d++)
@@ -87,16 +87,16 @@ HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
 
 HYPRE_Int 
 HYPRE_StructVectorSetBoxValues( HYPRE_StructVector  vector,
-                                HYPRE_Int                *ilower,
-                                HYPRE_Int                *iupper,
+                                HYPRE_Int          *ilower,
+                                HYPRE_Int          *iupper,
                                 double             *values )
 {
    hypre_Index   new_ilower;
    hypre_Index   new_iupper;
    hypre_Box    *new_value_box;
                  
-   HYPRE_Int           d;
-   HYPRE_Int           ierr = 0;
+   HYPRE_Int     d;
+   HYPRE_Int     ierr = 0;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);
@@ -122,13 +122,13 @@ HYPRE_StructVectorSetBoxValues( HYPRE_StructVector  vector,
 
 HYPRE_Int 
 HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
-                               HYPRE_Int                *grid_index,
+                               HYPRE_Int          *grid_index,
                                double              values )
 {
    hypre_Index  new_grid_index;
                 
-   HYPRE_Int          d;
-   HYPRE_Int          ierr = 0;
+   HYPRE_Int    d;
+   HYPRE_Int    ierr = 0;
 
    hypre_ClearIndex(new_grid_index);
    for (d = 0; d < hypre_StructGridDim(hypre_StructVectorGrid(vector)); d++)
@@ -147,16 +147,16 @@ HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
 
 HYPRE_Int 
 HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector  vector,
-                                  HYPRE_Int                *ilower,
-                                  HYPRE_Int                *iupper,
+                                  HYPRE_Int          *ilower,
+                                  HYPRE_Int          *iupper,
                                   double             *values )
 {
    hypre_Index   new_ilower;
    hypre_Index   new_iupper;
    hypre_Box    *new_value_box;
                  
-   HYPRE_Int           d;
-   HYPRE_Int           ierr = 0;
+   HYPRE_Int     d;
+   HYPRE_Int     ierr = 0;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);
@@ -193,13 +193,13 @@ HYPRE_StructVectorScaleValues( HYPRE_StructVector  vector,
 
 HYPRE_Int 
 HYPRE_StructVectorGetValues( HYPRE_StructVector  vector,
-                             HYPRE_Int                *grid_index,
+                             HYPRE_Int          *grid_index,
                              double             *values )
 {
    hypre_Index  new_grid_index;
                 
-   HYPRE_Int          d;
-   HYPRE_Int          ierr = 0;
+   HYPRE_Int    d;
+   HYPRE_Int    ierr = 0;
 
    hypre_ClearIndex(new_grid_index);
    for (d = 0; d < hypre_StructGridDim(hypre_StructVectorGrid(vector)); d++)
@@ -218,16 +218,16 @@ HYPRE_StructVectorGetValues( HYPRE_StructVector  vector,
 
 HYPRE_Int 
 HYPRE_StructVectorGetBoxValues( HYPRE_StructVector  vector,
-                                HYPRE_Int                *ilower,
-                                HYPRE_Int                *iupper,
+                                HYPRE_Int          *ilower,
+                                HYPRE_Int          *iupper,
                                 double             *values )
 {
    hypre_Index   new_ilower;
    hypre_Index   new_iupper;
    hypre_Box    *new_value_box;
                  
-   HYPRE_Int           d;
-   HYPRE_Int           ierr = 0;
+   HYPRE_Int     d;
+   HYPRE_Int     ierr = 0;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);
@@ -264,7 +264,7 @@ HYPRE_StructVectorAssemble( HYPRE_StructVector vector )
 HYPRE_Int
 HYPRE_StructVectorPrint( const char         *filename,
                          HYPRE_StructVector  vector,
-                         HYPRE_Int                 all )
+                         HYPRE_Int           all )
 {
    return ( hypre_StructVectorPrint(filename, vector, all) );
 }
@@ -275,7 +275,7 @@ HYPRE_StructVectorPrint( const char         *filename,
  
 HYPRE_Int
 HYPRE_StructVectorSetNumGhost( HYPRE_StructVector  vector,
-                               HYPRE_Int                *num_ghost )
+                               HYPRE_Int          *num_ghost )
 {
    return ( hypre_StructVectorSetNumGhost(vector, num_ghost) );
 }

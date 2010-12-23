@@ -104,7 +104,7 @@ HYPRE_StructJacobiGetTol( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructJacobiSetMaxIter( HYPRE_StructSolver solver,
-                              HYPRE_Int                max_iter  )
+                              HYPRE_Int          max_iter  )
 {
    return( hypre_JacobiSetMaxIter( (void *) solver, max_iter ) );
 }
@@ -115,7 +115,7 @@ HYPRE_StructJacobiSetMaxIter( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructJacobiGetMaxIter( HYPRE_StructSolver solver,
-                              HYPRE_Int              * max_iter  )
+                              HYPRE_Int        * max_iter  )
 {
    return( hypre_JacobiGetMaxIter( (void *) solver, max_iter ) );
 }
@@ -163,7 +163,7 @@ HYPRE_StructJacobiSetNonZeroGuess( HYPRE_StructSolver solver )
 
 HYPRE_Int
 HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
-                                    HYPRE_Int                *num_iterations )
+                                    HYPRE_Int          *num_iterations )
 {
    return( hypre_JacobiGetNumIterations( (void *) solver, num_iterations ) );
 }

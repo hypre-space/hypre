@@ -35,7 +35,7 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
                   hypre_Box              *cgrid_box,
                   hypre_Index             stencil_shape,
                   hypre_Index             rfactors,
-                  HYPRE_Int                     ndim )
+                  HYPRE_Int               ndim )
 {
    hypre_Box              coarsen_box;
    hypre_Box              contracted_box;
@@ -49,7 +49,7 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
    hypre_Index            temp_index;
    hypre_Index            shift_index;
 
-   HYPRE_Int                    i, remainder, intersect_size;
+   HYPRE_Int              i, remainder, intersect_size;
 
    hypre_ClearIndex(temp_index);
    stenbox = hypre_BoxCreate();

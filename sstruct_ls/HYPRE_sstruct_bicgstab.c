@@ -115,7 +115,7 @@ HYPRE_SStructBiCGSTABSetAbsoluteTol( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetMinIter( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 min_iter )
+                              HYPRE_Int           min_iter )
 {
    return( HYPRE_BiCGSTABSetMinIter( (HYPRE_Solver) solver, min_iter ) );
 }
@@ -126,7 +126,7 @@ HYPRE_SStructBiCGSTABSetMinIter( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetMaxIter( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 max_iter )
+                              HYPRE_Int           max_iter )
 {
    return( HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -137,7 +137,7 @@ HYPRE_SStructBiCGSTABSetMaxIter( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetStopCrit( HYPRE_SStructSolver solver,
-                               HYPRE_Int                 stop_crit )
+                               HYPRE_Int           stop_crit )
 {
    return( HYPRE_BiCGSTABSetStopCrit( (HYPRE_Solver) solver, stop_crit ) );
 }
@@ -164,7 +164,7 @@ HYPRE_SStructBiCGSTABSetPrecond( HYPRE_SStructSolver          solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetLogging( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 logging )
+                              HYPRE_Int           logging )
 {
    return( HYPRE_BiCGSTABSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -175,7 +175,7 @@ HYPRE_SStructBiCGSTABSetLogging( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetPrintLevel( HYPRE_SStructSolver solver,
-                              HYPRE_Int                 print_level )
+                              HYPRE_Int           print_level )
 {
    return( HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
 }
@@ -186,7 +186,7 @@ HYPRE_SStructBiCGSTABSetPrintLevel( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABGetNumIterations( HYPRE_SStructSolver  solver,
-                                    HYPRE_Int                 *num_iterations )
+                                    HYPRE_Int           *num_iterations )
 {
    return( HYPRE_BiCGSTABGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }

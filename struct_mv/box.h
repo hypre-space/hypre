@@ -54,8 +54,8 @@ typedef struct hypre_Box_struct
 typedef struct hypre_BoxArray_struct
 {
    hypre_Box  *boxes;         /* Array of boxes */
-   HYPRE_Int         size;          /* Size of box array */
-   HYPRE_Int         alloc_size;    /* Size of currently alloced space */
+   HYPRE_Int   size;          /* Size of box array */
+   HYPRE_Int   alloc_size;    /* Size of currently alloced space */
 
 } hypre_BoxArray;
 
@@ -69,7 +69,7 @@ typedef struct hypre_BoxArray_struct
 typedef struct hypre_BoxArrayArray_struct
 {
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
-   HYPRE_Int               size;          /* Size of box array array */
+   HYPRE_Int         size;          /* Size of box array array */
 
 } hypre_BoxArrayArray;
 

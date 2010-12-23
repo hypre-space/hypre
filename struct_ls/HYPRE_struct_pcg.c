@@ -213,7 +213,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructPCGSetMaxIter( HYPRE_StructSolver solver,
-                           HYPRE_Int                max_iter )
+                           HYPRE_Int          max_iter )
 {
    return( HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -239,7 +239,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver,
-                           HYPRE_Int                two_norm )
+                           HYPRE_Int          two_norm )
 {
    return( HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, two_norm ) );
 }
@@ -265,7 +265,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver,
-                             HYPRE_Int                rel_change )
+                             HYPRE_Int          rel_change )
 {
    return( HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, rel_change ) );
 }
@@ -325,7 +325,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
-                           HYPRE_Int                logging )
+                           HYPRE_Int          logging )
 {
    return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -349,7 +349,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructPCGSetPrintLevel( HYPRE_StructSolver solver,
-                               HYPRE_Int            print_level )
+                               HYPRE_Int      print_level )
 {
    return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
 }
@@ -372,7 +372,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
-                                 HYPRE_Int                *num_iterations )
+                                 HYPRE_Int          *num_iterations )
 {
    return( HYPRE_PCGGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }
@@ -476,19 +476,19 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    double               *yp;
    double               *xp;
                        
-   HYPRE_Int                   Ai;
-   HYPRE_Int                   yi;
-   HYPRE_Int                   xi;
+   HYPRE_Int             Ai;
+   HYPRE_Int             yi;
+   HYPRE_Int             xi;
                      
    hypre_Index           index;
    hypre_IndexRef        start;
    hypre_Index           stride;
    hypre_Index           loop_size;
                      
-   HYPRE_Int                   i;
-   HYPRE_Int                   loopi, loopj, loopk;
+   HYPRE_Int             i;
+   HYPRE_Int             loopi, loopj, loopk;
 
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
   
    /* x = D^{-1} y */
    hypre_SetIndex(stride, 1, 1, 1);

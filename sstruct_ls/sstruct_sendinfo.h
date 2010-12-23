@@ -22,11 +22,11 @@
 
 typedef struct 
 {
-   HYPRE_Int                   size;
+   HYPRE_Int             size;
 
    hypre_BoxArrayArray  *send_boxes;
-   HYPRE_Int                 **send_procs;
-   HYPRE_Int                 **send_remote_boxnums;
+   HYPRE_Int           **send_procs;
+   HYPRE_Int           **send_remote_boxnums;
 
 } hypre_SStructSendInfoData;
 

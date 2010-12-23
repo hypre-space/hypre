@@ -15,9 +15,9 @@
 
 typedef struct
 {
-   HYPRE_Int       row;
+   HYPRE_Int row;
                                                                                                                                     
-   HYPRE_Int       ncols;
+   HYPRE_Int ncols;
    HYPRE_Int      *cols;
    double   *data;
                                                                                                                                     

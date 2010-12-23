@@ -105,13 +105,13 @@ HYPRE_Int
 hypre_StructCoarsen( hypre_StructGrid  *fgrid,
                      hypre_Index        index,
                      hypre_Index        stride,
-                     HYPRE_Int                prune,
+                     HYPRE_Int          prune,
                      hypre_StructGrid **cgrid_ptr )
 {
    hypre_StructGrid *cgrid;
 
    MPI_Comm          comm;
-   HYPRE_Int               dim;
+   HYPRE_Int         dim;
 
    hypre_BoxArray   *my_boxes;
 
@@ -122,15 +122,15 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_Box        *new_box;
    hypre_Box        *bounding_box;
 
-   HYPRE_Int               i, j, myid, count;
-   HYPRE_Int               info_size, max_nentries;
-   HYPRE_Int               num_entries;
-   HYPRE_Int              *fids, *cids;
+   HYPRE_Int         i, j, myid, count;
+   HYPRE_Int         info_size, max_nentries;
+   HYPRE_Int         num_entries;
+   HYPRE_Int        *fids, *cids;
    hypre_Index       new_dist;
    hypre_IndexRef    max_distance;
-   HYPRE_Int               proc, id;
-   HYPRE_Int               coarsen_factor, known;
-   HYPRE_Int               num, last_proc;
+   HYPRE_Int         proc, id;
+   HYPRE_Int         coarsen_factor, known;
+   HYPRE_Int         num, last_proc;
 #if 0
    hypre_StructAssumedPart *fap = NULL, *cap = NULL;
 #endif

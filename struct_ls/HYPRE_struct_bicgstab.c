@@ -208,7 +208,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructBiCGSTABSetMaxIter( HYPRE_StructSolver solver,
-                           HYPRE_Int                max_iter )
+                           HYPRE_Int          max_iter )
 {
    return( HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -269,7 +269,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructBiCGSTABSetLogging( HYPRE_StructSolver solver,
-                           HYPRE_Int                logging )
+                           HYPRE_Int          logging )
 {
    return( HYPRE_BiCGSTABSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -318,7 +318,7 @@ headers.h
 
 HYPRE_Int
 HYPRE_StructBiCGSTABGetNumIterations( HYPRE_StructSolver  solver,
-                                 HYPRE_Int                *num_iterations )
+                                 HYPRE_Int          *num_iterations )
 {
    return( HYPRE_BiCGSTABGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }

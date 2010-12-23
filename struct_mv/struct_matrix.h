@@ -34,32 +34,32 @@ typedef struct hypre_StructMatrix_struct
    hypre_StructGrid     *grid;
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
-   HYPRE_Int                   num_values;   /* Number of "stored" coefficients */
+   HYPRE_Int             num_values;   /* Number of "stored" coefficients */
 
    hypre_BoxArray       *data_space;
 
    double               *data;         /* Pointer to matrix data */
-   HYPRE_Int                   data_alloced; /* Boolean used for freeing data */
-   HYPRE_Int                   data_size;    /* Size of matrix data */
-   HYPRE_Int                 **data_indices; /* num-boxes by stencil-size array
+   HYPRE_Int             data_alloced; /* Boolean used for freeing data */
+   HYPRE_Int             data_size;    /* Size of matrix data */
+   HYPRE_Int           **data_indices; /* num-boxes by stencil-size array
                                           of indices into the data array.
                                           data_indices[b][s] is the starting
                                           index of matrix data corresponding
                                           to box b and stencil coefficient s */
-   HYPRE_Int                   constant_coefficient;  /* normally 0; set to 1 for
+   HYPRE_Int             constant_coefficient;  /* normally 0; set to 1 for
                                                    constant coefficient matrices
                                                    or 2 for constant coefficient
                                                    with variable diagonal */
                       
-   HYPRE_Int                   symmetric;    /* Is the matrix symmetric */
-   HYPRE_Int                  *symm_elements;/* Which elements are "symmetric" */
-   HYPRE_Int                   num_ghost[6]; /* Num ghost layers in each direction */
+   HYPRE_Int             symmetric;    /* Is the matrix symmetric */
+   HYPRE_Int            *symm_elements;/* Which elements are "symmetric" */
+   HYPRE_Int             num_ghost[6]; /* Num ghost layers in each direction */
                       
-   HYPRE_Int                   global_size;  /* Total number of nonzero coeffs */
+   HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
 
    hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
-   HYPRE_Int                   ref_count;
+   HYPRE_Int             ref_count;
 
 } hypre_StructMatrix;
 

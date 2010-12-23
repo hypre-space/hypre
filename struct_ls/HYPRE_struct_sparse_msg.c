@@ -92,7 +92,7 @@ HYPRE_StructSparseMSGSetTol( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetMaxIter( HYPRE_StructSolver solver,
-                                 HYPRE_Int                max_iter  )
+                                 HYPRE_Int          max_iter  )
 {
    return( hypre_SparseMSGSetMaxIter( (void *) solver, max_iter ) );
 }
@@ -103,7 +103,7 @@ HYPRE_StructSparseMSGSetMaxIter( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetJump( HYPRE_StructSolver solver,
-                              HYPRE_Int                    jump )
+                              HYPRE_Int              jump )
 {
    return( hypre_SparseMSGSetJump( (void *) solver, jump ) );
 }
@@ -114,7 +114,7 @@ HYPRE_StructSparseMSGSetJump( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetRelChange( HYPRE_StructSolver solver,
-                                   HYPRE_Int                rel_change  )
+                                   HYPRE_Int          rel_change  )
 {
    return( hypre_SparseMSGSetRelChange( (void *) solver, rel_change ) );
 }
@@ -145,7 +145,7 @@ HYPRE_StructSparseMSGSetNonZeroGuess( HYPRE_StructSolver solver )
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetRelaxType( HYPRE_StructSolver solver,
-                              HYPRE_Int                relax_type )
+                              HYPRE_Int          relax_type )
 {
    return( hypre_SparseMSGSetRelaxType( (void *) solver, relax_type) );
 }
@@ -167,7 +167,7 @@ HYPRE_StructSparseMSGSetJacobiWeight(HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetNumPreRelax( HYPRE_StructSolver solver,
-                                     HYPRE_Int                num_pre_relax )
+                                     HYPRE_Int          num_pre_relax )
 {
    return( hypre_SparseMSGSetNumPreRelax( (void *) solver, num_pre_relax) );
 }
@@ -178,7 +178,7 @@ HYPRE_StructSparseMSGSetNumPreRelax( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetNumPostRelax( HYPRE_StructSolver solver,
-                                 HYPRE_Int                num_post_relax )
+                                 HYPRE_Int          num_post_relax )
 {
    return( hypre_SparseMSGSetNumPostRelax( (void *) solver, num_post_relax) );
 }
@@ -189,7 +189,7 @@ HYPRE_StructSparseMSGSetNumPostRelax( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetNumFineRelax( HYPRE_StructSolver solver,
-                                 HYPRE_Int                num_fine_relax )
+                                 HYPRE_Int          num_fine_relax )
 {
    return( hypre_SparseMSGSetNumFineRelax( (void *) solver, num_fine_relax) );
 }
@@ -200,7 +200,7 @@ HYPRE_StructSparseMSGSetNumFineRelax( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetLogging( HYPRE_StructSolver solver,
-                                 HYPRE_Int                logging )
+                                 HYPRE_Int          logging )
 {
    return( hypre_SparseMSGSetLogging( (void *) solver, logging) );
 }
@@ -211,7 +211,7 @@ HYPRE_StructSparseMSGSetLogging( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetPrintLevel( HYPRE_StructSolver solver,
-                                    HYPRE_Int              print_level )
+                                    HYPRE_Int        print_level )
 {
    return( hypre_SparseMSGSetPrintLevel( (void *) solver, print_level) );
 }
@@ -222,7 +222,7 @@ HYPRE_StructSparseMSGSetPrintLevel( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGGetNumIterations( HYPRE_StructSolver  solver,
-                                  HYPRE_Int                *num_iterations )
+                                  HYPRE_Int          *num_iterations )
 {
    return( hypre_SparseMSGGetNumIterations( (void *) solver, num_iterations ) );
 }

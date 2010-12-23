@@ -35,17 +35,17 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    hypre_Box                 *intersect_box, boxman_entry_box;
 
    hypre_BoxManEntry        **boxman_entries;
-   HYPRE_Int                        nboxman_entries;
+   HYPRE_Int                  nboxman_entries;
 
    hypre_BoxArrayArray       *recv_boxes;
-   HYPRE_Int                      **recv_processes;
+   HYPRE_Int                **recv_processes;
 
    hypre_Index                ilower, iupper, index1, index2;
 
-   HYPRE_Int                        myproc, proc;
+   HYPRE_Int                  myproc, proc;
 
-   HYPRE_Int                        cnt;
-   HYPRE_Int                        i, j;
+   HYPRE_Int                  cnt;
+   HYPRE_Int                  i, j;
 
    hypre_ClearIndex(index1); 
    hypre_SetIndex(index2, rfactor[0]-1, rfactor[1]-1, rfactor[2]-1);

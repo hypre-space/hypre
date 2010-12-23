@@ -35,18 +35,18 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    hypre_Box                 *intersect_box, boxman_entry_box;
 
    hypre_BoxManEntry        **boxman_entries;
-   HYPRE_Int                        nboxman_entries;
+   HYPRE_Int                  nboxman_entries;
 
    hypre_BoxArrayArray       *send_boxes;
-   HYPRE_Int                      **send_processes;
-   HYPRE_Int                      **send_remote_boxnums;
+   HYPRE_Int                **send_processes;
+   HYPRE_Int                **send_remote_boxnums;
 
    hypre_Index                ilower, iupper, index;
 
-   HYPRE_Int                        myproc, proc;
+   HYPRE_Int                  myproc, proc;
 
-   HYPRE_Int                        cnt;
-   HYPRE_Int                        i, j;
+   HYPRE_Int                  cnt;
+   HYPRE_Int                  i, j;
 
    hypre_ClearIndex(index); 
    hypre_MPI_Comm_rank(comm, &myproc);

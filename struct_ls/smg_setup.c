@@ -35,15 +35,15 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_IndexRef        base_index  = (smg_data -> base_index);
    hypre_IndexRef        base_stride = (smg_data -> base_stride);
                      
-   HYPRE_Int                   n_pre   = (smg_data -> num_pre_relax);
-   HYPRE_Int                   n_post  = (smg_data -> num_post_relax);
+   HYPRE_Int             n_pre   = (smg_data -> num_pre_relax);
+   HYPRE_Int             n_post  = (smg_data -> num_post_relax);
                      
-   HYPRE_Int                   max_iter;
-   HYPRE_Int                   max_levels;
+   HYPRE_Int             max_iter;
+   HYPRE_Int             max_levels;
                       
-   HYPRE_Int                   num_levels;
+   HYPRE_Int             num_levels;
                      
-   HYPRE_Int                   cdir;
+   HYPRE_Int             cdir;
 
    hypre_Index           bindex;
    hypre_Index           bstride;
@@ -55,7 +55,7 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructGrid    **PT_grid_l;
                     
    double               *data;
-   HYPRE_Int                   data_size = 0;
+   HYPRE_Int             data_size = 0;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
    hypre_StructMatrix  **R_l;
@@ -69,8 +69,8 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructVector  **e_l;
    double               *b_data;
    double               *x_data;
-   HYPRE_Int                   b_data_alloced;
-   HYPRE_Int                   x_data_alloced;
+   HYPRE_Int             b_data_alloced;
+   HYPRE_Int             x_data_alloced;
 
    void                **relax_data_l;
    void                **residual_data_l;
@@ -81,12 +81,12 @@ hypre_SMGSetup( void               *smg_vdata,
 
    hypre_Box            *cbox;
 
-   HYPRE_Int                   i, l;
+   HYPRE_Int             i, l;
                        
-   HYPRE_Int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int                   x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
                        
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif

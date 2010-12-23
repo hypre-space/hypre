@@ -23,13 +23,13 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructStencilCreate( HYPRE_Int                   ndim,
-                            HYPRE_Int                   size,
+HYPRE_SStructStencilCreate( HYPRE_Int             ndim,
+                            HYPRE_Int             size,
                             HYPRE_SStructStencil *stencil_ptr )
 {
    hypre_SStructStencil  *stencil;
    hypre_StructStencil   *sstencil;
-   HYPRE_Int                   *vars;
+   HYPRE_Int             *vars;
 
    stencil = hypre_TAlloc(hypre_SStructStencil, 1);
    HYPRE_StructStencilCreate(ndim, size, &sstencil);
@@ -69,9 +69,9 @@ HYPRE_SStructStencilDestroy( HYPRE_SStructStencil stencil )
 
 HYPRE_Int
 HYPRE_SStructStencilSetEntry( HYPRE_SStructStencil  stencil,
-                              HYPRE_Int                   entry,
-                              HYPRE_Int                  *offset,
-                              HYPRE_Int                   var )
+                              HYPRE_Int             entry,
+                              HYPRE_Int            *offset,
+                              HYPRE_Int             var )
 {
    hypre_StructStencil  *sstencil = hypre_SStructStencilSStencil(stencil);
 

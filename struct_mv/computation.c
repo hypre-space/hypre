@@ -121,7 +121,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
                          hypre_StructStencil   *stencil,
                          hypre_ComputeInfo    **compute_info_ptr )
 {
-   HYPRE_Int                      ierr = 0;
+   HYPRE_Int                ierr = 0;
 
    hypre_CommInfo          *comm_info;
    hypre_BoxArrayArray     *indt_boxes;
@@ -132,14 +132,14 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
    hypre_BoxArray          *cbox_array;
    hypre_Box               *cbox;
 
-   HYPRE_Int                      i;
+   HYPRE_Int                i;
 
 #ifdef HYPRE_OVERLAP_COMM_COMP
    hypre_Box               *rembox;
    hypre_Index             *stencil_shape;
-   HYPRE_Int                      border[3][2] = {{0, 0}, {0, 0}, {0, 0}};
-   HYPRE_Int                      cbox_array_size;
-   HYPRE_Int                      s, d;
+   HYPRE_Int                border[3][2] = {{0, 0}, {0, 0}, {0, 0}};
+   HYPRE_Int                cbox_array_size;
+   HYPRE_Int                s, d;
 #endif
 
    /*------------------------------------------------------
@@ -288,11 +288,11 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
 HYPRE_Int
 hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
                         hypre_BoxArray        *data_space,
-                        HYPRE_Int                    num_values,
+                        HYPRE_Int              num_values,
                         hypre_StructGrid      *grid,
                         hypre_ComputePkg     **compute_pkg_ptr )
 {
-   HYPRE_Int                ierr = 0;
+   HYPRE_Int          ierr = 0;
    hypre_ComputePkg  *compute_pkg;
    hypre_CommPkg     *comm_pkg;
 
@@ -357,7 +357,7 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
                                   double            *data,
                                   hypre_CommHandle **comm_handle_ptr )
 {
-   HYPRE_Int            ierr = 0;
+   HYPRE_Int      ierr = 0;
    hypre_CommPkg *comm_pkg = hypre_ComputePkgCommPkg(compute_pkg);
 
    ierr = hypre_InitializeCommunication(comm_pkg, data, data, 0, 0, comm_handle_ptr);

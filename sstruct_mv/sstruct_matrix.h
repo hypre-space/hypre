@@ -32,35 +32,35 @@ typedef struct
    hypre_SStructPGrid     *pgrid;
    hypre_SStructStencil  **stencils;     /* nvar array of stencils */
 
-   HYPRE_Int                     nvars;
-   HYPRE_Int                   **smaps;
+   HYPRE_Int               nvars;
+   HYPRE_Int             **smaps;
    hypre_StructStencil  ***sstencils;    /* nvar x nvar array of sstencils */
    hypre_StructMatrix   ***smatrices;    /* nvar x nvar array of smatrices */
-   HYPRE_Int                   **symmetric;    /* Stencil entries symmetric?
+   HYPRE_Int             **symmetric;    /* Stencil entries symmetric?
                                           * (nvar x nvar array) */
 
    /* temporary storage for SetValues routines */
-   HYPRE_Int                     sentries_size;
-   HYPRE_Int                    *sentries;
+   HYPRE_Int               sentries_size;
+   HYPRE_Int              *sentries;
 
-   HYPRE_Int                     accumulated;  /* AddTo values accumulated? */
-   HYPRE_Int                     complex;      /* Matrix complex? */
+   HYPRE_Int               accumulated;  /* AddTo values accumulated? */
+   HYPRE_Int               complex;      /* Matrix complex? */
 
-   HYPRE_Int                     ref_count;
+   HYPRE_Int               ref_count;
 
 } hypre_SStructPMatrix;
 
 typedef struct hypre_SStructMatrix_struct
 {
    MPI_Comm                comm;
-   HYPRE_Int                     ndim;
+   HYPRE_Int               ndim;
    hypre_SStructGraph     *graph;
-   HYPRE_Int                  ***splits;   /* S/U-matrix split for each stencil */
+   HYPRE_Int            ***splits;   /* S/U-matrix split for each stencil */
 
    /* S-matrix info */
-   HYPRE_Int                     nparts;
+   HYPRE_Int               nparts;
    hypre_SStructPMatrix  **pmatrices;
-   HYPRE_Int                  ***symmetric;    /* Stencil entries symmetric?
+   HYPRE_Int            ***symmetric;    /* Stencil entries symmetric?
                                           * (nparts x nvar x nvar array) */
 
    /* U-matrix info */
@@ -68,20 +68,20 @@ typedef struct hypre_SStructMatrix_struct
    hypre_ParCSRMatrix     *parcsrmatrix;
                          
    /* temporary storage for SetValues routines */
-   HYPRE_Int                     entries_size;
-   HYPRE_Int                    *Sentries;
-   HYPRE_Int                    *Uentries;
-   HYPRE_Int                    *tmp_col_coords;
+   HYPRE_Int               entries_size;
+   HYPRE_Int              *Sentries;
+   HYPRE_Int              *Uentries;
+   HYPRE_Int              *tmp_col_coords;
    double                 *tmp_coeffs;
 
-   HYPRE_Int                     ns_symmetric; /* Non-stencil entries symmetric? */
-   HYPRE_Int                     complex;      /* Matrix complex? */
-   HYPRE_Int                     global_size;  /* Total number of nonzero coeffs */
+   HYPRE_Int               ns_symmetric; /* Non-stencil entries symmetric? */
+   HYPRE_Int               complex;      /* Matrix complex? */
+   HYPRE_Int               global_size;  /* Total number of nonzero coeffs */
 
-   HYPRE_Int                     ref_count;
+   HYPRE_Int               ref_count;
 
   /* GEC0902   adding an object type to the matrix  */
-   HYPRE_Int                     object_type;
+   HYPRE_Int               object_type;
 
 } hypre_SStructMatrix;
 

@@ -59,7 +59,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
               
    hypre_Box  *box;
    hypre_Box  *rembox;
-   HYPRE_Int         d, size;
+   HYPRE_Int   d, size;
 
    /*------------------------------------------------------
     * Set the box array size to the maximum possible,
@@ -130,7 +130,7 @@ hypre_SubtractBoxArrays( hypre_BoxArray *box_array1,
    hypre_BoxArray  box_array;
    hypre_Box      *box1;
    hypre_Box      *box2;
-   HYPRE_Int             i, k;
+   HYPRE_Int       i, k;
 
    hypre_ForBoxI(i, box_array2)
       {
@@ -171,7 +171,7 @@ hypre_SubtractBoxArraysExceptBoxes( hypre_BoxArray *box_array1,
    hypre_BoxArray  box_array;
    hypre_Box      *box1;
    hypre_Box      *box2;
-   HYPRE_Int             i, k;
+   HYPRE_Int       i, k;
 
    hypre_ForBoxI(i, box_array2)
       {
@@ -243,21 +243,21 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
 
    hypre_Box       *box;
 
-   HYPRE_Int             *block_index[3];
-   HYPRE_Int              block_sz[3], block_volume;
-   HYPRE_Int             *block;
-   HYPRE_Int              index;
-   HYPRE_Int              size;
-   HYPRE_Int              factor[3];
+   HYPRE_Int       *block_index[3];
+   HYPRE_Int        block_sz[3], block_volume;
+   HYPRE_Int       *block;
+   HYPRE_Int        index;
+   HYPRE_Int        size;
+   HYPRE_Int        factor[3];
                   
-   HYPRE_Int              iminmax[2], imin[3], imax[3];
-   HYPRE_Int              ii[3], dd[3];
-   HYPRE_Int              join;
-   HYPRE_Int              i_tmp0, i_tmp1;
-   HYPRE_Int              ioff, joff, koff;
-   HYPRE_Int              bi, d, i, j, k;
+   HYPRE_Int        iminmax[2], imin[3], imax[3];
+   HYPRE_Int        ii[3], dd[3];
+   HYPRE_Int        join;
+   HYPRE_Int        i_tmp0, i_tmp1;
+   HYPRE_Int        ioff, joff, koff;
+   HYPRE_Int        bi, d, i, j, k;
                   
-   HYPRE_Int              index_not_there;
+   HYPRE_Int        index_not_there;
             
    /*------------------------------------------------------
     * If the size of boxes is less than 2, return
@@ -498,7 +498,7 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
    hypre_Box               *box, *rotated_box;
    hypre_Index              lower, upper;
 
-   HYPRE_Int                      i, j, size, min_size, array;
+   HYPRE_Int                i, j, size, min_size, array;
 
    size= hypre_BoxArraySize(boxes);
    rotated_box= hypre_CTAlloc(hypre_Box, 1);

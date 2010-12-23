@@ -25,8 +25,8 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructStencilCreate( HYPRE_Int                  dim,
-                           HYPRE_Int                  size,
+HYPRE_StructStencilCreate( HYPRE_Int            dim,
+                           HYPRE_Int            size,
                            HYPRE_StructStencil *stencil )
 {
    hypre_Index  *shape;
@@ -44,13 +44,13 @@ HYPRE_StructStencilCreate( HYPRE_Int                  dim,
 
 HYPRE_Int
 HYPRE_StructStencilSetElement( HYPRE_StructStencil  stencil,
-                               HYPRE_Int                  element_index,
-                               HYPRE_Int                 *offset )
+                               HYPRE_Int            element_index,
+                               HYPRE_Int           *offset )
 {
-   HYPRE_Int           ierr = 0;
+   HYPRE_Int     ierr = 0;
                 
    hypre_Index  *shape;
-   HYPRE_Int           d;
+   HYPRE_Int     d;
  
    shape = hypre_StructStencilShape(stencil);
    hypre_ClearIndex(shape[element_index]);

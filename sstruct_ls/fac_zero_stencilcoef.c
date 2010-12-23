@@ -40,12 +40,12 @@ HYPRE_Int
 hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                      hypre_SStructPMatrix *Ac,
                      hypre_SStructGrid    *grid,
-                     HYPRE_Int                   fine_part,
+                     HYPRE_Int             fine_part,
                      hypre_Index           rfactors )
 {
    hypre_BoxManager      *fboxman;
    hypre_BoxManEntry    **boxman_entries;
-   HYPRE_Int                    nboxman_entries;
+   HYPRE_Int              nboxman_entries;
 
    hypre_SStructPGrid    *p_cgrid;
 
@@ -60,26 +60,26 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
    hypre_StructMatrix    *smatrix;
 
    hypre_StructStencil   *stencils;
-   HYPRE_Int                    stencil_size;
+   HYPRE_Int              stencil_size;
 
    hypre_Index            refine_factors, upper_shift;
    hypre_Index            stride;
    hypre_Index            stencil_shape;
    hypre_Index            zero_index, ilower, iupper;
 
-   HYPRE_Int                    nvars, var1, var2;
-   HYPRE_Int                    ndim;
+   HYPRE_Int              nvars, var1, var2;
+   HYPRE_Int              ndim;
 
    hypre_Box             *ac_dbox;
    double                *ac_ptr;
    hypre_Index            loop_size;
 
-   HYPRE_Int                    loopi, loopj, loopk, iac;
-   HYPRE_Int                    ci, i, j;
+   HYPRE_Int              loopi, loopj, loopk, iac;
+   HYPRE_Int              ci, i, j;
 
-   HYPRE_Int                    abs_shape;
+   HYPRE_Int              abs_shape;
 
-   HYPRE_Int                    ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    p_cgrid  = hypre_SStructPMatrixPGrid(Ac);
    nvars    = hypre_SStructPMatrixNVars(Ac);
@@ -222,12 +222,12 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
 HYPRE_Int
 hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                      hypre_SStructGrid     *grid,
-                     HYPRE_Int                    fine_part)
+                     HYPRE_Int              fine_part)
 {
    MPI_Comm               comm=   hypre_SStructGridComm(grid); 
    hypre_BoxManager      *fboxman;
    hypre_BoxManEntry    **boxman_entries;
-   HYPRE_Int                    nboxman_entries;
+   HYPRE_Int              nboxman_entries;
 
    hypre_SStructPGrid    *p_fgrid;
    hypre_StructGrid      *fgrid;
@@ -241,7 +241,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    hypre_StructMatrix    *smatrix;
 
    hypre_StructStencil   *stencils;
-   HYPRE_Int                    stencil_size;
+   HYPRE_Int              stencil_size;
 
    hypre_Index            stride, ilower, iupper;
    hypre_Index            stencil_shape, shift_index;
@@ -250,18 +250,18 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    hypre_Box              intersect_box;
    hypre_Index            size_ibox;
 
-   HYPRE_Int                    nvars, var1, var2;
-   HYPRE_Int                    ndim;
+   HYPRE_Int              nvars, var1, var2;
+   HYPRE_Int              ndim;
 
    hypre_Box             *a_dbox;
    double                *a_ptr;
    hypre_Index            loop_size;
 
-   HYPRE_Int                    loopi, loopj, loopk, ia;
-   HYPRE_Int                    fi, fj, i, j;
-   HYPRE_Int                    abs_shape;
-   HYPRE_Int                    myid, proc;
-   HYPRE_Int                    ierr = 0;
+   HYPRE_Int              loopi, loopj, loopk, ia;
+   HYPRE_Int              fi, fj, i, j;
+   HYPRE_Int              abs_shape;
+   HYPRE_Int              myid, proc;
+   HYPRE_Int              ierr = 0;
 
    hypre_MPI_Comm_rank(comm, &myid);
 

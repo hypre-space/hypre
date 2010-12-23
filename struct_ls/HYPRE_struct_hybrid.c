@@ -102,7 +102,7 @@ HYPRE_StructHybridSetConvergenceTol( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetDSCGMaxIter( HYPRE_StructSolver solver,
-                                  HYPRE_Int                dscg_max_its )
+                                  HYPRE_Int          dscg_max_its )
 {
    return( hypre_HybridSetDSCGMaxIter( (void *) solver, dscg_max_its ) );
 }
@@ -113,7 +113,7 @@ HYPRE_StructHybridSetDSCGMaxIter( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetPCGMaxIter( HYPRE_StructSolver solver,
-                                 HYPRE_Int                pcg_max_its )
+                                 HYPRE_Int          pcg_max_its )
 {
    return( hypre_HybridSetPCGMaxIter( (void *) solver, pcg_max_its ) );
 }
@@ -135,7 +135,7 @@ HYPRE_StructHybridSetPCGAbsoluteTolFactor( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetTwoNorm( HYPRE_StructSolver solver,
-                              HYPRE_Int                two_norm    )
+                              HYPRE_Int          two_norm    )
 {
    return( hypre_HybridSetTwoNorm( (void *) solver, two_norm ) );
 }
@@ -146,7 +146,7 @@ HYPRE_StructHybridSetTwoNorm( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetStopCrit( HYPRE_StructSolver solver,
-                              HYPRE_Int                stop_crit    )
+                              HYPRE_Int          stop_crit    )
 {
    return( hypre_HybridSetStopCrit( (void *) solver, stop_crit ) );
 }
@@ -157,7 +157,7 @@ HYPRE_StructHybridSetStopCrit( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetRelChange( HYPRE_StructSolver solver,
-                                HYPRE_Int                rel_change    )
+                                HYPRE_Int          rel_change    )
 {
    return( hypre_HybridSetRelChange( (void *) solver, rel_change ) );
 }
@@ -168,7 +168,7 @@ HYPRE_StructHybridSetRelChange( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetSolverType( HYPRE_StructSolver solver,
-                                HYPRE_Int                solver_type    )
+                                HYPRE_Int          solver_type    )
 {
    return( hypre_HybridSetSolverType( (void *) solver, solver_type ) );
 }
@@ -179,7 +179,7 @@ HYPRE_StructHybridSetSolverType( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetKDim( HYPRE_StructSolver solver,
-                                HYPRE_Int                k_dim    )
+                                HYPRE_Int          k_dim    )
 {
    return( hypre_HybridSetKDim( (void *) solver, k_dim ) );
 }
@@ -205,7 +205,7 @@ HYPRE_StructHybridSetPrecond( HYPRE_StructSolver         solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetLogging( HYPRE_StructSolver solver,
-                              HYPRE_Int                logging    )
+                              HYPRE_Int          logging    )
 {
    return( hypre_HybridSetLogging( (void *) solver, logging ) );
 }
@@ -216,7 +216,7 @@ HYPRE_StructHybridSetLogging( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetPrintLevel( HYPRE_StructSolver solver,
-                              HYPRE_Int                print_level    )
+                              HYPRE_Int          print_level    )
 {
    return( hypre_HybridSetPrintLevel( (void *) solver, print_level ) );
 }
@@ -227,7 +227,7 @@ HYPRE_StructHybridSetPrintLevel( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridGetNumIterations( HYPRE_StructSolver solver,
-                                    HYPRE_Int               *num_its    )
+                                    HYPRE_Int         *num_its    )
 {
    return( hypre_HybridGetNumIterations( (void *) solver, num_its ) );
 }
@@ -238,7 +238,7 @@ HYPRE_StructHybridGetNumIterations( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridGetDSCGNumIterations( HYPRE_StructSolver solver,
-                                        HYPRE_Int               *dscg_num_its )
+                                        HYPRE_Int         *dscg_num_its )
 {
    return( hypre_HybridGetDSCGNumIterations( (void *) solver, dscg_num_its ) );
 }
@@ -249,7 +249,7 @@ HYPRE_StructHybridGetDSCGNumIterations( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridGetPCGNumIterations( HYPRE_StructSolver solver,
-                                       HYPRE_Int               *pcg_num_its )
+                                       HYPRE_Int         *pcg_num_its )
 {
    return( hypre_HybridGetPCGNumIterations( (void *) solver, pcg_num_its ) );
 }

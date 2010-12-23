@@ -56,14 +56,14 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
 
    MPI_Comm              comm = (smsg_data -> comm);
                      
-   HYPRE_Int                   max_iter;
-   HYPRE_Int                   jump       = (smsg_data -> jump);
-   HYPRE_Int                   relax_type = (smsg_data -> relax_type);
-   HYPRE_Int                   usr_jacobi_weight= (smsg_data -> usr_jacobi_weight);
+   HYPRE_Int             max_iter;
+   HYPRE_Int             jump       = (smsg_data -> jump);
+   HYPRE_Int             relax_type = (smsg_data -> relax_type);
+   HYPRE_Int             usr_jacobi_weight= (smsg_data -> usr_jacobi_weight);
    double                jacobi_weight    = (smsg_data -> jacobi_weight);
-   HYPRE_Int                  *num_grids  = (smsg_data -> num_grids);
-   HYPRE_Int                   num_all_grids;
-   HYPRE_Int                   num_levels;
+   HYPRE_Int            *num_grids  = (smsg_data -> num_grids);
+   HYPRE_Int             num_all_grids;
+   HYPRE_Int             num_levels;
 
    hypre_StructGrid    **grid_a;
    hypre_StructGrid    **Px_grid_a;
@@ -72,7 +72,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                     
    double               *data;
    double               *tdata;
-   HYPRE_Int                   data_size = 0;
+   HYPRE_Int             data_size = 0;
    hypre_StructMatrix  **A_a;
    hypre_StructMatrix  **Px_a;
    hypre_StructMatrix  **Py_a;
@@ -91,7 +91,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    hypre_StructVector  **visitx_a;
    hypre_StructVector  **visity_a;
    hypre_StructVector  **visitz_a;
-   HYPRE_Int                  *grid_on;
+   HYPRE_Int            *grid_on;
 
    void                **relax_a;
    void                **matvec_a;
@@ -108,16 +108,16 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    hypre_Index           stridePR;
 
    hypre_StructGrid     *grid;
-   HYPRE_Int                   dim;
+   HYPRE_Int             dim;
    hypre_Box            *cbox;   
 
-   HYPRE_Int                   d, l, lx, ly, lz;
-   HYPRE_Int                   fi, ci;
+   HYPRE_Int             d, l, lx, ly, lz;
+   HYPRE_Int             fi, ci;
                        
-   HYPRE_Int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int                   x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif

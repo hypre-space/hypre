@@ -36,15 +36,15 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
 
    hypre_Index           *RAP_stencil_shape;
    hypre_StructStencil   *RAP_stencil;
-   HYPRE_Int                    RAP_stencil_size;
-   HYPRE_Int                    RAP_stencil_dim;
-   HYPRE_Int                    RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int              RAP_stencil_size;
+   HYPRE_Int              RAP_stencil_dim;
+   HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
 
    hypre_StructStencil   *A_stencil;
-   HYPRE_Int                    A_stencil_size;
+   HYPRE_Int              A_stencil_size;
 
-   HYPRE_Int                    k, j, i;
-   HYPRE_Int                    stencil_rank;
+   HYPRE_Int              k, j, i;
+   HYPRE_Int              stencil_rank;
 
    RAP_stencil_dim = 3;
  
@@ -242,13 +242,13 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
    hypre_Index           index;
 
    hypre_StructStencil  *fine_stencil;
-   HYPRE_Int                   fine_stencil_size;
+   HYPRE_Int             fine_stencil_size;
 
    hypre_StructGrid     *fgrid;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
@@ -256,8 +256,8 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int                   fi, ci;
-   HYPRE_Int                   loopi, loopj, loopk;
+   HYPRE_Int             fi, ci;
+   HYPRE_Int             loopi, loopj, loopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *PT_dbox;
@@ -279,17 +279,17 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
    double               *rap_csw, *rap_cse;
    double               *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
 
-   HYPRE_Int                   iA, iAm1, iAp1;
-   HYPRE_Int                   iAc;
-   HYPRE_Int                   iP, iP1;
-   HYPRE_Int                   iR;
+   HYPRE_Int             iA, iAm1, iAp1;
+   HYPRE_Int             iAc;
+   HYPRE_Int             iP, iP1;
+   HYPRE_Int             iR;
                         
-   HYPRE_Int                   zOffsetA; 
-   HYPRE_Int                   xOffsetP; 
-   HYPRE_Int                   yOffsetP; 
-   HYPRE_Int                   zOffsetP; 
+   HYPRE_Int             zOffsetA; 
+   HYPRE_Int             xOffsetP; 
+   HYPRE_Int             yOffsetP; 
+   HYPRE_Int             zOffsetP; 
                         
-   HYPRE_Int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
@@ -954,13 +954,13 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
    hypre_Index           index;
 
    hypre_StructStencil  *fine_stencil;
-   HYPRE_Int                   fine_stencil_size;
+   HYPRE_Int             fine_stencil_size;
 
    hypre_StructGrid     *fgrid;
-   HYPRE_Int                  *fgrid_ids;
+   HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int                  *cgrid_ids;
+   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
@@ -968,8 +968,8 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int                   fi, ci;
-   HYPRE_Int                   loopi, loopj, loopk;
+   HYPRE_Int             fi, ci;
+   HYPRE_Int             loopi, loopj, loopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *PT_dbox;
@@ -991,17 +991,17 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
    double               *rap_cnw, *rap_cne;
    double               *rap_asw, *rap_ase, *rap_anw, *rap_ane;
 
-   HYPRE_Int                  iA, iAm1, iAp1;
-   HYPRE_Int                  iAc;
-   HYPRE_Int                  iP, iP1;
-   HYPRE_Int                  iR;
+   HYPRE_Int            iA, iAm1, iAp1;
+   HYPRE_Int            iAc;
+   HYPRE_Int            iP, iP1;
+   HYPRE_Int            iR;
 
-   HYPRE_Int                  zOffsetA;
-   HYPRE_Int                  xOffsetP;
-   HYPRE_Int                  yOffsetP;
-   HYPRE_Int                  zOffsetP;
+   HYPRE_Int            zOffsetA;
+   HYPRE_Int            xOffsetP;
+   HYPRE_Int            yOffsetP;
+   HYPRE_Int            zOffsetP;
 
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
@@ -1636,8 +1636,8 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
    hypre_Index             stridec;
    hypre_Index             loop_size;
 
-   HYPRE_Int                  ci;
-   HYPRE_Int                  loopi, loopj, loopk;
+   HYPRE_Int            ci;
+   HYPRE_Int            loopi, loopj, loopk;
 
    hypre_Box           *RAP_dbox;
 
@@ -1646,21 +1646,21 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
    double               *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
    double               *rap_csw, *rap_cse;
 
-   HYPRE_Int                  iAc;
-   HYPRE_Int                  iAcmx;
-   HYPRE_Int                  iAcmy;
-   HYPRE_Int                  iAcmxmy;
-   HYPRE_Int                  iAcpxmy;
+   HYPRE_Int            iAc;
+   HYPRE_Int            iAcmx;
+   HYPRE_Int            iAcmy;
+   HYPRE_Int            iAcmxmy;
+   HYPRE_Int            iAcpxmy;
 
-   HYPRE_Int                  xOffset;
-   HYPRE_Int                  yOffset;
+   HYPRE_Int            xOffset;
+   HYPRE_Int            yOffset;
 
    double               zero = 0.0;
 
    hypre_StructStencil *stencil;
-   HYPRE_Int                  stencil_size;
+   HYPRE_Int            stencil_size;
 
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            ierr = 0;
 
    stencil = hypre_StructMatrixStencil(RAP);
    stencil_size = hypre_StructStencilSize(stencil);
@@ -1841,8 +1841,8 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
    hypre_Index             stridec;
    hypre_Index             loop_size;
 
-   HYPRE_Int                  ci;
-   HYPRE_Int                  loopi, loopj, loopk;
+   HYPRE_Int            ci;
+   HYPRE_Int            loopi, loopj, loopk;
 
    hypre_Box           *RAP_dbox;
 
@@ -1853,14 +1853,14 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
    double               *rap_csw, *rap_cse, *rap_cnw, *rap_cne;
    double               *rap_asw, *rap_ase, *rap_anw, *rap_ane;
 
-   HYPRE_Int                  iAc;
+   HYPRE_Int            iAc;
 
    double               zero = 0.0;
 
    hypre_StructStencil *stencil;
-   HYPRE_Int                  stencil_size;
+   HYPRE_Int            stencil_size;
 
-   HYPRE_Int                  ierr = 0;
+   HYPRE_Int            ierr = 0;
 
    stencil = hypre_StructMatrixStencil(RAP);
    stencil_size = hypre_StructStencilSize(stencil);

@@ -50,7 +50,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    HYPRE_IJMatrix         T_grad;
    hypre_ParCSRMatrix    *parcsr_grad;
-   HYPRE_Int                    matrix_type= HYPRE_PARCSR;
+   HYPRE_Int              matrix_type= HYPRE_PARCSR;
 
    hypre_SStructGrid     *node_grid, *edge_grid;
 
@@ -65,34 +65,34 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    hypre_BoxManager      *boxman;
    hypre_BoxManEntry     *entry;
 
-   HYPRE_Int                   *inode, *jedge;
-   HYPRE_Int                    nrows, nnodes, *nflag, *eflag, *ncols;
+   HYPRE_Int             *inode, *jedge;
+   HYPRE_Int              nrows, nnodes, *nflag, *eflag, *ncols;
    double                *vals;
 
    hypre_Index            index;
    hypre_Index            loop_size, start;
    hypre_Index            shift, shift2;
    hypre_Index           *offsets, *varoffsets;
-   HYPRE_Int                    loopi, loopj, loopk;
+   HYPRE_Int              loopi, loopj, loopk;
 
-   HYPRE_Int                    nparts= hypre_SStructGridNParts(grid);
-   HYPRE_Int                    ndim  = hypre_SStructGridNDim(grid);
+   HYPRE_Int              nparts= hypre_SStructGridNParts(grid);
+   HYPRE_Int              ndim  = hypre_SStructGridNDim(grid);
 
    HYPRE_SStructVariable  vartype_node, *vartype_edges;
    HYPRE_SStructVariable *vartypes;
 
-   HYPRE_Int                    nvars, part;
+   HYPRE_Int              nvars, part;
 
-   HYPRE_Int                    i, j, k, m, n, d;
-   HYPRE_Int                   *direction, ndirection;
+   HYPRE_Int              i, j, k, m, n, d;
+   HYPRE_Int             *direction, ndirection;
 
-   HYPRE_Int                    ilower, iupper;
-   HYPRE_Int                    jlower, jupper;
+   HYPRE_Int              ilower, iupper;
+   HYPRE_Int              jlower, jupper;
 
-   HYPRE_Int                    start_rank1, start_rank2, rank;
+   HYPRE_Int              start_rank1, start_rank2, rank;
 
-   HYPRE_Int                    myproc;
-   HYPRE_Int                    ierr;
+   HYPRE_Int              myproc;
+   HYPRE_Int              ierr;
 
    hypre_MPI_Comm_rank(comm, &myproc);
 

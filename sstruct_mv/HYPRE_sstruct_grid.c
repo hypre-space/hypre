@@ -26,20 +26,20 @@
 
 HYPRE_Int
 HYPRE_SStructGridCreate( MPI_Comm           comm,
-                         HYPRE_Int                ndim,
-                         HYPRE_Int                nparts,
+                         HYPRE_Int          ndim,
+                         HYPRE_Int          nparts,
                          HYPRE_SStructGrid *grid_ptr )
 {
    hypre_SStructGrid       *grid;
    hypre_SStructPGrid     **pgrids;
    hypre_SStructPGrid      *pgrid;
-   HYPRE_Int                     *nneighbors;
+   HYPRE_Int               *nneighbors;
    hypre_SStructNeighbor  **neighbors;
    hypre_Index            **nbor_offsets;
-   HYPRE_Int                     *fem_nvars;
-   HYPRE_Int                    **fem_vars;
+   HYPRE_Int               *fem_nvars;
+   HYPRE_Int              **fem_vars;
    hypre_Index            **fem_offsets;
-   HYPRE_Int                      i;
+   HYPRE_Int                i;
 
    grid = hypre_TAlloc(hypre_SStructGrid, 1);
 
@@ -96,22 +96,22 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
 HYPRE_Int
 HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
 {
-   HYPRE_Int                            nparts;
+   HYPRE_Int                      nparts;
    hypre_SStructPGrid           **pgrids;
-   HYPRE_Int                           *nneighbors;
+   HYPRE_Int                     *nneighbors;
    hypre_SStructNeighbor        **neighbors;
    hypre_Index                  **nbor_offsets;
-   HYPRE_Int                          **nvneighbors;
+   HYPRE_Int                    **nvneighbors;
    hypre_SStructNeighbor       ***vneighbors;
    hypre_SStructCommInfo        **vnbor_comm_info;
-   HYPRE_Int                            vnbor_ncomms;
-   HYPRE_Int                           *fem_nvars;
-   HYPRE_Int                          **fem_vars;
+   HYPRE_Int                      vnbor_ncomms;
+   HYPRE_Int                     *fem_nvars;
+   HYPRE_Int                    **fem_vars;
    hypre_Index                  **fem_offsets;
    hypre_BoxManager            ***managers;
    hypre_BoxManager            ***nbor_managers;
-   HYPRE_Int                            nvars;
-   HYPRE_Int                            part, var, i;
+   HYPRE_Int                      nvars;
+   HYPRE_Int                      part, var, i;
 
    if (grid)
    {
@@ -183,11 +183,11 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
 
 HYPRE_Int
 HYPRE_SStructGridSetExtents( HYPRE_SStructGrid  grid,
-                             HYPRE_Int                part,
-                             HYPRE_Int               *ilower,
-                             HYPRE_Int               *iupper )
+                             HYPRE_Int          part,
+                             HYPRE_Int         *ilower,
+                             HYPRE_Int         *iupper )
 {
-   HYPRE_Int                  ndim  = hypre_SStructGridNDim(grid);
+   HYPRE_Int            ndim  = hypre_SStructGridNDim(grid);
    hypre_SStructPGrid  *pgrid = hypre_SStructGridPGrid(grid, part);
    hypre_Index          cilower;
    hypre_Index          ciupper;
@@ -204,8 +204,8 @@ HYPRE_SStructGridSetExtents( HYPRE_SStructGrid  grid,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
-                                   HYPRE_Int                    part,
-                                   HYPRE_Int                    nvars,
+                                   HYPRE_Int              part,
+                                   HYPRE_Int              nvars,
                                    HYPRE_SStructVariable *vartypes )
 {
    hypre_SStructPGrid  *pgrid = hypre_SStructGridPGrid(grid, part);
@@ -220,18 +220,18 @@ HYPRE_Int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
 
 HYPRE_Int
 HYPRE_SStructGridAddVariables( HYPRE_SStructGrid      grid,
-                               HYPRE_Int                    part,
-                               HYPRE_Int                   *index,
-                               HYPRE_Int                    nvars,
+                               HYPRE_Int              part,
+                               HYPRE_Int             *index,
+                               HYPRE_Int              nvars,
                                HYPRE_SStructVariable *vartypes )
 {
-   HYPRE_Int                  ndim    = hypre_SStructGridNDim(grid);
-   HYPRE_Int                  nucvars = hypre_SStructGridNUCVars(grid);
+   HYPRE_Int            ndim    = hypre_SStructGridNDim(grid);
+   HYPRE_Int            nucvars = hypre_SStructGridNUCVars(grid);
    hypre_SStructUCVar **ucvars  = hypre_SStructGridUCVars(grid);
    hypre_SStructUCVar  *ucvar;
 
-   HYPRE_Int                  memchunk = 1000;
-   HYPRE_Int                  i;
+   HYPRE_Int            memchunk = 1000;
+   HYPRE_Int            i;
 
    /* allocate more space if necessary */
    if ((nucvars % memchunk) == 0)
@@ -267,19 +267,19 @@ HYPRE_SStructGridAddVariables( HYPRE_SStructGrid      grid,
 
 HYPRE_Int
 HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
-                                 HYPRE_Int                part,
-                                 HYPRE_Int               *ordering )
+                                 HYPRE_Int          part,
+                                 HYPRE_Int         *ordering )
 {
-   HYPRE_Int                     ndim     = hypre_SStructGridNDim(grid);
+   HYPRE_Int               ndim     = hypre_SStructGridNDim(grid);
    hypre_SStructPGrid     *pgrid    = hypre_SStructGridPGrid(grid, part);
-   HYPRE_Int                     nvars    = hypre_SStructPGridNVars(pgrid);
+   HYPRE_Int               nvars    = hypre_SStructPGridNVars(pgrid);
    HYPRE_SStructVariable  *vartypes = hypre_SStructPGridVarTypes(pgrid);
-   HYPRE_Int                     fem_nvars;
-   HYPRE_Int                    *fem_vars;
+   HYPRE_Int               fem_nvars;
+   HYPRE_Int              *fem_vars;
    hypre_Index            *fem_offsets;
    hypre_Index             varoffset;
-   HYPRE_Int                     i, j, d, nv, *block, off[3], loop[3];
-   HYPRE_Int                     clean = 0;
+   HYPRE_Int               i, j, d, nv, *block, off[3], loop[3];
+   HYPRE_Int               clean = 0;
 
    /* compute fem_nvars */
    fem_nvars = 0;
@@ -367,17 +367,17 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
 
 HYPRE_Int
 HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
-                                  HYPRE_Int                part,
-                                  HYPRE_Int               *ilower,
-                                  HYPRE_Int               *iupper,
-                                  HYPRE_Int                nbor_part,
-                                  HYPRE_Int               *nbor_ilower,
-                                  HYPRE_Int               *nbor_iupper,
-                                  HYPRE_Int               *index_map,
-                                  HYPRE_Int               *index_dir )
+                                  HYPRE_Int          part,
+                                  HYPRE_Int         *ilower,
+                                  HYPRE_Int         *iupper,
+                                  HYPRE_Int          nbor_part,
+                                  HYPRE_Int         *nbor_ilower,
+                                  HYPRE_Int         *nbor_iupper,
+                                  HYPRE_Int         *index_map,
+                                  HYPRE_Int         *index_dir )
 {
-   HYPRE_Int                      ndim         = hypre_SStructGridNDim(grid);
-   HYPRE_Int                     *nneighbors   = hypre_SStructGridNNeighbors(grid);
+   HYPRE_Int                ndim         = hypre_SStructGridNDim(grid);
+   HYPRE_Int               *nneighbors   = hypre_SStructGridNNeighbors(grid);
    hypre_SStructNeighbor  **neighbors    = hypre_SStructGridNeighbors(grid);
    hypre_Index            **nbor_offsets = hypre_SStructGridNborOffsets(grid);
    hypre_SStructNeighbor   *neighbor;
@@ -387,8 +387,8 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
    hypre_Index              cilower;
    hypre_Index              ciupper;
    hypre_IndexRef           coord, dir, ilower_mapped;
-   HYPRE_Int                      memchunk = 10;
-   HYPRE_Int                      d, dd, tdir;
+   HYPRE_Int                memchunk = 10;
+   HYPRE_Int                d, dd, tdir;
 
    /* allocate more memory if needed */
    if ((nneighbors[part] % memchunk) == 0)
@@ -449,19 +449,19 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
 
 HYPRE_Int
 HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
-                                HYPRE_Int                part,
-                                HYPRE_Int               *ilower,
-                                HYPRE_Int               *iupper,
-                                HYPRE_Int               *offset,
-                                HYPRE_Int                shared_part,
-                                HYPRE_Int               *shared_ilower,
-                                HYPRE_Int               *shared_iupper,
-                                HYPRE_Int               *shared_offset,
-                                HYPRE_Int               *index_map,
-                                HYPRE_Int               *index_dir )
+                                HYPRE_Int          part,
+                                HYPRE_Int         *ilower,
+                                HYPRE_Int         *iupper,
+                                HYPRE_Int         *offset,
+                                HYPRE_Int          shared_part,
+                                HYPRE_Int         *shared_ilower,
+                                HYPRE_Int         *shared_iupper,
+                                HYPRE_Int         *shared_offset,
+                                HYPRE_Int         *index_map,
+                                HYPRE_Int         *index_dir )
 {
-   HYPRE_Int                      ndim       = hypre_SStructGridNDim(grid);
-   HYPRE_Int                     *nneighbors = hypre_SStructGridNNeighbors(grid);
+   HYPRE_Int                ndim       = hypre_SStructGridNDim(grid);
+   HYPRE_Int               *nneighbors = hypre_SStructGridNNeighbors(grid);
    hypre_SStructNeighbor  **neighbors  = hypre_SStructGridNeighbors(grid);
    hypre_Index            **nbor_offsets = hypre_SStructGridNborOffsets(grid);
    hypre_SStructNeighbor   *neighbor;
@@ -471,9 +471,9 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
    hypre_Index              cilower;
    hypre_Index              ciupper;
    hypre_IndexRef           coord, dir, ilower_mapped;
-   HYPRE_Int                      offset_mapped[3];
-   HYPRE_Int                      memchunk = 10;
-   HYPRE_Int                      d, dd, tdir;
+   HYPRE_Int                offset_mapped[3];
+   HYPRE_Int                memchunk = 10;
+   HYPRE_Int                d, dd, tdir;
 
    /* allocate more memory if needed */
    if ((nneighbors[part] % memchunk) == 0)
@@ -542,8 +542,8 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
 #if 0
 HYPRE_Int
 HYPRE_SStructGridAddUnstructuredPart( HYPRE_SStructGrid grid,
-                                      HYPRE_Int              ilower,
-                                      HYPRE_Int              iupper )
+                                      HYPRE_Int        ilower,
+                                      HYPRE_Int        iupper )
 {
    hypre_SStructGridAssemble(grid);
 
@@ -557,25 +557,25 @@ HYPRE_SStructGridAddUnstructuredPart( HYPRE_SStructGrid grid,
 HYPRE_Int
 HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 {
-   HYPRE_Int                      ndim         = hypre_SStructGridNDim(grid);
-   HYPRE_Int                      nparts       = hypre_SStructGridNParts(grid);
+   HYPRE_Int                ndim         = hypre_SStructGridNDim(grid);
+   HYPRE_Int                nparts       = hypre_SStructGridNParts(grid);
    hypre_SStructPGrid     **pgrids       = hypre_SStructGridPGrids(grid);
-   HYPRE_Int                     *nneighbors   = hypre_SStructGridNNeighbors(grid);
+   HYPRE_Int               *nneighbors   = hypre_SStructGridNNeighbors(grid);
    hypre_SStructNeighbor  **neighbors    = hypre_SStructGridNeighbors(grid);
    hypre_Index            **nbor_offsets = hypre_SStructGridNborOffsets(grid);
-   HYPRE_Int                    **nvneighbors  = hypre_SStructGridNVNeighbors(grid);
+   HYPRE_Int              **nvneighbors  = hypre_SStructGridNVNeighbors(grid);
    hypre_SStructNeighbor ***vneighbors   = hypre_SStructGridVNeighbors(grid);
    hypre_SStructNeighbor   *neighbor;
    hypre_IndexRef           nbor_offset;
    hypre_SStructNeighbor   *vneighbor;
    hypre_Box               *box;
-   HYPRE_Int                     *ilower, *coord, *dir;
+   HYPRE_Int               *ilower, *coord, *dir;
 
    hypre_SStructPGrid      *pgrid;
    HYPRE_SStructVariable   *vartypes;
    hypre_Index              varoffset;
-   HYPRE_Int                      nvars;
-   HYPRE_Int                      part, var, b, vb, d, i, valid;
+   HYPRE_Int                nvars;
+   HYPRE_Int                part, var, b, vb, d, i, valid;
 
    /*-------------------------------------------------------------
     * if I own no data on some part, prune that part's neighbor info
@@ -772,12 +772,12 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 
 HYPRE_Int
 HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid  grid,
-                              HYPRE_Int                part,
-                              HYPRE_Int               *periodic )
+                              HYPRE_Int          part,
+                              HYPRE_Int         *periodic )
 {
    hypre_SStructPGrid *pgrid          = hypre_SStructGridPGrid(grid, part);
    hypre_IndexRef      pgrid_periodic = hypre_SStructPGridPeriodic(pgrid);
-   HYPRE_Int                 d;
+   HYPRE_Int           d;
 
    for (d = 0; d < hypre_SStructGridNDim(grid); d++)
    {
@@ -794,7 +794,7 @@ HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid  grid,
 
 HYPRE_Int
 HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid,
-                              HYPRE_Int            *num_ghost)       
+                              HYPRE_Int      *num_ghost)       
 {
    hypre_SStructGridSetNumGhost(grid, num_ghost);
 
@@ -815,9 +815,9 @@ HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_SStructGridSetVariable( HYPRE_SStructGrid      grid,
-                                  HYPRE_Int                    part,
-                                  HYPRE_Int                    var,
-                                  HYPRE_Int                    nvars,
+                                  HYPRE_Int              part,
+                                  HYPRE_Int              var,
+                                  HYPRE_Int              nvars,
                                   HYPRE_SStructVariable  vartype )
 {
    hypre_SStructPGrid  *pgrid = hypre_SStructGridPGrid(grid, part);
@@ -836,18 +836,18 @@ HYPRE_Int HYPRE_SStructGridSetVariable( HYPRE_SStructGrid      grid,
 
 HYPRE_Int
 HYPRE_SStructGridAddVariable( HYPRE_SStructGrid      grid,
-                              HYPRE_Int                    part,
-                              HYPRE_Int                   *index,
-                              HYPRE_Int                    var,
+                              HYPRE_Int              part,
+                              HYPRE_Int             *index,
+                              HYPRE_Int              var,
                               HYPRE_SStructVariable  vartype )
 {
-   HYPRE_Int                  ndim    = hypre_SStructGridNDim(grid);
-   HYPRE_Int                  nucvars = hypre_SStructGridNUCVars(grid);
+   HYPRE_Int            ndim    = hypre_SStructGridNDim(grid);
+   HYPRE_Int            nucvars = hypre_SStructGridNUCVars(grid);
    hypre_SStructUCVar **ucvars  = hypre_SStructGridUCVars(grid);
    hypre_SStructUCVar  *ucvar;
 
-   HYPRE_Int                  memchunk = 1000;
-   HYPRE_Int                  nvars = 1;  /* each ucvar gets only one variable */
+   HYPRE_Int            memchunk = 1000;
+   HYPRE_Int            nvars = 1;  /* each ucvar gets only one variable */
 
    /* allocate more space if necessary */
    if ((nucvars % memchunk) == 0)
