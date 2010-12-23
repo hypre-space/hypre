@@ -179,6 +179,8 @@ hypre_SemiInterp( void               *interp_vdata,
    /* ... constant_coefficient==2 for P shouldn't happen, see
       hypre_PFMGCreateInterpOp in pfmg_setup_interp.c */
 
+   if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(e, 0);
+
    hypre_SetIndex(stridec, 1, 1, 1);
 
    /*-----------------------------------------------------------------------

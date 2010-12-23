@@ -137,7 +137,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
     *-----------------------------------------------------------------------*/
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if (constant_coefficient==1) hypre_StructVectorClearBoundGhostValues( x );
+   if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(x, 0);
 
    compute_pkg = (matvec_data -> compute_pkg);
 

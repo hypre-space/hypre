@@ -412,6 +412,7 @@ hypre_PointRelax( void               *relax_vdata,
    }
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
+   if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(x, 0);
 
    if ( tol>0.0 )
       bsumsq = hypre_StructInnerProd( b, b );
@@ -478,8 +479,8 @@ hypre_PointRelax( void               *relax_vdata,
                      start  = hypre_BoxIMin(compute_box);
                      hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+                     /* all matrix coefficients are constant */
                      if ( constant_coefficient==1 )
-                        /* all matrix coefficients are constant */
                      {
                         Ai = hypre_CCBoxIndexRank( A_data_box, start );
                         AAp0 = 1/Ap[Ai];
@@ -494,9 +495,9 @@ hypre_PointRelax( void               *relax_vdata,
                            }
                         hypre_BoxLoop2End(bi, xi);
                      }
+                     /* constant_coefficent 0 (variable) or 2 (variable diagonal
+                        only) are the same for the diagonal */
                      else
-                        /* constant_coefficent 0 (variable) or 2 (variable diagonal
-                           only) are the same for the diagonal */
                      {
                         hypre_BoxLoop3Begin(loop_size,
                                             A_data_box, start, stride, Ai,

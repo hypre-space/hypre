@@ -590,6 +590,9 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
                                     0, 0, &comm_handle);
       hypre_FinalizeCommunication(comm_handle);
       hypre_CommPkgDestroy(comm_pkg);
+
+      /* boundary ghost values may not be clear */
+      hypre_StructVectorBGhostNotClear(recv_vector) = 1;
    }
 
    return hypre_error_flag;

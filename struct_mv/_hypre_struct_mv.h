@@ -1928,6 +1928,7 @@ typedef struct hypre_StructVector_struct
                                           data corresponding to box b. */
                       
    HYPRE_Int                   num_ghost[6]; /* Num ghost layers in each direction */
+   HYPRE_Int                   bghost_not_clear; /* Are boundary ghosts clear? */
                       
    HYPRE_Int                   global_size;  /* Total number coefficients */
 
@@ -1947,6 +1948,7 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorDataSize(vector)      ((vector) -> data_size)
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
+#define hypre_StructVectorBGhostNotClear(vector)((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
@@ -2248,7 +2250,7 @@ HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y
 HYPRE_Int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector , double values );
 HYPRE_Int hypre_StructVectorSetFunctionValues ( hypre_StructVector *vector , double (*fcn )());
 HYPRE_Int hypre_StructVectorClearGhostValues ( hypre_StructVector *vector );
-HYPRE_Int hypre_StructVectorClearBoundGhostValues ( hypre_StructVector *vector );
+HYPRE_Int hypre_StructVectorClearBoundGhostValues ( hypre_StructVector *vector , HYPRE_Int force );
 HYPRE_Int hypre_StructVectorScaleValues ( hypre_StructVector *vector , double factor );
 HYPRE_Int hypre_StructVectorClearAllValues ( hypre_StructVector *vector );
 hypre_CommPkg *hypre_StructVectorGetMigrateCommPkg ( hypre_StructVector *from_vector , hypre_StructVector *to_vector );

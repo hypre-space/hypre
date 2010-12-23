@@ -11,17 +11,36 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
-
-
 #=============================================================================
-# struct: Run PFMG on a constant coefficient, variable diagonal matrix
+# Make sure that the constant case and variable diag case give the same results
 #=============================================================================
 
-mpirun -np 2 ./struct -n 10 20 20 -solver 4 -P 2 1 1\
- > pfmgconstcoeffmp.out.0
-mpirun -np 1 ./struct -n 20 20 20 -solver 4 \
- > pfmgconstcoeffmp.out.1
+#2D
+mpirun -np 1 ./struct -d 2 -n 15 15 1 -istart -7 -7 0 -solver 3 -skip 1 -rap 1          > pfmgconstcoeffmp.out.10
+mpirun -np 1 ./struct -d 2 -n 15 15 1 -istart -7 -7 0 -solver 4 -skip 1 -rap 1          > pfmgconstcoeffmp.out.11
+mpirun -np 1 ./struct -d 2 -n 15 15 1 -istart -7 -7 0 -solver 3 -skip 1 -rap 1 -relax 2 > pfmgconstcoeffmp.out.12
+mpirun -np 1 ./struct -d 2 -n 15 15 1 -istart -7 -7 0 -solver 4 -skip 1 -rap 1 -relax 2 > pfmgconstcoeffmp.out.13
+
+# 3D
+mpirun -np 1 ./struct -n 15 15 15 -istart -7 -7 -7 -solver 3 -skip 1 -rap 1          > pfmgconstcoeffmp.out.20
+mpirun -np 1 ./struct -n 15 15 15 -istart -7 -7 -7 -solver 4 -skip 1 -rap 1          > pfmgconstcoeffmp.out.21
+mpirun -np 1 ./struct -n 15 15 15 -istart -7 -7 -7 -solver 3 -skip 1 -rap 1 -relax 2 > pfmgconstcoeffmp.out.22
+mpirun -np 1 ./struct -n 15 15 15 -istart -7 -7 -7 -solver 4 -skip 1 -rap 1 -relax 2 > pfmgconstcoeffmp.out.23
+
+#=============================================================================
+# Make sure that serial vs parallel give the same results
+#=============================================================================
+
+mpirun -np 1 ./struct -n 20 20 20 -P 1 1 1 -solver 3 -skip 1 -rap 1 > pfmgconstcoeffmp.out.30
+mpirun -np 2 ./struct -n 10 20 20 -P 2 1 1 -solver 3 -skip 1 -rap 1 > pfmgconstcoeffmp.out.31
+mpirun -np 1 ./struct -n 20 20 20 -P 1 1 1 -solver 3                > pfmgconstcoeffmp.out.32
+mpirun -np 2 ./struct -n 10 20 20 -P 2 1 1 -solver 3                > pfmgconstcoeffmp.out.33
+mpirun -np 1 ./struct -n 20 20 20 -P 1 1 1 -solver 3 -relax 2       > pfmgconstcoeffmp.out.34
+mpirun -np 2 ./struct -n 10 20 20 -P 2 1 1 -solver 3 -relax 2       > pfmgconstcoeffmp.out.35
+
+mpirun -np 1 ./struct -n 20 20 20 -P 1 1 1 -solver 4 -skip 1 -rap 1 > pfmgconstcoeffmp.out.40
+mpirun -np 2 ./struct -n 10 20 20 -P 2 1 1 -solver 4 -skip 1 -rap 1 > pfmgconstcoeffmp.out.41
+mpirun -np 1 ./struct -n 20 20 20 -P 1 1 1 -solver 4                > pfmgconstcoeffmp.out.42
+mpirun -np 2 ./struct -n 10 20 20 -P 2 1 1 -solver 4                > pfmgconstcoeffmp.out.43
+mpirun -np 1 ./struct -n 20 20 20 -P 1 1 1 -solver 4 -relax 2       > pfmgconstcoeffmp.out.44
+mpirun -np 2 ./struct -n 10 20 20 -P 2 1 1 -solver 4 -relax 2       > pfmgconstcoeffmp.out.45

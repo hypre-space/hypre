@@ -1347,16 +1347,18 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
     * the neighbors from the box to get the boundary boxes.
     *-----------------------------------------------------------------------*/
 
-   data_space = hypre_StructMatrixDataSpace(matrix);
-   grid       = hypre_StructMatrixGrid(matrix);
-   boxes      = hypre_StructGridBoxes(grid);
-   boxman     = hypre_StructGridBoxMan(grid);
-   periodic   = hypre_StructGridPeriodic(grid);
+   if ( constant_coefficient!=1 )
+   {
+      data_space = hypre_StructMatrixDataSpace(matrix);
+      grid       = hypre_StructMatrixGrid(matrix);
+      boxes      = hypre_StructGridBoxes(grid);
+      boxman     = hypre_StructGridBoxMan(grid);
+      periodic   = hypre_StructGridPeriodic(grid);
 
-   boundary_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(data_space));
-   entry_box_a    = hypre_BoxArrayCreate(0);
-   tmp_box_a      = hypre_BoxArrayCreate(0);
-   hypre_ForBoxI(i, data_space)
+      boundary_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(data_space));
+      entry_box_a    = hypre_BoxArrayCreate(0);
+      tmp_box_a      = hypre_BoxArrayCreate(0);
+      hypre_ForBoxI(i, data_space)
       {
          /* copy data box to boundary_box_a */
          boundary_box_a = hypre_BoxArrayArrayBoxArray(boundary_boxes, i);
@@ -1395,15 +1397,15 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
          /* subtract neighbor boxes (entry_box_a) from data box (boundary_box_a) */
          hypre_SubtractBoxArrays(boundary_box_a, entry_box_a, tmp_box_a);
       }
-   hypre_BoxArrayDestroy(entry_box_a);
-   hypre_BoxArrayDestroy(tmp_box_a);
+      hypre_BoxArrayDestroy(entry_box_a);
+      hypre_BoxArrayDestroy(tmp_box_a);
 
-   /* set boundary ghost zones to the identity equation */
+      /* set boundary ghost zones to the identity equation */
 
-   hypre_SetIndex(index, 0, 0, 0);
-   hypre_SetIndex(stride, 1, 1, 1);
-   data_space = hypre_StructMatrixDataSpace(matrix);
-   hypre_ForBoxI(i, data_space)
+      hypre_SetIndex(index, 0, 0, 0);
+      hypre_SetIndex(stride, 1, 1, 1);
+      data_space = hypre_StructMatrixDataSpace(matrix);
+      hypre_ForBoxI(i, data_space)
       {
          datap = hypre_StructMatrixExtractPointerByIndex(matrix, i, index);
 
@@ -1412,36 +1414,26 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
             data_box = hypre_BoxArrayBox(data_space, i);
             boundary_box_a = hypre_BoxArrayArrayBoxArray(boundary_boxes, i);
             hypre_ForBoxI(j, boundary_box_a)
-               {
-                  boundary_box = hypre_BoxArrayBox(boundary_box_a, j);
-                  start = hypre_BoxIMin(boundary_box);
+            {
+               boundary_box = hypre_BoxArrayBox(boundary_box_a, j);
+               start = hypre_BoxIMin(boundary_box);
 
-                  if ( constant_coefficient==1 )
-                  {
-                     datai = hypre_CCBoxIndexRank(data_box, start);
-                     datap[datai] = 1.0;
-                  }
-                  else
-                  /* either fully variable coefficient matrix,
-                     constant_coefficient=0, or variable diagonal (otherwise
-                     constant) coefficient matrix, constant_coefficient=2 */
-                  {
-                     hypre_BoxGetSize(boundary_box, loop_size);
+               hypre_BoxGetSize(boundary_box, loop_size);
 
-                     hypre_BoxLoop1Begin(loop_size, data_box, start, stride, datai);
+               hypre_BoxLoop1Begin(loop_size, data_box, start, stride, datai);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
 #include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop1For(loopi, loopj, loopk, datai)
-                        {
-                           datap[datai] = 1.0;
-                        }
-                     hypre_BoxLoop1End(datai);
-                  }
+               hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+               {
+                  datap[datai] = 1.0;
                }
+               hypre_BoxLoop1End(datai);
             }
+         }
       }
 
-   hypre_BoxArrayArrayDestroy(boundary_boxes);
+      hypre_BoxArrayArrayDestroy(boundary_boxes);
+   }
 
    return hypre_error_flag;
 }

@@ -86,7 +86,6 @@ hypre_PFMGRelax( void               *pfmg_relax_vdata,
    HYPRE_Int          constant_coefficient= hypre_StructMatrixConstantCoefficient(A);
    HYPRE_Int          ierr = 0;
 
-   if (constant_coefficient==1) hypre_StructVectorClearBoundGhostValues( b );
    switch(relax_type)
    {
       case 0:
@@ -151,8 +150,6 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
 /*--------------------------------------------------------------------------
  * hypre_PFMGRelaxSetType
  *--------------------------------------------------------------------------*/
-/* All the weight-related code in this function should be migrated to
- * hypre_PFMGRelaxSetup */
 HYPRE_Int
 hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
                         HYPRE_Int    relax_type       )
@@ -190,9 +187,6 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
 /*--------------------------------------------------------------------------
  * hypre_PFMGRelaxSetJacobiWeight
  *--------------------------------------------------------------------------*/
-/* Presently this should be called before hypre_PFMGRelaxSetType.
- * If we move all the weight-related code in hypre_PFMGRelaxSetType
- * to hypre_PFMGRelaxSetup, then this restriction will go away */
 HYPRE_Int
 hypre_PFMGRelaxSetJacobiWeight(void  *pfmg_relax_vdata,
                                double weight) 

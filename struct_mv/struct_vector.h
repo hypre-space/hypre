@@ -42,6 +42,7 @@ typedef struct hypre_StructVector_struct
                                           data corresponding to box b. */
                       
    HYPRE_Int                   num_ghost[6]; /* Num ghost layers in each direction */
+   HYPRE_Int                   bghost_not_clear; /* Are boundary ghosts clear? */
                       
    HYPRE_Int                   global_size;  /* Total number coefficients */
 
@@ -61,6 +62,7 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorDataSize(vector)      ((vector) -> data_size)
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
+#define hypre_StructVectorBGhostNotClear(vector)((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  

@@ -33,10 +33,11 @@ hypre_StructVectorCreate( MPI_Comm          comm,
 
    vector = hypre_CTAlloc(hypre_StructVector, 1);
 
-   hypre_StructVectorComm(vector)        = comm;
+   hypre_StructVectorComm(vector)           = comm;
    hypre_StructGridRef(grid, &hypre_StructVectorGrid(vector));
-   hypre_StructVectorDataAlloced(vector) = 1;
-   hypre_StructVectorRefCount(vector)    = 1;
+   hypre_StructVectorDataAlloced(vector)    = 1;
+   hypre_StructVectorBGhostNotClear(vector) = 0;
+   hypre_StructVectorRefCount(vector)       = 1;
 
    /* set defaults */
    for (i = 0; i < 6; i++)
@@ -824,7 +825,8 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector )
+hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
+                                         HYPRE_Int           force )
 {
    HYPRE_Int                 vi;
    double             *vp;
@@ -847,11 +849,14 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector )
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   grid = hypre_StructVectorGrid(vector);
-   boxes = hypre_StructGridBoxes(grid);
-   hypre_SetIndex(stride, 1, 1, 1);
+   /* Only clear if not clear already or if force argument is set */
+   if (hypre_StructVectorBGhostNotClear(vector) || force)
+   {
+      grid = hypre_StructVectorGrid(vector);
+      boxes = hypre_StructGridBoxes(grid);
+      hypre_SetIndex(stride, 1, 1, 1);
 
-   hypre_ForBoxI(i, boxes)
+      hypre_ForBoxI(i, boxes)
       {
          box        = hypre_BoxArrayBox(boxes, i);
          boundary_boxes = hypre_BoxArrayCreate( 0 );
@@ -869,24 +874,27 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector )
          hypre_SubtractBoxArrays( boundary_boxes, array_of_box, work_boxarray );
 
          hypre_ForBoxI(i2, boundary_boxes)
-            {
-               bbox       = hypre_BoxArrayBox(boundary_boxes, i2);
-               hypre_BoxGetSize(bbox, loop_size);
-               start = hypre_BoxIMin(bbox);
-               hypre_BoxLoop1Begin(loop_size,
-                                   v_data_box, start, stride, vi);
+         {
+            bbox       = hypre_BoxArrayBox(boundary_boxes, i2);
+            hypre_BoxGetSize(bbox, loop_size);
+            start = hypre_BoxIMin(bbox);
+            hypre_BoxLoop1Begin(loop_size,
+                                v_data_box, start, stride, vi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
 #include "hypre_box_smp_forloop.h"
-               hypre_BoxLoop1For(loopi, loopj, loopk, vi)
-                  {
-                     vp[vi] = 0.0;
-                  }
-               hypre_BoxLoop1End(vi);
+            hypre_BoxLoop1For(loopi, loopj, loopk, vi)
+            {
+               vp[vi] = 0.0;
             }
+            hypre_BoxLoop1End(vi);
+         }
          hypre_BoxArrayDestroy(boundary_boxes);
          hypre_BoxArrayDestroy(work_boxarray);
          hypre_BoxArrayDestroy(array_of_box);
       }
+
+      hypre_StructVectorBGhostNotClear(vector) = 0;
+   }
 
    return hypre_error_flag;
 }

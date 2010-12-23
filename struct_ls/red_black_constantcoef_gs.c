@@ -121,6 +121,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
       }
    }
 
+   hypre_StructVectorClearBoundGhostValues(x, 0);
+
    /*----------------------------------------------------------
     * Do zero_guess iteration
     *----------------------------------------------------------*/
