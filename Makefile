@@ -156,13 +156,24 @@ check:
 	(cd test; ls -l ij.err struct.err sstruct.err)
 
 install: all
-	@echo "Installing hypre ..."
-	@echo "lib-install: ${HYPRE_LIB_INSTALL}"
-	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}
-	cp -fpPR ${HYPRE_BUILD_DIR}/lib/* ${HYPRE_LIB_INSTALL}/.
-	cp -fpPR ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
-	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}
-	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}
+	@ \
+	echo "Installing hypre ..."; \
+	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}; \
+	cd ${HYPRE_BUILD_DIR}/lib; HYPRE_FROMDIR=`pwd`; \
+	cd ${HYPRE_LIB_INSTALL};   HYPRE_TODIR=`pwd`; \
+	if [ "$$HYPRE_FROMDIR" != "$$HYPRE_TODIR" ]; \
+	then \
+	  cp -fpPR $$HYPRE_FROMDIR/* $$HYPRE_TODIR; \
+	fi; \
+	cd ${HYPRE_BUILD_DIR}/include; HYPRE_FROMDIR=`pwd`; \
+	cd ${HYPRE_INC_INSTALL};       HYPRE_TODIR=`pwd`; \
+	if [ "$$HYPRE_FROMDIR" != "$$HYPRE_TODIR" ]; \
+	then \
+	  cp -fpPR $$HYPRE_FROMDIR/* $$HYPRE_TODIR; \
+	fi; \
+	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}; \
+	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}; \
+	echo
 
 clean:
 	@ \
