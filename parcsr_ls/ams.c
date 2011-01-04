@@ -35,30 +35,30 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
-                      hypre_ParCSRMatrix *A,
-                      /* right-hand side */
-                      hypre_ParVector *f,
-                      /* relaxation type */
-                      HYPRE_Int relax_type,
-                      /* number of sweeps */
-                      HYPRE_Int relax_times,
-                      /* l1 norms of the rows of A */
-                      double *l1_norms,
-                      /* damping coefficient (usually <= 1) */
-                      double relax_weight,
-                      /* SOR parameter (usually in (0,2) */
-                      double omega,
-                      /* for cheby smoothers */
-                      double max_eig_est,
-                      double min_eig_est,
-                      HYPRE_Int cheby_order,
-                      double cheby_fraction,
-                      /* initial/updated approximation */
-                      hypre_ParVector *u,
-                      /* temporary vector */
-                      hypre_ParVector *v,
-                      /* temporary vector */
-                      hypre_ParVector *z )
+                            hypre_ParCSRMatrix *A,
+                            /* right-hand side */
+                            hypre_ParVector *f,
+                            /* relaxation type */
+                            HYPRE_Int relax_type,
+                            /* number of sweeps */
+                            HYPRE_Int relax_times,
+                            /* l1 norms of the rows of A */
+                            double *l1_norms,
+                            /* damping coefficient (usually <= 1) */
+                            double relax_weight,
+                            /* SOR parameter (usually in (0,2) */
+                            double omega,
+                            /* for cheby smoothers */
+                            double max_eig_est,
+                            double min_eig_est,
+                            HYPRE_Int cheby_order,
+                            double cheby_fraction,
+                            /* initial/updated approximation */
+                            hypre_ParVector *u,
+                            /* temporary vector */
+                            hypre_ParVector *v,
+                            /* temporary vector */
+                            hypre_ParVector *z)
 {
    HYPRE_Int sweep;
 
@@ -82,14 +82,14 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {
          hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-         double *A_diag_data  = hypre_CSRMatrixData(A_diag);
+         double *A_diag_data = hypre_CSRMatrixData(A_diag);
          HYPRE_Int *A_diag_I = hypre_CSRMatrixI(A_diag);
          HYPRE_Int *A_diag_J = hypre_CSRMatrixJ(A_diag);
 
          hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
          HYPRE_Int *A_offd_I = hypre_CSRMatrixI(A_offd);
          HYPRE_Int *A_offd_J = hypre_CSRMatrixJ(A_offd);
-         double *A_offd_data  = hypre_CSRMatrixData(A_offd);
+         double *A_offd_data = hypre_CSRMatrixData(A_offd);
 
          HYPRE_Int i, j;
          HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
@@ -229,14 +229,14 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
       else if (relax_type == 3) /* Kaczmarz */
       {
          hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-         double *A_diag_data  = hypre_CSRMatrixData(A_diag);
+         double *A_diag_data = hypre_CSRMatrixData(A_diag);
          HYPRE_Int *A_diag_I = hypre_CSRMatrixI(A_diag);
          HYPRE_Int *A_diag_J = hypre_CSRMatrixJ(A_diag);
 
          hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
          HYPRE_Int *A_offd_I = hypre_CSRMatrixI(A_offd);
          HYPRE_Int *A_offd_J = hypre_CSRMatrixJ(A_offd);
-         double *A_offd_data  = hypre_CSRMatrixData(A_offd);
+         double *A_offd_data = hypre_CSRMatrixData(A_offd);
 
          HYPRE_Int i, j;
          HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
@@ -246,7 +246,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          double res;
 
          HYPRE_Int num_procs;
-         hypre_MPI_Comm_size( hypre_ParCSRMatrixComm(A), &num_procs);
+         hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
 
          /* Copy off-diagonal values of u to the current processor */
          if (num_procs > 1)
@@ -319,7 +319,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
                                     max_eig_est,
                                     min_eig_est,
                                     cheby_fraction, cheby_order, 1,
-                                    0, u, v, z );
+                                    0, u, v, z);
 
 
          }
@@ -379,8 +379,8 @@ hypre_ParVector *hypre_ParVectorInDomainOf(hypre_ParCSRMatrix *A)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
-                              hypre_ParVector *x_[3],
-                              HYPRE_Int dim)
+                                    hypre_ParVector *x_[3],
+                                    HYPRE_Int dim)
 {
    HYPRE_Int i, d, size_;
    double *x_data, *x_data_[3];
@@ -406,8 +406,8 @@ HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ParVectorBlockGather(hypre_ParVector *x,
-                               hypre_ParVector *x_[3],
-                               HYPRE_Int dim)
+                                     hypre_ParVector *x_[3],
+                                     HYPRE_Int dim)
 {
    HYPRE_Int i, d, size_;
    double *x_data, *x_data_[3];
@@ -434,9 +434,9 @@ HYPRE_Int hypre_ParVectorBlockGather(hypre_ParVector *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_BoomerAMGBlockSolve(void *B,
-                              hypre_ParCSRMatrix *A,
-                              hypre_ParVector *b,
-                              hypre_ParVector *x)
+                                    hypre_ParCSRMatrix *A,
+                                    hypre_ParVector *b,
+                                    hypre_ParVector *x)
 {
    HYPRE_Int d, dim;
 
@@ -510,7 +510,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
 
       if (l1_norm < eps)
       {
-        for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
+         for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
             if (A_diag_J[j] == i)
                A_diag_data[j] = 1.0;
             else
@@ -542,9 +542,9 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
-                               HYPRE_Int option,
-                               HYPRE_Int *cf_marker,
-                               double **l1_norm_ptr)
+                                     HYPRE_Int option,
+                                     HYPRE_Int *cf_marker,
+                                     double **l1_norm_ptr)
 {
    HYPRE_Int i, j;
    HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
@@ -592,8 +592,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
             int_buf_data[index++] = cf_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
          }
       }
-      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
-                                                  cf_marker_offd);
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
+                                                 cf_marker_offd);
       hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(int_buf_data);
    }
@@ -764,7 +764,7 @@ void * hypre_AMSCreate()
 
    /* Default parameters */
 
-   ams_data -> dim  = 3;               /* 3D problem */
+   ams_data -> dim = 3;                /* 3D problem */
    ams_data -> maxit = 20;             /* perform at most 20 iterations */
    ams_data -> tol = 1e-6;             /* convergence tolerance */
    ams_data -> print_level = 1;        /* print residual norm at each step */
@@ -924,7 +924,7 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetDimension(void *solver,
-                          HYPRE_Int dim)
+                                HYPRE_Int dim)
 {
    hypre_AMSData *ams_data = solver;
 
@@ -943,7 +943,7 @@ HYPRE_Int hypre_AMSSetDimension(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetDiscreteGradient(void *solver,
-                                 hypre_ParCSRMatrix *G)
+                                       hypre_ParCSRMatrix *G)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> G = G;
@@ -960,9 +960,9 @@ HYPRE_Int hypre_AMSSetDiscreteGradient(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetCoordinateVectors(void *solver,
-                                  hypre_ParVector *x,
-                                  hypre_ParVector *y,
-                                  hypre_ParVector *z)
+                                        hypre_ParVector *x,
+                                        hypre_ParVector *y,
+                                        hypre_ParVector *z)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> x = x;
@@ -983,9 +983,9 @@ HYPRE_Int hypre_AMSSetCoordinateVectors(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetEdgeConstantVectors(void *solver,
-                                    hypre_ParVector *Gx,
-                                    hypre_ParVector *Gy,
-                                    hypre_ParVector *Gz)
+                                          hypre_ParVector *Gx,
+                                          hypre_ParVector *Gy,
+                                          hypre_ParVector *Gz)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> Gx = Gx;
@@ -1007,7 +1007,7 @@ HYPRE_Int hypre_AMSSetEdgeConstantVectors(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetAlphaPoissonMatrix(void *solver,
-                                   hypre_ParCSRMatrix *A_Pi)
+                                         hypre_ParCSRMatrix *A_Pi)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> A_Pi = A_Pi;
@@ -1033,7 +1033,7 @@ HYPRE_Int hypre_AMSSetAlphaPoissonMatrix(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
-                                  hypre_ParCSRMatrix *A_G)
+                                        hypre_ParCSRMatrix *A_G)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> A_G = A_G;
@@ -1059,7 +1059,7 @@ HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetInteriorNodes(void *solver,
-                              hypre_ParVector *interior_nodes)
+                                    hypre_ParVector *interior_nodes)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> interior_nodes = interior_nodes;
@@ -1076,7 +1076,7 @@ HYPRE_Int hypre_AMSSetInteriorNodes(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetProjectionFrequency(void *solver,
-                                    HYPRE_Int projection_frequency)
+                                          HYPRE_Int projection_frequency)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> projection_frequency = projection_frequency;
@@ -1092,7 +1092,7 @@ HYPRE_Int hypre_AMSSetProjectionFrequency(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetMaxIter(void *solver,
-                        HYPRE_Int maxit)
+                              HYPRE_Int maxit)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> maxit = maxit;
@@ -1107,7 +1107,7 @@ HYPRE_Int hypre_AMSSetMaxIter(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetTol(void *solver,
-                    double tol)
+                          double tol)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> tol = tol;
@@ -1140,7 +1140,7 @@ HYPRE_Int hypre_AMSSetTol(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetCycleType(void *solver,
-                          HYPRE_Int cycle_type)
+                                HYPRE_Int cycle_type)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> cycle_type = cycle_type;
@@ -1155,7 +1155,7 @@ HYPRE_Int hypre_AMSSetCycleType(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetPrintLevel(void *solver,
-                           HYPRE_Int print_level)
+                                 HYPRE_Int print_level)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> print_level = print_level;
@@ -1169,10 +1169,10 @@ HYPRE_Int hypre_AMSSetPrintLevel(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetSmoothingOptions(void *solver,
-                                 HYPRE_Int A_relax_type,
-                                 HYPRE_Int A_relax_times,
-                                 double A_relax_weight,
-                                 double A_omega)
+                                       HYPRE_Int A_relax_type,
+                                       HYPRE_Int A_relax_times,
+                                       double A_relax_weight,
+                                       double A_omega)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> A_relax_type = A_relax_type;
@@ -1189,8 +1189,8 @@ HYPRE_Int hypre_AMSSetSmoothingOptions(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetChebySmoothingOptions(void *solver,
-                                      HYPRE_Int A_cheby_order,
-                                      HYPRE_Int A_cheby_fraction)
+                                            HYPRE_Int A_cheby_order,
+                                            HYPRE_Int A_cheby_fraction)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> A_cheby_order =  A_cheby_order;
@@ -1205,12 +1205,12 @@ HYPRE_Int hypre_AMSSetChebySmoothingOptions(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetAlphaAMGOptions(void *solver,
-                                HYPRE_Int B_Pi_coarsen_type,
-                                HYPRE_Int B_Pi_agg_levels,
-                                HYPRE_Int B_Pi_relax_type,
-                                double B_Pi_theta,
-                                HYPRE_Int B_Pi_interp_type,
-                                HYPRE_Int B_Pi_Pmax)
+                                      HYPRE_Int B_Pi_coarsen_type,
+                                      HYPRE_Int B_Pi_agg_levels,
+                                      HYPRE_Int B_Pi_relax_type,
+                                      double B_Pi_theta,
+                                      HYPRE_Int B_Pi_interp_type,
+                                      HYPRE_Int B_Pi_Pmax)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> B_Pi_coarsen_type = B_Pi_coarsen_type;
@@ -1229,12 +1229,12 @@ HYPRE_Int hypre_AMSSetAlphaAMGOptions(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetBetaAMGOptions(void *solver,
-                               HYPRE_Int B_G_coarsen_type,
-                               HYPRE_Int B_G_agg_levels,
-                               HYPRE_Int B_G_relax_type,
-                               double B_G_theta,
-                               HYPRE_Int B_G_interp_type,
-                               HYPRE_Int B_G_Pmax)
+                                     HYPRE_Int B_G_coarsen_type,
+                                     HYPRE_Int B_G_agg_levels,
+                                     HYPRE_Int B_G_relax_type,
+                                     double B_G_theta,
+                                     HYPRE_Int B_G_interp_type,
+                                     HYPRE_Int B_G_Pmax)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> B_G_coarsen_type = B_G_coarsen_type;
@@ -1258,15 +1258,15 @@ HYPRE_Int hypre_AMSSetBetaAMGOptions(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
-                       hypre_ParCSRMatrix *G,
-                       hypre_ParVector *x,
-                       hypre_ParVector *y,
-                       hypre_ParVector *z,
-                       hypre_ParVector *Gx,
-                       hypre_ParVector *Gy,
-                       hypre_ParVector *Gz,
-                       HYPRE_Int dim,
-                       hypre_ParCSRMatrix **Pi_ptr)
+                             hypre_ParCSRMatrix *G,
+                             hypre_ParVector *x,
+                             hypre_ParVector *y,
+                             hypre_ParVector *z,
+                             hypre_ParVector *Gx,
+                             hypre_ParVector *Gy,
+                             hypre_ParVector *Gz,
+                             HYPRE_Int dim,
+                             hypre_ParCSRMatrix **Pi_ptr)
 {
    HYPRE_Int input_info = 0;
 
@@ -1440,17 +1440,17 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
-                          hypre_ParCSRMatrix *G,
-                          hypre_ParVector *x,
-                          hypre_ParVector *y,
-                          hypre_ParVector *z,
-                          hypre_ParVector *Gx,
-                          hypre_ParVector *Gy,
-                          hypre_ParVector *Gz,
-                          HYPRE_Int dim,
-                          hypre_ParCSRMatrix **Pix_ptr,
-                          hypre_ParCSRMatrix **Piy_ptr,
-                          hypre_ParCSRMatrix **Piz_ptr)
+                                hypre_ParCSRMatrix *G,
+                                hypre_ParVector *x,
+                                hypre_ParVector *y,
+                                hypre_ParVector *z,
+                                hypre_ParVector *Gx,
+                                hypre_ParVector *Gy,
+                                hypre_ParVector *Gz,
+                                HYPRE_Int dim,
+                                hypre_ParCSRMatrix **Pix_ptr,
+                                hypre_ParCSRMatrix **Piy_ptr,
+                                hypre_ParCSRMatrix **Piz_ptr)
 {
    HYPRE_Int input_info = 0;
 
@@ -1766,15 +1766,15 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
-                        hypre_ParCSRMatrix *G,
-                        hypre_ParVector *x,
-                        hypre_ParVector *y,
-                        hypre_ParVector *z,
-                        hypre_ParVector *Gx,
-                        hypre_ParVector *Gy,
-                        hypre_ParVector *Gz,
-                        HYPRE_Int dim,
-                        hypre_ParCSRMatrix **GPi_ptr)
+                              hypre_ParCSRMatrix *G,
+                              hypre_ParVector *x,
+                              hypre_ParVector *y,
+                              hypre_ParVector *z,
+                              hypre_ParVector *Gx,
+                              hypre_ParVector *Gy,
+                              hypre_ParVector *Gz,
+                              HYPRE_Int dim,
+                              hypre_ParCSRMatrix **GPi_ptr)
 {
    HYPRE_Int input_info = 0;
 
@@ -1954,9 +1954,9 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSetup(void *solver,
-                   hypre_ParCSRMatrix *A,
-                   hypre_ParVector *b,
-                   hypre_ParVector *x)
+                         hypre_ParCSRMatrix *A,
+                         hypre_ParVector *b,
+                         hypre_ParVector *x)
 {
    hypre_AMSData *ams_data = solver;
 
@@ -2051,15 +2051,15 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             double *dataB = hypre_CSRMatrixData(B_local);
             double factor, lfactor = dataB[0]*1e-10; /* assume dataB[0] = A11 */
             hypre_MPI_Allreduce(&lfactor, &factor, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX,
-                          hypre_ParCSRMatrixComm(A));
+                                hypre_ParCSRMatrixComm(A));
             for (i = 0; i < nnz; i++) data[i] *= factor;
          }
          C_tmp = hypre_CSRMatrixAdd(A_local, B_local);
          C_local = hypre_CSRMatrixDeleteZeros(C_tmp,0.0);
          if (C_local)
-           hypre_CSRMatrixDestroy(C_tmp);
+            hypre_CSRMatrixDestroy(C_tmp);
          else
-           C_local = C_tmp;
+            C_local = C_tmp;
 
          C = hypre_ParCSRMatrixCreate (comm,
                                        global_num_rows,
@@ -2099,9 +2099,9 @@ HYPRE_Int hypre_AMSSetup(void *solver,
    /* Chebyshev? */
    if (ams_data -> A_relax_type == 16)
    {
-       hypre_ParCSRMaxEigEstimateCG(ams_data->A, 1, 10,
-                                    &ams_data->A_max_eig_est,
-                                    &ams_data->A_min_eig_est);
+      hypre_ParCSRMaxEigEstimateCG(ams_data->A, 1, 10,
+                                   &ams_data->A_max_eig_est,
+                                   &ams_data->A_min_eig_est);
    }
 
    if (ams_data -> cycle_type == 20)
@@ -2468,9 +2468,9 @@ HYPRE_Int hypre_AMSSetup(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSSolve(void *solver,
-                   hypre_ParCSRMatrix *A,
-                   hypre_ParVector *b,
-                   hypre_ParVector *x)
+                         hypre_ParCSRMatrix *A,
+                         hypre_ParVector *b,
+                         hypre_ParVector *x)
 {
    hypre_AMSData *ams_data = solver;
 
@@ -2625,7 +2625,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
             hypre_printf("               residual        factor       residual\n");
             hypre_printf("               --------        ------       --------\n");
             hypre_printf("    Initial    %e                 %e\n",
-                   r_norm, relative_resid);
+                         r_norm, relative_resid);
          }
       }
 
@@ -2660,7 +2660,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
             relative_resid = r_norm;
          if (my_id == 0 && ams_data -> print_level > 0)
             hypre_printf("    Cycle %2d   %e    %f     %e \n",
-                   i+1, r_norm, r_norm / old_resid, relative_resid);
+                         i+1, r_norm, r_norm / old_resid, relative_resid);
       }
 
       if (relative_resid < ams_data -> tol)
@@ -2672,7 +2672,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
 
    if (my_id == 0 && ams_data -> print_level > 0 && ams_data -> maxit > 1)
       hypre_printf("\n\n Average Convergence Factor = %f\n\n",
-             pow((r_norm/r0_norm),(1.0/(double) i)));
+                   pow((r_norm/r0_norm),(1.0/(double) i)));
 
    ams_data -> num_iterations = i;
    ams_data -> rel_resid_norm = relative_resid;
@@ -2700,37 +2700,37 @@ HYPRE_Int hypre_AMSSolve(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
-                             hypre_ParCSRMatrix *A0,
-                             /* relaxation parameters */
-                             HYPRE_Int A0_relax_type,
-                             HYPRE_Int A0_relax_times,
-                             double *A0_l1_norms,
-                             double A0_relax_weight,
-                             double A0_omega,
-                             double A0_max_eig_est,
-                             double A0_min_eig_est,
-                             HYPRE_Int A0_cheby_order,
-                             double  A0_cheby_fraction,
-                             /* subspace matrices */
-                             hypre_ParCSRMatrix **A,
-                             /* subspace preconditioners */
-                             HYPRE_Solver *B,
-                             /* subspace interpolations */
-                             hypre_ParCSRMatrix **P,
-                             /* temporary subspace vectors */
-                             hypre_ParVector **r,
-                             hypre_ParVector **g,
-                             /* right-hand side */
-                             hypre_ParVector *x,
-                             /* current approximation */
-                             hypre_ParVector *y,
-                             /* current residual */
-                             hypre_ParVector *r0,
-                             /* temporary vector */
-                             hypre_ParVector *g0,
-                             char *cycle,
-                             /* temporary vector */
-                             hypre_ParVector *z)
+                                   hypre_ParCSRMatrix *A0,
+                                   /* relaxation parameters */
+                                   HYPRE_Int A0_relax_type,
+                                   HYPRE_Int A0_relax_times,
+                                   double *A0_l1_norms,
+                                   double A0_relax_weight,
+                                   double A0_omega,
+                                   double A0_max_eig_est,
+                                   double A0_min_eig_est,
+                                   HYPRE_Int A0_cheby_order,
+                                   double  A0_cheby_fraction,
+                                   /* subspace matrices */
+                                   hypre_ParCSRMatrix **A,
+                                   /* subspace preconditioners */
+                                   HYPRE_Solver *B,
+                                   /* subspace interpolations */
+                                   hypre_ParCSRMatrix **P,
+                                   /* temporary subspace vectors */
+                                   hypre_ParVector **r,
+                                   hypre_ParVector **g,
+                                   /* right-hand side */
+                                   hypre_ParVector *x,
+                                   /* current approximation */
+                                   hypre_ParVector *y,
+                                   /* current residual */
+                                   hypre_ParVector *r0,
+                                   /* temporary vector */
+                                   hypre_ParVector *g0,
+                                   char *cycle,
+                                   /* temporary vector */
+                                   hypre_ParVector *z)
 {
    char *op;
    HYPRE_Int use_saved_residual = 0;
@@ -2814,7 +2814,7 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSGetNumIterations(void *solver,
-                              HYPRE_Int *num_iterations)
+                                    HYPRE_Int *num_iterations)
 {
    hypre_AMSData *ams_data = solver;
    *num_iterations = ams_data -> num_iterations;
@@ -2828,7 +2828,7 @@ HYPRE_Int hypre_AMSGetNumIterations(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSGetFinalRelativeResidualNorm(void *solver,
-                                          double *rel_resid_norm)
+                                                double *rel_resid_norm)
 {
    hypre_AMSData *ams_data = solver;
    *rel_resid_norm = ams_data -> rel_resid_norm;
@@ -2850,7 +2850,7 @@ HYPRE_Int hypre_AMSGetFinalRelativeResidualNorm(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSProjectOutGradients(void *solver,
-                                 hypre_ParVector *x)
+                                       hypre_ParVector *x)
 {
    hypre_AMSData *ams_data = solver;
 
@@ -2883,10 +2883,10 @@ HYPRE_Int hypre_AMSProjectOutGradients(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
-                                       hypre_ParVector *x_coord,
-                                       HYPRE_Int *edge_vertex,
-                                       HYPRE_Int edge_orientation,
-                                       hypre_ParCSRMatrix **G_ptr)
+                                             hypre_ParVector *x_coord,
+                                             HYPRE_Int *edge_vertex,
+                                             HYPRE_Int edge_orientation,
+                                             hypre_ParCSRMatrix **G_ptr)
 {
    hypre_ParCSRMatrix *G;
 
@@ -3015,15 +3015,15 @@ HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMSFEISetup(void *solver,
-                      hypre_ParCSRMatrix *A,
-                      hypre_ParVector *b,
-                      hypre_ParVector *x,
-                      HYPRE_Int num_vert,
-                      HYPRE_Int num_local_vert,
-                      HYPRE_Int *vert_number,
-                      double *vert_coord,
-                      HYPRE_Int num_edges,
-                      HYPRE_Int *edge_vertex)
+                            hypre_ParCSRMatrix *A,
+                            hypre_ParVector *b,
+                            hypre_ParVector *x,
+                            HYPRE_Int num_vert,
+                            HYPRE_Int num_local_vert,
+                            HYPRE_Int *vert_number,
+                            double *vert_coord,
+                            HYPRE_Int num_edges,
+                            HYPRE_Int *edge_vertex)
 {
    hypre_AMSData *ams_data = solver;
 
@@ -3090,7 +3090,7 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
 
    /* Change vertex numbers from local to global */
    for (i = 0; i < 2*num_edges; i++)
-     edge_vertex[i] = vert_number[edge_vertex[i]];
+      edge_vertex[i] = vert_number[edge_vertex[i]];
 
    /* Construct the local part of G based on edge_vertex */
    {
@@ -3186,10 +3186,10 @@ HYPRE_Int hypre_AMSFEIDestroy(void *solver)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
-                                      HYPRE_Int option,
-                                      HYPRE_Int num_threads,
-                                      HYPRE_Int *cf_marker,
-                                      double **l1_norm_ptr)
+                                            HYPRE_Int option,
+                                            HYPRE_Int num_threads,
+                                            HYPRE_Int *cf_marker,
+                                            double **l1_norm_ptr)
 {
    HYPRE_Int i, j, k;
    HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
@@ -3238,8 +3238,8 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             int_buf_data[index++] = cf_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
          }
       }
-      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
-                                                  cf_marker_offd);
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
+                                                 cf_marker_offd);
       hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(int_buf_data);
    }
@@ -3432,54 +3432,54 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
  * 1 = l1-scaled Jacobi
  * 2 = l1-scaled block Gauss-Seidel/SSOR
  *--------------------------------------------------------------------------*/
-HYPRE_Int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
-                               hypre_ParVector    *f,
-                               HYPRE_Int relax_type,
-                               HYPRE_Int relax_times,
-                               double             *l1_norms,
-                               double              relax_weight,
-                               double              omega,
-                               hypre_ParVector    *u,
-                               hypre_ParVector    *Vtemp,
-                               hypre_ParVector    *z )
+HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
+                                    hypre_ParVector    *f,
+                                    HYPRE_Int           relax_type,
+                                    HYPRE_Int           relax_times,
+                                    double             *l1_norms,
+                                    double              relax_weight,
+                                    double              omega,
+                                    hypre_ParVector    *u,
+                                    hypre_ParVector    *Vtemp,
+                                    hypre_ParVector    *z)
 {
-   MPI_Comm        comm = hypre_ParCSRMatrixComm(A);
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
+   MPI_Comm         comm         = hypre_ParCSRMatrixComm(A);
+   hypre_CSRMatrix *A_diag       = hypre_ParCSRMatrixDiag(A);
+   double          *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int       *A_diag_j     = hypre_CSRMatrixJ(A_diag);
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
-   double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
-   HYPRE_Int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
-   hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_Int       *A_offd_i     = hypre_CSRMatrixI(A_offd);
+   double          *A_offd_data  = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int       *A_offd_j     = hypre_CSRMatrixJ(A_offd);
+   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
 
-   HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Int        n             = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
-   double         *u_data  = hypre_VectorData(u_local);
+   hypre_Vector    *u_local = hypre_ParVectorLocalVector(u);
+   double          *u_data  = hypre_VectorData(u_local);
 
-   hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
-   double         *f_data  = hypre_VectorData(f_local);
+   hypre_Vector    *f_local = hypre_ParVectorLocalVector(f);
+   double          *f_data  = hypre_VectorData(f_local);
 
-   hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-   double         *Vtemp_data = hypre_VectorData(Vtemp_local);
-   double         *Vext_data;
-   double         *v_buf_data;
-   double         *tmp_data;
+   hypre_Vector    *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
+   double          *Vtemp_data = hypre_VectorData(Vtemp_local);
+   double          *Vext_data;
+   double          *v_buf_data;
+   double          *tmp_data;
 
-   HYPRE_Int             i, j;
-   HYPRE_Int             ii, jj;
-   HYPRE_Int             ns, ne, size, rest;
-   HYPRE_Int             relax_error = 0;
-   HYPRE_Int             num_sends;
-   HYPRE_Int             index, start;
-   HYPRE_Int             num_procs, num_threads, my_id ;
+   HYPRE_Int        i, j;
+   HYPRE_Int        ii, jj;
+   HYPRE_Int        ns, ne, size, rest;
+   HYPRE_Int        relax_error = 0;
+   HYPRE_Int        num_sends;
+   HYPRE_Int        index, start;
+   HYPRE_Int        num_procs, num_threads, my_id;
 
-   double          zero = 0.0;
-   double          res, res2;
+   double           zero = 0.0;
+   double           res, res2;
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -3496,26 +3496,26 @@ HYPRE_Int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
    {
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       v_buf_data = hypre_CTAlloc(double,
-                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
       Vext_data = hypre_CTAlloc(double,num_cols_offd);
       if (num_cols_offd)
       {
-                A_offd_j = hypre_CSRMatrixJ(A_offd);
-                A_offd_data = hypre_CSRMatrixData(A_offd);
+         A_offd_j = hypre_CSRMatrixJ(A_offd);
+         A_offd_data = hypre_CSRMatrixData(A_offd);
       }
 
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
-        start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-        for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
-           v_buf_data[index++]
-        = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
+            v_buf_data[index++]
+               = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
 
-      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data,
-        Vext_data);
+      comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, v_buf_data,
+                                                 Vext_data);
 
       /*-----------------------------------------------------------------
        * Copy current approximation into temporary vector.
@@ -3535,27 +3535,27 @@ HYPRE_Int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
       }
 #define HYPRE_SMP_PRIVATE i,ii,jj,res
 #include "../utilities/hypre_smp_forloop.h"
-       for (i = 0; i < n; i++)
-       {
-          /*-----------------------------------------------------------
-           * If diagonal is nonzero, relax point i; otherwise, skip it.
-           *-----------------------------------------------------------*/
-          if (A_diag_data[A_diag_i[i]] != zero)
-          {
-             res = f_data[i];
-             for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
-             {
-                ii = A_diag_j[jj];
-                res -= A_diag_data[jj] * Vtemp_data[ii];
-             }
-             for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
-             {
-                ii = A_offd_j[jj];
-                res -= A_offd_data[jj] * Vext_data[ii];
-             }
-             u_data[i] += (relax_weight*res)/l1_norms[i];
-          }
-       }
+      for (i = 0; i < n; i++)
+      {
+         /*-----------------------------------------------------------
+          * If diagonal is nonzero, relax point i; otherwise, skip it.
+          *-----------------------------------------------------------*/
+         if (A_diag_data[A_diag_i[i]] != zero)
+         {
+            res = f_data[i];
+            for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+            {
+               ii = A_diag_j[jj];
+               res -= A_diag_data[jj] * Vtemp_data[ii];
+            }
+            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            {
+               ii = A_offd_j[jj];
+               res -= A_offd_data[jj] * Vext_data[ii];
+            }
+            u_data[i] += (relax_weight*res)/l1_norms[i];
+         }
+      }
    }
    else if (relax_type == 2) /* GS */
    {
@@ -3565,7 +3565,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
          for (i = 0; i < n; i++)
-              tmp_data[i] = u_data[i];
+            tmp_data[i] = u_data[i];
 #define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
 #include "../utilities/hypre_smp_forloop.h"
          for (j = 0; j < num_threads; j++)
@@ -3588,7 +3588,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
 
-               if ( A_diag_data[A_diag_i[i]] != zero)
+               if (A_diag_data[A_diag_i[i]] != zero)
                {
                   res = f_data[i];
                   for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
@@ -3615,7 +3615,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
 
-               if ( A_diag_data[A_diag_i[i]] != zero)
+               if (A_diag_data[A_diag_i[i]] != zero)
                {
                   res = f_data[i];
                   for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
@@ -3672,7 +3672,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
 
-               if ( A_diag_data[A_diag_i[i]] != zero)
+               if (A_diag_data[A_diag_i[i]] != zero)
                {
                   res2 = 0.0;
                   res = f_data[i];
@@ -3703,7 +3703,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
 
-               if ( A_diag_data[A_diag_i[i]] != zero)
+               if (A_diag_data[A_diag_i[i]] != zero)
                {
                   res2 = 0.0;
                   res = f_data[i];
@@ -3735,8 +3735,8 @@ HYPRE_Int  hypre_ParCSRRelaxThreads( hypre_ParCSRMatrix *A,
 
    if (num_procs > 1)
    {
-         hypre_TFree(Vext_data);
-         hypre_TFree(v_buf_data);
+      hypre_TFree(Vext_data);
+      hypre_TFree(v_buf_data);
    }
 
    return(relax_error);

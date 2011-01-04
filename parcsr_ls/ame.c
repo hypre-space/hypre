@@ -149,7 +149,7 @@ HYPRE_Int hypre_AMESetMassMatrix(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetBlockSize(void *esolver,
-                          HYPRE_Int block_size)
+                                HYPRE_Int block_size)
 {
    hypre_AMEData *ame_data = esolver;
    ame_data -> block_size = block_size;
@@ -163,7 +163,7 @@ HYPRE_Int hypre_AMESetBlockSize(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetMaxIter(void *esolver,
-                        HYPRE_Int maxit)
+                              HYPRE_Int maxit)
 {
    hypre_AMEData *ame_data = esolver;
    ame_data -> maxit = maxit;
@@ -177,7 +177,7 @@ HYPRE_Int hypre_AMESetMaxIter(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetTol(void *esolver,
-                    double tol)
+                          double tol)
 {
    hypre_AMEData *ame_data = esolver;
    ame_data -> tol = tol;
@@ -192,7 +192,7 @@ HYPRE_Int hypre_AMESetTol(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
-                           HYPRE_Int print_level)
+                                 HYPRE_Int print_level)
 {
    hypre_AMEData *ame_data = esolver;
    ame_data -> print_level = print_level;
@@ -595,7 +595,7 @@ HYPRE_Int hypre_AMESolve(void *esolver)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMEGetEigenvectors(void *esolver,
-                             HYPRE_ParVector **eigenvectors_ptr)
+                                   HYPRE_ParVector **eigenvectors_ptr)
 {
    hypre_AMEData *ame_data = esolver;
    mv_MultiVectorPtr
@@ -615,7 +615,7 @@ HYPRE_Int hypre_AMEGetEigenvectors(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMEGetEigenvalues(void *esolver,
-                            double **eigenvalues_ptr)
+                                  double **eigenvalues_ptr)
 {
    hypre_AMEData *ame_data = esolver;
    *eigenvalues_ptr = ame_data -> eigenvalues;

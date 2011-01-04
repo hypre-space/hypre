@@ -1326,9 +1326,9 @@ HYPRE_Int HYPRE_AMSDestroy(HYPRE_Solver solver);
  * @param x Ignored by this function.
  **/
 HYPRE_Int HYPRE_AMSSetup(HYPRE_Solver       solver,
-                   HYPRE_ParCSRMatrix A,
-                   HYPRE_ParVector    b,
-                   HYPRE_ParVector    x);
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector    b,
+                         HYPRE_ParVector    x);
 
 /**
  * Solve the system or apply AMS as a preconditioner.
@@ -1341,22 +1341,22 @@ HYPRE_Int HYPRE_AMSSetup(HYPRE_Solver       solver,
  * @param x [OUT] approximated solution of the linear system to be solved
  **/
 HYPRE_Int HYPRE_AMSSolve(HYPRE_Solver       solver,
-                   HYPRE_ParCSRMatrix A,
-                   HYPRE_ParVector    b,
-                   HYPRE_ParVector    x);
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector    b,
+                         HYPRE_ParVector    x);
 
 /**
  * (Optional) Sets the problem dimension (2 or 3). The default is 3.
  **/
 HYPRE_Int HYPRE_AMSSetDimension(HYPRE_Solver solver,
-                          HYPRE_Int          dim);
+                                HYPRE_Int          dim);
 
 /**
  * Sets the discrete gradient matrix $G$.
  * This function should be called before HYPRE\_AMSSetup()!
  **/
 HYPRE_Int HYPRE_AMSSetDiscreteGradient(HYPRE_Solver       solver,
-                                 HYPRE_ParCSRMatrix G);
+                                       HYPRE_ParCSRMatrix G);
 
 /**
  * Sets the $x$, $y$ and $z$ coordinates of the vertices in the mesh.
@@ -1365,9 +1365,9 @@ HYPRE_Int HYPRE_AMSSetDiscreteGradient(HYPRE_Solver       solver,
  * should be called before HYPRE\_AMSSetup()!
  **/
 HYPRE_Int HYPRE_AMSSetCoordinateVectors(HYPRE_Solver    solver,
-                                  HYPRE_ParVector x,
-                                  HYPRE_ParVector y,
-                                  HYPRE_ParVector z);
+                                        HYPRE_ParVector x,
+                                        HYPRE_ParVector y,
+                                        HYPRE_ParVector z);
 
 /**
  * Sets the vectors $Gx$, $Gy$ and $Gz$ which give the representations of
@@ -1378,9 +1378,9 @@ HYPRE_Int HYPRE_AMSSetCoordinateVectors(HYPRE_Solver    solver,
  * should be called before HYPRE\_AMSSetup()!
  **/
 HYPRE_Int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver    solver,
-                                    HYPRE_ParVector Gx,
-                                    HYPRE_ParVector Gy,
-                                    HYPRE_ParVector Gz);
+                                          HYPRE_ParVector Gx,
+                                          HYPRE_ParVector Gy,
+                                          HYPRE_ParVector Gz);
 
 /**
  * (Optional) Sets the matrix $A_\alpha$ corresponding to the Poisson
@@ -1393,7 +1393,7 @@ HYPRE_Int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver    solver,
  * as $\Pi^T A \Pi$ in HYPRE\_AMSSetup(). See the user's manual for more details.
  **/
 HYPRE_Int HYPRE_AMSSetAlphaPoissonMatrix(HYPRE_Solver       solver,
-                                   HYPRE_ParCSRMatrix A_alpha);
+                                         HYPRE_ParCSRMatrix A_alpha);
 
 /**
  * (Optional) Sets the matrix $A_\beta$ corresponding to the Poisson
@@ -1405,7 +1405,7 @@ HYPRE_Int HYPRE_AMSSetAlphaPoissonMatrix(HYPRE_Solver       solver,
  * and use two-level (instead of three-level) methods. See the user's manual for more details.
  **/
 HYPRE_Int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver       solver,
-                                  HYPRE_ParCSRMatrix A_beta);
+                                        HYPRE_ParCSRMatrix A_beta);
 
 /**
  * (Optional) Set the list of nodes which are interior to a zero-conductivity
@@ -1414,7 +1414,7 @@ HYPRE_Int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver       solver,
  * HYPRE\_AMSSetup()!
  **/
 HYPRE_Int HYPRE_AMSSetInteriorNodes(HYPRE_Solver    solver,
-                              HYPRE_ParVector interior_nodes);
+                                    HYPRE_ParVector interior_nodes);
 
 /**
  * (Optional) Set the frequency at which a projection onto the compatible
@@ -1422,7 +1422,7 @@ HYPRE_Int HYPRE_AMSSetInteriorNodes(HYPRE_Solver    solver,
  * default value is 5.
  **/
 HYPRE_Int HYPRE_AMSSetProjectionFrequency(HYPRE_Solver solver,
-                                    HYPRE_Int          projection_frequency);
+                                          HYPRE_Int    projection_frequency);
 
 /**
  * (Optional) Sets maximum number of iterations, if AMS is used
@@ -1430,7 +1430,7 @@ HYPRE_Int HYPRE_AMSSetProjectionFrequency(HYPRE_Solver solver,
  * number of iterations to $1$. The default is $20$.
  **/
 HYPRE_Int HYPRE_AMSSetMaxIter(HYPRE_Solver solver,
-                        HYPRE_Int          maxit);
+                              HYPRE_Int    maxit);
 
 /**
  * (Optional) Set the convergence tolerance, if AMS is used
@@ -1438,7 +1438,7 @@ HYPRE_Int HYPRE_AMSSetMaxIter(HYPRE_Solver solver,
  * to $0.0$. The default is $10^{-6}$.
  **/
 HYPRE_Int HYPRE_AMSSetTol(HYPRE_Solver solver,
-                    double       tol);
+                          double       tol);
 
 /**
  * (Optional) Choose which three-level solver to use. Possible values are:
@@ -1463,7 +1463,7 @@ HYPRE_Int HYPRE_AMSSetTol(HYPRE_Solver solver,
  * The default is $1$. See the user's manual for more details.
  **/
 HYPRE_Int HYPRE_AMSSetCycleType(HYPRE_Solver solver,
-                          HYPRE_Int          cycle_type);
+                                HYPRE_Int    cycle_type);
 
 /**
  * (Optional) Control how much information is printed during the
@@ -1471,53 +1471,53 @@ HYPRE_Int HYPRE_AMSSetCycleType(HYPRE_Solver solver,
  * The default is $1$ (print residual norm at each step).
  **/
 HYPRE_Int HYPRE_AMSSetPrintLevel(HYPRE_Solver solver,
-                           HYPRE_Int          print_level);
+                                 HYPRE_Int    print_level);
 
 /**
  * (Optional) Sets relaxation parameters for $A$.
  * The defaults are $2$, $1$, $1.0$, $1.0$.
  **/
 HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
-                                 HYPRE_Int          relax_type,
-                                 HYPRE_Int          relax_times,
-                                 double       relax_weight,
-                                 double       omega);
+                                       HYPRE_Int    relax_type,
+                                       HYPRE_Int    relax_times,
+                                       double       relax_weight,
+                                       double       omega);
 
 /**
  * (Optional) Sets AMG parameters for $B_\Pi$.
  * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
  **/
 HYPRE_Int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
-                                HYPRE_Int          alpha_coarsen_type,
-                                HYPRE_Int          alpha_agg_levels,
-                                HYPRE_Int          alpha_relax_type,
-                                double       alpha_strength_threshold,
-                                HYPRE_Int          alpha_interp_type,
-                                HYPRE_Int          alpha_Pmax);
+                                      HYPRE_Int    alpha_coarsen_type,
+                                      HYPRE_Int    alpha_agg_levels,
+                                      HYPRE_Int    alpha_relax_type,
+                                      double       alpha_strength_threshold,
+                                      HYPRE_Int    alpha_interp_type,
+                                      HYPRE_Int    alpha_Pmax);
 
 /**
  * (Optional) Sets AMG parameters for $B_G$.
  * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
  **/
 HYPRE_Int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
-                               HYPRE_Int          beta_coarsen_type,
-                               HYPRE_Int          beta_agg_levels,
-                               HYPRE_Int          beta_relax_type,
-                               double       beta_strength_threshold,
-                               HYPRE_Int          beta_interp_type,
-                               HYPRE_Int          beta_Pmax);
+                                     HYPRE_Int    beta_coarsen_type,
+                                     HYPRE_Int    beta_agg_levels,
+                                     HYPRE_Int    beta_relax_type,
+                                     double       beta_strength_threshold,
+                                     HYPRE_Int    beta_interp_type,
+                                     HYPRE_Int    beta_Pmax);
 
 /**
  * Returns the number of iterations taken.
  **/
 HYPRE_Int HYPRE_AMSGetNumIterations(HYPRE_Solver  solver,
-                              HYPRE_Int          *num_iterations);
+                                    HYPRE_Int    *num_iterations);
 
 /**
  * Returns the norm of the final relative residual.
  **/
 HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                          double       *rel_resid_norm);
+                                                double       *rel_resid_norm);
 
 /**
  * For problems with zero-conductivity regions, project the vector onto the
@@ -1531,7 +1531,7 @@ HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * the values in the zero-conductivity regions contain kernel components.
  **/
 HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver    solver,
-                                 HYPRE_ParVector x);
+                                       HYPRE_ParVector x);
 
 /**
  * Construct and return the discrete gradient matrix G using some
@@ -1545,10 +1545,10 @@ HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver    solver,
  * on the sign of edge\_vertex[2*i+1] - edge\_vertex[2*i].
  **/
 HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix  A,
-                                       HYPRE_ParVector     x_coord,
-                                       HYPRE_Int                *edge_vertex,
-                                       HYPRE_Int                 edge_orientation,
-                                       HYPRE_ParCSRMatrix *G);
+                                             HYPRE_ParVector     x_coord,
+                                             HYPRE_Int          *edge_vertex,
+                                             HYPRE_Int           edge_orientation,
+                                             HYPRE_ParCSRMatrix *G);
 
 /*@}*/
 

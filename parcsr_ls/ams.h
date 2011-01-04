@@ -156,8 +156,8 @@ typedef struct
 #define hypre_AMSDataAL1Norms(ams_data) ((ams_data)->A_l1_norms)
 #define hypre_AMSDataARelaxWeight(ams_data) ((ams_data)->A_relax_weight)
 #define hypre_AMSDataAOmega(ams_data) ((ams_data)->A_omega)
-#define hypre_AMSDataAMaxEigEst(ams_data) ((ams_data)->A_max_eig_est)	
-#define hypre_AMSDataAMinEigEst(ams_data) ((ams_data)->A_min_eig_est)	
+#define hypre_AMSDataAMaxEigEst(ams_data) ((ams_data)->A_max_eig_est)
+#define hypre_AMSDataAMinEigEst(ams_data) ((ams_data)->A_min_eig_est)
 #define hypre_AMSDataAChebyOrder(ams_data) ((ams_data)->A_cheby_order)
 #define hypre_AMSDataAChebyFraction(ams_data) ((ams_data)->A_cheby_fraction)
 
