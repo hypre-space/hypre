@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * HYPRE_SStructMatrix interface
@@ -29,12 +28,13 @@ hypre_F90_IFACE(hypre_sstructmatrixcreate, HYPRE_SSTRUCTMATRIXCREATE)
    (hypre_F90_Comm *comm,
     hypre_F90_Obj *graph,
     hypre_F90_Obj *matrix_ptr,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixCreate(
-                     (MPI_Comm)              *comm,
-                     (HYPRE_SStructGraph)    *graph,
-                     (HYPRE_SStructMatrix *)  matrix_ptr ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixCreate(
+          hypre_F90_PassComm (comm),
+          hypre_F90_PassObj (HYPRE_SStructGraph, graph),
+          hypre_F90_PassObjRef (HYPRE_SStructMatrix, matrix_ptr) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -44,10 +44,11 @@ hypre_F90_IFACE(hypre_sstructmatrixcreate, HYPRE_SSTRUCTMATRIXCREATE)
 void
 hypre_F90_IFACE(hypre_sstructmatrixdestroy, HYPRE_SSTRUCTMATRIXDESTROY)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixDestroy(
-                     (HYPRE_SStructMatrix) *matrix ));
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixDestroy(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -57,10 +58,11 @@ hypre_F90_IFACE(hypre_sstructmatrixdestroy, HYPRE_SSTRUCTMATRIXDESTROY)
 void
 hypre_F90_IFACE(hypre_sstructmatrixinitialize, HYPRE_SSTRUCTMATRIXINITIALIZE)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixInitialize(
-                     (HYPRE_SStructMatrix) *matrix ));
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixInitialize(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -70,22 +72,23 @@ hypre_F90_IFACE(hypre_sstructmatrixinitialize, HYPRE_SSTRUCTMATRIXINITIALIZE)
 void
 hypre_F90_IFACE(hypre_sstructmatrixsetvalues, HYPRE_SSTRUCTMATRIXSETVALUES)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *part,
-    HYPRE_Int  *index,
-    HYPRE_Int  *var,
-    HYPRE_Int  *nentries,
-    HYPRE_Int  *entries,
-    double     *values,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *part,
+    hypre_F90_IntArray *index,
+    hypre_F90_Int *var,
+    hypre_F90_Int *nentries,
+    hypre_F90_IntArray *entries,
+    hypre_F90_DblArray *values,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixSetValues(
-                     (HYPRE_SStructMatrix) *matrix,
-                     (HYPRE_Int)                 *part,
-                     (HYPRE_Int *)                index,
-                     (HYPRE_Int)                 *var,
-                     (HYPRE_Int)                 *nentries,
-                     (HYPRE_Int *)                entries,
-                     (double *)             values ));
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixSetValues(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (part),
+          hypre_F90_PassIntArray (index),
+          hypre_F90_PassInt (var),
+          hypre_F90_PassInt (nentries),
+          hypre_F90_PassIntArray (entries),
+          hypre_F90_PassDblArray (values) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -95,22 +98,23 @@ hypre_F90_IFACE(hypre_sstructmatrixsetvalues, HYPRE_SSTRUCTMATRIXSETVALUES)
 void
 hypre_F90_IFACE(hypre_sstructmatrixaddtovalues, HYPRE_SSTRUCTMATRIXADDTOVALUES)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *part,
-    HYPRE_Int  *index,
-    HYPRE_Int  *var,
-    HYPRE_Int  *nentries,
-    HYPRE_Int  *entries,
-    double     *values,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *part,
+    hypre_F90_IntArray *index,
+    hypre_F90_Int *var,
+    hypre_F90_Int *nentries,
+    hypre_F90_IntArray *entries,
+    hypre_F90_DblArray *values,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixAddToValues(
-                     (HYPRE_SStructMatrix) *matrix,
-                     (HYPRE_Int)                 *part,
-                     (HYPRE_Int *)                index,
-                     (HYPRE_Int)                 *var,
-                     (HYPRE_Int)                 *nentries,
-                     (HYPRE_Int *)                entries,
-                     (double *)             values) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixAddToValues(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (part),
+          hypre_F90_PassIntArray (index),
+          hypre_F90_PassInt (var),
+          hypre_F90_PassInt (nentries),
+          hypre_F90_PassIntArray (entries),
+          hypre_F90_PassDblArray (values)) );
 }
 
 /*--------------------------------------------------------------------------
@@ -120,16 +124,17 @@ hypre_F90_IFACE(hypre_sstructmatrixaddtovalues, HYPRE_SSTRUCTMATRIXADDTOVALUES)
 void
 hypre_F90_IFACE(hypre_sstructmatrixaddfemvalues, HYPRE_SSTRUCTMATRIXADDFEMVALUES)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *part,
-    HYPRE_Int  *index,
-    double     *values,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *part,
+    hypre_F90_IntArray *index,
+    hypre_F90_DblArray *values,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixAddFEMValues(
-                     (HYPRE_SStructMatrix) *matrix,
-                     (HYPRE_Int)                 *part,
-                     (HYPRE_Int *)                index,
-                     (double *)             values) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixAddFEMValues(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (part),
+          hypre_F90_PassIntArray (index),
+          hypre_F90_PassDblArray (values)) );
 }
 
 /*--------------------------------------------------------------------------
@@ -139,22 +144,23 @@ hypre_F90_IFACE(hypre_sstructmatrixaddfemvalues, HYPRE_SSTRUCTMATRIXADDFEMVALUES
 void
 hypre_F90_IFACE(hypre_sstructmatrixgetvalues, HYPRE_SSTRUCTMATRIXGETVALUES)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *part,
-    HYPRE_Int  *index,
-    HYPRE_Int  *var,
-    HYPRE_Int  *nentries,
-    HYPRE_Int  *entries,
-    double     *values,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *part,
+    hypre_F90_IntArray *index,
+    hypre_F90_Int *var,
+    hypre_F90_Int *nentries,
+    hypre_F90_IntArray *entries,
+    hypre_F90_DblArray *values,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixGetValues(
-                     (HYPRE_SStructMatrix) *matrix,
-                     (HYPRE_Int)                 *part,
-                     (HYPRE_Int *)                index,
-                     (HYPRE_Int)                 *var,
-                     (HYPRE_Int)                 *nentries,
-                     (HYPRE_Int *)                entries,
-                     (double *)             values) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixGetValues(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (part),
+          hypre_F90_PassIntArray (index),
+          hypre_F90_PassInt (var),
+          hypre_F90_PassInt (nentries),
+          hypre_F90_PassIntArray (entries),
+          hypre_F90_PassDblArray (values)) );
 }
 
 /*--------------------------------------------------------------------------
@@ -164,24 +170,25 @@ hypre_F90_IFACE(hypre_sstructmatrixgetvalues, HYPRE_SSTRUCTMATRIXGETVALUES)
 void
 hypre_F90_IFACE(hypre_sstructmatrixsetboxvalues, HYPRE_SSTRUCTMATRIXSETBOXVALUES)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *part,
-    HYPRE_Int  *ilower,
-    HYPRE_Int  *iupper,
-    HYPRE_Int  *var,
-    HYPRE_Int  *nentries,
-    HYPRE_Int  *entries,
-    double     *values,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *part,
+    hypre_F90_IntArray *ilower,
+    hypre_F90_IntArray *iupper,
+    hypre_F90_Int *var,
+    hypre_F90_Int *nentries,
+    hypre_F90_IntArray *entries,
+    hypre_F90_DblArray *values,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixSetBoxValues(
-                     (HYPRE_SStructMatrix)  *matrix,
-                     (HYPRE_Int)                  *part,
-                     (HYPRE_Int *)                 ilower,
-                     (HYPRE_Int *)                 iupper,
-                     (HYPRE_Int)                  *var,
-                     (HYPRE_Int)                  *nentries,
-                     (HYPRE_Int *)                 entries,
-                     (double *)              values));
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixSetBoxValues(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (part),
+          hypre_F90_PassIntArray (ilower),
+          hypre_F90_PassIntArray (iupper),
+          hypre_F90_PassInt (var),
+          hypre_F90_PassInt (nentries),
+          hypre_F90_PassIntArray (entries),
+          hypre_F90_PassDblArray (values)));
 }
 
 /*--------------------------------------------------------------------------
@@ -191,24 +198,25 @@ hypre_F90_IFACE(hypre_sstructmatrixsetboxvalues, HYPRE_SSTRUCTMATRIXSETBOXVALUES
 void
 hypre_F90_IFACE(hypre_sstructmatrixaddtoboxvalu, HYPRE_SSTRUCTMATRIXADDTOBOXVALU)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *part,
-    HYPRE_Int  *ilower,
-    HYPRE_Int  *iupper,
-    HYPRE_Int  *var,
-    HYPRE_Int  *nentries,
-    HYPRE_Int  *entries,
-    double     *values,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *part,
+    hypre_F90_IntArray *ilower,
+    hypre_F90_IntArray *iupper,
+    hypre_F90_Int *var,
+    hypre_F90_Int *nentries,
+    hypre_F90_IntArray *entries,
+    hypre_F90_DblArray *values,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixAddToBoxValues(
-                     (HYPRE_SStructMatrix)  *matrix,
-                     (HYPRE_Int)                  *part,
-                     (HYPRE_Int *)                 ilower,
-                     (HYPRE_Int *)                 iupper,
-                     (HYPRE_Int)                  *var,
-                     (HYPRE_Int)                  *nentries,
-                     (HYPRE_Int *)                 entries,
-                     (double *)              values ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixAddToBoxValues(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (part),
+          hypre_F90_PassIntArray (ilower),
+          hypre_F90_PassIntArray (iupper),
+          hypre_F90_PassInt (var),
+          hypre_F90_PassInt (nentries),
+          hypre_F90_PassIntArray (entries),
+          hypre_F90_PassDblArray (values) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -218,24 +226,25 @@ hypre_F90_IFACE(hypre_sstructmatrixaddtoboxvalu, HYPRE_SSTRUCTMATRIXADDTOBOXVALU
 void
 hypre_F90_IFACE(hypre_sstructmatrixgetboxvalues, HYPRE_SSTRUCTMATRIXGETBOXVALUES)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *part,
-    HYPRE_Int  *ilower,
-    HYPRE_Int  *iupper,
-    HYPRE_Int  *var,
-    HYPRE_Int  *nentries,
-    HYPRE_Int  *entries,
-    double     *values,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *part,
+    hypre_F90_IntArray *ilower,
+    hypre_F90_IntArray *iupper,
+    hypre_F90_Int *var,
+    hypre_F90_Int *nentries,
+    hypre_F90_IntArray *entries,
+    hypre_F90_DblArray *values,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixGetBoxValues(
-                     (HYPRE_SStructMatrix)  *matrix,
-                     (HYPRE_Int)                  *part,
-                     (HYPRE_Int *)                 ilower,
-                     (HYPRE_Int *)                 iupper,
-                     (HYPRE_Int)                  *var,
-                     (HYPRE_Int)                  *nentries,
-                     (HYPRE_Int *)                 entries,
-                     (double *)              values));
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixGetBoxValues(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (part),
+          hypre_F90_PassIntArray (ilower),
+          hypre_F90_PassIntArray (iupper),
+          hypre_F90_PassInt (var),
+          hypre_F90_PassInt (nentries),
+          hypre_F90_PassIntArray (entries),
+          hypre_F90_PassDblArray (values)));
 }
 
 /*--------------------------------------------------------------------------
@@ -245,10 +254,11 @@ hypre_F90_IFACE(hypre_sstructmatrixgetboxvalues, HYPRE_SSTRUCTMATRIXGETBOXVALUES
 void
 hypre_F90_IFACE(hypre_sstructmatrixassemble, HYPRE_SSTRUCTMATRIXASSEMBLE)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixAssemble(
-                     (HYPRE_SStructMatrix) *matrix ));
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixAssemble(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -258,18 +268,19 @@ hypre_F90_IFACE(hypre_sstructmatrixassemble, HYPRE_SSTRUCTMATRIXASSEMBLE)
 void
 hypre_F90_IFACE(hypre_sstructmatrixsetsymmetric, HYPRE_SSTRUCTMATRIXSETSYMMETRIC)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *part,
-    HYPRE_Int  *var,
-    HYPRE_Int  *to_var,
-    HYPRE_Int  *symmetric,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *part,
+    hypre_F90_Int *var,
+    hypre_F90_Int *to_var,
+    hypre_F90_Int *symmetric,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixSetSymmetric(
-                     (HYPRE_SStructMatrix) *matrix,
-                     (HYPRE_Int)                 *part,
-                     (HYPRE_Int)                 *var,
-                     (HYPRE_Int)                 *to_var,
-                     (HYPRE_Int)                 *symmetric ));
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixSetSymmetric(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (part),
+          hypre_F90_PassInt (var),
+          hypre_F90_PassInt (to_var),
+          hypre_F90_PassInt (symmetric) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -279,12 +290,13 @@ hypre_F90_IFACE(hypre_sstructmatrixsetsymmetric, HYPRE_SSTRUCTMATRIXSETSYMMETRIC
 void
 hypre_F90_IFACE(hypre_sstructmatrixsetnssymmetr, HYPRE_SSTRUCTMATRIXSETNSSYMMETR)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *symmetric,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *symmetric,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixSetNSSymmetric(
-                     (HYPRE_SStructMatrix) *matrix,
-                     (HYPRE_Int)                 *symmetric ));
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixSetNSSymmetric(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (symmetric) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -294,12 +306,13 @@ hypre_F90_IFACE(hypre_sstructmatrixsetnssymmetr, HYPRE_SSTRUCTMATRIXSETNSSYMMETR
 void
 hypre_F90_IFACE(hypre_sstructmatrixsetobjecttyp, HYPRE_SSTRUCTMATRIXSETOBJECTTYP)
    (hypre_F90_Obj *matrix,
-    HYPRE_Int  *type,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *type,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixSetObjectType(
-                     (HYPRE_SStructMatrix) *matrix,
-                     (HYPRE_Int)                 *type ));
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixSetObjectType(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (type) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -310,11 +323,12 @@ void
 hypre_F90_IFACE(hypre_sstructmatrixgetobject, HYPRE_SSTRUCTMATRIXGETOBJECT)
    (hypre_F90_Obj *matrix,
     hypre_F90_Obj *object,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixGetObject(
-                     (HYPRE_SStructMatrix) *matrix,
-                     (void **)              object )) ;
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixGetObject(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          (void **)              object )) ;
 }
 
 /*--------------------------------------------------------------------------
@@ -325,11 +339,12 @@ void
 hypre_F90_IFACE(hypre_sstructmatrixgetobject2, HYPRE_SSTRUCTMATRIXGETOBJECT2)
    (hypre_F90_Obj *matrix,
     hypre_F90_Obj *object,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixGetObject2(
-                     (HYPRE_SStructMatrix) *matrix,
-                     (void **)               object )) ;
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixGetObject2(
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          (void **)               object )) ;
 }
 
 /*--------------------------------------------------------------------------
@@ -338,15 +353,16 @@ hypre_F90_IFACE(hypre_sstructmatrixgetobject2, HYPRE_SSTRUCTMATRIXGETOBJECT2)
 
 void
 hypre_F90_IFACE(hypre_sstructmatrixprint, HYPRE_SSTRUCTMATRIXPRINT)
-   (const char *filename,
+   (char *filename,
     hypre_F90_Obj *matrix,
-    HYPRE_Int  *all,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *all,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixPrint(
-                     (const char *)           filename,
-                     (HYPRE_SStructMatrix)   *matrix,
-                     (HYPRE_Int)                   *all ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixPrint(
+          (char *)           filename,
+          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
+          hypre_F90_PassInt (all) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -355,17 +371,18 @@ hypre_F90_IFACE(hypre_sstructmatrixprint, HYPRE_SSTRUCTMATRIXPRINT)
 
 void
 hypre_F90_IFACE(hypre_sstructmatrixmatvec, HYPRE_SSTRUCTMATRIXMATVEC)
-   (double     *alpha,
+   (hypre_F90_Dbl *alpha,
     hypre_F90_Obj *A,
     hypre_F90_Obj *x,
-    double     *beta,
+    hypre_F90_Dbl *beta,
     hypre_F90_Obj *y,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructMatrixMatvec(
-                     (double)              *alpha,
-                     (HYPRE_SStructMatrix) *A,
-                     (HYPRE_SStructVector) *x,
-                     (double)              *beta,
-                     (HYPRE_SStructVector) *y )) ;
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructMatrixMatvec(
+          hypre_F90_PassDbl (alpha),
+          hypre_F90_PassObj (HYPRE_SStructMatrix, A),
+          hypre_F90_PassObj (HYPRE_SStructVector, x),
+          hypre_F90_PassDbl (beta),
+          hypre_F90_PassObj (HYPRE_SStructVector, y) )) ;
 }

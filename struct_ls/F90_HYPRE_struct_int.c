@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "headers.h"
 #include "fortran.h"
 
@@ -23,11 +19,14 @@
 
 void
 hypre_F90_IFACE(hypre_structvectorsetrandomvalu, HYPRE_STRUCTVECTORSETRANDOMVALU)
-               (hypre_F90_Obj *vector, HYPRE_Int *seed, HYPRE_Int *ierr)
-
+   (hypre_F90_Obj *vector,
+    hypre_F90_Int *seed,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) ( hypre_StructVectorSetRandomValues( (hypre_StructVector *) vector,
-                                                      (HYPRE_Int)                 *seed ));
+   *ierr = (hypre_F90_Int)
+      ( hypre_StructVectorSetRandomValues(
+           (hypre_StructVector *) vector,
+           hypre_F90_PassInt (seed) ));
 }
 
 
@@ -37,11 +36,14 @@ hypre_F90_IFACE(hypre_structvectorsetrandomvalu, HYPRE_STRUCTVECTORSETRANDOMVALU
 
 void
 hypre_F90_IFACE(hypre_structsetrandomvalues, HYPRE_STRUCTSETRANDOMVALUES)
-               (hypre_F90_Obj *vector, HYPRE_Int *seed, HYPRE_Int *ierr)
-
+   (hypre_F90_Obj *vector,
+    hypre_F90_Int *seed,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) ( hypre_StructSetRandomValues( (hypre_StructVector *) vector,
-                                                (HYPRE_Int)                 *seed ));
+   *ierr = (hypre_F90_Int)
+      ( hypre_StructSetRandomValues(
+           (hypre_StructVector *) vector,
+           hypre_F90_PassInt (seed) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -50,10 +52,12 @@ hypre_F90_IFACE(hypre_structsetrandomvalues, HYPRE_STRUCTSETRANDOMVALUES)
 
 void
 hypre_F90_IFACE(hypre_structsetupinterpreter, HYPRE_STRUCTSETUPINTERPRETER)
-               (hypre_F90_Obj *i, HYPRE_Int *ierr)
-
+   (hypre_F90_Obj *i,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) ( HYPRE_StructSetupInterpreter( (mv_InterfaceInterpreter *) i ));
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructSetupInterpreter(
+           (mv_InterfaceInterpreter *) i ));
 }
 
 /*--------------------------------------------------------------------------
@@ -62,8 +66,10 @@ hypre_F90_IFACE(hypre_structsetupinterpreter, HYPRE_STRUCTSETUPINTERPRETER)
 
 void
 hypre_F90_IFACE(hypre_structsetupmatvec, HYPRE_STRUCTSETUPMATVEC)
-               (hypre_F90_Obj *mv, HYPRE_Int *ierr)
-
+   (hypre_F90_Obj *mv,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) ( HYPRE_StructSetupMatvec( (HYPRE_MatvecFunctions *) mv));
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructSetupMatvec(
+           hypre_F90_PassObjRef (HYPRE_MatvecFunctions, mv)));
 }

@@ -125,10 +125,12 @@ typedef double     hypre_F90_DblArray;
 typedef HYPRE_Int *hypre_F90_Obj;
 typedef HYPRE_Int *hypre_F90_ObjRef;
 
-#define hypre_F90_PassComm(arg)       ((MPI_Comm) *arg)
+#define hypre_F90_PassComm(arg)       (hypre_MPI_Comm_f2c(*arg))
 #define hypre_F90_PassInt(arg)        ((HYPRE_Int) *arg)
+#define hypre_F90_PassIntRef(arg)     ((HYPRE_Int *) arg)
 #define hypre_F90_PassIntArray(arg)   ((HYPRE_Int *) arg)
 #define hypre_F90_PassDbl(arg)        ((double) *arg)
+#define hypre_F90_PassDblRef(arg)     ((double *) arg)
 #define hypre_F90_PassDblArray(arg)   ((double *) arg)
 #define hypre_F90_PassObj(obj,arg)    ((obj) *arg)
 #define hypre_F90_PassObjRef(obj,arg) ((obj *) arg)

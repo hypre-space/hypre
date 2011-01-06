@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * HYPRE_SStructGrid interface
@@ -268,18 +267,18 @@ hypre_F90_IFACE(hypre_sstructgridsetnumghost, HYPRE_SSTRUCTGRIDSETNUMGHOST)
 void
 hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
    (hypre_F90_Obj *grid,
-    HYPRE_Int  *part,
-    HYPRE_Int  *var,
-    HYPRE_Int  *nvars,
-    HYPRE_Int  *vartype,
-    HYPRE_Int  *ierr)
+    hypre_F90_Int *part,
+    hypre_F90_Int *var,
+    hypre_F90_Int *nvars,
+    hypre_F90_Int *vartype,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructGridSetVariable(
-                     (HYPRE_SStructGrid)      *grid,
-                     (HYPRE_Int)                    *part,
-                     (HYPRE_Int)                    *var,
-                     (HYPRE_Int)                    *nvars,
-                     (HYPRE_SStructVariable)  *vartype ) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridSetVariable(
+      hypre_F90_PassObj (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt (part),
+      hypre_F90_PassInt (var),
+      hypre_F90_PassInt (nvars),
+      hypre_F90_PassObj (HYPRE_SStructVariable, vartype) );
 }
 
 /*--------------------------------------------------------------------------
@@ -290,17 +289,17 @@ hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
 
 void
 hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
-   (hypre_F90_Obj *grid,
-    HYPRE_Int  *part,
-    HYPRE_Int  *index,
-    HYPRE_Int  *var,
-    HYPRE_Int  *vartype,
-    HYPRE_Int  *ierr)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_Int      *part,
+    hypre_F90_IntArray *index,
+    hypre_F90_Int      *var,
+    hypre_F90_Int      *vartype,
+    hypre_F90_Int      *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructGridAddVariable(
-                     (HYPRE_SStructGrid)      *grid,
-                     (HYPRE_Int)                    *part,
-                     (HYPRE_Int *)                   index,
-                     (HYPRE_Int)                    *var,
-                     (HYPRE_SStructVariable)  *vartype ));
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridAddVariable(
+      hypre_F90_PassObj      (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt      (part),
+      hypre_F90_PassIntArray (index),
+      hypre_F90_PassInt      (var),
+      hypre_F90_PassObj      (HYPRE_SStructVariable, vartype) );
 }

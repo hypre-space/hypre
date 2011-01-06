@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * HYPRE_SStructStencil interface
@@ -26,15 +25,16 @@
 
 void
 hypre_F90_IFACE(hypre_sstructstencilcreate, HYPRE_SSTRUCTSTENCILCREATE)
-   (HYPRE_Int      *ndim,
-    HYPRE_Int      *size,
+   (hypre_F90_Int *ndim,
+    hypre_F90_Int *size,
     hypre_F90_Obj *stencil_ptr,
-    HYPRE_Int      *ierr)
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructStencilCreate(
-                     (HYPRE_Int)                   *ndim,
-                     (HYPRE_Int)                   *size,
-                     (HYPRE_SStructStencil *) stencil_ptr ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructStencilCreate(
+          hypre_F90_PassInt (ndim),
+          hypre_F90_PassInt (size),
+          hypre_F90_PassObjRef (HYPRE_SStructStencil, stencil_ptr) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -44,10 +44,11 @@ hypre_F90_IFACE(hypre_sstructstencilcreate, HYPRE_SSTRUCTSTENCILCREATE)
 void
 hypre_F90_IFACE(hypre_sstructstencildestroy, HYPRE_SSTRUCTSTENCILDESTROY)
    (hypre_F90_Obj *stencil,
-    HYPRE_Int      *ierr)
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructStencilDestroy(
-                     (HYPRE_SStructStencil) *stencil ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructStencilDestroy(
+          hypre_F90_PassObj (HYPRE_SStructStencil, stencil) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -57,14 +58,15 @@ hypre_F90_IFACE(hypre_sstructstencildestroy, HYPRE_SSTRUCTSTENCILDESTROY)
 void
 hypre_F90_IFACE(hypre_sstructstencilsetentry, HYPRE_SSTRUCTSTENCILSETENTRY)
    (hypre_F90_Obj *stencil,
-    HYPRE_Int      *entry,
-    HYPRE_Int      *offset,
-    HYPRE_Int      *var,
-    HYPRE_Int      *ierr)
+    hypre_F90_Int *entry,
+    hypre_F90_IntArray *offset,
+    hypre_F90_Int *var,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (HYPRE_Int) (HYPRE_SStructStencilSetEntry(
-                     (HYPRE_SStructStencil) *stencil,
-                     (HYPRE_Int)                  *entry,
-                     (HYPRE_Int *)                 offset,
-                     (HYPRE_Int)                  *var ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructStencilSetEntry(
+          hypre_F90_PassObj (HYPRE_SStructStencil, stencil),
+          hypre_F90_PassInt (entry),
+          hypre_F90_PassIntArray (offset),
+          hypre_F90_PassInt (var) ) );
 }

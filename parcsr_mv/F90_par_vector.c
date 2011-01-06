@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * par_vector Fortran interface
@@ -27,12 +24,15 @@
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setparvectordataowner, HYPRE_SETPARVECTORDATAOWNER)( hypre_F90_Obj *vector,
-                                              HYPRE_Int      *owns_data,
-                                              HYPRE_Int      *ierr       )
+hypre_F90_IFACE(hypre_setparvectordataowner, HYPRE_SETPARVECTORDATAOWNER)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *owns_data,
+     hypre_F90_Int *ierr       )
 {
-   *ierr = (HYPRE_Int) ( hypre_ParVectorSetDataOwner ( (hypre_ParVector *) *vector,
-                                                 (HYPRE_Int)               *owns_data ) );
+   *ierr = (hypre_F90_Int)
+      ( hypre_ParVectorSetDataOwner(
+           (hypre_ParVector *) *vector,
+           hypre_F90_PassInt (owns_data) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -40,13 +40,15 @@ hypre_F90_IFACE(hypre_setparvectordataowner, HYPRE_SETPARVECTORDATAOWNER)( hypre
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setparvectorpartitioningo, HYPRE_SETPARVECTORPARTITIONINGO)( hypre_F90_Obj *vector,
-                                                  HYPRE_Int      *owns_partitioning,
-                                                  HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_setparvectorpartitioningo, HYPRE_SETPARVECTORPARTITIONINGO)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *owns_partitioning,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( hypre_ParVectorSetPartitioningOwner
-                         ( (hypre_ParVector *) *vector,
-                           (HYPRE_Int)               *owns_partitioning ) );
+   *ierr = (hypre_F90_Int)
+      ( hypre_ParVectorSetPartitioningOwner(
+           (hypre_ParVector *) *vector,
+           hypre_F90_PassInt (owns_partitioning) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -54,13 +56,15 @@ hypre_F90_IFACE(hypre_setparvectorpartitioningo, HYPRE_SETPARVECTORPARTITIONINGO
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setparvectorconstantvalue, HYPRE_SETPARVECTORCONSTANTVALUE)( hypre_F90_Obj *vector,
-                                                  double   *value,
-                                                  HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_setparvectorconstantvalue, HYPRE_SETPARVECTORCONSTANTVALUE)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Dbl *value,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( hypre_ParVectorSetConstantValues
-                      ( (hypre_ParVector *) *vector,
-                        (double)            *value   ) );
+   *ierr = (hypre_F90_Int)
+      ( hypre_ParVectorSetConstantValues(
+           (hypre_ParVector *) *vector,
+           hypre_F90_PassDbl (value)   ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -68,12 +72,15 @@ hypre_F90_IFACE(hypre_setparvectorconstantvalue, HYPRE_SETPARVECTORCONSTANTVALUE
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setparvectorrandomvalues, HYPRE_SETPARVECTORRANDOMVALUES)( hypre_F90_Obj *vector,
-                                                 HYPRE_Int      *seed,
-                                                 HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_setparvectorrandomvalues, HYPRE_SETPARVECTORRANDOMVALUES)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *seed,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( hypre_ParVectorSetRandomValues ( (hypre_ParVector *) *vector,
-                                                    (HYPRE_Int)               *seed    ) );
+   *ierr = (hypre_F90_Int)
+      ( hypre_ParVectorSetRandomValues(
+           (hypre_ParVector *) *vector,
+           hypre_F90_PassInt (seed)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -81,12 +88,15 @@ hypre_F90_IFACE(hypre_setparvectorrandomvalues, HYPRE_SETPARVECTORRANDOMVALUES)(
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_copyparvector, HYPRE_COPYPARVECTOR)( hypre_F90_Obj *x,
-                                      hypre_F90_Obj *y,
-                                      HYPRE_Int      *ierr )
+hypre_F90_IFACE(hypre_copyparvector, HYPRE_COPYPARVECTOR)
+   ( hypre_F90_Obj *x,
+     hypre_F90_Obj *y,
+     hypre_F90_Int *ierr )
 {
-   *ierr = (HYPRE_Int) ( hypre_ParVectorCopy ( (hypre_ParVector *) *x,
-                                         (hypre_ParVector *) *y  ) );
+   *ierr = (hypre_F90_Int)
+      ( hypre_ParVectorCopy(
+           (hypre_ParVector *) *x,
+           (hypre_ParVector *) *y  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -94,12 +104,15 @@ hypre_F90_IFACE(hypre_copyparvector, HYPRE_COPYPARVECTOR)( hypre_F90_Obj *x,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_scaleparvector, HYPRE_SCALEPARVECTOR)( hypre_F90_Obj *vector,
-                                       double   *scale,
-                                       HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_scaleparvector, HYPRE_SCALEPARVECTOR)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Dbl *scale,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( hypre_ParVectorScale ( (double)            *scale,
-                                          (hypre_ParVector *) *vector ) );
+   *ierr = (hypre_F90_Int)
+      ( hypre_ParVectorScale(
+           hypre_F90_PassDbl (scale),
+           (hypre_ParVector *) *vector ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -107,14 +120,17 @@ hypre_F90_IFACE(hypre_scaleparvector, HYPRE_SCALEPARVECTOR)( hypre_F90_Obj *vect
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_paraxpy, HYPRE_PARAXPY)( double   *a,
-                                hypre_F90_Obj *x,
-                                hypre_F90_Obj *y,
-                                HYPRE_Int      *ierr )
+hypre_F90_IFACE(hypre_paraxpy, HYPRE_PARAXPY)
+   ( hypre_F90_Dbl *a,
+     hypre_F90_Obj *x,
+     hypre_F90_Obj *y,
+     hypre_F90_Int *ierr )
 {
-   *ierr = (HYPRE_Int) ( hypre_ParVectorAxpy ( (double)            *a,
-                                   (hypre_ParVector *) *x,
-                                   (hypre_ParVector *) *y  ) );
+   *ierr = (hypre_F90_Int)
+      ( hypre_ParVectorAxpy(
+           hypre_F90_PassDbl (a),
+           (hypre_ParVector *) *x,
+           (hypre_ParVector *) *y  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -122,13 +138,16 @@ hypre_F90_IFACE(hypre_paraxpy, HYPRE_PARAXPY)( double   *a,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parinnerprod, HYPRE_PARINNERPROD)( hypre_F90_Obj *x,
-                                     hypre_F90_Obj *y,
-                                     double   *inner_prod, 
-                                     HYPRE_Int      *ierr           )
+hypre_F90_IFACE(hypre_parinnerprod, HYPRE_PARINNERPROD)
+   ( hypre_F90_Obj *x,
+     hypre_F90_Obj *y,
+     hypre_F90_Dbl *inner_prod, 
+     hypre_F90_Int *ierr           )
 {
-   *inner_prod = (double) ( hypre_ParVectorInnerProd ( (hypre_ParVector *) *x,
-                                                 (hypre_ParVector *) *y  ) );
+   *inner_prod = (hypre_F90_Dbl)
+      ( hypre_ParVectorInnerProd(
+           (hypre_ParVector *) *x,
+           (hypre_ParVector *) *y  ) );
 
    *ierr = 0;
 }
@@ -138,16 +157,18 @@ hypre_F90_IFACE(hypre_parinnerprod, HYPRE_PARINNERPROD)( hypre_F90_Obj *x,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)( hypre_F90_Comm *comm,
-                                          hypre_F90_Obj *vector,
-                                          HYPRE_Int      *vec_starts,
-                                          hypre_F90_Obj *par_vector,
-                                          HYPRE_Int      *ierr        )
+hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)
+   ( hypre_F90_Comm *comm,
+     hypre_F90_Obj *vector,
+     hypre_F90_IntArray *vec_starts,
+     hypre_F90_Obj *par_vector,
+     hypre_F90_Int *ierr        )
 {
-   *par_vector = (hypre_F90_Obj) ( hypre_VectorToParVector
-                                ( (MPI_Comm)       *comm,
-                                  (hypre_Vector *) *vector,
-                                  (HYPRE_Int *)           vec_starts ) );
+   *par_vector = (hypre_F90_Obj)
+      ( hypre_VectorToParVector(
+           hypre_F90_PassComm (comm),
+           (hypre_Vector *) *vector,
+           hypre_F90_PassIntArray (vec_starts) ) );
 
    *ierr = 0;
 }
@@ -157,14 +178,14 @@ hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)( hypre_F90_Com
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parvectortovectorall, HYPRE_PARVECTORTOVECTORALL)( hypre_F90_Obj *par_vector,
-                                             hypre_F90_Obj *vector,
-                                             HYPRE_Int      *ierr        )
+hypre_F90_IFACE(hypre_parvectortovectorall, HYPRE_PARVECTORTOVECTORALL)
+   ( hypre_F90_Obj *par_vector,
+     hypre_F90_Obj *vector,
+     hypre_F90_Int *ierr        )
 {
-   *vector = (hypre_F90_Obj) ( hypre_ParVectorToVectorAll
-                            ( (hypre_ParVector *) *par_vector ) );
+   *vector = (hypre_F90_Obj)(
+      hypre_ParVectorToVectorAll
+      ( (hypre_ParVector *) *par_vector ) );
 
    *ierr = 0;
 }
-
-

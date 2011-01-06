@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * HYPRE_ParCSRPilut Fortran interface
@@ -27,13 +24,15 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrpilutcreate, HYPRE_PARCSRPILUTCREATE)( hypre_F90_Comm *comm,
-                                              hypre_F90_Obj *solver,
-                                              HYPRE_Int      *ierr    )
-
+hypre_F90_IFACE(hypre_parcsrpilutcreate, HYPRE_PARCSRPILUTCREATE)
+   ( hypre_F90_Comm *comm,
+     hypre_F90_Obj *solver,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_ParCSRPilutCreate( (MPI_Comm)       *comm,
-                                                (HYPRE_Solver *)  solver ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_ParCSRPilutCreate(
+           hypre_F90_PassComm (comm),
+           hypre_F90_PassObjRef (HYPRE_Solver, solver) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -41,11 +40,13 @@ hypre_F90_IFACE(hypre_parcsrpilutcreate, HYPRE_PARCSRPILUTCREATE)( hypre_F90_Com
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrpilutdestroy, HYPRE_PARCSRPILUTDESTROY)( hypre_F90_Obj *solver,
-                                            HYPRE_Int      *ierr    )
-
+hypre_F90_IFACE(hypre_parcsrpilutdestroy, HYPRE_PARCSRPILUTDESTROY)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_ParCSRPilutDestroy( (HYPRE_Solver) *solver ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_ParCSRPilutDestroy(
+           hypre_F90_PassObj (HYPRE_Solver, solver) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -53,16 +54,19 @@ hypre_F90_IFACE(hypre_parcsrpilutdestroy, HYPRE_PARCSRPILUTDESTROY)( hypre_F90_O
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetup, HYPRE_PARCSRPILUTSETUP)( hypre_F90_Obj *solver,
-                                         hypre_F90_Obj *A,
-                                         hypre_F90_Obj *b,
-                                         hypre_F90_Obj *x,
-                                         HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_parcsrpilutsetup, HYPRE_PARCSRPILUTSETUP)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *A,
+     hypre_F90_Obj *b,
+     hypre_F90_Obj *x,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_ParCSRPilutSetup( (HYPRE_Solver)       *solver, 
-                                           (HYPRE_ParCSRMatrix) *A,
-                                           (HYPRE_ParVector)    *b,
-                                           (HYPRE_ParVector)    *x       ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_ParCSRPilutSetup(
+           hypre_F90_PassObj (HYPRE_Solver, solver), 
+           hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+           hypre_F90_PassObj (HYPRE_ParVector, b),
+           hypre_F90_PassObj (HYPRE_ParVector, x)       ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -70,16 +74,19 @@ hypre_F90_IFACE(hypre_parcsrpilutsetup, HYPRE_PARCSRPILUTSETUP)( hypre_F90_Obj *
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsolve, HYPRE_PARCSRPILUTSOLVE)( hypre_F90_Obj *solver,
-                                         hypre_F90_Obj *A,
-                                         hypre_F90_Obj *b,
-                                         hypre_F90_Obj *x,
-                                         HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_parcsrpilutsolve, HYPRE_PARCSRPILUTSOLVE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *A,
+     hypre_F90_Obj *b,
+     hypre_F90_Obj *x,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_ParCSRPilutSolve( (HYPRE_Solver)       *solver, 
-                                           (HYPRE_ParCSRMatrix) *A,
-                                           (HYPRE_ParVector)    *b,
-                                           (HYPRE_ParVector)    *x       ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_ParCSRPilutSolve(
+           hypre_F90_PassObj (HYPRE_Solver, solver), 
+           hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+           hypre_F90_PassObj (HYPRE_ParVector, b),
+           hypre_F90_PassObj (HYPRE_ParVector, x)       ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -87,12 +94,15 @@ hypre_F90_IFACE(hypre_parcsrpilutsolve, HYPRE_PARCSRPILUTSOLVE)( hypre_F90_Obj *
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetmaxiter, HYPRE_PARCSRPILUTSETMAXITER)( hypre_F90_Obj *solver,
-                                              HYPRE_Int      *max_iter,
-                                              HYPRE_Int      *ierr      )
+hypre_F90_IFACE(hypre_parcsrpilutsetmaxiter, HYPRE_PARCSRPILUTSETMAXITER)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *max_iter,
+     hypre_F90_Int *ierr      )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_ParCSRPilutSetMaxIter( (HYPRE_Solver) *solver, 
-                                                (HYPRE_Int)          *max_iter ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_ParCSRPilutSetMaxIter(
+           hypre_F90_PassObj (HYPRE_Solver, solver), 
+           hypre_F90_PassInt (max_iter) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -100,12 +110,15 @@ hypre_F90_IFACE(hypre_parcsrpilutsetmaxiter, HYPRE_PARCSRPILUTSETMAXITER)( hypre
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetdroptoleran, HYPRE_PARCSRPILUTSETDROPTOLERAN)( hypre_F90_Obj *solver,
-                                                  double   *tol,
-                                                  HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_parcsrpilutsetdroptoleran, HYPRE_PARCSRPILUTSETDROPTOLERAN)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Dbl *tol,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_ParCSRPilutSetDropTolerance( (HYPRE_Solver) *solver, 
-                                                      (double)       *tol     ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_ParCSRPilutSetDropTolerance(
+           hypre_F90_PassObj (HYPRE_Solver, solver), 
+           hypre_F90_PassDbl (tol)     ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -113,11 +126,14 @@ hypre_F90_IFACE(hypre_parcsrpilutsetdroptoleran, HYPRE_PARCSRPILUTSETDROPTOLERAN
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetfacrowsize, HYPRE_PARCSRPILUTSETFACROWSIZE)( hypre_F90_Obj *solver,
-                                                 HYPRE_Int      *size,
-                                                 HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_parcsrpilutsetfacrowsize, HYPRE_PARCSRPILUTSETFACROWSIZE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *size,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_ParCSRPilutSetFactorRowSize( (HYPRE_Solver) *solver,
-                                                      (HYPRE_Int)          *size    ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_ParCSRPilutSetFactorRowSize(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (size)    ) );
 }
 

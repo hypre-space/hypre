@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * HYPRE_IJMatrix Fortran interface
@@ -28,20 +25,22 @@
 
 void
 hypre_F90_IFACE(hypre_ijmatrixcreate, HYPRE_IJMATRIXCREATE)
-                                    ( hypre_F90_Comm *comm,
-                                      HYPRE_Int      *ilower,
-                                      HYPRE_Int      *iupper,
-                                      HYPRE_Int      *jlower,
-                                      HYPRE_Int      *jupper,
-                                      hypre_F90_Obj *matrix,
-                                      HYPRE_Int      *ierr    )
+   ( hypre_F90_Comm *comm,
+     hypre_F90_Int *ilower,
+     hypre_F90_Int *iupper,
+     hypre_F90_Int *jlower,
+     hypre_F90_Int *jupper,
+     hypre_F90_Obj *matrix,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixCreate( (MPI_Comm)         *comm,
-                                         (HYPRE_Int)              *ilower,
-                                         (HYPRE_Int)              *iupper,
-                                         (HYPRE_Int)              *jlower,
-                                         (HYPRE_Int)              *jupper,
-                                         (HYPRE_IJMatrix *)  matrix ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixCreate(
+           hypre_F90_PassComm (comm),
+           hypre_F90_PassInt (ilower),
+           hypre_F90_PassInt (iupper),
+           hypre_F90_PassInt (jlower),
+           hypre_F90_PassInt (jupper),
+           hypre_F90_PassObjRef (HYPRE_IJMatrix, matrix) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -50,10 +49,12 @@ hypre_F90_IFACE(hypre_ijmatrixcreate, HYPRE_IJMATRIXCREATE)
 
 void 
 hypre_F90_IFACE(hypre_ijmatrixdestroy, HYPRE_IJMATRIXDESTROY)
-                                     ( hypre_F90_Obj *matrix,
-                                       HYPRE_Int      *ierr    )
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixDestroy( (HYPRE_IJMatrix) *matrix ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixDestroy(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -62,10 +63,12 @@ hypre_F90_IFACE(hypre_ijmatrixdestroy, HYPRE_IJMATRIXDESTROY)
 
 void
 hypre_F90_IFACE(hypre_ijmatrixinitialize, HYPRE_IJMATRIXINITIALIZE)
-                                        ( hypre_F90_Obj *matrix,
-                                          HYPRE_Int      *ierr    )
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixInitialize( (HYPRE_IJMatrix) *matrix ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixInitialize(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -73,21 +76,23 @@ hypre_F90_IFACE(hypre_ijmatrixinitialize, HYPRE_IJMATRIXINITIALIZE)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijmatrixsetvalues, HYPRE_IJMATRIXSETVALUES)(
-                                                     hypre_F90_Obj *matrix,
-                                                     HYPRE_Int          *nrows,
-                                                     HYPRE_Int          *ncols,
-                                                     const HYPRE_Int    *rows,
-                                                     const HYPRE_Int    *cols,
-                                                     const double *values,
-                                                     HYPRE_Int          *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixsetvalues, HYPRE_IJMATRIXSETVALUES)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *nrows,
+     hypre_F90_IntArray *ncols,
+     hypre_F90_IntArray *rows,
+     hypre_F90_IntArray *cols,
+     hypre_F90_DblArray *values,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixSetValues( (HYPRE_IJMatrix) *matrix,
-                                            (HYPRE_Int)            *nrows,
-                                            (HYPRE_Int *)           ncols,
-                                            (const HYPRE_Int *)     rows,
-                                            (const HYPRE_Int *)     cols,
-                                            (const double *)  values  ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixSetValues(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassInt (nrows),
+           hypre_F90_PassIntArray (ncols),
+           hypre_F90_PassIntArray (rows),
+           hypre_F90_PassIntArray (cols),
+           hypre_F90_PassDblArray (values)  ) );
 
 }
 
@@ -96,21 +101,23 @@ hypre_F90_IFACE(hypre_ijmatrixsetvalues, HYPRE_IJMATRIXSETVALUES)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)(
-                                                     hypre_F90_Obj *matrix,
-                                                     HYPRE_Int          *nrows,
-                                                     HYPRE_Int          *ncols,
-                                                     const HYPRE_Int    *rows,
-                                                     const HYPRE_Int    *cols,
-                                                     const double *values,
-                                                     HYPRE_Int          *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *nrows,
+     hypre_F90_IntArray *ncols,
+     hypre_F90_IntArray *rows,
+     hypre_F90_IntArray *cols,
+     hypre_F90_DblArray *values,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixAddToValues( (HYPRE_IJMatrix) *matrix,
-                                              (HYPRE_Int)            *nrows,
-                                              (HYPRE_Int *)           ncols,
-                                              (const HYPRE_Int *)     rows,
-                                              (const HYPRE_Int *)     cols,
-                                              (const double *)  values  ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixAddToValues(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassInt (nrows),
+           hypre_F90_PassIntArray (ncols),
+           hypre_F90_PassIntArray (rows),
+           hypre_F90_PassIntArray (cols),
+           hypre_F90_PassDblArray (values)  ) );
 
 }
 
@@ -120,10 +127,12 @@ hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)(
 
 void 
 hypre_F90_IFACE(hypre_ijmatrixassemble, HYPRE_IJMATRIXASSEMBLE)
-                                      ( hypre_F90_Obj *matrix,
-                                        HYPRE_Int      *ierr    )
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixAssemble( (HYPRE_IJMatrix) *matrix ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixAssemble(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -132,16 +141,18 @@ hypre_F90_IFACE(hypre_ijmatrixassemble, HYPRE_IJMATRIXASSEMBLE)
  
 void
 hypre_F90_IFACE(hypre_ijmatrixgetrowcounts, HYPRE_IJMATRIXGETROWCOUNTS)
-                                          ( hypre_F90_Obj *matrix,
-                                            HYPRE_Int       *nrows,
-                                            HYPRE_Int       *rows,
-                                            HYPRE_Int       *ncols,
-                                            HYPRE_Int       *ierr    )
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *nrows,
+     hypre_F90_IntArray *rows,
+     hypre_F90_IntArray *ncols,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixGetRowCounts((HYPRE_IJMatrix) *matrix,
-                                              (HYPRE_Int)            *nrows,
-                                              (HYPRE_Int *)           rows,
-                                              (HYPRE_Int *)           ncols ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixGetRowCounts(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassInt (nrows),
+           hypre_F90_PassIntArray (rows),
+           hypre_F90_PassIntArray (ncols) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -150,20 +161,22 @@ hypre_F90_IFACE(hypre_ijmatrixgetrowcounts, HYPRE_IJMATRIXGETROWCOUNTS)
 
 void
 hypre_F90_IFACE(hypre_ijmatrixgetvalues, HYPRE_IJMATRIXGETVALUES)
-                                       ( hypre_F90_Obj *matrix,
-                                         HYPRE_Int          *nrows,
-                                         HYPRE_Int          *ncols,
-                                         HYPRE_Int    *rows,
-                                         HYPRE_Int    *cols,
-                                         double *values,
-                                         HYPRE_Int          *ierr    )
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *nrows,
+     hypre_F90_IntArray *ncols,
+     hypre_F90_IntArray *rows,
+     hypre_F90_IntArray *cols,
+     hypre_F90_DblArray *values,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixGetValues( (HYPRE_IJMatrix) *matrix,
-                                            (HYPRE_Int)            *nrows,
-                                            (HYPRE_Int *)           ncols,
-                                            (HYPRE_Int *)           rows,
-                                            (HYPRE_Int *)           cols,
-                                            (double *)        values  ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixGetValues(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassInt (nrows),
+           hypre_F90_PassIntArray (ncols),
+           hypre_F90_PassIntArray (rows),
+           hypre_F90_PassIntArray (cols),
+           hypre_F90_PassDblArray (values)  ) );
 
 }
 
@@ -172,13 +185,15 @@ hypre_F90_IFACE(hypre_ijmatrixgetvalues, HYPRE_IJMATRIXGETVALUES)
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijmatrixsetobjecttype, HYPRE_IJMATRIXSETOBJECTTYPE)(
-                                                     hypre_F90_Obj *matrix,
-                                                     const HYPRE_Int *type,
-                                                     HYPRE_Int       *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixsetobjecttype, HYPRE_IJMATRIXSETOBJECTTYPE)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *type,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixSetObjectType( (HYPRE_IJMatrix) *matrix,
-                                                (HYPRE_Int)            *type    ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixSetObjectType(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassInt (type)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -186,13 +201,15 @@ hypre_F90_IFACE(hypre_ijmatrixsetobjecttype, HYPRE_IJMATRIXSETOBJECTTYPE)(
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXGETOBJECTTYPE)(
-                                                     hypre_F90_Obj *matrix,
-                                                     HYPRE_Int      *type,
-                                                     HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXGETOBJECTTYPE)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *type,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixGetObjectType( (HYPRE_IJMatrix) *matrix,
-                                                (HYPRE_Int *)           type    ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixGetObjectType(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassIntRef (type)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -201,18 +218,20 @@ hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXGETOBJECTTYPE)(
 
 void 
 hypre_F90_IFACE(hypre_ijmatrixgetlocalrange, HYPRE_IJMATRIXGETLOCALRANGE)
-                                           ( hypre_F90_Obj *matrix,
-                                             HYPRE_Int      *ilower,
-                                             HYPRE_Int      *iupper,
-                                             HYPRE_Int      *jlower,
-                                             HYPRE_Int      *jupper,
-                                             HYPRE_Int      *ierr    )
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *ilower,
+     hypre_F90_Int *iupper,
+     hypre_F90_Int *jlower,
+     hypre_F90_Int *jupper,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixGetLocalRange( (HYPRE_IJMatrix) *matrix,
-                                                (HYPRE_Int *)           ilower,
-                                                (HYPRE_Int *)           iupper,
-                                                (HYPRE_Int *)           jlower,
-                                                (HYPRE_Int *)           jupper ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixGetLocalRange(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassIntRef (ilower),
+           hypre_F90_PassIntRef (iupper),
+           hypre_F90_PassIntRef (jlower),
+           hypre_F90_PassIntRef (jupper) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -220,13 +239,15 @@ hypre_F90_IFACE(hypre_ijmatrixgetlocalrange, HYPRE_IJMATRIXGETLOCALRANGE)
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijmatrixgetobject, HYPRE_IJMATRIXGETOBJECT)(
-                                                     hypre_F90_Obj *matrix,
-                                                     hypre_F90_Obj *object,
-                                                     HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixgetobject, HYPRE_IJMATRIXGETOBJECT)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Obj *object,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixGetObject( (HYPRE_IJMatrix) *matrix,
-                                            (void **)         object  ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixGetObject(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           (void **)         object  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -235,12 +256,14 @@ hypre_F90_IFACE(hypre_ijmatrixgetobject, HYPRE_IJMATRIXGETOBJECT)(
  
 void
 hypre_F90_IFACE(hypre_ijmatrixsetrowsizes, HYPRE_IJMATRIXSETROWSIZES)
-                                         ( hypre_F90_Obj *matrix,
-                                           const HYPRE_Int *sizes,
-                                           HYPRE_Int       *ierr    )
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_IntArray *sizes,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixSetRowSizes( (HYPRE_IJMatrix) *matrix,
-                                              (const HYPRE_Int *)     sizes   ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixSetRowSizes(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassIntArray (sizes)   ) );
 
 }
 
@@ -250,14 +273,16 @@ hypre_F90_IFACE(hypre_ijmatrixsetrowsizes, HYPRE_IJMATRIXSETROWSIZES)
  
 void
 hypre_F90_IFACE(hypre_ijmatrixsetdiagoffdsizes, HYPRE_IJMATRIXSETDIAGOFFDSIZES)
-                                              ( hypre_F90_Obj *matrix,
-                                                const HYPRE_Int *diag_sizes,
-                                                const HYPRE_Int *offd_sizes,
-                                                HYPRE_Int       *ierr        )
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_IntArray *diag_sizes,
+     hypre_F90_IntArray *offd_sizes,
+     hypre_F90_Int *ierr        )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixSetDiagOffdSizes( (HYPRE_IJMatrix) *matrix,
-                                                   (const HYPRE_Int *)     diag_sizes,
-                                                   (const HYPRE_Int *)     offd_sizes ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixSetDiagOffdSizes(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassIntArray (diag_sizes),
+           hypre_F90_PassIntArray (offd_sizes) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -266,13 +291,14 @@ hypre_F90_IFACE(hypre_ijmatrixsetdiagoffdsizes, HYPRE_IJMATRIXSETDIAGOFFDSIZES)
  
 void
 hypre_F90_IFACE(hypre_ijmatrixsetmaxoffprocelmt, HYPRE_IJMATRIXSETMAXOFFPROCELMT)
-                                              ( hypre_F90_Obj *matrix,
-                                                HYPRE_Int       *max_off_proc_elmts,
-                                                HYPRE_Int       *ierr        )
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *max_off_proc_elmts,
+     hypre_F90_Int *ierr        )
 {
-   *ierr = (HYPRE_Int) 
-         ( HYPRE_IJMatrixSetMaxOffProcElmts( (HYPRE_IJMatrix) *matrix,
-                                             (HYPRE_Int)            *max_off_proc_elmts ) );
+   *ierr = (hypre_F90_Int) 
+      ( HYPRE_IJMatrixSetMaxOffProcElmts(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassInt (max_off_proc_elmts) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -280,17 +306,19 @@ hypre_F90_IFACE(hypre_ijmatrixsetmaxoffprocelmt, HYPRE_IJMATRIXSETMAXOFFPROCELMT
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijmatrixread, HYPRE_IJMATRIXREAD)(
-                                                     char     *filename,
-                                                     hypre_F90_Comm *comm,
-                                                     HYPRE_Int      *object_type,
-                                                     hypre_F90_Obj *matrix,
-                                                     HYPRE_Int      *ierr      )
+hypre_F90_IFACE(hypre_ijmatrixread, HYPRE_IJMATRIXREAD)
+   ( char     *filename,
+     hypre_F90_Comm *comm,
+     hypre_F90_Int *object_type,
+     hypre_F90_Obj *matrix,
+     hypre_F90_Int *ierr      )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixRead( (char *)            filename,
-                                       (MPI_Comm)         *comm,
-                                       (HYPRE_Int)              *object_type,
-                                       (HYPRE_IJMatrix *)  matrix    ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixRead(
+           (char *)            filename,
+           hypre_F90_PassComm (comm),
+           hypre_F90_PassInt (object_type),
+           hypre_F90_PassObjRef (HYPRE_IJMatrix, matrix)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -298,11 +326,13 @@ hypre_F90_IFACE(hypre_ijmatrixread, HYPRE_IJMATRIXREAD)(
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijmatrixprint, HYPRE_IJMATRIXPRINT)(
-                                                     hypre_F90_Obj *matrix,
-                                                     char     *filename,
-                                                     HYPRE_Int      *ierr      )
+hypre_F90_IFACE(hypre_ijmatrixprint, HYPRE_IJMATRIXPRINT)
+   ( hypre_F90_Obj *matrix,
+     char     *filename,
+     hypre_F90_Int *ierr      )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_IJMatrixPrint( (HYPRE_IJMatrix) *matrix,
-                                        (char *)          filename ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixPrint(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           (char *)          filename ) );
 }

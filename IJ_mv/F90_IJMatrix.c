@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * hypre_IJMatrix Fortran interface
@@ -22,18 +19,19 @@
 #include "./_hypre_IJ_mv.h"
 #include "fortran.h"
 
-
 /*--------------------------------------------------------------------------
  * hypre_IJMatrixSetObject
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijmatrixsetobject, HYPRE_IJMATRIXSETOBJECT)(
-                                                     hypre_F90_Obj *matrix,
-                                                     hypre_F90_Obj *object,
-                                                     HYPRE_Int      *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixsetobject, HYPRE_IJMATRIXSETOBJECT)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Obj *object,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (HYPRE_Int) ( hypre_IJMatrixSetObject( (HYPRE_IJMatrix) *matrix,
-                                            (void *)         *object  ) );
+   *ierr = (hypre_F90_Int)
+      ( hypre_IJMatrixSetObject(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           (void *)         *object  ) );
 }
 

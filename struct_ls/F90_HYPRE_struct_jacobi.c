@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "headers.h"
 #include "fortran.h"
 
@@ -22,14 +18,15 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structjacobicreate, HYPRE_STRUCTJACOBICREATE)( hypre_F90_Comm *comm,
-                                            hypre_F90_Obj *solver,
-                                            HYPRE_Int      *ierr   )
-
+hypre_F90_IFACE(hypre_structjacobicreate, HYPRE_STRUCTJACOBICREATE)
+   ( hypre_F90_Comm *comm,
+     hypre_F90_Obj *solver,
+     hypre_F90_Int *ierr   )
 {
-   *ierr = (HYPRE_Int)
-      ( HYPRE_StructJacobiCreate( (MPI_Comm)             *comm,
-                               (HYPRE_StructSolver *) solver ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiCreate(
+           hypre_F90_PassComm (comm),
+           hypre_F90_PassObjRef (HYPRE_StructSolver, solver) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -37,10 +34,13 @@ hypre_F90_IFACE(hypre_structjacobicreate, HYPRE_STRUCTJACOBICREATE)( hypre_F90_C
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structjacobidestroy, HYPRE_STRUCTJACOBIDESTROY)( hypre_F90_Obj *solver,
-                                          HYPRE_Int      *ierr   )
+hypre_F90_IFACE(hypre_structjacobidestroy, HYPRE_STRUCTJACOBIDESTROY)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *ierr   )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_StructJacobiDestroy( (HYPRE_StructSolver) *solver ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiDestroy(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -48,16 +48,19 @@ hypre_F90_IFACE(hypre_structjacobidestroy, HYPRE_STRUCTJACOBIDESTROY)( hypre_F90
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structjacobisetup, HYPRE_STRUCTJACOBISETUP)( hypre_F90_Obj *solver,
-                                       hypre_F90_Obj *A,
-                                       hypre_F90_Obj *b,
-                                       hypre_F90_Obj *x,
-                                       HYPRE_Int      *ierr   )
+hypre_F90_IFACE(hypre_structjacobisetup, HYPRE_STRUCTJACOBISETUP)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *A,
+     hypre_F90_Obj *b,
+     hypre_F90_Obj *x,
+     hypre_F90_Int *ierr   )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_StructJacobiSetup( (HYPRE_StructSolver) *solver,
-                                         (HYPRE_StructMatrix) *A,
-                                         (HYPRE_StructVector) *b,
-                                         (HYPRE_StructVector) *x ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiSetup(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassObj (HYPRE_StructMatrix, A),
+           hypre_F90_PassObj (HYPRE_StructVector, b),
+           hypre_F90_PassObj (HYPRE_StructVector, x) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -65,16 +68,19 @@ hypre_F90_IFACE(hypre_structjacobisetup, HYPRE_STRUCTJACOBISETUP)( hypre_F90_Obj
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structjacobisolve, HYPRE_STRUCTJACOBISOLVE)( hypre_F90_Obj *solver,
-                                       hypre_F90_Obj *A,
-                                       hypre_F90_Obj *b,
-                                       hypre_F90_Obj *x,
-                                       HYPRE_Int      *ierr   )
+hypre_F90_IFACE(hypre_structjacobisolve, HYPRE_STRUCTJACOBISOLVE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *A,
+     hypre_F90_Obj *b,
+     hypre_F90_Obj *x,
+     hypre_F90_Int *ierr   )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_StructJacobiSolve( (HYPRE_StructSolver) *solver,
-                                         (HYPRE_StructMatrix) *A,
-                                         (HYPRE_StructVector) *b,
-                                         (HYPRE_StructVector) *x ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiSolve(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassObj (HYPRE_StructMatrix, A),
+           hypre_F90_PassObj (HYPRE_StructVector, b),
+           hypre_F90_PassObj (HYPRE_StructVector, x) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -82,12 +88,15 @@ hypre_F90_IFACE(hypre_structjacobisolve, HYPRE_STRUCTJACOBISOLVE)( hypre_F90_Obj
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structjacobisettol, HYPRE_STRUCTJACOBISETTOL)( hypre_F90_Obj *solver,
-                                        double   *tol,
-                                        HYPRE_Int      *ierr   )
+hypre_F90_IFACE(hypre_structjacobisettol, HYPRE_STRUCTJACOBISETTOL)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Dbl *tol,
+     hypre_F90_Int *ierr   )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_StructJacobiSetTol( (HYPRE_StructSolver) *solver,
-                                          (double)             *tol ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiSetTol(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassDbl (tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -95,12 +104,15 @@ hypre_F90_IFACE(hypre_structjacobisettol, HYPRE_STRUCTJACOBISETTOL)( hypre_F90_O
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structjacobigettol, HYPRE_STRUCTJACOBIGETTOL)( hypre_F90_Obj *solver,
-                                        double   *tol,
-                                        HYPRE_Int      *ierr   )
+hypre_F90_IFACE(hypre_structjacobigettol, HYPRE_STRUCTJACOBIGETTOL)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Dbl *tol,
+     hypre_F90_Int *ierr   )
 {
-   *ierr = (HYPRE_Int) ( HYPRE_StructJacobiGetTol( (HYPRE_StructSolver) *solver,
-                                          (double *)             tol ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiGetTol(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassDblRef (tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -109,13 +121,14 @@ hypre_F90_IFACE(hypre_structjacobigettol, HYPRE_STRUCTJACOBIGETTOL)( hypre_F90_O
 
 void
 hypre_F90_IFACE(hypre_structjacobisetmaxiter, HYPRE_STRUCTJACOBISETMAXITER)
-                                          ( hypre_F90_Obj *solver,
-                                            HYPRE_Int      *max_iter,
-                                            HYPRE_Int      *ierr     )
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *max_iter,
+     hypre_F90_Int *ierr     )
 {
-   *ierr = (HYPRE_Int)
-      ( HYPRE_StructJacobiSetMaxIter( (HYPRE_StructSolver) *solver,
-                                   (HYPRE_Int)                *max_iter ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiSetMaxIter(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassInt (max_iter) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -124,13 +137,14 @@ hypre_F90_IFACE(hypre_structjacobisetmaxiter, HYPRE_STRUCTJACOBISETMAXITER)
 
 void
 hypre_F90_IFACE(hypre_structjacobigetmaxiter, HYPRE_STRUCTJACOBIGETMAXITER)
-                                          ( hypre_F90_Obj *solver,
-                                            HYPRE_Int      *max_iter,
-                                            HYPRE_Int      *ierr     )
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *max_iter,
+     hypre_F90_Int *ierr     )
 {
-   *ierr = (HYPRE_Int)
-      ( HYPRE_StructJacobiGetMaxIter( (HYPRE_StructSolver) *solver,
-                                      (HYPRE_Int *)               max_iter ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiGetMaxIter(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassIntRef (max_iter) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -138,11 +152,13 @@ hypre_F90_IFACE(hypre_structjacobigetmaxiter, HYPRE_STRUCTJACOBIGETMAXITER)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structjacobisetzeroguess, HYPRE_STRUCTJACOBISETZEROGUESS)( hypre_F90_Obj *solver,
-                                              HYPRE_Int      *ierr       )
+hypre_F90_IFACE(hypre_structjacobisetzeroguess, HYPRE_STRUCTJACOBISETZEROGUESS)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *ierr       )
 {
-   *ierr = (HYPRE_Int)
-      ( HYPRE_StructJacobiSetZeroGuess( (HYPRE_StructSolver) *solver ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiSetZeroGuess(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -151,13 +167,14 @@ hypre_F90_IFACE(hypre_structjacobisetzeroguess, HYPRE_STRUCTJACOBISETZEROGUESS)(
 
 void
 hypre_F90_IFACE(hypre_structjacobigetzeroguess, HYPRE_STRUCTJACOBIGETZEROGUESS)
-                                            ( hypre_F90_Obj *solver,
-                                              HYPRE_Int      *zeroguess,
-                                              HYPRE_Int      *ierr       )
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *zeroguess,
+     hypre_F90_Int *ierr       )
 {
-   *ierr = (HYPRE_Int)
-      ( HYPRE_StructJacobiGetZeroGuess( (HYPRE_StructSolver) *solver,
-                                        (HYPRE_Int *)               zeroguess ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiGetZeroGuess(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassIntRef (zeroguess) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -165,11 +182,13 @@ hypre_F90_IFACE(hypre_structjacobigetzeroguess, HYPRE_STRUCTJACOBIGETZEROGUESS)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structjacobisetnonzerogue, HYPRE_STRUCTJACOBISETNONZEROGUE)( hypre_F90_Obj *solver,
-                                              HYPRE_Int      *ierr       )
+hypre_F90_IFACE(hypre_structjacobisetnonzerogue, HYPRE_STRUCTJACOBISETNONZEROGUE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *ierr       )
 {
-   *ierr = (HYPRE_Int)
-      ( HYPRE_StructJacobiSetNonZeroGuess( (HYPRE_StructSolver) *solver ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiSetNonZeroGuess(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -177,13 +196,15 @@ hypre_F90_IFACE(hypre_structjacobisetnonzerogue, HYPRE_STRUCTJACOBISETNONZEROGUE
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structjacobigetnumiterati, HYPRE_STRUCTJACOBIGETNUMITERATI)( hypre_F90_Obj *solver,
-                                                  HYPRE_Int      *num_iterations,
-                                                  HYPRE_Int      *ierr   )
+hypre_F90_IFACE(hypre_structjacobigetnumiterati, HYPRE_STRUCTJACOBIGETNUMITERATI)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *num_iterations,
+     hypre_F90_Int *ierr   )
 {
-   *ierr = (HYPRE_Int)
-      ( HYPRE_StructJacobiGetNumIterations( (HYPRE_StructSolver) *solver,
-         (HYPRE_Int *)              num_iterations ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiGetNumIterations(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassIntRef (num_iterations) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -191,11 +212,13 @@ hypre_F90_IFACE(hypre_structjacobigetnumiterati, HYPRE_STRUCTJACOBIGETNUMITERATI
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structjacobigetfinalrelat, HYPRE_STRUCTJACOBIGETFINALRELAT)( hypre_F90_Obj *solver,
-                                                  double   *norm,
-                                                  HYPRE_Int      *ierr   )
+hypre_F90_IFACE(hypre_structjacobigetfinalrelat, HYPRE_STRUCTJACOBIGETFINALRELAT)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Dbl *norm,
+     hypre_F90_Int *ierr   )
 {
-   *ierr = (HYPRE_Int)
-      ( HYPRE_StructJacobiGetFinalRelativeResidualNorm( (HYPRE_StructSolver) *solver,
-         (double *)           norm ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructJacobiGetFinalRelativeResidualNorm(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassDblRef (norm) ) );
 }
