@@ -75,12 +75,7 @@ c-----------------------------------------------------------------------
       call MPI_INIT(ierr)
       call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
-
-c   Convert the Fortran MPI communicator to a C version that can be used in hypre.
-c   Uncomment the line below if you are using MPICH
       mpi_comm = MPI_COMM_WORLD
-c   Uncomment the line below if you are using LAM-MPI
-c     call HYPRE_MPI_Comm_f2c(mpi_comm, MPI_COMM_WORLD, ierr)
 
 c   Default problem parameters
       n = 33
