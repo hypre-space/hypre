@@ -64,7 +64,7 @@ do
 done
 
 # Test other builds
-configure_opts="--enable-debug"
+configure_opts="--enable-bigint --enable-debug"
 for opt in $configure_opts
 do
    ./test.sh configure.sh $src_dir $opt $copts
