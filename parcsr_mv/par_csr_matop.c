@@ -1582,7 +1582,7 @@ void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, HYPRE_Int **in
     * child, put this edge on the tree. But if there is no such    *
     * edge, then I will assume my child will pick up an edge       */
 
-   for (j = 0; j < n_children; i++)
+   for (j = 0; j < n_children; j++)
    {
       proc = children[j];
       for (i = 0; i < nsends; i++)
