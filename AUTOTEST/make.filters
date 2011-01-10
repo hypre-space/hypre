@@ -20,3 +20,5 @@ configure: WARNING: Cannot find JVM shared library, Java support will be disable
 sidl_search_scl.c: In function `sclCharacters':
 sidl_search_scl.c:319: warning: comparison is always true due to *
 Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
+WARNING in dReadValues: Infinite loop.  Program may not stop.
+WARNING in dReadVector: Infinite loop.  Program may not stop.
