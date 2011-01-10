@@ -992,9 +992,11 @@ dnl * Set INSURE options
 dnl *********************************************************************
 if test "$hypre_using_insure" = "yes"
 then
-   LINK_F77="insure ${hypre_insure_flags}"
-   LINK_CC="insure ${hypre_insure_flags}"
-   LINK_CXX="insure ${hypre_insure_flags}"
+   LINK_F77="insure"
+   LINK_CC="insure"
+   LINK_CXX="insure"
+   LDFLAGS=`mpicc -link-info | awk '{$1=""; print}'`
+   LDFLAGS="$LDFLAGS ${hypre_insure_flags}"
 fi
 
 dnl *********************************************************************
