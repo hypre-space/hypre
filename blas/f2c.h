@@ -187,6 +187,8 @@ struct Namelist {
 	};
 typedef struct Namelist Namelist;
 
+/* The following undefs are to prevent conflicts with external libraries */
+#undef abs
 #define abs(x) ((x) >= 0 ? (x) : -(x))
 #define dabs(x) (doublereal)abs(x)
 #define min(a,b) ((a) <= (b) ? (a) : (b))

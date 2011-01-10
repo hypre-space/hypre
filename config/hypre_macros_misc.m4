@@ -109,8 +109,8 @@ then
       gcc|mpicc)
         CFLAGS="-O2"
         ;;
-      icc)
-        CFLAGS="-O3"
+      icc|mpiicc)
+        CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
           LDFLAGS="$LDFLAGS -openmp"
@@ -126,49 +126,12 @@ then
       KCC|mpiKCC)
         CFLAGS="-fast +K3"
         ;;
-      cc|mpcc|mpiicc|mpxlc|xlc)
-        case "${host}" in
-          alpha*-dec-osf4.*)
-            CFLAGS="-std1 -w0 -O2"
-            ;;
-          alpha*-dec-osf5.*)
-            CFLAGS="-fast"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CFLAGS="$CFLAGS -omp"
-              LDFLAGS="$LDFLAGS -omp"
-            fi
-            ;;
-          hppa*-hp-hpux*)
-            CFLAGS="-Aa -D_HPUX_SOURCE -O"
-            ;;
-          mips-sgi-irix6.[[4-9]]*)
-            CFLAGS="-Ofast -64 -OPT:Olimit=0"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CFLAGS="$CFLAGS -mp"
-              LDFLAGS="$LDCFLAGS -mp"
-            fi
-            ;;
-          mips-sgi-irix*)
-            CFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
-            ;;
-          rs6000-ibm-aix*)
-            CFLAGS="-D_ALL_SOURCE -O2"
-            ;;
-          powerpc-ibm-aix*)
-            CFLAGS="-O3 -qstrict"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CFLAGS="$CFLAGS -qsmp=omp"
-              LDFLAGS="$LDFLAGS -qsmp=omp"
-            fi
-            ;;
-          *)
-            CFLAGS="-O"
-            if test "$hypre_using_openmp" = "yes" ; then
-               CFLAGS="$CFLAGS -openmp"
-               LDFLAGS="$LDFLAGS -openmp"
-            fi
-            ;;
-        esac
+      cc|mpcc|xlc|mpxlc|mpixlc_r)
+        CFLAGS="-O2"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CFLAGS="$CFLAGS -qsmp=omp"
+          LDFLAGS="$LDFLAGS -qsmp=omp"
+        fi
         ;;
       *)
         CFLAGS="-O"
@@ -182,8 +145,8 @@ then
       gCC|mpiCC)
         CXXFLAGS="-O2"
         ;;
-      icpc|icc)
-        CXXFLAGS="-O3"
+      icpc|icc|mpiicpc|mpiicc)
+        CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
@@ -197,45 +160,11 @@ then
       KCC|mpiKCC)
         CXXFLAGS="-fast +K3"
         ;;
-      CC|mpCC|mpiicpc|mpiicc|mpxlC|xlC|cxx)
-        case "${host}" in
-          alpha*-dec-osf4.*)
-            CXXFLAGS="-std1 -w0 -O2"
-            ;;
-          alpha*-dec-osf5.*)
-            CXXFLAGS="-fast"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CXXFLAGS="$CXXFLAGS -omp"
-            fi
-            ;;
-          hppa*-hp-hpux*)
-            CXXFLAGS="-D_HPUX_SOURCE -O"
-            ;;
-          mips-sgi-irix6.[[4-9]]*)
-            CXXFLAGS="-Ofast -64 -OPT:Olimit=0"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CXXFLAGS="$CXXFLAGS -mp"
-            fi
-            ;;
-          mips-sgi-irix*)
-            CXXFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
-            ;;
-          rs6000-ibm-aix*)
-            CXXFLAGS="-D_ALL_SOURCE -O2"
-            ;;
-          powerpc-ibm-aix*)
-            CXXFLAGS="-O3 -qstrict"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CXXFLAGS="$CXXFLAGS -qsmp=omp"
-            fi
-            ;;
-          *)
-            CXXFLAGS="-O"
-            if test "$hypre_using_openmp" = "yes" ; then
-               CXXFLAGS="$CXXFLAGS -openmp"
-            fi
-            ;;
-        esac
+      CC|mpCC|mpxlC|xlC|cxx)
+        CXXFLAGS="-O2"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CXXFLAGS="$CXXFLAGS -qsmp=omp"
+        fi
         ;;
       *)
         CXXFLAGS="-O"
@@ -247,10 +176,10 @@ if test "x${hypre_user_chose_fflags}" = "xno"
 then
    case "${F77}" in
       g77)
-        FFLAGS="-O"
+        FFLAGS="-O2"
         ;;
-      ifort)
-        FFLAGS="-O3"
+      ifort|mpiifort)
+        FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi
@@ -264,45 +193,11 @@ then
       kf77|mpikf77)
         FFLAGS="-fast +K3"
         ;;
-      f77|f90|mpxlf|mpif77|mpiifort|xlf)
-        case "${host}" in
-          alpha*-dec-osf4.*)
-            FFLAGS="-std1 -w0 -O2"
-            ;;
-          alpha*-dec-osf5.*)
-            FFLAGS="-fast"
-            if test "$hypre_using_openmp" = "yes" ; then
-              FFLAGS="$FFLAGS -omp"
-            fi
-            ;;
-          mips-sgi-irix6.[[4-9]]*)
-            FFLAGS="-Ofast -64  -OPT:Olimit=0"
-            if test "$hypre_using_openmp" = "yes" ; then
-              FFLAGS="$FFLAGS -mp"
-            fi
-            ;;
-          mips-sgi-irix*)
-            FFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
-            ;;
-          rs6000-ibm-aix*)
-            FFLAGS="-D_ALL_SOURCE -O2"
-            ;;
-          powerpc-ibm-aix*)
-            FFLAGS="-O3 -qstrict"
-            if test "$hypre_using_openmp" = "yes" ; then
-              FFLAGS="$FFLAGS -qsmp=omp"
-            fi
-            ;;
-          sparc-sun-solaris2*)
-            FFLAGS="-silent -O"
-            ;;
-          *)
-            FFLAGS="-O"
-            if test "$hypre_using_openmp" = "yes" ; then
-               FFLAGS="$FFLAGS -openmp"
-            fi
-            ;;
-        esac
+      f77|f90|mpxlf|mpif77|xlf)
+        FFLAGS="-O2"
+        if test "$hypre_using_openmp" = "yes" ; then
+          FFLAGS="$FFLAGS -qsmp=omp"
+        fi
         ;;
       *)
         FFLAGS="-O"
@@ -327,7 +222,7 @@ then
       KCC|mpiKCC)
         CFLAGS="--c -g +K3"
         ;;
-      icc)
+      icc|mpiicc)
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
@@ -341,49 +236,12 @@ then
           LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
-      cc|mpcc|mpiicc|mpxlc|xlc)
-        case "${host}" in
-          alpha*-dec-osf4.*)
-            CFLAGS="-std1 -w0 -g"
-            ;;
-          alpha*-dec-osf5.*)
-            CFLAGS="-g"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CFLAGS="$CFLAGS -omp"
-              LDFLAGS="$LDFLAGS -omp"
-            fi
-            ;;
-          hppa*-hp-hpux*)
-            CFLAGS="-Aa -D_HPUX_SOURCE -g"
-            ;;
-          mips-sgi-irix6.[[4-9]]*)
-            CFLAGS="-g -64 -OPT:Olimit=0"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CFLAGS="$CFLAGS -mp"
-              LDFLAGS="$LDFLAGS -mp"
-            fi
-            ;;
-          mips-sgi-irix*)
-            CFLAGS="-fullwarn -woff 835 -g -Olimit 3500"
-            ;;
-          rs6000-ibm-aix*)
-            CFLAGS="-D_ALL_SOURCE -g"
-            ;;
-          powerpc-ibm-aix*)
-            CFLAGS="-g -qstrict"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CFLAGS="$CFLAGS -qsmp=omp"
-              LDFLAGS="$LDFLAGS -qsmp=omp"
-            fi
-            ;;
-          *)
-            CFLAGS="-g"
-            if test "$hypre_using_openmp" = "yes" ; then
-               CFLAGS="$CFLAGS -openmp"
-               LDFLAGS="$LDFLAGS -openmp"
-            fi
-            ;;
-        esac
+      cc|mpcc|xlc|mpxlc|mpixlc_r)
+        CFLAGS="-g"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CFLAGS="$CFLAGS -qsmp=omp"
+          LDFLAGS="$LDFLAGS -qsmp=omp"
+        fi
         ;;
       *)
         CFLAGS="-g"
@@ -400,7 +258,7 @@ then
       KCC|mpiKCC)
         CXXFLAGS="-g +K3"
         ;;
-      icpc|icc)
+      icpc|icc|mpiicpc|mpiicc)
         CXXFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
@@ -412,45 +270,11 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|mpCC|mpiicpc|mpiicc|mpxlC|xlC|cxx)
-        case "${host}" in
-          alpha*-dec-osf4.*)
-            CXXFLAGS="-std1 -w0 -g"
-            ;;
-          alpha*-dec-osf5.*)
-            CXXFLAGS="-g"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CXXFLAGS="$CXXFLAGS -omp"
-            fi
-            ;;
-          hppa*-hp-hpux*)
-            CXXFLAGS="-D_HPUX_SOURCE -g"
-            ;;
-          mips-sgi-irix6.[[4-9]]*)
-            CXXFLAGS="-g -64 -OPT:Olimit=0"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CXXFLAGS="$CXXFLAGS -mp"
-            fi
-            ;;
-          mips-sgi-irix*)
-            CXXFLAGS="-fullwarn -woff 835 -g -Olimit 3500"
-            ;;
-          rs6000-ibm-aix*)
-            CXXFLAGS="-D_ALL_SOURCE -g"
-            ;;
-          powerpc-ibm-aix*)
-            CXXFLAGS="-g -qstrict"
-            if test "$hypre_using_openmp" = "yes" ; then
-              CXXFLAGS="$CXXFLAGS -qsmp=omp"
-            fi
-            ;;
-          *)
-            CXXFLAGS="-g"
-            if test "$hypre_using_openmp" = "yes" ; then
-               CXXFLAGS="$CXXFLAGS -openmp"
-            fi
-            ;;
-        esac
+      CC|mpCC|mpxlC|xlC|cxx)
+        CXXFLAGS="-g"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CXXFLAGS="$CXXFLAGS -qsmp=omp"
+        fi
         ;;
       *)
         CXXFLAGS="-g"
@@ -467,7 +291,7 @@ then
       kf77|mpikf77)
         FFLAGS="-g +K3"
         ;;
-      ifort)
+      ifort|mpiifort)
         FFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
@@ -479,45 +303,11 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|mpxlf|mpif77|mpiifort|xlf)
-        case "${host}" in
-          alpha*-dec-osf4.*)
-            FFLAGS="-std1 -w0 -g"
-            ;;
-          alpha*-dec-osf5.*)
-            FFLAGS="-g"
-            if test "$hypre_using_openmp" = "yes" ; then
-              FFLAGS="$FFLAGS -omp"
-            fi
-            ;;
-          mips-sgi-irix6.[[4-9]]*)
-            FFLAGS="-g -64 -OPT:Olimit=0"
-            if test "$hypre_using_openmp" = "yes" ; then
-              FFLAGS="$FFLAGS -mp"
-            fi
-            ;;
-          mips-sgi-irix*)
-            FFLAGS="-fullwarn -woff 835 -g -Olimit 3500"
-            ;;
-          rs6000-ibm-aix*)
-            FFLAGS="-D_ALL_SOURCE -g"
-            ;;
-          powerpc-ibm-aix*)
-            FFLAGS="-g -qstrict"
-            if test "$hypre_using_openmp" = "yes" ; then
-              FFLAGS="$FFLAGS -qsmp=omp"
-            fi
-            ;;
-          sparc-sun-solaris2*)
-            FFLAGS="-silent -g"
-            ;;
-          *)
-            FFLAGS="-g"
-            if test "$hypre_using_openmp" = "yes" ; then
-               FFLAGS="$FFLAGS -openmp"
-            fi
-            ;;
-        esac
+      f77|f90|mpxlf|mpif77|xlf)
+        FFLAGS="-g"
+        if test "$hypre_using_openmp" = "yes" ; then
+          FFLAGS="$FFLAGS -qsmp=omp"
+        fi
         ;;
       *)
         FFLAGS="-g"

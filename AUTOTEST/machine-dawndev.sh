@@ -65,7 +65,7 @@ done
 # temporarily change word delimeter in order to have spaces in options
 tmpIFS=$IFS
 IFS=:
-configure_opts="--enable-debug:--with-openmp --with-LDFLAGS=-qsmp=omp"
+configure_opts="--enable-debug:--with-openmp:--enable-bigint"
 for opt in $configure_opts
 do
     # only use first part of $opt for subdir name
