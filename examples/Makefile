@@ -67,12 +67,15 @@ LFLAGS90 =
 ########################################################################
 ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f \
            ex13 ex14 ex15
+64BITPROGS = ex5big
 BABELPROGS = ex5b ex5b77 ex5bxx ex6b ex6b77
 # ... ex5bp and ex5b90 are not in BABELPROGS because they require a
 # software environment which many people haven't set up.
 FORTRANPROGS = ex5f ex12f
 
 all: $(ALLPROGS)
+
+64bit: $(64BITPROGS)
 
 babel: $(BABELPROGS)
 
@@ -106,6 +109,12 @@ ex4: ex4.o
 # Example 5
 ########################################################################
 ex5: ex5.o
+	$(CC) -o $@ $^ $(LFLAGS)
+
+########################################################################
+# Example 5 with 64-bit integers
+########################################################################
+ex5big: ex5big.o
 	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
@@ -221,10 +230,12 @@ ex15: ex15.o
 ########################################################################
 clean:
 	rm -f $(ALLPROGS:=.o)
+	rm -f $(64BITPROGS:=.o)
 	rm -f $(BABELPROGS:=.o)
 	rm -f $(FORTRANPROGS:=.o)
 distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)
+	rm -f $(64BITPROGS) $(64BITPROGS:=*~)
 	rm -f $(BABELPROGS) $(BABELPROGS:=*~)
 	rm -f $(FORTRANLPROGS) $(FORTRANPROGS:=*~)
 	rm -rf $(BABELPROGS:=*-pp.f90)

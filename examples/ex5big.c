@@ -3,19 +3,25 @@
 
    Interface:    Linear-Algebraic (IJ)
 
-   Compile with: make ex5
+   Compile with: make ex5big
 
-   Sample run:   mpirun -np 4 ex5
+   Sample run:   mpirun -np 4 ex5big
 
-   Description:  This example solves the 2-D
-                 Laplacian problem with zero boundary conditions
-                 on an nxn grid.  The number of unknowns is N=n^2.
-                 The standard 5-point stencil is used, and we solve
-                 for the interior nodes only.
+   Description:  This example is a slight modification of Example 5 that
+                 illustrates the 64-bit integer support in hypre needed to run
+                 problems with more than 2B unknowns.
 
-                 This example solves the same problem as Example 3.
-                 Available solvers are AMG, PCG, and PCG with AMG or
-                 Parasails preconditioners.
+                 Specifically, the changes compared to Example 5 are as follows:
+
+                 1) All integer arguments to HYPRE functions should be declared
+                    of type HYPRE_Int.
+
+                 2) Variables of type HYPRE_Int are 64-bit integers, so they
+                    should be printed in the %lld format (not %d).
+
+                 To enable the 64-bit integer support, you need to build hypre
+                 with the --enable-bigint option of the configure script.  We
+                 recommend comparing this example with Example 5.
 */
 
 #include <math.h>
@@ -31,12 +37,12 @@ int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
 
 int main (int argc, char *argv[])
 {
-   int i;
+   HYPRE_Int i;
    int myid, num_procs;
    int N, n;
 
-   int ilower, iupper;
-   int local_size, extra;
+   HYPRE_Int ilower, iupper;
+   HYPRE_Int local_size, extra;
 
    int solver_id;
    int print_solution, print_system;
@@ -171,9 +177,9 @@ int main (int argc, char *argv[])
       one could set all the rows together (see the User's Manual).
    */
    {
-      int nnz;
+      HYPRE_Int nnz;
       double values[5];
-      int cols[5];
+      HYPRE_Int cols[5];
 
       for (i = ilower; i <= iupper; i++)
       {
@@ -254,11 +260,11 @@ int main (int argc, char *argv[])
    /* Set the rhs values to h^2 and the solution to zero */
    {
       double *rhs_values, *x_values;
-      int    *rows;
+      HYPRE_Int *rows;
 
       rhs_values = calloc(local_size, sizeof(double));
       x_values = calloc(local_size, sizeof(double));
-      rows = calloc(local_size, sizeof(int));
+      rows = calloc(local_size, sizeof(HYPRE_Int));
 
       for (i=0; i<local_size; i++)
       {
@@ -304,7 +310,7 @@ int main (int argc, char *argv[])
    /* AMG */
    if (solver_id == 0)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Create solver */
@@ -328,7 +334,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -339,7 +345,7 @@ int main (int argc, char *argv[])
    /* PCG */
    else if (solver_id == 50)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Create solver */
@@ -362,7 +368,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -373,7 +379,7 @@ int main (int argc, char *argv[])
    /* PCG with AMG preconditioner */
    else if (solver_id == 1)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Create solver */
@@ -409,7 +415,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -421,7 +427,7 @@ int main (int argc, char *argv[])
    /* PCG with Parasails Preconditioner */
    else if (solver_id == 8)
    {
-      int    num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       int      sai_max_levels = 1;
@@ -463,7 +469,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -475,7 +481,7 @@ int main (int argc, char *argv[])
    /* Flexible GMRES with  AMG Preconditioner */
    else if (solver_id == 61)
    {
-      int    num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
       int    restart = 30;
       int    modify = 1;
@@ -524,7 +530,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
