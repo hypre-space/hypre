@@ -59,11 +59,11 @@ do
    mv -f link.??? $output_subdir
 done
 
-# Test other builds
+# Test other builds (last one is the default build)
 # temporarily change word delimeter in order to have spaces in options
 tmpIFS=$IFS
 IFS=:
-configure_opts="--enable-debug:--with-openmp:--enable-bigint"
+configure_opts="--enable-debug:--enable-bigint: "
 for opt in $configure_opts
 do
     # only use first part of $opt for subdir name
