@@ -49,8 +49,8 @@ mv -f configure.??? $output_dir
 ./test.sh make.sh $src_dir test
 mv -f make.??? $output_dir
 
-./test.sh run.sh $src_dir -D HYPRE_NO_SAVED
-mv -f run.??? $output_dir -nthreads 2
+./test.sh run.sh $src_dir -nthreads 2 -D HYPRE_NO_SAVED
+mv -f run.??? $output_dir
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
