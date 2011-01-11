@@ -6,9 +6,11 @@ NoRun=0
 JobCheckInterval=10        #sleep time between jobs finished check
 InputString=""
 RunString=""
+RunEcho=""
 ExecFileNames=""           #string of executable file names used
 TestDirNames=""            #string of names of TEST_* directories used
 HOST=`hostname|cut -c1-4`  #first 4 characters of host platform name
+NumThreads=0               #number of OpenMP threads to use if > 0
 
 function usage
 {
@@ -20,6 +22,7 @@ function usage
    printf "\n"
    printf " with options:\n"
    printf "    -h|-help       prints this usage information and exits\n"
+   printf "    -nthreads <n>  use 'n' OpenMP threads\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
    printf "    -t|-trace      echo each command\n"
    printf "    -D <var>       define <var> when running tests\n"
@@ -95,6 +98,9 @@ function MpirunString
          RunString="${RunString} -cwd $MY_EXECUTE_DIR -args \" $MY_ARGS \" "
          ;;
       hera*) shift
+         if [ $NumThreads -gt 0 ] ; then
+            export OMP_NUM_THREADS=$NumThreads
+         fi
          RunString="srun -p pdebug -n$*"
          ;;
       zeus*) shift
@@ -330,7 +336,7 @@ EOF
                       ;;
             esac
             if [ "$BatchMode" -eq 0 ] ; then
-               ${RunString} > $OutFile 2> $ErrFile </dev/null
+               ${RunEcho} ${RunString} > $OutFile 2> $ErrFile </dev/null
             else
                if [ "$BatchFlag" -eq 0 ] ; then
                   BatchFile=`echo $OutFile | sed -e 's/\.out\./.batch./'`
@@ -475,8 +481,14 @@ do
          usage
          exit
          ;;
+      -nthreads)
+         shift
+         NumThreads=$1
+         shift
+         ;;
       -n|-norun)
          NoRun=1
+         RunEcho="echo"
          shift
          ;;
       -t|-trace)
