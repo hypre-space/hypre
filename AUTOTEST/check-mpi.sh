@@ -38,13 +38,14 @@ shift
 
 cd $src_dir
 
-find . -regextype posix-egrep -regex '.*\.(c|cc|cpp|cxx|C|h|hpp|hxx|H)' -print |
+find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
   egrep -v '/AUTOTEST' |
   egrep -v '/babel' |
   egrep -v '/docs' |
   egrep -v '/docs_misc' |
   egrep -v '/examples' |
-  egrep -v '/FEI_mv' > check-mpi.files
+  egrep -v '/FEI_mv' |
+  egrep -v '/hypre/include' > check-mpi.files
 
 egrep '(^|[^[:alnum:]_]+)MPI_' `cat check-mpi.files` |
   egrep -v 'MPI_Comm' >&2
