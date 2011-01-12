@@ -49,6 +49,10 @@ shift
 ./test.sh debug.sh $src_dir --with-insure
 mv -f debug.??? $output_dir
 
+# Test examples
+./test.sh examples.sh $src_dir/examples
+mv -f examples.??? $output_dir
+
 # Test babel build (only if 'babel-runtime' directory is present)
 if [ -d $src_dir/babel-runtime ]; then
    opt="--with-babel"
@@ -97,10 +101,6 @@ mv -f configure.??? $output_subdir
 mv -f make.??? $output_subdir
 ./test.sh run.sh $src_dir
 mv -f run.??? $output_subdir
-
-# Test examples
-./test.sh examples.sh $src_dir/examples
-mv -f examples.??? $output_dir
 
 # Test documentation build (only if 'docs_misc' directory is present)
 if [ -d $src_dir/docs_misc ]; then
