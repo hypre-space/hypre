@@ -188,7 +188,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         Ai= hypre_CCBoxIndexRank(A_dbox, start);
                         AApd= 1.0/Ap[Ai];
 
-#define HYPRE_SMP_PRIVATE ii,jj,bi,xi, kk
+#define HYPRE_SMP_PRIVATE ii,jj,bi,xi,kk
 #include "hypre_smp_forloop.h"
         		for (kk = 0; kk < nk; kk++)
                         {

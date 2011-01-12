@@ -516,7 +516,7 @@ hypre_PFMGSetupInterpOp_CC2
       hypre_BoxLoop2Begin(loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc,mrk0,mrk1
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,Ap,Astenc,mrk0,mrk1
 #include "hypre_box_smp_forloop.h"
       hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
          {
@@ -530,22 +530,6 @@ hypre_PFMGSetupInterpOp_CC2
             Astenc = hypre_IndexD(stencil_shape[si], cdir);
             hypre_assert( Astenc==0 );
             center += Ap[Ai];
-#if 0
-            if (Astenc == 0)
-            {
-               /* expected to be the only case, the rest is left in
-                for now in case I missed something. */
-               center += Ap[Ai];
-            }
-            else if (Astenc == Pstenc0)
-            {
-               Pp0[Pi] -= Ap[Ai];
-            }
-            else if (Astenc == Pstenc1)
-            {
-               Pp1[Pi] -= Ap[Ai];
-            }
-#endif
 
             if (si == si0 && Ap[Ai] == 0.0)
                mrk0++;

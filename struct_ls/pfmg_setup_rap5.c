@@ -863,8 +863,8 @@ hypre_PFMGBuildCoarseOp5_onebox_CC2(
    hypre_BoxLoop2Begin(loop_size,
                        A_dbox, fstart, stridef, iA,
                        RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1,\
-                              diagm, diagp
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1,diagm,diagp,\
+                              bdy,floopi,floopj,floopk,box_index,fbi,fg_bdy_box
 #include "hypre_box_smp_forloop.h"
    hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
       {

@@ -69,8 +69,6 @@ hypre_PrintBoxArrayData( FILE            *file,
 
 	 hypre_BoxLoop1Begin(loop_size,
                              data_box, start, stride, datai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
-#include "hypre_box_smp_forloop.h"
 	 hypre_BoxLoop1For(loopi, loopj, loopk, datai)
             {
                for (j = 0; j < num_values; j++)
@@ -153,8 +151,6 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
 
          hypre_BoxLoop1Begin(loop_size,
                              data_box, start, stride, datai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
-#include "hypre_box_smp_forloop.h"
          hypre_BoxLoop1For(loopi, loopj, loopk, datai)
             {
                hypre_fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
@@ -262,8 +258,6 @@ hypre_ReadBoxArrayData( FILE            *file,
 
 	 hypre_BoxLoop1Begin(loop_size,
                              data_box, start, stride, datai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
-#include "hypre_box_smp_forloop.h"
 	 hypre_BoxLoop1For(loopi, loopj, loopk, datai)
             {
                for (j = 0; j < num_values; j++)
@@ -350,8 +344,6 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
          {
             hypre_BoxLoop1Begin(loop_size,
                                 data_box, start, stride, datai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
-#include "hypre_box_smp_forloop.h"
             hypre_BoxLoop1For(loopi, loopj, loopk, datai)
                {
                   hypre_fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
