@@ -721,7 +721,7 @@ hypre_NodeRelax(  void               *relax_vdata,
 #include "hypre_box_smp_forloop.h"
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, bi, xi)
                         {
-                           A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars*nvars];
+                           A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
                            x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
                            /*------------------------------------------------
                             * Copy rhs and matrix for diagonal coupling
@@ -918,7 +918,7 @@ hypre_NodeRelax(  void               *relax_vdata,
 #include "hypre_box_smp_forloop.h"
                      hypre_BoxLoop2For(loopi, loopj, loopk, Ai, ti)
                         {
-                           A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars*nvars];
+                           A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
                            x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
                            /*------------------------------------------------
                             * Copy rhs and matrix for diagonal coupling
