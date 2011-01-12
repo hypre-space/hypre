@@ -10,8 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
+/******************************************************************************
+ * OpenMP Problems
+ *
+ * Need to fix the way these variables are set and incremented in loops:
+ *   j, k (only where they are listed at the end of SMP_PRIVATE)
+ *
+ ******************************************************************************/
 
 #include "headers.h"
 
@@ -534,8 +539,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
             hypre_BoxLoop1Begin(loop_size,
                                &copy_box, start, stride, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,entry,p,j
 #include "hypre_box_smp_forloop.h"
+#endif
             hypre_BoxLoop1For(loopi, loopj, loopk, m)
             {
                hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -653,8 +660,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[2]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -728,8 +737,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[1]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -825,8 +836,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[2]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -899,8 +912,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[0]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -997,8 +1012,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[0]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -1069,8 +1086,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[1]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -1114,11 +1133,11 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
             }  /* switch */
          }     /* for (t= 0; t< Edge_nvars; t++) */
-                                                                                                                
+
          hypre_TFree(boxoffset);
       }  /* for (part= 0; part< nparts; part++) */
    }     /* if (ndim == 3) */
-                                                                                                       
+
    for (part= 0; part< nparts; part++)
    {
       p_fgrid= hypre_SStructGridPGrid(fgrid_edge, part);  /* edge grid */
@@ -1158,8 +1177,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -1216,8 +1237,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -1276,8 +1299,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -1345,8 +1370,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -1415,8 +1442,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -1656,8 +1685,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
               fbox is used. */
              hypre_BoxLoop1Begin(loop_size,
                                 &copy_box, start, stride, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,j,entry,p,cindex,l,k
 #include "hypre_box_smp_forloop.h"
+#endif
              hypre_BoxLoop1For(loopi, loopj, loopk, m)
              {
                 hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -1794,8 +1825,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[2]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -1897,8 +1930,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[1]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2008,7 +2043,6 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   {
                      hypre_AddIndex(hypre_BoxIMin(&copy_box), boxoffset[2],
                                     hypre_BoxIMin(&copy_box));
-                                                                                                                    
                     /* modify cstart */
                      hypre_AddIndex(cstart, kshift, cstart);
                   }
@@ -2025,8 +2059,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[2]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2113,7 +2149,6 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   {
                      hypre_AddIndex(hypre_BoxIMin(&copy_box), boxoffset[0],
                                     hypre_BoxIMin(&copy_box));
-                                                                                                                    
                     /* modify cstart */
                      hypre_AddIndex(cstart, ishift, cstart);
                   }
@@ -2128,8 +2163,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[0]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2236,7 +2273,6 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   {
                      hypre_AddIndex(hypre_BoxIMin(&copy_box), boxoffset[0],
                                     hypre_BoxIMin(&copy_box));
-                                                                                                                    
                     /* modify cstart */
                      hypre_AddIndex(cstart, ishift, cstart);
                   }
@@ -2252,8 +2288,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[0]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2353,8 +2391,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   loop_size[1]++;
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2466,8 +2506,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2536,8 +2578,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2606,8 +2650,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2703,8 +2749,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2800,8 +2848,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {
                      hypre_SetIndex(findex, loopi, loopj, loopk);
@@ -2935,5 +2985,4 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
    return (hypre_IJMatrix *) edge_Edge;
 }
-                                                                                                                                                         
 

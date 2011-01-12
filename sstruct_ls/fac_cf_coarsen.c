@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "headers.h" 
 #include "fac.h"
 
@@ -337,7 +334,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                     
                     hypre_BoxLoop1Begin(loop_size,
                                         A_dbox, node_extents, stridec, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,i
 #include "hypre_box_smp_forloop.h"
                     hypre_BoxLoop1For(loopi, loopj, loopk, iA)
                     {

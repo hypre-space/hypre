@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  *
@@ -291,10 +288,10 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
     * Allocate storage used to invert local diagonal blocks
     *----------------------------------------------------------*/
 
-   x_loc    = hypre_TAlloc(double   , nvars);
-   A_loc    = hypre_TAlloc(double  *, nvars);
-   A_loc[0] = hypre_TAlloc(double   , nvars*nvars);
-   for (vi = 1; vi < nvars; vi++)
+   x_loc    = hypre_TAlloc(double   , hypre_NumThreads()*nvars);
+   A_loc    = hypre_TAlloc(double  *, hypre_NumThreads()*nvars);
+   A_loc[0] = hypre_TAlloc(double   , hypre_NumThreads()*nvars*nvars);
+   for (vi = 1; vi < hypre_NumThreads()*nvars; vi++)
    {
       A_loc[vi] = A_loc[0] + vi*nvars;
    }
@@ -584,8 +581,10 @@ hypre_NodeRelax(  void               *relax_vdata,
    HYPRE_Int              xi;
    HYPRE_Int              ti;
                         
-   double               **A_loc = (relax_data -> A_loc);
-   double                *x_loc = (relax_data -> x_loc);
+   double               **tA_loc = (relax_data -> A_loc);
+   double                *tx_loc = (relax_data -> x_loc);
+   double               **A_loc;
+   double                *x_loc;
 
    double              ***Ap = (relax_data -> Ap);
    double               **bp = (relax_data -> bp);
@@ -718,10 +717,12 @@ hypre_NodeRelax(  void               *relax_vdata,
                                          A_data_box, start, stride, Ai,
                                          b_data_box, start, stride, bi,
                                          x_data_box, start, stride, xi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,bi,xi,vi,vj
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,bi,xi,vi,vj,x_loc,A_loc
 #include "hypre_box_smp_forloop.h"
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, bi, xi)
                         {
+                           A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars*nvars];
+                           x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
                            /*------------------------------------------------
                             * Copy rhs and matrix for diagonal coupling
                             * (intra-nodal) into local storage.
@@ -913,10 +914,12 @@ hypre_NodeRelax(  void               *relax_vdata,
                      hypre_BoxLoop2Begin(loop_size,
                                          A_data_box, start, stride, Ai,
                                          t_data_box, start, stride, ti);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,ti,vi,vj
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,ti,vi,vj,x_loc,A_loc
 #include "hypre_box_smp_forloop.h"
                      hypre_BoxLoop2For(loopi, loopj, loopk, Ai, ti)
                         {
+                           A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars*nvars];
+                           x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
                            /*------------------------------------------------
                             * Copy rhs and matrix for diagonal coupling
                             * (intra-nodal) into local storage.

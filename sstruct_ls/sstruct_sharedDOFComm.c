@@ -10,8 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
+/******************************************************************************
+ * OpenMP Problems
+ *
+ * Need to fix the way these variables are set and incremented in loops:
+ *   tot_nsendRowsNcols, send_ColsData_alloc, tot_sendColsData
+ *
+ ******************************************************************************/
 
 #include "headers.h"
 
@@ -45,17 +50,17 @@ hypre_MaxwellOffProcRowDestroy(void *OffProcRow_vdata)
 {
    hypre_MaxwellOffProcRow  *OffProcRow= OffProcRow_vdata;
    HYPRE_Int                 ierr= 0;
-                                                                                                                                      
+
    if (OffProcRow)
    {
       hypre_TFree(OffProcRow -> cols);
       hypre_TFree(OffProcRow -> data);
    }
    hypre_TFree(OffProcRow);
-                                                                                                                                      
+
    return ierr;
 }
-                                                                                                                                      
+
 /*--------------------------------------------------------------------------
  * hypre_SStructSharedDOF_ParcsrMatRowsComm
  *   Given a sstruct_grid & parcsr matrix with rows corresponding to the
@@ -688,7 +693,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                      hypre_CopyIndex(hypre_BoxIMin(&boxman_entry_box), start);
 
                      hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,rank,tot_nsendRowsNcols,n,col_inds,values,send_ColsData_alloc,k,tot_sendColsData
 #include "hypre_box_smp_forloop.h"
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {

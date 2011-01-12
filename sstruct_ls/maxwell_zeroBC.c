@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "headers.h"
 
 HYPRE_Int
@@ -36,14 +33,13 @@ hypre_SeqVectorZeroBCValues(hypre_Vector *v,
 {
    double  *vector_data = hypre_VectorData(v);
    HYPRE_Int      i;
-                                                                                                    
    HYPRE_Int      ierr  = 0;
-                                                                                                    
+
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < nrows; i++)
       vector_data[rows[i]]= 0.0;
-                                                                                                    
+
    return ierr;
 }
 

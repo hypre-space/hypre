@@ -10,8 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
+/******************************************************************************
+ * OpenMP Problems
+ *
+ * Need to fix the way these variables are set and incremented in loops:
+ *   i, nrows (only where they are listed at the end of SMP_PRIVATE)
+ *
+ ******************************************************************************/
 
 #include "headers.h"
 
@@ -134,21 +139,21 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             k++;
             break;
          }
-                                                                                                                       
+
          case 5:
          {
             vartype_edges[k]= HYPRE_SSTRUCT_VARIABLE_XEDGE;
             k++;
             break;
          }
-                                                                                                                       
+
          case 6:
          {
             vartype_edges[k]= HYPRE_SSTRUCT_VARIABLE_YEDGE;
             k++;
             break;
          }
-                                                                                                                       
+
          case 7:
          {
             vartype_edges[k]= HYPRE_SSTRUCT_VARIABLE_ZEDGE;
@@ -318,7 +323,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
          
                hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
                hypre_BoxLoop0For(loopi, loopj, loopk)
                {
@@ -398,13 +403,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                break;
             }
          }  /* switch(j) */
-                                                                                                                        
+
          hypre_ForBoxI(j, boxes)
          {
             box= hypre_BoxArrayBox(boxes, j);
             hypre_BoxManGetEntry(boxman, myproc, j, &entry);
             i= hypre_BoxVolume(box);
-                                                                                                                        
+
             for (d= 0; d< ndirection; d++)
             {
                tmp_box_array1= hypre_BoxArrayCreate(0);
@@ -419,9 +424,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   {
                      hypre_BoxGetSize(box_piece, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
-                                                                                                                        
+
                      hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {
@@ -445,15 +450,15 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   {
                      hypre_BoxGetSize(box_piece, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
-                                                                                                                        
+
                      hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {
                         hypre_SetIndex(index, loopi, loopj, loopk);
                         hypre_AddIndex(index, start, index);
-                                                                                                                        
+
                         hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                               &rank, matrix_type);
                         eflag[rank-start_rank2]= 0;
@@ -461,7 +466,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_BoxLoop0End();
                   }  /* if (hypre_BoxVolume(box_piece) < i) */
                }     /* for (k= 0; k< hypre_BoxArraySize(tmp_box_array2); k++) */
-                                                                                                                        
                hypre_BoxArrayDestroy(tmp_box_array2);
             }  /* for (d= 0; d< ndirection; d++) */
 
@@ -507,13 +511,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             hypre_SetIndex(offsets[i], 1, 0, 0);
             break;
          }
-                                                                                                             
+
          case 5:
          {
             hypre_SetIndex(offsets[i], 1, 0, 0);
             break;
          }
-                                                                                                             
+
          case 6:
          {
             hypre_SetIndex(offsets[i], 0, 1, 0);
@@ -579,8 +583,10 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
               then the column ranks for the connected nodes. Change the 
               appropriate values to 1. */
             hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
 #include "hypre_box_smp_forloop.h"
+#endif
             hypre_BoxLoop0For(loopi, loopj, loopk)
             {
                hypre_SetIndex(index, loopi, loopj, loopk);
@@ -642,8 +648,10 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   hypre_CopyIndex(hypre_BoxIMin(&layer), start);
 
                   hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
 #include "hypre_box_smp_forloop.h"
+#endif
                   hypre_BoxLoop0For(loopi, loopj, loopk)
                   {
                      hypre_SetIndex(index, loopi, loopj, loopk);
@@ -704,7 +712,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                            {
                               jedge[i]= m;
                               i++;
-                                                                                                                        
                               ncols[nrows]++;
                            }
                         }
@@ -712,10 +719,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                         {
                            jedge[i]= m;
                            i++;
-                                                                                                                        
                            ncols[nrows]++;
                         }
-                                                                                                                        
+
                         nrows++; /* must have at least one node connection */
                      }  /* if (eflag[m-start_rank2]) */
 

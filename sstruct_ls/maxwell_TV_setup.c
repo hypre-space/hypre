@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 #include "headers.h"
 #include "maxwell_TV.h"
 #include "par_amg.h"
@@ -295,7 +293,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                         hypre_BoxArraySize(boxes)-1,
                                         myproc, &entry);
    hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(box), &iupper);
-                                                                                                                        
+
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &Aen);
    HYPRE_IJMatrixSetObjectType(Aen, HYPRE_PARCSR);
    HYPRE_IJMatrixInitialize(Aen);
@@ -347,7 +345,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       sgrid = hypre_SStructPGridSGrid(pgrid, 0);
       nrows+= hypre_StructGridLocalSize(sgrid);
    }
-                                                                                                             
+
    flag = hypre_CTAlloc(HYPRE_Int, nrows);
    flag2= hypre_CTAlloc(HYPRE_Int, nrows);
    for (i= 0; i< nrows; i++)
@@ -364,13 +362,13 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       sgrid   = hypre_SStructPGridSGrid(pgrid, 0);
       boxes   = hypre_StructGridBoxes(sgrid);
       node_boxman = hypre_SStructGridBoxManager(node_grid, part, 0);
-                                                                                                             
+
       hypre_ForBoxI(j, boxes)
       {
          box= hypre_BoxArrayBox(boxes, j);
          hypre_BoxManGetEntry(node_boxman, myproc, j, &entry);
          i= hypre_BoxVolume(box);
-                                                                                                             
+
          tmp_box_array= hypre_BoxArrayCreate(0);
          ierr        += hypre_BoxBoundaryG(box, sgrid, tmp_box_array);
 
@@ -381,16 +379,15 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
             {
                hypre_BoxGetSize(box_piece, loop_size);
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
-                                                                                                             
+
                hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
                hypre_BoxLoop0For(loopi, loopj, loopk)
                {
                    hypre_SetIndex(index, loopi, loopj, loopk);
                    hypre_AddIndex(index, start, index);
-                                                                                                             
+
                    hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                      &rank, matrix_type);
                    flag[rank-start_rank] = 0;
@@ -398,13 +395,11 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                }
                hypre_BoxLoop0End();
             }  /* if (hypre_BoxVolume(box_piece) < i) */
-                                                                                                             
          }  /* for (m= 0; m< hypre_BoxArraySize(tmp_box_array); m++) */
          hypre_BoxArrayDestroy(tmp_box_array);
-                                                                                                             
       }  /* hypre_ForBoxI(j, boxes) */
    }     /* for (part= 0; part< nparts; part++) */
-                                                                                                             
+
    /* set up boundary identity */
    j= 0;
    for (i= 0; i< nrows; i++)
@@ -1366,13 +1361,12 @@ hypre_CoarsenPGrid( hypre_SStructGrid  *fgrid,
                     HYPRE_Int          *nboxes)
 {
    HYPRE_Int ierr = 0;
-                                                                                                             
+
    hypre_SStructPGrid *pgrid= hypre_SStructGridPGrid(fgrid, part);
    hypre_StructGrid   *sgrid= hypre_SStructPGridCellSGrid(pgrid);
 
    hypre_BoxArray     *boxes;
    hypre_Box          *box, *contract_box;
-                                                                                                             
    HYPRE_Int           i;
 
    /*-----------------------------------------

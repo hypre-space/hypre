@@ -10,8 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
+/******************************************************************************
+ * OpenMP Problems
+ *
+ * Need to fix the way these variables are set and incremented in loops:
+ *   cnt
+ *
+ ******************************************************************************/
 
 #include "headers.h"
 
@@ -469,8 +474,10 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                      hypre_CopyIndex(hypre_BoxIMin(box), start);
       
                      hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,boxman_entry,cnt
 #include "hypre_box_smp_forloop.h"
+#endif
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {
                         hypre_SetIndex(index, loopi, loopj, loopk);
@@ -751,8 +758,8 @@ hypre_Maxwell_VarBdy( hypre_SStructPGrid       *pgrid,
                    hypre_AppendBox(shifted_box, box_array2);
                 }
             }
-                                                                                                                        
-           /* boundary j= upper yface*/
+
+            /* boundary j= upper yface*/
             box_array= hypre_BoxArrayArrayBoxArray(cell_bdry, 3);
             if (hypre_BoxArraySize(box_array))
             {

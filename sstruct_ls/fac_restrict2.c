@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *  FAC composite level restriction.
  *  Injection away from the refinement patches; constant restriction
@@ -728,7 +725,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
           hypre_BoxLoop2Begin(loop_size,
                               xf_dbox, start, stride,  xfi,
                               xc_temp_dbox, startc, stridec, xci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xfi,xci
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xfi,xci,imax,jmax,kmax,k,kcell,j,jcell,i,icell,ijkcell,temp_index2
 #include "hypre_box_smp_forloop.h"
           hypre_BoxLoop2For(loopi, loopj, loopk, xfi, xci)
           {

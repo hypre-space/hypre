@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #if HYPRE_USING_PGCC_SMP
 #define HYPRE_SMP_PRIVATE \
 HYPRE_BOX_SMP_PRIVATE,hypre__nx,hypre__ny,hypre__nz,hypre__block
