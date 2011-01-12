@@ -1,0 +1,26 @@
+
+
+AMG SOLUTION INFO:
+                                            relative
+               residual        factor       residual
+               --------        ------       --------
+    Initial    2.335962e-01                 1.000000e+00
+    Cycle  1   1.345127e-02    0.057583     5.758345e-02 
+    Cycle  2   7.607388e-04    0.056555     3.256640e-03 
+    Cycle  3   4.280536e-05    0.056268     1.832451e-04 
+    Cycle  4   2.449140e-06    0.057216     1.048450e-05 
+    Cycle  5   1.473469e-07    0.060163     6.307762e-07 
+
+
+ Average Convergence Factor = 0.057541
+
+     Complexity:    grid = 1.509834
+                operator = 1.841964
+                   cycle = 3.675148
+
+
+
+
+Iterations = 5
+Final Relative Residual Norm = 6.30776e-07
+

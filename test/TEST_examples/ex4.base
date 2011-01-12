@@ -2,9 +2,9 @@
 Setup phase times:
 =============================================
 PCG Setup:
-  wall clock time = 2.920000 seconds
+  wall clock time = 0.220000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.350000 seconds
+  cpu clock time  = 0.040000 seconds
   cpu MFLOPS      = 0.000000
 
 <b,b>: 5.738541e-05
@@ -12,24 +12,24 @@ PCG Setup:
 
 Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 -----    ------------   ---------  ------------ 
-    1    2.705796e-03    0.357186    3.571858e-01
-    2    2.079537e-04    0.076855    2.745149e-02
-    3    8.661656e-06    0.041652    1.143405e-03
-    4    4.457876e-07    0.051467    5.884739e-05
-    5    2.853493e-08    0.064010    3.766830e-06
-    6    1.306057e-09    0.045770    1.724095e-07
+    1    2.449562e-03    0.323361    3.233611e-01
+    2    1.589475e-04    0.064888    2.098229e-02
+    3    6.225562e-06    0.039167    8.218220e-04
+    4    2.221278e-07    0.035680    2.932258e-05
+    5    1.094405e-08    0.049269    1.444699e-06
+    6    4.515981e-10    0.041264    5.961443e-08
 
 
 =============================================
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 1.700000 seconds
+  wall clock time = 0.640000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.200000 seconds
+  cpu clock time  = 0.130000 seconds
   cpu MFLOPS      = 0.000000
 
 
 Iterations = 6
-Final Relative Residual Norm = 1.724095e-07
+Final Relative Residual Norm = 5.961443e-08
 

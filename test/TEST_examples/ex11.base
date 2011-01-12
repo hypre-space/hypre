@@ -1,0 +1,129 @@
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    1089     5313  0.004     3    5   4.9   0.000e+00   2.000e+00
+ 1     545     4641  0.016     4    9   8.5   0.000e+00   2.500e+00
+ 2     157     1535  0.062     4   14   9.8  -1.246e-15   3.020e+00
+ 3      57      773  0.238     4   21  13.6   5.274e-16   3.294e+00
+ 4      19      251  0.695     8   18  13.2   9.852e-02   2.814e+00
+ 5       6       36  1.000     6    6   6.0   1.232e+00   1.875e+00
+
+
+Interpolation Matrix Information:
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  1089 x 545     1   4   2.500e-01 2.500e-01 7.500e-01 1.000e+00
+ 1   545 x 157     1   4   7.143e-02 5.000e-01 2.857e-01 1.000e+00
+ 2   157 x 57      1   6   2.767e-02 5.489e-01 2.630e-01 1.000e+00
+ 3    57 x 19      0   5   1.892e-02 7.312e-01 0.000e+00 1.000e+00
+ 4    19 x 6       0   4   2.675e-02 4.155e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.719927
+                operator = 2.361942
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of sweeps:            1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      6    6     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 10
+
+No constraints
+
+
+Initial Max. Residual   2.03558352288229e+00
+Iteration 1 	bsize 10 	maxres   6.61514157224839e-01
+Iteration 2 	bsize 10 	maxres   2.07896889117191e-01
+Iteration 3 	bsize 10 	maxres   8.94032219326696e-02
+Iteration 4 	bsize 10 	maxres   5.57350171800375e-02
+Iteration 5 	bsize 10 	maxres   4.52510317294955e-02
+Iteration 6 	bsize 10 	maxres   1.59857204841853e-02
+Iteration 7 	bsize 9 	maxres   3.01005213036222e-03
+Iteration 8 	bsize 9 	maxres   9.15794451299389e-04
+Iteration 9 	bsize 7 	maxres   2.67036722221628e-04
+Iteration 10 	bsize 7 	maxres   1.22560818421316e-04
+Iteration 11 	bsize 6 	maxres   5.82317136373133e-05
+Iteration 12 	bsize 4 	maxres   2.38206457569087e-05
+Iteration 13 	bsize 4 	maxres   1.73582470271719e-05
+Iteration 14 	bsize 3 	maxres   1.28829622197115e-05
+Iteration 15 	bsize 3 	maxres   8.43235763731739e-06
+Iteration 16 	bsize 2 	maxres   5.19301663958761e-06
+Iteration 17 	bsize 2 	maxres   3.31139933040550e-06
+Iteration 18 	bsize 2 	maxres   1.89643939662162e-06
+Iteration 19 	bsize 2 	maxres   7.92140854951590e-07
+Iteration 20 	bsize 2 	maxres   3.82278436745929e-07
+Iteration 21 	bsize 2 	maxres   2.43237926342817e-07
+Iteration 22 	bsize 1 	maxres   2.01135482738718e-07
+Iteration 23 	bsize 1 	maxres   1.56316249784731e-07
+Iteration 24 	bsize 1 	maxres   9.41761252071045e-08
+Iteration 25 	bsize 1 	maxres   4.18822161779752e-08
+Iteration 26 	bsize 1 	maxres   2.59457371819792e-08
+Iteration 27 	bsize 1 	maxres   1.29227827651513e-08
+Iteration 28 	bsize 1 	maxres   8.60346440903280e-09
+
+Eigenvalue lambda   1.70632948198618e-02
+Eigenvalue lambda   4.25854480421279e-02
+Eigenvalue lambda   4.25854480421287e-02
+Eigenvalue lambda   6.81076012643927e-02
+Eigenvalue lambda   8.48803610642917e-02
+Eigenvalue lambda   8.48803610642925e-02
+Eigenvalue lambda   1.10402514286558e-01
+Eigenvalue lambda   1.10402514286559e-01
+Eigenvalue lambda   1.43587188601221e-01
+Eigenvalue lambda   1.43587188601794e-01
+Residual   7.10733466548358e-09
+Residual   5.68997536359820e-09
+Residual   3.75669415544222e-09
+Residual   2.99575131439831e-09
+Residual   3.36297613525922e-09
+Residual   4.58134134720157e-09
+Residual   8.60346440903280e-09
+Residual   4.09352843534078e-09
+Residual   7.55937769040173e-09
+Residual   7.77054525649241e-09
+
+28 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 1.530000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.810000 seconds
+  cpu MFLOPS      = 0.000000
+
