@@ -453,6 +453,10 @@ function CleanUp
          if [ -f $ExecuteFile ] ; then
             rm -f $ExecuteFile
          fi
+         case $i in
+            TEST_examples)
+               rm -f ex? ex?? ex??f
+         esac
       done
    fi
 }
@@ -509,10 +513,9 @@ do
                TestDirNames="$TestDirNames $DirPart"
                case $DirPart in
                   TEST_examples)
-                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9"
-                     BabelExampleFiles="ex5b ex5b77"
+                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f ex13 ex14 ex15"
                      cd ../examples
-                     for file in $ExampleFiles $BabelExampleFiles
+                     for file in $ExampleFiles
                      do
                         if [ -x $file ]
                         then
