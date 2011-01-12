@@ -26,7 +26,8 @@ cat <<EOF
    where: {ex_dir}  is the hypre examples directory
           -h|-help  prints this usage information and exits
 
-   This script builds the hypre example codes in {ex_dir}.
+   This script builds the hypre example codes in {ex_dir} and runs the example
+   regression tests in test/TEST_examples.
 
    Example usage: $0 ../examples
 
@@ -36,6 +37,9 @@ EOF
 esac
 
 # Setup
+output_dir=`pwd`/$testname.dir
+rm -fr $output_dir
+mkdir -p $output_dir
 ex_dir=$1
 shift
 
@@ -43,3 +47,20 @@ shift
 cd $ex_dir
 make clean
 make $@
+
+# Run the examples regression test
+cd ../test
+./runtest.sh $@ TEST_examples/default.sh
+
+# Collect all error files from the tests
+for errfile in $( find TEST_examples -name "*.err" -o -name "*.fil" -o -name "*.out*" )
+do
+   mkdir -p $output_dir/`dirname $errfile`
+   mv -f $errfile $output_dir/$errfile
+done
+
+# Echo to stderr all nonempty error files in $output_dir
+for errfile in $( find $output_dir ! -size 0 -name "*.err" )
+do
+   echo $errfile >&2
+done
