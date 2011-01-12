@@ -87,10 +87,6 @@ do
    mv -f link.??? $output_subdir
 done
 
-# Test examples
-./test.sh examples.sh $src_dir/examples
-mv -f examples.??? $output_dir
-
 # Run tests with --enable-bigint configured
 opt="--enable-bigint --enable-debug"
 output_subdir="$output_dir/run--enable-bigint"
@@ -101,6 +97,10 @@ mv -f configure.??? $output_subdir
 mv -f make.??? $output_subdir
 ./test.sh run.sh $src_dir
 mv -f run.??? $output_subdir
+
+# Test examples
+./test.sh examples.sh $src_dir/examples
+mv -f examples.??? $output_dir
 
 # Test documentation build (only if 'docs_misc' directory is present)
 if [ -d $src_dir/docs_misc ]; then
