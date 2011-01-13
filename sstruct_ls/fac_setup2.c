@@ -494,16 +494,16 @@ hypre_FacSetup2( void                 *fac_vdata,
 
                 hypre_BoxGetSize(sgrid_box, loop_size);
 
-                k= 0;
-                hypre_BoxLoop1Begin(loop_size,
-                                       A_smatrix_dbox, box_start, stride, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA
+                hypre_BoxLoop2Begin(loop_size,
+                                    sgrid_box, box_start, stride, k,
+                                    A_smatrix_dbox, box_start, stride, iA);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,k,iA
 #include "hypre_box_smp_forloop.h"
-                hypre_BoxLoop1For(loopi, loopj, loopk, iA)
+                hypre_BoxLoop2For(loopi, loopj, loopk, k, iA)
                 {
-                   values[k++]= A_smatrix_value[iA];
+                   values[k]= A_smatrix_value[iA];
                 }
-                hypre_BoxLoop1End(iA);
+                hypre_BoxLoop2End(iA);
 
                 HYPRE_SStructMatrixSetBoxValues(A_level[level], part_fine, box_start, box_end,
                                                 var1, 1, &i, values);
@@ -568,16 +568,16 @@ hypre_FacSetup2( void                 *fac_vdata,
 
                    hypre_BoxGetSize(sgrid_box, loop_size);
 
-                   k= 0;
-                   hypre_BoxLoop1Begin(loop_size,
+                   hypre_BoxLoop2Begin(loop_size,
+                                       sgrid_box, box_start, stride, k,
                                        A_smatrix_dbox, box_start, stride, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,k,iA
 #include "hypre_box_smp_forloop.h"
-                   hypre_BoxLoop1For(loopi, loopj, loopk, iA)
+                   hypre_BoxLoop2For(loopi, loopj, loopk, k, iA)
                    {
-                       values[k++]= A_smatrix_value[iA];
+                       values[k]= A_smatrix_value[iA];
                    }
-                   hypre_BoxLoop1End(iA);
+                   hypre_BoxLoop2End(iA);
 
                    HYPRE_SStructMatrixSetBoxValues(A_level[level], part_crse, box_start, box_end,
                                                    var1, 1, &i, values);
@@ -828,16 +828,16 @@ hypre_FacSetup2( void                 *fac_vdata,
 
              hypre_BoxGetSize(sgrid_box, loop_size);
 
-             k= 0;
-             hypre_BoxLoop1Begin(loop_size,
+             hypre_BoxLoop2Begin(loop_size,
+                                 sgrid_box, box_start, stride, k,
                                  A_smatrix_dbox, box_start, stride, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,k,iA
 #include "hypre_box_smp_forloop.h"
-             hypre_BoxLoop1For(loopi, loopj, loopk, iA)
+             hypre_BoxLoop2For(loopi, loopj, loopk, k, iA)
              {
-                 values[k++]= A_smatrix_value[iA];
+                 values[k]= A_smatrix_value[iA];
              }
-             hypre_BoxLoop1End(iA);
+             hypre_BoxLoop2End(iA);
 
              HYPRE_SStructMatrixSetBoxValues(A_level[0], part_crse, box_start, box_end,
                                              var1, 1, &i, values);
