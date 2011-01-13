@@ -503,7 +503,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                 {
                    values[k]= A_smatrix_value[iA];
                 }
-                hypre_BoxLoop2End(iA);
+                hypre_BoxLoop2End(k, iA);
 
                 HYPRE_SStructMatrixSetBoxValues(A_level[level], part_fine, box_start, box_end,
                                                 var1, 1, &i, values);
@@ -577,7 +577,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                    {
                        values[k]= A_smatrix_value[iA];
                    }
-                   hypre_BoxLoop2End(iA);
+                   hypre_BoxLoop2End(k, iA);
 
                    HYPRE_SStructMatrixSetBoxValues(A_level[level], part_crse, box_start, box_end,
                                                    var1, 1, &i, values);
@@ -837,7 +837,7 @@ hypre_FacSetup2( void                 *fac_vdata,
              {
                  values[k]= A_smatrix_value[iA];
              }
-             hypre_BoxLoop2End(iA);
+             hypre_BoxLoop2End(k, iA);
 
              HYPRE_SStructMatrixSetBoxValues(A_level[0], part_crse, box_start, box_end,
                                              var1, 1, &i, values);
