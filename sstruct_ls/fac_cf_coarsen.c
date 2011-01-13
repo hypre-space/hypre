@@ -10,6 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+/******************************************************************************
+ * OpenMP Problems
+ *
+ * Are hypre_Index arrays a problem?
+ *
+ ******************************************************************************/
+
 #include "headers.h" 
 #include "fac.h"
 
@@ -334,8 +341,10 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                     
                     hypre_BoxLoop1Begin(loop_size,
                                         A_dbox, node_extents, stridec, iA);
+#if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,i,index_temp,boxman_entry,rank,found,Uventry,nUentries,temp1,cnt1,ncols,rows,cols,temp2,vals,index2,index1,j
 #include "hypre_box_smp_forloop.h"
+#endif
                     hypre_BoxLoop1For(loopi, loopj, loopk, iA)
                     {
                        for (i= 0; i< stencil_size; i++)
