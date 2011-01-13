@@ -10,16 +10,17 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /*****************************************************************************
  *	Wrapper code for SMP compiler directives.  Translates 
- *	hypre SMP directives into the appropriate Open MP,
+ *	hypre SMP directives into the appropriate OpenMP,
  *	IBM, SGI, or pgcc (Red) SMP compiler directives.
  ****************************************************************************/
 
 #ifndef HYPRE_SMP_PRIVATE
 #define HYPRE_SMP_PRIVATE
 #endif
+
+/* OpenMP */
 
 #ifdef HYPRE_USING_OPENMP
 
@@ -45,9 +46,9 @@ reduction(HYPRE_SMP_REDUCTION_OP: HYPRE_SMP_REDUCTION_VARS) \
 schedule(static)
 #endif
 
-
 #endif
 
+/* SGI */
 
 #ifdef HYPRE_USING_SGI_SMP
 #pragma parallel
@@ -56,10 +57,14 @@ schedule(static)
 #pragma chunksize(10)
 #endif
 
+/* IBM */
+
 #ifdef HYPRE_USING_IBM_SMP
 #pragma parallel_loop
 #pragma schedule (guided,10)
 #endif
+
+/* PGCC */
 
 #ifdef HYPRE_USING_PGCC_SMP
 #ifndef HYPRE_SMP_REDUCTION_OP

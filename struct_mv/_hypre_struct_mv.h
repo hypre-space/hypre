@@ -357,6 +357,9 @@ if (hypre__num_blocks > 1)\
 hypre_SetIndex(index, i+hypre_IndexX(base),\
 j+hypre_IndexY(base), k+hypre_IndexZ(base))
 
+/* Use this before the For macros below to force only one block */
+#define hypre_BoxLoopSetOneBlock() hypre__num_blocks = 1
+
 /* Use this to get the block iteration inside a BoxLoop */
 #define hypre_BoxLoopBlock() hypre__block
 
