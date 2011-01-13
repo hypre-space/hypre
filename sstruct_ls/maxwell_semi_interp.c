@@ -1003,113 +1003,72 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
          /* loop over each cell and find the row rank of Element_edge and then
             the column ranks of the connected fine edges. */
-         hypre_BoxLoop0Begin(loop_size)
+         hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,cindex,findex,entry,rank,nElements,low_index,t,hi_index,var,m,k,j,var_index,nElements_iedges
 #include "hypre_box_smp_forloop.h"
+#else
+         hypre_BoxLoopSetOneBlock();
 #endif
-            hypre_BoxLoop0For(loopi, loopj, loopk)
-            {
-               hypre_SetIndex(cindex, loopi, loopj, loopk);
-               hypre_AddIndex(cindex, cstart, cindex);
+         hypre_BoxLoop0For(loopi, loopj, loopk)
+         {
+            hypre_SetIndex(cindex, loopi, loopj, loopk);
+            hypre_AddIndex(cindex, cstart, cindex);
 
-               /* refined cindex to get the correct upper fine index */
-               hypre_StructMapCoarseToFine(cindex, zero_index, rfactor, findex);
-               hypre_AddIndex(findex, stride, findex);
+            /* refined cindex to get the correct upper fine index */
+            hypre_StructMapCoarseToFine(cindex, zero_index, rfactor, findex);
+            hypre_AddIndex(findex, stride, findex);
              
-               /* Element(i,j,k) rank */
-               hypre_SStructGridFindBoxManEntry(cgrid_element, part, cindex, 0, &entry);
-               hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
-               iElement[nElements]= rank;
-               nElements++;
+            /* Element(i,j,k) rank */
+            hypre_SStructGridFindBoxManEntry(cgrid_element, part, cindex, 0, &entry);
+            hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+            iElement[nElements]= rank;
+            nElements++;
 
-               /* Element_iedge columns: 3-d, x_edges, y_edges, and z_edges. */
-               if (ndim == 3)
+            /* Element_iedge columns: 3-d, x_edges, y_edges, and z_edges. */
+            if (ndim == 3)
+            {
+               hypre_SetIndex(low_index, findex[0]-rfactor[0]+1,
+                              findex[1]-rfactor[1]+1,
+                              findex[2]-rfactor[2]+1);
+
+               for (t= 0; t< Edge_nvars; t++)
                {
-                  hypre_SetIndex(low_index, findex[0]-rfactor[0]+1,
-                                 findex[1]-rfactor[1]+1,
-                                 findex[2]-rfactor[2]+1);
+                  hypre_CopyIndex(findex, hi_index);
+                  var= Edge_vartypes[t]; /* c & f edges enumerated the same */
 
-                  for (t= 0; t< Edge_nvars; t++)
+                  /* determine looping extents over the refined cells that 
+                     will have fine edges. */
+                  switch (var)
                   {
-                     hypre_CopyIndex(findex, hi_index);
-                     var= Edge_vartypes[t]; /* c & f edges enumerated the same */
-
-                     /* determine looping extents over the refined cells that 
-                        will have fine edges. */
-                     switch (var)
+                     case 5:  /* x_edges */
                      {
-                        case 5:  /* x_edges */
-                        {
-                           hi_index[1]-= 1;
-                           hi_index[2]-= 1;
-                           break;
-                        }
-                        case 6:  /* y_edges */
-                        {
-                           hi_index[0]-= 1;
-                           hi_index[2]-= 1;
-                           break;
-                        }
-                        case 7:  /* z_edges */
-                        {
-                           hi_index[0]-= 1;
-                           hi_index[1]-= 1;
-                           break;
-                        }
-                     }   /* switch (var) */
-
-                     /* column ranks. */
-                     for (m= low_index[2]; m<= hi_index[2]; m++)
+                        hi_index[1]-= 1;
+                        hi_index[2]-= 1;
+                        break;
+                     }
+                     case 6:  /* y_edges */
                      {
-                        for (k= low_index[1]; k<= hi_index[1]; k++)
-                        {
-                           for (j= low_index[0]; j<= hi_index[0]; j++)
-                           {
-                              hypre_SetIndex(var_index, j, k, m);
-                              hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index, 
-                                                               t, &entry);
-                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, 
-                                                                    &rank, matrix_type);
-                              jElement_edge[nElements_iedges]= rank;
-                              nElements_iedges++;
-                           }  /* for (j= findex[0]; j<= hi_index[0]; j++) */
-                        }     /* for (k= findex[1]; k<= hi_index[1]; k++) */
-                     }        /* for (m= findex[2]; m<= hi_index[2]; m++) */
-                  }           /* for (t= 0; t< Edge_nvars; t++) */
-               }              /* if (ndim == 3) */
- 
-               else if (ndim == 2) /* only x & y faces */
-               {
-                  hypre_SetIndex(low_index, findex[0]-rfactor[0]+1,
-                                 findex[1]-rfactor[1]+1,
-                                 findex[2]);
+                        hi_index[0]-= 1;
+                        hi_index[2]-= 1;
+                        break;
+                     }
+                     case 7:  /* z_edges */
+                     {
+                        hi_index[0]-= 1;
+                        hi_index[1]-= 1;
+                        break;
+                     }
+                  }   /* switch (var) */
 
-                  for (t= 0; t< Face_nvars; t++)
+                  /* column ranks. */
+                  for (m= low_index[2]; m<= hi_index[2]; m++)
                   {
-                     hypre_CopyIndex(findex, hi_index);
-                     var= Face_vartypes[t]; /* c & f faces enumerated the same */
-
-                     switch (var) /* note: hi_index computed differently in 2-d */
-                     {
-                        case 2:  /* x_faces */
-                        {
-                           hi_index[0]-= 1;
-                           break;
-                        }
-                        case 3:  /* y_edges */
-                        {
-                           hi_index[1]-= 1;
-                           break;
-                        }
-                     }   /* switch (var) */
-
-                     /* column ranks. */
                      for (k= low_index[1]; k<= hi_index[1]; k++)
                      {
                         for (j= low_index[0]; j<= hi_index[0]; j++)
                         {
-                           hypre_SetIndex(var_index, j, k, findex[2]);
+                           hypre_SetIndex(var_index, j, k, m);
                            hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index, 
                                                             t, &entry);
                            hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, 
@@ -1118,9 +1077,52 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            nElements_iedges++;
                         }  /* for (j= findex[0]; j<= hi_index[0]; j++) */
                      }     /* for (k= findex[1]; k<= hi_index[1]; k++) */
-                  }        /* for (t= 0; t< Face_nvars; t++) */
-               }           /* if (ndim == 2) */
-            }
+                  }        /* for (m= findex[2]; m<= hi_index[2]; m++) */
+               }           /* for (t= 0; t< Edge_nvars; t++) */
+            }              /* if (ndim == 3) */
+ 
+            else if (ndim == 2) /* only x & y faces */
+            {
+               hypre_SetIndex(low_index, findex[0]-rfactor[0]+1,
+                              findex[1]-rfactor[1]+1,
+                              findex[2]);
+
+               for (t= 0; t< Face_nvars; t++)
+               {
+                  hypre_CopyIndex(findex, hi_index);
+                  var= Face_vartypes[t]; /* c & f faces enumerated the same */
+
+                  switch (var) /* note: hi_index computed differently in 2-d */
+                  {
+                     case 2:  /* x_faces */
+                     {
+                        hi_index[0]-= 1;
+                        break;
+                     }
+                     case 3:  /* y_edges */
+                     {
+                        hi_index[1]-= 1;
+                        break;
+                     }
+                  }   /* switch (var) */
+
+                  /* column ranks. */
+                  for (k= low_index[1]; k<= hi_index[1]; k++)
+                  {
+                     for (j= low_index[0]; j<= hi_index[0]; j++)
+                     {
+                        hypre_SetIndex(var_index, j, k, findex[2]);
+                        hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index, 
+                                                         t, &entry);
+                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, 
+                                                              &rank, matrix_type);
+                        jElement_edge[nElements_iedges]= rank;
+                        nElements_iedges++;
+                     }  /* for (j= findex[0]; j<= hi_index[0]; j++) */
+                  }     /* for (k= findex[1]; k<= hi_index[1]; k++) */
+               }        /* for (t= 0; t< Face_nvars; t++) */
+            }           /* if (ndim == 2) */
+         }
          hypre_BoxLoop0End();
       }  /* hypre_ForBoxI(i, cboxes) */
    }     /* for (part= 0; part< nparts; part++) */
@@ -1276,78 +1278,80 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_ClearIndex(stride);
                      hypre_CopyIndex(upper_shifts[part][fboxi], stride);
 
-                     hypre_BoxLoop0Begin(loop_size)
+                     hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,cindex,entry,rank,nFaces,cell_index,findex,j,ilower,k,var_index,nFaces_iedges
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
-                        hypre_BoxLoop0For(loopi, loopj, loopk)
+                     hypre_BoxLoop0For(loopi, loopj, loopk)
+                     {
+                        hypre_SetIndex(cindex, loopi, loopj, loopk);
+                        hypre_AddIndex(cindex, start, cindex);
+
+                        hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t, &entry);
+                        hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+
+                        /* check if rank on proc before continuing */
+                        if ((rank <= cupper_ranks[part][var]) &&
+                            (rank >= clower_ranks[part][var]))
                         {
-                           hypre_SetIndex(cindex, loopi, loopj, loopk);
-                           hypre_AddIndex(cindex, start, cindex);
+                           iFace[nFaces]= rank;
+                           nFaces++;
 
-                           hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t, &entry);
-                           hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+                           /* transform face index to cell index */
+                           hypre_AddIndex(cindex, varoffsets[var], cell_index);
 
-                           /* check if rank on proc before continuing */
-                           if ((rank <= cupper_ranks[part][var]) &&
-                               (rank >= clower_ranks[part][var]))
+                           /* Refine the coarse cell to the upper fine index. The face will
+                              be on the "lower end" fine cells, i.e., the slab box starting
+                              with fine index cell_index. The fine edges will be on the
+                              lower x of the fine cell, e.g., with fine cell (i,j,k),
+                              y_iedge (i-1,j,k) & z_iedge (i-1,j,k). */
+                           hypre_StructMapCoarseToFine(cell_index, zero_index,
+                                                       rfactor, findex);
+                           hypre_AddIndex(findex, stride, findex);
+
+                           /* cell_index was refined to the upper fine index. Shift
+                              back to the lower end, subtract (rfactor-1). */
+                           for (j= 0; j< ndim; j++)
                            {
-                              iFace[nFaces]= rank;
-                              nFaces++;
+                              findex[j]-= rfactor[j]-1;
+                           }
 
-                              /* transform face index to cell index */
-                              hypre_AddIndex(cindex, varoffsets[var], cell_index);
-
-                              /* Refine the coarse cell to the upper fine index. The face will
-                                 be on the "lower end" fine cells, i.e., the slab box starting
-                                 with fine index cell_index. The fine edges will be on the
-                                 lower x of the fine cell, e.g., with fine cell (i,j,k),
-                                 y_iedge (i-1,j,k) & z_iedge (i-1,j,k). */
-                              hypre_StructMapCoarseToFine(cell_index, zero_index,
-                                                          rfactor, findex);
-                              hypre_AddIndex(findex, stride, findex);
-
-                              /* cell_index was refined to the upper fine index. Shift
-                                 back to the lower end, subtract (rfactor-1). */
-                              for (j= 0; j< ndim; j++)
+                           /* y_iedges */
+                           ilower= findex[0]-1;
+                           for (k= 0; k< rfactor[2]-1; k++)
+                           {
+                              for (j= 0; j< rfactor[1]; j++)
                               {
-                                 findex[j]-= rfactor[j]-1;
+                                 hypre_SetIndex(var_index, ilower, j+findex[1], k+findex[2]);
+                                 hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
+                                                                  vartype_map[6], &entry);
+                                 hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                       &rank, matrix_type);
+                                 jFace_edge[nFaces_iedges]= rank;
+                                 nFaces_iedges++;
                               }
+                           }
 
-                              /* y_iedges */
-                              ilower= findex[0]-1;
-                              for (k= 0; k< rfactor[2]-1; k++)
+                           /* z_iedges */
+                           for (k= 0; k< rfactor[2]; k++)
+                           {
+                              for (j= 0; j< rfactor[1]-1; j++)
                               {
-                                 for (j= 0; j< rfactor[1]; j++)
-                                 {
-                                    hypre_SetIndex(var_index, ilower, j+findex[1], k+findex[2]);
-                                    hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
-                                                                     vartype_map[6], &entry);
-                                    hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                          &rank, matrix_type);
-                                    jFace_edge[nFaces_iedges]= rank;
-                                    nFaces_iedges++;
-                                 }
+                                 hypre_SetIndex(var_index, ilower, j+findex[1], k+findex[2]);
+                                 hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
+                                                                  vartype_map[7], &entry);
+                                 hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                       &rank, matrix_type);
+                                 jFace_edge[nFaces_iedges]= rank;
+                                 nFaces_iedges++;
                               }
-
-                              /* z_iedges */
-                              for (k= 0; k< rfactor[2]; k++)
-                              {
-                                 for (j= 0; j< rfactor[1]-1; j++)
-                                 {
-                                    hypre_SetIndex(var_index, ilower, j+findex[1], k+findex[2]);
-                                    hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
-                                                                     vartype_map[7], &entry);
-                                    hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                          &rank, matrix_type);
-                                    jFace_edge[nFaces_iedges]= rank;
-                                    nFaces_iedges++;
-                                 }
-                              }
-                           }  /* if ((rank <= cupper_ranks[part][var]) &&
-                                 (rank >= clower_ranks[part][var])) */
-                        }
+                           }
+                        }  /* if ((rank <= cupper_ranks[part][var]) &&
+                              (rank >= clower_ranks[part][var])) */
+                     }
 
                      hypre_BoxLoop0End();
                   }  /* hypre_ForBoxI(i, cboxes) */
@@ -1377,77 +1381,79 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_ClearIndex(stride);
                      hypre_CopyIndex(upper_shifts[part][fboxi], stride);
 
-                     hypre_BoxLoop0Begin(loop_size)
+                     hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,cindex,entry,rank,nFaces,cell_index,findex,j,ilower,k,var_index,nFaces_iedges
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
-                        hypre_BoxLoop0For(loopi, loopj, loopk)
+                     hypre_BoxLoop0For(loopi, loopj, loopk)
+                     {
+                        hypre_SetIndex(cindex, loopi, loopj, loopk);
+                        hypre_AddIndex(cindex, start, cindex);
+
+                        hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t, &entry);
+                        hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+                        /* check if rank on proc before continuing */
+                        if ((rank <= cupper_ranks[part][var]) &&
+                            (rank >= clower_ranks[part][var]))
                         {
-                           hypre_SetIndex(cindex, loopi, loopj, loopk);
-                           hypre_AddIndex(cindex, start, cindex);
+                           iFace[nFaces]= rank;
+                           nFaces++;
 
-                           hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t, &entry);
-                           hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
-                           /* check if rank on proc before continuing */
-                           if ((rank <= cupper_ranks[part][var]) &&
-                               (rank >= clower_ranks[part][var]))
+                           /* transform face index to cell index */
+                           hypre_AddIndex(cindex, varoffsets[var], cell_index);
+
+                           /* Refine the coarse cell to the upper fine index. The face will
+                              be on the "lower end" fine cells, i.e., the slab box starting
+                              with fine index cell_index. The fine edges will be on the
+                              lower x of the fine cell, e.g., with fine cell (i,j,k),
+                              y_iedge (i-1,j,k) & z_iedge (i-1,j,k). */
+                           hypre_StructMapCoarseToFine(cell_index, zero_index,
+                                                       rfactor, findex);
+                           hypre_AddIndex(findex, stride, findex);
+
+                           /* cell_index is refined to the upper fine index. Shift
+                              back to the lower end, subtract (rfactor-1). */
+                           for (j= 0; j< ndim; j++)
                            {
-                              iFace[nFaces]= rank;
-                              nFaces++;
+                              findex[j]-= rfactor[j]-1;
+                           }
 
-                              /* transform face index to cell index */
-                              hypre_AddIndex(cindex, varoffsets[var], cell_index);
-
-                              /* Refine the coarse cell to the upper fine index. The face will
-                                 be on the "lower end" fine cells, i.e., the slab box starting
-                                 with fine index cell_index. The fine edges will be on the
-                                 lower x of the fine cell, e.g., with fine cell (i,j,k),
-                                 y_iedge (i-1,j,k) & z_iedge (i-1,j,k). */
-                              hypre_StructMapCoarseToFine(cell_index, zero_index,
-                                                          rfactor, findex);
-                              hypre_AddIndex(findex, stride, findex);
-
-                              /* cell_index is refined to the upper fine index. Shift
-                                 back to the lower end, subtract (rfactor-1). */
-                              for (j= 0; j< ndim; j++)
+                           /* x_iedges */
+                           ilower= findex[1]-1;
+                           for (k= 0; k< rfactor[2]-1; k++)
+                           {
+                              for (j= 0; j< rfactor[0]; j++)
                               {
-                                 findex[j]-= rfactor[j]-1;
+                                 hypre_SetIndex(var_index, j+findex[0], ilower, k+findex[2]);
+                                 hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
+                                                                  vartype_map[5], &entry);
+                                 hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                       &rank, matrix_type);
+                                 jFace_edge[nFaces_iedges]= rank;
+                                 nFaces_iedges++;
                               }
+                           }
 
-                              /* x_iedges */
-                              ilower= findex[1]-1;
-                              for (k= 0; k< rfactor[2]-1; k++)
+                           /* z_iedges */
+                           for (k= 0; k< rfactor[2]; k++)
+                           {
+                              for (j= 0; j< rfactor[0]-1; j++)
                               {
-                                 for (j= 0; j< rfactor[0]; j++)
-                                 {
-                                    hypre_SetIndex(var_index, j+findex[0], ilower, k+findex[2]);
-                                    hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
-                                                                     vartype_map[5], &entry);
-                                    hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                          &rank, matrix_type);
-                                    jFace_edge[nFaces_iedges]= rank;
-                                    nFaces_iedges++;
-                                 }
+                                 hypre_SetIndex(var_index, j+findex[0], ilower, k+findex[2]);
+                                 hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
+                                                                  vartype_map[7], &entry);
+                                 hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                       &rank, matrix_type);
+                                 jFace_edge[nFaces_iedges]= rank;
+                                 nFaces_iedges++;
                               }
-
-                              /* z_iedges */
-                              for (k= 0; k< rfactor[2]; k++)
-                              {
-                                 for (j= 0; j< rfactor[0]-1; j++)
-                                 {
-                                    hypre_SetIndex(var_index, j+findex[0], ilower, k+findex[2]);
-                                    hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
-                                                                     vartype_map[7], &entry);
-                                    hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                          &rank, matrix_type);
-                                    jFace_edge[nFaces_iedges]= rank;
-                                    nFaces_iedges++;
-                                 }
-                              }
-                           }  /* if ((rank <= cupper_ranks[part][var]) &&
-                                 (rank >= clower_ranks[part][var])) */
-                        }
+                           }
+                        }  /* if ((rank <= cupper_ranks[part][var]) &&
+                              (rank >= clower_ranks[part][var])) */
+                     }
 
                      hypre_BoxLoop0End();
                   }  /* hypre_ForBoxI(i, cboxes) */
@@ -1477,78 +1483,80 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_ClearIndex(stride);
                      hypre_CopyIndex(upper_shifts[part][fboxi], stride);
 
-                     hypre_BoxLoop0Begin(loop_size)
+                     hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,entry,rank,nFaces,cell_index,findex,j,ilower,k,var_index,nFaces_iedges
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
-                        hypre_BoxLoop0For(loopi, loopj, loopk)
+                     hypre_BoxLoop0For(loopi, loopj, loopk)
+                     {
+                        hypre_SetIndex(cindex, loopi, loopj, loopk);
+                        hypre_AddIndex(cindex, start, cindex);
+
+                        hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t, &entry);
+                        hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+
+                        /* check if rank on proc before continuing */
+                        if ((rank <= cupper_ranks[part][var]) &&
+                            (rank >= clower_ranks[part][var]))
                         {
-                           hypre_SetIndex(cindex, loopi, loopj, loopk);
-                           hypre_AddIndex(cindex, start, cindex);
+                           iFace[nFaces]= rank;
+                           nFaces++;
 
-                           hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t, &entry);
-                           hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank, matrix_type);
+                           /* transform face index to cell index */
+                           hypre_AddIndex(cindex, varoffsets[var], cell_index);
 
-                           /* check if rank on proc before continuing */
-                           if ((rank <= cupper_ranks[part][var]) &&
-                               (rank >= clower_ranks[part][var]))
+                           /* Refine the coarse cell to the upper fine index. The face will
+                              be on the "lower end" fine cells, i.e., the slab box starting
+                              with fine index cell_index. The fine edges will be on the
+                              lower x of the fine cell, e.g., with fine cell (i,j,k),
+                              y_iedge (i-1,j,k) & z_iedge (i-1,j,k). */
+                           hypre_StructMapCoarseToFine(cell_index, zero_index,
+                                                       rfactor, findex);
+                           hypre_AddIndex(findex, stride, findex);
+
+                           /* cell_index is refined to the upper fine index. Shift
+                              back to the lower end, subtract (rfactor-1). */
+                           for (j= 0; j< ndim; j++)
                            {
-                              iFace[nFaces]= rank;
-                              nFaces++;
+                              findex[j]-= rfactor[j]-1;
+                           }
 
-                              /* transform face index to cell index */
-                              hypre_AddIndex(cindex, varoffsets[var], cell_index);
-
-                              /* Refine the coarse cell to the upper fine index. The face will
-                                 be on the "lower end" fine cells, i.e., the slab box starting
-                                 with fine index cell_index. The fine edges will be on the
-                                 lower x of the fine cell, e.g., with fine cell (i,j,k),
-                                 y_iedge (i-1,j,k) & z_iedge (i-1,j,k). */
-                              hypre_StructMapCoarseToFine(cell_index, zero_index,
-                                                          rfactor, findex);
-                              hypre_AddIndex(findex, stride, findex);
-
-                              /* cell_index is refined to the upper fine index. Shift
-                                 back to the lower end, subtract (rfactor-1). */
-                              for (j= 0; j< ndim; j++)
+                           /* x_iedges */
+                           ilower= findex[2]-1;
+                           for (k= 0; k< rfactor[1]-1; k++)
+                           {
+                              for (j= 0; j< rfactor[0]; j++)
                               {
-                                 findex[j]-= rfactor[j]-1;
+                                 hypre_SetIndex(var_index, j+findex[0], k+findex[1], ilower);
+                                 hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
+                                                                  vartype_map[5], &entry);
+                                 hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                       &rank, matrix_type);
+                                 jFace_edge[nFaces_iedges]= rank;
+                                 nFaces_iedges++;
                               }
+                           }
 
-                              /* x_iedges */
-                              ilower= findex[2]-1;
-                              for (k= 0; k< rfactor[1]-1; k++)
+                           /* y_iedges */
+                           for (k= 0; k< rfactor[1]; k++)
+                           {
+                              for (j= 0; j< rfactor[0]-1; j++)
                               {
-                                 for (j= 0; j< rfactor[0]; j++)
-                                 {
-                                    hypre_SetIndex(var_index, j+findex[0], k+findex[1], ilower);
-                                    hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
-                                                                     vartype_map[5], &entry);
-                                    hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                          &rank, matrix_type);
-                                    jFace_edge[nFaces_iedges]= rank;
-                                    nFaces_iedges++;
-                                 }
+                                 hypre_SetIndex(var_index, j+findex[0], k+findex[1], ilower);
+                                 hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
+                                                                  vartype_map[6], &entry);
+                                 hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                       &rank, matrix_type);
+                                 jFace_edge[nFaces_iedges]= rank;
+                                 nFaces_iedges++;
                               }
-
-                              /* y_iedges */
-                              for (k= 0; k< rfactor[1]; k++)
-                              {
-                                 for (j= 0; j< rfactor[0]-1; j++)
-                                 {
-                                    hypre_SetIndex(var_index, j+findex[0], k+findex[1], ilower);
-                                    hypre_SStructGridFindBoxManEntry(fgrid_edge, part, var_index,
-                                                                     vartype_map[6], &entry);
-                                    hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                          &rank, matrix_type);
-                                    jFace_edge[nFaces_iedges]= rank;
-                                    nFaces_iedges++;
-                                 }
-                              }
-                           }  /* if ((rank <= cupper_ranks[part][var]) &&
-                                 (rank >= clower_ranks[part][var])) */
-                        }
+                           }
+                        }  /* if ((rank <= cupper_ranks[part][var]) &&
+                              (rank >= clower_ranks[part][var])) */
+                     }
                      hypre_BoxLoop0End();
                   }  /* hypre_ForBoxI(i, cboxes) */
                   break;
@@ -1700,141 +1708,143 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             hypre_ClearIndex(stride);
             hypre_CopyIndex(upper_shifts[part][fboxi], stride);
 
-            hypre_BoxLoop0Begin(loop_size)
+            hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,entry,rank,nEdges,cell_index,findex,j,var_index,m,entry,rank,nEdges_iedges
 #include "hypre_box_smp_forloop.h"
+#else
+            hypre_BoxLoopSetOneBlock();
 #endif
-               hypre_BoxLoop0For(loopi, loopj, loopk)
+            hypre_BoxLoop0For(loopi, loopj, loopk)
+            {
+               hypre_SetIndex(cindex, loopi, loopj, loopk);
+               hypre_AddIndex(cindex, start, cindex);
+
+               /* row rank */
+               hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
+                                                &entry);
+               hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
+                                                     matrix_type);
+
+               /* check if rank on proc before continuing */
+               if ((rank <= cupper_ranks[part][var]) &&
+                   (rank >= clower_ranks[part][var]))
                {
-                  hypre_SetIndex(cindex, loopi, loopj, loopk);
-                  hypre_AddIndex(cindex, start, cindex);
+                  iEdge[nEdges]= rank;
+                  nEdges++;
 
-                  /* row rank */
-                  hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
-                                                   &entry);
-                  hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
-                                                        matrix_type);
+                  hypre_AddIndex(cindex, varoffsets[var], cell_index);
 
-                  /* check if rank on proc before continuing */
-                  if ((rank <= cupper_ranks[part][var]) &&
-                      (rank >= clower_ranks[part][var]))
+                  /* refine cindex and then map back to variable index */
+                  hypre_StructMapCoarseToFine(cell_index, zero_index, rfactor,
+                                              findex);
+                  hypre_AddIndex(findex, stride, findex);
+
+                  /* cell_index is refined to the upper fine index. Shift
+                     back to the lower end, subtract (rfactor-1). */
+                  for (j= 0; j< ndim; j++)
                   {
-                     iEdge[nEdges]= rank;
-                     nEdges++;
+                     findex[j]-= rfactor[j]-1;
+                  }
 
-                     hypre_AddIndex(cindex, varoffsets[var], cell_index);
-
-                     /* refine cindex and then map back to variable index */
-                     hypre_StructMapCoarseToFine(cell_index, zero_index, rfactor,
-                                                 findex);
-                     hypre_AddIndex(findex, stride, findex);
-
-                     /* cell_index is refined to the upper fine index. Shift
-                        back to the lower end, subtract (rfactor-1). */
-                     for (j= 0; j< ndim; j++)
+                  hypre_SubtractIndex(findex, varoffsets[var], var_index);
+                
+                  switch(var)
+                  {
+                     case 2:    /* 2-d, x_face */
                      {
-                        findex[j]-= rfactor[j]-1;
+                        for (m= 0; m< rfactor[1]; m++)
+                        {
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
+                                                            var_index, t, &entry);
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                 &rank, matrix_type);
+                           jEdge_iedge[nEdges_iedges]= rank;
+                           nEdges_iedges++;
+
+                           /* increment the x component to get the next one in the
+                              refinement cell. */
+                           var_index[1]++;
+                        }
+                        break;
                      }
 
-                     hypre_SubtractIndex(findex, varoffsets[var], var_index);
-                
-                     switch(var)
+                     case 3:    /* 2-d, y_face */
                      {
-                        case 2:    /* 2-d, x_face */
+                        for (m= 0; m< rfactor[0]; m++)
                         {
-                           for (m= 0; m< rfactor[1]; m++)
-                           {
-                              hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
-                                                               var_index, t, &entry);
-                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                    &rank, matrix_type);
-                              jEdge_iedge[nEdges_iedges]= rank;
-                              nEdges_iedges++;
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
+                                                            var_index, t, &entry);
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                 &rank, matrix_type);
+                           jEdge_iedge[nEdges_iedges]= rank;
+                           nEdges_iedges++;
 
-                              /* increment the x component to get the next one in the
-                                 refinement cell. */
-                              var_index[1]++;
-                           }
-                           break;
+                           /* increment the y component to get the next one in the
+                              refinement cell. */
+                           var_index[0]++;
                         }
+                        break;
+                     }
 
-                        case 3:    /* 2-d, y_face */
+                     case 5:    /* 3-d, x_edge */
+                     {
+                        for (m= 0; m< rfactor[0]; m++)
                         {
-                           for (m= 0; m< rfactor[0]; m++)
-                           {
-                              hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
-                                                               var_index, t, &entry);
-                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                    &rank, matrix_type);
-                              jEdge_iedge[nEdges_iedges]= rank;
-                              nEdges_iedges++;
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
+                                                            var_index, t, &entry);
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                 &rank, matrix_type);
+                           jEdge_iedge[nEdges_iedges]= rank;
+                           nEdges_iedges++;
 
-                              /* increment the y component to get the next one in the
-                                 refinement cell. */
-                              var_index[0]++;
-                           }
-                           break;
+                           /* increment the x component to get the next one in the
+                              refinement cell. */
+                           var_index[0]++;
                         }
+                        break;
+                     }
 
-                        case 5:    /* 3-d, x_edge */
+                     case 6:    /* 3-d, y_edge */
+                     {
+                        for (m= 0; m< rfactor[1]; m++)
                         {
-                           for (m= 0; m< rfactor[0]; m++)
-                           {
-                              hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
-                                                               var_index, t, &entry);
-                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                    &rank, matrix_type);
-                              jEdge_iedge[nEdges_iedges]= rank;
-                              nEdges_iedges++;
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
+                                                            var_index, t, &entry);
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                 &rank, matrix_type);
+                           jEdge_iedge[nEdges_iedges]= rank;
+                           nEdges_iedges++;
 
-                              /* increment the x component to get the next one in the
-                                 refinement cell. */
-                              var_index[0]++;
-                           }
-                           break;
+                           /* increment the y component to get the next one in the
+                              refinement cell. */
+                           var_index[1]++;
                         }
+                        break;
+                     }
 
-                        case 6:    /* 3-d, y_edge */
+                     case 7:    /* 3-d, z_edge */
+                     {
+                        for (m= 0; m< rfactor[2]; m++)
                         {
-                           for (m= 0; m< rfactor[1]; m++)
-                           {
-                              hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
-                                                               var_index, t, &entry);
-                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                    &rank, matrix_type);
-                              jEdge_iedge[nEdges_iedges]= rank;
-                              nEdges_iedges++;
+                           hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
+                                                            var_index, t, &entry);
+                           hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
+                                                                 &rank, matrix_type);
+                           jEdge_iedge[nEdges_iedges]= rank;
+                           nEdges_iedges++;
 
-                              /* increment the y component to get the next one in the
-                                 refinement cell. */
-                              var_index[1]++;
-                           }
-                           break;
+                           /* increment the z component to get the next one in the
+                              refinement cell. */
+                           var_index[2]++;
                         }
+                        break;
+                     }
+                  }  /* switch(var) */
 
-                        case 7:    /* 3-d, z_edge */
-                        {
-                           for (m= 0; m< rfactor[2]; m++)
-                           {
-                              hypre_SStructGridFindBoxManEntry(fgrid_edge, part,
-                                                               var_index, t, &entry);
-                              hypre_SStructBoxManEntryGetGlobalRank(entry, var_index,
-                                                                    &rank, matrix_type);
-                              jEdge_iedge[nEdges_iedges]= rank;
-                              nEdges_iedges++;
-
-                              /* increment the z component to get the next one in the
-                                 refinement cell. */
-                              var_index[2]++;
-                           }
-                           break;
-                        }
-                     }  /* switch(var) */
-
-                  }   /* if ((rank <= cupper_ranks[part][var]) &&
-                         (rank >= clower_ranks[part][var])) */
-               }
+               }   /* if ((rank <= cupper_ranks[part][var]) &&
+                      (rank >= clower_ranks[part][var])) */
+            }
             hypre_BoxLoop0End();
 
          }  /* hypre_ForBoxI(i, cboxes) */
@@ -1918,40 +1928,42 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             hypre_BoxGetSize(cbox, loop_size);
             hypre_CopyIndex(hypre_BoxIMin(cbox), start);
 
-            hypre_BoxLoop0Begin(loop_size)
+            hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,cindex,t,var,entry,rank,nElements_Faces,var_index
 #include "hypre_box_smp_forloop.h"
+#else
+            hypre_BoxLoopSetOneBlock();
 #endif
-               hypre_BoxLoop0For(loopi, loopj, loopk)
+            hypre_BoxLoop0For(loopi, loopj, loopk)
+            {
+               hypre_SetIndex(cindex, loopi, loopj, loopk);
+               hypre_AddIndex(cindex, start, cindex);
+
+               /*-------------------------------------------------------------
+                * jElement_Face: (i,j,k) then (i-1,j,k), (i,j-1,k), (i,j,k-1).
+                *-------------------------------------------------------------*/
+               for (t= 0; t< Face_nvars; t++)
                {
-                  hypre_SetIndex(cindex, loopi, loopj, loopk);
-                  hypre_AddIndex(cindex, start, cindex);
+                  var= Face_vartypes[t];
 
-                  /*-------------------------------------------------------------
-                   * jElement_Face: (i,j,k) then (i-1,j,k), (i,j-1,k), (i,j,k-1).
-                   *-------------------------------------------------------------*/
-                  for (t= 0; t< Face_nvars; t++)
-                  {
-                     var= Face_vartypes[t];
+                  hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t,
+                                                   &entry);
+                  hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
+                                                        matrix_type);
+                  jElement_Face[nElements_Faces]= rank;
+                  nElements_Faces++;
 
-                     hypre_SStructGridFindBoxManEntry(cgrid_face, part, cindex, t,
-                                                      &entry);
-                     hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
-                                                           matrix_type);
-                     jElement_Face[nElements_Faces]= rank;
-                     nElements_Faces++;
-
-                     hypre_SubtractIndex(cindex, varoffsets[var], var_index);
-                     hypre_SStructGridFindBoxManEntry(cgrid_face, part, var_index, t,
-                                                      &entry);
-                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                           matrix_type);
-                     jElement_Face[nElements_Faces]= rank;
-                     nElements_Faces++;
-                  }
-
+                  hypre_SubtractIndex(cindex, varoffsets[var], var_index);
+                  hypre_SStructGridFindBoxManEntry(cgrid_face, part, var_index, t,
+                                                   &entry);
+                  hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                        matrix_type);
+                  jElement_Face[nElements_Faces]= rank;
+                  nElements_Faces++;
                }
+
+            }
             hypre_BoxLoop0End();
          }  /* hypre_ForBoxI(i, cboxes) */
       }  /* if (ndim == 3) */
@@ -1973,169 +1985,171 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          hypre_BoxGetSize(cbox, loop_size);
          hypre_CopyIndex(hypre_BoxIMin(cbox), start);
 
-         hypre_BoxLoop0Begin(loop_size)
+         hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,cindex,t,var,entry,rank,nElements_Edges,var_index
 #include "hypre_box_smp_forloop.h"
+#else
+         hypre_BoxLoopSetOneBlock();
 #endif
-            hypre_BoxLoop0For(loopi, loopj, loopk)
+         hypre_BoxLoop0For(loopi, loopj, loopk)
+         {
+            hypre_SetIndex(cindex, loopi, loopj, loopk);
+            hypre_AddIndex(cindex, start, cindex);
+
+            for (t= 0; t< Edge_nvars; t++)
             {
-               hypre_SetIndex(cindex, loopi, loopj, loopk);
-               hypre_AddIndex(cindex, start, cindex);
+               /* Edge (i,j,k) */
+               var= Edge_vartypes[t];
 
-               for (t= 0; t< Edge_nvars; t++)
+               switch (var)
                {
-                  /* Edge (i,j,k) */
-                  var= Edge_vartypes[t];
-
-                  switch (var)
+                  case 2: /* x_Face= {(i,j), (i-1,j)} */
                   {
-                     case 2: /* x_Face= {(i,j), (i-1,j)} */
-                     {
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_SubtractIndex(cindex, ishift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
-                        break;
-                     }
+                     hypre_SubtractIndex(cindex, ishift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
+                     break;
+                  }
 
-                     case 3: /* y_Face= {(i,j), (i,j-1)} */
-                     {
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                  case 3: /* y_Face= {(i,j), (i,j-1)} */
+                  {
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_SubtractIndex(cindex, jshift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
-                        break;
-                     }
+                     hypre_SubtractIndex(cindex, jshift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
+                     break;
+                  }
 
-                     case 5: /* "/" x_Edge={(i,j,k),(i,j-1,k),(i,j-1,k-1),(i,j,k-1)} */
-                     {
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                  case 5: /* "/" x_Edge={(i,j,k),(i,j-1,k),(i,j-1,k-1),(i,j,k-1)} */
+                  {
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_SubtractIndex(cindex, jshift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                     hypre_SubtractIndex(cindex, jshift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_SubtractIndex(var_index, kshift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                     hypre_SubtractIndex(var_index, kshift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_AddIndex(var_index, jshift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
-                        break;
-                     }
+                     hypre_AddIndex(var_index, jshift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
+                     break;
+                  }
 
-                     case 6: /* "-" y_Edge={(i,j,k),(i-1,j,k),(i-1,j,k-1),(i,j,k-1)}*/
-                     {
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                  case 6: /* "-" y_Edge={(i,j,k),(i-1,j,k),(i-1,j,k-1),(i,j,k-1)}*/
+                  {
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_SubtractIndex(cindex, ishift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                     hypre_SubtractIndex(cindex, ishift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_SubtractIndex(var_index, kshift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                     hypre_SubtractIndex(var_index, kshift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_AddIndex(var_index, ishift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
-                        break;
-                     }
+                     hypre_AddIndex(var_index, ishift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
+                     break;
+                  }
 
-                     case 7: /* "|" z_Edge={(i,j,k),(i,j-1,k),(i-1,j-1,k),(i-1,j,k)}*/
-                     {
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                  case 7: /* "|" z_Edge={(i,j,k),(i,j-1,k),(i-1,j-1,k),(i-1,j,k)}*/
+                  {
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_SubtractIndex(cindex, jshift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                     hypre_SubtractIndex(cindex, jshift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_SubtractIndex(var_index, ishift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
+                     hypre_SubtractIndex(var_index, ishift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
 
-                        hypre_AddIndex(var_index, jshift, var_index);
-                        hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
-                                                         &entry);
-                        hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
-                                                              matrix_type);
-                        jElement_Edge[nElements_Edges]= rank;
-                        nElements_Edges++;
-                        break;
-                     }
+                     hypre_AddIndex(var_index, jshift, var_index);
+                     hypre_SStructGridFindBoxManEntry(cgrid_edge, part, var_index, t,
+                                                      &entry);
+                     hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
+                                                           matrix_type);
+                     jElement_Edge[nElements_Edges]= rank;
+                     nElements_Edges++;
+                     break;
+                  }
 
-                  }   /* switch (var) */
-               }      /* for (t= 0; t< Edge_nvars; t++) */
-            }
+               }   /* switch (var) */
+            }      /* for (t= 0; t< Edge_nvars; t++) */
+         }
          hypre_BoxLoop0End();
       }  /* hypre_ForBoxI(i, cboxes) */
    }     /* for (part= 0; part< nparts; part++) */
@@ -2348,6 +2362,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,entry,rank,j
 #include "hypre_box_smp_forloop.h"
+#else
+            hypre_BoxLoopSetOneBlock();
 #endif
             hypre_BoxLoop1For(loopi, loopj, loopk, m)
             {
@@ -2475,6 +2491,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,p,var_index,n,entry,rank,j
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -2554,6 +2572,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j,l
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -2658,6 +2678,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j,l
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -2736,6 +2758,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j,l
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -2839,6 +2863,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j,l
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -2920,6 +2946,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j,l
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -3016,6 +3044,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
@@ -3076,6 +3106,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
@@ -3137,6 +3169,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
@@ -3208,6 +3242,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
@@ -3280,6 +3316,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,rank,j
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, m)
                   {
@@ -3533,6 +3571,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,j,entry,cindex,var_index,rank,k
 #include "hypre_box_smp_forloop.h"
+#else
+            hypre_BoxLoopSetOneBlock();
 #endif
             hypre_BoxLoop1For(loopi, loopj, loopk, m)
             {
@@ -3687,6 +3727,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -3828,6 +3870,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -3995,6 +4039,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -4131,6 +4177,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -4298,6 +4346,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -4433,6 +4483,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, m)
                      {
@@ -4594,6 +4646,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {
@@ -4681,6 +4735,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {
@@ -4768,6 +4824,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {
@@ -4926,6 +4984,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {
@@ -5085,6 +5145,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, r)
                   {

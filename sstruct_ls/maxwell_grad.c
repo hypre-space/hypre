@@ -16,6 +16,8 @@
  * Need to fix the way these variables are set and incremented in loops:
  *   i, nrows (only where they are listed at the end of SMP_PRIVATE)
  *
+ * Are private static arrays a problem?
+ *
  ******************************************************************************/
 
 #include "headers.h"
@@ -322,9 +324,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                hypre_BoxGetSize(box_piece, loop_size);
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
          
-               hypre_BoxLoop0Begin(loop_size)
+               hypre_BoxLoop0Begin(loop_size);
+#if 0 /* Are private static arrays a problem? */
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
+#else
+               hypre_BoxLoopSetOneBlock();
+#endif
                hypre_BoxLoop0For(loopi, loopj, loopk)
                {
                    hypre_SetIndex(index, loopi, loopj, loopk);
@@ -425,9 +431,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_BoxGetSize(box_piece, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
-                     hypre_BoxLoop0Begin(loop_size)
+                     hypre_BoxLoop0Begin(loop_size);
+#if 0 /* Are private static arrays a problem? */
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
+#endif
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {
                         hypre_SetIndex(index, loopi, loopj, loopk);
@@ -451,9 +461,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_BoxGetSize(box_piece, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
-                     hypre_BoxLoop0Begin(loop_size)
+                     hypre_BoxLoop0Begin(loop_size);
+#if 0 /* Are private static arrays a problem? */
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
+#endif
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {
                         hypre_SetIndex(index, loopi, loopj, loopk);
@@ -582,10 +596,12 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
            /* Interior box- loop over each edge and find the row rank and 
               then the column ranks for the connected nodes. Change the 
               appropriate values to 1. */
-            hypre_BoxLoop0Begin(loop_size)
+            hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
 #include "hypre_box_smp_forloop.h"
+#else
+            hypre_BoxLoopSetOneBlock();
 #endif
             hypre_BoxLoop0For(loopi, loopj, loopk)
             {
@@ -647,10 +663,12 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   hypre_BoxGetSize(&layer, loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&layer), start);
 
-                  hypre_BoxLoop0Begin(loop_size)
+                  hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
 #endif
                   hypre_BoxLoop0For(loopi, loopj, loopk)
                   {

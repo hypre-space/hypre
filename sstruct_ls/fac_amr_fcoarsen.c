@@ -1875,6 +1875,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,sum,vals
 #include "hypre_box_smp_forloop.h"
+#else
+                   hypre_BoxLoopSetOneBlock();
 #endif
                    hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                    {
@@ -2054,6 +2056,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,temp3,ll,kk,jj,temp2,cnt1,index_temp,boxman_entry,found,Uventry,nUentries,ncols,rows,cols,vals2,sum,vals
 #include "hypre_box_smp_forloop.h"
+#else
+                   hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                      {

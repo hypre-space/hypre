@@ -13,7 +13,7 @@
 /******************************************************************************
  * OpenMP Problems
  *
- * Are hypre_Index arrays a problem?
+ * Are private static arrays a problem?
  *
  ******************************************************************************/
 
@@ -341,9 +341,11 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                     
                     hypre_BoxLoop1Begin(loop_size,
                                         A_dbox, node_extents, stridec, iA);
-#if 0
+#if 0 /* Are private static arrays a problem? */
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,i,index_temp,boxman_entry,rank,found,Uventry,nUentries,temp1,cnt1,ncols,rows,cols,temp2,vals,index2,index1,j
 #include "hypre_box_smp_forloop.h"
+#else
+                   hypre_BoxLoopSetOneBlock();
 #endif
                     hypre_BoxLoop1For(loopi, loopj, loopk, iA)
                     {

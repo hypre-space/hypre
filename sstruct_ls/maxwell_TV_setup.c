@@ -10,6 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+/******************************************************************************
+ * OpenMP Problems
+ *
+ * Are private static arrays a problem?
+ *
+ ******************************************************************************/
+
 #include "headers.h"
 #include "maxwell_TV.h"
 #include "par_amg.h"
@@ -380,9 +387,11 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                hypre_BoxGetSize(box_piece, loop_size);
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
-               hypre_BoxLoop0Begin(loop_size)
+               hypre_BoxLoop0Begin(loop_size);
+#if 0 /* Are private static arrays a problem? */
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
+#endif
                hypre_BoxLoop0For(loopi, loopj, loopk)
                {
                    hypre_SetIndex(index, loopi, loopj, loopk);

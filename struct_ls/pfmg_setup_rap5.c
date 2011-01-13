@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "headers.h"
 #include "pfmg.h"
 
@@ -22,12 +19,12 @@
  * allow for coarsening to be done in the x-direction also.
  *--------------------------------------------------------------------------*/
 
-#define MapIndex(in_index, cdir, out_index) \
-hypre_IndexD(out_index, 2)    = hypre_IndexD(in_index, 2);\
-hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 1);\
-cdir = (cdir + 1) % 2;\
-hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 0);\
-cdir = (cdir + 1) % 2;
+#define MapIndex(in_index, cdir, out_index)                     \
+   hypre_IndexD(out_index, 2)    = hypre_IndexD(in_index, 2);   \
+   hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 1);   \
+   cdir = (cdir + 1) % 2;                                       \
+   hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 0);   \
+   cdir = (cdir + 1) % 2;
 
 /*--------------------------------------------------------------------------
  * hypre_PFMGCreateCoarseOp5 
@@ -205,19 +202,19 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
       
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
+   {
+      while (fgrid_ids[fi] != cgrid_ids[ci])
       {
-         while (fgrid_ids[fi] != cgrid_ids[ci])
-         {
-            fi++;
-         }
+         fi++;
+      }
 
-         /*--------------------------------------------------------------
-          * Loop for symmetric 5-point fine grid operator; produces a
-          * symmetric 5-point coarse grid operator. 
-          *--------------------------------------------------------------*/
+      /*--------------------------------------------------------------
+       * Loop for symmetric 5-point fine grid operator; produces a
+       * symmetric 5-point coarse grid operator. 
+       *--------------------------------------------------------------*/
 
-         switch (constant_coefficient)
-         {
+      switch (constant_coefficient)
+      {
          case 0:
             ierr += hypre_PFMGBuildCoarseOp5_onebox_CC0(
                fi, ci, A, P, R, cdir, cindex, cstride, RAP );
@@ -231,9 +228,9 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             ierr += hypre_PFMGBuildCoarseOp5_onebox_CC2(
                fi, ci, A, P, R, cdir, cindex, cstride, RAP );
             break;
-         }
+      }
 
-      } /* end ForBoxI */
+   } /* end ForBoxI */
 
    return ierr;
 }
@@ -415,36 +412,35 @@ hypre_PFMGBuildCoarseOp5_onebox_CC0(
                        P_dbox, cstart, stridec, iP,
                        A_dbox, fstart, stridef, iA,
                        RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,\
-                              west,east
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,west,east
 #include "hypre_box_smp_forloop.h"
    hypre_BoxLoop3For(loopi, loopj, loopk, iP, iA, iAc)
-      {
-         iAm1 = iA - yOffsetA;
-         iAp1 = iA + yOffsetA;
+   {
+      iAm1 = iA - yOffsetA;
+      iAp1 = iA + yOffsetA;
 
-         iPm1 = iP - yOffsetP;
-         iPp1 = iP + yOffsetP;
+      iPm1 = iP - yOffsetP;
+      iPp1 = iP + yOffsetP;
 
-         rap_cs[iAc] = a_cs[iA] * pa[iPm1];
-         rap_cn[iAc] = a_cn[iA] * pb[iPp1];
+      rap_cs[iAc] = a_cs[iA] * pa[iPm1];
+      rap_cn[iAc] = a_cn[iA] * pb[iPp1];
 
-         west = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
-         east = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
+      west = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
+      east = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
 
-         /*-----------------------------------------------------
-          * Prevent non-zero entries reaching off grid
-          *-----------------------------------------------------*/
-         if(a_cw[iA] == 0.0) west = 0.0;
-         if(a_ce[iA] == 0.0) east = 0.0;
+      /*-----------------------------------------------------
+       * Prevent non-zero entries reaching off grid
+       *-----------------------------------------------------*/
+      if(a_cw[iA] == 0.0) west = 0.0;
+      if(a_ce[iA] == 0.0) east = 0.0;
                
-         rap_cw[iAc] = west;
-         rap_ce[iAc] = east;
+      rap_cw[iAc] = west;
+      rap_ce[iAc] = east;
 
-         rap_cc[iAc] = a_cc[iA] + a_cw[iA] + a_ce[iA]
-            + a_cs[iA] * pb[iP] + a_cn[iA] * pa[iP]
-            - west - east;
-      }
+      rap_cc[iAc] = a_cc[iA] + a_cw[iA] + a_ce[iA]
+         + a_cs[iA] * pb[iP] + a_cn[iA] * pa[iP]
+         - west - east;
+   }
    hypre_BoxLoop3End(iP, iA, iAc);
 
 /*      }*/ /* end ForBoxI */
@@ -863,47 +859,49 @@ hypre_PFMGBuildCoarseOp5_onebox_CC2(
    hypre_BoxLoop2Begin(loop_size,
                        A_dbox, fstart, stridef, iA,
                        RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1,diagm,diagp,\
-                              bdy,floopi,floopj,floopk,box_index,fbi,fg_bdy_box
+#if 0 /* box_index and fg_bdy_box may be a problem here */
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1,diagm,diagp,bdy,floopi,floopj,floopk,box_index,fbi,fg_bdy_box
 #include "hypre_box_smp_forloop.h"
+#endif
+   hypre_BoxLoopSetOneBlock(); /* this is needed (because of bdy logic?) */
    hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
+   {
+      iAm1 = iA - yOffsetA;
+      iAp1 = iA + yOffsetA;
+      diagm = a_cc[iAm1] + diagcorr;
+      diagp = a_cc[iAp1] + diagcorr;
+      rap_cc[iAc] = a_cc[iA] + diagcorr + diag + 0.5*( diagm+diagp );
+
+      bdy = 0;  /* so we don't treat this point as a boundary pt twice */
+      floopi= fstart[0] + loopi*stridef[0];
+      floopj= fstart[1] + loopj*stridef[1];
+      floopk= fstart[2] + loopk*stridef[2];
+      hypre_SetIndex(box_index, floopi, floopj, floopk);
+
+      hypre_ForBoxI(fbi, fboundarys)
       {
-         iAm1 = iA - yOffsetA;
-         iAp1 = iA + yOffsetA;
-         diagm = a_cc[iAm1] + diagcorr;
-         diagp = a_cc[iAp1] + diagcorr;
-         rap_cc[iAc] = a_cc[iA] + diagcorr + diag + 0.5*( diagm+diagp );
-
-         bdy = 0;  /* so we don't treat this point as a boundary pt twice */
-         floopi= fstart[0] + loopi*stridef[0];
-         floopj= fstart[1] + loopj*stridef[1];
-         floopk= fstart[2] + loopk*stridef[2];
-         hypre_SetIndex(box_index, floopi, floopj, floopk);
-
-         hypre_ForBoxI(fbi, fboundarys)
-            {
-               fg_bdy_box = hypre_BoxArrayBox( fboundarys, fbi);
-               if ( hypre_IndexInBoxP( box_index, fg_bdy_box ) && bdy==0 )
-               {  /* we're in a boundary (in the south direction) */
-                  rap_cc[iAc] -= south;
-                  rap_cc[iAc] -= 0.5*diagm;
-                  bdy = 1;
-                  break;
-               }
-            }
-         if ( bdy == 0 )
-            hypre_ForBoxI(fbi, fboundaryn)
-            {
-               fg_bdy_box = hypre_BoxArrayBox( fboundaryn, fbi);
-               if ( hypre_IndexInBoxP( box_index, fg_bdy_box ) && bdy==0 )
-               {  /* we're in a boundary (in the north direction) */
-                  rap_cc[iAc] -= north;
-                  rap_cc[iAc] -= 0.5*diagp;
-                  bdy = 1;
-                  break;
-               }
-            }
+         fg_bdy_box = hypre_BoxArrayBox( fboundarys, fbi);
+         if ( hypre_IndexInBoxP( box_index, fg_bdy_box ) && bdy==0 )
+         {  /* we're in a boundary (in the south direction) */
+            rap_cc[iAc] -= south;
+            rap_cc[iAc] -= 0.5*diagm;
+            bdy = 1;
+            break;
+         }
       }
+      if ( bdy == 0 )
+         hypre_ForBoxI(fbi, fboundaryn)
+         {
+            fg_bdy_box = hypre_BoxArrayBox( fboundaryn, fbi);
+            if ( hypre_IndexInBoxP( box_index, fg_bdy_box ) && bdy==0 )
+            {  /* we're in a boundary (in the north direction) */
+               rap_cc[iAc] -= north;
+               rap_cc[iAc] -= 0.5*diagp;
+               bdy = 1;
+               break;
+            }
+         }
+   }
    hypre_BoxLoop2End(iA, iAc);
 
    hypre_BoxArrayDestroy(fboundaryn);

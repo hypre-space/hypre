@@ -473,10 +473,12 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                      hypre_BoxGetSize(box, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box), start);
       
-                     hypre_BoxLoop0Begin(loop_size)
+                     hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,boxman_entry,cnt
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {
@@ -489,7 +491,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                                                           &ranks[cnt], matrix_type);
                         cnt++;
 
-                     }  /* hypre_BoxLoop0For(loopi, loopj, loopk) */
+                     }
                      hypre_BoxLoop0End();
                   }  /* hypre_ForBoxI(p, box_array) */
                }     /* hypre_ForBoxArrayI(m, fbdry) */

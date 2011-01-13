@@ -692,10 +692,12 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                      hypre_BoxGetSize(&boxman_entry_box, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(&boxman_entry_box), start);
 
-                     hypre_BoxLoop0Begin(loop_size)
+                     hypre_BoxLoop0Begin(loop_size);
 #if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,rank,tot_nsendRowsNcols,n,col_inds,values,send_ColsData_alloc,k,tot_sendColsData
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
 #endif
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {
@@ -740,7 +742,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                                                             &col_inds, &values);
                             }  /* if (rank <= end_rank && rank >= start_rank) */
                          }     /* if (entry) */
-                     }   /* hypre_BoxLoop0For(loopi, loopj, loopk) */
+                     }
                      hypre_BoxLoop0End();
 
                   }  /* if (proc != myproc) */

@@ -13,7 +13,7 @@
 /******************************************************************************
  * OpenMP Problems
  *
- * Not sure what the problem is here.
+ * Are private static arrays a problem?
  *
  ******************************************************************************/
 
@@ -732,9 +732,11 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
           hypre_BoxLoop2Begin(loop_size,
                               xf_dbox, start, stride,  xfi,
                               xc_temp_dbox, startc, stridec, xci);
-#if 0
+#if 0 /* Are private static arrays a problem? */
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xfi,xci,imax,jmax,kmax,k,kcell,j,jcell,i,icell,ijkcell,temp_index2
 #include "hypre_box_smp_forloop.h"
+#else
+          hypre_BoxLoopSetOneBlock();
 #endif
           hypre_BoxLoop2For(loopi, loopj, loopk, xfi, xci)
           {
