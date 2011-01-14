@@ -897,30 +897,32 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, compute_boxes)
-      {
-         compute_box = hypre_BoxArrayBox(compute_boxes, i);
-         start  = hypre_BoxIMin(compute_box);
-         A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         Ap = hypre_StructMatrixExtractPointerByIndex(A, i, diag_index);
-         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+   {
+      compute_box = hypre_BoxArrayBox(compute_boxes, i);
+      start  = hypre_BoxIMin(compute_box);
+      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      Ap = hypre_StructMatrixExtractPointerByIndex(A, i, diag_index);
+      hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-         if ( constant_coefficient )
+      if ( constant_coefficient )
+      {
+         Ai = hypre_CCBoxIndexRank( A_dbox, start );
+         diag_product *= Ap[Ai];
+      }
+      else
+      {
+         hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai
+#define HYPRE_SMP_REDUCTION_OP *
+#define HYPRE_SMP_REDUCTION_VARS diag_product
+#include "hypre_box_smp_forloop.h"
+         hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
          {
-            Ai = hypre_CCBoxIndexRank( A_dbox, start );
             diag_product *= Ap[Ai];
          }
-         else
-         {
-
-            hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
-            hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
-               {
-                  diag_product *= Ap[Ai];
-               }
-            hypre_BoxLoop1End(Ai);
-         }
-
+         hypre_BoxLoop1End(Ai);
       }
+   }
 
    if (diag_product == 0)
    {
