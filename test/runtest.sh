@@ -100,8 +100,10 @@ function MpirunString
       hera*) shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
+            RunString="srun -p pdebug -c $NumThreads -n$*"
+         else
+            RunString="srun -p pdebug -n$*"
          fi
-         RunString="srun -p pdebug -n$*"
          ;;
       zeus*) shift
          RunString="srun -p pdebug -n$*"
