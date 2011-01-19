@@ -43,6 +43,7 @@ then
       rm -f $testdir/*err*
       rm -f $testdir/*out*
       rm -f $testdir/*log*
+      rm -f $testdir/*.fil
    done
 else
    while [ "$*" ]
@@ -50,6 +51,7 @@ else
       rm -f $1/*err*
       rm -f $1/*out*
       rm -f $1/*log*
+      rm -f $1/*.fil
       shift
    done
 fi
