@@ -152,52 +152,6 @@ hypre_SubtractBoxArrays( hypre_BoxArray *box_array1,
 }
 
 /*--------------------------------------------------------------------------
- * Compute (box_array1 - box_array2) (excluding boxa and boxb from box_array2)
- * and replace box_array1 with result.
- *
- * This is used only in 'struct_mv/box_boundary.c'
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SubtractBoxArraysExceptBoxes( hypre_BoxArray *box_array1,
-                                    hypre_BoxArray *box_array2,
-                                    hypre_BoxArray *tmp_box_array,
-                                    hypre_Box *boxa, hypre_Box *boxb )
-{
-   HYPRE_Int ierr = 0;
-              
-   hypre_BoxArray *diff_boxes     = box_array1;
-   hypre_BoxArray *new_diff_boxes = tmp_box_array;
-   hypre_BoxArray  box_array;
-   hypre_Box      *box1;
-   hypre_Box      *box2;
-   HYPRE_Int       i, k;
-
-   hypre_ForBoxI(i, box_array2)
-      {
-         box2 = hypre_BoxArrayBox(box_array2, i);
-
-         if ( (! hypre_BoxEqualP(boxa,box2)) && (! hypre_BoxEqualP(boxb,box2)) )
-         {
-            /* compute new_diff_boxes = (diff_boxes - box2) */
-            hypre_BoxArraySetSize(new_diff_boxes, 0);
-            hypre_ForBoxI(k, diff_boxes)
-               {
-                  box1 = hypre_BoxArrayBox(diff_boxes, k);
-                  hypre_SubtractBoxes(box1, box2, new_diff_boxes);
-               }
-
-            /* swap internals of diff_boxes and new_diff_boxes */
-            box_array       = *new_diff_boxes;
-            *new_diff_boxes = *diff_boxes;
-            *diff_boxes     = box_array;
-         }
-      }
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
  * Compute the union of all boxes.
  *
  * To compute the union, we first construct a logically rectangular,

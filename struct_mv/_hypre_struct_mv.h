@@ -1988,7 +1988,6 @@ HYPRE_Int hypre_StructAssumedPartitionGetProcsFromBox ( hypre_StructAssumedPart 
 HYPRE_Int hypre_IntersectBoxes ( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
 HYPRE_Int hypre_SubtractBoxes ( hypre_Box *box1 , hypre_Box *box2 , hypre_BoxArray *box_array );
 HYPRE_Int hypre_SubtractBoxArrays ( hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 , hypre_BoxArray *tmp_box_array );
-HYPRE_Int hypre_SubtractBoxArraysExceptBoxes ( hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 , hypre_BoxArray *tmp_box_array , hypre_Box *boxa , hypre_Box *boxb );
 HYPRE_Int hypre_UnionBoxes ( hypre_BoxArray *boxes );
 HYPRE_Int hypre_MinUnionBoxes ( hypre_BoxArray *boxes );
 
@@ -2000,10 +1999,6 @@ HYPRE_Int hypre_BoxFree ( hypre_Box *box );
 
 /* box_boundary.c */
 HYPRE_Int hypre_BoxBoundaryIntersect ( hypre_Box *box , hypre_StructGrid *grid , HYPRE_Int d , HYPRE_Int dir , hypre_BoxArray *boundary );
-HYPRE_Int hypre_BoxArraySubtractAdjacentBoxArray ( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , HYPRE_Int thick );
-HYPRE_Int hypre_BoxArraySubtractAdjacentBoxArrayD ( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , HYPRE_Int ds , HYPRE_Int thick );
-HYPRE_Int hypre_BoxBoundaryDNT ( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , HYPRE_Int ds , HYPRE_Int thick );
-HYPRE_Int hypre_BoxBoundaryNT ( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , HYPRE_Int *thickness );
 HYPRE_Int hypre_BoxBoundaryG ( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundary );
 HYPRE_Int hypre_BoxBoundaryDG ( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundarym , hypre_BoxArray *boundaryp , HYPRE_Int d );
 
