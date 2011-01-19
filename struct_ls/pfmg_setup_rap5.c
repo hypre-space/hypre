@@ -149,7 +149,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
  *    so is coarse, i.e. non-Galerkin.
  *
  *    Uses the non-Galerkin strategy from Ashby & Falgout's original ParFlow
- *    algorithm.  For constant_coefficient==2, see [issue???].
+ *    algorithm.  For constant_coefficient==2, see [issue663].
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
