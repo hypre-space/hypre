@@ -331,7 +331,9 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
     *-----------------------------------------------------------------------*/
 
    hypre_MPI_Comm_size(comm,&num_procs);
-   num_threads = hypre_NumThreads();
+   /* num_threads = hypre_NumThreads(); */
+   num_threads = 1;
+   
    bnnz = block_size * block_size;
    r_a_products = (double *) malloc(bnnz * sizeof(double));
    r_a_p_products = (double *) malloc(bnnz * sizeof(double));
@@ -496,8 +498,6 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
   {
      jj_count = hypre_CTAlloc(HYPRE_Int, num_threads);
 
-#define HYPRE_SMP_PRIVATE i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker
-#include "../utilities/hypre_smp_forloop.h"
      for (ii = 0; ii < num_threads; ii++)
      {
         size = num_cols_offd_RT/num_threads;
@@ -703,8 +703,6 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       *  Second Pass: Fill in RAP_int_data and RAP_int_j.
       *-----------------------------------------------------------------------*/
 
-#define HYPRE_SMP_PRIVATE i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker
-#include "../utilities/hypre_smp_forloop.h"
      for (ii = 0; ii < num_threads; ii++)
      {
         size = num_cols_offd_RT/num_threads;
@@ -1118,8 +1116,6 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
   jj_cnt_diag = hypre_CTAlloc(HYPRE_Int, num_threads);
   jj_cnt_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
-#define HYPRE_SMP_PRIVATE i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker
-#include "../utilities/hypre_smp_forloop.h"
   for (ii = 0; ii < num_threads; ii++)
   {
      size = num_cols_diag_P/num_threads;
@@ -1386,8 +1382,6 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    *  Second Pass: Fill in RAP_offd_data and RAP_offd_j.
    *-----------------------------------------------------------------------*/
 
-#define HYPRE_SMP_PRIVATE i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker
-#include "../utilities/hypre_smp_forloop.h"
   for (ii = 0; ii < num_threads; ii++)
   {
      size = num_cols_diag_P/num_threads;

@@ -185,8 +185,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    one_minus_omega = 1.0 - omega;
    hypre_MPI_Comm_size(comm, &num_procs);  
    hypre_MPI_Comm_rank(comm, &my_id);  
-   num_threads = hypre_NumThreads();
-
+   /* num_threads = hypre_NumThreads(); */
+   num_threads = 1;
+   
    res_vec = hypre_CTAlloc(double, block_size);
    out_vec = hypre_CTAlloc(double, block_size);
    tmp_vec = hypre_CTAlloc(double, block_size);
@@ -247,8 +248,6 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
          
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
          for (i = 0; i < n*block_size; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -265,8 +264,6 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
          if (relax_points == 0)
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res_vec
-#include "../utilities/hypre_smp_forloop.h"
             for (i = 0; i < n; i++)
             {
                
@@ -315,8 +312,6 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
          
          else
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res_vec
-#include "../utilities/hypre_smp_forloop.h"
             for (i = 0; i < n; i++)
             {
                
@@ -413,8 +408,7 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
          * Copy current approximation into temporary vector.
          *-----------------------------------------------------------------*/
          
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
          for (i = 0; i < n*block_size; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -443,12 +437,10 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                if (num_threads > 1)
                {
                   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
                   for (i = 0; i < n; i++)
                      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -563,12 +555,10 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                if (num_threads > 1)
                {
                   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
                   for (i = 0; i < n; i++)
                      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -701,12 +691,8 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                if (num_threads > 1)
                {
                   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                   for (i = 0; i < n; i++)
                      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -843,12 +829,8 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;
@@ -1070,12 +1052,8 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;
@@ -1285,12 +1263,8 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;
@@ -1515,8 +1489,6 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
            prod = (1.0-relax_weight*omega);
            res0_vec = hypre_CTAlloc(double, block_size);
            res2_vec = hypre_CTAlloc(double, block_size);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
            {
               Vtemp_data[i] = u_data[i];
@@ -1527,12 +1499,8 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;
@@ -1787,12 +1755,8 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;

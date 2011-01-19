@@ -151,8 +151,9 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
-   num_threads = hypre_NumThreads();
-
+   /* num_threads = hypre_NumThreads(); */
+   num_threads = 1;
+   
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
@@ -283,8 +284,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
    jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
    jj_counter = start_indexing;
@@ -294,9 +294,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
     *  Loop over fine grid.
     *-----------------------------------------------------------------------*/
 
-/* RDF: this looks a little tricky, but doable */
-#define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
-#include "../utilities/hypre_smp_forloop.h"
+
    for (j = 0; j < num_threads; j++)
    {
      size = n_fine/num_threads;
@@ -443,8 +441,6 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd); 
 
-#define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
-#include "../utilities/hypre_smp_forloop.h"
    for (j = 0; j < num_threads; j++)
    {
      coarse_shift = 0;
@@ -491,16 +487,12 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj1,jj,ns,ne,size,rest,sum_block,diagonal_block,distribute_block,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
-#include "../utilities/hypre_smp_forloop.h"
    for (jl = 0; jl < num_threads; jl++)
    {
      size = n_fine/num_threads;
@@ -1120,8 +1112,6 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
    {
       P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < num_cols_A_offd; i++)
 	 P_marker[i] = 0;
 
@@ -1145,8 +1135,6 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
          col_map_offd_P[i] = index++;
       }
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < P_offd_size; i++)
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],
@@ -1927,8 +1915,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
    jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
    jj_counter = start_indexing;
@@ -1938,9 +1925,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
     *  Loop over fine grid.
     *-----------------------------------------------------------------------*/
 
-/* RDF: this looks a little tricky, but doable */
-#define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
-#include "../utilities/hypre_smp_forloop.h"
+
    for (j = 0; j < num_threads; j++)
    {
      size = n_fine/num_threads;
@@ -2092,8 +2077,6 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd); 
 
-#define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
-#include "../utilities/hypre_smp_forloop.h"
    for (j = 0; j < num_threads; j++)
    {
      coarse_shift = 0;
@@ -2140,16 +2123,12 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj1,jj,ns,ne,size,rest,sum_block,diagonal_block,distribute_block,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
-#include "../utilities/hypre_smp_forloop.h"
    for (jl = 0; jl < num_threads; jl++)
    {
      size = n_fine/num_threads;
@@ -2816,8 +2795,6 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
    {
       P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < num_cols_A_offd; i++)
 	 P_marker[i] = 0;
 
@@ -2841,8 +2818,6 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
          col_map_offd_P[i] = index++;
       }
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < P_offd_size; i++)
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],
@@ -3155,8 +3130,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
    jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
    jj_counter = start_indexing;
@@ -3166,9 +3140,6 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
     *  Loop over fine grid.
     *-----------------------------------------------------------------------*/
 
-/* RDF: this looks a little tricky, but doable */
-#define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
-#include "../utilities/hypre_smp_forloop.h"
    for (j = 0; j < num_threads; j++)
    {
      size = n_fine/num_threads;
@@ -3315,8 +3286,6 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd); 
 
-#define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
-#include "../utilities/hypre_smp_forloop.h"
    for (j = 0; j < num_threads; j++)
    {
      coarse_shift = 0;
@@ -3363,16 +3332,12 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj1,jj,ns,ne,size,rest,sum_block,diagonal_block,distribute_block,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
-#include "../utilities/hypre_smp_forloop.h"
    for (jl = 0; jl < num_threads; jl++)
    {
      size = n_fine/num_threads;
@@ -3954,8 +3919,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
    {
       P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
       for (i=0; i < num_cols_A_offd; i++)
 	 P_marker[i] = 0;
 
@@ -3979,8 +3943,6 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
          col_map_offd_P[i] = index++;
       }
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < P_offd_size; i++)
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],
@@ -4288,8 +4250,7 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
    jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
    jj_counter = start_indexing;
@@ -4299,9 +4260,7 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
     *  Loop over fine grid.
     *-----------------------------------------------------------------------*/
 
-/* RDF: this looks a little tricky, but doable */
-#define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
-#include "../utilities/hypre_smp_forloop.h"
+
    for (j = 0; j < num_threads; j++)
    {
      size = n_fine/num_threads;
@@ -4448,8 +4407,6 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd); 
 
-#define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
-#include "../utilities/hypre_smp_forloop.h"
    for (j = 0; j < num_threads; j++)
    {
      coarse_shift = 0;
@@ -4496,16 +4453,14 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum_block,diagonal_block,distribute_block,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
-#include "../utilities/hypre_smp_forloop.h"
+
    for (jl = 0; jl < num_threads; jl++)
    {
      size = n_fine/num_threads;
@@ -5087,8 +5042,6 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
    {
       P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < num_cols_A_offd; i++)
 	 P_marker[i] = 0;
 
@@ -5112,8 +5065,6 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
          col_map_offd_P[i] = index++;
       }
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < P_offd_size; i++)
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],
@@ -5332,8 +5283,7 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
    jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
    jj_counter = start_indexing;
@@ -5343,9 +5293,7 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
     *  Loop over fine grid.
     *-----------------------------------------------------------------------*/
 
-/* RDF: this looks a little tricky, but doable */
-#define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
-#include "../utilities/hypre_smp_forloop.h"
+
    for (j = 0; j < num_threads; j++)
    {
      size = n_fine/num_threads;
@@ -5491,8 +5439,6 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd); 
 
-#define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
-#include "../utilities/hypre_smp_forloop.h"
    for (j = 0; j < num_threads; j++)
    {
      coarse_shift = 0;
@@ -5536,16 +5482,13 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,jj,ns,ne,size,rest,P_marker,P_marker_offd,jj_counter,jj_counter_offd,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
-#include "../utilities/hypre_smp_forloop.h"
    for (jl = 0; jl < num_threads; jl++)
    {
      size = n_fine/num_threads;
@@ -5900,8 +5843,6 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
    {
       P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < num_cols_A_offd; i++)
          P_marker[i] = 0;
                                                                                 
@@ -5925,8 +5866,6 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
          col_map_offd_P[i] = index++;
       }
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < P_offd_size; i++)
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],
