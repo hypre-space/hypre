@@ -1999,6 +1999,7 @@ hypre_Box *hypre_BoxAlloc ( void );
 HYPRE_Int hypre_BoxFree ( hypre_Box *box );
 
 /* box_boundary.c */
+HYPRE_Int hypre_BoxBoundaryIntersect ( hypre_Box *box , hypre_StructGrid *grid , HYPRE_Int d , HYPRE_Int dir , hypre_BoxArray *boundary );
 HYPRE_Int hypre_BoxArraySubtractAdjacentBoxArray ( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , HYPRE_Int thick );
 HYPRE_Int hypre_BoxArraySubtractAdjacentBoxArrayD ( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , HYPRE_Int ds , HYPRE_Int thick );
 HYPRE_Int hypre_BoxBoundaryDNT ( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , HYPRE_Int ds , HYPRE_Int thick );

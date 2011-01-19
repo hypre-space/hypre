@@ -528,12 +528,13 @@ main( hypre_int argc,
       hypre_printf("                        0  - SMG (default)\n");
       hypre_printf("                        1  - PFMG\n");
       hypre_printf("                        2  - SparseMSG\n");
-      hypre_printf("                        3  - PFMG constant coefficients\n");
-      hypre_printf("                        4  - PFMG constant coefficients variable diagonal\n");
+      hypre_printf("                        3  - PFMG constant coeffs\n");
+      hypre_printf("                        4  - PFMG constant coeffs var diag\n");
       hypre_printf("                        8  - Jacobi\n");
       hypre_printf("                        10 - CG with SMG precond\n");
-      hypre_printf("                        11 - CG with PFMG precond\n");
       hypre_printf("                        12 - CG with SparseMSG precond\n");
+      hypre_printf("                        13 - CG with PFMG-3 precond\n");
+      hypre_printf("                        14 - CG with PFMG-4 precond\n");
       hypre_printf("                        17 - CG with 2-step Jacobi\n");
       hypre_printf("                        18 - CG with diagonal scaling\n");
       hypre_printf("                        19 - CG\n");

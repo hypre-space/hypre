@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Member functions for hypre_Box class:
@@ -156,6 +154,8 @@ hypre_SubtractBoxArrays( hypre_BoxArray *box_array1,
 /*--------------------------------------------------------------------------
  * Compute (box_array1 - box_array2) (excluding boxa and boxb from box_array2)
  * and replace box_array1 with result.
+ *
+ * This is used only in 'struct_mv/box_boundary.c'
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
