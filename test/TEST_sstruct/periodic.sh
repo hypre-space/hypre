@@ -47,6 +47,23 @@ tail -3 ${TNAME}.out.52 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
+# Check PFMG, SMG, and SysPFMG for problems with period larger than the grid
+#=============================================================================
+
+# First check that sstruct and struct are the same here
+tail -3 ${TNAME}.out.60 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.61 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.62 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.63 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+# Also check that PFMG and SysPFMG are the same
+tail -3 ${TNAME}.out.66 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.67 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -61,6 +78,13 @@ FILES="\
  ${TNAME}.out.50\
  ${TNAME}.out.51\
  ${TNAME}.out.52\
+ ${TNAME}.out.60\
+ ${TNAME}.out.61\
+ ${TNAME}.out.62\
+ ${TNAME}.out.63\
+ ${TNAME}.out.65\
+ ${TNAME}.out.66\
+ ${TNAME}.out.67\
 "
 
 for i in $FILES

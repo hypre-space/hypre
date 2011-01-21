@@ -50,4 +50,23 @@ mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 11 22 1 -P 2 1 1 -solver 
 mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 22 11 1 -P 1 2 1 -solver 3 \
 > periodic.out.52
 
+#=============================================================================
+# Check PFMG, SMG, and SysPFMG for problems with period larger than the grid
+#=============================================================================
 
+# First check that sstruct and struct are the same here
+mpirun -np 2 ./struct -d 2 -n 8 16 1 -P 2 1 1 -p 16 0 0 -istart 0 0 0 \
+-solver 0 > periodic.out.60
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigA -r 1 2 1 -P 2 1 1 -rhsone \
+-solver 200 > periodic.out.61
+mpirun -np 2 ./struct -d 2 -n 8 16 1 -P 2 1 1 -p 16 0 0 -istart 0 0 0 \
+-solver 1 > periodic.out.62
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigA -r 1 2 1 -P 2 1 1 -rhsone \
+-solver 201 > periodic.out.63
+
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigB -r 3 6 1 -P 2 1 1 -rhsone \
+-solver 200 > periodic.out.65
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigB -r 3 6 1 -P 2 1 1 -rhsone \
+-solver 201 > periodic.out.66
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigB -r 3 6 1 -P 2 1 1 -rhsone \
+-solver 3 > periodic.out.67
