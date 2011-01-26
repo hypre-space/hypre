@@ -262,6 +262,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - tolerance <f>\n");
          printf("    - gmresDim <d>\n");
          printf("    - stopCrit <absolute,relative>\n");
+         printf("    - pcgRecomputeResiudal\n");
          printf("    - preconditioner <identity,diagonal,pilut,parasails,\n");
          printf("    -    boomeramg,ddilut,schwarz,ddict,poly,euclid,...\n");
          printf("    -    blockP,ml,mli,reuse,parasails_reuse> <override>\n");
@@ -644,6 +645,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters stopCrit = %s\n",
                    param2);
+      }
+
+      //----------------------------------------------------------------
+      // for PCG only 
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "pcgRecomputeResidual") )
+      {
+         pcgRecomputeRes_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters pcgRecomputeResidual\n");
       }
 
       //----------------------------------------------------------------
