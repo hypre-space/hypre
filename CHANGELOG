@@ -17,7 +17,27 @@
 #=============================================================================
 
 
-Version x.x.x released xxxx/xx/xx
+Version 2.7.0b released 2011/01/xx
+
+- Fixed a bug in the Struct multigrid solvers for periodic problems when the
+  period is larger than the grid.
+
+- Fixed some OpenMP problems in the Struct and SStruct code.
+
+- Changed the Fortran interface to use a Fortran MPI communicator.  Previously,
+  users were required to call HYPRE_MPI_Comm_f2c() to convert their Fortran
+  communicator to a C communicator.  Fortran users will need to remove this call
+  from their code to use the new release.
+
+- Fixed the constant-coefficient PFMG solvers.  Also changed the non-Galerkin
+  scheme slightly for the constant-coefficient variable-diagonal PFMG solver to
+  simplify the code and enable easier threading.
+
+- Added a new --enable-bigint feature that, when turned on, requires the user to
+  pass integers of size 'long long int' to hypre and enables ParCSR matrices with
+  more than 2 billion unknowns (previously a limitation due to 32-bit integers).
+  This feature is currently not available in the FEI or babel sections of hypre.
+  Added example 'ex5big.c' as an illustration of how to use this new feature.
 
 - Relaxed the power-of-two restrictions for the PFMG and SysPFMG solvers.  See
   the reference manual for more details.  SMG still requires a power-of-two.
