@@ -32,8 +32,8 @@ typedef struct
     HYPRE_Int   num_blocks;
     HYPRE_Int   bytes_left;
 
-    long  total_bytes;
-    long  bytes_alloc;
+    hypre_longint  total_bytes;
+    hypre_longint  bytes_alloc;
     HYPRE_Int   num_over;
 
     char *avail;

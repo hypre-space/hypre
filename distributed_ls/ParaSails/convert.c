@@ -24,7 +24,7 @@ HYPRE_Int convert(FILE *infile, FILE *outfile)
     char line[MM_MAX_LINE_LENGTH];
     HYPRE_Int num_items_read, ret;
     HYPRE_Int M, N, nz, nnz;
-    long offset;
+    hypre_longint offset;
     HYPRE_Int *counts, *pointers;
     HYPRE_Int row, col;
     double value;

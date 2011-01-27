@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 
-typedef long amg_Clock_t;
+typedef hypre_longint amg_Clock_t;
 #define AMG_TICKS_PER_SEC 10000
 
 typedef clock_t amg_CPUClock_t;

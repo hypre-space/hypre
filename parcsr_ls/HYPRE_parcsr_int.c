@@ -127,7 +127,7 @@ aux_maskCount( HYPRE_Int n, HYPRE_Int* mask ) {
 void
 aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index ) {
 
-  long i, j;
+  HYPRE_Int i, j;
   
   if ( mask != NULL ) {
     for ( i = 0, j = 0; i < n; i++ )

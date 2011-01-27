@@ -2,7 +2,7 @@
 
 amg_Clock_t amg_start_clock=0;
    
-long AMG_CPU_TICKS_PER_SEC;
+hypre_longint AMG_CPU_TICKS_PER_SEC;
  
 void HYPRE_AMGClock_init()
 {

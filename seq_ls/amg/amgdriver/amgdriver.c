@@ -216,7 +216,7 @@ char *argv[];
 
    if (SolverAMGIOutDat(solver) >= 3)
    {
-      long AMG_CPU_TICKS_PER_SEC;
+      hypre_longint AMG_CPU_TICKS_PER_SEC;
 
       AMG_CPU_TICKS_PER_SEC = sysconf(_SC_CLK_TCK);
 

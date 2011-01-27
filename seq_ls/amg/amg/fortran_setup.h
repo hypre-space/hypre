@@ -64,7 +64,7 @@ void hypre_NAME_FORTRAN_FOR_C(setup)(HYPRE_Int *, HYPRE_Int *, HYPRE_Int *,
 			       double *, HYPRE_Int *, HYPRE_Int *,
 			       HYPRE_Int *, HYPRE_Int *, HYPRE_Int *,
 			       HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *,
-			       char *, long);
+			       char *, hypre_longint);
 
 
 /* idec */

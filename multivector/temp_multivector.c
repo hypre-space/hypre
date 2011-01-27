@@ -55,7 +55,7 @@ aux_maskCount( HYPRE_Int n, HYPRE_Int* mask ) {
 static void
 aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index ) {
 
-  long i, j;
+  HYPRE_Int i, j;
   
   if ( mask != NULL ) {
     for ( i = 0, j = 0; i < n; i++ )
@@ -70,7 +70,7 @@ aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index ) {
 
 /* ------- here goes simple random number generator --------- */
 
-static unsigned long next = 1;
+static hypre_ulongint next = 1;
 
 /* RAND_MAX assumed to be 32767 */
 static HYPRE_Int myrand(void) {
@@ -501,7 +501,7 @@ void
 mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
 			   void* x_, void* y_ ) {
 
-  long i, mx, my;
+  HYPRE_Int i, mx, my;
   void** px;
   void** py;
   mv_TempMultiVector* x;

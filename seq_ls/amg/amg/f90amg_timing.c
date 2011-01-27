@@ -30,7 +30,7 @@ void     hypre_NAME_C_FOR_FORTRAN(amg_clock_init)()
  *--------------------------------------------------------------------------*/
  
 void hypre_NAME_C_FOR_FORTRAN(amg_clock)(time_ticks)
-long *time_ticks;
+hypre_longint *time_ticks;
 {
  
  *time_ticks = HYPRE_AMGClock();
@@ -42,7 +42,7 @@ long *time_ticks;
  *--------------------------------------------------------------------------*/
  
 void hypre_NAME_C_FOR_FORTRAN(amg_cpuclock)(cpu_ticks)
-long *cpu_ticks;
+hypre_longint *cpu_ticks;
 {
  
    *cpu_ticks = HYPRE_AMGCPUClock();

@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /*
  * File:	timer.c
  * Author:	Scott Kohn (skohn@llnl.gov)
@@ -21,6 +19,8 @@
  * wallclock seconds, since we assume that the MPI timers have better
  * resolution than the system timers.
  */
+
+#include "_hypre_utilities.h"
 
 #include <time.h>
 #ifndef WIN32
@@ -41,7 +41,7 @@ double time_getWallclockSeconds(void)
    return(((double) cl)/((double) CLOCKS_PER_SEC));
 #else
    struct tms usage;
-   long wallclock = times(&usage);
+   hypre_longint wallclock = times(&usage);
    return(((double) wallclock)/((double) sysconf(_SC_CLK_TCK)));
 #endif
 #endif

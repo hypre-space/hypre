@@ -266,7 +266,7 @@ argument If you don't need residual norms history, provide NULL in this entry */
   HYPRE_Int				i; /* short loop counter */
 
 #if 0
-  long				n; /* dimension 1 of X */
+  hypre_longint				n; /* dimension 1 of X */
   /* had to remove because n is not available in some interfaces */ 
 #endif 
 

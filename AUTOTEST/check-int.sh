@@ -49,4 +49,6 @@ find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
 
 egrep '(^|[^[:alnum:]_]+)int([^[:alnum:]_]+|$)' `cat check-int.files` >&2
 
+egrep '(^|[^[:alnum:]_]+)long([^[:alnum:]_]+|$)' `cat check-int.files` >&2
+
 rm -f check-int.files

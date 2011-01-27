@@ -296,8 +296,8 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     HYPRE_Int num_rows, curr_proc;
     HYPRE_Int row, col;
     double value;
-    long offset;
-    long outbuf;
+    hypre_longint offset;
+    hypre_longint outbuf;
 
     HYPRE_Int curr_row;
     HYPRE_Int len;
@@ -415,7 +415,7 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
     HYPRE_Int ret;
     HYPRE_Int row, col;
     double value;
-    long offset;
+    hypre_longint offset;
 
     HYPRE_Int curr_row;
     HYPRE_Int len;

@@ -20,7 +20,7 @@
 
 typedef struct
 {
-  long	 numVectors;
+  hypre_longint	 numVectors;
   HYPRE_Int*   mask;
   void** vector;
   HYPRE_Int	 ownsVectors;

@@ -38,11 +38,11 @@ double hypre_GlobalSESumDouble( double value , MPI_Comm hypre_MPI_Context );
 /* debug.c */
 void hypre_PrintLine( char *str , hypre_PilutSolverGlobals *globals );
 void hypre_CheckBounds( HYPRE_Int low , HYPRE_Int i , HYPRE_Int up , hypre_PilutSolverGlobals *globals );
-long hypre_IDX_Checksum( const HYPRE_Int *v , HYPRE_Int len , const char *msg , HYPRE_Int tag , hypre_PilutSolverGlobals *globals );
-long hypre_INT_Checksum( const HYPRE_Int *v , HYPRE_Int len , const char *msg , HYPRE_Int tag , hypre_PilutSolverGlobals *globals );
-long hypre_FP_Checksum( const double *v , HYPRE_Int len , const char *msg , HYPRE_Int tag , hypre_PilutSolverGlobals *globals );
-long hypre_RMat_Checksum( const ReduceMatType *rmat , hypre_PilutSolverGlobals *globals );
-long hypre_LDU_Checksum( const FactorMatType *ldu , hypre_PilutSolverGlobals *globals );
+hypre_longint hypre_IDX_Checksum( const HYPRE_Int *v , HYPRE_Int len , const char *msg , HYPRE_Int tag , hypre_PilutSolverGlobals *globals );
+hypre_longint hypre_INT_Checksum( const HYPRE_Int *v , HYPRE_Int len , const char *msg , HYPRE_Int tag , hypre_PilutSolverGlobals *globals );
+hypre_longint hypre_FP_Checksum( const double *v , HYPRE_Int len , const char *msg , HYPRE_Int tag , hypre_PilutSolverGlobals *globals );
+hypre_longint hypre_RMat_Checksum( const ReduceMatType *rmat , hypre_PilutSolverGlobals *globals );
+hypre_longint hypre_LDU_Checksum( const FactorMatType *ldu , hypre_PilutSolverGlobals *globals );
 void hypre_PrintVector( HYPRE_Int *v , HYPRE_Int n , char *msg , hypre_PilutSolverGlobals *globals );
 
 /* hypre.c */

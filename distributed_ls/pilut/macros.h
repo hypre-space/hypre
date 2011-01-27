@@ -113,7 +113,7 @@
 # define starttimer(tmr) (tmr -= rtclock())
 # define stoptimer(tmr)  (tmr += rtclock())
 # define gettimer(tmr)   ((double) tmr*_secpertick)
-  typedef long timer ;
+  typedef hypre_longint timer ;
 #else
 # define cleartimer(tmr) (tmr = 0.0)
 # define starttimer(tmr) (tmr -= hypre_MPI_Wtime())

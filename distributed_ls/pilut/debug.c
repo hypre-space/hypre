@@ -54,7 +54,7 @@ void hypre_CheckBounds(HYPRE_Int low, HYPRE_Int i ,HYPRE_Int up, hypre_PilutSolv
 /*************************************************************************
 * This function prints a checksum for an HYPRE_Int (HYPRE_Int) array
 **************************************************************************/
-long hypre_IDX_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *msg, HYPRE_Int tag,
+hypre_longint hypre_IDX_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *msg, HYPRE_Int tag,
           hypre_PilutSolverGlobals *globals)
 {
   static HYPRE_Int numChk = 0;
@@ -76,7 +76,7 @@ long hypre_IDX_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *msg, HYPR
 /*************************************************************************
 * This function prints a checksum for an HYPRE_Int (HYPRE_Int) array
 **************************************************************************/
-long hypre_INT_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *msg, HYPRE_Int tag,
+hypre_longint hypre_INT_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *msg, HYPRE_Int tag,
           hypre_PilutSolverGlobals *globals)
 {
   static HYPRE_Int numChk = 0;
@@ -98,7 +98,7 @@ long hypre_INT_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *msg, HYPR
 /*************************************************************************
 * This function prints a checksum for a float (double) array
 **************************************************************************/
-long hypre_FP_Checksum(const double *v, HYPRE_Int len, const char *msg, HYPRE_Int tag,
+hypre_longint hypre_FP_Checksum(const double *v, HYPRE_Int len, const char *msg, HYPRE_Int tag,
           hypre_PilutSolverGlobals *globals)
 {
   static HYPRE_Int numChk = 0;
@@ -121,7 +121,7 @@ long hypre_FP_Checksum(const double *v, HYPRE_Int len, const char *msg, HYPRE_In
 /*************************************************************************
 * This function prints checksums for each array of the rmat struct
 **************************************************************************/
-long hypre_RMat_Checksum(const ReduceMatType *rmat,
+hypre_longint hypre_RMat_Checksum(const ReduceMatType *rmat,
           hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i;
@@ -165,7 +165,7 @@ long hypre_RMat_Checksum(const ReduceMatType *rmat,
 /*************************************************************************
 * This function prints checksums for some arrays of the LDU struct
 **************************************************************************/
-long hypre_LDU_Checksum(const FactorMatType *ldu,
+hypre_longint hypre_LDU_Checksum(const FactorMatType *ldu,
           hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i, j;
@@ -191,16 +191,16 @@ long hypre_LDU_Checksum(const FactorMatType *ldu,
   for (i=0; i<lnrows; i++) {
     for (j=ldu->lsrowptr[i]; j<ldu->lerowptr[i]; j++) {
       lisum += ldu->lcolind[j];
-      ldsum += (long)ldu->lvalues[j];
+      ldsum += (hypre_longint)ldu->lvalues[j];
     }
 
     for (j=ldu->usrowptr[i]; j<ldu->uerowptr[i]; j++) {
       uisum += ldu->ucolind[j];
-      udsum += (long)ldu->uvalues[j];
+      udsum += (hypre_longint)ldu->uvalues[j];
     }
 
     if (ldu->usrowptr[i] < ldu->uerowptr[i])
-      dsum += (long)ldu->dvalues[i];
+      dsum += (hypre_longint)ldu->dvalues[i];
   }
 
   hypre_printf("PE %d [S%3d] LDU check [%16lx %16lx] [%16lx] [%16lx %16lx]\n",
