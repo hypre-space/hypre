@@ -700,7 +700,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
          }
 
          /* Truncate according to Remark 6.2 */
-         if (l1_norm[i] < 1.5*diag)
+         if (l1_norm[i] <= 4.0/3.0*diag)
             l1_norm[i] = diag;
       }
    }
@@ -3407,7 +3407,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             }
 
             /* Truncate according to Remark 6.2 */
-            if (l1_norm[i] < 1.5*diag)
+            if (l1_norm[i] <= 4.0/3.0*diag)
                l1_norm[i] = diag;
          }
       }
