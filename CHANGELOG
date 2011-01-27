@@ -44,7 +44,10 @@ Version 2.7.0b released 2011/01/xx
 
 - Fixed some bugs in the coarsening routines for BoomerAMG.
 
-- Added some new smoothers to BoomerAMG.
+- Added a new version of the l1-SGS smoother in BoomerAMG as a replacement for
+  relax type 8.  This smoother behaves similarly to relax type 6 on matrices
+  with relatively small off-processor entries, but is guaranteed to always be
+  convergent.  The new smoother is also available in AMS as relax type 4.
 
 #====================================
 
