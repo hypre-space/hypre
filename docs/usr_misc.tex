@@ -171,12 +171,6 @@ An application code linking with \hypre{} must be compiled with
 noted above, if \hypre{} was built as a shared library the user MUST have its
 location defined in the environment variable \kbd{LD\_LIBRARY\_PATH}.
 
-We strongly recommend that users link with \kbd{libHYPRE.a} rather than
-specifying each of the separate \hypre{} libraries, i.e.
-\kbd{libHYPRE\_krylov.a}, \kbd{libHYPRE\_parcsr\_mv.a}, etc.  By using
-\kbd{libHYPRE.a} the user is guaranteed to have all capabilities without having
-to change their link flags.
-
 As an example of linking with \hypre{}, a user may refer to the \kbd{Makefile}
 in the \file{examples} sub-directory.  It is designed to build codes similar to
 user applications that link with and call \hypre{}.  All include and linking
