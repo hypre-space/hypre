@@ -13,8 +13,8 @@
 
 # Which tests to run?
 TEST_ALPHA="-tux273"
-TEST_BETA="$TEST_ALPHA -zeus -up"
-TEST_GENERAL="$TEST_BETA -thunder -zeus"
+TEST_BETA="$TEST_ALPHA -zeus -hera -dawndev"
+TEST_GENERAL="$TEST_BETA"
 TERMCMD=""
 
 while [ "$*" ]
