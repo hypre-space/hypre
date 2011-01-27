@@ -126,7 +126,7 @@ HYPRE_Int HYPRE_PCGSetAbsoluteTol(HYPRE_Solver solver,
 
 /**
  * (Optional) Set a residual-based convergence tolerance which checks if
- * $\|r_old-r_new\| < rtol \|b\|$. This is useful when trying to converge to
+ * $\|r_{old}-r_{new}\| < rtol \|b\|$. This is useful when trying to converge to
  * very low relative and/or absolute tolerances, in order to bail-out before
  * roundoff errors affect the approximation.
  **/

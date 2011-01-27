@@ -287,12 +287,12 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
  * 4 & hybrid Gauss-Seidel or SOR, backward solve \\
  * 5 & hybrid chaotic Gauss-Seidel (works only with OpenMP) \\
  * 6 & hybrid symmetric Gauss-Seidel or SSOR \\
- * 8 & L1-scaled hybrid symmetric Gauss-Seidel\\
+ * 8 & $\ell_1$-scaled hybrid symmetric Gauss-Seidel\\
  * 9 & Gaussian elimination (only on coarsest level) \\
  * 15 & CG (warning - not a fixed smoother - may require FGMRES)\\
  * 16 & Chebyshev\\
  * 17 & FCF-Jacobi\\                              
- * 18 & L1-scaled jacobi\\
+ * 18 & $\ell_1$-scaled jacobi\\
  * \hline
  * \end{tabular}
  **/
@@ -1476,6 +1476,17 @@ HYPRE_Int HYPRE_AMSSetPrintLevel(HYPRE_Solver solver,
 /**
  * (Optional) Sets relaxation parameters for $A$.
  * The defaults are $2$, $1$, $1.0$, $1.0$.
+ *
+ * The available options for relax\_type are:
+ *
+ * \begin{tabular}{|c|l|} \hline
+ * 1 & $\ell_1$-scaled Jacobi \\
+ * 2 & $\ell_1$-scaled block symmetric Gauss-Seidel/SSOR \\
+ * 3 & Kaczmarz \\
+ * 4 & truncated version of $\ell_1$-scaled block symmetric Gauss-Seidel/SSOR \\
+ * 16 & Chebyshev \\
+ * \hline
+ * \end{tabular}
  **/
 HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
                                        HYPRE_Int    relax_type,
