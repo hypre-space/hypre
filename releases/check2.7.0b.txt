@@ -35,16 +35,16 @@ the responsible project member before the release is made available to users.
 
 - Verify that all agreed-upon changes have been committed.
 
-  []
+  [rdf 1/27/2011]
 
 - Project Lead review and/or concurrence to release.
 
-  []
+  [rdf 1/27/2011]
 
 - Update 'config/configure.in' with release number and date, then run
   'config/bootstrap' and commit changes to the repository.
 
-  []
+  [rdf 1/27/2011]
 
 - Tag repository with release number.
 

@@ -10,28 +10,12 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 #=============================================================================
 # This file chronicles user-level changes to hypre, beginning with the most
 # recent release.
 #=============================================================================
 
-
-Version 2.7.0b released 2011/01/xx
-
-- Fixed a bug in the Struct multigrid solvers for periodic problems when the
-  period is larger than the grid.
-
-- Fixed some OpenMP problems in the Struct and SStruct code.
-
-- Changed the Fortran interface to use a Fortran MPI communicator.  Previously,
-  users were required to call HYPRE_MPI_Comm_f2c() to convert their Fortran
-  communicator to a C communicator.  Fortran users will need to remove this call
-  from their code to use the new release.
-
-- Fixed the constant-coefficient PFMG solvers.  Also changed the non-Galerkin
-  scheme slightly for the constant-coefficient variable-diagonal PFMG solver to
-  simplify the code and enable easier threading.
+Version 2.7.0b released 2011/01/27
 
 - Added a new --enable-bigint feature that, when turned on, requires the user to
   pass integers of size 'long long int' to hypre and enables ParCSR matrices with
@@ -39,15 +23,29 @@ Version 2.7.0b released 2011/01/xx
   This feature is currently not available in the FEI or babel sections of hypre.
   Added example 'ex5big.c' as an illustration of how to use this new feature.
 
-- Relaxed the power-of-two restrictions for the PFMG and SysPFMG solvers.  See
-  the reference manual for more details.  SMG still requires a power-of-two.
-
-- Fixed some bugs in the coarsening routines for BoomerAMG.
+- Changed the Fortran interface to use a Fortran MPI communicator.  Previously,
+  users were required to call HYPRE_MPI_Comm_f2c() to convert their Fortran
+  communicator to a C communicator.  Fortran users will need to remove this call
+  from their code to use the new release.
 
 - Added a new version of the l1-SGS smoother in BoomerAMG as a replacement for
   relax type 8.  This smoother behaves similarly to relax type 6 on matrices
   with relatively small off-processor entries, but is guaranteed to always be
   convergent.  The new smoother is also available in AMS as relax type 4.
+
+- Fixed some bugs in the coarsening routines for BoomerAMG.
+
+- Relaxed the power-of-two restrictions for the PFMG and SysPFMG solvers.  See
+  the reference manual for more details.  SMG still requires a power-of-two.
+
+- Fixed the constant-coefficient PFMG solvers.  Also changed the non-Galerkin
+  scheme slightly for the constant-coefficient variable-diagonal PFMG solver to
+  simplify the code and enable easier threading.
+
+- Fixed a bug in the Struct multigrid solvers for periodic problems when the
+  period is larger than the grid.
+
+- Fixed some OpenMP problems in the Struct and SStruct code.
 
 #====================================
 
