@@ -70,7 +70,7 @@ testing_dir=`cd ..; pwd`
 autotest_dir="$testing_dir/AUTOTEST"
 release_file=$1
 release_dir=`basename $release_file | awk -F.tar '{print $1}'`
-release=`echo $release_dir | awk -F- '{print $2}'`
+release=`echo $release_dir | sed 's/hypre-//' | sed 's/.tar.gz//'`
 output_dir="$testing_dir/AUTOTEST-hypre-$release"
 case $release in
    *[0-9].*[0-9].*[0-9])  NAME="GENERAL"; TESTS=$TEST_GENERAL ;;
