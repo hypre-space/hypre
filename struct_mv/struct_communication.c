@@ -172,20 +172,24 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    data_offset = 0;
    num_boxes = 0;
    num_entries = 0;
-   hypre_ForBoxArrayI(i, send_boxes)
+   hypre_ForBoxI(i, send_data_space)
    {
       data_offsets[i] = data_offset;
       data_box = hypre_BoxArrayBox(send_data_space, i);
       data_offset += hypre_BoxVolume(data_box) * num_values;
 
-      box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
-      num_boxes += hypre_BoxArraySize(box_array);
-      hypre_ForBoxI(j, box_array)
+      /* RDF: This should always be true, but it's not for FAC.  Find out why. */
+      if (i < hypre_BoxArrayArraySize(send_boxes))
       {
-         box = hypre_BoxArrayBox(box_array, j);
-         if (hypre_BoxVolume(box) != 0)
+         box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
+         num_boxes += hypre_BoxArraySize(box_array);
+         hypre_ForBoxI(j, box_array)
          {
-            num_entries++;
+            box = hypre_BoxArrayBox(box_array, j);
+            if (hypre_BoxVolume(box) != 0)
+            {
+               num_entries++;
+            }
          }
       }
    }
@@ -310,14 +314,18 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    data_offsets = hypre_TAlloc(HYPRE_Int, hypre_BoxArrayArraySize(recv_boxes));
    data_offset = 0;
    num_boxes = 0;
-   hypre_ForBoxArrayI(i, recv_boxes)
+   hypre_ForBoxI(i, recv_data_space)
    {
       data_offsets[i] = data_offset;
       data_box = hypre_BoxArrayBox(recv_data_space, i);
       data_offset += hypre_BoxVolume(data_box) * num_values;
 
-      box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
-      num_boxes += hypre_BoxArraySize(box_array);
+      /* RDF: This should always be true, but it's not for FAC.  Find out why. */
+      if (i < hypre_BoxArrayArraySize(recv_boxes))
+      {
+         box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
+         num_boxes += hypre_BoxArraySize(box_array);
+      }
    }
    hypre_CommPkgRecvDataOffsets(comm_pkg) = data_offsets;
    hypre_CommPkgRecvDataSpace(comm_pkg) = hypre_BoxArrayDuplicate(recv_data_space);
