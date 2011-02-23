@@ -168,7 +168,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
     *------------------------------------------------------*/
 
    /* set data_offsets and compute num_boxes, num_entries */
-   data_offsets = hypre_TAlloc(HYPRE_Int, hypre_BoxArrayArraySize(send_boxes));
+   data_offsets = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(send_data_space));
    data_offset = 0;
    num_boxes = 0;
    num_entries = 0;
@@ -311,7 +311,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
     *------------------------------------------------------*/
 
    /* set data_offsets and compute num_boxes */
-   data_offsets = hypre_TAlloc(HYPRE_Int, hypre_BoxArrayArraySize(recv_boxes));
+   data_offsets = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(recv_data_space));
    data_offset = 0;
    num_boxes = 0;
    hypre_ForBoxI(i, recv_data_space)
