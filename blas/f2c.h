@@ -22,6 +22,10 @@
 #ifndef F2C_INCLUDE
 #define F2C_INCLUDE
 
+/* MPI is not needed here, so don't include mpi.h */
+#ifndef HYPRE_SEQUENTIAL
+#define HYPRE_SEQUENTIAL 1
+#endif
 #include "_hypre_utilities.h"
 
 #ifdef HYPRE_BIGINT
