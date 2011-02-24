@@ -314,6 +314,9 @@ function ExecuteJobs
             BatchFile=""
             ;;
 
+         *"#"*) :
+            ;; 
+
          *mpirun*)
             RunCmd=`echo $InputLine| sed -e 's/^[ \t]*mpirun[ \t]*//'` 
             RunCmd=`echo $RunCmd | sed -e 's/[ \t]*>.*$//'`
@@ -381,9 +384,6 @@ EOF
                fi                           # BatchFlag set
             fi                              # BatchMode set
             ;;
-
-         *"#"*) :
-            ;; 
 
          *)
             NOTBLANK=`echo $InputLine | sed 's/[ \n\t]//g'`
