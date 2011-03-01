@@ -262,7 +262,7 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_BoxLoop2Begin(loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc,mrk0,mrk1
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1
 #include "hypre_box_smp_forloop.h"
    hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
       {

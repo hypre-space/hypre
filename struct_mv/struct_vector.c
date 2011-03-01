@@ -744,8 +744,13 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
          i = hypre_IndexX(start);
          j = hypre_IndexY(start);
          k = hypre_IndexZ(start);
+/* RDF: This won't work as written with threading on */
+#if 0
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
 #include "hypre_box_smp_forloop.h"
+#else
+         hypre_BoxLoopSetOneBlock();
+#endif
          hypre_BoxLoop1For(loopi, loopj, loopk, vi)
             {
                vp[vi] = fcn(i, j, k);
