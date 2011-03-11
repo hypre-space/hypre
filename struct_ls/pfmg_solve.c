@@ -10,14 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
 #include "headers.h"
 #include "pfmg.h"
 
@@ -30,8 +22,8 @@
  *
  * Since r_l and e_l point to the same temporary data, the boundary ghost values
  * are not guaranteed to stay clear as needed in the constant coefficient case.
- * In addition, for the non-Galerkin case, the interpolation operator is set to
- * be a variable coefficient operator.  However, interpolation values that reach
+ * In addition, for the Galerkin case, the interpolation operator is set to be a
+ * variable coefficient operator.  However, interpolation values that reach
  * outside of the boundary are currently not always computed to be zero in this
  * case, so we can't rewrite SemiRestrict and SemiInterp to faithfully zero out
  * boundary ghost values only when needed because there isn't enough context.
