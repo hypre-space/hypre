@@ -1,42 +1,42 @@
-#!/bin/tcsh
+#!/bin/sh
 
-set examplesdir = "$argv[1]"
-set currentdir  = `pwd`
+examplesdir="$1"
+currentdir=`pwd`
 
 # Create the README_files directory
-if (!(-d $examplesdir/README_files)) then
+if [ ! -d $examplesdir/README_files ]; then
     mkdir $examplesdir/README_files
-endif
+fi
 
 # Syntax highlighting
 cd $examplesdir/README_files
-foreach target (`ls ../*.c`)
+for target in `ls ../*.c`; do
     $currentdir/code2html.perl -l c -n -o html $target $target.html
     mv $target.html .
-end
-foreach target (`ls ../*.f*`)
+done
+for target in `ls ../*.f*`; do
     $currentdir/code2html.perl -l f -n -o html $target $target.html
     mv $target.html .
-end
-foreach target (`ls ../*.cxx`)
+done
+for target in `ls ../*.cxx`; do
     $currentdir/code2html.perl -l c++ -n -o html $target $target.html
     mv $target.html .
-end
-foreach target (`ls ../*.py`)
+done
+for target in `ls ../*.py`; do
     $currentdir/code2html.perl -l python -n -o html $target $target.html
     mv $target.html .
-end
+done
 cd $currentdir
 
 # Copy the example files
-foreach file (`ls ex*.htm`)
+for file in `ls ex*.htm`; do
     cp -fp "$file" "$file"l
-end
+done
 
 # Replace the server side includes
-foreach file (`ls *.htm`)
+for file in `ls *.htm`; do
     $currentdir/replace-ssi.perl "$file" > $examplesdir/README_files/"$file"l
-end
+done
 
 # Copy images
 cp -fp *.gif $examplesdir/README_files
