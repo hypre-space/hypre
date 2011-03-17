@@ -10,7 +10,7 @@ The following steps must be completed, initialed & dated on the [] line by
 the responsible project member before the release is made available to users.
 
 
-- Decision made for release number X.X.Xb
+- Decision made for release number 2.7.0b
 
   [rdf 1/25/2011]
 
