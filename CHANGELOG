@@ -15,6 +15,17 @@
 # recent release.
 #=============================================================================
 
+Version 2.7.1a released 2011/03/18
+
+- Fixed a long-standing O(P) memory allocation problem in the communication
+  setup routines for Struct.
+
+- Fixed some OpenMP threading problems in Struct.
+
+- Made some optimizations to the constant coefficient version of PFMG.
+
+#====================================
+
 Version 2.7.0b released 2011/01/27
 
 - Added a new --enable-bigint feature that, when turned on, requires the user to
