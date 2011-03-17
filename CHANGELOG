@@ -24,6 +24,8 @@ Version 2.7.1a released 2011/03/18
 
 - Made some optimizations to the constant coefficient version of PFMG.
 
+- Added a 64-bit version of Example 15 (file 'ex15big.c' in examples/)
+
 #====================================
 
 Version 2.7.0b released 2011/01/27
