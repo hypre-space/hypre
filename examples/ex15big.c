@@ -1,5 +1,5 @@
 /*
-   Example 15
+   Example 15big
 
    Interface:      Semi-Structured interface (SStruct)
 
