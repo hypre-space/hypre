@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Routine for building a DistributedMatrix from a ParCSRMatrix
@@ -27,8 +24,8 @@
 
 #include "general.h"
 
+#include "_hypre_utilities.h"
 #include "HYPRE.h"
-#include "HYPRE_utilities.h"
 
 /* Prototypes for DistributedMatrix */
 #include "HYPRE_distributed_matrix_types.h"
@@ -43,10 +40,9 @@
 
 HYPRE_Int 
 HYPRE_ConvertParCSRMatrixToDistributedMatrix( 
-                 HYPRE_ParCSRMatrix parcsr_matrix,
-                 HYPRE_DistributedMatrix *DistributedMatrix )
+   HYPRE_ParCSRMatrix parcsr_matrix,
+   HYPRE_DistributedMatrix *DistributedMatrix )
 {
-   HYPRE_Int ierr;
    MPI_Comm comm;
    HYPRE_Int M, N;
 
@@ -57,34 +53,33 @@ HYPRE_ConvertParCSRMatrixToDistributedMatrix(
 #endif
 
 
-   if (!parcsr_matrix) return(-1);
+   if (!parcsr_matrix)
+   {
+      hypre_error(HYPRE_ERROR_ARG);
+      return hypre_error_flag; 
+   }
 
-   ierr = HYPRE_ParCSRMatrixGetComm( parcsr_matrix, &comm);
+   HYPRE_ParCSRMatrixGetComm( parcsr_matrix, &comm);
 
-   ierr = HYPRE_DistributedMatrixCreate( comm, DistributedMatrix );
+   HYPRE_DistributedMatrixCreate( comm, DistributedMatrix );
 
-   ierr = HYPRE_DistributedMatrixSetLocalStorageType( *DistributedMatrix,
-                                                     HYPRE_PARCSR );
-   /* if(ierr) return(ierr); */
+   HYPRE_DistributedMatrixSetLocalStorageType( *DistributedMatrix, HYPRE_PARCSR );
 
-   ierr = HYPRE_DistributedMatrixInitialize( *DistributedMatrix );
-   /* if(ierr) return(ierr); */
+   HYPRE_DistributedMatrixInitialize( *DistributedMatrix );
 
-   ierr = HYPRE_DistributedMatrixSetLocalStorage( *DistributedMatrix, parcsr_matrix );
-   /* if(ierr) return(ierr);*/
+   HYPRE_DistributedMatrixSetLocalStorage( *DistributedMatrix, parcsr_matrix );
    
 
-   ierr = HYPRE_ParCSRMatrixGetDims( parcsr_matrix, &M, &N); /* if(ierr) return(ierr); */
-   ierr = HYPRE_DistributedMatrixSetDims( *DistributedMatrix, M, N);
+   HYPRE_ParCSRMatrixGetDims( parcsr_matrix, &M, &N);
+   HYPRE_DistributedMatrixSetDims( *DistributedMatrix, M, N);
 
-   ierr = HYPRE_DistributedMatrixAssemble( *DistributedMatrix );
-   /* if(ierr) return(ierr); */
+   HYPRE_DistributedMatrixAssemble( *DistributedMatrix );
 
 #ifdef HYPRE_TIMING
    hypre_EndTiming( timer );
    /* hypre_FinalizeTiming( timer ); */
 #endif
 
-   return(0);
+   return hypre_error_flag; 
 }
 

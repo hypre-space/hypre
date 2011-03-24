@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 /******************************************************************************
  *
  * HYPRE_ParCSRParaSails interface
@@ -37,7 +33,7 @@
 #include "../IJ_mv/HYPRE_IJ_mv.h"
 
 /* Must include implementation definition for ParVector since no data access
-  functions are publically provided. AJC, 5/99 */
+   functions are publically provided. AJC, 5/99 */
 /* Likewise for Vector. AJC, 5/99 */
 #include "../seq_mv/vector.h"
 /* AB 8/06 - replace header file */
@@ -47,17 +43,17 @@
 /* If code is more mysterious, then it must be good */
 typedef struct
 {
-    hypre_ParaSails obj;
-    HYPRE_Int             sym;
-    double          thresh;
-    HYPRE_Int             nlevels;
-    double          filter;
-    double          loadbal;
-    HYPRE_Int             reuse; /* reuse pattern */
-    MPI_Comm        comm;
-    HYPRE_Int		    logging;
+   hypre_ParaSails obj;
+   HYPRE_Int       sym;
+   double          thresh;
+   HYPRE_Int       nlevels;
+   double          filter;
+   double          loadbal;
+   HYPRE_Int       reuse; /* reuse pattern */
+   MPI_Comm        comm;
+   HYPRE_Int       logging;
 }
-Secret;
+   Secret;
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRParaSailsCreate - Return a ParaSails preconditioner object 
@@ -73,7 +69,10 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    secret = (Secret *) malloc(sizeof(Secret));
 
    if (secret == NULL)
-       return 1;
+   {
+      hypre_error(HYPRE_ERROR_MEMORY);
+      return hypre_error_flag;
+   }
 
    secret->sym     = 1;
    secret->thresh  = 0.1;
@@ -88,7 +87,7 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 
    *solver = (HYPRE_Solver) secret;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -98,15 +97,14 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 HYPRE_Int 
 HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver )
 {
-   HYPRE_Int ierr = 0;
    Secret *secret;
 
    secret = (Secret *) solver;
-   ierr = hypre_ParaSailsDestroy(secret->obj);
+   hypre_ParaSailsDestroy(secret->obj);
 
    free(secret);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -117,39 +115,38 @@ HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver )
 
 HYPRE_Int 
 HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
-                   HYPRE_ParCSRMatrix A,
-                   HYPRE_ParVector b,
-                   HYPRE_ParVector x      )
+                            HYPRE_ParCSRMatrix A,
+                            HYPRE_ParVector b,
+                            HYPRE_ParVector x      )
 {
-   HYPRE_Int ierr = 0;
    static HYPRE_Int virgin = 1;
    HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
 
    /* The following call will also create the distributed matrix */
 
-   ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
-   if (ierr) return ierr;
+   HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
+   if (hypre_error_flag) return hypre_error_flag;
 
    if (virgin || secret->reuse == 0) /* call set up at least once */
    {
-       virgin = 0;
-       ierr = hypre_ParaSailsSetup(secret->obj, mat, secret->sym, 
-           secret->thresh, secret->nlevels, secret->filter, secret->loadbal,
-	   secret->logging);
-       if (ierr) return ierr;
+      virgin = 0;
+      hypre_ParaSailsSetup(
+         secret->obj, mat, secret->sym, secret->thresh, secret->nlevels,
+         secret->filter, secret->loadbal, secret->logging);
+      if (hypre_error_flag) return hypre_error_flag;
    }
    else /* reuse is true; this is a subsequent call */
    {
-       /* reuse pattern: always use filter value of 0 and loadbal of 0 */
-       ierr = hypre_ParaSailsSetupValues(secret->obj, mat,
-	 0.0, 0.0, secret->logging);
-       if (ierr) return ierr;
+      /* reuse pattern: always use filter value of 0 and loadbal of 0 */
+      hypre_ParaSailsSetupValues(secret->obj, mat,
+                                 0.0, 0.0, secret->logging);
+      if (hypre_error_flag) return hypre_error_flag;
    }
 
-   ierr = HYPRE_DistributedMatrixDestroy(mat);
+   HYPRE_DistributedMatrixDestroy(mat);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -162,16 +159,15 @@ HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver,
                             HYPRE_ParVector b,
                             HYPRE_ParVector x     )
 {
-   HYPRE_Int ierr = 0;
    double *rhs, *soln;
    Secret *secret = (Secret *) solver;
 
    rhs  = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) b));
    soln = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) x));
 
-   ierr = hypre_ParaSailsApply(secret->obj, rhs, soln);
+   hypre_ParaSailsApply(secret->obj, rhs, soln);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -182,14 +178,14 @@ HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver, 
                                double       thresh,
-                               HYPRE_Int          nlevels )
+                               HYPRE_Int    nlevels )
 {
    Secret *secret = (Secret *) solver;
 
    secret->thresh  = thresh;
    secret->nlevels = nlevels;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -205,7 +201,7 @@ HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver,
 
    secret->filter = filter;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -216,7 +212,7 @@ HYPRE_ParCSRParaSailsGetFilter(HYPRE_Solver solver,
 
    *filter = secret->filter;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -226,13 +222,13 @@ HYPRE_ParCSRParaSailsGetFilter(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver, 
-                            HYPRE_Int          sym     )
+                            HYPRE_Int    sym     )
 {
    Secret *secret = (Secret *) solver;
 
    secret->sym = sym;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -247,7 +243,7 @@ HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver,
 
    secret->loadbal = loadbal;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -258,7 +254,7 @@ HYPRE_ParCSRParaSailsGetLoadbal(HYPRE_Solver solver,
 
    *loadbal = secret->loadbal;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -267,13 +263,13 @@ HYPRE_ParCSRParaSailsGetLoadbal(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver, 
-                              HYPRE_Int          reuse   )
+                              HYPRE_Int    reuse   )
 {
    Secret *secret = (Secret *) solver;
 
    secret->reuse = reuse;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -282,13 +278,13 @@ HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver, 
-                                HYPRE_Int          logging )
+                                HYPRE_Int    logging )
 {
    Secret *secret = (Secret *) solver;
 
    secret->logging = logging;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /******************************************************************************
@@ -311,7 +307,10 @@ HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    secret = (Secret *) malloc(sizeof(Secret));
 
    if (secret == NULL)
-       return 1;
+   {
+      hypre_error(HYPRE_ERROR_MEMORY);
+      return hypre_error_flag;
+   }
 
    secret->sym     = 1;
    secret->thresh  = 0.1;
@@ -326,7 +325,7 @@ HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 
    *solver = (HYPRE_Solver) secret;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -336,15 +335,14 @@ HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 HYPRE_Int 
 HYPRE_ParaSailsDestroy( HYPRE_Solver solver )
 {
-   HYPRE_Int ierr = 0;
    Secret *secret;
 
    secret = (Secret *) solver;
-   ierr = hypre_ParaSailsDestroy(secret->obj);
+   hypre_ParaSailsDestroy(secret->obj);
 
    free(secret);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -359,35 +357,34 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x     )
 {
-   HYPRE_Int ierr = 0;
    static HYPRE_Int virgin = 1;
    HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
 
    /* The following call will also create the distributed matrix */
 
-   ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
-   if (ierr) return ierr;
+   HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
+   if (hypre_error_flag) return hypre_error_flag;
 
    if (virgin || secret->reuse == 0) /* call set up at least once */
    {
-       virgin = 0;
-       ierr = hypre_ParaSailsSetup(secret->obj, mat, secret->sym, 
-           secret->thresh, secret->nlevels, secret->filter, secret->loadbal,
-	   secret->logging);
-       if (ierr) return ierr;
+      virgin = 0;
+      hypre_ParaSailsSetup(
+         secret->obj, mat, secret->sym, secret->thresh, secret->nlevels,
+         secret->filter, secret->loadbal, secret->logging);
+      if (hypre_error_flag) return hypre_error_flag;
    }
    else /* reuse is true; this is a subsequent call */
    {
-       /* reuse pattern: always use filter value of 0 and loadbal of 0 */
-       ierr = hypre_ParaSailsSetupValues(secret->obj, mat,
-	 0.0, 0.0, secret->logging);
-       if (ierr) return ierr;
+      /* reuse pattern: always use filter value of 0 and loadbal of 0 */
+      hypre_ParaSailsSetupValues(secret->obj, mat,
+                                 0.0, 0.0, secret->logging);
+      if (hypre_error_flag) return hypre_error_flag;
    }
 
-   ierr = HYPRE_DistributedMatrixDestroy(mat);
+   HYPRE_DistributedMatrixDestroy(mat);
 
-   return ierr;
+   return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSolve - Solve function for ParaSails.
@@ -399,16 +396,15 @@ HYPRE_ParaSailsSolve( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x     )
 {
-   HYPRE_Int ierr = 0;
    double *rhs, *soln;
    Secret *secret = (Secret *) solver;
 
    rhs  = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) b));
    soln = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) x));
 
-   ierr = hypre_ParaSailsApply(secret->obj, rhs, soln);
+   hypre_ParaSailsApply(secret->obj, rhs, soln);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -419,14 +415,14 @@ HYPRE_ParaSailsSolve( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_ParaSailsSetParams(HYPRE_Solver solver, 
                          double       thresh,
-                         HYPRE_Int          nlevels )
+                         HYPRE_Int    nlevels )
 {
    Secret *secret = (Secret *) solver;
 
    secret->thresh  = thresh;
    secret->nlevels = nlevels;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -443,7 +439,7 @@ HYPRE_ParaSailsSetThresh( HYPRE_Solver solver,
 
    secret->thresh  = thresh;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -454,7 +450,7 @@ HYPRE_ParaSailsGetThresh( HYPRE_Solver solver,
 
    *thresh = secret->thresh;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -465,24 +461,24 @@ HYPRE_ParaSailsGetThresh( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsSetNlevels( HYPRE_Solver solver, 
-                           HYPRE_Int          nlevels )
+                           HYPRE_Int    nlevels )
 {
    Secret *secret = (Secret *) solver;
 
    secret->nlevels  = nlevels;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetNlevels( HYPRE_Solver solver, 
-                           HYPRE_Int        * nlevels )
+                           HYPRE_Int  * nlevels )
 {
    Secret *secret = (Secret *) solver;
 
    *nlevels = secret->nlevels;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -498,7 +494,7 @@ HYPRE_ParaSailsSetFilter(HYPRE_Solver solver,
 
    secret->filter = filter;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -509,7 +505,7 @@ HYPRE_ParaSailsGetFilter(HYPRE_Solver solver,
 
    *filter = secret->filter;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -520,24 +516,24 @@ HYPRE_ParaSailsGetFilter(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsSetSym(HYPRE_Solver solver, 
-                      HYPRE_Int          sym     )
+                      HYPRE_Int    sym     )
 {
    Secret *secret = (Secret *) solver;
 
    secret->sym = sym;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetSym(HYPRE_Solver solver, 
-                      HYPRE_Int        * sym     )
+                      HYPRE_Int  * sym     )
 {
    Secret *secret = (Secret *) solver;
 
    *sym = secret->sym;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -552,7 +548,7 @@ HYPRE_ParaSailsSetLoadbal(HYPRE_Solver solver,
 
    secret->loadbal = loadbal;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -563,7 +559,7 @@ HYPRE_ParaSailsGetLoadbal(HYPRE_Solver solver,
 
    *loadbal = secret->loadbal;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -573,24 +569,24 @@ HYPRE_ParaSailsGetLoadbal(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsSetReuse(HYPRE_Solver solver, 
-                        HYPRE_Int          reuse   )
+                        HYPRE_Int    reuse   )
 {
    Secret *secret = (Secret *) solver;
 
    secret->reuse = reuse;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetReuse(HYPRE_Solver solver, 
-                        HYPRE_Int        * reuse   )
+                        HYPRE_Int  * reuse   )
 {
    Secret *secret = (Secret *) solver;
 
    *reuse = secret->reuse;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -599,24 +595,24 @@ HYPRE_ParaSailsGetReuse(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsSetLogging(HYPRE_Solver solver, 
-                          HYPRE_Int          logging )
+                          HYPRE_Int    logging )
 {
    Secret *secret = (Secret *) solver;
 
    secret->logging = logging;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
 HYPRE_ParaSailsGetLogging(HYPRE_Solver solver, 
-                          HYPRE_Int        * logging )
+                          HYPRE_Int  * logging )
 {
    Secret *secret = (Secret *) solver;
 
    *logging = secret->logging;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -629,5 +625,5 @@ HYPRE_ParaSailsBuildIJMatrix(HYPRE_Solver solver, HYPRE_IJMatrix *pij_A)
 
    hypre_ParaSailsBuildIJMatrix(secret->obj, pij_A);
     
-   return 0;
+   return hypre_error_flag;
 }
