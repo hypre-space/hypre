@@ -1272,10 +1272,10 @@ main( hypre_int argc,
 
    if (build_matrix_type < 0)
    {
-     ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
-     parcsr_A = (HYPRE_ParCSRMatrix) object;
+     /*ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
+     parcsr_A = (HYPRE_ParCSRMatrix) object;*/
 
-     ierr = HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
+     ierr = HYPRE_IJMatrixGetLocalRange( ij_A,
                &first_local_row, &last_local_row ,
                &first_local_col, &last_local_col );
 
@@ -1450,7 +1450,6 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
-
    if (build_matrix_type > -1)
      ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
