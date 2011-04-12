@@ -532,6 +532,7 @@ main( hypre_int argc,
       hypre_printf("                        4  - PFMG constant coeffs var diag\n");
       hypre_printf("                        8  - Jacobi\n");
       hypre_printf("                        10 - CG with SMG precond\n");
+      hypre_printf("                        11 - CG with PFMG precond\n");
       hypre_printf("                        12 - CG with SparseMSG precond\n");
       hypre_printf("                        13 - CG with PFMG-3 precond\n");
       hypre_printf("                        14 - CG with PFMG-4 precond\n");
