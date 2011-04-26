@@ -81,7 +81,7 @@ hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,\
                             hypre_BoxIMax(box))
 
 /*--------------------------------------------------------------------------
- * New version of hypre_StructCoarsen that uses the BoxManager (AHB 9/12)
+ * New version of hypre_StructCoarsen that uses the BoxManager (AHB 12/06)
  *
  * This routine coarsens the grid, 'fgrid', by the coarsening factor, 'stride',
  * using the index mapping in 'hypre_StructMapFineToCoarse'.

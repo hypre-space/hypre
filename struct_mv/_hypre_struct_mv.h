@@ -33,8 +33,6 @@ extern "C" {
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Header info for the Box structures
@@ -1067,13 +1065,16 @@ HYPRE_Int  kinc = (hypre_IndexZ(stride)*\
 typedef struct 
 {
    /* the entries will be the same for all procs */  
-   hypre_BoxArray      *regions;
-   HYPRE_Int           num_regions;      
-   HYPRE_Int           *proc_partitions;
-   hypre_Index         *divisions;
+   hypre_BoxArray      *regions;  /* areas of the grid with boxes */
+   HYPRE_Int           num_regions;  /* how many regions */    
+   HYPRE_Int           *proc_partitions;  /* proc ids assigned to each region  
+                                             - this is size num_regions +1*/
+   hypre_Index         *divisions;        /* number of proc divisions in x y z 
+                                             direction
+                                             for each region */
    /* these entries are specific to each proc */
-   hypre_BoxArray      *my_partition;
-   hypre_BoxArray      *my_partition_boxes;
+   hypre_BoxArray      *my_partition;  /*the portion of grid that I own - at most 2 */
+   hypre_BoxArray      *my_partition_boxes;  /* boxes in my portion */
    HYPRE_Int           *my_partition_proc_ids;
    HYPRE_Int           *my_partition_boxnums;
    HYPRE_Int           my_partition_ids_size;   
@@ -1577,7 +1578,7 @@ typedef struct hypre_CommPkg_struct
    hypre_CommType   *copy_from_type;
    hypre_CommType   *copy_to_type;
 
-   /* these are pointers just to help free up memory */
+   /* these pointers are just to help free up memory for send/from types */
    hypre_CommEntryType *entries;
    HYPRE_Int           *rem_boxnums;
    hypre_Box           *rem_boxes;
