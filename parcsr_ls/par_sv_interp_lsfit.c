@@ -19,11 +19,12 @@ int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, int *, int *, double *, int *
  * hypre_BoomerAMGFitInterpVectors
  *
   This routine for updating the interp operator to interpolate the
-  supplied smooth vectors with a L.S. fitting.   This code (varient 0)
+  supplied smooth vectors with a L.S. fitting.  This code (varient 0)
   was used for the Baker, Kolev and Yang elasticity paper in section 3
-  to evalute the least squares fitting methed proposed by Stuben in
-  his talk (see paper for details).
- 
+  to evaluate the least squares fitting methed proposed by Stuben in
+  his talk (see paper for details).  So this code is basically a
+  post-processing step that performs the LS fit (the size and sparsity
+  of P do not change).
 
   Note: truncation only works correctly for 1 processor - needs to
         just use the other truncation rouitne
