@@ -616,9 +616,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    hypre_TFree(lev_counter);
    hypre_TFree(num_coeffs);
-   if (smooth_type == 7 || smooth_type == 8 || smooth_type == 9 || 
+   if (smooth_num_levels > 0)
+   {
+     if (smooth_type == 7 || smooth_type == 8 || smooth_type == 9 || 
 	smooth_type == 17 || smooth_type == 18 || smooth_type == 19 )
         hypre_ParVectorDestroy(Utemp);
-
+   }
    return(Solve_err_flag);
 }
