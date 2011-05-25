@@ -150,6 +150,12 @@ void MatrixDestroy(Matrix *mat)
     for (i=0; i<mat->num_send; i++)
         hypre_MPI_Request_free(&mat->send_req[i]);
 
+    for (i=0; i<mat->num_send; i++)
+        hypre_MPI_Request_free(&mat->recv_req2[i]);
+
+    for (i=0; i<mat->num_recv; i++)
+        hypre_MPI_Request_free(&mat->send_req2[i]);
+
     free(mat->recv_req);
     free(mat->send_req);
     free(mat->recv_req2);
