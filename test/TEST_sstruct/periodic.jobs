@@ -70,3 +70,10 @@ mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigB -r 3 6 1 -P 2 1 1 -rhsone \
 -solver 201 > periodic.out.66
 mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigB -r 3 6 1 -P 2 1 1 -rhsone \
 -solver 3 > periodic.out.67
+
+#=============================================================================
+# Check that reverse communication used to AddValues still works
+#=============================================================================
+
+mpirun -np 2 sstruct -in sstruct.in.periodic.add -solver 218 -P 1 1 2 \
+> periodic.out.70
