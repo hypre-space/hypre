@@ -1476,6 +1476,11 @@ DistributeData( ProblemData   global_data,
                   }
                }
             }
+            for (box = i; box < pdata.matadd_nboxes; box++)
+            {
+               hypre_TFree(pdata.matadd_entries[box]);
+               hypre_TFree(pdata.matadd_values[box]);
+            }
             pdata.matadd_nboxes = i;
 
             i = 0;
