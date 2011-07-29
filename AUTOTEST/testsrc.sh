@@ -74,9 +74,9 @@ if [ "$rem_dir_exists" == "no" ]
 then
    tar -C `dirname $src_dir` -zcf - $rem_dir | ssh -q $machine tar -C $rem_path -zxf -
 else
-   rsync -zae "ssh -q" --delete $src_dir/ $machine:$rem_path/$rem_dir
+   rsync -zae "ssh -q" --delete $src_dir/ $USER@$machine:$rem_path/$rem_dir
 fi
-rsync -zae "ssh -q" --delete . $machine:$rem_path/$rem_dir/AUTOTEST
+rsync -zae "ssh -q" --delete . $USER@$machine:$rem_path/$rem_dir/AUTOTEST
 
 # Run the test and copy the results
 # Use the '.hyprerc' file when needed to customize the environment
