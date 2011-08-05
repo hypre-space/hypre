@@ -241,7 +241,7 @@ for dir in $ch_dirs lastrun-*
 do
    if [ -e $dir ]; then
       chmod -fR a+rX,ug+w,o-w $dir
-      chgrp -fR hypre         $dir
+      # chgrp -fR hypre         $dir
    fi
 done
 
@@ -257,7 +257,7 @@ do
    if [ ! -d $dir ]; then
       mkdir $dir
       chmod -fR a+rX,ug+w,o-w $dir
-      chgrp -fR hypre         $dir
+      # chgrp -fR hypre         $dir
    fi
    mv $i $dir/$i
    count=`expr $count - 1`
