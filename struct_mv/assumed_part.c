@@ -181,7 +181,6 @@ HYPRE_Int hypre_APFindMyBoxesInRegions( hypre_BoxArray *region_array,
 {
 
    HYPRE_Int            i,j, d, grow;
-   HYPRE_Int            myid;
    HYPRE_Int            num_boxes, num_regions;
    HYPRE_Int           *count_array;
    double              *vol_array;
@@ -190,9 +189,6 @@ HYPRE_Int hypre_APFindMyBoxesInRegions( hypre_BoxArray *region_array,
    hypre_Box           *my_box, *result_box, *grow_box;
    hypre_Box           *region;
   
-
-   /* this is just for debuugging - need myid for print statement */
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    num_boxes =  hypre_BoxArraySize(my_box_array);
    num_regions = hypre_BoxArraySize(region_array);
@@ -356,7 +352,6 @@ HYPRE_Int hypre_APShrinkRegions( hypre_BoxArray *region_array,
 
 
    HYPRE_Int            i,j, d;
-   HYPRE_Int            myid;
    HYPRE_Int            num_boxes, num_regions;
    HYPRE_Int            *indices, *recvbuf;
    HYPRE_Int            count = 0;
@@ -367,11 +362,6 @@ HYPRE_Int hypre_APShrinkRegions( hypre_BoxArray *region_array,
    hypre_Box           *region;
    hypre_Index          imin, imax;
    
-
-   /* hypre_printf("SHRINKING!\n"); */
-   
-
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    num_boxes =  hypre_BoxArraySize(my_box_array);
    num_regions = hypre_BoxArraySize(region_array);
