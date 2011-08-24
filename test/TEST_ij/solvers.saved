@@ -12,7 +12,7 @@ Final GMRES Relative Residual Norm = 7.746171e-09
 
 # Output file: solvers.out.3
 GMRES Iterations = 93
-Final GMRES Relative Residual Norm = 8.225662e-09
+Final GMRES Relative Residual Norm = 8.225661e-09
 
 # Output file: solvers.out.4
 Iterations = 7
@@ -60,39 +60,39 @@ Final Relative Residual Norm = 6.069126e-08
 
 # Output file: solvers.out.1.lobpcg.1
 Eigenvalue lambda   2.43042158313104e-01
-Residual   4.05590545303291e-07
+Residual   4.05590544958688e-07
 
 # Output file: solvers.out.1.lobpcg.5
 Eigenvalue lambda   2.43042158313016e-01
-Eigenvalue lambda   4.79521039879679e-01
-Eigenvalue lambda   4.79521039879701e-01
-Eigenvalue lambda   4.79521039879804e-01
-Eigenvalue lambda   7.15999921446399e-01
-Residual   1.47262238800593e-07
-Residual   4.10376104288507e-07
-Residual   3.65312516960111e-07
-Residual   5.54929870625253e-07
-Residual   4.13490009728192e-07
+Eigenvalue lambda   4.79521039879678e-01
+Eigenvalue lambda   4.79521039879700e-01
+Eigenvalue lambda   4.79521039879798e-01
+Eigenvalue lambda   7.15999921446381e-01
+Residual   1.47262238951452e-07
+Residual   4.10416726959020e-07
+Residual   3.71025229730563e-07
+Residual   5.54739225377475e-07
+Residual   4.13480970042727e-07
 
 # Output file: solvers.out.2.lobpcg
 Iterations = 20
 Final Relative Residual Norm = 5.962015e-07
 
 # Output file: solvers.out.2.lobpcg.1
-Eigenvalue lambda   2.43042158313121e-01
-Residual   4.63315030227870e-07
+Eigenvalue lambda   2.43042158313120e-01
+Residual   4.63315030075101e-07
 
 # Output file: solvers.out.2.lobpcg.5
 Eigenvalue lambda   2.43042158313016e-01
 Eigenvalue lambda   4.79521039879678e-01
-Eigenvalue lambda   4.79521039879697e-01
-Eigenvalue lambda   4.79521039879779e-01
-Eigenvalue lambda   7.15999921446424e-01
-Residual   1.43322942727203e-07
-Residual   4.86327493980576e-07
-Residual   3.74901094014400e-07
-Residual   5.18320251929702e-07
-Residual   4.88658296857988e-07
+Eigenvalue lambda   4.79521039879702e-01
+Eigenvalue lambda   4.79521039879777e-01
+Eigenvalue lambda   7.15999921446472e-01
+Residual   1.43322942756939e-07
+Residual   4.86471853062634e-07
+Residual   3.80514535258685e-07
+Residual   5.18360455474111e-07
+Residual   4.88673170172331e-07
 
 # Output file: solvers.out.8.lobpcg
 Iterations = 15
@@ -100,19 +100,19 @@ Final Relative Residual Norm = 6.352784e-07
 
 # Output file: solvers.out.8.lobpcg.1
 Eigenvalue lambda   2.43042158313109e-01
-Residual   4.35799317987121e-07
+Residual   4.35799317992281e-07
 
 # Output file: solvers.out.8.lobpcg.5
 Eigenvalue lambda   2.43042158313016e-01
-Eigenvalue lambda   4.79521039879680e-01
-Eigenvalue lambda   4.79521039879698e-01
-Eigenvalue lambda   4.79521039879799e-01
-Eigenvalue lambda   7.15999921446915e-01
-Residual   1.37749965270722e-07
-Residual   4.63016861555976e-07
-Residual   3.91625598741712e-07
-Residual   5.41397570061897e-07
-Residual   9.41625642307417e-07
+Eigenvalue lambda   4.79521039879681e-01
+Eigenvalue lambda   4.79521039879696e-01
+Eigenvalue lambda   4.79521039879797e-01
+Eigenvalue lambda   7.15999921446900e-01
+Residual   1.37749965201035e-07
+Residual   4.62909573037802e-07
+Residual   3.92243064406046e-07
+Residual   5.41758662738602e-07
+Residual   9.41628951499493e-07
 
 # Output file: solvers.out.12.lobpcg
 Iterations = 13
@@ -120,39 +120,39 @@ Final Relative Residual Norm = 3.896456e-07
 
 # Output file: solvers.out.12.lobpcg.1
 Eigenvalue lambda   2.43042158313099e-01
-Residual   3.94665204217252e-07
+Residual   3.94665203872263e-07
 
 # Output file: solvers.out.12.lobpcg.5
 Eigenvalue lambda   2.43042158313016e-01
-Eigenvalue lambda   4.79521039879679e-01
+Eigenvalue lambda   4.79521039879677e-01
 Eigenvalue lambda   4.79521039879688e-01
-Eigenvalue lambda   4.79521039879785e-01
-Eigenvalue lambda   7.15999921446463e-01
-Residual   1.36414438526940e-07
-Residual   4.59805246256873e-07
-Residual   3.76885380845784e-07
-Residual   5.07955936869875e-07
-Residual   4.54935484514903e-07
+Eigenvalue lambda   4.79521039879784e-01
+Eigenvalue lambda   7.15999921446475e-01
+Residual   1.36414438635337e-07
+Residual   4.59821249520523e-07
+Residual   3.78900179495246e-07
+Residual   5.07942568509693e-07
+Residual   4.54934909112381e-07
 
 # Output file: solvers.out.43.lobpcg
 Iterations = 9
 Final Relative Residual Norm = 5.971754e-07
 
 # Output file: solvers.out.43.lobpcg.1
-Eigenvalue lambda   2.43042158313103e-01
-Residual   4.06686998990432e-07
+Eigenvalue lambda   2.43042158313104e-01
+Residual   4.06686998943146e-07
 
 # Output file: solvers.out.43.lobpcg.5
 Eigenvalue lambda   2.43042158313016e-01
 Eigenvalue lambda   4.79521039879676e-01
-Eigenvalue lambda   4.79521039879706e-01
-Eigenvalue lambda   4.79521039879825e-01
-Eigenvalue lambda   7.15999921446965e-01
-Residual   1.61376258749699e-07
-Residual   4.77062254772330e-07
-Residual   4.04530246844666e-07
-Residual   5.81688965850651e-07
-Residual   9.97065707340949e-07
+Eigenvalue lambda   4.79521039879713e-01
+Eigenvalue lambda   4.79521039879829e-01
+Eigenvalue lambda   7.15999921446991e-01
+Residual   1.61376258584891e-07
+Residual   4.77153868535215e-07
+Residual   4.00095580278183e-07
+Residual   5.82277072063708e-07
+Residual   9.97050184991679e-07
 
 # Output file: solvers.out.sysh
  Average Convergence Factor = 0.059838
@@ -185,7 +185,7 @@ Final LGMRES Relative Residual Norm = 7.746171e-09
 
 # Output file: solvers.out.103
 FlexGMRES Iterations = 93
-Final FlexGMRES Relative Residual Norm = 8.225662e-09
+Final FlexGMRES Relative Residual Norm = 8.225661e-09
 
 # Output file: solvers.out.104
 FlexGMRES Iterations = 4

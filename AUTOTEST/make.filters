@@ -10,7 +10,7 @@ sidl_BaseClass_Impl.c: In function
 sidl_BaseClass_Impl.c:.*: warning: label `EXIT' defined but not used
 ltdl.c:.*: warning: function declaration isn't a prototype
 bHYPRE_.*_Impl.c: In function
-sidlx_rmi_.*_Impl.c:.*: warning: `.*' defined but not used
+sidlx_rmi_.*_Impl.c:.*: warning: .* defined but not used
 bHYPRE_.*_Impl.c:.*: warning: control reaches end of non-void function
 configure: WARNING: The Java compiler javac failed
 configure: WARNING: Disabling Java support
@@ -18,7 +18,9 @@ configure: WARNING: Cannot find jni.h, Java support will be disabled
 configure: WARNING: Try setting JNI_INCLUDES and rerunning configure
 configure: WARNING: Cannot find JVM shared library, Java support will be disabled
 sidl_search_scl.c: In function `sclCharacters':
-sidl_search_scl.c:319: warning: comparison is always true due to *
+sidl_search_scl.c:319: warning: comparison is always true due to
+sidl_rmi_InstanceRegistry_Impl.c: In function
+sidl_rmi_InstanceRegistry_Impl.c:.*: warning: cast from pointer
 Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
 WARNING in dReadValues: Infinite loop.  Program may not stop.
 WARNING in dReadVector: Infinite loop.  Program may not stop.
