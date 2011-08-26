@@ -7,7 +7,7 @@ ranlib: file: lib.*\(.*\) has no symbols
 /tmp/.*: Assembler messages:
 /tmp/.*: Warning: Additional NOP may be necessary to workaround Itanium processor A/B step errata
 sidl_BaseClass_Impl.c: In function
-sidl_BaseClass_Impl.c:.*: warning: label `EXIT' defined but not used
+sidl_BaseClass_Impl.c:.*: warning: label 'EXIT' defined but not used
 ltdl.c:.*: warning: function declaration isn't a prototype
 bHYPRE_.*_Impl.c: In function
 sidlx_rmi_.*_Impl.c:.*: warning: .* defined but not used
@@ -17,7 +17,7 @@ configure: WARNING: Disabling Java support
 configure: WARNING: Cannot find jni.h, Java support will be disabled
 configure: WARNING: Try setting JNI_INCLUDES and rerunning configure
 configure: WARNING: Cannot find JVM shared library, Java support will be disabled
-sidl_search_scl.c: In function `sclCharacters':
+sidl_search_scl.c: In function 'sclCharacters':
 sidl_search_scl.c:319: warning: comparison is always true due to
 sidl_rmi_InstanceRegistry_Impl.c: In function
 sidl_rmi_InstanceRegistry_Impl.c:.*: warning: cast from pointer
