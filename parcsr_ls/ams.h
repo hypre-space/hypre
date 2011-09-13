@@ -44,7 +44,7 @@ typedef struct
    /* AMG solver for A_Pi */
    HYPRE_Solver B_Pi;
 
-   /* Componenets of the Nedelec interpolation matrix (vertex^dim-to-edge) */
+   /* Componenets of the Nedelec interpolation matrix (vertex-to-edge each) */
    hypre_ParCSRMatrix *Pix, *Piy, *Piz;
    /* Coarse grid matrices on the ranges of Pi{x,y,z}^T */
    hypre_ParCSRMatrix *A_Pix, *A_Piy, *A_Piz;
