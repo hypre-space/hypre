@@ -637,7 +637,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
       for (i = 0; i < num_rows; i++)
       {
          /* Add the diag element of the ith row */
-         l1_norm[i] = A_diag_data[A_diag_I[i]];
+         l1_norm[i] = fabs(A_diag_data[A_diag_I[i]]);
          if (cf_marker == NULL)
          {
             /* Add the l1 norm of the offd part of the ith row */
@@ -677,7 +677,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
       for (i = 0; i < num_rows; i++)
       {
          /* Add the diag element of the ith row */
-         diag = l1_norm[i] = A_diag_data[A_diag_I[i]];
+         diag = l1_norm[i] = fabs(A_diag_data[A_diag_I[i]]);
          if (cf_marker == NULL)
          {
             /* Add the scaled l1 norm of the offd part of the ith row */
@@ -705,8 +705,13 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
       }
    }
 
+   /* Handle negative definite matrices */
    for (i = 0; i < num_rows; i++)
-      if (l1_norm[i] < DBL_EPSILON)
+      if (A_diag_data[A_diag_I[i]] < 0)
+         l1_norm[i] = -l1_norm[i];
+
+   for (i = 0; i < num_rows; i++)
+      if (fabs(l1_norm[i]) < DBL_EPSILON)
       {
          hypre_error_in_arg(1);
          break;
@@ -3364,7 +3369,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                   {
                      if (ii == i)
                      {
-                        diag = A_diag_data[j];
+                        diag = fabs(A_diag_data[j]);
                         l1_norm[i] += fabs(A_diag_data[j]);
                      }
                      else
@@ -3390,7 +3395,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                   {
                      if (ii == i)
                      {
-                        diag = A_diag_data[j];
+                        diag = fabs(A_diag_data[j]);
                         l1_norm[i] += fabs(A_diag_data[j]);
                      }
                      else
@@ -3412,8 +3417,13 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
          }
       }
 
+      /* Handle negative definite matrices */
       for (i = ns; i < ne; i++)
-         if (l1_norm[i] < DBL_EPSILON)
+         if (A_diag_data[A_diag_I[i]] < 0)
+            l1_norm[i] = -l1_norm[i];
+
+      for (i = ns; i < ne; i++)
+         if (fabs(l1_norm[i]) < DBL_EPSILON)
          {
             hypre_error_in_arg(1);
             break;
