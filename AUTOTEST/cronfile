@@ -14,11 +14,13 @@
 00 1 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -tux339  >> autotest-tux-cron.out     2>> autotest-tux-cron.err
 00 6 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -summary-email
 
-# Rob's crontab (on aztec2)
+# Rob's crontab (on rzcereal)
 
-00 1 * * 2 source /etc/profile; source .profile; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -dawndev >> autotest-dawndev-cron.out 2>> autotest-dawndev-cron.err
-00 1 * * 3 source /etc/profile; source .profile; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -hera    >> autotest-hera-cron.out    2>> autotest-hera-cron.err
-00 1 * * 4 source /etc/profile; source .profile; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -zeus    >> autotest-zeus-cron.out    2>> autotest-zeus-cron.err
+40 0 * * * source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -checkout
+00 1 * * 2 source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -rzdawndev >> autotest-rzdawndev-cron.out 2>> autotest-rzdawndev-cron.err
+00 1 * * 3 source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -hera      >> autotest-hera-cron.out      2>> autotest-hera-cron.err
+00 1 * * 4 source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -rzzeus    >> autotest-rzzeus-cron.out    2>> autotest-rzzeus-cron.err
+00 5 * * * source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -summary-copy tux339:/usr/casc/hypre/testing
 
 # Tzanio's crontab (on tux252)
 

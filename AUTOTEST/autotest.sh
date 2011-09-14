@@ -31,18 +31,19 @@ do
       -h|-help)
          cat <<EOF
 
-   $0 [options] [-checkout | -dist M.mm.rr | -{test1} -{test2} ... | -summary]
+   $0 [options] [-checkout | -dist M.mm.rr | -{test1} ... | -summary]
 
    where:
 
-      -checkout       Checks out the repository and updates the current AUTOTEST
-                      directory.  Should be called before running tests.
-      -dist           Use the hypre release M.mm.rr (e.g. 2.4.0b). This is an
-                      alternative to -checkout and is used by testdist.sh.
-      -{test}         Runs the indicated tests in sequence, which are associated
-                      with specific machine names (e.g., -tux149, -alc, -up).
-      -summary        Generates a summary file of passed, pending, failed tests.
-      -summary-email  Same as -summary, but also sends developers an email.
+      -checkout           Checks out the repository and updates the current AUTOTEST
+                          directory.  Should be called before running tests.
+      -dist               Use the hypre release M.mm.rr (e.g. 2.4.0b). This is an
+                          alternative to -checkout and is used by testdist.sh.
+      -{test}             Runs the indicated tests in sequence, which are associated
+                          with specific machine names (e.g., -tux149, -alc, -up).
+      -summary            Generates a summary file of passed, pending, failed tests.
+      -summary-email      Same as -summary, but also sends developers an email.
+      -summary-copy {dir} Same as -summary, but also copies to remote test {dir}.
 
    with options:
 
@@ -53,8 +54,9 @@ do
    and to ensure that all related files have the appropriate permissions.
 
    Example usage: $0 -checkout
-                  $0 -tux149
+                  $0 -tux149 -alc
                   $0 -summary
+                  $0 -summary-copy tux149:/usr/casc/hypre/testing
 
 EOF
          exit
@@ -66,10 +68,11 @@ EOF
          ;;
 
       # Checkout the repository and update the global AUTOTEST directory
+      # Must have CVSROOT set to point to the hypre repository
       -checkout)
          cd $testing_dir
          rm -fr linear_solvers
-         cvs -d /home/casc/repository checkout $cvs_opts linear_solvers
+         cvs checkout $cvs_opts linear_solvers
          trap "cp -fR $testing_dir/linear_solvers/AUTOTEST $testing_dir" EXIT
          test_opts=""
          break
@@ -87,9 +90,11 @@ EOF
       -summary*)
          # move the finished logs to todays output directory
          # (using 'cp' then 'rm' produces fewer complaints than using 'mv')
+         # (the autotest-* files are removed below if not pending)
          mkdir -p $output_dir
          cp -fr $finished_dir/* $output_dir
          rm -fr $finished_dir/*
+         cp -f  $autotest_dir/autotest-* $output_dir
 
          cd $output_dir
          echo "<html>"          > $summary_file;
@@ -111,17 +116,15 @@ EOF
          # active tests without a *-done file are reported as "pending"
          echo ""          >> $summary_file;
          echo "[PENDING]" >> $summary_file
-         cd $autotest_dir
          for test in $( find . -name "autotest-*-start" )
          do
             testbase=`basename $test -start`
             if [ ! -e $testbase-done ]; then
                echo $testbase | sed {s/autotest//g} >> $output_dir/$summary_file
             else
-               mv $testbase* $output_dir
+               rm -f $autotest_dir/$testbase*
             fi
          done
-         cd $output_dir
 
          # all top-level tests with non-empty error files are reported as "failed",
          # including the cron autotest logs
@@ -176,6 +179,12 @@ EOF
                cat $summary_file
 
             ) | /usr/sbin/sendmail -t
+         fi
+
+         if [ "$1" = "-summary-copy" ]; then
+            # copy output_dir files to the specified remote testing_dir
+            rem_finished_dir="$2/AUTOTEST-FINISHED"
+            scp -q -r * $rem_finished_dir
          fi
 
          test_opts=""
