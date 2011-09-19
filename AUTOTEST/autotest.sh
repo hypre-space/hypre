@@ -91,10 +91,17 @@ EOF
          # move the finished logs to todays output directory
          # (using 'cp' then 'rm' produces fewer complaints than using 'mv')
          # (the autotest-* files are removed below if not pending)
+         # (check first that the files exist to reduce error messages from 'cp')
          mkdir -p $output_dir
-         cp -fr $finished_dir/* $output_dir
-         rm -fr $finished_dir/*
-         cp -f  $autotest_dir/autotest-* $output_dir
+         count=$( find $finished_dir -mindepth 1 -name "*" | wc -m )
+         if [ $count -ne 0 ]; then
+            cp -fr $finished_dir/* $output_dir
+            rm -fr $finished_dir/*
+         fi
+         count=$( find $autotest_dir -mindepth 1 -name "autotest-*" | wc -m )
+         if [ $count -ne 0 ]; then
+            cp -f  $autotest_dir/autotest-* $output_dir
+         fi
 
          cd $output_dir
          echo "<html>"          > $summary_file;
