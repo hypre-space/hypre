@@ -235,6 +235,17 @@ int main (int argc, char *argv[])
       /* Create the graph object */
       HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 
+      /* See MatrixSetObjectType below */
+      if (solver_id > 1 && solver_id < 4)
+      {
+         object_type = HYPRE_PARCSR;
+      }
+      else
+      {
+         object_type = HYPRE_SSTRUCT;
+      }
+      HYPRE_SStructGraphSetObjectType(graph, object_type);
+
       /* Assign the u-stencil we created to variable u (variable 0) */
       var = 0;
       HYPRE_SStructGraphSetStencil(graph, part, var, stencil_u);
@@ -262,14 +273,6 @@ int main (int argc, char *argv[])
          unstructured solvers, e.g. BoomerAMG, the object type should be
          HYPRE_PARCSR. If the problem is purely structured (with one part), you
          may want to use HYPRE_STRUCT to access the structured solvers.  */
-      if (solver_id > 1 && solver_id < 4)
-      {
-         object_type = HYPRE_PARCSR;
-      }
-      else
-      {
-         object_type = HYPRE_SSTRUCT;
-      }
       HYPRE_SStructMatrixSetObjectType(A, object_type);
 
       /* Indicate that the matrix coefficients are ready to be set */

@@ -254,6 +254,10 @@ int main (int argc, char *argv[])
       /* Create the graph object */
       HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 
+      /* See MatrixSetObjectType below */
+      object_type = HYPRE_SSTRUCT;
+      HYPRE_SStructGraphSetObjectType(graph, object_type);
+
       /* Use the 5-pt stencil on part 0 */
       part = 0;
       HYPRE_SStructGraphSetStencil(graph, part, var, stencil_5pt);

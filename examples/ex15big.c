@@ -472,6 +472,9 @@ int main (int argc, char *argv[])
          /* Create the graph object */
          HYPRE_SStructGraphCreate(MPI_COMM_WORLD, edge_grid, &A_graph);
 
+         /* See MatrixSetObjectType below */
+         HYPRE_SStructGraphSetObjectType(A_graph, HYPRE_PARCSR);
+
          /* Indicate that this problem uses finite element stiffness matrices and
             load vectors, instead of stencils. */
          HYPRE_SStructGraphSetFEM(A_graph, part);
@@ -640,6 +643,9 @@ int main (int argc, char *argv[])
 
          /* Create the discrete gradient graph object */
          HYPRE_SStructGraphCreate(MPI_COMM_WORLD, edge_grid, &G_graph);
+
+         /* See MatrixSetObjectType below */
+         HYPRE_SStructGraphSetObjectType(G_graph, HYPRE_PARCSR);
 
          /* Since the discrete gradient relates edge and nodal variables (it is a
             rectangular matrix), we have to specify the domain (column) grid. */

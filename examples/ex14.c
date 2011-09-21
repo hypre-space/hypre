@@ -362,6 +362,9 @@ int main (int argc, char *argv[])
       /* Create the graph object */
       HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 
+      /* See MatrixSetObjectType below */
+      HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);
+
       /* Indicate that this problem uses finite element stiffness matrices and
          load vectors, instead of stencils. */
       for (part = 0; part < num_procs; part++)

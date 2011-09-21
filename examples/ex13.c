@@ -375,6 +375,9 @@ int main (int argc, char *argv[])
       /* Create the graph object */
       HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 
+      /* See MatrixSetObjectType below */
+      HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);
+
       /* Now we need to tell the graph which stencil to use for each
          variable on each part (we only have one variable) */
       for (part = 0; part < num_procs; part++)
