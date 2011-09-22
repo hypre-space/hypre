@@ -950,8 +950,9 @@ extern HYPRE_Int hypre__global_error;
  * HYPRE error macros
  *--------------------------------------------------------------------------*/
 
-void hypre_error_handler(char *filename, HYPRE_Int line, HYPRE_Int ierr);
-#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR)
+void hypre_error_handler(char *filename, HYPRE_Int line, HYPRE_Int ierr, char *msg);
+#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
+#define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
 #define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
 #ifdef NDEBUG
 #define hypre_assert(EX)

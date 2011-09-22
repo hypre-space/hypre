@@ -320,9 +320,13 @@ hypre_PFMGSetupInterpOp_CC0
             Pp1[Pi] = 0.0;
       }
    hypre_BoxLoop2End(Ai, Pi);
-  
+
    if (warning_cnt)
-      hypre_printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
+   {
+      hypre_error_w_msg(
+         HYPRE_ERROR_GENERIC,
+         "Warning 0 center in interpolation. Setting interp = 0.");
+   }
 
    return hypre_error_flag;
 }
@@ -419,7 +423,11 @@ hypre_PFMGSetupInterpOp_CC1
       Pp1[Pi] = 0.0;
 
    if (warning_cnt)
-      hypre_printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
+   {
+      hypre_error_w_msg(
+         HYPRE_ERROR_GENERIC,
+         "Warning 0 center in interpolation. Setting interp = 0.");
+   }
 
    return hypre_error_flag;
 }
@@ -564,7 +572,11 @@ hypre_PFMGSetupInterpOp_CC2
    }
 
    if (warning_cnt)
-      hypre_printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
+   {
+      hypre_error_w_msg(
+         HYPRE_ERROR_GENERIC,
+         "Warning 0 center in interpolation. Setting interp = 0.");
+   }
 
    return hypre_error_flag;
 }

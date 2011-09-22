@@ -18,14 +18,23 @@ HYPRE_Int hypre__global_error = 0;
 
 /* Process the error with code ierr raised in the given line of the
    given source file. */
-void hypre_error_handler(char *filename, HYPRE_Int line, HYPRE_Int ierr)
+void hypre_error_handler(char *filename, HYPRE_Int line, HYPRE_Int ierr, char *msg)
 {
    hypre_error_flag |= ierr;
 
 #ifdef HYPRE_PRINT_ERRORS
-   hypre_fprintf(stderr,
-           "hypre error in file \"%s\", line %d, error code = %d\n",
-           filename, line, ierr);
+   if (msg)
+   {
+      hypre_fprintf(
+         stderr, "hypre error in file \"%s\", line %d, error code = %d - %s\n",
+         filename, line, ierr, msg);
+   }
+   else
+   {
+      hypre_fprintf(
+         stderr, "hypre error in file \"%s\", line %d, error code = %d\n",
+         filename, line, ierr);
+   }
 #endif
 }
 
