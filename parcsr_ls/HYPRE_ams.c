@@ -40,9 +40,9 @@ HYPRE_Int HYPRE_AMSDestroy(HYPRE_Solver solver)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetup (HYPRE_Solver solver,
-                    HYPRE_ParCSRMatrix A,
-                    HYPRE_ParVector b,
-                    HYPRE_ParVector x)
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector b,
+                          HYPRE_ParVector x)
 {
    return hypre_AMSSetup((void *) solver,
                          (hypre_ParCSRMatrix *) A,
@@ -55,9 +55,9 @@ HYPRE_Int HYPRE_AMSSetup (HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSolve (HYPRE_Solver solver,
-                    HYPRE_ParCSRMatrix A,
-                    HYPRE_ParVector b,
-                    HYPRE_ParVector x)
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector b,
+                          HYPRE_ParVector x)
 {
    return hypre_AMSSolve((void *) solver,
                          (hypre_ParCSRMatrix *) A,
@@ -70,7 +70,7 @@ HYPRE_Int HYPRE_AMSSolve (HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetDimension(HYPRE_Solver solver,
-                          HYPRE_Int dim)
+                                HYPRE_Int dim)
 {
    return hypre_AMSSetDimension((void *) solver, dim);
 }
@@ -80,7 +80,7 @@ HYPRE_Int HYPRE_AMSSetDimension(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetDiscreteGradient(HYPRE_Solver solver,
-                                 HYPRE_ParCSRMatrix G)
+                                       HYPRE_ParCSRMatrix G)
 {
    return hypre_AMSSetDiscreteGradient((void *) solver,
                                        (hypre_ParCSRMatrix *) G);
@@ -91,9 +91,9 @@ HYPRE_Int HYPRE_AMSSetDiscreteGradient(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetCoordinateVectors(HYPRE_Solver solver,
-                                  HYPRE_ParVector x,
-                                  HYPRE_ParVector y,
-                                  HYPRE_ParVector z)
+                                        HYPRE_ParVector x,
+                                        HYPRE_ParVector y,
+                                        HYPRE_ParVector z)
 {
    return hypre_AMSSetCoordinateVectors((void *) solver,
                                         (hypre_ParVector *) x,
@@ -106,9 +106,9 @@ HYPRE_Int HYPRE_AMSSetCoordinateVectors(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver solver,
-                                    HYPRE_ParVector Gx,
-                                    HYPRE_ParVector Gy,
-                                    HYPRE_ParVector Gz)
+                                          HYPRE_ParVector Gx,
+                                          HYPRE_ParVector Gy,
+                                          HYPRE_ParVector Gz)
 {
    return hypre_AMSSetEdgeConstantVectors((void *) solver,
                                           (hypre_ParVector *) Gx,
@@ -121,7 +121,7 @@ HYPRE_Int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetAlphaPoissonMatrix(HYPRE_Solver solver,
-                                   HYPRE_ParCSRMatrix A_alpha)
+                                         HYPRE_ParCSRMatrix A_alpha)
 {
    return hypre_AMSSetAlphaPoissonMatrix((void *) solver,
                                          (hypre_ParCSRMatrix *) A_alpha);
@@ -132,7 +132,7 @@ HYPRE_Int HYPRE_AMSSetAlphaPoissonMatrix(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver solver,
-                                  HYPRE_ParCSRMatrix A_beta)
+                                        HYPRE_ParCSRMatrix A_beta)
 {
    return hypre_AMSSetBetaPoissonMatrix((void *) solver,
                                         (hypre_ParCSRMatrix *) A_beta);
@@ -143,7 +143,7 @@ HYPRE_Int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetInteriorNodes(HYPRE_Solver solver,
-                              HYPRE_ParVector interior_nodes)
+                                    HYPRE_ParVector interior_nodes)
 {
    return hypre_AMSSetInteriorNodes((void *) solver,
                                     (hypre_ParVector *) interior_nodes);
@@ -154,7 +154,7 @@ HYPRE_Int HYPRE_AMSSetInteriorNodes(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetProjectionFrequency(HYPRE_Solver solver,
-                                    HYPRE_Int projection_frequency)
+                                          HYPRE_Int projection_frequency)
 {
    return hypre_AMSSetProjectionFrequency((void *) solver,
                                           projection_frequency);
@@ -165,7 +165,7 @@ HYPRE_Int HYPRE_AMSSetProjectionFrequency(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetMaxIter(HYPRE_Solver solver,
-                        HYPRE_Int maxit)
+                              HYPRE_Int maxit)
 {
    return hypre_AMSSetMaxIter((void *) solver, maxit);
 }
@@ -175,7 +175,7 @@ HYPRE_Int HYPRE_AMSSetMaxIter(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetTol(HYPRE_Solver solver,
-                    double tol)
+                          double tol)
 {
    return hypre_AMSSetTol((void *) solver, tol);
 }
@@ -185,7 +185,7 @@ HYPRE_Int HYPRE_AMSSetTol(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetCycleType(HYPRE_Solver solver,
-                          HYPRE_Int cycle_type)
+                                HYPRE_Int cycle_type)
 {
    return hypre_AMSSetCycleType((void *) solver, cycle_type);
 }
@@ -195,7 +195,7 @@ HYPRE_Int HYPRE_AMSSetCycleType(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetPrintLevel(HYPRE_Solver solver,
-                           HYPRE_Int print_level)
+                                 HYPRE_Int print_level)
 {
    return hypre_AMSSetPrintLevel((void *) solver, print_level);
 }
@@ -205,10 +205,10 @@ HYPRE_Int HYPRE_AMSSetPrintLevel(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
-                                 HYPRE_Int relax_type,
-                                 HYPRE_Int relax_times,
-                                 double relax_weight,
-                                 double omega)
+                                       HYPRE_Int relax_type,
+                                       HYPRE_Int relax_times,
+                                       double relax_weight,
+                                       double omega)
 {
    return hypre_AMSSetSmoothingOptions((void *) solver,
                                        relax_type,
@@ -218,16 +218,29 @@ HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ARTSSetChebyOptions
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_AMSSetChebySmoothingOptions(HYPRE_Solver solver,
+                                            HYPRE_Int cheby_order,
+                                            HYPRE_Int cheby_fraction)
+{
+   return hypre_AMSSetChebySmoothingOptions((void *) solver,
+                                            cheby_order,
+                                            cheby_fraction);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMSSetAlphaAMGOptions
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
-                                HYPRE_Int alpha_coarsen_type,
-                                HYPRE_Int alpha_agg_levels,
-                                HYPRE_Int alpha_relax_type,
-                                double alpha_strength_threshold,
-                                HYPRE_Int alpha_interp_type,
-                                HYPRE_Int alpha_Pmax)
+                                      HYPRE_Int alpha_coarsen_type,
+                                      HYPRE_Int alpha_agg_levels,
+                                      HYPRE_Int alpha_relax_type,
+                                      double alpha_strength_threshold,
+                                      HYPRE_Int alpha_interp_type,
+                                      HYPRE_Int alpha_Pmax)
 {
    return hypre_AMSSetAlphaAMGOptions((void *) solver,
                                       alpha_coarsen_type,
@@ -243,12 +256,12 @@ HYPRE_Int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
-                               HYPRE_Int beta_coarsen_type,
-                               HYPRE_Int beta_agg_levels,
-                               HYPRE_Int beta_relax_type,
-                               double beta_strength_threshold,
-                               HYPRE_Int beta_interp_type,
-                               HYPRE_Int beta_Pmax)
+                                     HYPRE_Int beta_coarsen_type,
+                                     HYPRE_Int beta_agg_levels,
+                                     HYPRE_Int beta_relax_type,
+                                     double beta_strength_threshold,
+                                     HYPRE_Int beta_interp_type,
+                                     HYPRE_Int beta_Pmax)
 {
    return hypre_AMSSetBetaAMGOptions((void *) solver,
                                      beta_coarsen_type,
@@ -264,7 +277,7 @@ HYPRE_Int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSGetNumIterations(HYPRE_Solver solver,
-                              HYPRE_Int *num_iterations)
+                                    HYPRE_Int *num_iterations)
 {
    return hypre_AMSGetNumIterations((void *) solver,
                                     num_iterations);
@@ -275,7 +288,7 @@ HYPRE_Int HYPRE_AMSGetNumIterations(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
-                                          double *rel_resid_norm)
+                                                double *rel_resid_norm)
 {
    return hypre_AMSGetFinalRelativeResidualNorm((void *) solver,
                                                 rel_resid_norm);
@@ -286,7 +299,7 @@ HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver solver,
-                                 HYPRE_ParVector x)
+                                       HYPRE_ParVector x)
 {
    return hypre_AMSProjectOutGradients((void *) solver,
                                        (hypre_ParVector *) x);
@@ -297,10 +310,10 @@ HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
-                                       HYPRE_ParVector x_coord,
-				       HYPRE_Int *edge_vertex,
-                                       HYPRE_Int edge_orientation,
-                                       HYPRE_ParCSRMatrix *G)
+                                             HYPRE_ParVector x_coord,
+                                             HYPRE_Int *edge_vertex,
+                                             HYPRE_Int edge_orientation,
+                                             HYPRE_ParCSRMatrix *G)
 {
    return hypre_AMSConstructDiscreteGradient((hypre_ParCSRMatrix *) A,
                                              (hypre_ParVector *) x_coord,
@@ -314,15 +327,15 @@ HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSFEISetup(HYPRE_Solver solver,
-                      HYPRE_ParCSRMatrix A,
-                      HYPRE_ParVector b,
-                      HYPRE_ParVector x,
-                      HYPRE_Int    *EdgeNodeList_,
-                      HYPRE_Int    *NodeNumbers_,
-                      HYPRE_Int    numEdges_,
-                      HYPRE_Int    numLocalNodes_,
-                      HYPRE_Int    numNodes_,
-                      double *NodalCoord_)
+                            HYPRE_ParCSRMatrix A,
+                            HYPRE_ParVector b,
+                            HYPRE_ParVector x,
+                            HYPRE_Int *EdgeNodeList_,
+                            HYPRE_Int *NodeNumbers_,
+                            HYPRE_Int numEdges_,
+                            HYPRE_Int numLocalNodes_,
+                            HYPRE_Int numNodes_,
+                            double *NodalCoord_)
 {
    return hypre_AMSFEISetup((void *) solver,
                             (hypre_ParCSRMatrix *) A,
