@@ -405,6 +405,40 @@ HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix  matrix,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *index,
+                                 double              *values )
+{
+   HYPRE_Int           ndim         = hypre_SStructMatrixNDim(matrix);
+   hypre_SStructGraph *graph        = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid  *grid         = hypre_SStructGraphGrid(graph);
+   HYPRE_Int           fem_nsparse  = hypre_SStructGraphFEMPNSparse(graph, part);
+   HYPRE_Int          *fem_sparse_i = hypre_SStructGraphFEMPSparseI(graph, part);
+   HYPRE_Int          *fem_entries  = hypre_SStructGraphFEMPEntries(graph, part);
+   HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
+   hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
+   HYPRE_Int           s, i, d, vindex[3];
+
+   for (s = 0; s < fem_nsparse; s++)
+   {
+      i = fem_sparse_i[s];
+      for (d = 0; d < ndim; d++)
+      {
+         /* note: these offsets are different from what the user passes in */
+         vindex[d] = index[d] + hypre_IndexD(fem_offsets[i], d);
+      }
+      hypre_SStructMatrixSetValues(
+         matrix, part, vindex, fem_vars[i], 1, &fem_entries[s], &values[s], -1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int            part,
                                  HYPRE_Int           *ilower,

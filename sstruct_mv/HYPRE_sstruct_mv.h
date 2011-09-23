@@ -622,6 +622,23 @@ HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
                              double              *values);
 
 /**
+ * Get finite element stiffness matrix coefficients index by index.  The layout
+ * of the data in {\tt values} is determined by the routines
+ * \Ref{HYPRE_SStructGridSetFEMOrdering} and
+ * \Ref{HYPRE_SStructGraphSetFEMSparsity}.
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructMatrixSetComplex
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixGetFEMValues(HYPRE_SStructMatrix  matrix,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *index,
+                                double              *values);
+
+/**
  * Set matrix coefficients a box at a time.  The data in {\tt values} is ordered
  * as follows:
  *
@@ -889,6 +906,22 @@ HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
                              HYPRE_Int           *index,
                              HYPRE_Int            var,
                              double              *value);
+
+/**
+ * Get finite element vector coefficients index by index.  The layout of the
+ * data in {\tt values} is determined by the routine
+ * \Ref{HYPRE_SStructGridSetFEMOrdering}.
+ *
+ * If the vector is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructVectorSetComplex
+ **/
+HYPRE_Int
+HYPRE_SStructVectorGetFEMValues(HYPRE_SStructVector  vector,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *index,
+                                double              *values);
 
 /**
  * Set vector coefficients a box at a time.  The data in {\tt values} is ordered

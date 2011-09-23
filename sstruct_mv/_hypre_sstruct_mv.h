@@ -858,6 +858,7 @@ HYPRE_Int HYPRE_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int 
 HYPRE_Int HYPRE_SStructMatrixAddToValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
 HYPRE_Int HYPRE_SStructMatrixAddFEMValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , double *values );
 HYPRE_Int HYPRE_SStructMatrixGetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
+HYPRE_Int HYPRE_SStructMatrixGetFEMValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , double *values );
 HYPRE_Int HYPRE_SStructMatrixSetBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
 HYPRE_Int HYPRE_SStructMatrixAddToBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
 HYPRE_Int HYPRE_SStructMatrixGetBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
@@ -883,6 +884,7 @@ HYPRE_Int HYPRE_SStructVectorSetValues ( HYPRE_SStructVector vector , HYPRE_Int 
 HYPRE_Int HYPRE_SStructVectorAddToValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , double *value );
 HYPRE_Int HYPRE_SStructVectorAddFEMValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *index , double *values );
 HYPRE_Int HYPRE_SStructVectorGetValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , double *value );
+HYPRE_Int HYPRE_SStructVectorGetFEMValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *index , double *values );
 HYPRE_Int HYPRE_SStructVectorSetBoxValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , double *values );
 HYPRE_Int HYPRE_SStructVectorAddToBoxValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , double *values );
 HYPRE_Int HYPRE_SStructVectorGetBoxValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , double *values );

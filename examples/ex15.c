@@ -398,7 +398,7 @@ int main (int argc, char *argv[])
    hypre_BeginTiming(time_index);
 
    /* 1. Set up the edge and nodal grids.  Note that we do this simultaneously
-         to make sure that they have the same extends.  For simplicity we use
+         to make sure that they have the same extents.  For simplicity we use
          only one part to represent the unit cube. */
    {
       int ndim = 3;
