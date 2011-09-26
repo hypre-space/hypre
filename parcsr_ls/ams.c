@@ -717,6 +717,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
          break;
       }
 
+   hypre_TFree(cf_marker_offd);
+
    *l1_norm_ptr = l1_norm;
 
    return hypre_error_flag;
@@ -2485,22 +2487,28 @@ HYPRE_Int hypre_AMSSolve(void *solver,
    char cycle[30];
    hypre_ParCSRMatrix *Ai[5], *Pi[5];
    HYPRE_Solver Bi[5];
+   HYPRE_PtrToSolverFcn HBi[5];
    hypre_ParVector *ri[5], *gi[5];
 
    hypre_ParVector *z = NULL;
 
+   Ai[0] = ams_data -> A_G;    Pi[0] = ams_data -> G;
+   Ai[1] = ams_data -> A_Pi;   Pi[1] = ams_data -> Pi;
+   Ai[2] = ams_data -> A_Pix;  Pi[2] = ams_data -> Pix;
+   Ai[3] = ams_data -> A_Piy;  Pi[3] = ams_data -> Piy;
+   Ai[4] = ams_data -> A_Piz;  Pi[4] = ams_data -> Piz;
 
-   Ai[0] = ams_data -> A_G;   Bi[0] = ams_data -> B_G;   Pi[0] = ams_data -> G;
-   Ai[1] = ams_data -> A_Pi;  Bi[1] = ams_data -> B_Pi;  Pi[1] = ams_data -> Pi;
-   Ai[2] = ams_data -> A_Pix; Bi[2] = ams_data -> B_Pix; Pi[2] = ams_data -> Pix;
-   Ai[3] = ams_data -> A_Piy; Bi[3] = ams_data -> B_Piy; Pi[3] = ams_data -> Piy;
-   Ai[4] = ams_data -> A_Piz; Bi[4] = ams_data -> B_Piz; Pi[4] = ams_data -> Piz;
+   Bi[0] = ams_data -> B_G;    HBi[0] = (HYPRE_PtrToSolverFcn) hypre_BoomerAMGSolve;
+   Bi[1] = ams_data -> B_Pi;   HBi[1] = (HYPRE_PtrToSolverFcn) hypre_BoomerAMGBlockSolve;
+   Bi[2] = ams_data -> B_Pix;  HBi[2] = (HYPRE_PtrToSolverFcn) hypre_BoomerAMGSolve;
+   Bi[3] = ams_data -> B_Piy;  HBi[3] = (HYPRE_PtrToSolverFcn) hypre_BoomerAMGSolve;
+   Bi[4] = ams_data -> B_Piz;  HBi[4] = (HYPRE_PtrToSolverFcn) hypre_BoomerAMGSolve;
 
-   ri[0] = ams_data -> r1;    gi[0] = ams_data -> g1;
-   ri[1] = ams_data -> r2;    gi[1] = ams_data -> g2;
-   ri[2] = ams_data -> r1;    gi[2] = ams_data -> g1;
-   ri[3] = ams_data -> r1;    gi[3] = ams_data -> g1;
-   ri[4] = ams_data -> r1;    gi[4] = ams_data -> g1;
+   ri[0] = ams_data -> r1;     gi[0] = ams_data -> g1;
+   ri[1] = ams_data -> r2;     gi[1] = ams_data -> g2;
+   ri[2] = ams_data -> r1;     gi[2] = ams_data -> g1;
+   ri[3] = ams_data -> r1;     gi[3] = ams_data -> g1;
+   ri[4] = ams_data -> r1;     gi[4] = ams_data -> g1;
 
    /* may need to create an additional temporary vector for relaxation */
    if (hypre_NumThreads() > 1 ||  ams_data -> A_relax_type == 16)
@@ -2645,7 +2653,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
                                ams_data -> A_min_eig_est,
                                ams_data -> A_cheby_order,
                                ams_data -> A_cheby_fraction,
-                               Ai, Bi, Pi, ri, gi,
+                               Ai, Bi, HBi, Pi, ri, gi,
                                b, x,
                                ams_data -> r0,
                                ams_data -> g0,
@@ -2720,6 +2728,8 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
                                    hypre_ParCSRMatrix **A,
                                    /* subspace preconditioners */
                                    HYPRE_Solver *B,
+                                   /* hypre solver functions for B */
+                                   HYPRE_PtrToSolverFcn *HB,
                                    /* subspace interpolations */
                                    hypre_ParCSRMatrix **P,
                                    /* temporary subspace vectors */
@@ -2800,10 +2810,8 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
          }
 
          hypre_ParVectorSetConstantValues(g[i], 0.0);
-         if (i == 1)
-            hypre_BoomerAMGBlockSolve((void *)B[i], A[i], r[i], g[i]);
-         else
-            hypre_BoomerAMGSolve((void *)B[i], A[i], r[i], g[i]);
+         (*HB[i]) (B[i], (HYPRE_Matrix)A[i],
+                   (HYPRE_Vector)r[i], (HYPRE_Vector)g[i]);
          hypre_ParCSRMatrixMatvec(1.0, P[i], g[i], 0.0, g0);
          hypre_ParVectorAxpy(1.0, g0, y);
       }
@@ -3430,6 +3438,8 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
          }
 
    }
+
+   hypre_TFree(cf_marker_offd);
 
    *l1_norm_ptr = l1_norm;
 
