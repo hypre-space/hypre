@@ -80,6 +80,7 @@ FILES =\
  HYPRE_parcsr_pilut.c\
  HYPRE_parcsr_schwarz.c\
  HYPRE_ams.c\
+ HYPRE_ads.c\
  HYPRE_ame.c\
  par_amg.c\
  par_amg_setup.c\
@@ -121,6 +122,7 @@ FILES =\
  schwarz.c\
  block_tridiag.c\
  ams.c\
+ ads.c\
  ame.c
 
 OBJS = ${FILES:.c=.o}

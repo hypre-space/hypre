@@ -30,6 +30,27 @@ extern "C" {
 typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 
+/* ads.c */
+void *hypre_ADSCreate ( void );
+HYPRE_Int hypre_ADSDestroy ( void *solver );
+HYPRE_Int hypre_ADSSetDiscreteCurl ( void *solver , hypre_ParCSRMatrix *C );
+HYPRE_Int hypre_ADSSetDiscreteGradient ( void *solver , hypre_ParCSRMatrix *G );
+HYPRE_Int hypre_ADSSetCoordinateVectors ( void *solver , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *z );
+HYPRE_Int hypre_ADSSetMaxIter ( void *solver , HYPRE_Int maxit );
+HYPRE_Int hypre_ADSSetTol ( void *solver , double tol );
+HYPRE_Int hypre_ADSSetCycleType ( void *solver , HYPRE_Int cycle_type );
+HYPRE_Int hypre_ADSSetPrintLevel ( void *solver , HYPRE_Int print_level );
+HYPRE_Int hypre_ADSSetSmoothingOptions ( void *solver , HYPRE_Int A_relax_type , HYPRE_Int A_relax_times , double A_relax_weight , double A_omega );
+HYPRE_Int hypre_ADSSetChebySmoothingOptions ( void *solver , HYPRE_Int A_cheby_order , HYPRE_Int A_cheby_fraction );
+HYPRE_Int hypre_ADSSetAMSOptions ( void *solver , HYPRE_Int B_C_cycle_type , HYPRE_Int B_C_coarsen_type , HYPRE_Int B_C_agg_levels , HYPRE_Int B_C_relax_type , double B_C_theta , HYPRE_Int B_C_interp_type , HYPRE_Int B_C_Pmax );
+HYPRE_Int hypre_ADSSetAMGOptions ( void *solver , HYPRE_Int B_Pi_coarsen_type , HYPRE_Int B_Pi_agg_levels , HYPRE_Int B_Pi_relax_type , double B_Pi_theta , HYPRE_Int B_Pi_interp_type , HYPRE_Int B_Pi_Pmax );
+HYPRE_Int hypre_ADSComputePi ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *G , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *z , hypre_ParCSRMatrix *PiNDx , hypre_ParCSRMatrix *PiNDy , hypre_ParCSRMatrix *PiNDz , hypre_ParCSRMatrix **Pi_ptr );
+HYPRE_Int hypre_ADSComputePixyz ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *G , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *z , hypre_ParCSRMatrix *PiNDx , hypre_ParCSRMatrix *PiNDy , hypre_ParCSRMatrix *PiNDz , hypre_ParCSRMatrix **Pix_ptr , hypre_ParCSRMatrix **Piy_ptr , hypre_ParCSRMatrix **Piz_ptr );
+HYPRE_Int hypre_ADSSetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
+HYPRE_Int hypre_ADSSolve ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
+HYPRE_Int hypre_ADSGetNumIterations ( void *solver , HYPRE_Int *num_iterations );
+HYPRE_Int hypre_ADSGetFinalRelativeResidualNorm ( void *solver , double *rel_resid_norm );
+
 /* ame.c */
 void *hypre_AMECreate ( void );
 HYPRE_Int hypre_AMEDestroy ( void *esolver );
@@ -136,7 +157,7 @@ HYPRE_Int hypre_AMSComputePixyz ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *G 
 HYPRE_Int hypre_AMSComputeGPi ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *G , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *z , hypre_ParVector *Gx , hypre_ParVector *Gy , hypre_ParVector *Gz , HYPRE_Int dim , hypre_ParCSRMatrix **GPi_ptr );
 HYPRE_Int hypre_AMSSetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 HYPRE_Int hypre_AMSSolve ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
-HYPRE_Int hypre_ParCSRSubspacePrec ( hypre_ParCSRMatrix *A0 , HYPRE_Int A0_relax_type , HYPRE_Int A0_relax_times , double *A0_l1_norms , double A0_relax_weight , double A0_omega , double A0_max_eig_est , double A0_min_eig_est , HYPRE_Int A0_cheby_order , double A0_cheby_fraction , hypre_ParCSRMatrix **A , HYPRE_Solver *B , hypre_ParCSRMatrix **P , hypre_ParVector **r , hypre_ParVector **g , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *g0 , char *cycle , hypre_ParVector *z );
+HYPRE_Int hypre_ParCSRSubspacePrec ( hypre_ParCSRMatrix *A0 , HYPRE_Int A0_relax_type , HYPRE_Int A0_relax_times , double *A0_l1_norms , double A0_relax_weight , double A0_omega , double A0_max_eig_est , double A0_min_eig_est , HYPRE_Int A0_cheby_order , double A0_cheby_fraction , hypre_ParCSRMatrix **A , HYPRE_Solver *B , HYPRE_PtrToSolverFcn *HB , hypre_ParCSRMatrix **P , hypre_ParVector **r , hypre_ParVector **g , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *g0 , char *cycle , hypre_ParVector *z );
 HYPRE_Int hypre_AMSGetNumIterations ( void *solver , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , double *rel_resid_norm );
 HYPRE_Int hypre_AMSProjectOutGradients ( void *solver , hypre_ParVector *x );
@@ -177,6 +198,25 @@ HYPRE_Int BuildRhsParFromOneFile ( HYPRE_Int argc , char *argv [], HYPRE_Int arg
 HYPRE_Int BuildParLaplacian9pt ( HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParLaplacian27pt ( HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 
+/* HYPRE_ads.c */
+HYPRE_Int HYPRE_ADSCreate ( HYPRE_Solver *solver );
+HYPRE_Int HYPRE_ADSDestroy ( HYPRE_Solver solver );
+HYPRE_Int HYPRE_ADSSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+HYPRE_Int HYPRE_ADSSolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+HYPRE_Int HYPRE_ADSSetDiscreteCurl ( HYPRE_Solver solver , HYPRE_ParCSRMatrix C );
+HYPRE_Int HYPRE_ADSSetDiscreteGradient ( HYPRE_Solver solver , HYPRE_ParCSRMatrix G );
+HYPRE_Int HYPRE_ADSSetCoordinateVectors ( HYPRE_Solver solver , HYPRE_ParVector x , HYPRE_ParVector y , HYPRE_ParVector z );
+HYPRE_Int HYPRE_ADSSetMaxIter ( HYPRE_Solver solver , HYPRE_Int maxit );
+HYPRE_Int HYPRE_ADSSetTol ( HYPRE_Solver solver , double tol );
+HYPRE_Int HYPRE_ADSSetCycleType ( HYPRE_Solver solver , HYPRE_Int cycle_type );
+HYPRE_Int HYPRE_ADSSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
+HYPRE_Int HYPRE_ADSSetSmoothingOptions ( HYPRE_Solver solver , HYPRE_Int relax_type , HYPRE_Int relax_times , double relax_weight , double omega );
+HYPRE_Int HYPRE_ADSSetChebySmoothingOptions ( HYPRE_Solver solver , HYPRE_Int cheby_order , HYPRE_Int cheby_fraction );
+HYPRE_Int HYPRE_ADSSetAMSOptions ( HYPRE_Solver solver , HYPRE_Int cycle_type , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , double strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax );
+HYPRE_Int HYPRE_ADSSetAMGOptions ( HYPRE_Solver solver , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , double strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax );
+HYPRE_Int HYPRE_ADSGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
+HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm ( HYPRE_Solver solver , double *rel_resid_norm );
+
 /* HYPRE_ame.c */
 HYPRE_Int HYPRE_AMECreate ( HYPRE_Solver *esolver );
 HYPRE_Int HYPRE_AMEDestroy ( HYPRE_Solver esolver );
@@ -209,6 +249,7 @@ HYPRE_Int HYPRE_AMSSetTol ( HYPRE_Solver solver , double tol );
 HYPRE_Int HYPRE_AMSSetCycleType ( HYPRE_Solver solver , HYPRE_Int cycle_type );
 HYPRE_Int HYPRE_AMSSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
 HYPRE_Int HYPRE_AMSSetSmoothingOptions ( HYPRE_Solver solver , HYPRE_Int relax_type , HYPRE_Int relax_times , double relax_weight , double omega );
+HYPRE_Int HYPRE_AMSSetChebySmoothingOptions ( HYPRE_Solver solver , HYPRE_Int cheby_order , HYPRE_Int cheby_fraction );
 HYPRE_Int HYPRE_AMSSetAlphaAMGOptions ( HYPRE_Solver solver , HYPRE_Int alpha_coarsen_type , HYPRE_Int alpha_agg_levels , HYPRE_Int alpha_relax_type , double alpha_strength_threshold , HYPRE_Int alpha_interp_type , HYPRE_Int alpha_Pmax );
 HYPRE_Int HYPRE_AMSSetBetaAMGOptions ( HYPRE_Solver solver , HYPRE_Int beta_coarsen_type , HYPRE_Int beta_agg_levels , HYPRE_Int beta_relax_type , double beta_strength_threshold , HYPRE_Int beta_interp_type , HYPRE_Int beta_Pmax );
 HYPRE_Int HYPRE_AMSGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
@@ -881,10 +922,6 @@ HYPRE_Int hypre_ParCSRRelax_CG ( HYPRE_Solver solver , hypre_ParCSRMatrix *A , h
 HYPRE_Int hypre_LINPACKcgtql1 ( HYPRE_Int *n , double *d , double *e , HYPRE_Int *ierr );
 double hypre_LINPACKcgpthy ( double *a , double *b );
 HYPRE_Int hypre_ParCSRRelax_L1_Jacobi ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_points , double relax_weight , double *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp );
-
-/* par_relax_old.c */
-HYPRE_Int hypre_BoomerAMGRelax ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_type , HYPRE_Int relax_points , double relax_weight , double omega , double *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *Ztemp );
-HYPRE_Int gselim ( double *A , double *x , HYPRE_Int n );
 
 /* par_rotate_7pt.c */
 HYPRE_ParCSRMatrix GenerateRotate7pt ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int p , HYPRE_Int q , double alpha , double eps );

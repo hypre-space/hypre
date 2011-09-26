@@ -1567,6 +1567,161 @@ HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix  A,
  *--------------------------------------------------------------------------*/
 
 /**
+ * @name ParCSR ADS Solver and Preconditioner
+ *
+ * Parallel auxiliary space divergence solver and preconditioner
+ **/
+/*@{*/
+
+/**
+ * Create an ADS solver object.
+ **/
+HYPRE_Int HYPRE_ADSCreate ( HYPRE_Solver *solver );
+
+/**
+ * Destroy an ADS solver object.
+ **/
+HYPRE_Int HYPRE_ADSDestroy ( HYPRE_Solver solver );
+
+/**
+ * Set up the ADS solver or preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+HYPRE_Int HYPRE_ADSSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+
+/**
+ * Solve the system or apply ADS as a preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_ADSSolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+
+/**
+ * Sets the discrete curl matrix $C$.
+ * This function should be called before HYPRE\_ADSSetup()!
+ **/
+HYPRE_Int HYPRE_ADSSetDiscreteCurl ( HYPRE_Solver solver , HYPRE_ParCSRMatrix C );
+
+/**
+ * Sets the discrete gradient matrix $G$.
+ * This function should be called before HYPRE\_ADSSetup()!
+ **/
+HYPRE_Int HYPRE_ADSSetDiscreteGradient ( HYPRE_Solver solver , HYPRE_ParCSRMatrix G );
+
+/**
+ * Sets the $x$, $y$ and $z$ coordinates of the vertices in the mesh.
+ * This function should be called before HYPRE\_ADSSetup()!
+ **/
+HYPRE_Int HYPRE_ADSSetCoordinateVectors ( HYPRE_Solver solver , HYPRE_ParVector x , HYPRE_ParVector y ,
+                                          HYPRE_ParVector z );
+
+/**
+ * (Optional) Sets maximum number of iterations, if ADS is used
+ * as a solver. To use ADS as a preconditioner, set the maximum
+ * number of iterations to $1$. The default is $20$.
+ **/
+HYPRE_Int HYPRE_ADSSetMaxIter ( HYPRE_Solver solver , HYPRE_Int maxit );
+
+/**
+ * (Optional) Set the convergence tolerance, if ADS is used
+ * as a solver. When using ADS as a preconditioner, set the tolerance
+ * to $0.0$. The default is $10^{-6}$.
+ **/
+HYPRE_Int HYPRE_ADSSetTol ( HYPRE_Solver solver , double tol );
+
+/**
+ * (Optional) Choose which auxiliary-space solver to use. Possible values are:
+ *
+ * \begin{tabular}{|c|l|}
+ * \hline
+ *   1 & 3-level multiplicative solver (01210) \\
+ *   2 & 3-level additive solver (0+1+2) \\
+ *   3 & 3-level multiplicative solver (02120) \\
+ *   4 & 3-level additive solver (010+2) \\
+ *   5 & 3-level multiplicative solver (0102010) \\
+ *   6 & 3-level additive solver (1+020) \\
+ *   7 & 3-level multiplicative solver (0201020) \\
+ *   8 & 3-level additive solver (0(1+2)0) \\
+ *  11 & 5-level multiplicative solver (013454310) \\
+ *  12 & 5-level additive solver (0+1+3+4+5) \\
+ *  13 & 5-level multiplicative solver (034515430) \\
+ *  14 & 5-level additive solver (01(3+4+5)10) \\
+ * \hline
+ * \end{tabular}
+ *
+ * The default is $1$. See the user's manual for more details.
+ **/
+HYPRE_Int HYPRE_ADSSetCycleType ( HYPRE_Solver solver , HYPRE_Int cycle_type );
+
+/**
+ * (Optional) Control how much information is printed during the
+ * solution iterations.
+ * The default is $1$ (print residual norm at each step).
+ **/
+HYPRE_Int HYPRE_ADSSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
+
+/**
+ * (Optional) Sets relaxation parameters for $A$.
+ * The defaults are $2$, $1$, $1.0$, $1.0$.
+ *
+ * The available options for relax\_type are:
+ *
+ * \begin{tabular}{|c|l|} \hline
+ * 1 & $\ell_1$-scaled Jacobi \\
+ * 2 & $\ell_1$-scaled block symmetric Gauss-Seidel/SSOR \\
+ * 3 & Kaczmarz \\
+ * 4 & truncated version of $\ell_1$-scaled block symmetric Gauss-Seidel/SSOR \\
+ * 16 & Chebyshev \\
+ * \hline
+ * \end{tabular}
+ **/
+HYPRE_Int HYPRE_ADSSetSmoothingOptions ( HYPRE_Solver solver , HYPRE_Int relax_type , HYPRE_Int relax_times , double relax_weight , double omega );
+
+/**
+ * (Optional) Sets parameters for Chebyshev relaxation.
+ * The defaults are $2$, $0.3$.
+ **/
+HYPRE_Int HYPRE_ADSSetChebySmoothingOptions ( HYPRE_Solver solver , HYPRE_Int cheby_order , HYPRE_Int cheby_fraction );
+
+/**
+ * (Optional) Sets AMS parameters for $B_C$.
+ * The defaults are $11$, $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
+ **/
+HYPRE_Int HYPRE_ADSSetAMSOptions ( HYPRE_Solver solver , HYPRE_Int cycle_type , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , double strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax );
+
+/**
+ * (Optional) Sets AMG parameters for $B_\Pi$.
+ * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
+ **/
+HYPRE_Int HYPRE_ADSSetAMGOptions ( HYPRE_Solver solver , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , double strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax );
+
+/**
+ * Returns the number of iterations taken.
+ **/
+HYPRE_Int HYPRE_ADSGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
+
+/**
+ * Returns the norm of the final relative residual.
+ **/
+HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm ( HYPRE_Solver solver , double *rel_resid_norm );
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
  * @name ParCSR PCG Solver
  *
  * These routines should be used in conjunction with the generic interface in
