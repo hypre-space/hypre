@@ -34,6 +34,7 @@ FAC        &   & X &   &   \\
 Maxwell    &   & X &   &   \\
 BoomerAMG  &   & X & X & X \\
 AMS        &   & X & X & X \\
+ADS        &   & X & X & X \\
 MLI        &   & X & X & X \\
 ParaSails  &   & X & X & X \\
 Euclid     &   & X & X & X \\
@@ -751,6 +752,184 @@ HYPRE_AMSDestroy(&solver);
 
 \noindent
 More details can be found in the files \file{ams.h} and \file{ams.c}
+located in the \file{parcsr_ls} directory.
+
+%-----------------------------------------------------------------------------
+
+\section{ADS}
+\label{ADS}
+
+ADS (the Auxiliary-space Divergence Solver) is a parallel unstructured solver
+similar to AMS, but targeting $H(div)$ instead of $H(curl)$ problems. Its usage
+and options are very similar to those of AMS, and in general the relationship
+between ADS and AMS is analogous to that between AMS and AMG.
+
+Specifically ADS was designed for the scalable solution of linear systems
+arising in the finite element discretization of the variational problem
+\begin{equation} \label{ads-hdiv}
+\mbox{Find } {\mathbf u} \in {\mathbf W}_h \>:\qquad
+(\alpha\, \nabla \cdot {\mathbf u},  \nabla \cdot {\mathbf v}) +
+(\beta\, {\mathbf u},  {\mathbf v}) = ({\mathbf f},  {\mathbf v})\,,
+\qquad \mbox{for all } {\mathbf v} \in {\mathbf W}_h \,,
+\end{equation}
+where ${\mathbf W}_h$ is the lowest order Raviart-Thomas (face) finite element
+space, and $\alpha>0$ and $\beta>0$ are scalar, or SPD matrix variable
+coefficients.  It is based on the auxiliary space methods for $H(div)$ problems
+proposed in \cite{xu_H_curl}.
+% For more details, see \cite{h_curl_amg_report,ams_report}.
+
+\subsection{Overview}
+Let ${\mathbf A}$ and ${\mathbf b}$ be the stiffness matrix and  the
+load vector corresponding to (\ref{ads-hdiv}). Then the resulting
+linear system of interest reads,
+\begin{equation} \label{ads-hdiv-ls}
+{\mathbf A}\, {\mathbf x} = {\mathbf b} \,.
+\end{equation}
+The coefficients $\alpha$ and $\beta$ are naturally associated with
+the ``stiffness'' and ``mass'' terms of ${\mathbf A}$.
+Besides ${\mathbf A}$ and ${\mathbf b}$, ADS requires the following
+additional user input:
+\begin{enumerate}
+\item The discrete curl matrix $C$ representing the faces of the mesh in terms
+  of its edges. $C$ has as many rows as the number of faces in the mesh, with
+  each row having nonzero entries $+1$ and $-1$ in the columns corresponding to
+  the edges composing the face. The sign is determined based on the orientation
+  of the edges relative to the face.  We require that $C$ includes all (interior
+  and boundary) faces and edges.
+
+\item The discrete gradient matrix $G$ representing the edges of the mesh in
+  terms of its vertices. $G$ has as many rows as the number of edges in the
+  mesh, with each row having two nonzero entries: $+1$ and $-1$ in the columns
+  corresponding to the vertices composing the edge. The sign is determined based
+  on the orientation of the edge.  We require that $G$ includes all (interior
+  and boundary) edges and vertices.
+
+\item Vectors $x$, $y$, and $z$ representing the coordinates of the vertices of
+  the mesh.
+\end{enumerate}
+
+\noindent
+Internally, ADS proceeds with the construction of the following additional objects:
+\begin{itemize}
+\item $A_C$ -- the curl-curl matrix $C^{\,T} {\mathbf A} C$.
+\item ${\mathbf \Pi}$ -- the matrix representation of the interpolation operator
+from vector linear to face finite elements.
+\item ${\mathbf A}_{{\mathbf \Pi}}$ -- the vector nodal matrix ${\mathbf \Pi}^{\,T} {\mathbf A} {\mathbf \Pi}$.
+\item $B_C$ and ${\mathbf B}_{{\mathbf \Pi}}$ -- efficient (AMS/AMG) solvers for $A_C$ and ${\mathbf A}_{{\mathbf \Pi}}$.
+\end{itemize}
+The solution procedure then is a three-level method using smoothing in the
+original face space and subspace corrections based on $B_C$ and ${\mathbf
+  B}_{{\mathbf \Pi}}$.  We can employ a number of options here utilizing various
+combinations of the smoother and solvers in additive or multiplicative fashion.
+
+\subsection{Sample Usage}
+ADS can be used either as a solver or as a preconditioner.  Below we list the
+sequence of \hypre{} calls needed to create and use it as a solver. We start
+with the allocation of the \code{HYPRE_Solver} object:
+\begin{display}\begin{verbatim}
+HYPRE_Solver solver;
+HYPRE_ADSCreate(&solver);
+\end{verbatim}\end{display}
+
+Next, we set a number of solver parameters. Some of them are optional, while
+ others are necessary in order to perform the solver setup.
+
+The user is required to provide the discrete curl and gradient matrices $C$ and
+$G$.  ADS expects a matrix defined on the whole mesh with no boundary
+faces, edges or nodes excluded. It is essential to {\bf not} impose any boundary
+conditions on $C$ or $G$.  Regardless of which \hypre{} conceptual interface
+was used to construct the matrices, one can always obtain a ParCSR version of
+them. This is the expected format in the following functions.
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetDiscreteCurl(solver, C);
+HYPRE_ADSSetDiscreteGradient(solver, G);
+\end{verbatim}\end{display}
+
+Next, ADS requires the coordinates of the vertices in the mesh as three
+\hypre{} parallel vectors.  The corresponding function call reads:
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetCoordinateVectors(solver, x, y, z);
+\end{verbatim}\end{display}
+
+
+The remaining solver parameters are optional.  For example, the user can choose
+a different cycle type by calling
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetCycleType(solver, cycle_type); /* default value: 1 */
+\end{verbatim}\end{display}
+
+\noindent
+The available cycle types in ADS are:
+\begin{itemize}
+\item \code{cycle_type=1}: multiplicative solver $(01210)$
+\item \code{cycle_type=2}: additive solver $(0+1+2)$
+\item \code{cycle_type=3}: multiplicative solver $(02120)$
+\item \code{cycle_type=4}: additive solver $(010+2)$
+\item \code{cycle_type=5}: multiplicative solver $(0102010)$
+\item \code{cycle_type=6}: additive solver $(1+020)$
+\item \code{cycle_type=7}: multiplicative solver $(0201020)$
+\item \code{cycle_type=8}: additive solver $(0(1+2)0)$
+\item \code{cycle_type=11}: multiplicative solver $(013454310)$
+\item \code{cycle_type=12}: additive solver $(0+1+3+4+5)$
+\item \code{cycle_type=13}: multiplicative solver $(034515430)$
+\item \code{cycle_type=14}: additive solver $(01(3+4+5)10)$
+\end{itemize}
+Here we use the following convention for the three subspace correction methods:
+$0$ refers to smoothing, $1$ stands for AMS based on $B_C$, and $2$ refers to a
+call to BoomerAMG for ${\mathbf B}_{{\mathbf \Pi}}$.  The values $3$, $4$ and
+$5$ refer to the scalar subspaces corresponding to the $x$, $y$ and $z$
+components of $\mathbf \Pi$.
+
+The abbreviation $xyyz$ for $x,y,z \in \{0,1,2,3,4,5\}$ refers to a
+multiplicative subspace correction based on solvers $x$, $y$, $y$, and $z$ (in
+that order).  The abbreviation $x+y+z$ stands for an additive subspace
+correction method based on $x$, $y$ and $z$ solvers.  The additive cycles are
+meant to be used only when ADS is called as a preconditioner.  In our experience
+the choices \code{cycle_type=1,5,8,11,13} often produced fastest solution times,
+while \code{cycle_type=7} resulted in smallest number of iterations.
+
+Additional solver parameters, such as the maximum number of iterations, the
+convergence tolerance and the output level, can be set with
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetMaxIter(solver, maxit);     /* default value: 20 */
+HYPRE_ADSSetTol(solver, tol);           /* default value: 1e-6 */
+HYPRE_ADSSetPrintLevel(solver, print);  /* default value: 1 */
+\end{verbatim}\end{display}
+
+More advanced parameters, affecting the smoothing and the internal AMS and AMG
+ solvers, can be set with the following three functions:
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetSmoothingOptions(solver, 2, 1, 1.0, 1.0);
+HYPRE_ADSSetAMSOptions(solver, 11, 10, 1, 3, 0.25, 0, 0);
+HYPRE_ADSSetAMGOptions(solver, 10, 1, 3, 0.25, 0, 0);
+\end{verbatim}\end{display}
+
+After the above calls, the solver is ready to be constructed.  The user has to
+provide the stiffness matrix ${\mathbf A}$ (in ParCSR format) and the \hypre{}
+parallel vectors ${\mathbf b}$ and ${\mathbf x}$. (The vectors are actually not
+used in the current ADS setup.) The setup call reads,
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetup(solver, A, b, x);
+\end{verbatim}\end{display}
+It is important to note the order of the calling sequence. For example, do {\bf not}
+call \code{HYPRE_ADSSetup} before calling each of the functions 
+\code{HYPRE_ADSSetDiscreteCurl}, \code{HYPRE_ADSSetDiscreteGradient}
+and \code{HYPRE_ADSSetCoordinateVectors}.
+
+\noindent
+Once the setup has completed, we can solve the linear system by calling
+\begin{display}\begin{verbatim}
+HYPRE_ADSSolve(solver, A, b, x);
+\end{verbatim}\end{display}
+
+\noindent
+Finally, the solver can be destroyed with
+\begin{display}\begin{verbatim}
+HYPRE_ADSDestroy(&solver);
+\end{verbatim}\end{display}
+
+\noindent
+More details can be found in the files \file{ads.h} and \file{ads.c}
 located in the \file{parcsr_ls} directory.
 
 %-----------------------------------------------------------------------------
