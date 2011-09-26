@@ -37,14 +37,14 @@ typedef struct
    /* Is the mass term coefficient zero? */
    HYPRE_Int beta_is_zero;
 
-   /* Nedelec interpolation matrix (vertex^dim-to-edge) */
+   /* Nedelec nodal interpolation matrix (vertex^dim-to-edge) */
    hypre_ParCSRMatrix *Pi;
    /* Coarse grid matrix on the range of Pi^T */
    hypre_ParCSRMatrix *A_Pi;
    /* AMG solver for A_Pi */
    HYPRE_Solver B_Pi;
 
-   /* Componenets of the Nedelec interpolation matrix (vertex-to-edge each) */
+   /* Components of the Nedelec interpolation matrix (vertex-to-edge each) */
    hypre_ParCSRMatrix *Pix, *Piy, *Piz;
    /* Coarse grid matrices on the ranges of Pi{x,y,z}^T */
    hypre_ParCSRMatrix *A_Pix, *A_Piy, *A_Piz;
@@ -161,15 +161,15 @@ typedef struct
 #define hypre_AMSDataAChebyOrder(ams_data) ((ams_data)->A_cheby_order)
 #define hypre_AMSDataAChebyFraction(ams_data) ((ams_data)->A_cheby_fraction)
 
+#define hypre_AMSDataPoissonAlphaAMGCoarsenType(ams_data) ((ams_data)->B_Pi_coarsen_type)
+#define hypre_AMSDataPoissonAlphaAMGAggLevels(ams_data) ((ams_data)->B_Pi_agg_levels)
+#define hypre_AMSDataPoissonAlphaAMGRelaxType(ams_data) ((ams_data)->B_Pi_relax_type)
+#define hypre_AMSDataPoissonAlphaAMGStrengthThreshold(ams_data) ((ams_data)->B_Pi_theta)
 
 #define hypre_AMSDataPoissonBetaAMGCoarsenType(ams_data) ((ams_data)->B_G_coarsen_type)
 #define hypre_AMSDataPoissonBetaAMGAggLevels(ams_data) ((ams_data)->B_G_agg_levels)
 #define hypre_AMSDataPoissonBetaAMGRelaxType(ams_data) ((ams_data)->B_G_relax_type)
 #define hypre_AMSDataPoissonBetaAMGStrengthThreshold(ams_data) ((ams_data)->B_G_theta)
-#define hypre_AMSDataPoissonAlphaAMGCoarsenType(ams_data) ((ams_data)->B_Pi_coarsen_type)
-#define hypre_AMSDataPoissonAlphaAMGAggLevels(ams_data) ((ams_data)->B_Pi_agg_levels)
-#define hypre_AMSDataPoissonAlphaAMGRelaxType(ams_data) ((ams_data)->B_Pi_relax_type)
-#define hypre_AMSDataPoissonAlphaAMGStrengthThreshold(ams_data) ((ams_data)->B_Pi_theta)
 
 /* Temporary vectors */
 #define hypre_AMSDataTempEdgeVectorR(ams_data) ((ams_data)->r0)
