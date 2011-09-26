@@ -31,19 +31,20 @@
 
 typedef struct
 {
-   double  *data;
    HYPRE_Int     *i;
    HYPRE_Int     *j;
    HYPRE_Int      num_rows;
    HYPRE_Int      num_cols;
    HYPRE_Int      num_nonzeros;
 
-  /* for compressing rows in matrix multiplication  */
-   HYPRE_Int     *rownnz;
-   HYPRE_Int      num_rownnz;
-
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
    HYPRE_Int      owns_data;
+
+   double  *data;
+
+   /* for compressing rows in matrix multiplication  */
+   HYPRE_Int     *rownnz;
+   HYPRE_Int      num_rownnz;
 
 } hypre_CSRMatrix;
 
