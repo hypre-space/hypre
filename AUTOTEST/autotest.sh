@@ -229,7 +229,7 @@ do
          ;;
 
       -mac)
-         host="kolev-mac"
+         host="parsol"
          name="mac"
          ;;
 
