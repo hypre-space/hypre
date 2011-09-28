@@ -629,15 +629,12 @@ impl_bHYPRE_StructVector_Clone(
       shallow in terms of the grid */
 
    int ierr = 0;
-   int my_id;
    struct bHYPRE_StructVector__data * data, * data_x;
    bHYPRE_StructVectorView bHYPRE_x;
    bHYPRE_StructVector bHYPREP_x;
    HYPRE_StructVector yy, xx;
    HYPRE_StructGrid grid;
    int * num_ghost;
-
-   MPI_Comm_rank(MPI_COMM_WORLD, &my_id );
 
    bHYPREP_x = bHYPRE_StructVector__create(_ex); SIDL_CHECK(*_ex);
    bHYPRE_x = bHYPRE_StructVectorView__cast( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);

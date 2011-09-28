@@ -759,13 +759,11 @@ impl_bHYPRE_IJParCSRVector_Clone(
 
    int ierr = 0;
    int type[1];  /* type[0] produces silly error messages on Sun */
-   int jlower, jupper, my_id;
+   int jlower, jupper;
    struct bHYPRE_IJParCSRVector__data * data_y, * data_x;
    HYPRE_IJVector ij_y, ij_x;
    bHYPRE_IJVectorView bHYPRE_ij_x;
    bHYPRE_IJParCSRVector bHYPREP_x;
-
-   MPI_Comm_rank(MPI_COMM_WORLD, &my_id );
 
    bHYPREP_x = bHYPRE_IJParCSRVector__create(_ex); SIDL_CHECK(*_ex);
    bHYPRE_ij_x = bHYPRE_IJVectorView__cast( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
