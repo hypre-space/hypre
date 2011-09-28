@@ -1446,7 +1446,6 @@ typedef struct hypre_StructStencil_struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
    HYPRE_Int      size;    /* Number of stencil coefficients */
-   HYPRE_Int      max_offset;
                 
    HYPRE_Int      dim;     /* Number of dimensions */
 
@@ -1460,7 +1459,6 @@ typedef struct hypre_StructStencil_struct
 
 #define hypre_StructStencilShape(stencil)      ((stencil) -> shape)
 #define hypre_StructStencilSize(stencil)       ((stencil) -> size)
-#define hypre_StructStencilMaxOffset(stencil)  ((stencil) -> max_offset)
 #define hypre_StructStencilDim(stencil)        ((stencil) -> dim)
 #define hypre_StructStencilRefCount(stencil)   ((stencil) -> ref_count)
 

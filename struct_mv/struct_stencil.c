@@ -32,7 +32,6 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
    hypre_StructStencil   *stencil;
 
    HYPRE_Int              abs_offset;
-   HYPRE_Int              max_offset;
    HYPRE_Int              s, d;
 
    stencil = hypre_TAlloc(hypre_StructStencil, 1);
@@ -41,19 +40,6 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
    hypre_StructStencilSize(stencil)     = size;
    hypre_StructStencilDim(stencil)      = dim;
    hypre_StructStencilRefCount(stencil) = 1;
-
-   /* compute max_offset */
-   max_offset = 0;
-   for (s = 0; s < size; s++)
-   {
-      for (d = 0; d < 3; d++)
-      {
-         abs_offset = hypre_IndexD(shape[s], d);
-         abs_offset = (abs_offset < 0) ? -abs_offset : abs_offset;
-         max_offset = hypre_max(abs_offset, max_offset);
-      }
-   }
-   hypre_StructStencilMaxOffset(stencil) = max_offset;
 
    return stencil;
 }
