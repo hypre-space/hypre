@@ -31,9 +31,6 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
 {
    hypre_StructStencil   *stencil;
 
-   HYPRE_Int              abs_offset;
-   HYPRE_Int              s, d;
-
    stencil = hypre_TAlloc(hypre_StructStencil, 1);
 
    hypre_StructStencilShape(stencil)    = shape;
