@@ -191,7 +191,7 @@ lobpcg_errorMessage( HYPRE_Int verbosityLevel, const char* message )
 {
   if ( verbosityLevel ) {
     hypre_fprintf( stderr, "Error in LOBPCG:\n" );
-    hypre_fprintf( stderr, message );
+    hypre_fprintf( stderr, "%s", message );
   }
 }
 

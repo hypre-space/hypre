@@ -81,7 +81,7 @@ void TimeLog_dhMark(TimeLog_dh t, const char *desc)
     Timer_dhStop(t->timer);
     t->time[t->last] = Timer_dhReadWall(t->timer);
     Timer_dhStart(t->timer);
-    hypre_sprintf(t->desc[t->last], desc);
+    hypre_sprintf(t->desc[t->last], "%s", desc);
     t->last += 1;
   }
   END_FUNC_DH
