@@ -111,7 +111,7 @@ void
 utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u );
 
 HYPRE_Int
-utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] );
+utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName);
 
 #ifdef __cplusplus
 }

@@ -696,7 +696,7 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u ) {
 }
 
 HYPRE_Int
-utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] ) {
+utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName) {
 
   hypre_longint i, j, h, w, jump;
   double* p;

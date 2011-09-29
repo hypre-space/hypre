@@ -21,10 +21,10 @@
 
 void
 hypre_F90_IFACE(hypre_mpi_comm_f2c, HYPRE_MPI_COMM_F2C)
-   (hypre_F90_Comm *c_comm,
+   (hypre_F90_Obj *c_comm,
     hypre_F90_Comm *f_comm,
     hypre_F90_Int  *ierr)
 {
-   *c_comm = (hypre_F90_Comm) hypre_MPI_Comm_f2c( (hypre_int) *f_comm );
+   *c_comm = (hypre_F90_Obj) hypre_MPI_Comm_f2c( (hypre_int) *f_comm );
    *ierr = 0;
 }

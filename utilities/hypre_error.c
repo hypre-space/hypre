@@ -18,7 +18,7 @@ HYPRE_Int hypre__global_error = 0;
 
 /* Process the error with code ierr raised in the given line of the
    given source file. */
-void hypre_error_handler(char *filename, HYPRE_Int line, HYPRE_Int ierr, char *msg)
+void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg)
 {
    hypre_error_flag |= ierr;
 

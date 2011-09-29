@@ -73,7 +73,7 @@ void TimeLog_dhStop(TimeLog_dh t)
 
 #undef __FUNC__
 #define __FUNC__ "TimeLog_dhMark"
-void TimeLog_dhMark(TimeLog_dh t, char *desc)
+void TimeLog_dhMark(TimeLog_dh t, const char *desc)
 {
   START_FUNC_DH
   if (t->last < MAX_TIME_MARKS - 3) {
