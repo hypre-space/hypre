@@ -21,7 +21,7 @@ remote_dir="hypre/testing"
 cvs_opts=""
 summary_file="SUMMARY.html"
 summary_subject="Autotest Error Summary `date +%Y-%m-%d`"
-email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, schroder2@llnl.gov, abaker@llnl.gov"
+email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, schroder2@llnl.gov"
 
 # Main loop
 test_opts=""
