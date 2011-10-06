@@ -169,6 +169,14 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxCoarseSize(HYPRE_Solver solver,
                                     HYPRE_Int          max_coarse_size);
 
 /**
+ * (Optional) Sets maximal size for redundant coarse grid solve. 
+ * When the system is smaller than this threshold, sequential AMG is used 
+ * on all remaining active processors.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold(HYPRE_Solver solver,
+                                    HYPRE_Int          seq_threshold);
+
+/**
  * (Optional) Sets AMG strength threshold. The default is 0.25.
  * For 2d Laplace operators, 0.25 is a good value, for 3d Laplace
  * operators, 0.5 or 0.6 is a better value. For elasticity problems,

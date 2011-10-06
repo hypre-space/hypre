@@ -58,6 +58,7 @@ typedef struct
    HYPRE_Int      CR_use_CG;
    HYPRE_Int      cgc_its;
    HYPRE_Int      max_coarse_size;
+   HYPRE_Int      seq_threshold;
 
    /* solve params */
    HYPRE_Int      max_iter;
@@ -179,8 +180,13 @@ typedef struct
    HYPRE_Int               interp_refine;
    HYPRE_Int               smooth_interp_vectors;
    double           *expandp_weights; /* currently not set by user */
-   
 
+ /* enable redundant coarse grid solve */
+   HYPRE_Solver   coarse_solver;
+   hypre_ParCSRMatrix  *A_coarse;
+   hypre_ParVector  *f_coarse;
+   hypre_ParVector  *u_coarse;
+   MPI_Comm   new_comm;
 
 } hypre_ParAMGData;
 
@@ -220,6 +226,7 @@ typedef struct
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
  #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
  #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+ #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
 
@@ -345,6 +352,11 @@ typedef struct
 #define hypre_ParAMGSmoothInterpVectors(amg_data) ((amg_data)->smooth_interp_vectors)
 #define hypre_ParAMGDataExpandPWeights(amg_data) ((amg_data)->expandp_weights)
 
+#define hypre_ParAMGDataCoarseSolver(amg_data) ((amg_data)->coarse_solver)
+#define hypre_ParAMGDataACoarse(amg_data) ((amg_data)->A_coarse)
+#define hypre_ParAMGDataFCoarse(amg_data) ((amg_data)->f_coarse)
+#define hypre_ParAMGDataUCoarse(amg_data) ((amg_data)->u_coarse)
+#define hypre_ParAMGDataNewComm(amg_data) ((amg_data)->new_comm)
 
 #endif
 

@@ -63,6 +63,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int 	    IS_type;
    HYPRE_Int 	    CR_use_CG;
    HYPRE_Int 	    cgc_its;
+   HYPRE_Int 	    seq_threshold;
 
    /* solve params */
    HYPRE_Int      min_iter;
@@ -116,6 +117,7 @@ hypre_BoomerAMGCreate()
    /* setup params */
    max_levels = 25;
    max_coarse_size = 9;
+   seq_threshold = 0;
    strong_threshold = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
@@ -327,6 +329,12 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGSmoothInterpVectors(amg_data) = 0;
    hypre_ParAMGDataExpandPWeights(amg_data) = NULL;
 
+   /* for redundant coarse grid solve */
+   hypre_ParAMGDataCoarseSolver(amg_data) = NULL;
+   hypre_ParAMGDataACoarse(amg_data) = NULL;
+   hypre_ParAMGDataFCoarse(amg_data) = NULL;
+   hypre_ParAMGDataUCoarse(amg_data) = NULL;
+   hypre_ParAMGDataNewComm(amg_data) = MPI_COMM_NULL;
 
    return (void *) amg_data;
 }
@@ -640,6 +648,48 @@ hypre_BoomerAMGGetMaxCoarseSize( void *data,
    } 
 
    *max_coarse_size = hypre_ParAMGDataMaxCoarseSize(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetSeqThreshold( void *data,
+                          HYPRE_Int   seq_threshold )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   if (seq_threshold < 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataSeqThreshold(amg_data) = seq_threshold;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetSeqThreshold( void *data,
+                             HYPRE_Int *  seq_threshold )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *seq_threshold = hypre_ParAMGDataSeqThreshold(amg_data);
 
    return hypre_error_flag;
 }

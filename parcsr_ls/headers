@@ -47,6 +47,8 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 @
 
+cat par_amg.h >> $INTERNAL_HEADER
+ 
 #===========================================================================
 # Structures and prototypes
 #===========================================================================
