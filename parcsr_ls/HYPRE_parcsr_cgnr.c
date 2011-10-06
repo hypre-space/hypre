@@ -33,7 +33,7 @@ HYPRE_ParCSRCGNRCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
-         hypre_ParKrylovMatvec, hypre_ParKrylovMatvec,
+         hypre_ParKrylovMatvec, hypre_ParKrylovMatvecT,
          hypre_ParKrylovMatvecDestroy,
          hypre_ParKrylovInnerProd,
          hypre_ParKrylovCopyVector, hypre_ParKrylovClearVector,
