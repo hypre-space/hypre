@@ -166,6 +166,8 @@ main( hypre_int argc,
    HYPRE_Int	    smooth_type = 6;
    HYPRE_Int	    smooth_num_levels = 0;
    HYPRE_Int      smooth_num_sweeps = 1;
+   HYPRE_Int      coarse_threshold = 0;
+   HYPRE_Int      seq_threshold = 0;
    double   relax_wt; 
    double   relax_wt_level; 
    double   outer_wt;
@@ -731,6 +733,16 @@ main( hypre_int argc,
       {
          arg_index++;
          schwarz_rlx_weight = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-coarse_th") == 0 )
+      {
+         arg_index++;
+         coarse_threshold  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-seq_th") == 0 )
+      {
+         arg_index++;
+         seq_threshold  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-th") == 0 )
       {
@@ -2031,6 +2043,8 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_BoomerAMGSetSeqThreshold(amg_solver, seq_threshold);
+      HYPRE_BoomerAMGSetMaxCoarseSize(amg_solver, coarse_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
       HYPRE_BoomerAMGSetPMaxElmts(amg_solver, P_max_elmts);
       HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
@@ -2153,6 +2167,8 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_BoomerAMGSetSeqThreshold(amg_solver, seq_threshold);
+      HYPRE_BoomerAMGSetMaxCoarseSize(amg_solver, coarse_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
       HYPRE_BoomerAMGSetPMaxElmts(amg_solver, P_max_elmts);
       HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
@@ -2291,6 +2307,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
@@ -2417,6 +2435,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
@@ -2613,6 +2633,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
@@ -2728,6 +2750,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
@@ -2927,6 +2951,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
@@ -3078,6 +3104,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
@@ -3235,6 +3263,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
@@ -3441,6 +3471,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
          HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
