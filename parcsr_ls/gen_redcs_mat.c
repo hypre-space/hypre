@@ -39,11 +39,11 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
    /* misc */
    dof_func_array = hypre_ParAMGDataDofFuncArray(amg_data);
 
-   //MPI Stuff
+   /*MPI Stuff */
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
   
-   //initial
+   /*initial */
    level = p_level;
    
    not_finished_coarsening = 1;
@@ -218,7 +218,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          row_starts[1] = size;
  
          /* Create 1 proc communicator */
-         seq_comm = MPI_COMM_SELF;
+         seq_comm = hypre_MPI_COMM_SELF;
 
          A_seq = hypre_ParCSRMatrixCreate(seq_comm,size,size,
 					  row_starts, row_starts,
