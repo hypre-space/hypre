@@ -334,7 +334,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataACoarse(amg_data) = NULL;
    hypre_ParAMGDataFCoarse(amg_data) = NULL;
    hypre_ParAMGDataUCoarse(amg_data) = NULL;
-   hypre_ParAMGDataNewComm(amg_data) = MPI_COMM_NULL;
+   hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
 
    return (void *) amg_data;
 }
