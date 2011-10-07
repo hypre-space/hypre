@@ -118,6 +118,7 @@ extern "C" {
 
 #define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD       
 #define MPI_COMM_NULL       hypre_MPI_COMM_NULL
+#define MPI_COMM_SELF       hypre_MPI_COMM_SELF
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
@@ -208,6 +209,7 @@ typedef struct
 typedef HYPRE_Int  hypre_MPI_Op;
 typedef HYPRE_Int  hypre_MPI_Aint;
 
+#define  hypre_MPI_COMM_SELF 1
 #define  hypre_MPI_COMM_WORLD 0
 #define  hypre_MPI_COMM_NULL  -1
 
@@ -246,6 +248,7 @@ typedef MPI_Aint     hypre_MPI_Aint;
 #define  hypre_MPI_COMM_WORLD MPI_COMM_WORLD
 #define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
 #define  hypre_MPI_BOTTOM     MPI_BOTTOM
+#define  hypre_MPI_COMM_SELF  MPI_COMM_SELF
 
 #define  hypre_MPI_DOUBLE MPI_DOUBLE
 /* HYPRE_MPI_INT is defined in HYPRE_utilities.h */
