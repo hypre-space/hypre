@@ -665,7 +665,7 @@ hypre_BoomerAMGSetSeqThreshold( void *data,
       return hypre_error_flag;
    } 
 
-   if (seq_threshold < 1)
+   if (seq_threshold < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
