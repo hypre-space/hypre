@@ -166,7 +166,7 @@ main( hypre_int argc,
    HYPRE_Int	    smooth_type = 6;
    HYPRE_Int	    smooth_num_levels = 0;
    HYPRE_Int      smooth_num_sweeps = 1;
-   HYPRE_Int      coarse_threshold = 0;
+   HYPRE_Int      coarse_threshold = 1;
    HYPRE_Int      seq_threshold = 0;
    double   relax_wt; 
    double   relax_wt_level; 
