@@ -87,6 +87,7 @@ FILES="\
  ${TNAME}.out.102\
  ${TNAME}.out.103\
  ${TNAME}.out.104\
+ ${TNAME}.out.105\
 "
 
 for i in $FILES

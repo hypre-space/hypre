@@ -100,3 +100,6 @@ mpirun -np 2 ./new_ij -solver 50 -rhsrand > solvers.out.101
 mpirun -np 2 ./new_ij -solver 51 -rhsrand > solvers.out.102
 mpirun -np 2 ./new_ij -solver 60 -rhsrand > solvers.out.103
 mpirun -np 2 ./new_ij -solver 61 -rhsrand > solvers.out.104
+
+#redundant coarse grid solve
+mpirun -np 8 ./new_ij -n 80 80 80 -P 2 2 2 -agg_nl 1 -hmis -interptype 6 -Pmx 4 -seq_th 100 -solver 1 -rlx 6 > solvers.out.105
