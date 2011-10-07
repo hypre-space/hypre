@@ -74,7 +74,6 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       double *A_diag_data = hypre_CSRMatrixData(A_diag);
       double *A_offd_data = hypre_CSRMatrixData(A_offd);
       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
-      HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
       HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
 
       MPI_Group orig_group, new_group; 
@@ -84,7 +83,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 
       hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, comm);
 
-      ranks = hypre_CTAlloc(HYPRE_Int, global_num_rows);
+      ranks = hypre_CTAlloc(HYPRE_Int, num_procs);
 
       new_num_procs = 0;
       for (i=0; i < num_procs; i++)
