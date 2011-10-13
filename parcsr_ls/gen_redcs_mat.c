@@ -268,7 +268,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
 
    /* Local variables  */
 
-   HYPRE_Int       Solve_err_flag;
+   HYPRE_Int       Solve_err_flag = 0;
 
    HYPRE_Int n;
    HYPRE_Int i;
