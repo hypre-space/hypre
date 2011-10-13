@@ -76,7 +76,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
       HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
 
-      MPI_Group orig_group, new_group; 
+      hypre_MPI_Group orig_group, new_group; 
       HYPRE_Int *ranks, new_num_procs, *row_starts;
 
       info = hypre_CTAlloc(HYPRE_Int, num_procs);
@@ -194,9 +194,9 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                        A_seq_j, info, displs2,
                        HYPRE_MPI_INT, new_comm );
 
-         hypre_MPI_Allgatherv ( A_tmp_data, num_nonzeros, MPI_DOUBLE,
+         hypre_MPI_Allgatherv ( A_tmp_data, num_nonzeros, hypre_MPI_DOUBLE,
                        A_seq_data, info, displs2,
-                       MPI_DOUBLE, new_comm );
+                       hypre_MPI_DOUBLE, new_comm );
 
          A_seq_diag = hypre_CSRMatrixCreate(size,size,total_nnz);
          A_seq_offd = hypre_CSRMatrixCreate(size,0,0);
@@ -327,17 +327,17 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       tmp_vec =  hypre_ParVectorLocalVector(F_coarse);
       recv_buf = hypre_VectorData(tmp_vec);
 
-      hypre_MPI_Allgatherv ( f_data, nf, MPI_DOUBLE, 
+      hypre_MPI_Allgatherv ( f_data, nf, hypre_MPI_DOUBLE, 
                           recv_buf, info, displs, 
-                          MPI_DOUBLE, new_comm );
+                          hypre_MPI_DOUBLE, new_comm );
 
       tmp_vec =  hypre_ParVectorLocalVector(U_coarse);
       recv_buf = hypre_VectorData(tmp_vec);
       
       /*then u */
-      hypre_MPI_Allgatherv ( u_data, n, MPI_DOUBLE, 
+      hypre_MPI_Allgatherv ( u_data, n, hypre_MPI_DOUBLE, 
                        recv_buf, info, displs, 
-                       MPI_DOUBLE, new_comm );
+                       hypre_MPI_DOUBLE, new_comm );
          
       /* clean up */
       hypre_TFree(displs);
