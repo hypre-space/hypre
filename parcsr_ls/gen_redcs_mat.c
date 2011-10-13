@@ -96,6 +96,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       MPI_Comm_group(comm, &orig_group);
       hypre_MPI_Group_incl(orig_group, new_num_procs, ranks, &new_group);
       MPI_Comm_create(comm, new_group, &new_comm);
+      hypre_MPI_Group_free(&new_group);
 
       if (num_rows)
       {
@@ -113,14 +114,16 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 		hypre_ParAMGDataTruncFactor(amg_data)); 
          HYPRE_BoomerAMGSetPMaxElmts(coarse_solver, 
 		hypre_ParAMGDataPMaxElmts(amg_data)); 
-         /*HYPRE_BoomerAMGSetRelaxType(coarse_solver, 
-		hypre_ParAMGDataRelaxType(amg_data)); */
+	 if (hypre_ParAMGDataUserRelaxType(amg_data) > -1) 
+            HYPRE_BoomerAMGSetRelaxType(coarse_solver, 
+		hypre_ParAMGDataUserRelaxType(amg_data)); 
          HYPRE_BoomerAMGSetRelaxOrder(coarse_solver, 
 		hypre_ParAMGDataRelaxOrder(amg_data)); 
-         /*HYPRE_BoomerAMGSetRelaxWt(coarse_solver, 
-		hypre_ParAMGDataRelaxWeight(amg_data)); 
-         HYPRE_BoomerAMGSetNumSweeps(coarse_solver, 
-		hypre_ParAMGDataNumSweeps(amg_data)); */
+         HYPRE_BoomerAMGSetRelaxWt(coarse_solver, 
+		hypre_ParAMGDataUserRelaxWeight(amg_data)); 
+	 if (hypre_ParAMGDataUserNumSweeps(amg_data) > -1) 
+            HYPRE_BoomerAMGSetNumSweeps(coarse_solver, 
+		hypre_ParAMGDataUserNumSweeps(amg_data)); 
          HYPRE_BoomerAMGSetNumFunctions(coarse_solver, 
 		hypre_ParAMGDataNumFunctions(amg_data)); 
          HYPRE_BoomerAMGSetMaxIter(coarse_solver, 1); 
@@ -198,14 +201,6 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                        A_seq_data, info, displs2,
                        hypre_MPI_DOUBLE, new_comm );
 
-         A_seq_diag = hypre_CSRMatrixCreate(size,size,total_nnz);
-         A_seq_offd = hypre_CSRMatrixCreate(size,0,0);
-
-         hypre_CSRMatrixData(A_seq_diag) = A_seq_data;
-         hypre_CSRMatrixI(A_seq_diag) = A_seq_i;
-         hypre_CSRMatrixJ(A_seq_diag) = A_seq_j;
-         hypre_CSRMatrixI(A_seq_offd) = A_seq_offd_i;
-
          hypre_TFree(displs);
          hypre_TFree(displs2);
          hypre_TFree(A_tmp_i);
@@ -223,8 +218,13 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 					  row_starts, row_starts,
 						0,total_nnz,0); 
 
-         hypre_ParCSRMatrixDiag(A_seq) = A_seq_diag;
-         hypre_ParCSRMatrixOffd(A_seq) = A_seq_offd;
+         A_seq_diag = hypre_ParCSRMatrixDiag(A_seq);
+         A_seq_offd = hypre_ParCSRMatrixOffd(A_seq);
+
+         hypre_CSRMatrixData(A_seq_diag) = A_seq_data;
+         hypre_CSRMatrixI(A_seq_diag) = A_seq_i;
+         hypre_CSRMatrixJ(A_seq_diag) = A_seq_j;
+         hypre_CSRMatrixI(A_seq_offd) = A_seq_offd_i;
 
          F_seq = hypre_ParVectorCreate(seq_comm, size, row_starts);
          U_seq = hypre_ParVectorCreate(seq_comm, size, row_starts);

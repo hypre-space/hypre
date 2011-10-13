@@ -29,6 +29,21 @@ extern "C" {
 
 typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
+
+
 
 #ifndef hypre_ParAMG_DATA_HEADER
 #define hypre_ParAMG_DATA_HEADER
@@ -36,6 +51,7 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 #define CUMNUMIT
 
 #include "par_csr_block_matrix.h"
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
@@ -84,6 +100,9 @@ typedef struct
    HYPRE_Int    **grid_relax_points;
    HYPRE_Int      relax_order;
    HYPRE_Int      user_coarse_relax_type;   
+   HYPRE_Int      user_relax_type;   
+   HYPRE_Int      user_num_sweeps;   
+   double         user_relax_weight;   
    double  *relax_weight; 
    double  *omega;
    double   tol;
@@ -251,6 +270,9 @@ typedef struct
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
 #define hypre_ParAMGDataNumGridSweeps(amg_data) ((amg_data)->num_grid_sweeps)
 #define hypre_ParAMGDataUserCoarseRelaxType(amg_data) ((amg_data)->user_coarse_relax_type)
+#define hypre_ParAMGDataUserRelaxType(amg_data) ((amg_data)->user_relax_type)
+#define hypre_ParAMGDataUserRelaxWeight(amg_data) ((amg_data)->user_relax_weight)
+#define hypre_ParAMGDataUserNumSweeps(amg_data) ((amg_data)->user_num_sweeps)
 #define hypre_ParAMGDataGridRelaxType(amg_data) ((amg_data)->grid_relax_type)
 #define hypre_ParAMGDataGridRelaxPoints(amg_data) \
 ((amg_data)->grid_relax_points)

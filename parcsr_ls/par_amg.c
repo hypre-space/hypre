@@ -203,6 +203,9 @@ hypre_BoomerAMGCreate()
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1);
 
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
+   hypre_ParAMGDataUserRelaxType(amg_data) = -1;
+   hypre_ParAMGDataUserNumSweeps(amg_data) = -1;
+   hypre_ParAMGDataUserRelaxWeight(amg_data) = 1.0;
    hypre_BoomerAMGSetMaxLevels(amg_data, max_levels);
    hypre_BoomerAMGSetMaxCoarseSize(amg_data, max_coarse_size);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
@@ -350,6 +353,8 @@ hypre_BoomerAMGDestroy( void *data )
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
    HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
+   void *amg = hypre_ParAMGDataCoarseSolver(amg_data);
+   MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
    HYPRE_Int i;
 
    if (hypre_ParAMGDataMaxEigEst(amg_data))
@@ -541,7 +546,21 @@ hypre_BoomerAMGDestroy( void *data )
    
    }
    
+   if (amg) hypre_BoomerAMGDestroy(amg);
 
+   if (hypre_ParAMGDataACoarse(amg_data))
+      hypre_ParCSRMatrixDestroy(hypre_ParAMGDataACoarse(amg_data));
+
+   if (hypre_ParAMGDataUCoarse(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataUCoarse(amg_data));
+
+   if (hypre_ParAMGDataFCoarse(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
+
+   if (new_comm != MPI_COMM_NULL) 
+   {
+       MPI_Comm_free (&new_comm);
+   }
    hypre_TFree(amg_data);
    return hypre_error_flag;
 }
@@ -1345,6 +1364,8 @@ hypre_BoomerAMGSetNumSweeps( void     *data,
       num_grid_sweeps[i] = num_sweeps;
    num_grid_sweeps[3] = 1;
 
+   hypre_ParAMGDataUserNumSweeps(amg_data) = num_sweeps;
+
    return hypre_error_flag;
 }
  
@@ -1492,6 +1513,7 @@ hypre_BoomerAMGSetRelaxType( void     *data,
       grid_relax_type[i] = relax_type;
    grid_relax_type[3] = 9;
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
+   hypre_ParAMGDataUserRelaxType(amg_data) = relax_type;
 
    return hypre_error_flag;
 }
@@ -1757,6 +1779,8 @@ hypre_BoomerAMGSetRelaxWt( void     *data,
    relax_weight_array = hypre_ParAMGDataRelaxWeight(amg_data);
    for (i=0; i < num_levels; i++)
       relax_weight_array[i] = relax_weight;
+
+   hypre_ParAMGDataUserRelaxWeight(amg_data) = relax_weight;
    
    return hypre_error_flag;
 }
