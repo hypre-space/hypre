@@ -97,6 +97,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       hypre_MPI_Group_incl(orig_group, new_num_procs, ranks, &new_group);
       MPI_Comm_create(comm, new_group, &new_comm);
       hypre_MPI_Group_free(&new_group);
+      hypre_MPI_Group_free(&orig_group);
 
       if (num_rows)
       {
