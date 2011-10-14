@@ -557,7 +557,7 @@ hypre_BoomerAMGDestroy( void *data )
    if (hypre_ParAMGDataFCoarse(amg_data))
       hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
 
-   if (new_comm != MPI_COMM_NULL) 
+   if (new_comm != hypre_MPI_COMM_NULL) 
    {
        MPI_Comm_free (&new_comm);
    }
