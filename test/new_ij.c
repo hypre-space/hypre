@@ -1954,8 +1954,6 @@ main( hypre_int argc,
          HYPRE_ParCSRHybridSetCycleRelaxType(amg_solver, relax_up, 2);
       if (relax_coarse > -1)
          HYPRE_ParCSRHybridSetCycleRelaxType(amg_solver, relax_coarse, 3);
-      HYPRE_BoomerAMGSetChebyOrder(amg_solver, cheby_order);
-      HYPRE_BoomerAMGSetChebyFraction(amg_solver, cheby_fraction);
       HYPRE_ParCSRHybridSetRelaxOrder(amg_solver, relax_order);
       HYPRE_ParCSRHybridSetRelaxWt(amg_solver, relax_wt);
       HYPRE_ParCSRHybridSetOuterWt(amg_solver, outer_wt);
