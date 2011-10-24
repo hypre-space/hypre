@@ -1955,6 +1955,8 @@ main( hypre_int argc,
       if (relax_coarse > -1)
          HYPRE_ParCSRHybridSetCycleRelaxType(amg_solver, relax_coarse, 3);
       HYPRE_ParCSRHybridSetRelaxOrder(amg_solver, relax_order);
+      HYPRE_ParCSRHybridSetMaxCoarseSize(amg_solver, coarse_threshold);
+      HYPRE_ParCSRHybridSetSeqThreshold(amg_solver, seq_threshold);
       HYPRE_ParCSRHybridSetRelaxWt(amg_solver, relax_wt);
       HYPRE_ParCSRHybridSetOuterWt(amg_solver, outer_wt);
       if (level_w > -1)
@@ -1994,31 +1996,7 @@ main( hypre_int argc,
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
-      time_index = hypre_InitializeTiming("ParCSR Hybrid Solve");
-      hypre_BeginTiming(time_index);
 
-      HYPRE_ParCSRHybridSolve(amg_solver, parcsr_A, x, b);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_ParCSRHybridGetNumIterations(amg_solver, &num_iterations);
-      HYPRE_ParCSRHybridGetPCGNumIterations(amg_solver, &pcg_num_its);
-      HYPRE_ParCSRHybridGetDSCGNumIterations(amg_solver, &dscg_num_its);
-      HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(amg_solver, 
-	&final_res_norm);
-
-      if (myid == 0)
-      {
-         hypre_printf("\n");
-         hypre_printf("Iterations = %d\n", num_iterations);
-         hypre_printf("PCG_Iterations = %d\n", pcg_num_its);
-         hypre_printf("DSCG_Iterations = %d\n", dscg_num_its);
-         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         hypre_printf("\n");
-      }
       HYPRE_ParCSRHybridDestroy(amg_solver);
    }
    /*-----------------------------------------------------------
