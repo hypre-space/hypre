@@ -473,6 +473,8 @@ HYPRE_Int hypre_AMGHybridSetCycleNumSweeps ( void *AMGhybrid_vdata , HYPRE_Int n
 HYPRE_Int hypre_AMGHybridSetRelaxType ( void *AMGhybrid_vdata , HYPRE_Int relax_type );
 HYPRE_Int hypre_AMGHybridSetCycleRelaxType ( void *AMGhybrid_vdata , HYPRE_Int relax_type , HYPRE_Int k );
 HYPRE_Int hypre_AMGHybridSetRelaxOrder ( void *AMGhybrid_vdata , HYPRE_Int relax_order );
+HYPRE_Int hypre_AMGHybridSetMaxCoarseSize ( void *AMGhybrid_vdata , HYPRE_Int max_coarse_size );
+HYPRE_Int hypre_AMGHybridSetSeqThreshold ( void *AMGhybrid_vdata , HYPRE_Int seq_threshold );
 HYPRE_Int hypre_AMGHybridSetNumGridSweeps ( void *AMGhybrid_vdata , HYPRE_Int *num_grid_sweeps );
 HYPRE_Int hypre_AMGHybridSetGridRelaxType ( void *AMGhybrid_vdata , HYPRE_Int *grid_relax_type );
 HYPRE_Int hypre_AMGHybridSetGridRelaxPoints ( void *AMGhybrid_vdata , HYPRE_Int **grid_relax_points );
@@ -891,6 +893,8 @@ HYPRE_Int HYPRE_ParCSRHybridSetCycleNumSweeps ( HYPRE_Solver solver , HYPRE_Int 
 HYPRE_Int HYPRE_ParCSRHybridSetRelaxType ( HYPRE_Solver solver , HYPRE_Int relax_type );
 HYPRE_Int HYPRE_ParCSRHybridSetCycleRelaxType ( HYPRE_Solver solver , HYPRE_Int relax_type , HYPRE_Int k );
 HYPRE_Int HYPRE_ParCSRHybridSetRelaxOrder ( HYPRE_Solver solver , HYPRE_Int relax_order );
+HYPRE_Int HYPRE_ParCSRHybridSetMaxCoarseSize ( HYPRE_Solver solver , HYPRE_Int max_coarse_size );
+HYPRE_Int HYPRE_ParCSRHybridSetSeqThreshold ( HYPRE_Solver solver , HYPRE_Int seq_threshold );
 HYPRE_Int HYPRE_ParCSRHybridSetRelaxWt ( HYPRE_Solver solver , double relax_wt );
 HYPRE_Int HYPRE_ParCSRHybridSetLevelRelaxWt ( HYPRE_Solver solver , double relax_wt , HYPRE_Int level );
 HYPRE_Int HYPRE_ParCSRHybridSetOuterWt ( HYPRE_Solver solver , double outer_wt );

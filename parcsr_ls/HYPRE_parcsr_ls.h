@@ -2508,7 +2508,24 @@ HYPRE_ParCSRHybridSetOuterWt(HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_ParCSRHybridSetLevelOuterWt(HYPRE_Solver solver,
                                   double       outer_wt,
-                                  HYPRE_Int          level);
+                                  HYPRE_Int    level);
+
+/**
+ * (Optional) Defines the maximal coarse grid size.
+ * The default is 9.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetMaxCoarseSize(HYPRE_Solver solver,
+                               HYPRE_Int        max_coarse_size);
+
+/**
+ * (Optional) enables redundant coarse grid size. If the system size becomes
+ * smaller than seq_threshold, sequential AMG is used on all remaining processors.
+ * The default is 0.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetSeqThreshold(HYPRE_Solver solver,
+                               HYPRE_Int       seq_threshold);
 
 /*
  *

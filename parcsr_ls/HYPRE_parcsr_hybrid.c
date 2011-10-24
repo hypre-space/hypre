@@ -424,6 +424,28 @@ HYPRE_ParCSRHybridSetRelaxOrder( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetMaxCoarseSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetMaxCoarseSize( HYPRE_Solver solver,
+                              HYPRE_Int                max_coarse_size    )
+{
+   return( hypre_AMGHybridSetMaxCoarseSize( (void *) solver, max_coarse_size ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetSeqThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetSeqThreshold( HYPRE_Solver solver,
+                              HYPRE_Int                seq_threshold    )
+{
+   return( hypre_AMGHybridSetSeqThreshold( (void *) solver, seq_threshold ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetRelaxWt
  *--------------------------------------------------------------------------*/
 
