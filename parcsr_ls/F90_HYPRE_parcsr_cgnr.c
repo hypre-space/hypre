@@ -207,6 +207,26 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond, HYPRE_PARCSRCGNRSETPRECOND)
               HYPRE_ParCSRPilutSetup,
               (void *)       *precond_solver ) );
    }
+   if (*precond_id == 4)
+   {
+      *ierr = (hypre_F90_Int)
+         ( HYPRE_ParCSRCGNRSetPrecond(
+              hypre_F90_PassObj (HYPRE_Solver, solver),
+              HYPRE_ParCSRParaSailsSolve,
+              HYPRE_ParCSRParaSailsSolve,
+              HYPRE_ParCSRParaSailsSetup,
+              (void *)       *precond_solver ) );
+   }
+   if (*precond_id == 5)
+   {
+      *ierr = (hypre_F90_Int)
+         ( HYPRE_ParCSRCGNRSetPrecond(
+              hypre_F90_PassObj (HYPRE_Solver, solver),
+              HYPRE_EuclidSolve,
+              HYPRE_EuclidSolve,
+              HYPRE_EuclidSetup,
+              (void *)       *precond_solver ) );
+   }
    else
    {
       *ierr = -1;

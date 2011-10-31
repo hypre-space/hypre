@@ -290,6 +290,15 @@ hypre_F90_IFACE(hypre_parcsrhybridsetprecond, HYPRE_PARCSRHYBRIDSETPRECOND)
              HYPRE_ParCSRParaSailsSetup,
              (void *)          *precond_solver ));
    }
+   else if (*precond_id == 5)
+   {
+      *ierr = (hypre_F90_Int)
+         (HYPRE_ParCSRHybridSetPrecond(
+             hypre_F90_PassObj (HYPRE_Solver, solver),
+             HYPRE_EuclidSolve,
+             HYPRE_EuclidSetup,
+             (void *)          *precond_solver ));
+   }
    else
    {
       *ierr = -1;

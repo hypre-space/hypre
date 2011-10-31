@@ -246,6 +246,15 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond, HYPRE_PARCSRPCGSETPRECOND)
               HYPRE_ParaSailsSetup,
               (void *)       *precond_solver) );
    }
+   else if (*precond_id == 5)
+   {
+      *ierr = (hypre_F90_Int)
+         ( HYPRE_ParCSRPCGSetPrecond(
+              hypre_F90_PassObj (HYPRE_Solver, solver),
+              HYPRE_EuclidSolve,
+              HYPRE_EuclidSetup,
+              (void *)       *precond_solver) );
+   }
    else
    {
       *ierr = -1;
