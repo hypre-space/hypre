@@ -36,6 +36,8 @@
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_krylov.h"
 
+#include "vis.c"
+
 int main (int argc, char *argv[])
 {
    int i, j;
@@ -49,7 +51,7 @@ int main (int argc, char *argv[])
    int solver_id;
    int n_pre, n_post;
 
-   int print_solution;
+   int vis;
    int object_type;
 
    HYPRE_SStructGrid     grid;
@@ -78,7 +80,7 @@ int main (int argc, char *argv[])
    solver_id = 0;
    n_pre  = 1;
    n_post = 1;
-   print_solution  = 0;
+   vis = 0;
 
    /* Parse command line */
    {
@@ -103,10 +105,10 @@ int main (int argc, char *argv[])
             n_pre = atoi(argv[arg_index++]);
             n_post = atoi(argv[arg_index++]);
          }
-         else if ( strcmp(argv[arg_index], "-print_solution") == 0 )
+         else if ( strcmp(argv[arg_index], "-vis") == 0 )
          {
             arg_index++;
-            print_solution = 1;
+            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
@@ -131,7 +133,7 @@ int main (int argc, char *argv[])
          printf("                        2  - GMRES with AMG precond\n");
          printf("                        3  - AMG\n");
          printf("  -v <n_pre> <n_post> : number of pre and post relaxations for SysPFMG (default: 1 1)\n");
-         printf("  -print_solution     : print the solution vector\n");
+         printf("  -vis                : save the solution for GLVis visualization\n");
          printf("\n");
       }
 
@@ -689,10 +691,65 @@ int main (int argc, char *argv[])
          HYPRE_SStructVectorGather(x);
       }
 
-      /* Print the solution and other info */
-      if (print_solution)
+      /* Save the solution for GLVis visualization, see vis/glvis-ex7.sh */
+      if (vis)
       {
-         HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
+         FILE *file;
+         char filename[255];
+
+         int k, part = 0, var;
+         int nvalues = n*n;
+         double *values = calloc(nvalues, sizeof(double));
+
+         /* save local solution for variable u */
+         var = 0;
+         HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
+                                         var, values);
+
+         sprintf(filename, "%s.%06d", "vis/ex9-u.sol", myid);
+         if ((file = fopen(filename, "w")) == NULL)
+         {
+            printf("Error: can't open output file %s\n", filename);
+            MPI_Finalize();
+            exit(1);
+         }
+
+         /* save solution with global unknown numbers */
+         k = 0;
+         for (j = 0; j < n; j++)
+            for (i = 0; i < n; i++)
+               fprintf(file, "%06d %.14e\n", pj*N*n*n+pi*n+j*N*n+i, values[k++]);
+
+         fflush(file);
+         fclose(file);
+
+         /* save local solution for variable v */
+         var = 1;
+         HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
+                                         var, values);
+
+         sprintf(filename, "%s.%06d", "vis/ex9-v.sol", myid);
+         if ((file = fopen(filename, "w")) == NULL)
+         {
+            printf("Error: can't open output file %s\n", filename);
+            MPI_Finalize();
+            exit(1);
+         }
+
+         /* save solution with global unknown numbers */
+         k = 0;
+         for (j = 0; j < n; j++)
+            for (i = 0; i < n; i++)
+               fprintf(file, "%06d %.14e\n", pj*N*n*n+pi*n+j*N*n+i, values[k++]);
+
+         fflush(file);
+         fclose(file);
+
+         free(values);
+
+         /* save global finite element mesh */
+         if (myid == 0)
+            GLVis_PrintGlobalSquareMesh("vis/ex9.mesh", N*n-1);
       }
 
       if (myid == 0)

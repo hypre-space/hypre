@@ -245,6 +245,7 @@ clean:
 	rm -f $(64BITPROGS:=.o)
 	rm -f $(BABELPROGS:=.o)
 	rm -f $(FORTRANPROGS:=.o)
+	cd vis; make clean
 distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)
 	rm -f $(64BITPROGS) $(64BITPROGS:=*~)

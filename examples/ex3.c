@@ -40,9 +40,11 @@
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 
+#include "vis.c"
+
 int main (int argc, char *argv[])
 {
-   int i, j;
+   int i, j, k;
 
    int myid, num_procs;
 
@@ -64,7 +66,7 @@ int main (int argc, char *argv[])
    int num_iterations;
    double final_res_norm;
 
-   int print_solution;
+   int vis;
 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -76,7 +78,7 @@ int main (int argc, char *argv[])
    solver_id = 0;
    n_pre  = 1;
    n_post = 1;
-   print_solution = 0;
+   vis = 0;
 
    /* Parse command line */
    {
@@ -101,10 +103,10 @@ int main (int argc, char *argv[])
             n_pre = atoi(argv[arg_index++]);
             n_post = atoi(argv[arg_index++]);
          }
-         else if ( strcmp(argv[arg_index], "-print_solution") == 0 )
+         else if ( strcmp(argv[arg_index], "-vis") == 0 )
          {
             arg_index++;
-            print_solution = 1;
+            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
@@ -127,7 +129,7 @@ int main (int argc, char *argv[])
          printf("                        0  - PCG with SMG precond (default)\n");
          printf("                        1  - SMG\n");
          printf("  -v <n_pre> <n_post> : number of pre and post relaxations (default: 1 1)\n");
-         printf("  -print_solution     : print the solution vector\n");
+         printf("  -vis                : save the solution for GLVis visualization\n");
          printf("\n");
       }
 
@@ -230,7 +232,7 @@ int main (int argc, char *argv[])
 
       values = calloc(nvalues, sizeof(double));
       for (j = 0; j < nvalues; j++)
-            values[j] = 0.0;
+         values[j] = 0.0;
 
       /* Recall: pi and pj describe position in the processor grid */
       if (pj == 0)
@@ -391,9 +393,40 @@ int main (int argc, char *argv[])
       HYPRE_StructSMGDestroy(solver);
    }
 
-   /* Print the solution and other info */
-   if (print_solution)
-      HYPRE_StructVectorPrint("struct.out.x", x, 0);
+   /* Save the solution for GLVis visualization, see vis/glvis-ex3.sh */
+   if (vis)
+   {
+      FILE *file;
+      char filename[255];
+
+      int nvalues = n*n;
+      double *values = calloc(nvalues, sizeof(double));
+
+      /* get the local solution */
+      HYPRE_StructVectorGetBoxValues(x, ilower, iupper, values);
+
+      sprintf(filename, "%s.%06d", "vis/ex3.sol", myid);
+      if ((file = fopen(filename, "w")) == NULL)
+      {
+         printf("Error: can't open output file %s\n", filename);
+         MPI_Finalize();
+         exit(1);
+      }
+
+      /* save solution with global unknown numbers */
+      k = 0;
+      for (j = 0; j < n; j++)
+         for (i = 0; i < n; i++)
+            fprintf(file, "%06d %.14e\n", pj*N*n*n+pi*n+j*N*n+i, values[k++]);
+
+      fflush(file);
+      fclose(file);
+      free(values);
+
+      /* save global finite element mesh */
+      if (myid == 0)
+         GLVis_PrintGlobalSquareMesh("vis/ex3.mesh", N*n-1);
+   }
 
    if (myid == 0)
    {

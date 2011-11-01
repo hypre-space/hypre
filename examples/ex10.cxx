@@ -29,6 +29,8 @@
 
 using namespace std;
 
+#include "vis.c"
+
 int main(int argc, char *argv[])
 {
    int i, j, k;
@@ -39,7 +41,7 @@ int main(int argc, char *argv[])
    double h;
 
    int solverID;
-   int print_solution;
+   int vis;
 
    // Initialize MPI
    MPI_Init(&argc, &argv);
@@ -49,7 +51,7 @@ int main(int argc, char *argv[])
    // Set default parameters
    n = 4*nprocs;
    solverID = 2;
-   print_solution = 0;
+   vis = 0;
 
    // Parse command line
    {
@@ -68,10 +70,10 @@ int main(int argc, char *argv[])
             arg_index++;
             solverID = atoi(argv[arg_index++]);
          }
-         else if ( strcmp(argv[arg_index], "-print_solution") == 0 )
+         else if ( strcmp(argv[arg_index], "-vis") == 0 )
          {
             arg_index++;
-            print_solution = 1;
+            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
@@ -471,8 +473,8 @@ int main(int argc, char *argv[])
    int status;
    feiPtr->solve(&status);
 
-   // 5. Save the solution and destroy the FEI object
-   if (print_solution)
+   // 5. Save the solution for GLVis visualization, see vis/glvis-ex10.sh
+   if (vis)
    {
       int numNodes, *nodeIDList, *solnOffsets;
       double *solnValues;
@@ -496,11 +498,26 @@ int main(int argc, char *argv[])
 
       // Save the ordered nodal values to a file
       char sol_out[20];
-      sprintf(sol_out, "fei-test.sol_%d", mypid);
+      sprintf(sol_out, "%s.%06d", "vis/ex10.sol", mypid);
       ofstream sol(sol_out);
-      sol << sol_out << endl;
+      sol << "FiniteElementSpace\n"
+          << "FiniteElementCollection: H1_2D_P1\n"
+          << "VDim: 1\n"
+          << "Ordering: 0\n\n";
       for (i = 0; i < numNodes; i++)
          sol << solnValues[solnOffsets[i]] << endl;
+
+      // Save local finite element mesh
+      GLVis_PrintLocalSquareMesh("vis/ex10.mesh", n, m, h, 0, mypid*h*m, mypid);
+
+      // additional visualization data
+      if (mypid == 0)
+      {
+         char data_out[20];
+         sprintf(data_out, "%s", "vis/ex10.data");
+         ofstream data(data_out);
+         data << "np " << nprocs << endl;
+      }
 
       // Clean up
       delete [] solnValues;

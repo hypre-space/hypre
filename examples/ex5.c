@@ -7,16 +7,14 @@
 
    Sample run:   mpirun -np 4 ex5
 
-   Description:  This example solves the 2-D
-                 Laplacian problem with zero boundary conditions
-                 on an nxn grid.  The number of unknowns is N=n^2.
-                 The standard 5-point stencil is used, and we solve
-                 for the interior nodes only.
+   Description:  This example solves the 2-D Laplacian problem with zero boundary
+                 conditions on an n x n grid.  The number of unknowns is N=n^2.
+                 The standard 5-point stencil is used, and we solve for the
+                 interior nodes only.
 
-                 This example solves the same problem as Example 3.
-                 Available solvers are AMG, PCG, and PCG with AMG or
-                 Parasails preconditioners.
-*/
+                 This example solves the same problem as Example 3.  Available
+                 solvers are AMG, PCG, and PCG with AMG or Parasails
+                 preconditioners.  */
 
 #include <math.h>
 #include "_hypre_utilities.h"
@@ -24,6 +22,7 @@
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 
+#include "vis.c"
 
 int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
                                       double rel_residual_norm);
@@ -39,7 +38,7 @@ int main (int argc, char *argv[])
    int local_size, extra;
 
    int solver_id;
-   int print_solution, print_system;
+   int vis, print_system;
 
    double h, h2;
 
@@ -60,7 +59,7 @@ int main (int argc, char *argv[])
    /* Default problem parameters */
    n = 33;
    solver_id = 0;
-   print_solution  = 0;
+   vis = 0;
    print_system = 0;
 
 
@@ -81,18 +80,16 @@ int main (int argc, char *argv[])
             arg_index++;
             solver_id = atoi(argv[arg_index++]);
          }
-         else if ( strcmp(argv[arg_index], "-print_solution") == 0 )
+         else if ( strcmp(argv[arg_index], "-vis") == 0 )
          {
             arg_index++;
-            print_solution = 1;
+            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-print_system") == 0 )
          {
             arg_index++;
             print_system = 1;
          }
-
-
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
             print_usage = 1;
@@ -116,7 +113,7 @@ int main (int argc, char *argv[])
          printf("                        8  - ParaSails-PCG\n");
          printf("                        50 - PCG\n");
          printf("                        61 - AMG-FlexGMRES\n");
-         printf("  -print_solution     : print the solution vector\n");
+         printf("  -vis                : save the solution for GLVis visualization\n");
          printf("  -print_system       : print the matrix and rhs\n");
          printf("\n");
       }
@@ -539,9 +536,44 @@ int main (int argc, char *argv[])
       if (myid ==0) printf("Invalid solver id specified.\n");
    }
 
-   /* Print the solution */
-   if (print_solution)
-      HYPRE_IJVectorPrint(x, "ij.out.x");
+   /* Save the solution for GLVis visualization, see vis/glvis-ex5.sh */
+   if (vis)
+   {
+      FILE *file;
+      char filename[255];
+
+      int nvalues = local_size;
+      int *rows = calloc(nvalues, sizeof(int));
+      double *values = calloc(nvalues, sizeof(double));
+
+      for (i = 0; i < nvalues; i++)
+         rows[i] = ilower + i;
+
+      /* get the local solution */
+      HYPRE_IJVectorGetValues(x, nvalues, rows, values);
+
+      sprintf(filename, "%s.%06d", "vis/ex5.sol", myid);
+      if ((file = fopen(filename, "w")) == NULL)
+      {
+         printf("Error: can't open output file %s\n", filename);
+         MPI_Finalize();
+         exit(1);
+      }
+
+      /* save solution */
+      for (i = 0; i < nvalues; i++)
+         fprintf(file, "%.14e\n", values[i]);
+
+      fflush(file);
+      fclose(file);
+
+      free(rows);
+      free(values);
+
+      /* save global finite element mesh */
+      if (myid == 0)
+         GLVis_PrintGlobalSquareMesh("vis/ex5.mesh", n-1);
+   }
 
    /* Clean up */
    HYPRE_IJMatrixDestroy(A);

@@ -9,9 +9,7 @@
 
    To see options: ex16 -help
 
-   Description: 
-
-                   This code solves the 2D Laplace equation using a high order
+   Description:    This code solves the 2D Laplace equation using a high order
                    Q3 finite element discretization.  Specifically, we solve
                    -Delta u = 1 with zero boundary conditions on a unit square
                    domain meshed with a uniform grid.  The mesh is distributed
@@ -25,6 +23,7 @@
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
 
+#include "vis.c"
 
 /*
    This routine computes the stiffness matrix for the Laplacian on a square of
@@ -226,7 +225,7 @@ int main (int argc, char *argv[])
    int myid, num_procs;
    int n, N, pi, pj;
    double h;
-   int print_solution;
+   int vis;
 
    HYPRE_SStructGrid     grid;
    HYPRE_SStructGraph    graph;
@@ -243,7 +242,7 @@ int main (int argc, char *argv[])
 
    /* Set default parameters */
    n = 10;
-   print_solution = 0;
+   vis = 0;
 
    /* Parse command line */
    {
@@ -257,10 +256,10 @@ int main (int argc, char *argv[])
             arg_index++;
             n = atoi(argv[arg_index++]);
          }
-         else if ( strcmp(argv[arg_index], "-print_solution") == 0 )
+         else if ( strcmp(argv[arg_index], "-vis") == 0 )
          {
             arg_index++;
-            print_solution = 1;
+            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
@@ -279,7 +278,7 @@ int main (int argc, char *argv[])
          printf("Usage: %s [<options>]\n", argv[0]);
          printf("\n");
          printf("  -n <n>           : problem size per processor (default: 10)\n");
-         printf("  -print_solution  : print the solution vector\n");
+         printf("  -vis             : save the solution for GLVis visualization\n");
          printf("\n");
       }
 
@@ -573,8 +572,8 @@ int main (int argc, char *argv[])
       /* Gather the solution vector */
       HYPRE_SStructVectorGather(x);
 
-      /* Print the solution with replicated shared data */
-      if (print_solution)
+      /* Save the solution for GLVis visualization, see vis/glvis-ex16.sh */
+      if (vis)
       {
          FILE *file;
          char  filename[255];
@@ -583,6 +582,9 @@ int main (int argc, char *argv[])
          int i, j, k, index[2];
          int nvalues = n*n*16;
          double X[16], *values;
+
+         /* GLVis-to-hypre local renumbering */
+         int g2h[16] = {0, 3, 15, 12, 1, 2, 7, 11, 14, 13, 8, 4, 5, 6, 9, 10};
 
          values = calloc(nvalues, sizeof(double));
 
@@ -600,25 +602,47 @@ int main (int argc, char *argv[])
                /* Copy local solution X into values array */
                for (k = 0; k < 16; k++)
                {
-                  values[nvalues] = X[k];
+                  values[nvalues] = X[g2h[k]];
                   nvalues++;
                }
             }
          }
 
-         sprintf(filename, "sstruct.out.x.%05d", myid);
+         sprintf(filename, "%s.%06d", "vis/ex16.sol", myid);
          if ((file = fopen(filename, "w")) == NULL)
          {
             printf("Error: can't open output file %s\n", filename);
             MPI_Finalize();
             exit(1);
          }
+
+         /* Finite element space header */
+         fprintf(file, "FiniteElementSpace\n");
+         fprintf(file, "FiniteElementCollection: Local_Quad_Q3\n");
+         fprintf(file, "VDim: 1\n");
+         fprintf(file, "Ordering: 0\n\n");
+
+         /* Save solution with replicated shared data */
          for (i = 0; i < nvalues; i++)
             fprintf(file, "%.14e\n", values[i]);
+
          fflush(file);
          fclose(file);
-
          free(values);
+
+         /* Save local finite element mesh */
+         GLVis_PrintLocalSquareMesh("vis/ex16.mesh", n, n, h,
+                                    pi*h*n, pj*h*n, myid);
+
+         /* Additional visualization data */
+         if (myid == 0)
+         {
+            sprintf(filename, "%s", "vis/ex16.data");
+            file = fopen(filename, "w");
+            fprintf(file, "np %d\n", num_procs);
+            fflush(file);
+            fclose(file);
+         }
       }
 
       if (myid == 0)
