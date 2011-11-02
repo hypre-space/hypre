@@ -742,13 +742,11 @@ dnl *********************************************************************
 if test "$hypre_using_c" = "yes"
 then
    AC_PROG_CC
-   AC_PROG_CPP
 fi
 
 if test "$hypre_using_cxx" = "yes"
 then
    AC_PROG_CXX
-   AC_PROG_CXXCPP
 fi
 
 if test "$hypre_using_fortran" = "yes"
