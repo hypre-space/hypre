@@ -887,7 +887,9 @@ HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
                                 double              *values);
 
 /**
- * Get vector coefficients index by index.
+ * Get vector coefficients index by index.  Users must first call the routine
+ * \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
+ * processes is correct.
  *
  * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorGetBoxValues} to get
  * coefficients a box at a time.
@@ -910,7 +912,9 @@ HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
 /**
  * Get finite element vector coefficients index by index.  The layout of the
  * data in {\tt values} is determined by the routine
- * \Ref{HYPRE_SStructGridSetFEMOrdering}.
+ * \Ref{HYPRE_SStructGridSetFEMOrdering}.  Users must first call the routine
+ * \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
+ * processes is correct.
  *
  * If the vector is complex, then {\tt values} consists of pairs of doubles
  * representing the real and imaginary parts of each complex value.
@@ -976,7 +980,9 @@ HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
 
 /**
  * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
- * as in \Ref{HYPRE_SStructVectorSetBoxValues}.
+ * as in \Ref{HYPRE_SStructVectorSetBoxValues}.  Users must first call the
+ * routine \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
+ * processes is correct.
  *
  * NOTE: Users may only get values on processes that own the associated
  * variables.
@@ -1002,7 +1008,7 @@ HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
 
 /**
  * Gather vector data so that efficient {\tt GetValues} can be done.  This
- * routine must be called prior to calling {\tt GetValues} to insure that
+ * routine must be called prior to calling {\tt GetValues} to ensure that
  * correct and consistent values are returned, especially for non cell-centered
  * data that is shared between more than one processor.
  **/
