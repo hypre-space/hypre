@@ -835,7 +835,6 @@ main( hypre_int argc,
       {
          /* My processor has no data on it */
          nblocks = bx = by = bz = 0;
-printf("nblocks=%d\n", nblocks);
       }
 
       /*-----------------------------------------------------------
