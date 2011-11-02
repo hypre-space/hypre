@@ -967,7 +967,12 @@ then
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
    BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
-   BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
+   if test "$hypre_using_fei" = "yes"
+   then
+      BUILD_CC_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
+   else
+      BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
+   fi
    BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
    SHARED_SET_SONAME="-Wl,-soname,"
    SHARED_OPTIONS="-Wl,-z,defs"
