@@ -282,7 +282,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - amgMaxLevels <d>\n");
          printf("    - amgCoarsenType <cljp,falgout,ruge,ruge3c,pmis,hmis>\n");
          printf("    - amgMeasureType <global,local>\n");
-         printf("    - amgRelaxType <jacobi,gsFast,hybrid,hybridsym>\n");
+         printf("    - amgRelaxType <jacobi,gsFast,hybrid,hybridsym,l1gs>\n");
          printf("    - amgNumSweeps <d>\n");
          printf("    - amgRelaxWeight <f>\n");
          printf("    - amgRelaxOmega <f>\n");
@@ -974,6 +974,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          else if ( !strcmp(param2, "CFhybrid" ) ) 
 		{rtype = 3; amgGridRlxType_ = 1;}
          else if ( !strcmp(param2, "hybridsym" ) ) rtype = 6;
+         else if ( !strcmp(param2, "l1gs" ) ) rtype = 8;
          else if ( !strcmp(param2, "CFhybridsym" ) ) 
 		{rtype = 6; amgGridRlxType_ = 1;}
          else                                   rtype = 4;
@@ -1575,9 +1576,10 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if      (!strcmp(param2, "jacobi"))    amsRelaxType_ = 0;
          else if (!strcmp(param2, "scjacobi"))  amsRelaxType_ = 1;
          else if (!strcmp(param2, "scgs"))      amsRelaxType_ = 2;
-         else if (!strcmp(param2, "gsFast"))    amsRelaxType_ = 4;
-         else if (!strcmp(param2, "hybrid"))    amsRelaxType_ = 3;
+         else if (!strcmp(param2, "kaczmarz"))  amsRelaxType_ = 3;
+         else if (!strcmp(param2, "l1gs*"))     amsRelaxType_ = 4;
          else if (!strcmp(param2, "hybridsym")) amsRelaxType_ = 6;
+         else if (!strcmp(param2, "cheby"))     amsRelaxType_ = 16;
          else                                   amsRelaxType_ = 2;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amsRelaxType = %s\n",
@@ -1795,6 +1797,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          else if (!strcmp(param2, "gsFast"))    amsAlphaRelaxType_ = 4;
          else if (!strcmp(param2, "hybrid"))    amsAlphaRelaxType_ = 3;
          else if (!strcmp(param2, "hybridsym")) amsAlphaRelaxType_ = 6;
+         else if (!strcmp(param2, "l1gs" ) )    amsAlphaRelaxType_ = 8;
          else                                   amsAlphaRelaxType_ = 4;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amsAlphaRelaxType = %s\n",
@@ -1813,6 +1816,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          else if (!strcmp(param2, "gsFast"))    amsBetaRelaxType_ = 4;
          else if (!strcmp(param2, "hybrid"))    amsBetaRelaxType_ = 3;
          else if (!strcmp(param2, "hybridsym")) amsBetaRelaxType_ = 6;
+         else if (!strcmp(param2, "l1gs" ) )    amsBetaRelaxType_ = 8;
          else                                   amsBetaRelaxType_ = 4;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amsBetaRelaxType = %s\n",
