@@ -15,6 +15,29 @@
 # recent release.
 #=============================================================================
 
+Version 2.8.0b released 2011/11/??
+
+- Added the new Auxiliary-space Divergence Solver (ADS) which targets div-div
+  problems discretized with lowest order Raviart-Thomas "face" finite elements.
+  ADS is very similar to AMS, and in general its relationship to AMS is
+  analogous to the relationship between AMS and AMG.
+
+- Added a redundant coarse-grid solve option to BoomerAMG, which can improve
+  solution times on machines with high communication latencies.
+
+- Added a Euclid preconditioner option to the Fortran interfaces for the ParCSR
+  Krylov solvers.
+
+- Fixed a bug with periodic problems in the SStruct interface.
+
+- Fixed a bug in CGNR.
+
+- Added a new higher order FEM example (ex16).
+
+- Added visualization capabilities to the examples based on the GLVis package.
+
+#====================================
+
 Version 2.7.1a released 2011/03/18
 
 - Fixed a long-standing O(P) memory allocation problem in the communication
