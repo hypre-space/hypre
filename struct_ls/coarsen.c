@@ -219,6 +219,10 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       coarsen_factor = hypre_IndexD(stride,i); 
       hypre_IndexD(new_dist, i) = hypre_IndexD(max_distance,i)/coarsen_factor;
    }
+   for (i = dim; i < 3; i++)
+   {
+      hypre_IndexD(new_dist, i) = 2;
+   }
    
    hypre_BoxManGetAllGlobalKnown (fboxman, &known );
 
