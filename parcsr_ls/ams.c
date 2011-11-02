@@ -840,6 +840,7 @@ void * hypre_AMSCreate()
    ams_data -> A_max_eig_est = 0;
    ams_data -> A_min_eig_est = 0;
 
+   ams_data -> owns_Pi   = 1;
    ams_data -> owns_A_G  = 0;
    ams_data -> owns_A_Pi = 0;
 
@@ -864,7 +865,7 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
       if (ams_data -> B_G)
          HYPRE_BoomerAMGDestroy(ams_data -> B_G);
 
-   if (ams_data -> Pi)
+   if (ams_data -> owns_Pi && ams_data -> Pi)
       hypre_ParCSRMatrixDestroy(ams_data -> Pi);
    if (ams_data -> owns_A_Pi)
       if (ams_data -> A_Pi)
@@ -872,19 +873,19 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
    if (ams_data -> B_Pi)
       HYPRE_BoomerAMGDestroy(ams_data -> B_Pi);
 
-   if (ams_data -> Pix)
+   if (ams_data -> owns_Pi && ams_data -> Pix)
       hypre_ParCSRMatrixDestroy(ams_data -> Pix);
    if (ams_data -> A_Pix)
       hypre_ParCSRMatrixDestroy(ams_data -> A_Pix);
    if (ams_data -> B_Pix)
       HYPRE_BoomerAMGDestroy(ams_data -> B_Pix);
-   if (ams_data -> Piy)
+   if (ams_data -> owns_Pi && ams_data -> Piy)
       hypre_ParCSRMatrixDestroy(ams_data -> Piy);
    if (ams_data -> A_Piy)
       hypre_ParCSRMatrixDestroy(ams_data -> A_Piy);
    if (ams_data -> B_Piy)
       HYPRE_BoomerAMGDestroy(ams_data -> B_Piy);
-   if (ams_data -> Piz)
+   if (ams_data -> owns_Pi && ams_data -> Piz)
       hypre_ParCSRMatrixDestroy(ams_data -> Piz);
    if (ams_data -> A_Piz)
       hypre_ParCSRMatrixDestroy(ams_data -> A_Piz);
@@ -998,6 +999,70 @@ HYPRE_Int hypre_AMSSetEdgeConstantVectors(void *solver,
    ams_data -> Gx = Gx;
    ams_data -> Gy = Gy;
    ams_data -> Gz = Gz;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSSetNedelecInterpolation
+ *
+ * Set the Nedelec interpolation matrix Pi.
+ *
+ * This is an optional call, which is generally intended to be used only for
+ * high-order Nedelec discretizations (in the lowest order case, Pi is
+ * constructed internally in AMS from the discreet gradient matrix and the
+ * coordinates of the vertices). By definition, Pi is the matrix representation
+ * of the linear operator that interpolates (high-order) vector nodal finite
+ * elements into the (high-order) Nedelec space. Note that this depends on the
+ * choice for the basis in the (high-order) nodal space.
+ *
+ * The column numbering of Pi should be node-based, i.e. the x/y/z components of
+ * the first node (vertex or high-order dof) should be listed first, followed by
+ * the x/y/z components of the second node and so on (see the documentation of
+ * HYPRE_BoomerAMGSetDofFunc).
+ *
+ * If used, this function should be called before hypre_AMSSetup() and there is
+ * no need to provide the vertex coordinates. Furthermore, only AMS cycle types
+ * based on monolithic Pi (i.e. cycle_type < 10) will be available.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_AMSSetNedelecInterpolation(void *solver,
+                                           hypre_ParCSRMatrix *Pi)
+{
+   hypre_AMSData *ams_data = solver;
+   ams_data -> Pi = Pi;
+   ams_data -> owns_Pi = 0;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSSetNedelecInterpolations
+ *
+ * Set the components of the Nedelec interpolation matrix Pi = [Pix, Piy, Piz].
+ *
+ * This is an optional call, which is generally intended to be used only for
+ * high-order Nedelec discretizations (in the lowest order case, Pi is
+ * constructed internally in AMS from the discrete gradient matrix and the
+ * coordinates of the vertices). By definition, Pix is the matrix representation
+ * of the linear operator that interpolates (high-order) vector nodal finite
+ * elements in the form (phi,0,0) into the (high-order) Nedelec space. In other
+ * words, Pix phi = Pi (phi,0,0) and similarly for Piy and Piz. Note that these
+ * depends on the choice for the basis in the (high-order) nodal space.
+ *
+ * If used, this function should be called before hypre_AMSSetup() and there is
+ * no need to provide the vertex coordinates. Furthermore, only AMS cycle types
+ * based on scalar Pi (i.e. cycle_type > 10) will be available.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_AMSSetNedelecInterpolations(void *solver,
+                                            hypre_ParCSRMatrix *Pix,
+                                            hypre_ParCSRMatrix *Piy,
+                                            hypre_ParCSRMatrix *Piz)
+{
+   hypre_AMSData *ams_data = solver;
+   ams_data -> Pix = Pix;
+   ams_data -> Piy = Piy;
+   ams_data -> Piz = Piz;
+   ams_data -> owns_Pi = 0;
    return hypre_error_flag;
 }
 
@@ -2111,21 +2176,37 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                                    &ams_data->A_min_eig_est);
    }
 
-   if (ams_data -> cycle_type == 20)
-      /* Construct the combined interpolation matrix [G,Pi] */
-      hypre_AMSComputeGPi(ams_data -> A,
-                          ams_data -> G,
-                          ams_data -> x,
-                          ams_data -> y,
-                          ams_data -> z,
-                          ams_data -> Gx,
-                          ams_data -> Gy,
-                          ams_data -> Gz,
-                          ams_data -> dim,
-                          &ams_data -> Pi);
-   else if (ams_data -> cycle_type > 10)
-      /* Construct Pi{x,y,z} instead of Pi = [Pix,Piy,Piz] */
-      hypre_AMSComputePixyz(ams_data -> A,
+   if (ams_data -> Pi == NULL && ams_data -> Pix == NULL)
+   {
+      if (ams_data -> cycle_type == 20)
+         /* Construct the combined interpolation matrix [G,Pi] */
+         hypre_AMSComputeGPi(ams_data -> A,
+                             ams_data -> G,
+                             ams_data -> x,
+                             ams_data -> y,
+                             ams_data -> z,
+                             ams_data -> Gx,
+                             ams_data -> Gy,
+                             ams_data -> Gz,
+                             ams_data -> dim,
+                             &ams_data -> Pi);
+      else if (ams_data -> cycle_type > 10)
+         /* Construct Pi{x,y,z} instead of Pi = [Pix,Piy,Piz] */
+         hypre_AMSComputePixyz(ams_data -> A,
+                               ams_data -> G,
+                               ams_data -> x,
+                               ams_data -> y,
+                               ams_data -> z,
+                               ams_data -> Gx,
+                               ams_data -> Gy,
+                               ams_data -> Gz,
+                               ams_data -> dim,
+                               &ams_data -> Pix,
+                               &ams_data -> Piy,
+                               &ams_data -> Piz);
+      else
+         /* Construct the Pi interpolation matrix */
+         hypre_AMSComputePi(ams_data -> A,
                             ams_data -> G,
                             ams_data -> x,
                             ams_data -> y,
@@ -2134,21 +2215,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                             ams_data -> Gy,
                             ams_data -> Gz,
                             ams_data -> dim,
-                            &ams_data -> Pix,
-                            &ams_data -> Piy,
-                            &ams_data -> Piz);
-   else
-      /* Construct the Pi interpolation matrix */
-      hypre_AMSComputePi(ams_data -> A,
-                         ams_data -> G,
-                         ams_data -> x,
-                         ams_data -> y,
-                         ams_data -> z,
-                         ams_data -> Gx,
-                         ams_data -> Gy,
-                         ams_data -> Gz,
-                         ams_data -> dim,
-                         &ams_data -> Pi);
+                            &ams_data -> Pi);
+   }
 
    /* Create the AMG solver on the range of G^T */
    if (!ams_data -> beta_is_zero && ams_data -> cycle_type != 20)

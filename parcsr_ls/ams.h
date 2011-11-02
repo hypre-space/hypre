@@ -51,6 +51,8 @@ typedef struct
    /* AMG solvers for A_Pi{x,y,z} */
    HYPRE_Solver B_Pix, B_Piy, B_Piz;
 
+   /* Does the solver own the Nedelec interpolations? */
+   HYPRE_Int owns_Pi;
    /* Does the solver own the coarse grid matrices? */
    HYPRE_Int owns_A_G, owns_A_Pi;
 

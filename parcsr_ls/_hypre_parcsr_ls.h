@@ -512,6 +512,8 @@ HYPRE_Int hypre_AMSSetDimension ( void *solver , HYPRE_Int dim );
 HYPRE_Int hypre_AMSSetDiscreteGradient ( void *solver , hypre_ParCSRMatrix *G );
 HYPRE_Int hypre_AMSSetCoordinateVectors ( void *solver , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *z );
 HYPRE_Int hypre_AMSSetEdgeConstantVectors ( void *solver , hypre_ParVector *Gx , hypre_ParVector *Gy , hypre_ParVector *Gz );
+HYPRE_Int hypre_AMSSetNedelecInterpolation ( void *solver , hypre_ParCSRMatrix *Pi);
+HYPRE_Int hypre_AMSSetNedelecInterpolations ( void *solver , hypre_ParCSRMatrix *Pix , hypre_ParCSRMatrix *Piy , hypre_ParCSRMatrix *Piz);
 HYPRE_Int hypre_AMSSetAlphaPoissonMatrix ( void *solver , hypre_ParCSRMatrix *A_Pi );
 HYPRE_Int hypre_AMSSetBetaPoissonMatrix ( void *solver , hypre_ParCSRMatrix *A_G );
 HYPRE_Int hypre_AMSSetInteriorNodes ( void *solver , hypre_ParVector *interior_nodes );

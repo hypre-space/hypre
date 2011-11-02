@@ -495,7 +495,7 @@ the right-hand side should be chosen to satisfy compatibility conditions.
 
 AMS is based on the auxiliary space methods for definite Maxwell
 problems proposed in \cite{xu_H_curl}.
-For more details, see \cite{h_curl_amg_report,ams_report}.
+For more details, see \cite{ams_jcm}.
 
 \subsection{Overview}
 Let ${\mathbf A}$ and ${\mathbf b}$ be the stiffness matrix and  the
@@ -753,6 +753,60 @@ HYPRE_AMSDestroy(&solver);
 \noindent
 More details can be found in the files \file{ams.h} and \file{ams.c}
 located in the \file{parcsr_ls} directory.
+
+\subsection{High-order Discretizations}
+In addition to the interface for lowest order Nedelec elements described in the
+previous subsections, AMS also provides support for (arbitrary) high-order
+Nedelec element discretizations. Since the robustness of AMS depends on the
+performance of BoomerAMG on the associated (high-order) auxiliary subspace
+problems, we note that the convergence may not be optimal for large polynomial
+degrees $k \geq 1$.
+
+In the high-order AMS interface, the user does not need to provide the
+coordinates of the vertices (or the representations of the constant vector
+fields in the edge basis), but instead should construct and pass the Nedelec
+interpolation matrix ${\mathbf \Pi}$ which maps (high-order) vector nodal finite
+elements into the (high-order) Nedelec space. In other words, ${\mathbf \Pi}$ is
+the (parallel) matrix representation of the interpolation mapping from
+$\mathrm{P}_k^3$/$\mathrm{Q}_k^3$ into $\mathrm{ND}_k$, see \cite{xu_H_curl,
+  ams_jcm}.  We require this matrix as an input, since in the high-order case
+its entries very much depend on the particular choice of the basis functions in
+the edge and nodal spaces, as well as on the geometry of the mesh elements. The
+columns of ${\mathbf \Pi}$ should use a node-based numbering, where the
+$x$/$y$/$z$ components of the first node (vertex or high-order degree of
+freedom) should be listed first, followed by the $x$/$y$/$z$ components of the
+second node and so on (see the documentation of HYPRE\_BoomerAMGSetDofFunc).
+
+Similarly to the Nedelec interpolation, the discrete gradient matrix $G$ should
+correspond to the mapping $\varphi \in \mathrm{P}_k^3$/$\mathrm{Q}_k^3 \mapsto
+\nabla \varphi \in \mathrm{ND}_k$, so even though its values are still
+independent of the mesh coordinates, they will not be $\pm 1$, but will be
+determined by the particular form of the high-order basis functions and degrees
+of freedom.
+
+With these clarifications, the high-order setup procedure is simply
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetDimension(solver, dim);
+HYPRE_AMSSetDiscreteGradient(solver, G);
+HYPRE_AMSSetNedelecInterpolation(solver, Pi);
+\end{verbatim}\end{display}
+We remark that the above interface calls can also be used in the lowest-order
+case, though we recommend calling the previously described
+HYPRE\_AMSSetEdgeConstantVectors instead, since this allows AMS to handle the
+construction and use of ${\mathbf \Pi}$ internally.
+
+
+Specifying the monolithic ${\mathbf \Pi}$ limits the AMS cycle type options to
+those less than 10. Alternatively one can separately specify the $x$, $y$ and
+$z$ components of $\mathbf \Pi$:
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetNedelecInterpolations(solver, Pix, Piy, Piz);
+\end{verbatim}\end{display}
+which enables the use of AMS cycle types with index greater than 10. By
+definition, ${\mathbf \Pi}^x \varphi = {\mathbf \Pi} (\varphi,0,0)$, and
+similarly for ${\mathbf \Pi}^y$ and ${\mathbf \Pi}^z$. Each of these matrices
+has the same sparsity pattern as $G$, but their entries depend on the
+coordinates of the mesh vertices.
 
 %-----------------------------------------------------------------------------
 

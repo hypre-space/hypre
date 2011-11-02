@@ -1391,6 +1391,51 @@ HYPRE_Int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver    solver,
                                           HYPRE_ParVector Gz);
 
 /**
+ * Sets the Nedelec interpolation matrix $\Pi$.
+ *
+ * This is an optional call, which is generally intended to be used only for
+ * high-order Nedelec discretizations (in the lowest order case, $\Pi$ is
+ * constructed internally in AMS from the discreet gradient matrix and the
+ * coordinates of the vertices). By definition, $\Pi$ is the matrix
+ * representation of the linear operator that interpolates (high-order) vector
+ * nodal finite elements into the (high-order) Nedelec space. Note that this
+ * depends on the choice for the basis in the (high-order) nodal space.
+ *
+ * The column numbering of Pi should be node-based, i.e. the $x$/$y$/$z$
+ * components of the first node (vertex or high-order dof) should be listed
+ * first, followed by the $x$/$y$/$z$ components of the second node and so on
+ * (see the documentation of HYPRE\_BoomerAMGSetDofFunc).
+ *
+ * If used, this function should be called before HYPRE\_AMSSetup() and there is
+ * no need to provide the vertex coordinates. Furthermore, only AMS cycle types
+ * based on monolithic $\Pi$ (i.e. cycle\_type < 10) will be available.
+ **/
+HYPRE_Int HYPRE_AMSSetNedelecInterpolation(HYPRE_Solver       solver,
+                                           HYPRE_ParCSRMatrix Pi);
+
+/**
+ * Set the components of the Nedelec interpolation matrix $\Pi = [ \Pi^x, \Pi^y, \Pi^z ]$.
+ *
+ * This is an optional call, which is generally intended to be used only for
+ * high-order Nedelec discretizations (in the lowest order case, $\Pi$ is
+ * constructed internally in AMS from the discrete gradient matrix and the
+ * coordinates of the vertices). By definition, $\Pi^x$ is the matrix
+ * representation of the linear operator that interpolates (high-order) vector
+ * nodal finite elements in the form $(\varphi,0,0)$ into the (high-order) Nedelec
+ * space. In other words, $\Pi^x \varphi = \Pi (\varphi,0,0)$ and similarly for
+ * $\Pi^y$ and $\Pi^z$. Note that these depends on the choice for the basis in
+ * the (high-order) nodal space.
+ *
+ * If used, this function should be called before HYPRE\_AMSSetup() and there is
+ * no need to provide the vertex coordinates. Furthermore, only AMS cycle types
+ * based on scalar $\Pi$ (i.e. cycle\_type > 10) will be available.
+ **/
+HYPRE_Int HYPRE_AMSSetNedelecInterpolations(HYPRE_Solver       solver,
+                                            HYPRE_ParCSRMatrix Pix,
+                                            HYPRE_ParCSRMatrix Piy,
+                                            HYPRE_ParCSRMatrix Piz);
+
+/**
  * (Optional) Sets the matrix $A_\alpha$ corresponding to the Poisson
  * problem with coefficient $\alpha$ (the curl-curl term coefficient in
  * the Maxwell problem).
