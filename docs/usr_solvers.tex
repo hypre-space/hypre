@@ -784,15 +784,15 @@ independent of the mesh coordinates, they will not be $\pm 1$, but will be
 determined by the particular form of the high-order basis functions and degrees
 of freedom.
 
-With these clarifications, the high-order setup procedure is simply
+With these matrices, the high-order setup procedure is simply
 \begin{display}\begin{verbatim}
 HYPRE_AMSSetDimension(solver, dim);
 HYPRE_AMSSetDiscreteGradient(solver, G);
-HYPRE_AMSSetNedelecInterpolation(solver, Pi);
+HYPRE_AMSSetInterpolations(solver, Pi, NULL, NULL, NULL);
 \end{verbatim}\end{display}
 We remark that the above interface calls can also be used in the lowest-order
 case, though we recommend calling the previously described
-HYPRE\_AMSSetEdgeConstantVectors instead, since this allows AMS to handle the
+HYPRE\_AMSSetCoordinateVectors instead, since this allows AMS to handle the
 construction and use of ${\mathbf \Pi}$ internally.
 
 
@@ -800,13 +800,20 @@ Specifying the monolithic ${\mathbf \Pi}$ limits the AMS cycle type options to
 those less than 10. Alternatively one can separately specify the $x$, $y$ and
 $z$ components of $\mathbf \Pi$:
 \begin{display}\begin{verbatim}
-HYPRE_AMSSetNedelecInterpolations(solver, Pix, Piy, Piz);
+HYPRE_AMSSetInterpolations(solver, NULL, Pix, Piy, Piz);
 \end{verbatim}\end{display}
 which enables the use of AMS cycle types with index greater than 10. By
 definition, ${\mathbf \Pi}^x \varphi = {\mathbf \Pi} (\varphi,0,0)$, and
 similarly for ${\mathbf \Pi}^y$ and ${\mathbf \Pi}^z$. Each of these matrices
 has the same sparsity pattern as $G$, but their entries depend on the
 coordinates of the mesh vertices.
+
+Finally, both ${\mathbf \Pi}$ and its components can be passed to the solver:
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetInterpolations(solver, Pi, Pix, Piy, Piz);
+\end{verbatim}\end{display}
+which will duplicate some memory, but allows for experimentation with all
+available AMS cycle types.
 
 %-----------------------------------------------------------------------------
 
@@ -985,6 +992,73 @@ HYPRE_ADSDestroy(&solver);
 \noindent
 More details can be found in the files \file{ads.h} and \file{ads.c}
 located in the \file{parcsr_ls} directory.
+
+\subsection{High-order Discretizations}
+Similarly to AMS, ADS also provides support for (arbitrary) high-order $H(div)$
+discretizations. Since the robustness of ADS depends on the performance of AMS
+BoomerAMG on the associated (high-order) auxiliary subspace problems, we note
+that the convergence may not be optimal for large polynomial degrees $k \geq 1$.
+
+In the high-order ADS interface, the user does not need to provide the
+coordinates of the vertices, but instead should construct and pass the
+Raviart-Thomas and Nedelec interpolation matrices ${\mathbf \Pi}_{RT}$ and
+${\mathbf \Pi}_{ND}$ which map (high-order) vector nodal finite elements into
+the (high-order) Raviart-Thomas and Nedelec space. In other words, these are the
+(parallel) matrix representation of the interpolation mappings from
+$\mathrm{P}_k^3$/$\mathrm{Q}_k^3$ into $\mathrm{RT}_{k-1}$ and $\mathrm{ND}_k$,
+see \cite{xu_H_curl, ams_jcm}.  We require these matrices as inputs, since in
+the high-order case their entries very much depend on the particular choice of
+the basis functions in the finite element spaces, as well as on the geometry of
+the mesh elements. The columns of the ${\mathbf \Pi}$ matrices should use a
+node-based numbering, where the $x$/$y$/$z$ components of the first node (vertex
+or high-order degree of freedom) should be listed first, followed by the
+$x$/$y$/$z$ components of the second node and so on (see the documentation of
+HYPRE\_BoomerAMGSetDofFunc). Furthermore each interpolation matrix can be split
+into $x$, $y$ and $z$ components by defining ${\mathbf \Pi}^x \varphi = {\mathbf
+\Pi} (\varphi,0,0)$, and similarly for ${\mathbf \Pi}^y$ and ${\mathbf
+\Pi}^z$. 
+
+The discrete gradient and curl matrices $G$ and $C$ should correspond to the
+mappings $\varphi \in \mathrm{P}_k^3$/$\mathrm{Q}_k^3 \mapsto \nabla \varphi \in
+\mathrm{ND}_k$ and ${\mathbf u} \in \mathrm{ND}_k \mapsto \nabla \times {\mathbf
+  u} \in \mathrm{RT}_{k-1}$, so even though their values are still independent
+of the mesh coordinates, they will not be $\pm 1$, but will be determined by the
+particular form of the high-order basis functions and degrees of freedom.
+
+With these matrices, the high-order setup procedure is simply
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetDiscreteCurl(solver, C);
+HYPRE_ADSSetDiscreteGradient(solver, G);
+HYPRE_ADSSetInterpolations(solver, RT_Pi, NULL, NULL, NULL,
+                                   ND_Pi, NULL, NULL, NULL);
+\end{verbatim}\end{display}
+We remark that the above interface calls can also be used in the lowest-order
+case, though we recommend calling the previously described
+HYPRE\_ADSSetCoordinateVectors instead, since this allows ADS to handle the
+construction and use of the interpolations internally.
+
+
+Specifying the monolithic ${\mathbf \Pi}_{RT}$ limits the ADS cycle type options
+ to those less than 10. Alternatively one can separately specify the $x$, $y$
+ and $z$ components of ${\mathbf \Pi}_{RT}$.
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetInterpolations(solver, NULL, RT_Pix, RT_Piy, RT_Piz,
+                                   ND_Pi, NULL, NULL, NULL);
+\end{verbatim}\end{display}
+which enables the use of ADS cycle types with index greater than 10. The same holds for
+${\mathbf \Pi}_{ND}$ and its components, e.g. to enable the subspace AMS cycle type greater
+then 10 we need to call
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetInterpolations(solver, NULL, RT_Pix, RT_Piy, RT_Piz,
+                                   NULL, ND_Pix, ND_Piy, ND_Piz);
+\end{verbatim}\end{display}
+Finally, both ${\mathbf \Pi}$ and their components can be passed to the solver:
+\begin{display}\begin{verbatim}
+HYPRE_ADSSetInterpolations(solver, RT_Pi, RT_Pix, RT_Piy, RT_Piz
+                                   ND_Pi, ND_Pix, ND_Piy, ND_Piz);
+\end{verbatim}\end{display}
+which will duplicate some memory, but allows for experimentation with all
+available ADS and AMS cycle types.
 
 %-----------------------------------------------------------------------------
 
