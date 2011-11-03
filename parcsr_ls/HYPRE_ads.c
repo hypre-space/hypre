@@ -104,6 +104,32 @@ HYPRE_Int HYPRE_ADSSetCoordinateVectors(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ADSSetInterpolations
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_ADSSetInterpolations(HYPRE_Solver solver,
+                                     HYPRE_ParCSRMatrix RT_Pi,
+                                     HYPRE_ParCSRMatrix RT_Pix,
+                                     HYPRE_ParCSRMatrix RT_Piy,
+                                     HYPRE_ParCSRMatrix RT_Piz,
+                                     HYPRE_ParCSRMatrix ND_Pi,
+                                     HYPRE_ParCSRMatrix ND_Pix,
+                                     HYPRE_ParCSRMatrix ND_Piy,
+                                     HYPRE_ParCSRMatrix ND_Piz)
+{
+   return hypre_ADSSetInterpolations((void *) solver,
+                                     (hypre_ParCSRMatrix *) RT_Pi,
+                                     (hypre_ParCSRMatrix *) RT_Pix,
+                                     (hypre_ParCSRMatrix *) RT_Piy,
+                                     (hypre_ParCSRMatrix *) RT_Piz,
+                                     (hypre_ParCSRMatrix *) ND_Pi,
+                                     (hypre_ParCSRMatrix *) ND_Pix,
+                                     (hypre_ParCSRMatrix *) ND_Piy,
+                                     (hypre_ParCSRMatrix *) ND_Piz);
+
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ADSSetMaxIter
  *--------------------------------------------------------------------------*/
 

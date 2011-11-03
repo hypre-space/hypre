@@ -92,6 +92,12 @@ void * hypre_ADSCreate()
    ads_data -> A_max_eig_est = 0;
    ads_data -> A_min_eig_est = 0;
 
+   ads_data -> owns_Pi = 1;
+   ads_data -> ND_Pi   = NULL;
+   ads_data -> ND_Pix  = NULL;
+   ads_data -> ND_Piy  = NULL;
+   ads_data -> ND_Piz  = NULL;
+
    return (void *) ads_data;
 }
 
@@ -111,26 +117,26 @@ HYPRE_Int hypre_ADSDestroy(void *solver)
    if (ads_data -> B_C)
       HYPRE_AMSDestroy(ads_data -> B_C);
 
-   if (ads_data -> Pi)
+   if (ads_data -> owns_Pi && ads_data -> Pi)
       hypre_ParCSRMatrixDestroy(ads_data -> Pi);
    if (ads_data -> A_Pi)
       hypre_ParCSRMatrixDestroy(ads_data -> A_Pi);
    if (ads_data -> B_Pi)
       HYPRE_BoomerAMGDestroy(ads_data -> B_Pi);
 
-   if (ads_data -> Pix)
+   if (ads_data -> owns_Pi && ads_data -> Pix)
       hypre_ParCSRMatrixDestroy(ads_data -> Pix);
    if (ads_data -> A_Pix)
       hypre_ParCSRMatrixDestroy(ads_data -> A_Pix);
    if (ads_data -> B_Pix)
       HYPRE_BoomerAMGDestroy(ads_data -> B_Pix);
-   if (ads_data -> Piy)
+   if (ads_data -> owns_Pi && ads_data -> Piy)
       hypre_ParCSRMatrixDestroy(ads_data -> Piy);
    if (ads_data -> A_Piy)
       hypre_ParCSRMatrixDestroy(ads_data -> A_Piy);
    if (ads_data -> B_Piy)
       HYPRE_BoomerAMGDestroy(ads_data -> B_Piy);
-   if (ads_data -> Piz)
+   if (ads_data -> owns_Pi && ads_data -> Piz)
       hypre_ParCSRMatrixDestroy(ads_data -> Piz);
    if (ads_data -> A_Piz)
       hypre_ParCSRMatrixDestroy(ads_data -> A_Piz);
@@ -207,6 +213,63 @@ HYPRE_Int hypre_ADSSetCoordinateVectors(void *solver,
    ads_data -> x = x;
    ads_data -> y = y;
    ads_data -> z = z;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ADSSetInterpolations
+ *
+ * Set the (components of) the Raviart-Thomas (RT_Pi) and the Nedelec (ND_Pi)
+ * interpolation matrices.
+ *
+ * This function is generally intended to be used only for high-order H(div)
+ * discretizations (in the lowest order case, these matrices are constructed
+ * internally in ADS from the discreet gradient and curl matrices and the
+ * coordinates of the vertices).
+ *
+ * By definition, RT_Pi and ND_Pi are the matrix representations of the linear
+ * operators that interpolate (high-order) vector nodal finite elements into the
+ * (high-order) Raviart-Thomas and Nedelec spaces. The component matrices are
+ * defined in both cases as Pix phi = Pi (phi,0,0) and similarly for Piy and
+ * Piz. Note that all these operators depend on the choice of the basis and
+ * degrees of freedom in the high-order spaces.
+ *
+ * The column numbering of RT_Pi and ND_pi should be node-based, i.e. the x/y/z
+ * components of the first node (vertex or high-order dof) should be listed
+ * first, followed by the x/y/z components of the second node and so on (see the
+ * documentation of HYPRE_BoomerAMGSetDofFunc).
+ *
+ * If used, this function should be called before hypre_ADSSetup() and there is
+ * no need to provide the vertex coordinates. Furthermore, only one of the sets
+ * {RT_Pi} and {RT_Pix,RT_Piy,RT_Piz} needs to be specified (though it is OK to
+ * provide both).  If RT_Pix is NULL, then scalar Pi-based ADS cycles, i.e.
+ * those with cycle_type > 10, will be unavailable. Similarly, ADS cycles based
+ * on monolithic Pi (cycle_type < 10) require that RT_Pi is not NULL. The same
+ * restrictions hold for the sets {ND_Pi} and {ND_Pix,ND_Piy,ND_Piz} -- only one
+ * of them needs to be specified, and the availability of each enables different
+ * AMS cycle type options.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_ADSSetInterpolations(void *solver,
+                                     hypre_ParCSRMatrix *RT_Pi,
+                                     hypre_ParCSRMatrix *RT_Pix,
+                                     hypre_ParCSRMatrix *RT_Piy,
+                                     hypre_ParCSRMatrix *RT_Piz,
+                                     hypre_ParCSRMatrix *ND_Pi,
+                                     hypre_ParCSRMatrix *ND_Pix,
+                                     hypre_ParCSRMatrix *ND_Piy,
+                                     hypre_ParCSRMatrix *ND_Piz)
+{
+   hypre_ADSData *ads_data = solver;
+   ads_data -> Pi = RT_Pi;
+   ads_data -> Pix = RT_Pix;
+   ads_data -> Piy = RT_Piy;
+   ads_data -> Piz = RT_Piz;
+   ads_data -> ND_Pi = ND_Pi;
+   ads_data -> ND_Pix = ND_Pix;
+   ads_data -> ND_Piy = ND_Piy;
+   ads_data -> ND_Piz = ND_Piz;
+   ads_data -> owns_Pi = 0;
    return hypre_error_flag;
 }
 
@@ -348,10 +411,6 @@ HYPRE_Int hypre_ADSSetAMSOptions(void *solver,
    ads_data -> B_C_theta = B_C_theta;
    ads_data -> B_C_interp_type = B_C_interp_type;
    ads_data -> B_C_Pmax = B_C_Pmax;
-
-   if (B_C_cycle_type < 10)
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "ADS requires AMS solver type greater than 10!");
 
    return hypre_error_flag;
 }
@@ -843,10 +902,29 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       HYPRE_AMSSetCycleType(ads_data -> B_C, ads_data -> B_C_cycle_type);
       HYPRE_AMSSetDiscreteGradient(ads_data -> B_C,
                                    (HYPRE_ParCSRMatrix) ads_data -> G);
-      HYPRE_AMSSetCoordinateVectors(ads_data -> B_C,
-                                    (HYPRE_ParVector) ads_data -> x,
-                                    (HYPRE_ParVector) ads_data -> y,
-                                    (HYPRE_ParVector) ads_data -> z);
+
+      if (ads_data -> ND_Pi == NULL && ads_data -> ND_Pix == NULL)
+      {
+         if (ads_data -> B_C_cycle_type < 10)
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Unsupported AMS cycle type in ADS!");
+         HYPRE_AMSSetCoordinateVectors(ads_data -> B_C,
+                                       (HYPRE_ParVector) ads_data -> x,
+                                       (HYPRE_ParVector) ads_data -> y,
+                                       (HYPRE_ParVector) ads_data -> z);
+      }
+      else
+      {
+         if ((ads_data -> B_C_cycle_type < 10 && ads_data -> ND_Pi == NULL) ||
+             (ads_data -> B_C_cycle_type > 10 && ads_data -> ND_Pix == NULL))
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Unsupported AMS cycle type in ADS!");
+         HYPRE_AMSSetInterpolations(ads_data -> B_C,
+                                    (HYPRE_ParCSRMatrix) ads_data -> ND_Pi,
+                                    (HYPRE_ParCSRMatrix) ads_data -> ND_Pix,
+                                    (HYPRE_ParCSRMatrix) ads_data -> ND_Piy,
+                                    (HYPRE_ParCSRMatrix) ads_data -> ND_Piz);
+      }
 
       /* beta=0 in the subspace */
       HYPRE_AMSSetBetaPoissonMatrix(ads_data -> B_C, NULL);
@@ -890,9 +968,26 @@ HYPRE_Int hypre_ADSSetup(void *solver,
    }
 
    ams_data = (hypre_AMSData *) ads_data -> B_C;
-   if (ads_data -> cycle_type > 10)
-      /* Construct Pi{x,y,z} instead of Pi = [Pix,Piy,Piz] */
-      hypre_ADSComputePixyz(ads_data -> A,
+
+   if (ads_data -> Pi == NULL && ads_data -> Pix == NULL)
+   {
+      if (ads_data -> cycle_type > 10)
+         /* Construct Pi{x,y,z} instead of Pi = [Pix,Piy,Piz] */
+         hypre_ADSComputePixyz(ads_data -> A,
+                               ads_data -> C,
+                               ads_data -> G,
+                               ads_data -> x,
+                               ads_data -> y,
+                               ads_data -> z,
+                               ams_data -> Pix,
+                               ams_data -> Piy,
+                               ams_data -> Piz,
+                               &ads_data -> Pix,
+                               &ads_data -> Piy,
+                               &ads_data -> Piz);
+      else
+         /* Construct the Pi interpolation matrix */
+         hypre_ADSComputePi(ads_data -> A,
                             ads_data -> C,
                             ads_data -> G,
                             ads_data -> x,
@@ -901,21 +996,8 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                             ams_data -> Pix,
                             ams_data -> Piy,
                             ams_data -> Piz,
-                            &ads_data -> Pix,
-                            &ads_data -> Piy,
-                            &ads_data -> Piz);
-   else
-      /* Construct the Pi interpolation matrix */
-      hypre_ADSComputePi(ads_data -> A,
-                         ads_data -> C,
-                         ads_data -> G,
-                         ads_data -> x,
-                         ads_data -> y,
-                         ads_data -> z,
-                         ams_data -> Pix,
-                         ams_data -> Piy,
-                         ams_data -> Piz,
-                         &ads_data -> Pi);
+                            &ads_data -> Pi);
+   }
 
    if (ads_data -> cycle_type > 10)
    /* Create the AMG solvers on the range of Pi{x,y,z}^T */

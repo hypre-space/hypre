@@ -46,6 +46,11 @@ typedef struct
    /* AMG solvers for A_Pi{x,y,z} */
    HYPRE_Solver B_Pix, B_Piy, B_Piz;
 
+   /* Does the solver own the RT/ND interpolations matrices? */
+   HYPRE_Int owns_Pi;
+   /* The (high-order) edge interpolation matrix and its components */
+   hypre_ParCSRMatrix *ND_Pi, *ND_Pix, *ND_Piy, *ND_Piz;
+
    /* Discrete gradient matrix (vertex-to-edge) */
    hypre_ParCSRMatrix *G;
    /* Coordinates of the vertices */

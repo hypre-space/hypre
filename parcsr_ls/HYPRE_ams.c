@@ -117,29 +117,20 @@ HYPRE_Int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AMSSetNedelecInterpolation
+ * HYPRE_AMSSetInterpolations
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_AMSSetNedelecInterpolation(HYPRE_Solver solver,
-                                           HYPRE_ParCSRMatrix Pi)
+HYPRE_Int HYPRE_AMSSetInterpolations(HYPRE_Solver solver,
+                                     HYPRE_ParCSRMatrix Pi,
+                                     HYPRE_ParCSRMatrix Pix,
+                                     HYPRE_ParCSRMatrix Piy,
+                                     HYPRE_ParCSRMatrix Piz)
 {
-   return hypre_AMSSetNedelecInterpolation((void *) solver,
-                                           (hypre_ParCSRMatrix *) Pi);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_AMSSetNedelecInterpolations
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int HYPRE_AMSSetNedelecInterpolations(HYPRE_Solver solver,
-                                            HYPRE_ParCSRMatrix Pix,
-                                            HYPRE_ParCSRMatrix Piy,
-                                            HYPRE_ParCSRMatrix Piz)
-{
-   return hypre_AMSSetNedelecInterpolations((void *) solver,
-                                            (hypre_ParCSRMatrix *) Pix,
-                                            (hypre_ParCSRMatrix *) Piy,
-                                            (hypre_ParCSRMatrix *) Piz);
+   return hypre_AMSSetInterpolations((void *) solver,
+                                     (hypre_ParCSRMatrix *) Pi,
+                                     (hypre_ParCSRMatrix *) Pix,
+                                     (hypre_ParCSRMatrix *) Piy,
+                                     (hypre_ParCSRMatrix *) Piz);
 }
 
 /*--------------------------------------------------------------------------
