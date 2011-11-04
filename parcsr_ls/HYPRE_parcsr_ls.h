@@ -1396,7 +1396,9 @@ HYPRE_Int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver    solver,
  *
  * This function is generally intended to be used only for high-order Nedelec
  * discretizations (in the lowest order case, $\Pi$ is constructed internally in
- * AMS from the discreet gradient matrix and the coordinates of the vertices).
+ * AMS from the discreet gradient matrix and the coordinates of the vertices),
+ * though it can also be used in the lowest-order case or for other types of
+ * discretizations (e.g. ones based on the second family of Nedelec elements).
  *
  * By definition, $\Pi$ is the matrix representation of the linear operator that
  * interpolates (high-order) vector nodal finite elements into the (high-order)
@@ -1586,10 +1588,9 @@ HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver    solver,
                                        HYPRE_ParVector x);
 
 /**
- * Construct and return the discrete gradient matrix G using some
- * edge and vertex information. We assume that edge\_vertex lists
- * the edge vertices consecutively, and that the orientation of all
- * edges is consistent.
+ * Construct and return the lowest-order discrete gradient matrix G using some
+ * edge and vertex information. We assume that edge\_vertex lists the edge
+ * vertices consecutively, and that the orientation of all edges is consistent.
  *
  * If edge\_orientation = 1, the edges are already oriented.
  *
