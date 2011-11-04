@@ -319,7 +319,7 @@ HYPRE_Int hypre_ADSSetTol(void *solver,
  *   7 = 3-level multipl. solver (0201020)    <-- small number of iterations
  *   8 = 3-level additive solver (0(1+2)0)    <-- small solution time
  *   9 = 3-level multipl. solver (01210) with discrete divergence
- *  11 = 5-level multipl. solver (013454310)  <-- small solution time, memory
+ *  11 = 5-level multipl. solver (01345054310)<-- small solution time, memory
  *  12 = 5-level additive solver (0+1+3+4+5)
  *  13 = 5-level multipl. solver (034515430)  <-- small solution time, memory
  *  14 = 5-level additive solver (01(3+4+5)10)
@@ -1040,6 +1040,14 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       HYPRE_BoomerAMGSetInterpType(ads_data -> B_Piz, ads_data -> B_Pi_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ads_data -> B_Piz, ads_data -> B_Pi_Pmax);
 
+      /* Don't use exact solve on the coarsest level (matrices may be singular) */
+      HYPRE_BoomerAMGSetCycleRelaxType(ads_data -> B_Pix,
+                                       ads_data -> B_Pi_relax_type, 3);
+      HYPRE_BoomerAMGSetCycleRelaxType(ads_data -> B_Piy,
+                                       ads_data -> B_Pi_relax_type, 3);
+      HYPRE_BoomerAMGSetCycleRelaxType(ads_data -> B_Piz,
+                                       ads_data -> B_Pi_relax_type, 3);
+
       /* Construct the coarse space matrices by RAP */
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Pix))
          hypre_MatvecCommPkgCreate(ads_data -> Pix);
@@ -1229,7 +1237,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
          hypre_sprintf(cycle,"%s","01210");
          break;
       case 11:
-         hypre_sprintf(cycle,"%s","013454310");
+         hypre_sprintf(cycle,"%s","01345054310");
          break;
       case 12:
          hypre_sprintf(cycle,"%s","(0+1+3+4+5)");

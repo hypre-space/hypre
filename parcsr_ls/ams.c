@@ -2290,6 +2290,17 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_Piz, ams_data -> B_Pi_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Piz, ams_data -> B_Pi_Pmax);
 
+      if (ams_data -> beta_is_zero)
+      {
+         /* don't use exact solve on the coarsest level (matrices may be singular) */
+         HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pix,
+                                          ams_data -> B_Pi_relax_type, 3);
+         HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Piy,
+                                          ams_data -> B_Pi_relax_type, 3);
+         HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Piz,
+                                          ams_data -> B_Pi_relax_type, 3);
+      }
+
       if (ams_data -> cycle_type == 0)
       {
          HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Pix, 2);
