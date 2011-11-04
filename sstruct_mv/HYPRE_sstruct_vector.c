@@ -669,29 +669,26 @@ HYPRE_Int
 HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
                               void                **object )
 {
-   HYPRE_Int vector_type = hypre_SStructVectorObjectType(vector);
+   HYPRE_Int             type = hypre_SStructVectorObjectType(vector);
    hypre_SStructPVector *pvector;
    hypre_StructVector   *svector;
+   HYPRE_Int             part, var;
 
-   HYPRE_Int part, var;
-
-   /* GEC1102 in case the vector is HYPRE_SSTRUCT  */
-
-   if (vector_type == HYPRE_SSTRUCT)
+   if (type == HYPRE_SSTRUCT)
    {
-      hypre_SStructVectorConvert(vector, (hypre_ParVector **) object);
+      *object = vector;
    }
-   else if (vector_type == HYPRE_PARCSR)
+   else if (type == HYPRE_PARCSR)
    {
-      *object= hypre_SStructVectorParVector(vector);
+      *object = hypre_SStructVectorParVector(vector);
    }
-   else if (vector_type == HYPRE_STRUCT)
+   else if (type == HYPRE_STRUCT)
    {
       /* only one part & one variable */
-      part= 0;
+      part = 0;
       var = 0;
-      pvector= hypre_SStructVectorPVector(vector, part);
-      svector= hypre_SStructPVectorSVector(pvector, var);
+      pvector = hypre_SStructVectorPVector(vector, part);
+      svector = hypre_SStructPVectorSVector(pvector, var);
       *object = svector;
    }
 

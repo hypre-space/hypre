@@ -865,7 +865,6 @@ HYPRE_Int HYPRE_SStructMatrixSetSymmetric ( HYPRE_SStructMatrix matrix , HYPRE_I
 HYPRE_Int HYPRE_SStructMatrixSetNSSymmetric ( HYPRE_SStructMatrix matrix , HYPRE_Int symmetric );
 HYPRE_Int HYPRE_SStructMatrixSetObjectType ( HYPRE_SStructMatrix matrix , HYPRE_Int type );
 HYPRE_Int HYPRE_SStructMatrixGetObject ( HYPRE_SStructMatrix matrix , void **object );
-HYPRE_Int HYPRE_SStructMatrixGetObject2 ( HYPRE_SStructMatrix matrix , void **object );
 HYPRE_Int HYPRE_SStructMatrixPrint ( const char *filename , HYPRE_SStructMatrix matrix , HYPRE_Int all );
 HYPRE_Int HYPRE_SStructMatrixMatvec ( double alpha , HYPRE_SStructMatrix A , HYPRE_SStructVector x , double beta , HYPRE_SStructVector y );
 
