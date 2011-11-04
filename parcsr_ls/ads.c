@@ -225,7 +225,8 @@ HYPRE_Int hypre_ADSSetCoordinateVectors(void *solver,
  * This function is generally intended to be used only for high-order H(div)
  * discretizations (in the lowest order case, these matrices are constructed
  * internally in ADS from the discreet gradient and curl matrices and the
- * coordinates of the vertices).
+ * coordinates of the vertices), though it can also be used in the lowest-order
+ * case or for other types of discretizations.
  *
  * By definition, RT_Pi and ND_Pi are the matrix representations of the linear
  * operators that interpolate (high-order) vector nodal finite elements into the
@@ -234,7 +235,7 @@ HYPRE_Int hypre_ADSSetCoordinateVectors(void *solver,
  * Piz. Note that all these operators depend on the choice of the basis and
  * degrees of freedom in the high-order spaces.
  *
- * The column numbering of RT_Pi and ND_pi should be node-based, i.e. the x/y/z
+ * The column numbering of RT_Pi and ND_Pi should be node-based, i.e. the x/y/z
  * components of the first node (vertex or high-order dof) should be listed
  * first, followed by the x/y/z components of the second node and so on (see the
  * documentation of HYPRE_BoomerAMGSetDofFunc).
@@ -247,7 +248,7 @@ HYPRE_Int hypre_ADSSetCoordinateVectors(void *solver,
  * on monolithic Pi (cycle_type < 10) require that RT_Pi is not NULL. The same
  * restrictions hold for the sets {ND_Pi} and {ND_Pix,ND_Piy,ND_Piz} -- only one
  * of them needs to be specified, and the availability of each enables different
- * AMS cycle type options.
+ * AMS cycle type options for the subspace solve.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ADSSetInterpolations(void *solver,
@@ -391,7 +392,8 @@ HYPRE_Int hypre_ADSSetChebySmoothingOptions(void *solver,
  *
  * Set AMS parameters for B_C. Default values: 11, 10, 1, 3, 0.25, 0, 0.
  *
- * Note that B_C_cycle_type should be greater than 10!
+ * Note that B_C_cycle_type should be greater than 10, unless the high-order
+ * interface of hypre_ADSSetInterpolations is being used!
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ADSSetAMSOptions(void *solver,
@@ -491,7 +493,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
       HYPRE_Int i, j, d;
 
       /* Each component of Pi has the sparsity pattern of the following
-         face-to-vertex boolean matrix. We use the object structure in hypre to
+         face-to-vertex Boolean matrix. We use the object structure in hypre to
          consider ParCSR matrices as Boolean matrices and vice versa. */
       hypre_ParCSRMatrix *F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
          (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);
@@ -672,7 +674,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
       HYPRE_Int i, j;
 
       /* Each component of Pi has the sparsity pattern of the following
-         face-to-vertex boolean matrix. We use the object structure in hypre to
+         face-to-vertex Boolean matrix. We use the object structure in hypre to
          consider ParCSR matrices as Boolean matrices and vice versa. */
       hypre_ParCSRMatrix *F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
          (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);

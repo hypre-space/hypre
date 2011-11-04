@@ -109,6 +109,7 @@ typedef struct
 
 /* Vector vertex space data */
 #define hypre_ADSDataPiInterpolation(ads_data) ((ads_data)->Pi)
+#define hypre_ADSDataOwnsPiInterpolation(ads_data) ((ads_data)->owns_Pi)
 #define hypre_ADSDataPoissonA(ads_data) ((ads_data)->A_Pi)
 #define hypre_ADSDataPoissonAMG(ads_data) ((ads_data)->B_Pi)
 

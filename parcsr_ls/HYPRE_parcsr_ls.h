@@ -1675,7 +1675,8 @@ HYPRE_Int HYPRE_ADSSetCoordinateVectors(HYPRE_Solver solver , HYPRE_ParVector x 
  * This function is generally intended to be used only for high-order $H(div)$
  * discretizations (in the lowest order case, these matrices are constructed
  * internally in ADS from the discreet gradient and curl matrices and the
- * coordinates of the vertices).
+ * coordinates of the vertices), though it can also be used in the lowest-order
+ * case or for other types of discretizations.
  *
  * By definition, RT\_Pi and ND\_Pi are the matrix representations of the linear
  * operators $\Pi_{RT}$ and $\Pi_{ND}$ that interpolate (high-order) vector
@@ -1780,7 +1781,10 @@ HYPRE_Int HYPRE_ADSSetChebySmoothingOptions(HYPRE_Solver solver , HYPRE_Int cheb
 
 /**
  * (Optional) Sets AMS parameters for $B_C$.
- * The defaults are $11$, $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
+ * The defaults are $11$, $10$, $1$, $3$, $0.25$, $0$, $0$.
+ * Note that cycle\_type should be greater than 10, unless the high-order
+ * interface of HYPRE\_ADSSetInterpolations is being used!
+ * See the user's manual for more details.
  **/
 HYPRE_Int HYPRE_ADSSetAMSOptions(HYPRE_Solver solver , HYPRE_Int cycle_type , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , double strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax);
 
