@@ -293,7 +293,7 @@ on semi-structured grids. Details of the algorithm can be found in \cite{JonesLe
 The solver can be viewed as an operator-dependent multiple-coarsening algorithm for the Helmholtz
 decomposition of the error correction. Input to this solver consist of only the linear system
 and a gradient operator. In fact, if the orientation of the edge elements conforms to
-a lexigraphical ordering of the nodes of the grid, then the gradient operator can be generated
+a lexicographical ordering of the nodes of the grid, then the gradient operator can be generated
 with the routine HYPRE$\_$MaxwellGrad: at grid points $(i,j,k)$ and $(i-1,j,k),$
 the produced gradient operator takes values $1$ and $-1$ respectively, which
 is the correct gradient operator for the appropriate edge orientation. Since the gradient operator
@@ -452,7 +452,7 @@ and \code{HYPRE_BoomerAMGSetSmoothNumLevels}. There are further parameter choice
 individual smoothers, which are described in the reference manual.
 The default relaxation type is hybrid Gauss-Seidel with CF-relaxation (relax first the C-,
 then the F-points) on the down cycle and FC-relaxation on the up-cycle. Note that if
-BoomerAMG is used as a preconditioner for comjugate gradient, it is necessary to use
+BoomerAMG is used as a preconditioner for conjugate gradient, it is necessary to use
 a symmetric smoother such as weighted Jacobi or hybrid symmetric Gauss-Seidel.
 
  
@@ -755,8 +755,8 @@ More details can be found in the files \file{ams.h} and \file{ams.c}
 located in the \file{parcsr_ls} directory.
 
 \subsection{High-order Discretizations}
-In addition to the interface for lowest order Nedelec elements described in the
-previous subsections, AMS also provides support for (arbitrary) high-order
+In addition to the interface for the lowest-order Nedelec elements described in
+the previous subsections, AMS also provides support for (arbitrary) high-order
 Nedelec element discretizations. Since the robustness of AMS depends on the
 performance of BoomerAMG on the associated (high-order) auxiliary subspace
 problems, we note that the convergence may not be optimal for large polynomial
@@ -775,7 +775,7 @@ the edge and nodal spaces, as well as on the geometry of the mesh elements. The
 columns of ${\mathbf \Pi}$ should use a node-based numbering, where the
 $x$/$y$/$z$ components of the first node (vertex or high-order degree of
 freedom) should be listed first, followed by the $x$/$y$/$z$ components of the
-second node and so on (see the documentation of HYPRE\_BoomerAMGSetDofFunc).
+second node and so on (see the documentation of \code{HYPRE_BoomerAMGSetDofFunc}).
 
 Similarly to the Nedelec interpolation, the discrete gradient matrix $G$ should
 correspond to the mapping $\varphi \in \mathrm{P}_k^3$/$\mathrm{Q}_k^3 \mapsto
@@ -791,8 +791,9 @@ HYPRE_AMSSetDiscreteGradient(solver, G);
 HYPRE_AMSSetInterpolations(solver, Pi, NULL, NULL, NULL);
 \end{verbatim}\end{display}
 We remark that the above interface calls can also be used in the lowest-order
-case, though we recommend calling the previously described
-HYPRE\_AMSSetCoordinateVectors instead, since this allows AMS to handle the
+case (or even other types of discretizations such as those based on the second
+family of Nedelec elements), but we recommend calling the previously described
+\code{HYPRE_AMSSetCoordinateVectors} instead, since this allows AMS to handle the
 construction and use of ${\mathbf \Pi}$ internally.
 
 
@@ -820,7 +821,7 @@ available AMS cycle types.
 \section{ADS}
 \label{ADS}
 
-ADS (the Auxiliary-space Divergence Solver) is a parallel unstructured solver
+The Auxiliary-space Divergence Solver (ADS) is a parallel unstructured solver
 similar to AMS, but targeting $H(div)$ instead of $H(curl)$ problems. Its usage
 and options are very similar to those of AMS, and in general the relationship
 between ADS and AMS is analogous to that between AMS and AMG.
@@ -964,6 +965,10 @@ HYPRE_ADSSetSmoothingOptions(solver, 2, 1, 1.0, 1.0);
 HYPRE_ADSSetAMSOptions(solver, 11, 10, 1, 3, 0.25, 0, 0);
 HYPRE_ADSSetAMGOptions(solver, 10, 1, 3, 0.25, 0, 0);
 \end{verbatim}\end{display}
+We note that the AMS cycle type, which is the second parameter of
+\code{HYPRE_ADSSetAMSOptions} should be greater than 10, unless the high-order
+interface of \code{HYPRE_ADSSetInterpolations} described in the next subsection
+is being used.
 
 After the above calls, the solver is ready to be constructed.  The user has to
 provide the stiffness matrix ${\mathbf A}$ (in ParCSR format) and the \hypre{}
@@ -996,8 +1001,9 @@ located in the \file{parcsr_ls} directory.
 \subsection{High-order Discretizations}
 Similarly to AMS, ADS also provides support for (arbitrary) high-order $H(div)$
 discretizations. Since the robustness of ADS depends on the performance of AMS
-BoomerAMG on the associated (high-order) auxiliary subspace problems, we note
-that the convergence may not be optimal for large polynomial degrees $k \geq 1$.
+and BoomerAMG on the associated (high-order) auxiliary subspace problems, we
+note that the convergence may not be optimal for large polynomial degrees $k
+\geq 1$.
 
 In the high-order ADS interface, the user does not need to provide the
 coordinates of the vertices, but instead should construct and pass the
@@ -1013,10 +1019,10 @@ the mesh elements. The columns of the ${\mathbf \Pi}$ matrices should use a
 node-based numbering, where the $x$/$y$/$z$ components of the first node (vertex
 or high-order degree of freedom) should be listed first, followed by the
 $x$/$y$/$z$ components of the second node and so on (see the documentation of
-HYPRE\_BoomerAMGSetDofFunc). Furthermore each interpolation matrix can be split
-into $x$, $y$ and $z$ components by defining ${\mathbf \Pi}^x \varphi = {\mathbf
-\Pi} (\varphi,0,0)$, and similarly for ${\mathbf \Pi}^y$ and ${\mathbf
-\Pi}^z$. 
+\code{HYPRE_BoomerAMGSetDofFunc}). Furthermore, each interpolation matrix can be
+split into $x$, $y$ and $z$ components by defining ${\mathbf \Pi}^x \varphi =
+{\mathbf \Pi} (\varphi,0,0)$, and similarly for ${\mathbf \Pi}^y$ and ${\mathbf
+  \Pi}^z$.
 
 The discrete gradient and curl matrices $G$ and $C$ should correspond to the
 mappings $\varphi \in \mathrm{P}_k^3$/$\mathrm{Q}_k^3 \mapsto \nabla \varphi \in
@@ -1033,9 +1039,9 @@ HYPRE_ADSSetInterpolations(solver, RT_Pi, NULL, NULL, NULL,
                                    ND_Pi, NULL, NULL, NULL);
 \end{verbatim}\end{display}
 We remark that the above interface calls can also be used in the lowest-order
-case, though we recommend calling the previously described
-HYPRE\_ADSSetCoordinateVectors instead, since this allows ADS to handle the
-construction and use of the interpolations internally.
+case (or even other types of discretizations), but we recommend calling the
+previously described \code{HYPRE_ADSSetCoordinateVectors} instead, since this
+allows ADS to handle the construction and use of the interpolations internally.
 
 
 Specifying the monolithic ${\mathbf \Pi}_{RT}$ limits the ADS cycle type options
@@ -1126,7 +1132,7 @@ For more details about the ParaSails algorithm, see \cite{EChow_2000}.
 
 \subsection{Parameter Settings}
 
-The accuracy and cost of ParaSails are parameterized by the real {\em thresh}
+The accuracy and cost of ParaSails are parametrized by the real {\em thresh}
 and integer {\em nlevels} parameters,
 $0 \le {\it thresh} \le 1$, $0 \le {\it nlevels}$.
 Lower values of {\em thresh}
@@ -1154,7 +1160,7 @@ order to construct the preconditioner.
 
 %-----------------------------
 
-ParaSail's Create function differs from the synopsis in the followin way:
+ParaSail's Create function differs from the synopsis in the following way:
 
 \begin{display}
 \begin{verbatim}
