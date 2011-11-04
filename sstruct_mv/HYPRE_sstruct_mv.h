@@ -323,6 +323,11 @@ HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
  * actual period.  For example, periodicity in the first and third dimensions
  * for a 10x11x12 part is indicated by the array [10,0,12].
  *
+ * NOTE: Currently, this routine will only have an effect for matrix object
+ * types {\tt HYPRE\_SSTRUCT} and {\tt HYPRE\_STRUCT}.  For {\tt HYPRE\_PARCSR},
+ * periodicity must be set up manually through other routines such as
+ * \Ref{HYPRE_SStructGridSetNeighborPart}.
+ *
  * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
  * of the periodic dimensions.
  **/
