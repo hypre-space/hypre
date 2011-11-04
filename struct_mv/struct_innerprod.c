@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Structured inner product routine
@@ -19,7 +17,6 @@
  *****************************************************************************/
 
 #include "headers.h"
-
 
 /*--------------------------------------------------------------------------
  * hypre_StructInnerProd
@@ -29,13 +26,11 @@
 double          *local_result_ref[hypre_MAX_THREADS];
 #endif
 
-double           final_innerprod_result;
-
-
 double
 hypre_StructInnerProd(  hypre_StructVector *x,
                         hypre_StructVector *y )
 {
+   double           final_innerprod_result;
    double           local_result;
    double           process_result;
                    
