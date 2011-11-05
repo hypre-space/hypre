@@ -29,8 +29,8 @@ case $1 in
    Example usage: $0 ..
 
 EOF
-      exit
-      ;;
+   exit
+   ;;
 esac
 
 # Setup
@@ -39,9 +39,27 @@ shift
 
 cd $src_dir
 
+# find global symbols
 if [ -f lib/libHYPRE.a ]; then
-   nm -o --extern-only --defined-only lib/libHYPRE.a | grep -vi hypre_ | grep -vi mli_ | grep -vi fei_ | grep -vi Euclid | grep -vi ParaSails | grep -v " _Z" >&2
+  nm -o --extern-only --defined-only lib/libHYPRE.a |
+    grep -vi hypre_ |
+    grep -vi mli_ |
+    grep -vi fei_ |
+    grep -vi Euclid |
+    grep -vi ParaSails |
+    grep -v " _Z" > check-glob-symb.temp
 else
    echo "check-glob-symb.sh can't find lib/libHYPRE.a"
 fi
 
+# find the '.o' file directories and add them to the output for filtering
+while read line
+do
+  sym=`echo $line | awk -F: '{print $2}'`
+  for dir in `find . -name $sym`
+  do
+    echo $line | awk -v dir=$dir -F: 'BEGIN {OFS=FS} {print $1,dir,$3}'
+  done
+done < check-glob-symb.temp >&2
+
+rm -f check-glob-symb.temp
