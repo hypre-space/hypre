@@ -231,7 +231,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    HYPRE_Int             logging        = (bicgstab_data -> logging);
    HYPRE_Int             print_level    = (bicgstab_data -> print_level);
    double         *norms          = (bicgstab_data -> norms);
-/*   char           *log_file_name  = (bicgstab_data -> log_file_name);
+   /*   char           *log_file_name  = (bicgstab_data -> log_file_name);
      FILE           *fp; */
    
    HYPRE_Int        ierr = 0;
@@ -259,7 +259,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    /* initialize work arrays */
    (*(bicgstab_functions->CopyVector))(b,r0);
 
-/* compute initial residual */
+   /* compute initial residual */
 
    (*(bicgstab_functions->Matvec))(matvec_data,-1.0, A, x, 1.0, r0);
    (*(bicgstab_functions->CopyVector))(r0,r);
@@ -321,7 +321,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       norms[0] = r_norm;
       if (print_level > 0 && my_id == 0)
       {
-  	 hypre_printf("L2 norm of b: %e\n", b_norm);
+   	     hypre_printf("L2 norm of b: %e\n", b_norm);
          if (b_norm == 0.0)
             hypre_printf("Rel_resid_norm actually contains the residual norm\n");
          hypre_printf("Initial L2 norm of residual: %e\n", r_norm);
@@ -331,16 +331,16 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 
    if (b_norm > 0.0)
    {
-/* convergence criterion |r_i| <= r_tol*|b| if |b| > 0 */
-     den_norm = b_norm;
+      /* convergence criterion |r_i| <= r_tol*|b| if |b| > 0 */
+      den_norm = b_norm;
    }
    else
    {
-/* convergence criterion |r_i| <= r_tol*|r0| if |b| = 0 */
-     den_norm = r_norm;
+      /* convergence criterion |r_i| <= r_tol*|r0| if |b| = 0 */
+      den_norm = r_norm;
    };
 
-/* convergence criterion |r_i| <= r_tol/a_tol , absolute residual norm*/
+   /* convergence criterion |r_i| <= r_tol/a_tol , absolute residual norm*/
    if (stop_crit)
    {
       if (a_tol == 0.0) /* this is for backwards compatibility
@@ -383,60 +383,26 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    (bicgstab_data -> num_iterations) = iter;
    if (b_norm > 0.0)
       (bicgstab_data -> rel_residual_norm) = r_norm/b_norm;
-   while (iter < max_iter)
+   /* check for convergence before starting */
+   if (r_norm == 0.0)
    {
-
-        if (r_norm == 0.0)
-        {
 	   ierr = 0;
 	   return hypre_error_flag;
-	}
-
-/* check for convergence, evaluate actual residual */
-	if (r_norm <= epsilon && iter >= min_iter) 
-        {
-	   (*(bicgstab_functions->CopyVector))(b,r);
-           (*(bicgstab_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
-	   r_norm = sqrt((*(bicgstab_functions->InnerProd))(r,r));
-	   if (r_norm <= epsilon)
-           {
-              if (print_level > 0 && my_id == 0)
-              {
-                 hypre_printf("\n\n");
-                 hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-              }
-              (bicgstab_data -> converged) = 1;
-              break;
-           }
-	   else
-	   {
-	      (*(bicgstab_functions->CopyVector))(r,p);
-	   }
-	}
-
-      /*--------------------------------------------------------------------
-       * Optional test to see if adequate progress is being made.
-       * The average convergence factor is recorded and compared
-       * against the tolerance 'cf_tol'. The weighting factor is
-       * intended to pay more attention to the test when an accurate
-       * estimate for average convergence factor is available.
-       *--------------------------------------------------------------------*/
-
-        if (cf_tol > 0.0)
-        {
-           cf_ave_0 = cf_ave_1;
-           cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
-
-           weight   = fabs(cf_ave_1 - cf_ave_0);
-           weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
-           weight   = 1.0 - weight;
-#if 0
-           hypre_printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
-                i, cf_ave_1, cf_ave_0, weight );
-#endif
-           if (weight * cf_ave_1 > cf_tol) break;
-        }
-
+   }
+   else if (r_norm <= epsilon && iter >= min_iter) 
+   {
+       if (print_level > 0 && my_id == 0)
+       {
+          hypre_printf("\n\n");
+          hypre_printf("Tolerance and min_iter requirements satisfied by initial data.\n");
+          hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
+       }
+       (bicgstab_data -> converged) = 1;
+       return hypre_error_flag;
+   }
+   /* Start BiCGStab iterations */
+   while (iter < max_iter)
+   {
         iter++;
 
 	(*(bicgstab_functions->ClearVector))(v);
@@ -455,10 +421,71 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	(*(bicgstab_functions->ClearVector))(v);
         precond(precond_data, A, r, v);
         (*(bicgstab_functions->Matvec))(matvec_data,1.0,A,v,0.0,s);
-      	gamma = (*(bicgstab_functions->InnerProd))(r,s) /
-           (*(bicgstab_functions->InnerProd))(s,s);
+      	/* Handle case when gamma = 0.0/0.0 as 0.0 and not NAN */
+        double gamma_numer = (*(bicgstab_functions->InnerProd))(r,s);
+        double gamma_denom = (*(bicgstab_functions->InnerProd))(s,s);
+        if ((gamma_numer == 0.0) && (gamma_denom == 0.0))
+            gamma = 0.0;
+        else
+            gamma= gamma_numer/gamma_denom;
 	(*(bicgstab_functions->Axpy))(gamma,v,x);
 	(*(bicgstab_functions->Axpy))(-gamma,s,r);
+    /* residual is now updated, must immediately check for convergence */
+	r_norm = sqrt((*(bicgstab_functions->InnerProd))(r,r));
+	if (logging > 0 || print_level > 0)
+	{
+	   norms[iter] = r_norm;
+	}
+    if (print_level > 0 && my_id == 0)
+    {
+        if (b_norm > 0.0)
+           hypre_printf("% 5d    %e    %f   %e\n", iter, norms[iter],
+                      norms[iter]/norms[iter-1], norms[iter]/b_norm);
+        else
+           hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
+		                             norms[iter]/norms[iter-1]);
+	}
+    /* Is this extra check for r_norm exactly 0.0 necessary ?*/
+    if (r_norm == 0.0)
+    {
+	   ierr = 0;
+	   return hypre_error_flag;
+	}
+    /* check for convergence, evaluate actual residual */
+	if (r_norm <= epsilon && iter >= min_iter) 
+    {
+	   (*(bicgstab_functions->CopyVector))(b,r);
+           (*(bicgstab_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
+	   r_norm = sqrt((*(bicgstab_functions->InnerProd))(r,r));
+	   if (r_norm <= epsilon)
+       {
+           if (print_level > 0 && my_id == 0)
+           {
+              hypre_printf("\n\n");
+              hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
+           }
+           (bicgstab_data -> converged) = 1;
+           break;
+       }
+    }
+    /*--------------------------------------------------------------------
+     * Optional test to see if adequate progress is being made.
+     * The average convergence factor is recorded and compared
+     * against the tolerance 'cf_tol'. The weighting factor is
+     * intended to pay more attention to the test when an accurate
+     * estimate for average convergence factor is available.
+     *--------------------------------------------------------------------*/
+    if (cf_tol > 0.0)
+    {
+       cf_ave_0 = cf_ave_1;
+       cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
+
+       weight   = fabs(cf_ave_1 - cf_ave_0);
+       weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
+       weight   = 1.0 - weight;
+       if (weight * cf_ave_1 > cf_tol) break;
+    }
+
       	if (fabs(res) >= epsmac)
            beta = 1.0/res;
 	else
@@ -477,24 +504,8 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	   return(3);
 	}
 	(*(bicgstab_functions->Axpy))(1.0,r,p);
-
-	r_norm = sqrt((*(bicgstab_functions->InnerProd))(r,r));
-	if (logging > 0 || print_level > 0)
-	{
-	   norms[iter] = r_norm;
-	}
-
-        if (print_level > 0 && my_id == 0)
-	{
-           if (b_norm > 0.0)
-              hypre_printf("% 5d    %e    %f   %e\n", iter, norms[iter],
-			norms[iter]/norms[iter-1], norms[iter]/b_norm);
-           else
-              hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
-		norms[iter]/norms[iter-1]);
-	}
-   }
-
+   } /* end while loop */
+    
    (bicgstab_data -> num_iterations) = iter;
    if (b_norm > 0.0)
       (bicgstab_data -> rel_residual_norm) = r_norm/b_norm;
