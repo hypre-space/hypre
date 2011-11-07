@@ -89,11 +89,11 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 #ifdef HYPRE_TIMING
 {
    HYPRE_Int           FSUtimer;
-   FSUtimer = hypre_InitializeTiming( "FindStructuralUnion");
+   FSUtimer = hypre_InitializeTiming( "hypre_FindStructuralUnion");
    hypre_BeginTiming( FSUtimer );
 #endif
 
-  ierr = FindStructuralUnion( matrix, &structural_union, globals );
+  ierr = hypre_FindStructuralUnion( matrix, &structural_union, globals );
 
 #ifdef HYPRE_TIMING
    hypre_EndTiming( FSUtimer );
@@ -104,7 +104,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 /* if(ierr) return(ierr);*/
 
   /* Exchange structural unions with other processors */
-  ierr = ExchangeStructuralUnions( ddist, &structural_union, globals );
+  ierr = hypre_ExchangeStructuralUnions( ddist, &structural_union, globals );
   /* if(ierr) return(ierr); */
 
   /* Select the rows to be factored */
@@ -407,11 +407,11 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
 
 
 /*************************************************************************
-* FindStructuralUnion
+* hypre_FindStructuralUnion
 *   Produces a vector of length n that marks the union of the nonzero
 *   structure of all locally stored rows, not including locally stored columns.
 **************************************************************************/
-HYPRE_Int FindStructuralUnion( HYPRE_DistributedMatrix matrix, 
+HYPRE_Int hypre_FindStructuralUnion( HYPRE_DistributedMatrix matrix, 
                     HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 { 
@@ -449,14 +449,14 @@ HYPRE_Int FindStructuralUnion( HYPRE_DistributedMatrix matrix,
 
 
 /*************************************************************************
-* ExchangeStructuralUnions
+* hypre_ExchangeStructuralUnions
 *   Exchanges structural union vectors with other processors and produces
 *   a vector the size of the number of locally stored rows that marks
 *   whether any exterior processor has a nonzero in the column corresponding
 *   to each row. This is used to determine if a local row might have to
 *   update an off-processor row.
 **************************************************************************/
-HYPRE_Int ExchangeStructuralUnions( DataDistType *ddist,
+HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
                     HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 { 

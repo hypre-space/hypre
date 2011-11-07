@@ -38,14 +38,14 @@ static HYPRE_Int mthresh;		/* MTHRESHold in chars */
 
 
 /*
- * tex_qsort:
+ * hypre_tex_qsort:
  * First, set up some global parameters for qst to share.  Then, quicksort
  * with qst(), and then a cleanup insertion sort ourselves.  Sound simple?
  * It's not...
  */
 
 void
-tex_qsort(base, n, size, compar)
+hypre_tex_qsort(base, n, size, compar)
 char *base;
 HYPRE_Int n;
 HYPRE_Int size;

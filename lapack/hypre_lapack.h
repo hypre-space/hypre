@@ -18,6 +18,7 @@
 #ifndef HYPRE_LAPACK_H
 #define HYPRE_LAPACK_H
 #include "f2c.h"
+#include "fortran.h"
 
 /* --------------------------------------------------------------------------
  *  Change all names to hypre_ to avoid link conflicts
@@ -103,6 +104,14 @@
 #define dlasq4_  hypre_dlasq4
 #define dlasq5_  hypre_dlasq5
 #define dlasq6_  hypre_dlasq6
+
+#define s_cmp    hypre_F90_NAME_BLAS(s_cmp,S_CMP)
+#define s_copy   hypre_F90_NAME_BLAS(s_copy,S_COPY)
+#define d_lg10   hypre_d_lg10
+#define d_sign   hypre_d_sign
+#define pow_dd   hypre_pow_dd
+#define pow_di   hypre_pow_di
+#define s_cat    hypre_s_cat
 
 /* --------------------------------------------------------------------------
  *           Prototypes

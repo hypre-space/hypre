@@ -170,7 +170,7 @@ HYPRE_Int hypre_DecKeyValueCmp(const void *v1, const void *v2)
 **************************************************************************/
 void hypre_SortKeyValueNodesDec(KeyValueType *nodes, HYPRE_Int n)
 {
-  tex_qsort((void *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), hypre_DecKeyValueCmp);
+  hypre_tex_qsort((void *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), hypre_DecKeyValueCmp);
 }
 
 
@@ -210,13 +210,13 @@ static HYPRE_Int decshort(const void *v1, const void *v2)
 **************************************************************************/
 void hypre_sincsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), incshort);
+  hypre_tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), incshort);
 }
 
 
-void sdecsort(HYPRE_Int n, HYPRE_Int *a)
+void hypre_sdecsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), decshort);
+  hypre_tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), decshort);
 }
 
 
