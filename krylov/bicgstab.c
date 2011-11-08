@@ -244,7 +244,9 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    double     cf_ave_1 = 0.0;
    double     weight;
    double     r_norm_0;
-   double den_norm;
+   double     den_norm;
+   double     gamma_numer;
+   double     gamma_denom;
 
    (bicgstab_data -> converged) = 0;
 
@@ -422,8 +424,8 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
         precond(precond_data, A, r, v);
         (*(bicgstab_functions->Matvec))(matvec_data,1.0,A,v,0.0,s);
       	/* Handle case when gamma = 0.0/0.0 as 0.0 and not NAN */
-        double gamma_numer = (*(bicgstab_functions->InnerProd))(r,s);
-        double gamma_denom = (*(bicgstab_functions->InnerProd))(s,s);
+        gamma_numer = (*(bicgstab_functions->InnerProd))(r,s);
+        gamma_denom = (*(bicgstab_functions->InnerProd))(s,s);
         if ((gamma_numer == 0.0) && (gamma_denom == 0.0))
             gamma = 0.0;
         else
