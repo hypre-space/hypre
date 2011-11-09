@@ -278,7 +278,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
         Aux_U = U_array[level];
         Aux_F = F_array[level];
         num_sweep = 1;
-        relax_type = 0;
+        /* TK: Use the user relax type (instead of 0) to allow for setting a
+           convergent smoother (e.g. in the solution of singular problems). */
+        relax_type = hypre_ParAMGDataUserRelaxType(amg_data);
       }
 
       if (l1_norms != NULL)
