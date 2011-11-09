@@ -1738,7 +1738,7 @@ HYPRE_Int HYPRE_ADSSetTol(HYPRE_Solver solver , double tol);
  *   6 & 3-level additive solver (1+020) \\
  *   7 & 3-level multiplicative solver (0201020) \\
  *   8 & 3-level additive solver (0(1+2)0) \\
- *  11 & 5-level multiplicative solver (01345054310) \\
+ *  11 & 5-level multiplicative solver (013454310) \\
  *  12 & 5-level additive solver (0+1+3+4+5) \\
  *  13 & 5-level multiplicative solver (034515430) \\
  *  14 & 5-level additive solver (01(3+4+5)10) \\

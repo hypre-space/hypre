@@ -319,7 +319,7 @@ HYPRE_Int hypre_ADSSetTol(void *solver,
  *   7 = 3-level multipl. solver (0201020)    <-- small number of iterations
  *   8 = 3-level additive solver (0(1+2)0)    <-- small solution time
  *   9 = 3-level multipl. solver (01210) with discrete divergence
- *  11 = 5-level multipl. solver (01345054310)<-- small solution time, memory
+ *  11 = 5-level multipl. solver (013454310)  <-- small solution time, memory
  *  12 = 5-level additive solver (0+1+3+4+5)
  *  13 = 5-level multipl. solver (034515430)  <-- small solution time, memory
  *  14 = 5-level additive solver (01(3+4+5)10)
@@ -492,11 +492,16 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j, d;
 
-      /* Each component of Pi has the sparsity pattern of the following
-         face-to-vertex Boolean matrix. We use the object structure in hypre to
-         consider ParCSR matrices as Boolean matrices and vice versa. */
-      hypre_ParCSRMatrix *F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
-         (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);
+      /* Each component of Pi has the sparsity pattern of the topological
+         face-to-vertex matrix. */
+      hypre_ParCSRMatrix *F2V;
+      if (HYPRE_AssumedPartitionCheck())
+         F2V = hypre_ParMatmul(C, G);
+      else
+         /* With global partitioning we can use the object structure in hypre to
+            consider ParCSR matrices as Boolean matrices and vice versa. */
+         F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
+            (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);
 
       double *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
       double *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
@@ -606,8 +611,10 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
                Pi_cmap[3*i+d] = 3*F2V_cmap[i]+d;
       }
 
-      /* Destroy F2V as a Boolean matrix. */
-      hypre_ParCSRBooleanMatrixDestroy((hypre_ParCSRBooleanMatrix*)F2V);
+      if (HYPRE_AssumedPartitionCheck())
+         hypre_ParCSRMatrixDestroy(F2V);
+      else
+         hypre_ParCSRBooleanMatrixDestroy((hypre_ParCSRBooleanMatrix*)F2V);
    }
 
    hypre_ParVectorDestroy(RT100);
@@ -673,11 +680,16 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j;
 
-      /* Each component of Pi has the sparsity pattern of the following
-         face-to-vertex Boolean matrix. We use the object structure in hypre to
-         consider ParCSR matrices as Boolean matrices and vice versa. */
-      hypre_ParCSRMatrix *F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
-         (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);
+      /* Each component of Pi has the sparsity pattern of the topological
+         face-to-vertex matrix. */
+      hypre_ParCSRMatrix *F2V;
+      if (HYPRE_AssumedPartitionCheck())
+         F2V = hypre_ParMatmul(C, G);
+      else
+         /* With global partitioning we can use the object structure in hypre to
+            consider ParCSR matrices as Boolean matrices and vice versa. */
+         F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
+            (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);
 
       double *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
       double *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
@@ -839,8 +851,10 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          }
       }
 
-      /* Destroy F2V as a Boolean matrix. */
-      hypre_ParCSRBooleanMatrixDestroy((hypre_ParCSRBooleanMatrix*)F2V);
+      if (HYPRE_AssumedPartitionCheck())
+         hypre_ParCSRMatrixDestroy(F2V);
+      else
+         hypre_ParCSRBooleanMatrixDestroy((hypre_ParCSRBooleanMatrix*)F2V);
    }
 
    hypre_ParVectorDestroy(RT100);
@@ -1237,7 +1251,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
          hypre_sprintf(cycle,"%s","01210");
          break;
       case 11:
-         hypre_sprintf(cycle,"%s","01345054310");
+         hypre_sprintf(cycle,"%s","013454310");
          break;
       case 12:
          hypre_sprintf(cycle,"%s","(0+1+3+4+5)");
