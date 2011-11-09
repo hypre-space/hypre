@@ -2783,7 +2783,7 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
                                    double A0_max_eig_est,
                                    double A0_min_eig_est,
                                    HYPRE_Int A0_cheby_order,
-                                   double  A0_cheby_fraction,
+                                   double A0_cheby_fraction,
                                    /* subspace matrices */
                                    hypre_ParCSRMatrix **A,
                                    /* subspace preconditioners */
