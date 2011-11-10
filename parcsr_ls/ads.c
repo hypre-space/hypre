@@ -492,6 +492,10 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j, d;
 
+      double *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
+      double *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
+      double *RT001_data = hypre_VectorData(hypre_ParVectorLocalVector(RT001));
+
       /* Each component of Pi has the sparsity pattern of the topological
          face-to-vertex matrix. */
       hypre_ParCSRMatrix *F2V;
@@ -503,44 +507,43 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
             (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);
 
-      double *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
-      double *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
-      double *RT001_data = hypre_VectorData(hypre_ParVectorLocalVector(RT001));
-
-      MPI_Comm comm = hypre_ParCSRMatrixComm(F2V);
-      HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
-      HYPRE_Int global_num_cols = 3*hypre_ParCSRMatrixGlobalNumCols(F2V);
-      HYPRE_Int *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
-      HYPRE_Int col_starts_size, *col_starts;
-      HYPRE_Int num_cols_offd = 3*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
-      HYPRE_Int num_nonzeros_diag = 3*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
-      HYPRE_Int num_nonzeros_offd = 3*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
-      HYPRE_Int *col_starts_F2V = hypre_ParCSRMatrixColStarts(F2V);
+      /* Create the parallel interpolation matrix */
+      {
+         MPI_Comm comm = hypre_ParCSRMatrixComm(F2V);
+         HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
+         HYPRE_Int global_num_cols = 3*hypre_ParCSRMatrixGlobalNumCols(F2V);
+         HYPRE_Int *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
+         HYPRE_Int col_starts_size, *col_starts;
+         HYPRE_Int num_cols_offd = 3*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
+         HYPRE_Int num_nonzeros_diag = 3*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
+         HYPRE_Int num_nonzeros_offd = 3*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
+         HYPRE_Int *col_starts_F2V = hypre_ParCSRMatrixColStarts(F2V);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-      col_starts_size = 2;
+         col_starts_size = 2;
 #else
-      HYPRE_Int num_procs;
-      hypre_MPI_Comm_size(comm, &num_procs);
-      col_starts_size = num_procs+1;
+         HYPRE_Int num_procs;
+         hypre_MPI_Comm_size(comm, &num_procs);
+         col_starts_size = num_procs+1;
 #endif
-      col_starts = hypre_TAlloc(HYPRE_Int,col_starts_size);
-      for (i = 0; i < col_starts_size; i++)
-         col_starts[i] = 3 * col_starts_F2V[i];
+         col_starts = hypre_TAlloc(HYPRE_Int,col_starts_size);
+         for (i = 0; i < col_starts_size; i++)
+            col_starts[i] = 3 * col_starts_F2V[i];
 
-      Pi = hypre_ParCSRMatrixCreate(comm,
-                                    global_num_rows,
-                                    global_num_cols,
-                                    row_starts,
-                                    col_starts,
-                                    num_cols_offd,
-                                    num_nonzeros_diag,
-                                    num_nonzeros_offd);
+         Pi = hypre_ParCSRMatrixCreate(comm,
+                                       global_num_rows,
+                                       global_num_cols,
+                                       row_starts,
+                                       col_starts,
+                                       num_cols_offd,
+                                       num_nonzeros_diag,
+                                       num_nonzeros_offd);
 
-      hypre_ParCSRMatrixOwnsData(Pi) = 1;
-      hypre_ParCSRMatrixOwnsRowStarts(Pi) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(Pi) = 1;
+         hypre_ParCSRMatrixOwnsData(Pi) = 1;
+         hypre_ParCSRMatrixOwnsRowStarts(Pi) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(Pi) = 1;
 
-      hypre_ParCSRMatrixInitialize(Pi);
+         hypre_ParCSRMatrixInitialize(Pi);
+      }
 
       /* Fill-in the diagonal part */
       {
@@ -680,6 +683,10 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j;
 
+      double *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
+      double *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
+      double *RT001_data = hypre_VectorData(hypre_ParVectorLocalVector(RT001));
+
       /* Each component of Pi has the sparsity pattern of the topological
          face-to-vertex matrix. */
       hypre_ParCSRMatrix *F2V;
@@ -691,57 +698,56 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
             (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);
 
-      double *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
-      double *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
-      double *RT001_data = hypre_VectorData(hypre_ParVectorLocalVector(RT001));
+      /* Create the components of the parallel interpolation matrix */
+      {
+         MPI_Comm comm = hypre_ParCSRMatrixComm(F2V);
+         HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
+         HYPRE_Int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(F2V);
+         HYPRE_Int *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
+         HYPRE_Int *col_starts = hypre_ParCSRMatrixColStarts(F2V);
+         HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
+         HYPRE_Int num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
+         HYPRE_Int num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
 
-      MPI_Comm comm = hypre_ParCSRMatrixComm(F2V);
-      HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
-      HYPRE_Int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(F2V);
-      HYPRE_Int *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
-      HYPRE_Int *col_starts = hypre_ParCSRMatrixColStarts(F2V);
-      HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
-      HYPRE_Int num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
-      HYPRE_Int num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
+         Pix = hypre_ParCSRMatrixCreate(comm,
+                                        global_num_rows,
+                                        global_num_cols,
+                                        row_starts,
+                                        col_starts,
+                                        num_cols_offd,
+                                        num_nonzeros_diag,
+                                        num_nonzeros_offd);
+         hypre_ParCSRMatrixOwnsData(Pix) = 1;
+         hypre_ParCSRMatrixOwnsRowStarts(Pix) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(Pix) = 0;
+         hypre_ParCSRMatrixInitialize(Pix);
 
-      Pix = hypre_ParCSRMatrixCreate(comm,
-                                     global_num_rows,
-                                     global_num_cols,
-                                     row_starts,
-                                     col_starts,
-                                     num_cols_offd,
-                                     num_nonzeros_diag,
-                                     num_nonzeros_offd);
-      hypre_ParCSRMatrixOwnsData(Pix) = 1;
-      hypre_ParCSRMatrixOwnsRowStarts(Pix) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(Pix) = 0;
-      hypre_ParCSRMatrixInitialize(Pix);
+         Piy = hypre_ParCSRMatrixCreate(comm,
+                                        global_num_rows,
+                                        global_num_cols,
+                                        row_starts,
+                                        col_starts,
+                                        num_cols_offd,
+                                        num_nonzeros_diag,
+                                        num_nonzeros_offd);
+         hypre_ParCSRMatrixOwnsData(Piy) = 1;
+         hypre_ParCSRMatrixOwnsRowStarts(Piy) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(Piy) = 0;
+         hypre_ParCSRMatrixInitialize(Piy);
 
-      Piy = hypre_ParCSRMatrixCreate(comm,
-                                     global_num_rows,
-                                     global_num_cols,
-                                     row_starts,
-                                     col_starts,
-                                     num_cols_offd,
-                                     num_nonzeros_diag,
-                                     num_nonzeros_offd);
-      hypre_ParCSRMatrixOwnsData(Piy) = 1;
-      hypre_ParCSRMatrixOwnsRowStarts(Piy) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(Piy) = 0;
-      hypre_ParCSRMatrixInitialize(Piy);
-
-      Piz = hypre_ParCSRMatrixCreate(comm,
-                                     global_num_rows,
-                                     global_num_cols,
-                                     row_starts,
-                                     col_starts,
-                                     num_cols_offd,
-                                     num_nonzeros_diag,
-                                     num_nonzeros_offd);
-      hypre_ParCSRMatrixOwnsData(Piz) = 1;
-      hypre_ParCSRMatrixOwnsRowStarts(Piz) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(Piz) = 0;
-      hypre_ParCSRMatrixInitialize(Piz);
+         Piz = hypre_ParCSRMatrixCreate(comm,
+                                        global_num_rows,
+                                        global_num_cols,
+                                        row_starts,
+                                        col_starts,
+                                        num_cols_offd,
+                                        num_nonzeros_diag,
+                                        num_nonzeros_offd);
+         hypre_ParCSRMatrixOwnsData(Piz) = 1;
+         hypre_ParCSRMatrixOwnsRowStarts(Piz) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(Piz) = 0;
+         hypre_ParCSRMatrixInitialize(Piz);
+      }
 
       /* Fill-in the diagonal part */
       {
