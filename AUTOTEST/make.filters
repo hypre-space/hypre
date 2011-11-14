@@ -25,3 +25,4 @@ sidl_rmi_InstanceRegistry_Impl.c:.*: warning: cast from pointer
 Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
 WARNING in dReadValues: Infinite loop.  Program may not stop.
 WARNING in dReadVector: Infinite loop.  Program may not stop.
+icc: command line warning #*: overriding
