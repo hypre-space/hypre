@@ -15,7 +15,7 @@
 # recent release.
 #=============================================================================
 
-Version 2.8.0b released 2011/11/??
+Version 2.8.0b released 2011/11/14
 
 - Added the new Auxiliary-space Divergence Solver (ADS) which targets div-div
   problems discretized with lowest order Raviart-Thomas "face" finite elements.
