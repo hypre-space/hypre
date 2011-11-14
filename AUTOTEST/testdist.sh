@@ -12,8 +12,8 @@
 #EHEADER**********************************************************************
 
 # Which tests to run?
-TEST_ALPHA="-tux273"
-TEST_BETA="$TEST_ALPHA -zeus -hera -dawndev"
+TEST_ALPHA="-tux339"
+TEST_BETA="$TEST_ALPHA -rzzeus -hera -rzdawndev"
 TEST_GENERAL="$TEST_BETA"
 TERMCMD=""
 
