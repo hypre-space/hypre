@@ -178,6 +178,7 @@ HYPRE_FILES="\
   $HYPRE_DIR/src/distributed_matrix \
   $HYPRE_DIR/src/docs \
   $HYPRE_DIR/src/examples/ex* \
+  $HYPRE_DIR/src/examples/vis* \
   $HYPRE_DIR/src/examples/Make* \
   $HYPRE_DIR/src/examples/README.html \
   $HYPRE_DIR/src/examples/README_files \
