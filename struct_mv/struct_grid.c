@@ -803,6 +803,7 @@ hypre_StructGridRead( MPI_Comm           comm,
 
    hypre_Index       ilower;
    hypre_Index       iupper;
+   hypre_IndexRef    periodic;
 
    HYPRE_Int         dim;
    HYPRE_Int         num_boxes;
@@ -826,6 +827,12 @@ hypre_StructGridRead( MPI_Comm           comm,
 
       hypre_StructGridSetExtents(grid, ilower, iupper);
    }
+
+   periodic = hypre_StructGridPeriodic(grid);
+   hypre_fscanf(file, "Periodic: %d %d %d\n",
+                &hypre_IndexX(periodic),
+                &hypre_IndexX(periodic),
+                &hypre_IndexX(periodic));
 
    hypre_StructGridAssemble(grid);
 
