@@ -831,8 +831,8 @@ hypre_StructGridRead( MPI_Comm           comm,
    periodic = hypre_StructGridPeriodic(grid);
    hypre_fscanf(file, "Periodic: %d %d %d\n",
                 &hypre_IndexX(periodic),
-                &hypre_IndexX(periodic),
-                &hypre_IndexX(periodic));
+                &hypre_IndexY(periodic),
+                &hypre_IndexZ(periodic));
 
    hypre_StructGridAssemble(grid);
 
