@@ -891,10 +891,13 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          /* non-stencil entries */
          entry -= size;
          hypre_SStructGraphFindUVEntry(graph, part, index, var, &Uventry);
-        
-	 col_coords[ncoeffs] = hypre_SStructUVEntryRank(Uventry, entry);   
-         coeffs[ncoeffs] = values[i];
-         ncoeffs++;
+
+         if (Uventry)
+         {
+            col_coords[ncoeffs] = hypre_SStructUVEntryRank(Uventry, entry);   
+            coeffs[ncoeffs] = values[i];
+            ncoeffs++;
+         }
       }
    }
 

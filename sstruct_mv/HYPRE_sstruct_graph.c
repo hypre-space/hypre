@@ -357,7 +357,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int                 part, var;
    hypre_IndexRef            index;
    hypre_Index               cindex;
-   HYPRE_Int                 startrank;
    HYPRE_Int                 boxnum;
    HYPRE_Int                 aUventries;
    HYPRE_Int                 ndim       = hypre_SStructGridNDim(grid);
@@ -544,10 +543,9 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
     * set up the UVEntry and iUventries
     *---------------------------------------------------------*/
 
-   /* allocate proper storage */
-   aUventries = hypre_max(hypre_SStructGridGhlocalSize(grid), n_add_entries);
+   aUventries = hypre_SStructGridGhlocalSize(grid);
 
-   iUventries = hypre_TAlloc(HYPRE_Int, aUventries);
+   iUventries = hypre_TAlloc(HYPRE_Int, n_add_entries);
    Uventries = hypre_CTAlloc(hypre_SStructUVEntry *, aUventries);
 
    hypre_SStructGraphAUVEntries(graph) = aUventries;
@@ -571,71 +569,69 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       /* compute location (rank) for Uventry */
       hypre_CopyToCleanIndex(index, ndim, cindex);
 
+      /* NOTE: This is the same code as in SStructGraphFindUVEntry() */
       hypre_SStructGridFindBoxManEntry(grid, part, cindex, var, &boxman_entry);
-    
-      /* GEC0203 getting the rank */ 
       hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, cindex, &rank, type);
       
-      /* GEC 0902 filling up the iUventries with local ghrank
-       * since HYPRE_SSTRUCT is chosen */
-
       if (type == HYPRE_SSTRUCT || type == HYPRE_STRUCT) 
       { 
-         startrank = hypre_SStructGridGhstartRank(grid);
+         rank -= hypre_SStructGridGhstartRank(grid);
       }
       if (type == HYPRE_PARCSR)
       {
-         startrank = hypre_SStructGridStartRank(grid);
+         rank -= hypre_SStructGridStartRank(grid);
       }
 
-      rank -= startrank;
-
-      iUventries[nUventries] = rank;
-
-      if (Uventries[rank] == NULL)
+      /* only add the entry if it is in my processor's range */
+      if ((rank > -1) && (rank < aUventries))
       {
-         Uventry = hypre_TAlloc(hypre_SStructUVEntry, 1);
-         hypre_SStructUVEntryPart(Uventry) = part;
-         hypre_CopyToCleanIndex(index, ndim, hypre_SStructUVEntryIndex(Uventry));
-         hypre_SStructUVEntryVar(Uventry) = var;
-         hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &boxnum);
-         hypre_SStructUVEntryBoxnum(Uventry) = boxnum;
-         nUentries = 1;
-         Uentries = hypre_TAlloc(hypre_SStructUEntry, nUentries);
-      }
-      else
-      {
-         Uventry = Uventries[rank];
-         nUentries = hypre_SStructUVEntryNUEntries(Uventry) + 1;
-         Uentries = hypre_SStructUVEntryUEntries(Uventry);
-         Uentries = hypre_TReAlloc(Uentries, hypre_SStructUEntry, nUentries);
-      }
-      hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
-      hypre_SStructUVEntryUEntries(Uventry)  = Uentries;
+         iUventries[nUventries] = rank;
 
-      i = nUentries - 1;
-      hypre_SStructUVEntryToPart(Uventry, i) = to_part;
-      hypre_CopyToCleanIndex(to_index, ndim,
-                             hypre_SStructUVEntryToIndex(Uventry, i));
-      hypre_SStructUVEntryToVar(Uventry, i) = to_var;
+         if (Uventries[rank] == NULL)
+         {
+            Uventry = hypre_TAlloc(hypre_SStructUVEntry, 1);
+            hypre_SStructUVEntryPart(Uventry) = part;
+            hypre_CopyToCleanIndex(index, ndim, hypre_SStructUVEntryIndex(Uventry));
+            hypre_SStructUVEntryVar(Uventry) = var;
+            hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &boxnum);
+            hypre_SStructUVEntryBoxnum(Uventry) = boxnum;
+            nUentries = 1;
+            Uentries = hypre_TAlloc(hypre_SStructUEntry, nUentries);
+         }
+         else
+         {
+            Uventry = Uventries[rank];
+            nUentries = hypre_SStructUVEntryNUEntries(Uventry) + 1;
+            Uentries = hypre_SStructUVEntryUEntries(Uventry);
+            Uentries = hypre_TReAlloc(Uentries, hypre_SStructUEntry, nUentries);
+         }
+         hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
+         hypre_SStructUVEntryUEntries(Uventry)  = Uentries;
+
+         i = nUentries - 1;
+         hypre_SStructUVEntryToPart(Uventry, i) = to_part;
+         hypre_CopyToCleanIndex(to_index, ndim,
+                                hypre_SStructUVEntryToIndex(Uventry, i));
+         hypre_SStructUVEntryToVar(Uventry, i) = to_var;
       
-      hypre_CopyToCleanIndex(to_index, ndim, cindex);
+         hypre_CopyToCleanIndex(to_index, ndim, cindex);
            
-      hypre_SStructGridFindBoxManEntry(
-         dom_grid, to_part, cindex, to_var, &boxman_entry);
-      hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &to_boxnum);
-      hypre_SStructUVEntryToBoxnum(Uventry, i) = to_boxnum;
-      hypre_SStructBoxManEntryGetProcess(boxman_entry, &to_proc);
-      hypre_SStructUVEntryToProc(Uventry, i)= to_proc;
+         hypre_SStructGridFindBoxManEntry(
+            dom_grid, to_part, cindex, to_var, &boxman_entry);
+         hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &to_boxnum);
+         hypre_SStructUVEntryToBoxnum(Uventry, i) = to_boxnum;
+         hypre_SStructBoxManEntryGetProcess(boxman_entry, &to_proc);
+         hypre_SStructUVEntryToProc(Uventry, i)= to_proc;
       
-      Uventries[rank] = Uventry; /* GEC1102 where rank labels Uventries */
+         Uventries[rank] = Uventry; /* GEC1102 where rank labels Uventries */
       
-      nUventries++;
-      hypre_SStructGraphNUVEntries(graph) = nUventries;
+         nUventries++;
+         hypre_SStructGraphNUVEntries(graph) = nUventries;
 
-      hypre_SStructGraphUVEntries(graph) = Uventries;
+         hypre_SStructGraphUVEntries(graph) = Uventries;
       
-      hypre_SStructGraphTotUEntries(graph) ++;
+         hypre_SStructGraphTotUEntries(graph) ++;
+      }
 
       /*free each add entry after copying */
       hypre_TFree(new_entry);

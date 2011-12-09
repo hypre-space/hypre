@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * Member functions for hypre_SStructGraph class.
@@ -33,8 +32,6 @@ hypre_SStructGraphRef( hypre_SStructGraph  *graph,
 }
 
 /*--------------------------------------------------------------------------
- * NOTE: This may search an Octree in the future.
- *
  * 9/09 AB - modified to use the box manager
  *--------------------------------------------------------------------------*/
 
@@ -47,27 +44,36 @@ hypre_SStructGraphFindUVEntry( hypre_SStructGraph    *graph,
 {
    hypre_SStructUVEntry **Uventries = hypre_SStructGraphUVEntries(graph);
    hypre_SStructGrid     *grid      = hypre_SStructGraphGrid(graph);
-   HYPRE_Int             type       = hypre_SStructGraphObjectType(graph);
+   HYPRE_Int              type      = hypre_SStructGraphObjectType(graph);
    hypre_BoxManEntry     *boxman_entry;
-   HYPRE_Int              rank;
+   HYPRE_Int              rank, max_rank;
 
 
-   
-   /* Should we be checking the neighbor box manager also ?*/
+   /* Should we be checking the neighbor box manager also? */
 
    hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
    hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &rank, type);
 
+   /* compute local rank */
    if (type == HYPRE_SSTRUCT || type ==  HYPRE_STRUCT)
    {
-    rank -= hypre_SStructGridGhstartRank(grid);
+      rank -= hypre_SStructGridGhstartRank(grid);
    }
    if (type == HYPRE_PARCSR)
    {
-    rank -= hypre_SStructGridStartRank(grid);
+      rank -= hypre_SStructGridStartRank(grid);
    }
- 
-   *Uventry_ptr = Uventries[rank];
+
+   /* only return an entry if it is in my processor's range */
+   max_rank = hypre_SStructGridGhlocalSize(hypre_SStructGraphGrid(graph));
+   if ((rank > -1) && (rank < max_rank))
+   {
+      *Uventry_ptr = Uventries[rank];
+   }
+   else
+   {
+      *Uventry_ptr = NULL;
+   }
 
    return hypre_error_flag;
 }
