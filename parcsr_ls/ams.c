@@ -2102,10 +2102,17 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             HYPRE_Int i, nnz = hypre_CSRMatrixNumNonzeros(A_local);
             double *data = hypre_CSRMatrixData(A_local);
             double *dataB = hypre_CSRMatrixData(B_local);
-            double factor, lfactor = dataB[0]*1e-10; /* assume dataB[0] = A11 */
+            HYPRE_Int nnzB = hypre_CSRMatrixNumNonzeros(A_local);
+            double factor, lfactor;
+            lfactor = -1;
+            for (i = 0; i < nnzB; i++)
+               if (fabs(dataB[i]) > lfactor)
+                  lfactor = fabs(dataB[i]);
+            lfactor *= 1e-10; /* scaling factor: max|A_ij|*1e-10 */
             hypre_MPI_Allreduce(&lfactor, &factor, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX,
                                 hypre_ParCSRMatrixComm(A));
-            for (i = 0; i < nnz; i++) data[i] *= factor;
+            for (i = 0; i < nnz; i++)
+               data[i] *= factor;
          }
          C_tmp = hypre_CSRMatrixAdd(A_local, B_local);
          C_local = hypre_CSRMatrixDeleteZeros(C_tmp,0.0);
