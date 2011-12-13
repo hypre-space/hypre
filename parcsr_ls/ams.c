@@ -2102,7 +2102,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             HYPRE_Int i, nnz = hypre_CSRMatrixNumNonzeros(A_local);
             double *data = hypre_CSRMatrixData(A_local);
             double *dataB = hypre_CSRMatrixData(B_local);
-            HYPRE_Int nnzB = hypre_CSRMatrixNumNonzeros(A_local);
+            HYPRE_Int nnzB = hypre_CSRMatrixNumNonzeros(B_local);
             double factor, lfactor;
             lfactor = -1;
             for (i = 0; i < nnzB; i++)
