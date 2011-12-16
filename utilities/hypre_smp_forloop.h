@@ -27,7 +27,11 @@
 #ifndef HYPRE_SMP_REDUCTION_OP
 #ifndef HYPRE_SMP_PAR_REGION
 #ifndef HYPRE_SMP_FOR
+#ifndef HYPRE_SMP_CRITICAL
+#ifndef HYPRE_SMP_BARRIER
 #pragma omp parallel for private(HYPRE_SMP_PRIVATE) schedule(static)
+#endif
+#endif
 #endif
 #endif
 #endif
@@ -38,6 +42,14 @@
 
 #ifdef HYPRE_SMP_FOR
 #pragma omp for schedule(static)
+#endif
+
+#ifdef HYPRE_SMP_CRITICAL
+#pragma omp critical
+#endif
+
+#ifdef HYPRE_SMP_BARRIER
+#pragma omp barrier
 #endif
 
 #ifdef HYPRE_SMP_REDUCTION_OP
@@ -79,3 +91,5 @@ schedule(static)
 #undef HYPRE_SMP_REDUCTION_VARS
 #undef HYPRE_SMP_PAR_REGION
 #undef HYPRE_SMP_FOR
+#undef HYPRE_SMP_CRITICAL
+#undef HYPRE_SMP_BARRIER

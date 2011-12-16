@@ -604,11 +604,13 @@ HYPRE_Int MPI_Irsend( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPR
 
 HYPRE_Int hypre_NumThreads( void );
 HYPRE_Int hypre_GetThreadNum( void );
+HYPRE_Int hypre_GetMaxNumThreads( void );
 
 #else
 
 #define hypre_NumThreads() 1
 #define hypre_GetThreadNum() 0
+#define hypre_GetMaxNumThreads() 1
 
 #endif
 
