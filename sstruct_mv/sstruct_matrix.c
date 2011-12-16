@@ -679,7 +679,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_SStructStencil   *stencil;
    HYPRE_Int              *split;
    HYPRE_Int               nvars;
-   HYPRE_Int               nrows, nnzs ;
+   HYPRE_Int               nrows, rowstart, nnzs ;
    HYPRE_Int               part, var, entry, b, loopi, loopj, loopk, m, mi;
    HYPRE_Int              *row_sizes;
    HYPRE_Int               max_row_size;
@@ -696,10 +696,12 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
  
    if (matrix_type == HYPRE_PARCSR)
    {
+      rowstart = hypre_SStructGridStartRank(grid);
       nrows = hypre_SStructGridLocalSize(grid);
    }
    if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
+      rowstart = hypre_SStructGridGhstartRank(grid);
       nrows = hypre_SStructGridGhlocalSize(grid) ;
    }
 
@@ -772,9 +774,13 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    /* RDF: THREAD? */
    for (entry = 0; entry < nUventries; entry++)
    {
-      m = iUventries[entry];
-      row_sizes[m] += hypre_SStructUVEntryNUEntries(Uventries[m]);
-      max_row_size = hypre_max(max_row_size, row_sizes[m]);
+      mi = iUventries[entry];
+      m = hypre_SStructUVEntryRank(Uventries[mi]) - rowstart;
+      if ((m > -1) && (m < nrows))
+      {
+         row_sizes[m] += hypre_SStructUVEntryNUEntries(Uventries[mi]);
+         max_row_size = hypre_max(max_row_size, row_sizes[m]);
+      }
    }
 
    /* ZTODO: Update row_sizes based on neighbor off-part couplings */
@@ -827,7 +833,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    HYPRE_Int               *col_coords;
    HYPRE_Int                ncoeffs;
    double                  *coeffs;
-   HYPRE_Int                i, entry;
+   HYPRE_Int                i, entry, Uverank;
    /* GEC1002 the matrix type */
    HYPRE_Int                matrix_type = hypre_SStructMatrixObjectType(matrix);
 
@@ -890,11 +896,12 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       {
          /* non-stencil entries */
          entry -= size;
-         hypre_SStructGraphFindUVEntry(graph, part, index, var, &Uventry);
+         hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);
 
-         if (Uventry)
+         if (Uverank > -1)
          {
-            col_coords[ncoeffs] = hypre_SStructUVEntryRank(Uventry, entry);   
+            Uventry = hypre_SStructGraphUVEntry(graph, Uverank);
+            col_coords[ncoeffs] = hypre_SStructUVEntryToRank(Uventry, entry);   
             coeffs[ncoeffs] = values[i];
             ncoeffs++;
          }

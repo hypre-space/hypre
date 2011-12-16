@@ -37,3 +37,8 @@ mpirun -np 1 ./sstruct -in sstruct.in.amr.graphadd -solver 20 -r 2 1 1 \
  > amr2d.out.10
 mpirun -np 2 ./sstruct -in sstruct.in.amr.graphadd -solver 20 -P 2 1 1 \
  > amr2d.out.11
+
+mpirun -np 1 ./sstruct -in sstruct.in.amr.graphadd -solver 28 -r 1 2 1 -pooldist 0 \
+ > amr2d.out.12
+mpirun -np 4 ./sstruct -in sstruct.in.amr.graphadd -solver 28 -P 1 2 1 -pooldist 1 \
+ > amr2d.out.13

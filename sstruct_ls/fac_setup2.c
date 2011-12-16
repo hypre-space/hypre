@@ -636,7 +636,7 @@ hypre_FacSetup2( void                 *fac_vdata,
       for (k= 0; k< nUentries; k++)
       {
          to_part =  hypre_SStructUVEntryToPart(Uventry, k);
-         to_rank =  hypre_SStructUVEntryRank(Uventry, k);
+         to_rank =  hypre_SStructUVEntryToRank(Uventry, k);
          
          /*-----------------------------------------------------------
           *  store the row & col indices in the correct level.
@@ -684,7 +684,7 @@ hypre_FacSetup2( void                 *fac_vdata,
          nUentries=  hypre_SStructUVEntryNUEntries(Uventry);
          for (k= 0; k< nUentries; k++)
          {
-            to_rank =  hypre_SStructUVEntryRank(Uventry, k);
+            to_rank =  hypre_SStructUVEntryToRank(Uventry, k);
          
             level_rows[level_cnt]  = row_coord;
             level_cols[level_cnt++]= to_rank;

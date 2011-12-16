@@ -2268,7 +2268,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                              if (hypre_SStructUVEntryToPart(Uventry, i)==part_crse)
                                              {
                                                 rows[cnt1]= rank;
-                                                cols[cnt1++]= hypre_SStructUVEntryRank(Uventry, i);
+                                                cols[cnt1++]= hypre_SStructUVEntryToRank(Uventry, i);
                                              }
 
                                           }  /* for (i= 0; i< nUentries; i++) */
@@ -2805,7 +2805,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                    {
                       if (hypre_SStructUVEntryToPart(Uventry, l) == part_crse)
                       {
-                         to_rank  = hypre_SStructUVEntryRank(Uventry, l);
+                         to_rank  = hypre_SStructUVEntryToRank(Uventry, l);
                          rows[k]  = rank;
                          cols[k++]= to_rank;
 

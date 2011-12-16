@@ -418,7 +418,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                {
                                   ncols[i]= 1;
                                   rows[i] = rank;
-                                  cols[i] = hypre_SStructUVEntryRank(Uventry, temp1[i]);
+                                  cols[i] = hypre_SStructUVEntryToRank(Uventry, temp1[i]);
                          
                                  /* determine the stencil connection pattern */
                                   hypre_StructMapFineToCoarse(

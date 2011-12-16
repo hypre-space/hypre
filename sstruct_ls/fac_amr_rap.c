@@ -131,7 +131,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
 
       for (j= 0; j< nUentries; j++)
       {
-         cols[k++]= hypre_SStructUVEntryRank(Uventry, j);
+         cols[k++]= hypre_SStructUVEntryToRank(Uventry, j);
       }
    }
 
