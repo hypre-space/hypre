@@ -999,10 +999,11 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
          /* RDF: Add periodic boxes to the neighbor box managers.
           *
           * Compute a local bounding box and grow by max_distance, shift the
-          * non-local boxman boxes and intersect them with the grown local
-          * bounding box.  If there is a nonzero intersection, add the shifted
-          * box to the neighbor boxman.  The only reason for doing the intersect
-          * is to reduce the number of boxes that we add. */
+          * boxman boxes (local and non-local to allow for periodicity of a box
+          * with itself) and intersect them with the grown local bounding box.
+          * If there is a nonzero intersection, add the shifted box to the
+          * neighbor boxman.  The only reason for doing the intersect is to
+          * reduce the number of boxes that we add. */
 
          num_periods = hypre_StructGridNumPeriods(sgrid);
          if ((num_periods > 1) && (hypre_StructGridNumBoxes(sgrid)))
@@ -1036,24 +1037,21 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
                
                proc = hypre_BoxManEntryProc(entry);
                
-               if (proc != myproc)
-               {
-                  hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
+               hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
                   
-                  for (k = 1; k < num_periods; k++) /* k = 0 is original box */
-                  {
-                     pshift = hypre_StructGridPShift(sgrid, k);
-                     hypre_BoxSetExtents(box, hypre_BoxManEntryIMin(entry),
-                                         hypre_BoxManEntryIMax(entry));
-                     hypre_BoxShiftPos(box, pshift);
+               for (k = 1; k < num_periods; k++) /* k = 0 is original box */
+               {
+                  pshift = hypre_StructGridPShift(sgrid, k);
+                  hypre_BoxSetExtents(box, hypre_BoxManEntryIMin(entry),
+                                      hypre_BoxManEntryIMax(entry));
+                  hypre_BoxShiftPos(box, pshift);
                      
-                     hypre_IntersectBoxes(box, bounding_box, int_box);
-                     if (hypre_BoxVolume(int_box) > 0)
-                     {
-                        hypre_BoxManAddEntry(nbor_managers[part][var],
-                                             hypre_BoxIMin(box), hypre_BoxIMax(box),
-                                             proc, -1, entry_info);
-                     }
+                  hypre_IntersectBoxes(box, bounding_box, int_box);
+                  if (hypre_BoxVolume(int_box) > 0)
+                  {
+                     hypre_BoxManAddEntry(nbor_managers[part][var],
+                                          hypre_BoxIMin(box), hypre_BoxIMax(box),
+                                          proc, -1, entry_info);
                   }
                }
             }
