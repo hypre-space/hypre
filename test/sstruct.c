@@ -1176,6 +1176,8 @@ DistributeData( ProblemData   global_data,
    HYPRE_Int        np, pid;
    HYPRE_Int        pool, part, box, b, p, q, r, i, d;
    HYPRE_Int        dmap, sign, size;
+   HYPRE_Int       *iptr;
+   double          *dptr;
    Index            m, mmap, n;
    ProblemIndex     ilower, iupper, int_ilower, int_iupper;
 
@@ -1469,8 +1471,12 @@ DistributeData( ProblemData   global_data,
                      }
                      pdata.matadd_vars[i]     = pdata.matadd_vars[box];
                      pdata.matadd_nentries[i] = pdata.matadd_nentries[box];
-                     pdata.matadd_entries[i]  = pdata.matadd_entries[box];
-                     pdata.matadd_values[i]   = pdata.matadd_values[box];
+                     iptr = pdata.matadd_entries[i];
+                     pdata.matadd_entries[i] = pdata.matadd_entries[box];
+                     pdata.matadd_entries[box] = iptr;
+                     dptr = pdata.matadd_values[i];
+                     pdata.matadd_values[i] = pdata.matadd_values[box];
+                     pdata.matadd_values[box] = dptr;
                      i++;
                      break;
                   }
@@ -1512,10 +1518,17 @@ DistributeData( ProblemData   global_data,
                            pdata.fem_matadd_iuppers[box][d];
                      }
                      pdata.fem_matadd_nrows[i]  = pdata.fem_matadd_nrows[box];
-                     pdata.fem_matadd_rows[i]   = pdata.fem_matadd_rows[box];
+                     iptr = pdata.fem_matadd_rows[box];
+                     iptr = pdata.fem_matadd_rows[i];
+                     pdata.fem_matadd_rows[i] = pdata.fem_matadd_rows[box];
+                     pdata.fem_matadd_rows[box] = iptr;
                      pdata.fem_matadd_ncols[i]  = pdata.fem_matadd_ncols[box];
-                     pdata.fem_matadd_cols[i]   = pdata.fem_matadd_cols[box];
+                     iptr = pdata.fem_matadd_cols[i];
+                     pdata.fem_matadd_cols[i] = pdata.fem_matadd_cols[box];
+                     pdata.fem_matadd_cols[box] = iptr;
+                     dptr = pdata.fem_matadd_values[i];
                      pdata.fem_matadd_values[i] = pdata.fem_matadd_values[box];
+                     pdata.fem_matadd_values[box] = dptr;
                      i++;
                      break;
                   }
@@ -1597,7 +1610,9 @@ DistributeData( ProblemData   global_data,
                         pdata.fem_rhsadd_iuppers[i][d] =
                            pdata.fem_rhsadd_iuppers[box][d];
                      }
+                     dptr = pdata.fem_rhsadd_values[i];
                      pdata.fem_rhsadd_values[i] = pdata.fem_rhsadd_values[box];
+                     pdata.fem_rhsadd_values[box] = dptr;
                      i++;
                      break;
                   }

@@ -8,11 +8,11 @@ GridCreate: 2 1
 GridSetExtents: 0 (0- 0-) (7+ 7+)
 
 # GridSetVariables: part nvars vartypes[nvars]
-# CELL  = 0
-GridSetVariables: 0 1 [0]
+# NODE  = 1
+GridSetVariables: 0 1 [1]
 
 # GridSetPeriodic: part periodic[ndim]
-GridSetPeriodic: 0 [8 0]
+GridSetPeriodic: 0 [0 8]
 
 ###########################################################
 
@@ -35,14 +35,14 @@ GraphSetStencil: 0 0 0
 
 # MatrixSetSymmetric: part var to_var symmetric
 # ('-1' means "all", e.g. "all parts")
-MatrixSetSymmetric: -1 -1 -1  1
+#MatrixSetSymmetric: -1 -1 -1  1
 
 # MatrixSetValues: \
 #   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
-#MatrixSetValues: 0 (0- 0-) (0- 7+) [1 1] 0 0 0.0
-#MatrixSetValues: 0 (7+ 0-) (7+ 7+) [1 1] 0 3 0.0
-MatrixSetValues: 0 (0- 0-) (7+ 0-) [1 1] 0 1 0.0
-MatrixSetValues: 0 (0- 7+) (7+ 7+) [1 1] 0 4 0.0
+MatrixSetValues: 0 (-1+ -1+) (-1+ 7+) [1 1] 0 0 0.0
+MatrixSetValues: 0 ( 7+ -1+) ( 7+ 7+) [1 1] 0 3 0.0
+#MatrixSetValues: 0 (-1+ -1+) (7+ -1+) [1 1] 0 1 0.0
+#MatrixSetValues: 0 (-1+  7+) (7+  7+) [1 1] 0 4 0.0
 
 ###########################################################
 
