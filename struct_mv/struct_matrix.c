@@ -704,6 +704,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    hypre_StructStencil *stencil;
    HYPRE_Int            center_rank;
                    
+   HYPRE_Int           *symm_elements;
    hypre_BoxArray      *data_space;
    hypre_Box           *data_box;
    hypre_IndexRef       data_start;
@@ -727,6 +728,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
     *-----------------------------------------------------------------------*/
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(matrix);
+   symm_elements        = hypre_StructMatrixSymmElements(matrix);
 
    if (outside > 0)
    {
@@ -785,90 +787,93 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
 
          for (s = 0; s < num_stencil_indices; s++)
          {
-            datap = hypre_StructMatrixBoxData(matrix, i,
-                                              stencil_indices[s]);
-
-            if ( constant_coefficient==1 ||
-                 ( constant_coefficient==2 && stencil_indices[s]!=center_rank ))
-               /* datap has only one data point for a given i and s */
+            /* only set stored stencil values */
+            if (symm_elements[stencil_indices[s]] < 0)
             {
-               /* should have called SetConstantValues */
-               hypre_error(HYPRE_ERROR_GENERIC);
-               hypre_BoxGetSize(int_box, loop_size);
+               datap = hypre_StructMatrixBoxData(matrix, i, stencil_indices[s]);
 
-               if (action > 0)
+               if ( (constant_coefficient==1) ||
+                    (constant_coefficient==2 && stencil_indices[s]!=center_rank ))
+                  /* datap has only one data point for a given i and s */
                {
-                  datai = hypre_CCBoxIndexRank(data_box,data_start);
-                  dvali = hypre_BoxIndexRank(dval_box,dval_start);
-                  datap[datai] += values[dvali];
-               }
-               else if (action > -1)
-               {
-                  datai = hypre_CCBoxIndexRank(data_box,data_start);
-                  dvali = hypre_BoxIndexRank(dval_box,dval_start);
-                  datap[datai] = values[dvali];
-               }
-               else
-               {
-                  datai = hypre_CCBoxIndexRank(data_box,data_start);
-                  dvali = hypre_BoxIndexRank(dval_box,dval_start);
-                  values[dvali] = datap[datai];
-                  if (action == -2)
+                  /* should have called SetConstantValues */
+                  hypre_error(HYPRE_ERROR_GENERIC);
+                  hypre_BoxGetSize(int_box, loop_size);
+
+                  if (action > 0)
                   {
-                     datap[datai] = 0;
-                  }
-               }
-
-            }
-            else   /* variable coefficient: constant_coefficient==0
-                      or diagonal with constant_coefficient==2   */
-            {
-               hypre_BoxGetSize(int_box, loop_size);
-
-               if (action > 0)
-               {
-                  hypre_BoxLoop2Begin(loop_size,
-                                      data_box,data_start,data_stride,datai,
-                                      dval_box,dval_start,dval_stride,dvali);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
-#include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
-                  {
+                     datai = hypre_CCBoxIndexRank(data_box,data_start);
+                     dvali = hypre_BoxIndexRank(dval_box,dval_start);
                      datap[datai] += values[dvali];
                   }
-                  hypre_BoxLoop2End(datai, dvali);
-               }
-               else if (action > -1)
-               {
-                  hypre_BoxLoop2Begin(loop_size,
-                                      data_box,data_start,data_stride,datai,
-                                      dval_box,dval_start,dval_stride,dvali);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
-#include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+                  else if (action > -1)
                   {
+                     datai = hypre_CCBoxIndexRank(data_box,data_start);
+                     dvali = hypre_BoxIndexRank(dval_box,dval_start);
                      datap[datai] = values[dvali];
                   }
-                  hypre_BoxLoop2End(datai, dvali);
-               }
-               else
-               {
-                  hypre_BoxLoop2Begin(loop_size,
-                                      data_box,data_start,data_stride,datai,
-                                      dval_box,dval_start,dval_stride,dvali);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
-#include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+                  else
                   {
+                     datai = hypre_CCBoxIndexRank(data_box,data_start);
+                     dvali = hypre_BoxIndexRank(dval_box,dval_start);
                      values[dvali] = datap[datai];
                      if (action == -2)
                      {
                         datap[datai] = 0;
                      }
                   }
-                  hypre_BoxLoop2End(datai, dvali);
+
                }
-            }
+               else   /* variable coefficient: constant_coefficient==0
+                         or diagonal with constant_coefficient==2   */
+               {
+                  hypre_BoxGetSize(int_box, loop_size);
+
+                  if (action > 0)
+                  {
+                     hypre_BoxLoop2Begin(loop_size,
+                                         data_box,data_start,data_stride,datai,
+                                         dval_box,dval_start,dval_stride,dvali);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+                     {
+                        datap[datai] += values[dvali];
+                     }
+                     hypre_BoxLoop2End(datai, dvali);
+                  }
+                  else if (action > -1)
+                  {
+                     hypre_BoxLoop2Begin(loop_size,
+                                         data_box,data_start,data_stride,datai,
+                                         dval_box,dval_start,dval_stride,dvali);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+                     {
+                        datap[datai] = values[dvali];
+                     }
+                     hypre_BoxLoop2End(datai, dvali);
+                  }
+                  else
+                  {
+                     hypre_BoxLoop2Begin(loop_size,
+                                         data_box,data_start,data_stride,datai,
+                                         dval_box,dval_start,dval_stride,dvali);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+                     {
+                        values[dvali] = datap[datai];
+                        if (action == -2)
+                        {
+                           datap[datai] = 0;
+                        }
+                     }
+                     hypre_BoxLoop2End(datai, dvali);
+                  }
+               }
+            } /* end if (symm_elements) */
 
             hypre_IndexD(dval_start, 0) ++;
          }
