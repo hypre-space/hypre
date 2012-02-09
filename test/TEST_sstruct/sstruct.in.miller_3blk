@@ -1,4 +1,23 @@
-
+###########################################################
+#
+#   --------------------------------
+#   |                             /|
+#   |                           /  |
+#   |                         /    |
+#   |       part 1          /      |
+#   |                     /        |
+#   | j                 /          | 
+#   | |               /            | 
+#   | ---i          /              |
+#   ---------------      part 2    | 
+#   |             |                |
+#   |   part 0    |                |
+#   |             |                | 
+#   | j           | j              |
+#   | |           | |              |
+#   | ---i        | ---i           |
+#   --------------------------------
+#
 ###########################################################
 
 # GridCreate: ndim nparts
@@ -47,6 +66,49 @@ StencilSetEntry: 0  8 [ 0  0] 0  8.0
 GraphSetStencil: 0 0 0
 GraphSetStencil: 1 0 0
 GraphSetStencil: 2 0 0
+
+###########################################################
+
+# MatrixSetValues: \
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+MatrixSetValues: 0 (2- 2-) (2- 6+) [1 1] 0 0 0.0
+MatrixSetValues: 0 (2- 2-) (2- 6+) [1 1] 0 1 0.0
+MatrixSetValues: 0 (2- 2-) (2- 6+) [1 1] 0 2 0.0
+#MatrixSetValues: 0 (6+ 2-) (6+ 6+) [1 1] 0 4 0.0
+#MatrixSetValues: 0 (6+ 2-) (6+ 6+) [1 1] 0 5 0.0
+#MatrixSetValues: 0 (6+ 2-) (6+ 6+) [1 1] 0 6 0.0
+MatrixSetValues: 0 (2- 2-) (6+ 2-) [1 1] 0 0 0.0
+MatrixSetValues: 0 (2- 2-) (6+ 2-) [1 1] 0 6 0.0
+MatrixSetValues: 0 (2- 2-) (6+ 2-) [1 1] 0 7 0.0
+#MatrixSetValues: 0 (2- 6+) (6+ 6+) [1 1] 0 2 0.0
+#MatrixSetValues: 0 (2- 6+) (6+ 6+) [1 1] 0 3 0.0
+#MatrixSetValues: 0 (2- 6+) (6+ 6+) [1 1] 0 4 0.0
+
+MatrixSetValues: 1 (2- 2-) (2- 6+) [1 1] 0 0 0.0
+MatrixSetValues: 1 (2- 2-) (2- 6+) [1 1] 0 1 0.0
+MatrixSetValues: 1 (2- 2-) (2- 6+) [1 1] 0 2 0.0
+#MatrixSetValues: 1 (6+ 2-) (6+ 6+) [1 1] 0 4 0.0
+#MatrixSetValues: 1 (6+ 2-) (6+ 6+) [1 1] 0 5 0.0
+#MatrixSetValues: 1 (6+ 2-) (6+ 6+) [1 1] 0 6 0.0
+#MatrixSetValues: 1 (2- 2-) (6+ 2-) [1 1] 0 0 0.0
+#MatrixSetValues: 1 (2- 2-) (6+ 2-) [1 1] 0 6 0.0
+#MatrixSetValues: 1 (2- 2-) (6+ 2-) [1 1] 0 7 0.0
+MatrixSetValues: 1 (2- 6+) (6+ 6+) [1 1] 0 2 0.0
+MatrixSetValues: 1 (2- 6+) (6+ 6+) [1 1] 0 3 0.0
+MatrixSetValues: 1 (2- 6+) (6+ 6+) [1 1] 0 4 0.0
+
+#MatrixSetValues: 2 (2- 2-) (2- 6+) [1 1] 0 0 0.0
+#MatrixSetValues: 2 (2- 2-) (2- 6+) [1 1] 0 1 0.0
+#MatrixSetValues: 2 (2- 2-) (2- 6+) [1 1] 0 2 0.0
+MatrixSetValues: 2 (6+ 2-) (6+ 6+) [1 1] 0 4 0.0
+MatrixSetValues: 2 (6+ 2-) (6+ 6+) [1 1] 0 5 0.0
+MatrixSetValues: 2 (6+ 2-) (6+ 6+) [1 1] 0 6 0.0
+MatrixSetValues: 2 (2- 2-) (6+ 2-) [1 1] 0 0 0.0
+MatrixSetValues: 2 (2- 2-) (6+ 2-) [1 1] 0 6 0.0
+MatrixSetValues: 2 (2- 2-) (6+ 2-) [1 1] 0 7 0.0
+#MatrixSetValues: 2 (2- 6+) (6+ 6+) [1 1] 0 2 0.0
+#MatrixSetValues: 2 (2- 6+) (6+ 6+) [1 1] 0 3 0.0
+#MatrixSetValues: 2 (2- 6+) (6+ 6+) [1 1] 0 4 0.0
 
 ###########################################################
 

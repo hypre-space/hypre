@@ -1,5 +1,23 @@
 
 ###########################################################
+#
+#   ---------------
+#   |             |
+#   |   part 1    |
+#   |             | 
+#   | j           |
+#   | |           |
+#   | ---i        |
+#   ---------------
+#   |             |
+#   |   part 0    |
+#   |             | 
+#   | j           |
+#   | |           |
+#   | ---i        |
+#   ---------------
+#
+###########################################################
 
 # GridCreate: ndim nparts
 GridCreate: 2 2
@@ -36,6 +54,20 @@ StencilSetEntry: 0  4 [ 0  0] 0  4.0
 # GraphSetStencil: part var stencil_num
 GraphSetStencil: 0 0 0
 GraphSetStencil: 1 0 0
+
+###########################################################
+
+# MatrixSetValues: \
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+MatrixSetValues: 0 (2- 2-) (2- 3+) [1 1] 0 0 0.0
+MatrixSetValues: 0 (3+ 2-) (3+ 3+) [1 1] 0 2 0.0
+MatrixSetValues: 0 (2- 2-) (3+ 2-) [1 1] 0 3 0.0
+#MatrixSetValues: 0 (2- 3+) (3+ 3+) [1 1] 0 1 0.0
+
+MatrixSetValues: 1 (2- 2-) (2- 3+) [1 1] 0 0 0.0
+MatrixSetValues: 1 (3+ 2-) (3+ 3+) [1 1] 0 2 0.0
+#MatrixSetValues: 1 (2- 2-) (3+ 2-) [1 1] 0 3 0.0
+MatrixSetValues: 1 (2- 3+) (3+ 3+) [1 1] 0 1 0.0
 
 ###########################################################
 
