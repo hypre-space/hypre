@@ -669,14 +669,17 @@ void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HY
     {
       diag_ftc[i] = -1;
       offd_ftc[i] = -1;
-      diag_pm[i] = -1;
-      offd_pm[i] = -1;
       tmp_CF[i] = -1;
+      if(diag_pm != NULL)
+      {  diag_pm[i] = -1; }
+      if(offd_pm != NULL)
+      {  offd_pm[i] = -1;}
     }
     for(i = offd_n; i < diag_n; i++)
     { 
       diag_ftc[i] = -1;
-      diag_pm[i] = -1;
+      if(diag_pm != NULL)
+      {  diag_pm[i] = -1; }
     }
   }
   else
@@ -685,15 +688,18 @@ void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HY
     {
       diag_ftc[i] = -1;
       offd_ftc[i] = -1;
-      diag_pm[i] = -1;
-      offd_pm[i] = -1;
       tmp_CF[i] = -1;
+      if(diag_pm != NULL)
+      {  diag_pm[i] = -1;}
+      if(offd_pm != NULL)
+      {  offd_pm[i] = -1;}
     }
     for(i = diag_n; i < offd_n; i++)
     { 
       offd_ftc[i] = -1;
-      offd_pm[i] = -1;
       tmp_CF[i] = -1;
+      if(offd_pm != NULL)
+      {  offd_pm[i] = -1;}
     }
   }
   return;

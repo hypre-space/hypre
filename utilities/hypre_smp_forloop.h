@@ -27,9 +27,11 @@
 #ifndef HYPRE_SMP_REDUCTION_OP
 #ifndef HYPRE_SMP_PAR_REGION
 #ifndef HYPRE_SMP_FOR
+#ifndef HYPRE_SMP_ONLY_OUTER_FOR_LOOP
 #ifndef HYPRE_SMP_CRITICAL
 #ifndef HYPRE_SMP_BARRIER
 #pragma omp parallel for private(HYPRE_SMP_PRIVATE) schedule(static)
+#endif
 #endif
 #endif
 #endif
@@ -42,6 +44,11 @@
 
 #ifdef HYPRE_SMP_FOR
 #pragma omp for schedule(static)
+#endif
+
+/* This specifically tells OMP to only parallelize the outer-most for loop */
+#ifdef HYPRE_SMP_ONLY_OUTER_FOR_LOOP
+#pragma omp parallel for private(HYPRE_SMP_PRIVATE) schedule(static) collapse(1)
 #endif
 
 #ifdef HYPRE_SMP_CRITICAL
@@ -92,4 +99,5 @@ schedule(static)
 #undef HYPRE_SMP_PAR_REGION
 #undef HYPRE_SMP_FOR
 #undef HYPRE_SMP_CRITICAL
+#undef HYPRE_SMP_ONLY_OUTER_FOR_LOOP
 #undef HYPRE_SMP_BARRIER
