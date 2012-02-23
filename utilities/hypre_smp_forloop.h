@@ -46,11 +46,6 @@
 #pragma omp for schedule(static)
 #endif
 
-/* This specifically tells OMP to only parallelize the outer-most for loop */
-#ifdef HYPRE_SMP_ONLY_OUTER_FOR_LOOP
-#pragma omp parallel for private(HYPRE_SMP_PRIVATE) schedule(static) collapse(1)
-#endif
-
 #ifdef HYPRE_SMP_CRITICAL
 #pragma omp critical
 #endif

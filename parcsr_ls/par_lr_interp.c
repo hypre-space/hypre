@@ -2023,7 +2023,6 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        #define HYPRE_SMP_PRIVATE i,j
-       #define HYPRE_SMP_ONLY_OUTER_FOR_LOOP
        #include "../utilities/hypre_smp_forloop.h"
        for(i = 0; i < P_offd_size; i++)
          for(j = 0; j < num_cols_P_offd; j++)
