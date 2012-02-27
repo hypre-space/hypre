@@ -209,6 +209,24 @@ HYPRE_GMRESGetRelChange( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetSkipRealResidualCheck, HYPRE_GMRESGetSkipRealResidualCheck
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESSetSkipRealResidualCheck( HYPRE_Solver solver,
+                                     HYPRE_Int skip_real_r_check )
+{
+   return( hypre_GMRESSetSkipRealResidualCheck( (void *) solver, skip_real_r_check ) );
+}
+
+HYPRE_Int
+HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver,
+                                     HYPRE_Int *skip_real_r_check )
+{
+   return( hypre_GMRESGetSkipRealResidualCheck( (void *) solver, skip_real_r_check ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GMRESSetPrecond
  *--------------------------------------------------------------------------*/
 

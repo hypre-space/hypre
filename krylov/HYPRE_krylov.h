@@ -258,6 +258,11 @@ HYPRE_Int HYPRE_PCGGetRelChange(HYPRE_Solver  solver,
 
 /**
  **/
+HYPRE_Int HYPRE_GMRESGetSkipRealResidualCheck(HYPRE_Solver solver,
+                                              HYPRE_Int *skip_real_r_check);
+
+/**
+ **/
 HYPRE_Int HYPRE_PCGGetPrecond(HYPRE_Solver  solver,
                         HYPRE_Solver *precond_data_ptr);
 
@@ -353,6 +358,16 @@ HYPRE_Int HYPRE_GMRESSetKDim(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_GMRESSetRelChange(HYPRE_Solver solver,
                             HYPRE_Int          rel_change);
+
+/**
+ * (Optional) By default, hypre checks for convergence by evaluating the actual
+ * residual before returnig from GMRES (with restart if the true residual does
+ * not indicate convergence). This option allows users to skip the evaluation
+ * and the check of the actual residual for badly conditioned problems where
+ * restart is not expected to be beneficial.
+ **/
+HYPRE_Int HYPRE_GMRESSetSkipRealResidualCheck(HYPRE_Solver solver,
+                                              HYPRE_Int skip_real_r_check);
 
 /**
  * (Optional) Set the preconditioner to use.

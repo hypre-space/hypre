@@ -89,6 +89,7 @@ typedef struct
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      rel_change;
+   HYPRE_Int      skip_real_r_check;
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
    double   tol;

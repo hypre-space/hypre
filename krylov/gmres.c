@@ -93,6 +93,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
    (gmres_data -> min_iter)       = 0;
    (gmres_data -> max_iter)       = 1000;
    (gmres_data -> rel_change)     = 0;
+   (gmres_data -> skip_real_r_check) = 0;
    (gmres_data -> stop_crit)      = 0; /* rel. residual norm  - this is obsolete!*/
    (gmres_data -> converged)      = 0;
    (gmres_data -> precond_data)   = NULL;
@@ -251,6 +252,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Int               min_iter     = (gmres_data -> min_iter);
    HYPRE_Int 		     max_iter     = (gmres_data -> max_iter);
    HYPRE_Int               rel_change   = (gmres_data -> rel_change);
+   HYPRE_Int         skip_real_r_check  = (gmres_data -> skip_real_r_check);
    double 	     r_tol        = (gmres_data -> tol);
    double 	     cf_tol       = (gmres_data -> cf_tol);
    double            a_tol        = (gmres_data -> a_tol);
@@ -293,7 +295,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
    double     relative_error = 1.0;
 
    HYPRE_Int        rel_change_passed = 0, num_rel_change_check = 0;
-   
+
+   double     real_r_norm_old, real_r_norm_new;
 
    (gmres_data -> converged) = 0;
    /*-----------------------------------------------------------------------
@@ -330,6 +333,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    (*(gmres_functions->Matvec))(matvec_data,-1.0, A, x, 1.0, p[0]);
 
    b_norm = sqrt((*(gmres_functions->InnerProd))(b,b));
+   real_r_norm_old = b_norm;
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
@@ -706,14 +710,20 @@ hypre_GMRESSolve(void  *gmres_vdata,
          
 
         /* check for convergence by evaluating the actual residual */
-	if (r_norm  <= epsilon && iter >= min_iter) 
+	if (r_norm  <= epsilon && iter >= min_iter)
         {
+           if (skip_real_r_check)
+           {
+              (gmres_data -> converged) = 1;
+              break;
+           }
+
            /* calculate actual residual norm*/
            (*(gmres_functions->CopyVector))(b,r);
            (*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
-           r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
+           real_r_norm_new = r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
 
-           if (r_norm  <= epsilon)
+           if (r_norm <= epsilon)
            {
               if (rel_change && !rel_change_passed) /* calculate the relative change */
               {
@@ -773,12 +783,26 @@ hypre_GMRESSolve(void  *gmres_vdata,
                  break;
               }
            }
-           else /* conv. has not occurred, according to true residual */ 
+           else /* conv. has not occurred, according to true residual */
            {
+              /* exit if the real residual norm has not decreased */
+              if (real_r_norm_new >= real_r_norm_old)
+              {
+                 if (print_level > 1 && my_id == 0)
+                 {
+                    hypre_printf("\n\n");
+                    hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
+                 }
+                 (gmres_data -> converged) = 1;
+                 break;
+              }
+
+              /* report discrepancy between real/GMRES residuals and restart */
               if ( print_level>0 && my_id == 0)
-                 hypre_printf("false convergence 2\n");
+                 hypre_printf("false convergence 2, L2 norm of residual: %e\n", r_norm);
               (*(gmres_functions->CopyVector))(r,p[0]);
               i = 0;
+              real_r_norm_old = real_r_norm_new;
            }
 	} /* end of convergence check */
 
@@ -1019,6 +1043,32 @@ hypre_GMRESGetRelChange( void *gmres_vdata,
  
    *rel_change = (gmres_data -> rel_change);
  
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetSkipRealResidualCheck, hypre_GMRESGetSkipRealResidualCheck
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetSkipRealResidualCheck( void *gmres_vdata,
+                                     HYPRE_Int skip_real_r_check )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+
+   (gmres_data -> skip_real_r_check) = skip_real_r_check;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESGetSkipRealResidualCheck( void *gmres_vdata,
+                                     HYPRE_Int *skip_real_r_check)
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+
+   *skip_real_r_check = (gmres_data -> skip_real_r_check);
+
    return hypre_error_flag;
 }
 
