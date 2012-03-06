@@ -24,7 +24,6 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- headers.h\
  HYPRE_parcsr_mv.h\
  _hypre_parcsr_mv.h\
  new_commpkg.h\

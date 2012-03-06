@@ -29,7 +29,6 @@ C_COMPILE_FLAGS = \
 HEADERS =\
  HYPRE_sstruct_mv.h\
  _hypre_sstruct_mv.h\
- headers.h\
  sstruct_graph.h\
  sstruct_grid.h\
  sstruct_matrix.h\

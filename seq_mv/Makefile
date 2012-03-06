@@ -24,7 +24,6 @@ C_COMPILE_FLAGS =\
 
 HEADERS =\
  csr_matrix.h\
- headers.h\
  HYPRE_seq_mv.h\
  mapped_matrix.h\
  multiblock_matrix.h\

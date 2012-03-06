@@ -39,7 +39,6 @@ HEADERS =\
  aux_interp.h\
  block_tridiag.h\
  Common.h\
- headers.h\
  par_amg.h\
  schwarz.h
 

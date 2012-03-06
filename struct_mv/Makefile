@@ -30,7 +30,6 @@ HEADERS =\
  box_manager.h\
  box_pthreads.h\
  computation.h\
- headers.h\
  hypre_box_smp_forloop.h\
  struct_communication.h\
  struct_grid.h\

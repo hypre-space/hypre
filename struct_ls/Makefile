@@ -28,7 +28,6 @@ C_COMPILE_FLAGS = \
 HEADERS =\
  HYPRE_struct_ls.h\
  _hypre_struct_ls.h\
- headers.h\
  pfmg.h\
  red_black_gs.h\
  smg.h\

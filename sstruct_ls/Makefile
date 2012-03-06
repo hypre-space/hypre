@@ -35,7 +35,6 @@ HEADERS =\
  HYPRE_sstruct_ls.h\
  _hypre_sstruct_ls.h\
  fac.h\
- headers.h\
  maxwell_TV.h\
  nd1_amge_interpolation.h\
  sstruct_owninfo.h\
