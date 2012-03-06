@@ -10,10 +10,8 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "blas_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "blas_dh.h" */
 
 #undef __FUNC__
 #define __FUNC__ "matvec_euclid_seq"

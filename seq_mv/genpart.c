@@ -14,7 +14,7 @@
 
 
  
-#include "headers.h"
+#include "seq_mv.h"
  
 /*--------------------------------------------------------------------------
  * hypre_GeneratePartitioning:

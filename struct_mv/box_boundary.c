@@ -28,7 +28,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
  * Intersect a surface of 'box' with the physical boundary.  The surface is

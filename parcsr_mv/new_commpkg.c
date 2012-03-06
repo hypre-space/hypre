@@ -18,7 +18,7 @@
  *  AHB 6/04                                            
  *-----------------------------------------------------*/
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 /* some debugging tools*/
 #define mydebug 0

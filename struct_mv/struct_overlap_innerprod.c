@@ -17,7 +17,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /* this is all commented out now as it is currently not used - if used
    in the future, it needs to use the box manager instead of the neighbors 

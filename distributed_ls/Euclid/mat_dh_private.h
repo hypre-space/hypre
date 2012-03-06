@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef MAT_DH_PRIVATE
 #define MAT_DH_PRIVATE
 
@@ -22,7 +19,7 @@
  
  */
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 extern HYPRE_Int mat_find_owner(HYPRE_Int *beg_rows, HYPRE_Int *end_rows, HYPRE_Int index);
 

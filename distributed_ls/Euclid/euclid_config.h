@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef EUCLID_CONF_DH
 #define EUCLID_CONF_DH
 

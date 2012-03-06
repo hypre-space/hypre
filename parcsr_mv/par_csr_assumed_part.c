@@ -19,7 +19,7 @@
  *  AHB 4/06                                            
  *-----------------------------------------------------*/
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 /* This is used only in the function below */
 #define CONTACT(a,b)  (contact_list[(a)*3+(b)])

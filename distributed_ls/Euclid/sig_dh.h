@@ -10,13 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef MY_SIG_DH
 #define MY_SIG_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 #include <signal.h>
 
 extern void sigRegister_dh();

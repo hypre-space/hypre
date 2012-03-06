@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_block_mv.h"
 
 #define LB_VERSION 0 /* lapack and blas version 5/12/06 - preliminary testing shows this
                       is slower for block sizes < 4 (did not try larger block sizes)-

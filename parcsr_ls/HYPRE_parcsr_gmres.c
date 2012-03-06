@@ -19,7 +19,7 @@
  * HYPRE_ParCSRGMRES interface
  *
  *****************************************************************************/
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESCreate

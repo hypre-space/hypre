@@ -10,12 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "Hash_dh.h"
-#include "Parser_dh.h"
-#include "Mem_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "Hash_dh.h" */
+/* #include "Parser_dh.h" */
+/* #include "Mem_dh.h" */
 
 static void Hash_dhInit_private(Hash_dh h, HYPRE_Int s);
 

@@ -13,7 +13,7 @@
 
 
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 void RowsWithColumn_original
 ( HYPRE_Int * rowmin, HYPRE_Int * rowmax, HYPRE_Int column, hypre_ParCSRMatrix * A )

@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 HYPRE_Int
 hypre_ParVectorZeroBCValues(hypre_ParVector *v,

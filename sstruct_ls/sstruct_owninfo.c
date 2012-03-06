@@ -13,7 +13,7 @@
 
 
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 HYPRE_Int
 hypre_SStructIndexScaleF_C( hypre_Index findex,

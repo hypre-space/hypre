@@ -10,13 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "SortedSet_dh.h"
-#include "shellSort_dh.h"
-#include "Mem_dh.h"
-
+#include "_hypre_Euclid.h"
+/* #include "SortedSet_dh.h" */
+/* #include "shellSort_dh.h" */
+/* #include "Mem_dh.h" */
 
 #undef __FUNC__
 #define __FUNC__ "SortedSet_dhCreate"

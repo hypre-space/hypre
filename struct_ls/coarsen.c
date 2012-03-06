@@ -17,7 +17,7 @@ static HYPRE_Int s_coarsen_num = 0;
 #endif
 
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 #define DEBUG 0
 

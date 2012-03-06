@@ -10,16 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "Numbering_dh.h"
-#include "Mat_dh.h"
-#include "Hash_i_dh.h"
-#include "Mem_dh.h"
-#include "shellSort_dh.h"
-#include "Parser_dh.h"
-
+#include "_hypre_Euclid.h"
+/* #include "Numbering_dh.h" */
+/* #include "Mat_dh.h" */
+/* #include "Hash_i_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "shellSort_dh.h" */
+/* #include "Parser_dh.h" */
 
 #undef __FUNC__
 #define __FUNC__ "Numbering_dhCreate"

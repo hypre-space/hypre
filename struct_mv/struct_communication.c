@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 #define DEBUG 0
 

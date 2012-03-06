@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "./HYPRE_parcsr_ls.h"
 #include "../matrix_matrix/HYPRE_matrix_matrix_protos.h"
 #include "../utilities/mpistubs.h"
@@ -26,13 +23,13 @@
 /* #include "../parcsr_mv/par_vector.h" */
 #include "../parcsr_mv/_hypre_parcsr_mv.h"
 
-
-  /* These are what we need from Euclid */
-#include "../distributed_ls/Euclid/Mem_dh.h"
-#include "../distributed_ls/Euclid/io_dh.h"
-#include "../distributed_ls/Euclid/TimeLog_dh.h"
-#include "../distributed_ls/Euclid/Parser_dh.h"
-#include "../distributed_ls/Euclid/Euclid_dh.h"
+/* These are what we need from Euclid */
+#include "distributed_ls/Euclid/_hypre_Euclid.h"
+/* #include "../distributed_ls/Euclid/Mem_dh.h" */
+/* #include "../distributed_ls/Euclid/io_dh.h" */
+/* #include "../distributed_ls/Euclid/TimeLog_dh.h" */
+/* #include "../distributed_ls/Euclid/Parser_dh.h" */
+/* #include "../distributed_ls/Euclid/Euclid_dh.h" */
 
 /*------------------------------------------------------------------
  * Error checking

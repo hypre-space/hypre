@@ -14,13 +14,10 @@
 include ../config/Makefile.config
 
 ## Euclid specific macros taken from distributed_ls/Euclid
-EUCLID_CFLAGS = -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
-                -DHYPRE_MODE -DOPTIMIZED_DH
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
 C_COMPILE_FLAGS =\
- ${EUCLID_CFLAGS}\
  -I..\
  -I../distributed_ls/Euclid\
  -I$(srcdir)\

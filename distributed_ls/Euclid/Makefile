@@ -10,17 +10,11 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../../config/Makefile.config
-
-########Euclid specific macros:
-EUCLID_CFLAGS =  -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
-                 -DHYPRE_MODE -DOPTIMIZED_DH
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
 C_COMPILE_FLAGS = \
- ${EUCLID_CFLAGS} \
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
@@ -36,7 +30,6 @@ HEADERS =\
  euclid_common.h\
  euclid_config.h\
  Euclid_dh.h\
- euclid.h\
  ExternalRows_dh.h\
  Factor_dh.h\
  getRow_dh.h\

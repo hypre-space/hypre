@@ -10,12 +10,16 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifndef hypre_STRUCT_MV_HEADER
+#define hypre_STRUCT_MV_HEADER
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
 #include "_hypre_utilities.h"
 
 #include "HYPRE_struct_mv.h"
-
-#ifndef hypre_STRUCT_MV_HEADER
-#define hypre_STRUCT_MV_HEADER
 
 #ifdef __cplusplus
 extern "C" {

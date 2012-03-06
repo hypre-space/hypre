@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef COMMON_DH
 #define COMMON_DH
 
@@ -58,12 +55,9 @@
  * Euclid includes
  *-----------------------------------------------------------------------*/
 
-#include "euclid_config.h" /* contains various user-configurable settings;
-                              edit this when building an interface with
-                              other libraries.  
-                            */  
+/* #include "euclid_config.h" */
 
-#include "macros_dh.h" /* macros for error checking, etc */
+/* #include "macros_dh.h" */ /* macros for error checking, etc */
 
 /*----------------------------------------------------------- 
  *  Euclid classes 

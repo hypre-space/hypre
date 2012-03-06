@@ -10,16 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "Euclid_dh.h"
-#include "Mat_dh.h"
-#include "Factor_dh.h"
-#include "Parser_dh.h"
-#include "TimeLog_dh.h"
-#include "SubdomainGraph_dh.h"
-
+#include "_hypre_Euclid.h"
+/* #include "Euclid_dh.h" */
+/* #include "Mat_dh.h" */
+/* #include "Factor_dh.h" */
+/* #include "Parser_dh.h" */
+/* #include "TimeLog_dh.h" */
+/* #include "SubdomainGraph_dh.h" */
 
 static void scale_rhs_private(Euclid_dh ctx, double *rhs);
 static void permute_vec_n2o_private(Euclid_dh ctx, double *xIN, double *xOUT);

@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef MACROS_DH
 #define MACROS_DH
 

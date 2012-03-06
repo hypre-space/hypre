@@ -14,13 +14,13 @@
 
 
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*==========================================================================*/
 /** Creates a new GMRES solver object.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -58,7 +58,7 @@ HYPRE_StructGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 /** Destroys a GMRES solver object.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -82,7 +82,7 @@ ensures that the setup for the preconditioner is also called.
 NOTE: This is supposed to be an optional call, but currently is required.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -115,7 +115,7 @@ HYPRE_StructGMRESSetup( HYPRE_StructSolver solver,
 /** Performs the GMRES linear solve.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -148,7 +148,7 @@ HYPRE_StructGMRESSolve( HYPRE_StructSolver solver,
 /** (Optional) Set the stopping tolerance.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -171,7 +171,7 @@ HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver,
 /** (Optional) Set the absolute stopping tolerance.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -195,7 +195,7 @@ HYPRE_StructGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
 /** (Optional) Set the maximum number of iterations.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -219,7 +219,7 @@ HYPRE_StructGMRESSetMaxIter( HYPRE_StructSolver solver,
 /** (Optional) Sets the dimension of the Krylov subspace.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -243,7 +243,7 @@ HYPRE_StructGMRESSetKDim( HYPRE_StructSolver solver,
 preconditioner, i.e. the solver is just conjugate gradients (CG).
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -278,7 +278,7 @@ logging is set to 0, no logging is done.  If set to 1, the norms and
 relative norms for each iteration are saved.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -303,7 +303,7 @@ HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver,
 is allowed.  If set to 1, printing takes place.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -327,7 +327,7 @@ HYPRE_StructGMRESSetPrintLevel( HYPRE_StructSolver solver,
 /** (Optional) Gets the number of iterations done in the solve.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -351,7 +351,7 @@ HYPRE_StructGMRESGetNumIterations( HYPRE_StructSolver  solver,
 /** (Optional) Gets the final relative residual norm for the solve.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 

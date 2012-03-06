@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "red_black_gs.h"
 
 #ifndef hypre_abs

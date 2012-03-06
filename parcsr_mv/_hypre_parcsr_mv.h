@@ -13,6 +13,10 @@
 #ifndef hypre_PARCSR_MV_HEADER
 #define hypre_PARCSR_MV_HEADER
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
 #include "HYPRE_parcsr_mv.h"
 #include "_hypre_utilities.h"
 #include "seq_mv.h"
@@ -20,10 +24,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
-
-
 
 #ifndef HYPRE_PAR_CSR_COMMUNICATION_HEADER
 #define HYPRE_PAR_CSR_COMMUNICATION_HEADER

@@ -59,7 +59,7 @@ misc. notes/considerations/open questions:
 
 ********************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
  hypre_BoxManEntrySetInfo - this is not used

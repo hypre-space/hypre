@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 #include "../seq_mv/HYPRE_seq_mv.h"
 /* In addition to publically accessible interface in HYPRE_mv.h, the implementation

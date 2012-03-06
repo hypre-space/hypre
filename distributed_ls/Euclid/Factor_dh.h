@@ -10,13 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef FACTOR_DH
 #define FACTOR_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 struct _factor_dh {
   /* dimensions of local rectangular submatrix; global matrix is n*n */

@@ -13,7 +13,7 @@
 
 
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
  * Finds the boundary boxes for all var_grids in pgrid. Use the cell grid

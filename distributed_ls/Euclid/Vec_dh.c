@@ -11,10 +11,11 @@
  ***********************************************************************EHEADER*/
 
 #include <stdlib.h>
-#include "Vec_dh.h"
-#include "Mem_dh.h"
-#include "SubdomainGraph_dh.h"
-#include "io_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "Vec_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "SubdomainGraph_dh.h" */
+/* #include "io_dh.h" */
 
 #undef __FUNC__
 #define __FUNC__ "Vec_dhCreate"

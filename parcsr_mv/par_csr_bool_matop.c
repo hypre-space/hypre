@@ -14,7 +14,7 @@
 
 
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
 ( hypre_ParCSRBooleanMatrix *A,  hypre_ParCSRBooleanMatrix  *B )

@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 /* This routine takes as input 2 parcsr matrices L1 and L2 (and the
  corresponding initial guess and rhs), and creates the system M*[L1 0;

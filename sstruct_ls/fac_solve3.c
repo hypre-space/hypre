@@ -18,7 +18,7 @@
  *  Note that the level solves compute corrections to the composite solution.
  ******************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 #include "fac.h"
 
 #define DEBUG 0

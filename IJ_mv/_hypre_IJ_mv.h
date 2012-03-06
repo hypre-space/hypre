@@ -1,18 +1,3 @@
-
-#include <HYPRE_config.h>
-
-#ifndef hypre_IJ_HEADER
-#define hypre_IJ_HEADER
-
-#include "_hypre_utilities.h"
-#include "seq_mv.h"
-#include "_hypre_parcsr_mv.h"
-#include "HYPRE_IJ_mv.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -25,9 +10,23 @@ extern "C" {
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifndef hypre_IJ_HEADER
+#define hypre_IJ_HEADER
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
+#include <HYPRE_config.h>
 
+#include "_hypre_utilities.h"
+#include "seq_mv.h"
+#include "_hypre_parcsr_mv.h"
+#include "HYPRE_IJ_mv.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /******************************************************************************
  *

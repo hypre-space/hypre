@@ -22,7 +22,7 @@
 #undef HYPRE_USE_PTHREADS
 #endif
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 
 /*--------------------------------------------------------------------------

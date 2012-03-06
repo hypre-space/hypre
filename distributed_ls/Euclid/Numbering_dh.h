@@ -10,19 +10,14 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef NUMBERING_DH_H
 #define NUMBERING_DH_H
-
 
 /* code and algorithms in this class adopted from Edmond Chow's
    ParaSails
 */
 
-
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 struct _numbering_dh {
   HYPRE_Int   size;    /* max number of indices that can be stored;

@@ -10,23 +10,22 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifndef hypre_MV_HEADER
+#define hypre_MV_HEADER
 
-
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 #include <HYPRE_config.h>
 
 #include "HYPRE_seq_mv.h"
-
-#ifndef hypre_MV_HEADER
-#define hypre_MV_HEADER
 
 #include "_hypre_utilities.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /******************************************************************************
  *

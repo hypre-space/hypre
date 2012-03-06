@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef THREADED_BLAS_DH
 #define THREADED_BLAS_DH
 
@@ -22,7 +19,7 @@
              where applicable.
 */
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 #ifdef SEQUENTIAL_MODE
 #define MatVec       matvec_euclid_seq

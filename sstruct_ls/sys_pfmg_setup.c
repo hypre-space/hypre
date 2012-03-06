@@ -18,7 +18,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
 
 #define DEBUG 0

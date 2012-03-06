@@ -18,7 +18,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 #define DEBUG 0
 

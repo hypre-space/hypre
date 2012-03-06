@@ -18,7 +18,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
 

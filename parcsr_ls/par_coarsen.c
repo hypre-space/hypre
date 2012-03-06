@@ -21,7 +21,7 @@
 /* following should be in a header file */
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 
 
@@ -78,7 +78,7 @@
   \end{itemize}
 
   {\bf Input files:}
-  headers.h
+  _hypre_parcsr_ls.h
 
   @return Error code.
   

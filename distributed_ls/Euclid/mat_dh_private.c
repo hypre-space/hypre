@@ -10,12 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#include "mat_dh_private.h"
-#include "Parser_dh.h"
-#include "Hash_i_dh.h"
-#include "Mat_dh.h"
-#include "Mem_dh.h"
-#include "Vec_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "mat_dh_private.h" */
+/* #include "Parser_dh.h" */
+/* #include "Hash_i_dh.h" */
+/* #include "Mat_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "Vec_dh.h" */
 
 #ifdef PETSC_MODE
 #include "euclid_petsc.h"

@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 #include <assert.h>
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION

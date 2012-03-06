@@ -10,13 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef MEM_DH_DH
 #define MEM_DH_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 extern void  Mem_dhCreate(Mem_dh *m);
 extern void  Mem_dhDestroy(Mem_dh m);

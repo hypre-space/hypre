@@ -10,12 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "TimeLog_dh.h"
-#include "Timer_dh.h"
-#include "Mem_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "TimeLog_dh.h" */
+/* #include "Timer_dh.h" */
+/* #include "Mem_dh.h" */
 
 #define MAX_TIME_MARKS  100
 #define MAX_DESC_LENGTH 60

@@ -13,7 +13,7 @@
 
 
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_MaxwellSolve- note that there is no input operator Aee. We assume

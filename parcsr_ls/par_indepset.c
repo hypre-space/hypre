@@ -17,7 +17,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 /*==========================================================================*/
 /*==========================================================================*/
@@ -25,7 +25,7 @@
   Augments measures by some random value between 0 and 1.
 
   {\bf Input files:}
-  headers.h
+  _hypre_parcsr_ls.h
 
   @return Error code.
 
@@ -85,7 +85,7 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
   independent set by simply comparing the measures of adjacent nodes.
 
   {\bf Input files:}
-  headers.h
+  _hypre_parcsr_ls.h
 
   @return Error code.
 

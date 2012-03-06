@@ -10,18 +10,17 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
+#include "_hypre_Euclid.h"
 
 /* to do: re-integrate fix-smalll-pivots */
 
-#include "ilu_dh.h"
-#include "Mem_dh.h"
-#include "Parser_dh.h"
-#include "Euclid_dh.h"
-#include "getRow_dh.h"
-#include "Factor_dh.h"
-#include "SubdomainGraph_dh.h"
+/* #include "ilu_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "Parser_dh.h" */
+/* #include "Euclid_dh.h" */
+/* #include "getRow_dh.h" */
+/* #include "Factor_dh.h" */
+/* #include "SubdomainGraph_dh.h" */
 
 static bool check_constraint_private(Euclid_dh ctx, HYPRE_Int b, HYPRE_Int j);
 

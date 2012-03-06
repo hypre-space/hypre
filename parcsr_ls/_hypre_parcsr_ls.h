@@ -10,12 +10,16 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifndef hypre_PARCSR_LS_HEADER
+#define hypre_PARCSR_LS_HEADER
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
 #include <HYPRE_config.h>
 
 #include "HYPRE_parcsr_ls.h"
-
-#ifndef hypre_PARCSR_LS_HEADER
-#define hypre_PARCSR_LS_HEADER
 
 #include "_hypre_utilities.h"
 #include "krylov.h"

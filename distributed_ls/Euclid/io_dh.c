@@ -10,14 +10,15 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#include "io_dh.h"
-#include "Mat_dh.h"
-#include "Vec_dh.h"
-#include "Mem_dh.h"
-#include "Timer_dh.h"
-#include "Parser_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "io_dh.h" */
+/* #include "Mat_dh.h" */
+/* #include "Vec_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "Timer_dh.h" */
+/* #include "Parser_dh.h" */
 /* #include "euclid_petsc.h" */
-#include "mat_dh_private.h"
+/* #include "mat_dh_private.h" */
 
 #undef __FUNC__
 #define __FUNC__ "openFile_dh"

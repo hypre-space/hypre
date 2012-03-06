@@ -10,13 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef GUARDS_DH
 #define GUARDS_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 
 /*

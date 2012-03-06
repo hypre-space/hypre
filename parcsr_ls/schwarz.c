@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "Common.h"
 
 

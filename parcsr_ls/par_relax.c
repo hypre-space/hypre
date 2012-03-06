@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "Common.h"
 
 #ifdef HYPRE_USING_ESSL

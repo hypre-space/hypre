@@ -15,7 +15,7 @@
  * HYPRE_SStructSplit solver interface
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------

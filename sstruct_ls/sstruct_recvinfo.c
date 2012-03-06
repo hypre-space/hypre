@@ -13,7 +13,7 @@
 
 
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_SStructRecvInfo: For each processor, for each cbox of its cgrid,

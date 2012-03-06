@@ -10,12 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "Hash_i_dh.h"
-#include "Parser_dh.h"
-#include "Mem_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "Hash_i_dh.h" */
+/* #include "Parser_dh.h" */
+/* #include "Mem_dh.h" */
 
 #define DEFAULT_TABLE_SIZE 16
 

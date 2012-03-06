@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 hypre_IJMatrix *
 hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,

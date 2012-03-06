@@ -14,13 +14,13 @@
 
 
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*==========================================================================*/
 /** Creates a new BiCGSTAB solver object.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -56,7 +56,7 @@ HYPRE_StructBiCGSTABCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 /** Destroys a BiCGSTAB solver object.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -80,7 +80,7 @@ ensures that the setup for the preconditioner is also called.
 NOTE: This is supposed to be an optional call, but currently is required.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -113,7 +113,7 @@ HYPRE_StructBiCGSTABSetup( HYPRE_StructSolver solver,
 /** Performs the BiCGSTAB linear solve.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -146,7 +146,7 @@ HYPRE_StructBiCGSTABSolve( HYPRE_StructSolver solver,
 /** (Optional) Set the stopping tolerance.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -170,7 +170,7 @@ HYPRE_StructBiCGSTABSetTol( HYPRE_StructSolver solver,
 /** (Optional) Set the absolute stopping tolerance.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -194,7 +194,7 @@ HYPRE_StructBiCGSTABSetAbsoluteTol( HYPRE_StructSolver solver,
 /** (Optional) Set the maximum number of iterations.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -220,7 +220,7 @@ HYPRE_StructBiCGSTABSetMaxIter( HYPRE_StructSolver solver,
 preconditioner, i.e. the solver is just conjugate gradients (CG).
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -255,7 +255,7 @@ logging is set to 0, no logging is done.  If set to 1, the norms and
 relative norms for each iteration are saved.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -280,7 +280,7 @@ HYPRE_StructBiCGSTABSetLogging( HYPRE_StructSolver solver,
 is set to 0, no printing is done. 
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -304,7 +304,7 @@ HYPRE_StructBiCGSTABSetPrintLevel( HYPRE_StructSolver solver,
 /** (Optional) Gets the number of iterations done in the solve.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -328,7 +328,7 @@ HYPRE_StructBiCGSTABGetNumIterations( HYPRE_StructSolver  solver,
 /** (Optional) Gets the final relative residual norm for the solve.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -353,7 +353,7 @@ HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 /** (Optional) Gets the residual .
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 

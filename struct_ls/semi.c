@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
  * This routine serves as an alternative to the MatrixAssemble routine for the

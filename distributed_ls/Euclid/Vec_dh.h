@@ -10,13 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef VEC_DH_H
 #define VEC_DH_H
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 struct _vec_dh {
   HYPRE_Int n;

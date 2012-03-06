@@ -10,17 +10,16 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
+#include "_hypre_Euclid.h"
 
 /* Contains definitions of globally scoped  objects; 
  * Also, functions for error handling and message logging.
  */
 
-#include "euclid_common.h"
-#include "Parser_dh.h"
-#include "Mem_dh.h"
-#include "TimeLog_dh.h"
+/* #include "euclid_common.h" */
+/* #include "Parser_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "TimeLog_dh.h" */
 extern void sigRegister_dh(); /* use sig_dh.h if not for euclid_signals_len */
 
 /*-------------------------------------------------------------------------

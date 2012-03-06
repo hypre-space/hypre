@@ -10,13 +10,11 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "getRow_dh.h"
-#include "Mat_dh.h"
-#include "Euclid_dh.h"
-#include "Mem_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "getRow_dh.h" */
+/* #include "Mat_dh.h" */
+/* #include "Euclid_dh.h" */
+/* #include "Mem_dh.h" */
 
 /*-------------------------------------------------------------------
  *  HYPRE

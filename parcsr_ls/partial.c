@@ -13,7 +13,7 @@
 
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "aux_interp.h"
 
 /*---------------------------------------------------------------------------

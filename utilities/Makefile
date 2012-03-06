@@ -14,7 +14,7 @@
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
-CDEFS = ${TIMERDEFS} -DHYPRE_TIMING
+CDEFS = ${TIMERDEFS}
 
 C_COMPILE_FLAGS =\
    -I..\

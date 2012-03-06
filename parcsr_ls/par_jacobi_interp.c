@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 
 /* #define HYPRE_JACINT_PRINT_ROW_SUMS*/

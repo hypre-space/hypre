@@ -17,7 +17,7 @@
    based on par_csr_matop.c and mli_pcsr_bool_matop.c */
 
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 
 extern hypre_CSRMatrix * 

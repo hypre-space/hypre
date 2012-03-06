@@ -19,7 +19,7 @@
 /* following should be in a header file */
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "../HYPRE.h" /* BM Aug 15, 2006 */
 
 #define C_PT 1

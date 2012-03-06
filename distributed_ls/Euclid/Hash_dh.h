@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef HASH_D_DH
 #define HASH_D_DH
 
@@ -20,7 +17,7 @@
          as of now, an error is set if the table overflows.
 */
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 /* This should be done with templates, if this were in C++;
    for now, a record contains every type of entry we might

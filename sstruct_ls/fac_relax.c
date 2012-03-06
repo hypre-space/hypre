@@ -18,7 +18,7 @@
  *  relaxation.
  ******************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 #include "fac.h"
 
 #define DEBUG 0

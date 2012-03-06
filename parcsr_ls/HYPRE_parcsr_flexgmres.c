@@ -19,7 +19,7 @@
  * HYPRE_ParCSRFlexGMRES interface
  *
  *****************************************************************************/
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRFlexGMRESCreate

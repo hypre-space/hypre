@@ -16,7 +16,7 @@
 /*====================
  * Functions to run cr
  *====================*/
-#include <headers.h>
+#include <_hypre_parcsr_ls.h>
 
 #define RelaxScheme1 3 /* cr type */
 #define fptOmegaJac 1  /* 1 is f pt weighted jacobi */

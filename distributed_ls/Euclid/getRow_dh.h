@@ -10,13 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef GET_ROW_DH
 #define GET_ROW_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 /* "row" refers to global row number */
 

@@ -22,7 +22,7 @@
 #ifndef IO_DH
 #define IO_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 /*--------------------------------------------------------------------------
  * open and close files, with error checking

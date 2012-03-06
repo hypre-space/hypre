@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
 HYPRE_Int hypre_ParVectorSize( void *x );

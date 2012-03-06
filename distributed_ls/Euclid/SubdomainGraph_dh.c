@@ -10,19 +10,16 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "SubdomainGraph_dh.h"
-#include "getRow_dh.h"
-#include "Mem_dh.h"
-#include "Parser_dh.h"
-#include "Hash_i_dh.h"
-#include "mat_dh_private.h"
-#include "io_dh.h"
-#include "SortedSet_dh.h"
-#include "shellSort_dh.h"
-
+#include "_hypre_Euclid.h"
+/* #include "SubdomainGraph_dh.h" */
+/* #include "getRow_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "Parser_dh.h" */
+/* #include "Hash_i_dh.h" */
+/* #include "mat_dh_private.h" */
+/* #include "io_dh.h" */
+/* #include "SortedSet_dh.h" */
+/* #include "shellSort_dh.h" */
 
 #ifndef WIN32
 /* for debugging only! */

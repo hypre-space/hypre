@@ -18,7 +18,7 @@
  *
  ******************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
  * Finds the physical boundary boxes for all levels. Since the coarse grid's

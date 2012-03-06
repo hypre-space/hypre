@@ -25,7 +25,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 void hypre_ParChordMatrix_RowStarts(
    hypre_ParChordMatrix *Ac, MPI_Comm comm,

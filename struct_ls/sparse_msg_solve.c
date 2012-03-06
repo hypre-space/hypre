@@ -17,7 +17,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "sparse_msg.h"
 
 #define DEBUG 0

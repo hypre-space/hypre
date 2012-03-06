@@ -17,7 +17,7 @@
  *
  ******************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 #include "maxwell_TV.h"
 #include "par_amg.h"
 

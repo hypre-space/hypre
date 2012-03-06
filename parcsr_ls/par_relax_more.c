@@ -7,7 +7,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "float.h"
 
 HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,double *,double *,HYPRE_Int *);

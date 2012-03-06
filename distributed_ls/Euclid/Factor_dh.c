@@ -10,22 +10,20 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "Factor_dh.h"
-#include "Vec_dh.h"
-#include "Mat_dh.h"
-#include "SubdomainGraph_dh.h"
-#include "TimeLog_dh.h"
-#include "Mem_dh.h"
-#include "Numbering_dh.h"
-#include "Hash_i_dh.h"
-#include "Parser_dh.h"
-#include "mat_dh_private.h"
-#include "getRow_dh.h"
-#include "Euclid_dh.h"
-#include "io_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "Factor_dh.h" */
+/* #include "Vec_dh.h" */
+/* #include "Mat_dh.h" */
+/* #include "SubdomainGraph_dh.h" */
+/* #include "TimeLog_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "Numbering_dh.h" */
+/* #include "Hash_i_dh.h" */
+/* #include "Parser_dh.h" */
+/* #include "mat_dh_private.h" */
+/* #include "getRow_dh.h" */
+/* #include "Euclid_dh.h" */
+/* #include "io_dh.h" */
 
 /* suppress compiler complaints */
 void Factor_dh_junk()

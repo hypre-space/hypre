@@ -10,13 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef SUBDOMAIN_GRAPH_DH
 #define SUBDOMAIN_GRAPH_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 #define MAX_SUBDOMAIN_COLOR 100
   /* could be done better: if we can't color the subdomain graph

@@ -10,15 +10,12 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "Euclid_dh.h"
-#include "krylov_dh.h"
-#include "Mem_dh.h"
-#include "Parser_dh.h"
-#include "Mat_dh.h"
-
+#include "_hypre_Euclid.h"
+/* #include "Euclid_dh.h" */
+/* #include "krylov_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "Parser_dh.h" */
+/* #include "Mat_dh.h" */
 
 #undef __FUNC__
 #define __FUNC__ "bicgstab_euclid"

@@ -24,7 +24,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 
 #ifdef HYPRE_USING_ESSL

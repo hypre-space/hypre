@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef MATGENFD_DH_DH
 #define MATGENFD_DH_DH
 
@@ -56,8 +53,7 @@ Misc.
      -striped (may not work?)
 =====================================================================*/
 
-
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 struct _matgenfd {
   bool allocateMem; 

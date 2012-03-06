@@ -15,7 +15,7 @@
 /* This is code for the struct assumed partition 
    AHB 6/05 */
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 
 /* these are for debugging */

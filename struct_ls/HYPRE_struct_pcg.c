@@ -14,13 +14,13 @@
 
 
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*==========================================================================*/
 /** Creates a new PCG solver object.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -62,7 +62,7 @@ HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 /** Destroys a PCG solver object.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -86,7 +86,7 @@ ensures that the setup for the preconditioner is also called.
 NOTE: This is supposed to be an optional call, but currently is required.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -119,7 +119,7 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
 /** Performs the PCG linear solve.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -152,7 +152,7 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
 /** (Optional) Set the stopping tolerance.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -175,7 +175,7 @@ HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
 /** (Optional) Set the absolute stopping tolerance.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -199,7 +199,7 @@ HYPRE_StructPCGSetAbsoluteTol( HYPRE_StructSolver solver,
 /** (Optional) Set the maximum number of iterations.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -225,7 +225,7 @@ If parameter two\_norm is set to 0, the preconditioner norm is used.
 If set to 1, the two-norm is used.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -251,7 +251,7 @@ stopping test.  If parameter rel\_change is set to 0, no additional
 stopping test is done.  If set to 1, the additional test is done.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -276,7 +276,7 @@ HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver,
 preconditioner, i.e. the solver is just conjugate gradients (CG).
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -311,7 +311,7 @@ logging is set to 0, no logging is done.  If set to 1, the norms and
 relative norms for each iteration are saved.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -335,7 +335,7 @@ HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
 is allowed.  If set to 1, printing takes place.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -358,7 +358,7 @@ HYPRE_StructPCGSetPrintLevel( HYPRE_StructSolver solver,
 /** (Optional) Gets the number of iterations done in the solve.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -382,7 +382,7 @@ HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
 /** (Optional) Gets the final relative residual norm for the solve.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -406,7 +406,7 @@ HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 /** Setup routine for diagonally scaling a vector.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 
@@ -436,7 +436,7 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
 /** Diagonally scale a vector.
 
 {\bf Input files:}
-headers.h
+_hypre_struct_ls.h
 
 @return Error code.
 

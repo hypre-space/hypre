@@ -10,20 +10,15 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /* This is similar to the Hash_i_dh class (woe, for a lack
    of templates); this this class is for hashing data
    consisting of single, non-negative integers.
 */
 
-
 #ifndef HASH_I_DH
 #define HASH_I_DH
 
-#include "euclid_common.h"
-
+/* #include "euclid_common.h" */
                                  
 /*
     class methods 

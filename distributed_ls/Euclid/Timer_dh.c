@@ -10,11 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "Timer_dh.h"
-#include "Mem_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "Timer_dh.h" */
+/* #include "Mem_dh.h" */
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhCreate"

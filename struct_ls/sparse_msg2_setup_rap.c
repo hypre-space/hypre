@@ -18,7 +18,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
  * Macro to "change coordinates".  This routine is written as though
