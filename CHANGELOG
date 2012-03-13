@@ -15,6 +15,30 @@
 # recent release.
 #=============================================================================
 
+Version 2.8.1a released 2012/03/13
+
+- For non-cell data, fixed a memory problem with SStructGraphAddEntries() and an
+  accumulation problem with SStructMatrixAddValues().
+  
+- Improved the penalty scaling factor for AMS's discrete divergence term (which is
+  added to the matrix to handle robustly problems with pure void regions).
+  
+- Added threading to various routines in BoomerAMG.
+  
+- Fixed the SStructGridSetPeriodic() routine to work for all object types,
+  including HYPRE_PARCSR which previously did not work.
+  
+- Made two changes to GMRES: 1) Added GMRESSetSkipRealResidualCheck to skip the
+  evaluation and check of the final residual in GMRES. This can be useful in
+  situations where restart is not expected to be beneficial. 2) Independent of the
+  above, added a check to see if consecutive real GMRES residuals decrease (in the
+  "false convergence" case). If not, we conclude that restart leads to pollution
+  from round-off errors and exit GMRES.
+  
+- Implemented a CMake build system for the library and the test drivers.
+
+#====================================
+
 Version 2.8.0b released 2011/11/14
 
 - Added the new Auxiliary-space Divergence Solver (ADS) which targets div-div
