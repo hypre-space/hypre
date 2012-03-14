@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /* f2c.h  --  Standard Fortran to C header file */
 
 /**  barf  [ba:rf]  2.  "He suggested using FORTRAN, and everybody barfed."
@@ -23,6 +20,7 @@
 #define F2C_INCLUDE
 
 /* MPI is not needed here, so don't include mpi.h */
+#include "HYPRE_config.h"
 #ifndef HYPRE_SEQUENTIAL
 #define HYPRE_SEQUENTIAL
 #endif
