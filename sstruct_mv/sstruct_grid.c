@@ -622,7 +622,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
       } /* end of variable loop */
    } /* end of part loop */
 
-#if  HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
    {
       /* need to do a gather entries on neighbor information so that we have
          what we need for the NborBoxManagers function */
@@ -805,7 +805,7 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
           * but we don't gather anything currently for the neighbor boxman, so
           * the next bit of code is not needed right now. */
 #if 0
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
          {
             MPI_Comm     comm        = hypre_SStructGridComm(grid);
             hypre_Box   *vbox;

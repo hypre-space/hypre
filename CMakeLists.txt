@@ -11,26 +11,23 @@ set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 # Set default installation directory, but provide a means for users to change
 set (HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
   "Installation directory for HYPRE")
-set (CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL
-  "Prefix prepended to install directories" FORCE)
+set (CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL "" FORCE)
+
+# Set default compile optimization flag
+set (HYPRE_BUILD_TYPE "RELEASE" CACHE STRING
+  "Optimization flags: set to DEBUG, RELEASE, RELWITHDEBINFO, or MINSIZEREL")
+set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
 
 # Configuration options
-option(HYPRE_BIGINT
-  "Use long long int for HYPRE_Int" OFF)
-option(HYPRE_SEQUENTIAL
-  "Compile without MPI" OFF)
-option(HYPRE_TIMING
-  "Use HYPRE timing routines" OFF)
-option(HYPRE_USING_HYPRE_BLAS
-  "Use internal BLAS library" ON)
-option(HYPRE_USING_HYPRE_LAPACK
-  "Use internal LAPACK library" ON)
-option(HYPRE_NO_GLOBAL_PARTITION
-  "Use assumed partition" OFF)
-option(HYPRE_PRINT_ERRORS
-  "Print HYPRE errors" OFF)
-option(HYPRE_USING_OPENMP
-  "Use OpenMP" OFF)
+option(HYPRE_SHARED               "Build a shared library" OFF)
+option(HYPRE_BIGINT               "Use long long int for HYPRE_Int" OFF)
+option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
+option(HYPRE_TIMING               "Use HYPRE timing routines" OFF)
+option(HYPRE_USING_HYPRE_BLAS     "Use internal BLAS library" ON)
+option(HYPRE_USING_HYPRE_LAPACK   "Use internal LAPACK library" ON)
+option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" OFF)
+option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
+option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
 
 #   --with-examples         Build example codes.
 #   --with-fei              Use internal FEI routines.
@@ -727,6 +724,37 @@ include_directories (${PROJECT_BINARY_DIR}
   "${PROJECT_SOURCE_DIR}/sstruct_mv"
   "${PROJECT_SOURCE_DIR}/sstruct_ls"
 )
+
+# Set library build type
+if (HYPRE_SHARED)
+  set (BUILD_SHARED_LIBS ON CACHE INTERNAL "" FORCE)
+else ()
+  set (BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
+endif ()
+
+# Set MPI compile flags
+if (NOT HYPRE_SEQUENTIAL)
+  find_package (MPI)
+  if ((MPI_C_FOUND) AND (NOT MPI_C_COMPILER))
+    include_directories (${MPI_C_INCLUDE_PATH})
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MPI_C_COMPILE_FLAGS}")
+  endif ((MPI_C_FOUND) AND (NOT MPI_C_COMPILER))
+  if ((MPI_CXX_FOUND) AND (NOT MPI_CXX_COMPILER))
+    include_directories (${MPI_CXX_INCLUDE_PATH})
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
+  endif ((MPI_CXX_FOUND) AND (NOT MPI_CXX_COMPILER))
+endif (NOT HYPRE_SEQUENTIAL)
+# set (HYPRE_MPI_C_INCLUDE_PATH "${MPI_C_INCLUDE_PATH}" CACHE PATH
+#   "MPI include path")
+
+# Set OpenMP compile flags
+if (HYPRE_USING_OPENMP)
+  find_package (OpenMP)
+  if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  endif (OPENMP_FOUND)
+endif (HYPRE_USING_OPENMP)
 
 # Turn optimization off for this file
 set_source_files_properties (lapack/dlamch.c PROPERTIES COMPILE_FLAGS -O0)

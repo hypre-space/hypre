@@ -350,7 +350,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_IndexRef            index;
    HYPRE_Int                 i, j;
 
-#if  HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
 
    /* may need to re-do box managers for the AP*/
    hypre_BoxManager        ***managers = hypre_SStructGridBoxManagers(grid);

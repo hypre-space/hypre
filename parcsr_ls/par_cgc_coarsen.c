@@ -672,7 +672,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
     hypre_printf ("Starting CGC matrix communication\n");
   }
 #endif
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
  {
   /* classical CGC does not really make sense in combination with HYPRE_NO_GLOBAL_PARTITION,
      but anyway, here it is:
@@ -750,7 +750,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
 #endif
   HYPRE_IJMatrixDestroy (ijG);
   if (vertexrange) hypre_TFree (vertexrange);
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
   if (vertexrange_all) hypre_TFree (vertexrange_all);
 #endif
   if (CF_marker_offd)  hypre_TFree (CF_marker_offd);
@@ -915,7 +915,7 @@ HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPR
   pointrange = hypre_ParCSRMatrixRowStarts (S);
   pointrange_nonlocal = hypre_CTAlloc  (HYPRE_Int, 2*num_recvs);
   vertexrange_nonlocal = hypre_CTAlloc (HYPRE_Int, 2*num_recvs);
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
   {
     HYPRE_Int num_sends  =  hypre_ParCSRCommPkgNumSends (comm_pkg);
     HYPRE_Int *send_procs =  hypre_ParCSRCommPkgSendProcs (comm_pkg);

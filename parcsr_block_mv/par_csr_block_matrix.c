@@ -723,7 +723,7 @@ HYPRE_Int
 hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
 {
 
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
  
    HYPRE_Int        row_start=0, row_end=0, col_start = 0, col_end = 0;
    HYPRE_Int        num_recvs, *recv_procs, *recv_vec_starts;

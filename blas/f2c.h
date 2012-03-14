@@ -24,7 +24,7 @@
 
 /* MPI is not needed here, so don't include mpi.h */
 #ifndef HYPRE_SEQUENTIAL
-#define HYPRE_SEQUENTIAL 1
+#define HYPRE_SEQUENTIAL
 #endif
 #include "_hypre_utilities.h"
 

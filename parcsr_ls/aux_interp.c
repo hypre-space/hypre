@@ -221,7 +221,7 @@ hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, HYPRE_Int newoff, HYPRE_Int
   /* use found instead of col_map_offd in A, and newoff instead 
       of num_cols_offd*/
 
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
 
    HYPRE_Int        row_start=0, row_end=0, col_start = 0, col_end = 0;
    HYPRE_Int        global_num_cols;
