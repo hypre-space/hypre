@@ -348,6 +348,24 @@ HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifndef HYPRE_SMP_HEADER
+#define HYPRE_SMP_HEADER
+#endif
+
+#define HYPRE_SMP_SCHEDULE schedule(static)
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 
 /******************************************************************************
  *
@@ -595,25 +613,22 @@ HYPRE_Int MPI_Irsend( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPR
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
-#if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
+#ifdef HYPRE_USING_OPENMP
 
 HYPRE_Int hypre_NumThreads( void );
+HYPRE_Int hypre_NumActiveThreads( void );
 HYPRE_Int hypre_GetThreadNum( void );
-HYPRE_Int hypre_GetMaxNumThreads( void );
 
 #else
 
 #define hypre_NumThreads() 1
+#define hypre_NumActiveThreads() 1
 #define hypre_GetThreadNum() 0
-#define hypre_GetMaxNumThreads() 1
 
 #endif
-
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /* The pthreads stuff needs to be reworked */

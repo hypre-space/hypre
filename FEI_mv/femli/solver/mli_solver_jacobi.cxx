@@ -236,8 +236,9 @@ int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
             }
          }
 
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for ( i = 0; i < localNRows; i++ ) 
             uData[i] += weight * rData[i] * diagonal_[i];
 
@@ -266,8 +267,9 @@ int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
          if ( zeroInitialGuess_ == 0 )
             hypre_ParCSRMatrixMatvec(-1.0, A, u2, 1.0, r);
  
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for ( i = 0; i < localNRows; i++ ) 
             u2Data[i] += weight * rData[i] * diagonal_[i];
 

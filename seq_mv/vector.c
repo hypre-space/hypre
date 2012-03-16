@@ -246,8 +246,9 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 
    size *=hypre_VectorNumVectors(v);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < size; i++)
       vector_data[i] = value;
 
@@ -300,8 +301,9 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    HYPRE_Int      ierr = 0;
 
    size *=hypre_VectorNumVectors(x);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < size; i++)
       y_data[i] = x_data[i];
 
@@ -370,8 +372,9 @@ hypre_SeqVectorScale( double        alpha,
 
    size *=hypre_VectorNumVectors(y);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < size; i++)
       y_data[i] *= alpha;
 
@@ -397,8 +400,9 @@ hypre_SeqVectorAxpy( double        alpha,
 
    size *=hypre_VectorNumVectors(x);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < size; i++)
       y_data[i] += alpha * x_data[i];
 
@@ -422,10 +426,9 @@ double   hypre_SeqVectorInnerProd( hypre_Vector *x,
 
    size *=hypre_VectorNumVectors(x);
 
-#define HYPRE_SMP_PRIVATE i
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS result
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < size; i++)
       result += y_data[i] * x_data[i];
 
@@ -444,10 +447,9 @@ double hypre_VectorSumElts( hypre_Vector *vector )
    HYPRE_Int size = hypre_VectorSize( vector );
    HYPRE_Int i;
 
-#define HYPRE_SMP_PRIVATE i
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS sum
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
+#endif
    for ( i=0; i<size; ++i ) sum += data[i];
 
    return sum;

@@ -747,8 +747,9 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             start = hypre_BoxIMin(box);
             hypre_BoxGetSize(box, loop_size);
             hypre_BoxLoop1Begin(loop_size, ghost_box, start, stride, mi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,mi 
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,mi ) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop1For(loopi, loopj, loopk, mi)
             {
                row_sizes[m+mi] = nnzs;
@@ -997,8 +998,9 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       hypre_BoxSetExtents(box, ilower, iupper);
       nrows    = hypre_BoxVolume(box)*nentries;
       ncols    = hypre_CTAlloc(HYPRE_Int, nrows);
-#define HYPRE_SMP_PRIVATE i
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < nrows; i++)
       {
          ncols[i] = 1;

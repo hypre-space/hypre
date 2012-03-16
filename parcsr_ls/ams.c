@@ -3324,8 +3324,9 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
       hypre_TFree(int_buf_data);
    }
 
-#define HYPRE_SMP_PRIVATE i,ii,j,k,ns,ne,rest,size,diag
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,k,ns,ne,rest,size,diag) HYPRE_SMP_SCHEDULE
+#endif
    for (k = 0; k < num_threads; k++)
    {
       size = num_rows/num_threads;
@@ -3614,14 +3615,16 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
    if (relax_type == 1) /* Jacobi */
    {
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < n; i++)
       {
          Vtemp_data[i] = u_data[i];
       }
-#define HYPRE_SMP_PRIVATE i,ii,jj,res
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < n; i++)
       {
          /*-----------------------------------------------------------
@@ -3649,12 +3652,14 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
       if (relax_weight == 1 && omega == 1)
       {
          tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < n; i++)
             tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
          for (j = 0; j < num_threads; j++)
          {
             size = n/num_threads;
@@ -3731,14 +3736,16 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
          double c1 = omega*relax_weight;
          double c2 = omega*(1.0-relax_weight);
          tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < n; i++)
          {
             tmp_data[i] = u_data[i];
          }
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
          for (j = 0; j < num_threads; j++)
          {
             size = n/num_threads;

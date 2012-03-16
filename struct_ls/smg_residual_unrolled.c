@@ -236,8 +236,9 @@ hypre_SMGResidual( void               *residual_vdata,
                   hypre_BoxLoop2Begin(loop_size,
                                       b_data_box, start, base_stride, bi,
                                       r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,bi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,bi,ri) HYPRE_SMP_SCHEDULE
+#endif
                   hypre_BoxLoop2For(loopi, loopj, loopk, bi, ri)
                      {
                         rp[ri] = bp[bi];
@@ -606,8 +607,9 @@ hypre_SMGResidual( void               *residual_vdata,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                         {
 
@@ -626,8 +628,9 @@ hypre_SMGResidual( void               *residual_vdata,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                         {
  
@@ -648,8 +651,9 @@ hypre_SMGResidual( void               *residual_vdata,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                         {
  
@@ -672,8 +676,9 @@ hypre_SMGResidual( void               *residual_vdata,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                         {
 
@@ -698,8 +703,9 @@ hypre_SMGResidual( void               *residual_vdata,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                         {
    
@@ -726,8 +732,9 @@ hypre_SMGResidual( void               *residual_vdata,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                         {
    
@@ -760,8 +767,9 @@ hypre_SMGResidual( void               *residual_vdata,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                         {
    
@@ -798,8 +806,9 @@ hypre_SMGResidual( void               *residual_vdata,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                         {
    
@@ -851,8 +860,9 @@ hypre_SMGResidual( void               *residual_vdata,
                                             A_data_box, start, base_stride, Ai,
                                             x_data_box, start, base_stride, xi,
                                             r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
                         hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
                            {
                               rp[ri] -= Ap0[Ai] * xp0[xi];

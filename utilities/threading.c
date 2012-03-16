@@ -10,71 +10,44 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 #include <stdlib.h>
 #include <stdio.h>
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
+#ifdef HYPRE_USING_OPENMP
 
 HYPRE_Int
 hypre_NumThreads( )
 {
    HYPRE_Int num_threads;
 
-#ifdef HYPRE_USING_OPENMP
-/* JBS: I think this pragma is an error, because it redefines a parallel
- * region, thus giving me num_threads=1, when the routine calling
- * hypre_NumThreads(...) has in fact multiple threads.
- * #pragma omp parallel */
-   num_threads = omp_get_num_threads();
-#endif
-#ifdef HYPRE_USING_PGCC_SMP
-   num_threads = 2;
-#endif
+   num_threads = omp_get_max_threads();
 
    return num_threads;
 }
 
+/* This next function must be called from within a parallel region! */
 
+HYPRE_Int
+hypre_NumActiveThreads( )
+{
+   HYPRE_Int num_threads;
 
-/* This next function must be called from within a 
-parallel region! */
+   num_threads = omp_get_num_threads();
+
+   return num_threads;
+}
+
+/* This next function must be called from within a parallel region! */
 
 HYPRE_Int
 hypre_GetThreadNum( )
 {
    HYPRE_Int my_thread_num;
 
-#ifdef HYPRE_USING_OPENMP
    my_thread_num = omp_get_thread_num();
-#endif
-#ifdef HYPRE_USING_PGCC_SMP
-   /* THIS NEEDS TO BE FIXED */
-   my_thread_num = 0;
-#endif
 
    return my_thread_num;
-}
-
-/* This next function must be called from within a 
-parallel region! */
-
-HYPRE_Int
-hypre_GetMaxNumThreads( )
-{
-   HYPRE_Int max_num_threads;
-
-#ifdef HYPRE_USING_OPENMP
-   max_num_threads = omp_get_max_threads();
-#endif
-#ifdef HYPRE_USING_PGCC_SMP
-   /* THIS NEEDS TO BE FIXED */
-   max_num_threads = 1;
-#endif
-
-   return max_num_threads;
 }
 
 #endif

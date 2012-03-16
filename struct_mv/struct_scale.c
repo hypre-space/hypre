@@ -59,8 +59,9 @@ hypre_StructScale( double              alpha,
 
 	 hypre_BoxLoop1Begin(loop_size,
                              y_data_box, start, unit_stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#endif
 	 hypre_BoxLoop1For(loopi, loopj, loopk, yi)
             {
                yp[yi] *= alpha;

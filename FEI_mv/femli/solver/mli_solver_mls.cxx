@@ -211,8 +211,9 @@ int MLI_Solver_MLS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
       /* u = u + coef * Vtemp */
 
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < localNRows; i++) uData[i] += (coef * VtempData[i]);
 
       /* compute residual Vtemp = A u - f */
@@ -246,8 +247,9 @@ int MLI_Solver_MLS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
       coef = mlsOver_ * mlsOm2_;
 
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < localNRows; i++) uData[i] -= ( coef * VtempData[i] );
 
    }
@@ -257,8 +259,9 @@ int MLI_Solver_MLS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
       coef = mlsCf_[0];
 
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < localNRows; i++) YtempData[i] = (coef * VtempData[i]);
 
       /* Wtemp = coef * Vtemp */
@@ -269,14 +272,16 @@ int MLI_Solver_MLS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
          hypre_ParVectorCopy(Wtemp,Vtemp); 
          coef = mlsCf_[deg];
 
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < localNRows; i++) 
             YtempData[i] += ( coef * WtempData[i] );
       }
 
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < localNRows; i++) uData[i] += (mlsOver_ * YtempData[i]);
 
       /* compute residual Vtemp = A u - f */
@@ -310,8 +315,9 @@ int MLI_Solver_MLS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
       coef = mlsOver_ * mlsOm2_;
 
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < localNRows; i++) uData[i] -= ( coef * VtempData[i] );
 
    }

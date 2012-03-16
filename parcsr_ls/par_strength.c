@@ -216,8 +216,9 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    /* give S same nonzero structure as A */
    hypre_ParCSRMatrixCopy(A,S,0);
 
-#define HYPRE_SMP_PRIVATE i,diag,row_scale,row_sum,jA
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,diag,row_scale,row_sum,jA) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < num_variables; i++)
    {
       diag = A_diag_data[A_diag_i[i]];
@@ -639,8 +640,9 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    /* give S same nonzero structure as A */
    hypre_ParCSRMatrixCopy(A,S,0);
 
-#define HYPRE_SMP_PRIVATE i,diag,row_scale,row_sum,jA
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,diag,row_scale,row_sum,jA) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < num_variables; i++)
    {
       diag = A_diag_data[A_diag_i[i]];

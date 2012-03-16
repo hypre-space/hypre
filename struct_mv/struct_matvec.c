@@ -162,8 +162,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
             hypre_BoxLoop1Begin(loop_size,
                                 y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop1For(loopi, loopj, loopk, yi)
                {
                   yp[yi] *= beta;
@@ -220,8 +221,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
                      hypre_BoxLoop1Begin(loop_size,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, yi)
                         {
                            yp[yi] = 0.0;
@@ -234,8 +236,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
                      hypre_BoxLoop1Begin(loop_size,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, yi)
                         {
                            yp[yi] *= temp;
@@ -389,8 +392,9 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                                          A_data_box, start, stride, Ai,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                         {
                            yp[yi] +=
@@ -431,8 +435,9 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                                          A_data_box, start, stride, Ai,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                         {
                            yp[yi] +=
@@ -469,8 +474,9 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                                          A_data_box, start, stride, Ai,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                         {
                            yp[yi] +=
@@ -503,8 +509,9 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                                          A_data_box, start, stride, Ai,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                         {
                            yp[yi] +=
@@ -533,8 +540,9 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                                          A_data_box, start, stride, Ai,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                         {
                            yp[yi] +=
@@ -559,8 +567,9 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                                          A_data_box, start, stride, Ai,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                         {
                            yp[yi] +=
@@ -581,8 +590,9 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                                          A_data_box, start, stride, Ai,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                         {
                            yp[yi] +=
@@ -598,8 +608,9 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                {
                   hypre_BoxLoop1Begin(loop_size,
                                       y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#endif
                   hypre_BoxLoop1For(loopi, loopj, loopk, yi)
                      {
                         yp[yi] *= alpha;
@@ -732,8 +743,9 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -778,8 +790,9 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -819,8 +832,9 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -855,8 +869,9 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -886,8 +901,9 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -912,8 +928,9 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -933,8 +950,9 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -1097,8 +1115,9 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -1156,8 +1175,9 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -1208,8 +1228,9 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -1254,8 +1275,9 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -1294,8 +1316,9 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -1328,8 +1351,9 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -1353,8 +1377,9 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box, start, stride, xi,
                                          y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                         {
                            yp[yi] +=
@@ -1375,8 +1400,9 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
                   hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                      {
                         yp[yi] = alpha * ( yp[yi] +
@@ -1390,8 +1416,9 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
                   hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
                      {
                         yp[yi] +=

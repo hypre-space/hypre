@@ -338,8 +338,9 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             hypre_BoxLoop2Begin(loop_size,
                                 A_dbox, fstart, stridef, iA,
                                 Ac_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc,iAm1,iAp1) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                {
                   iAm1 = iA - xOffsetA;
@@ -368,8 +369,9 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             hypre_BoxLoop2Begin(loop_size,
                                 A_dbox, fstart, stridef, iA,
                                 Ac_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,iAm1,iAp1
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc,iAm1,iAp1) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                {
                   iAm1 = iA - xOffsetA;
@@ -434,8 +436,9 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
             hypre_BoxLoop1Begin(loop_size,
                                 Ac_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iAc) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
                   ac_cc[iAc] += (ac_cw[iAc] + ac_ce[iAc]);
@@ -455,8 +458,9 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
             hypre_BoxLoop1Begin(loop_size,
                                 Ac_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iAc) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
                   ac_cc[iAc] += (2.0  *  ac_cw[iAc]);
@@ -835,8 +839,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          hypre_BoxLoop2Begin(loop_size,
                                 x_dbox, start, base_stride, xi,
                                 b_dbox, start, base_stride, bi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,bi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,bi) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop2For(loopi, loopj, loopk, xi, bi)
             {
                xp[xi] = bp[bi];
@@ -889,8 +894,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             hypre_BoxLoop2Begin(loop_size,
                                 A_dbox, start, stride, Ai,
                                 x_dbox, start, stride, xi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
                {
                   xp[xi] /= Ap[Ai]; 
@@ -974,8 +980,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                          A_dbox, start, stride, Ai,
                                          x_dbox, start, stride, xi,
                                          xc_dbox, startc, stridec, xci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,xci
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,xci) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, xci)
                         {
                            xcp[xci] = xp[xi] -
@@ -1022,8 +1029,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          hypre_BoxLoop2Begin(loop_size,
                              A_dbox, start, stride, Ai,
                              x_dbox, start, stride, xi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
             {
                if (Ap[Ai] != 0.0)
@@ -1083,8 +1091,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             hypre_BoxLoop2Begin(loop_size,
                                 x_dbox, start, stride, xi,
                                 xc_dbox, startc, stridec, xci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,xci
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,xci) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, xi, xci)
                {
                   xp[xi] = xcp[xci];
@@ -1152,8 +1161,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                      hypre_BoxLoop2Begin(loop_size,
                                          A_dbox, start, stride, Ai,
                                          x_dbox, start, stride, xi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
                         {
                            xp[xi] -= (Awp[Ai]*xwp[xi] +

@@ -342,8 +342,9 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                     hypre_BoxLoop1Begin(loop_size,
                                         A_dbox, node_extents, stridec, iA);
 #if 0 /* Are private static arrays a problem? */
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,i,index_temp,boxman_entry,rank,found,Uventry,nUentries,temp1,cnt1,ncols,rows,cols,temp2,vals,index2,index1,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,i,index_temp,boxman_entry,rank,found,Uventry,nUentries,temp1,cnt1,ncols,rows,cols,temp2,vals,index2,index1,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                    hypre_BoxLoopSetOneBlock();
 #endif

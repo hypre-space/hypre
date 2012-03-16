@@ -286,8 +286,9 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       {
          beta = rho / rhom1;
 
-#define HYPRE_SMP_PRIVATE i
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for ( i = 0; i < localNRows; i++ ) 
             pData[i] = beta * pData[i] + zData[i];
 

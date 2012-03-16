@@ -540,8 +540,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             hypre_BoxLoop1Begin(loop_size,
                                &copy_box, start, stride, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,entry,p,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,entry,p,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
             hypre_BoxLoopSetOneBlock();
 #endif
@@ -663,8 +664,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -742,8 +744,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -843,8 +846,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -921,8 +925,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -1023,8 +1028,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -1099,8 +1105,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -1192,8 +1199,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -1254,8 +1262,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -1318,8 +1327,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -1391,8 +1401,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -1465,8 +1476,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,k,p,var_index,n,entry,l,j) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -1710,8 +1722,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
              hypre_BoxLoop1Begin(loop_size,
                                 &copy_box, start, stride, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,j,entry,p,cindex,l,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,j,entry,p,cindex,l,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
              hypre_BoxLoopSetOneBlock();
 #endif
@@ -1852,8 +1865,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -1959,8 +1973,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -2090,8 +2105,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -2196,8 +2212,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -2323,8 +2340,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -2428,8 +2446,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, m);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,m,findex,cindex,l,var_index,entry,rank2,rank,p,n,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -2545,8 +2564,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,cindex,entry,rank,var_index,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,r,findex,p,n,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -2619,8 +2639,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,cindex,entry,rank,var_index,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,r,findex,p,n,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -2693,8 +2714,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -2794,8 +2816,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
@@ -2895,8 +2918,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_BoxLoop1Begin(loop_size,
                                      &copy_box, start, rfactor, r);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,r,findex,p,n,m,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif

@@ -217,8 +217,9 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                   hypre_BoxLoop2Begin(loop_size, 
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc) HYPRE_SMP_SCHEDULE
+#endif
                   hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                   {
                       fac_smatrix_vals[iAc]= smatrix_vals[iA];
@@ -273,8 +274,9 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                     hypre_BoxLoop2Begin(loop_size, 
                                         smatrix_dbox, ilower, stride, iA,
                                         fac_smatrix_dbox, ilower, stride, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc) HYPRE_SMP_SCHEDULE
+#endif
                     hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                     {
                        fac_smatrix_vals[iAc]= smatrix_vals[iA];
@@ -410,8 +412,9 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                   hypre_BoxLoop2Begin(loop_size,
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc) HYPRE_SMP_SCHEDULE
+#endif
                   hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                   {
                       fac_smatrix_vals[iAc]= smatrix_vals[iA];

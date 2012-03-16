@@ -112,10 +112,9 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
       hypre_BoxLoop2Begin(loop_size,
                           x_data_box, start, unit_stride, xi,
                           y_data_box, start, unit_stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,yi
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS local_result
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,yi) reduction(+:local_result) HYPRE_SMP_SCHEDULE
+#endif
       hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
       {
           local_result += xp[xi] * yp[yi];
@@ -157,8 +156,9 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
             hypre_BoxLoop2Begin(loop_size,
                                 x_data_box, start, unit_stride, xi,
                                 y_data_box, start, unit_stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,yi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,yi) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
             {
                overlap_result += xp[xi] * yp[yi];
@@ -244,8 +244,9 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
                hypre_BoxLoop2Begin(loop_size,
                                    x_data_box, start, unit_stride, xi,
                                    y_data_box, start, unit_stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,yi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,yi) HYPRE_SMP_SCHEDULE
+#endif
                hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
                {
                   overlap_result += xp[xi] * yp[yi];

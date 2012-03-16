@@ -733,8 +733,9 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
                               xf_dbox, start, stride,  xfi,
                               xc_temp_dbox, startc, stridec, xci);
 #if 0 /* Are private static arrays a problem? */
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xfi,xci,imax,jmax,kmax,k,kcell,j,jcell,i,icell,ijkcell,temp_index2
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xfi,xci,imax,jmax,kmax,k,kcell,j,jcell,i,icell,ijkcell,temp_index2) HYPRE_SMP_SCHEDULE
+#endif
 #else
           hypre_BoxLoopSetOneBlock();
 #endif
@@ -858,8 +859,9 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             hypre_BoxLoop2Begin(loop_size,
                                 xc_temp_dbox, hypre_BoxIMin(own_box), stridec, xfi,
                                 xf_dbox, hypre_BoxIMin(own_box), stridec, xci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xfi,xci
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xfi,xci) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, xfi, xci)
             {
                 xcp[0][0][xci]+= xcp_temp[0][0][xfi];

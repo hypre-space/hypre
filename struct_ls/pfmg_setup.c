@@ -712,10 +712,9 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       else
       {
          hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,si,Astenc,tcx,tcy,tcz
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS cx,cy,cz,sqcx,sqcy,sqcz
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,si,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
          {
             tcx = 0.0;
@@ -891,10 +890,9 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       else
       {
          hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai
-#define HYPRE_SMP_REDUCTION_OP *
-#define HYPRE_SMP_REDUCTION_VARS diag_product
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai) reduction(*:diag_product) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
          {
             diag_product *= Ap[Ai];

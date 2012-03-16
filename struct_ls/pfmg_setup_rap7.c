@@ -372,8 +372,9 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                              P_dbox, cstart, stridec, iP,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,west,east,south,north
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,west,east,south,north) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop3For(loopi, loopj, loopk, iP, iA, iAc)
          {
             iAm1 = iA - OffsetA;
@@ -439,8 +440,9 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(loop_size,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
          {
             rap_cc[iAc] = 2.0*a_cc[iA] + center_int;
@@ -473,8 +475,9 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
             hypre_BoxLoop2Begin(loop_size,
                                 A_dbox, bfstart, stridef, iA,
                                 RAP_dbox, bcstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
             {
                rap_cc[iAc] -= 0.5*a_cc[iA] + center_bdy;

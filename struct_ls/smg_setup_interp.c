@@ -276,8 +276,9 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                      hypre_BoxLoop2Begin(loop_size,
                                          x_data_box,  start,  stride,  xi,
                                          PT_data_box, startc, stridec, PTi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,PTi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,PTi) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, xi, PTi)
                         {
                            PTp[PTi] = xp[xi];

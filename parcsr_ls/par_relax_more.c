@@ -240,7 +240,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
           
           /* p = s + beta p */
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) schedule(static)
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
           for (j=0; j < local_size; j++)
           {
@@ -507,9 +507,8 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
          mult = coefs[i];
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) schedule(static) 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
 #endif
-
          for ( j = 0; j < num_rows; j++ )
          {
             u_data[j] = mult * r_data[j] + v_data[j];
@@ -518,7 +517,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) schedule(static) 
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE 
 #endif
       for ( i = 0; i < num_rows; i++ ) 
       {
@@ -551,7 +550,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
 
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j,diag) schedule(static) 
+#pragma omp parallel for private(j,diag) HYPRE_SMP_SCHEDULE 
 #endif
       for (j = 0; j < num_rows; j++)
       {
@@ -563,7 +562,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
 
       hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) schedule(static) 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
 #endif
       for ( j = 0; j < num_rows; j++ ) 
       {
@@ -574,7 +573,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
          the iteration by multiplying r by the cheby coef.*/
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) schedule(static) 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
 #endif
       for ( j = 0; j < num_rows; j++ ) 
       {
@@ -588,7 +587,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
       {
          /* v = D^(-1/2)AD^(-1/2)u */
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) schedule(static) 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
 #endif
          for ( j = 0; j < num_rows; j++ )
          {
@@ -600,7 +599,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
          mult = coefs[i];
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j,tmp_d) schedule(static) 
+#pragma omp parallel for private(j,tmp_d) HYPRE_SMP_SCHEDULE 
 #endif
          for ( j = 0; j < num_rows; j++ )
          {
@@ -610,12 +609,10 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
          
       } /* end of cheby_order loop */
 
-
       /* now we have to scale u_data before adding it to u_orig*/
 
-
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) schedule(static) 
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE 
 #endif
       for ( j = 0; j < num_rows; j++ ) 
       {
@@ -1071,8 +1068,9 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     * Copy current approximation into temporary vector.
     *-----------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
     for (i = 0; i < n; i++)
     {
        Vtemp_data[i] = u_data[i];
@@ -1090,8 +1088,9 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     
     if (relax_points == 0)
     {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
+#endif
        for (i = 0; i < n; i++)
        {
           
@@ -1121,8 +1120,9 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
      *-----------------------------------------------------------------*/
     else
     {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
+#endif
        for (i = 0; i < n; i++)
        {
           

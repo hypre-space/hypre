@@ -962,8 +962,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                   e_dbox,  start,  stride,  ei,
                                   xc_dbox, startc, stridec, xci);
 #if 1
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei,xci,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei,xci,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
+#endif
 #else
               hypre_BoxLoopSetOneBlock();
 #endif
@@ -1299,8 +1300,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                  e_dbox,  start,  stride,  ei,
                                  xc_dbox, startc, stridec, xci);
 #if 1
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei,xci,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei,xci,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
+#endif
 #else
              hypre_BoxLoopSetOneBlock();
 #endif

@@ -496,8 +496,9 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                rap_ptrS = hypre_StructMatrixBoxData(RAP, ci, RAPloop);
                hypre_BoxLoop1Begin(loop_size,
                                    RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iAc) HYPRE_SMP_SCHEDULE
+#endif
                hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                   {
                      rap_ptrS[iAc] = zero;
@@ -571,8 +572,9 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                              R_dbox, cstart, stridec, iR,
                                              A_dbox, fstart, stridef, iA,
                                              RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#endif
                          hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                             {
                                /* path 1 : (stay,stay) */
@@ -606,8 +608,9 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                              R_dbox, cstart, stridec, iR,
                                              A_dbox, fstart, stridef, iA,
                                              RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#endif
                          hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                             {
                                /* path 1 : (stay,stay) */
@@ -678,8 +681,9 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                           R_dbox, cstart, stridec, iR,
                                           A_dbox, fstart, stridef, iA,
                                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#endif
                       hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                          {
                             /* Path 1 : (stay,up) & symmetric path  */
@@ -746,8 +750,9 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                           R_dbox, cstart, stridec, iR,
                                           A_dbox, fstart, stridef, iA,
                                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#endif
                       hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
                          {
                             /* Path 1 : (stay,up) */
@@ -853,8 +858,9 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                       hypre_BoxLoop1Begin(loop_size,
                                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iAc) HYPRE_SMP_SCHEDULE
+#endif
                       hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                          {
                             rap_ptrS[iAc] += symm_path_multiplier *

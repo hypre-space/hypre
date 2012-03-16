@@ -370,8 +370,9 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
             hypre_BoxLoop2Begin(loop_size,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,datai,dvali) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
             {
                datap[datai] += values[dvali];
@@ -383,8 +384,9 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
             hypre_BoxLoop2Begin(loop_size,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,datai,dvali) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
             {
                datap[datai] = values[dvali];
@@ -396,8 +398,9 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
             hypre_BoxLoop2Begin(loop_size,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,datai,dvali) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
             {
                values[dvali] = datap[datai];
@@ -548,8 +551,9 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
 
          hypre_BoxLoop1Begin(loop_size,
                              data_box,data_start,data_stride,datai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,datai) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop1For(loopi, loopj, loopk, datai)
          {
             datap[datai] = 0.0;
@@ -573,8 +577,9 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
    HYPRE_Int  data_size = hypre_StructVectorDataSize(vector);
    HYPRE_Int  i;
 
-#define HYPRE_SMP_PRIVATE i
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < data_size; i++)
    {
       data[i] = 0.0;
@@ -654,8 +659,9 @@ hypre_StructVectorCopy( hypre_StructVector *x,
 
          hypre_BoxLoop1Begin(loop_size,
                              x_data_box, start, unit_stride, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,vi ) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop1For(loopi, loopj, loopk, vi)
             {
                yp[vi] = xp[vi];
@@ -707,8 +713,9 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
 
          hypre_BoxLoop1Begin(loop_size,
                              v_data_box, start, unit_stride, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,vi ) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop1For(loopi, loopj, loopk, vi)
             {
                vp[vi] = values;
@@ -766,8 +773,9 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
          k = hypre_IndexZ(start);
 /* RDF: This won't work as written with threading on */
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,vi ) HYPRE_SMP_SCHEDULE
+#endif
 #else
          hypre_BoxLoopSetOneBlock();
 #endif
@@ -831,8 +839,9 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 
                hypre_BoxLoop1Begin(loop_size,
                                    v_data_box, start, unit_stride, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,vi ) HYPRE_SMP_SCHEDULE
+#endif
                hypre_BoxLoop1For(loopi, loopj, loopk, vi)
                   {
                      vp[vi] = 0.0;
@@ -905,8 +914,9 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
             start = hypre_BoxIMin(bbox);
             hypre_BoxLoop1Begin(loop_size,
                                 v_data_box, start, stride, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,vi ) HYPRE_SMP_SCHEDULE
+#endif
             hypre_BoxLoop1For(loopi, loopj, loopk, vi)
             {
                vp[vi] = 0.0;
@@ -953,8 +963,9 @@ hypre_StructVectorScaleValues( hypre_StructVector *vector, double factor )
 
    hypre_BoxLoop1Begin(loop_size,
                        box, imin, imin, datai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,datai) HYPRE_SMP_SCHEDULE
+#endif
    hypre_BoxLoop1For(loopi, loopj, loopk, datai)
       {
          data[datai] *= factor;
@@ -1220,8 +1231,9 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
          maxindex = hypre_BoxIndexRank( box, imin );
          maxvalue = data[maxindex];
          hypre_CopyIndex( imin, max_xyz_index );
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,datai) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop1For(loopi, loopj, loopk, datai)
             {
                if ( data[datai] > maxvalue )

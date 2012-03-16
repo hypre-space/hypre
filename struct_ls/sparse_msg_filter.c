@@ -123,8 +123,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(loop_size,
                              A_dbox, start,  stride,  Ai,
                              v_dbox, startv, stridev, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,vi,lambdax,lambday,lambdaz,si,Ap,Astenc,lambda_max,dir
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,vi,lambdax,lambday,lambdaz,si,Ap,Astenc,lambda_max,dir) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop2For(loopi, loopj, loopk, Ai, vi)
             {
                lambdax = 0.0;
@@ -288,8 +289,9 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
          hypre_BoxLoop2Begin(loop_size,
                              e_dbox, start,  stride,  ei,
                              v_dbox, startv, stridev, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei,vi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei,vi) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop2For(loopi, loopj, loopk, ei, vi)
             {
                if ( !(((HYPRE_Int) vp[vi]) & k) )
@@ -395,8 +397,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(loop_size,
                              A_dbox, start,  stride,  Ai,
                              v_dbox, startv, stridev, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,vi,lambdax,lambday,lambdaz,si,Ap,Astenc
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,vi,lambdax,lambday,lambdaz,si,Ap,Astenc) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop2For(loopi, loopj, loopk, Ai, vi)
             {
                lambdax = 0.0;
@@ -522,8 +525,9 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
          hypre_BoxLoop2Begin(loop_size,
                              e_dbox, start,  stride,  ei,
                              v_dbox, startv, stridev, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei,vi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei,vi) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop2For(loopi, loopj, loopk, ei, vi)
             {
                ep[ei] *= vp[vi];

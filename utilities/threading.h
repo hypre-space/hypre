@@ -10,25 +10,22 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
-#if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
+#ifdef HYPRE_USING_OPENMP
 
 HYPRE_Int hypre_NumThreads( void );
+HYPRE_Int hypre_NumActiveThreads( void );
 HYPRE_Int hypre_GetThreadNum( void );
-HYPRE_Int hypre_GetMaxNumThreads( void );
 
 #else
 
 #define hypre_NumThreads() 1
+#define hypre_NumActiveThreads() 1
 #define hypre_GetThreadNum() 0
-#define hypre_GetMaxNumThreads() 1
 
 #endif
-
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /* The pthreads stuff needs to be reworked */

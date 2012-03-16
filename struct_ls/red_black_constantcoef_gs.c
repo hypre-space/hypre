@@ -188,8 +188,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         Ai= hypre_CCBoxIndexRank(A_dbox, start);
                         AApd= 1.0/Ap[Ai];
 
-#define HYPRE_SMP_PRIVATE ii,jj,bi,xi,kk
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
         		for (kk = 0; kk < nk; kk++)
                         {
                            for (jj = 0; jj < nj; jj++)
@@ -211,8 +212,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                          Ani = hypre_BoxSizeX(A_dbox);
                          Anj = hypre_BoxSizeY(A_dbox);
 
-#define HYPRE_SMP_PRIVATE ii,jj,Ai,bi,xi,kk
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
 		         for (kk = 0; kk < nk; kk++)
                          {
                             for (jj = 0; jj < nj; jj++)
@@ -340,8 +342,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         switch(stencil_size)
                         {
                            case 7:
-#define HYPRE_SMP_PRIVATE ii,jj,bi,xi,kk
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
                               for (kk = 0; kk < nk; kk++)
                               {
                                  for (jj = 0; jj < nj; jj++)
@@ -365,8 +368,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                            break;
 
                            case 5:
-#define HYPRE_SMP_PRIVATE ii,jj,bi,xi,kk
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
                               for (kk = 0; kk < nk; kk++)
                               {
                                  for (jj = 0; jj < nj; jj++)
@@ -388,8 +392,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                            break;
 
                            case 3:
-#define HYPRE_SMP_PRIVATE ii,jj,bi,xi,kk
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
                               for (kk = 0; kk < nk; kk++)
                               {
                                  for (jj = 0; jj < nj; jj++)
@@ -420,8 +425,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         switch(stencil_size)
                         {
                            case 7:
-#define HYPRE_SMP_PRIVATE ii,jj,Ai,bi,xi,kk
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
                            for (kk = 0; kk < nk; kk++)
                            {
                               for (jj = 0; jj < nj; jj++)
@@ -446,8 +452,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                            break;
 
                            case 5:
-#define HYPRE_SMP_PRIVATE ii,jj,Ai,bi,xi,kk
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
                            for (kk = 0; kk < nk; kk++)
                            {
                               for (jj = 0; jj < nj; jj++)
@@ -470,8 +477,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                            break;
 
                            case 3:
-#define HYPRE_SMP_PRIVATE ii,jj,Ai,bi,xi,kk
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
                            for (kk = 0; kk < nk; kk++)
                            {
                               for (jj = 0; jj < nj; jj++)

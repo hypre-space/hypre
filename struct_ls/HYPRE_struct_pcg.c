@@ -514,8 +514,9 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
                              A_data_box, start, stride, Ai,
                              x_data_box, start, stride, xi,
                              y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
             {
                xp[xi] = yp[yi] / Ap[Ai];

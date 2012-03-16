@@ -1305,7 +1305,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    /*-----------------------------------------------------------------------
     *  Initialize threading variables 
     *-----------------------------------------------------------------------*/
-   max_num_threads[0] = hypre_GetMaxNumThreads();
+   max_num_threads[0] = hypre_NumThreads();
    diag_offset = hypre_CTAlloc(HYPRE_Int, max_num_threads[0]);
    fine_to_coarse_offset = hypre_CTAlloc(HYPRE_Int, max_num_threads[0]);
    offd_offset = hypre_CTAlloc(HYPRE_Int, max_num_threads[0]);
@@ -1319,9 +1319,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    /*-----------------------------------------------------------------------
     *  Loop over fine grid.
     *-----------------------------------------------------------------------*/
-   #define HYPRE_SMP_PRIVATE i,my_thread_num,num_threads,start,stop,coarse_counter,jj_counter,jj_counter_offd, P_marker, P_marker_offd,jj,kk,i1,k1,loc_col,jj_begin_row,jj_begin_row_offd,jj_end_row,jj_end_row_offd,diagonal,sum,sgn,jj1,i2,distribute,strong_f_marker
-   #define HYPRE_SMP_PAR_REGION
-   #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel private(i,my_thread_num,num_threads,start,stop,coarse_counter,jj_counter,jj_counter_offd, P_marker, P_marker_offd,jj,kk,i1,k1,loc_col,jj_begin_row,jj_begin_row_offd,jj_end_row,jj_end_row_offd,diagonal,sum,sgn,jj1,i2,distribute,strong_f_marker)
+#endif
    { 
        
        /* Parallelize by computing only over each thread's range of rows.  
@@ -1360,7 +1360,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
        /* this thread's row range */
        my_thread_num = hypre_GetThreadNum();
-       num_threads = hypre_NumThreads();
+       num_threads = hypre_NumActiveThreads();
        start = (n_fine/num_threads)*my_thread_num;
        if (my_thread_num == num_threads-1)
        {  stop = n_fine; }
@@ -1492,8 +1492,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
        /*-----------------------------------------------------------------------
         *  End loop over fine grid.
         *-----------------------------------------------------------------------*/
-       #define HYPRE_SMP_BARRIER
-       #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
        P_diag_i[stop] = jj_counter; 
        P_offd_i[stop] = jj_counter_offd;
        fine_to_coarse_offset[my_thread_num] = coarse_counter;
@@ -1501,8 +1502,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
        offd_offset[my_thread_num] = jj_counter_offd;
 
        /* Stitch P_diag_i, P_offd_i and fine_to_coarse together */
-       #define HYPRE_SMP_BARRIER
-       #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
        if(my_thread_num == 0)
        { 
          /* Calculate the offset for P_diag_i and P_offd_i for each thread */
@@ -1513,8 +1515,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
            offd_offset[i] = offd_offset[i-1] + offd_offset[i];
          }
        }
-       #define HYPRE_SMP_BARRIER
-       #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
        
        if(my_thread_num > 0)
        {
@@ -1533,8 +1536,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
            { fine_to_coarse[i] += fine_to_coarse_offset[my_thread_num-1]; }
          }
        }
-       #define HYPRE_SMP_BARRIER
-       #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
       
        if(my_thread_num == 0)
        {
@@ -1592,8 +1596,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
        /*-----------------------------------------------------------------------
         *  Loop over fine grid points.
         *-----------------------------------------------------------------------*/
-       #define HYPRE_SMP_BARRIER
-       #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
        for (i = start; i < stop; i++)
        {
          jj_begin_row = P_diag_i[i];        
@@ -1953,16 +1958,18 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      if (full_off_procNodes)
         P_marker = hypre_CTAlloc(HYPRE_Int, full_off_procNodes);
      
-     #define HYPRE_SMP_PRIVATE i
-     #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
      for (i=0; i < full_off_procNodes; i++)
        P_marker[i] = 0;
      
      /* These two loops set P_marker[i] to 1 if it appears in P_offd_j and if
       * tmp_CF_marker_offd has i marked. num_cols_P_offd is then set to the
       * total number of times P_marker is set */
-     #define HYPRE_SMP_PRIVATE i,index
-     #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,index) HYPRE_SMP_SCHEDULE
+#endif
      for (i=0; i < P_offd_size; i++)
      {
        index = P_offd_j[i];
@@ -1970,10 +1977,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
        {  P_marker[index] = 1; }
      }
      num_cols_P_offd = 0;
-     #define HYPRE_SMP_PRIVATE i
-     #define HYPRE_SMP_REDUCTION_OP +
-     #define HYPRE_SMP_REDUCTION_VARS num_cols_P_offd
-     #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) reduction(+:num_cols_P_offd) HYPRE_SMP_SCHEDULE
+#endif
      for (i=0; i < full_off_procNodes; i++)
      {
        if(P_marker[i])
@@ -1994,8 +2000,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
        col_map_offd_P[i] = index++;
      }
      
-     #define HYPRE_SMP_PRIVATE i
-     #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
      for(i = 0; i < P_offd_size; i++)
        P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
                      P_offd_j[i],
@@ -2014,16 +2021,18 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      }
 
      /* Sort the col_map_offd_P and P_offd_j correctly */
-     #define HYPRE_SMP_PRIVATE i
-     #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
      for(i = 0; i < num_cols_P_offd; i++)
        P_marker[i] = col_map_offd_P[i];
      
      /* Check if sort actually changed anything */
      if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
-       #define HYPRE_SMP_PRIVATE i,j
-       #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j) HYPRE_SMP_SCHEDULE
+#endif
        for(i = 0; i < P_offd_size; i++)
          for(j = 0; j < num_cols_P_offd; j++)
            if(P_marker[P_offd_j[i]] == col_map_offd_P[j])
@@ -2043,8 +2052,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    hypre_MatvecCommPkgCreate(P);
     
-   #define HYPRE_SMP_PRIVATE i
-   #include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i=0; i < n_fine; i++)
       if (CF_marker[i] == -3) CF_marker[i] = -1;
  

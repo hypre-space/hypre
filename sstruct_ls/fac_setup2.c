@@ -497,8 +497,9 @@ hypre_FacSetup2( void                 *fac_vdata,
                 hypre_BoxLoop2Begin(loop_size,
                                     sgrid_box, box_start, stride, k,
                                     A_smatrix_dbox, box_start, stride, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,k,iA
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,k,iA) HYPRE_SMP_SCHEDULE
+#endif
                 hypre_BoxLoop2For(loopi, loopj, loopk, k, iA)
                 {
                    values[k]= A_smatrix_value[iA];
@@ -571,8 +572,9 @@ hypre_FacSetup2( void                 *fac_vdata,
                    hypre_BoxLoop2Begin(loop_size,
                                        sgrid_box, box_start, stride, k,
                                        A_smatrix_dbox, box_start, stride, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,k,iA
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,k,iA) HYPRE_SMP_SCHEDULE
+#endif
                    hypre_BoxLoop2For(loopi, loopj, loopk, k, iA)
                    {
                        values[k]= A_smatrix_value[iA];
@@ -831,8 +833,9 @@ hypre_FacSetup2( void                 *fac_vdata,
              hypre_BoxLoop2Begin(loop_size,
                                  sgrid_box, box_start, stride, k,
                                  A_smatrix_dbox, box_start, stride, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,k,iA
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,k,iA) HYPRE_SMP_SCHEDULE
+#endif
              hypre_BoxLoop2For(loopi, loopj, loopk, k, iA)
              {
                  values[k]= A_smatrix_value[iA];

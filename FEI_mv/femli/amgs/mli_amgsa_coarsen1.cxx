@@ -1436,8 +1436,9 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    {
       diagData = new double[AdiagNRows];
 
-#define HYPRE_SMP_PRIVATE irow,j
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(irow,j) HYPRE_SMP_SCHEDULE
+#endif
       for (irow = 0; irow < AdiagNRows; irow++)
       {
          for (j = AdiagRPtr[irow]; j < AdiagRPtr[irow+1]; j++)
@@ -1474,8 +1475,9 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    epsilon = epsilon * epsilon;
    rowLengths = new int[AdiagNRows];
 
-#define HYPRE_SMP_PRIVATE irow,j,jj,index,dcomp1,dcomp2
-#include "utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(irow,j,jj,index,dcomp1,dcomp2) HYPRE_SMP_SCHEDULE
+#endif
    for ( irow = 0; irow < AdiagNRows; irow++ )
    {
       rowLengths[irow] = 0;

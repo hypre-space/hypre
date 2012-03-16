@@ -326,8 +326,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
          
                hypre_BoxLoop0Begin(loop_size);
 #if 0 /* Are private static arrays a problem? */
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,index,rank) HYPRE_SMP_SCHEDULE
+#endif
 #else
                hypre_BoxLoopSetOneBlock();
 #endif
@@ -433,8 +434,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
                      hypre_BoxLoop0Begin(loop_size);
 #if 0 /* Are private static arrays a problem? */
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,index,rank) HYPRE_SMP_SCHEDULE
+#endif
 #else
                      hypre_BoxLoopSetOneBlock();
 #endif
@@ -463,8 +465,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
                      hypre_BoxLoop0Begin(loop_size);
 #if 0 /* Are private static arrays a problem? */
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,index,rank) HYPRE_SMP_SCHEDULE
+#endif
 #else
                      hypre_BoxLoopSetOneBlock();
 #endif
@@ -598,8 +601,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
               appropriate values to 1. */
             hypre_BoxLoop0Begin(loop_size);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,index,entry,m,i,nrows) HYPRE_SMP_SCHEDULE
+#endif
 #else
             hypre_BoxLoopSetOneBlock();
 #endif
@@ -665,8 +669,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
                   hypre_BoxLoop0Begin(loop_size);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,index,entry,m,i,nrows) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif

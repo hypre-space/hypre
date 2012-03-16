@@ -30,7 +30,6 @@ HEADERS =\
  fortran_matrix.h\
  general.h\
  hypre_memory.h\
- hypre_smp_forloop.h\
  HYPRE_utilities.h\
  mpistubs.h\
  threading.h\

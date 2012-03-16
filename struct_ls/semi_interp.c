@@ -217,8 +217,9 @@ hypre_SemiInterp( void               *interp_vdata,
          hypre_BoxLoop2Begin(loop_size,
                              e_dbox, start, stride, ei,
                              xc_dbox, startc, stridec, xci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei,xci
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei,xci) HYPRE_SMP_SCHEDULE
+#endif
          hypre_BoxLoop2For(loopi, loopj, loopk, ei, xci)
             {
                ep[ei] = xcp[xci];
@@ -295,8 +296,9 @@ hypre_SemiInterp( void               *interp_vdata,
                      Pi = hypre_CCBoxIndexRank( P_dbox, startc );
                      hypre_BoxLoop1Begin(loop_size,
                                          e_dbox, start, stride, ei);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop1For(loopi, loopj, loopk, ei)
                         {
                            ep[ei] =  (Pp0[Pi] * ep0[ei] +
@@ -309,8 +311,9 @@ hypre_SemiInterp( void               *interp_vdata,
                      hypre_BoxLoop2Begin(loop_size,
                                          P_dbox, startc, stridec, Pi,
                                          e_dbox, start, stride, ei);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Pi,ei
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Pi,ei) HYPRE_SMP_SCHEDULE
+#endif
                      hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
                         {
                            ep[ei] =  (Pp0[Pi] * ep0[ei] +

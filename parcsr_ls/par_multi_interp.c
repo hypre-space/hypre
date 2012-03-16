@@ -1673,8 +1673,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
           P_marker_offd = hypre_CTAlloc(HYPRE_Int,new_num_cols_offd);
       }
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i=0; i < new_num_cols_offd; i++)
          P_marker_offd[i] = 0;
  
@@ -1717,8 +1718,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             permute[i] = hypre_BinarySearch(col_map_offd_P,k1,num_cols_offd_P);
       }
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i=0; i < P_offd_size; i++)
          P_offd_j[i] = permute[P_offd_j[i]];
    }

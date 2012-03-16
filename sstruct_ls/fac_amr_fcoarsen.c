@@ -1873,8 +1873,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                        A_dbox, fstart, stridef, iA,
                                        crse_dbox, cstart, stridec, iAc);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,sum,vals
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,sum,vals) HYPRE_SMP_SCHEDULE
+#endif
 #else
                    hypre_BoxLoopSetOneBlock();
 #endif
@@ -2054,8 +2055,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                          A_dbox, fstart, stridef, iA,
                                          crse_dbox, cstart, stridec, iAc);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,temp3,ll,kk,jj,temp2,cnt1,index_temp,boxman_entry,found,Uventry,nUentries,ncols,rows,cols,vals2,sum,vals
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,temp3,ll,kk,jj,temp2,cnt1,index_temp,boxman_entry,found,Uventry,nUentries,ncols,rows,cols,vals2,sum,vals) HYPRE_SMP_SCHEDULE
+#endif
 #else
                    hypre_BoxLoopSetOneBlock();
 #endif
@@ -3481,8 +3483,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                    hypre_BoxLoop1Begin(loop_size,
                                        A_dbox, cstart, stridec, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,i
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,i) HYPRE_SMP_SCHEDULE
+#endif
                    hypre_BoxLoop1For(loopi, loopj, loopk, iA)
                    {
                        for (i= 0; i< stencil_size; i++)

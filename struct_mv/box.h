@@ -262,6 +262,8 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 
 #ifndef HYPRE_USE_PTHREADS
 
+#define HYPRE_BOX_PRIVATE hypre__nx,hypre__ny,hypre__nz
+
 #define hypre_BoxLoopDeclareS(dbox, stride, sx, sy, sz) \
 HYPRE_Int  sx = (hypre_IndexX(stride));\
 HYPRE_Int  sy = (hypre_IndexY(stride)*hypre_BoxSizeX(dbox));\

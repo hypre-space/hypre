@@ -238,8 +238,9 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
                                       R_dbox,  startR, strideR, Ri,
                                       r_dbox,  start,  stride,  ri,
                                       rc_dbox, startc, stridec, rci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ri,ri,rci
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ri,ri,rci) HYPRE_SMP_SCHEDULE
+#endif
                   hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
                      {
                         rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +

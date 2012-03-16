@@ -678,8 +678,9 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                hypre_BoxLoop2Begin(loop_size,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,bi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,bi) HYPRE_SMP_SCHEDULE
+#endif
                hypre_BoxLoop2For(loopi, loopj, loopk, yi, bi)
                   {
                      pardata[pari+bi] = yp[yi];
@@ -767,8 +768,9 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                   hypre_BoxLoop2Begin(loop_size,
                                       y_data_box, start, stride, yi,
                                       box,        start, stride, bi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,bi
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,bi) HYPRE_SMP_SCHEDULE
+#endif
                   hypre_BoxLoop2For(loopi, loopj, loopk, yi, bi)
                      {
                         yp[yi] = pardata[pari+bi];
