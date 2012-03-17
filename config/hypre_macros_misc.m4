@@ -127,7 +127,7 @@ then
           LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
-      cc|xlc|mpxlc|mpcc)
+      cc|xlc|mpxlc|mpixlc|mpcc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qsmp=omp"
@@ -164,7 +164,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|cxx|xlC|mpxlC|mpCC)
+      CC|cxx|xlC|mpxlC|mpixlC|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
@@ -200,7 +200,7 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|xlf|mpxlf)
+      f77|f90|xlf|mpxlf|mpixlf77)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -qsmp=omp"
@@ -247,7 +247,7 @@ then
           LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
-      cc|xlc|mpxlc|mpcc)
+      cc|xlc|mpxlc|mpixlc|mpcc)
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qsmp=omp"
@@ -284,7 +284,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|cxx|xlC|mpxlC|mpCC)
+      CC|cxx|xlC|mpxlC|mpixlC|mpCC)
         CXXFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
@@ -320,7 +320,7 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|xlf|mpxlf)
+      f77|f90|xlf|mpxlf|mpixlf77)
         FFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -qsmp=omp"
