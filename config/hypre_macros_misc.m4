@@ -106,8 +106,12 @@ AC_DEFUN([AC_HYPRE_OPTIMIZATION_FLAGS],
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
    case "${CC}" in
-      gcc|mpicc)
+      gcc|mpigcc|mpicc)
         CFLAGS="-O2"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CFLAGS="$CFLAGS -fopenmp"
+          LDFLAGS="$LDFLAGS -fopenmp"
+        fi
         ;;
       icc|mpiicc)
         CFLAGS="-O2"
@@ -123,15 +127,15 @@ then
           LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
-      KCC|mpiKCC)
-        CFLAGS="-fast +K3"
-        ;;
-      cc|mpcc|xlc|mpxlc|mpixlc_r)
+      cc|xlc|mpxlc|mpcc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qsmp=omp"
           LDFLAGS="$LDFLAGS -qsmp=omp"
         fi
+        ;;
+      KCC|mpiKCC)
+        CFLAGS="-fast +K3"
         ;;
       *)
         CFLAGS="-O"
@@ -142,8 +146,11 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      gCC|mpiCC)
+      g++|gCC|mpig++|mpicxx|mpiCC)
         CXXFLAGS="-O2"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CXXFLAGS="$CXXFLAGS -fopenmp"
+        fi
         ;;
       icpc|icc|mpiicpc|mpiicc)
         CXXFLAGS="-O2"
@@ -157,14 +164,14 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      KCC|mpiKCC)
-        CXXFLAGS="-fast +K3"
-        ;;
-      CC|mpCC|mpxlC|xlC|cxx)
+      CC|cxx|xlC|mpxlC|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
         fi
+        ;;
+      KCC|mpiKCC)
+        CXXFLAGS="-fast +K3"
         ;;
       *)
         CXXFLAGS="-O"
@@ -175,8 +182,11 @@ fi
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
    case "${F77}" in
-      g77)
+      g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
+        if test "$hypre_using_openmp" = "yes" ; then
+          FFLAGS="$FFLAGS -fopenmp"
+        fi
         ;;
       ifort|mpiifort)
         FFLAGS="-O2"
@@ -190,14 +200,14 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      kf77|mpikf77)
-        FFLAGS="-fast +K3"
-        ;;
-      f77|f90|mpxlf|mpif77|xlf)
+      f77|f90|xlf|mpxlf)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -qsmp=omp"
         fi
+        ;;
+      kf77|mpikf77)
+        FFLAGS="-fast +K3"
         ;;
       *)
         FFLAGS="-O"
@@ -216,11 +226,12 @@ AC_DEFUN([AC_HYPRE_DEBUG_FLAGS],
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
    case "${CC}" in
-      gcc|mpicc)
+      gcc|mpigcc|mpicc)
         CFLAGS="-g -Wall"
-        ;;
-      KCC|mpiKCC)
-        CFLAGS="--c -g +K3"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CFLAGS="$CFLAGS -fopenmp"
+          LDFLAGS="$LDFLAGS -fopenmp"
+        fi
         ;;
       icc|mpiicc)
         CFLAGS="-g"
@@ -236,12 +247,15 @@ then
           LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
-      cc|mpcc|xlc|mpxlc|mpixlc_r)
+      cc|xlc|mpxlc|mpcc)
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qsmp=omp"
           LDFLAGS="$LDFLAGS -qsmp=omp"
         fi
+        ;;
+      KCC|mpiKCC)
+        CFLAGS="--c -g +K3"
         ;;
       *)
         CFLAGS="-g"
@@ -252,11 +266,11 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      g++|mpig++)
+      g++|gCC|mpig++|mpicxx|mpiCC)
         CXXFLAGS="-g -Wall"
-        ;;
-      KCC|mpiKCC)
-        CXXFLAGS="-g +K3"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CXXFLAGS="$CXXFLAGS -fopenmp"
+        fi
         ;;
       icpc|icc|mpiicpc|mpiicc)
         CXXFLAGS="-g"
@@ -270,11 +284,14 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|mpCC|mpxlC|xlC|cxx)
+      CC|cxx|xlC|mpxlC|mpCC)
         CXXFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
         fi
+        ;;
+      KCC|mpiKCC)
+        CXXFLAGS="-g +K3"
         ;;
       *)
         CXXFLAGS="-g"
@@ -285,11 +302,11 @@ fi
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
    case "${F77}" in
-      g77|mpig77)
+      g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-g -Wall"
-        ;;
-      kf77|mpikf77)
-        FFLAGS="-g +K3"
+        if test "$hypre_using_openmp" = "yes" ; then
+          FFLAGS="$FFLAGS -fopenmp"
+        fi
         ;;
       ifort|mpiifort)
         FFLAGS="-g"
@@ -303,17 +320,20 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|mpxlf|mpif77|xlf)
+      f77|f90|xlf|mpxlf)
         FFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -qsmp=omp"
         fi
         ;;
+      kf77|mpikf77)
+        FFLAGS="-g +K3"
+        ;;
       *)
         FFLAGS="-g"
         ;;
    esac
-fi]) dnl
+fi])
 
 dnl **********************************************************************
 dnl * AC_HYPRE_SET_ARCH

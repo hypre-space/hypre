@@ -2257,50 +2257,7 @@ fi;
 
 if test "$hypre_user_chose_ccompilers" = "no"
 then
-   if test "$hypre_using_openmp" = "yes"
-   then
-      for ac_prog in mpxlc mpixlc_r xlc mpiicc icc mpguidec guidec pgcc cc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_CC+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$CC"; then
-  ac_cv_prog_CC="$CC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CC="$ac_prog"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-fi
-fi
-CC=$ac_cv_prog_CC
-if test -n "$CC"; then
-  echo "$as_me:$LINENO: result: $CC" >&5
-echo "${ECHO_T}$CC" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
-  test -n "$CC" && break
-done
-test -n "$CC" || CC=""""
-
-   elif test "$hypre_using_mpi" = "no"
+   if test "$hypre_using_mpi" = "no"
    then
       for ac_prog in xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC
 do
@@ -2344,7 +2301,7 @@ done
 test -n "$CC" || CC=""""
 
    else
-      for ac_prog in mpxlc mpixlc mpiicc mpcc mpicc mpipgcc
+      for ac_prog in mpxlc mpixlc mpiicc mpicc mpipgcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2395,50 +2352,7 @@ fi
 
 if test "$hypre_user_chose_cxxcompilers" = "no"
 then
-   if test "$hypre_using_openmp" = "yes"
-   then
-      for ac_prog in mpxlC mpixlcxx_r xlC mpiicpc mpguidec++ guidec++ icpc pgCC CC
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_CXX+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$CXX"; then
-  ac_cv_prog_CXX="$CXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CXX="$ac_prog"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-fi
-fi
-CXX=$ac_cv_prog_CXX
-if test -n "$CXX"; then
-  echo "$as_me:$LINENO: result: $CXX" >&5
-echo "${ECHO_T}$CXX" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
-  test -n "$CXX" && break
-done
-test -n "$CXX" || CXX=""""
-
-   elif test "$hypre_using_mpi" = "no"
+   if test "$hypre_using_mpi" = "no"
    then
       for ac_prog in xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
 do
@@ -2482,7 +2396,7 @@ done
 test -n "$CXX" || CXX=""""
 
    else
-      for ac_prog in mpxlC mpixlcxx mpiicpc mpCC mpiCC mpicxx mpipgCC
+      for ac_prog in mpxlC mpixlC mpiicpc mpiCC mpicxx mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2533,50 +2447,7 @@ fi
 
 if test "$hypre_using_fortran" = "yes" -a "$hypre_user_chose_fcompilers" = "no"
 then
-   if test "$hypre_using_openmp" = "yes"
-   then
-      for ac_prog in mpxlf mpixlf77_r xlf mpiifort ifort mpguidef77 guidef77 pg77 f77
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_F77+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$F77"; then
-  ac_cv_prog_F77="$F77" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_F77="$ac_prog"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-fi
-fi
-F77=$ac_cv_prog_F77
-if test -n "$F77"; then
-  echo "$as_me:$LINENO: result: $F77" >&5
-echo "${ECHO_T}$F77" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
-  test -n "$F77" && break
-done
-test -n "$F77" || F77=""""
-
-   elif test "$hypre_using_mpi" = "no"
+   if test "$hypre_using_mpi" = "no"
    then
       for ac_prog in xlf ifort gfortran g77 g95 pgf77 f77
 do
@@ -2620,7 +2491,7 @@ done
 test -n "$F77" || F77=""""
 
    else
-      for ac_prog in mpxlf mpixlf77 mpiifort mpf77 mpif77 mpipgf77
+      for ac_prog in mpxlf mpixlf77 mpiifort mpif77 mpipgf77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4166,7 +4037,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:4169:" \
+echo "$as_me:4040:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -4362,7 +4233,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:4365: \"$ac_link\") >&5
+(eval echo $as_me:4236: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -4440,7 +4311,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:4443: \"$ac_link\") >&5
+(eval echo $as_me:4314: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6198,11 +6069,12 @@ then
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
    case "${CC}" in
-      gcc|mpicc)
+      gcc|mpigcc|mpicc)
         CFLAGS="-g -Wall"
-        ;;
-      KCC|mpiKCC)
-        CFLAGS="--c -g +K3"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CFLAGS="$CFLAGS -fopenmp"
+          LDFLAGS="$LDFLAGS -fopenmp"
+        fi
         ;;
       icc|mpiicc)
         CFLAGS="-g"
@@ -6218,12 +6090,15 @@ then
           LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
-      cc|mpcc|xlc|mpxlc|mpixlc_r)
+      cc|xlc|mpxlc|mpcc)
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qsmp=omp"
           LDFLAGS="$LDFLAGS -qsmp=omp"
         fi
+        ;;
+      KCC|mpiKCC)
+        CFLAGS="--c -g +K3"
         ;;
       *)
         CFLAGS="-g"
@@ -6234,11 +6109,11 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      g++|mpig++)
+      g++|gCC|mpig++|mpicxx|mpiCC)
         CXXFLAGS="-g -Wall"
-        ;;
-      KCC|mpiKCC)
-        CXXFLAGS="-g +K3"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CXXFLAGS="$CXXFLAGS -fopenmp"
+        fi
         ;;
       icpc|icc|mpiicpc|mpiicc)
         CXXFLAGS="-g"
@@ -6252,11 +6127,14 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|mpCC|mpxlC|xlC|cxx)
+      CC|cxx|xlC|mpxlC|mpCC)
         CXXFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
         fi
+        ;;
+      KCC|mpiKCC)
+        CXXFLAGS="-g +K3"
         ;;
       *)
         CXXFLAGS="-g"
@@ -6267,11 +6145,11 @@ fi
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
    case "${F77}" in
-      g77|mpig77)
+      g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-g -Wall"
-        ;;
-      kf77|mpikf77)
-        FFLAGS="-g +K3"
+        if test "$hypre_using_openmp" = "yes" ; then
+          FFLAGS="$FFLAGS -fopenmp"
+        fi
         ;;
       ifort|mpiifort)
         FFLAGS="-g"
@@ -6285,11 +6163,14 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|mpxlf|mpif77|xlf)
+      f77|f90|xlf|mpxlf)
         FFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -qsmp=omp"
         fi
+        ;;
+      kf77|mpikf77)
+        FFLAGS="-g +K3"
         ;;
       *)
         FFLAGS="-g"
@@ -6301,8 +6182,12 @@ else
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
    case "${CC}" in
-      gcc|mpicc)
+      gcc|mpigcc|mpicc)
         CFLAGS="-O2"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CFLAGS="$CFLAGS -fopenmp"
+          LDFLAGS="$LDFLAGS -fopenmp"
+        fi
         ;;
       icc|mpiicc)
         CFLAGS="-O2"
@@ -6318,15 +6203,15 @@ then
           LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
-      KCC|mpiKCC)
-        CFLAGS="-fast +K3"
-        ;;
-      cc|mpcc|xlc|mpxlc|mpixlc_r)
+      cc|xlc|mpxlc|mpcc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qsmp=omp"
           LDFLAGS="$LDFLAGS -qsmp=omp"
         fi
+        ;;
+      KCC|mpiKCC)
+        CFLAGS="-fast +K3"
         ;;
       *)
         CFLAGS="-O"
@@ -6337,8 +6222,11 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      gCC|mpiCC)
+      g++|gCC|mpig++|mpicxx|mpiCC)
         CXXFLAGS="-O2"
+        if test "$hypre_using_openmp" = "yes" ; then
+          CXXFLAGS="$CXXFLAGS -fopenmp"
+        fi
         ;;
       icpc|icc|mpiicpc|mpiicc)
         CXXFLAGS="-O2"
@@ -6352,14 +6240,14 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      KCC|mpiKCC)
-        CXXFLAGS="-fast +K3"
-        ;;
-      CC|mpCC|mpxlC|xlC|cxx)
+      CC|cxx|xlC|mpxlC|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
         fi
+        ;;
+      KCC|mpiKCC)
+        CXXFLAGS="-fast +K3"
         ;;
       *)
         CXXFLAGS="-O"
@@ -6370,8 +6258,11 @@ fi
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
    case "${F77}" in
-      g77)
+      g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
+        if test "$hypre_using_openmp" = "yes" ; then
+          FFLAGS="$FFLAGS -fopenmp"
+        fi
         ;;
       ifort|mpiifort)
         FFLAGS="-O2"
@@ -6385,14 +6276,14 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      kf77|mpikf77)
-        FFLAGS="-fast +K3"
-        ;;
-      f77|f90|mpxlf|mpif77|xlf)
+      f77|f90|xlf|mpxlf)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -qsmp=omp"
         fi
+        ;;
+      kf77|mpikf77)
+        FFLAGS="-fast +K3"
         ;;
       *)
         FFLAGS="-O"
