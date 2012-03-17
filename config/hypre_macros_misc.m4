@@ -164,7 +164,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|cxx|xlC|mpxlC|mpixlC|mpCC)
+      CC|cxx|xlC|mpxlC|mpixlcxx|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
@@ -284,7 +284,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|cxx|xlC|mpxlC|mpixlC|mpCC)
+      CC|cxx|xlC|mpxlC|mpixlcxx|mpCC)
         CXXFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
