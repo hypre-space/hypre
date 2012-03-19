@@ -43,19 +43,19 @@ the responsible project member before the release is made available to users.
 
 - Tag repository with release number.
 
-  []
+  [rdf 3/19/2012]
 
 - Create release tar files by running the 'tools/mkdist' script (for more
   information, do 'mkdist -help').  This can be run from within any directory,
   just be sure to use the latest version of the 'mkdist' script.
 
-  []
+  [rdf 3/19/2012]
 
 - On the CASC cluster, copy tar file to '/usr/casc/hypre'.
 
-  []
+  [rdf 3/19/2012]
 
 - FINAL CERTIFICATION: Verify that all steps have been signed off and commit
   this file to the repository.
 
-  []
+  [rdf 3/19/2012]
