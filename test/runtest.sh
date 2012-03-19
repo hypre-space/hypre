@@ -112,6 +112,9 @@ function MpirunString
          RunString="srun -p pdebug -n$*"
          ;;
       tux*) BatchMode=0
+         if [ $NumThreads -gt 0 ] ; then
+            export OMP_NUM_THREADS=$NumThreads
+         fi
          MACHINES_FILE="hostname"
          if [ ! -f $MACHINES_FILE ] ; then
             hostname > $MACHINES_FILE
