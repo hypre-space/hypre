@@ -261,7 +261,6 @@ else
    hypre_user_chose_cflags=yes
 fi
 
-
 dnl *********************************************************************
 dnl * Determine if user provided CXX compiler or flags
 dnl *********************************************************************
@@ -278,7 +277,6 @@ then
 else
    hypre_user_chose_cxxflags=yes
 fi
-
 
 dnl *********************************************************************
 dnl * Determine if user provided fortran compiler or flags
@@ -676,9 +674,19 @@ if test "$hypre_user_chose_ccompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(CC, [xlc_r xlC_r icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
+      else
+         AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
+      fi
    else
-      AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpicc mpipgcc], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpiicc mpicc mpipgcc])
+      else
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpicc mpipgcc])
+      fi
    fi
 
    if test "x$CC" = "x"
@@ -691,9 +699,19 @@ if test "$hypre_user_chose_cxxcompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(CXX, [xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+      else
+         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+      fi
    else
-      AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpiCC mpicxx mpipgCC], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpiicpc mpiCC mpicxx mpipgCC])
+      else
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpiCC mpicxx mpipgCC])
+      fi
    fi
 
    if test "x$CXX" = "x"
@@ -706,9 +724,19 @@ if test "$hypre_using_fortran" = "yes" -a "$hypre_user_chose_fcompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(F77, [xlf ifort gfortran g77 g95 pgf77 f77], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(F77, [xlf_r ifort gfortran g77 g95 pgf77 f77])
+      else
+         AC_CHECK_PROGS(F77, [xlf ifort gfortran g77 g95 pgf77 f77])
+      fi
    else
-      AC_CHECK_PROGS(F77, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(F77, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77])
+      else
+         AC_CHECK_PROGS(F77, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77])
+      fi
    fi
 
    if test "x$F77" = "x"
