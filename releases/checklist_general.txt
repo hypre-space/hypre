@@ -49,8 +49,8 @@ the responsible project member before the release is made available to users.
 
   []
 
-- Update 'config/configure.in' with release number and date, then run
-  'config/bootstrap' and commit changes to the repository.
+- Update 'config/configure.in' and 'CMakeLists.txt' with release number and
+  date, then run 'config/bootstrap' and commit changes to the repository.
 
   []
 

@@ -15,13 +15,13 @@
 # recent release.
 #=============================================================================
 
-Version 2.8.1a released 2012/03/13
+Version 2.8.1a released 2012/03/19
 
 - For non-cell data, fixed a memory problem with SStructGraphAddEntries() and an
   accumulation problem with SStructMatrixAddValues().
   
 - Improved the penalty scaling factor for AMS's discrete divergence term (which is
-  added to the matrix to handle robustly problems with pure void regions).
+  added to the matrix to robustly handle problems with pure void regions).
   
 - Added threading to various routines in BoomerAMG.
   
