@@ -71,7 +71,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    double         *Vtemp_data = hypre_VectorData(Vtemp_local);
-   double 	  *Vext_data;
+   double 	  *Vext_data = NULL;
    double 	  *v_buf_data;
    double 	  *tmp_data;
 

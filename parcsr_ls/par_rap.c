@@ -267,9 +267,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    hypre_CSRMatrix *RAP_ext;
 
-   double          *RAP_ext_data;
-   HYPRE_Int             *RAP_ext_i;
-   HYPRE_Int             *RAP_ext_j;
+   double          *RAP_ext_data = NULL;
+   HYPRE_Int             *RAP_ext_i = NULL;
+   HYPRE_Int             *RAP_ext_j = NULL;
 
    hypre_CSRMatrix *RAP_diag;
 
@@ -279,9 +279,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    hypre_CSRMatrix *RAP_offd;
 
-   double          *RAP_offd_data;
-   HYPRE_Int             *RAP_offd_i;
-   HYPRE_Int             *RAP_offd_j;
+   double          *RAP_offd_data = NULL;
+   HYPRE_Int             *RAP_offd_i = NULL;
+   HYPRE_Int             *RAP_offd_j = NULL;
 
    HYPRE_Int              RAP_size;
    HYPRE_Int              RAP_ext_size;
@@ -311,18 +311,18 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    HYPRE_Int             *Ps_ext_i;
    HYPRE_Int             *Ps_ext_j;
 
-   double          *P_ext_diag_data;
-   HYPRE_Int             *P_ext_diag_i;
-   HYPRE_Int             *P_ext_diag_j;
+   double          *P_ext_diag_data = NULL;
+   HYPRE_Int             *P_ext_diag_i = NULL;
+   HYPRE_Int             *P_ext_diag_j = NULL;
 
-   double          *P_ext_offd_data;
-   HYPRE_Int             *P_ext_offd_i;
-   HYPRE_Int             *P_ext_offd_j;
+   double          *P_ext_offd_data = NULL;
+   HYPRE_Int             *P_ext_offd_i = NULL;
+   HYPRE_Int             *P_ext_offd_j = NULL;
 
    HYPRE_Int             *col_map_offd_Pext;
-   HYPRE_Int             *map_P_to_Pext;
-   HYPRE_Int             *map_P_to_RAP;
-   HYPRE_Int             *map_Pext_to_RAP;
+   HYPRE_Int             *map_P_to_Pext = NULL;
+   HYPRE_Int             *map_P_to_RAP = NULL;
+   HYPRE_Int             *map_Pext_to_RAP = NULL;
 
    HYPRE_Int             *P_marker;
    HYPRE_Int            **P_mark_array;

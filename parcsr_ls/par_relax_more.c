@@ -1020,7 +1020,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     
     hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
     double         *Vtemp_data = hypre_VectorData(Vtemp_local);
-    double 	   *Vext_data;
+    double 	   *Vext_data = NULL;
     double 	   *v_buf_data;
     
     HYPRE_Int            i, j;

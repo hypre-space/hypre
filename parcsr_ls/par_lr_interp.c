@@ -1167,7 +1167,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *Sop_i;
   HYPRE_Int             *Sop_j;
   
-  HYPRE_Int              Soprows, sgn;
+  HYPRE_Int              Soprows, sgn = 1;
   
   /* Variables to keep count of interpolatory points */
   HYPRE_Int              jj_counter, jj_counter_offd;
@@ -2175,7 +2175,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *Sop_i;
   HYPRE_Int             *Sop_j;
   
-  HYPRE_Int              Soprows, sgn;
+  HYPRE_Int              Soprows, sgn = 1;
   
   /* Variables to keep count of interpolatory points */
   HYPRE_Int              jj_counter, jj_counter_offd;
@@ -3257,7 +3257,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   /* Interpolation weight variables */
   double           sum, diagonal, distribute;
   HYPRE_Int              strong_f_marker = -2;
-  HYPRE_Int              sgn;
+  HYPRE_Int              sgn = 1;
 
   /* Loop variables */
   HYPRE_Int              index;
@@ -4263,7 +4263,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   /* Interpolation weight variables */
   double           sum, diagonal, distribute;
   HYPRE_Int              strong_f_marker = -2;
-  HYPRE_Int              sgn;
+  HYPRE_Int              sgn = 1;
 
   /* Loop variables */
   HYPRE_Int              index;
@@ -5269,7 +5269,7 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *Sop_i;
   HYPRE_Int             *Sop_j;
   
-  HYPRE_Int              Soprows, sgn;
+  HYPRE_Int              Soprows, sgn = 1;
   
   /* Variables to keep count of interpolatory points */
   HYPRE_Int              jj_counter, jj_counter_offd;
