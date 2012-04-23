@@ -3674,7 +3674,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
                ns = j*size+rest;
                ne = (j+1)*size+rest;
             }
-            for (i = ns; i < ne; i++)	/* interior points first */
+            for (i = ns; i < ne; i++)   /* interior points first */
             {
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
@@ -3701,7 +3701,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
                   u_data[i] += res / l1_norms[i];
                }
             }
-            for (i = ne-1; i > ns-1; i--)	/* interior points first */
+            for (i = ne-1; i > ns-1; i--)       /* interior points first */
             {
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
@@ -3760,7 +3760,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
                ns = j*size+rest;
                ne = (j+1)*size+rest;
             }
-            for (i = ns; i < ne; i++)	/* interior points first */
+            for (i = ns; i < ne; i++)   /* interior points first */
             {
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
@@ -3791,7 +3791,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
                   u_data[i] += (c1*res + c2*res2) / l1_norms[i];
                }
             }
-            for (i = ne-1; i > ns-1; i--)	/* interior points first */
+            for (i = ne-1; i > ns-1; i--)       /* interior points first */
             {
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
