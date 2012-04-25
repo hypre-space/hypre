@@ -1574,10 +1574,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
            /* Initialize thread-wise variables */
            tmp_marker = NULL;
            if (n_fine) 
-           {   tmp_marker = hypre_CTAlloc(int,n_fine); }
+           {   tmp_marker = hypre_CTAlloc(HYPRE_Int,n_fine); }
            tmp_marker_offd = NULL;
            if (num_cols_offd) 
-           {   tmp_marker_offd = hypre_CTAlloc(int,num_cols_offd); }
+           {   tmp_marker_offd = hypre_CTAlloc(HYPRE_Int,num_cols_offd); }
            for (i=0; i < n_fine; i++)
            {   tmp_marker[i] = -1; }
            for (i=0; i < num_cols_offd; i++)
@@ -1736,18 +1736,18 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
              /* Initialize thread-wise variables */
              tmp_marker = NULL;
              if (n_fine) 
-             {    tmp_marker = hypre_CTAlloc(int,n_fine); }
+             {    tmp_marker = hypre_CTAlloc(HYPRE_Int,n_fine); }
              tmp_marker_offd = NULL;
              if (num_cols_offd) 
-             {    tmp_marker_offd = hypre_CTAlloc(int,num_cols_offd); }
+             {    tmp_marker_offd = hypre_CTAlloc(HYPRE_Int,num_cols_offd); }
              tmp_array = NULL;
              if (n_coarse) 
-             {    tmp_array = hypre_CTAlloc(int,n_coarse); }
+             {    tmp_array = hypre_CTAlloc(HYPRE_Int,n_coarse); }
              tmp_array_offd = NULL;
              if (new_num_cols_offd > n_coarse_offd) 
-             {    tmp_array_offd = hypre_CTAlloc(int,new_num_cols_offd); }
+             {    tmp_array_offd = hypre_CTAlloc(HYPRE_Int,new_num_cols_offd); }
              else
-             {    tmp_array_offd = hypre_CTAlloc(int,n_coarse_offd);}
+             {    tmp_array_offd = hypre_CTAlloc(HYPRE_Int,n_coarse_offd);}
              for (i=0; i < n_fine; i++)
              {    tmp_marker[i] = -1; }
              for (i=0; i < num_cols_offd; i++)
