@@ -112,6 +112,12 @@ HYPRE_Int hypre_ADSDestroy(void *solver)
 {
    hypre_ADSData *ads_data = solver;
 
+   if (!ads_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    if (ads_data -> A_C)
       hypre_ParCSRMatrixDestroy(ads_data -> A_C);
    if (ads_data -> B_C)

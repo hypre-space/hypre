@@ -858,6 +858,12 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
 {
    hypre_AMSData *ams_data = solver;
 
+   if (!ams_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    if (ams_data -> owns_A_G)
       if (ams_data -> A_G)
          hypre_ParCSRMatrixDestroy(ams_data -> A_G);
@@ -1312,41 +1318,13 @@ HYPRE_Int hypre_AMSSetBetaAMGOptions(void *solver,
 
 HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
                              hypre_ParCSRMatrix *G,
-                             hypre_ParVector *x,
-                             hypre_ParVector *y,
-                             hypre_ParVector *z,
                              hypre_ParVector *Gx,
                              hypre_ParVector *Gy,
                              hypre_ParVector *Gz,
                              HYPRE_Int dim,
                              hypre_ParCSRMatrix **Pi_ptr)
 {
-   HYPRE_Int input_info = 0;
-
    hypre_ParCSRMatrix *Pi;
-
-   if (x != NULL && y != NULL && (dim == 2 || z != NULL))
-      input_info = 1;
-
-   if (Gx != NULL && Gy != NULL && (dim == 2 || Gz != NULL))
-      input_info = 2;
-
-   if (!input_info)
-      hypre_error_in_arg(3);
-
-   /* If not given, compute Gx, Gy and Gz */
-   if (input_info == 1)
-   {
-      Gx = hypre_ParVectorInRangeOf(G);
-      hypre_ParCSRMatrixMatvec (1.0, G, x, 0.0, Gx);
-      Gy = hypre_ParVectorInRangeOf(G);
-      hypre_ParCSRMatrixMatvec (1.0, G, y, 0.0, Gy);
-      if (dim == 3)
-      {
-         Gz = hypre_ParVectorInRangeOf(G);
-         hypre_ParCSRMatrixMatvec (1.0, G, z, 0.0, Gz);
-      }
-   }
 
    /* Compute Pi = [Pi_x, Pi_y, Pi_z] */
    {
@@ -1467,14 +1445,6 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 
    }
 
-   if (input_info == 1)
-   {
-      hypre_ParVectorDestroy(Gx);
-      hypre_ParVectorDestroy(Gy);
-      if (dim == 3)
-         hypre_ParVectorDestroy(Gz);
-   }
-
    *Pi_ptr = Pi;
 
    return hypre_error_flag;
@@ -1494,9 +1464,6 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 
 HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
                                 hypre_ParCSRMatrix *G,
-                                hypre_ParVector *x,
-                                hypre_ParVector *y,
-                                hypre_ParVector *z,
                                 hypre_ParVector *Gx,
                                 hypre_ParVector *Gy,
                                 hypre_ParVector *Gz,
@@ -1505,32 +1472,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
                                 hypre_ParCSRMatrix **Piy_ptr,
                                 hypre_ParCSRMatrix **Piz_ptr)
 {
-   HYPRE_Int input_info = 0;
-
    hypre_ParCSRMatrix *Pix, *Piy, *Piz;
-
-   if (x != NULL && y != NULL && (dim == 2 || z != NULL))
-      input_info = 1;
-
-   if (Gx != NULL && Gy != NULL && (dim == 2 || Gz != NULL))
-      input_info = 2;
-
-   if (!input_info)
-      hypre_error_in_arg(3);
-
-   /* If not given, compute Gx, Gy and Gz */
-   if (input_info == 1)
-   {
-      Gx = hypre_ParVectorInRangeOf(G);
-      hypre_ParCSRMatrixMatvec (1.0, G, x, 0.0, Gx);
-      Gy = hypre_ParVectorInRangeOf(G);
-      hypre_ParCSRMatrixMatvec (1.0, G, y, 0.0, Gy);
-      if (dim == 3)
-      {
-         Gz = hypre_ParVectorInRangeOf(G);
-         hypre_ParCSRMatrixMatvec (1.0, G, z, 0.0, Gz);
-      }
-   }
 
    /* Compute Pix, Piy, Piz  */
    {
@@ -1794,14 +1736,6 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
       }
    }
 
-   if (input_info == 1)
-   {
-      hypre_ParVectorDestroy(Gx);
-      hypre_ParVectorDestroy(Gy);
-      if (dim == 3)
-         hypre_ParVectorDestroy(Gz);
-   }
-
    *Pix_ptr = Pix;
    *Piy_ptr = Piy;
    if (dim == 3)
@@ -1820,44 +1754,16 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 
 HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
                               hypre_ParCSRMatrix *G,
-                              hypre_ParVector *x,
-                              hypre_ParVector *y,
-                              hypre_ParVector *z,
                               hypre_ParVector *Gx,
                               hypre_ParVector *Gy,
                               hypre_ParVector *Gz,
                               HYPRE_Int dim,
                               hypre_ParCSRMatrix **GPi_ptr)
 {
-   HYPRE_Int input_info = 0;
-
    hypre_ParCSRMatrix *GPi;
-
-   if (x != NULL && y != NULL && (dim == 2 || z != NULL))
-      input_info = 1;
-
-   if (Gx != NULL && Gy != NULL && (dim == 2 || Gz != NULL))
-      input_info = 2;
-
-   if (!input_info)
-      hypre_error_in_arg(3);
 
    /* Take into account G */
    dim++;
-
-   /* If not given, compute Gx, Gy and Gz */
-   if (input_info == 1)
-   {
-      Gx = hypre_ParVectorInRangeOf(G);
-      hypre_ParCSRMatrixMatvec (1.0, G, x, 0.0, Gx);
-      Gy = hypre_ParVectorInRangeOf(G);
-      hypre_ParCSRMatrixMatvec (1.0, G, y, 0.0, Gy);
-      if (dim == 4)
-      {
-         Gz = hypre_ParVectorInRangeOf(G);
-         hypre_ParCSRMatrixMatvec (1.0, G, z, 0.0, Gz);
-      }
-   }
 
    /* Compute GPi = [Pi_x, Pi_y, Pi_z, G] */
    {
@@ -1982,14 +1888,6 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
 
    }
 
-   if (input_info == 1)
-   {
-      hypre_ParVectorDestroy(Gx);
-      hypre_ParVectorDestroy(Gy);
-      if (dim == 4)
-         hypre_ParVectorDestroy(Gz);
-   }
-
    *GPi_ptr = GPi;
 
    return hypre_error_flag;
@@ -2012,6 +1910,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                          hypre_ParVector *x)
 {
    hypre_AMSData *ams_data = solver;
+
+   HYPRE_Int input_info = 0;
 
    ams_data -> A = A;
 
@@ -2164,15 +2064,36 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                                    &ams_data->A_min_eig_est);
    }
 
+   /* If not given, compute Gx, Gy and Gz */
+   {
+      if (ams_data -> x != NULL && ams_data -> y != NULL &&
+          (ams_data -> dim == 2 || ams_data -> z != NULL))
+         input_info = 1;
+
+      if (ams_data -> Gx != NULL && ams_data -> Gy != NULL &&
+          (ams_data -> dim == 2 || ams_data -> Gz != NULL))
+         input_info = 2;
+
+      if (input_info == 1)
+      {
+         ams_data -> Gx = hypre_ParVectorInRangeOf(ams_data -> G);
+         hypre_ParCSRMatrixMatvec (1.0, ams_data -> G, ams_data -> x, 0.0, ams_data -> Gx);
+         ams_data -> Gy = hypre_ParVectorInRangeOf(ams_data -> G);
+         hypre_ParCSRMatrixMatvec (1.0, ams_data -> G, ams_data -> y, 0.0, ams_data -> Gy);
+         if (ams_data -> dim == 3)
+         {
+            ams_data -> Gz = hypre_ParVectorInRangeOf(ams_data -> G);
+            hypre_ParCSRMatrixMatvec (1.0, ams_data -> G, ams_data -> z, 0.0, ams_data -> Gz);
+         }
+      }
+   }
+
    if (ams_data -> Pi == NULL && ams_data -> Pix == NULL)
    {
       if (ams_data -> cycle_type == 20)
          /* Construct the combined interpolation matrix [G,Pi] */
          hypre_AMSComputeGPi(ams_data -> A,
                              ams_data -> G,
-                             ams_data -> x,
-                             ams_data -> y,
-                             ams_data -> z,
                              ams_data -> Gx,
                              ams_data -> Gy,
                              ams_data -> Gz,
@@ -2182,9 +2103,6 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          /* Construct Pi{x,y,z} instead of Pi = [Pix,Piy,Piz] */
          hypre_AMSComputePixyz(ams_data -> A,
                                ams_data -> G,
-                               ams_data -> x,
-                               ams_data -> y,
-                               ams_data -> z,
                                ams_data -> Gx,
                                ams_data -> Gy,
                                ams_data -> Gz,
@@ -2196,14 +2114,21 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          /* Construct the Pi interpolation matrix */
          hypre_AMSComputePi(ams_data -> A,
                             ams_data -> G,
-                            ams_data -> x,
-                            ams_data -> y,
-                            ams_data -> z,
                             ams_data -> Gx,
                             ams_data -> Gy,
                             ams_data -> Gz,
                             ams_data -> dim,
                             &ams_data -> Pi);
+   }
+
+   /* Keep Gx, Gy and Gz only if use the method with discrete divergence
+      stabilization (where we use them to compute the local mesh size). */
+   if (input_info == 1 && ams_data -> cycle_type != 9)
+   {
+      hypre_ParVectorDestroy(ams_data -> Gx);
+      hypre_ParVectorDestroy(ams_data -> Gy);
+      if (ams_data -> dim == 3)
+         hypre_ParVectorDestroy(ams_data -> Gz);
    }
 
    /* Create the AMG solver on the range of G^T */
@@ -2394,6 +2319,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             {
                hypre_ParCSRMatrix *Gt, *GGt, *ApGGt;
                hypre_ParCSRMatrixTranspose(ams_data -> G, &Gt, 1);
+               hypre_ParCSRMatrixOwnsColStarts(Gt) = 0;
+               hypre_ParCSRMatrixOwnsRowStarts(Gt) = 0;
 
                /* scale GGt by h^2 */
                {
@@ -2437,7 +2364,17 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                   }
                }
 
+               /* we only needed Gx, Gy and Gz to compute the local mesh size */
+               if (input_info == 1)
+               {
+                  hypre_ParVectorDestroy(ams_data -> Gx);
+                  hypre_ParVectorDestroy(ams_data -> Gy);
+                  if (ams_data -> dim == 3)
+                     hypre_ParVectorDestroy(ams_data -> Gz);
+               }
+
                GGt = hypre_ParMatmul(ams_data -> G, Gt);
+               hypre_ParCSRMatrixDestroy(Gt);
 
                /* hypre_ParCSRMatrixAdd(GGt, A, &ams_data -> A); */
                {
@@ -2484,6 +2421,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
 
                   *C_ptr = C;
                }
+
+               hypre_ParCSRMatrixDestroy(GGt);
 
                hypre_BoomerAMGBuildCoarseOperator(ams_data -> Pi,
                                                   ApGGt,
