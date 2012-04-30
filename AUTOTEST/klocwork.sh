@@ -73,6 +73,6 @@ build_list=`kwadmin list-builds hypre`
 # generate the list of new issues
 build_name=`echo $build_list | awk '{print $1}'`
 kwinspectreport --license-host swordfish --host rzcereal3 --port 8066 --text hyprenew.txt --state new --project hypre --build $build_name
-cat hyprenew.txt > &2
+cat hyprenew.txt >&2
 
 # TODO: add lines to delete old builds (e.g., keep the latest 5 builds)
