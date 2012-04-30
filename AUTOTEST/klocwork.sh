@@ -39,8 +39,6 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-cd $src_dir
-
 # configure the code
 ./test.sh configure.sh $src_dir $@
 mv -f configure.??? $output_dir
@@ -51,6 +49,8 @@ do
    echo $errfile >&2
 done
 
+cd $src_dir
+
 # do the static analysis
 kwinject -T hypre.trace make
 kwinject -t hypre.trace -o hypre.out
@@ -59,7 +59,6 @@ kwbuildproject --license-host swordfish --host rzcereal3 --port 8066 -j 4 --proj
 
 # save and check tables/build.log and tables/parse_errors.log files
 cp tables/build.log tables/parse_errors.log $output_dir
-grep Error tables/build.log >&2
 cat tables/parse_errors.log >&2
 
 # upload the results to the host
